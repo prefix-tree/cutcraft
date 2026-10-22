@@ -74,11 +74,10 @@ file.tsx ──evaluate──▶ element tree ──collect──▶ CollectedTr
 
 ## Status
 
-Skeleton. Every action in the spec is registered and round-trips through
-undo/redo against `fixtures/sample.tsx` (which uses every element). Three
-actions are validated stubs: `track/setLayout`, `nested/extract`,
-`multicam/flatten`. `<Captions src>` does not yet generate children from the
-transcript. There is no renderer: `useT()` throws until a Player installs one.
+Every action in the spec is registered, applies, and round-trips through
+undo/redo against `fixtures/sample.tsx` (which uses every element).
+`<Captions src>` does not yet generate children from the transcript. There is
+no renderer: `useT()` throws until a Player installs one.
 
 ```
 pnpm typecheck

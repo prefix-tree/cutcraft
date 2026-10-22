@@ -8,6 +8,12 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- `@cutcut/kit`: `track/setLayout`, `multicam/flatten` and `nested/extract`
+  apply (they were validated stubs), with `resolveScene` resolving a
+  `<Nested>` interior for the kit and the player alike. The fold prints
+  chained inserts and reorders as one group and an inserted node as it
+  stands after later patches.
+
 - A comparison with Diffusion Studio (`docs/comparisons/diffusion-studio.md`)
   and decision 0012 on what cutcut adopts from it: fold per gesture, editing
   policy in the prompt, `sequence-gap` and `cut-inside-word` lint rules,

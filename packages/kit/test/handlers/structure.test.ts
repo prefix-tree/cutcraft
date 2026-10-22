@@ -99,4 +99,105 @@ describe("structure on free and sequence tracks", () => {
     expect(exec.execute({ type: "effect/setOrder", params: { id: "c1", childIds: ["fx1", "ghost"] } }).errors?.[0]?.code).toBe("INVALID_PARAMS");
     expect(exec.execute({ type: "effect/add", params: { id: "c1", childId: "fx9", type: "nope" as never } }).errors?.[0]?.code).toBe("INVALID_PARAMS");
   });
+
+  it("converts a sequence track to free, keeping every element where it played", () => {
+    const exec = fixtureExecutor();
+    const before = exec.state();
+    const timing = (state: typeof before) => [...state.items.values()].filter((p) => p.track === "main" && p.kind !== "gap").map((p) => [p.id, Math.round(p.start * 1000), Math.round(p.end * 1000)]);
+    const was = timing(before);
+    expect(exec.execute({ type: "track/setLayout", params: { trackId: "main", layout: "free" } }).ok).toBe(true);
+    const s = exec.state();
+    expect(s.tracks.find((t) => t.id === "main")?.layout).toBe("free");
+    expect(s.items.has("g1")).toBe(false);
+    expect(s.tree.byId.get("c2")?.props.start).toBe(5);
+    expect(s.tree.byId.get("c3")?.props.start).toBe(10);
+    expect(s.tree.byId.get("x1")?.props).toMatchObject({ on: "c1", edge: "out" });
+    expect(timing(s)).toEqual(was);
+    expect(s.errors).toEqual([]);
+    expect(exec.execute({ type: "track/setLayout", params: { trackId: "main", layout: "free" } }).errors?.[0]?.code).toBe("INVALID_PARAMS");
+    exec.undo();
+    expect(serialize(exec.state())).toEqual(serialize(before));
+  });
+
+  it("converts a free track to a sequence, reordering by start and filling holes with gaps", () => {
+    const exec = fixtureExecutor();
+    expect(exec.execute({ type: "track/add", params: { trackId: "f", layout: "free" } }).ok).toBe(true);
+    expect(exec.execute({ type: "clip/add", params: { id: "fb", trackId: "f", src: "asset:city", place: { start: 4 }, in: 0, out: 2 } }).ok).toBe(true);
+    expect(exec.execute({ type: "clip/add", params: { id: "fa", trackId: "f", src: "asset:city", place: { start: 0 }, in: 0, out: 2 } }).ok).toBe(true);
+    const before = serialize(exec.state());
+    expect(exec.execute({ type: "track/setLayout", params: { trackId: "f", layout: "sequence" } }).ok).toBe(true);
+    const s = exec.state();
+    expect(s.tracks.find((t) => t.id === "f")?.layout).toBe("sequence");
+    expect(s.tree.byId.get("f")?.props.layout).toBeUndefined();
+    expect(s.tree.byId.get("f")?.children.map((c) => c.id)).toEqual(["fa", "gap-f-1", "fb"]);
+    expect(s.items.get("fa")).toMatchObject({ start: 0, end: 2 });
+    expect(s.items.get("gap-f-1")).toMatchObject({ start: 2, end: 4 });
+    expect(s.items.get("fb")).toMatchObject({ start: 4, end: 6 });
+    expect(s.tree.byId.get("fb")?.props.start).toBeUndefined();
+    expect(s.errors).toEqual([]);
+    exec.undo();
+    expect(serialize(exec.state())).toEqual(before);
+    exec.redo();
+    expect(exec.state().tree.byId.get("f")?.children.map((c) => c.id)).toEqual(["fa", "gap-f-1", "fb"]);
+  });
+
+  it("refuses a sequence conversion when free items overlap", () => {
+    const exec = fixtureExecutor();
+    exec.execute({ type: "track/add", params: { trackId: "f", layout: "free" } });
+    exec.execute({ type: "clip/add", params: { id: "fa", trackId: "f", src: "asset:city", place: { start: 0 }, in: 0, out: 2 } });
+    exec.execute({ type: "clip/add", params: { id: "fb", trackId: "f", src: "asset:city", place: { start: 1 }, in: 0, out: 2 } });
+    expect(exec.execute({ type: "track/setLayout", params: { trackId: "f", layout: "sequence" } }).errors?.[0]?.code).toBe("UNSUPPORTED_ON_LAYOUT");
+  });
+
+  it("flattens a multicam into literal clips and restores it on undo", () => {
+    const exec = fixtureExecutor();
+    const before = serialize(exec.state());
+    expect(exec.state().items.get("mc1.cu2")?.end).toBeGreaterThan(12);
+    expect(exec.execute({ type: "multicam/flatten", params: { id: "mc1" } }).ok).toBe(true);
+    const s = exec.state();
+    expect(s.items.has("mc1")).toBe(false);
+    expect(s.items.has("mc1.cu1")).toBe(false);
+    expect(s.tree.byId.get("mc")?.children.map((c) => c.id)).toEqual(["mc1-cu1", "mc1-cu2"]);
+    expect(s.items.get("mc1-cu1")).toMatchObject({ start: 0, end: 2, editable: "literal", source: { in: 0, out: 2, asset: "interview" } });
+    // The last cut ran to the end of the composition, past the 12 s of city; the literal clip stops where the source does.
+    expect(s.items.get("mc1-cu2")).toMatchObject({ start: 2, end: 12, source: { in: 2, out: 12, asset: "city" } });
+    expect(s.tree.byId.get("mc1-cu2")?.props).toEqual({ id: "mc1-cu2", src: "asset:city", in: 2, duration: 10, start: 2 });
+    expect(s.errors).toEqual([]);
+    exec.undo();
+    expect(serialize(exec.state())).toEqual(before);
+  });
+
+  it("flattens only on a free track", () => {
+    const exec = fixtureExecutor();
+    expect(exec.execute({ type: "track/setLayout", params: { trackId: "mc", layout: "sequence" } }).ok).toBe(true);
+    expect(exec.execute({ type: "multicam/flatten", params: { id: "mc1" } }).errors?.[0]?.code).toBe("UNSUPPORTED_ON_LAYOUT");
+  });
+
+  it("extracts a nested scene into free tracks after the nested's track", () => {
+    const exec = fixtureExecutor();
+    const before = serialize(exec.state());
+    const n1 = exec.state().items.get("n1")!;
+    expect(exec.execute({ type: "nested/extract", params: { id: "n1" } }).ok).toBe(true);
+    const s = exec.state();
+    expect(s.items.has("n1")).toBe(false);
+    const trackIds = s.tree.root.children.filter((c) => c.kind === "track").map((c) => c.id);
+    expect(trackIds.slice(0, 2)).toEqual(["main", "n1-outro"]);
+    expect(s.tracks.find((t) => t.id === "n1-outro")).toMatchObject({ layout: "free", items: ["n1-oc1"] });
+    expect(s.items.get("n1-oc1")).toMatchObject({ track: "n1-outro", start: n1.start, end: n1.end, source: { in: 0, out: 3, asset: "city" } });
+    expect(s.tree.byId.get("n1-oc1")?.props).toEqual({ id: "n1-oc1", src: "asset:city", in: 0, out: 3, start: n1.start, volume: 0.8 });
+    expect(s.tree.byId.get("main")?.children.map((c) => c.id)).toEqual(["c1", "x1", "c2", "g1", "c3", "n1-gap"]);
+    expect(s.items.get("n1-gap")).toMatchObject({ start: n1.start, end: n1.end });
+    expect(s.composition.duration).toBeCloseTo(n1.end, 6);
+    expect(s.errors).toEqual([]);
+    exec.undo();
+    expect(serialize(exec.state())).toEqual(before);
+  });
+
+  it("refuses to extract a nested that re-times its scene", () => {
+    const exec = fixtureExecutor();
+    expect(exec.execute({ type: "nested/update", params: { id: "n1", props: { in: 1 } } }).ok).toBe(true);
+    const r = exec.execute({ type: "nested/extract", params: { id: "n1" } });
+    expect(r.errors?.[0]?.code).toBe("INVALID_PARAMS");
+    expect(r.errors?.[0]?.message).toContain("n1.in");
+  });
 });

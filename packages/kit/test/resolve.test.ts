@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { createElement } from "react";
 import { describe, expect, it } from "vitest";
-import { Clip, Composition, Gap, Title, Track, Transition, collect, resolve } from "@cutcut/kit";
+import { Clip, Composition, Gap, Title, Track, Transition, collect, resolve, resolveScene, type SceneFn } from "@cutcut/kit";
 import { lint } from "@cutcut/kit/source";
 import { fixtureText, fixtureTree, fixturesDir, manifest, serialize, round } from "./helpers";
 
@@ -77,5 +77,14 @@ describe("resolve", () => {
     expect(state.items.get("t1")?.lockedProps).toEqual([]);
     expect(state.items.get("t1")?.boundProps).toEqual({ color: "accent" });
     expect(state.items.get("mc1.cu2")).toMatchObject({ editable: "generated", start: 2 });
+  });
+
+  it("resolves a nested scene by calling it inside a composition of the outer size", () => {
+    const n1 = fixtureTree().byId.get("n1")!;
+    const scene = resolveScene(n1.props.of as SceneFn, n1.props, { fps: 30, width: 1920, height: 1080 }, manifest);
+    expect(scene.errors).toEqual([]);
+    expect(scene.composition).toMatchObject({ fps: 30, width: 1920, height: 1080, duration: 3 });
+    expect(scene.tracks.map((t) => [t.id, t.layout, t.items])).toEqual([["outro", "sequence", ["oc1"]]]);
+    expect(scene.items.get("oc1")).toMatchObject({ start: 0, end: 3, source: { in: 0, out: 3, asset: "city" } });
   });
 });

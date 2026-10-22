@@ -421,4 +421,4 @@ define({
   fold: () => [],
 });
 
-export { requireLayout, placementOf };
+export { requireLayout, placementOf, restoreTiming, timingOf };

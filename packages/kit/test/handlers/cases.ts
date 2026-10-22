@@ -1,7 +1,7 @@
 import type { ActionInput, ActionType } from "@cutcut/kit";
 
 /** Stubs: specified, validated, not yet applied. */
-export const STUBS: readonly ActionType[] = ["track/setLayout", "nested/extract", "multicam/flatten"];
+export const STUBS: readonly ActionType[] = [];
 
 const clipSpec = { id: "new1", kind: "clip", props: { id: "new1", src: "asset:city", in: 0, out: 2 } };
 

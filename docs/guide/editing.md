@@ -66,6 +66,21 @@ When the model writes the file, the executor is reset with the new tree
 (`replaceTree`): the log and history belong to the previous version of the
 file.
 
+Three actions rewrite structure rather than a value, and fold the same way:
+
+- `track/setLayout` converts a track. To free: every sequenced child gets its
+  resolved `start`, a transition between siblings becomes an edge transition
+  on the outgoing clip, gaps go. To sequence: children are reordered by
+  start, holes become `<Gap>`s and starts are dropped; overlapping items are
+  refused, since a sequence cannot express them. Nothing moves in time.
+- `multicam/flatten` replaces a `<Multicam>` on a free track by one literal
+  `<Clip>` per cut, at the time and source range the cut resolved to; a cut
+  that ran past its source is cut short where the source ends.
+- `nested/extract` writes a scene's tracks into the file: one free track per
+  inner track, inserted after the nested element's track, every item at the
+  time it played; on a sequence track a `<Gap>` keeps the slot. A nested
+  with `in`, `out` or a transform is refused, as are scenes with transitions.
+
 ## Lint
 
 ```ts

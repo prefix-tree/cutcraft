@@ -1,6 +1,8 @@
-import { define, isError, makePropHandler, placeNode, placementOf, rawNode, requireElement, requireUnlocked, siblingAfter, stub, validateTarget } from "../handler-kit";
-import { invalid, nodeOfSpec, nodeSpecOf, ok, type ActionInput } from "../types";
+import { define, insertNode, isError, makePropHandler, placeNode, placementOf, rawNode, requireElement, requireLayout, requireUnlocked, siblingAfter, uniqueId, validateTarget } from "../handler-kit";
+import { invalid, nodeOfSpec, nodeSpecOf, ok, type ActionInput, type NodeSpec } from "../types";
 import type { Json } from "../../patches/types";
+import type { Placement, ResolvedState } from "../../resolve/resolve";
+import { lookupAsset } from "../../manifest/types";
 
 define({
   type: "multicam/create",
@@ -91,8 +93,62 @@ define({
   fold: () => [],
 });
 
-/** Bake generated cut clips into literal <Clip>s. Needs the source tools; stubbed in the skeleton. */
-stub("multicam/flatten",
-  (a, state) => validateTarget(state, a.params.id, []),
-  (a): ActionInput => ({ type: "source/setProps", params: { id: a.params.id, props: {} } }),
-);
+/** Replace the multicam by one literal <Clip> per cut, each at the time and source range the cut resolved to. */
+define({
+  type: "multicam/flatten",
+  validate: (a, state) => {
+    const base = validateTarget(state, a.params.id, []);
+    if (!base.valid) return base;
+    const item = state.items.get(a.params.id) as Placement;
+    if (item.kind !== "multicam") return invalid({ code: "INVALID_PARAMS", message: `"${a.params.id}" is not a <Multicam>` });
+    if (requireLayout(state, item, "free")) return invalid({ code: "UNSUPPORTED_ON_LAYOUT", message: "flatten needs a free track: a sequence ignores a multicam's cut times, so convert the track first" });
+    const clips = cutClips(state, a.params.id);
+    if (clips.length === 0) return invalid({ code: "INVALID_PARAMS", message: "no cuts to flatten" });
+    const children = (rawNode(state, a.params.id)?.children ?? []).map((c) => state.items.get(c.id)).filter((p): p is Placement => Boolean(p));
+    const broken = [...clips, ...children].find((p) => p.errors.length > 0);
+    if (broken) return invalid({ code: "INVALID_PARAMS", message: `"${broken.id}" has ${(broken.errors[0] as { code: string }).code}; fix it before flattening` });
+    const past = clips.find((p) => sourceLeft(state, p) <= 0);
+    if (past) return invalid({ code: "INVALID_TIME_RANGE", message: `"${past.id}" starts past the end of its source` });
+    return ok;
+  },
+  apply: (a, log, ctx) => {
+    const state = ctx.before;
+    const trackId = rawNode(state, a.params.id)?.parent as string;
+    let after = siblingAfter(state, a.params.id);
+    for (const spec of flattenedClips(state, a.params.id)) {
+      insertNode(log, trackId, after, spec);
+      after = spec.id;
+    }
+    log.append({ op: "remove", id: a.params.id });
+  },
+  invert: (a, before) => {
+    const node = rawNode(before, a.params.id)!;
+    return [
+      ...flattenedClips(before, a.params.id).map((spec): ActionInput => ({ type: "clip/remove", params: { id: spec.id } })),
+      { type: "multicam/restore", params: { id: a.params.id, node: nodeSpecOf(node), trackId: node.parent as string, place: placementOf(before, a.params.id) } },
+    ];
+  },
+  fold: () => [],
+});
+
+/** The clips the resolver generated for the multicam's cuts, in time order. */
+function cutClips(state: ResolvedState, id: string): Placement[] {
+  return [...state.items.values()].filter((p) => p.parent === id && p.kind === "clip" && p.editable === "generated").sort((x, y) => x.start - y.start);
+}
+
+function flattenedClips(state: ResolvedState, id: string): NodeSpec[] {
+  const taken = new Set<string>();
+  return cutClips(state, id).map((p) => {
+    const cutId = p.id.startsWith(`${id}.`) ? p.id.slice(id.length + 1) : p.id;
+    const clipId = uniqueId(state, `${id}-${cutId}`, taken);
+    taken.add(clipId);
+    // A cut runs to the next cut or the end of the composition; the literal clip cannot run past its source.
+    const duration = Math.min(p.duration, sourceLeft(state, p));
+    return { id: clipId, kind: "clip", props: { id: clipId, src: p.props.src as Json, in: p.source?.in ?? 0, duration, start: p.start }, children: [] };
+  });
+}
+
+function sourceLeft(state: ResolvedState, p: Placement): number {
+  const asset = lookupAsset(state.manifest, String(p.props.src));
+  return asset && asset.kind !== "image" ? asset.duration - (p.source?.in ?? 0) : Number.POSITIVE_INFINITY;
+}

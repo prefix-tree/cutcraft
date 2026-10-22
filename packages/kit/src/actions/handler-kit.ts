@@ -99,6 +99,13 @@ export function placementOf(state: ResolvedState, id: string): PlacementSpec {
   return { after: siblingAfter(state, id) };
 }
 
+/** `base`, or `base-2`, `base-3`, … until it names nothing in the tree, the resolved items or `taken`. */
+export function uniqueId(state: ResolvedState, base: string, taken: ReadonlySet<string> = new Set()): string {
+  let id = base;
+  for (let n = 2; state.tree.byId.has(id) || state.items.has(id) || taken.has(id); n++) id = `${base}-${n}`;
+  return id;
+}
+
 export function setProps(log: PatchLog, id: string, props: Readonly<Record<string, Json | undefined>>): void {
   for (const [prop, value] of Object.entries(props)) log.append({ op: "set", id, prop, value });
 }

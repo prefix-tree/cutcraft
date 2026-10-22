@@ -1,9 +1,9 @@
 import { nodeSpecOf } from "../actions/types";
 import type { Json, NetPatch, PatchLog } from "../patches/types";
 import type { ResolvedState } from "../resolve/resolve";
-import type { CollectedNode } from "../resolve/tree";
 import { bake } from "./bake";
 import { applyEdits, lineRange, type SourceEdit } from "./edits";
+import type { Range } from "./parse";
 import { buildSourceIndex, type ElementSite, type SourceIndex } from "./index";
 import { printElement, printLiteral, printProp } from "./print";
 
@@ -20,11 +20,46 @@ export interface FoldResult {
  * Targets without a literal site are reported, not folded; `foldToSource`
  * bakes them first and folds again.
  */
-export function fold(log: PatchLog, index: SourceIndex, _state: ResolvedState): { edits: SourceEdit[]; needsBake: string[]; skipped: FoldResult["skipped"] } {
+export function fold(log: PatchLog, index: SourceIndex, state: ResolvedState): { edits: SourceEdit[]; needsBake: string[]; skipped: FoldResult["skipped"] } {
   const edits: SourceEdit[] = [];
   const needsBake: string[] = [];
   const skipped: { id: string; reason: string }[] = [];
   const text = index.text;
+  const groups = new Map<string, PlacedGroup>();
+
+  /**
+   * Queue a placed node (inserted or moved) at its insertion point. Siblings
+   * that are themselves placed in this net have no usable site yet, so the
+   * point is taken from the nearest sibling that sits in the text, and the
+   * group keeps the order the overlay produces: an element placed after that
+   * anchor goes first, one placed after a queued sibling goes right behind it.
+   */
+  const place = (id: string, at: { parent: string; after: string | null }, print: (indent: string) => string, from: Range | null): boolean => {
+    let anchor = at.after;
+    while (anchor !== null) {
+      const sibling = log.net.get(anchor);
+      if (!sibling?.place || sibling.place.parent !== at.parent) break;
+      anchor = sibling.place.after;
+    }
+    const point = insertionPoint(index, at.parent, anchor);
+    if (!point) return false;
+    const key = `${at.parent}\u0000${anchor ?? ""}`;
+    let group = groups.get(key);
+    if (!group) { group = { point, ids: [], texts: new Map(), moved: new Map() }; groups.set(key, group); }
+    group.texts.set(id, print(point.indent));
+    if (from) group.moved.set(id, from);
+    const behind = at.after === anchor ? -1 : group.ids.indexOf(at.after as string);
+    group.ids.splice(behind + 1, 0, id);
+    return true;
+  };
+
+  /** The nearest ancestor inserted by this net: its printed subtree already carries this node. */
+  const insertedAncestor = (id: string): string | null => {
+    for (let node = state.tree.byId.get(id); node && node.parent !== null; node = state.tree.byId.get(node.parent)) {
+      if (log.net.get(node.parent)?.presence === "inserted") return node.parent;
+    }
+    return null;
+  };
 
   for (const [id, net] of log.net) {
     if (net.bake) { needsBake.push(id); continue; }
@@ -45,26 +80,36 @@ export function fold(log: PatchLog, index: SourceIndex, _state: ResolvedState): 
       }
       case "inserted": {
         if (!net.node || !net.place) { skipped.push({ id, reason: "insert without a node" }); break; }
-        const target = insertionPoint(index, net.place.parent, net.place.after);
-        if (!target) { needsBake.push(net.place.parent); break; }
-        edits.push(insertEdit(index, id, target, net.node));
+        if (insertedAncestor(id)) break;
+        // The node as it stands now, with the props and children later patches gave it.
+        const node = state.tree.byId.get(id) ?? net.node;
+        if (!place(id, net.place, (indent) => printElement(nodeSpecOf(node), indent), null)) needsBake.push(net.place.parent);
         break;
       }
       case "present": {
         const site = index.elements.get(id);
         if (!site) { needsBake.push(id); break; }
-        if (net.place) {
-          const target = insertionPoint(index, net.place.parent, net.place.after);
-          if (!target) { needsBake.push(net.place.parent); break; }
-          const original = text.slice(site.range[0], site.range[1]);
-          const from = lineRange(text, site.range);
-          const reindented = reindent(original, site.indent, target.indent);
-          edits.push({ kind: "move", id, from, range: [target.pos, target.pos], text: target.wrap(reindented) });
+        if (insertedAncestor(id)) {
+          // Moved into a subtree this net inserts; the subtree's print carries it, the original goes.
+          edits.push({ kind: "remove", id, range: lineRange(text, site.range), text: "" });
+          break;
         }
+        if (net.place) {
+          const original = text.slice(site.range[0], site.range[1]);
+          if (!place(id, net.place, (indent) => reindent(original, site.indent, indent), lineRange(text, site.range))) needsBake.push(net.place.parent);
+        }
+        let newAttrs = -1;
         for (const [prop, value] of net.props) {
           const key = site.boundProps[prop];
           const e = key !== undefined ? bindingEdit(index, id, prop, key, value, skipped) : propEdit(site, prop, value, text);
-          if (e) edits.push(e);
+          if (!e) continue;
+          if (e.kind === "prop" && e.range[0] === e.range[1]) {
+            // New attributes share one insertion point; one edit keeps them in write order.
+            const prev = edits[newAttrs];
+            if (prev?.kind === "prop" && prev.range[0] === e.range[0]) { edits[newAttrs] = { ...prev, text: prev.text + e.text }; continue; }
+            newAttrs = edits.length;
+          }
+          edits.push(e);
         }
         if (net.text !== undefined) {
           const e = textEdit(site, net.text);
@@ -75,7 +120,21 @@ export function fold(log: PatchLog, index: SourceIndex, _state: ResolvedState): 
       }
     }
   }
+  for (const group of groups.values()) {
+    const printed = group.ids.map((id) => group.texts.get(id) as string).join("\n");
+    edits.push(insertEdit(index, group.ids[0] as string, group.point, printed));
+    for (const [id, from] of group.moved) edits.push({ kind: "remove", id, range: from, text: "" });
+  }
   return { edits: lastWriteWins(edits), needsBake: [...new Set(needsBake)], skipped };
+}
+
+interface PlacedGroup {
+  readonly point: InsertionPoint;
+  /** In the order the elements will appear. */
+  readonly ids: string[];
+  readonly texts: Map<string, string>;
+  /** Moved elements: the line range of their original. */
+  readonly moved: Map<string, Range>;
 }
 
 function lastWriteWins(edits: SourceEdit[]): SourceEdit[] {
@@ -160,8 +219,7 @@ function insertionPoint(index: SourceIndex, parentId: string, after: string | nu
   };
 }
 
-function insertEdit(index: SourceIndex, id: string, target: InsertionPoint, node: CollectedNode): SourceEdit {
-  const printed = printElement(nodeSpecOf(node), target.indent);
+function insertEdit(index: SourceIndex, id: string, target: InsertionPoint, printed: string): SourceEdit {
   if (target.convertsParent) {
     const open = target.convertsParent.openingTag;
     const before = index.text.slice(open[1] - 2, open[1]) === "/>" ? open[1] - 2 : target.pos;

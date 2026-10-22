@@ -70,6 +70,64 @@ describe("fold", () => {
   });
 });
 
+describe("fold, layout conversion, flatten and extract", () => {
+  const cases: { name: string; actions: Parameters<ReturnType<typeof fixtureExecutor>["execute"]>[0][]; expect: (text: string) => void }[] = [
+    {
+      name: "sequence → free",
+      actions: [{ type: "track/setLayout", params: { trackId: "main", layout: "free" } }],
+      expect: (text) => {
+        expect(text).toContain('<Track id="main" name="Main" layout="free">');
+        expect(text).toContain('<Transition id="x1" type="crossfade" duration={0.5} on="c1" edge="out" />');
+        expect(text).toContain('<Clip id="c2" src="asset:city" duration={4} fit="cover" transform={{ scale: 1.1 }} start={5}>');
+        expect(text).not.toContain('<Gap id="g1"');
+      },
+    },
+    {
+      name: "free → sequence with a reorder and a gap",
+      actions: [
+        { type: "track/add", params: { trackId: "f", layout: "free" } },
+        { type: "clip/add", params: { id: "fb", trackId: "f", src: "asset:city", place: { start: 4 }, in: 0, out: 2 } },
+        { type: "clip/add", params: { id: "fa", trackId: "f", src: "asset:city", place: { start: 0 }, in: 0, out: 2 } },
+        { type: "track/setLayout", params: { trackId: "f", layout: "sequence" } },
+      ],
+      expect: (text) => {
+        expect(text).toContain('<Track id="f">\n        <Clip id="fa" src="asset:city" in={0} out={2} />\n        <Gap id="gap-f-1" duration={2} />\n        <Clip id="fb" src="asset:city" in={0} out={2} />\n      </Track>');
+      },
+    },
+    {
+      name: "flatten",
+      actions: [{ type: "multicam/flatten", params: { id: "mc1" } }],
+      expect: (text) => {
+        expect(text).not.toContain("<Multicam");
+        expect(text).toContain('<Clip id="mc1-cu1" src="asset:interview" in={0} duration={2} start={0} />\n        <Clip id="mc1-cu2" src="asset:city" in={2} duration={10} start={2} />');
+      },
+    },
+    {
+      name: "extract",
+      actions: [{ type: "nested/extract", params: { id: "n1" } }],
+      expect: (text) => {
+        expect(text).not.toContain('<Nested id="n1"');
+        expect(text).toMatch(/<Gap id="n1-gap" duration=\{3\} \/>\n {6}<\/Track>\n {6}<Track id="n1-outro" layout="free">\n {8}<Clip id="n1-oc1" src="asset:city" in=\{0\} out=\{3\} start=\{14\.16666666666666\d\} volume=\{0\.8\} \/>\n {6}<\/Track>\n {6}<Track id="overlays"/);
+      },
+    },
+  ];
+  for (const c of cases) {
+    it(`${c.name} folds to a file that resolves to the same state`, async () => {
+      const exec = fixtureExecutor();
+      for (const a of c.actions) expect(exec.execute(a).ok, a.type).toBe(true);
+      const result = foldToSource(fixtureText, exec.log(), exec.state());
+      expect(result.skipped).toEqual([]);
+      c.expect(result.text);
+      const mod = await evaluate(result.text);
+      const index = buildSourceIndex(result.text);
+      const reresolved = resolve(collectModule(mod, {}, { index }), manifest);
+      expect(reresolved.errors).toEqual([]);
+      expect(lint(result.text, { manifest }).filter((d) => d.severity === "error")).toEqual([]);
+      expect(serialize(reresolved, false)).toEqual(serialize(exec.state(), false));
+    });
+  }
+});
+
 async function evaluate(text: string): Promise<{ default: (props: Record<string, unknown>) => React.ReactElement | null; defaults?: Record<string, unknown> }> {
   // Vitest transpiles TSX on import; write the folded text next to the fixture under a unique name.
   const { writeFileSync, mkdirSync, rmSync } = await import("node:fs");

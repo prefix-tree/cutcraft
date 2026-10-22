@@ -1,11 +1,10 @@
-import { Composition, collect, resolve, type Placement, type ResolvedState } from "@cutcut/kit";
-import { createElement, type ReactElement } from "react";
+import { resolveScene, type Placement, type ResolvedState, type SceneFn } from "@cutcut/kit";
 import type { ResolveNested } from "./model/frame-plan";
 
 /**
- * Resolves `<Nested of={Helper}>` by calling the helper and wrapping what it
- * returns in a composition of the parent's size. File references
- * (`of="file:..."`) have no loader yet and resolve to nothing.
+ * Resolves `<Nested of={Helper}>` through the kit's `resolveScene`, once per
+ * helper. File references (`of="file:..."`) have no loader yet and resolve
+ * to nothing.
  */
 export function makeNestedResolver(parent: () => ResolvedState): ResolveNested {
   const cache = new WeakMap<object, ResolvedState>();
@@ -15,10 +14,7 @@ export function makeNestedResolver(parent: () => ResolvedState): ResolveNested {
     const hit = cache.get(of as object);
     if (hit) return hit;
     const outer = parent();
-    const { of: _of, id: _id, ...rest } = p.props as Record<string, unknown>;
-    const inner = (of as (props: Record<string, unknown>) => ReactElement | null)(rest);
-    const element = createElement(Composition, { fps: outer.composition.fps, width: outer.composition.width, height: outer.composition.height }, inner);
-    const state = resolve(collect(element as ReactElement), outer.manifest);
+    const state = resolveScene(of as SceneFn, p.props, outer.composition, outer.manifest);
     cache.set(of as object, state);
     return state;
   };

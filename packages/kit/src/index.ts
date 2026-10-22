@@ -13,6 +13,7 @@ export * from "./resolve/tree";
 export * from "./resolve/collect";
 export * from "./resolve/errors";
 export * from "./resolve/resolve";
+export * from "./resolve/scene";
 
 export * from "./patches/types";
 export * from "./patches/log";

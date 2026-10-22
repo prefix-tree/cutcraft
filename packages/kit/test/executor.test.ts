@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { Executor } from "@cutcut/kit";
+import { Executor, ok, registerHandler, type ActionInput, type PatchLog } from "@cutcut/kit";
 import { fixtureExecutor, fixtureTree, manifest, serialize } from "./helpers";
 
 describe("Executor", () => {
@@ -13,8 +13,9 @@ describe("Executor", () => {
   });
 
   it("rolls back patches when apply throws", () => {
+    registerHandler({ type: "test/throws", validate: () => ok, apply: (_a: unknown, log: PatchLog) => { log.append({ op: "set", id: "c1", prop: "speed", value: 2 }); throw new Error("boom"); }, invert: (a: ActionInput) => a, fold: () => [] } as never);
     const exec = fixtureExecutor();
-    const r = exec.execute({ type: "track/setLayout", params: { trackId: "main", layout: "free" } });
+    const r = exec.execute({ type: "test/throws", params: {} } as never);
     expect(r.ok).toBe(false);
     expect(exec.log().entries).toHaveLength(0);
   });
