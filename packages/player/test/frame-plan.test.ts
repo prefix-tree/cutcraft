@@ -35,12 +35,12 @@ describe("buildFramePlan", () => {
     expect(plan.background).toBe("#000000");
   });
 
-  it("crossfades opacities summing to one and multiplies element opacity", () => {
+  it("fades the incoming clip over an opaque outgoing one and multiplies element opacity", () => {
     const plan = buildFramePlan(state, 3.25);
     const [a, b] = plan.ops;
     expect(a!.id).toBe("c1");
     expect(b!.id).toBe("c2");
-    expect(a!.opacity).toBeCloseTo(0.75);
+    expect(a!.opacity).toBe(1);
     expect(b!.opacity).toBeCloseTo(0.25 * 0.5);
     expect(b!.kind).toBe("image");
     expect(b!.blend).toBe("source-over");

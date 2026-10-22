@@ -98,7 +98,10 @@ function mediaOp(state: ResolvedState, item: VisibleItem, t: number, resolveNest
       devWarn(key, `transition "${type}" on "${x.id}" is drawn as a crossfade`);
       warnings.push(`transition ${x.id}: ${type} drawn as crossfade`);
     }
-    opacity *= item.transition.role === "out" ? 1 - item.transition.progress : item.transition.progress;
+    // Between two clips the incoming one fades in over the outgoing one, which stays opaque, so the
+    // result is (1 − p)·A + p·B. Only an edge transition fades a clip against the background.
+    if (item.transition.role === "in") opacity *= item.transition.progress;
+    else if (!x.between) opacity *= 1 - item.transition.progress;
   }
   const { filter } = filterString(item.children, p.id);
   const mask = maskOf(item.children, warnings);

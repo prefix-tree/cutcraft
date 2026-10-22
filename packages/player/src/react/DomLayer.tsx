@@ -56,7 +56,7 @@ interface ElementCellProps { item: VisibleItem; state: ResolvedState; time: numb
 const Element = memo(
   function Element({ item, state, time, interior }: ElementCellProps) {
     const t = item.transition;
-    const transitionOpacity = t ? (t.role === "out" ? 1 - t.progress : t.progress) : 1;
+    const transitionOpacity = t ? (t.role === "in" ? t.progress : t.placement.between ? 1 : 1 - t.progress) : 1;
     const props: ElementProps = { placement: item.placement, children: item.children, state, time, transitionOpacity };
     switch (item.placement.kind) {
       case "title": return <Title {...props} />;

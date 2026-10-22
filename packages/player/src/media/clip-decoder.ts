@@ -22,7 +22,7 @@ export class ClipDecoder {
   private current: Frame | null = null;
   private generation = 0;
   private gen: AsyncGenerator<Frame, void, unknown> | null = null;
-  private pumping = false;
+  private pumping: Promise<void> | null = null;
   private streamEnd = 0;
   private seekPending: Promise<void> | null = null;
   private reverseLow = Number.POSITIVE_INFINITY;
@@ -167,24 +167,29 @@ export class ClipDecoder {
     void this.pumpOnce();
   }
 
-  private async pumpOnce(): Promise<void> {
-    if (this.pumping || this.gen === null) return;
-    this.pumping = true;
+  /** Pull frames until the queue is at target; a caller that finds a pump running awaits that one. */
+  private pumpOnce(): Promise<void> {
+    if (this.pumping) return this.pumping;
+    if (this.gen === null) return Promise.resolve();
     const gen = this.gen, generation = this.generation;
-    try {
-      while (this.queue.length < QUEUE_TARGET && this.gen === gen) {
-        const next = await gen.next();
-        if (generation !== this.generation || this.disposed) { if (!next.done) next.value.close(); return; }
-        if (next.done) { this.gen = null; return; }
-        const frame = next.value;
-        const last = this.queue[this.queue.length - 1];
-        if (last && frame.timestamp <= last.timestamp) { frame.close(); continue; }
-        this.queue.push(frame);
-        while (this.queue.length > QUEUE_MAX) this.queue.shift()!.close();
+    const run = async (): Promise<void> => {
+      try {
+        while (this.queue.length < QUEUE_TARGET && this.gen === gen) {
+          const next = await gen.next();
+          if (generation !== this.generation || this.disposed) { if (!next.done) next.value.close(); return; }
+          if (next.done) { this.gen = null; return; }
+          const frame = next.value;
+          const last = this.queue[this.queue.length - 1];
+          if (last && frame.timestamp <= last.timestamp) { frame.close(); continue; }
+          this.queue.push(frame);
+          while (this.queue.length > QUEUE_MAX) this.queue.shift()!.close();
+        }
+      } finally {
+        this.pumping = null;
       }
-    } finally {
-      this.pumping = false;
-    }
+    };
+    this.pumping = run();
+    return this.pumping;
   }
 
   private seekFrame(st: number, wait: boolean): Promise<Frame | null> {

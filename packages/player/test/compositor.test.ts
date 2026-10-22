@@ -28,7 +28,7 @@ describe("Compositor", () => {
     expect(draws(rec.calls)).toEqual(["a", "b"]);
     expect(frames).toEqual([[3.5, 105]]);
     const alphas = rec.calls.filter((c) => c.name === "set:globalAlpha").map((c) => c.args[0]);
-    expect(alphas).toContain(0.5);
+    expect(alphas).toEqual(expect.arrayContaining([1, 0.5]));
   });
 
   it("coalesces ticks that arrive while one is in flight", async () => {
