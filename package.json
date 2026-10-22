@@ -2,7 +2,7 @@
   "name": "cut",
   "private": true,
   "version": "0.0.0",
-  "description": "A video-editing DSL: an LLM writes a TSX file, the browser renders it, the editor edits it.",
+  "description": "A video-editing DSL: a model writes a TSX file, the browser renders it, the editor edits the same file.",
   "packageManager": "pnpm@10.28.0",
   "engines": {
     "node": ">=22"
@@ -11,6 +11,24 @@
     "typecheck": "pnpm -r typecheck",
     "lint": "pnpm -r lint",
     "test": "pnpm -r test",
-    "check": "pnpm typecheck && pnpm lint && pnpm test"
-  }
+    "check": "pnpm typecheck && pnpm lint && pnpm test",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs",
+    "docs:gen": "tsx scripts/gen-docs.ts"
+  },
+  "devDependencies": {
+    "tsx": "^4.23.15",
+    "vitepress": "1.6.4",
+    "zod": "^4.6.7"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bsnisar/cut.git"
+  },
+  "homepage": "https://bsnisar.github.io/cut/",
+  "bugs": {
+    "url": "https://github.com/bsnisar/cut/issues"
+  },
+  "license": "MIT"
 }

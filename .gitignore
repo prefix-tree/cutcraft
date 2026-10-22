@@ -7,3 +7,5 @@ packages/player/test-results/
 packages/player/playwright-report/
 test-results/
 playwright-report/
+docs/.vitepress/dist/
+docs/.vitepress/cache/
