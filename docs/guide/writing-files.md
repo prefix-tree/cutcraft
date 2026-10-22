@@ -124,6 +124,16 @@ overrides; saving rewrites the `defaults` literal and nothing else. This is
 Claude Design's `EDITMODE` literal done as a typed export, and Diffusion
 Studio's `@inspect` consts done as a schema.
 
+## Schema props bind, expressions lock
+
+`out={closeOut}` where `closeOut` is a `schema` prop is *bound*: the index
+records which key the prop reads, the timeline drags it like a literal, and
+the fold writes the new value into `defaults` so every element reading
+`closeOut` follows. `out={start + 2}` is an *expression*: nothing in the file
+says what a new value should become, so the prop shows locked and the editor
+offers to bake it into a literal first. The lint warns on the second, not the
+first.
+
 ## Trim by meaning: time references
 
 `in="word:12" out="word:23.end"` is the sentence "Small software still deserves

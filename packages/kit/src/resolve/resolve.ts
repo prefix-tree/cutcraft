@@ -23,6 +23,8 @@ export interface Placement {
   readonly props: Readonly<Record<string, unknown>>;
   readonly editable: Editable;
   readonly lockedProps: readonly string[];
+  /** Prop → `schema` key; editable, but the fold writes the value into `defaults` rather than the element. */
+  readonly boundProps: Readonly<Record<string, string>>;
   readonly errors: readonly ResolveError[];
   /** For transitions between siblings: the two clips. */
   readonly between?: readonly [string, string];
@@ -108,11 +110,11 @@ function compute(original: CollectedTree, manifest: AssetManifest, log: PatchLog
   const place = (node: CollectedNode, track: string | null, parent: string | null, start: number, length: number, props: Record<string, unknown>, errors: readonly ResolveError[], source: Placement["source"], between: Placement["between"]): Placement => {
     const prev = previous?.get(node.id);
     if (prev && prev.kind === node.kind && prev.track === track && prev.parent === parent && prev.start === start && prev.duration === length && prev.props === props
-      && prev.editable === node.editable && prev.lockedProps === node.lockedProps && sameSource(prev.source, source) && sameBetween(prev.between, between)
+      && prev.editable === node.editable && prev.lockedProps === node.lockedProps && prev.boundProps === node.boundProps && sameSource(prev.source, source) && sameBetween(prev.between, between)
       && sameChildIds(prev.children, node.children) && sameErrors(prev.errors, errors)) return prev;
     const placement: Placement = {
       id: node.id, kind: node.kind, track, parent, children: node.children.map((c) => c.id),
-      start, end: start + length, duration: length, props, editable: node.editable, lockedProps: node.lockedProps, errors,
+      start, end: start + length, duration: length, props, editable: node.editable, lockedProps: node.lockedProps, boundProps: node.boundProps, errors,
       ...(source ? { source } : {}), ...(between ? { between } : {}),
     };
     return placement;
@@ -183,12 +185,12 @@ function compute(original: CollectedTree, manifest: AssetManifest, log: PatchLog
     if (child.kind === "track") {
       const own: ResolveError[] = [];
       const props = parseProps(child, own);
-      structural.push({ id: child.id, kind: "track", track: child.id, parent: root.id, children: child.children.map((c) => c.id), start: 0, end: 0, duration: 0, props, editable: child.editable, lockedProps: child.lockedProps, errors: own });
+      structural.push({ id: child.id, kind: "track", track: child.id, parent: root.id, children: child.children.map((c) => c.id), start: 0, end: 0, duration: 0, props, editable: child.editable, lockedProps: child.lockedProps, boundProps: child.boundProps, errors: own });
     } else if (child.kind === "marker") {
       const own: ResolveError[] = [];
       const props = parseProps(child, own);
       const at = markers.get(child.id) ?? 0;
-      structural.push({ id: child.id, kind: "marker", track: null, parent: root.id, children: [], start: at, end: at, duration: 0, props, editable: child.editable, lockedProps: child.lockedProps, errors: own });
+      structural.push({ id: child.id, kind: "marker", track: null, parent: root.id, children: [], start: at, end: at, duration: 0, props, editable: child.editable, lockedProps: child.lockedProps, boundProps: child.boundProps, errors: own });
     }
   }
   let duration = 0;
@@ -208,7 +210,7 @@ function compute(original: CollectedTree, manifest: AssetManifest, log: PatchLog
   }
   items.set(root.id, reuse({
     id: root.id, kind: "composition", track: null, parent: null, children: root.children.map((c) => c.id),
-    start: 0, end: duration, duration, props: compParsed, editable: root.editable, lockedProps: root.lockedProps, errors: [],
+    start: 0, end: duration, duration, props: compParsed, editable: root.editable, lockedProps: root.lockedProps, boundProps: root.boundProps, errors: [],
   }));
   return {
     composition: {
@@ -505,7 +507,7 @@ function placeMulticam(node: CollectedNode, p: Pending, track: ResolvedTrack, pe
     const id = `${node.id}.${cut.node.id}`;
     const inSec = Math.max(0, cut.at - sync + Number(angle.offset ?? 0));
     const generated: CollectedNode = {
-      id, kind: "clip", parent: node.id, children: [], editable: "generated", lockedProps: [],
+      id, kind: "clip", parent: node.id, children: [], editable: "generated", lockedProps: [], boundProps: {},
       props: { id, src: angle.src, in: inSec },
       origin: { helper: "multicam", callerId: node.id, callIndex: 0 },
     };
@@ -581,7 +583,7 @@ export function samePlacement(a: Placement, b: Placement): boolean {
   if (a === b) return true;
   if (a.id !== b.id || a.kind !== b.kind || a.track !== b.track || a.parent !== b.parent) return false;
   if (a.start !== b.start || a.end !== b.end || a.duration !== b.duration) return false;
-  if (a.props !== b.props || a.editable !== b.editable || a.lockedProps !== b.lockedProps) return false;
+  if (a.props !== b.props || a.editable !== b.editable || a.lockedProps !== b.lockedProps || a.boundProps !== b.boundProps) return false;
   if (!sameSource(a.source, b.source) || !sameBetween(a.between, b.between)) return false;
   if (a.children.length !== b.children.length || a.children.some((id, i) => id !== b.children[i])) return false;
   return sameErrors(a.errors, b.errors);

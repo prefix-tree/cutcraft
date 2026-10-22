@@ -18,6 +18,8 @@ export interface PropSite {
   /** The value when it is a literal (or a bare attribute, which is `true`). */
   readonly literal: Json | undefined;
   readonly isExpression: boolean;
+  /** The `schema` key this prop reads, when the expression is a plain reference to one of the file's props. */
+  readonly binding?: string;
 }
 
 export interface ElementSite {
@@ -33,7 +35,10 @@ export interface ElementSite {
   readonly props: ReadonlyMap<string, PropSite>;
   readonly parent: string | null;
   readonly siblingIndex: number;
+  /** Expression props with no binding: the editor cannot write them without baking. */
   readonly lockedProps: readonly string[];
+  /** Prop → schema key for props that reference the file's props; edits to them rewrite `defaults`. */
+  readonly boundProps: Readonly<Record<string, string>>;
   readonly indent: string;
 }
 
@@ -85,6 +90,32 @@ export function buildSourceIndex(text: string): SourceIndex {
   let hasSchema = false;
   let hasDefaultExport = false;
   let compositionId: string | null = null;
+
+  // How the default export names the file's props: `({ a, b: local })` or `(props)` with `props.a`.
+  let schemaFn: t.Node | null = null;
+  const paramKeys = new Map<string, string>();
+  let propsName: string | null = null;
+  for (const node of ast.program.body) {
+    if (!t.isExportDefaultDeclaration(node)) continue;
+    const decl = node.declaration;
+    const fn = t.isFunctionDeclaration(decl) || t.isArrowFunctionExpression(decl) || t.isFunctionExpression(decl) ? decl : null;
+    if (!fn) continue;
+    schemaFn = fn;
+    const param = fn.params[0];
+    if (t.isIdentifier(param)) propsName = param.name;
+    else if (t.isObjectPattern(param)) {
+      for (const p of param.properties) {
+        if (!t.isObjectProperty(p) || !t.isIdentifier(p.key)) continue;
+        const local = t.isIdentifier(p.value) ? p.value : t.isAssignmentPattern(p.value) && t.isIdentifier(p.value.left) ? p.value.left : null;
+        if (local) paramKeys.set(local.name, p.key.name);
+      }
+    }
+  }
+  const bindingOf = (expr: t.Node | null | undefined): string | null => {
+    if (t.isIdentifier(expr)) return paramKeys.get(expr.name) ?? null;
+    if (t.isMemberExpression(expr) && !expr.computed && t.isIdentifier(expr.object) && expr.object.name === propsName && t.isIdentifier(expr.property)) return expr.property.name;
+    return null;
+  };
 
   const helperNames = new Set<string>();
   for (const node of ast.program.body) {
@@ -145,11 +176,15 @@ export function buildSourceIndex(text: string): SourceIndex {
       if (!kind) return;
       const props = new Map<string, PropSite>();
       const locked: string[] = [];
+      const bound: Record<string, string> = {};
+      const inSchemaFn = schemaFn !== null && path.getFunctionParent()?.node === schemaFn;
       for (const attr of opening.attributes) {
         if (!t.isJSXAttribute(attr) || !t.isJSXIdentifier(attr.name)) continue;
-        const site = propSite(attr);
+        let site = propSite(attr);
+        const binding = inSchemaFn && site.isExpression && t.isJSXExpressionContainer(attr.value) ? bindingOf(attr.value.expression) : null;
+        if (binding !== null) { site = { ...site, binding }; bound[site.name] = binding; }
         props.set(site.name, site);
-        if (site.isExpression) locked.push(site.name);
+        if (site.isExpression && binding === null) locked.push(site.name);
       }
       const idSite = props.get("id");
       let id = typeof idSite?.literal === "string" ? idSite.literal : null;
@@ -169,7 +204,7 @@ export function buildSourceIndex(text: string): SourceIndex {
       elements.set(id, {
         generated: false, id, kind, name,
         range: rangeOf(path.node), openingTag: rangeOf(opening), closingTag: closing ? rangeOf(closing) : null,
-        childrenRange, props, parent, siblingIndex, lockedProps: locked, indent,
+        childrenRange, props, parent, siblingIndex, lockedProps: locked, boundProps: bound, indent,
       });
     },
   });

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createPatchLog, type CollectedNode } from "@cutcut/kit";
 
 const node = (id: string, props: Record<string, unknown> = {}): CollectedNode =>
-  ({ id, kind: "clip", props: { id, ...props }, children: [], parent: "t1", editable: "literal", lockedProps: [] });
+  ({ id, kind: "clip", props: { id, ...props }, children: [], parent: "t1", editable: "literal", lockedProps: [], boundProps: {} });
 
 describe("patch log reduction", () => {
   it("keeps the last write per prop", () => {

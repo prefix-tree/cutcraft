@@ -69,7 +69,7 @@ describe("overlay", () => {
     log.append({ op: "set", id: "a", prop: "out", value: 0.5 });
     log.append({ op: "set", id: "a", prop: "in", value: undefined });
     log.append({ op: "remove", id: "b" });
-    log.append({ op: "insert", id: "n", parent: "t", after: null, node: { id: "n", kind: "title", props: { id: "n", duration: 1 }, text: "x", children: [], parent: "t", editable: "literal", lockedProps: [] } });
+    log.append({ op: "insert", id: "n", parent: "t", after: null, node: { id: "n", kind: "title", props: { id: "n", duration: 1 }, text: "x", children: [], parent: "t", editable: "literal", lockedProps: [], boundProps: {} } });
     log.append({ op: "move", id: "a", parent: "u", after: null });
     const out = overlay(tree, log);
     expect(out.byId.get("t")?.children.map((c) => c.id)).toEqual(["n"]);

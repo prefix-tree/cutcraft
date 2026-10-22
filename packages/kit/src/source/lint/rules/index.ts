@@ -62,7 +62,7 @@ export const expressionLocked: Rule = {
     for (const site of index.elements.values()) {
       for (const prop of TIMING_PROPS) {
         const p = site.props.get(prop);
-        if (p?.isExpression) out.push({ rule: "expression-locked", severity: "warning", message: `"${site.id}.${prop}" is an expression; the timeline will show it locked`, range: p.range, id: site.id, prop });
+        if (p?.isExpression && p.binding === undefined) out.push({ rule: "expression-locked", severity: "warning", message: `"${site.id}.${prop}" is an expression; the timeline will show it locked`, range: p.range, id: site.id, prop });
       }
     }
     return out;

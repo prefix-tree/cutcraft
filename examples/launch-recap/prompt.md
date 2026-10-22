@@ -58,9 +58,12 @@ Children that the inspector edits one by one: `<Keyframe property at value easin
 1. **Every element has a literal `id`**, unique in the file, a short noun
    (`hook`, `broll`, `lt-bg`). Gestures, undo and your own replacements address
    elements by id. An id that is an expression cannot be edited.
-2. **Timing props are literals.** `in`, `out`, `duration`, `start`, `offset`,
-   `anchor`, `at` are numbers, strings or references, never computed. A computed
-   timing prop shows as locked in the timeline.
+2. **Timing props are literals or schema props.** `in`, `out`, `duration`,
+   `start`, `offset`, `anchor`, `at` are numbers, strings, references, or a
+   plain reference to one of the file's `schema` props (`out={closeOut}`).
+   A bound prop stays draggable: the editor writes the new value into
+   `defaults`, so every element reading that prop follows. Anything computed
+   (`out={start + 2}`) shows as locked in the timeline.
 3. **Trim by meaning when there is a transcript.** `in="word:12"`,
    `out="word:23.end"`, `in="shot:1"`, `out="silence:2"`, `at="marker:intro"`
    resolve against the manifest. When the editor drags that edge it writes

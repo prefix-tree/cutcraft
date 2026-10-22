@@ -26,6 +26,10 @@ All notable changes to this project are documented here. The format follows
 
 ### Changed
 
+- A timing prop that references a `schema` prop (`out={closeOut}`) is bound,
+  not locked: the timeline drags it and the fold writes the value into
+  `defaults`. Placements carry `boundProps`; `expression-locked` no longer
+  warns on it.
 - The project and its packages are named cutcut (`@cutcut/kit`, `@cutcut/player`); the TSX file is still called a cut file.
 - Resolve caches parsed props and intrinsic timing per node and keeps
   placement identity, so a drag step costs about 1 µs per element.

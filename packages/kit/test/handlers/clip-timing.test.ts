@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { fixtureExecutor, serialize, round } from "../helpers";
+import { Executor, collectModule } from "@cutcut/kit";
+import { buildSourceIndex } from "@cutcut/kit/source";
+import * as sample from "../../fixtures/sample";
+import { fixtureExecutor, fixtureText, manifest, serialize, round } from "../helpers";
 
 describe("clip timing", () => {
   it("trim → undo restores the state and keeps the inverse in the log", () => {
@@ -78,7 +81,10 @@ describe("clip timing", () => {
     exec.execute({ type: "track/setFlag", params: { trackId: "main", flag: "locked", value: true } });
     const r = exec.execute({ type: "clip/trim", params: { id: "c2", edge: "out", value: 4 } });
     expect(r.errors?.[0]?.code).toBe("TRACK_LOCKED");
-    const locked = exec.execute({ type: "text/update", params: { id: "t1", props: { color: "#fff" } } });
+    const bound = exec.execute({ type: "text/update", params: { id: "t1", props: { color: "#fff" } } });
+    expect(bound.ok).toBe(true);
+    const index = buildSourceIndex(fixtureText.replace('size={64}', 'size={32 + 32}'));
+    const locked = new Executor({ tree: collectModule(sample, {}, { index }), manifest, now: () => 0 }).execute({ type: "text/update", params: { id: "t1", props: { size: 40 } } });
     expect(locked.errors?.[0]?.code).toBe("LOCKED_PROP");
   });
 });

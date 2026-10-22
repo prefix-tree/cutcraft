@@ -69,7 +69,7 @@ export function makeState(spec: StateSpec): ResolvedState {
   const trackNodes: CollectedNode[] = [];
 
   const node = (id: string, kind: string, parent: string | null, props: Record<string, unknown>, children: CollectedNode[], text?: string): CollectedNode => {
-    const n: CollectedNode = { id, kind, parent, props, children, editable: "literal", lockedProps: [], ...(text !== undefined ? { text } : {}) };
+    const n: CollectedNode = { id, kind, parent, props, children, editable: "literal", lockedProps: [], boundProps: {}, ...(text !== undefined ? { text } : {}) };
     byId.set(id, n);
     return n;
   };
@@ -85,7 +85,7 @@ export function makeState(spec: StateSpec): ResolvedState {
       let cs = start, cd = duration;
       if (c.kind === "keyframe" || c.kind === "speedKey") { cs = start + Number(c.props?.at ?? 0); cd = 0; }
       if (c.kind === "freeze") { cs = start + Number(c.props?.start ?? 0); cd = Number(c.props?.duration ?? 0); }
-      const cp: Placement = { id: c.id, kind: c.kind, track, parent: it.id, children: [], start: cs, end: cs + cd, duration: cd, props: { id: c.id, ...(c.props ?? {}) }, editable: "literal", lockedProps: [], errors: [] };
+      const cp: Placement = { id: c.id, kind: c.kind, track, parent: it.id, children: [], start: cs, end: cs + cd, duration: cd, props: { id: c.id, ...(c.props ?? {}) }, editable: "literal", lockedProps: [], boundProps: {}, errors: [] };
       items.set(c.id, cp);
       childPlacements.push(cp);
       childNodes.push(node(c.id, c.kind, it.id, cp.props as Record<string, unknown>, []));
@@ -93,7 +93,7 @@ export function makeState(spec: StateSpec): ResolvedState {
     node(it.id, it.kind, parent, props, childNodes, it.text);
     const p: Placement = {
       id: it.id, kind: it.kind, track, parent, children: childPlacements.map((c) => c.id),
-      start, end: start + duration, duration, ...(source ? { source } : {}), props, editable: "literal", lockedProps: [], errors: [],
+      start, end: start + duration, duration, ...(source ? { source } : {}), props, editable: "literal", lockedProps: [], boundProps: {}, errors: [],
       ...(it.between ? { between: it.between } : {}),
     };
     items.set(it.id, p);
@@ -131,11 +131,11 @@ export function makeState(spec: StateSpec): ResolvedState {
 
   const duration = Math.max(0, ...[...items.values()].filter((i) => i.kind !== "transition").map((i) => i.end));
   for (const t of tracks) {
-    items.set(t.id, { id: t.id, kind: "track", track: t.id, parent: "composition", children: t.items, start: 0, end: duration, duration, props: { id: t.id, layout: t.layout }, editable: "literal", lockedProps: [], errors: [] });
+    items.set(t.id, { id: t.id, kind: "track", track: t.id, parent: "composition", children: t.items, start: 0, end: duration, duration, props: { id: t.id, layout: t.layout }, editable: "literal", lockedProps: [], boundProps: {}, errors: [] });
   }
   const compProps = { id: "composition", fps, width, height, ...(spec.background ? { background: spec.background } : {}) };
   const root = node("composition", "composition", null, compProps, trackNodes);
-  items.set("composition", { id: "composition", kind: "composition", track: null, parent: null, children: tracks.map((t) => t.id), start: 0, end: duration, duration, props: compProps, editable: "literal", lockedProps: [], errors: [] });
+  items.set("composition", { id: "composition", kind: "composition", track: null, parent: null, children: tracks.map((t) => t.id), start: 0, end: duration, duration, props: compProps, editable: "literal", lockedProps: [], boundProps: {}, errors: [] });
   return {
     composition: { id: "composition", fps, width, height, duration },
     tracks, items, errors: [], tree: { root, byId, errors: [] }, manifest, log: undefined,

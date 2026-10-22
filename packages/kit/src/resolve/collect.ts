@@ -5,13 +5,15 @@ import type { ResolveError } from "./errors";
 import type { CollectedNode, CollectedTree, Editable } from "./tree";
 
 export interface SourceIndexLike {
-  readonly elements: ReadonlyMap<string, { readonly generated: boolean; readonly lockedProps?: readonly string[] }>;
+  readonly elements: ReadonlyMap<string, { readonly generated: boolean; readonly lockedProps?: readonly string[]; readonly boundProps?: Readonly<Record<string, string>> }>;
 }
 
 export interface CollectOptions {
   /** When supplied, elements absent from the index are marked generated and expression props locked. */
   readonly index?: SourceIndexLike;
 }
+
+const NO_BINDINGS: Readonly<Record<string, string>> = Object.freeze({});
 
 interface Walker {
   readonly byId: Map<string, CollectedNode>;
@@ -31,7 +33,7 @@ export function collect(element: ReactElement, options: CollectOptions = {}): Co
   const roots = collectChildren(element, null, walker, null);
   const root = roots.find((n) => n.kind === "composition") ?? roots[0];
   if (!root) {
-    const empty: CollectedNode = { id: "composition", kind: "composition", props: {}, children: [], parent: null, editable: "literal", lockedProps: [] };
+    const empty: CollectedNode = { id: "composition", kind: "composition", props: {}, children: [], parent: null, editable: "literal", lockedProps: [], boundProps: {} };
     walker.errors.push({ code: "SCHEMA", id: "composition", message: "the file must render a <Composition>" });
     return { root: empty, byId: walker.byId, errors: walker.errors };
   }
@@ -133,8 +135,9 @@ function makeNode(
   let editable: Editable = "literal";
   if (walker.index && (!indexed || indexed.generated)) editable = "generated";
   const lockedProps = indexed?.lockedProps ?? [];
+  const boundProps = indexed?.boundProps ?? NO_BINDINGS;
   const node: CollectedNode = {
-    id, kind, props, children, parent, editable, lockedProps,
+    id, kind, props, children, parent, editable, lockedProps, boundProps,
     ...(text !== undefined ? { text } : {}),
     ...(origin ? { origin } : {}),
   };

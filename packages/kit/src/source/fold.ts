@@ -62,7 +62,8 @@ export function fold(log: PatchLog, index: SourceIndex, _state: ResolvedState): 
           edits.push({ kind: "move", id, from, range: [target.pos, target.pos], text: target.wrap(reindented) });
         }
         for (const [prop, value] of net.props) {
-          const e = propEdit(site, prop, value, text);
+          const key = site.boundProps[prop];
+          const e = key !== undefined ? bindingEdit(index, id, prop, key, value, skipped) : propEdit(site, prop, value, text);
           if (e) edits.push(e);
         }
         if (net.text !== undefined) {
@@ -74,7 +75,20 @@ export function fold(log: PatchLog, index: SourceIndex, _state: ResolvedState): 
       }
     }
   }
-  return { edits, needsBake: [...new Set(needsBake)], skipped };
+  return { edits: lastWriteWins(edits), needsBake: [...new Set(needsBake)], skipped };
+}
+
+function lastWriteWins(edits: SourceEdit[]): SourceEdit[] {
+  const byRange = new Map<string, number>();
+  const keep: SourceEdit[] = [];
+  for (const e of edits) {
+    if (e.kind !== "defaults") { keep.push(e); continue; }
+    const k = `${e.range[0]}:${e.range[1]}`;
+    const prev = byRange.get(k);
+    if (prev !== undefined) keep[prev] = e;
+    else { byRange.set(k, keep.length); keep.push(e); }
+  }
+  return keep;
 }
 
 /** Fold with baking: generated targets are baked into literals, the file is re-indexed, and the fold is retried. */
@@ -156,6 +170,19 @@ function insertEdit(index: SourceIndex, id: string, target: InsertionPoint, node
     return { kind: "insert", id, range: [start, open[1]], text: target.wrap(printed) };
   }
   return { kind: "insert", id, range: [target.pos, target.pos], text: target.wrap(printed) };
+}
+
+/**
+ * A prop bound to a `schema` key keeps its reference; the value goes into
+ * the `defaults` literal, so every element reading that key follows. Two
+ * elements writing the same key in one fold would collide on the same
+ * range, so the later write wins and the earlier edit is dropped.
+ */
+function bindingEdit(index: SourceIndex, id: string, prop: string, key: string, value: Json | undefined, skipped: { id: string; reason: string }[]): SourceEdit | null {
+  const target = index.defaults?.props.get(key);
+  if (value === undefined) { skipped.push({ id, reason: `cannot unset "${prop}": it is bound to defaults.${key}` }); return null; }
+  if (!target || !target.valueRange) { skipped.push({ id, reason: `"${prop}" is bound to defaults.${key}, which has no literal` }); return null; }
+  return { kind: "defaults", id, range: target.valueRange, text: printLiteral(value) };
 }
 
 function propEdit(site: ElementSite, prop: string, value: Json | undefined, text: string): SourceEdit | null {

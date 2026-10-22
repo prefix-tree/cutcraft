@@ -69,6 +69,7 @@ export function nodeOfSpec(spec: NodeSpec, parent: string | null): CollectedNode
     id: spec.id,
     kind: spec.kind,
     props: { ...spec.props },
+    boundProps: {},
     parent,
     editable: "literal",
     lockedProps: [],

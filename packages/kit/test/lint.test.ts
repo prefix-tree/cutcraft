@@ -35,13 +35,14 @@ describe("lint", () => {
     expect(d.map((x) => x.rule).sort()).toEqual(["file-shape", "missing-asset"]);
   });
 
-  it("indexes elements with prop sites and locked props", () => {
+  it("indexes elements with prop sites, locked props and schema bindings", () => {
     const index = buildSourceIndex(fixtureText);
     const c1 = index.elements.get("c1")!;
     expect(c1.kind).toBe("clip");
     expect(c1.props.get("in")?.literal).toBe("word:3");
     expect(c1.parent).toBe("main");
-    expect(index.elements.get("t1")?.lockedProps).toEqual(["color"]);
+    expect(index.elements.get("t1")?.lockedProps).toEqual([]);
+    expect(index.elements.get("t1")?.boundProps).toEqual({ color: "accent" });
     expect(index.defaults?.props.get("title")?.literal).toBe("Why we built it");
     expect(index.helpers.get("Badge")?.pure).toBe(true);
     expect(index.helpers.get("Counter")?.hooks).toEqual(["useT"]);

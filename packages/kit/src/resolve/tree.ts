@@ -16,8 +16,10 @@ export interface CollectedNode {
   readonly text?: string;
   readonly parent: string | null;
   readonly editable: Editable;
-  /** Props whose source value is an expression (known only when a SourceIndex was supplied). */
+  /** Props whose source value is an expression the editor cannot write (known only when a SourceIndex was supplied). */
   readonly lockedProps: readonly string[];
+  /** Prop → `schema` key for props that read the file's props; a write to one rewrites `defaults`. */
+  readonly boundProps: Readonly<Record<string, string>>;
   /** For helper output: which helper produced the node, under which parent, and the helper's nth use in the file. */
   readonly origin?: { readonly helper: string; readonly callerId: string | null; readonly callIndex: number };
 }

@@ -71,10 +71,11 @@ describe("resolve", () => {
     expect(lint(fixtureText, { manifest })).toEqual([]);
   });
 
-  it("marks helper output as generated and locks expression props", () => {
+  it("marks helper output as generated and binds schema props", () => {
     const state = resolve(fixtureTree(), manifest);
     expect(state.items.get("b1")?.editable).toBe("generated");
-    expect(state.items.get("t1")?.lockedProps).toContain("color");
+    expect(state.items.get("t1")?.lockedProps).toEqual([]);
+    expect(state.items.get("t1")?.boundProps).toEqual({ color: "accent" });
     expect(state.items.get("mc1.cu2")).toMatchObject({ editable: "generated", start: 2 });
   });
 });
