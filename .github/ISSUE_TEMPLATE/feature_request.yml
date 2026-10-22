@@ -1,0 +1,20 @@
+name: Feature request
+description: A vocabulary element, an action, a rendering capability or a tool
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What you are trying to do
+      description: The edit, the file or the workflow, in the user's terms.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: How it would look in the file, in the action set or in the player.
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives you considered

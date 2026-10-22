@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Design and decisions
+    url: https://github.com/bsnisar/cut/tree/main/docs/decisions
+    about: Read the decision records before proposing a change to the model.

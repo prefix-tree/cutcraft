@@ -1,0 +1,32 @@
+name: Bug report
+description: Something resolves, edits or renders wrong
+labels: [bug]
+body:
+  - type: textarea
+    id: file
+    attributes:
+      label: The cut file (or the smallest part of it that reproduces the problem)
+      render: tsx
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: What happened
+      description: Resolve errors, lint output, console errors or a screenshot.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Commit or version
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and OS (for player issues)
