@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2022", "DOM", "DOM.Iterable", "DOM.AsyncIterable"],
+    "types": ["node", "vitest/globals"],
+    "baseUrl": ".",
+    "paths": {
+      "@cut/kit": ["../kit/src/index.ts"],
+      "@cut/player": ["./src/index.ts"]
+    }
+  },
+  "include": ["src", "test", "e2e", "vitest.config.ts", "playwright.config.ts", "eslint.config.js"]
+}
