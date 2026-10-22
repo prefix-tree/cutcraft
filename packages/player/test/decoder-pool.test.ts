@@ -106,15 +106,17 @@ describe("DecoderPool", () => {
     expect(errors.map((e) => e.asset)).toEqual(["b"]);
   });
 
-  it("recreates a decoder when its source range changes", async () => {
+  it("keeps a decoder across a trim and recreates it when the asset changes", async () => {
     const { pool } = setup();
     pool.sync(state, 0);
-    const first = pool.decoderFor("c1");
-    const edited = makeState({ tracks: [{ id: "main", items: [{ id: "c1", kind: "clip", source: { in: 1, out: 4, asset: "a" } }] }] });
-    pool.sync(edited, 0);
+    const first = pool.decoderFor("c1")!;
+    const trimmed = makeState({ tracks: [{ id: "main", items: [{ id: "c1", kind: "clip", source: { in: 1, out: 4, asset: "a" } }] }] });
+    pool.sync(trimmed, 0);
+    expect(pool.decoderFor("c1")).toBe(first);
+    expect(first.placement.source!.in).toBe(1);
+    const swapped = makeState({ tracks: [{ id: "main", items: [{ id: "c1", kind: "clip", source: { in: 1, out: 4, asset: "b" } }] }] });
+    pool.sync(swapped, 0);
     expect(pool.decoderFor("c1")).not.toBe(first);
-    pool.sync(edited, 0);
-    expect(pool.decoderFor("c1")).toBe(pool.decoderFor("c1"));
     await flush();
     pool.dispose();
     expect(pool.mounted).toEqual([]);

@@ -199,15 +199,35 @@ function compute(original: CollectedTree, manifest: AssetManifest, log: PatchLog
   };
 }
 
+interface ParsedProps { readonly data: Record<string, unknown>; readonly errors: readonly ResolveError[] }
+
+/**
+ * Parsed props are cached per raw props object: the overlay keeps the props
+ * object of every node a patch did not touch, so a drag step re-parses one
+ * node, not the whole tree. The cached `data` is shared, never mutated, and
+ * is what `Placement.props` points at, so untouched placements keep it
+ * across resolves and consumers can memoise on its identity.
+ */
+const parsedByProps = new WeakMap<object, ParsedProps>();
+
 function parseProps(node: CollectedNode, errors: ResolveError[]): Record<string, unknown> {
-  const schema = SCHEMAS_BY_KIND[node.kind] as z.ZodType | undefined;
-  if (!schema) return { ...node.props };
-  const result = schema.safeParse(node.props);
-  if (result.success) return result.data as Record<string, unknown>;
-  for (const issue of result.error.issues) {
-    errors.push({ code: "SCHEMA", id: node.id, prop: issue.path.map(String).join(".") || undefined, message: issue.message } as ResolveError);
+  const cached = parsedByProps.get(node.props);
+  if (cached) {
+    errors.push(...cached.errors);
+    return cached.data;
   }
-  return { ...node.props };
+  const schema = SCHEMAS_BY_KIND[node.kind] as z.ZodType | undefined;
+  let parsed: ParsedProps;
+  if (!schema) parsed = { data: { ...node.props }, errors: [] };
+  else {
+    const result = schema.safeParse(node.props);
+    parsed = result.success
+      ? { data: result.data as Record<string, unknown>, errors: [] }
+      : { data: { ...node.props }, errors: result.error.issues.map((issue) => ({ code: "SCHEMA", id: node.id, prop: issue.path.map(String).join(".") || undefined, message: issue.message }) as ResolveError) };
+  }
+  parsedByProps.set(node.props, parsed);
+  errors.push(...parsed.errors);
+  return parsed.data;
 }
 
 /** Everything about an element that does not depend on where other elements are. */

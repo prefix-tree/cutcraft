@@ -34,5 +34,7 @@ export const ENVELOPE_STEP_S = 0.05;
 /** Playback rate clamp. */
 export const MIN_RATE = 0.25;
 export const MAX_RATE = 4;
+/** Quiet time after the last setState before a paused preview fetches its exact frame. */
+export const SETTLE_MS = 120;
 /** Tolerance when rounding a time to a frame index. */
 export const FRAME_EPS = 1e-6;

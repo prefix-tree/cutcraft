@@ -54,6 +54,12 @@ file.tsx ──evaluate──▶ element tree ──collect──▶ CollectedTr
   transitions (overlap by their duration), anchors, `fill` and `match`
   durations, transcript references, multicam cuts. Errors are typed and
   attached to the element that caused them.
+- Cost: a resolve is linear in the number of elements, about 2 µs per node
+  (1,000 nodes in ~2 ms). Parsed props are cached per raw props object and the
+  overlay keeps every node a patch did not touch, so a drag step re-parses one
+  element; `Placement.props` stays referentially stable for the rest.
+  `pnpm bench` prints per-step costs on the sample fixture and a synthetic
+  500-clip project.
 - `new Executor({ tree, manifest })` runs actions. Each handler has four faces:
   `validate`, `apply` (appends patches), `invert` (never null), `fold`. History
   groups gestures and auto-groups rapid same-target updates. `undo()` and

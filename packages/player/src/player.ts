@@ -4,7 +4,7 @@ import { WebAudioOutput } from "./audio/web-audio-output";
 import { AudioContextClock } from "./clock/audio-clock";
 import { PerformanceClock } from "./clock/clock";
 import { Transport } from "./clock/transport";
-import { MAX_RATE, MIN_RATE } from "./constants";
+import { MAX_RATE, MIN_RATE, SETTLE_MS } from "./constants";
 import { AssetSources } from "./media/asset-sources";
 import { defaultCreateCanvas } from "./media/frame-source";
 import { mediabunnyAudioSourceFactory } from "./media/mediabunny-audio-source";
@@ -36,6 +36,8 @@ export interface PlayerOptions {
   readonly cancelRaf?: ((id: number) => void) | undefined;
   readonly setInterval?: ((fn: () => void, ms: number) => unknown) | undefined;
   readonly clearInterval?: ((id: unknown) => void) | undefined;
+  readonly setTimeout?: ((fn: () => void, ms: number) => unknown) | undefined;
+  readonly clearTimeout?: ((id: unknown) => void) | undefined;
 }
 
 export interface TimeSnapshot { readonly time: number; readonly frame: number }
@@ -63,6 +65,9 @@ export class PlayerCore {
   private readonly raf: (cb: () => void) => number;
   private readonly cancelRaf: (id: number) => void;
   private rafId: number | null = null;
+  private readonly setTimeoutFn: (fn: () => void, ms: number) => unknown;
+  private readonly clearTimeoutFn: (id: unknown) => void;
+  private settleTimer: unknown = null;
   private snapshot: TimeSnapshot = { time: 0, frame: 0 };
   private _muted: boolean;
   private _volume = 1;
@@ -84,6 +89,8 @@ export class PlayerCore {
     if (options.playbackRate !== undefined) this.transport.setRate(options.playbackRate);
     this.raf = options.raf ?? ((cb) => requestAnimationFrame(cb));
     this.cancelRaf = options.cancelRaf ?? ((id) => cancelAnimationFrame(id));
+    this.setTimeoutFn = options.setTimeout ?? ((fn, ms) => setTimeout(fn, ms));
+    this.clearTimeoutFn = options.clearTimeout ?? ((id) => clearTimeout(id as ReturnType<typeof setTimeout>));
     const createCanvas = options.createCanvas ?? defaultCreateCanvas;
     this.inputs = options.frameSourceFactory && options.audioSourceFactory ? null : new MediabunnyInputs();
     const frameSourceFactory = options.frameSourceFactory ?? mediabunnyFrameSourceFactory(this.inputs!, createCanvas);
@@ -195,12 +202,23 @@ export class PlayerCore {
     if (this.transport.playing) await this.compositor.seek(this.transport.time());
   }
 
-  /** The editor pushes a new resolve; decoders whose source range is unchanged keep their frames. */
+  /**
+   * The editor pushes a new resolve on every drag step. Decoders of the same
+   * asset keep their frames and take the new trim; a paused preview paints at
+   * once with what is decoded and fetches the exact frame after the gesture
+   * has been quiet for `SETTLE_MS`.
+   */
   setState(state: ResolvedState): void {
     this._state = state;
     this.transport.duration = state.composition.duration;
     this.compositor.setState(state);
-    if (!this.transport.playing) void this.compositor.tick(this.transport.time(), { wait: true });
+    if (this.transport.playing) return;
+    void this.compositor.tick(this.transport.time(), { wait: false });
+    if (this.settleTimer !== null) this.clearTimeoutFn(this.settleTimer);
+    this.settleTimer = this.setTimeoutFn(() => {
+      this.settleTimer = null;
+      if (!this.disposed && !this.transport.playing) void this.compositor.tick(this.transport.time(), { wait: true });
+    }, SETTLE_MS);
   }
 
   attachCanvas(canvas: HTMLCanvasElement | OffscreenCanvas | null): void {
@@ -234,6 +252,8 @@ export class PlayerCore {
     if (this.disposed) return;
     this.pause();
     this.disposed = true;
+    if (this.settleTimer !== null) this.clearTimeoutFn(this.settleTimer);
+    this.settleTimer = null;
     this.engine.dispose();
     this.compositor.dispose();
     this.sources.dispose();

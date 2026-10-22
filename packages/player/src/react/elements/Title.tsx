@@ -5,9 +5,9 @@ import { dataAttrs, overlayStyle, type ElementProps } from "./shared";
 const SUPPORTED = new Set(["none", "fade", "slide-up", "slide-down", "slide-left", "slide-right", "scale", "typewriter", "word-by-word"]);
 
 /** Text title: the file's text content with font props; entrance/exit presets as CSS transforms. */
-export function Title(p: ElementProps) {
+export function Title(p: ElementProps & { readonly text: string }) {
   const props = p.placement.props as Record<string, unknown>;
-  const text = p.state.tree.byId.get(p.placement.id)?.text ?? "";
+  const text = p.text;
   const comp = p.state.composition;
   const box = { width: comp.width, height: comp.height };
   const style = overlayStyle(p, box);

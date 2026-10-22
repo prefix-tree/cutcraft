@@ -30,7 +30,10 @@ const state = resolve(collectModule(file), manifest);
   the play head has a `ClipDecoder`: a `VideoSampleSink` stream feeding a
   short queue for forward play, pre-decoded windows for reverse, single-frame
   fetches at high speeds and while scrubbing, one retained frame per freeze.
-  A playing tick never waits for a frame; a seek does.
+  A playing tick never waits for a frame; a seek does. A trim or speed drag
+  updates the decoder in place rather than reopening it, and a paused preview
+  repaints each drag step with what is decoded, then fetches the exact frame
+  once the gesture has been quiet for 120 ms.
 - **Compositing.** `buildFramePlan(state, t)` is pure and deterministic: tracks
   in document order (the first track is the bottom), each clip with its
   animated transform, crop, fit, opacity, blend, filter and mask; crossfades

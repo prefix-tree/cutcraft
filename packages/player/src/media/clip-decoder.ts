@@ -31,17 +31,36 @@ export class ClipDecoder {
   private disposed = false;
   private primed: Promise<void> | null = null;
 
+  private _placement: Placement;
+  private _children: readonly Placement[];
+
   constructor(
     private readonly source: FrameSource,
-    readonly placement: Placement,
-    readonly children: readonly Placement[],
+    placement: Placement,
+    children: readonly Placement[],
     private readonly effectiveSpeed: () => number,
   ) {
     this.id = placement.id;
     this.sourceKey = sourceKeyOf(placement);
+    this._placement = placement;
+    this._children = children;
   }
 
+  /** Asset and direction: everything else (trim, speed, freezes) may change under a live decoder. */
   static sourceKey(p: Placement): string { return sourceKeyOf(p); }
+
+  get placement(): Placement { return this._placement; }
+  get children(): readonly Placement[] { return this._children; }
+
+  /**
+   * Take a new resolve of the same placement. A trim or speed change moves
+   * where source time lands; the queue is kept and the next `frameFor` reseeks
+   * only if the new source time falls outside what is queued.
+   */
+  update(placement: Placement, children: readonly Placement[]): void {
+    this._placement = placement;
+    this._children = children;
+  }
 
   get mode(): DecodeMode {
     if (this.placement.props.reverse === true) return "reverse";
@@ -155,9 +174,9 @@ export class ClipDecoder {
   }
 
   private startStream(from: number): void {
-    const src = this.placement.source;
-    this.streamEnd = src ? src.out : Number.POSITIVE_INFINITY;
-    if (from >= this.streamEnd) return;
+    // Stream to the asset's end, not the clip's out point: the queue bounds the work and a later
+    // trim that extends the clip then needs no restart.
+    this.streamEnd = Number.POSITIVE_INFINITY;
     this.gen = this.source.stream(from, this.streamEnd);
     this.pump();
   }
@@ -295,5 +314,5 @@ export class ClipDecoder {
 
 function sourceKeyOf(p: Placement): string {
   const s = p.source;
-  return s ? `${s.asset}|${s.in}|${s.out}|${s.speed}|${p.props.reverse === true ? "r" : "f"}` : p.id;
+  return s ? `${s.asset}|${p.props.reverse === true ? "r" : "f"}` : p.id;
 }

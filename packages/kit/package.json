@@ -17,7 +17,8 @@
     "lint": "eslint . --max-warnings 0",
     "test": "vitest run",
     "test:watch": "vitest",
-    "parity": "tsx scripts/parity.ts"
+    "parity": "tsx scripts/parity.ts",
+    "bench": "tsx scripts/bench.ts"
   },
   "peerDependencies": {
     "react": "^19.0.0"

@@ -50,7 +50,7 @@ export function DomLayer({ state, interiors }: DomLayerProps) {
   );
 }
 
-interface ElementCellProps { item: VisibleItem; state: ResolvedState; time: number; interior: ReactNode }
+export interface ElementCellProps { item: VisibleItem; state: ResolvedState; time: number; interior: ReactNode }
 
 /** Re-renders only when the element's own relative frame or placement changes. */
 const Element = memo(
@@ -59,7 +59,7 @@ const Element = memo(
     const transitionOpacity = t ? (t.role === "in" ? t.progress : t.placement.between ? 1 : 1 - t.progress) : 1;
     const props: ElementProps = { placement: item.placement, children: item.children, state, time, transitionOpacity };
     switch (item.placement.kind) {
-      case "title": return <Title {...props} />;
+      case "title": return <Title {...props} text={state.tree.byId.get(item.placement.id)?.text ?? ""} />;
       case "shape": return <Shape {...props} />;
       case "svg": return <Svg {...props} />;
       case "sticker": return <Sticker {...props} />;
@@ -68,12 +68,25 @@ const Element = memo(
       default: return null;
     }
   },
-  (a, b) => a.item.placement === b.item.placement && a.state === b.state && a.interior === b.interior && sameFrame(a, b),
+  (a, b) => sameElement(a, b),
 );
 
-function sameFrame(a: ElementCellProps, b: ElementCellProps): boolean {
-  const fps = a.state.composition.fps;
-  if (frameIndex(a.time - a.item.placement.start, fps) !== frameIndex(b.time - b.item.placement.start, fps)) return false;
+/**
+ * Whether two renders of an overlay would produce the same DOM. Placements
+ * are new objects on every resolve, so compare what matters: timing, the
+ * parsed props (referentially stable while untouched), children, the
+ * element-relative frame, the transition progress, the text and the
+ * composition box.
+ */
+export function sameElement(a: ElementCellProps, b: ElementCellProps): boolean {
+  const p = a.item.placement, q = b.item.placement;
+  if (p.id !== q.id || p.kind !== q.kind || p.start !== q.start || p.end !== q.end || p.props !== q.props) return false;
+  if (a.interior !== b.interior) return false;
+  if (a.item.children.length !== b.item.children.length || a.item.children.some((c, i) => c.props !== b.item.children[i]!.props || c.start !== b.item.children[i]!.start)) return false;
+  const ca = a.state.composition, cb = b.state.composition;
+  if (ca.width !== cb.width || ca.height !== cb.height || ca.fps !== cb.fps) return false;
+  if (p.kind === "title" && a.state.tree.byId.get(p.id)?.text !== b.state.tree.byId.get(p.id)?.text) return false;
+  if (frameIndex(a.time - p.start, ca.fps) !== frameIndex(b.time - q.start, cb.fps)) return false;
   return (a.item.transition?.progress ?? -1) === (b.item.transition?.progress ?? -1);
 }
 

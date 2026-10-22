@@ -33,6 +33,7 @@ export class DecoderPool {
     for (const [id, d] of this.decoders) {
       const w = want.get(id);
       if (!w || ClipDecoder.sourceKey(w.p) !== d.sourceKey) this.unmount(id);
+      else if (w.p !== d.placement) d.update(w.p, w.children);
     }
     for (const [id, w] of want) {
       if (this.decoders.has(id)) continue;
