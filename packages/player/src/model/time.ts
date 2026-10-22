@@ -12,6 +12,13 @@ export function frameTime(frame: number, fps: number): number {
   return frame / fps;
 }
 
+/** `mm:ss.ff` for a composition time, what the controls show and the contact sheet labels. */
+export function timecode(t: number, fps: number): string {
+  const total = Math.max(0, t);
+  const m = Math.floor(total / 60), s = Math.floor(total % 60), f = Math.floor((total - Math.floor(total)) * fps + 1e-6);
+  return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}.${String(f).padStart(2, "0")}`;
+}
+
 /** 0..1 progress through a placement, what `useT()` returns inside a Layer. */
 export function localT(p: Placement, t: number): number {
   if (p.duration <= 0) return 0;

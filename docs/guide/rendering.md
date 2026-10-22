@@ -33,6 +33,17 @@ playing. The browser suite checks it by encoding the frame number into the test
 video and reading pixels back, and by comparing two `renderFrame` calls byte
 for byte.
 
+## Looking at the result
+
+`captureSheet(times, { columns, cellWidth, labels })` renders each time through
+`renderFrame` into a cell of one canvas with a `mm:ss.ff` label and returns
+the sheet. The transport does not move and the attached canvas is repainted
+afterwards. It is the verification step the authoring prompt asks for after
+every stage: the first frame of each clip and the frames around each join,
+read back by an agent or compared by a test. Only the canvas plane is on the
+sheet; titles, shapes and Layer interiors live in the DOM and are checked
+there.
+
 ## Addressability
 
 Every DOM element carries `data-el` and `data-kind`; the root carries

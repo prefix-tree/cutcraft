@@ -37,7 +37,7 @@ describe("fold", () => {
     const index = buildSourceIndex(result.text);
     const reresolved = resolve(collectModule(mod, {}, { index }), manifest);
     expect(reresolved.errors).toEqual([]);
-    expect(lint(result.text, { manifest })).toEqual([]);
+    expect(lint(result.text, { manifest }).filter((d) => d.severity === "error")).toEqual([]);
     expect(serialize(reresolved, false)).toEqual(serialize(exec.state(), false));
     expect(result.text).toContain('<Effect id="fx9" type="grain" params={{ amount: 20 }} enabled />');
     expect(result.text).not.toContain('<Gap id="g1"');

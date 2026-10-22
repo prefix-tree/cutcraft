@@ -75,4 +75,8 @@ lint(text, { manifest })   // Diagnostic[] with rule, severity, message, range, 
 Rules: `literal-ids`, `unique-ids`, `no-start-on-sequence`, `pure-helpers`,
 `expression-locked`, `one-captions`, `ambiguous-duration`, `file-shape`,
 `missing-asset`. They are the conventions that keep a file editable; the
-model's prompt lists the same ones.
+model's prompt lists the same ones. Two warnings check the cut rather than
+the file: `sequence-gap` (a `<Gap>` on the first sequence track, which is
+black unless another track covers it) and `cut-inside-word` (a numeric `in`
+or `out` that lands strictly inside a transcript word; it needs the manifest
+and names the `word:N` reference to use instead).

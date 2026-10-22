@@ -11,8 +11,9 @@ export default function V() {
 `;
 
 describe("lint", () => {
-  it("accepts the sample file", () => {
-    expect(lint(fixtureText, { manifest })).toEqual([]);
+  it("accepts the sample file, warning only about the gap on its main track", () => {
+    const d = lint(fixtureText, { manifest });
+    expect(d.map((x) => `${x.severity}:${x.rule}:${x.id}`)).toEqual(["warning:sequence-gap:g1"]);
   });
 
   it("flags missing and non-literal ids", () => {
@@ -33,6 +34,24 @@ describe("lint", () => {
   it("checks assets against the manifest and the file shape", () => {
     const d = lint(wrap('<Track id="t"><Clip id="c" src="asset:missing" /></Track>', "export const schema = 1;"), { manifest });
     expect(d.map((x) => x.rule).sort()).toEqual(["file-shape", "missing-asset"]);
+  });
+
+  it("warns on gaps on the first sequence track only", () => {
+    const gap = (track: string) => `<Track id="${track}"><Clip id="c-${track}" src="asset:city" duration={2} /><Gap id="g-${track}" duration={1} /></Track>`;
+    const d = lint(wrap(`${gap("a")}${gap("b")}`).replace("Clip, Title", "Clip, Gap, Title"));
+    expect(d.map((x) => `${x.rule}:${x.id}`)).toEqual(["sequence-gap:g-a"]);
+    const free = lint(wrap(`<Track id="z" layout="free">${""}</Track>${gap("hid").replace('id="hid"', 'id="hid" hidden')}${gap("a")}`).replace("Clip, Title", "Clip, Gap, Title"));
+    expect(free.map((x) => `${x.rule}:${x.id}`)).toEqual(["sequence-gap:g-a"]);
+  });
+
+  it("warns on numeric trims that land inside a transcript word", () => {
+    const words = manifest.assets.interview!.transcript!.words;
+    const w = words[1]!;
+    const inside = (w.start + w.end) / 2;
+    const d = lint(wrap(`<Track id="t"><Clip id="c" src="asset:interview" in={${inside}} out={${w.end}} /><Clip id="d" src="asset:city" in={${inside}} /></Track>`), { manifest });
+    expect(d.map((x) => `${x.rule}:${x.id}.${x.prop}`)).toEqual(["cut-inside-word:c.in"]);
+    expect(d[0]!.message).toContain(`word:${w.i}`);
+    expect(lint(wrap(`<Track id="t"><Clip id="c" src="asset:interview" in={${inside}} /></Track>`))).toEqual([]);
   });
 
   it("indexes elements with prop sites, locked props and schema bindings", () => {

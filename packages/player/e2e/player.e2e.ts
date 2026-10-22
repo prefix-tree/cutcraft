@@ -173,6 +173,30 @@ test.describe("player", () => {
     expect(await page.evaluate(() => window.__playerErrors)).toEqual([]);
   });
 
+  test("captures a contact sheet whose cells are the exact frames", async ({ page }) => {
+    await open(page);
+    await seek(page, 1.0);
+    const result = await page.evaluate(async () => {
+      const sheet = await window.__player!.captureSheet([1.0, 2.5, 4.0], { columns: 2, cellWidth: 640 });
+      const ctx = (sheet as HTMLCanvasElement).getContext("2d")!;
+      const read = (ox: number, oy: number): number => {
+        let n = 0;
+        for (let k = 0; k < 10; k++) {
+          const px = ctx.getImageData(ox + Math.floor((k + 0.5) * 64), oy + 20, 1, 1).data;
+          if (px[0]! > 128) n |= 1 << k;
+        }
+        return n;
+      };
+      return { width: sheet.width, height: sheet.height, cells: [read(0, 0), read(640, 0), read(0, 360)], time: window.__player!.getCurrentTime() };
+    });
+    expect([result.width, result.height]).toEqual([1280, 720]);
+    expect(Math.abs(result.cells[0]! - 30)).toBeLessThanOrEqual(1);
+    expect(Math.abs(result.cells[1]! - 75)).toBeLessThanOrEqual(1);
+    expect(Math.abs(result.cells[2]! - 202)).toBeLessThanOrEqual(1);
+    expect(result.time).toBe(1);
+    expect(Math.abs((await readCounter(page)) - 30)).toBeLessThanOrEqual(1);
+  });
+
   test("decodes h264 when the browser can", async ({ page }) => {
     test.skip(!existsSync(join(mediaDir, "bars.mp4")), "no bars.mp4");
     await page.goto("/");

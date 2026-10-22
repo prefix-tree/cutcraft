@@ -12,10 +12,19 @@ import { mediabunnyFrameSourceFactory } from "./media/mediabunny-frame-source";
 import { MediabunnyInputs } from "./media/mediabunny-input";
 import { toResolver } from "./media/resolver";
 import type { ResolveNested } from "./model/frame-plan";
-import { frameIndex, frameTime } from "./model/time";
+import { frameIndex, frameTime, timecode } from "./model/time";
 import { makeNestedResolver } from "./nested";
 import { Compositor } from "./render/compositor";
-import type { AudioOutput, AudioSource, AudioSourceFactory, Clock, CreateCanvas, Ctx2D, FrameSourceFactory, MediaHandle, MediaResolver, PlayerErrorEvent, PlayerEvents } from "./types";
+import type { AnyCanvas, AudioOutput, AudioSource, AudioSourceFactory, Clock, CreateCanvas, Ctx2D, FrameSourceFactory, MediaHandle, MediaResolver, PlayerErrorEvent, PlayerEvents } from "./types";
+
+export interface CaptureSheetOptions {
+  /** Cells per row; default 4, never more than the number of times. */
+  readonly columns?: number;
+  /** Cell width in pixels; default the composition width capped at 320. Height follows the aspect ratio. */
+  readonly cellWidth?: number;
+  /** Draw a `mm:ss:ff` label in each cell; default true. */
+  readonly labels?: boolean;
+}
 
 export interface PlayerOptions {
   readonly state: ResolvedState;
@@ -62,6 +71,7 @@ export class PlayerCore {
   private readonly audioSources = new Map<string, Promise<AudioSource>>();
   private readonly listeners = new Map<keyof PlayerEvents, Set<Listener<keyof PlayerEvents>>>();
   private readonly timeListeners = new Set<() => void>();
+  private readonly createCanvas: CreateCanvas;
   private readonly raf: (cb: () => void) => number;
   private readonly cancelRaf: (id: number) => void;
   private rafId: number | null = null;
@@ -92,6 +102,7 @@ export class PlayerCore {
     this.setTimeoutFn = options.setTimeout ?? ((fn, ms) => setTimeout(fn, ms));
     this.clearTimeoutFn = options.clearTimeout ?? ((id) => clearTimeout(id as ReturnType<typeof setTimeout>));
     const createCanvas = options.createCanvas ?? defaultCreateCanvas;
+    this.createCanvas = createCanvas;
     this.inputs = options.frameSourceFactory && options.audioSourceFactory ? null : new MediabunnyInputs();
     const frameSourceFactory = options.frameSourceFactory ?? mediabunnyFrameSourceFactory(this.inputs!, createCanvas);
     const audioSourceFactory = options.audioSourceFactory ?? mediabunnyAudioSourceFactory(this.inputs!);
@@ -200,6 +211,42 @@ export class PlayerCore {
     await this.compositor.seek(t);
     await this.compositor.tick(t, { wait: true });
     if (this.transport.playing) await this.compositor.seek(this.transport.time());
+  }
+
+  /**
+   * A contact sheet of the canvas plane at `times`: each cell is `renderFrame`
+   * of that time with a timecode label, laid out `columns` wide. The way an
+   * agent or a test looks at the result without exporting. DOM overlays
+   * (titles, shapes, Layer interiors) are not on the canvas and do not appear.
+   */
+  async captureSheet(times: readonly number[], options: CaptureSheetOptions = {}): Promise<AnyCanvas> {
+    const comp = this._state.composition;
+    const count = times.length;
+    const columns = Math.max(1, Math.min(Math.floor(options.columns ?? 4), Math.max(1, count)));
+    const cellWidth = Math.max(1, Math.round(options.cellWidth ?? Math.min(comp.width, DEFAULT_SHEET_CELL_WIDTH)));
+    const cellHeight = Math.max(1, Math.round((cellWidth * comp.height) / comp.width));
+    const rows = Math.max(1, Math.ceil(count / columns));
+    const sheet = this.createCanvas(columns * cellWidth, rows * cellHeight);
+    const ctx = sheet.getContext("2d") as Ctx2D | null;
+    const scratch = this.createCanvas(comp.width, comp.height);
+    const scratchCtx = scratch.getContext("2d") as Ctx2D | null;
+    if (!ctx || !scratchCtx) throw new Error("captureSheet: no 2d context");
+    const previous = this.compositor.attachedContext;
+    this.compositor.attach(scratchCtx);
+    try {
+      for (let i = 0; i < count; i++) {
+        const t = times[i]!;
+        await this.renderFrame(t);
+        const x = (i % columns) * cellWidth;
+        const y = Math.floor(i / columns) * cellHeight;
+        ctx.drawImage(scratch, x, y, cellWidth, cellHeight);
+        if (options.labels !== false) drawLabel(ctx, timecode(Math.min(this.duration, Math.max(0, t)), comp.fps), x, y, cellWidth, cellHeight);
+      }
+    } finally {
+      this.compositor.attach(previous);
+      if (previous && !this.disposed && !this.transport.playing) void this.compositor.tick(this.transport.time(), { wait: true });
+    }
+    return sheet;
   }
 
   /**
@@ -321,3 +368,18 @@ export class PlayerCore {
 }
 
 export type { PlayerErrorEvent };
+
+const DEFAULT_SHEET_CELL_WIDTH = 320;
+
+function drawLabel(ctx: Ctx2D, text: string, x: number, y: number, w: number, h: number): void {
+  const band = Math.max(12, Math.round(h * 0.1));
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.globalAlpha = 1;
+  ctx.globalCompositeOperation = "source-over";
+  ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
+  ctx.fillRect(x, y + h - band, w, band);
+  ctx.fillStyle = "#ffffff";
+  ctx.font = `${Math.round(band * 0.7)}px monospace`;
+  ctx.textBaseline = "middle";
+  ctx.fillText(text, x + Math.round(band / 3), y + h - band / 2);
+}

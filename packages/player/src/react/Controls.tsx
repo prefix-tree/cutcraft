@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { useCompositionTime, usePlayer } from "./hooks";
+import { timecode } from "../model/time";
 
 const bar: CSSProperties = { display: "flex", alignItems: "center", gap: 8, padding: "6px 8px", background: "rgba(0,0,0,0.75)", color: "#eee", font: "12px system-ui, sans-serif", position: "absolute", left: 0, right: 0, bottom: 0, zIndex: 1000 };
 const button: CSSProperties = { background: "none", border: "1px solid #777", color: "inherit", borderRadius: 4, padding: "2px 8px", cursor: "pointer", font: "inherit" };
@@ -41,8 +42,4 @@ export function Controls() {
   );
 }
 
-export function timecode(t: number, fps: number): string {
-  const total = Math.max(0, t);
-  const m = Math.floor(total / 60), s = Math.floor(total % 60), f = Math.floor((total - Math.floor(total)) * fps + 1e-6);
-  return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}.${String(f).padStart(2, "0")}`;
-}
+export { timecode };

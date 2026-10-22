@@ -29,7 +29,7 @@ export interface PlayerProps {
   readonly coreOptions?: Partial<PlayerOptions>;
 }
 
-export type PlayerRef = Pick<PlayerCore, "play" | "pause" | "toggle" | "seekTo" | "seekToFrame" | "getCurrentTime" | "getCurrentFrame" | "isPlaying" | "addEventListener" | "removeEventListener" | "renderFrame" | "duration" | "state"> & {
+export type PlayerRef = Pick<PlayerCore, "play" | "pause" | "toggle" | "seekTo" | "seekToFrame" | "getCurrentTime" | "getCurrentFrame" | "isPlaying" | "addEventListener" | "removeEventListener" | "renderFrame" | "captureSheet" | "duration" | "state"> & {
   playbackRate: number;
   loop: boolean;
   muted: boolean;
@@ -121,7 +121,7 @@ function refOf(core: PlayerCore, canvas: HTMLCanvasElement | null): PlayerRef {
     seekTo: (t) => core.seekTo(t), seekToFrame: (f) => core.seekToFrame(f),
     getCurrentTime: () => core.getCurrentTime(), getCurrentFrame: () => core.getCurrentFrame(), isPlaying: () => core.isPlaying(),
     addEventListener: (type, fn) => core.addEventListener(type, fn), removeEventListener: (type, fn) => core.removeEventListener(type, fn),
-    renderFrame: (t) => core.renderFrame(t),
+    renderFrame: (t) => core.renderFrame(t), captureSheet: (times, o) => core.captureSheet(times, o),
     get duration() { return core.duration; },
     get state() { return core.state; },
     get playbackRate() { return core.playbackRate; }, set playbackRate(v) { core.playbackRate = v; },

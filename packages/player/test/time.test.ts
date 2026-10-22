@@ -1,4 +1,4 @@
-import { frameIndex, frameTime, localT, placementSourceTime } from "@cutcut/player";
+import { frameIndex, frameTime, localT, placementSourceTime, timecode } from "@cutcut/player";
 import { childrenOf, fixtureState, makeState } from "./helpers/state";
 
 const state = makeState({
@@ -83,5 +83,13 @@ describe("frames", () => {
     expect(localT(c1, -1)).toBe(0);
     expect(localT(c1, 2)).toBe(0.5);
     expect(localT(c1, 10)).toBe(1);
+  });
+
+  it("formats timecode as mm:ss.ff", () => {
+    expect(timecode(0, 30)).toBe("00:00.00");
+    expect(timecode(0.5, 30)).toBe("00:00.15");
+    expect(timecode(65.9, 30)).toBe("01:05.27");
+    expect(timecode(-1, 30)).toBe("00:00.00");
+    expect(timecode(1, 29.97)).toBe("00:01.00");
   });
 });

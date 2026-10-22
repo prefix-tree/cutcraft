@@ -68,7 +68,7 @@ describe("resolve", () => {
     const state = resolve(fixtureTree(), manifest);
     expect(state.errors).toEqual([]);
     expect(serialize(state, false).map(({ props, ...rest }) => (void props, rest))).toEqual(expected);
-    expect(lint(fixtureText, { manifest })).toEqual([]);
+    expect(lint(fixtureText, { manifest }).filter((d) => d.severity === "error")).toEqual([]);
   });
 
   it("marks helper output as generated and binds schema props", () => {

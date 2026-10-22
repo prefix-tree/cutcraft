@@ -153,6 +153,11 @@ then `outro`, back to back, with the two crossfades overlapping their
 neighbours by 0.4 s. No clip has a `start`; writing one is a lint error
 (`no-start-on-sequence`). Trim `hook` and everything after it moves.
 
+A `<Gap>` on this track is black unless another track covers it, so the lint
+warns (`sequence-gap`); pauses belong inside clips, as trailing silence kept
+in the trim. A numeric trim that lands inside a transcript word gets a
+warning too (`cut-inside-word`), with the `word:N` reference to use instead.
+
 `music` is a free track: the bed has `start={0}` and `duration="fill"`, so it
 runs to the end of whatever the sequence became.
 

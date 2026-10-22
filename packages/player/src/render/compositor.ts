@@ -48,6 +48,7 @@ export class Compositor {
   }
 
   get renderedFrame(): number { return this.lastFrame; }
+  get attachedContext(): Ctx2D | null { return this.ctx; }
   get lastPlanBuilt(): FramePlan | null { return this.lastPlan; }
   get currentState(): ResolvedState { return this.state; }
 

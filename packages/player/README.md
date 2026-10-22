@@ -51,12 +51,15 @@ const state = resolve(collectModule(file), manifest);
   `[data-el="composition"]`.
 - **Determinism.** `seekTo(t)` and `renderFrame(t)` draw the exact frame for
   `t`, paused or playing, so an exporter can step through frames.
+- **Looking at the result.** `captureSheet(times, { columns })` returns a
+  labelled contact sheet of those frames, the way an agent or a test checks
+  a cut without exporting.
 
 ## API
 
 `PlayerCore` (framework-free): `play`, `pause`, `toggle`, `seekTo`,
-`seekToFrame`, `renderFrame`, `getCurrentTime`, `getCurrentFrame`,
-`isPlaying`, `duration`, `playbackRate` (0.25–4), `loop`, `muted`, `volume`,
+`seekToFrame`, `renderFrame`, `captureSheet`, `getCurrentTime`,
+`getCurrentFrame`, `isPlaying`, `duration`, `playbackRate` (0.25–4), `loop`, `muted`, `volume`,
 `setState`, `attachCanvas`, `addEventListener` (`frameupdate`, `play`,
 `pause`, `seeked`, `ended`, `ratechange`, `volumechange`, `error`),
 `subscribeTime`, `dispose`. Every browser dependency is injectable

@@ -1,5 +1,6 @@
 import type { Diagnostic, LintOptions } from "../index";
-import type { SourceIndex } from "../../index";
+import type { ElementSite, SourceIndex } from "../../index";
+import { lookupAsset } from "../../../manifest/types";
 
 export interface Rule {
   readonly name: string;
@@ -117,4 +118,54 @@ export const missingAsset: Rule = {
   },
 };
 
-export const rules: readonly Rule[] = [literalIds, uniqueIds, noStartOnSequence, pureHelpers, expressionLocked, oneCaptions, ambiguousDuration, fileShape, missingAsset];
+export const sequenceGap: Rule = {
+  name: "sequence-gap",
+  check: (index) => {
+    const main = firstSequenceTrack(index);
+    if (!main) return [];
+    const out: Diagnostic[] = [];
+    for (const site of index.elements.values()) {
+      if (site.kind !== "gap" || site.parent !== main.id) continue;
+      out.push({ rule: "sequence-gap", severity: "warning", message: `"${site.id}" is a gap on the first sequence track "${main.id}"; nothing is under it, so those frames are black unless another track covers them`, range: site.range, id: site.id });
+    }
+    return out;
+  },
+};
+
+export const cutInsideWord: Rule = {
+  name: "cut-inside-word",
+  check: (index, options) => {
+    if (!options.manifest) return [];
+    const out: Diagnostic[] = [];
+    for (const site of index.elements.values()) {
+      if (site.kind !== "clip" && site.kind !== "audio") continue;
+      const src = site.props.get("src")?.literal;
+      if (typeof src !== "string") continue;
+      const words = lookupAsset(options.manifest, src)?.transcript?.words;
+      if (!words || words.length === 0) continue;
+      for (const prop of ["in", "out"] as const) {
+        const p = site.props.get(prop);
+        if (typeof p?.literal !== "number") continue;
+        const t = p.literal;
+        const word = words.find((w) => t > w.start && t < w.end);
+        if (!word) continue;
+        const ref = prop === "in" ? `word:${word.i}` : `word:${word.i}.end`;
+        out.push({ rule: "cut-inside-word", severity: "warning", message: `"${site.id}.${prop}" = ${t} cuts inside "${word.text}" (${word.start}–${word.end}); use ${ref} or a time outside the word`, range: p.range, id: site.id, prop });
+      }
+    }
+    return out;
+  },
+};
+
+export const rules: readonly Rule[] = [literalIds, uniqueIds, noStartOnSequence, pureHelpers, expressionLocked, oneCaptions, ambiguousDuration, fileShape, missingAsset, sequenceGap, cutInsideWord];
+
+/** The composition's first track in document order that lays out as a sequence and is not hidden: the one under everything else. */
+function firstSequenceTrack(index: SourceIndex): ElementSite | null {
+  let first: ElementSite | null = null;
+  for (const site of index.elements.values()) {
+    if (site.kind !== "track" || site.parent !== index.compositionId) continue;
+    if (site.props.get("layout")?.literal === "free" || site.props.get("hidden")?.literal === true) continue;
+    if (!first || site.siblingIndex < first.siblingIndex) first = site;
+  }
+  return first;
+}

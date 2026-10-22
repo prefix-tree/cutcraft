@@ -1,5 +1,5 @@
 import { ManualClock, PlayerCore, type PlayerEvents } from "@cutcut/player";
-import { FakeAudioOutput, FakeAudioSource, FakeFrameSource, fakeResolver, flush, recorderCanvas, recorderContext } from "./helpers/fakes";
+import { FakeAudioOutput, FakeAudioSource, FakeFrameSource, fakeResolver, flush, recorderContext } from "./helpers/fakes";
 import { makeState } from "./helpers/state";
 
 const state = makeState({ tracks: [{ id: "main", items: [
@@ -15,11 +15,12 @@ function setup(opts: { loop?: boolean } = {}) {
   const audio = new Map<string, FakeAudioSource>();
   const rafQueue: (() => void)[] = [];
   const events: { type: string; e: unknown }[] = [];
+  const canvases: ReturnType<typeof recorderContext>[] = [];
   const core = new PlayerCore({
     state, media: fakeResolver(["a", "b"]), clock, audioOutput: output, toContextTime: (t) => t,
     frameSourceFactory: (id) => { const f = new FakeFrameSource(id); frames.set(id, f); return f; },
     audioSourceFactory: (id) => { const a = new FakeAudioSource(id); audio.set(id, a); return a; },
-    createCanvas: recorderCanvas,
+    createCanvas: (w, h) => { const r = recorderContext(); (r.canvas as { width: number; height: number }).width = w; (r.canvas as { width: number; height: number }).height = h; canvases.push(r); return r.canvas as unknown as OffscreenCanvas; },
     raf: (cb) => { rafQueue.push(cb); return rafQueue.length; },
     cancelRaf: () => { rafQueue.length = 0; },
     setInterval: () => 1, clearInterval: () => {},
@@ -38,7 +39,7 @@ function setup(opts: { loop?: boolean } = {}) {
       await flush(2);
     }
   };
-  return { core, clock, output, frames, audio, rec, events, step, types: () => events.map((x) => x.type) };
+  return { core, clock, output, frames, audio, rec, canvases, events, step, types: () => events.map((x) => x.type) };
 }
 
 describe("PlayerCore", () => {
@@ -135,5 +136,36 @@ describe("PlayerCore", () => {
       expect(f.closed).toBe(true);
     }
     expect(core.isPlaying()).toBe(false);
+  });
+
+  it("captures a labelled contact sheet without moving the transport or losing the attached canvas", async () => {
+    const { core, rec, canvases, frames } = setup();
+    await flush();
+    await core.seekTo(1);
+    const before = rec.calls.length;
+    const sheet = await core.captureSheet([0.5, 5, 6.5], { columns: 2 });
+    await flush();
+    expect(core.getCurrentTime()).toBe(1);
+    expect(sheet.width).toBe(640);
+    expect(sheet.height).toBe(360);
+    const sheetRec = canvases.find((c) => c.canvas === sheet)!;
+    const draws = sheetRec.calls.filter((c) => c.name === "drawImage").map((c) => c.args.slice(1));
+    expect(draws).toEqual([[0, 0, 320, 180], [320, 0, 320, 180], [0, 180, 320, 180]]);
+    expect(sheetRec.calls.filter((c) => c.name === "fillText").map((c) => c.args[0])).toEqual(["00:00.15", "00:05.00", "00:06.15"]);
+    expect(frames.get("a")!.frameAtCalls).toContain(0.5);
+    expect(frames.get("b")!.frameAtCalls).toEqual(expect.arrayContaining([2, 3.5]));
+    const after = rec.calls.slice(before);
+    expect(after.filter((c) => c.name === "drawImage").length).toBeGreaterThan(0);
+    expect(after.some((c) => c.name === "drawImage" && (c.args[0] as { timestamp?: number }).timestamp === 150)).toBe(false);
+  });
+
+  it("captures without labels when asked and clamps columns to the cell count", async () => {
+    const { core, canvases } = setup();
+    await flush();
+    const sheet = await core.captureSheet([2], { columns: 4, cellWidth: 160, labels: false });
+    expect([sheet.width, sheet.height]).toEqual([160, 90]);
+    const sheetRec = canvases.find((c) => c.canvas === sheet)!;
+    expect(sheetRec.calls.filter((c) => c.name === "fillText")).toEqual([]);
+    expect(sheetRec.calls.filter((c) => c.name === "drawImage")).toHaveLength(1);
   });
 });
