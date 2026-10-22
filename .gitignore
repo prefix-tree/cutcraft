@@ -5,3 +5,5 @@ coverage/
 packages/player/e2e/app/public/
 packages/player/test-results/
 packages/player/playwright-report/
+test-results/
+playwright-report/
