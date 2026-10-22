@@ -8,3 +8,4 @@ export * from "./render";
 export * from "./audio";
 export * from "./nested";
 export * from "./player";
+export * from "./react";

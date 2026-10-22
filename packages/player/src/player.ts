@@ -15,7 +15,7 @@ import type { ResolveNested } from "./model/frame-plan";
 import { frameIndex, frameTime } from "./model/time";
 import { makeNestedResolver } from "./nested";
 import { Compositor } from "./render/compositor";
-import type { AudioOutput, AudioSource, AudioSourceFactory, Clock, CreateCanvas, Ctx2D, FrameSourceFactory, MediaResolver, PlayerErrorEvent, PlayerEvents } from "./types";
+import type { AudioOutput, AudioSource, AudioSourceFactory, Clock, CreateCanvas, Ctx2D, FrameSourceFactory, MediaHandle, MediaResolver, PlayerErrorEvent, PlayerEvents } from "./types";
 
 export interface PlayerOptions {
   readonly state: ResolvedState;
@@ -133,6 +133,9 @@ export class PlayerCore {
     this.engine.setMaster(vol, this._muted);
     this.emit("volumechange", { volume: vol, muted: this._muted });
   }
+
+  /** The media handle for an asset id, for DOM elements that show images. */
+  resolveMedia(assetId: string): Promise<MediaHandle> { return this.media.resolve(assetId); }
 
   getCurrentTime(): number { return this.transport.time(); }
   getCurrentFrame(): number { return frameIndex(this.transport.time(), this._state.composition.fps); }
