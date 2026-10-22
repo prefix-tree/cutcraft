@@ -1,6 +1,6 @@
-import { collectModule, resolve, type AssetManifest, type ResolvedState } from "@cut/kit";
-import { lint } from "@cut/kit/source";
-import { Player } from "@cut/player";
+import { collectModule, resolve, type AssetManifest, type ResolvedState } from "@cutcut/kit";
+import { lint } from "@cutcut/kit/source";
+import { Player } from "@cutcut/player";
 import { useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import manifestJson from "../manifest.json";

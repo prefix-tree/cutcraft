@@ -15,7 +15,7 @@ errors and children are equal to the previous resolve is the same object.
 Consumers memoise on identity: the DOM layer skips elements whose placement
 is the same object, decoders are keyed by asset and take a new trim in place,
 and a paused preview paints at once and fetches the exact frame after the
-gesture is quiet. A benchmark (`pnpm --filter @cut/kit bench`) and tests guard
+gesture is quiet. A benchmark (`pnpm --filter @cutcut/kit bench`) and tests guard
 the identities and a loose budget.
 
 ## Consequences

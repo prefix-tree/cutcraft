@@ -1,4 +1,4 @@
-import type { Placement } from "@cut/kit";
+import type { Placement } from "@cutcut/kit";
 import { devWarn } from "../warn";
 
 export interface FilterResult { readonly filter: string; readonly unsupported: readonly string[] }

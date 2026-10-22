@@ -1,4 +1,4 @@
-import type { Placement, ResolvedState, Transform } from "@cut/kit";
+import type { Placement, ResolvedState, Transform } from "@cutcut/kit";
 import type { CSSProperties } from "react";
 import { filterString } from "../../model/effects";
 import { animatedTransform, layoutRect, matrixToCss, type Box } from "../../model/transform";

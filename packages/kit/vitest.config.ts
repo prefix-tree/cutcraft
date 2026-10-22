@@ -6,8 +6,8 @@ const shared = {
   globals: true,
   include: ["test/**/*.test.ts", "test/**/*.test.tsx"],
   alias: {
-    "@cut/kit/source": new URL("./src/source/index-public.ts", import.meta.url).pathname,
-    "@cut/kit": new URL("./src/index.ts", import.meta.url).pathname,
+    "@cutcut/kit/source": new URL("./src/source/index-public.ts", import.meta.url).pathname,
+    "@cutcut/kit": new URL("./src/index.ts", import.meta.url).pathname,
   },
 };
 

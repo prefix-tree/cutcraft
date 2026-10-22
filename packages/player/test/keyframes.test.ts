@@ -1,5 +1,5 @@
-import { EASING_FN, ease, keyframedValue } from "@cut/player";
-import { captureWarnings } from "@cut/player";
+import { EASING_FN, ease, keyframedValue } from "@cutcut/player";
+import { captureWarnings } from "@cutcut/player";
 import { makeState, childrenOf } from "./helpers/state";
 
 const state = makeState({

@@ -1,9 +1,9 @@
 import { defineConfig } from "vitepress";
 
 export default defineConfig({
-  title: "cut",
+  title: "cutcut",
   description: "A video-editing DSL: a model writes a TSX file, the browser renders it, the editor edits the same file.",
-  base: "/cut/",
+  base: "/cutcut/",
   cleanUrls: true,
   lastUpdated: true,
   themeConfig: {
@@ -11,7 +11,7 @@ export default defineConfig({
       { text: "Guide", link: "/guide/getting-started" },
       { text: "Reference", link: "/reference/elements" },
       { text: "Decisions", link: "/decisions/" },
-      { text: "GitHub", link: "https://github.com/bsnisar/cut" },
+      { text: "GitHub", link: "https://github.com/bsnisar/cutcut" },
     ],
     sidebar: {
       "/guide/": [
@@ -26,8 +26,8 @@ export default defineConfig({
         { text: "Reference", items: [
           { text: "Elements", link: "/reference/elements" },
           { text: "Actions", link: "/reference/actions" },
-          { text: "Specification (kit)", link: "https://github.com/bsnisar/cut/blob/main/packages/kit/docs/spec.md" },
-          { text: "OpenReel parity (kit)", link: "https://github.com/bsnisar/cut/blob/main/packages/kit/docs/parity.md" },
+          { text: "Specification (kit)", link: "https://github.com/bsnisar/cutcut/blob/main/packages/kit/docs/spec.md" },
+          { text: "OpenReel parity (kit)", link: "https://github.com/bsnisar/cutcut/blob/main/packages/kit/docs/parity.md" },
         ] },
       ],
       "/decisions/": [
@@ -47,9 +47,9 @@ export default defineConfig({
         ] },
       ],
     },
-    socialLinks: [{ icon: "github", link: "https://github.com/bsnisar/cut" }],
+    socialLinks: [{ icon: "github", link: "https://github.com/bsnisar/cutcut" }],
     search: { provider: "local" },
-    editLink: { pattern: "https://github.com/bsnisar/cut/edit/main/docs/:path" },
+    editLink: { pattern: "https://github.com/bsnisar/cutcut/edit/main/docs/:path" },
     footer: { message: "MIT licensed." },
   },
 });

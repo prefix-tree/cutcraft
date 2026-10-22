@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import "@cut/kit";
+import "@cutcut/kit";
 import { parityGaps, PARITY } from "../scripts/parity";
 
 describe("parity with OpenReel", () => {

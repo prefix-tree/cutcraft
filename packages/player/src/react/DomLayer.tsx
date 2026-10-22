@@ -1,4 +1,4 @@
-import type { ResolvedState } from "@cut/kit";
+import type { ResolvedState } from "@cutcut/kit";
 import { memo, type ReactNode } from "react";
 import { frameIndex } from "../model/time";
 import { visiblePlacements, type VisibleItem } from "../model/visible";

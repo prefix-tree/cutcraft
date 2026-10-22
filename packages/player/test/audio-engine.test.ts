@@ -1,4 +1,4 @@
-import { AudioEngine, ManualClock, Transport } from "@cut/player";
+import { AudioEngine, ManualClock, Transport } from "@cutcut/player";
 import { FakeAudioOutput, FakeAudioSource, flush } from "./helpers/fakes";
 import { makeState } from "./helpers/state";
 

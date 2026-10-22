@@ -6,7 +6,7 @@ export function devWarn(key: string, message: string): void {
   if (seen.has(key)) return;
   seen.add(key);
   if (sink) sink(message);
-  else console.warn(`[cut/player] ${message}`);
+  else console.warn(`[cutcut/player] ${message}`);
 }
 
 export function captureWarnings(fn: ((message: string) => void) | null): void {

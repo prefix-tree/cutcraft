@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for looking. cut is small and opinionated; the fastest way to help is a
+Thanks for looking. cutcut is small and opinionated; the fastest way to help is a
 focused pull request with a test.
 
 ## Setup
@@ -8,12 +8,12 @@ focused pull request with a test.
 - Node 22 (`.nvmrc`), pnpm 10 (`corepack enable` picks the pinned version).
 - `pnpm install`, then `pnpm check` runs typecheck, lint and the test suites of
   every package. CI runs the same command.
-- Browser tests: `pnpm --filter @cut/player test:e2e` needs `ffmpeg` on the
+- Browser tests: `pnpm --filter @cutcut/player test:e2e` needs `ffmpeg` on the
   path and Playwright's Chromium (`pnpm exec playwright install --with-deps chromium`
   from `packages/player`). They generate their media on first run.
 - Docs: `pnpm docs:dev` serves the site; `pnpm docs:gen` regenerates the
   reference pages from the code and must leave `git diff` empty (CI checks).
-- The example: `pnpm --filter @cut/example-launch-recap gen` then `dev`.
+- The example: `pnpm --filter @cutcut/example-launch-recap gen` then `dev`.
 
 ## Where things live
 

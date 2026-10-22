@@ -1,4 +1,4 @@
-import type { FitMode, Placement, Transform } from "@cut/kit";
+import type { FitMode, Placement, Transform } from "@cutcut/kit";
 import { keyframedValue } from "./keyframes";
 
 export interface DrawRect { readonly x: number; readonly y: number; readonly w: number; readonly h: number }

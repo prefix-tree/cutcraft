@@ -33,8 +33,8 @@ jobs:
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
-      - run: pnpm --filter @cut/player exec playwright install --with-deps chromium
-      - run: pnpm --filter @cut/player test:e2e
+      - run: pnpm --filter @cutcut/player exec playwright install --with-deps chromium
+      - run: pnpm --filter @cutcut/player test:e2e
       - uses: actions/upload-artifact@v4
         if: failure()
         with:

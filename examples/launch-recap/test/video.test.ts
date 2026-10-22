@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { Executor, collectModule, resolve, type AssetManifest } from "@cut/kit";
-import { foldToSource, lint } from "@cut/kit/source";
+import { Executor, collectModule, resolve, type AssetManifest } from "@cutcut/kit";
+import { foldToSource, lint } from "@cutcut/kit/source";
 import * as file from "../video";
 
 const root = join(import.meta.dirname, "..");

@@ -1,4 +1,4 @@
-import { installUseT } from "@cut/kit";
+import { installUseT } from "@cutcut/kit";
 import { useContext, useSyncExternalStore } from "react";
 import type { PlayerCore } from "../player";
 import { LayerContext, PlayerContext } from "./context";

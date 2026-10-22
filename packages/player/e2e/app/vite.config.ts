@@ -10,8 +10,8 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      "@cut/kit": here("../../../kit/src/index.ts"),
-      "@cut/player": here("../../src/index.ts"),
+      "@cutcut/kit": here("../../../kit/src/index.ts"),
+      "@cutcut/player": here("../../src/index.ts"),
     },
   },
   server: { port: 5179, strictPort: true, fs: { allow: [here("../../..")] } },

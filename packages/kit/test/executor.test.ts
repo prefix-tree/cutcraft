@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { Executor } from "@cut/kit";
+import { Executor } from "@cutcut/kit";
 import { fixtureExecutor, fixtureTree, manifest, serialize } from "./helpers";
 
 describe("Executor", () => {

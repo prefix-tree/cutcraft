@@ -1,7 +1,7 @@
 # Writing a file
 
 This page follows one file from brief to pixels: the launch recap in
-[`examples/launch-recap`](https://github.com/bsnisar/cut/tree/main/examples/launch-recap).
+[`examples/launch-recap`](https://github.com/bsnisar/cutcut/tree/main/examples/launch-recap).
 The brief is a paragraph a person wrote; the prompt is what the model was
 given; the file is what it wrote. Every convention in the file exists for a
 reason, and this page gives the reason, the alternative we rejected, and what
@@ -24,7 +24,7 @@ a screen recording; a music track; the logo.
 
 ## The prompt
 
-The model receives [`prompt.md`](https://github.com/bsnisar/cut/blob/main/examples/launch-recap/prompt.md):
+The model receives [`prompt.md`](https://github.com/bsnisar/cutcut/blob/main/examples/launch-recap/prompt.md):
 the file shape, the vocabulary, ten conventions and the instruction to check
 its own work the way the lint will. It is short enough to read in a minute,
 and it explains what the editor will do with each construct rather than

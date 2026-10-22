@@ -14,7 +14,7 @@ OpenReel Video (MIT, clone at `/tmp/claude-0/-home-user/228eaac9-6e23-53eb-80af-
 
 **Scope (agreed):** Core NLE + advanced timeline: tracks, clips, trim/split/slip/slide/roll/ripple, speed, reverse, speed ramps, freeze frames, transforms, crop, video and audio effects, color grading, keyframes, transitions, text, shapes/SVG/stickers, captions, markers, audio levels/fades/automation/ducking, masks, adjustment layers, compound (nested) clips, multicam groups, stabilization, chroma key. **Out:** Motion Creator compositions, generated shaders, expressions, 3D creation scenes, 3D mesh shapes.
 
-**Deliverable (agreed):** this spec plus a TypeScript kit package skeleton `@cut/kit` in a new standalone pnpm workspace at `/home/user/cut` (`packages/kit`): Zod prop schemas per element, action type unions, registry, history, executor, stub handlers with the four faces, resolver and source-index interfaces, lint rules, fixtures and the first tests. No renderer, no DOM, no UI.
+**Deliverable (agreed):** this spec plus a TypeScript kit package skeleton `@cutcut/kit` in a new standalone pnpm workspace at `/home/user/cutcut` (`packages/kit`): Zod prop schemas per element, action type unions, registry, history, executor, stub handlers with the four faces, resolver and source-index interfaces, lint rules, fixtures and the first tests. No renderer, no DOM, no UI.
 
 ## Sources consulted
 
@@ -213,11 +213,11 @@ Behaviours we add beyond OpenReel: magnetic sequence tracks (ripple on move/dele
 
 ---
 
-## Part D. Kit package skeleton (`@cut/kit` at `/home/user/cut/packages/kit`)
+## Part D. Kit package skeleton (`@cutcut/kit` at `/home/user/cutcut/packages/kit`)
 
 ### D.1 Workspace and tooling
 
-`/home/user/cut`: `pnpm-workspace.yaml` (`packages/*`), root `package.json` (scripts fan out with `pnpm -r`), `tsconfig.base.json`. Package: React 19, Zod, `@babel/parser`, `@babel/traverse`, `@babel/types`, `recast`; dev: vitest, typescript, eslint + typescript-eslint. `tsconfig`: strict, `jsx: react-jsx`, `moduleResolution: bundler`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`. ESLint flat config bans DOM and `node:` imports under `src/`. Vitest runs the same tests in `node` and `jsdom` projects to prove resolver parity.
+`/home/user/cutcut`: `pnpm-workspace.yaml` (`packages/*`), root `package.json` (scripts fan out with `pnpm -r`), `tsconfig.base.json`. Package: React 19, Zod, `@babel/parser`, `@babel/traverse`, `@babel/types`, `recast`; dev: vitest, typescript, eslint + typescript-eslint. `tsconfig`: strict, `jsx: react-jsx`, `moduleResolution: bundler`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`. ESLint flat config bans DOM and `node:` imports under `src/`. Vitest runs the same tests in `node` and `jsdom` projects to prove resolver parity.
 
 ### D.2 Directory tree
 
@@ -292,10 +292,10 @@ First tests: (1) resolve of a two-clip sequence with a gap and a speed change gi
 ## Verification
 
 ```
-cd /home/user/cut && pnpm install
-pnpm --filter @cut/kit typecheck      # tsc --noEmit, fixtures included
-pnpm --filter @cut/kit lint
-pnpm --filter @cut/kit test           # vitest, node + jsdom projects
+cd /home/user/cutcut && pnpm install
+pnpm --filter @cutcut/kit typecheck      # tsc --noEmit, fixtures included
+pnpm --filter @cutcut/kit lint
+pnpm --filter @cutcut/kit test           # vitest, node + jsdom projects
 ```
 
 End-to-end on `fixtures/sample.tsx` (exercises every element in A.2):

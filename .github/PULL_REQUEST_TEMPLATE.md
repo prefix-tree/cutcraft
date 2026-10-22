@@ -5,7 +5,7 @@
 ## Validation
 
 - [ ] `pnpm check` passes
-- [ ] browser tests run, if the player changed (`pnpm --filter @cut/player test:e2e`)
+- [ ] browser tests run, if the player changed (`pnpm --filter @cutcut/player test:e2e`)
 - [ ] `pnpm docs:gen` leaves no diff, if a schema or action changed
 - [ ] before/after numbers, if performance changed; screenshots, if rendering changed
 

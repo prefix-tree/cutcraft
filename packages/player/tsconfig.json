@@ -5,8 +5,8 @@
     "types": ["node", "vitest/globals"],
     "baseUrl": ".",
     "paths": {
-      "@cut/kit": ["../kit/src/index.ts"],
-      "@cut/player": ["./src/index.ts"]
+      "@cutcut/kit": ["../kit/src/index.ts"],
+      "@cutcut/player": ["./src/index.ts"]
     }
   },
   "include": ["src", "test", "e2e", "vitest.config.ts", "playwright.config.ts", "eslint.config.js"]

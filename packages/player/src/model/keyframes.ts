@@ -1,4 +1,4 @@
-import type { Easing, Placement } from "@cut/kit";
+import type { Easing, Placement } from "@cutcut/kit";
 import { devWarn } from "../warn";
 
 type Fn = (x: number) => number;

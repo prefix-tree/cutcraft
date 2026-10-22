@@ -1,4 +1,4 @@
-import { capabilitiesOf, type Placement, type ResolvedState, type ResolvedTrack } from "@cut/kit";
+import { capabilitiesOf, type Placement, type ResolvedState, type ResolvedTrack } from "@cutcut/kit";
 import { ease } from "./keyframes";
 
 export interface TransitionRole {

@@ -1,4 +1,4 @@
-import { Composition, collect, resolve, type Placement, type ResolvedState } from "@cut/kit";
+import { Composition, collect, resolve, type Placement, type ResolvedState } from "@cutcut/kit";
 import { createElement, type ReactElement } from "react";
 import type { ResolveNested } from "./model/frame-plan";
 

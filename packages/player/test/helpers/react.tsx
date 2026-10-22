@@ -1,5 +1,5 @@
-import type { ResolvedState } from "@cut/kit";
-import { ManualClock, Player, type PlayerOptions, type PlayerRef } from "@cut/player";
+import type { ResolvedState } from "@cutcut/kit";
+import { ManualClock, Player, type PlayerOptions, type PlayerRef } from "@cutcut/player";
 import { act, createRef, type ReactNode } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { FakeAudioOutput, FakeAudioSource, FakeFrameSource, fakeResolver, recorderCanvas, recorderContext } from "./fakes";

@@ -1,4 +1,4 @@
-import { useT } from "@cut/kit";
+import { useT } from "@cutcut/kit";
 import { fixtureElement, fixtureState } from "./helpers/state";
 import { mountPlayer } from "./helpers/react";
 

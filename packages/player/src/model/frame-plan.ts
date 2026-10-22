@@ -1,4 +1,4 @@
-import { lookupAsset, type BlendMode, type FitMode, type Placement, type ResolvedState, type Transform } from "@cut/kit";
+import { lookupAsset, type BlendMode, type FitMode, type Placement, type ResolvedState, type Transform } from "@cutcut/kit";
 import { devWarn } from "../warn";
 import { filterString } from "./effects";
 import { frameIndex, nestedSourceTime, placementSourceTime } from "./time";

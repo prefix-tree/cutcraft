@@ -2,8 +2,8 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { createElement } from "react";
 import { describe, expect, it } from "vitest";
-import { Clip, Composition, Gap, Title, Track, Transition, collect, resolve } from "@cut/kit";
-import { lint } from "@cut/kit/source";
+import { Clip, Composition, Gap, Title, Track, Transition, collect, resolve } from "@cutcut/kit";
+import { lint } from "@cutcut/kit/source";
 import { fixtureText, fixtureTree, fixturesDir, manifest, serialize, round } from "./helpers";
 
 const h = createElement;

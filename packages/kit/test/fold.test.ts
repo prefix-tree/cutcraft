@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { collectModule, resolve } from "@cut/kit";
-import { applyEdits, buildSourceIndex, foldToSource, lint, printElement, printProp } from "@cut/kit/source";
+import { collectModule, resolve } from "@cutcut/kit";
+import { applyEdits, buildSourceIndex, foldToSource, lint, printElement, printProp } from "@cutcut/kit/source";
 import { fixtureExecutor, fixtureText, fixturesDir, manifest, serialize } from "./helpers";
 
 function changedLines(a: string, b: string): number {

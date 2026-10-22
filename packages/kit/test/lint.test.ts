@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { buildSourceIndex, lint } from "@cut/kit/source";
+import { buildSourceIndex, lint } from "@cutcut/kit/source";
 import { fixtureText, manifest } from "./helpers";
 
 const wrap = (body: string, extra = "") => `
-import { Composition, Track, Clip, Title } from "@cut/kit";
+import { Composition, Track, Clip, Title } from "@cutcut/kit";
 ${extra}
 export default function V() {
   return (<Composition fps={30} width={1920} height={1080}>${body}</Composition>);

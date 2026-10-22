@@ -186,7 +186,7 @@ test.describe("player", () => {
 
 declare global {
   interface Window {
-    __player: import("@cut/player").PlayerRef | null;
+    __player: import("@cutcut/player").PlayerRef | null;
     __ctx: AudioContext;
     __errors: unknown[];
     __playerErrors: unknown[];

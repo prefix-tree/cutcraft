@@ -1,5 +1,5 @@
 {
-  "name": "cut",
+  "name": "cutcut",
   "private": true,
   "version": "0.0.0",
   "description": "A video-editing DSL: a model writes a TSX file, the browser renders it, the editor edits the same file.",
@@ -24,11 +24,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/bsnisar/cut.git"
+    "url": "https://github.com/bsnisar/cutcut.git"
   },
-  "homepage": "https://bsnisar.github.io/cut/",
+  "homepage": "https://bsnisar.github.io/cutcut/",
   "bugs": {
-    "url": "https://github.com/bsnisar/cut/issues"
+    "url": "https://github.com/bsnisar/cutcut/issues"
   },
   "license": "MIT"
 }

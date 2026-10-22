@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ELEMENTS, SCHEMAS_BY_KIND, TRANSITION_PARAMS, TRANSITION_TYPES, capabilitiesOf, defaultTransitionParams, isKeyframeProperty, isVocabulary } from "@cut/kit";
+import { ELEMENTS, SCHEMAS_BY_KIND, TRANSITION_PARAMS, TRANSITION_TYPES, capabilitiesOf, defaultTransitionParams, isKeyframeProperty, isVocabulary } from "@cutcut/kit";
 import { fixtureTree } from "./helpers";
 
 describe("element schemas", () => {

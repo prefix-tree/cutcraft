@@ -1,4 +1,4 @@
-import { ClipDecoder, QUEUE_MAX } from "@cut/player";
+import { ClipDecoder, QUEUE_MAX } from "@cutcut/player";
 import { FakeFrameSource, flush } from "./helpers/fakes";
 import { childrenOf, makeState } from "./helpers/state";
 

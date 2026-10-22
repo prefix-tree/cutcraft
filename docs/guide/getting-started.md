@@ -1,11 +1,11 @@
 # Getting started
 
 ```
-git clone https://github.com/bsnisar/cut && cd cut
+git clone https://github.com/bsnisar/cutcut && cd cutcut
 pnpm install
 pnpm check                                     # typecheck, lint, every test suite
-pnpm --filter @cut/example-launch-recap gen    # placeholder footage (needs ffmpeg)
-pnpm --filter @cut/example-launch-recap dev    # http://localhost:5180
+pnpm --filter @cutcut/example-launch-recap gen    # placeholder footage (needs ffmpeg)
+pnpm --filter @cutcut/example-launch-recap dev    # http://localhost:5180
 ```
 
 The example plays a file a model wrote from a brief; the page shows the lint
@@ -15,8 +15,8 @@ result, the resolve result and a tweaks form bound to the file's `schema`.
 ## Using the kit
 
 ```ts
-import { collectModule, resolve, Executor } from "@cut/kit";
-import { lint, foldToSource } from "@cut/kit/source";
+import { collectModule, resolve, Executor } from "@cutcut/kit";
+import { lint, foldToSource } from "@cutcut/kit/source";
 import * as file from "./video";
 
 const state = resolve(collectModule(file), manifest);      // absolute placements by id
@@ -29,7 +29,7 @@ const { text: edited } = foldToSource(text, exec.log(), exec.state());
 ## Using the player
 
 ```tsx
-import { Player } from "@cut/player";
+import { Player } from "@cutcut/player";
 
 <Player state={state} element={file.default(file.defaults)} media={{ founder: blob, music: "/music.ogg" }} controls />
 ```
@@ -42,7 +42,7 @@ without React; see [Rendering](./rendering.md).
 
 | | |
 |---|---|
-| `@cut/kit` | vocabulary, manifest and time references, resolver, patches and actions, source tools and lint. No DOM. |
-| `@cut/player` | WebCodecs decoding through mediabunny, canvas compositing, DOM overlays, Web Audio clock and mixer, `<Player>`. |
+| `@cutcut/kit` | vocabulary, manifest and time references, resolver, patches and actions, source tools and lint. No DOM. |
+| `@cutcut/player` | WebCodecs decoding through mediabunny, canvas compositing, DOM overlays, Web Audio clock and mixer, `<Player>`. |
 
 Neither is published to npm yet; the workspace is the way to use them.

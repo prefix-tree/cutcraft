@@ -20,10 +20,10 @@ importers:
 
   examples/launch-recap:
     dependencies:
-      '@cut/kit':
+      '@cutcut/kit':
         specifier: workspace:*
         version: link:../../packages/kit
-      '@cut/player':
+      '@cutcut/player':
         specifier: workspace:*
         version: link:../../packages/player
       react:
@@ -121,7 +121,7 @@ importers:
 
   packages/player:
     dependencies:
-      '@cut/kit':
+      '@cutcut/kit':
         specifier: workspace:*
         version: link:../kit
       mediabunny:

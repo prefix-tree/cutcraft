@@ -1,5 +1,5 @@
-import { collectModule, resolve } from "@cut/kit";
-import { Player, type PlayerRef } from "@cut/player";
+import { collectModule, resolve } from "@cutcut/kit";
+import { Player, type PlayerRef } from "@cutcut/player";
 import { createRef } from "react";
 import { createRoot } from "react-dom/client";
 import * as file from "./composition";

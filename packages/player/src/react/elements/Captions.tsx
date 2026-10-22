@@ -1,4 +1,4 @@
-import type { Placement, ResolvedState } from "@cut/kit";
+import type { Placement, ResolvedState } from "@cutcut/kit";
 import type { CSSProperties } from "react";
 import { isVisibleAt } from "../../model/visible";
 

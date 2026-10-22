@@ -1,4 +1,4 @@
-import type { ResolvedState } from "@cut/kit";
+import type { ResolvedState } from "@cutcut/kit";
 import { AudioEngine } from "./audio/audio-engine";
 import { WebAudioOutput } from "./audio/web-audio-output";
 import { AudioContextClock } from "./clock/audio-clock";

@@ -1,4 +1,4 @@
-import type { ResolvedState } from "@cut/kit";
+import type { ResolvedState } from "@cutcut/kit";
 import { buildFramePlan, type FramePlan, type ResolveNested } from "../model/frame-plan";
 import { frameIndex } from "../model/time";
 import type { AssetSources } from "../media/asset-sources";

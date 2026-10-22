@@ -1,4 +1,4 @@
-import { Audio, Clip, Composition, Layer, Title, Track, Transition, useT, type AssetManifest } from "@cut/kit";
+import { Audio, Clip, Composition, Layer, Title, Track, Transition, useT, type AssetManifest } from "@cutcut/kit";
 
 export const manifest: AssetManifest = {
   assets: {

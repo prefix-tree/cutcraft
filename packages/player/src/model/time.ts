@@ -1,4 +1,4 @@
-import type { Placement } from "@cut/kit";
+import type { Placement } from "@cutcut/kit";
 import { FRAME_EPS } from "../constants";
 import { ease } from "./keyframes";
 

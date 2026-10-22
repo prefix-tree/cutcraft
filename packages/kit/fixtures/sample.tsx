@@ -2,7 +2,7 @@ import { z } from "zod";
 import {
   Adjustment, Angle, Audio, AudioEffect, Caption, Captions, Clip, ColorGrade, Composition, Cut, Effect, Freeze, Gap,
   Keyframe, Layer, Marker, Mask, Multicam, Nested, Shape, SpeedKey, Sticker, Svg, Title, Track, Transition, useT,
-} from "@cut/kit";
+} from "@cutcut/kit";
 
 export const schema = z.object({
   title: z.string(),

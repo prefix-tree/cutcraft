@@ -8,9 +8,9 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      "@cut/kit/source": here("../../packages/kit/src/source/index-public.ts"),
-      "@cut/kit": here("../../packages/kit/src/index.ts"),
-      "@cut/player": here("../../packages/player/src/index.ts"),
+      "@cutcut/kit/source": here("../../packages/kit/src/source/index-public.ts"),
+      "@cutcut/kit": here("../../packages/kit/src/index.ts"),
+      "@cutcut/player": here("../../packages/player/src/index.ts"),
     },
   },
   // The lint runs in the page through the kit's source tools, which pull Babel; Babel reads process.env.

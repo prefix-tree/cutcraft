@@ -1,4 +1,4 @@
-import { AssetSources, Compositor, ManualClock } from "@cut/player";
+import { AssetSources, Compositor, ManualClock } from "@cutcut/player";
 import { FakeFrameSource, fakeResolver, flush, recorderCanvas, recorderContext } from "./helpers/fakes";
 import { DEFAULT_MANIFEST, makeState } from "./helpers/state";
 

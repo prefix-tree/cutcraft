@@ -1,5 +1,5 @@
-import type { ResolvedState } from "@cut/kit";
-import { buildFramePlan, captureWarnings } from "@cut/player";
+import type { ResolvedState } from "@cutcut/kit";
+import { buildFramePlan, captureWarnings } from "@cutcut/player";
 import { fixtureState, makeState } from "./helpers/state";
 
 const state = makeState({

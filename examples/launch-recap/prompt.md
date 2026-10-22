@@ -10,7 +10,7 @@ work on it.
 
 ```tsx
 import { z } from "zod";
-import { Clip, Composition, Title, Track, Transition } from "@cut/kit";
+import { Clip, Composition, Title, Track, Transition } from "@cutcut/kit";
 
 export const schema = z.object({ title: z.string() });   // the tweaks panel
 export const defaults = { title: "Why we built it" };     // a JSON literal

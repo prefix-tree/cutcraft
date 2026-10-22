@@ -1,4 +1,4 @@
-import type { Placement } from "@cut/kit";
+import type { Placement } from "@cutcut/kit";
 import { FRAME_WAIT_MS, QUEUE_MAX, QUEUE_TARGET, REVERSE_WINDOW_FRAMES, REVERSE_WINDOW_S, SEEK_MODE_SPEED } from "../constants";
 import { placementSourceTime } from "../model/time";
 import type { Frame, FrameSource } from "../types";

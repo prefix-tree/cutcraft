@@ -1,4 +1,4 @@
-import { buildAudioPlan, buildGainEnvelope, captureWarnings, duckIntervals } from "@cut/player";
+import { buildAudioPlan, buildGainEnvelope, captureWarnings, duckIntervals } from "@cutcut/player";
 import { makeState } from "./helpers/state";
 
 const state = makeState({

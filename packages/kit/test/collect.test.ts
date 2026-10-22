@@ -1,6 +1,6 @@
 import { createElement, Fragment } from "react";
 import { describe, expect, it } from "vitest";
-import { Clip, Composition, Layer, Title, Track, collect, createPatchLog, resolve } from "@cut/kit";
+import { Clip, Composition, Layer, Title, Track, collect, createPatchLog, resolve } from "@cutcut/kit";
 import { overlay } from "../src/resolve/overlay";
 import { manifest } from "./helpers";
 

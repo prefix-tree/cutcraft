@@ -1,4 +1,4 @@
-# cut
+# cutcut
 
 **The file is the video.** A model writes a TSX file. The browser renders it.
 The editor's timeline, inspector and preview edit that same file. There is no
@@ -35,7 +35,7 @@ model reads the new file and sees what you did.
 ## Why
 
 Models are good at writing code and bad at driving a hundred tools. Editors are
-good at direct manipulation and bad at explaining themselves to a model. cut
+good at direct manipulation and bad at explaining themselves to a model. cutcut
 puts both on one artifact: a file in a fixed vocabulary with literal ids, so a
 gesture can find its element and change one value, and a model can read the
 result as the code it wrote. The reasoning behind each choice is in
@@ -69,8 +69,8 @@ file.tsx ──evaluate──▶ element tree ──collect──▶ CollectedTr
 ```
 pnpm install
 pnpm check                                     # typecheck, lint, every suite (kit 432, player 90, example 4)
-pnpm --filter @cut/example-launch-recap gen    # placeholder footage via ffmpeg
-pnpm --filter @cut/example-launch-recap dev    # http://localhost:5180
+pnpm --filter @cutcut/example-launch-recap gen    # placeholder footage via ffmpeg
+pnpm --filter @cutcut/example-launch-recap dev    # http://localhost:5180
 ```
 
 The example is a 25 s launch recap a model wrote from a brief under the

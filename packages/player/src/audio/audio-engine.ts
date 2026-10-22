@@ -1,4 +1,4 @@
-import type { ResolvedState } from "@cut/kit";
+import type { ResolvedState } from "@cutcut/kit";
 import { AUDIO_CACHE_S, AUDIO_PRIME_S, LOOKAHEAD_S, PLAY_PRIME_TIMEOUT_MS, SCHEDULER_MS } from "../constants";
 import type { Transport } from "../clock/transport";
 import { buildAudioPlan, type AudioOccurrence } from "../model/audio-plan";

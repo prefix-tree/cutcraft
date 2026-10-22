@@ -1,5 +1,5 @@
 {
-  "name": "@cut/player",
+  "name": "@cutcut/player",
   "version": "0.1.0",
   "private": true,
   "description": "Browser player for the cut video DSL: WebCodecs decode through mediabunny, canvas compositing, DOM overlays, Web Audio clock.",
@@ -19,7 +19,7 @@
     "react-dom": "^19.0.0"
   },
   "dependencies": {
-    "@cut/kit": "workspace:*",
+    "@cutcut/kit": "workspace:*",
     "mediabunny": "1.62.0"
   },
   "devDependencies": {

@@ -1,4 +1,4 @@
-import type { ActionInput, ActionType } from "@cut/kit";
+import type { ActionInput, ActionType } from "@cutcut/kit";
 
 /** Stubs: specified, validated, not yet applied. */
 export const STUBS: readonly ActionType[] = ["track/setLayout", "nested/extract", "multicam/flatten"];

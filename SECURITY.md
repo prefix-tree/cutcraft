@@ -1,6 +1,6 @@
 # Security
 
-cut runs media the user chose in the user's own browser. Its attack surface is
+cutcut runs media the user chose in the user's own browser. Its attack surface is
 the file a model wrote and the assets it references.
 
 Please report vulnerabilities privately through GitHub's security advisories

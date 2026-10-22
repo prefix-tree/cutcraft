@@ -1,4 +1,4 @@
-import type { AudioOutput, AudioSource, AudioSourceInfo, Ctx2D, Frame, FrameSource, FrameSourceInfo, MediaResolver, ScheduledSource } from "@cut/player";
+import type { AudioOutput, AudioSource, AudioSourceInfo, Ctx2D, Frame, FrameSource, FrameSourceInfo, MediaResolver, ScheduledSource } from "@cutcut/player";
 
 export class FakeFrame implements Frame {
   closed = false;

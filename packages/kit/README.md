@@ -1,6 +1,6 @@
-# @cut/kit
+# @cutcut/kit
 
-The shared core of the cut editor: the JSX vocabulary a model writes, the
+The shared core of the cutcut editor: the JSX vocabulary a model writes, the
 resolver that turns a file into absolute placements, the invertible action
 system the editor dispatches, and the source tools that write those actions
 back into the file.
@@ -12,7 +12,7 @@ set is in [`docs/parity.md`](docs/parity.md) (`pnpm parity` regenerates it).
 
 ```tsx
 import { z } from "zod";
-import { Clip, Composition, Title, Track, Transition } from "@cut/kit";
+import { Clip, Composition, Title, Track, Transition } from "@cutcut/kit";
 
 export const schema = z.object({ title: z.string(), accent: z.string() });
 export const defaults = { title: "Why we built it", accent: "#ff5a1f" };

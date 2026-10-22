@@ -1,4 +1,4 @@
-import { isVocabulary } from "@cut/kit";
+import { isVocabulary } from "@cutcut/kit";
 import { Children, Fragment, isValidElement, type ReactElement, type ReactNode } from "react";
 
 /**

@@ -1,6 +1,6 @@
 # Decision records
 
-Why cut is built the way it is, one decision per file, in the order they were
+Why cutcut is built the way it is, one decision per file, in the order they were
 made. A record is never edited to say something else; a change of mind adds a
 new record that supersedes the old one.
 

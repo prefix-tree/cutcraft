@@ -1,14 +1,14 @@
-# @cut/player
+# @cutcut/player
 
-The browser player for cut files. It takes a `ResolvedState` from `@cut/kit`
+The browser player for cut files. It takes a `ResolvedState` from `@cutcut/kit`
 and plays it: footage decoded with WebCodecs through mediabunny and composited
 on one canvas, overlays rendered as React DOM above it, sound mixed and
 clocked by Web Audio. The editor's preview, the model's filmstrip and the
 later headless export all drive the same `PlayerCore`.
 
 ```tsx
-import { collectModule, resolve } from "@cut/kit";
-import { Player } from "@cut/player";
+import { collectModule, resolve } from "@cutcut/kit";
+import { Player } from "@cutcut/player";
 import * as file from "./video";          // the TSX file the model wrote
 
 const state = resolve(collectModule(file), manifest);
@@ -80,8 +80,8 @@ is reported once through `devWarn` and listed in the frame plan's `warnings`.
 ## Tests
 
 ```
-pnpm --filter @cut/player test        # vitest over jsdom with fakes (part of `pnpm check`)
-pnpm --filter @cut/player test:e2e    # Playwright: ffmpeg-generated media, Vite, headless Chromium
+pnpm --filter @cutcut/player test        # vitest over jsdom with fakes (part of `pnpm check`)
+pnpm --filter @cutcut/player test:e2e    # Playwright: ffmpeg-generated media, Vite, headless Chromium
 ```
 
 The browser suite generates `bars.webm` (frame number encoded in a binary

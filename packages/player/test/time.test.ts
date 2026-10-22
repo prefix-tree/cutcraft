@@ -1,4 +1,4 @@
-import { frameIndex, frameTime, localT, placementSourceTime } from "@cut/player";
+import { frameIndex, frameTime, localT, placementSourceTime } from "@cutcut/player";
 import { childrenOf, fixtureState, makeState } from "./helpers/state";
 
 const state = makeState({

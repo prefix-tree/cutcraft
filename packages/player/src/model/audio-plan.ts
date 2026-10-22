@@ -1,4 +1,4 @@
-import { capabilitiesOf, lookupAsset, type Placement, type ResolvedState, type ResolvedTrack } from "@cut/kit";
+import { capabilitiesOf, lookupAsset, type Placement, type ResolvedState, type ResolvedTrack } from "@cutcut/kit";
 import { AUDIO_CHUNK_S, DUCK_ATTACK_S, DUCK_RELEASE_S, ENVELOPE_STEP_S } from "../constants";
 import { devWarn } from "../warn";
 import { keyframedValue } from "./keyframes";

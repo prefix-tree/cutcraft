@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ActionHistory, type Action, type ActionInput } from "@cut/kit";
+import { ActionHistory, type Action, type ActionInput } from "@cutcut/kit";
 
 const trim = (id: string, out: number, actionId = "a"): Action => ({ type: "clip/trim", actionId, ts: 0, params: { id, edge: "out", value: out } });
 const inverse: ActionInput = { type: "source/setProps", params: { id: "c1", props: {} } };

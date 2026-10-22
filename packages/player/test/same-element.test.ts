@@ -1,5 +1,5 @@
-import { visiblePlacements, sameElement, type ElementCellProps } from "@cut/player";
-import { collectModule, createPatchLog, resolve } from "@cut/kit";
+import { visiblePlacements, sameElement, type ElementCellProps } from "@cutcut/player";
+import { collectModule, createPatchLog, resolve } from "@cutcut/kit";
 import * as sample from "../../kit/fixtures/sample";
 import { fixtureManifest } from "./helpers/state";
 

@@ -8,13 +8,13 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
-- `@cut/kit`: the JSX vocabulary (26 elements with Zod schemas), the asset
+- `@cutcut/kit`: the JSX vocabulary (26 elements with Zod schemas), the asset
   manifest and `TimeRef` resolution, the resolver (sequence and free tracks,
   gaps, transitions, anchors, fill and match durations, multicam cuts), the
   patch log, the action system (124 actions with validate, apply, invert and
   fold), history with gesture grouping, the executor, the source index, fold,
   bake and lint.
-- `@cut/player`: the browser renderer. WebCodecs decoding through mediabunny,
+- `@cutcut/player`: the browser renderer. WebCodecs decoding through mediabunny,
   per-clip decoders, canvas compositing with transforms, masks, crossfades and
   adjustments, DOM overlays, a Web Audio clock and mixer with ducking, the
   framework-free `PlayerCore` and the React `<Player>`.
@@ -26,6 +26,7 @@ All notable changes to this project are documented here. The format follows
 
 ### Changed
 
+- The project and its packages are named cutcut (`@cutcut/kit`, `@cutcut/player`); the TSX file is still called a cut file.
 - Resolve caches parsed props and intrinsic timing per node and keeps
   placement identity, so a drag step costs about 1 µs per element.
 - Decoders survive trims; a paused preview repaints without waiting and

@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { Executor, collectModule, resolve, type AssetManifest, type CollectedTree, type ResolvedState } from "@cut/kit";
-import { buildSourceIndex } from "@cut/kit/source";
+import { Executor, collectModule, resolve, type AssetManifest, type CollectedTree, type ResolvedState } from "@cutcut/kit";
+import { buildSourceIndex } from "@cutcut/kit/source";
 import * as sample from "../fixtures/sample";
 
 export const fixturesDir = join(import.meta.dirname, "..", "fixtures");
