@@ -30,7 +30,7 @@ export class Compositor {
   private ctx: Ctx2D | null = null;
   private state: ResolvedState;
   private inFlight: Promise<void> | null = null;
-  private pending: { t: number; opts: TickOptions } | null = null;
+  private pending: { t: number; opts: TickOptions; done: Promise<void>; resolve: () => void } | null = null;
   private lastFrame = -1;
   private lastPlan: FramePlan | null = null;
   private readonly nested = new Map<string, { compositor: Compositor; canvas: AnyCanvas }>();
@@ -78,14 +78,22 @@ export class Compositor {
   tick(t: number, opts: TickOptions): Promise<void> {
     if (this.disposed) return Promise.resolve();
     if (this.inFlight) {
-      this.pending = { t, opts: { wait: opts.wait || this.pending?.opts.wait === true } };
-      return this.inFlight;
+      // Coalesce: the newest request replaces the pending one; both callers resolve when it has run.
+      if (this.pending) {
+        this.pending.t = t;
+        this.pending.opts = { wait: opts.wait || this.pending.opts.wait };
+        return this.pending.done;
+      }
+      let resolve = (): void => undefined;
+      const done = new Promise<void>((r) => { resolve = r; });
+      this.pending = { t, opts, done, resolve };
+      return done;
     }
-    const run = this.run(t, opts).finally(() => {
+    const run = this.run(t, opts).catch(() => undefined).then(() => {
       this.inFlight = null;
       const next = this.pending;
       this.pending = null;
-      if (next) void this.tick(next.t, next.opts);
+      if (next) void this.tick(next.t, next.opts).then(next.resolve, next.resolve);
     });
     this.inFlight = run;
     return run;

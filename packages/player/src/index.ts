@@ -5,3 +5,6 @@ export * from "./model";
 export * from "./clock";
 export * from "./media";
 export * from "./render";
+export * from "./audio";
+export * from "./nested";
+export * from "./player";
