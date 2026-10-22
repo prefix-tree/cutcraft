@@ -17,7 +17,6 @@ describe("sameElement", () => {
 
   it("is true for an untouched overlay after another element was patched", () => {
     expect(sameElement(cell(before, "t1", 1.5), cell(after, "t1", 1.5))).toBe(true);
-    expect(cell(before, "t1", 1.5).item.placement).not.toBe(cell(after, "t1", 1.5).item.placement);
   });
 
   it("is false for the patched element", () => {
@@ -27,6 +26,11 @@ describe("sameElement", () => {
   it("tracks the element-relative frame, not wall time", () => {
     expect(sameElement(cell(before, "t1", 1.5), cell(before, "t1", 1.5 + 0.01))).toBe(true);
     expect(sameElement(cell(before, "t1", 1.5), cell(before, "t1", 1.6))).toBe(false);
+  });
+
+  it("keeps identity for untouched placements across resolves", () => {
+    expect(cell(before, "t1", 1.5).item.placement).toBe(cell(after, "t1", 1.5).item.placement);
+    expect(cell(before, "s1", 5.5).item.placement).not.toBe(cell(after, "s1", 5.5).item.placement);
   });
 
   it("is false when the text changes", () => {

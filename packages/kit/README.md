@@ -57,7 +57,9 @@ file.tsx ──evaluate──▶ element tree ──collect──▶ CollectedTr
 - Cost: a resolve is linear in the number of elements, about 2 µs per node
   (1,000 nodes in ~2 ms). Parsed props are cached per raw props object and the
   overlay keeps every node a patch did not touch, so a drag step re-parses one
-  element; `Placement.props` stays referentially stable for the rest.
+  element and re-derives one trim; every placement whose timing, props and
+  errors did not change is returned as the same object, so consumers can
+  memoise on `Placement` identity.
   `pnpm bench` prints per-step costs on the sample fixture and a synthetic
   500-clip project.
 - `new Executor({ tree, manifest })` runs actions. Each handler has four faces:

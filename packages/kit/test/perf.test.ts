@@ -1,5 +1,5 @@
 import { performance } from "node:perf_hooks";
-import { Executor, collectModule, createPatchLog, resolve } from "@cut/kit";
+import { Executor, collectModule, createPatchLog, resolve, samePlacement } from "@cut/kit";
 import { buildLarge } from "../fixtures/large";
 import { manifest } from "./helpers";
 
@@ -57,5 +57,48 @@ describe("drag-loop cost", () => {
     const second = resolve(bad, manifest, log);
     expect(first.errors.filter((e) => e.id === "c1" && e.code === "SCHEMA")).toHaveLength(1);
     expect(second.errors.filter((e) => e.id === "c1" && e.code === "SCHEMA")).toHaveLength(1);
+  });
+});
+
+describe("placement identity", () => {
+  const tree = collectModule(buildLarge(200));
+
+  it("keeps every placement a prop patch did not affect, children and structure included", () => {
+    const before = resolve(tree, manifest);
+    const log = createPatchLog({ isSource: (id) => tree.byId.has(id) });
+    log.append({ op: "set", id: "c3", prop: "fit", value: "contain" });
+    const after = resolve(tree, manifest, log);
+    expect(after.items.get("c4")).toBe(before.items.get("c4"));
+    expect(after.items.get("c4k1")).toBe(before.items.get("c4k1"));
+    expect(after.items.get("v2")).toBe(before.items.get("v2"));
+    expect(after.items.get("composition")).toBe(before.items.get("composition"));
+    expect(after.items.get("bed")).toBe(before.items.get("bed"));
+    expect(after.items.get("c3")).not.toBe(before.items.get("c3"));
+    const changed = [...after.items].filter(([id, p]) => before.items.get(id) !== p).map(([id]) => id);
+    expect(changed).toEqual(["c3"]);
+  });
+
+  it("changes only the trimmed clip, what follows it and what anchors to those", () => {
+    const before = resolve(tree, manifest);
+    const log = createPatchLog({ isSource: (id) => tree.byId.has(id) });
+    log.append({ op: "set", id: "c3", prop: "out", value: 4.5 });
+    const after = resolve(tree, manifest, log);
+    const changed = new Set([...after.items].filter(([id, p]) => before.items.get(id) !== p).map(([id]) => id));
+    expect(changed.has("c3")).toBe(true);
+    expect(changed.has("c6")).toBe(true);
+    expect(changed.has("c4")).toBe(false);
+    expect(changed.has("v2")).toBe(false);
+    expect(changed.has("c0")).toBe(false);
+    expect(changed.size).toBeLessThan(after.items.size / 2);
+    expect(after.items.get("c6")!.start).toBeCloseTo(before.items.get("c6")!.start + 3.5);
+  });
+
+  it("compares placements by what renders and edits", () => {
+    const state = resolve(tree, manifest);
+    const c4 = state.items.get("c4")!;
+    expect(samePlacement(c4, { ...c4 })).toBe(true);
+    expect(samePlacement(c4, { ...c4, errors: [{ code: "SCHEMA", id: "c4", message: "x" }] })).toBe(false);
+    expect(samePlacement(c4, { ...c4, children: [...c4.children].reverse() })).toBe(c4.children.length < 2);
+    expect(samePlacement(c4, { ...c4, props: { ...c4.props } })).toBe(false);
   });
 });
