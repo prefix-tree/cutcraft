@@ -26,9 +26,9 @@ generated.
   snapshots, and the history is a readable list of what the user did.
 - The fold is the only place where "edit the code" is confronted, and it is a
   token edit, not a transpile.
-- Policy, not yet decided by an editor package: fold on every gesture end (so
-  the model always reads the latest file, as Diffusion Studio does) or on save.
-  Both are supported; folding on gesture end is the recommended default.
+- Policy: the fold runs when a history group closes, so the file is at most
+  one gesture behind the preview (decided in 0012 after studying Diffusion
+  Studio, whose debounced writer can write a drag several times).
 
 ## Alternatives
 

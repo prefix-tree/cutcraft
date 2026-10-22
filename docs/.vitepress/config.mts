@@ -11,6 +11,7 @@ export default defineConfig({
       { text: "Guide", link: "/guide/getting-started" },
       { text: "Reference", link: "/reference/elements" },
       { text: "Decisions", link: "/decisions/" },
+      { text: "Comparisons", link: "/comparisons/diffusion-studio" },
       { text: "GitHub", link: "https://github.com/bsnisar/cutcut" },
     ],
     sidebar: {
@@ -44,6 +45,12 @@ export default defineConfig({
           { text: "0009 Helpers, layers, editability", link: "/decisions/0009-helpers-layers-and-editability" },
           { text: "0010 OpenReel as the reference", link: "/decisions/0010-openreel-as-the-ux-reference" },
           { text: "0011 Performance contract", link: "/decisions/0011-performance-contract" },
+          { text: "0012 What we adopt from Diffusion Studio", link: "/decisions/0012-what-we-adopt-from-diffusion-studio" },
+        ] },
+      ],
+      "/comparisons/": [
+        { text: "Comparisons", items: [
+          { text: "Diffusion Studio", link: "/comparisons/diffusion-studio" },
         ] },
       ],
     },

@@ -87,6 +87,23 @@ Children that the inspector edits one by one: `<Keyframe property at value easin
 10. **Tracks and sound.** Put dialogue on the first track, overlays above it,
     music on a free track with `duck={{ under: "<dialogue track id>", to }}`.
 
+## How to edit
+
+1. Write the brief down first, as a short markdown note: the length, the
+   story order, what must be tweakable. Every revision is checked against it.
+2. Lay down the A-roll: the interview or voice clips on the first sequence
+   track, trimmed by words. Get the spine right before anything else.
+3. Then B-roll and the screen, then overlays and music, then captions last.
+4. With no target length, make no editorial cuts: keep every good take,
+   drop only silences and retakes, and keep the last take of a line.
+5. Pauses live inside clips, not as gaps: leave 0.3–0.5 s between sentences
+   (`out="word:N.end"` already lands after the word), at most 0.8 s of tail,
+   and never cut inside a word.
+6. After each stage, check the file (the lint and the resolve errors) and look
+   at the result (the player's `captureSheet` of the first frame of every
+   clip and the frames around each join) before going on. Scale the check to
+   the change: a one-word trim needs no picture.
+
 Before you hand the file over, check it as the lint would: literal unique ids,
 no `start` on a sequence track, no hooks in helpers, one `<Captions>`, every
 `src` in the manifest, either `in`/`out` or `duration`.

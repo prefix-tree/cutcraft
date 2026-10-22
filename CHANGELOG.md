@@ -8,6 +8,11 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- A comparison with Diffusion Studio (`docs/comparisons/diffusion-studio.md`)
+  and decision 0012 on what cutcut adopts from it: fold per gesture, editing
+  policy in the prompt, `sequence-gap` and `cut-inside-word` lint rules,
+  `PlayerCore.captureSheet`.
+
 - `@cutcut/kit`: the JSX vocabulary (26 elements with Zod schemas), the asset
   manifest and `TimeRef` resolution, the resolver (sequence and free tracks,
   gaps, transitions, anchors, fill and match durations, multicam cuts), the
