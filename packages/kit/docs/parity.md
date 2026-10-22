@@ -1,0 +1,149 @@
+# Action parity with OpenReel
+
+OpenReel executable action types: 115. Ours: 124.
+
+| OpenReel | Ours |
+|---|---|
+| `project/create` | — (a file is created, not an action) |
+| `project/updateSettings` | `composition/updateSettings` |
+| `project/setCanvasBackground` | `composition/setBackground` |
+| `project/rename` | — (file name) |
+| `project/registerGeneratedShader` | out: shaders |
+| `project/removeGeneratedShader` | out: shaders |
+| `project/applyEditSnapshot` | — (replaceTree on the executor) |
+| `media/import` | — (ingest service) |
+| `media/delete` | — (ingest service) |
+| `media/rename` | — (ingest service) |
+| `media/restore` | — (ingest service) |
+| `track/add` | `track/add` |
+| `track/duplicate` | `track/duplicate` |
+| `track/remove` | `track/remove` |
+| `track/rename` | `track/rename` |
+| `track/reorder` | `track/reorder` |
+| `track/lock` | `track/setFlag` |
+| `track/hide` | `track/setFlag` |
+| `track/mute` | `track/setFlag` |
+| `track/solo` | `track/setFlag` |
+| `track/restore` | `track/restore` |
+| `track/consolidate` | `track/consolidate` |
+| `track/restorePositions` | `track/restorePositions` |
+| `clip/add` | `clip/add` |
+| `clip/remove` | `clip/remove` |
+| `clip/move` | `clip/move` |
+| `clip/trim` | `clip/trim` |
+| `clip/split` | `clip/split` |
+| `clip/merge` | `clip/merge` |
+| `clip/rippleDelete` | `clip/rippleDelete` |
+| `clip/rippleRestore` | `clip/rippleRestore` |
+| `clip/restore` | `clip/restore` |
+| `clip/setBlendMode` | `clip/setBlend` |
+| `clip/setBlendOpacity` | `clip/setBlend` |
+| `clip/setEmphasisAnimation` | `clip/setEmphasis` |
+| `clip/setColorGrading` | `colorGrade/set` |
+| `clip/slip` | `clip/slip` |
+| `clip/slide` | `clip/slide` |
+| `clip/roll` | `clip/roll` |
+| `clip/trimToPlayhead` | `clip/trimToPlayhead` |
+| `clip/restoreTiming` | `clip/restoreTiming` |
+| `clip/closeGapBefore` | `clip/closeGapBefore` |
+| `clip/setSpeed` | `clip/setSpeed` |
+| `clip/setReverse` | `clip/setReverse` |
+| `clip/setPitchCorrection` | `clip/setPitchCorrection` |
+| `clip/setStabilization` | `clip/setStabilization` |
+| `clip/setChromaKey` | `clip/setChromaKey` |
+| `speed/setKeyframes` | `speed/setKeys` |
+| `speed/setFreezeFrames` | `speed/setFreezes` |
+| `speed/setRampData` | `batch/apply of speed/setKeys`, `speed/setFreezes`, `clip/setPitchCorrection` |
+| `transform/update` | `transform/update` |
+| `effect/add` | `effect/add` |
+| `effect/remove` | `effect/remove` |
+| `effect/update` | `effect/update` |
+| `effect/toggle` | `effect/toggle` |
+| `effect/reorder` | `effect/setOrder` |
+| `effect/setOrder` | `effect/setOrder` |
+| `effect/setStack` | `effect/setStack` |
+| `effect/restore` | `effect/restore` |
+| `keyframe/add` | `keyframe/add` |
+| `keyframe/remove` | `keyframe/remove` |
+| `keyframe/update` | `keyframe/update` |
+| `keyframe/setAll` | `keyframe/setAll` |
+| `transition/add` | `transition/add` |
+| `transition/set` | `transition/add (edge form)`, `transition/update` |
+| `transition/remove` | `transition/remove` |
+| `transition/update` | `transition/update` |
+| `transition/restore` | `transition/restore` |
+| `transition/restoreTrack` | — (per-transition restore) |
+| `audio/setVolume` | `audio/setVolume` |
+| `audio/setFade` | `audio/setFade` |
+| `audio/addAutomation` | `audio/setAutomation` |
+| `audio/addEffect` | `audioEffect/add` |
+| `audio/removeEffect` | `audioEffect/remove` |
+| `audio/updateEffect` | `audioEffect/update` |
+| `audio/toggleEffect` | `audioEffect/toggle` |
+| `audio/restoreEffect` | `audioEffect/restore` |
+| `subtitle/import` | `caption/import` |
+| `subtitle/add` | `caption/add` |
+| `subtitle/update` | `caption/update` |
+| `subtitle/remove` | `caption/remove` |
+| `subtitle/setStyle` | `caption/setStyle` |
+| `subtitle/replace` | `caption/update` |
+| `subtitle/setAll` | `caption/setAll` |
+| `subtitle/restore` | `caption/restore` |
+| `subtitle/restoreAll` | `caption/setAll` |
+| `marker/add` | `marker/add` |
+| `marker/remove` | `marker/remove` |
+| `marker/update` | `marker/update` |
+| `marker/restore` | `marker/restore` |
+| `text/create` | `text/create` |
+| `text/update` | `text/update (+ text/setContent)` |
+| `text/remove` | `text/remove` |
+| `shape/create` | `shape/create` |
+| `shape/update` | `shape/update` |
+| `shape/remove` | `shape/remove` |
+| `svg/create` | `svg/create` |
+| `svg/update` | `svg/update` |
+| `svg/remove` | `svg/remove` |
+| `sticker/create` | `sticker/create` |
+| `sticker/update` | `sticker/update` |
+| `sticker/remove` | `sticker/remove` |
+| `motion/createComposition` | out: motion |
+| `motion/upsertComposition` | out: motion |
+| `motion/removeComposition` | out: motion |
+| `motion/insertInstance` | out: motion |
+| `motion/removeInstance` | out: motion |
+| `adjustment/setAll` | `adjustment/create`, `adjustment/update`, `adjustment/remove`, `effect/* on the adjustment` |
+| `mask/setAll` | `mask/create`, `mask/update`, `mask/remove`, `mask/setPath` |
+| `multicam/setAll` | `multicam/create`, `multicam/addCut`, `multicam/moveCut`, `multicam/removeCut` |
+| `multicam/applyEdit` | `multicam/flatten` |
+| `multicam/restoreEdit` | `multicam/restore` |
+| `nested/setAll` | `nested/create`, `nested/update`, `nested/remove`, `nested/extract` |
+| `creation/replaceState` | out: 3D creation |
+| `creation/applyOperation` | out: 3D creation |
+
+## Ours with no OpenReel equivalent
+
+| Ours | Why |
+|---|---|
+| `batch/apply` | one history entry for multi-action gestures and compound inverses |
+| `composition/setProps` | the tweaks panel: rewrites the file's `defaults` literal |
+| `clip/setSmoothSlowMo` | OpenReel sets this via raw store writes |
+| `clip/setFit` | OpenReel folds it into transform/update |
+| `clip/setSource` | media-slot replacement |
+| `clip/setAnchor` | connected clips (anchors) have no OpenReel equivalent |
+| `audio/setDuck` | OpenReel's ducking bypasses its action system |
+| `keyframe/move` | named but never implemented in OpenReel |
+| `keyframe/restore` | undo of keyframe/remove keeps easing and handles |
+| `caption/setAnimation` | caption animation style as its own action |
+| `audioEffect/setOrder` | parity with the video stack |
+| `audioEffect/setStack` | parity with the video stack |
+| `multicam/restoreCut` | undo of removeCut |
+| `multicam/remove` | a multicam group is an element and can be deleted |
+| `mask/restore` | undo of mask/remove |
+| `multicam/setActiveAngle` | angle selection |
+| `layer/setTiming` | the <Layer> escape hatch |
+| `layer/setTransform` | the <Layer> escape hatch |
+| `source/bake` | expand generated elements into literals |
+| `source/setProp` | generic inspector write |
+| `source/setProps` | the inverse of every prop-writing action |
+| `track/setLayout` | sequence ↔ free |
+| `track/setGroup` | OpenReel groups tracks via raw store writes |

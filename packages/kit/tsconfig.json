@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node", "vitest/globals"],
+    "baseUrl": ".",
+    "paths": {
+      "@cut/kit": ["./src/index.ts"],
+      "@cut/kit/source": ["./src/source/index-public.ts"]
+    }
+  },
+  "include": ["src", "test", "fixtures", "scripts", "vitest.config.ts", "eslint.config.js"]
+}

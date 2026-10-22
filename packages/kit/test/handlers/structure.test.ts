@@ -1,0 +1,102 @@
+import { describe, expect, it } from "vitest";
+import { fixtureExecutor, serialize } from "../helpers";
+
+describe("structure on free and sequence tracks", () => {
+  it("adds a clip on a free track by start and refuses the wrong placement form", () => {
+    const exec = fixtureExecutor();
+    expect(exec.execute({ type: "clip/add", params: { id: "f1", trackId: "music", src: "asset:city", place: { after: null } } }).errors?.[0]?.code).toBe("UNSUPPORTED_ON_LAYOUT");
+    expect(exec.execute({ type: "clip/add", params: { id: "f1", trackId: "main", src: "asset:city", place: { start: 2 } } }).errors?.[0]?.code).toBe("UNSUPPORTED_ON_LAYOUT");
+    expect(exec.execute({ type: "clip/add", params: { id: "f1", trackId: "music", src: "asset:city", place: { start: 3 }, in: 0, out: 2 } }).ok).toBe(true);
+    expect(exec.state().items.get("f1")).toMatchObject({ start: 3, end: 5, track: "music" });
+  });
+
+  it("moves a clip to another track and back", () => {
+    const exec = fixtureExecutor();
+    const before = serialize(exec.state());
+    expect(exec.execute({ type: "clip/move", params: { id: "c2", trackId: "music", place: { start: 1 } } }).ok).toBe(true);
+    const s = exec.state();
+    expect(s.items.get("c2")).toMatchObject({ track: "music", start: 1 });
+    expect(s.items.get("c3")?.start).toBe(6.5);
+    expect(s.items.get("x1")?.errors.map((e) => e.code)).toEqual(["NOT_ADJACENT"]);
+    expect(exec.undo()?.ok).toBe(true);
+    expect(serialize(exec.state())).toEqual(before);
+  });
+
+  it("ripple delete on a free track pulls later items left; on a sequence it is a plain remove", () => {
+    const exec = fixtureExecutor();
+    exec.execute({ type: "clip/add", params: { id: "f1", trackId: "music", src: "asset:city", place: { start: 20 }, in: 0, out: 2 } });
+    exec.execute({ type: "clip/add", params: { id: "f2", trackId: "music", src: "asset:city", place: { start: 25 }, in: 0, out: 2 } });
+    expect(exec.execute({ type: "clip/rippleDelete", params: { id: "f1" } }).ok).toBe(true);
+    expect(exec.state().items.get("f2")?.start).toBe(23);
+    expect(exec.undo()?.ok).toBe(true);
+    expect(exec.state().items.get("f2")?.start).toBe(25);
+    expect(exec.state().items.get("f1")?.start).toBe(20);
+    expect(exec.execute({ type: "clip/rippleDelete", params: { id: "c2" } }).ok).toBe(true);
+    expect(exec.state().items.get("c3")?.start).toBe(6.5);
+  });
+
+  it("closes gaps on both layouts", () => {
+    const exec = fixtureExecutor();
+    exec.execute({ type: "clip/add", params: { id: "f1", trackId: "music", src: "asset:city", place: { start: 20 }, in: 0, out: 2 } });
+    exec.execute({ type: "clip/add", params: { id: "f2", trackId: "music", src: "asset:city", place: { start: 30 }, in: 0, out: 2 } });
+    expect(exec.execute({ type: "clip/closeGapBefore", params: { id: "f2" } }).ok).toBe(true);
+    expect(exec.state().items.get("f2")?.start).toBe(22);
+    expect(exec.execute({ type: "clip/closeGapBefore", params: { id: "c3" } }).ok).toBe(true);
+    expect(exec.state().items.has("g1")).toBe(false);
+    expect(exec.state().items.get("c3")?.start).toBe(9);
+    expect(exec.execute({ type: "clip/closeGapBefore", params: { id: "c2" } }).errors?.[0]?.code).toBe("INVALID_PARAMS");
+    exec.undo();
+    expect(exec.state().items.get("g1")).toMatchObject({ start: 9, end: 10 });
+  });
+
+  it("consolidates a free track and restores positions on undo", () => {
+    const exec = fixtureExecutor();
+    exec.execute({ type: "source/setProps", params: { id: "a1", props: { duration: 5 } } });
+    exec.execute({ type: "clip/add", params: { id: "f1", trackId: "music", src: "asset:city", place: { start: 20 }, in: 0, out: 2 } });
+    expect(exec.execute({ type: "track/consolidate", params: { trackId: "music" } }).ok).toBe(true);
+    const s = exec.state();
+    expect(s.items.get("a1")?.start).toBe(0);
+    expect(s.items.get("f1")?.start).toBe(5);
+    exec.undo();
+    expect(exec.state().items.get("f1")?.start).toBe(20);
+    expect(exec.execute({ type: "track/consolidate", params: { trackId: "main" } }).errors?.[0]?.code).toBe("UNSUPPORTED_ON_LAYOUT");
+  });
+
+  it("duplicates a track with remapped ids and anchors", () => {
+    const exec = fixtureExecutor();
+    expect(exec.execute({ type: "track/duplicate", params: { sourceTrackId: "main", trackId: "main2", idMap: { c1: "d1", c2: "d2" } } }).ok).toBe(true);
+    const s = exec.state();
+    expect(s.tracks.map((t) => t.id)).toEqual(["main", "main2", "overlays", "music", "mc"]);
+    expect(s.items.get("d1")).toMatchObject({ track: "main2", start: 0 });
+    expect(s.items.get("c3_main2")?.track).toBe("main2");
+    expect(s.items.get("main2")?.props.name).toBe("Main Copy");
+    expect(s.errors).toEqual([]);
+  });
+
+  it("reorders tracks and keeps compositing order", () => {
+    const exec = fixtureExecutor();
+    exec.execute({ type: "track/reorder", params: { trackId: "music", position: 0 } });
+    expect(exec.state().tracks.map((t) => t.id)).toEqual(["music", "main", "overlays", "mc"]);
+    exec.undo();
+    expect(exec.state().tracks.map((t) => t.id)).toEqual(["main", "overlays", "music", "mc"]);
+  });
+
+  it("creates captions when none exist and anchors overlays on creation", () => {
+    const exec = fixtureExecutor();
+    exec.execute({ type: "caption/setAll", params: { captionsId: "cap", nodes: [] } });
+    expect(exec.execute({ type: "caption/add", params: { captionsId: "cap", captionId: "cn1", start: 1, end: 2, text: "one" } }).ok).toBe(true);
+    expect(exec.execute({ type: "caption/add", params: { captionsId: "cap", captionId: "cn0", start: 0.5, end: 1, text: "zero" } }).ok).toBe(true);
+    expect(exec.state().tree.byId.get("cap")?.children.map((c) => c.id)).toEqual(["cn0", "cn1"]);
+    expect(exec.execute({ type: "text/create", params: { id: "t9", kind: "title", trackId: "overlays", place: { anchor: "c3", offset: 0.5 }, props: { duration: 1 }, text: "late" } }).ok).toBe(true);
+    expect(exec.state().items.get("t9")).toMatchObject({ start: 10.5, end: 11.5 });
+    expect(exec.execute({ type: "text/create", params: { id: "t10", kind: "title", trackId: "overlays", place: { anchor: "ghost" }, props: {} } }).errors?.[0]?.code).toBe("ELEMENT_NOT_FOUND");
+  });
+
+  it("keeps the keyframe inside its element and the transition on an existing cut", () => {
+    const exec = fixtureExecutor();
+    expect(exec.execute({ type: "keyframe/move", params: { id: "c1", keyId: "k2", at: 99 } }).errors?.[0]?.code).toBe("OUT_OF_BOUNDS");
+    expect(exec.execute({ type: "keyframe/add", params: { id: "c1", keyId: "k9", property: "nope", at: 0, value: 1 } }).errors?.[0]?.code).toBe("INVALID_PARAMS");
+    expect(exec.execute({ type: "effect/setOrder", params: { id: "c1", childIds: ["fx1", "ghost"] } }).errors?.[0]?.code).toBe("INVALID_PARAMS");
+    expect(exec.execute({ type: "effect/add", params: { id: "c1", childId: "fx9", type: "nope" as never } }).errors?.[0]?.code).toBe("INVALID_PARAMS");
+  });
+});
