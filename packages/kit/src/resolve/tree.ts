@@ -2,6 +2,9 @@ import type { ResolveError } from "./errors";
 
 export type Editable = "literal" | "generated" | "opaque";
 
+/** Prop keys under this prefix address a Layer's handles rather than the Layer's own props. */
+export const INTERIOR_PREFIX = "interior.";
+
 /**
  * One vocabulary element as collected from the React element tree, before
  * schema parsing and before placement. `props` are the raw JSX props minus
@@ -22,6 +25,13 @@ export interface CollectedNode {
   readonly boundProps: Readonly<Record<string, string>>;
   /** For helper output: which helper produced the node, under which parent, and the helper's nth use in the file. */
   readonly origin?: { readonly helper: string; readonly callerId: string | null; readonly callIndex: number };
+  /** A Layer's handles: the one component inside it and its props. The component's body stays opaque. */
+  readonly interior?: LayerInterior;
+}
+
+export interface LayerInterior {
+  readonly component: string;
+  readonly props: Readonly<Record<string, unknown>>;
 }
 
 export interface CollectedTree {

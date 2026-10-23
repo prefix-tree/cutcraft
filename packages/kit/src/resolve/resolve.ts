@@ -7,7 +7,7 @@ import { resolveTimeRef } from "../manifest/timeref";
 import type { PatchLog } from "../patches/types";
 import type { ResolveError } from "./errors";
 import { overlay } from "./overlay";
-import type { CollectedNode, CollectedTree, Editable } from "./tree";
+import type { CollectedNode, CollectedTree, Editable, LayerInterior } from "./tree";
 
 export interface Placement {
   readonly id: string;
@@ -28,6 +28,8 @@ export interface Placement {
   readonly errors: readonly ResolveError[];
   /** For transitions between siblings: the two clips. */
   readonly between?: readonly [string, string];
+  /** A Layer's handles: the component inside it and its current props. */
+  readonly interior?: LayerInterior;
 }
 
 export interface ResolvedTrack {
@@ -111,11 +113,11 @@ function compute(original: CollectedTree, manifest: AssetManifest, log: PatchLog
     const prev = previous?.get(node.id);
     if (prev && prev.kind === node.kind && prev.track === track && prev.parent === parent && prev.start === start && prev.duration === length && prev.props === props
       && prev.editable === node.editable && prev.lockedProps === node.lockedProps && prev.boundProps === node.boundProps && sameSource(prev.source, source) && sameBetween(prev.between, between)
-      && sameChildIds(prev.children, node.children) && sameErrors(prev.errors, errors)) return prev;
+      && prev.interior === node.interior && sameChildIds(prev.children, node.children) && sameErrors(prev.errors, errors)) return prev;
     const placement: Placement = {
       id: node.id, kind: node.kind, track, parent, children: node.children.map((c) => c.id),
       start, end: start + length, duration: length, props, editable: node.editable, lockedProps: node.lockedProps, boundProps: node.boundProps, errors,
-      ...(source ? { source } : {}), ...(between ? { between } : {}),
+      ...(source ? { source } : {}), ...(between ? { between } : {}), ...(node.interior ? { interior: node.interior } : {}),
     };
     return placement;
   };
@@ -584,7 +586,7 @@ export function samePlacement(a: Placement, b: Placement): boolean {
   if (a.id !== b.id || a.kind !== b.kind || a.track !== b.track || a.parent !== b.parent) return false;
   if (a.start !== b.start || a.end !== b.end || a.duration !== b.duration) return false;
   if (a.props !== b.props || a.editable !== b.editable || a.lockedProps !== b.lockedProps || a.boundProps !== b.boundProps) return false;
-  if (!sameSource(a.source, b.source) || !sameBetween(a.between, b.between)) return false;
+  if (!sameSource(a.source, b.source) || !sameBetween(a.between, b.between) || a.interior !== b.interior) return false;
   if (a.children.length !== b.children.length || a.children.some((id, i) => id !== b.children[i])) return false;
   return sameErrors(a.errors, b.errors);
 }

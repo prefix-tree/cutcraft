@@ -54,6 +54,16 @@ describe("fold", () => {
     expect(buildSourceIndex(result.text).elements.get("b1")?.props.get("size")?.literal).toBe(40);
   });
 
+  it("writes a Layer's handles into the component tag", () => {
+    const exec = fixtureExecutor();
+    expect(exec.execute({ type: "layer/setProps", params: { id: "l1", props: { to: 900, label: "go" } } }).ok).toBe(true);
+    const result = foldToSource(fixtureText, exec.log(), exec.state());
+    expect(result.skipped).toEqual([]);
+    expect(result.text).toContain('<Counter from={0} to={900} label="go" />');
+    expect(changedLines(fixtureText, result.text)).toBe(1);
+    expect(buildSourceIndex(result.text).elements.get("l1")?.interior?.props.get("to")?.literal).toBe(900);
+  });
+
   it("rewrites the defaults literal for the tweaks panel", () => {
     const exec = fixtureExecutor();
     exec.execute({ type: "composition/setProps", params: { defaults: { title: "Changed", accent: "#123456" } } });

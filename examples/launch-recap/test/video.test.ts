@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { Executor, collectModule, resolve, type AssetManifest } from "@cutcut/kit";
-import { foldToSource, lint } from "@cutcut/kit/source";
+import { buildSourceIndex, foldToSource, lint } from "@cutcut/kit/source";
 import * as file from "../video";
 
 const root = join(import.meta.dirname, "..");
@@ -34,6 +34,22 @@ describe("the launch recap file", () => {
     for (const id of ["lt-bg", "lt-name", "lt-role"]) expect(state.items.get(id)!.editable).toBe("literal");
     expect(state.items.get("cta")!.kind).toBe("layer");
     expect(state.tree.byId.get("cta")!.children).toEqual([]);
+  });
+
+  it("gives the call-to-action layer two handles, both bound to the schema", () => {
+    const index = buildSourceIndex(text);
+    expect(index.elements.get("cta")?.interior?.component).toBe("CallToAction");
+    expect(index.elements.get("cta")?.boundProps).toEqual({ "interior.text": "cta", "interior.accent": "accent" });
+    const indexed = collectModule(file, {}, { index });
+    expect(indexed.byId.get("cta")?.interior).toEqual({ component: "CallToAction", props: { text: file.defaults.cta, accent: file.defaults.accent } });
+    const exec = new Executor({ tree: indexed, manifest, now: () => 0 });
+    expect(exec.execute({ type: "layer/setProps", params: { id: "cta", props: { text: "Go" } } }).ok).toBe(true);
+    const folded = foldToSource(text, exec.log(), exec.state());
+    expect(folded.skipped).toEqual([]);
+    expect(folded.edits).toHaveLength(1);
+    expect(folded.edits[0]).toMatchObject({ kind: "defaults", id: "cta" });
+    expect(folded.text).toContain('cta: "Go"');
+    expect(folded.text).toContain("<CallToAction text={cta} accent={accent} />");
   });
 
   it("folds a trim gesture into one changed token", () => {

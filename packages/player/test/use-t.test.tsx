@@ -1,5 +1,6 @@
-import { Composition, Layer, Track, useLayer, useT } from "@cutcut/kit";
-import { fixtureElement, fixtureState, makeState } from "./helpers/state";
+import { Composition, Executor, Layer, Track, collectModule, useLayer, useT } from "@cutcut/kit";
+import * as sample from "../../kit/fixtures/sample";
+import { fixtureElement, fixtureManifest, fixtureState, makeState } from "./helpers/state";
 import { mountPlayer } from "./helpers/react";
 
 describe("useT", () => {
@@ -50,5 +51,15 @@ describe("useT", () => {
     expect(text()).toBe("1/2.9/3/7.9");
     await m.unmount();
     expect(() => useLayer()).toThrow(/needs a Player/);
+  });
+
+  it("applies edited handles to the interior without re-evaluating the file", async () => {
+    const exec = new Executor({ tree: collectModule(sample), manifest: fixtureManifest, now: () => 0 });
+    expect(exec.execute({ type: "layer/setProps", params: { id: "l1", props: { to: 600 } } }).ok).toBe(true);
+    const m = await mountPlayer(exec.state(), fixtureElement());
+    const text = () => m.container.querySelector('[data-el="l1"][data-kind="layer"]')?.textContent;
+    await m.seek(7);
+    expect(text()).toBe("300");
+    await m.unmount();
   });
 });

@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { fixtureExecutor, serialize } from "../helpers";
+import { createElement as h } from "react";
+import { Composition, Executor, Layer, Track, collect } from "@cutcut/kit";
+import { fixtureExecutor, manifest, serialize } from "../helpers";
 
 describe("structure on free and sequence tracks", () => {
   it("adds a clip on a free track by start and refuses the wrong placement form", () => {
@@ -199,5 +201,17 @@ describe("structure on free and sequence tracks", () => {
     const r = exec.execute({ type: "nested/extract", params: { id: "n1" } });
     expect(r.errors?.[0]?.code).toBe("INVALID_PARAMS");
     expect(r.errors?.[0]?.message).toContain("n1.in");
+  });
+
+  it("edits a Layer's handles and refuses a Layer without them", () => {
+    const exec = fixtureExecutor();
+    expect(exec.state().items.get("l1")?.interior).toEqual({ component: "Counter", props: { from: 0, to: 1200 } });
+    expect(exec.execute({ type: "layer/setProps", params: { id: "l1", props: { to: 900, label: "go" } } }).ok).toBe(true);
+    expect(exec.state().items.get("l1")?.interior).toEqual({ component: "Counter", props: { from: 0, to: 900, label: "go" } });
+    expect(exec.state().items.get("l1")?.props).not.toHaveProperty("to");
+    exec.undo();
+    expect(exec.state().items.get("l1")?.interior).toEqual({ component: "Counter", props: { from: 0, to: 1200 } });
+    const bare = new Executor({ tree: collect(h(Composition, { fps: 30, width: 1, height: 1 }, h(Track, { id: "t" }, h(Layer, { id: "l", duration: 1 }, h("div", null, "x"))))), manifest, now: () => 0 });
+    expect(bare.execute({ type: "layer/setProps", params: { id: "l", props: { x: 1 } } }).errors?.[0]?.code).toBe("INVALID_PARAMS");
   });
 });

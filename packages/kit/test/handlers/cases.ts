@@ -158,6 +158,7 @@ export const CASES: Partial<Record<ActionType, ActionInput>> = {
   "multicam/flatten": { type: "multicam/flatten", params: { id: "mc1" } },
 
   "layer/setTiming": { type: "layer/setTiming", params: { id: "l1", duration: 2, offset: 0.5 } },
+  "layer/setProps": { type: "layer/setProps", params: { id: "l1", props: { to: 900 } } },
   "layer/setTransform": { type: "layer/setTransform", params: { id: "l1", transform: { opacity: 0.5 } } },
 
   "source/bake": { type: "source/bake", params: { id: "b1" } },

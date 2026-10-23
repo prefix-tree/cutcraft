@@ -1,6 +1,6 @@
 # Action parity with OpenReel
 
-OpenReel executable action types: 115. Ours: 124.
+OpenReel executable action types: 115. Ours: 125.
 
 | OpenReel | Ours |
 |---|---|
@@ -142,6 +142,7 @@ OpenReel executable action types: 115. Ours: 124.
 | `multicam/setActiveAngle` | angle selection |
 | `layer/setTiming` | the <Layer> escape hatch |
 | `layer/setTransform` | the <Layer> escape hatch |
+| `layer/setProps` | the handles of a Layer's component |
 | `source/bake` | expand generated elements into literals |
 | `source/setProp` | generic inspector write |
 | `source/setProps` | the inverse of every prop-writing action |

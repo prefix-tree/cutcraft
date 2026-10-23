@@ -2,7 +2,7 @@ import { createElement, Fragment } from "react";
 import { describe, expect, it } from "vitest";
 import { Clip, Composition, Layer, Title, Track, collect, createPatchLog, resolve } from "@cutcut/kit";
 import { overlay } from "../src/resolve/overlay";
-import { manifest } from "./helpers";
+import { fixtureTree, manifest } from "./helpers";
 
 const h = createElement;
 
@@ -31,7 +31,13 @@ describe("collect", () => {
     )));
     expect(tree.byId.has("hidden")).toBe(false);
     expect(tree.byId.get("l")?.children).toEqual([]);
+    expect(tree.byId.get("l")?.interior).toBeUndefined();
     expect(tree.byId.get("ti")?.text).toBe("Hello world");
+  });
+
+  it("keeps a Layer's one component and its props as handles", () => {
+    expect(fixtureTree().byId.get("l1")?.interior).toEqual({ component: "Counter", props: { from: 0, to: 1200 } });
+    expect(fixtureTree().byId.get("l1")?.children).toEqual([]);
   });
 
   it("reports missing and duplicate ids", () => {

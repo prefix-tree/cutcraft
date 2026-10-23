@@ -1,6 +1,7 @@
 import { nodeSpecOf } from "../actions/types";
 import type { Json, NetPatch, PatchLog } from "../patches/types";
 import type { ResolvedState } from "../resolve/resolve";
+import { INTERIOR_PREFIX } from "../resolve/tree";
 import { bake } from "./bake";
 import { applyEdits, lineRange, type SourceEdit } from "./edits";
 import type { Range } from "./parse";
@@ -101,7 +102,10 @@ export function fold(log: PatchLog, index: SourceIndex, state: ResolvedState): {
         let newAttrs = -1;
         for (const [prop, value] of net.props) {
           const key = site.boundProps[prop];
-          const e = key !== undefined ? bindingEdit(index, id, prop, key, value, skipped) : propEdit(site, prop, value, text);
+          const handle = prop.startsWith(INTERIOR_PREFIX);
+          if (handle && !site.interior && key === undefined) { skipped.push({ id, reason: `"${id}" has no handles` }); continue; }
+          const target = handle ? { id, props: site.interior!.props, openingTag: site.interior!.openingTag } : site;
+          const e = key !== undefined ? bindingEdit(index, id, prop, key, value, skipped) : propEdit(target, handle ? prop.slice(INTERIOR_PREFIX.length) : prop, value, text);
           if (!e) continue;
           if (e.kind === "prop" && e.range[0] === e.range[1]) {
             // New attributes share one insertion point; one edit keeps them in write order.
@@ -243,7 +247,7 @@ function bindingEdit(index: SourceIndex, id: string, prop: string, key: string, 
   return { kind: "defaults", id, range: target.valueRange, text: printLiteral(value) };
 }
 
-function propEdit(site: ElementSite, prop: string, value: Json | undefined, text: string): SourceEdit | null {
+function propEdit(site: Pick<ElementSite, "id" | "props" | "openingTag">, prop: string, value: Json | undefined, text: string): SourceEdit | null {
   const existing = site.props.get(prop);
   if (value === undefined) {
     if (!existing) return null;

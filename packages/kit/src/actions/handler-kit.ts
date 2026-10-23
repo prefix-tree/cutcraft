@@ -1,7 +1,7 @@
 import { asJson } from "../patches/log";
 import type { Json, PatchLog } from "../patches/types";
 import type { Placement as ResolvedPlacement, ResolvedState } from "../resolve/resolve";
-import type { CollectedNode } from "../resolve/tree";
+import { INTERIOR_PREFIX, type CollectedNode } from "../resolve/tree";
 import { registerHandler, type ActionHandler, type ApplyContext } from "./registry";
 import { invalid, nodeOfSpec, ok, type Action, type ActionError, type ActionType, type NodeSpec, type PlacementSpec, type ValidationResult } from "./types";
 
@@ -72,7 +72,9 @@ export function rawNode(state: ResolvedState, id: string): CollectedNode | undef
 }
 
 export function rawProp(state: ResolvedState, id: string, prop: string): Json | undefined {
-  return asJson(rawNode(state, id)?.props[prop]);
+  const node = rawNode(state, id);
+  if (prop.startsWith(INTERIOR_PREFIX)) return asJson(node?.interior?.props[prop.slice(INTERIOR_PREFIX.length)]);
+  return asJson(node?.props[prop]);
 }
 
 export function siblingAfter(state: ResolvedState, id: string): string | null {

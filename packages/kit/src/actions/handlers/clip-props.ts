@@ -1,4 +1,5 @@
-import { define, makePropHandler, rawProp, validateTarget } from "../handler-kit";
+import { define, makePropHandler, rawNode, rawProp, validateTarget } from "../handler-kit";
+import { INTERIOR_PREFIX } from "../../resolve/tree";
 import { invalid, nodeSpecOf, ok, type NodeSpec } from "../types";
 import { replaceAll, stackPosition } from "./effect";
 import type { Json } from "../../patches/types";
@@ -41,6 +42,14 @@ define(makePropHandler({
 }));
 
 define(makePropHandler({ type: "layer/setTransform", kinds: ["layer"], write: (p, state) => ({ transform: deepMerge((rawProp(state, p.id, "transform") ?? {}) as Record<string, Json>, p.transform) }) }));
+/** The handles of a Layer: the literal or schema-bound props of the one component inside it. */
+define(makePropHandler({
+  type: "layer/setProps",
+  kinds: ["layer"],
+  write: (p) => Object.fromEntries(Object.entries(p.props).map(([k, v]) => [`${INTERIOR_PREFIX}${k}`, v])),
+  validate: (a, state) => (rawNode(state, a.params.id)?.interior ? ok : invalid({ code: "INVALID_PARAMS", message: `"${a.params.id}" has no handles: a Layer gets them from the one component inside it` })),
+}));
+
 define(makePropHandler({
   type: "layer/setTiming",
   kinds: ["layer"],

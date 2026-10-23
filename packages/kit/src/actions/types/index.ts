@@ -188,6 +188,7 @@ export interface MulticamActions {
 
 export interface LayerActions {
   "layer/setTiming": { id: Id; duration?: Json; anchor?: Id | "start"; offset?: number; start?: number };
+  "layer/setProps": { id: Id; props: Readonly<Record<string, Json | undefined>> };
   "layer/setTransform": { id: Id; transform: Readonly<Record<string, Json>> };
 }
 
@@ -221,7 +222,7 @@ export const AUTO_GROUP_TYPES: ReadonlySet<ActionType> = new Set<ActionType>([
   "transition/update", "clip/setBlend", "colorGrade/set", "clip/move", "clip/trim", "clip/slip", "clip/slide", "clip/roll",
   "clip/setSpeed", "clip/setChromaKey", "clip/setStabilization", "keyframe/move", "keyframe/update",
   "composition/updateSettings", "composition/setBackground", "text/update", "shape/update", "svg/update", "sticker/update",
-  "mask/update", "layer/setTiming", "layer/setTransform",
+  "mask/update", "layer/setTiming", "layer/setTransform", "layer/setProps",
 ]);
 
 export const TARGET_PARAM_KEYS = ["id", "leftId", "trackId", "transitionId", "childId", "keyId", "captionId", "captionsId", "cutId", "markerId"] as const;

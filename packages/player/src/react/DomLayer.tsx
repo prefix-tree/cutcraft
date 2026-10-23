@@ -81,7 +81,7 @@ const Element = memo(
 export function sameElement(a: ElementCellProps, b: ElementCellProps): boolean {
   const p = a.item.placement, q = b.item.placement;
   // The resolver hands back the same Placement object when nothing about it changed.
-  if (p !== q && (p.id !== q.id || p.kind !== q.kind || p.start !== q.start || p.end !== q.end || p.props !== q.props)) return false;
+  if (p !== q && (p.id !== q.id || p.kind !== q.kind || p.start !== q.start || p.end !== q.end || p.props !== q.props || p.interior !== q.interior)) return false;
   if (a.interior !== b.interior) return false;
   if (a.item.children.length !== b.item.children.length || a.item.children.some((c, i) => c !== b.item.children[i] && (c.props !== b.item.children[i]!.props || c.start !== b.item.children[i]!.start))) return false;
   const ca = a.state.composition, cb = b.state.composition;

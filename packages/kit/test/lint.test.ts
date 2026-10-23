@@ -3,7 +3,7 @@ import { buildSourceIndex, lint } from "@cutcut/kit/source";
 import { fixtureText, manifest } from "./helpers";
 
 const wrap = (body: string, extra = "") => `
-import { Composition, Track, Clip, Title } from "@cutcut/kit";
+import { Composition, Track, Clip, Layer, Title } from "@cutcut/kit";
 ${extra}
 export default function V() {
   return (<Composition fps={30} width={1920} height={1080}>${body}</Composition>);
@@ -32,7 +32,7 @@ describe("lint", () => {
   });
 
   it("lets a Layer interior call useT and useLayer but no other hook", () => {
-    const text = wrap('<Track id="t"><Layer id="l" duration={3}><Clock /></Layer></Track>', 'import { Layer, useLayer } from "@cutcut/kit";\nfunction Clock() { const { remaining } = useLayer(); return <div>{Math.ceil(remaining)}</div>; }');
+    const text = wrap('<Track id="t"><Layer id="l" duration={3}><Clock /></Layer></Track>', 'import { useLayer } from "@cutcut/kit";\nfunction Clock() { const { remaining } = useLayer(); return <div>{Math.ceil(remaining)}</div>; }');
     expect(lint(text).filter((d) => d.rule === "pure-helpers")).toEqual([]);
   });
 
@@ -71,5 +71,20 @@ describe("lint", () => {
     expect(index.helpers.get("Badge")?.pure).toBe(true);
     expect(index.helpers.get("Counter")?.hooks).toEqual(["useT"]);
     expect(index.calls.filter((c) => c.helper === "Badge")).toHaveLength(2);
+  });
+
+  it("indexes a Layer's one component as its handles", () => {
+    const l1 = buildSourceIndex(fixtureText).elements.get("l1")!;
+    expect(l1.interior?.component).toBe("Counter");
+    expect([...l1.interior!.props.keys()]).toEqual(["from", "to"]);
+    expect(l1.interior?.props.get("to")?.literal).toBe(1200);
+    expect(l1.lockedProps).toEqual([]);
+    const bound = buildSourceIndex(wrap('<Track id="t"><Layer id="l" duration={2}><Clock total={limit} label="go" step={1 + 1} /></Layer></Track>', 'export const schema = 1;\nexport const defaults = { limit: 90 };\nfunction Clock() { return null; }').replace("export default function V() {", "export default function V({ limit }: { limit: number }) {")).elements.get("l")!;
+    expect(bound.interior?.boundProps).toEqual({ total: "limit" });
+    expect(bound.boundProps).toEqual({ "interior.total": "limit" });
+    expect(bound.lockedProps).toEqual(["interior.step"]);
+    const none = buildSourceIndex(wrap('<Track id="t"><Layer id="l" duration={2}><div><Clock /></div></Layer><Layer id="m" duration={2}><Clock /><Clock /></Layer></Track>', "function Clock() { return null; }"));
+    expect(none.elements.get("l")?.interior).toBeUndefined();
+    expect(none.elements.get("m")?.interior).toBeUndefined();
   });
 });

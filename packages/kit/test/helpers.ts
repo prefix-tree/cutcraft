@@ -18,7 +18,7 @@ export function fixtureExecutor(): Executor {
 
 export interface SerializedItem {
   id: string; kind: string; track: string | null; parent: string | null; order: number;
-  start: number; end: number; editable: string; props: string; text: string | undefined; errors: string[];
+  start: number; end: number; editable: string; props: string; interior?: string; text: string | undefined; errors: string[];
 }
 
 /** A stable view of a resolved state for equality checks: ids sorted, numbers rounded to the millisecond. */
@@ -33,6 +33,7 @@ export function serialize(state: ResolvedState, withProps = true): SerializedIte
       id: p.id, kind: p.kind, track: p.track, parent: p.parent, order: orderOf(p.id, p.parent),
       start: round(p.start), end: round(p.end), editable: p.editable,
       props: withProps ? stable(state.tree.byId.get(p.id)?.props ?? p.props) : "",
+      ...(withProps ? { interior: p.interior ? stable(p.interior.props) : "" } : {}),
       text: state.tree.byId.get(p.id)?.text,
       errors: p.errors.map((e) => e.code),
     }));

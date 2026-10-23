@@ -1,6 +1,7 @@
 import traverseModule from "@babel/traverse";
 import * as t from "@babel/types";
 import { ELEMENTS } from "../jsx/elements";
+import { INTERIOR_PREFIX } from "../resolve/tree";
 import type { Json } from "../patches/types";
 import { parseSource, rangeOf, type Range } from "./parse";
 
@@ -22,6 +23,16 @@ export interface PropSite {
   readonly binding?: string;
 }
 
+/** The one component inside a Layer: its props are the Layer's handles, its body is opaque. */
+export interface InteriorSite {
+  readonly component: string;
+  readonly range: Range;
+  readonly openingTag: Range;
+  readonly props: ReadonlyMap<string, PropSite>;
+  readonly lockedProps: readonly string[];
+  readonly boundProps: Readonly<Record<string, string>>;
+}
+
 export interface ElementSite {
   readonly generated: false;
   readonly id: string;
@@ -40,6 +51,8 @@ export interface ElementSite {
   /** Prop → schema key for props that reference the file's props; edits to them rewrite `defaults`. */
   readonly boundProps: Readonly<Record<string, string>>;
   readonly indent: string;
+  /** Set on a Layer whose interior is exactly one component element; its props also appear on the Layer as `interior.<name>`. */
+  readonly interior?: InteriorSite;
 }
 
 export interface HelperCallSite {
@@ -174,18 +187,8 @@ export function buildSourceIndex(text: string): SourceIndex {
       }
       const kind = KIND_BY_NAME.get(name);
       if (!kind) return;
-      const props = new Map<string, PropSite>();
-      const locked: string[] = [];
-      const bound: Record<string, string> = {};
       const inSchemaFn = schemaFn !== null && path.getFunctionParent()?.node === schemaFn;
-      for (const attr of opening.attributes) {
-        if (!t.isJSXAttribute(attr) || !t.isJSXIdentifier(attr.name)) continue;
-        let site = propSite(attr);
-        const binding = inSchemaFn && site.isExpression && t.isJSXExpressionContainer(attr.value) ? bindingOf(attr.value.expression) : null;
-        if (binding !== null) { site = { ...site, binding }; bound[site.name] = binding; }
-        props.set(site.name, site);
-        if (site.isExpression && binding === null) locked.push(site.name);
-      }
+      const { props, locked, bound } = attributesOf(opening, inSchemaFn);
       const idSite = props.get("id");
       let id = typeof idSite?.literal === "string" ? idSite.literal : null;
       if (id === null && kind === "composition" && !idSite) id = "composition";
@@ -201,13 +204,46 @@ export function buildSourceIndex(text: string): SourceIndex {
       if (kind === "composition") compositionId = id;
       const closing = path.node.closingElement;
       const childrenRange: Range | null = closing ? [opening.end ?? 0, closing.start ?? 0] : null;
+      const interior = kind === "layer" ? interiorOf(path.node, inSchemaFn) : null;
+      if (interior) {
+        for (const prop of interior.lockedProps) locked.push(`${INTERIOR_PREFIX}${prop}`);
+        for (const [prop, key] of Object.entries(interior.boundProps)) bound[`${INTERIOR_PREFIX}${prop}`] = key;
+      }
       elements.set(id, {
         generated: false, id, kind, name,
         range: rangeOf(path.node), openingTag: rangeOf(opening), closingTag: closing ? rangeOf(closing) : null,
         childrenRange, props, parent, siblingIndex, lockedProps: locked, boundProps: bound, indent,
+        ...(interior ? { interior } : {}),
       });
     },
   });
+
+  /** A tag's attributes as prop sites, with schema bindings resolved when the tag sits in the default export. */
+  function attributesOf(opening: t.JSXOpeningElement, inSchemaFn: boolean): { props: Map<string, PropSite>; locked: string[]; bound: Record<string, string> } {
+    const props = new Map<string, PropSite>();
+    const locked: string[] = [];
+    const bound: Record<string, string> = {};
+    for (const attr of opening.attributes) {
+      if (!t.isJSXAttribute(attr) || !t.isJSXIdentifier(attr.name)) continue;
+      let site = propSite(attr);
+      const binding = inSchemaFn && site.isExpression && t.isJSXExpressionContainer(attr.value) ? bindingOf(attr.value.expression) : null;
+      if (binding !== null) { site = { ...site, binding }; bound[site.name] = binding; }
+      props.set(site.name, site);
+      if (site.isExpression && binding === null) locked.push(site.name);
+    }
+    return { props, locked, bound };
+  }
+
+  /** The Layer's handles: exactly one element child whose tag names a file-level function. */
+  function interiorOf(layer: t.JSXElement, inSchemaFn: boolean): InteriorSite | null {
+    const elements = layer.children.filter((c) => !(t.isJSXText(c) && c.value.trim() === ""));
+    const only = elements.length === 1 ? elements[0] : null;
+    if (!only || !t.isJSXElement(only)) return null;
+    const name = jsxName(only.openingElement.name);
+    if (name === null || !helperNames.has(name) || KIND_BY_NAME.has(name)) return null;
+    const { props, locked, bound } = attributesOf(only.openingElement, inSchemaFn);
+    return { component: name, range: rangeOf(only), openingTag: rangeOf(only.openingElement), props, lockedProps: locked, boundProps: bound };
+  }
 
   return { text, ast, elements, calls, helpers, defaults, hasSchema, hasDefaultExport, compositionId, anonymous };
 }

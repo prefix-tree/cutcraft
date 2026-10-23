@@ -139,6 +139,7 @@ export const OURS_ONLY: readonly [ours: string, why: string][] = [
   ["multicam/setActiveAngle", "angle selection"],
   ["layer/setTiming", "the <Layer> escape hatch"],
   ["layer/setTransform", "the <Layer> escape hatch"],
+  ["layer/setProps", "the handles of a Layer's component"],
   ["source/bake", "expand generated elements into literals"],
   ["source/setProp", "generic inspector write"],
   ["source/setProps", "the inverse of every prop-writing action"],

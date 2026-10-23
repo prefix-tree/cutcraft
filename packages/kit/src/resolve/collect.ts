@@ -2,7 +2,7 @@ import type { ReactElement, ReactNode } from "react";
 import { Children, Fragment, isValidElement } from "react";
 import { isVocabulary } from "../jsx/define";
 import type { ResolveError } from "./errors";
-import type { CollectedNode, CollectedTree, Editable } from "./tree";
+import type { CollectedNode, CollectedTree, Editable, LayerInterior } from "./tree";
 
 export interface SourceIndexLike {
   readonly elements: ReadonlyMap<string, { readonly generated: boolean; readonly lockedProps?: readonly string[]; readonly boundProps?: Readonly<Record<string, string>> }>;
@@ -80,7 +80,13 @@ function collectChildren(
     }
     if (isVocabulary(type)) {
       if (type.kind === "layer") {
-        out.push(makeNode(element, type.kind, parent, walker, origin, [], true));
+        const node = makeNode(element, type.kind, parent, walker, origin, [], true);
+        const interior = interiorOf(element.props.children as ReactNode);
+        if (interior) {
+          const withInterior: CollectedNode = { ...node, interior };
+          walker.byId.set(node.id, withInterior);
+          out.push(withInterior);
+        } else out.push(node);
         return;
       }
       const placeholder = makeNode(element, type.kind, parent, walker, origin, [], false);
@@ -160,4 +166,13 @@ function textOf(children: ReactNode): string | undefined {
   });
   if (!onlyText || parts.length === 0) return undefined;
   return parts.join("");
+}
+
+/** A Layer's handles: exactly one child element whose type is a function component (not a vocabulary element). */
+function interiorOf(children: ReactNode): LayerInterior | null {
+  const only = Children.toArray(children).filter((c) => c !== null && c !== undefined && typeof c !== "boolean" && c !== "");
+  const child = only.length === 1 ? only[0] : null;
+  if (!isValidElement(child) || typeof child.type !== "function" || isVocabulary(child.type)) return null;
+  const { children: _children, ...props } = child.props as Record<string, unknown>;
+  return { component: (child.type as { name?: string }).name || "anonymous", props };
 }
