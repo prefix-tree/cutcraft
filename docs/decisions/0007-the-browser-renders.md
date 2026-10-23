@@ -1,5 +1,7 @@
 # 0007. The browser is the renderer
 
+> Corrected in part by [0013](./0013-remotion-has-an-editor-and-layer-handles.md): Remotion has an editor and a browser renderer now.
+
 ## Context
 
 The preview must show exactly what the file says, including arbitrary React

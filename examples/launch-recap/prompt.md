@@ -48,7 +48,9 @@ as a sibling *between* two clips of a sequence track, `<Title>` (text as
 children), `<Shape shape width height fill stroke cornerRadius>`, `<Svg>`,
 `<Sticker>`, `<Adjustment>`, `<Nested of>`, `<Layer>` (arbitrary React inside;
 call `useT()` for 0..1 progress or `useLayer()` for `elapsed`, `remaining`,
-`duration` and `time` in seconds).
+`duration` and `time` in seconds). Give a Layer one component child whose
+props are literals or schema props: those props are the editor's handles,
+the component's body is not.
 
 Children that the inspector edits one by one: `<Keyframe property at value easing>`,
 `<Effect type params>`, `<ColorGrade>`, `<Mask>`, `<SpeedKey>`, `<Freeze>`,

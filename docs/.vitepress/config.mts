@@ -46,11 +46,13 @@ export default defineConfig({
           { text: "0010 OpenReel as the reference", link: "/decisions/0010-openreel-as-the-ux-reference" },
           { text: "0011 Performance contract", link: "/decisions/0011-performance-contract" },
           { text: "0012 What we adopt from Diffusion Studio", link: "/decisions/0012-what-we-adopt-from-diffusion-studio" },
+          { text: "0013 Remotion and Layer handles", link: "/decisions/0013-remotion-has-an-editor-and-layer-handles" },
         ] },
       ],
       "/comparisons/": [
         { text: "Comparisons", items: [
           { text: "Diffusion Studio", link: "/comparisons/diffusion-studio" },
+          { text: "Remotion", link: "/comparisons/remotion" },
         ] },
       ],
     },

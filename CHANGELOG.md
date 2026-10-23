@@ -8,6 +8,13 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- Layer handles: a `<Layer>` whose interior is one component exposes that
+  component's literal and schema-bound props to the editor (`layer/setProps`,
+  `ElementSite.interior`, `Placement.interior`); the player applies edited
+  handles without re-evaluating the file. Decision 0013 and a Remotion
+  comparison (`docs/comparisons/remotion.md`) record where the idea comes
+  from and correct 0001 and 0007 on Remotion having an editor.
+
 - `useLayer()` beside `useT()` inside a `<Layer>`: the layer's clock with
   `elapsed`, `remaining` and `duration` in seconds, the composition `time`
   and `fps`, so a countdown or a timer reads real time off the player.

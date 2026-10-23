@@ -213,10 +213,18 @@ function Countdown() {
 ```
 
 Both hooks read the player's time, so scrubbing shows the right value and
-pausing freezes it; a `setInterval` would drift and ignore seeks. The editor
-treats the interior as opaque: it can move, trim and anchor the layer, but to
-change what is inside it asks the model. The layer's own timing stays literal
-so it remains a timeline item.
+pausing freezes it; a `setInterval` would drift and ignore seeks.
+
+The interior's body is opaque to the editor, but its props are not. A Layer
+whose interior is exactly one component gets *handles*: that component's
+literal props are editable (`layer/setProps`), props that reference a
+`schema` prop are bound and fold into `defaults`, and expressions are
+locked. `<Layer id="cta"><CallToAction text={cta} accent={accent} /></Layer>`
+gives the inspector `text` and `accent` without reading `CallToAction`. Wrap
+the component in a `<div>` or give the Layer two children and there are no
+handles; the editor can still move, trim and anchor the layer, and to change
+what is inside it asks the model. The layer's own timing stays literal so it
+remains a timeline item.
 
 ## Captions use composition seconds today
 

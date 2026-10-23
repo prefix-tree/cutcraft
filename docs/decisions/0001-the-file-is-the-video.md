@@ -1,5 +1,7 @@
 # 0001. The file is the video
 
+> Corrected in part by [0013](./0013-remotion-has-an-editor-and-layer-handles.md): Remotion has an editor now.
+
 ## Context
 
 Three parties work on the same edit: a model that writes it, a person who

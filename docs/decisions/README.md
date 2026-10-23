@@ -18,3 +18,4 @@ new record that supersedes the old one.
 | [0010](./0010-openreel-as-the-ux-reference.md) | OpenReel is the UX reference, with named deviations |
 | [0011](./0011-performance-contract.md) | The performance contract: identity, not diffing |
 | [0012](./0012-what-we-adopt-from-diffusion-studio.md) | What we adopt from Diffusion Studio |
+| [0013](./0013-remotion-has-an-editor-and-layer-handles.md) | Remotion has an editor now; a Layer's component gets handles |
