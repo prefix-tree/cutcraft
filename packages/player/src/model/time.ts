@@ -1,4 +1,4 @@
-import type { Placement } from "@cutcut/kit";
+import type { LayerClock, Placement } from "@cutcut/kit";
 import { FRAME_EPS } from "../constants";
 import { ease } from "./keyframes";
 
@@ -24,6 +24,13 @@ export function localT(p: Placement, t: number): number {
   if (p.duration <= 0) return 0;
   const u = (t - p.start) / p.duration;
   return u < 0 ? 0 : u > 1 ? 1 : u;
+}
+
+/** What `useLayer()` returns inside a Layer: progress plus real seconds. */
+export function layerClock(p: Placement, t: number, fps: number): LayerClock {
+  const duration = Math.max(0, p.duration);
+  const elapsed = Math.min(duration, Math.max(0, t - p.start));
+  return { t: localT(p, t), elapsed, remaining: duration - elapsed, duration, time: t, fps };
 }
 
 interface SpeedKey { at: number; speed: number; easing: string | undefined }

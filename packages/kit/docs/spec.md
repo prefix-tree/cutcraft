@@ -64,7 +64,7 @@ function Helper(...) {...}                       // pure helpers (no hooks excep
 | `<Mask>` | Mask | child of a visual element: `type: shape\|drawn\|matte`, `shape` or `path={{ points, closed }}`, `feather` 0–100, `inverted`, `expansion` −100..100, `opacity`, `matte={{ source, channel: alpha\|luminance\|bounds }}`; children `<Keyframe property="path">` |
 | `<Nested>` | CompoundClip + instance | `of={SceneHelper}` (pure helper returning tracks/composition), `in`, `out`, `transform`, `volume` |
 | `<Multicam>` + `<Angle>` + `<Cut>` | MultiCamGroup + angles + switches | `<Multicam id name sync>` with `<Angle id src offset color/>` and `<Cut id at angle/>`; the resolver expands cuts into generated clips on the containing track; angle sources render hidden |
-| `<Layer>` | — (ours) | `duration`, `anchor`/`offset`, `transform`; arbitrary React interior using `useT()` |
+| `<Layer>` | — (ours) | `duration`, `anchor`/`offset`, `transform`; arbitrary React interior using `useT()` (0..1) or `useLayer()` (seconds elapsed, remaining, duration) |
 | `<Effect>` / `<AudioEffect>` | Effect | `type`, `params`, `enabled`; order = stack order |
 | `<ColorGrade>` | ClipColorGrading | `wheels`, `curves`, `lut`, `hsl`, `temperature`, `tint` |
 | `<Keyframe>` | Keyframe | `property`, `at` (element-relative), `value`, `easing`, `handles`, `roving` |

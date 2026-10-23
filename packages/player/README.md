@@ -69,7 +69,7 @@ const state = resolve(collectModule(file), manifest);
 React: `<Player>` with `controls`, `loop`, `autoPlay`, `initiallyMuted`,
 `playbackRate`, `fit`, `onError`, `onFrame` and a `PlayerRef`; hooks
 `usePlayer`, `useCompositionTime`, `useCompositionFrame`, `useLayerT`.
-Mounting a Player installs the kit's `useT()`.
+Mounting a Player installs the kit's `useT()` and `useLayer()`.
 
 ## Not rendered yet
 

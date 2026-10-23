@@ -3,7 +3,8 @@
 The player takes a `ResolvedState` and plays it. It does not render the file's
 JSX: the vocabulary components render nothing, and the player draws from
 placements. The one exception is `<Layer>`, whose interior is real React
-rendered with `useT()` in context.
+rendered with `useT()` and `useLayer()` in context: progress 0..1, or the
+clock in seconds (`elapsed`, `remaining`, `duration`, `time`, `fps`).
 
 ## Pipeline per tick
 

@@ -1,4 +1,4 @@
-import { installUseT } from "@cutcut/kit";
+import { installLayerClock, type LayerClock } from "@cutcut/kit";
 import { useContext, useSyncExternalStore } from "react";
 import type { PlayerCore } from "../player";
 import { LayerContext, PlayerContext } from "./context";
@@ -19,19 +19,24 @@ export function useCompositionFrame(): number {
   return useSyncExternalStore((fn) => core.subscribeTime(fn), () => core.getTime().frame, () => core.getTime().frame);
 }
 
-/** What the kit's `useT()` delegates to while a Player is mounted. */
+/** What the kit's `useLayer()` and `useT()` delegate to while a Player is mounted. */
+export function useLayerClock(): LayerClock {
+  const clock = useContext(LayerContext);
+  if (!clock) throw new Error("useLayer() and useT() are only valid inside a <Layer>");
+  return clock;
+}
+
+/** 0..1 progress through the enclosing Layer. */
 export function useLayerT(): number {
-  const t = useContext(LayerContext);
-  if (Number.isNaN(t)) throw new Error("useT() is only valid inside a <Layer>");
-  return t;
+  return useLayerClock().t;
 }
 
 let mounted = 0;
 
-/** Installs `useT` for the first mounted Player and removes it after the last unmounts. */
+/** Installs the kit's layer hooks for the first mounted Player and removes them after the last unmounts. */
 export function retainUseT(): () => void {
-  if (mounted++ === 0) installUseT(useLayerT);
+  if (mounted++ === 0) installLayerClock(useLayerClock);
   return () => {
-    if (--mounted === 0) installUseT(null);
+    if (--mounted === 0) installLayerClock(null);
   };
 }

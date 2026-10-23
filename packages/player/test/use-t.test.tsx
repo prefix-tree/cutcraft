@@ -1,5 +1,5 @@
-import { useT } from "@cutcut/kit";
-import { fixtureElement, fixtureState } from "./helpers/state";
+import { Composition, Layer, Track, useLayer, useT } from "@cutcut/kit";
+import { fixtureElement, fixtureState, makeState } from "./helpers/state";
 import { mountPlayer } from "./helpers/react";
 
 describe("useT", () => {
@@ -27,5 +27,28 @@ describe("useT", () => {
     await m.seek(6);
     expect(m.container.querySelector('[data-el="l1"]')?.textContent).toBe("");
     await m.unmount();
+  });
+
+  it("useLayer gives the clock in seconds, clamped to the layer", async () => {
+    const state = makeState({ tracks: [{ id: "main", layout: "free", items: [{ id: "l1", kind: "layer", start: 5, duration: 3 }] }] });
+    function Countdown() {
+      const { remaining, elapsed, duration, time } = useLayer();
+      return <span>{`${Math.ceil(remaining)}/${elapsed.toFixed(1)}/${duration}/${time}`}</span>;
+    }
+    const element = (
+      <Composition fps={30} width={640} height={360}>
+        <Track id="main" layout="free"><Layer id="l1" start={5} duration={3}><Countdown /></Layer></Track>
+      </Composition>
+    );
+    const m = await mountPlayer(state, element);
+    const text = () => m.container.querySelector('[data-el="l1"]')?.textContent;
+    await m.seek(5);
+    expect(text()).toBe("3/0.0/3/5");
+    await m.seek(6.5);
+    expect(text()).toBe("2/1.5/3/6.5");
+    await m.seek(7.9);
+    expect(text()).toBe("1/2.9/3/7.9");
+    await m.unmount();
+    expect(() => useLayer()).toThrow(/needs a Player/);
   });
 });

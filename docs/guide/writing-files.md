@@ -194,17 +194,29 @@ they would be `generated`, and the editor would bake the helper's output into
 the file before the first gesture on one copy. The prompt tells the model to
 prefer writing elements out when there are only two.
 
-Helpers must be pure: no state, no effects, no hooks except `useT()`. The lint
-checks (`pure-helpers`). The resolver expands them by calling them, so a helper
+Helpers must be pure: no state, no effects, no hooks except `useT()` and
+`useLayer()`. The lint checks (`pure-helpers`). The resolver expands them by calling them, so a helper
 that reads the clock would resolve differently every time.
 
 ## `<Layer>` is the escape hatch
 
 The call to action is a `<div>` with a progress bar, inside `<Layer id="cta">`.
-`useT()` returns 0..1 over the layer's duration. The editor treats the interior
-as opaque: it can move, trim and anchor the layer, but to change what is inside
-it asks the model. The layer's own timing stays literal so it remains a
-timeline item.
+`useT()` returns 0..1 over the layer's duration; `useLayer()` returns the
+clock in full: `t`, `elapsed` and `remaining` in seconds, the layer's
+`duration`, the composition `time` and `fps`. A countdown is one line:
+
+```tsx
+function Countdown() {
+  const { remaining } = useLayer();
+  return <div>{Math.ceil(remaining)}</div>;
+}
+```
+
+Both hooks read the player's time, so scrubbing shows the right value and
+pausing freezes it; a `setInterval` would drift and ignore seeks. The editor
+treats the interior as opaque: it can move, trim and anchor the layer, but to
+change what is inside it asks the model. The layer's own timing stays literal
+so it remains a timeline item.
 
 ## Captions use composition seconds today
 

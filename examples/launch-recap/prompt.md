@@ -27,8 +27,8 @@ function Lower({ who }: { who: string }) {                 // pure helpers only
 - `schema` lists what a person may change without touching the edit; `defaults`
   is a plain JSON object literal (the editor rewrites it when a tweak changes).
 - The default export returns one `<Composition>`. Helpers are plain functions
-  of their props: no state, no effects, no hooks except `useT()` inside a
-  `<Layer>`.
+  of their props: no state, no effects, no hooks except `useT()` and
+  `useLayer()` inside a `<Layer>`.
 - Add one-line intent comments (`{/* … */}`) where a choice is not obvious.
 
 ## Vocabulary
@@ -47,7 +47,8 @@ Timed elements: `<Clip src in out|duration speed reverse fit transform volume fa
 as a sibling *between* two clips of a sequence track, `<Title>` (text as
 children), `<Shape shape width height fill stroke cornerRadius>`, `<Svg>`,
 `<Sticker>`, `<Adjustment>`, `<Nested of>`, `<Layer>` (arbitrary React inside;
-call `useT()` for 0..1 progress).
+call `useT()` for 0..1 progress or `useLayer()` for `elapsed`, `remaining`,
+`duration` and `time` in seconds).
 
 Children that the inspector edits one by one: `<Keyframe property at value easing>`,
 `<Effect type params>`, `<ColorGrade>`, `<Mask>`, `<SpeedKey>`, `<Freeze>`,

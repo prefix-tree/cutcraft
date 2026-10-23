@@ -49,10 +49,13 @@ export const noStartOnSequence: Rule = {
   },
 };
 
+/** The hooks a Layer interior may call: they read the player's clock, nothing else. */
+const LAYER_HOOKS: ReadonlySet<string> = new Set(["useT", "useLayer"]);
+
 export const pureHelpers: Rule = {
   name: "pure-helpers",
-  check: (index) => [...index.helpers.values()].filter((h) => !h.pure && h.hooks.some((n) => n !== "useT")).map((h) => ({
-    rule: "pure-helpers", severity: "error", message: `helper ${h.name} calls ${h.hooks.filter((n) => n !== "useT").join(", ")}; helpers must be pure so the resolver can expand them`, range: h.range,
+  check: (index) => [...index.helpers.values()].filter((h) => !h.pure && h.hooks.some((n) => !LAYER_HOOKS.has(n))).map((h) => ({
+    rule: "pure-helpers", severity: "error", message: `helper ${h.name} calls ${h.hooks.filter((n) => !LAYER_HOOKS.has(n)).join(", ")}; helpers must be pure so the resolver can expand them`, range: h.range,
   } satisfies Diagnostic)),
 };
 

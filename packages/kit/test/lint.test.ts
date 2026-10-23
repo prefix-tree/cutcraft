@@ -31,6 +31,11 @@ describe("lint", () => {
     expect(d.map((x) => `${x.severity}:${x.rule}`).sort()).toEqual(["error:ambiguous-duration", "error:pure-helpers", "warning:expression-locked"]);
   });
 
+  it("lets a Layer interior call useT and useLayer but no other hook", () => {
+    const text = wrap('<Track id="t"><Layer id="l" duration={3}><Clock /></Layer></Track>', 'import { Layer, useLayer } from "@cutcut/kit";\nfunction Clock() { const { remaining } = useLayer(); return <div>{Math.ceil(remaining)}</div>; }');
+    expect(lint(text).filter((d) => d.rule === "pure-helpers")).toEqual([]);
+  });
+
   it("checks assets against the manifest and the file shape", () => {
     const d = lint(wrap('<Track id="t"><Clip id="c" src="asset:missing" /></Track>', "export const schema = 1;"), { manifest });
     expect(d.map((x) => x.rule).sort()).toEqual(["file-shape", "missing-asset"]);

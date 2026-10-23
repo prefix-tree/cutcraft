@@ -8,6 +8,10 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- `useLayer()` beside `useT()` inside a `<Layer>`: the layer's clock with
+  `elapsed`, `remaining` and `duration` in seconds, the composition `time`
+  and `fps`, so a countdown or a timer reads real time off the player.
+
 - `@cutcut/kit`: `track/setLayout`, `multicam/flatten` and `nested/extract`
   apply (they were validated stubs), with `resolveScene` resolving a
   `<Nested>` interior for the kit and the player alike. The fold prints

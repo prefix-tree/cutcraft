@@ -1,4 +1,4 @@
-import { frameIndex, frameTime, localT, placementSourceTime, timecode } from "@cutcut/player";
+import { frameIndex, frameTime, layerClock, localT, placementSourceTime, timecode } from "@cutcut/player";
 import { childrenOf, fixtureState, makeState } from "./helpers/state";
 
 const state = makeState({
@@ -91,5 +91,12 @@ describe("frames", () => {
     expect(timecode(65.9, 30)).toBe("01:05.27");
     expect(timecode(-1, 30)).toBe("00:00.00");
     expect(timecode(1, 29.97)).toBe("00:01.00");
+  });
+
+  it("layerClock gives progress and real seconds, clamped to the layer", () => {
+    const c1 = item("c1");
+    expect(layerClock(c1, c1.start + 1, 30)).toEqual({ t: 0.25, elapsed: 1, remaining: 3, duration: 4, time: c1.start + 1, fps: 30 });
+    expect(layerClock(c1, c1.start - 2, 30)).toMatchObject({ t: 0, elapsed: 0, remaining: 4 });
+    expect(layerClock(c1, c1.end + 2, 30)).toMatchObject({ t: 1, elapsed: 4, remaining: 0 });
   });
 });
