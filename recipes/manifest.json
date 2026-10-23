@@ -1,0 +1,1183 @@
+{
+  "assets": {
+    "podcast": {
+      "id": "podcast",
+      "kind": "video",
+      "duration": 90,
+      "fps": 30,
+      "width": 1920,
+      "height": 1080,
+      "audio": {
+        "sampleRate": 48000,
+        "channels": 2,
+        "streams": 1
+      },
+      "transcript": {
+        "words": [
+          {
+            "i": 0,
+            "text": "Welcome",
+            "start": 0.4,
+            "end": 0.68,
+            "speaker": "ana"
+          },
+          {
+            "i": 1,
+            "text": "back",
+            "start": 0.76,
+            "end": 1.04,
+            "speaker": "ana"
+          },
+          {
+            "i": 2,
+            "text": "to",
+            "start": 1.12,
+            "end": 1.4,
+            "speaker": "ana"
+          },
+          {
+            "i": 3,
+            "text": "the",
+            "start": 1.48,
+            "end": 1.76,
+            "speaker": "ana"
+          },
+          {
+            "i": 4,
+            "text": "show.",
+            "start": 1.84,
+            "end": 2.12,
+            "speaker": "ana"
+          },
+          {
+            "i": 5,
+            "text": "Thanks",
+            "start": 2.82,
+            "end": 3.1,
+            "speaker": "ben"
+          },
+          {
+            "i": 6,
+            "text": "for",
+            "start": 3.18,
+            "end": 3.46,
+            "speaker": "ben"
+          },
+          {
+            "i": 7,
+            "text": "having",
+            "start": 3.54,
+            "end": 3.82,
+            "speaker": "ben"
+          },
+          {
+            "i": 8,
+            "text": "me.",
+            "start": 3.9,
+            "end": 4.18,
+            "speaker": "ben"
+          },
+          {
+            "i": 9,
+            "text": "So",
+            "start": 4.88,
+            "end": 5.16,
+            "speaker": "ana"
+          },
+          {
+            "i": 10,
+            "text": "what",
+            "start": 5.24,
+            "end": 5.52,
+            "speaker": "ana"
+          },
+          {
+            "i": 11,
+            "text": "is",
+            "start": 5.6,
+            "end": 5.88,
+            "speaker": "ana"
+          },
+          {
+            "i": 12,
+            "text": "cutcut,",
+            "start": 5.96,
+            "end": 6.24,
+            "speaker": "ana"
+          },
+          {
+            "i": 13,
+            "text": "in",
+            "start": 6.32,
+            "end": 6.6,
+            "speaker": "ana"
+          },
+          {
+            "i": 14,
+            "text": "one",
+            "start": 6.68,
+            "end": 6.96,
+            "speaker": "ana"
+          },
+          {
+            "i": 15,
+            "text": "sentence?",
+            "start": 7.04,
+            "end": 7.32,
+            "speaker": "ana"
+          },
+          {
+            "i": 16,
+            "text": "It",
+            "start": 8.02,
+            "end": 8.3,
+            "speaker": "ben"
+          },
+          {
+            "i": 17,
+            "text": "is",
+            "start": 8.38,
+            "end": 8.66,
+            "speaker": "ben"
+          },
+          {
+            "i": 18,
+            "text": "a",
+            "start": 8.74,
+            "end": 9.02,
+            "speaker": "ben"
+          },
+          {
+            "i": 19,
+            "text": "video",
+            "start": 9.1,
+            "end": 9.38,
+            "speaker": "ben"
+          },
+          {
+            "i": 20,
+            "text": "file",
+            "start": 9.46,
+            "end": 9.74,
+            "speaker": "ben"
+          },
+          {
+            "i": 21,
+            "text": "a",
+            "start": 9.82,
+            "end": 10.1,
+            "speaker": "ben"
+          },
+          {
+            "i": 22,
+            "text": "model",
+            "start": 10.18,
+            "end": 10.46,
+            "speaker": "ben"
+          },
+          {
+            "i": 23,
+            "text": "can",
+            "start": 10.54,
+            "end": 10.82,
+            "speaker": "ben"
+          },
+          {
+            "i": 24,
+            "text": "write",
+            "start": 10.9,
+            "end": 11.18,
+            "speaker": "ben"
+          },
+          {
+            "i": 25,
+            "text": "and",
+            "start": 11.26,
+            "end": 11.54,
+            "speaker": "ben"
+          },
+          {
+            "i": 26,
+            "text": "a",
+            "start": 11.62,
+            "end": 11.9,
+            "speaker": "ben"
+          },
+          {
+            "i": 27,
+            "text": "person",
+            "start": 11.98,
+            "end": 12.26,
+            "speaker": "ben"
+          },
+          {
+            "i": 28,
+            "text": "can",
+            "start": 12.34,
+            "end": 12.62,
+            "speaker": "ben"
+          },
+          {
+            "i": 29,
+            "text": "edit.",
+            "start": 12.7,
+            "end": 12.98,
+            "speaker": "ben"
+          },
+          {
+            "i": 30,
+            "text": "Let",
+            "start": 13.68,
+            "end": 13.96,
+            "speaker": "ben"
+          },
+          {
+            "i": 31,
+            "text": "me",
+            "start": 14.04,
+            "end": 14.32,
+            "speaker": "ben"
+          },
+          {
+            "i": 32,
+            "text": "say",
+            "start": 14.4,
+            "end": 14.68,
+            "speaker": "ben"
+          },
+          {
+            "i": 33,
+            "text": "that",
+            "start": 14.76,
+            "end": 15.04,
+            "speaker": "ben"
+          },
+          {
+            "i": 34,
+            "text": "again.",
+            "start": 15.12,
+            "end": 15.4,
+            "speaker": "ben"
+          },
+          {
+            "i": 35,
+            "text": "It",
+            "start": 16.9,
+            "end": 17.18,
+            "speaker": "ben"
+          },
+          {
+            "i": 36,
+            "text": "is",
+            "start": 17.26,
+            "end": 17.54,
+            "speaker": "ben"
+          },
+          {
+            "i": 37,
+            "text": "a",
+            "start": 17.62,
+            "end": 17.9,
+            "speaker": "ben"
+          },
+          {
+            "i": 38,
+            "text": "video",
+            "start": 17.98,
+            "end": 18.26,
+            "speaker": "ben"
+          },
+          {
+            "i": 39,
+            "text": "file",
+            "start": 18.34,
+            "end": 18.62,
+            "speaker": "ben"
+          },
+          {
+            "i": 40,
+            "text": "a",
+            "start": 18.7,
+            "end": 18.98,
+            "speaker": "ben"
+          },
+          {
+            "i": 41,
+            "text": "model",
+            "start": 19.06,
+            "end": 19.34,
+            "speaker": "ben"
+          },
+          {
+            "i": 42,
+            "text": "can",
+            "start": 19.42,
+            "end": 19.7,
+            "speaker": "ben"
+          },
+          {
+            "i": 43,
+            "text": "write",
+            "start": 19.78,
+            "end": 20.06,
+            "speaker": "ben"
+          },
+          {
+            "i": 44,
+            "text": "and",
+            "start": 20.14,
+            "end": 20.42,
+            "speaker": "ben"
+          },
+          {
+            "i": 45,
+            "text": "a",
+            "start": 20.5,
+            "end": 20.78,
+            "speaker": "ben"
+          },
+          {
+            "i": 46,
+            "text": "person",
+            "start": 20.86,
+            "end": 21.14,
+            "speaker": "ben"
+          },
+          {
+            "i": 47,
+            "text": "can",
+            "start": 21.22,
+            "end": 21.5,
+            "speaker": "ben"
+          },
+          {
+            "i": 48,
+            "text": "still",
+            "start": 21.58,
+            "end": 21.86,
+            "speaker": "ben"
+          },
+          {
+            "i": 49,
+            "text": "edit.",
+            "start": 21.94,
+            "end": 22.22,
+            "speaker": "ben"
+          },
+          {
+            "i": 50,
+            "text": "Why",
+            "start": 22.92,
+            "end": 23.2,
+            "speaker": "ana"
+          },
+          {
+            "i": 51,
+            "text": "a",
+            "start": 23.28,
+            "end": 23.56,
+            "speaker": "ana"
+          },
+          {
+            "i": 52,
+            "text": "file?",
+            "start": 23.64,
+            "end": 23.92,
+            "speaker": "ana"
+          },
+          {
+            "i": 53,
+            "text": "Because",
+            "start": 24.62,
+            "end": 24.9,
+            "speaker": "ben"
+          },
+          {
+            "i": 54,
+            "text": "the",
+            "start": 24.98,
+            "end": 25.26,
+            "speaker": "ben"
+          },
+          {
+            "i": 55,
+            "text": "model",
+            "start": 25.34,
+            "end": 25.62,
+            "speaker": "ben"
+          },
+          {
+            "i": 56,
+            "text": "is",
+            "start": 25.7,
+            "end": 25.98,
+            "speaker": "ben"
+          },
+          {
+            "i": 57,
+            "text": "good",
+            "start": 26.06,
+            "end": 26.34,
+            "speaker": "ben"
+          },
+          {
+            "i": 58,
+            "text": "at",
+            "start": 26.42,
+            "end": 26.7,
+            "speaker": "ben"
+          },
+          {
+            "i": 59,
+            "text": "code",
+            "start": 26.78,
+            "end": 27.06,
+            "speaker": "ben"
+          },
+          {
+            "i": 60,
+            "text": "and",
+            "start": 27.14,
+            "end": 27.42,
+            "speaker": "ben"
+          },
+          {
+            "i": 61,
+            "text": "bad",
+            "start": 27.5,
+            "end": 27.78,
+            "speaker": "ben"
+          },
+          {
+            "i": 62,
+            "text": "at",
+            "start": 27.86,
+            "end": 28.14,
+            "speaker": "ben"
+          },
+          {
+            "i": 63,
+            "text": "documents.",
+            "start": 28.22,
+            "end": 28.5,
+            "speaker": "ben"
+          },
+          {
+            "i": 64,
+            "text": "And",
+            "start": 29.2,
+            "end": 29.48,
+            "speaker": "ana"
+          },
+          {
+            "i": 65,
+            "text": "the",
+            "start": 29.56,
+            "end": 29.84,
+            "speaker": "ana"
+          },
+          {
+            "i": 66,
+            "text": "editor?",
+            "start": 29.92,
+            "end": 30.2,
+            "speaker": "ana"
+          },
+          {
+            "i": 67,
+            "text": "The",
+            "start": 30.9,
+            "end": 31.18,
+            "speaker": "ben"
+          },
+          {
+            "i": 68,
+            "text": "editor",
+            "start": 31.26,
+            "end": 31.54,
+            "speaker": "ben"
+          },
+          {
+            "i": 69,
+            "text": "writes",
+            "start": 31.62,
+            "end": 31.9,
+            "speaker": "ben"
+          },
+          {
+            "i": 70,
+            "text": "back",
+            "start": 31.98,
+            "end": 32.26,
+            "speaker": "ben"
+          },
+          {
+            "i": 71,
+            "text": "into",
+            "start": 32.34,
+            "end": 32.62,
+            "speaker": "ben"
+          },
+          {
+            "i": 72,
+            "text": "the",
+            "start": 32.7,
+            "end": 32.98,
+            "speaker": "ben"
+          },
+          {
+            "i": 73,
+            "text": "same",
+            "start": 33.06,
+            "end": 33.34,
+            "speaker": "ben"
+          },
+          {
+            "i": 74,
+            "text": "file,",
+            "start": 33.42,
+            "end": 33.7,
+            "speaker": "ben"
+          },
+          {
+            "i": 75,
+            "text": "one",
+            "start": 33.78,
+            "end": 34.06,
+            "speaker": "ben"
+          },
+          {
+            "i": 76,
+            "text": "token",
+            "start": 34.14,
+            "end": 34.42,
+            "speaker": "ben"
+          },
+          {
+            "i": 77,
+            "text": "at",
+            "start": 34.5,
+            "end": 34.78,
+            "speaker": "ben"
+          },
+          {
+            "i": 78,
+            "text": "a",
+            "start": 34.86,
+            "end": 35.14,
+            "speaker": "ben"
+          },
+          {
+            "i": 79,
+            "text": "time.",
+            "start": 35.22,
+            "end": 35.5,
+            "speaker": "ben"
+          },
+          {
+            "i": 80,
+            "text": "That",
+            "start": 36.2,
+            "end": 36.48,
+            "speaker": "ana"
+          },
+          {
+            "i": 81,
+            "text": "is",
+            "start": 36.56,
+            "end": 36.84,
+            "speaker": "ana"
+          },
+          {
+            "i": 82,
+            "text": "the",
+            "start": 36.92,
+            "end": 37.2,
+            "speaker": "ana"
+          },
+          {
+            "i": 83,
+            "text": "whole",
+            "start": 37.28,
+            "end": 37.56,
+            "speaker": "ana"
+          },
+          {
+            "i": 84,
+            "text": "idea.",
+            "start": 37.64,
+            "end": 37.92,
+            "speaker": "ana"
+          }
+        ]
+      },
+      "shots": [
+        {
+          "i": 0,
+          "start": 0,
+          "end": 30
+        },
+        {
+          "i": 1,
+          "start": 30,
+          "end": 60
+        },
+        {
+          "i": 2,
+          "start": 60,
+          "end": 90
+        }
+      ],
+      "silences": [
+        {
+          "i": 0,
+          "start": 2.12,
+          "end": 2.82
+        },
+        {
+          "i": 1,
+          "start": 4.18,
+          "end": 4.88
+        },
+        {
+          "i": 2,
+          "start": 7.32,
+          "end": 8.02
+        },
+        {
+          "i": 3,
+          "start": 12.98,
+          "end": 13.68
+        },
+        {
+          "i": 4,
+          "start": 15.4,
+          "end": 16.9
+        },
+        {
+          "i": 5,
+          "start": 22.22,
+          "end": 22.92
+        },
+        {
+          "i": 6,
+          "start": 23.92,
+          "end": 24.62
+        },
+        {
+          "i": 7,
+          "start": 28.5,
+          "end": 29.2
+        },
+        {
+          "i": 8,
+          "start": 30.2,
+          "end": 30.9
+        },
+        {
+          "i": 9,
+          "start": 35.5,
+          "end": 36.2
+        }
+      ]
+    },
+    "screen": {
+      "id": "screen",
+      "kind": "video",
+      "duration": 40,
+      "fps": 30,
+      "width": 1920,
+      "height": 1080
+    },
+    "voice": {
+      "id": "voice",
+      "kind": "audio",
+      "duration": 40,
+      "audio": {
+        "sampleRate": 48000,
+        "channels": 1,
+        "streams": 1
+      },
+      "transcript": {
+        "words": [
+          {
+            "i": 0,
+            "text": "Open",
+            "start": 0.5,
+            "end": 0.78,
+            "speaker": "narrator"
+          },
+          {
+            "i": 1,
+            "text": "the",
+            "start": 0.86,
+            "end": 1.14,
+            "speaker": "narrator"
+          },
+          {
+            "i": 2,
+            "text": "dashboard.",
+            "start": 1.22,
+            "end": 1.5,
+            "speaker": "narrator"
+          },
+          {
+            "i": 3,
+            "text": "Click",
+            "start": 3.1,
+            "end": 3.38,
+            "speaker": "narrator"
+          },
+          {
+            "i": 4,
+            "text": "new",
+            "start": 3.46,
+            "end": 3.74,
+            "speaker": "narrator"
+          },
+          {
+            "i": 5,
+            "text": "project.",
+            "start": 3.82,
+            "end": 4.1,
+            "speaker": "narrator"
+          },
+          {
+            "i": 6,
+            "text": "Pick",
+            "start": 5.7,
+            "end": 5.98,
+            "speaker": "narrator"
+          },
+          {
+            "i": 7,
+            "text": "a",
+            "start": 6.06,
+            "end": 6.34,
+            "speaker": "narrator"
+          },
+          {
+            "i": 8,
+            "text": "template",
+            "start": 6.42,
+            "end": 6.7,
+            "speaker": "narrator"
+          },
+          {
+            "i": 9,
+            "text": "and",
+            "start": 6.78,
+            "end": 7.06,
+            "speaker": "narrator"
+          },
+          {
+            "i": 10,
+            "text": "name",
+            "start": 7.14,
+            "end": 7.42,
+            "speaker": "narrator"
+          },
+          {
+            "i": 11,
+            "text": "it.",
+            "start": 7.5,
+            "end": 7.78,
+            "speaker": "narrator"
+          },
+          {
+            "i": 12,
+            "text": "Then",
+            "start": 9.38,
+            "end": 9.66,
+            "speaker": "narrator"
+          },
+          {
+            "i": 13,
+            "text": "deploy.",
+            "start": 9.74,
+            "end": 10.02,
+            "speaker": "narrator"
+          }
+        ]
+      },
+      "silences": [
+        {
+          "i": 0,
+          "start": 1.5,
+          "end": 3.1
+        },
+        {
+          "i": 1,
+          "start": 4.1,
+          "end": 5.7
+        },
+        {
+          "i": 2,
+          "start": 7.78,
+          "end": 9.38
+        }
+      ]
+    },
+    "product": {
+      "id": "product",
+      "kind": "video",
+      "duration": 24,
+      "fps": 30,
+      "width": 1920,
+      "height": 1080,
+      "shots": [
+        {
+          "i": 0,
+          "start": 0,
+          "end": 6
+        },
+        {
+          "i": 1,
+          "start": 6,
+          "end": 12
+        },
+        {
+          "i": 2,
+          "start": 12,
+          "end": 18
+        },
+        {
+          "i": 3,
+          "start": 18,
+          "end": 24
+        }
+      ]
+    },
+    "cam-a": {
+      "id": "cam-a",
+      "kind": "video",
+      "duration": 60,
+      "fps": 30,
+      "width": 1920,
+      "height": 1080,
+      "audio": {
+        "sampleRate": 48000,
+        "channels": 1,
+        "streams": 1
+      },
+      "transcript": {
+        "words": [
+          {
+            "i": 0,
+            "text": "Alright,",
+            "start": 2.0,
+            "end": 2.28,
+            "speaker": "host"
+          },
+          {
+            "i": 1,
+            "text": "settle",
+            "start": 2.36,
+            "end": 2.64,
+            "speaker": "host"
+          },
+          {
+            "i": 2,
+            "text": "in.",
+            "start": 2.72,
+            "end": 3.0,
+            "speaker": "host"
+          },
+          {
+            "i": 3,
+            "text": "Here",
+            "start": 5.2,
+            "end": 5.48,
+            "speaker": "host"
+          },
+          {
+            "i": 4,
+            "text": "is",
+            "start": 5.56,
+            "end": 5.84,
+            "speaker": "host"
+          },
+          {
+            "i": 5,
+            "text": "the",
+            "start": 5.92,
+            "end": 6.2,
+            "speaker": "host"
+          },
+          {
+            "i": 6,
+            "text": "part",
+            "start": 6.28,
+            "end": 6.56,
+            "speaker": "host"
+          },
+          {
+            "i": 7,
+            "text": "everyone",
+            "start": 6.64,
+            "end": 6.92,
+            "speaker": "host"
+          },
+          {
+            "i": 8,
+            "text": "asks",
+            "start": 7.0,
+            "end": 7.28,
+            "speaker": "host"
+          },
+          {
+            "i": 9,
+            "text": "about.",
+            "start": 7.36,
+            "end": 7.64,
+            "speaker": "host"
+          },
+          {
+            "i": 10,
+            "text": "You",
+            "start": 8.34,
+            "end": 8.62,
+            "speaker": "host"
+          },
+          {
+            "i": 11,
+            "text": "write",
+            "start": 8.7,
+            "end": 8.98,
+            "speaker": "host"
+          },
+          {
+            "i": 12,
+            "text": "the",
+            "start": 9.06,
+            "end": 9.34,
+            "speaker": "host"
+          },
+          {
+            "i": 13,
+            "text": "file,",
+            "start": 9.42,
+            "end": 9.7,
+            "speaker": "host"
+          },
+          {
+            "i": 14,
+            "text": "the",
+            "start": 9.78,
+            "end": 10.06,
+            "speaker": "host"
+          },
+          {
+            "i": 15,
+            "text": "agent",
+            "start": 10.14,
+            "end": 10.42,
+            "speaker": "host"
+          },
+          {
+            "i": 16,
+            "text": "writes",
+            "start": 10.5,
+            "end": 10.78,
+            "speaker": "host"
+          },
+          {
+            "i": 17,
+            "text": "the",
+            "start": 10.86,
+            "end": 11.14,
+            "speaker": "host"
+          },
+          {
+            "i": 18,
+            "text": "file,",
+            "start": 11.22,
+            "end": 11.5,
+            "speaker": "host"
+          },
+          {
+            "i": 19,
+            "text": "and",
+            "start": 11.58,
+            "end": 11.86,
+            "speaker": "host"
+          },
+          {
+            "i": 20,
+            "text": "it",
+            "start": 11.94,
+            "end": 12.22,
+            "speaker": "host"
+          },
+          {
+            "i": 21,
+            "text": "runs.",
+            "start": 12.3,
+            "end": 12.58,
+            "speaker": "host"
+          },
+          {
+            "i": 22,
+            "text": "No",
+            "start": 13.28,
+            "end": 13.56,
+            "speaker": "host"
+          },
+          {
+            "i": 23,
+            "text": "project",
+            "start": 13.64,
+            "end": 13.92,
+            "speaker": "host"
+          },
+          {
+            "i": 24,
+            "text": "document,",
+            "start": 14.0,
+            "end": 14.28,
+            "speaker": "host"
+          },
+          {
+            "i": 25,
+            "text": "no",
+            "start": 14.36,
+            "end": 14.64,
+            "speaker": "host"
+          },
+          {
+            "i": 26,
+            "text": "sync,",
+            "start": 14.72,
+            "end": 15.0,
+            "speaker": "host"
+          },
+          {
+            "i": 27,
+            "text": "no",
+            "start": 15.08,
+            "end": 15.36,
+            "speaker": "host"
+          },
+          {
+            "i": 28,
+            "text": "export",
+            "start": 15.44,
+            "end": 15.72,
+            "speaker": "host"
+          },
+          {
+            "i": 29,
+            "text": "step.",
+            "start": 15.8,
+            "end": 16.08,
+            "speaker": "host"
+          },
+          {
+            "i": 30,
+            "text": "Questions?",
+            "start": 18.78,
+            "end": 19.06,
+            "speaker": "host"
+          }
+        ]
+      },
+      "silences": [
+        {
+          "i": 0,
+          "start": 3.0,
+          "end": 5.2
+        },
+        {
+          "i": 1,
+          "start": 7.64,
+          "end": 8.34
+        },
+        {
+          "i": 2,
+          "start": 12.58,
+          "end": 13.28
+        },
+        {
+          "i": 3,
+          "start": 16.08,
+          "end": 18.78
+        }
+      ]
+    },
+    "cam-b": {
+      "id": "cam-b",
+      "kind": "video",
+      "duration": 60,
+      "fps": 30,
+      "width": 1920,
+      "height": 1080,
+      "shots": [
+        {
+          "i": 0,
+          "start": 0,
+          "end": 10
+        },
+        {
+          "i": 1,
+          "start": 10,
+          "end": 25
+        },
+        {
+          "i": 2,
+          "start": 25,
+          "end": 40
+        },
+        {
+          "i": 3,
+          "start": 40,
+          "end": 60
+        }
+      ]
+    },
+    "photo-1": {
+      "id": "photo-1",
+      "kind": "image",
+      "duration": 0,
+      "width": 3000,
+      "height": 2000
+    },
+    "photo-2": {
+      "id": "photo-2",
+      "kind": "image",
+      "duration": 0,
+      "width": 3000,
+      "height": 2000
+    },
+    "photo-3": {
+      "id": "photo-3",
+      "kind": "image",
+      "duration": 0,
+      "width": 2000,
+      "height": 3000
+    },
+    "photo-4": {
+      "id": "photo-4",
+      "kind": "image",
+      "duration": 0,
+      "width": 3000,
+      "height": 2000
+    },
+    "music": {
+      "id": "music",
+      "kind": "audio",
+      "duration": 180,
+      "audio": {
+        "sampleRate": 48000,
+        "channels": 2,
+        "streams": 1
+      }
+    },
+    "logo": {
+      "id": "logo",
+      "kind": "image",
+      "duration": 0,
+      "width": 512,
+      "height": 512
+    }
+  }
+}

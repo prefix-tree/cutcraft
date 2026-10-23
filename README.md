@@ -84,6 +84,7 @@ choice in it, and `pnpm docs:dev` serves the full site.
 | `packages/kit` | vocabulary, manifest and time references, resolver, patches and actions, source tools, lint. No DOM. | [README](packages/kit/README.md), [spec](packages/kit/docs/spec.md) |
 | `packages/player` | the browser renderer and the React `<Player>` | [README](packages/player/README.md) |
 | `examples/launch-recap` | the worked example: brief, prompt, manifest, file, runnable page | [README](examples/launch-recap/README.md) |
+| `recipes` | seven complete cut files for the videos cutcut is made for, each linted, resolved and tested | [docs](docs/recipes/index.md) |
 | `docs` | guides, generated reference, decision records (VitePress) | `pnpm docs:dev` |
 
 ## Status

@@ -1,0 +1,13 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": ["node", "vitest/globals"],
+    "baseUrl": ".",
+    "paths": {
+      "@cutcut/kit": ["../packages/kit/src/index.ts"],
+      "@cutcut/kit/source": ["../packages/kit/src/source/index-public.ts"]
+    }
+  },
+  "include": ["*.tsx", "test", "vitest.config.ts", "eslint.config.js"]
+}

@@ -11,6 +11,7 @@ export default defineConfig({
       { text: "Guide", link: "/guide/getting-started" },
       { text: "Reference", link: "/reference/elements" },
       { text: "Decisions", link: "/decisions/" },
+      { text: "Recipes", link: "/recipes/" },
       { text: "Comparisons", link: "/comparisons/diffusion-studio" },
       { text: "GitHub", link: "https://github.com/bsnisar/cutcut" },
     ],
@@ -48,6 +49,18 @@ export default defineConfig({
           { text: "0012 What we adopt from Diffusion Studio", link: "/decisions/0012-what-we-adopt-from-diffusion-studio" },
           { text: "0013 Remotion and Layer handles", link: "/decisions/0013-remotion-has-an-editor-and-layer-handles" },
           { text: "0014 Captions follow the clips", link: "/decisions/0014-captions-follow-the-clips" },
+        ] },
+      ],
+      "/recipes/": [
+        { text: "Recipes", items: [
+          { text: "Overview", link: "/recipes/" },
+          { text: "Talking-head cut", link: "/recipes/talking-head" },
+          { text: "Product demo with zoom-ins", link: "/recipes/product-demo" },
+          { text: "Vertical clip from a podcast", link: "/recipes/vertical-podcast" },
+          { text: "Slideshow with motion", link: "/recipes/slideshow" },
+          { text: "Stats with handles", link: "/recipes/stats" },
+          { text: "Variants from one file", link: "/recipes/variants" },
+          { text: "Multicam highlights", link: "/recipes/highlights" },
         ] },
       ],
       "/comparisons/": [

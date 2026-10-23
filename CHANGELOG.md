@@ -8,6 +8,11 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- `recipes/`: seven complete cut files (talking-head cut, product demo with
+  zoom-ins, vertical podcast clip, slideshow, stats with handles, variants,
+  multicam highlights) over one fixture manifest, each linted, resolved and
+  pinned by a test, with a docs page per recipe.
+
 - Captions follow the clips: a word reference on a `<Caption>` resolves to
   where the word plays, and `<Captions src>` with no literal cues generates
   them from the transcript along the timeline (`maxChars`, `maxDuration`,
