@@ -1,3 +1,5 @@
+<p align="center"><img src="docs/public/logo.svg" width="96" alt="cutcut logo"></p>
+
 # cutcut
 
 **The file is the video.** A model writes a TSX file. The browser renders it.

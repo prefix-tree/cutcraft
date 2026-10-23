@@ -1,3 +1,5 @@
+<p align="center"><img src="../../docs/public/logo.svg" width="64" alt="cutcut logo"></p>
+
 # launch recap
 
 A 25 s product recap written by a model from [`brief.md`](brief.md) under the

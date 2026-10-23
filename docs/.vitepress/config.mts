@@ -6,7 +6,9 @@ export default defineConfig({
   base: "/cutcut/",
   cleanUrls: true,
   lastUpdated: true,
+  head: [["link", { rel: "icon", type: "image/svg+xml", href: "/cutcut/favicon.svg" }]],
   themeConfig: {
+    logo: "/logo.svg",
     nav: [
       { text: "Guide", link: "/guide/getting-started" },
       { text: "Reference", link: "/reference/elements" },

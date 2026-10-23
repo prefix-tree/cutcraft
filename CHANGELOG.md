@@ -8,6 +8,10 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- A logo: an orange disc with a wedge cut out of it, like Pac-Man, and a
+  small frame ahead of it. Used as the docs site's nav logo and favicon and
+  at the top of the READMEs (`docs/public/logo.svg`).
+
 - `recipes/`: seven complete cut files (talking-head cut, product demo with
   zoom-ins, vertical podcast clip, slideshow, stats with handles, variants,
   multicam highlights) over one fixture manifest, each linted, resolved and

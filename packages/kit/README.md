@@ -1,3 +1,5 @@
+<p align="center"><img src="../../docs/public/logo.svg" width="64" alt="cutcut logo"></p>
+
 # @cutcut/kit
 
 The shared core of the cutcut editor: the JSX vocabulary a model writes, the

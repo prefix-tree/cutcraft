@@ -1,3 +1,5 @@
+<p align="center"><img src="../../docs/public/logo.svg" width="64" alt="cutcut logo"></p>
+
 # @cutcut/player
 
 The browser player for cut files. It takes a `ResolvedState` from `@cutcut/kit`
