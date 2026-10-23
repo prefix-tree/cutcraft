@@ -8,6 +8,8 @@ import type { PatchLog } from "../patches/types";
 import type { ResolveError } from "./errors";
 import { overlay } from "./overlay";
 import type { CollectedNode, CollectedTree, Editable, LayerInterior } from "./tree";
+import { cueNodes, onTimeline, planCues, playsKey, sameAsset, timelineWords, type AssetPlay, type CueOptions } from "./captions";
+import { parseTimeRef } from "../manifest/timeref";
 
 export interface Placement {
   readonly id: string;
@@ -161,6 +163,7 @@ function compute(original: CollectedTree, manifest: AssetManifest, log: PatchLog
     placeTrack(trackNode, track, pending, errors);
   }
   iterateDependencies(pending, errors);
+  placeCaptions(root, pending, tracks, manifest, markers);
 
   let compositionEnd = 0;
   for (const p of pending.values()) {
@@ -349,14 +352,7 @@ function intrinsicCompute(
   } else if (node.kind === "gap") {
     p.duration = Number(props.duration);
   } else if (node.kind === "caption") {
-    const parent = node.parent ? pending.get(node.parent) : undefined;
-    const asset = parent && typeof parent.props.src === "string" ? lookupAsset(manifest, parent.props.src) : null;
-    const s = resolveTimeRef(props.start, asset, markers, { id: node.id, prop: "start" });
-    const e = resolveTimeRef(props.end, asset, markers, { id: node.id, prop: "end" });
-    if (typeof s !== "number") own.push(s);
-    if (typeof e !== "number") own.push(e);
-    p.start = typeof s === "number" ? s : 0;
-    p.duration = typeof s === "number" && typeof e === "number" ? Math.max(0, e - s) : 0;
+    // Timed in the captions pass, once the clips that play the asset are placed.
   } else if (node.kind === "captions") {
     p.start = 0;
     p.durationDep = { kind: "fill" };
@@ -639,4 +635,73 @@ function placeChildren(node: CollectedNode, parent: Placement, items: Map<string
     end = placeChildren(child, placement, items, errors, place, end);
   }
   return end;
+}
+
+interface CueMemo { readonly key: string; readonly manifest: AssetManifest; readonly props: Record<string, unknown>; readonly nodes: readonly CollectedNode[] }
+const cuesByCaptions = new WeakMap<CollectedNode, CueMemo>();
+
+/**
+ * Captions follow the clips: a word reference on a literal <Caption> means
+ * the composition time at which that word plays, and <Captions src> with no
+ * literal cues generates them from the asset's transcript along the timeline.
+ */
+function placeCaptions(root: CollectedNode, pending: Map<string, Pending>, tracks: readonly ResolvedTrack[], manifest: AssetManifest, markers: ReadonlyMap<string, number>): void {
+  for (const node of root.children) {
+    if (node.kind !== "captions") continue;
+    const cp = pending.get(node.id);
+    if (!cp) continue;
+    const src = typeof cp.props.src === "string" ? cp.props.src : null;
+    const asset = src ? lookupAsset(manifest, src) : null;
+    const plays = src ? assetPlays(src, pending, tracks) : [];
+    const literal = node.children.filter((c) => c.kind === "caption");
+    if (literal.length > 0) {
+      for (const child of literal) {
+        const p = pending.get(child.id);
+        if (!p) continue;
+        const s = captionTime(p.props.start, asset, plays, markers, { id: child.id, prop: "start", src });
+        const e = captionTime(p.props.end, asset, plays, markers, { id: child.id, prop: "end", src });
+        if (typeof s !== "number") p.errors.push(s);
+        if (typeof e !== "number") p.errors.push(e);
+        p.start = typeof s === "number" ? s : 0;
+        p.duration = typeof s === "number" && typeof e === "number" ? Math.max(0, e - s) : 0;
+      }
+      continue;
+    }
+    if (!asset?.transcript) continue;
+    const key = playsKey(plays);
+    const hit = cuesByCaptions.get(node);
+    let nodes: readonly CollectedNode[];
+    if (hit && hit.key === key && hit.manifest === manifest && hit.props === cp.props) nodes = hit.nodes;
+    else {
+      const options: CueOptions = { maxChars: Number(cp.props.maxChars ?? 42), maxDuration: Number(cp.props.maxDuration ?? 5), maxGap: Number(cp.props.maxGap ?? 0.8) };
+      nodes = cueNodes(node, planCues(timelineWords(asset, plays), options), (id) => pending.has(id));
+      cuesByCaptions.set(node, { key, manifest, props: cp.props, nodes });
+    }
+    for (const cue of nodes) {
+      pending.set(cue.id, { node: cue, track: null, parent: node.id, props: cue.props as Record<string, unknown>, errors: [], start: Number(cue.props.start), duration: Number(cue.props.end) - Number(cue.props.start) });
+    }
+  }
+}
+
+/** Where an asset plays: media placements on visible tracks that draw from it, in start order. */
+function assetPlays(src: string, pending: Map<string, Pending>, tracks: readonly ResolvedTrack[]): AssetPlay[] {
+  const hidden = new Set(tracks.filter((t) => t.hidden).map((t) => t.id));
+  const plays: AssetPlay[] = [];
+  for (const p of pending.values()) {
+    if (!p.source || p.start === undefined || !sameAsset(p.source.asset, src)) continue;
+    if (p.track && hidden.has(p.track)) continue;
+    if (p.node.kind !== "clip" && p.node.kind !== "audio") continue;
+    plays.push({ id: p.node.id, start: p.start, in: p.source.in, out: p.duration === undefined ? Number.POSITIVE_INFINITY : p.source.out, speed: p.source.speed });
+  }
+  return plays.sort((a, b) => a.start - b.start);
+}
+
+function captionTime(ref: unknown, asset: AssetEntry | null, plays: readonly AssetPlay[], markers: ReadonlyMap<string, number>, ctx: { id: string; prop: string; src: string | null }): number | ResolveError {
+  const parsed = parseTimeRef(ref);
+  if (parsed.kind === "seconds" || parsed.kind === "marker" || parsed.kind === "invalid") return resolveTimeRef(ref as never, asset, markers, ctx);
+  const sec = resolveTimeRef(ref as never, asset, markers, ctx);
+  if (typeof sec !== "number") return sec;
+  const at = onTimeline(sec, plays);
+  if (at === null) return { code: "UNKNOWN_REF", id: ctx.id, prop: ctx.prop, message: `${String(ref)} of ${ctx.src ?? "the asset"} is not on the timeline` };
+  return at;
 }

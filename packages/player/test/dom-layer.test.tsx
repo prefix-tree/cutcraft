@@ -18,11 +18,14 @@ describe("DomLayer", () => {
 
   it("stacks tracks in document order and shows captions on top", async () => {
     const m = await mountPlayer(fixtureState());
-    await m.seek(2.1);
+    // cp1 is word:3..word:6.end of the interview, which c1 (in="word:3") plays from 0.
+    await m.seek(0.5);
     const overlays = m.container.querySelector('[data-track="overlays"]') as HTMLElement;
     expect(overlays.style.zIndex).toBe("2");
     expect(m.container.querySelector('[data-el="cp1"][data-kind="caption"]')?.textContent).toBe("Hello and welcome back");
     expect(m.container.querySelector('[data-el="cp2"]')).toBeNull();
+    await m.seek(2.1);
+    expect(m.container.querySelector('[data-el="cp1"]')).toBeNull();
     await m.seek(5.5);
     expect(m.container.querySelector('[data-el="cp2"]')?.textContent).toBe("to the show");
     expect(m.container.querySelector('[data-el="s1"][data-kind="shape"] svg rect')).not.toBeNull();

@@ -76,7 +76,7 @@ file.tsx ──evaluate──▶ element tree ──collect──▶ CollectedTr
 
 Every action in the spec is registered, applies, and round-trips through
 undo/redo against `fixtures/sample.tsx` (which uses every element).
-`<Captions src>` does not yet generate children from the transcript. There is
+There is
 no renderer: `useT()` and `useLayer()` throw until a Player installs one.
 
 ```

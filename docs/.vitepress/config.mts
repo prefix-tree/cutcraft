@@ -47,6 +47,7 @@ export default defineConfig({
           { text: "0011 Performance contract", link: "/decisions/0011-performance-contract" },
           { text: "0012 What we adopt from Diffusion Studio", link: "/decisions/0012-what-we-adopt-from-diffusion-studio" },
           { text: "0013 Remotion and Layer handles", link: "/decisions/0013-remotion-has-an-editor-and-layer-handles" },
+          { text: "0014 Captions follow the clips", link: "/decisions/0014-captions-follow-the-clips" },
         ] },
       ],
       "/comparisons/": [

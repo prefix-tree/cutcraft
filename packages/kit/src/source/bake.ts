@@ -1,4 +1,5 @@
 import { nodeSpecOf } from "../actions/types";
+import { capabilitiesOf } from "../jsx/capabilities";
 import type { ResolvedState } from "../resolve/resolve";
 import type { CollectedNode } from "../resolve/tree";
 import { lineRange, type SourceEdit } from "./edits";
@@ -38,10 +39,21 @@ function topLevelFromCall(state: ResolvedState, helper: string, callIndex: numbe
 function bakeGeneratedChildren(text: string, parentId: string, state: ResolvedState, index: SourceIndex): SourceEdit[] {
   const site = index.elements.get(parentId);
   if (!site) return [];
-  const generated = [...state.items.values()].filter((p) => p.editable === "generated" && p.parent === parentId && !state.tree.byId.has(p.id));
+  const generated = [...state.items.values()].filter((p) => p.editable === "generated" && p.parent === parentId && !state.tree.byId.has(p.id)).sort((a, b) => a.start - b.start);
+  const parentKind = state.tree.byId.get(parentId)?.kind ?? site.kind;
+  const asChildren = generated.length > 0 && generated.every((p) => capabilitiesOf(parentKind).childKinds.includes(p.kind));
+  const indent = asChildren ? `${site.indent}  ` : site.indent;
   const printed = generated
-    .map((p) => printElement({ id: p.id, kind: p.kind, props: JSON.parse(JSON.stringify(p.props)) as Record<string, never> }, site.indent))
+    .map((p) => printElement({ id: p.id, kind: p.kind, props: JSON.parse(JSON.stringify(p.props)) as Record<string, never> }, indent))
     .join("\n");
-  const end = lineRange(text, site.range)[1];
-  return [{ kind: "bake", id: parentId, range: [end, end], text: `${printed}\n` }];
+  if (!asChildren) {
+    const end = lineRange(text, site.range)[1];
+    return [{ kind: "bake", id: parentId, range: [end, end], text: `${printed}\n` }];
+  }
+  // Children go inside the parent: open a self-closing tag, or replace the whitespace between the tags.
+  if (site.childrenRange) return [{ kind: "bake", id: parentId, range: site.childrenRange, text: `\n${printed}\n${site.indent}` }];
+  const open = site.openingTag;
+  const slash = text.lastIndexOf("/>", open[1]);
+  const start = text[slash - 1] === " " ? slash - 1 : slash;
+  return [{ kind: "bake", id: parentId, range: [start, open[1]], text: `>\n${printed}\n${site.indent}</${site.name}>` }];
 }

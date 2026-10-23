@@ -1,5 +1,7 @@
 # 0006. Time references resolve against an asset manifest
 
+> Extended by [0014](./0014-captions-follow-the-clips.md): captions now resolve word references to where the word plays, and generate cues from the transcript.
+
 ## Context
 
 The model never sees pixels or hears audio. It edits against what an ingest

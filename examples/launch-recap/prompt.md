@@ -85,8 +85,12 @@ Children that the inspector edits one by one: `<Keyframe property at value easin
 8. **`<Layer>` is the escape hatch.** Anything the vocabulary cannot say goes
    inside a `<Layer>`; the editor treats the interior as opaque and asks you to
    change it. Keep the layer's own timing literal.
-9. **Captions use composition seconds** for `start`/`end` today; compute them
-   from the clip placement and the transcript.
+9. **Captions follow the clips.** Give `<Captions>` the transcript's asset
+   as `src` and either leave it empty, so cues are generated from the words
+   the timeline plays (`maxChars`, `maxDuration`, `maxGap` tune the
+   grouping), or write `<Caption start="word:N" end="word:M.end" text>`
+   cues: a word reference means where that word plays. Numbers are
+   composition seconds.
 10. **Tracks and sound.** Put dialogue on the first track, overlays above it,
     music on a free track with `duck={{ under: "<dialogue track id>", to }}`.
 

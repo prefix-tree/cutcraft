@@ -85,10 +85,13 @@ describe("structure on free and sequence tracks", () => {
 
   it("creates captions when none exist and anchors overlays on creation", () => {
     const exec = fixtureExecutor();
+    // With no literal cues, <Captions src> generates them from the transcript; the first literal edit makes them literal.
     exec.execute({ type: "caption/setAll", params: { captionsId: "cap", nodes: [] } });
+    expect([...exec.state().items.values()].filter((p) => p.parent === "cap").map((p) => [p.id, p.editable])).toEqual([["cap-1", "generated"], ["cap-2", "generated"]]);
     expect(exec.execute({ type: "caption/add", params: { captionsId: "cap", captionId: "cn1", start: 1, end: 2, text: "one" } }).ok).toBe(true);
     expect(exec.execute({ type: "caption/add", params: { captionsId: "cap", captionId: "cn0", start: 0.5, end: 1, text: "zero" } }).ok).toBe(true);
-    expect(exec.state().tree.byId.get("cap")?.children.map((c) => c.id)).toEqual(["cn0", "cn1"]);
+    expect(exec.state().tree.byId.get("cap")?.children.map((c) => c.id)).toEqual(["cap-1", "cn0", "cn1", "cap-2"]);
+    expect(exec.state().items.get("cap-1")?.editable).toBe("literal");
     expect(exec.execute({ type: "text/create", params: { id: "t9", kind: "title", trackId: "overlays", place: { anchor: "c3", offset: 0.5 }, props: { duration: 1 }, text: "late" } }).ok).toBe(true);
     expect(exec.state().items.get("t9")).toMatchObject({ start: 10.5, end: 11.5 });
     expect(exec.execute({ type: "text/create", params: { id: "t10", kind: "title", trackId: "overlays", place: { anchor: "ghost" }, props: {} } }).errors?.[0]?.code).toBe("ELEMENT_NOT_FOUND");

@@ -236,6 +236,9 @@ Generated from the Zod schemas in `packages/kit/src/jsx/schemas` and the capabil
 | `src` | string |  |  |
 | `style` | { font, size, color, background, position, highlight, upcoming } |  |  |
 | `animation` | "none" \| "word-highlight" \| "word-by-word" \| "karaoke" \| "bounce" \| "typewriter" | `"none"` |  |
+| `maxChars` | integer | `42` |  |
+| `maxDuration` | number | `5` |  |
+| `maxGap` | number (0..∞) | `0.8` |  |
 
 ## `<Caption>`
 

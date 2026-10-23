@@ -13,9 +13,10 @@ export function Captions(p: CaptionsProps) {
   const props = p.placement.props as Record<string, unknown>;
   const style = (props.style ?? {}) as { font?: string; size?: number; color?: string; background?: string; position?: string; highlight?: string; upcoming?: string };
   const animation = String(props.animation ?? "none");
-  const active = p.placement.children
-    .map((id) => p.state.items.get(id))
-    .filter((c): c is Placement => c !== undefined && c.kind === "caption" && isVisibleAt(c, p.time, p.state.composition.duration));
+  // Cues are the captions' children in the file, or the ones the resolver generated from the transcript.
+  const active = [...p.state.items.values()]
+    .filter((c): c is Placement => c.parent === p.placement.id && c.kind === "caption" && isVisibleAt(c, p.time, p.state.composition.duration))
+    .sort((a, b) => a.start - b.start);
   const comp = p.state.composition;
   const container: CSSProperties = {
     position: "absolute", left: 0, right: 0,

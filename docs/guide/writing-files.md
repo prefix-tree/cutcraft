@@ -226,13 +226,24 @@ handles; the editor can still move, trim and anchor the layer, and to change
 what is inside it asks the model. The layer's own timing stays literal so it
 remains a timeline item.
 
-## Captions use composition seconds today
+## Captions follow the clips
 
-`cap-1` is `start={0} end={3}`: the hook starts at 0 with word 12, which is
-5.6 s in the source, so the first sentence ends at 8.6 − 5.6 = 3.0. The model
-computed this from the clip placement and the transcript; the prompt says so.
-Generating `<Caption>` children from a transcript, in composition time, is a
-known gap in the kit.
+`<Captions src="asset:founder">` names the transcript. A literal
+`<Caption start="word:12" end="word:18.end">` then means *where those words
+play*: the resolver finds the clip that shows word 12 (`hook`, trimmed to
+start there) and puts the cue at 0–3.0 s. Trim or move the clip and the cue
+follows. A word that no clip plays is an `UNKNOWN_REF` error. Numbers are
+still composition seconds, and `marker:` references still name markers.
+
+Leave the element empty, `<Captions src="asset:founder" />`, and the
+resolver generates the cues: every word the timeline plays, grouped into
+cues that break at a sentence end (`.`, `?`, `!`), at a pause longer than
+`maxGap` (0.8 s), at a clip boundary, or when a cue would pass `maxChars`
+(42) or `maxDuration` (5 s). Generated cues carry `words` with composition
+times, so karaoke colouring works, and they show as generated in the
+editor. The first edit to one of them (a text change, a move, a delete)
+writes all of them into the file as literal `<Caption>` children and then
+applies the edit; undo removes the literals and generation resumes.
 
 ## What the player does with it
 

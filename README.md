@@ -91,7 +91,7 @@ choice in it, and `pnpm docs:dev` serves the full site.
 | | |
 |---|---|
 | Works | resolve, every action with undo, fold and bake, lint; playback with seek, rate, loop, crossfades, keyframed transforms, masks, DOM overlays, captions, ducking; the example end to end |
-| Partial | `<Captions src>` does not yet generate children from a transcript; three actions are validated stubs (`track/setLayout`, `nested/extract`, `multicam/flatten`); transition types other than crossfade draw as crossfade; effects without a CSS filter equivalent, LUTs, matte masks, audio effects and reversed audio warn and are skipped |
+| Partial | transition types other than crossfade draw as crossfade; effects without a CSS filter equivalent, LUTs, matte masks, audio effects and reversed audio warn and are skipped |
 | Planned | the editor package (timeline, inspector, preview gestures over the action set); headless export driving the same player; the agent-facing skill and a `cut lint` CLI; npm publishing |
 
 ## Contributing

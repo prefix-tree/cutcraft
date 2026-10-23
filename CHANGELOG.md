@@ -8,6 +8,12 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- Captions follow the clips: a word reference on a `<Caption>` resolves to
+  where the word plays, and `<Captions src>` with no literal cues generates
+  them from the transcript along the timeline (`maxChars`, `maxDuration`,
+  `maxGap`). The first edit to a generated cue writes all cues into the
+  file; undo resumes generation. Decision 0014.
+
 - Layer handles: a `<Layer>` whose interior is one component exposes that
   component's literal and schema-bound props to the editor (`layer/setProps`,
   `ElementSite.interior`, `Placement.interior`); the player applies edited

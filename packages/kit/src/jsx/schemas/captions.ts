@@ -19,6 +19,10 @@ export const captionsSchema = z.strictObject({
   src: assetRefSchema.optional(),
   style: captionStyleSchema.optional(),
   animation: zCaptionAnimation.default("none"),
+  /** Generation limits: a cue breaks at a sentence end, a long pause, or when one of these would be exceeded. */
+  maxChars: z.number().int().positive().default(42),
+  maxDuration: z.number().positive().default(5),
+  maxGap: z.number().nonnegative().default(0.8),
 });
 
 export const captionSchema = z.strictObject({
