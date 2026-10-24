@@ -30,6 +30,15 @@ export class SampleFrame implements Frame {
   close(): void { this.sample.close(); }
 }
 
+/** How a host customises decoding: the Node renderer converts samples itself and decodes in software. */
+export interface FrameSourceHooks {
+  /** Turns a decoded sample into a frame; may convert eagerly (the sample is closed by the frame). */
+  readonly makeFrame?: (sample: VideoSample) => Promise<Frame> | Frame;
+  /** Loads a still image asset. */
+  readonly loadImage?: (handle: MediaHandle) => Promise<ImageBitmap | HTMLImageElement>;
+  readonly hardwareAcceleration?: "no-preference" | "prefer-hardware" | "prefer-software";
+}
+
 /** Frames of one video asset through a shared `VideoSampleSink`. */
 export class MediabunnyFrameSource implements FrameSource {
   private input: Input | null = null;
@@ -42,7 +51,12 @@ export class MediabunnyFrameSource implements FrameSource {
     private readonly handle: MediaHandle,
     private readonly inputs: MediabunnyInputs,
     private readonly createCanvas: CreateCanvas,
+    private readonly hooks: FrameSourceHooks = {},
   ) {}
+
+  private wrap(sample: VideoSample): Promise<Frame> | Frame {
+    return this.hooks.makeFrame ? this.hooks.makeFrame(sample) : new SampleFrame(sample, this.createCanvas);
+  }
 
   async open(): Promise<FrameSourceInfo> {
     this.input = this.inputs.acquire(this.assetId, this.handle);
@@ -51,19 +65,19 @@ export class MediabunnyFrameSource implements FrameSource {
     const decodable = await track.canDecode();
     const [width, height, duration] = await Promise.all([track.getDisplayWidth(), track.getDisplayHeight(), track.computeDuration()]);
     this.track = track;
-    this.sink = new VideoSampleSink(track, { hardwareAcceleration: "no-preference", optimizeForLatency: true });
+    this.sink = new VideoSampleSink(track, { hardwareAcceleration: this.hooks.hardwareAcceleration ?? "no-preference", optimizeForLatency: true });
     return { width, height, duration, decodable };
   }
 
   async frameAt(sourceTime: number): Promise<Frame | null> {
     if (!this.sink) return null;
     const sample = await this.sink.getSample(Math.max(0, sourceTime) + PICK_EPS);
-    return sample ? new SampleFrame(sample, this.createCanvas) : null;
+    return sample ? this.wrap(sample) : null;
   }
 
   async *stream(from: number, to: number): AsyncGenerator<Frame, void, unknown> {
     if (!this.sink) return;
-    for await (const sample of this.sink.samples(Math.max(0, from), to)) yield new SampleFrame(sample, this.createCanvas);
+    for await (const sample of this.sink.samples(Math.max(0, from), to)) yield await this.wrap(sample);
   }
 
   /** A canvas copy of the frame at `sourceTime`, for freeze frames; pooled canvases are copied right away. */
@@ -87,11 +101,12 @@ export class MediabunnyFrameSource implements FrameSource {
 }
 
 async function loadImage(handle: MediaHandle): Promise<ImageBitmap> {
+  if (handle.kind === "path") throw new Error("a file path needs a host image loader (hooks.loadImage)");
   const blob = handle.kind === "blob" ? handle.blob : await (await fetch(handle.url)).blob();
   return createImageBitmap(blob);
 }
 
-export function mediabunnyFrameSourceFactory(inputs: MediabunnyInputs, createCanvas: CreateCanvas): FrameSourceFactory {
+export function mediabunnyFrameSourceFactory(inputs: MediabunnyInputs, createCanvas: CreateCanvas, hooks: FrameSourceHooks = {}): FrameSourceFactory {
   return (assetId: string, handle: MediaHandle, kind: AssetEntry["kind"]) =>
-    kind === "image" ? new ImageFrameSource(() => loadImage(handle)) : new MediabunnyFrameSource(assetId, handle, inputs, createCanvas);
+    kind === "image" ? new ImageFrameSource(() => (hooks.loadImage ?? loadImage)(handle)) : new MediabunnyFrameSource(assetId, handle, inputs, createCanvas, hooks);
 }

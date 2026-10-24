@@ -16,6 +16,8 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      # The render tests generate their test media with ffmpeg.
+      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
       - run: pnpm check
 
   e2e:

@@ -33,7 +33,8 @@ export function useMediaUrl(ref: string | null): string | null {
     core.resolveMedia(id).then((handle) => {
       if (cancelled) return;
       if (handle.kind === "url") setUrl(handle.url);
-      else { revoke = URL.createObjectURL(handle.blob); setUrl(revoke); }
+      else if (handle.kind === "blob") { revoke = URL.createObjectURL(handle.blob); setUrl(revoke); }
+      else setUrl(null);
     }).catch(() => { if (!cancelled) setUrl(null); });
     return () => { cancelled = true; if (revoke) URL.revokeObjectURL(revoke); };
   }, [core, ref]);

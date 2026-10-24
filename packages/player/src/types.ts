@@ -22,7 +22,11 @@ export type Ctx2D = CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D
 export type AnyCanvas = HTMLCanvasElement | OffscreenCanvas;
 export type CreateCanvas = (width: number, height: number) => AnyCanvas;
 
-export type MediaHandle = { readonly kind: "blob"; readonly blob: Blob } | { readonly kind: "url"; readonly url: string };
+/** Where an asset's bytes come from. `path` is a file on disk, for the Node renderer; browsers use `blob` or `url`. */
+export type MediaHandle =
+  | { readonly kind: "blob"; readonly blob: Blob }
+  | { readonly kind: "url"; readonly url: string }
+  | { readonly kind: "path"; readonly path: string };
 
 export interface MediaResolver {
   resolve(assetId: string): Promise<MediaHandle>;

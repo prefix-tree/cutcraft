@@ -30,5 +30,10 @@
   "bugs": {
     "url": "https://github.com/bsnisar/cutcut/issues"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "pnpm": {
+    "ignoredBuiltDependencies": [
+      "node-av"
+    ]
+  }
 }
