@@ -38,3 +38,9 @@ export const MAX_RATE = 4;
 export const SETTLE_MS = 120;
 /** Tolerance when rounding a time to a frame index. */
 export const FRAME_EPS = 1e-6;
+/**
+ * Container timestamps are often rounded to the millisecond, so the frame for
+ * the exact time n/fps can sit a fraction of a millisecond after it. A frame
+ * is picked when its timestamp is at most this far past the wanted time.
+ */
+export const PICK_EPS = 0.001;

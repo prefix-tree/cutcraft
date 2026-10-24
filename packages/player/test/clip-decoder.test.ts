@@ -95,4 +95,46 @@ describe("ClipDecoder", () => {
     const f = await d.frameFor(p.start + 1, true);
     expect(f!.timestamp).toBeCloseTo(1);
   });
+
+  it("picks the frame for an exact n/fps time when container timestamps are rounded to the millisecond", async () => {
+    class RoundedSource extends FakeFrameSource {
+      override async *stream(from: number, to: number) {
+        for await (const f of super.stream(from, to)) {
+          const ms = Math.round(f.timestamp * 1000) / 1000;
+          yield Object.assign(f, { timestamp: ms });
+        }
+      }
+      override async frameAt(t: number) {
+        const f = await super.frameAt(t);
+        return f ? Object.assign(f, { timestamp: Math.round(f.timestamp * 1000) / 1000 }) : f;
+      }
+    }
+    const source = new RoundedSource("a");
+    const p = state.items.get("c1")!;
+    const d = new ClipDecoder(source, p, childrenOf(state, "c1"), () => 1);
+    await d.prime(p.start);
+    await flush();
+    // 2/30 = 0.0666…, the frame is stamped 0.067: without a tolerance the previous frame (0.033) is drawn.
+    const f = await d.frameFor(p.start + 2 / 30, true);
+    expect(f!.timestamp).toBe(0.067);
+    const g = await d.frameFor(p.start + 5 / 30, true);
+    expect(g!.timestamp).toBe(0.167);
+    d.dispose();
+  });
+
+  it("with exact, waits for a slow frame instead of drawing a stale one", async () => {
+    const { source, d, p } = decoder("c1");
+    await d.prime(p.start);
+    await flush();
+    source.slow = true;
+    const slow = d.frameFor(p.start + 1, true, true);
+    let settled = false;
+    void slow.then(() => { settled = true; });
+    await flush(3);
+    expect(settled).toBe(false);
+    source.release(40);
+    const f = await slow;
+    expect(f!.timestamp).toBeCloseTo(1);
+    d.dispose();
+  });
 });

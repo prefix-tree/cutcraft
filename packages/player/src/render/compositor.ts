@@ -17,6 +17,8 @@ export interface CompositorDeps {
 export interface TickOptions {
   /** Fetch missing frames before painting (seek, export). */
   readonly wait: boolean;
+  /** With `wait`: no deadline. An export waits for every frame instead of drawing a stale one. */
+  readonly exact?: boolean;
 }
 
 /**
@@ -76,13 +78,23 @@ export class Compositor {
     return Promise.all([this.pool.seekAll(t), ...nested]).then(() => undefined);
   }
 
+  /**
+   * The next frame of a sequential render (export): decoders keep streaming
+   * from where they are instead of being re-primed, and every frame is waited
+   * for. Paint order and output are the same as `seek` then `tick`, at a
+   * fraction of the decode work.
+   */
+  step(t: number): Promise<void> {
+    return this.tick(t, { wait: true, exact: true });
+  }
+
   tick(t: number, opts: TickOptions): Promise<void> {
     if (this.disposed) return Promise.resolve();
     if (this.inFlight) {
       // Coalesce: the newest request replaces the pending one; both callers resolve when it has run.
       if (this.pending) {
         this.pending.t = t;
-        this.pending.opts = { wait: opts.wait || this.pending.opts.wait };
+        this.pending.opts = { wait: opts.wait || this.pending.opts.wait, exact: Boolean(opts.exact || this.pending.opts.exact) };
         return this.pending.done;
       }
       let resolve = (): void => undefined;
@@ -127,7 +139,7 @@ export class Compositor {
       }
       if (op.kind !== "video" && op.kind !== "image" && op.kind !== "error") return;
       const d = this.pool.decoderFor(op.id);
-      frames.set(op.id, d ? await d.frameFor(t, opts.wait) : null);
+      frames.set(op.id, d ? await d.frameFor(t, opts.wait, opts.exact) : null);
     }));
     if (this.disposed) return;
     if (this.ctx) this.painter.paint(this.ctx, plan, { frames, nested: nestedCanvases });

@@ -5,7 +5,8 @@
   "description": "Browser player for the cut video DSL: WebCodecs decode through mediabunny, canvas compositing, DOM overlays, Web Audio clock.",
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./engine": "./src/engine.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit -p tsconfig.json",

@@ -37,9 +37,9 @@ test.describe("player", () => {
   test("draws the exact frame for a time", async ({ page }) => {
     await open(page);
     await seek(page, 1.0);
-    expect(Math.abs((await readCounter(page)) - 30)).toBeLessThanOrEqual(1);
+    expect(await readCounter(page)).toBe(30);
     await seek(page, 2.5);
-    expect(Math.abs((await readCounter(page)) - 75)).toBeLessThanOrEqual(1);
+    expect(await readCounter(page)).toBe(75);
     await seek(page, 4.0);
     expect(Math.abs((await readCounter(page)) - 202)).toBeLessThanOrEqual(1);
     await expect(page.locator("[data-player]")).toHaveAttribute("data-time", "4.0000");
@@ -55,7 +55,7 @@ test.describe("player", () => {
       if (t >= 3.5 && t < 4) continue;
       await seek(page, t);
       expect(await time(page)).toBeCloseTo(t, 5);
-      expect(Math.abs((await readCounter(page)) - expectedCounter(t)), `t=${t}`).toBeLessThanOrEqual(1);
+      expect(Math.abs((await readCounter(page)) - expectedCounter(t)), `t=${t}`).toBeLessThanOrEqual(t < 3.5 ? 0 : 1);
     }
   });
 

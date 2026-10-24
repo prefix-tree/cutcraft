@@ -1,5 +1,5 @@
 import type { Placement } from "@cutcut/kit";
-import { FRAME_WAIT_MS, QUEUE_MAX, QUEUE_TARGET, REVERSE_WINDOW_FRAMES, REVERSE_WINDOW_S, SEEK_MODE_SPEED } from "../constants";
+import { FRAME_WAIT_MS, PICK_EPS, QUEUE_MAX, QUEUE_TARGET, REVERSE_WINDOW_FRAMES, REVERSE_WINDOW_S, SEEK_MODE_SPEED } from "../constants";
 import { placementSourceTime } from "../model/time";
 import type { Frame, FrameSource } from "../types";
 
@@ -90,22 +90,26 @@ export class ClipDecoder {
     return this.primed;
   }
 
-  /** The frame to draw at composition time `t`. With `wait`, fetch it if it is not queued. */
-  async frameFor(t: number, wait: boolean): Promise<Frame | null> {
+  /**
+   * The frame to draw at composition time `t`. With `wait`, fetch it if it is
+   * not queued, for at most `FRAME_WAIT_MS`; with `exact` as well, for as long
+   * as it takes, so an export never draws a frame it did not wait for.
+   */
+  async frameFor(t: number, wait: boolean, exact = false): Promise<Frame | null> {
     if (this.disposed) return null;
     const freeze = this.activeFreeze(t);
     if (freeze) return this.freezeFrame(freeze, wait);
     const st = this.sourceTime(t);
     if (this.mode === "seek") return this.seekFrame(st, wait);
     if (this.mode === "reverse") return this.reverseFrame(st, wait);
-    return this.forwardFrame(st, wait);
+    return this.forwardFrame(st, wait, exact);
   }
 
   /** Close consumed frames; called after a frame was painted. */
   advance(t: number): void {
     if (this.mode !== "forward") return;
     const st = this.sourceTime(t);
-    while (this.queue.length > 0 && this.queue[0]!.timestamp + this.queue[0]!.duration <= st && this.queue.length > 1 && this.queue[1]!.timestamp <= st) {
+    while (this.queue.length > 0 && this.queue[0]!.timestamp + this.queue[0]!.duration <= st && this.queue.length > 1 && this.queue[1]!.timestamp <= st + PICK_EPS) {
       this.queue.shift()!.close();
     }
     this.pump();
@@ -119,10 +123,10 @@ export class ClipDecoder {
     this.freezes.clear();
   }
 
-  private async forwardFrame(st: number, wait: boolean): Promise<Frame | null> {
+  private async forwardFrame(st: number, wait: boolean, exact = false): Promise<Frame | null> {
     const newest = this.queue[this.queue.length - 1] ?? this.current;
     const behind = newest !== null && st - (newest.timestamp + newest.duration) > BEHIND_RESEEK_S;
-    const before = this.current !== null && st < this.current.timestamp && !this.queue.some((f) => f.timestamp <= st);
+    const before = this.current !== null && st + PICK_EPS < this.current.timestamp && !this.queue.some((f) => f.timestamp <= st + PICK_EPS);
     if (this.gen === null && this.queue.length === 0 && this.current === null) {
       if (wait) { await this.primeAtSource(st); return this.current; }
       void this.primeAtSource(st);
@@ -138,11 +142,11 @@ export class ClipDecoder {
       this.pump();
       return picked ?? this.current;
     }
-    const deadline = Date.now() + FRAME_WAIT_MS;
+    const deadline = exact ? Number.POSITIVE_INFINITY : Date.now() + FRAME_WAIT_MS;
     for (;;) {
       const picked = this.forwardPick(st);
       const next = this.queue[0];
-      const settled = (next !== undefined && next.timestamp > st) || this.gen === null || (picked !== null && picked.timestamp + picked.duration > st);
+      const settled = (next !== undefined && next.timestamp > st + PICK_EPS) || this.gen === null || (picked !== null && picked.timestamp + picked.duration > st);
       if (settled || Date.now() >= deadline || this.disposed) { this.pump(); return picked ?? this.current; }
       await this.pumpOnce();
     }
@@ -153,7 +157,7 @@ export class ClipDecoder {
     let best: Frame | null = null;
     let index = -1;
     for (let i = 0; i < this.queue.length; i++) {
-      if (this.queue[i]!.timestamp <= st) { best = this.queue[i]!; index = i; } else break;
+      if (this.queue[i]!.timestamp <= st + PICK_EPS) { best = this.queue[i]!; index = i; } else break;
     }
     if (!best) return null;
     for (let i = 0; i < index; i++) this.queue[i]!.close();
@@ -212,7 +216,7 @@ export class ClipDecoder {
   }
 
   private seekFrame(st: number, wait: boolean): Promise<Frame | null> {
-    if (this.current && this.current.timestamp <= st && st < this.current.timestamp + this.current.duration) return Promise.resolve(this.current);
+    if (this.current && this.current.timestamp <= st + PICK_EPS && st + PICK_EPS < this.current.timestamp + this.current.duration) return Promise.resolve(this.current);
     if (!this.seekPending) {
       const gen = this.generation;
       this.seekPending = this.source.frameAt(st).then((frame) => {

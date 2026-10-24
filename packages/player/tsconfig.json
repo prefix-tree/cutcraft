@@ -6,6 +6,7 @@
     "baseUrl": ".",
     "paths": {
       "@cutcut/kit": ["../kit/src/index.ts"],
+      "@cutcut/player/engine": ["./src/engine.ts"],
       "@cutcut/player": ["./src/index.ts"]
     }
   },

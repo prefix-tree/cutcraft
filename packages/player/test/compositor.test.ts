@@ -60,4 +60,22 @@ describe("Compositor", () => {
     await comp.tick(0.5, { wait: false });
     expect(draws(rec.calls)).toEqual(["a"]);
   });
+
+  it("steps through consecutive frames without restarting any decoder stream", async () => {
+    const sources = new Map<string, FakeFrameSource>();
+    const make = () => new AssetSources({ media: fakeResolver(["a", "b"]), manifest: DEFAULT_MANIFEST, clock: new ManualClock(), onError: () => {}, frameSourceFactory: (id) => { const f = new FakeFrameSource(id); sources.set(id, f); return f; } });
+    const stepped = new Compositor(state, { sources: make(), createCanvas: recorderCanvas });
+    stepped.attach(recorderContext().ctx);
+    for (let n = 0; n < 60; n++) await stepped.step(n / 30);
+    const started = sources.get("a")!.streamsStarted;
+    expect(started).toBeLessThanOrEqual(2);
+    expect(stepped.renderedFrame).toBe(59);
+    stepped.dispose();
+
+    const seeked = new Compositor(state, { sources: make(), createCanvas: recorderCanvas });
+    seeked.attach(recorderContext().ctx);
+    for (let n = 0; n < 60; n++) { await seeked.seek(n / 30); await seeked.tick(n / 30, { wait: true }); }
+    expect(sources.get("a")!.streamsStarted).toBeGreaterThan(started * 10);
+    seeked.dispose();
+  });
 });

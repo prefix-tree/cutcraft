@@ -1,5 +1,6 @@
 import type { AssetEntry } from "@cutcut/kit";
 import { CanvasSink, VideoSampleSink, type Input, type InputVideoTrack, type VideoSample } from "mediabunny";
+import { PICK_EPS } from "../constants";
 import type { CreateCanvas, Ctx2D, Frame, FrameSource, FrameSourceFactory, FrameSourceInfo, MediaHandle } from "../types";
 import { copyFrame, ImageFrameSource } from "./frame-source";
 import type { MediabunnyInputs } from "./mediabunny-input";
@@ -56,7 +57,7 @@ export class MediabunnyFrameSource implements FrameSource {
 
   async frameAt(sourceTime: number): Promise<Frame | null> {
     if (!this.sink) return null;
-    const sample = await this.sink.getSample(Math.max(0, sourceTime));
+    const sample = await this.sink.getSample(Math.max(0, sourceTime) + PICK_EPS);
     return sample ? new SampleFrame(sample, this.createCanvas) : null;
   }
 
