@@ -1,12 +1,14 @@
 import type { ResolvedState } from "@cutcut/kit";
 import {
-  AssetSources, Compositor, FRAME_EPS, ManualClock, MediabunnyInputs, captureWarnings, makeNestedResolver,
+  AssetSources, Compositor, FRAME_EPS, ManualClock, MediabunnyInputs, buildAudioPlan, captureWarnings, makeNestedResolver,
   mediabunnyFrameSourceFactory, type MediaResolver, type PlayerErrorEvent,
 } from "@cutcut/player/engine";
-import { FilePathTarget, Mp4OutputFormat, Output, VideoSample, VideoSampleSource, WebMOutputFormat } from "mediabunny";
+import { AudioSample, AudioSampleSource, FilePathTarget, Mp4OutputFormat, Output, VideoSample, VideoSampleSource, WebMOutputFormat, canEncodeAudio } from "mediabunny";
 import type { Canvas } from "skia-canvas";
 import { createCanvas, initEnv } from "./env";
 import { frameSourceHooks } from "./frame-source";
+import { mixPlan, type MixedBlock } from "./mixer";
+import { MediabunnyPcm } from "./pcm";
 
 export type VideoCodec = "vp9" | "vp8" | "av1" | "avc" | "hevc";
 
@@ -24,6 +26,10 @@ export interface RenderOptions {
   /** Render only this part of the composition, in composition seconds. */
   readonly from?: number;
   readonly to?: number;
+  /** Skip the soundtrack. */
+  readonly silent?: boolean;
+  /** Audio bits per second; default 128 kbit/s. */
+  readonly audioBitrate?: number;
   readonly onProgress?: (progress: { readonly frame: number; readonly frames: number }) => void;
   readonly signal?: AbortSignal;
   /** What to do when an asset cannot be opened or decoded: stop (default) or draw the grey placeholder and go on. */
@@ -32,6 +38,8 @@ export interface RenderOptions {
 
 export interface RenderResult {
   readonly frames: number;
+  /** Whether the file has an audio track. */
+  readonly audio: boolean;
   readonly fps: number;
   readonly width: number;
   readonly height: number;
@@ -78,12 +86,40 @@ export async function renderVideo(options: RenderOptions): Promise<RenderResult>
   });
   output.addVideoTrack(source, { frameRate: fps });
 
+  // Audio: the player's own plan, mixed by us and handed to the encoder block by block, a little ahead of the picture.
+  const sampleRate = Number(state.items.get(state.composition.id)?.props.sampleRate ?? 48000);
+  const plan = options.silent ? [] : buildAudioPlan(state, from, to, makeNestedResolver(() => state));
+  const audioCodec = container === "mp4" ? "aac" : "opus";
+  const withAudio = plan.length > 0 && (await canEncodeAudio(audioCodec, { numberOfChannels: 2, sampleRate }));
+  if (plan.length > 0 && !withAudio) warnings.push(`no ${audioCodec} encoder for ${sampleRate} Hz stereo: the file has no sound`);
+  const pcm = withAudio ? new MediabunnyPcm(options.media) : null;
+  const audioSource = withAudio ? new AudioSampleSource({ codec: audioCodec, bitrate: options.audioBitrate ?? 128_000 }) : null;
+  if (audioSource) output.addAudioTrack(audioSource);
+  const mix = pcm ? mixPlan(plan, pcm, { sampleRate, from, to }) : null;
+  let mixedUntil = 0;
+  let audioDone = !mix;
+  const pumpAudio = async (until: number): Promise<void> => {
+    while (mix && audioSource && !audioDone && mixedUntil < until) {
+      const next = await mix.next();
+      if (next.done) { audioDone = true; return; }
+      const block: MixedBlock = next.value;
+      const planar = new Float32Array(block.left.length * 2);
+      planar.set(block.left, 0);
+      planar.set(block.right, block.left.length);
+      const sample = new AudioSample({ data: planar, format: "f32-planar", numberOfChannels: 2, sampleRate, timestamp: block.timestamp });
+      await audioSource.add(sample);
+      sample.close();
+      mixedUntil = block.timestamp + block.left.length / sampleRate;
+    }
+  };
+
   const started = performance.now();
   try {
     await output.start();
     for (let n = first; n < last; n++) {
       if (options.signal?.aborted) throw new Error("render aborted");
       const t = n / fps;
+      await pumpAudio((n - first + 1) / fps + 0.5);
       await compositor.step(t);
       if (errors.length > 0 && options.onAssetError !== "continue") {
         throw new Error(`cannot render: ${errors.map((e) => `${e.asset ?? e.id ?? "?"}: ${e.error.message}`).join("; ")}`);
@@ -94,6 +130,7 @@ export async function renderVideo(options: RenderOptions): Promise<RenderResult>
       sample.close();
       options.onProgress?.({ frame: n - first + 1, frames: total });
     }
+    await pumpAudio(Number.POSITIVE_INFINITY);
     await output.finalize();
   } catch (error) {
     await output.cancel().catch(() => undefined);
@@ -102,7 +139,8 @@ export async function renderVideo(options: RenderOptions): Promise<RenderResult>
     compositor.dispose();
     sources.dispose();
     inputs.dispose();
+    pcm?.dispose();
     captureWarnings(null);
   }
-  return { frames: total, fps, width, height, wallMs: performance.now() - started, warnings, errors };
+  return { frames: total, audio: withAudio, fps, width, height, wallMs: performance.now() - started, warnings, errors };
 }
