@@ -122,7 +122,7 @@ export async function feedSegment(
     const config = await track.getDecoderConfig();
     if (!config) throw new Error("a render worker produced a segment with no decoder configuration");
     const first = into.config.current;
-    if (first && !sameConfig(first, config)) throw new Error(`render workers encoded with different settings (${first.codec} against ${config.codec}); the pieces cannot be joined`);
+    if (first && !compatibleConfig(first, config)) throw new Error(`render workers encoded with different settings (${first.codec} against ${config.codec}); the pieces cannot be joined`);
     let end = 0;
     for await (const packet of new EncodedPacketSink(track).packets()) {
       const frame = Math.round(packet.timestamp * into.fps) + into.offsetFrames;
@@ -138,8 +138,18 @@ export async function feedSegment(
   }
 }
 
-function sameConfig(a: VideoDecoderConfig, b: VideoDecoderConfig): boolean {
-  if (a.codec !== b.codec || a.codedWidth !== b.codedWidth || a.codedHeight !== b.codedHeight) return false;
+/**
+ * Whether two decoder configurations describe streams one decoder can play through: the same codec, profile and
+ * bit depth and the same size. VP9 level strings differ between encoders and mean nothing to a decoder; an AVC
+ * or HEVC description (its parameter sets) must match byte for byte.
+ */
+export function compatibleConfig(a: VideoDecoderConfig, b: VideoDecoderConfig): boolean {
+  if (a.codedWidth !== b.codedWidth || a.codedHeight !== b.codedHeight) return false;
+  if (a.codec.startsWith("vp09") && b.codec.startsWith("vp09")) {
+    const [, pa, , da] = a.codec.split("."), [, pb, , db] = b.codec.split(".");
+    return pa === pb && da === db;
+  }
+  if (a.codec !== b.codec) return false;
   const da = a.description ? new Uint8Array(a.description as ArrayBuffer) : null;
   const db = b.description ? new Uint8Array(b.description as ArrayBuffer) : null;
   if (!da || !db) return da === db;

@@ -60,7 +60,7 @@ export class CanvasPainter {
   private blit(ctx: Ctx2D, op: DrawOp, frame: Frame | null, nested: AnyCanvas | null): void {
     const { w, h } = op.rect;
     if (nested) ctx.drawImage(nested, 0, 0, w, h);
-    else if (frame && !(covers(op, this.width, this.height) && frame.paintFull?.(ctx, this.width, this.height))) frame.draw(ctx, 0, 0, w, h, op.crop);
+    else if (frame && !(coversCanvas(op, this.width, this.height) && frame.paintFull?.(ctx, this.width, this.height))) frame.draw(ctx, 0, 0, w, h, op.crop);
   }
 
   /** Applies the border radius and mask as a clip in local coordinates. Returns true when a mask clip was set. */
@@ -137,7 +137,7 @@ function canvasOf(ctx: Ctx2D): AnyCanvas {
 }
 
 /** Whether a draw op puts its picture over the whole canvas as it is: no transform, crop, clip, fade, filter or blend. */
-function covers(op: DrawOp, width: number, height: number): boolean {
+export function coversCanvas(op: DrawOp, width: number, height: number): boolean {
   const m = op.matrix;
   return m.a === 1 && m.b === 0 && m.c === 0 && m.d === 1 && m.e === 0 && m.f === 0
     && op.rect.w === width && op.rect.h === height && !op.crop

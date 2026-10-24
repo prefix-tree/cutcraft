@@ -5,11 +5,12 @@ import { AudioSample, AudioSampleSource, EncodedVideoPacketSource, FilePathTarge
 import { encodeFrames } from "./encode";
 import { initEnv } from "./env";
 import { mixPlan, type MixedBlock } from "./mixer";
-import type { OverlayFont } from "./overlays";
+import { OverlayPlane, type OverlayFont } from "./overlays";
 import { MediabunnyPcm } from "./pcm";
-import { feedSegment, planSegments, SegmentPool, defaultWorkers, type ParallelOptions } from "./parallel";
+import { feedCopy, planCopy, type Run } from "./copy";
+import { feedSegment, planSegments, SegmentPool, defaultWorkers, type ParallelOptions, type SegmentOutcome } from "./parallel";
 import { FramePipeline } from "./pipeline";
-import { videoSource, type VideoCodec, type VideoEncoding } from "./segment";
+import { encodeSegment, videoSource, type VideoCodec, type VideoEncoding } from "./segment";
 
 export interface RenderOptions {
   readonly state: ResolvedState;
@@ -36,6 +37,11 @@ export interface RenderOptions {
    * the result is the same pictures, in pieces joined at keyframes.
    */
   readonly parallel?: ParallelOptions;
+  /**
+   * Copy the encoded pictures of whole groups of pictures from the source where a cut shows nothing but a stretch of
+   * one file (VP8 or VP9, at the composition's size and frame rate, no overlay or effect), and render only the ends.
+   */
+  readonly smartCopy?: boolean;
   /** Skip the soundtrack. */
   readonly silent?: boolean;
   /** Audio bits per second; default 128 kbit/s. */
@@ -56,6 +62,8 @@ export interface RenderResult {
   readonly wallMs: number;
   /** Threads that rendered: 1 when the frames were rendered in this one. */
   readonly workers: number;
+  /** Frames whose encoded pictures were copied from a source instead of rendered. */
+  readonly copiedFrames: number;
   /** How long the frame loop was held up by each stage, summed over frames (the encoder runs beside the loop, so `encode` is only the part it did not hide). */
   readonly stagesMs: { readonly composite: number; readonly overlays: number; readonly readback: number; readonly encode: number; readonly audio: number };
   readonly warnings: readonly string[];
@@ -81,14 +89,20 @@ export async function renderVideo(options: RenderOptions): Promise<RenderResult>
   const last = Math.ceil(to * fps - FRAME_EPS);
   const total = Math.max(0, last - first);
   if (total === 0) throw new Error("nothing to render: the range holds no frames");
-  // Workers only pay off with at least two runs of frames to share.
+  const gopFrames = Math.max(1, Math.round(encoding.keyFrameInterval * fps));
   const wanted = options.parallel ? Math.max(1, Math.floor(options.parallel.workers ?? defaultWorkers())) : 1;
-  const runs = options.parallel && wanted > 1 ? planSegments(first, last, Math.round(encoding.keyFrameInterval * fps), wanted, options.parallel.segmentFrames) : [];
-  const threads = runs.length > 1 ? Math.min(wanted, runs.length) : 1;
 
   const warnings: string[] = [];
   captureWarnings((m) => warnings.push(m));
   const errors: PlayerErrorEvent[] = [];
+  // Which frames are copied, which are rendered, and how the rendered ones are cut into runs for workers.
+  const sharedOverlays = options.smartCopy ? new OverlayPlane({ state, media: options.media, warn: (m) => warnings.push(m), ...(options.interiors ? { interiors: options.interiors } : {}), ...(options.fonts ? { fonts: options.fonts } : {}) }) : null;
+  const copyPlan = sharedOverlays ? await planCopy({ state, media: options.media, overlays: sharedOverlays, codec: encoding.codec, first, last }) : null;
+  const runs: readonly Run[] = copyPlan?.runs ?? [{ kind: "render", first, last }];
+  const pieces: Run[] = runs.flatMap((run) => (run.kind === "copy" || wanted === 1 ? [run] : planSegments(run.first, run.last, gopFrames, wanted, options.parallel?.segmentFrames).map((r): Run => ({ kind: "render", ...r }))));
+  const renderPieces = pieces.filter((p) => p.kind === "render").length;
+  const threads = options.parallel && wanted > 1 && renderPieces > 1 ? Math.min(wanted, renderPieces) : 1;
+  const joined = (copyPlan?.copied ?? 0) > 0 || threads > 1;
   const output = new Output({ format: container === "mp4" ? new Mp4OutputFormat() : new WebMOutputFormat(), target: new FilePathTarget(options.out) });
 
   // Audio: the player's own plan, mixed by us and handed to the encoder block by block, a little ahead of the picture.
@@ -127,28 +141,42 @@ export async function renderVideo(options: RenderOptions): Promise<RenderResult>
   let pool: SegmentPool | null = null;
   let pipeline: FramePipeline | null = null;
   try {
-    if (options.parallel && threads > 1) {
-      // Workers render and encode runs of frames; this thread joins them in order and mixes the sound.
+    if (joined) {
+      // Pieces joined in order: runs a worker (or this thread) renders and encodes, and runs copied from the source.
+      // This thread writes them to the file and mixes the sound.
       const source = new EncodedVideoPacketSource(encoding.codec);
       output.addVideoTrack(source, { frameRate: fps });
       if (audioSource) output.addAudioTrack(audioSource);
       await output.start();
       const par = options.parallel;
-      pool = new SegmentPool(threads, {
-        file: par.file, load: par.load ?? {}, mediaDir: par.mediaDir, overrides: par.overrides ?? {}, fonts: options.fonts ?? [], encoding, onAssetError: options.onAssetError ?? "throw",
+      if (par && threads > 1) {
+        pool = new SegmentPool(threads, {
+          file: par.file, load: par.load ?? {}, mediaDir: par.mediaDir, overrides: par.overrides ?? {}, fonts: options.fonts ?? [], encoding, onAssetError: options.onAssetError ?? "throw",
+        });
+      }
+      // Pooled pieces start at once and finish in any order; in-process ones start when their turn comes.
+      const work = pieces.map((piece): (() => Promise<SegmentOutcome>) | null => {
+        if (piece.kind === "copy") return null;
+        if (pool) { const started = pool.run(piece.first, piece.last); started.catch(() => undefined); return () => started; }
+        return async () => {
+          const r = await encodeSegment({ state, media: options.media, interiors: options.interiors, fonts: options.fonts, overlays: sharedOverlays ?? undefined, onAssetError: options.onAssetError, encoding, first: piece.first, last: piece.last });
+          return { bytes: r.bytes, stages: r.stages, warnings: r.warnings, errors: r.errors.map((e) => `${e.asset ?? e.id ?? "?"}: ${e.error.message}`) };
+        };
       });
-      const results = runs.map((r) => pool!.run(r.first, r.last));
-      results.forEach((r) => r.catch(() => undefined));
       const config = { current: null as VideoDecoderConfig | null };
       let done = 0;
-      for (const [i, run] of runs.entries()) {
+      for (const [i, piece] of pieces.entries()) {
         if (options.signal?.aborted) throw new Error("render aborted");
-        const outcome = await timed("encode", () => results[i] as Promise<Awaited<(typeof results)[number]>>);
-        if (outcome.errors.length > 0 && options.onAssetError !== "continue") throw new Error(`cannot render: ${outcome.errors.join("; ")}`);
-        for (const w of outcome.warnings) if (!warnings.includes(w)) warnings.push(w);
-        for (const k of ["composite", "overlays", "readback"] as const) stages[k] += outcome.stages[k];
-        await feedSegment(outcome, { source, codec: encoding.codec, fps, offsetFrames: run.first - first, config }, ahead);
-        done += run.last - run.first;
+        if (piece.kind === "copy") {
+          await feedCopy(piece, { source, fps, originFrame: first, config }, ahead);
+        } else {
+          const outcome = await timed("encode", () => (work[i] as () => Promise<SegmentOutcome>)());
+          if (outcome.errors.length > 0 && options.onAssetError !== "continue") throw new Error(`cannot render: ${outcome.errors.join("; ")}`);
+          for (const w of outcome.warnings) if (!warnings.includes(w)) warnings.push(w);
+          for (const k of ["composite", "overlays", "readback"] as const) stages[k] += outcome.stages[k];
+          await feedSegment(outcome, { source, codec: encoding.codec, fps, offsetFrames: piece.first - first, config }, ahead);
+        }
+        done += piece.last - piece.first;
         options.onProgress?.({ frame: done, frames: total });
       }
       await timed("audio", () => pumpAudio(Number.POSITIVE_INFINITY));
@@ -175,10 +203,11 @@ export async function renderVideo(options: RenderOptions): Promise<RenderResult>
   } finally {
     await pool?.terminate();
     pipeline?.dispose();
+    sharedOverlays?.dispose();
     pcm?.dispose();
     captureWarnings(null);
   }
-  return { frames: total, audio: withAudio, fps, width, height, wallMs: performance.now() - started, workers: pool ? threads : 1, stagesMs: stages, warnings, errors };
+  return { frames: total, audio: withAudio, fps, width, height, wallMs: performance.now() - started, workers: pool ? threads : 1, copiedFrames: copyPlan?.copied ?? 0, stagesMs: stages, warnings, errors };
 }
 
 export type { VideoCodec };

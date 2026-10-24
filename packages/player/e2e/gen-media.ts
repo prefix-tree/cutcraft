@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdirSync } from "node:fs";
+import { existsSync, mkdirSync, renameSync, rmSync } from "node:fs";
 import { join } from "node:path";
 
 /**
@@ -22,7 +22,15 @@ export default function generate(): void {
   const run = (name: string, args: string[]): void => {
     const out = join(mediaDir, name);
     if (existsSync(out)) return;
-    execFileSync("ffmpeg", ["-hide_banner", "-loglevel", "error", "-y", ...args, out], { stdio: "inherit" });
+    // Written under another name and renamed when complete: test files run in parallel, and one that finds the file
+    // must never find half of it.
+    const partial = join(mediaDir, `.${process.pid}-${name}`);
+    try {
+      execFileSync("ffmpeg", ["-hide_banner", "-loglevel", "error", "-y", ...args, partial], { stdio: "inherit" });
+      renameSync(partial, out);
+    } finally {
+      rmSync(partial, { force: true });
+    }
   };
   run("bars.webm", [
     "-f", "lavfi", "-i", "testsrc2=size=640x360:rate=30:duration=10",

@@ -19,6 +19,8 @@ const USAGE = `Usage: cutcut-render <file.tsx> --out <video.webm|video.mp4> [opt
   --bitrate <bps>       video bits per second (default: about 0.1 per pixel per frame)
   --speed <fast>        the encoder's real-time mode: faster, larger files at the same quality
   --workers <n>         render in n threads (default: one fewer than the cores, at most 4; 1 renders in this one)
+  --copy                copy encoded pictures from the source where a cut shows nothing else (VP8/VP9 at the composition's
+                        size and rate), and render only the ends; fast for plain cuts
   --keyframe <seconds>  seconds between keyframes (default 2)
   --silent              no soundtrack
   --font <spec>         extra font for titles: Name=file.ttf, Name:700=file.ttf or Name:700:italic=file.ttf
@@ -34,7 +36,7 @@ async function main(): Promise<number> {
       out: { type: "string" }, workers: { type: "string" }, speed: { type: "string" }, keyframe: { type: "string" }, manifest: { type: "string" }, media: { type: "string" }, props: { type: "string" },
       from: { type: "string" }, to: { type: "string" }, codec: { type: "string" }, bitrate: { type: "string" },
       silent: { type: "boolean" }, font: { type: "string", multiple: true }, tsconfig: { type: "string" },
-      continue: { type: "boolean" }, quiet: { type: "boolean" }, help: { type: "boolean", short: "h" },
+      continue: { type: "boolean" }, copy: { type: "boolean" }, quiet: { type: "boolean" }, help: { type: "boolean", short: "h" },
     },
   });
   const [file] = positionals;
@@ -62,6 +64,7 @@ async function main(): Promise<number> {
     ...(values.bitrate ? { bitrate: Number(values.bitrate) } : {}),
     ...(values.silent ? { silent: true } : {}),
     ...(values.speed === "fast" ? { speed: "fast" as const } : {}),
+    ...(values.copy ? { smartCopy: true } : {}),
     ...(values.keyframe ? { keyFrameInterval: Number(values.keyframe) } : {}),
     ...(workers > 1 ? { parallel: { file: resolve(file), load: loadOptions, mediaDir: resolve(values.media ?? dirname(file)), workers } } : {}),
     ...(values.continue ? { onAssetError: "continue" as const } : {}),
@@ -71,7 +74,7 @@ async function main(): Promise<number> {
   if (tty) process.stderr.write("\n");
   for (const w of result.warnings) process.stderr.write(`warning: ${w}\n`);
   const seconds = (result.wallMs / 1000).toFixed(1);
-  process.stderr.write(`${values.out}: ${result.frames} frames, ${result.width}x${result.height} at ${result.fps} fps${result.audio ? ", with sound" : ""}, in ${seconds}s${result.workers > 1 ? ` on ${result.workers} threads` : ""} (${(result.frames / (result.wallMs / 1000)).toFixed(1)} fps)\n`);
+  process.stderr.write(`${values.out}: ${result.frames} frames, ${result.width}x${result.height} at ${result.fps} fps${result.audio ? ", with sound" : ""}, in ${seconds}s${result.workers > 1 ? ` on ${result.workers} threads` : ""}${result.copiedFrames > 0 ? `, ${result.copiedFrames} frames copied` : ""} (${(result.frames / (result.wallMs / 1000)).toFixed(1)} fps)\n`);
   return 0;
 }
 

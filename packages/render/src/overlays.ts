@@ -1,7 +1,7 @@
 import { createRequire } from "node:module";
 import type { ResolvedState } from "@cutcut/kit";
 import { installLayerClock } from "@cutcut/kit";
-import { visiblePlacements, type MediaResolver, type VisibleItem } from "@cutcut/player/engine";
+import { isVisibleAt, visiblePlacements, type MediaResolver, type VisibleItem } from "@cutcut/player/engine";
 import {
   OVERLAY_KINDS, captionsContent, layerClock, layerContent, overlayLayout, shapeContent, shapeSize, stickerPlaceholder, stickerSize, titleContent,
   type ElementProps, type OverlayLayout,
@@ -32,6 +32,10 @@ export interface OverlayOptions {
 }
 
 const IMAGE_CACHE = 64;
+const LAYOUT_CACHE = 32;
+
+/** How much layout work the plane did: Satori runs against pictures reused from earlier frames. */
+export interface OverlayStats { layouts: number; reused: number }
 
 /**
  * The overlay plane in Node: titles, layers and captions are laid out by
@@ -46,16 +50,22 @@ export class OverlayPlane {
   private readonly images = new Map<string, Image>();
   private readonly assets = new Map<string, Promise<Image | null>>();
   private readonly warned = new Set<string>();
+  private readonly laidOut = new Map<string, Image>();
+  /** Layer interiors that never read the clock: one picture serves every frame. */
+  private readonly steady = new Set<string>();
+  private clockRead = false;
+  readonly stats: OverlayStats = { layouts: 0, reused: 0 };
 
   constructor(private readonly options: OverlayOptions) {
     this.fonts = [...bundledFonts(), ...(options.fonts ?? [])].map((f) => ({ name: f.name, data: f.data, weight: f.weight ?? 400, style: f.style ?? "normal" }));
     this.families = new Set(this.fonts.map((f) => f.name));
   }
 
-  /** Whether anything but footage shows at `t`. */
+  /** Whether anything but footage shows at `t`: an overlay element, or a caption line. */
   hasOverlays(t: number): boolean {
     const { state } = this.options;
-    return visiblePlacements(state, t).some((v) => OVERLAY_KINDS.has(v.placement.kind)) || [...state.items.values()].some((p) => p.kind === "captions");
+    if (visiblePlacements(state, t).some((v) => OVERLAY_KINDS.has(v.placement.kind))) return true;
+    return [...state.items.values()].some((p) => p.kind === "caption" && isVisibleAt(p, t, state.composition.duration));
   }
 
   /** Draws every overlay visible at `t` onto `ctx`, tracks in order, captions last. */
@@ -77,6 +87,7 @@ export class OverlayPlane {
 
   dispose(): void {
     this.images.clear();
+    this.laidOut.clear();
     this.assets.clear();
     installLayerClock(null);
   }
@@ -114,11 +125,19 @@ export class OverlayPlane {
       case "layer": {
         const layout = overlayLayout(props, full);
         const clock = layerClock(placement, t, comp.fps);
-        installLayerClock(() => clock);
         const interior = this.options.interiors?.get(placement.id);
         if (interior === undefined) { this.warnOnce(`interior:${placement.id}`, `layer "${placement.id}" has no interior (pass interiors from indexLayerInteriors); it is left out`); return; }
-        const tree = layerContent(interior, placement.interior?.props);
-        this.place(ctx, layout, await this.layoutImage(tree, layout.rect.w, layout.rect.h));
+        // An interior that never asked for the time looks the same on every frame: lay it out once.
+        const key = `layer|${placement.id}|${JSON.stringify(placement.interior?.props ?? null)}|${layout.rect.w}x${layout.rect.h}`;
+        let image = this.steady.has(key) ? this.laidOut.get(key) : undefined;
+        if (image) this.stats.reused++;
+        else {
+          this.clockRead = false;
+          installLayerClock(() => { this.clockRead = true; return clock; });
+          image = await this.layoutImage(layerContent(interior, placement.interior?.props), layout.rect.w, layout.rect.h);
+          if (!this.clockRead) { this.steady.add(key); this.remember(key, image); }
+        }
+        this.place(ctx, layout, image);
         return;
       }
       case "shape": {
@@ -179,11 +198,28 @@ export class OverlayPlane {
     ctx.restore();
   }
 
-  /** Satori: a React tree laid out in a `width`×`height` box, as an image. */
+  /** Satori: a React tree laid out in a `width`×`height` box, as an image. Trees of plain elements are remembered by content. */
   private async layoutImage(tree: ReactNode, width: number, height: number): Promise<Image> {
+    const content = treeKey(tree);
+    const key = content === null ? null : `${width}x${height}|${content}`;
+    const hit = key === null ? undefined : this.laidOut.get(key);
+    if (hit && key !== null) {
+      this.laidOut.delete(key);
+      this.laidOut.set(key, hit);
+      this.stats.reused++;
+      return hit;
+    }
     const root = createElement("div", { style: { display: "flex", position: "relative", width, height } }, tree);
     const svg = await satori(root as ReactElement, { width, height, fonts: this.fonts });
-    return this.vectorImage(svg);
+    this.stats.layouts++;
+    const image = await this.vectorImage(svg);
+    if (key !== null) this.remember(key, image);
+    return image;
+  }
+
+  private remember(key: string, image: Image): void {
+    this.laidOut.set(key, image);
+    if (this.laidOut.size > LAYOUT_CACHE) this.laidOut.delete(this.laidOut.keys().next().value as string);
   }
 
   /** An SVG document as an image, cached by its text. */
@@ -231,6 +267,33 @@ function containRect(image: Image, w: number, h: number, upscale = false): Box {
   const k = Math.min(w / iw, h / ih, upscale ? Infinity : 1);
   const dw = iw * k, dh = ih * k;
   return { x: (w - dw) / 2, y: (h - dh) / 2, w: dw, h: dh };
+}
+
+/**
+ * A string that is the same for two trees that Satori would lay out the same: plain elements, their props and
+ * their text. Null for anything else (a component, whose output depends on more than its props).
+ */
+export function treeKey(node: ReactNode): string | null {
+  const out: string[] = [];
+  const walk = (n: unknown): boolean => {
+    if (n === null || n === undefined || typeof n === "boolean") { out.push("_"); return true; }
+    if (typeof n === "string" || typeof n === "number") { out.push(JSON.stringify(n)); return true; }
+    if (Array.isArray(n)) {
+      out.push("[");
+      for (const child of n) if (!walk(child)) return false;
+      out.push("]");
+      return true;
+    }
+    if (!isValidElement(n) || typeof n.type !== "string") return false;
+    const props = n.props as Record<string, unknown>;
+    out.push(`<${n.type}`);
+    for (const k of Object.keys(props).sort()) if (k !== "children") out.push(`${k}=${JSON.stringify(props[k])}`);
+    out.push(">");
+    if (!walk(props.children)) return false;
+    out.push("</>");
+    return true;
+  };
+  return walk(node) ? out.join("") : null;
 }
 
 /** How far a shape's stroke reaches past its box. */

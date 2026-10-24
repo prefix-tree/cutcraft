@@ -1,10 +1,10 @@
-import { createElement as h } from "react";
+import { createElement as h, type ReactElement } from "react";
 import type { Canvas, CanvasRenderingContext2D } from "skia-canvas";
-import { Caption, Captions, Composition, Shape, Sticker, Svg, Title, Track, collect, resolve } from "@cutcut/kit";
+import { Caption, Captions, Composition, Layer, Shape, Sticker, Svg, Title, Track, collect, resolve, useT } from "@cutcut/kit";
 import { indexLayerInteriors } from "@cutcut/player/overlays";
 import generateMedia, { mediaDir } from "../../player/e2e/gen-media";
 import { manifest } from "../../player/e2e/app/composition";
-import { OverlayPlane, createCanvas, directoryResolver, toSvg } from "../src";
+import { OverlayPlane, createCanvas, directoryResolver, toSvg, treeKey } from "../src";
 
 type Rgb = readonly [number, number, number];
 
@@ -114,5 +114,63 @@ describe("toSvg", () => {
   it("writes a standalone document with room around the shape", () => {
     const svg = toSvg(h("svg", { width: 10, height: 20, viewBox: "0 0 10 20", style: { display: "block" } }, h("rect", { x: 0, y: 0, width: 10, height: 20, fillOpacity: 0.5, fill: "#fff" })), 3);
     expect(svg).toBe('<svg xmlns="http://www.w3.org/2000/svg" width="16" height="26" viewBox="-3 -3 16 26"><rect x="0" y="0" width="10" height="20" fill-opacity="0.5" fill="#fff"/></svg>');
+  });
+});
+
+describe("layout reuse", () => {
+  function Steady() { return h("div", { style: { position: "absolute", left: 20, top: 20, color: "#ffffff", fontSize: 40 } }, "same every frame"); }
+  function Ticking() { const t = useT(); return h("div", { style: { position: "absolute", left: 20, top: 20, color: "#ffffff", fontSize: 40 } }, String(Math.round(t * 100))); }
+
+  function planeFor(...children: ReactElement[]) {
+    const el = h(Composition, { fps: 30, width: 640, height: 360 }, h(Track, { id: "a", layout: "free" }, ...children));
+    const st = resolve(collect(el), manifest);
+    return new OverlayPlane({ state: st, media: directoryResolver(mediaDir, manifest), interiors: indexLayerInteriors(el), warn: () => undefined });
+  }
+
+  async function frames(plane: OverlayPlane, times: number[]): Promise<void> {
+    const c = createCanvas(640, 360) as unknown as Canvas;
+    const context = c.getContext("2d") as CanvasRenderingContext2D;
+    for (const t of times) { context.clearRect(0, 0, 640, 360); await plane.draw(context, t); }
+  }
+
+  it("lays a still title out once, however many frames show it", async () => {
+    const plane = planeFor(h(Title, { id: "e", start: 0, duration: 4, size: 50 }, "Still"));
+    await frames(plane, [0.1, 0.5, 1, 2, 3]);
+    expect(plane.stats).toEqual({ layouts: 1, reused: 4 });
+    // A picture from the cache is the picture a fresh layout would give.
+    const cached = createCanvas(640, 360) as unknown as Canvas, fresh = createCanvas(640, 360) as unknown as Canvas;
+    await plane.draw(cached.getContext("2d") as CanvasRenderingContext2D, 2.5);
+    const other = planeFor(h(Title, { id: "e", start: 0, duration: 4, size: 50 }, "Still"));
+    await other.draw(fresh.getContext("2d") as CanvasRenderingContext2D, 2.5);
+    expect(Buffer.from((cached.getContext("2d") as CanvasRenderingContext2D).getImageData(0, 0, 640, 360).data).equals(Buffer.from((fresh.getContext("2d") as CanvasRenderingContext2D).getImageData(0, 0, 640, 360).data))).toBe(true);
+    plane.dispose();
+    other.dispose();
+  });
+
+  it("lays an animated title out again only while it animates", async () => {
+    const plane = planeFor(h(Title, { id: "e", start: 0, duration: 4, size: 50, animation: { preset: "fade", in: 0.5, out: 0.5 } }, "Fading"));
+    await frames(plane, [0.1, 0.3, 1, 2, 3]);
+    expect(plane.stats.layouts).toBe(3);
+    expect(plane.stats.reused).toBe(2);
+    plane.dispose();
+  });
+
+  it("lays out a layer that reads the clock on every frame, and one that does not only once", async () => {
+    const ticking = planeFor(h(Layer, { id: "e", start: 0, duration: 4 }, h(Ticking)));
+    await frames(ticking, [0.5, 1, 1.5]);
+    expect(ticking.stats).toEqual({ layouts: 3, reused: 0 });
+    ticking.dispose();
+    const steady = planeFor(h(Layer, { id: "e", start: 0, duration: 4 }, h(Steady)));
+    await frames(steady, [0.5, 1, 1.5, 2]);
+    expect(steady.stats).toEqual({ layouts: 1, reused: 3 });
+    steady.dispose();
+  });
+
+  it("reuses a picture only for the same content", () => {
+    const tree = (text: string) => h("div", { style: { color: "#fff", fontSize: 20 } }, text);
+    expect(treeKey(tree("a"))).toBe(treeKey(tree("a")));
+    expect(treeKey(tree("a"))).not.toBe(treeKey(tree("b")));
+    expect(treeKey(h("div", { style: { color: "#fff" } }, "a"))).not.toBe(treeKey(h("div", { style: { color: "#000" } }, "a")));
+    expect(treeKey(h(Steady))).toBeNull();
   });
 });
