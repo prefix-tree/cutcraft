@@ -9,6 +9,7 @@ import { directoryResolver, renderVideo } from "../src";
 import { checkExactFrames } from "./helpers/exact";
 import { decodeAudio, decodeFrames, type DecodedFrame, decodesClean, pixel, probe, readStrip, rmsOf, tonePower } from "./helpers/output";
 
+const CRISP = 4_000_000;
 const state = resolve(collectModule(file), file.manifest);
 const media = directoryResolver(mediaDir, file.manifest);
 let dir = "";
@@ -23,7 +24,8 @@ describe("renderVideo", () => {
   it("renders the e2e composition frame-exactly to WebM", async () => {
     const out = join(dir, "exact.webm");
     const progress: number[] = [];
-    const result = await renderVideo({ state, media, out, onProgress: (p) => progress.push(p.frame) });
+    // The strip is read back bit by bit, so the picture is encoded generously: this test is about which frame is chosen, not compression.
+    const result = await renderVideo({ state, media, out, bitrate: CRISP, onProgress: (p) => progress.push(p.frame) });
     expect(result).toMatchObject({ frames: 210, fps: 30, width: 640, height: 360, audio: true });
     expect(result.errors).toEqual([]);
     expect(progress.at(-1)).toBe(210);

@@ -45,7 +45,7 @@ afterAll(() => rmSync(scratch, { recursive: true, force: true }));
 async function render(out: string, workers: number, extra: Record<string, unknown> = {}) {
   const loaded = await loadVideo(file);
   return renderVideo({
-    state: loaded.state, media: directoryResolver(mediaDir, loaded.manifest), interiors: loaded.interiors, out, keyFrameInterval: 1,
+    state: loaded.state, media: directoryResolver(mediaDir, loaded.manifest), interiors: loaded.interiors, out, keyFrameInterval: 1, bitrate: 4_000_000,
     ...(workers > 1 ? { parallel: { file, mediaDir, workers, segmentFrames: 30 } } : {}),
     ...extra,
   });

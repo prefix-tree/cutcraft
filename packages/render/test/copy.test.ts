@@ -29,7 +29,7 @@ async function render(body: string, extra: Record<string, unknown> = {}, comp?: 
   writeFileSync(file, source(body, comp));
   const loaded = await loadVideo(file);
   const out = join(dir, `out${n}.webm`);
-  const result = await renderVideo({ state: loaded.state, media: directoryResolver(mediaDir, loaded.manifest), interiors: loaded.interiors, out, keyFrameInterval: 1, silent: true, ...extra });
+  const result = await renderVideo({ state: loaded.state, media: directoryResolver(mediaDir, loaded.manifest), interiors: loaded.interiors, out, keyFrameInterval: 1, bitrate: 4_000_000, silent: true, ...extra });
   return { result, out };
 }
 
@@ -119,7 +119,7 @@ describe("smart copy", () => {
     writeFileSync(file, source('<Track id="main"><Clip id="a" src="asset:bars" in={1} out={3} /><Clip id="b" src="asset:bars" in={5.5} out={8} /></Track><Track id="o"><Title id="t" anchor="b" offset={0.5} duration={1} size={30}>Hi</Title></Track>'));
     const loaded = await loadVideo(file);
     const out = join(dir, "par-copy.webm");
-    const result = await renderVideo({ state: loaded.state, media: directoryResolver(mediaDir, loaded.manifest), interiors: loaded.interiors, out, keyFrameInterval: 1, silent: true, smartCopy: true, parallel: { file, mediaDir, workers: 2, segmentFrames: 30 } });
+    const result = await renderVideo({ state: loaded.state, media: directoryResolver(mediaDir, loaded.manifest), interiors: loaded.interiors, out, keyFrameInterval: 1, bitrate: 4_000_000, silent: true, smartCopy: true, parallel: { file, mediaDir, workers: 2, segmentFrames: 30 } });
     expect(result.copiedFrames).toBeGreaterThan(0);
     expect(await strips(out)).toEqual([...Array.from({ length: 60 }, (_, k) => 30 + k), ...Array.from({ length: 75 }, (_, k) => 165 + k)]);
     decodesClean(out);
