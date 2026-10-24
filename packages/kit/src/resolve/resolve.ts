@@ -172,6 +172,7 @@ function compute(original: CollectedTree, manifest: AssetManifest, log: PatchLog
   for (const p of pending.values()) {
     if (p.durationDep?.kind === "fill" && p.start !== undefined) {
       p.duration = Math.max(0, compositionEnd - p.start);
+      if (p.source) p.source = { ...p.source, out: p.source.in + p.duration * p.source.speed };
       delete p.durationDep;
     }
   }

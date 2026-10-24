@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { createElement } from "react";
 import { describe, expect, it } from "vitest";
-import { Clip, Composition, Gap, Title, Track, Transition, collect, resolve, resolveScene, type SceneFn } from "@cutcut/kit";
+import { Audio, Clip, Composition, Gap, Title, Track, Transition, collect, resolve, resolveScene, type SceneFn } from "@cutcut/kit";
 import { lint } from "@cutcut/kit/source";
 import { fixtureText, fixtureTree, fixturesDir, manifest, serialize, round } from "./helpers";
 
@@ -48,6 +48,16 @@ describe("resolve", () => {
     expect(state.items.get("c1")?.source).toMatchObject({ in: 2, out: 3.5 });
     expect(round(state.items.get("t")?.start ?? 0)).toBe(0.5);
     expect(round(state.items.get("t")?.end ?? 0)).toBe(1.5);
+  });
+
+  it("gives a filling audio placement the source range it plays", () => {
+    const el = h(Composition, { fps: 30, width: 1920, height: 1080 },
+      h(Track, { id: "t1" }, h(Clip, { id: "c1", src: "asset:city", in: 0, out: 4 })),
+      h(Track, { id: "t2", layout: "free" }, h(Audio, { id: "a", src: "asset:bed", start: 0, in: 2, duration: "fill", speed: 2 })),
+    );
+    const state = resolve(collect(el), manifest);
+    expect(state.errors).toEqual([]);
+    expect(state.items.get("a")).toMatchObject({ start: 0, end: 4, source: { in: 2, out: 10, speed: 2 } });
   });
 
   it("reports typed errors instead of throwing", () => {
