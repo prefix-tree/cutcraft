@@ -5,7 +5,8 @@
 **The file is the video.** A model writes a TSX file. The browser renders it.
 The editor's timeline, inspector and preview edit that same file. There is no
 project document beside it, no tool catalog for the model, and no second
-renderer for export.
+renderer for export: the file is exported to WebM or MP4 by the same engine,
+headless, in Node.
 
 ```tsx
 export const schema = z.object({ product: z.string(), accent: z.string() });
@@ -84,7 +85,8 @@ choice in it, and `pnpm docs:dev` serves the full site.
 | package | what | docs |
 |---|---|---|
 | `packages/kit` | vocabulary, manifest and time references, resolver, patches and actions, source tools, lint. No DOM. | [README](packages/kit/README.md), [spec](packages/kit/docs/spec.md) |
-| `packages/player` | the browser renderer and the React `<Player>` | [README](packages/player/README.md) |
+| `packages/player` | the browser renderer and the React `<Player>`; `./engine` and `./overlays`, the parts a Node renderer shares | [README](packages/player/README.md) |
+| `packages/render` | export: a file to WebM or MP4 in Node, with offline audio mixing, parallel workers and smart copy | [README](packages/render/README.md), [guide](docs/guide/exporting.md) |
 | `examples/launch-recap` | the worked example: brief, prompt, manifest, file, runnable page | [README](examples/launch-recap/README.md) |
 | `recipes` | seven complete cut files for the videos cutcut is made for, each linted, resolved and tested | [docs](docs/recipes/index.md) |
 | `docs` | guides, generated reference, decision records (VitePress) | `pnpm docs:dev` |
@@ -93,9 +95,9 @@ choice in it, and `pnpm docs:dev` serves the full site.
 
 | | |
 |---|---|
-| Works | resolve, every action with undo, fold and bake, lint; playback with seek, rate, loop, crossfades, keyframed transforms, masks, DOM overlays, captions, ducking; the example end to end |
+| Works | resolve, every action with undo, fold and bake, lint; playback with seek, rate, loop, crossfades, keyframed transforms, masks, DOM overlays, captions, ducking; the example end to end; export to WebM and MP4 in Node (`cutcut-render`) with frame-exact pictures, our own audio mix, workers and smart copy for cuts |
 | Partial | transition types other than crossfade draw as crossfade; effects without a CSS filter equivalent, LUTs, matte masks, audio effects and reversed audio warn and are skipped |
-| Planned | the editor package (timeline, inspector, preview gestures over the action set); headless export driving the same player; the agent-facing skill and a `cut lint` CLI; npm publishing |
+| Planned | the editor package (timeline, inspector, preview gestures over the action set); the agent-facing skill and a `cut lint` CLI; npm publishing |
 
 ## Contributing
 

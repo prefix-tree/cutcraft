@@ -67,6 +67,10 @@ async function main(): Promise<void> {
   for (const c of cases) {
     if (values.only && !c.name.includes(values.only)) continue;
     c.prepare?.();
+    if (!existsSync(c.media)) {
+      console.log(`skipped "${c.name}": ${c.media} does not exist (the example's media is made by its \`gen\` script)`);
+      continue;
+    }
     const loaded = await loadVideo(c.file, { manifest: c.manifest });
     const cpu0 = process.cpuUsage();
     const workers = Number(values.workers ?? 1);

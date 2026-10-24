@@ -59,3 +59,24 @@ jobs:
       - run: pnpm docs:gen
       - run: git diff --exit-code -- docs
       - run: pnpm docs:build
+
+  # Not a gate: records how fast the export is on a CI machine, for comparison over time.
+  bench:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - run: pnpm --filter @cutcut/render bench --json bench-results.json | tee bench.md
+      - uses: actions/upload-artifact@v4
+        with:
+          name: render-bench
+          path: |
+            packages/render/bench-results.json
+            bench.md

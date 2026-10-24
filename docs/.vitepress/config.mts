@@ -24,6 +24,7 @@ export default defineConfig({
           { text: "Writing a file", link: "/guide/writing-files" },
           { text: "Editing", link: "/guide/editing" },
           { text: "Rendering", link: "/guide/rendering" },
+          { text: "Exporting", link: "/guide/exporting" },
         ] },
       ],
       "/reference/": [
@@ -51,6 +52,7 @@ export default defineConfig({
           { text: "0012 What we adopt from Diffusion Studio", link: "/decisions/0012-what-we-adopt-from-diffusion-studio" },
           { text: "0013 Remotion and Layer handles", link: "/decisions/0013-remotion-has-an-editor-and-layer-handles" },
           { text: "0014 Captions follow the clips", link: "/decisions/0014-captions-follow-the-clips" },
+          { text: "0015 A headless engine exports", link: "/decisions/0015-a-headless-engine-renders-the-export" },
         ] },
       ],
       "/recipes/": [

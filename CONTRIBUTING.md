@@ -8,6 +8,10 @@ focused pull request with a test.
 - Node 22 (`.nvmrc`), pnpm 10 (`corepack enable` picks the pinned version).
 - `pnpm install`, then `pnpm check` runs typecheck, lint and the test suites of
   every package. CI runs the same command.
+- The export (`packages/render`) loads native binaries (`skia-canvas`, `node-av` with
+  its FFmpeg) with the install; its tests make their media with the system `ffmpeg`
+  (`sudo apt-get install ffmpeg`). `pnpm --filter @cutcut/render test:browser` also
+  needs Playwright's Chromium, and `bench` measures frames per second.
 - Browser tests: `pnpm --filter @cutcut/player test:e2e` needs `ffmpeg` on the
   path and Playwright's Chromium (`pnpm exec playwright install --with-deps chromium`
   from `packages/player`). They generate their media on first run.

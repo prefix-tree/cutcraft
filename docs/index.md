@@ -20,7 +20,7 @@ features:
   - title: A vocabulary the editor can address
     details: 26 elements with Zod schemas, literal ids on everything, magnetic sequence tracks, anchors, and time references that trim by transcript words and shots.
   - title: The browser renders
-    details: WebCodecs through mediabunny, one canvas for footage, DOM for overlays, Web Audio as the clock. seekTo(t) draws the exact frame, so export is the same player, headless.
+    details: WebCodecs through mediabunny, one canvas for footage, DOM for overlays, Web Audio as the clock. seekTo(t) draws the exact frame. Export runs the same engine headless in Node and mixes the sound offline.
 ---
 
 ## The pipeline

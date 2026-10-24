@@ -1,6 +1,8 @@
 # 0007. The browser is the renderer
 
 > Corrected in part by [0013](./0013-remotion-has-an-editor-and-layer-handles.md): Remotion has an editor and a browser renderer now.
+>
+> Superseded in part by [0015](./0015-a-headless-engine-renders-the-export.md): the preview is still the browser's, but export runs a headless engine in Node, not a browser.
 
 ## Context
 

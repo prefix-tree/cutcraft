@@ -5,8 +5,10 @@
 The browser player for cut files. It takes a `ResolvedState` from `@cutcut/kit`
 and plays it: footage decoded with WebCodecs through mediabunny and composited
 on one canvas, overlays rendered as React DOM above it, sound mixed and
-clocked by Web Audio. The editor's preview, the model's filmstrip and the
-later headless export all drive the same `PlayerCore`.
+clocked by Web Audio. The editor's preview and the model's filmstrip drive the
+same `PlayerCore`; the export (`@cutcut/render`) runs the same engine in Node
+through `@cutcut/player/engine` and `@cutcut/player/overlays`, which have no
+React layer, DOM or Web Audio in them.
 
 ```tsx
 import { collectModule, resolve } from "@cutcut/kit";
@@ -52,7 +54,8 @@ const state = resolve(collectModule(file), manifest);
   root carries `data-time` and `data-frame`; the canvas is
   `[data-el="composition"]`.
 - **Determinism.** `seekTo(t)` and `renderFrame(t)` draw the exact frame for
-  `t`, paused or playing, so an exporter can step through frames.
+  `t`, paused or playing. The exporter steps through frames with
+  `Compositor.step(t)`, which keeps every decoder streaming.
 - **Looking at the result.** `captureSheet(times, { columns })` returns a
   labelled contact sheet of those frames, the way an agent or a test checks
   a cut without exporting.

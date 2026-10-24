@@ -20,3 +20,4 @@ new record that supersedes the old one.
 | [0012](./0012-what-we-adopt-from-diffusion-studio.md) | What we adopt from Diffusion Studio |
 | [0013](./0013-remotion-has-an-editor-and-layer-handles.md) | Remotion has an editor now; a Layer's component gets handles |
 | [0014](./0014-captions-follow-the-clips.md) | Captions follow the clips |
+| [0015](./0015-a-headless-engine-renders-the-export.md) | A headless engine renders the export |

@@ -51,6 +51,12 @@ Every DOM element carries `data-el` and `data-kind`; the root carries
 `data-time` and `data-frame`; the canvas is `[data-el="composition"]`. An editor
 can select, highlight and drag preview elements by the same ids the file uses.
 
+## Export
+
+The export runs this pipeline in Node: the same plan, painter, compositor and
+audio plan, with a skia canvas for the browser's, [Satori](https://github.com/vercel/satori)
+for the DOM and an offline mixer for Web Audio. See [Exporting](/guide/exporting).
+
 ## What is not rendered yet
 
 Transition types other than crossfade (drawn as a crossfade), effects without

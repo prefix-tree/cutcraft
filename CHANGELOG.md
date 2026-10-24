@@ -8,6 +8,19 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- `@cutcut/render`: export to WebM (VP9 and Opus) or MP4 (H.264 and AAC) in Node,
+  with no browser. It runs the player's engine through the new
+  `@cutcut/player/engine` and `@cutcut/player/overlays` entries; titles, layers
+  and captions are laid out by Satori from the trees the browser mounts and drawn
+  with the layout the DOM gives them (blend modes included); the soundtrack is
+  mixed by our own offline mixer (bit-exact against Web Audio's
+  `OfflineAudioContext` at 1x and 1.5x); `cutcut-render` loads a TSX file and
+  renders it. Workers render runs of whole keyframe intervals and the main
+  thread joins them (1.6 to 2.2 times one thread on four cores); `--copy` copies
+  the encoded pictures of plain cuts of a VP8/VP9 source (460 fps against 12 on
+  keyframe-aligned cuts); overlay layouts are cached; `--speed fast` is the
+  encoder's real-time mode. Every recipe is rendered in a test. Decision 0015.
+
 - A logo: an orange disc with a wedge cut out of it, like Pac-Man, and a
   small frame ahead of it. Used as the docs site's nav logo and favicon and
   at the top of the READMEs (`docs/public/logo.svg`).
@@ -72,3 +85,14 @@ All notable changes to this project are documented here. The format follows
   placement identity, so a drag step costs about 1 µs per element.
 - Decoders survive trims; a paused preview repaints without waiting and
   settles to the exact frame after the gesture.
+
+### Fixed
+
+- A placement with `duration="fill"` (a music bed under the whole video) had a
+  source range of nothing, so the audio plan skipped it and the bed was silent
+  in the preview. It now plays the range it fills.
+- A multicam's generated clips carried the angle's `asset:` reference as their
+  asset id, which no media resolver knows. They carry the plain id.
+- `useT()` and `useLayer()` look for the player's clock on `globalThis`, so a
+  cut file loaded with its own copy of the kit (a tool's private module graph)
+  still finds it.
