@@ -131,6 +131,18 @@ describe("parallel render", () => {
     expect(worst, "mean red difference between the two renders, worst frame").toBeLessThan(3);
   });
 
+  it("brings back what the workers' overlays warn about", async () => {
+    const withFont = join(dir, "font.tsx");
+    writeFileSync(withFont, SOURCE.replace('import { Audio, Clip,', 'import { Title, Audio, Clip,').replace('<Track id="music"', '<Track id="o"><Title id="t" start={0} duration={5} font="Comic Neue">Hi</Title></Track>\n      <Track id="music"'));
+    const loaded = await loadVideo(withFont);
+    const result = await renderVideo({
+      state: loaded.state, media: directoryResolver(mediaDir, loaded.manifest), interiors: loaded.interiors, out: join(dir, "font.webm"), keyFrameInterval: 1, silent: true, to: 4,
+      parallel: { file: withFont, mediaDir, workers: 2, segmentFrames: 30 },
+    });
+    expect(result.workers).toBe(2);
+    expect(result.warnings.filter((w) => w.includes('font "Comic Neue"'))).toHaveLength(1);
+  });
+
   it("reports a worker's failure, and leaves no threads behind", async () => {
     const loaded = await loadVideo(file);
     await expect(renderVideo({

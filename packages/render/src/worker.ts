@@ -23,11 +23,13 @@ export type SegmentReply =
 
 const init = workerData as WorkerInit;
 let loaded: Promise<{ video: LoadedVideo; overlays: OverlayPlane }> | null = null;
+/** What the overlay plane, which lives across segments, has said since the last reply. */
+const said: string[] = [];
 
 function open(): Promise<{ video: LoadedVideo; overlays: OverlayPlane }> {
   loaded ??= loadVideo(init.file, init.load).then((video) => ({
     video,
-    overlays: new OverlayPlane({ state: video.state, media: directoryResolver(init.mediaDir, video.manifest, init.overrides), interiors: video.interiors, fonts: init.fonts, warn: () => undefined }),
+    overlays: new OverlayPlane({ state: video.state, media: directoryResolver(init.mediaDir, video.manifest, init.overrides), interiors: video.interiors, fonts: init.fonts, warn: (m) => said.push(m) }),
   }));
   return loaded;
 }
@@ -41,7 +43,7 @@ parentPort?.on("message", (request: SegmentRequest) => {
         onAssetError: init.onAssetError, encoding: init.encoding, first: request.first, last: request.last,
       });
       const reply: SegmentReply = {
-        id: request.id, ok: true, bytes: result.bytes, stages: result.stages, warnings: result.warnings,
+        id: request.id, ok: true, bytes: result.bytes, stages: result.stages, warnings: [...result.warnings, ...said.splice(0)],
         errors: result.errors.map((e) => `${e.asset ?? e.id ?? "?"}: ${e.error.message}`),
       };
       parentPort?.postMessage(reply, [result.bytes.buffer as ArrayBuffer]);
