@@ -1,5 +1,5 @@
 import { filterString } from "../../model/effects";
-import { dataAttrs, type ElementProps } from "./shared";
+import { dataAttrs, type ElementProps } from "../../overlays/layout";
 
 /** Backdrop filter over the DOM items beneath it; the canvas part is the painter's adjustment op. */
 export function Adjustment(p: ElementProps) {

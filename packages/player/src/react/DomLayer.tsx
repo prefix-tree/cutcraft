@@ -6,13 +6,11 @@ import { Adjustment } from "./elements/Adjustment";
 import { Captions } from "./elements/Captions";
 import { Layer } from "./elements/Layer";
 import { Shape } from "./elements/Shape";
-import type { ElementProps } from "./elements/shared";
+import { OVERLAY_KINDS, type ElementProps } from "../overlays/layout";
 import { Sticker } from "./elements/Sticker";
 import { Svg } from "./elements/Svg";
 import { Title } from "./elements/Title";
 import { useCompositionTime } from "./hooks";
-
-const DOM_KINDS = new Set(["title", "shape", "svg", "sticker", "layer", "adjustment"]);
 
 export interface DomLayerProps {
   readonly state: ResolvedState;
@@ -22,7 +20,7 @@ export interface DomLayerProps {
 /** Overlay elements as DOM, one absolutely positioned group per track in compositing order, above the canvas. */
 export function DomLayer({ state, interiors }: DomLayerProps) {
   const time = useCompositionTime();
-  const items = visiblePlacements(state, time).filter((v) => DOM_KINDS.has(v.placement.kind));
+  const items = visiblePlacements(state, time).filter((v) => OVERLAY_KINDS.has(v.placement.kind));
   const byTrack = new Map<string, VisibleItem[]>();
   for (const item of items) {
     const list = byTrack.get(item.track.id) ?? [];

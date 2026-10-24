@@ -4,8 +4,9 @@ import { join } from "node:path";
 import { collectModule, resolve } from "@cutcut/kit";
 import generateMedia, { mediaDir } from "../../player/e2e/gen-media";
 import * as file from "../../player/e2e/app/composition";
+import { indexLayerInteriors } from "@cutcut/player/overlays";
 import { directoryResolver, renderVideo } from "../src";
-import { decodeAudio, decodeFrames, decodesClean, pixel, probe, readStrip, rmsOf, tonePower } from "./helpers/output";
+import { decodeAudio, decodeFrames, type DecodedFrame, decodesClean, pixel, probe, readStrip, rmsOf, tonePower } from "./helpers/output";
 
 const state = resolve(collectModule(file), file.manifest);
 const media = directoryResolver(mediaDir, file.manifest);
@@ -55,6 +56,31 @@ describe("renderVideo", () => {
     expect(decoded).toBe(210);
     expect(seen).toBe(210);
     expect(wrong).toEqual([]);
+  });
+
+  it("draws titles and layers above the footage, in the preview's colours and places", async () => {
+    const out = join(dir, "overlays.webm");
+    const interiors = indexLayerInteriors(file.default());
+    const result = await renderVideo({ state, media, out, interiors, to: 3 });
+    expect(result.errors).toEqual([]);
+    expect(result.warnings).toEqual([]);
+    const lit = (frame: DecodedFrame, test: (r: number, g: number, b: number) => boolean, box: [number, number, number, number]): number => {
+      let n = 0;
+      for (let y = box[1]; y < box[3]; y++) for (let x = box[0]; x < box[2]; x++) { const [r, g, b] = pixel(frame, x, y); if (test(r, g, b)) n++; }
+      return n;
+    };
+    const green = (r: number, g: number, b: number): boolean => g > 230 && r < 40 && b < 40;
+    const white = (r: number, g: number, b: number): boolean => r > 220 && g > 220 && b > 220;
+    const frames: Record<number, { green: number; white: number }> = {};
+    await decodeFrames(out, (frame, n) => {
+      // The title (0.5-2.5 s) is green text at the centre; the counter (0-3 s) is white text at the top right.
+      if (n === 10 || n === 45) frames[n] = { green: lit(frame, green, [250, 150, 390, 210]), white: lit(frame, white, [596, 8, 640, 36]) };
+    });
+    expect(frames[10]?.green).toBe(0);
+    expect(frames[45]?.green).toBeGreaterThan(150);
+    // The strip's last cell is black for these frame numbers, so what is white there is the counter's digits.
+    expect(frames[10]?.white).toBeGreaterThan(30);
+    expect(frames[45]?.white).toBeGreaterThan(30);
   });
 
   it("renders a time range", async () => {

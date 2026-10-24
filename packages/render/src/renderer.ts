@@ -1,4 +1,5 @@
 import type { ResolvedState } from "@cutcut/kit";
+import type { ReactNode } from "react";
 import {
   AssetSources, Compositor, FRAME_EPS, ManualClock, MediabunnyInputs, buildAudioPlan, captureWarnings, makeNestedResolver,
   mediabunnyFrameSourceFactory, type MediaResolver, type PlayerErrorEvent,
@@ -8,6 +9,7 @@ import type { Canvas } from "skia-canvas";
 import { createCanvas, initEnv } from "./env";
 import { frameSourceHooks } from "./frame-source";
 import { mixPlan, type MixedBlock } from "./mixer";
+import { OverlayPlane, type OverlayFont } from "./overlays";
 import { MediabunnyPcm } from "./pcm";
 
 export type VideoCodec = "vp9" | "vp8" | "av1" | "avc" | "hevc";
@@ -26,6 +28,10 @@ export interface RenderOptions {
   /** Render only this part of the composition, in composition seconds. */
   readonly from?: number;
   readonly to?: number;
+  /** The children of each `<Layer id>` in the file (`indexLayerInteriors(file.default())`); without them layers draw nothing. */
+  readonly interiors?: ReadonlyMap<string, ReactNode>;
+  /** Fonts beyond the bundled Inter, picked by a title's `font` prop. */
+  readonly fonts?: readonly OverlayFont[];
   /** Skip the soundtrack. */
   readonly silent?: boolean;
   /** Audio bits per second; default 128 kbit/s. */
@@ -75,7 +81,9 @@ export async function renderVideo(options: RenderOptions): Promise<RenderResult>
   });
   const compositor = new Compositor(state, { sources, createCanvas, resolveNested: makeNestedResolver(() => state) });
   const canvas = createCanvas(width, height) as unknown as Canvas;
-  compositor.attach(canvas.getContext("2d") as never);
+  const ctx = canvas.getContext("2d");
+  compositor.attach(ctx as never);
+  const overlays = new OverlayPlane({ state, media: options.media, warn: (m) => warnings.push(m), ...(options.interiors ? { interiors: options.interiors } : {}), ...(options.fonts ? { fonts: options.fonts } : {}) });
 
   const output = new Output({ format: container === "mp4" ? new Mp4OutputFormat() : new WebMOutputFormat(), target: new FilePathTarget(options.out) });
   const source = new VideoSampleSource({
@@ -124,6 +132,7 @@ export async function renderVideo(options: RenderOptions): Promise<RenderResult>
       if (errors.length > 0 && options.onAssetError !== "continue") {
         throw new Error(`cannot render: ${errors.map((e) => `${e.asset ?? e.id ?? "?"}: ${e.error.message}`).join("; ")}`);
       }
+      await overlays.draw(ctx, t);
       const raw = await canvas.toBuffer("raw");
       const sample = new VideoSample(new Uint8Array(raw.buffer, raw.byteOffset, raw.length), { format: "RGBA", codedWidth: width, codedHeight: height, timestamp: (n - first) / fps, duration: 1 / fps });
       await source.add(sample);
@@ -136,6 +145,7 @@ export async function renderVideo(options: RenderOptions): Promise<RenderResult>
     await output.cancel().catch(() => undefined);
     throw error;
   } finally {
+    overlays.dispose();
     compositor.dispose();
     sources.dispose();
     inputs.dispose();

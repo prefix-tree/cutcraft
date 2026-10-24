@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { usePlayer } from "../hooks";
-import { dataAttrs, overlayStyle, type ElementProps } from "./shared";
+import { dataAttrs, overlayStyle, type ElementProps } from "../../overlays/layout";
 
 /** Inline SVG markup, or an SVG asset through the media resolver. */
 export function Svg(p: ElementProps) {

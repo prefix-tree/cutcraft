@@ -11,6 +11,7 @@ export default defineConfig({
       "@cutcut/kit/source": new URL("../kit/src/source/index-public.ts", import.meta.url).pathname,
       "@cutcut/kit": new URL("../kit/src/index.ts", import.meta.url).pathname,
       "@cutcut/player/engine": new URL("../player/src/engine.ts", import.meta.url).pathname,
+      "@cutcut/player/overlays": new URL("../player/src/overlays.ts", import.meta.url).pathname,
     },
   },
 });

@@ -8,6 +8,7 @@ export default defineConfig({
     alias: {
       "@cutcut/kit": new URL("../kit/src/index.ts", import.meta.url).pathname,
       "@cutcut/player/engine": new URL("./src/engine.ts", import.meta.url).pathname,
+      "@cutcut/player/overlays": new URL("./src/overlays.ts", import.meta.url).pathname,
       "@cutcut/player": new URL("./src/index.ts", import.meta.url).pathname,
     },
   },

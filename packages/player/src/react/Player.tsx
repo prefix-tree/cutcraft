@@ -6,7 +6,7 @@ import { PlayerContext } from "./context";
 import { Controls } from "./Controls";
 import { DomLayer } from "./DomLayer";
 import { retainUseT, usePlayer } from "./hooks";
-import { indexLayerInteriors } from "./layer-interiors";
+import { indexLayerInteriors } from "../overlays/layer-interiors";
 
 export interface PlayerProps {
   readonly state: ResolvedState;
