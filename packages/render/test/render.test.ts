@@ -6,6 +6,7 @@ import generateMedia, { mediaDir } from "../../player/e2e/gen-media";
 import * as file from "../../player/e2e/app/composition";
 import { indexLayerInteriors } from "@cutcut/player/overlays";
 import { directoryResolver, renderVideo } from "../src";
+import { checkExactFrames } from "./helpers/exact";
 import { decodeAudio, decodeFrames, type DecodedFrame, decodesClean, pixel, probe, readStrip, rmsOf, tonePower } from "./helpers/output";
 
 const state = resolve(collectModule(file), file.manifest);
@@ -34,27 +35,8 @@ describe("renderVideo", () => {
     decodesClean(out);
 
     // The source video paints its frame number into a strip; every output frame must show the source frame for its time.
-    const wrong: string[] = [];
-    let seen = 0;
-    const decoded = await decodeFrames(out, (frame, n) => {
-      seen++;
-      const t = n / 30;
-      if (t < 3.5) {
-        if (readStrip(frame) !== n) wrong.push(`t=${t.toFixed(3)} strip ${readStrip(frame)} expected ${n}`);
-      } else if (t >= 4.0 && t < 5.5) {
-        const st = 6 + (t - 3.5) * 1.5;
-        const expected = Math.floor(st * 30 + 0.03);
-        if (readStrip(frame) !== expected) wrong.push(`t=${t.toFixed(3)} strip ${readStrip(frame)} expected ${expected}`);
-      } else if (n === 170) {
-        const [r, g, b] = pixel(frame, 320, 180);
-        if (!(r > 200 && g < 60 && b < 60)) wrong.push(`t=${t.toFixed(3)} logo centre is ${r},${g},${b}`);
-      } else if (n === 207) {
-        const [r, g, b] = pixel(frame, 320, 180);
-        if (!(b > 200 && r < 60 && g < 60)) wrong.push(`t=${t.toFixed(3)} solid centre is ${r},${g},${b}`);
-      }
-    });
+    const { decoded, wrong } = await checkExactFrames(out);
     expect(decoded).toBe(210);
-    expect(seen).toBe(210);
     expect(wrong).toEqual([]);
   });
 

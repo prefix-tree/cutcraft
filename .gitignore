@@ -10,3 +10,4 @@ playwright-report/
 docs/.vitepress/dist/
 docs/.vitepress/cache/
 packages/render/test/.tmp
+packages/render/bench/.cache

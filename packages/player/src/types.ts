@@ -47,6 +47,11 @@ export interface Frame {
   readonly width: number;
   readonly height: number;
   draw(ctx: Ctx2D, dx: number, dy: number, dw: number, dh: number, crop?: { x: number; y: number; w: number; h: number }): void;
+  /**
+   * Optional fast path for a picture that covers the whole `width`×`height` canvas, untransformed, opaque and
+   * normally blended: replace the canvas content with it and return true, or return false to be drawn with `draw`.
+   */
+  paintFull?(ctx: Ctx2D, width: number, height: number): boolean;
   /** A copy that outlives the source's pools and the original's `close()`. */
   retain(): Frame;
   close(): void;
