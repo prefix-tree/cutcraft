@@ -1,3 +1,5 @@
+/** @jsxRuntime automatic */
+/** @jsxImportSource react */
 import type { Placement } from "@cutcut/kit";
 import { Children, cloneElement, isValidElement, type CSSProperties, type ReactNode } from "react";
 import { isVisibleAt } from "../model/visible";

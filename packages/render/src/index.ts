@@ -1,5 +1,6 @@
 export { createCanvas, initEnv } from "./env";
 export { RgbaFrame, frameSourceHooks, makeRgbaFrame } from "./frame-source";
+export { loadVideo, type LoadOptions, type LoadedVideo } from "./load";
 export { directoryResolver } from "./media";
 export { envelopeAt, mixBlock, mixPlan, type MixOptions, type MixSource, type MixedBlock, type PcmBuffer, type PcmProvider } from "./mixer";
 export { OverlayPlane, toSvg, type OverlayFont, type OverlayOptions } from "./overlays";

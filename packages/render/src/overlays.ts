@@ -12,10 +12,12 @@ import satori, { type Font } from "satori";
 import { loadImage, type CanvasRenderingContext2D, type Image } from "skia-canvas";
 
 /** A font handed to Satori. Satori reads TTF, OTF and WOFF, not WOFF2. */
+export type FontWeight = 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900;
+
 export interface OverlayFont {
   readonly name: string;
   readonly data: Buffer | ArrayBuffer;
-  readonly weight?: 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900;
+  readonly weight?: FontWeight;
   readonly style?: "normal" | "italic";
 }
 

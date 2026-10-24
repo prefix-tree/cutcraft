@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { createElement } from "react";
 import { describe, expect, it } from "vitest";
-import { Audio, Clip, Composition, Gap, Title, Track, Transition, collect, resolve, resolveScene, type SceneFn } from "@cutcut/kit";
+import { Angle, Audio, Clip, Cut, Multicam, Composition, Gap, Title, Track, Transition, collect, resolve, resolveScene, type SceneFn } from "@cutcut/kit";
 import { lint } from "@cutcut/kit/source";
 import { fixtureText, fixtureTree, fixturesDir, manifest, serialize, round } from "./helpers";
 
@@ -58,6 +58,23 @@ describe("resolve", () => {
     const state = resolve(collect(el), manifest);
     expect(state.errors).toEqual([]);
     expect(state.items.get("a")).toMatchObject({ start: 0, end: 4, source: { in: 2, out: 10, speed: 2 } });
+  });
+
+  it("gives a multicam's generated clips plain asset ids and the last one its length", () => {
+    const el = h(Composition, { fps: 30, width: 1920, height: 1080 },
+      h(Track, { id: "t1", layout: "free" },
+        h(Multicam, { id: "mc", sync: 0 },
+          h(Angle, { id: "a", src: "asset:city" }),
+          h(Angle, { id: "b", src: "asset:interview" }),
+          h(Cut, { id: "c1", at: 0, angle: "a" }),
+          h(Cut, { id: "c2", at: 2, angle: "b" }),
+        ),
+      ),
+      h(Track, { id: "t2" }, h(Clip, { id: "len", src: "asset:city", in: 0, out: 5 })),
+    );
+    const state = resolve(collect(el), manifest);
+    expect(state.items.get("mc.c1")).toMatchObject({ start: 0, end: 2, source: { asset: "city", in: 0, out: 2 } });
+    expect(state.items.get("mc.c2")).toMatchObject({ start: 2, end: 5, source: { asset: "interview", in: 2, out: 5 } });
   });
 
   it("reports typed errors instead of throwing", () => {

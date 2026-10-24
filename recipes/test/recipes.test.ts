@@ -90,7 +90,7 @@ const recipes: { name: string; file: string; mod: Module; check: (state: Resolve
   {
     name: "highlights", file: "highlights.tsx", mod: highlights as Module,
     check: (s) => {
-      expect(s.items.get("mc.cut-2")).toMatchObject({ start: 10, end: 25, editable: "generated", source: { asset: "asset:cam-b" } });
+      expect(s.items.get("mc.cut-2")).toMatchObject({ start: 10, end: 25, editable: "generated", source: { asset: "cam-b" } });
       expect(s.items.get("mc.cut-3")).toMatchObject({ start: 25 });
       expect(s.items.get("dense")).toMatchObject({ source: { in: 5.2, out: 7.64 } });
       expect(s.tracks.find((t) => t.id === "pull")?.hidden).toBe(true);

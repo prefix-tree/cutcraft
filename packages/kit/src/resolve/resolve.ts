@@ -2,7 +2,7 @@ import type { z } from "zod";
 import { SCHEMAS_BY_KIND } from "../jsx/elements";
 import type { TrackLayout } from "../jsx/enums";
 import { capabilitiesOf } from "../jsx/capabilities";
-import { lookupAsset, type AssetEntry, type AssetManifest } from "../manifest/types";
+import { assetIdOf, lookupAsset, type AssetEntry, type AssetManifest } from "../manifest/types";
 import { resolveTimeRef } from "../manifest/timeref";
 import type { PatchLog } from "../patches/types";
 import type { ResolveError } from "./errors";
@@ -511,7 +511,7 @@ function placeMulticam(node: CollectedNode, p: Pending, track: ResolvedTrack, pe
       origin: { helper: "multicam", callerId: node.id, callIndex: 0 },
     };
     const gp: Pending = { node: generated, track: track.id, parent: node.id, props: generated.props as Record<string, unknown>, errors: [], start: cut.at };
-    gp.source = { in: inSec, out: inSec, speed: 1, asset: String(angle.src) };
+    gp.source = { in: inSec, out: inSec, speed: 1, asset: assetIdOf(String(angle.src)) };
     if (next) {
       gp.duration = next.at - cut.at;
       gp.source = { ...gp.source, out: inSec + gp.duration };
