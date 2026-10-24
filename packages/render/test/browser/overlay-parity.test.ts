@@ -1,0 +1,132 @@
+// Renders the same overlay elements with Chromium's DOM and with the Node overlay plane, and compares where the ink is.
+import { readFileSync } from "node:fs";
+import { createRequire } from "node:module";
+import { createElement as h, type ReactElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { chromium, type Browser } from "@playwright/test";
+import { Canvas, loadImage } from "skia-canvas";
+import { Caption, Captions, Composition, Layer, Shape, Title, Track, collect, installLayerClock, resolve, type ResolvedState } from "@cutcut/kit";
+import { visiblePlacements } from "@cutcut/player/engine";
+import { indexLayerInteriors, layerClock } from "@cutcut/player/overlays";
+import { Captions as DomCaptions } from "../../../player/src/react/elements/Captions";
+import { Layer as DomLayerElement } from "../../../player/src/react/elements/Layer";
+import { Shape as DomShape } from "../../../player/src/react/elements/Shape";
+import { Title as DomTitle } from "../../../player/src/react/elements/Title";
+import { OverlayPlane, directoryResolver } from "../../src";
+import { useT } from "@cutcut/kit";
+
+const W = 640, H = 360, T = 1;
+const manifest = { assets: {} };
+const require = createRequire(import.meta.url);
+const fontDir = require.resolve("@fontsource/inter/package.json").replace(/package\.json$/, "files/");
+
+function fontFaces(): string {
+  return ([[400, "normal"], [700, "normal"], [400, "italic"], [700, "italic"]] as const)
+    .map(([weight, style]) => `@font-face{font-family:Inter;font-weight:${weight};font-style:${style};src:url(data:font/woff;base64,${readFileSync(`${fontDir}inter-latin-${weight}-${style}.woff`).toString("base64")}) format("woff")}`)
+    .join("");
+}
+
+function Counter() {
+  const t = useT();
+  return h("div", { style: { position: "absolute", left: 40, top: 30, color: "#fff", fontSize: 48, fontWeight: 700 } }, String(Math.round(1200 * t)));
+}
+
+interface Case { readonly name: string; readonly element: ReactElement; readonly dom: (state: ResolvedState) => ReactElement }
+
+function scene(...children: ReactElement[]): ReactElement {
+  return h(Composition, { fps: 30, width: W, height: H }, h(Track, { id: "a", layout: "free" }, ...children));
+}
+
+const cases: Case[] = [
+  {
+    name: "a centred bold title",
+    element: scene(h(Title, { id: "e", start: 0, duration: 2, size: 64, color: "#ffffff" }, "Parity of text")),
+    dom: (s) => domOf(s, DomTitle, { text: "Parity of text" }),
+  },
+  {
+    name: "a left-aligned italic title with letter spacing",
+    element: scene(h(Title, { id: "e", start: 0, duration: 2, size: 44, weight: "normal", italic: true, align: "left", valign: "top", letterSpacing: 2, color: "#ffd400" }, "Second line of ink")),
+    dom: (s) => domOf(s, DomTitle, { text: "Second line of ink" }),
+  },
+  {
+    name: "a title with a text shadow",
+    element: scene(h(Title, { id: "e", start: 0, duration: 2, size: 72, color: "#ffffff", shadow: { color: "#000000", blur: 6, x: 4, y: 4 } }, "Shadow")),
+    dom: (s) => domOf(s, DomTitle, { text: "Shadow" }),
+  },
+  {
+    name: "a star with a stroke",
+    element: scene(h(Shape, { id: "e", shape: "star", width: 160, height: 160, fill: "#ff5a1f", stroke: { color: "#ffffff", width: 8 }, start: 0, duration: 2 })),
+    dom: (s) => domOf(s, DomShape, {}),
+  },
+  {
+    name: "a layer with a live counter",
+    element: scene(h(Layer, { id: "e", start: 0, duration: 2 }, h(Counter))),
+    dom: (s) => domOf(s, DomLayerElement, { interior: indexLayerInteriors(scene(h(Layer, { id: "e", start: 0, duration: 2 }, h(Counter)))).get("e") }),
+  },
+  {
+    name: "a caption line",
+    element: h(Composition, { fps: 30, width: W, height: H }, h(Captions, { id: "e", style: { position: "bottom", size: 30 } }, h(Caption, { id: "k", start: 0, end: 2, text: "Captions follow the clips" }))),
+    dom: (s) => h(DomCaptions, { placement: s.items.get("e")!, state: s, time: T }),
+  },
+];
+
+function domOf(state: ResolvedState, Component: (props: never) => ReactElement | null, extra: Record<string, unknown>): ReactElement {
+  const item = visiblePlacements(state, T).find((v) => v.placement.id === "e")!;
+  return h(Component as never, { placement: item.placement, children: item.children, state, time: T, transitionOpacity: 1, ...extra });
+}
+
+interface Ink { readonly box: readonly [number, number, number, number] | null; readonly coverage: number }
+
+function inkOf(rgba: Uint8ClampedArray | Uint8Array): Ink {
+  let x0 = W, y0 = H, x1 = -1, y1 = -1, sum = 0;
+  for (let y = 0; y < H; y++) {
+    for (let x = 0; x < W; x++) {
+      const a = rgba[(y * W + x) * 4 + 3] as number;
+      sum += a / 255;
+      if (a > 24) { x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y); }
+    }
+  }
+  return { box: x1 < 0 ? null : [x0, y0, x1, y1], coverage: sum };
+}
+
+let browser: Browser;
+beforeAll(async () => { browser = await chromium.launch(); }, 60_000);
+afterAll(async () => { await browser.close(); });
+
+describe("overlay parity between the browser DOM and the Node renderer", () => {
+  it.each(cases)("$name", async ({ element, dom }) => {
+    const state = resolve(collect(element), manifest);
+    expect(state.errors).toEqual([]);
+
+    // Node: the overlay plane onto a transparent canvas.
+    const canvas = new Canvas(W, H);
+    const ctx = canvas.getContext("2d");
+    const plane = new OverlayPlane({ state, media: directoryResolver("/nowhere", manifest), interiors: indexLayerInteriors(element), warn: () => undefined });
+    await plane.draw(ctx, T);
+    plane.dispose();
+    const node = inkOf(ctx.getImageData(0, 0, W, H).data);
+
+    // Browser: the DOM components, as they are mounted in the player, with the same Inter faces.
+    installLayerClock(() => layerClock(state.items.get("e")!, T, 30));
+    const markup = renderToStaticMarkup(dom(state));
+    installLayerClock(null);
+    const page = await browser.newPage({ viewport: { width: W, height: H } });
+    await page.setContent(`<!doctype html><style>${fontFaces()}html,body{margin:0;background:transparent}#root{position:relative;width:${W}px;height:${H}px;overflow:hidden;font-family:Inter}</style><div id="root">${markup}</div>`);
+    await page.evaluate(() => document.fonts.ready);
+    const shot = await page.screenshot({ omitBackground: true, clip: { x: 0, y: 0, width: W, height: H } });
+    await page.close();
+    const image = await loadImage(shot);
+    const probeCanvas = new Canvas(W, H);
+    const probe = probeCanvas.getContext("2d");
+    probe.drawImage(image, 0, 0);
+    const browserInk = inkOf(probe.getImageData(0, 0, W, H).data);
+
+    expect(browserInk.box, "the browser drew something").not.toBeNull();
+    expect(node.box, "the renderer drew something").not.toBeNull();
+    const [a, b] = [node.box!, browserInk.box!];
+    for (let i = 0; i < 4; i++) expect(Math.abs(a[i]! - b[i]!), `ink box edge ${i}: node ${a} browser ${b}`).toBeLessThanOrEqual(4);
+    const ratio = node.coverage / browserInk.coverage;
+    expect(ratio, `ink coverage: node ${node.coverage.toFixed(0)} browser ${browserInk.coverage.toFixed(0)}`).toBeGreaterThan(0.93);
+    expect(ratio).toBeLessThan(1.07);
+  }, 60_000);
+});

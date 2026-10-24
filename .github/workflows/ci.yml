@@ -37,6 +37,8 @@ jobs:
           key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
       - run: pnpm --filter @cutcut/player exec playwright install --with-deps chromium
       - run: pnpm --filter @cutcut/player test:e2e
+      # The export is checked against the browser here: overlay layout and the audio mix.
+      - run: pnpm --filter @cutcut/render test:browser
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
