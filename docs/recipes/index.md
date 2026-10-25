@@ -13,6 +13,7 @@ as the prompt's conventions in use; copy them as starting points.
 | [Slideshow with motion](./slideshow) | Four photos held four seconds each with a slow push, crossfades between them, a bed that fades out with the last one. |
 | [Stats with handles](./stats) | Two numbers count up over product footage. Each counter is one component inside a Layer, so its value and label are handles. |
 | [Variants from one file](./variants) | One cut rendered for many brands or markets: copy, colour and logo are schema props, and a variant is `defaults` with overrides. |
+| [Brand spot in any theme](./brand-spot) | A spot built from graphics around a screen recording, with a backdrop beneath it; one prop swaps the theme and with it every colour, font and entrance. |
 | [Multicam highlights](./highlights) | Two cameras of one scene switched at camera B's shot boundaries, with the dense segment picked by the transcript's silences. |
 
 The fixture manifest they share is `recipes/manifest.json`: a two-speaker

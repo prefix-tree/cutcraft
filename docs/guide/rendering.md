@@ -20,9 +20,13 @@ clock in seconds (`elapsed`, `remaining`, `duration`, `time`, `fps`).
    source time and never waits; a seek waits for the exact frame.
 4. **Paint**: `CanvasPainter` executes the plan on the composition canvas.
    Nested compositions render through child compositors into their own canvas.
-5. **DOM**: titles, shapes, SVG, stickers, layers and captions are React
-   elements positioned with the same matrix math, re-rendered once per frame
-   index and only when their own placement changed.
+5. **DOM**: titles, shapes, SVG, stickers, graphics, layers and captions are
+   React elements positioned with the same matrix math, re-rendered once per
+   frame index and only when their own placement changed. They draw above the
+   canvas, except on tracks below every footage track (`backdropTracks`): those
+   draw beneath it, the canvas clears to transparent, and the composition
+   background is painted under them. The export stacks the same layers in the
+   same order.
 6. **Audio**: the engine schedules each audio chunk once per play session,
    200 ms ahead, on Web Audio with offset, duration, `playbackRate = speed × rate`
    and a gain envelope (volume, fades, automation, ducking, mute and solo).

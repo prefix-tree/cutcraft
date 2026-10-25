@@ -69,6 +69,7 @@ export default defineConfig({
           { text: "Stats with handles", link: "/recipes/stats" },
           { text: "Variants from one file", link: "/recipes/variants" },
           { text: "Multicam highlights", link: "/recipes/highlights" },
+          { text: "Brand spot in any theme", link: "/recipes/brand-spot" },
         ] },
       ],
       "/comparisons/": [

@@ -1,5 +1,6 @@
 import type { ResolvedState } from "@cutcut/kit";
 import { memo, type ReactNode } from "react";
+import { backdropTracks } from "../model/backdrop";
 import { frameIndex } from "../model/time";
 import { visiblePlacements, type VisibleItem } from "../model/visible";
 import { Adjustment } from "./elements/Adjustment";
@@ -16,10 +17,12 @@ import { useCompositionTime } from "./hooks";
 export interface DomLayerProps {
   readonly state: ResolvedState;
   readonly interiors: ReadonlyMap<string, ReactNode>;
+  /** Which overlays: those beneath the footage (`backdropTracks`), or the rest and the captions (default). */
+  readonly layer?: "backdrop" | "front";
 }
 
-/** Overlay elements as DOM, one absolutely positioned group per track in compositing order, above the canvas. */
-export function DomLayer({ state, interiors }: DomLayerProps) {
+/** Overlay elements as DOM, one absolutely positioned group per track in compositing order, above the canvas (or, for the backdrop, below it). */
+export function DomLayer({ state, interiors, layer = "front" }: DomLayerProps) {
   const time = useCompositionTime();
   const items = visiblePlacements(state, time).filter((v) => OVERLAY_KINDS.has(v.placement.kind));
   const byTrack = new Map<string, VisibleItem[]>();
@@ -28,10 +31,12 @@ export function DomLayer({ state, interiors }: DomLayerProps) {
     list.push(item);
     byTrack.set(item.track.id, list);
   }
-  const captions = [...state.items.values()].filter((p) => p.kind === "captions");
+  const backdrop = backdropTracks(state);
+  const tracks = state.tracks.filter((t) => backdrop.has(t.id) === (layer === "backdrop"));
+  const captions = layer === "front" ? [...state.items.values()].filter((p) => p.kind === "captions") : [];
   return (
     <>
-      {state.tracks.map((track) => {
+      {tracks.map((track) => {
         const list = byTrack.get(track.id);
         if (!list) return null;
         return (

@@ -27,8 +27,8 @@ export class CanvasPainter {
     ctx.globalAlpha = 1;
     ctx.globalCompositeOperation = "source-over";
     ctx.filter = "none";
-    ctx.fillStyle = plan.backgroundGradient ? backgroundFill(ctx, plan.backgroundGradient, this.width, this.height) : plan.background;
-    ctx.fillRect(0, 0, this.width, this.height);
+    if (plan.clear) ctx.clearRect(0, 0, this.width, this.height);
+    else paintBackground(ctx, plan, this.width, this.height);
     for (const op of plan.ops) {
       if (op.kind === "adjustment") this.adjust(ctx, op);
       else this.drawOp(ctx, op, inputs);
@@ -142,6 +142,28 @@ export function coversCanvas(op: DrawOp, width: number, height: number): boolean
   return m.a === 1 && m.b === 0 && m.c === 0 && m.d === 1 && m.e === 0 && m.f === 0
     && op.rect.w === width && op.rect.h === height && !op.crop
     && op.opacity >= 1 && op.blend === "source-over" && !op.filter && op.borderRadius === 0 && !op.mask;
+}
+
+/** The composition background (a colour or a gradient) over the whole frame. */
+export function paintBackground(ctx: Ctx2D, plan: Pick<FramePlan, "background" | "backgroundGradient">, w: number, h: number): void {
+  ctx.save();
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.globalAlpha = 1;
+  ctx.globalCompositeOperation = "source-over";
+  ctx.filter = "none";
+  ctx.fillStyle = plan.backgroundGradient ? backgroundFill(ctx, plan.backgroundGradient, w, h) : plan.background;
+  ctx.fillRect(0, 0, w, h);
+  ctx.restore();
+}
+
+/** The same background as CSS, for the preview's ground under backdrop overlays. */
+export function backgroundCss(plan: Pick<FramePlan, "background" | "backgroundGradient">): string {
+  const g = plan.backgroundGradient;
+  if (!g) return plan.background;
+  const stops = [...g.stops].sort((a, b) => a.offset - b.offset).map((s) => `${withOpacity(s.color, s.opacity)} ${Math.round(Math.max(0, Math.min(1, s.offset)) * 10000) / 100}%`).join(", ");
+  if (g.type === "radial") return `radial-gradient(farthest-corner at ${(g.center?.x ?? 0.5) * 100}% ${(g.center?.y ?? 0.5) * 100}%, ${stops})`;
+  if (g.type === "conic") return `conic-gradient(from ${g.angle ?? 0}deg at ${(g.center?.x ?? 0.5) * 100}% ${(g.center?.y ?? 0.5) * 100}%, ${stops})`;
+  return `linear-gradient(${g.angle ?? 180}deg, ${stops})`;
 }
 
 /** A canvas gradient for the frame, laid out the way CSS lays out the same gradient on a box of this size. */

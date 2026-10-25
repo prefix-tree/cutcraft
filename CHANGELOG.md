@@ -8,6 +8,12 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- Overlays on tracks below every footage track draw beneath the footage (backgrounds under
+  the cut), in the preview and the export; elsewhere overlays still draw above it.
+- The model's prompt has a "Graphics and style" section (theme first, tokens, presets, graphic
+  kinds, backgrounds, SVG rules); a new recipe, a brand spot that one prop renders in any
+  theme; the variants recipe takes a theme beside its brand colour.
+
 - `<Graphic kind>`: thirty built-in graphics from the new `@cutcut/graphics` package (arrows,
   callouts, speech bubbles, badges, pills, bursts, three lower thirds, corner brackets, frames,
   device frames, underline and circle scribbles, marker sweeps, strikes, progress bars,
@@ -120,6 +126,9 @@ All notable changes to this project are documented here. The format follows
 
 ### Fixed
 
+- A parallel export that fails no longer cuts off the other workers mid-frame: a busy worker
+  finishes its run (or a minute passes) before the pool terminates it, since terminating a thread
+  inside a skia call can abort the whole process.
 - The export no longer aborts on SVG text in a font it lacks: skia ends the process (no
   exception) for an unknown or quoted family, so families are narrowed to one it has, or
   sans-serif with a warning. The bundled fonts are registered for SVG text too.

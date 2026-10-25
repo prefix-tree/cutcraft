@@ -7,6 +7,9 @@ import { Controls } from "./Controls";
 import { DomLayer } from "./DomLayer";
 import { retainUseT, usePlayer } from "./hooks";
 import { indexLayerInteriors } from "../overlays/layer-interiors";
+import { backdropTracks } from "../model/backdrop";
+import { compositionBackground } from "../model/frame-plan";
+import { backgroundCss } from "../render/painter";
 
 export interface PlayerProps {
   readonly state: ResolvedState;
@@ -81,15 +84,26 @@ export const Player = forwardRef<PlayerRef, PlayerProps>(function Player(props, 
 
   const { width, height } = state.composition;
   const snapshot = core?.getTime() ?? { time: 0, frame: 0 };
+  const backdrop = backdropTracks(state).size > 0;
+  const layerStyle: CSSProperties = { position: "absolute", left: 0, top: 0, width, height, transformOrigin: "0 0", transform: fit === "none" ? undefined : `scale(${scale})`, pointerEvents: "none" };
   const rootStyle: CSSProperties = fit === "none"
     ? { position: "relative", width, height, overflow: "hidden", background: "#000", ...style }
     : { position: "relative", width: "100%", aspectRatio: `${width} / ${height}`, overflow: "hidden", background: "#000", ...style };
   return (
     <div ref={rootRef} className={className} style={rootStyle} data-time={snapshot.time.toFixed(4)} data-frame={snapshot.frame} data-player="">
-      <canvas ref={canvasRef} data-el={state.composition.id} data-kind="composition" width={width} height={height} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", display: "block" }} />
+      {/* Overlays beneath the footage: the background, then those tracks, then the canvas over a transparent ground. */}
+      {backdrop && <div data-ground="" style={{ position: "absolute", inset: 0, zIndex: 0, background: backgroundCss(compositionBackground(state)) }} />}
+      {backdrop && core && (
+        <PlayerContext.Provider value={core}>
+          <div data-dom-layer="backdrop" style={{ ...layerStyle, zIndex: 0 }}>
+            <DomLayer state={state} interiors={interiors} layer="backdrop" />
+          </div>
+        </PlayerContext.Provider>
+      )}
+      <canvas ref={canvasRef} data-el={state.composition.id} data-kind="composition" width={width} height={height} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", display: "block", zIndex: 1 }} />
       {core && (
         <PlayerContext.Provider value={core}>
-          <div data-dom-layer="" style={{ position: "absolute", left: 0, top: 0, width, height, transformOrigin: "0 0", transform: fit === "none" ? undefined : `scale(${scale})`, pointerEvents: "none" }}>
+          <div data-dom-layer="" style={{ ...layerStyle, zIndex: 2 }}>
             <TimeAttrs />
             <DomLayer state={state} interiors={interiors} />
           </div>

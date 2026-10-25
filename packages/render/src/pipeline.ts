@@ -1,6 +1,6 @@
 import type { ResolvedState } from "@cutcut/kit";
 import {
-  AssetSources, Compositor, ManualClock, MediabunnyInputs, makeNestedResolver, mediabunnyFrameSourceFactory,
+  AssetSources, Compositor, ManualClock, MediabunnyInputs, backdropTracks, compositionBackground, makeNestedResolver, mediabunnyFrameSourceFactory, paintBackground,
   type MediaResolver, type PlayerErrorEvent,
 } from "@cutcut/player/engine";
 import type { ReactNode } from "react";
@@ -38,6 +38,7 @@ export class FramePipeline {
   private readonly ctx: CanvasRenderingContext2D;
   private readonly overlays: OverlayPlane;
   private readonly ownsOverlays: boolean;
+  private readonly footage: Canvas | null;
 
   constructor(private readonly options: PipelineOptions) {
     initEnv();
@@ -53,7 +54,9 @@ export class FramePipeline {
     this.compositor = new Compositor(state, { sources: this.sources, createCanvas, resolveNested: makeNestedResolver(() => state) });
     this.canvas = createCanvas(width, height) as unknown as Canvas;
     this.ctx = this.canvas.getContext("2d") as CanvasRenderingContext2D;
-    this.compositor.attach(this.ctx as never);
+    // With overlays beneath the footage, the footage is composited on its own transparent canvas first.
+    this.footage = backdropTracks(state).size ? createCanvas(width, height) as unknown as Canvas : null;
+    this.compositor.attach((this.footage ? this.footage.getContext("2d") : this.ctx) as never);
     this.ownsOverlays = !options.overlays;
     this.overlays = options.overlays ?? new OverlayPlane({ state, media: options.media, warn: options.warn, ...(options.interiors ? { interiors: options.interiors } : {}), ...(options.fonts ? { fonts: options.fonts } : {}) });
   }
@@ -69,7 +72,15 @@ export class FramePipeline {
     }
     this.stages.composite += performance.now() - at;
     at = performance.now();
-    await this.overlays.draw(this.ctx, t);
+    if (this.footage) {
+      // Overlays beneath the footage: the background, those overlays, then the footage over them.
+      paintBackground(this.ctx as never, compositionBackground(this.options.state), width, height);
+      await this.overlays.draw(this.ctx, t, "backdrop");
+      this.ctx.drawImage(this.footage, 0, 0);
+      await this.overlays.draw(this.ctx, t, "front");
+    } else {
+      await this.overlays.draw(this.ctx, t);
+    }
     this.stages.overlays += performance.now() - at;
     at = performance.now();
     const data = this.ctx.getImageData(0, 0, width, height).data;

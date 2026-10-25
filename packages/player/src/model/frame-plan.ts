@@ -3,6 +3,7 @@ import { devWarn } from "../warn";
 import { filterString } from "./effects";
 import { frameIndex, nestedSourceTime, placementSourceTime } from "./time";
 import { animatedTransform, layoutRect, type DrawRect, type Matrix2D } from "./transform";
+import { backdropTracks } from "./backdrop";
 import { visiblePlacements, type VisibleItem } from "./visible";
 
 export interface MaskSpec {
@@ -44,6 +45,8 @@ export interface FramePlan {
   readonly background: string;
   /** A gradient that fills the frame instead of `background` (which is then its first colour). */
   readonly backgroundGradient?: BackgroundGradient;
+  /** The footage goes over a transparent ground: overlays beneath it (see `backdropTracks`) and the background are drawn under the canvas. */
+  readonly clear?: true;
   readonly ops: readonly DrawOp[];
   readonly warnings: readonly string[];
 }
@@ -71,10 +74,8 @@ export function buildFramePlan(state: ResolvedState, t: number, resolveNested?: 
   const comp = state.composition;
   const warnings: string[] = [];
   const ops: DrawOp[] = [];
-  const bg = state.items.get(comp.id)?.props.background as { mode?: string; color?: string; gradient?: BackgroundGradient } | undefined;
-  if (bg?.mode === "blur") warnings.push("background mode blur is drawn as a colour");
-  const gradient = bg?.mode === "gradient" && bg.gradient && bg.gradient.stops.length >= 2 ? bg.gradient : undefined;
-  const background = bg?.color ?? gradient?.stops[0]?.color ?? "#000000";
+  const { background, backgroundGradient: gradient, blur } = compositionBackground(state);
+  if (blur) warnings.push("background mode blur is drawn as a colour");
 
   for (const item of visiblePlacements(state, t)) {
     const p = item.placement;
@@ -91,7 +92,14 @@ export function buildFramePlan(state: ResolvedState, t: number, resolveNested?: 
       });
     }
   }
-  return { time: t, frame: frameIndex(t, comp.fps), background, ...(gradient ? { backgroundGradient: gradient } : {}), ops, warnings };
+  return { time: t, frame: frameIndex(t, comp.fps), background, ...(gradient ? { backgroundGradient: gradient } : {}), ...(backdropTracks(state).size ? { clear: true as const } : {}), ops, warnings };
+}
+
+/** The composition's background as the painter draws it: a colour, or a gradient (whose first colour is `background`). */
+export function compositionBackground(state: ResolvedState): { background: string; backgroundGradient?: BackgroundGradient; blur: boolean } {
+  const bg = state.items.get(state.composition.id)?.props.background as { mode?: string; color?: string; gradient?: BackgroundGradient } | undefined;
+  const gradient = bg?.mode === "gradient" && bg.gradient && bg.gradient.stops.length >= 2 ? bg.gradient : undefined;
+  return { background: bg?.color ?? gradient?.stops[0]?.color ?? "#000000", ...(gradient ? { backgroundGradient: gradient } : {}), blur: bg?.mode === "blur" };
 }
 
 function mediaOp(state: ResolvedState, item: VisibleItem, t: number, resolveNested: ResolveNested | undefined, warnings: string[]): DrawOp | null {

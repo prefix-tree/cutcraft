@@ -82,6 +82,24 @@ and the `type` and `duration` of a `<Transition>`. To keep one element still, gi
 | `bouncy` | pop, 0.5 s | scale, 0.3 s | crossfade, 0.4 s |
 | `editorial` | wipe right, 0.6 s | wipe right, 0.4 s | crossfade, 0.5 s |
 
+## Backgrounds beneath the footage
+
+Overlays draw above the footage, so a background graphic on top of a clip
+would hide it. Put a background on a track **below every track that holds
+footage**: overlays there draw beneath the footage, in the preview and the
+export alike, and the composition background goes under them.
+
+```tsx
+<Track id="backdrop" layout="free">
+  <Graphic id="blobs" kind="blobs-background" start={0} duration={12} />
+</Track>
+<Track id="main">…clips…</Track>
+<Track id="notes" layout="free">…callouts above the footage…</Track>
+```
+
+Footage that blends (`blend="multiply"`, say) blends with the clips beneath it,
+not with the backdrop.
+
 ## Fonts
 
 Five families ship with both renderers, all under the SIL Open Font License:

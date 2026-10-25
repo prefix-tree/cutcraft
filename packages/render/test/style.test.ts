@@ -1,7 +1,8 @@
 // Shape styling, entrances and exits, and gradient backgrounds, as the export draws them.
 import { createElement as h, type ReactElement } from "react";
 import type { Canvas, CanvasRenderingContext2D } from "skia-canvas";
-import { Composition, Graphic, Shape, Sticker, Svg, THEMES, Title, Track, collect, resolve } from "@cutcut/kit";
+import { join } from "node:path";
+import { Clip, Composition, Graphic, Shape, Sticker, Svg, THEMES, Title, Track, collect, resolve } from "@cutcut/kit";
 import { indexLayerInteriors } from "@cutcut/player/overlays";
 import { manifest } from "../../player/e2e/app/composition";
 import { FramePipeline } from "../src/pipeline";
@@ -188,5 +189,34 @@ describe("graphics in the export", () => {
     expect(px(470, 180)[3]).toBe(0);
     // The sticker is 90 px (a quarter of 360) and stroked in the theme's text colour.
     expect(px(170 - 45 + 11, 180)[3]).toBeGreaterThan(150);
+  });
+});
+
+describe("overlays beneath the footage", () => {
+  const mediaDir = join(import.meta.dirname, "..", "..", "player", "e2e", "app", "public");
+
+  async function frameOf(...tracks: ReactElement[]) {
+    const state = resolve(collect(h(Composition, { fps: 30, width: W, height: H, background: { mode: "color", color: "#0000ff" } }, ...tracks)), manifest);
+    expect(state.errors).toEqual([]);
+    const pipeline = new FramePipeline({ state, media: directoryResolver(mediaDir, manifest), warn: () => undefined });
+    const rgba = await pipeline.frame(15);
+    pipeline.dispose();
+    return (x: number, y: number): Rgba => { const i = (y * W + x) * 4; return [rgba[i]!, rgba[i + 1]!, rgba[i + 2]!, rgba[i + 3]!]; };
+  }
+
+  const backdrop = h(Track, { id: "under", layout: "free" }, h(Shape, { id: "yellow", shape: "rectangle", width: W, height: H, fill: "#ffff00", start: 0, duration: 2 }));
+  const footage = h(Track, { id: "main" }, h(Clip, { id: "logo", src: "asset:logo", duration: 2, fit: "none" }));
+  const front = h(Track, { id: "over", layout: "free" }, h(Shape, { id: "green", shape: "rectangle", width: 40, height: 40, fill: "#00ff00", start: 0, duration: 2, transform: { position: { x: -280, y: -150 } } }));
+
+  it("draws a track below the footage beneath it, and the rest above", async () => {
+    const at = await frameOf(backdrop, footage, front);
+    expect(close(at(320, 180), [253, 0, 0, 255])).toBe(true); // the (red) logo, over the backdrop
+    expect(close(at(20, 340), [255, 255, 0, 255])).toBe(true); // the yellow backdrop where the logo is not
+    expect(close(at(40, 30), [0, 255, 0, 255])).toBe(true); // the front overlay, over both
+  });
+
+  it("keeps an overlay above the footage when it comes after it", async () => {
+    const at = await frameOf(footage, backdrop);
+    expect(close(at(320, 180), [255, 255, 0, 255])).toBe(true);
   });
 });

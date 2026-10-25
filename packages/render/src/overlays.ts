@@ -1,7 +1,7 @@
 import { createRequire } from "node:module";
 import type { ResolvedState } from "@cutcut/kit";
 import { BUNDLED_FONTS, BUNDLED_FONT_WEIGHTS, installLayerClock } from "@cutcut/kit";
-import { isVisibleAt, visiblePlacements, type MediaResolver, type VisibleItem } from "@cutcut/player/engine";
+import { backdropTracks, isVisibleAt, visiblePlacements, type MediaResolver, type VisibleItem } from "@cutcut/player/engine";
 import {
   OVERLAY_KINDS, captionsContent, graphicDrawing, graphicLabels, iconStickerDrawing, parseSvg, serialize, shapeDrawing, svgDrawing, layerClock, layerContent, overlayLayout, stickerPlaceholder, stickerSize, titleContent,
   type ElementProps, type GraphicDrawing, type OverlayLayout,
@@ -71,13 +71,19 @@ export class OverlayPlane {
     return [...state.items.values()].some((p) => p.kind === "caption" && isVisibleAt(p, t, state.composition.duration));
   }
 
-  /** Draws every overlay visible at `t` onto `ctx`, tracks in order, captions last. */
-  async draw(ctx: CanvasRenderingContext2D, t: number): Promise<void> {
+  /**
+   * Draws the overlays visible at `t` onto `ctx`, tracks in order, captions last: those beneath the
+   * footage (`backdropTracks`) for `"backdrop"`, the rest for `"front"`, all of them by default.
+   */
+  async draw(ctx: CanvasRenderingContext2D, t: number, layer: "all" | "backdrop" | "front" = "all"): Promise<void> {
     const { state } = this.options;
+    const backdrop = backdropTracks(state);
     for (const item of visiblePlacements(state, t)) {
       if (!OVERLAY_KINDS.has(item.placement.kind)) continue;
+      if (layer !== "all" && backdrop.has(item.track.id) !== (layer === "backdrop")) continue;
       await this.guard(item.placement.id, () => this.drawItem(ctx, item, t));
     }
+    if (layer === "backdrop") return;
     for (const captions of state.items.values()) {
       if (captions.kind !== "captions") continue;
       await this.guard(captions.id, async () => {

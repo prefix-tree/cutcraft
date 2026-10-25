@@ -33,8 +33,8 @@ function Lower({ who }: { who: string }) {                 // pure helpers only
 
 ## Vocabulary
 
-`<Composition fps width height background>` holds `<Track>`s, `<Marker>`s and
-at most one `<Captions>`.
+`<Composition fps width height background theme>` holds `<Track>`s, `<Marker>`s
+and at most one `<Captions>`.
 
 `<Track id layout="sequence"|"free" name role hidden muted solo>`. The first
 track is the bottom of the picture; later tracks draw on top. On a
@@ -46,7 +46,7 @@ Timed elements: `<Clip src in out|duration speed reverse fit transform volume fa
 (video or image), `<Audio>` (same, audio only), `<Transition type duration>`
 as a sibling *between* two clips of a sequence track, `<Title>` (text as
 children), `<Shape shape width height fill stroke cornerRadius>`, `<Svg>`,
-`<Sticker>`, `<Adjustment>`, `<Nested of>`, `<Layer>` (arbitrary React inside;
+`<Sticker>`, `<Graphic kind>` (a built-in graphic: see below), `<Adjustment>`, `<Nested of>`, `<Layer>` (arbitrary React inside;
 call `useT()` for 0..1 progress or `useLayer()` for `elapsed`, `remaining`,
 `duration` and `time` in seconds). Give a Layer one component child whose
 props are literals or schema props: those props are the editor's handles,
@@ -94,6 +94,56 @@ Children that the inspector edits one by one: `<Keyframe property at value easin
 10. **Tracks and sound.** Put dialogue on the first track, overlays above it,
     music on a free track with `duck={{ under: "<dialogue track id>", to }}`.
 
+## Graphics and style
+
+Give the video one look, the way a designer would, and say it once.
+
+1. **Set a theme first.** `theme={{ extends: "midnight" }}` on the
+   composition picks a built-in look (`midnight`, `paper`, `neon`, `pastel`,
+   `mono`, `bold`): a palette, fonts, a corner radius, a motion style and
+   presets. Lay a brand over it with `palette: { primary: "#ff5a1f" }` or
+   `fonts: { heading: "Playfair Display" }`; pick the motion with
+   `motion: "calm" | "snappy" | "bouncy" | "editorial" | "none"`. A brand
+   colour the user must be able to change goes in `schema` and into
+   `palette` from there.
+2. **Use tokens, not literals.** Colours are `$primary`, `$secondary`,
+   `$accent`, `$background`, `$surface`, `$text`, `$muted`, `$onPrimary`;
+   fonts are `$heading`, `$body`, `$mono`; corners are `$radius`. A literal
+   colour or font under a theme is a lint warning: it will not follow the
+   next theme.
+3. **Use presets for text.** `<Title style="h1">`, `h2`, `kicker`, `body`,
+   `caption`, `quote`, `label`, `code`; a plain title already takes the
+   heading font and the text colour. Own props override a preset
+   (`style="h1" size={180}`). `<Shape style="card">` (also `panel`, `pill`,
+   `outline`, `accent`), `<Captions style="boxed">`.
+4. **Leave entrances to the motion style.** Titles, shapes, SVG, stickers and
+   graphics enter and exit the theme's way; write `enter`/`exit` only where
+   one element should differ (`enter={{ type: "draw" }}` for a scribble,
+   `{ type: "none" }` to keep one still).
+5. **Prefer a `<Graphic kind>` to drawing one.** Arrows (`arrow`,
+   `curved-arrow`, `hand-arrow`), callouts (`callout`, `speech-bubble`,
+   `badge`, `pill`, `burst`), lower thirds (`lower-third`, `-card`, `-split`),
+   frames (`corner-brackets`, `frame`, `device-frame`), highlights
+   (`underline`, `circle-scribble`, `marker`, `strike`), `progress-bar`,
+   `countdown`, `steps`, `divider`, backgrounds (`gradient-background`,
+   `dots-background`, `grid-background`, `waves-background`,
+   `blobs-background`), `confetti`, `sparkles` and `icon` (any Lucide name;
+   `<Sticker src="icon:check">` too). Each takes a few props (`text`, `name`,
+   `color`, `tail`…), sizes itself, and draws in the theme. `width`/`height`
+   set its box; `transform.position` places it from the centre.
+6. **Backgrounds go on the lowest track.** A graphic or shape on a track below
+   every footage track draws beneath the footage; anything on a later track
+   draws above it.
+7. **Write `<Svg content>` only for one-off art** no kind covers. Give it a
+   `viewBox`, fill it with tokens (`fill="$primary"` or
+   `var(--cc-primary)`), keep it small (a few kilobytes), no scripts, no
+   external links, and no SMIL that depends on clicks. Text in SVG uses a
+   bundled font (Inter, Space Grotesk, Playfair Display, DM Sans, JetBrains
+   Mono) or a generic family.
+8. **Look at it.** Graphics are judged by eye: after adding them, take a
+   `captureSheet` at the moments they are fully in, and fix overlaps and
+   text that runs out of its box.
+
 ## How to edit
 
 1. Write the brief down first, as a short markdown note: the length, the
@@ -113,4 +163,5 @@ Children that the inspector edits one by one: `<Keyframe property at value easin
 
 Before you hand the file over, check it as the lint would: literal unique ids,
 no `start` on a sequence track, no hooks in helpers, one `<Captions>`, every
-`src` in the manifest, either `in`/`out` or `duration`.
+`src` in the manifest, either `in`/`out` or `duration`, every `$token` and
+`style` known to the theme, every graphic `kind` and its props real.

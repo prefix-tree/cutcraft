@@ -1,6 +1,6 @@
 # Variants from one file
 
-One cut rendered for many brands or markets: copy, colour and logo are schema props, and a variant is `defaults` with overrides.
+One cut rendered for many brands or markets: copy, look, colour and logo are schema props, and a variant is `defaults` with overrides.
 
 ## What the manifest gives it
 
@@ -8,7 +8,8 @@ The `product` footage and the `logo` image are shared; everything that changes i
 
 ## What the file shows
 
-- Titles bind their text and colour to the schema; `src={logo}` binds the card's asset.
+- The look is a built-in theme named by the `theme` prop, and the brand colour is that theme's `primary`; the headline and the captions use it as `$primary`, the titles take their fonts from presets (`h1`, `h2`).
+- Titles bind their text to the schema; `src={logo}` binds the card's asset.
 - `collectModule(file, overrides)` renders a variant without touching the file; the tweaks panel edits the same props.
 - No `<Caption>` cues and no `src`: the captions element is a styled placeholder for the voice-over each market records.
 
@@ -24,4 +25,4 @@ The `product` footage and the `logo` image are shared; everything that changes i
 ## What to check
 
 - No lint warnings expected.
-- `captureSheet([0.8, 7, 12.5])` per variant: the headline in the brand colour, the detail shot, the card.
+- `captureSheet([0.8, 7, 12.5])` per variant: the headline in the brand colour and the theme's heading font, the detail shot, the card.
