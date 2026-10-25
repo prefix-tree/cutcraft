@@ -1,4 +1,4 @@
-import type { Placement, ResolvedState, Transform } from "@cutcut/kit";
+import type { FitMode, Placement, ResolvedState, Transform } from "@cutcut/kit";
 import type { CSSProperties } from "react";
 import { filterString } from "../model/effects";
 import { animatedTransform, layoutRect, matrixToCss, type Box, type Matrix2D } from "../model/transform";
@@ -29,7 +29,7 @@ export interface OverlayLayout {
   readonly borderRadius: number;
 }
 
-export function overlayLayout(p: ElementProps, size: Box, fit: "contain" | "none" = "none"): OverlayLayout {
+export function overlayLayout(p: ElementProps, size: Box, fit: FitMode = "none"): OverlayLayout {
   const rel = p.time - p.placement.start;
   const transform = animatedTransform(p.placement.props.transform as Transform | undefined, p.children, rel);
   const layout = layoutRect(p.state.composition, size, fit, transform);
@@ -46,7 +46,7 @@ export function overlayLayout(p: ElementProps, size: Box, fit: "contain" | "none
 }
 
 /** Position an overlay of `size` composition pixels with its transform, filter and blend as CSS. */
-export function overlayStyle(p: ElementProps, size: Box, fit: "contain" | "none" = "none"): CSSProperties {
+export function overlayStyle(p: ElementProps, size: Box, fit: FitMode = "none"): CSSProperties {
   const l = overlayLayout(p, size, fit);
   return {
     position: "absolute",

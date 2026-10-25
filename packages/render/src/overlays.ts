@@ -3,10 +3,11 @@ import type { ResolvedState } from "@cutcut/kit";
 import { installLayerClock } from "@cutcut/kit";
 import { isVisibleAt, visiblePlacements, type MediaResolver, type VisibleItem } from "@cutcut/player/engine";
 import {
-  OVERLAY_KINDS, captionsContent, layerClock, layerContent, overlayLayout, shapeContent, shapeSize, stickerPlaceholder, stickerSize, titleContent,
+  OVERLAY_KINDS, captionsContent, parseSvg, serialize, svgDrawing, layerClock, layerContent, overlayLayout, shapeContent, shapeSize, stickerPlaceholder, stickerSize, titleContent,
   type ElementProps, type OverlayLayout,
 } from "@cutcut/player/overlays";
 import { readFileSync } from "node:fs";
+import { readFile } from "node:fs/promises";
 import { createElement, isValidElement, type ReactElement, type ReactNode } from "react";
 import satori, { type Font } from "satori";
 import { loadImage, type CanvasRenderingContext2D, type Image } from "skia-canvas";
@@ -49,6 +50,7 @@ export class OverlayPlane {
   private readonly families: ReadonlySet<string>;
   private readonly images = new Map<string, Image>();
   private readonly assets = new Map<string, Promise<Image | null>>();
+  private readonly texts = new Map<string, Promise<string | null>>();
   private readonly warned = new Set<string>();
   private readonly laidOut = new Map<string, Image>();
   /** Layer interiors that never read the clock: one picture serves every frame. */
@@ -89,6 +91,7 @@ export class OverlayPlane {
     this.images.clear();
     this.laidOut.clear();
     this.assets.clear();
+    this.texts.clear();
     installLayerClock(null);
   }
 
@@ -149,13 +152,14 @@ export class OverlayPlane {
         return;
       }
       case "svg": {
-        const layout = overlayLayout(props, full);
         const content = typeof placement.props.content === "string" ? placement.props.content : null;
         const src = typeof placement.props.src === "string" ? placement.props.src : null;
-        const image = content ? await this.vectorImage(content) : src ? await this.asset(src) : null;
-        if (!image) return;
-        const tint = placement.props.color as { mode: string; tint?: string } | undefined;
-        this.place(ctx, layout, image, containRect(image, layout.rect.w, layout.rect.h), tint?.mode === "tint" && tint.tint ? `drop-shadow(0 0 0 ${tint.tint})` : null);
+        const markup = content ?? (src ? await this.assetText(src) : null);
+        if (!markup) return;
+        const drawing = svgDrawing(props, markup);
+        for (const w of drawing.prepared.warnings) this.warnOnce(`svg:${placement.id}:${w}`, `svg "${placement.id}": ${w}`);
+        if (!drawing.prepared.markup) return;
+        this.place(ctx, drawing.layout, await this.vectorImage(drawing.prepared.markup));
         return;
       }
       case "sticker": {
@@ -210,7 +214,7 @@ export class OverlayPlane {
       return hit;
     }
     const root = createElement("div", { style: { display: "flex", position: "relative", width, height } }, tree);
-    const svg = await satori(root as ReactElement, { width, height, fonts: this.fonts });
+    const svg = inlineSvgImages(await satori(root as ReactElement, { width, height, fonts: this.fonts }));
     this.stats.layouts++;
     const image = await this.vectorImage(svg);
     if (key !== null) this.remember(key, image);
@@ -234,6 +238,23 @@ export class OverlayPlane {
     this.images.set(svg, image);
     if (this.images.size > IMAGE_CACHE) this.images.delete(this.images.keys().next().value as string);
     return image;
+  }
+
+  private assetText(ref: string): Promise<string | null> {
+    const id = ref.startsWith("asset:") ? ref.slice(6) : ref;
+    let p = this.texts.get(id);
+    if (!p) {
+      p = this.options.media.resolve(id).then(async (handle) => {
+        if (handle.kind === "path") return readFile(handle.path, "utf8");
+        if (handle.kind === "blob") return handle.blob.text();
+        return (await fetch(handle.url)).text();
+      }).catch((error: unknown) => {
+        this.warnOnce(`asset:${id}`, `SVG asset "${id}" could not be read: ${error instanceof Error ? error.message : String(error)}`);
+        return null;
+      });
+      this.texts.set(id, p);
+    }
+    return p;
   }
 
   private asset(ref: string): Promise<Image | null> {
@@ -260,6 +281,32 @@ export class OverlayPlane {
 }
 
 interface Box { readonly x: number; readonly y: number; readonly w: number; readonly h: number }
+
+/**
+ * Satori embeds an inline `<svg>` (in a Layer, say) as an `<image>` with an SVG data URL, which skia draws as nothing.
+ * Each such image becomes a nested `<svg>` with the same box, clip and mask, which skia draws.
+ */
+export function inlineSvgImages(svg: string): string {
+  if (!svg.includes("data:image/svg+xml")) return svg;
+  // Satori's masks size themselves to the masked element's bounding box, which skia gets wrong around a nested
+  // <svg>; in user space they cover the same pixels, since their content is the element's own box.
+  return svg.replace(/<mask (?![^>]*maskUnits)/g, '<mask maskUnits="userSpaceOnUse" ').replace(/<image\b([^>]*?)\s(?:xlink:)?href="data:image\/svg\+xml;(utf8|base64),([^"]*)"([^>]*?)\/?>/g, (whole, before: string, encoding: string, data: string, after: string) => {
+    let inner: string;
+    try {
+      inner = encoding === "base64" ? Buffer.from(data, "base64").toString("utf8") : decodeURIComponent(data);
+    } catch {
+      return whole;
+    }
+    const root = parseSvg(inner).root;
+    if (!root) return whole;
+    const attrs = `${before}${after}`.replace(/\s*\/$/, "");
+    // Clip and mask stay on a group in the outer coordinates: skia would read them in the nested viewBox's.
+    const outer = [...attrs.matchAll(/\s(clip-path|mask)="[^"]*"/g)].map((m) => m[0]).join("");
+    const box = attrs.replace(/\s(clip-path|mask)="[^"]*"/g, "");
+    const viewBox = root.attrs.viewBox ?? (root.attrs.width && root.attrs.height ? `0 0 ${parseFloat(root.attrs.width)} ${parseFloat(root.attrs.height)}` : null);
+    return `<g${outer}><svg${box}${viewBox ? ` viewBox="${viewBox}"` : ""}>${root.children.map((c) => serialize(c)).join("")}</svg></g>`;
+  });
+}
 
 /** `object-fit: contain` (or a centred natural size capped to the box, as `max-width: 100%` does) for an image in a box. */
 function containRect(image: Image, w: number, h: number, upscale = false): Box {

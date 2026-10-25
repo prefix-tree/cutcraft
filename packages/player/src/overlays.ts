@@ -7,3 +7,5 @@ export { OVERLAY_KINDS, overlayLayout, type ElementProps, type OverlayLayout } f
 export { captionsContent, layerContent, shapeContent, shapeSize, stickerPlaceholder, stickerSize, titleContent } from "./overlays/content";
 export { indexLayerInteriors } from "./overlays/layer-interiors";
 export { layerClock } from "./model/time";
+export { parseSvg, prepareSvg, rgb, serialize, svgIntrinsicSize, type PrepareSvgOptions, type PreparedSvg, type SvgColor, type SvgNode, type SvgViewBox } from "./overlays/svg";
+export { svgDrawing, type SvgDrawing } from "./overlays/svg-element";

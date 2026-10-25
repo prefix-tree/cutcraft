@@ -1,6 +1,9 @@
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { createElement as h, type ReactElement } from "react";
 import type { Canvas, CanvasRenderingContext2D } from "skia-canvas";
-import { Caption, Captions, Composition, Layer, Shape, Sticker, Svg, Title, Track, collect, resolve, useT } from "@cutcut/kit";
+import { Caption, Captions, Composition, Layer, Shape, Sticker, Svg, Title, Track, collect, resolve, useT, type AssetManifest } from "@cutcut/kit";
 import { indexLayerInteriors } from "@cutcut/player/overlays";
 import generateMedia, { mediaDir } from "../../player/e2e/gen-media";
 import { manifest } from "../../player/e2e/app/composition";
@@ -172,5 +175,79 @@ describe("layout reuse", () => {
     expect(treeKey(tree("a"))).not.toBe(treeKey(tree("b")));
     expect(treeKey(h("div", { style: { color: "#fff" } }, "a"))).not.toBe(treeKey(h("div", { style: { color: "#000" } }, "a")));
     expect(treeKey(h(Steady))).toBeNull();
+  });
+});
+
+describe("SVG in the export", () => {
+  const icon = '<svg viewBox="0 0 10 10"><rect width="10" height="10" fill="#2080ff"/><rect x="2.5" y="2.5" width="5" height="5" fill="#ffffff"/></svg>';
+  const scratch = mkdtempSync(join(tmpdir(), "cutcut-svg-"));
+  writeFileSync(join(scratch, "badge.svg"), icon);
+  const svgManifest: AssetManifest = { assets: { ...manifest.assets, badge: { id: "badge", kind: "image", duration: 0, width: 10, height: 10 } } };
+  afterAll(() => rmSync(scratch, { recursive: true, force: true }));
+
+  function Inline() { return h("div", { style: { display: "flex", position: "absolute", left: 300, top: 100 } }, h("svg", { width: 40, height: 40, viewBox: "0 0 10 10" }, h("rect", { width: 10, height: 10, fill: "#00ff00" }))); }
+
+  async function draw(...children: ReactElement[]) {
+    const el = h(Composition, { fps: 30, width: 640, height: 360 }, h(Track, { id: "a", layout: "free" }, ...children));
+    const st = resolve(collect(el), svgManifest);
+    expect(st.errors).toEqual([]);
+    const seen: string[] = [];
+    const plane = new OverlayPlane({ state: st, media: directoryResolver(scratch, svgManifest), interiors: indexLayerInteriors(el), warn: (m) => seen.push(m) });
+    const c = createCanvas(640, 360) as unknown as Canvas;
+    const context = c.getContext("2d") as CanvasRenderingContext2D;
+    await plane.draw(context, 1);
+    plane.dispose();
+    const at = (x: number, y: number): Rgb => { const d = context.getImageData(x, y, 1, 1).data; return [d[0] as number, d[1] as number, d[2] as number]; };
+    return { at, seen };
+  }
+
+  it("draws an SVG at the size it asks for, or fitted to the frame", async () => {
+    const { at } = await draw(
+      h(Svg, { id: "small", content: icon.replace('viewBox="0 0 10 10"', 'width="40" height="40" viewBox="0 0 10 10"'), start: 0, duration: 2, transform: { position: { x: -200, y: 0 } } }),
+      h(Svg, { id: "big", content: icon, fit: "contain", start: 0, duration: 2, transform: { position: { x: 140, y: 0 } } }),
+    );
+    // "small" is 40 px, centred 200 px left of the middle: blue edge at x=105, white centre at 120.
+    expect(near(at(105, 180), [32, 128, 255])).toBe(true);
+    expect(near(at(120, 180), [255, 255, 255])).toBe(true);
+    expect(near(at(95, 180), [0, 0, 0])).toBe(true);
+    // "big" fills the frame's height (360 px square), moved 140 px right: x from 280 to 640.
+    expect(near(at(300, 20), [32, 128, 255])).toBe(true);
+    expect(near(at(460, 180), [255, 255, 255])).toBe(true);
+  });
+
+  it("replaces every colour with the tint, or tints keeping the shading", async () => {
+    const { at } = await draw(
+      h(Svg, { id: "rep", content: icon, start: 0, duration: 2, fit: "contain", transform: { scale: 0.3, position: { x: -200, y: 0 } }, color: { mode: "replace", tint: "#ff0000" } }),
+      h(Svg, { id: "tin", content: icon, start: 0, duration: 2, fit: "contain", transform: { scale: 0.3 }, color: { mode: "tint", tint: "#ff0000" } }),
+      h(Svg, { id: "half", content: icon, start: 0, duration: 2, fit: "contain", transform: { scale: 0.3, position: { x: 200, y: 0 } }, color: { mode: "replace", tint: "#ff0000", opacity: 0.5 } }),
+    );
+    expect(near(at(120 - 45, 180), [255, 0, 0])).toBe(true);
+    expect(near(at(120, 180), [255, 0, 0])).toBe(true);
+    // Tint: the white centre turns full red, the blue edge a darker red (its luminance).
+    expect(near(at(320, 180), [255, 0, 0])).toBe(true);
+    const [r, g, b] = at(320 - 45, 180);
+    expect(r).toBeGreaterThan(100);
+    expect(r).toBeLessThan(200);
+    expect(g + b).toBe(0);
+    // Half replace: halfway between the blue edge (32, 128, 255) and red.
+    expect(near(at(520 - 45, 180), [144, 64, 128], 6)).toBe(true);
+  });
+
+  it("reads an SVG asset as markup", async () => {
+    const { at, seen } = await draw(h(Svg, { id: "file", src: "asset:badge", start: 0, duration: 2, fit: "contain" }));
+    expect(seen).toEqual([]);
+    expect(near(at(320, 180), [255, 255, 255])).toBe(true);
+    expect(near(at(160, 180), [32, 128, 255])).toBe(true);
+  });
+
+  it("warns once about what it removed from the markup", async () => {
+    const { seen } = await draw(h(Svg, { id: "bad", content: '<svg viewBox="0 0 1 1"><script>x()</script></svg>', start: 0, duration: 2 }));
+    expect(seen).toEqual(['svg "bad": <script> is not drawn and was removed']);
+  });
+
+  it("draws an inline <svg> inside a Layer, which Satori hands over as an embedded image", async () => {
+    const { at } = await draw(h(Layer, { id: "l", start: 0, duration: 2 }, h(Inline)));
+    expect(near(at(320, 120), [0, 255, 0])).toBe(true);
+    expect(near(at(290, 120), [0, 0, 0])).toBe(true);
   });
 });

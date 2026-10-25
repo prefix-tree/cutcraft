@@ -51,6 +51,23 @@ Every DOM element carries `data-el` and `data-kind`; the root carries
 `data-time` and `data-frame`; the canvas is `[data-el="composition"]`. An editor
 can select, highlight and drag preview elements by the same ids the file uses.
 
+## SVG
+
+`<Svg>` draws inline `content` or an SVG asset read as text. Before either surface draws it,
+`prepareSvg` (in `@cutcut/player/overlays`) turns it into the markup both draw:
+
+- **Removed:** scripts, `foreignObject`, event attributes, links outside the file (a `#id` and an
+  embedded PNG, JPEG, GIF or WebP stay). Each removal warns once.
+- **Sized:** the SVG draws at the size it asks for (its `width` and `height`, else its
+  `viewBox`), centred; `fit="contain"` or `"cover"` scales it to the frame. The element's
+  `viewBox` and `preserveAspectRatio` override the file's.
+- **Ids renamed** per element, so two copies of one icon never share a gradient.
+- **Tokens:** `$name` and `var(--cc-name)` in attributes and styles take a value from the theme.
+- **Colour:** a `color` prop with `mode: "replace"` paints every drawn pixel in its `tint`;
+  `mode: "tint"` keeps the shading and colours it; `opacity` is how much.
+
+Animation inside the SVG (SMIL, CSS) is not played yet.
+
 ## Export
 
 The export runs this pipeline in Node: the same plan, painter, compositor and

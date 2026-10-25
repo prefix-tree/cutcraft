@@ -5,13 +5,15 @@ import { createElement as h, type ReactElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { chromium, type Browser } from "@playwright/test";
 import { Canvas, loadImage } from "skia-canvas";
-import { Caption, Captions, Composition, Layer, Shape, Title, Track, collect, installLayerClock, resolve, type ResolvedState } from "@cutcut/kit";
+import { Caption, Captions, Composition, Layer, Shape, Svg, Title, Track, collect, installLayerClock, resolve, type ResolvedState } from "@cutcut/kit";
 import { visiblePlacements } from "@cutcut/player/engine";
 import { indexLayerInteriors, layerClock } from "@cutcut/player/overlays";
 import { Captions as DomCaptions } from "../../../player/src/react/elements/Captions";
 import { Layer as DomLayerElement } from "../../../player/src/react/elements/Layer";
 import { Shape as DomShape } from "../../../player/src/react/elements/Shape";
 import { Title as DomTitle } from "../../../player/src/react/elements/Title";
+import { Svg as DomSvg } from "../../../player/src/react/elements/Svg";
+import { PlayerContext } from "../../../player/src/react/context";
 import { OverlayPlane, directoryResolver } from "../../src";
 import { useT } from "@cutcut/kit";
 
@@ -29,6 +31,12 @@ function fontFaces(): string {
 function Counter() {
   const t = useT();
   return h("div", { style: { position: "absolute", left: 40, top: 30, color: "#fff", fontSize: 48, fontWeight: 700 } }, String(Math.round(1200 * t)));
+}
+
+const BADGE = '<svg width="120" height="120" viewBox="0 0 20 20"><circle cx="10" cy="10" r="9" fill="#ffd400"/><path d="M5 10 L9 14 L15 6" stroke="#111" stroke-width="2" fill="none"/></svg>';
+
+function InlineSvg() {
+  return h("div", { style: { position: "absolute", left: 200, top: 80, display: "flex" } }, h("svg", { width: 160, height: 160, viewBox: "0 0 20 20" }, h("circle", { cx: 10, cy: 10, r: 9, fill: "#00c853" })));
 }
 
 interface Case { readonly name: string; readonly element: ReactElement; readonly dom: (state: ResolvedState) => ReactElement }
@@ -62,6 +70,21 @@ const cases: Case[] = [
     name: "a layer with a live counter",
     element: scene(h(Layer, { id: "e", start: 0, duration: 2 }, h(Counter))),
     dom: (s) => domOf(s, DomLayerElement, { interior: indexLayerInteriors(scene(h(Layer, { id: "e", start: 0, duration: 2 }, h(Counter)))).get("e") }),
+  },
+  {
+    name: "an SVG at its own size, colours replaced",
+    element: scene(h(Svg, { id: "e", start: 0, duration: 2, content: BADGE, color: { mode: "replace", tint: "#ff5a1f" } })),
+    dom: (s) => domOf(s, DomSvg, {}),
+  },
+  {
+    name: "an SVG fitted to the frame with its own viewBox, tinted",
+    element: scene(h(Svg, { id: "e", start: 0, duration: 2, content: BADGE, fit: "contain", viewBox: { minX: -2, minY: -2, width: 24, height: 24 }, color: { mode: "tint", tint: "#2080ff" }, transform: { rotation: 15 } })),
+    dom: (s) => domOf(s, DomSvg, {}),
+  },
+  {
+    name: "a layer drawing an inline <svg>",
+    element: scene(h(Layer, { id: "e", start: 0, duration: 2 }, h(InlineSvg))),
+    dom: (s) => domOf(s, DomLayerElement, { interior: indexLayerInteriors(scene(h(Layer, { id: "e", start: 0, duration: 2 }, h(InlineSvg)))).get("e") }),
   },
   {
     name: "a caption line",
@@ -108,7 +131,7 @@ describe("overlay parity between the browser DOM and the Node renderer", () => {
 
     // Browser: the DOM components, as they are mounted in the player, with the same Inter faces.
     installLayerClock(() => layerClock(state.items.get("e")!, T, 30));
-    const markup = renderToStaticMarkup(dom(state));
+    const markup = renderToStaticMarkup(h(PlayerContext.Provider, { value: {} as never }, dom(state)));
     installLayerClock(null);
     const page = await browser.newPage({ viewport: { width: W, height: H } });
     await page.setContent(`<!doctype html><style>${fontFaces()}html,body{margin:0;background:transparent}#root{position:relative;width:${W}px;height:${H}px;overflow:hidden;font-family:Inter}</style><div id="root">${markup}</div>`);

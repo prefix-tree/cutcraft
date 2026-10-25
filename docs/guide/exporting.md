@@ -70,7 +70,8 @@ and with captions on top:
   CSS: flexbox, not grid, and no state or effects inside a layer (only
   `useT()` and `useLayer()`). Put images in a layer as data URLs. An element
   Satori cannot draw is left out with a warning that names it.
-- **Shapes and SVG** are drawn as vectors, **stickers** and image assets as
+- **Shapes and SVG** are drawn as vectors (SVG through the same preparation as the
+  preview; see [Rendering](/guide/rendering#svg)), **stickers** and image assets as
   images.
 - **Fonts**: Inter (regular, bold, italic) is bundled. A title that names
   another font is set in Inter with a warning unless you pass the font with

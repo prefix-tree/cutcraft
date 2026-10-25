@@ -1,24 +1,19 @@
 import { useEffect, useState } from "react";
 import { usePlayer } from "../hooks";
 import { dataAttrs, overlayStyle, type ElementProps } from "../../overlays/layout";
+import { svgDrawing } from "../../overlays/svg-element";
+import { devWarn } from "../../warn";
 
-/** Inline SVG markup, or an SVG asset through the media resolver. */
+/** Inline SVG markup, or an SVG asset read as text, prepared the way the export prepares it. */
 export function Svg(p: ElementProps) {
   const props = p.placement.props as Record<string, unknown>;
-  const comp = p.state.composition;
-  const style = overlayStyle(p, { width: comp.width, height: comp.height });
   const content = typeof props.content === "string" ? props.content : null;
-  const src = typeof props.src === "string" ? props.src : null;
-  const url = useMediaUrl(src);
-  const tint = props.color as { mode: string; tint?: string; opacity?: number } | undefined;
-  const filter = tint?.mode === "tint" && tint.tint ? { filter: `drop-shadow(0 0 0 ${tint.tint})` } : {};
-  return (
-    <div {...dataAttrs(p.placement)} style={{ ...style, display: "flex", alignItems: "center", justifyContent: "center" }}>
-      {content
-        ? <div style={{ width: "100%", height: "100%", ...filter }} dangerouslySetInnerHTML={{ __html: content }} />
-        : url ? <img src={url} alt="" style={{ maxWidth: "100%", maxHeight: "100%", ...filter }} /> : null}
-    </div>
-  );
+  const text = useMediaText(content === null && typeof props.src === "string" ? props.src : null);
+  const markup = content ?? text;
+  if (markup === null) return <div {...dataAttrs(p.placement)} style={overlayStyle(p, { width: 0, height: 0 })} />;
+  const drawing = svgDrawing(p, markup);
+  for (const w of drawing.prepared.warnings) devWarn(`svg:${p.placement.id}:${w}`, `svg "${p.placement.id}": ${w}`);
+  return <div {...dataAttrs(p.placement)} style={{ ...overlayStyle(p, drawing.size, drawing.fit), lineHeight: 0 }} dangerouslySetInnerHTML={{ __html: drawing.prepared.markup }} />;
 }
 
 /** Resolves an `asset:` reference to an object URL or a plain URL. */
@@ -39,4 +34,21 @@ export function useMediaUrl(ref: string | null): string | null {
     return () => { cancelled = true; if (revoke) URL.revokeObjectURL(revoke); };
   }, [core, ref]);
   return url;
+}
+
+/** Reads an `asset:` reference as text, for markup that is inlined rather than loaded as an image. */
+export function useMediaText(ref: string | null): string | null {
+  const core = usePlayer();
+  const [text, setText] = useState<string | null>(null);
+  useEffect(() => {
+    if (!ref) { setText(null); return; }
+    const id = ref.startsWith("asset:") ? ref.slice(6) : ref;
+    let cancelled = false;
+    core.resolveMedia(id)
+      .then((handle) => (handle.kind === "url" ? fetch(handle.url).then((r) => r.text()) : handle.kind === "blob" ? handle.blob.text() : null))
+      .then((t) => { if (!cancelled) setText(t); })
+      .catch(() => { if (!cancelled) setText(null); });
+    return () => { cancelled = true; };
+  }, [core, ref]);
+  return text;
 }
