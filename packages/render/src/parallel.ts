@@ -46,6 +46,9 @@ export class SegmentPool {
   private readonly idle: Worker[] = [];
   private readonly queue: Job[] = [];
   private readonly running = new Map<Worker, Job>();
+  /** Workers in the middle of a run, failed or not; `terminate` waits for them. */
+  private readonly inFlight = new Set<Worker>();
+  private readonly drained: (() => void)[] = [];
   private nextId = 0;
   private failure: Error | null = null;
 
@@ -55,7 +58,10 @@ export class SegmentPool {
       const worker = new Worker(url, { workerData: init });
       worker.on("message", (reply: SegmentReply) => this.settle(worker, reply));
       worker.on("error", (error) => this.fail(error));
-      worker.on("exit", (code) => { if (code !== 0 && !this.failure) this.fail(new Error(`a render worker exited with code ${code}`)); });
+      worker.on("exit", (code) => {
+        this.markIdle(worker);
+        if (code !== 0 && !this.failure) this.fail(new Error(`a render worker exited with code ${code}`));
+      });
       this.workers.push(worker);
       this.idle.push(worker);
     }
@@ -69,8 +75,23 @@ export class SegmentPool {
     });
   }
 
-  async terminate(): Promise<void> {
+  /**
+   * Stops every worker. One in the middle of a run is let finish it first: terminating a thread
+   * inside a native skia call leaves an exception skia-canvas cannot handle, and it aborts the
+   * whole process. A run that has not finished within `patience` milliseconds is cut off anyway.
+   */
+  async terminate(patience = 60_000): Promise<void> {
+    if (this.inFlight.size > 0) {
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      await Promise.race([new Promise<void>((resolve) => this.drained.push(resolve)), new Promise<void>((resolve) => { timer = setTimeout(resolve, patience); })]);
+      clearTimeout(timer);
+    }
     await Promise.all(this.workers.map((w) => w.terminate()));
+  }
+
+  private markIdle(worker: Worker): void {
+    this.inFlight.delete(worker);
+    if (this.inFlight.size === 0) for (const resolve of this.drained.splice(0)) resolve();
   }
 
   private dispatch(): void {
@@ -78,11 +99,13 @@ export class SegmentPool {
       const worker = this.idle.shift() as Worker;
       const job = this.queue.shift() as Job;
       this.running.set(worker, job);
+      this.inFlight.add(worker);
       worker.postMessage(job.request);
     }
   }
 
   private settle(worker: Worker, reply: SegmentReply): void {
+    this.markIdle(worker);
     const job = this.running.get(worker);
     this.running.delete(worker);
     this.idle.push(worker);
