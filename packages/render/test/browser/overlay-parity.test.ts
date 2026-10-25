@@ -131,6 +131,11 @@ const cases: Case[] = [
     dom: (s) => domOf(s, DomSvg, {}),
   },
   {
+    name: "an SVG halfway through a SMIL animation",
+    element: scene(h(Svg, { id: "e", start: 0, duration: 2, content: '<svg width="200" height="200" viewBox="0 0 20 20"><circle cx="10" cy="10" r="2" fill="#ffd400"><animate attributeName="r" from="2" to="10" dur="2s"/></circle><rect width="4" height="4" fill="#2080ff"><animateTransform attributeName="transform" type="translate" from="0 0" to="16 16" dur="2s"/></rect></svg>' })),
+    dom: (s) => domOf(s, DomSvg, {}),
+  },
+  {
     name: "a callout graphic with its text",
     element: themed({ extends: "midnight", motion: "none" }, h(Graphic, { id: "e", kind: "callout", text: "Try it free", start: 0, duration: 2 })),
     dom: (s) => domOf(s, DomGraphic, {}),

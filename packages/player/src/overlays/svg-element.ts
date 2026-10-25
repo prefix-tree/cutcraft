@@ -1,6 +1,6 @@
 import type { FitMode, ResolvedTheme } from "@cutcut/kit";
 import { overlayLayout, type ElementProps, type OverlayLayout } from "./layout";
-import { prepareSvg, svgIntrinsicSize, type PreparedSvg, type SvgColor, type SvgViewBox } from "./svg";
+import { prepareSvg, svgAnimated, svgIntrinsicSize, type PreparedSvg, type SvgColor, type SvgViewBox } from "./svg";
 
 export interface SvgDrawing {
   /** The size the SVG asks for, before `fit`. */
@@ -29,6 +29,8 @@ export function svgDrawing(p: ElementProps, markup: string, tokens: Readonly<Rec
     tokens,
     idPrefix: p.placement.id,
     draw: layout.draw,
+    // SMIL plays on the element's own clock; markup without it is prepared once for every frame.
+    ...(svgAnimated(markup) ? { time: p.time - p.placement.start } : {}),
   });
   return { size, fit, layout, prepared };
 }

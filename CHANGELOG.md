@@ -8,6 +8,10 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- SMIL in `<Svg>` plays on the element's own clock: animations are evaluated at each frame and
+  written into the markup, so the preview, scrubbing and the export agree. CSS animations in SVG
+  are removed with a warning instead of playing on the browser's clock alone.
+
 - Overlays on tracks below every footage track draw beneath the footage (backgrounds under
   the cut), in the preview and the export; elsewhere overlays still draw above it.
 - The model's prompt has a "Graphics and style" section (theme first, tokens, presets, graphic

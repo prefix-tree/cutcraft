@@ -1,4 +1,5 @@
 import { SaxesParser } from "saxes";
+import { freezeSmil, hasSmil } from "./smil";
 import { shapeLength } from "./svg-length";
 
 /**
@@ -34,6 +35,8 @@ export interface PrepareSvgOptions {
   readonly draw?: number | null | undefined;
   /** Room, in pixels, kept on every side of the box for strokes and shadows that reach past it. */
   readonly bleed?: number | undefined;
+  /** Seconds into the element, for SMIL animation (see `svgAnimated`); 0 when omitted. */
+  readonly time?: number | undefined;
 }
 
 export interface PreparedSvg {
@@ -61,6 +64,20 @@ export function parseSvg(markup: string): Parsed {
   parsed.set(markup, result);
   if (parsed.size > PARSE_CACHE) parsed.delete(parsed.keys().next().value as string);
   return result;
+}
+
+const animatedRoots = new WeakMap<SvgNode, boolean>();
+
+/** Whether markup animates (SMIL or CSS animations): such markup is prepared for each moment, the rest once. */
+export function svgAnimated(markup: string): boolean {
+  const root = parseSvg(markup).root;
+  if (!root) return false;
+  let hit = animatedRoots.get(root);
+  if (hit === undefined) {
+    hit = hasSmil(root);
+    animatedRoots.set(root, hit);
+  }
+  return hit;
 }
 
 /** The size an SVG asks for: its width and height, else its viewBox, else the HTML default of 300 by 150. */
@@ -92,12 +109,14 @@ export function prepareSvg(markup: string, options: PrepareSvgOptions): Prepared
 }
 
 function build(markup: string, options: PrepareSvgOptions): PreparedSvg {
-  const { root, warnings: parseWarnings } = parseSvg(markup);
+  const { root: parsedRoot, warnings: parseWarnings } = parseSvg(markup);
   const warnings = [...parseWarnings];
-  if (!root) return { markup: "", animated: false, warnings };
+  if (!parsedRoot) return { markup: "", animated: false, warnings };
+  const animated = svgAnimated(markup);
+  const root = animated ? freezeSmil(parsedRoot, options.time ?? 0, warnings) : parsedRoot;
   const prefix = options.idPrefix ? `${options.idPrefix.replace(/[^A-Za-z0-9_-]/g, "_")}-` : "";
   const draw = options.draw === null || options.draw === undefined || options.draw >= 1 ? null : Math.max(0, options.draw);
-  const ctx: Walk = { prefix, tokens: options.tokens ?? {}, warnings, unknownTokens: new Set(), animated: false, draw, inDefs: false };
+  const ctx: Walk = { prefix, tokens: options.tokens ?? {}, warnings, unknownTokens: new Set(), draw, inDefs: false };
   const body = root.children.map((c) => clean(c, ctx)).filter((c): c is SvgNode | string => c !== null);
 
   const box = options.viewBox ?? viewBoxOf(root) ?? { minX: 0, minY: 0, ...svgIntrinsicSize(markup) };
@@ -122,7 +141,7 @@ function build(markup: string, options: PrepareSvgOptions): PreparedSvg {
   const filter = colorFilter(options.color, `${prefix}cc-color`, { minX: box.minX - bx, minY: box.minY - by, width: box.width + 2 * bx, height: box.height + 2 * by });
   if (filter) children = [{ name: "defs", attrs: {}, children: [filter] }, { name: "g", attrs: { filter: `url(#${prefix}cc-color)` }, children: body }];
   const out = serialize({ name: "svg", attrs: { ...head, ...rootAttrs }, children });
-  return { markup: out, animated: ctx.animated, warnings };
+  return { markup: out, animated, warnings };
 }
 
 interface Walk {
@@ -130,7 +149,6 @@ interface Walk {
   readonly tokens: Readonly<Record<string, string>>;
   readonly warnings: string[];
   readonly unknownTokens: Set<string>;
-  animated: boolean;
   /** Stroke drawing progress, or null when everything is drawn. */
   readonly draw: number | null;
   /** Inside definitions (gradients, clips, masks…), which are not drawn by themselves. */
@@ -155,7 +173,6 @@ function clean(node: SvgNode | string, ctx: Walk): SvgNode | string | null {
   const children = node.children
     .map((c) => (node.name === "style" && typeof c === "string" ? cleanStyleSheet(c, inner) : clean(c, inner)))
     .filter((c): c is SvgNode | string => c !== null);
-  if (inner !== ctx && inner.animated) ctx.animated = true;
   if (ctx.draw !== null && !ctx.inDefs && FILLED.has(node.name)) drawProgress(node.name, attrs, ctx.draw);
   // A link cannot be followed in a video; keep what it draws.
   if (node.name === "a") return { name: "g", attrs: Object.fromEntries(Object.entries(attrs).filter(([k]) => k !== "href" && k !== "xlink:href" && k !== "target")), children };
@@ -197,7 +214,7 @@ function cleanAttr(name: string, value: string, ctx: Walk): string | null {
 
 /** Drops imports and outside URLs from CSS, prefixes `url(#id)` and fills in tokens. */
 function cleanStyleSheet(css: string, ctx: Walk): string {
-  let out = withTokens(css, ctx).replace(/@import[^;]*;?/gi, "");
+  let out = withoutCssAnimation(withTokens(css, ctx).replace(/@import[^;]*;?/gi, ""), ctx);
   out = out.replace(/url\(\s*(['"]?)([^'")]+)\1\s*\)/gi, (_m, _q: string, target: string) => {
     const t = target.trim();
     if (t.startsWith("#")) return `url(#${ctx.prefix}${t.slice(1)})`;
@@ -207,6 +224,34 @@ function cleanStyleSheet(css: string, ctx: Walk): string {
   // Selectors that name ids must follow the renamed ids.
   return ctx.prefix ? out.replace(/#([A-Za-z_][\w-]*)(?=[^{}]*\{)/g, `#${ctx.prefix}$1`) : out;
 }
+
+/**
+ * CSS animations are removed: the browser would play them on its own clock and skia not at all,
+ * so the element is drawn as it is styled without them.
+ */
+function withoutCssAnimation(css: string, ctx: Walk): string {
+  if (!/@keyframes|animation/i.test(css)) return css;
+  let out = "", i = 0;
+  const keyframes = /@(-webkit-)?keyframes\b/gi;
+  for (let m = keyframes.exec(css); m; m = keyframes.exec(css)) {
+    out += css.slice(i, m.index);
+    const open = css.indexOf("{", m.index);
+    if (open < 0) { i = css.length; break; }
+    let depth = 0, j = open;
+    for (; j < css.length; j++) {
+      if (css[j] === "{") depth++;
+      else if (css[j] === "}" && --depth === 0) break;
+    }
+    i = j + 1;
+    keyframes.lastIndex = i;
+  }
+  out += css.slice(i);
+  const stripped = out.replace(/(^|[;{\s])animation(-[a-z-]+)?\s*:[^;}]*;?/gi, "$1");
+  if (stripped !== css && !ctx.warnings.includes(CSS_ANIMATION_WARNING)) ctx.warnings.push(CSS_ANIMATION_WARNING);
+  return stripped;
+}
+
+const CSS_ANIMATION_WARNING = "CSS animations are not played; the SVG is drawn without them (use SMIL <animate>, which is)";
 
 function prefixUrls(value: string, prefix: string): string {
   if (!prefix || !value.includes("url(")) return value;

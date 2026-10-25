@@ -212,6 +212,24 @@ describe("SVG in the export", () => {
     expect(ink).toBeGreaterThan(50);
   });
 
+  it("plays SMIL on the element's own clock", async () => {
+    const pulse = '<svg width="100" height="100"><rect width="100" height="100" fill="#ff0000"><animate attributeName="fill" values="#ff0000;#0000ff" dur="2s" fill="freeze"/></rect></svg>';
+    const svgAt = async (t: number) => {
+      const el = h(Composition, { fps: 30, width: 640, height: 360 }, h(Track, { id: "a", layout: "free" }, h(Svg, { id: "p", content: pulse, start: 1, duration: 4 })));
+      const st = resolve(collect(el), svgManifest);
+      const plane = new OverlayPlane({ state: st, media: directoryResolver(scratch, svgManifest), warn: () => undefined });
+      const c = createCanvas(640, 360) as unknown as Canvas;
+      const context = c.getContext("2d") as CanvasRenderingContext2D;
+      await plane.draw(context, t);
+      plane.dispose();
+      const d = context.getImageData(320, 180, 1, 1).data;
+      return [d[0] as number, d[1] as number, d[2] as number] as Rgb;
+    };
+    expect(near(await svgAt(1), [255, 0, 0])).toBe(true); // the element's own time 0
+    expect(near(await svgAt(2), [128, 0, 128])).toBe(true); // halfway through the 2 s animation
+    expect(near(await svgAt(4), [0, 0, 255])).toBe(true); // frozen at its end
+  });
+
   it("narrows SVG font lists to a family skia knows", () => {
     const known = (f: string) => f === "Inter" || f === "sans-serif" || f === "serif";
     expect(safeSvgFonts('<text font-family="Foo, Inter">x</text>', known)).toEqual({ svg: '<text font-family="Inter">x</text>', replaced: [] });

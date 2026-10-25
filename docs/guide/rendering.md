@@ -87,7 +87,18 @@ on shapes warn). The composition's `background` can be a `gradient` too.
 - **Colour:** a `color` prop with `mode: "replace"` paints every drawn pixel in its `tint`;
   `mode: "tint"` keeps the shading and colours it; `opacity` is how much.
 
-Animation inside the SVG (SMIL, CSS) is not played yet.
+- **Animation:** SMIL plays on the element's own clock. At each frame `<animate>`, `<set>`,
+  `<animateTransform>` and `<animateColor>` are evaluated at the time since the element began
+  and written into plain attributes, so the browser (which would play SMIL on the page's clock)
+  and skia (which would not play it) draw the same picture, and scrubbing is exact. Supported:
+  `values`, `from`/`to`/`by`, `keyTimes`, `keySplines`, linear, discrete, spline and paced
+  timing, `begin`/`end` as offsets or `id.begin`/`id.end` plus an offset, `dur`, `repeatCount`,
+  `repeatDur`, `fill="freeze"`, `additive` and `accumulate`. Numbers interpolate wherever they
+  sit in a value (lengths, lists, paths with the same commands, transforms) and colours mix.
+  Begins on events or `indefinite`, and `<animateMotion>`, are left out with a warning. CSS
+  animations (`@keyframes`, `animation`) are removed with a warning.
+- **Text** in SVG uses a bundled family or a generic one; any other family is drawn in
+  sans-serif in the export (skia has no fallback of its own and would stop).
 
 ## Export
 
@@ -100,5 +111,5 @@ for the DOM and an offline mixer for Web Audio. See [Exporting](/guide/exporting
 Transition types other than crossfade (drawn as a crossfade), effects without
 a CSS filter equivalent, colour wheels, curves and LUTs, matte masks, audio
 effects, pitch correction, reversed audio, 3D text, most text animation
-presets, `emphasis` animations, `background.mode: "blur"`, sticker packs and `file:` nested
+presets, `emphasis` animations, `background.mode: "blur"`, sticker packs other than `icon:`, `<animateMotion>` and CSS animation in SVG, and `file:` nested
 references. Each warns once and is listed in the plan's `warnings`.

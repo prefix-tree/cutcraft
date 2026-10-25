@@ -137,9 +137,11 @@ Give the video one look, the way a designer would, and say it once.
 7. **Write `<Svg content>` only for one-off art** no kind covers. Give it a
    `viewBox`, fill it with tokens (`fill="$primary"` or
    `var(--cc-primary)`), keep it small (a few kilobytes), no scripts, no
-   external links, and no SMIL that depends on clicks. Text in SVG uses a
-   bundled font (Inter, Space Grotesk, Playfair Display, DM Sans, JetBrains
-   Mono) or a generic family.
+   external links. Animate it with SMIL (`<animate>`, `<animateTransform>`,
+   `<set>` with `begin`/`dur` in seconds from the element's start); not with
+   CSS `@keyframes`, clicks or `<animateMotion>`, which are dropped. Text in
+   SVG uses a bundled font (Inter, Space Grotesk, Playfair Display, DM Sans,
+   JetBrains Mono) or a generic family.
 8. **Look at it.** Graphics are judged by eye: after adding them, take a
    `captureSheet` at the moments they are fully in, and fix overlaps and
    text that runs out of its box.
