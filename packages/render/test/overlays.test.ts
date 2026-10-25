@@ -7,7 +7,7 @@ import { Caption, Captions, Composition, Layer, Shape, Sticker, Svg, Title, Trac
 import { indexLayerInteriors } from "@cutcut/player/overlays";
 import generateMedia, { mediaDir } from "../../player/e2e/gen-media";
 import { manifest } from "../../player/e2e/app/composition";
-import { OverlayPlane, createCanvas, directoryResolver, toSvg, treeKey } from "../src";
+import { OverlayPlane, createCanvas, directoryResolver, treeKey } from "../src";
 
 type Rgb = readonly [number, number, number];
 
@@ -110,13 +110,6 @@ describe("OverlayPlane", () => {
     await plane.draw(ctx, 5);
     const data = ctx.getImageData(0, 0, 640, 360).data;
     expect(data.every((v: number) => v === 0)).toBe(true);
-  });
-});
-
-describe("toSvg", () => {
-  it("writes a standalone document with room around the shape", () => {
-    const svg = toSvg(h("svg", { width: 10, height: 20, viewBox: "0 0 10 20", style: { display: "block" } }, h("rect", { x: 0, y: 0, width: 10, height: 20, fillOpacity: 0.5, fill: "#fff" })), 3);
-    expect(svg).toBe('<svg xmlns="http://www.w3.org/2000/svg" width="16" height="26" viewBox="-3 -3 16 26"><rect x="0" y="0" width="10" height="20" fill-opacity="0.5" fill="#fff"/></svg>');
   });
 });
 

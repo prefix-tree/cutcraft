@@ -1,4 +1,4 @@
-import type { DrawOp, FramePlan } from "../model/frame-plan";
+import type { BackgroundGradient, DrawOp, FramePlan } from "../model/frame-plan";
 import type { Matrix2D } from "../model/transform";
 import type { AnyCanvas, CreateCanvas, Ctx2D, Frame } from "../types";
 import { roundedRect, traceMask } from "./masks";
@@ -27,7 +27,7 @@ export class CanvasPainter {
     ctx.globalAlpha = 1;
     ctx.globalCompositeOperation = "source-over";
     ctx.filter = "none";
-    ctx.fillStyle = plan.background;
+    ctx.fillStyle = plan.backgroundGradient ? backgroundFill(ctx, plan.backgroundGradient, this.width, this.height) : plan.background;
     ctx.fillRect(0, 0, this.width, this.height);
     for (const op of plan.ops) {
       if (op.kind === "adjustment") this.adjust(ctx, op);
@@ -142,4 +142,34 @@ export function coversCanvas(op: DrawOp, width: number, height: number): boolean
   return m.a === 1 && m.b === 0 && m.c === 0 && m.d === 1 && m.e === 0 && m.f === 0
     && op.rect.w === width && op.rect.h === height && !op.crop
     && op.opacity >= 1 && op.blend === "source-over" && !op.filter && op.borderRadius === 0 && !op.mask;
+}
+
+/** A canvas gradient for the frame, laid out the way CSS lays out the same gradient on a box of this size. */
+export function backgroundFill(ctx: Ctx2D, g: BackgroundGradient, w: number, h: number): CanvasGradient | string {
+  const c = g.center ?? { x: 0.5, y: 0.5 };
+  const cx = c.x * w, cy = c.y * h;
+  let grad: CanvasGradient;
+  if (g.type === "radial") {
+    // CSS's default size: the farthest corner.
+    const r = Math.max(Math.hypot(cx, cy), Math.hypot(w - cx, cy), Math.hypot(cx, h - cy), Math.hypot(w - cx, h - cy));
+    grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+  } else if (g.type === "conic" && typeof (ctx as { createConicGradient?: unknown }).createConicGradient === "function") {
+    grad = (ctx as unknown as { createConicGradient(a: number, x: number, y: number): CanvasGradient }).createConicGradient((((g.angle ?? 0) - 90) * Math.PI) / 180, cx, cy);
+  } else {
+    const rad = ((g.angle ?? 180) * Math.PI) / 180;
+    const dx = Math.sin(rad), dy = -Math.cos(rad);
+    // The CSS gradient line: through the centre, long enough that its ends touch the corners.
+    const half = (Math.abs(w * dx) + Math.abs(h * dy)) / 2;
+    grad = ctx.createLinearGradient(w / 2 - dx * half, h / 2 - dy * half, w / 2 + dx * half, h / 2 + dy * half);
+  }
+  for (const s of [...g.stops].sort((a, b) => a.offset - b.offset)) grad.addColorStop(Math.max(0, Math.min(1, s.offset)), withOpacity(s.color, s.opacity));
+  return grad;
+}
+
+function withOpacity(color: string, opacity: number | undefined): string {
+  if (opacity === undefined || opacity >= 1) return color;
+  const hex = color.trim().match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i);
+  if (!hex) return color;
+  const h = (hex[1] as string).length === 3 ? (hex[1] as string).split("").map((x) => x + x).join("") : (hex[1] as string);
+  return `rgba(${parseInt(h.slice(0, 2), 16)}, ${parseInt(h.slice(2, 4), 16)}, ${parseInt(h.slice(4, 6), 16)}, ${Math.max(0, opacity)})`;
 }

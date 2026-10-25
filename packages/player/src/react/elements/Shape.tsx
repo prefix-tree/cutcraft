@@ -1,7 +1,14 @@
-import { shapeContent, shapeSize } from "../../overlays/content";
-import { dataAttrs, overlayStyle, type ElementProps } from "../../overlays/layout";
+import { dataAttrs, layoutStyle, type ElementProps } from "../../overlays/layout";
+import { shapeDrawing } from "../../overlays/shape";
+import { devWarn } from "../../warn";
 
-/** Vector shape as inline SVG in composition pixels. */
+/** A vector shape, drawn from the same markup as the export, with room around it for its stroke and shadows. */
 export function Shape(p: ElementProps) {
-  return <div {...dataAttrs(p.placement)} style={overlayStyle(p, shapeSize(p))}>{shapeContent(p)}</div>;
+  const d = shapeDrawing(p);
+  for (const w of d.prepared.warnings) devWarn(`shape:${p.placement.id}:${w}`, `shape "${p.placement.id}": ${w}`);
+  return (
+    <div {...dataAttrs(p.placement)} style={layoutStyle(d.layout)}>
+      <div style={{ position: "absolute", left: -d.bleed, top: -d.bleed, lineHeight: 0 }} dangerouslySetInnerHTML={{ __html: d.prepared.markup }} />
+    </div>
+  );
 }

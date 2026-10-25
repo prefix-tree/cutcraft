@@ -43,7 +43,7 @@ Generated from the Zod schemas in `packages/kit/src/jsx/schemas` and the capabil
 | `height` | integer |  | yes |
 | `sampleRate` | integer | `48000` |  |
 | `channels` | integer | `2` |  |
-| `background` | { mode, color } |  |  |
+| `background` | { mode, color, gradient } |  |  |
 
 ## `<Track>`
 
@@ -143,6 +143,8 @@ Generated from the Zod schemas in `packages/kit/src/jsx/schemas` and the capabil
 | `blend` | "normal" \| "multiply" \| "screen" \| "overlay" \| "darken" \| "lighten" \| "color-dodge" \| "color-burn" \| "hard-light" \| "soft-light" \| "difference" \| "exclusion" \| "hue" \| "saturation" \| "color" \| "luminosity" \| "add" \| "linear-dodge" |  |  |
 | `blendOpacity` | number (0..1) |  |  |
 | `emphasis` | "none" \| "pulse" \| "shake" \| "bounce" \| "float" \| "spin" \| "flash" \| "heartbeat" \| "swing" \| "wobble" \| "jello" \| "rubber-band" \| "tada" \| "vibrate" \| "flicker" \| "glow" \| "breathe" \| "wave" \| "tilt" \| "zoom-pulse" \| "focus-zoom" \| "pan-left" \| "pan-right" \| "pan-up" \| "pan-down" \| "ken-burns" \| { type, speed, intensity, loop, focusPoint, zoomScale, holdDuration, startTime, animationDuration } |  |  |
+| `enter` | { type, duration, easing } |  |  |
+| `exit` | { type, duration, easing } |  |  |
 | `style` | string |  |  |
 | `font` | string | `"Inter"` |  |
 | `size` | number (1..1000) | `48` |  |
@@ -175,6 +177,8 @@ Generated from the Zod schemas in `packages/kit/src/jsx/schemas` and the capabil
 | `blend` | "normal" \| "multiply" \| "screen" \| "overlay" \| "darken" \| "lighten" \| "color-dodge" \| "color-burn" \| "hard-light" \| "soft-light" \| "difference" \| "exclusion" \| "hue" \| "saturation" \| "color" \| "luminosity" \| "add" \| "linear-dodge" |  |  |
 | `blendOpacity` | number (0..1) |  |  |
 | `emphasis` | "none" \| "pulse" \| "shake" \| "bounce" \| "float" \| "spin" \| "flash" \| "heartbeat" \| "swing" \| "wobble" \| "jello" \| "rubber-band" \| "tada" \| "vibrate" \| "flicker" \| "glow" \| "breathe" \| "wave" \| "tilt" \| "zoom-pulse" \| "focus-zoom" \| "pan-left" \| "pan-right" \| "pan-up" \| "pan-down" \| "ken-burns" \| { type, speed, intensity, loop, focusPoint, zoomScale, holdDuration, startTime, animationDuration } |  |  |
+| `enter` | { type, duration, easing } |  |  |
+| `exit` | { type, duration, easing } |  |  |
 | `shape` | "rectangle" \| "circle" \| "ellipse" \| "triangle" \| "arrow" \| "line" \| "polygon" \| "path" \| "star" |  | yes |
 | `width` | number |  |  |
 | `height` | number |  |  |
@@ -224,6 +228,8 @@ Generated from the Zod schemas in `packages/kit/src/jsx/schemas` and the capabil
 | `blend` | "normal" \| "multiply" \| "screen" \| "overlay" \| "darken" \| "lighten" \| "color-dodge" \| "color-burn" \| "hard-light" \| "soft-light" \| "difference" \| "exclusion" \| "hue" \| "saturation" \| "color" \| "luminosity" \| "add" \| "linear-dodge" |  |  |
 | `blendOpacity` | number (0..1) |  |  |
 | `emphasis` | "none" \| "pulse" \| "shake" \| "bounce" \| "float" \| "spin" \| "flash" \| "heartbeat" \| "swing" \| "wobble" \| "jello" \| "rubber-band" \| "tada" \| "vibrate" \| "flicker" \| "glow" \| "breathe" \| "wave" \| "tilt" \| "zoom-pulse" \| "focus-zoom" \| "pan-left" \| "pan-right" \| "pan-up" \| "pan-down" \| "ken-burns" \| { type, speed, intensity, loop, focusPoint, zoomScale, holdDuration, startTime, animationDuration } |  |  |
+| `enter` | { type, duration, easing } |  |  |
+| `exit` | { type, duration, easing } |  |  |
 | `src` | string |  | yes |
 | `category` | string |  |  |
 | `name` | string |  |  |
@@ -344,6 +350,8 @@ Generated from the Zod schemas in `packages/kit/src/jsx/schemas` and the capabil
 | `anchor` | string \| "start" |  |  |
 | `offset` | number |  |  |
 | `duration` | number \| "fill" \| "source" \| { match } |  |  |
+| `enter` | { type, duration, easing } |  |  |
+| `exit` | { type, duration, easing } |  |  |
 | `transform` | { position, scale, rotation, anchor, opacity, borderRadius, crop, rotate3d, perspective, transformStyle } |  |  |
 | `blend` | "normal" \| "multiply" \| "screen" \| "overlay" \| "darken" \| "lighten" \| "color-dodge" \| "color-burn" \| "hard-light" \| "soft-light" \| "difference" \| "exclusion" \| "hue" \| "saturation" \| "color" \| "luminosity" \| "add" \| "linear-dodge" |  |  |
 

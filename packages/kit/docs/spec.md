@@ -49,22 +49,22 @@ function Helper(...) {...}                       // pure helpers (no hooks excep
 
 | Element | OpenReel kind | Key props beyond id/placement |
 |---|---|---|
-| `<Composition>` | Project settings + Timeline | `fps`, `width`, `height`, `sampleRate=48000`, `channels=2`, `background={{ mode: "color"\|"blur", color }}`; children `<Track>`, `<Marker>`, `<Multicam>` |
+| `<Composition>` | Project settings + Timeline | `fps`, `width`, `height`, `sampleRate=48000`, `channels=2`, `background={{ mode: "color"\|"blur"\|"gradient", color, gradient }}`; children `<Track>`, `<Marker>`, `<Multicam>` |
 | `<Track>` | Track (universal) | `layout`, `name`, `role: general\|captions\|dialogue\|music\|effects\|ambience`, `locked`, `hidden`, `muted`, `solo`, `group`. Child order = compositing order, first on top. Any item kind on any track. |
 | `<Clip>` (alias `<Audio>`) | Clip (video/image/audio media) | `src="asset:ID"`, `in`, `out`, `duration`, `speed` 0.1–20, `reverse`, `pitchCorrection`, `smoothSlowMo`, `interpolation`, `transform`, `fit`, `blend`, `blendOpacity`, `volume` 0–4, `fade={{in,out}}`, `automation={{volume:[[t,v]], pan:[[t,v]]}}`, `duck={{ under: trackId, to, attack?, release? }}`, `audioTrack`, `stabilize`, `chromaKey`, `emphasis`, `behindSubject`; children `<Effect>`, `<AudioEffect>`, `<ColorGrade>`, `<Keyframe>`, `<Mask>`, `<SpeedKey>`, `<Freeze>` |
 | `<Gap>` | (gaps) | `duration` |
 | `<Transition>` | Transition | Sibling between two clips in a sequence track: `type`, `duration`, `params`. Edge form: `on="<clipId>" edge="in"\|"out"`. In sequence layout the two clips overlap by `duration` (each extends its source by `duration/2`; needs handles) and the sequence shortens by `duration`. The resolver emits a placement for the transition itself at `boundary − duration/2`. |
-| `<Title>` | TextClip | text as children; flat style props (`font`, `size`, `weight`, `italic`, `color`, `background`, `stroke`, `shadow`, `align`, `valign`, `lineHeight`, `letterSpacing`, `decoration`); `animation={{ preset, in, out, stagger, unit, params }}`; `text3d`; `transform`, `blend`, `emphasis`; children `<Effect>`, `<Keyframe>` |
-| `<Shape>` | ShapeClip | `shape` (rectangle, circle, ellipse, triangle, arrow, line, polygon, path, star), `points`, `fill`, `stroke`, `shadow`, `shadows`, `cornerRadius`/`cornerRadii`, `starPoints`, `innerRadius`; transform/blend/emphasis; children `<Effect>`, `<Keyframe>` |
+| `<Title>` | TextClip | text as children; flat style props (`font`, `size`, `weight`, `italic`, `color`, `background`, `stroke`, `shadow`, `align`, `valign`, `lineHeight`, `letterSpacing`, `decoration`); `animation={{ preset, in, out, stagger, unit, params }}`; `text3d`; `enter`, `exit`; `transform`, `blend`, `emphasis`; children `<Effect>`, `<Keyframe>` |
+| `<Shape>` | ShapeClip | `shape` (rectangle, circle, ellipse, triangle, arrow, line, polygon, path, star), `points`, `fill`, `stroke`, `shadow`, `shadows`, `cornerRadius`/`cornerRadii`, `starPoints`, `innerRadius`; `enter`, `exit`; transform/blend/emphasis; children `<Effect>`, `<Keyframe>` |
 | `<Svg>` | SVGClip | `src` or `content`, `viewBox`, `preserveAspectRatio`, `color={{ mode, tint, opacity }}`, `enter`, `exit` |
-| `<Sticker>` | StickerClip | `src`, `category`, `name`; transform/blend/emphasis |
+| `<Sticker>` | StickerClip | `src`, `category`, `name`; `enter`, `exit`; transform/blend/emphasis |
 | `<Captions>` | Timeline.subtitles | `src="asset:ID"` (generated children from the transcript) or literal `<Caption id start end text words>` children; `style={{ font, size, color, background, position, highlight, upcoming }}`, `animation`. One per composition. |
 | `<Marker>` | Marker | `at`, `label`, `color`; child of `<Composition>` |
 | `<Adjustment>` | AdjustmentLayer | `affects="all" \| [trackId]`, `opacity`, `blend`, `enabled`, `transform`; children `<Effect>` |
 | `<Mask>` | Mask | child of a visual element: `type: shape\|drawn\|matte`, `shape` or `path={{ points, closed }}`, `feather` 0–100, `inverted`, `expansion` −100..100, `opacity`, `matte={{ source, channel: alpha\|luminance\|bounds }}`; children `<Keyframe property="path">` |
 | `<Nested>` | CompoundClip + instance | `of={SceneHelper}` (pure helper returning tracks/composition), `in`, `out`, `transform`, `volume` |
 | `<Multicam>` + `<Angle>` + `<Cut>` | MultiCamGroup + angles + switches | `<Multicam id name sync>` with `<Angle id src offset color/>` and `<Cut id at angle/>`; the resolver expands cuts into generated clips on the containing track; angle sources render hidden |
-| `<Layer>` | — (ours) | `duration`, `anchor`/`offset`, `transform`; arbitrary React interior using `useT()` (0..1) or `useLayer()` (seconds elapsed, remaining, duration); one component child gives the Layer handles (`layer/setProps`) |
+| `<Layer>` | — (ours) | `duration`, `anchor`/`offset`, `transform`, `enter`, `exit`; arbitrary React interior using `useT()` (0..1) or `useLayer()` (seconds elapsed, remaining, duration); one component child gives the Layer handles (`layer/setProps`) |
 | `<Effect>` / `<AudioEffect>` | Effect | `type`, `params`, `enabled`; order = stack order |
 | `<ColorGrade>` | ClipColorGrading | `wheels`, `curves`, `lut`, `hsl`, `temperature`, `tint` |
 | `<Keyframe>` | Keyframe | `property`, `at` (element-relative), `value`, `easing`, `handles`, `roving` |

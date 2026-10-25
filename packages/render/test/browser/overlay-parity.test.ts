@@ -87,6 +87,27 @@ const cases: Case[] = [
     dom: (s) => domOf(s, DomLayerElement, { interior: indexLayerInteriors(scene(h(Layer, { id: "e", start: 0, duration: 2 }, h(InlineSvg)))).get("e") }),
   },
   {
+    name: "a shape with a gradient, a shadow and its own corner radii",
+    element: scene(h(Shape, { id: "e", shape: "rectangle", width: 260, height: 140, start: 0, duration: 2, cornerRadii: { topLeft: 40, topRight: 6, bottomRight: 40, bottomLeft: 6 },
+      fill: { type: "gradient", gradient: { type: "linear", angle: 135, stops: [{ offset: 0, color: "#ff5a1f" }, { offset: 1, color: "#7c3aed" }] } }, shadow: { color: "#000000", blur: 12, x: 0, y: 14 } })),
+    dom: (s) => domOf(s, DomShape, {}),
+  },
+  {
+    name: "a title halfway through a slide entrance",
+    element: scene(h(Title, { id: "e", start: 0, duration: 4, size: 64, color: "#ffffff", enter: { type: "slide-up", duration: 2, easing: "linear" } }, "Arriving")),
+    dom: (s) => domOf(s, DomTitle, { text: "Arriving" }),
+  },
+  {
+    name: "an SVG halfway through drawing its strokes",
+    element: scene(h(Svg, { id: "e", start: 0, duration: 4, content: BADGE, enter: { type: "draw", duration: 2, easing: "linear" } })),
+    dom: (s) => domOf(s, DomSvg, {}),
+  },
+  {
+    name: "a shape halfway through a reveal from the edges",
+    element: scene(h(Shape, { id: "e", shape: "rectangle", width: 300, height: 120, start: 0, duration: 4, fill: "#16a34a", enter: { type: "reveal-edges", duration: 2, easing: "linear" } })),
+    dom: (s) => domOf(s, DomShape, {}),
+  },
+  {
     name: "a caption line",
     element: h(Composition, { fps: 30, width: W, height: H }, h(Captions, { id: "e", style: { position: "bottom", size: 30 } }, h(Caption, { id: "k", start: 0, end: 2, text: "Captions follow the clips" }))),
     dom: (s) => h(DomCaptions, { placement: s.items.get("e")!, state: s, time: T }),

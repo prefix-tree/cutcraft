@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { zTrackLayout, zTrackRole } from "../enums";
-import { colorSchema, idSchema, timeRefSchema } from "./common";
+import { colorSchema, gradientSchema, idSchema, timeRefSchema } from "./common";
 
 export const compositionSchema = z.strictObject({
   id: idSchema.default("composition"),
@@ -10,8 +10,9 @@ export const compositionSchema = z.strictObject({
   sampleRate: z.number().int().min(8000).max(192000).default(48000),
   channels: z.number().int().min(1).max(8).default(2),
   background: z.strictObject({
-    mode: z.enum(["color", "blur"]),
+    mode: z.enum(["color", "blur", "gradient"]),
     color: colorSchema.optional(),
+    gradient: gradientSchema.optional(),
   }).optional(),
 });
 

@@ -30,10 +30,20 @@ export interface DrawOp {
   readonly mask?: MaskSpec;
 }
 
+/** A composition background gradient, as the schema writes it. CSS angles: 0 points up, 180 (the default) runs down. */
+export interface BackgroundGradient {
+  readonly type: "linear" | "radial" | "conic";
+  readonly angle?: number;
+  readonly center?: { readonly x: number; readonly y: number };
+  readonly stops: readonly { readonly offset: number; readonly color: string; readonly opacity?: number }[];
+}
+
 export interface FramePlan {
   readonly time: number;
   readonly frame: number;
   readonly background: string;
+  /** A gradient that fills the frame instead of `background` (which is then its first colour). */
+  readonly backgroundGradient?: BackgroundGradient;
   readonly ops: readonly DrawOp[];
   readonly warnings: readonly string[];
 }
@@ -61,9 +71,10 @@ export function buildFramePlan(state: ResolvedState, t: number, resolveNested?: 
   const comp = state.composition;
   const warnings: string[] = [];
   const ops: DrawOp[] = [];
-  const bg = state.items.get(comp.id)?.props.background as { mode?: string; color?: string } | undefined;
+  const bg = state.items.get(comp.id)?.props.background as { mode?: string; color?: string; gradient?: BackgroundGradient } | undefined;
   if (bg?.mode === "blur") warnings.push("background mode blur is drawn as a colour");
-  const background = bg?.color ?? "#000000";
+  const gradient = bg?.mode === "gradient" && bg.gradient && bg.gradient.stops.length >= 2 ? bg.gradient : undefined;
+  const background = bg?.color ?? gradient?.stops[0]?.color ?? "#000000";
 
   for (const item of visiblePlacements(state, t)) {
     const p = item.placement;
@@ -80,7 +91,7 @@ export function buildFramePlan(state: ResolvedState, t: number, resolveNested?: 
       });
     }
   }
-  return { time: t, frame: frameIndex(t, comp.fps), background, ops, warnings };
+  return { time: t, frame: frameIndex(t, comp.fps), background, ...(gradient ? { backgroundGradient: gradient } : {}), ops, warnings };
 }
 
 function mediaOp(state: ResolvedState, item: VisibleItem, t: number, resolveNested: ResolveNested | undefined, warnings: string[]): DrawOp | null {

@@ -51,6 +51,23 @@ Every DOM element carries `data-el` and `data-kind`; the root carries
 `data-time` and `data-frame`; the canvas is `[data-el="composition"]`. An editor
 can select, highlight and drag preview elements by the same ids the file uses.
 
+## Entrances and exits
+
+Titles, shapes, SVG, stickers and layers take `enter` and `exit`, each a
+`{ type, duration, easing }` that plays at the element's start or end: `fade`,
+`slide-left`/`right`/`up`/`down` (a quarter of the element's size, at most 160 px),
+`scale`, `rotate`, `pop`, `bounce`, `elastic`, `flip-horizontal`/`vertical`,
+`wipe-left`/`right`/`up`/`down`, `reveal-center`, `reveal-edges` and `draw`, which
+draws a shape's or an SVG's strokes and then fades its fills in (other elements fade).
+They apply to the element's layout, so the preview and the export compute them the same way.
+
+## Shapes
+
+A `<Shape>` is drawn as SVG through the same preparation as `<Svg>`: solid or gradient
+fill and stroke (`linear` at a CSS angle, `radial`), dashes, caps and joins, one radius
+or `cornerRadii` per corner, and drop `shadow`/`shadows` (inset ones and conic gradients
+on shapes warn). The composition's `background` can be a `gradient` too.
+
 ## SVG
 
 `<Svg>` draws inline `content` or an SVG asset read as text. Before either surface draws it,
@@ -79,5 +96,5 @@ for the DOM and an offline mixer for Web Audio. See [Exporting](/guide/exporting
 Transition types other than crossfade (drawn as a crossfade), effects without
 a CSS filter equivalent, colour wheels, curves and LUTs, matte masks, audio
 effects, pitch correction, reversed audio, 3D text, most text animation
-presets, `background.mode: "blur"`, sticker packs and `file:` nested
+presets, `emphasis` animations, `background.mode: "blur"`, sticker packs and `file:` nested
 references. Each warns once and is listed in the plan's `warnings`.

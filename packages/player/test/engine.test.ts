@@ -59,6 +59,6 @@ describe("@cutcut/player/overlays", () => {
     }
     expect(typeof document).toBe("undefined");
     const overlays = await import("../src/overlays");
-    for (const name of ["overlayLayout", "titleContent", "shapeContent", "captionsContent", "layerContent", "indexLayerInteriors"]) expect(overlays, name).toHaveProperty(name);
+    for (const name of ["overlayLayout", "titleContent", "shapeDrawing", "prepareSvg", "captionsContent", "layerContent", "indexLayerInteriors"]) expect(overlays, name).toHaveProperty(name);
   });
 });

@@ -1,7 +1,8 @@
 import type { FitMode, Placement, ResolvedState, Transform } from "@cutcut/kit";
 import type { CSSProperties } from "react";
 import { filterString } from "../model/effects";
-import { animatedTransform, layoutRect, matrixToCss, type Box, type Matrix2D } from "../model/transform";
+import { motionAt, type ClipRect, type GraphicAnimation } from "../model/motion";
+import { animatedTransform, layoutRect, matrixToCss, multiply, type Box, type Matrix2D } from "../model/transform";
 import { blendOf } from "../model/frame-plan";
 
 /** Placement kinds drawn above the canvas plane, besides captions. */
@@ -27,27 +28,51 @@ export interface OverlayLayout {
   /** A canvas compositing operation, or null for normal. */
   readonly blend: GlobalCompositeOperation | null;
   readonly borderRadius: number;
+  /** The part shown while an entrance or exit wipes or reveals it, in the element's own pixels; null for all. */
+  readonly clip: readonly ClipRect[] | null;
+  /** How much of its strokes are drawn (0..1) during a `draw` entrance or exit; null when not drawing. */
+  readonly draw: number | null;
 }
 
-export function overlayLayout(p: ElementProps, size: Box, fit: FitMode = "none"): OverlayLayout {
+/**
+ * `drawable` elements (shapes, SVG) draw their strokes progressively for a `draw` entrance;
+ * others fade instead.
+ */
+export function overlayLayout(p: ElementProps, size: Box, fit: FitMode = "none", drawable = false): OverlayLayout {
   const rel = p.time - p.placement.start;
   const transform = animatedTransform(p.placement.props.transform as Transform | undefined, p.children, rel);
   const layout = layoutRect(p.state.composition, size, fit, transform);
   const { filter } = filterString(p.children, p.placement.id);
   const blend = p.placement.props.blend;
+  const props = p.placement.props as { enter?: GraphicAnimation; exit?: GraphicAnimation };
+  const motion = motionAt(props.enter, props.exit, rel, p.placement.duration, layout.rect.w, layout.rect.h);
+  const fadeForDraw = !drawable && motion.draw !== null ? motion.draw : 1;
   return {
     rect: { w: layout.rect.w, h: layout.rect.h },
-    matrix: layout.matrix,
-    opacity: (transform.opacity ?? 1) * p.transitionOpacity,
+    matrix: multiply(layout.matrix, motion.matrix),
+    opacity: (transform.opacity ?? 1) * p.transitionOpacity * motion.opacity * fadeForDraw,
     filter: filter || null,
     blend: blend && blend !== "normal" ? blendOf(blend) : null,
     borderRadius: transform.borderRadius ?? 0,
+    clip: motion.clip,
+    draw: drawable ? motion.draw : null,
   };
 }
 
+/** A clip as a CSS `path()`: rectangles in the element's own pixels, an empty one when nothing shows. */
+export function clipPathCss(clip: readonly ClipRect[]): string {
+  const n = (v: number): string => String(Math.round(v * 100) / 100);
+  const d = clip.map((r) => `M${n(r.x)} ${n(r.y)}h${n(r.w)}v${n(r.h)}h${n(-r.w)}Z`).join("");
+  return `path("${d || "M0 0Z"}")`;
+}
+
 /** Position an overlay of `size` composition pixels with its transform, filter and blend as CSS. */
-export function overlayStyle(p: ElementProps, size: Box, fit: FitMode = "none"): CSSProperties {
-  const l = overlayLayout(p, size, fit);
+export function overlayStyle(p: ElementProps, size: Box, fit: FitMode = "none", drawable = false): CSSProperties {
+  return layoutStyle(overlayLayout(p, size, fit, drawable));
+}
+
+/** The CSS that puts an element where its layout says. */
+export function layoutStyle(l: OverlayLayout): CSSProperties {
   return {
     position: "absolute",
     left: 0,
@@ -60,6 +85,7 @@ export function overlayStyle(p: ElementProps, size: Box, fit: FitMode = "none"):
     ...(l.filter ? { filter: l.filter } : {}),
     ...(l.blend ? { mixBlendMode: cssBlend(l.blend) } : {}),
     ...(l.borderRadius ? { borderRadius: l.borderRadius, overflow: "hidden" } : {}),
+    ...(l.clip ? { clipPath: clipPathCss(l.clip) } : {}),
     boxSizing: "border-box",
   };
 }

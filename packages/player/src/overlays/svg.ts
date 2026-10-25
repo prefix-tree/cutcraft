@@ -1,4 +1,5 @@
 import { SaxesParser } from "saxes";
+import { shapeLength } from "./svg-length";
 
 /**
  * SVG markup as both surfaces draw it. The browser preview inlines the string,
@@ -29,6 +30,10 @@ export interface PrepareSvgOptions {
   readonly tokens?: Readonly<Record<string, string>> | undefined;
   /** Prefixed to every id, so two inline SVGs on one page cannot collide. */
   readonly idPrefix?: string | undefined;
+  /** How much of the strokes are drawn (0..1); fills fade in over the last 40%. Omit for all of it. */
+  readonly draw?: number | null | undefined;
+  /** Room, in pixels, kept on every side of the box for strokes and shadows that reach past it. */
+  readonly bleed?: number | undefined;
 }
 
 export interface PreparedSvg {
@@ -91,10 +96,13 @@ function build(markup: string, options: PrepareSvgOptions): PreparedSvg {
   const warnings = [...parseWarnings];
   if (!root) return { markup: "", animated: false, warnings };
   const prefix = options.idPrefix ? `${options.idPrefix.replace(/[^A-Za-z0-9_-]/g, "_")}-` : "";
-  const ctx: Walk = { prefix, tokens: options.tokens ?? {}, warnings, unknownTokens: new Set(), animated: false };
+  const draw = options.draw === null || options.draw === undefined || options.draw >= 1 ? null : Math.max(0, options.draw);
+  const ctx: Walk = { prefix, tokens: options.tokens ?? {}, warnings, unknownTokens: new Set(), animated: false, draw, inDefs: false };
   const body = root.children.map((c) => clean(c, ctx)).filter((c): c is SvgNode | string => c !== null);
 
   const box = options.viewBox ?? viewBoxOf(root) ?? { minX: 0, minY: 0, ...svgIntrinsicSize(markup) };
+  const bleed = Math.max(0, options.bleed ?? 0);
+  const bx = bleed * (box.width / Math.max(1e-9, options.box.width)), by = bleed * (box.height / Math.max(1e-9, options.box.height));
   const rootAttrs: Record<string, string> = {};
   for (const [k, v] of Object.entries(root.attrs)) {
     if (k === "width" || k === "height" || k === "viewBox" || k === "preserveAspectRatio" || k === "x" || k === "y" || k.startsWith("xmlns")) continue;
@@ -104,14 +112,14 @@ function build(markup: string, options: PrepareSvgOptions): PreparedSvg {
   const head: Record<string, string> = {
     xmlns: SVG_NS,
     "xmlns:xlink": XLINK_NS,
-    width: num(options.box.width),
-    height: num(options.box.height),
-    viewBox: `${num(box.minX)} ${num(box.minY)} ${num(box.width)} ${num(box.height)}`,
+    width: num(options.box.width + 2 * bleed),
+    height: num(options.box.height + 2 * bleed),
+    viewBox: `${num(box.minX - bx)} ${num(box.minY - by)} ${num(box.width + 2 * bx)} ${num(box.height + 2 * by)}`,
     preserveAspectRatio: options.preserveAspectRatio ?? root.attrs.preserveAspectRatio ?? "xMidYMid meet",
   };
 
   let children: (SvgNode | string)[] = body;
-  const filter = colorFilter(options.color, `${prefix}cc-color`, box);
+  const filter = colorFilter(options.color, `${prefix}cc-color`, { minX: box.minX - bx, minY: box.minY - by, width: box.width + 2 * bx, height: box.height + 2 * by });
   if (filter) children = [{ name: "defs", attrs: {}, children: [filter] }, { name: "g", attrs: { filter: `url(#${prefix}cc-color)` }, children: body }];
   const out = serialize({ name: "svg", attrs: { ...head, ...rootAttrs }, children });
   return { markup: out, animated: ctx.animated, warnings };
@@ -123,7 +131,14 @@ interface Walk {
   readonly warnings: string[];
   readonly unknownTokens: Set<string>;
   animated: boolean;
+  /** Stroke drawing progress, or null when everything is drawn. */
+  readonly draw: number | null;
+  /** Inside definitions (gradients, clips, masks…), which are not drawn by themselves. */
+  readonly inDefs: boolean;
 }
+
+const DEFINITIONS = new Set(["defs", "clipPath", "mask", "marker", "pattern", "symbol", "linearGradient", "radialGradient", "filter"]);
+const FILLED = new Set(["path", "line", "polyline", "polygon", "circle", "ellipse", "rect", "text"]);
 
 function clean(node: SvgNode | string, ctx: Walk): SvgNode | string | null {
   if (typeof node === "string") return node;
@@ -136,12 +151,31 @@ function clean(node: SvgNode | string, ctx: Walk): SvgNode | string | null {
     const kept = cleanAttr(k, v, ctx);
     if (kept !== null) attrs[k] = kept;
   }
+  const inner: Walk = DEFINITIONS.has(node.name) && !ctx.inDefs ? { ...ctx, inDefs: true } : ctx;
   const children = node.children
-    .map((c) => (node.name === "style" && typeof c === "string" ? cleanStyleSheet(c, ctx) : clean(c, ctx)))
+    .map((c) => (node.name === "style" && typeof c === "string" ? cleanStyleSheet(c, inner) : clean(c, inner)))
     .filter((c): c is SvgNode | string => c !== null);
+  if (inner !== ctx && inner.animated) ctx.animated = true;
+  if (ctx.draw !== null && !ctx.inDefs && FILLED.has(node.name)) drawProgress(node.name, attrs, ctx.draw);
   // A link cannot be followed in a video; keep what it draws.
   if (node.name === "a") return { name: "g", attrs: Object.fromEntries(Object.entries(attrs).filter(([k]) => k !== "href" && k !== "xlink:href" && k !== "target")), children };
   return { name: node.name, attrs, children };
+}
+
+/** Hides the stroke beyond `draw` of its length with a dash, and fades the fill in over the last 40%. */
+function drawProgress(name: string, attrs: Record<string, string>, draw: number): void {
+  const style = attrs.style ?? "";
+  const stroke = attrs.stroke ?? style.match(/(?:^|;)\s*stroke\s*:\s*([^;]+)/)?.[1]?.trim();
+  if (stroke && stroke !== "none") {
+    const len = shapeLength(name, attrs);
+    if (len !== null && len > 0) {
+      attrs["stroke-dasharray"] = `${num(len)} ${num(len)}`;
+      attrs["stroke-dashoffset"] = num(len * (1 - draw));
+    }
+  }
+  const fade = Math.max(0, Math.min(1, (draw - 0.6) / 0.4));
+  const own = parseFloat(attrs["fill-opacity"] ?? "1");
+  attrs["fill-opacity"] = num((Number.isFinite(own) ? own : 1) * fade);
 }
 
 function cleanAttr(name: string, value: string, ctx: Walk): string | null {

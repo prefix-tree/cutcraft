@@ -1,8 +1,8 @@
 import { z } from "zod";
-import { zBlendMode, zEasing, zGraphicAnimation, zShapeType, zTextAnimationPreset } from "../enums";
+import { zBlendMode, zShapeType, zTextAnimationPreset } from "../enums";
 import { zAnimationUnit, zSvgColorMode, zTextAlign, zTextDecoration, zTextValign } from "./enums-local";
 import {
-  assetRefSchema, colorSchema, gradientSchema, idSchema, shadowSchema, timedProps, timeRefSchema,
+  assetRefSchema, colorSchema, entranceProps, gradientSchema, idSchema, shadowSchema, timedProps, timeRefSchema,
   transformSchema, vec2Schema, visualProps,
 } from "./common";
 
@@ -31,6 +31,7 @@ export const text3dSchema = z.strictObject({
 export const titleSchema = z.strictObject({
   ...timedProps,
   ...visualProps,
+  ...entranceProps,
   style: idSchema.optional(),
   font: z.string().default("Inter"),
   size: z.number().min(1).max(1000).default(48),
@@ -74,6 +75,7 @@ const strokeSchema = z.strictObject({
 export const shapeSchema = z.strictObject({
   ...timedProps,
   ...visualProps,
+  ...entranceProps,
   shape: zShapeType,
   width: z.number().positive().optional(),
   height: z.number().positive().optional(),
@@ -88,11 +90,6 @@ export const shapeSchema = z.strictObject({
   innerRadius: z.number().min(0).max(1).optional(),
 });
 
-const graphicAnimationSchema = z.strictObject({
-  type: zGraphicAnimation,
-  duration: z.number().positive().default(0.5),
-  easing: zEasing.default("ease-out"),
-});
 
 export const svgSchema = z.strictObject({
   ...timedProps,
@@ -102,13 +99,13 @@ export const svgSchema = z.strictObject({
   viewBox: z.strictObject({ minX: z.number(), minY: z.number(), width: z.number().positive(), height: z.number().positive() }).optional(),
   preserveAspectRatio: z.string().optional(),
   color: z.strictObject({ mode: zSvgColorMode, tint: colorSchema.optional(), opacity: z.number().min(0).max(1).optional() }).optional(),
-  enter: graphicAnimationSchema.optional(),
-  exit: graphicAnimationSchema.optional(),
+  ...entranceProps,
 }).refine((v) => Boolean(v.src) !== Boolean(v.content), { message: "Svg takes either src or content" });
 
 export const stickerSchema = z.strictObject({
   ...timedProps,
   ...visualProps,
+  ...entranceProps,
   src: z.string().min(1),
   category: z.string().optional(),
   name: z.string().optional(),
@@ -135,6 +132,7 @@ export const nestedSchema = z.strictObject({
 
 export const layerSchema = z.strictObject({
   ...timedProps,
+  ...entranceProps,
   transform: transformSchema.optional(),
   blend: zBlendMode.optional(),
 });

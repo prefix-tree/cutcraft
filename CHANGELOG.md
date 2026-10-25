@@ -8,6 +8,12 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- Entrances and exits (`enter`, `exit`) on titles, shapes, SVG, stickers and layers, all
+  twenty presets including wipes, reveals and `draw`, computed in the shared layout so the
+  preview and the export agree. Shapes are drawn as SVG with gradient fill and stroke, drop
+  shadows, per-corner radii, caps, joins and dash offsets; the composition background can be
+  a gradient.
+
 - SVG is prepared once for both surfaces (`prepareSvg`): sanitised, sized to what it
   asks for or fitted with `fit`, `viewBox` and `preserveAspectRatio` honoured, ids renamed per
   element, theme tokens filled in, and `color` `replace`/`tint`/`opacity` applied as SVG filters.

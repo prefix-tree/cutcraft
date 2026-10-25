@@ -3,7 +3,7 @@ import type { ResolvedState } from "@cutcut/kit";
 import { installLayerClock } from "@cutcut/kit";
 import { isVisibleAt, visiblePlacements, type MediaResolver, type VisibleItem } from "@cutcut/player/engine";
 import {
-  OVERLAY_KINDS, captionsContent, parseSvg, serialize, svgDrawing, layerClock, layerContent, overlayLayout, shapeContent, shapeSize, stickerPlaceholder, stickerSize, titleContent,
+  OVERLAY_KINDS, captionsContent, parseSvg, serialize, shapeDrawing, svgDrawing, layerClock, layerContent, overlayLayout, stickerPlaceholder, stickerSize, titleContent,
   type ElementProps, type OverlayLayout,
 } from "@cutcut/player/overlays";
 import { readFileSync } from "node:fs";
@@ -144,11 +144,10 @@ export class OverlayPlane {
         return;
       }
       case "shape": {
-        const size = shapeSize(props);
-        const layout = overlayLayout(props, size);
-        const pad = shapeBleed(placement.props);
-        const image = await this.vectorImage(toSvg(shapeContent(props), pad));
-        this.place(ctx, layout, image, { x: -pad, y: -pad, w: layout.rect.w + 2 * pad, h: layout.rect.h + 2 * pad });
+        const d = shapeDrawing(props);
+        for (const w of d.prepared.warnings) this.warnOnce(`shape:${placement.id}:${w}`, `shape "${placement.id}": ${w}`);
+        const image = await this.vectorImage(d.prepared.markup);
+        this.place(ctx, d.layout, image, { x: -d.bleed, y: -d.bleed, w: d.layout.rect.w + 2 * d.bleed, h: d.layout.rect.h + 2 * d.bleed });
         return;
       }
       case "svg": {
@@ -195,6 +194,12 @@ export class OverlayPlane {
     if (layout.borderRadius > 0) {
       ctx.beginPath();
       ctx.roundRect(0, 0, rect.w, rect.h, layout.borderRadius);
+      ctx.clip();
+    }
+    if (layout.clip) {
+      // An entrance or exit that wipes or reveals: only these rectangles show (none at all is allowed).
+      ctx.beginPath();
+      for (const r of layout.clip) ctx.rect(r.x, r.y, r.w, r.h);
       ctx.clip();
     }
     const b = box ?? { x: 0, y: 0, w: rect.w, h: rect.h };
@@ -341,41 +346,6 @@ export function treeKey(node: ReactNode): string | null {
     return true;
   };
   return walk(node) ? out.join("") : null;
-}
-
-/** How far a shape's stroke reaches past its box. */
-function shapeBleed(props: Readonly<Record<string, unknown>>): number {
-  const stroke = props.stroke as { width?: number } | undefined;
-  return stroke?.width ? Math.ceil(stroke.width / 2) + 1 : 0;
-}
-
-/** A tree of plain SVG elements (what `shapeContent` returns) as a standalone document, with `pad` pixels of room on every side. */
-export function toSvg(node: ReactNode, pad = 0): string {
-  if (!isValidElement(node)) return "";
-  const root = node as ReactElement<Record<string, unknown>>;
-  const w = Number(root.props.width), h = Number(root.props.height);
-  const attrs = { xmlns: "http://www.w3.org/2000/svg", width: w + 2 * pad, height: h + 2 * pad, viewBox: `${-pad} ${-pad} ${w + 2 * pad} ${h + 2 * pad}` };
-  return `<svg ${Object.entries(attrs).map(([k, v]) => `${k}="${v}"`).join(" ")}>${children(root.props.children as ReactNode)}</svg>`;
-}
-
-function children(node: ReactNode): string {
-  if (node === null || node === undefined || typeof node === "boolean") return "";
-  if (Array.isArray(node)) return node.map(children).join("");
-  if (typeof node === "string" || typeof node === "number") return escape(String(node));
-  if (!isValidElement(node)) return "";
-  const el = node as ReactElement<Record<string, unknown>>;
-  if (typeof el.type !== "string") return "";
-  const { children: kids, style: _style, ...rest } = el.props;
-  const attrs = Object.entries(rest)
-    .filter(([, v]) => v !== undefined && v !== null && v !== false)
-    .map(([k, v]) => ` ${k === "viewBox" ? k : k.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`)}="${escape(String(v))}"`)
-    .join("");
-  const inner = children(kids as ReactNode);
-  return inner ? `<${el.type}${attrs}>${inner}</${el.type}>` : `<${el.type}${attrs}/>`;
-}
-
-function escape(text: string): string {
-  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
 /** Inter regular and bold, upright and italic, from the `@fontsource/inter` package. */

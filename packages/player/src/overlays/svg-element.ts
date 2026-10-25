@@ -19,7 +19,7 @@ export function svgDrawing(p: ElementProps, markup: string, tokens?: Readonly<Re
   const viewBox = props.viewBox as SvgViewBox | undefined;
   const size = svgIntrinsicSize(markup, viewBox);
   const fit = (props.fit as FitMode | undefined) ?? "none";
-  const layout = overlayLayout(p, size, fit);
+  const layout = overlayLayout(p, size, fit, true);
   const prepared = prepareSvg(markup, {
     box: { width: layout.rect.w, height: layout.rect.h },
     viewBox,
@@ -27,6 +27,7 @@ export function svgDrawing(p: ElementProps, markup: string, tokens?: Readonly<Re
     color: props.color as SvgColor | undefined,
     tokens,
     idPrefix: p.placement.id,
+    draw: layout.draw,
   });
   return { size, fit, layout, prepared };
 }

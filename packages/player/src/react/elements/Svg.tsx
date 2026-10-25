@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { usePlayer } from "../hooks";
-import { dataAttrs, overlayStyle, type ElementProps } from "../../overlays/layout";
+import { dataAttrs, layoutStyle, overlayStyle, type ElementProps } from "../../overlays/layout";
 import { svgDrawing } from "../../overlays/svg-element";
 import { devWarn } from "../../warn";
 
@@ -13,7 +13,7 @@ export function Svg(p: ElementProps) {
   if (markup === null) return <div {...dataAttrs(p.placement)} style={overlayStyle(p, { width: 0, height: 0 })} />;
   const drawing = svgDrawing(p, markup);
   for (const w of drawing.prepared.warnings) devWarn(`svg:${p.placement.id}:${w}`, `svg "${p.placement.id}": ${w}`);
-  return <div {...dataAttrs(p.placement)} style={{ ...overlayStyle(p, drawing.size, drawing.fit), lineHeight: 0 }} dangerouslySetInnerHTML={{ __html: drawing.prepared.markup }} />;
+  return <div {...dataAttrs(p.placement)} style={{ ...layoutStyle(drawing.layout), lineHeight: 0 }} dangerouslySetInnerHTML={{ __html: drawing.prepared.markup }} />;
 }
 
 /** Resolves an `asset:` reference to an object URL or a plain URL. */
