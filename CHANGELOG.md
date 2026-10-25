@@ -8,6 +8,12 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- SVG is prepared once for both surfaces (`prepareSvg`): sanitised, sized to what it
+  asks for or fitted with `fit`, `viewBox` and `preserveAspectRatio` honoured, ids renamed per
+  element, theme tokens filled in, and `color` `replace`/`tint`/`opacity` applied as SVG filters.
+  The preview inlines SVG assets instead of loading them as images. In the export, an inline
+  `<svg>` inside a Layer is drawn (Satori embedded it as an image skia could not read).
+
 - `@cutcut/render`: export to WebM (VP9 and Opus) or MP4 (H.264 and AAC) in Node,
   with no browser. It runs the player's engine through the new
   `@cutcut/player/engine` and `@cutcut/player/overlays` entries; titles, layers
@@ -87,6 +93,11 @@ All notable changes to this project are documented here. The format follows
   settles to the exact frame after the gesture.
 
 ### Fixed
+
+- A seek or export frame could be the one before the right frame when the source time
+  landed a hair below a frame boundary (as it does at 1.5x) and the next frame was not decoded
+  yet: the wait ended because the earlier frame still "covered" the time. It now uses the same
+  1 ms tolerance as the pick. This was the intermittent off-by-one in the parallel export test.
 
 - A placement with `duration="fill"` (a music bed under the whole video) had a
   source range of nothing, so the audio plan skipped it and the bed was silent

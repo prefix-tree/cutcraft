@@ -146,7 +146,9 @@ export class ClipDecoder {
     for (;;) {
       const picked = this.forwardPick(st);
       const next = this.queue[0];
-      const settled = (next !== undefined && next.timestamp > st + PICK_EPS) || this.gen === null || (picked !== null && picked.timestamp + picked.duration > st);
+      // A frame that starts within PICK_EPS after `st` is the one to pick, so the picked frame is final only if
+      // it lasts past that tolerance too; otherwise the next frame may simply not be decoded yet.
+      const settled = (next !== undefined && next.timestamp > st + PICK_EPS) || this.gen === null || (picked !== null && picked.timestamp + picked.duration > st + PICK_EPS);
       if (settled || Date.now() >= deadline || this.disposed) { this.pump(); return picked ?? this.current; }
       await this.pumpOnce();
     }

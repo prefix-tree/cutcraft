@@ -1,4 +1,4 @@
-import { ClipDecoder, QUEUE_MAX } from "@cutcut/player";
+import { ClipDecoder, QUEUE_MAX, QUEUE_TARGET } from "@cutcut/player";
 import { FakeFrameSource, flush } from "./helpers/fakes";
 import { childrenOf, makeState } from "./helpers/state";
 
@@ -135,6 +135,20 @@ describe("ClipDecoder", () => {
     source.release(40);
     const f = await slow;
     expect(f!.timestamp).toBeCloseTo(1);
+    d.dispose();
+  });
+
+  it("with wait, does not settle for the previous frame when the time lands a hair before the next one", async () => {
+    // At 1.5x a source time lands exactly on a frame boundary, and float error puts it just below (0.2666… minus a
+    // hair for the frame at 8/30). That frame is the one to pick (it is within PICK_EPS), but the frame before it
+    // still "covers" the time by its duration. When the queue is full and ends with that earlier frame, the next one
+    // is not decoded yet, and the wait must not end with the earlier frame.
+    const { d, p } = decoder("c1");
+    await d.prime(p.start);
+    await flush();
+    expect(d.queued).toBe(QUEUE_TARGET); // frames 0 to 7
+    const f = await d.frameFor(p.start + 8 / 30 - 1e-9, true, true);
+    expect(f!.timestamp).toBeCloseTo(8 / 30, 9);
     d.dispose();
   });
 });
