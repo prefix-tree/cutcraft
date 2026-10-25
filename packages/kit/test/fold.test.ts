@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { collectModule, resolve } from "@cutcut/kit";
+import { Executor, collectModule, resolve } from "@cutcut/kit";
 import { applyEdits, buildSourceIndex, foldToSource, lint, printElement, printProp } from "@cutcut/kit/source";
 import { fixtureExecutor, fixtureText, fixturesDir, manifest, serialize } from "./helpers";
 
@@ -11,6 +11,20 @@ function changedLines(a: string, b: string): number {
 }
 
 describe("fold", () => {
+  it.each(["@cutcut/kit", "@cut/kit"])("imports newly materialized captions from %s", (moduleName) => {
+    const initial = fixtureExecutor();
+    initial.execute({ type: "caption/setAll", params: { captionsId: "cap", nodes: [] } });
+    const generated = foldToSource(fixtureText, initial.log(), initial.state()).text
+      .replace("Caption, ", "").replaceAll("@cutcut/kit", moduleName);
+    const exec = new Executor({ tree: initial.state().tree, manifest });
+    expect(exec.execute({ type: "caption/update", params: { captionId: "cap-1", text: "Edited caption" } }).ok).toBe(true);
+    const result = foldToSource(generated, exec.log(), exec.state());
+    expect(result.skipped).toEqual([]);
+    expect(result.text).toContain(`import { Caption } from "${moduleName}";`);
+    expect(result.text).toContain("<Caption");
+    expect(lint(result.text, { manifest }).filter((d) => d.severity === "error")).toEqual([]);
+  });
+
   it("folds a trim into a one-token prop edit", () => {
     const exec = fixtureExecutor();
     exec.execute({ type: "clip/trim", params: { id: "c3", edge: "out", value: 25 } });
