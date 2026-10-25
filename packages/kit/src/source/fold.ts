@@ -7,6 +7,30 @@ import { applyEdits, lineRange, type SourceEdit } from "./edits";
 import type { Range } from "./parse";
 import { buildSourceIndex, type ElementSite, type SourceIndex } from "./index";
 import { printElement, printLiteral, printProp } from "./print";
+import traverseModule from "@babel/traverse";
+import * as t from "@babel/types";
+import { ELEMENTS } from "../jsx/elements";
+import { parseSource } from "./parse";
+
+const traverse = ((traverseModule as unknown as { default?: typeof traverseModule }).default ?? traverseModule) as typeof traverseModule;
+
+/** Structural edits can introduce vocabulary tags the original file never imported. */
+function elementImports(text: string): SourceEdit[] {
+  const { ast } = parseSource(text);
+  const missing = new Set<string>();
+  traverse(ast, {
+    JSXOpeningElement(path) {
+      const name = path.node.name;
+      if (t.isJSXIdentifier(name) && Object.hasOwn(ELEMENTS, name.name) && !path.scope.hasBinding(name.name)) missing.add(name.name);
+    },
+  });
+  if (!missing.size) return [];
+  const imports = ast.program.body.filter(t.isImportDeclaration);
+  const kitImport = imports.find((node) => node.source.value === "@cutcut/kit" || node.source.value === "@cut/kit");
+  const pos = (imports.at(-1)?.end ?? ast.program.directives.at(-1)?.end) ?? 0;
+  const moduleName = kitImport?.source.value ?? "@cutcut/kit";
+  return [{ kind: "insert", id: "composition", range: [pos, pos], text: `\nimport { ${[...missing].sort().join(", ")} } from ${JSON.stringify(moduleName)};\n` }];
+}
 
 export interface FoldResult {
   readonly text: string;
@@ -164,7 +188,9 @@ export function foldToSource(text: string, log: PatchLog, state: ResolvedState, 
     const { edits, needsBake, skipped } = fold(log, index, state);
     if (needsBake.length === 0) {
       allEdits = [...allEdits, ...edits];
-      return { text: applyEdits(current, edits), edits: allEdits, baked, skipped };
+      const folded = applyEdits(current, edits);
+      const imports = elementImports(folded);
+      return { text: applyEdits(folded, imports), edits: [...allEdits, ...imports], baked, skipped };
     }
     let bakeEdits: SourceEdit[] = [];
     for (const id of needsBake) {
