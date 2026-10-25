@@ -110,6 +110,10 @@ All notable changes to this project are documented here. The format follows
 
 ### Fixed
 
+- The export no longer aborts on SVG text in a font it lacks: skia ends the process (no
+  exception) for an unknown or quoted family, so families are narrowed to one it has, or
+  sans-serif with a warning. The bundled fonts are registered for SVG text too.
+
 - A seek or export frame could be the one before the right frame when the source time
   landed a hair below a frame boundary (as it does at 1.5x) and the next frame was not decoded
   yet: the wait ended because the earlier frame still "covered" the time. It now uses the same

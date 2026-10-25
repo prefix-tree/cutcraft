@@ -7,7 +7,7 @@ import { Caption, Captions, Composition, Layer, Shape, Sticker, Svg, Title, Trac
 import { indexLayerInteriors } from "@cutcut/player/overlays";
 import generateMedia, { mediaDir } from "../../player/e2e/gen-media";
 import { manifest } from "../../player/e2e/app/composition";
-import { OverlayPlane, createCanvas, directoryResolver, treeKey } from "../src";
+import { OverlayPlane, createCanvas, directoryResolver, safeSvgFonts, treeKey } from "../src";
 
 type Rgb = readonly [number, number, number];
 
@@ -193,6 +193,33 @@ describe("SVG in the export", () => {
     const at = (x: number, y: number): Rgb => { const d = context.getImageData(x, y, 1, 1).data; return [d[0] as number, d[1] as number, d[2] as number]; };
     return { at, seen };
   }
+
+  it("draws SVG text in a bundled font, and in sans-serif (with a warning) for a font it lacks", async () => {
+    // Skia aborts the process on SVG text in a family it has no font for; reaching the assertions is the test.
+    const text = (family: string) => `<svg width="300" height="80"><text x="10" y="60" font-family="${family}" font-size="56" fill="#ffffff">Hamburg</text></svg>`;
+    const { at, seen } = await draw(
+      h(Svg, { id: "known", content: text("Playfair Display, serif"), start: 0, duration: 2, transform: { position: { x: 0, y: -100 } } }),
+      h(Svg, { id: "unknown", content: text("Comic Neue"), start: 0, duration: 2, transform: { position: { x: 0, y: 60 } } }),
+      h(Svg, { id: "styled", content: '<svg width="300" height="80"><style>text { font: 40px "Nope"; font-family: Nope, \'Also Nope\' }</style><text x="10" y="60" style="font-family: &quot;Nope&quot;" fill="#fff">Hi</text></svg>', start: 0, duration: 2, transform: { position: { x: 200, y: 140 } } }),
+    );
+    expect(seen.filter((m) => m.includes("svg") || m.includes("SVG"))).toEqual([
+      'SVG text in font "Comic Neue" is drawn in sans-serif; the export has no such font',
+      'SVG text in font "Nope" is drawn in sans-serif; the export has no such font',
+      'SVG text in font "Also Nope" is drawn in sans-serif; the export has no such font',
+    ]);
+    let ink = 0;
+    for (let x = 180; x < 460; x++) for (let y = 40; y < 110; y += 3) if (at(x, y)[0] > 128) ink++;
+    expect(ink).toBeGreaterThan(50);
+  });
+
+  it("narrows SVG font lists to a family skia knows", () => {
+    const known = (f: string) => f === "Inter" || f === "sans-serif" || f === "serif";
+    expect(safeSvgFonts('<text font-family="Foo, Inter">x</text>', known)).toEqual({ svg: '<text font-family="Inter">x</text>', replaced: [] });
+    expect(safeSvgFonts("<text font-family='Foo'>x</text>", known)).toEqual({ svg: "<text font-family='sans-serif'>x</text>", replaced: ["Foo"] });
+    expect(safeSvgFonts('<text style="font: bold 12px Foo; fill: red">font: kept</text>', known).svg).toBe('<text style=" fill: red">font: kept</text>');
+    const plain = '<svg><rect width="1" height="1"/></svg>';
+    expect(safeSvgFonts(plain, known).svg).toBe(plain);
+  });
 
   it("draws an SVG at the size it asks for, or fitted to the frame", async () => {
     const { at } = await draw(

@@ -10,7 +10,7 @@ import { readFileSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { createElement, isValidElement, type ReactElement, type ReactNode } from "react";
 import satori, { type Font } from "satori";
-import { loadImage, type CanvasRenderingContext2D, type Image } from "skia-canvas";
+import { FontLibrary, loadImage, type CanvasRenderingContext2D, type Image } from "skia-canvas";
 
 /** A font handed to Satori. Satori reads TTF, OTF and WOFF, not WOFF2. */
 export type FontWeight = 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900;
@@ -61,6 +61,7 @@ export class OverlayPlane {
   constructor(private readonly options: OverlayOptions) {
     this.fonts = [...bundledFonts(), ...(options.fonts ?? [])].map((f) => ({ name: f.name, data: f.data, weight: f.weight ?? 400, style: f.style ?? "normal" }));
     this.families = new Set(this.fonts.map((f) => f.name));
+    registerSvgFonts();
   }
 
   /** Whether anything but footage shows at `t`: an overlay element, or a caption line. */
@@ -239,7 +240,9 @@ export class OverlayPlane {
       this.images.set(svg, hit);
       return hit;
     }
-    const image = await loadImage(Buffer.from(svg));
+    const { svg: safe, replaced } = safeSvgFonts(svg, svgFontKnown);
+    for (const family of replaced) this.warnOnce(`svg-font:${family}`, `SVG text in font "${family}" is drawn in sans-serif; the export has no such font`);
+    const image = await loadImage(Buffer.from(safe));
     this.images.set(svg, image);
     if (this.images.size > IMAGE_CACHE) this.images.delete(this.images.keys().next().value as string);
     return image;
@@ -346,6 +349,55 @@ export function treeKey(node: ReactNode): string | null {
     return true;
   };
   return walk(node) ? out.join("") : null;
+}
+
+const GENERIC_FAMILIES: ReadonlySet<string> = new Set(["serif", "sans-serif", "monospace", "cursive", "fantasy", "system-ui"]);
+
+function svgFontKnown(family: string): boolean {
+  return GENERIC_FAMILIES.has(family.toLowerCase()) || FontLibrary.has(family);
+}
+
+/**
+ * Font families in SVG text that skia cannot find, replaced with `sans-serif`.
+ * Skia aborts the whole process (not an exception) when SVG text names a family
+ * it has no font for, so every family list is narrowed to its first known
+ * family before the markup reaches `loadImage`. The CSS `font` shorthand is
+ * dropped for the same reason.
+ */
+export function safeSvgFonts(svg: string, known: (family: string) => boolean): { svg: string; replaced: string[] } {
+  if (!/font(-family)?\s*[:=]/.test(svg)) return { svg, replaced: [] };
+  const replaced = new Set<string>();
+  const pick = (list: string): string => {
+    const families = list.split(",").map((f) => f.trim().replace(/^(["'])(.*)\1$/, "$2").replace(/&quot;|&apos;/g, "")).filter(Boolean);
+    const found = families.find(known);
+    // Unquoted: skia takes a quoted name for an unknown family, and aborts.
+    if (found) return found;
+    for (const f of families) replaced.add(f);
+    return "sans-serif";
+  };
+  const css = (text: string): string => text
+    .replace(/font-family\s*:\s*([^;}]+)/g, (_m, list: string) => `font-family: ${pick(list)}`)
+    .replace(/(^|[;{\s])font\s*:[^;}]*;?/g, "$1");
+  const out = svg
+    .replace(/font-family=(["'])(.*?)\1/g, (_m, q: string, list: string) => `font-family=${q}${pick(list)}${q}`)
+    .replace(/\sstyle=(["'])(.*?)\1/g, (_m, q: string, text: string) => {
+      return ` style=${q}${css(text.replace(/&quot;/g, ""))}${q}`;
+    })
+    .replace(/(<style[^>]*>)([\s\S]*?)(<\/style>)/g, (_m, open: string, text: string, close: string) => `${open}${css(text)}${close}`);
+  return { svg: out, replaced: [...replaced] };
+}
+
+let svgFontsRegistered = false;
+/** The bundled families, made known to skia's SVG text as well as to Satori. */
+function registerSvgFonts(): void {
+  if (svgFontsRegistered) return;
+  svgFontsRegistered = true;
+  const require = createRequire(import.meta.url);
+  for (const font of BUNDLED_FONTS) {
+    const dir = require.resolve(`@fontsource/${font.id}/package.json`).replace(/package\.json$/, "files/");
+    const files = BUNDLED_FONT_WEIGHTS.flatMap((w) => (font.italic ? ["normal", "italic"] : ["normal"]).map((st) => `${dir}${font.id}-latin-${w}-${st}.woff`));
+    FontLibrary.use(font.family, files);
+  }
 }
 
 /** The bundled families (see `BUNDLED_FONTS`), regular and bold, upright and italic where the family has one. Read once. */
