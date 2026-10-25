@@ -85,6 +85,7 @@ choice in it, and `pnpm docs:dev` serves the full site.
 | package | what | docs |
 |---|---|---|
 | `packages/kit` | vocabulary, manifest and time references, resolver, patches and actions, source tools, lint. No DOM. | [README](packages/kit/README.md), [spec](packages/kit/docs/spec.md) |
+| `packages/graphics` | the built-in `<Graphic>` kinds (arrows, callouts, lower thirds, frames, highlights, progress, backgrounds, confetti, Lucide icons): pure functions from props and theme to SVG and text. No DOM. | [catalog](docs/reference/graphics.md) |
 | `packages/player` | the browser renderer and the React `<Player>`; `./engine` and `./overlays`, the parts a Node renderer shares | [README](packages/player/README.md) |
 | `packages/render` | export: a file to WebM or MP4 in Node, with offline audio mixing, parallel workers and smart copy | [README](packages/render/README.md), [guide](docs/guide/exporting.md) |
 | `examples/launch-recap` | the worked example: brief, prompt, manifest, file, runnable page | [README](examples/launch-recap/README.md) |

@@ -3,6 +3,7 @@ import { join } from "node:path";
 import { z } from "zod";
 import { ELEMENTS, KIND_CAPABILITIES, listHandlers } from "../packages/kit/src/index";
 import { OURS_ONLY, PARITY } from "../packages/kit/scripts/parity-table";
+import { GRAPHIC_KINDS, GRAPHIC_KIND_NAMES } from "../packages/graphics/src/index";
 
 /**
  * Generated reference pages: the element table from the Zod schemas and the
@@ -38,8 +39,17 @@ function elementsPage(): string {
     lines.push(`| \`<${name}>\` | ${yes(c.timed)} | ${yes(c.visual)} | ${yes(c.audio)} | ${yes(c.trimSource)} | ${yes(c.transformable)} | ${c.childKinds.map((k) => `\`${k}\``).join(", ")} |`);
   }
   for (const [name, component] of Object.entries(ELEMENTS)) {
-    const schema = z.toJSONSchema(component.schema as z.ZodType, { unrepresentable: "any", io: "input" }) as JsonSchema;
-    lines.push("", `## \`<${name}>\``, "", "| prop | type | default | required |", "|---|---|---|---|");
+    let schema = z.toJSONSchema(component.schema as z.ZodType, { unrepresentable: "any", io: "input" }) as JsonSchema;
+    lines.push("", `## \`<${name}>\``, "");
+    if (name === "Graphic") {
+      // One schema per kind: show the props every graphic takes; the kinds' own are on the graphics page.
+      const own = new Set(GRAPHIC_KIND_NAMES.flatMap((k) => Object.keys(GRAPHIC_KINDS[k].shape)));
+      const first = (schema.oneOf ?? schema.anyOf ?? [])[0] ?? {};
+      const properties = Object.fromEntries(Object.entries(first.properties ?? {}).filter(([k]) => !own.has(k)));
+      schema = { ...first, properties: { ...properties, kind: { enum: [...GRAPHIC_KIND_NAMES] } } };
+      lines.push("Plus the props of its `kind`: see [Graphics](./graphics).", "");
+    }
+    lines.push("| prop | type | default | required |", "|---|---|---|---|");
     const required = new Set(schema.required ?? []);
     for (const [prop, s] of Object.entries(schema.properties ?? {})) {
       const def = s.default === undefined ? "" : `\`${JSON.stringify(s.default)}\``;
@@ -47,6 +57,30 @@ function elementsPage(): string {
     }
   }
   return lines.join("\n") + "\n";
+}
+
+function graphicsPage(): string {
+  const lines = [
+    "# Graphics", "",
+    "The built-in kinds of `<Graphic>`, generated from `packages/graphics`. Do not edit by hand; run `pnpm docs:gen` (and `pnpm docs:graphics` for the pictures).", "",
+    "Every graphic also takes the props on the [Graphic element](./elements#graphic): timing, `transform`, `enter`/`exit`, `style`, and `width`/`height` to size its box. Colour and font defaults are theme tokens, so a graphic follows the theme unless you set them.", "",
+    "![Every kind in the midnight theme](/graphics/sheet.png)", "",
+  ];
+  const categories = new Map<string, string[]>();
+  for (const name of GRAPHIC_KIND_NAMES) categories.set(GRAPHIC_KINDS[name].category, [...(categories.get(GRAPHIC_KINDS[name].category) ?? []), name]);
+  for (const [category, names] of categories) {
+    lines.push(`## ${category[0]!.toUpperCase()}${category.slice(1)}`, "");
+    for (const name of names) {
+      const kind = GRAPHIC_KINDS[name];
+      const schema = z.toJSONSchema(z.strictObject(kind.shape), { unrepresentable: "any", io: "input" }) as JsonSchema;
+      const example = Object.entries(kind.example).map(([k, v]) => (typeof v === "string" ? ` ${k}="${v}"` : ` ${k}={${JSON.stringify(v)}}`)).join("");
+      lines.push(`### \`${name}\``, "", `${kind.description}${kind.animated ? " Animated." : ""}`, "", `![${kind.title}](/graphics/${name}.png)`, "", "```tsx", `<Graphic id="g1" kind="${name}"${example} start={0} duration={3} />`, "```", "");
+      lines.push("| prop | type | default |", "|---|---|---|");
+      for (const [prop, ps] of Object.entries(schema.properties ?? {})) lines.push(`| \`${prop}\` | ${typeOf(ps)} | ${ps.default === undefined ? "" : `\`${JSON.stringify(ps.default)}\``} |`);
+      lines.push("");
+    }
+  }
+  return lines.join("\n");
 }
 
 function actionsPage(): string {
@@ -85,4 +119,5 @@ function escapeTags(markdown: string): string {
 
 writeFileSync(join(out, "elements.md"), escapeTags(elementsPage()));
 writeFileSync(join(out, "actions.md"), escapeTags(actionsPage()));
-console.log("docs/reference: elements.md actions.md");
+writeFileSync(join(out, "graphics.md"), escapeTags(graphicsPage()));
+console.log("docs/reference: elements.md actions.md graphics.md");

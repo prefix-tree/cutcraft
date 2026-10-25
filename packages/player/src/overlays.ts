@@ -11,3 +11,4 @@ export { indexLayerInteriors } from "./overlays/layer-interiors";
 export { layerClock } from "./model/time";
 export { parseSvg, prepareSvg, rgb, serialize, svgIntrinsicSize, type PrepareSvgOptions, type PreparedSvg, type SvgColor, type SvgNode, type SvgViewBox } from "./overlays/svg";
 export { svgDrawing, themeTokens, type SvgDrawing } from "./overlays/svg-element";
+export { graphicDrawing, graphicLabels, iconStickerDrawing, type GraphicDrawing } from "./overlays/graphic";

@@ -11,7 +11,11 @@ export const NO_STATE_CHANGE: readonly ActionType[] = ["source/bake"];
 export interface Case { readonly input: ActionInput; readonly setup?: readonly ActionInput[] }
 
 /** Actions that need the fixture prepared first, e.g. a gap removed so two clips meet. */
+const graphic: ActionInput = { type: "graphic/create", params: { id: "gr9", kind: "graphic", trackId: "overlays", place: { anchor: "start" }, props: { kind: "badge", duration: 1, text: "NEW" } } };
+
 export const SETUP: Partial<Record<ActionType, readonly ActionInput[]>> = {
+  "graphic/update": [graphic],
+  "graphic/remove": [graphic],
   "clip/slide": [{ type: "clip/remove", params: { id: "g1" } }, { type: "transition/remove", params: { transitionId: "x1" } }],
   "clip/roll": [{ type: "transition/remove", params: { transitionId: "x1" } }],
   "track/consolidate": [{ type: "clip/move", params: { id: "a1", place: { start: 2 } } }],
@@ -121,6 +125,9 @@ export const CASES: Partial<Record<ActionType, ActionInput>> = {
   "sticker/create": { type: "sticker/create", params: { id: "st9", kind: "sticker", trackId: "overlays", place: { anchor: "c1" }, props: { duration: 1, src: "sticker:x" } } },
   "sticker/update": { type: "sticker/update", params: { id: "st1", props: { emphasis: "shake" } } },
   "sticker/remove": { type: "sticker/remove", params: { id: "st1" } },
+  "graphic/create": { type: "graphic/create", params: { id: "gr9", kind: "graphic", trackId: "overlays", place: { anchor: "start" }, props: { kind: "badge", duration: 1, text: "NEW" } } },
+  "graphic/update": { type: "graphic/update", params: { id: "gr9", props: { text: "HOT" } } },
+  "graphic/remove": { type: "graphic/remove", params: { id: "gr9" } },
   "adjustment/create": { type: "adjustment/create", params: { id: "adj9", kind: "adjustment", trackId: "overlays", place: { anchor: "start" }, props: { duration: 2 } } },
   "adjustment/update": { type: "adjustment/update", params: { id: "adj1", props: { opacity: 0.5 } } },
   "adjustment/remove": { type: "adjustment/remove", params: { id: "adj1" } },

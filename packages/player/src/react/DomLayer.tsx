@@ -7,6 +7,7 @@ import { Captions } from "./elements/Captions";
 import { Layer } from "./elements/Layer";
 import { Shape } from "./elements/Shape";
 import { OVERLAY_KINDS, type ElementProps } from "../overlays/layout";
+import { Graphic } from "./elements/Graphic";
 import { Sticker } from "./elements/Sticker";
 import { Svg } from "./elements/Svg";
 import { Title } from "./elements/Title";
@@ -61,6 +62,7 @@ const Element = memo(
       case "shape": return <Shape {...props} />;
       case "svg": return <Svg {...props} />;
       case "sticker": return <Sticker {...props} />;
+      case "graphic": return <Graphic {...props} />;
       case "layer": return <Layer {...props} interior={interior} />;
       case "adjustment": return <Adjustment {...props} />;
       default: return null;

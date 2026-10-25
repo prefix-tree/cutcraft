@@ -1,0 +1,27 @@
+{
+  "name": "@cutcut/graphics",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The built-in graphic kinds for the cut video DSL: arrows, callouts, badges, lower thirds, frames, highlights, progress, backgrounds, confetti and icons, each a pure function from props and theme to SVG and text labels.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "lint": "eslint . --max-warnings 0",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "lucide": "^1.61.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.0.0",
+    "@types/node": "^22.0.0",
+    "eslint": "^9.0.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.72.0",
+    "vitest": "^5.0.5"
+  }
+}

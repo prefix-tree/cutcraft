@@ -22,3 +22,4 @@ new record that supersedes the old one.
 | [0014](./0014-captions-follow-the-clips.md) | Captions follow the clips |
 | [0015](./0015-a-headless-engine-renders-the-export.md) | A headless engine renders the export |
 | [0016](./0016-a-theme-lives-in-the-file.md) | A theme lives in the file |
+| [0017](./0017-graphics-are-svg-generators.md) | Graphics are SVG generators |

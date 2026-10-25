@@ -9,7 +9,7 @@ const EPS = 1e-6;
 /** Nested props that re-time or re-draw the scene as a whole; the extracted elements could not carry them. */
 const EXTRACT_BLOCKERS = ["in", "out", "transform", "fit", "blend", "blendOpacity", "emphasis"] as const;
 
-const KIND_OF_NS: Record<string, string> = { text: "title", shape: "shape", svg: "svg", sticker: "sticker", adjustment: "adjustment", nested: "nested" };
+const KIND_OF_NS: Record<string, string> = { text: "title", shape: "shape", svg: "svg", sticker: "sticker", graphic: "graphic", adjustment: "adjustment", nested: "nested" };
 
 function overlayHandlers(ns: keyof typeof KIND_OF_NS) {
   const kind = KIND_OF_NS[ns] as string;

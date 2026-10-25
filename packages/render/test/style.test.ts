@@ -1,7 +1,7 @@
 // Shape styling, entrances and exits, and gradient backgrounds, as the export draws them.
 import { createElement as h, type ReactElement } from "react";
 import type { Canvas, CanvasRenderingContext2D } from "skia-canvas";
-import { Composition, Shape, Svg, THEMES, Title, Track, collect, resolve } from "@cutcut/kit";
+import { Composition, Graphic, Shape, Sticker, Svg, THEMES, Title, Track, collect, resolve } from "@cutcut/kit";
 import { indexLayerInteriors } from "@cutcut/player/overlays";
 import { manifest } from "../../player/e2e/app/composition";
 import { FramePipeline } from "../src/pipeline";
@@ -150,5 +150,43 @@ describe("themes in the export", () => {
     // Editorial wipes in from the left over 0.6 s: at 0.3 s the right edge is not drawn yet.
     expect(close(early.px(240, 180), hex(THEMES.mono.palette.primary))).toBe(true);
     expect(early.px(400, 180)[3]).toBe(0);
+  });
+});
+
+describe("graphics in the export", () => {
+  const hex = (c: string): Rgba => [parseInt(c.slice(1, 3), 16), parseInt(c.slice(3, 5), 16), parseInt(c.slice(5, 7), 16), 255];
+  const midnight = THEMES.midnight.palette;
+
+  it("draws a callout's art in theme colours with its text above it", async () => {
+    const { px, warnings } = await overlaysWith({ theme: { extends: "midnight", motion: "none" } }, 1,
+      h(Graphic, { id: "c", kind: "callout", text: "WWWWWW", size: 40, tail: "none", width: 400, height: 120, start: 0, duration: 4 }));
+    expect(warnings).toEqual([]);
+    // The box spans x 120-520, y 120-240: surface near its edge, light text ink in the middle.
+    expect(close(px(130, 180), hex(midnight.surface))).toBe(true);
+    let ink = 0;
+    for (let x = 200; x < 440; x++) if (close(px(x, 180), hex(midnight.text), 40)) ink++;
+    expect(ink).toBeGreaterThan(20);
+  });
+
+  it("fills a progress bar with time", async () => {
+    const bar = h(Graphic, { id: "p", kind: "progress-bar", width: 400, height: 20, start: 0, duration: 4 });
+    const early = await overlaysWith({ theme: { motion: "none" } }, 1, bar);
+    const late = await overlaysWith({ theme: { motion: "none" } }, 3, bar);
+    // A quarter filled at 1 s, three quarters at 3 s; x=320 is the middle of the bar (120-520).
+    expect(close(early.px(320, 180), hex(midnight.surface))).toBe(true);
+    expect(close(late.px(320, 180), hex(midnight.primary))).toBe(true);
+  });
+
+  it("draws icon stickers and icon graphics from Lucide", async () => {
+    const { px, warnings } = await overlaysWith({}, 1,
+      h(Sticker, { id: "s", src: "icon:square", start: 0, duration: 4, transform: { position: { x: -150, y: 0 } } }),
+      h(Graphic, { id: "i", kind: "icon", name: "square", color: "#ff0000", strokeWidth: 3, start: 0, duration: 4, transform: { position: { x: 150, y: 0 } } }),
+    );
+    expect(warnings).toEqual([]);
+    // Lucide's square is a rounded rect from 3 to 21 in a 24 box: on a 120 px icon, its left edge is near x=15.
+    expect(px(470 - 60 + 15, 180)[0]).toBeGreaterThan(200);
+    expect(px(470, 180)[3]).toBe(0);
+    // The sticker is 90 px (a quarter of 360) and stroked in the theme's text colour.
+    expect(px(170 - 45 + 11, 180)[3]).toBeGreaterThan(150);
   });
 });

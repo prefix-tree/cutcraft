@@ -32,6 +32,7 @@ export default defineConfig({
         { text: "Reference", items: [
           { text: "Elements", link: "/reference/elements" },
           { text: "Actions", link: "/reference/actions" },
+          { text: "Graphics", link: "/reference/graphics" },
           { text: "Specification (kit)", link: "https://github.com/bsnisar/cutcut/blob/main/packages/kit/docs/spec.md" },
           { text: "OpenReel parity (kit)", link: "https://github.com/bsnisar/cutcut/blob/main/packages/kit/docs/parity.md" },
         ] },
@@ -55,6 +56,7 @@ export default defineConfig({
           { text: "0014 Captions follow the clips", link: "/decisions/0014-captions-follow-the-clips" },
           { text: "0015 A headless engine exports", link: "/decisions/0015-a-headless-engine-renders-the-export" },
           { text: "0016 A theme lives in the file", link: "/decisions/0016-a-theme-lives-in-the-file" },
+          { text: "0017 Graphics are SVG generators", link: "/decisions/0017-graphics-are-svg-generators" },
         ] },
       ],
       "/recipes/": [

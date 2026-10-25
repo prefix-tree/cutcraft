@@ -5,7 +5,7 @@ import { audioEffectSchema, colorGradeSchema, effectSchema, freezeSchema, keyfra
 import { compositionSchema, gapSchema, markerSchema, trackSchema } from "./schemas/composition";
 import { audioSchema, clipSchema } from "./schemas/media";
 import { angleSchema, cutSchema, multicamSchema } from "./schemas/multicam";
-import { adjustmentSchema, layerSchema, nestedSchema, shapeSchema, stickerSchema, svgSchema, titleSchema } from "./schemas/overlays";
+import { adjustmentSchema, graphicSchema, layerSchema, nestedSchema, shapeSchema, stickerSchema, svgSchema, titleSchema } from "./schemas/overlays";
 import { transitionSchema } from "./schemas/transition";
 
 const el = <K extends string, S extends Parameters<typeof defineElement>[0]["schema"]>(kind: K, schema: S) =>
@@ -21,6 +21,7 @@ export const Title = el("title", titleSchema);
 export const Shape = el("shape", shapeSchema);
 export const Svg = el("svg", svgSchema);
 export const Sticker = el("sticker", stickerSchema);
+export const Graphic = el("graphic", graphicSchema);
 export const Captions = el("captions", captionsSchema);
 export const Caption = el("caption", captionSchema);
 export const Marker = el("marker", markerSchema);
@@ -39,7 +40,7 @@ export const SpeedKey = el("speedKey", speedKeySchema);
 export const Freeze = el("freeze", freezeSchema);
 
 export const ELEMENTS = {
-  Composition, Track, Clip, Audio, Gap, Transition, Title, Shape, Svg, Sticker, Captions, Caption, Marker,
+  Composition, Track, Clip, Audio, Gap, Transition, Title, Shape, Svg, Sticker, Graphic, Captions, Caption, Marker,
   Adjustment, Mask, Nested, Multicam, Angle, Cut, Layer, Effect, AudioEffect, ColorGrade, Keyframe, SpeedKey, Freeze,
 } as const;
 

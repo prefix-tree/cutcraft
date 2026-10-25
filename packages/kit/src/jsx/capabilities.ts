@@ -18,7 +18,7 @@ const OVERLAY_CHILDREN = ["effect", "keyframe", "mask"] as const;
 export const KIND_CAPABILITIES: Readonly<Record<string, ElementCapabilities>> = {
   composition: with_({ container: true, childKinds: ["track", "marker", "multicam", "captions"], placementScope: "none" }),
   track: with_({ container: true, placementScope: "composition",
-    childKinds: ["clip", "audio", "gap", "transition", "title", "shape", "svg", "sticker", "adjustment", "nested", "layer", "multicam"] }),
+    childKinds: ["clip", "audio", "gap", "transition", "title", "shape", "svg", "sticker", "graphic", "adjustment", "nested", "layer", "multicam"] }),
   clip: with_({ timed: true, visual: true, audio: true, trimSource: true, transformable: true, container: true, childKinds: CLIP_CHILDREN, placementScope: "track" }),
   audio: with_({ timed: true, audio: true, trimSource: true, container: true, childKinds: ["audioEffect", "keyframe"], placementScope: "track" }),
   gap: with_({ timed: true, placementScope: "track" }),
@@ -27,6 +27,7 @@ export const KIND_CAPABILITIES: Readonly<Record<string, ElementCapabilities>> = 
   shape: with_({ timed: true, visual: true, transformable: true, container: true, childKinds: OVERLAY_CHILDREN, placementScope: "track" }),
   svg: with_({ timed: true, visual: true, transformable: true, container: true, childKinds: OVERLAY_CHILDREN, placementScope: "track" }),
   sticker: with_({ timed: true, visual: true, transformable: true, container: true, childKinds: OVERLAY_CHILDREN, placementScope: "track" }),
+  graphic: with_({ timed: true, visual: true, transformable: true, container: true, childKinds: OVERLAY_CHILDREN, placementScope: "track" }),
   captions: with_({ visual: true, container: true, childKinds: ["caption"], placementScope: "composition" }),
   caption: with_({ timed: true, visual: true, placementScope: "child" }),
   marker: with_({ placementScope: "composition" }),

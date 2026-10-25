@@ -7,7 +7,7 @@ Generated from the Zod schemas in `packages/kit/src/jsx/schemas` and the capabil
 | element | timed | visual | audio | trims source | transformable | children allowed |
 |---|---|---|---|---|---|---|
 | `<Composition>` |  |  |  |  |  | `track`, `marker`, `multicam`, `captions` |
-| `<Track>` |  |  |  |  |  | `clip`, `audio`, `gap`, `transition`, `title`, `shape`, `svg`, `sticker`, `adjustment`, `nested`, `layer`, `multicam` |
+| `<Track>` |  |  |  |  |  | `clip`, `audio`, `gap`, `transition`, `title`, `shape`, `svg`, `sticker`, `graphic`, `adjustment`, `nested`, `layer`, `multicam` |
 | `<Clip>` | yes | yes | yes | yes | yes | `effect`, `audioEffect`, `colorGrade`, `keyframe`, `mask`, `speedKey`, `freeze` |
 | `<Audio>` | yes |  | yes | yes |  | `audioEffect`, `keyframe` |
 | `<Gap>` | yes |  |  |  |  |  |
@@ -16,6 +16,7 @@ Generated from the Zod schemas in `packages/kit/src/jsx/schemas` and the capabil
 | `<Shape>` | yes | yes |  |  | yes | `effect`, `keyframe`, `mask` |
 | `<Svg>` | yes | yes |  |  | yes | `effect`, `keyframe`, `mask` |
 | `<Sticker>` | yes | yes |  |  | yes | `effect`, `keyframe`, `mask` |
+| `<Graphic>` | yes | yes |  |  | yes | `effect`, `keyframe`, `mask` |
 | `<Captions>` |  | yes |  |  |  | `caption` |
 | `<Caption>` | yes | yes |  |  |  |  |
 | `<Marker>` |  |  |  |  |  |  |
@@ -237,6 +238,29 @@ Generated from the Zod schemas in `packages/kit/src/jsx/schemas` and the capabil
 | `src` | string |  | yes |
 | `category` | string |  |  |
 | `name` | string |  |  |
+
+## `<Graphic>`
+
+Plus the props of its `kind`: see [Graphics](./graphics).
+
+| prop | type | default | required |
+|---|---|---|---|
+| `id` | string |  | yes |
+| `start` | number (0..∞) |  |  |
+| `anchor` | string \| "start" |  |  |
+| `offset` | number |  |  |
+| `duration` | number \| "fill" \| "source" \| { match } |  |  |
+| `transform` | { position, scale, rotation, anchor, opacity, borderRadius, crop, rotate3d, perspective, transformStyle } |  |  |
+| `fit` | "contain" \| "cover" \| "stretch" \| "none" |  |  |
+| `blend` | "normal" \| "multiply" \| "screen" \| "overlay" \| "darken" \| "lighten" \| "color-dodge" \| "color-burn" \| "hard-light" \| "soft-light" \| "difference" \| "exclusion" \| "hue" \| "saturation" \| "color" \| "luminosity" \| "add" \| "linear-dodge" |  |  |
+| `blendOpacity` | number (0..1) |  |  |
+| `emphasis` | "none" \| "pulse" \| "shake" \| "bounce" \| "float" \| "spin" \| "flash" \| "heartbeat" \| "swing" \| "wobble" \| "jello" \| "rubber-band" \| "tada" \| "vibrate" \| "flicker" \| "glow" \| "breathe" \| "wave" \| "tilt" \| "zoom-pulse" \| "focus-zoom" \| "pan-left" \| "pan-right" \| "pan-up" \| "pan-down" \| "ken-burns" \| { type, speed, intensity, loop, focusPoint, zoomScale, holdDuration, startTime, animationDuration } |  |  |
+| `enter` | { type, duration, easing } |  |  |
+| `exit` | { type, duration, easing } |  |  |
+| `style` | string |  |  |
+| `width` | number |  |  |
+| `height` | number |  |  |
+| `kind` | "arrow" \| "curved-arrow" \| "hand-arrow" \| "callout" \| "speech-bubble" \| "badge" \| "pill" \| "burst" \| "lower-third" \| "lower-third-card" \| "lower-third-split" \| "corner-brackets" \| "frame" \| "device-frame" \| "underline" \| "circle-scribble" \| "marker" \| "strike" \| "progress-bar" \| "countdown" \| "steps" \| "divider" \| "gradient-background" \| "dots-background" \| "grid-background" \| "waves-background" \| "blobs-background" \| "confetti" \| "sparkles" \| "icon" |  | yes |
 
 ## `<Captions>`
 

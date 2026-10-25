@@ -8,7 +8,7 @@ export const TOKEN_PATTERN = /^\$([A-Za-z][A-Za-z0-9_-]*)$/;
 export const tokenSchema = z.string().regex(TOKEN_PATTERN, 'theme tokens look like "$primary"');
 
 /** Element kinds a theme can hold named presets for; their elements pick one with `style`. */
-export const STYLED_KINDS = ["title", "shape", "svg", "sticker", "captions"] as const;
+export const STYLED_KINDS = ["title", "shape", "svg", "sticker", "graphic", "captions"] as const;
 export type StyledKind = (typeof STYLED_KINDS)[number];
 
 const nameSchema = z.string().regex(/^[A-Za-z][A-Za-z0-9_-]*$/, "names are identifiers: letters, digits, _ and -");

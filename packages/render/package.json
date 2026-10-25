@@ -15,9 +15,11 @@
     "lint": "eslint . --max-warnings 0",
     "test": "vitest run",
     "bench": "tsx bench/render.bench.ts",
-    "test:browser": "vitest run -c vitest.browser.config.ts"
+    "test:browser": "vitest run -c vitest.browser.config.ts",
+    "catalog": "tsx scripts/graphics-catalog.ts"
   },
   "dependencies": {
+    "@cutcut/graphics": "workspace:*",
     "@cutcut/kit": "workspace:*",
     "@cutcut/player": "workspace:*",
     "@fontsource/dm-sans": "^5.3.0",

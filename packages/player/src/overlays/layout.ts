@@ -6,7 +6,7 @@ import { animatedTransform, layoutRect, matrixToCss, multiply, type Box, type Ma
 import { blendOf } from "../model/frame-plan";
 
 /** Placement kinds drawn above the canvas plane, besides captions. */
-export const OVERLAY_KINDS: ReadonlySet<string> = new Set(["title", "shape", "svg", "sticker", "layer", "adjustment"]);
+export const OVERLAY_KINDS: ReadonlySet<string> = new Set(["title", "shape", "svg", "sticker", "graphic", "layer", "adjustment"]);
 
 export interface ElementProps {
   readonly placement: Placement;

@@ -1,6 +1,7 @@
 import type { Diagnostic, LintOptions } from "../index";
 import type { ElementSite, SourceIndex } from "../../index";
 import { lookupAsset } from "../../../manifest/types";
+import { graphicProps } from "./graphic";
 import { fontAvailable, themeLiterals, themeRefs } from "./theme";
 
 export interface Rule {
@@ -161,7 +162,7 @@ export const cutInsideWord: Rule = {
   },
 };
 
-export const rules: readonly Rule[] = [literalIds, uniqueIds, noStartOnSequence, pureHelpers, expressionLocked, oneCaptions, ambiguousDuration, fileShape, missingAsset, sequenceGap, cutInsideWord, themeRefs, themeLiterals, fontAvailable];
+export const rules: readonly Rule[] = [literalIds, uniqueIds, noStartOnSequence, pureHelpers, expressionLocked, oneCaptions, ambiguousDuration, fileShape, missingAsset, sequenceGap, cutInsideWord, themeRefs, themeLiterals, fontAvailable, graphicProps];
 
 /** The composition's first track in document order that lays out as a sequence and is not hidden: the one under everything else. */
 function firstSequenceTrack(index: SourceIndex): ElementSite | null {

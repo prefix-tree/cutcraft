@@ -3,14 +3,14 @@ import type { ResolvedState } from "@cutcut/kit";
 import { BUNDLED_FONTS, BUNDLED_FONT_WEIGHTS, installLayerClock } from "@cutcut/kit";
 import { isVisibleAt, visiblePlacements, type MediaResolver, type VisibleItem } from "@cutcut/player/engine";
 import {
-  OVERLAY_KINDS, captionsContent, parseSvg, serialize, shapeDrawing, svgDrawing, layerClock, layerContent, overlayLayout, stickerPlaceholder, stickerSize, titleContent,
-  type ElementProps, type OverlayLayout,
+  OVERLAY_KINDS, captionsContent, graphicDrawing, graphicLabels, iconStickerDrawing, parseSvg, serialize, shapeDrawing, svgDrawing, layerClock, layerContent, overlayLayout, stickerPlaceholder, stickerSize, titleContent,
+  type ElementProps, type GraphicDrawing, type OverlayLayout,
 } from "@cutcut/player/overlays";
 import { readFileSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { createElement, isValidElement, type ReactElement, type ReactNode } from "react";
 import satori, { type Font } from "satori";
-import { FontLibrary, loadImage, type CanvasRenderingContext2D, type Image } from "skia-canvas";
+import { Canvas, FontLibrary, loadImage, type CanvasRenderingContext2D, type Image } from "skia-canvas";
 
 /** A font handed to Satori. Satori reads TTF, OTF and WOFF, not WOFF2. */
 export type FontWeight = 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900;
@@ -162,8 +162,14 @@ export class OverlayPlane {
         this.place(ctx, drawing.layout, await this.vectorImage(drawing.prepared.markup));
         return;
       }
+      case "graphic": {
+        await this.drawGraphic(ctx, placement.id, graphicDrawing(props));
+        return;
+      }
       case "sticker": {
         const size = stickerSize(props);
+        const icon = iconStickerDrawing(props, size);
+        if (icon) { await this.drawGraphic(ctx, placement.id, icon); return; }
         const layout = overlayLayout(props, { width: size, height: size });
         const src = String(placement.props.src ?? "");
         const image = src.startsWith("asset:") ? await this.asset(src) : null;
@@ -183,8 +189,23 @@ export class OverlayPlane {
     }
   }
 
+  /** A graphic's art with its labels laid out by Satori above it, drawn as one picture so fades treat them as one. */
+  private async drawGraphic(ctx: CanvasRenderingContext2D, id: string, d: GraphicDrawing): Promise<void> {
+    for (const w of d.prepared.warnings) this.warnOnce(`graphic:${id}:${w}`, `graphic "${id}": ${w}`);
+    const art = await this.vectorImage(d.prepared.markup);
+    if (d.labels.length === 0) { this.place(ctx, d.layout, art); return; }
+    for (const l of d.labels) this.checkFont(id, l.font);
+    const w = Math.max(1, Math.ceil(d.layout.rect.w)), h = Math.max(1, Math.ceil(d.layout.rect.h));
+    const text = await this.layoutImage(graphicLabels(d.labels), w, h);
+    const both = new Canvas(w, h);
+    const c = both.getContext("2d");
+    c.drawImage(art, 0, 0, d.layout.rect.w, d.layout.rect.h);
+    c.drawImage(text, 0, 0, w, h);
+    this.place(ctx, d.layout, both, { x: 0, y: 0, w, h });
+  }
+
   /** Draws `image` into `box` (default: the layout rect) under the element's matrix, opacity, filter, blend and corner radius. */
-  private place(ctx: CanvasRenderingContext2D, layout: OverlayLayout, image: Image, box?: Box, extraFilter: string | null = null): void {
+  private place(ctx: CanvasRenderingContext2D, layout: OverlayLayout, image: Image | Canvas, box?: Box, extraFilter: string | null = null): void {
     const { rect, matrix: m } = layout;
     ctx.save();
     ctx.setTransform(m.a, m.b, m.c, m.d, m.e, m.f);

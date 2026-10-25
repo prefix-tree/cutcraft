@@ -5,7 +5,7 @@ import { createElement as h, type ReactElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { chromium, type Browser } from "@playwright/test";
 import { Canvas, loadImage } from "skia-canvas";
-import { Caption, Captions, Composition, Layer, Shape, Svg, Title, Track, collect, installLayerClock, resolve, type ResolvedState } from "@cutcut/kit";
+import { Caption, Captions, Composition, Graphic, Layer, Shape, Sticker, Svg, Title, Track, collect, installLayerClock, resolve, type ResolvedState } from "@cutcut/kit";
 import { visiblePlacements } from "@cutcut/player/engine";
 import { indexLayerInteriors, layerClock } from "@cutcut/player/overlays";
 import { Captions as DomCaptions } from "../../../player/src/react/elements/Captions";
@@ -13,6 +13,8 @@ import { Layer as DomLayerElement } from "../../../player/src/react/elements/Lay
 import { Shape as DomShape } from "../../../player/src/react/elements/Shape";
 import { Title as DomTitle } from "../../../player/src/react/elements/Title";
 import { Svg as DomSvg } from "../../../player/src/react/elements/Svg";
+import { Graphic as DomGraphic } from "../../../player/src/react/elements/Graphic";
+import { Sticker as DomSticker } from "../../../player/src/react/elements/Sticker";
 import { PlayerContext } from "../../../player/src/react/context";
 import { OverlayPlane, directoryResolver } from "../../src";
 import { BUNDLED_FONTS, BUNDLED_FONT_WEIGHTS, useT } from "@cutcut/kit";
@@ -127,6 +129,26 @@ const cases: Case[] = [
     name: "an SVG filled from theme tokens",
     element: themed({ extends: "neon" }, h(Svg, { id: "e", start: 0, duration: 2, content: '<svg width="160" height="160" viewBox="0 0 20 20"><circle cx="10" cy="10" r="9" fill="$primary"/><path d="M5 10 L9 14 L15 6" stroke="var(--cc-text)" stroke-width="2" fill="none"/></svg>' })),
     dom: (s) => domOf(s, DomSvg, {}),
+  },
+  {
+    name: "a callout graphic with its text",
+    element: themed({ extends: "midnight", motion: "none" }, h(Graphic, { id: "e", kind: "callout", text: "Try it free", start: 0, duration: 2 })),
+    dom: (s) => domOf(s, DomGraphic, {}),
+  },
+  {
+    name: "a lower third card in the paper theme",
+    element: themed({ extends: "paper", motion: "none" }, h(Graphic, { id: "e", kind: "lower-third-card", name: "Ada Lovelace", role: "Engineer", size: 36, start: 0, duration: 2 })),
+    dom: (s) => domOf(s, DomGraphic, {}),
+  },
+  {
+    name: "a progress bar halfway through filling",
+    element: themed({ extends: "neon", motion: "none" }, h(Graphic, { id: "e", kind: "progress-bar", width: 400, height: 30, start: 0, duration: 2 })),
+    dom: (s) => domOf(s, DomGraphic, {}),
+  },
+  {
+    name: "an icon sticker",
+    element: scene(h(Sticker, { id: "e", src: "icon:rocket", start: 0, duration: 2 })),
+    dom: (s) => domOf(s, DomSticker, {}),
   },
   {
     name: "a caption line",

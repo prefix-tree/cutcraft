@@ -34,7 +34,7 @@ it restyles every element that uses it without touching the edit.
 | `fonts` | Families by role: `heading`, `body`, `mono` | `$heading`, `$body`, `$mono` |
 | `radius` | Corner radius in pixels | `$radius` |
 | `motion` | `none`, `calm`, `snappy`, `bouncy`, `editorial`, or `{ enter, exit, transition }` | fills entrances, exits and transitions |
-| `styles` | Named presets per kind (`title`, `shape`, `svg`, `sticker`, `captions`), merged over the base's | `style="h1"` |
+| `styles` | Named presets per kind (`title`, `shape`, `svg`, `sticker`, `graphic`, `captions`), merged over the base's | `style="h1"` |
 
 Tokens and preset names share one namespace per theme; the schema rejects a
 font role with the name of a palette colour.
@@ -71,7 +71,7 @@ The built-in themes share one set of presets, written in tokens:
 ## Motion
 
 The motion style fills what the file leaves out: `enter` and `exit` on titles,
-shapes, SVG and stickers (a title with a text `animation` keeps it instead),
+shapes, SVG, stickers and graphics (a title with a text `animation` keeps it instead),
 and the `type` and `duration` of a `<Transition>`. To keep one element still, give it an
 `enter` of type `none`.
 

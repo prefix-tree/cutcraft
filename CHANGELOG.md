@@ -8,6 +8,16 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- `<Graphic kind>`: thirty built-in graphics from the new `@cutcut/graphics` package (arrows,
+  callouts, speech bubbles, badges, pills, bursts, three lower thirds, corner brackets, frames,
+  device frames, underline and circle scribbles, marker sweeps, strikes, progress bars,
+  countdowns, step dots, dividers, five backgrounds, confetti, sparkles and Lucide icons). Each
+  kind is a pure function from its props, the theme and the time to SVG art and text labels, so
+  the preview and the export draw the same thing and every graphic follows the theme. Props are
+  typed per kind in JSX and checked by the `graphic-props` lint; `<Sticker src="icon:name">` draws
+  a Lucide icon. The graphics reference shows each kind as the export renders it
+  (`pnpm docs:graphics`).
+
 - Themes: `theme` on the composition holds a palette, fonts, a corner radius, a motion style
   and named presets per element kind, starting from one of six built-in themes. Props take
   theme values as `$tokens`, elements pick presets with `style`, and the motion style fills

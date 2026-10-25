@@ -29,7 +29,7 @@ export interface Themed {
 }
 
 /** Kinds whose entrance and exit a motion style fills. */
-const MOTION_KINDS = new Set(["title", "shape", "svg", "sticker"]);
+const MOTION_KINDS = new Set(["title", "shape", "svg", "sticker", "graphic"]);
 /** Props whose strings are content, never tokens. */
 const CONTENT_PROPS = new Set(["text", "content", "src", "label", "name", "category", "theme"]);
 

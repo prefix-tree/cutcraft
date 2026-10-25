@@ -1,3 +1,4 @@
+import { GRAPHIC_KINDS, GRAPHIC_KIND_NAMES } from "@cutcut/graphics";
 import { z } from "zod";
 import { zBlendMode, zShapeType, zTextAnimationPreset } from "../enums";
 import { zAnimationUnit, zSvgColorMode, zTextAlign, zTextDecoration, zTextValign } from "./enums-local";
@@ -106,6 +107,28 @@ export const svgSchema = z.strictObject({
   color: z.strictObject({ mode: zSvgColorMode, tint: colorSchema.optional(), opacity: z.number().min(0).max(1).optional() }).optional(),
   ...entranceProps,
 }).refine((v) => Boolean(v.src) !== Boolean(v.content), { message: "Svg takes either src or content" });
+
+const graphicBase = {
+  ...timedProps,
+  ...visualProps,
+  ...entranceProps,
+  /** A theme preset for graphics. */
+  style: idSchema.optional(),
+  /** The box, in composition pixels; each kind has a size of its own when these are left out. */
+  width: z.number().positive().optional(),
+  height: z.number().positive().optional(),
+};
+
+type Kinds = typeof GRAPHIC_KINDS;
+type KindShape<K extends keyof Kinds> = Kinds[K]["shape"] extends infer S extends z.ZodRawShape ? S : never;
+type GraphicVariant<K extends keyof Kinds> = z.ZodObject<typeof graphicBase & { kind: z.ZodLiteral<K> } & KindShape<K>, z.core.$strict>;
+type GraphicVariants = { [K in keyof Kinds]: GraphicVariant<K> }[keyof Kinds];
+
+/** `<Graphic kind>`: the props every graphic takes, and the kind's own (see `@cutcut/graphics`). */
+export const graphicSchema = z.discriminatedUnion(
+  "kind",
+  GRAPHIC_KIND_NAMES.map((k) => z.strictObject({ ...graphicBase, kind: z.literal(k), ...GRAPHIC_KINDS[k].shape })) as unknown as [GraphicVariants, ...GraphicVariants[]],
+);
 
 export const stickerSchema = z.strictObject({
   ...timedProps,
