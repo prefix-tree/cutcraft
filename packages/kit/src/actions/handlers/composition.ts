@@ -1,6 +1,9 @@
 import { getHandler, inverseOf } from "../registry";
 import { define, isError, makePropHandler, rawNode, rawProp, requireElement, setProps, validateTarget } from "../handler-kit";
 import { invalid, ok, type Action, type ActionInput } from "../types";
+import type { Json } from "../../patches/types";
+import { FONT_KEYS } from "../../theme/builtins";
+import { themeSchema } from "../../theme/schema";
 
 define(makePropHandler({
   type: "composition/updateSettings",
@@ -24,6 +27,60 @@ define(makePropHandler({
     return { background: Object.keys(next).length ? (next as never) : undefined };
   },
 }));
+
+define(makePropHandler({
+  type: "composition/setTheme",
+  target: () => "composition",
+  write: (p, state) => ({ theme: p.theme === null ? undefined : p.merge ? mergeTheme(currentTheme(state), p.theme) : p.theme as Json }),
+  validate: (a, state) => {
+    if (a.params.theme === null) return ok;
+    const next = a.params.merge ? mergeTheme(currentTheme(state), a.params.theme) : a.params.theme;
+    const result = themeSchema.safeParse(next);
+    return result.success ? ok : invalid({ code: "INVALID_PARAMS", path: "theme", message: result.error.issues.map((i) => `${i.path.join(".") || "theme"}: ${i.message}`).join("; ") });
+  },
+}));
+
+define(makePropHandler({
+  type: "theme/setToken",
+  target: () => "composition",
+  write: (p, state) => {
+    const theme = currentTheme(state);
+    const name = p.token.replace(/^\$/, "");
+    if (name === "radius") return { theme: { ...theme, radius: p.value } };
+    const group = (FONT_KEYS as readonly string[]).includes(name) || Object.hasOwn(state.theme.fonts, name) ? "fonts" : "palette";
+    const prior = (theme[group] ?? {}) as Record<string, Json>;
+    return { theme: { ...theme, [group]: { ...prior, [name]: p.value } } };
+  },
+  validate: (a) => {
+    const name = a.params.token.replace(/^\$/, "");
+    if (!/^[A-Za-z][A-Za-z0-9_-]*$/.test(name)) return invalid({ code: "INVALID_PARAMS", path: "token", message: `"${a.params.token}" is not a token name` });
+    if (name === "radius" ? typeof a.params.value !== "number" : typeof a.params.value !== "string") {
+      return invalid({ code: "INVALID_PARAMS", path: "value", message: name === "radius" ? "radius takes a number" : `${name} takes a string` });
+    }
+    return ok;
+  },
+}));
+
+/** The file's own theme literal, after patches; empty when it has none. */
+function currentTheme(state: Parameters<typeof rawProp>[0]): Record<string, Json> {
+  const raw = rawProp(state, "composition", "theme");
+  return raw && typeof raw === "object" && !Array.isArray(raw) ? raw as Record<string, Json> : {};
+}
+
+/** `over` laid on `base`: palette, fonts and styles merge one level down, the rest replaces. */
+function mergeTheme(base: Record<string, Json>, over: Readonly<Record<string, Json>>): Record<string, Json> {
+  const out: Record<string, Json> = { ...base };
+  for (const [key, value] of Object.entries(over)) {
+    const prior = base[key];
+    const nested = (key === "palette" || key === "fonts" || key === "styles") && isObject(prior) && isObject(value);
+    out[key] = nested ? { ...prior, ...value } : value;
+  }
+  return out;
+}
+
+function isObject(v: Json | undefined): v is Record<string, Json> {
+  return typeof v === "object" && v !== null && !Array.isArray(v);
+}
 
 /** The tweaks panel. Stored as a prop patch on the composition; fold rewrites the `defaults` literal. */
 define({

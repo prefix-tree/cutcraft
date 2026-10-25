@@ -17,7 +17,8 @@ export const captionsSchema = z.strictObject({
   id: idSchema,
   /** Generate children from the asset's transcript. Literal `<Caption>` children override this. */
   src: assetRefSchema.optional(),
-  style: captionStyleSchema.optional(),
+  /** Caption styling, or the name of a theme captions preset. */
+  style: z.union([idSchema, captionStyleSchema]).optional(),
   animation: zCaptionAnimation.default("none"),
   /** Generation limits: a cue breaks at a sentence end, a long pause, or when one of these would be exceeded. */
   maxChars: z.number().int().positive().default(42),

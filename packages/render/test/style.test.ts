@@ -1,7 +1,7 @@
 // Shape styling, entrances and exits, and gradient backgrounds, as the export draws them.
 import { createElement as h, type ReactElement } from "react";
 import type { Canvas, CanvasRenderingContext2D } from "skia-canvas";
-import { Composition, Shape, Svg, Title, Track, collect, resolve } from "@cutcut/kit";
+import { Composition, Shape, Svg, THEMES, Title, Track, collect, resolve } from "@cutcut/kit";
 import { indexLayerInteriors } from "@cutcut/player/overlays";
 import { manifest } from "../../player/e2e/app/composition";
 import { FramePipeline } from "../src/pipeline";
@@ -15,7 +15,11 @@ function scene(children: ReactElement[], comp: Record<string, unknown> = {}) {
 }
 
 async function overlaysAt(t: number, ...children: ReactElement[]) {
-  const el = scene(children);
+  return overlaysWith({}, t, ...children);
+}
+
+async function overlaysWith(comp: Record<string, unknown>, t: number, ...children: ReactElement[]) {
+  const el = scene(children, comp);
   const state = resolve(collect(el), manifest);
   expect(state.errors).toEqual([]);
   const warnings: string[] = [];
@@ -106,5 +110,45 @@ describe("gradient background", () => {
     expect(close(at(320, 1), [255, 0, 0, 255], 6)).toBe(true);
     expect(close(at(320, 358), [0, 0, 255, 255], 6)).toBe(true);
     expect(close(at(320, 180), [128, 0, 127, 255], 6)).toBe(true);
+  });
+});
+
+describe("themes in the export", () => {
+  const hex = (c: string): Rgba => [parseInt(c.slice(1, 3), 16), parseInt(c.slice(3, 5), 16), parseInt(c.slice(5, 7), 16), 255];
+
+  it("draws shape presets and svg tokens in the theme's colours", async () => {
+    const neon = THEMES.neon.palette;
+    const { px, warnings } = await overlaysWith({ theme: { extends: "neon", motion: "none" } }, 1,
+      h(Shape, { id: "card", style: "panel", shape: "rectangle", width: 200, height: 100, start: 0, duration: 4, transform: { position: { x: -150, y: 0 } } }),
+      h(Svg, { id: "dot", start: 0, duration: 4, transform: { position: { x: 150, y: 0 } }, content: '<svg width="100" height="100"><circle cx="50" cy="50" r="50" fill="$accent"/><rect x="40" y="40" width="20" height="20" fill="var(--cc-secondary)"/></svg>' }),
+    );
+    expect(warnings).toEqual([]);
+    expect(close(px(170, 180), hex(neon.surface))).toBe(true);
+    expect(close(px(470, 150), hex(neon.accent))).toBe(true);
+    expect(close(px(470, 180), hex(neon.secondary))).toBe(true);
+    // The panel's corners take the theme radius (22 px).
+    expect(px(72, 132)[3]).toBe(0);
+  });
+
+  it("sets titles in the theme's fonts, with no fallback warning", async () => {
+    const title = h(Title, { id: "t", start: 0, duration: 4, style: "h2" }, "Hamburgefonts");
+    const widthOf = async (theme: string): Promise<number> => {
+      const { px, warnings } = await overlaysWith({ theme: { extends: theme, motion: "none" } }, 1, title);
+      expect(warnings).toEqual([]);
+      let left = W, right = 0;
+      for (let y = 140; y < 220; y += 2) for (let x = 0; x < W; x++) if (px(x, y)[3] > 128) { left = Math.min(left, x); right = Math.max(right, x); }
+      return right - left;
+    };
+    const serif = await widthOf("paper"), grotesk = await widthOf("midnight"), sans = await widthOf("pastel");
+    expect(serif).toBeGreaterThan(100);
+    expect(new Set([serif, grotesk, sans]).size).toBe(3);
+  });
+
+  it("plays the motion style's entrance where the element has none", async () => {
+    const shape = box("m", { fill: "$primary" });
+    const early = await overlaysWith({ theme: { extends: "mono", motion: "editorial" } }, 0.3, shape);
+    // Editorial wipes in from the left over 0.6 s: at 0.3 s the right edge is not drawn yet.
+    expect(close(early.px(240, 180), hex(THEMES.mono.palette.primary))).toBe(true);
+    expect(early.px(400, 180)[3]).toBe(0);
   });
 });

@@ -1,6 +1,6 @@
 import { createRequire } from "node:module";
 import type { ResolvedState } from "@cutcut/kit";
-import { installLayerClock } from "@cutcut/kit";
+import { BUNDLED_FONTS, BUNDLED_FONT_WEIGHTS, installLayerClock } from "@cutcut/kit";
 import { isVisibleAt, visiblePlacements, type MediaResolver, type VisibleItem } from "@cutcut/player/engine";
 import {
   OVERLAY_KINDS, captionsContent, parseSvg, serialize, shapeDrawing, svgDrawing, layerClock, layerContent, overlayLayout, stickerPlaceholder, stickerSize, titleContent,
@@ -27,7 +27,7 @@ export interface OverlayOptions {
   readonly media: MediaResolver;
   /** The children of each `<Layer id>` in the file; see `indexLayerInteriors`. */
   readonly interiors?: ReadonlyMap<string, ReactNode>;
-  /** Fonts beyond the bundled Inter; a title's `font` prop picks one by name. */
+  /** Fonts beyond the bundled families (`BUNDLED_FONTS`); a title's `font` prop picks one by name. */
   readonly fonts?: readonly OverlayFont[];
   readonly warn: (message: string) => void;
 }
@@ -348,10 +348,19 @@ export function treeKey(node: ReactNode): string | null {
   return walk(node) ? out.join("") : null;
 }
 
-/** Inter regular and bold, upright and italic, from the `@fontsource/inter` package. */
+/** The bundled families (see `BUNDLED_FONTS`), regular and bold, upright and italic where the family has one. Read once. */
+let bundled: OverlayFont[] | null = null;
 function bundledFonts(): OverlayFont[] {
+  if (bundled) return bundled;
   const require = createRequire(import.meta.url);
-  const dir = require.resolve("@fontsource/inter/package.json").replace(/package\.json$/, "files/");
-  const load = (weight: 400 | 700, style: "normal" | "italic"): OverlayFont => ({ name: "Inter", data: readFileSync(`${dir}inter-latin-${weight}-${style}.woff`), weight, style });
-  return [load(400, "normal"), load(700, "normal"), load(400, "italic"), load(700, "italic")];
+  const out: OverlayFont[] = [];
+  for (const font of BUNDLED_FONTS) {
+    const dir = require.resolve(`@fontsource/${font.id}/package.json`).replace(/package\.json$/, "files/");
+    for (const weight of BUNDLED_FONT_WEIGHTS) {
+      for (const style of font.italic ? ["normal", "italic"] as const : ["normal"] as const) {
+        out.push({ name: font.family, data: readFileSync(`${dir}${font.id}-latin-${weight}-${style}.woff`), weight, style });
+      }
+    }
+  }
+  return (bundled = out);
 }

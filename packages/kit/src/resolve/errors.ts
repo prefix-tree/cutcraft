@@ -13,6 +13,8 @@ export type ResolveErrorCode =
   | "AMBIGUOUS_DURATION"
   | "INVALID_CHILD"
   | "INVALID_TIME_RANGE"
+  | "UNKNOWN_TOKEN"
+  | "UNKNOWN_STYLE"
   | "SCHEMA";
 
 export interface ResolveError {

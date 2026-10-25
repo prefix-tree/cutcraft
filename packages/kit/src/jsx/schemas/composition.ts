@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { zTrackLayout, zTrackRole } from "../enums";
+import { themeSchema } from "../../theme/schema";
 import { colorSchema, gradientSchema, idSchema, timeRefSchema } from "./common";
 
 export const compositionSchema = z.strictObject({
@@ -14,6 +15,8 @@ export const compositionSchema = z.strictObject({
     color: colorSchema.optional(),
     gradient: gradientSchema.optional(),
   }).optional(),
+  /** The video's look: palette, fonts, radius, motion style and element presets. Elements use it through `$tokens` and `style`. */
+  theme: themeSchema.optional(),
 });
 
 export const trackSchema = z.strictObject({

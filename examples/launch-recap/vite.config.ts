@@ -10,6 +10,7 @@ export default defineConfig({
     alias: {
       "@cutcut/kit/source": here("../../packages/kit/src/source/index-public.ts"),
       "@cutcut/kit": here("../../packages/kit/src/index.ts"),
+      "@cutcut/player/fonts.css": here("../../packages/player/fonts.css"),
       "@cutcut/player": here("../../packages/player/src/index.ts"),
     },
   },

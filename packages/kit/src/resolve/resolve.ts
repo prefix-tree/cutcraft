@@ -10,6 +10,7 @@ import { overlay } from "./overlay";
 import type { CollectedNode, CollectedTree, Editable, LayerInterior } from "./tree";
 import { cueNodes, onTimeline, planCues, playsKey, sameAsset, timelineWords, type AssetPlay, type CueOptions } from "./captions";
 import { parseTimeRef } from "../manifest/timeref";
+import { applyTheme, resolveTheme, type ResolvedTheme, type ThemeOrigin } from "../theme/theme";
 
 export interface Placement {
   readonly id: string;
@@ -32,6 +33,8 @@ export interface Placement {
   readonly between?: readonly [string, string];
   /** A Layer's handles: the component inside it and its current props. */
   readonly interior?: LayerInterior;
+  /** Props the theme supplied, by dot path: `$primary`, `style:h1`, `motion` or `theme`. Absent when none did. */
+  readonly themed?: Readonly<Record<string, ThemeOrigin>>;
 }
 
 export interface ResolvedTrack {
@@ -54,6 +57,8 @@ export interface ResolvedState {
   readonly tree: CollectedTree;
   readonly manifest: AssetManifest;
   readonly log: PatchLog | undefined;
+  /** The composition's theme, its base merged in; the default theme when the file declares none. */
+  readonly theme: ResolvedTheme;
 }
 
 const DEFAULT_OVERLAY_DURATION = 5;
@@ -102,7 +107,8 @@ function compute(original: CollectedTree, manifest: AssetManifest, log: PatchLog
   const tree = overlay(original, log);
   const errors: ResolveError[] = [...tree.errors];
   const root = tree.root;
-  const compParsed = parseProps(root, errors);
+  const theme = resolveTheme(root.props.theme);
+  const compParsed = parseProps(root, errors, theme);
   const markers = new Map<string, number>();
   const pending = new Map<string, Pending>();
   const tracks: ResolvedTrack[] = [];
@@ -119,14 +125,14 @@ function compute(original: CollectedTree, manifest: AssetManifest, log: PatchLog
     const placement: Placement = {
       id: node.id, kind: node.kind, track, parent, children: node.children.map((c) => c.id),
       start, end: start + length, duration: length, props, editable: node.editable, lockedProps: node.lockedProps, boundProps: node.boundProps, errors,
-      ...(source ? { source } : {}), ...(between ? { between } : {}), ...(node.interior ? { interior: node.interior } : {}),
+      ...(source ? { source } : {}), ...(between ? { between } : {}), ...(node.interior ? { interior: node.interior } : {}), ...themedField(props),
     };
     return placement;
   };
 
   for (const child of root.children) {
     if (child.kind === "marker") {
-      const p = parseProps(child, errors);
+      const p = parseProps(child, errors, theme);
       const at = p.at;
       if (typeof at === "number") markers.set(child.id, at);
       else errors.push({ code: "UNKNOWN_REF", id: child.id, prop: "at", message: "markers take seconds, not references" });
@@ -137,7 +143,7 @@ function compute(original: CollectedTree, manifest: AssetManifest, log: PatchLog
   let order = 0;
   for (const child of root.children) {
     if (child.kind === "track") {
-      const p = parseProps(child, errors);
+      const p = parseProps(child, errors, theme);
       tracks.push({
         id: child.id,
         layout: (p.layout as TrackLayout) ?? "sequence",
@@ -146,9 +152,9 @@ function compute(original: CollectedTree, manifest: AssetManifest, log: PatchLog
         ...(typeof p.group === "string" ? { group: p.group } : {}),
         items: child.children.map((c) => c.id),
       });
-      for (const item of child.children) intrinsic(item, child.id, pending, manifest, markers, markersKey, errors);
+      for (const item of child.children) intrinsic(item, child.id, pending, manifest, markers, markersKey, theme, errors);
     } else if (child.kind === "captions") {
-      intrinsic(child, null, pending, manifest, markers, markersKey, errors);
+      intrinsic(child, null, pending, manifest, markers, markersKey, theme, errors);
     } else if (child.kind === "multicam") {
       errors.push({ code: "INVALID_CHILD", id: child.id, message: "<Multicam> belongs inside a <Track>" });
     } else if (child.kind !== "marker") {
@@ -160,7 +166,7 @@ function compute(original: CollectedTree, manifest: AssetManifest, log: PatchLog
   for (const track of tracks) {
     const trackNode = tree.byId.get(track.id);
     if (!trackNode) continue;
-    placeTrack(trackNode, track, pending, errors);
+    placeTrack(trackNode, track, pending, theme, errors);
   }
   iterateDependencies(pending, errors);
   placeCaptions(root, pending, tracks, manifest, markers);
@@ -190,13 +196,13 @@ function compute(original: CollectedTree, manifest: AssetManifest, log: PatchLog
   for (const child of root.children) {
     if (child.kind === "track") {
       const own: ResolveError[] = [];
-      const props = parseProps(child, own);
-      structural.push({ id: child.id, kind: "track", track: child.id, parent: root.id, children: child.children.map((c) => c.id), start: 0, end: 0, duration: 0, props, editable: child.editable, lockedProps: child.lockedProps, boundProps: child.boundProps, errors: own });
+      const props = parseProps(child, own, theme);
+      structural.push({ id: child.id, kind: "track", track: child.id, parent: root.id, children: child.children.map((c) => c.id), start: 0, end: 0, duration: 0, props, editable: child.editable, lockedProps: child.lockedProps, boundProps: child.boundProps, errors: own, ...themedField(props) });
     } else if (child.kind === "marker") {
       const own: ResolveError[] = [];
-      const props = parseProps(child, own);
+      const props = parseProps(child, own, theme);
       const at = markers.get(child.id) ?? 0;
-      structural.push({ id: child.id, kind: "marker", track: null, parent: root.id, children: [], start: at, end: at, duration: 0, props, editable: child.editable, lockedProps: child.lockedProps, boundProps: child.boundProps, errors: own });
+      structural.push({ id: child.id, kind: "marker", track: null, parent: root.id, children: [], start: at, end: at, duration: 0, props, editable: child.editable, lockedProps: child.lockedProps, boundProps: child.boundProps, errors: own, ...themedField(props) });
     }
   }
   let duration = 0;
@@ -207,7 +213,7 @@ function compute(original: CollectedTree, manifest: AssetManifest, log: PatchLog
     items.set(p.node.id, placement);
     if (p.errors.length > 0) errors.push(...p.errors);
     if (p.node.kind !== "transition") duration = Math.max(duration, placement.end);
-    duration = placeChildren(p.node, placement, items, errors, place, duration);
+    duration = placeChildren(p.node, placement, items, errors, place, duration, theme);
   }
 
   for (const s of structural) {
@@ -216,7 +222,7 @@ function compute(original: CollectedTree, manifest: AssetManifest, log: PatchLog
   }
   items.set(root.id, reuse({
     id: root.id, kind: "composition", track: null, parent: null, children: root.children.map((c) => c.id),
-    start: 0, end: duration, duration, props: compParsed, editable: root.editable, lockedProps: root.lockedProps, boundProps: root.boundProps, errors: [],
+    start: 0, end: duration, duration, props: compParsed, editable: root.editable, lockedProps: root.lockedProps, boundProps: root.boundProps, errors: [], ...themedField(compParsed),
   }));
   return {
     composition: {
@@ -226,45 +232,65 @@ function compute(original: CollectedTree, manifest: AssetManifest, log: PatchLog
       height: Number(compParsed.height ?? 1080),
       duration,
     },
-    tracks, items, errors, tree, manifest, log,
+    tracks, items, errors, tree, manifest, log, theme,
   };
 }
 
-interface ParsedProps { readonly data: Record<string, unknown>; readonly errors: readonly ResolveError[] }
+interface ParsedProps { readonly theme: ResolvedTheme; readonly unthemed: boolean; readonly data: Record<string, unknown>; readonly errors: readonly ResolveError[] }
 
 /**
- * Parsed props are cached per raw props object: the overlay keeps the props
- * object of every node a patch did not touch, so a drag step re-parses one
- * node, not the whole tree. The cached `data` is shared, never mutated, and
- * is what `Placement.props` points at, so untouched placements keep it
- * across resolves and consumers can memoise on its identity.
+ * Parsed props are cached per raw props object and theme: the overlay keeps
+ * the props object of every node a patch did not touch, so a drag step
+ * re-parses one node, not the whole tree. The cached `data` is shared, never
+ * mutated, and is what `Placement.props` points at, so untouched placements
+ * keep it across resolves and consumers can memoise on its identity.
  */
 const parsedByProps = new WeakMap<object, ParsedProps>();
+/** Which parsed props the theme supplied, keyed by the parsed `data`. */
+const themedByData = new WeakMap<object, Readonly<Record<string, ThemeOrigin>>>();
 
-function parseProps(node: CollectedNode, errors: ResolveError[]): Record<string, unknown> {
+function parseProps(node: CollectedNode, errors: ResolveError[], theme: ResolvedTheme): Record<string, unknown> {
   const cached = parsedByProps.get(node.props);
-  if (cached) {
+  if (cached && cached.theme === theme) {
     errors.push(...cached.errors);
     return cached.data;
   }
-  const schema = SCHEMAS_BY_KIND[node.kind] as z.ZodType | undefined;
-  let parsed: ParsedProps;
-  if (!schema) parsed = { data: { ...node.props }, errors: [] };
-  else {
-    const result = schema.safeParse(node.props);
-    parsed = result.success
-      ? { data: result.data as Record<string, unknown>, errors: [] }
-      : { data: { ...node.props }, errors: result.error.issues.map((issue) => ({ code: "SCHEMA", id: node.id, prop: issue.path.map(String).join(".") || undefined, message: issue.message }) as ResolveError) };
+  const themed = applyTheme(node.kind, node.props, theme);
+  // A theme change keeps the parse of an element the theme touches under neither theme.
+  if (cached && cached.unthemed && themed.props === node.props) {
+    parsedByProps.set(node.props, { ...cached, theme });
+    errors.push(...cached.errors);
+    return cached.data;
   }
+  const own: ResolveError[] = themed.issues.map((issue) => ({ code: issue.code, id: node.id, prop: issue.prop, message: issue.message }));
+  const schema = SCHEMAS_BY_KIND[node.kind] as z.ZodType | undefined;
+  let data: Record<string, unknown>;
+  if (!schema) data = { ...themed.props };
+  else {
+    const result = schema.safeParse(themed.props);
+    if (result.success) data = result.data as Record<string, unknown>;
+    else {
+      data = { ...themed.props };
+      own.push(...result.error.issues.map((issue) => ({ code: "SCHEMA", id: node.id, prop: issue.path.map(String).join(".") || undefined, message: issue.message }) as ResolveError));
+    }
+  }
+  if (Object.keys(themed.from).length > 0) themedByData.set(data, themed.from);
+  const parsed: ParsedProps = { theme, unthemed: themed.props === node.props, data, errors: own };
   parsedByProps.set(node.props, parsed);
-  errors.push(...parsed.errors);
-  return parsed.data;
+  errors.push(...own);
+  return data;
+}
+
+function themedField(props: Record<string, unknown>): { themed?: Readonly<Record<string, ThemeOrigin>> } {
+  const themed = themedByData.get(props);
+  return themed ? { themed } : {};
 }
 
 /** What `intrinsic` derives for a node; cached per node object and copied into a fresh Pending each resolve. */
 interface IntrinsicEntry {
   readonly manifest: AssetManifest;
   readonly markersKey: string;
+  readonly theme: ResolvedTheme;
   /** The parent's parsed props a caption's transcript references were resolved against. */
   readonly parentProps: Record<string, unknown> | undefined;
   readonly template: Readonly<Pick<Pending, "props" | "errors" | "source" | "start" | "duration" | "durationDep" | "anchorDep">>;
@@ -290,11 +316,12 @@ function intrinsic(
   manifest: AssetManifest,
   markers: ReadonlyMap<string, number>,
   markersKey: string,
+  theme: ResolvedTheme,
   errors: ResolveError[],
 ): void {
   const parentProps = node.kind === "caption" && node.parent ? pending.get(node.parent)?.props : undefined;
   const hit = intrinsicByNode.get(node);
-  if (hit && hit.manifest === manifest && hit.markersKey === markersKey && hit.parentProps === parentProps) {
+  if (hit && hit.manifest === manifest && hit.markersKey === markersKey && hit.theme === theme && hit.parentProps === parentProps) {
     const t = hit.template;
     const p: Pending = { node, track, parent: node.parent, props: t.props, errors: [...t.errors] };
     if (t.source) p.source = t.source;
@@ -303,12 +330,12 @@ function intrinsic(
     if (t.durationDep) p.durationDep = { ...t.durationDep };
     if (t.anchorDep) p.anchorDep = { ...t.anchorDep };
     pending.set(node.id, p);
-    if (node.kind === "captions") for (const child of node.children) if (child.kind === "caption") intrinsic(child, track, pending, manifest, markers, markersKey, errors);
+    if (node.kind === "captions") for (const child of node.children) if (child.kind === "caption") intrinsic(child, track, pending, manifest, markers, markersKey, theme, errors);
     return;
   }
-  const p = intrinsicCompute(node, track, pending, manifest, markers, markersKey, errors);
+  const p = intrinsicCompute(node, track, pending, manifest, markers, markersKey, theme, errors);
   intrinsicByNode.set(node, {
-    manifest, markersKey, parentProps,
+    manifest, markersKey, theme, parentProps,
     template: {
       props: p.props, errors: [...p.errors],
       ...(p.source ? { source: p.source } : {}),
@@ -327,11 +354,12 @@ function intrinsicCompute(
   manifest: AssetManifest,
   markers: ReadonlyMap<string, number>,
   markersKey: string,
+  theme: ResolvedTheme,
   errors: ResolveError[],
 ): Pending {
   const caps = capabilitiesOf(node.kind);
   const own: ResolveError[] = [];
-  const props = parseProps(node, own);
+  const props = parseProps(node, own, theme);
   const p: Pending = { node, track, parent: node.parent, props, errors: own };
   pending.set(node.id, p);
 
@@ -357,7 +385,7 @@ function intrinsicCompute(
   } else if (node.kind === "captions") {
     p.start = 0;
     p.durationDep = { kind: "fill" };
-    for (const child of node.children) if (child.kind === "caption") intrinsic(child, track, pending, manifest, markers, markersKey, errors);
+    for (const child of node.children) if (child.kind === "caption") intrinsic(child, track, pending, manifest, markers, markersKey, theme, errors);
     return p;
   } else if (node.kind === "multicam") {
     p.start = 0;
@@ -407,7 +435,7 @@ function sourceRange(p: Pending, asset: AssetEntry, markers: ReadonlyMap<string,
   p.duration = (outSec - inSec) / speed;
 }
 
-function placeTrack(trackNode: CollectedNode, track: ResolvedTrack, pending: Map<string, Pending>, errors: ResolveError[]): void {
+function placeTrack(trackNode: CollectedNode, track: ResolvedTrack, pending: Map<string, Pending>, theme: ResolvedTheme, errors: ResolveError[]): void {
   let cursor = 0;
   let prevClip: Pending | null = null;
   let pendingTransition: Pending | null = null;
@@ -416,7 +444,7 @@ function placeTrack(trackNode: CollectedNode, track: ResolvedTrack, pending: Map
     if (!p) continue;
     const caps = capabilitiesOf(child.kind);
     if (child.kind === "multicam") {
-      placeMulticam(child, p, track, pending, errors);
+      placeMulticam(child, p, track, pending, theme, errors);
       continue;
     }
     if (child.kind === "transition") {
@@ -485,11 +513,11 @@ function placeTrack(trackNode: CollectedNode, track: ResolvedTrack, pending: Map
   }
 }
 
-function placeMulticam(node: CollectedNode, p: Pending, track: ResolvedTrack, pending: Map<string, Pending>, errors: ResolveError[]): void {
+function placeMulticam(node: CollectedNode, p: Pending, track: ResolvedTrack, pending: Map<string, Pending>, theme: ResolvedTheme, errors: ResolveError[]): void {
   const angles = new Map<string, Record<string, unknown>>();
   const cuts: { node: CollectedNode; at: number; angle: string }[] = [];
   for (const child of node.children) {
-    const cp = parseProps(child, errors);
+    const cp = parseProps(child, errors, theme);
     if (child.kind === "angle") angles.set(child.id, cp);
     else if (child.kind === "cut") {
       if (typeof cp.at !== "number") { errors.push({ code: "UNKNOWN_REF", id: child.id, prop: "at", message: "cuts take seconds" }); continue; }
@@ -616,11 +644,11 @@ function sameErrors(a: readonly ResolveError[], b: readonly ResolveError[]): boo
 type Place = (node: CollectedNode, track: string | null, parent: string | null, start: number, length: number, props: Record<string, unknown>, errors: readonly ResolveError[], source: Placement["source"], between: Placement["between"]) => Placement;
 
 /** Non-timed children get the parent's range so the editor can address them; keyframes sit at their `at`. Returns the running composition end. */
-function placeChildren(node: CollectedNode, parent: Placement, items: Map<string, Placement>, errors: ResolveError[], place: Place, end: number): number {
+function placeChildren(node: CollectedNode, parent: Placement, items: Map<string, Placement>, errors: ResolveError[], place: Place, end: number, theme: ResolvedTheme): number {
   for (const child of node.children) {
     if (items.has(child.id)) continue;
     const own: ResolveError[] = [];
-    const props = parseProps(child, own);
+    const props = parseProps(child, own, theme);
     const caps = capabilitiesOf(child.kind);
     if (caps.placementScope !== "child") {
       own.push({ code: "INVALID_CHILD", id: child.id, message: `<${child.kind}> cannot be a child of <${node.kind}>` });
@@ -633,7 +661,7 @@ function placeChildren(node: CollectedNode, parent: Placement, items: Map<string
     items.set(child.id, placement);
     if (own.length > 0) errors.push(...own);
     if (child.kind !== "transition") end = Math.max(end, placement.end);
-    end = placeChildren(child, placement, items, errors, place, end);
+    end = placeChildren(child, placement, items, errors, place, end, theme);
   }
   return end;
 }

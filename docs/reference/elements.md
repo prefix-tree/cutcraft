@@ -44,6 +44,7 @@ Generated from the Zod schemas in `packages/kit/src/jsx/schemas` and the capabil
 | `sampleRate` | integer | `48000` |  |
 | `channels` | integer | `2` |  |
 | `background` | { mode, color, gradient } |  |  |
+| `theme` | { extends, palette, fonts, radius, motion, styles } |  |  |
 
 ## `<Track>`
 
@@ -179,6 +180,7 @@ Generated from the Zod schemas in `packages/kit/src/jsx/schemas` and the capabil
 | `emphasis` | "none" \| "pulse" \| "shake" \| "bounce" \| "float" \| "spin" \| "flash" \| "heartbeat" \| "swing" \| "wobble" \| "jello" \| "rubber-band" \| "tada" \| "vibrate" \| "flicker" \| "glow" \| "breathe" \| "wave" \| "tilt" \| "zoom-pulse" \| "focus-zoom" \| "pan-left" \| "pan-right" \| "pan-up" \| "pan-down" \| "ken-burns" \| { type, speed, intensity, loop, focusPoint, zoomScale, holdDuration, startTime, animationDuration } |  |  |
 | `enter` | { type, duration, easing } |  |  |
 | `exit` | { type, duration, easing } |  |  |
+| `style` | string |  |  |
 | `shape` | "rectangle" \| "circle" \| "ellipse" \| "triangle" \| "arrow" \| "line" \| "polygon" \| "path" \| "star" |  | yes |
 | `width` | number |  |  |
 | `height` | number |  |  |
@@ -187,7 +189,7 @@ Generated from the Zod schemas in `packages/kit/src/jsx/schemas` and the capabil
 | `stroke` | { color, width, opacity, dashArray, dashOffset, lineCap, lineJoin, gradient } |  |  |
 | `shadow` | { color, blur, x, y, spread, inset } |  |  |
 | `shadows` | { color, blur, x, y, spread, inset }[] |  |  |
-| `cornerRadius` | number (0..∞) |  |  |
+| `cornerRadius` | number (0..∞) \| string |  |  |
 | `cornerRadii` | { topLeft, topRight, bottomRight, bottomLeft } |  |  |
 | `starPoints` | integer |  |  |
 | `innerRadius` | number (0..1) |  |  |
@@ -206,6 +208,7 @@ Generated from the Zod schemas in `packages/kit/src/jsx/schemas` and the capabil
 | `blend` | "normal" \| "multiply" \| "screen" \| "overlay" \| "darken" \| "lighten" \| "color-dodge" \| "color-burn" \| "hard-light" \| "soft-light" \| "difference" \| "exclusion" \| "hue" \| "saturation" \| "color" \| "luminosity" \| "add" \| "linear-dodge" |  |  |
 | `blendOpacity` | number (0..1) |  |  |
 | `emphasis` | "none" \| "pulse" \| "shake" \| "bounce" \| "float" \| "spin" \| "flash" \| "heartbeat" \| "swing" \| "wobble" \| "jello" \| "rubber-band" \| "tada" \| "vibrate" \| "flicker" \| "glow" \| "breathe" \| "wave" \| "tilt" \| "zoom-pulse" \| "focus-zoom" \| "pan-left" \| "pan-right" \| "pan-up" \| "pan-down" \| "ken-burns" \| { type, speed, intensity, loop, focusPoint, zoomScale, holdDuration, startTime, animationDuration } |  |  |
+| `style` | string |  |  |
 | `src` | string |  |  |
 | `content` | string |  |  |
 | `viewBox` | { minX, minY, width, height } |  |  |
@@ -230,6 +233,7 @@ Generated from the Zod schemas in `packages/kit/src/jsx/schemas` and the capabil
 | `emphasis` | "none" \| "pulse" \| "shake" \| "bounce" \| "float" \| "spin" \| "flash" \| "heartbeat" \| "swing" \| "wobble" \| "jello" \| "rubber-band" \| "tada" \| "vibrate" \| "flicker" \| "glow" \| "breathe" \| "wave" \| "tilt" \| "zoom-pulse" \| "focus-zoom" \| "pan-left" \| "pan-right" \| "pan-up" \| "pan-down" \| "ken-burns" \| { type, speed, intensity, loop, focusPoint, zoomScale, holdDuration, startTime, animationDuration } |  |  |
 | `enter` | { type, duration, easing } |  |  |
 | `exit` | { type, duration, easing } |  |  |
+| `style` | string |  |  |
 | `src` | string |  | yes |
 | `category` | string |  |  |
 | `name` | string |  |  |
@@ -240,7 +244,7 @@ Generated from the Zod schemas in `packages/kit/src/jsx/schemas` and the capabil
 |---|---|---|---|
 | `id` | string |  | yes |
 | `src` | string |  |  |
-| `style` | { font, size, color, background, position, highlight, upcoming } |  |  |
+| `style` | string \| { font, size, color, background, position, highlight, upcoming } |  |  |
 | `animation` | "none" \| "word-highlight" \| "word-by-word" \| "karaoke" \| "bounce" \| "typewriter" | `"none"` |  |
 | `maxChars` | integer | `42` |  |
 | `maxDuration` | number | `5` |  |

@@ -23,6 +23,7 @@ export default defineConfig({
           { text: "Getting started", link: "/guide/getting-started" },
           { text: "Writing a file", link: "/guide/writing-files" },
           { text: "Editing", link: "/guide/editing" },
+          { text: "Themes and style", link: "/guide/themes" },
           { text: "Rendering", link: "/guide/rendering" },
           { text: "Exporting", link: "/guide/exporting" },
         ] },
@@ -53,6 +54,7 @@ export default defineConfig({
           { text: "0013 Remotion and Layer handles", link: "/decisions/0013-remotion-has-an-editor-and-layer-handles" },
           { text: "0014 Captions follow the clips", link: "/decisions/0014-captions-follow-the-clips" },
           { text: "0015 A headless engine exports", link: "/decisions/0015-a-headless-engine-renders-the-export" },
+          { text: "0016 A theme lives in the file", link: "/decisions/0016-a-theme-lives-in-the-file" },
         ] },
       ],
       "/recipes/": [

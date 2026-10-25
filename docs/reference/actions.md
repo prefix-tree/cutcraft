@@ -1,6 +1,6 @@
 # Actions
 
-Generated from the registered handlers (125) and the parity table. Do not edit by hand; run `pnpm docs:gen`.
+Generated from the registered handlers (127) and the parity table. Do not edit by hand; run `pnpm docs:gen`.
 
 Every action has `validate`, `apply`, `invert` and `fold`; the inverse is never null. Params are typed in `packages/kit/src/actions/types/index.ts`.
 
@@ -95,6 +95,7 @@ Every action has `validate`, `apply`, `invert` and `fold`; the inverse is never 
 |---|---|---|
 | `composition/setBackground` | `project/setCanvasBackground` |  |
 | `composition/setProps` | — | the tweaks panel: rewrites the file's `defaults` literal |
+| `composition/setTheme` | — | the file's theme: swap it, extend it or remove it in one step |
 | `composition/updateSettings` | `project/updateSettings` |  |
 
 ## `effect/`
@@ -217,6 +218,12 @@ Every action has `validate`, `apply`, `invert` and `fold`; the inverse is never 
 | `text/remove` | `text/remove` |  |
 | `text/setContent` | — |  |
 | `text/update` | `text/update` |  |
+
+## `theme/`
+
+| action | OpenReel counterpart | note |
+|---|---|---|
+| `theme/setToken` | — | one palette colour, font role or radius in the file's theme |
 
 ## `track/`
 

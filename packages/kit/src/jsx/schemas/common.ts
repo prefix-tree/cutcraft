@@ -8,6 +8,13 @@ export const ASSET_REF_PATTERN = /^asset:[A-Za-z0-9_.-]+$/;
 export const idSchema = z.string().regex(ID_PATTERN, "ids are identifiers: letters, digits, _ and -");
 export const assetRefSchema = z.string().regex(ASSET_REF_PATTERN, 'asset references look like "asset:ID"');
 export const colorSchema = z.string().min(1);
+/**
+ * A length a theme can supply: pixels, or a token such as `$radius`. The
+ * resolver replaces tokens before parsing; one it cannot resolve is reported
+ * there and reads as 0.
+ */
+export const themedLengthSchema = z.union([z.number().nonnegative(), z.string().regex(/^\$[A-Za-z][A-Za-z0-9_-]*$/, 'theme tokens look like "$radius"')])
+  .transform((v) => (typeof v === "number" ? v : 0));
 
 export const timeRefSchema = z.union([
   z.number().nonnegative(),
@@ -41,7 +48,7 @@ export const transformSchema = z.strictObject({
   rotation: z.number().min(-360).max(360).optional(),
   anchor: vec2Schema.optional(),
   opacity: z.number().min(0).max(1).optional(),
-  borderRadius: z.number().min(0).optional(),
+  borderRadius: themedLengthSchema.optional(),
   crop: z.strictObject({ x: z.number().min(0).max(1), y: z.number().min(0).max(1), width: z.number().min(0).max(1), height: z.number().min(0).max(1) }).optional(),
   rotate3d: vec3Schema.optional(),
   perspective: z.number().min(100).max(5000).optional(),

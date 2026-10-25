@@ -73,9 +73,10 @@ and with captions on top:
 - **Shapes and SVG** are drawn as vectors (SVG through the same preparation as the
   preview; see [Rendering](/guide/rendering#svg)), **stickers** and image assets as
   images.
-- **Fonts**: Inter (regular, bold, italic) is bundled. A title that names
-  another font is set in Inter with a warning unless you pass the font with
-  `--font` or `fonts`.
+- **Fonts**: Inter, Space Grotesk, Playfair Display, DM Sans and JetBrains
+  Mono are bundled (regular and bold, italic where the family has one; see
+  [Themes](/guide/themes#fonts)). A title that names another font is set in
+  Inter with a warning unless you pass the font with `--font` or `fonts`.
 - **Sound** is mixed by `mixPlan`, a pure function of the audio plan: volume,
   fades, automation, ducking, pan, speed (pitch follows speed, as in the
   preview) and sample-rate conversion. Mute and solo apply.

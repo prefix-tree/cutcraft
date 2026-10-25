@@ -16,6 +16,8 @@ export * from "./resolve/resolve";
 export * from "./resolve/scene";
 export * from "./resolve/captions";
 
+export * from "./theme";
+
 export * from "./patches/types";
 export * from "./patches/log";
 

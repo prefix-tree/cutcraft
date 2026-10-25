@@ -15,17 +15,24 @@ import { Title as DomTitle } from "../../../player/src/react/elements/Title";
 import { Svg as DomSvg } from "../../../player/src/react/elements/Svg";
 import { PlayerContext } from "../../../player/src/react/context";
 import { OverlayPlane, directoryResolver } from "../../src";
-import { useT } from "@cutcut/kit";
+import { BUNDLED_FONTS, BUNDLED_FONT_WEIGHTS, useT } from "@cutcut/kit";
 
 const W = 640, H = 360, T = 1;
 const manifest = { assets: {} };
 const require = createRequire(import.meta.url);
-const fontDir = require.resolve("@fontsource/inter/package.json").replace(/package\.json$/, "files/");
-
+/** The bundled families as data-URL faces, so the DOM sets text in the files the export reads. */
 function fontFaces(): string {
-  return ([[400, "normal"], [700, "normal"], [400, "italic"], [700, "italic"]] as const)
-    .map(([weight, style]) => `@font-face{font-family:Inter;font-weight:${weight};font-style:${style};src:url(data:font/woff;base64,${readFileSync(`${fontDir}inter-latin-${weight}-${style}.woff`).toString("base64")}) format("woff")}`)
-    .join("");
+  const faces: string[] = [];
+  for (const font of BUNDLED_FONTS) {
+    const dir = require.resolve(`@fontsource/${font.id}/package.json`).replace(/package\.json$/, "files/");
+    for (const weight of BUNDLED_FONT_WEIGHTS) {
+      for (const style of font.italic ? ["normal", "italic"] : ["normal"]) {
+        const data = readFileSync(`${dir}${font.id}-latin-${weight}-${style}.woff`).toString("base64");
+        faces.push(`@font-face{font-family:"${font.family}";font-weight:${weight};font-style:${style};src:url(data:font/woff;base64,${data}) format("woff")}`);
+      }
+    }
+  }
+  return faces.join("");
 }
 
 function Counter() {
@@ -40,6 +47,10 @@ function InlineSvg() {
 }
 
 interface Case { readonly name: string; readonly element: ReactElement; readonly dom: (state: ResolvedState) => ReactElement }
+
+function themed(theme: Record<string, unknown>, ...children: ReactElement[]): ReactElement {
+  return h(Composition, { fps: 30, width: W, height: H, theme }, h(Track, { id: "a", layout: "free" }, ...children));
+}
 
 function scene(...children: ReactElement[]): ReactElement {
   return h(Composition, { fps: 30, width: W, height: H }, h(Track, { id: "a", layout: "free" }, ...children));
@@ -106,6 +117,16 @@ const cases: Case[] = [
     name: "a shape halfway through a reveal from the edges",
     element: scene(h(Shape, { id: "e", shape: "rectangle", width: 300, height: 120, start: 0, duration: 4, fill: "#16a34a", enter: { type: "reveal-edges", duration: 2, easing: "linear" } })),
     dom: (s) => domOf(s, DomShape, {}),
+  },
+  {
+    name: "a themed title preset in the theme's serif",
+    element: themed({ extends: "paper" }, h(Title, { id: "e", start: 0, duration: 2, style: "h2", color: "$primary" }, "Themed")),
+    dom: (s) => domOf(s, DomTitle, { text: "Themed" }),
+  },
+  {
+    name: "an SVG filled from theme tokens",
+    element: themed({ extends: "neon" }, h(Svg, { id: "e", start: 0, duration: 2, content: '<svg width="160" height="160" viewBox="0 0 20 20"><circle cx="10" cy="10" r="9" fill="$primary"/><path d="M5 10 L9 14 L15 6" stroke="var(--cc-text)" stroke-width="2" fill="none"/></svg>' })),
+    dom: (s) => domOf(s, DomSvg, {}),
   },
   {
     name: "a caption line",

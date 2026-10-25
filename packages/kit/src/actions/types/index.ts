@@ -13,6 +13,10 @@ export interface CompositionActions {
   "composition/setBackground": { mode?: "color" | "blur"; color?: string };
   /** The tweaks panel: rewrites the file's `defaults` literal. */
   "composition/setProps": { defaults: Readonly<Record<string, Json>> };
+  /** Swap the theme (or remove it with null); with `merge`, lay the given parts over the current theme instead. */
+  "composition/setTheme": { theme: Readonly<Record<string, Json>> | null; merge?: boolean };
+  /** One theme value: a palette colour, a font role or `radius`, by token name without the `$`. */
+  "theme/setToken": { token: string; value: string | number };
   "batch/apply": { actions: readonly ActionInput[] };
 }
 
@@ -221,7 +225,7 @@ export const AUTO_GROUP_TYPES: ReadonlySet<ActionType> = new Set<ActionType>([
   "transform/update", "effect/update", "audioEffect/update", "audio/setVolume", "audio/setFade", "audio/setDuck",
   "transition/update", "clip/setBlend", "colorGrade/set", "clip/move", "clip/trim", "clip/slip", "clip/slide", "clip/roll",
   "clip/setSpeed", "clip/setChromaKey", "clip/setStabilization", "keyframe/move", "keyframe/update",
-  "composition/updateSettings", "composition/setBackground", "text/update", "shape/update", "svg/update", "sticker/update",
+  "composition/updateSettings", "composition/setBackground", "theme/setToken", "text/update", "shape/update", "svg/update", "sticker/update",
   "mask/update", "layer/setTiming", "layer/setTransform", "layer/setProps",
 ]);
 

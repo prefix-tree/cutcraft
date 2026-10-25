@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { collectModule, resolve, type AssetManifest, type CollectedNode, type Placement, type ResolvedState, type ResolvedTrack } from "@cutcut/kit";
+import { collectModule, resolve, resolveTheme, type AssetManifest, type CollectedNode, type Placement, type ResolvedState, type ResolvedTrack } from "@cutcut/kit";
 import * as sample from "../../../kit/fixtures/sample";
 
 export const kitFixturesDir = join(import.meta.dirname, "..", "..", "..", "kit", "fixtures");
@@ -138,7 +138,7 @@ export function makeState(spec: StateSpec): ResolvedState {
   items.set("composition", { id: "composition", kind: "composition", track: null, parent: null, children: tracks.map((t) => t.id), start: 0, end: duration, duration, props: compProps, editable: "literal", lockedProps: [], boundProps: {}, errors: [] });
   return {
     composition: { id: "composition", fps, width, height, duration },
-    tracks, items, errors: [], tree: { root, byId, errors: [] }, manifest, log: undefined,
+    tracks, items, errors: [], tree: { root, byId, errors: [] }, manifest, log: undefined, theme: resolveTheme(undefined),
   };
 }
 

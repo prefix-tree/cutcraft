@@ -8,6 +8,16 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- Themes: `theme` on the composition holds a palette, fonts, a corner radius, a motion style
+  and named presets per element kind, starting from one of six built-in themes. Props take
+  theme values as `$tokens`, elements pick presets with `style`, and the motion style fills
+  entrances, exits and transitions the file leaves out; the resolver applies all of it before
+  parsing and records on each placement which props came from the theme. New actions
+  `composition/setTheme` and `theme/setToken` fold into the theme literal; new lint rules
+  `theme-refs`, `theme-literals` and `font-available`. Four OFL families ship beside Inter
+  (Space Grotesk, Playfair Display, DM Sans, JetBrains Mono) in the export and, through
+  `@cutcut/player/fonts.css`, in the preview.
+
 - Entrances and exits (`enter`, `exit`) on titles, shapes, SVG, stickers and layers, all
   twenty presets including wipes, reveals and `draw`, computed in the shared layout so the
   preview and the export agree. Shapes are drawn as SVG with gradient fill and stroke, drop

@@ -1,4 +1,4 @@
-import type { FitMode } from "@cutcut/kit";
+import type { FitMode, ResolvedTheme } from "@cutcut/kit";
 import { overlayLayout, type ElementProps, type OverlayLayout } from "./layout";
 import { prepareSvg, svgIntrinsicSize, type PreparedSvg, type SvgColor, type SvgViewBox } from "./svg";
 
@@ -12,9 +12,10 @@ export interface SvgDrawing {
 
 /**
  * How an `<Svg>` element draws its markup: at the size the SVG asks for (or fitted to the
- * composition with `fit`), with its `viewBox`, `preserveAspectRatio` and `color` applied.
+ * composition with `fit`), with its `viewBox`, `preserveAspectRatio` and `color` applied, and
+ * `$name` / `var(--cc-name)` filled from `tokens` (by default the composition's theme).
  */
-export function svgDrawing(p: ElementProps, markup: string, tokens?: Readonly<Record<string, string>>): SvgDrawing {
+export function svgDrawing(p: ElementProps, markup: string, tokens: Readonly<Record<string, string>> = themeTokens(p.state.theme)): SvgDrawing {
   const props = p.placement.props as Record<string, unknown>;
   const viewBox = props.viewBox as SvgViewBox | undefined;
   const size = svgIntrinsicSize(markup, viewBox);
@@ -30,4 +31,17 @@ export function svgDrawing(p: ElementProps, markup: string, tokens?: Readonly<Re
     draw: layout.draw,
   });
   return { size, fit, layout, prepared };
+}
+
+const tokensByTheme = new WeakMap<ResolvedTheme, Readonly<Record<string, string>>>();
+
+/** A theme's tokens as SVG attribute values. */
+export function themeTokens(theme: ResolvedTheme | undefined): Readonly<Record<string, string>> {
+  if (!theme) return {};
+  let tokens = tokensByTheme.get(theme);
+  if (!tokens) {
+    tokens = Object.fromEntries(Object.entries(theme.tokens).map(([k, v]) => [k, String(v)]));
+    tokensByTheme.set(theme, tokens);
+  }
+  return tokens;
 }

@@ -10,4 +10,4 @@ export { shapeDrawing, shapeMarkup, shapeSize, type ShapeDrawing, type ShapeMark
 export { indexLayerInteriors } from "./overlays/layer-interiors";
 export { layerClock } from "./model/time";
 export { parseSvg, prepareSvg, rgb, serialize, svgIntrinsicSize, type PrepareSvgOptions, type PreparedSvg, type SvgColor, type SvgNode, type SvgViewBox } from "./overlays/svg";
-export { svgDrawing, type SvgDrawing } from "./overlays/svg-element";
+export { svgDrawing, themeTokens, type SvgDrawing } from "./overlays/svg-element";

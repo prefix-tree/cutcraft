@@ -123,6 +123,8 @@ export const PARITY: readonly [openreel: string, ours: string][] = [
 export const OURS_ONLY: readonly [ours: string, why: string][] = [
   ["batch/apply", "one history entry for multi-action gestures and compound inverses"],
   ["composition/setProps", "the tweaks panel: rewrites the file's `defaults` literal"],
+  ["composition/setTheme", "the file's theme: swap it, extend it or remove it in one step"],
+  ["theme/setToken", "one palette colour, font role or radius in the file's theme"],
   ["clip/setSmoothSlowMo", "OpenReel sets this via raw store writes"],
   ["clip/setFit", "OpenReel folds it into transform/update"],
   ["clip/setSource", "media-slot replacement"],

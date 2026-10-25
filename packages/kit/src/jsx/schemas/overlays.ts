@@ -3,7 +3,7 @@ import { zBlendMode, zShapeType, zTextAnimationPreset } from "../enums";
 import { zAnimationUnit, zSvgColorMode, zTextAlign, zTextDecoration, zTextValign } from "./enums-local";
 import {
   assetRefSchema, colorSchema, entranceProps, gradientSchema, idSchema, shadowSchema, timedProps, timeRefSchema,
-  transformSchema, vec2Schema, visualProps,
+  themedLengthSchema, transformSchema, vec2Schema, visualProps,
 } from "./common";
 
 export const textAnimationSchema = z.strictObject({
@@ -32,6 +32,7 @@ export const titleSchema = z.strictObject({
   ...timedProps,
   ...visualProps,
   ...entranceProps,
+  /** A theme preset for titles; without one, the theme's `default` title preset applies. */
   style: idSchema.optional(),
   font: z.string().default("Inter"),
   size: z.number().min(1).max(1000).default(48),
@@ -76,6 +77,8 @@ export const shapeSchema = z.strictObject({
   ...timedProps,
   ...visualProps,
   ...entranceProps,
+  /** A theme preset for shapes. */
+  style: idSchema.optional(),
   shape: zShapeType,
   width: z.number().positive().optional(),
   height: z.number().positive().optional(),
@@ -84,7 +87,7 @@ export const shapeSchema = z.strictObject({
   stroke: strokeSchema.optional(),
   shadow: shadowSchema.optional(),
   shadows: z.array(shadowSchema).optional(),
-  cornerRadius: z.number().nonnegative().optional(),
+  cornerRadius: themedLengthSchema.optional(),
   cornerRadii: z.strictObject({ topLeft: z.number(), topRight: z.number(), bottomRight: z.number(), bottomLeft: z.number() }).optional(),
   starPoints: z.number().int().min(3).optional(),
   innerRadius: z.number().min(0).max(1).optional(),
@@ -94,6 +97,8 @@ export const shapeSchema = z.strictObject({
 export const svgSchema = z.strictObject({
   ...timedProps,
   ...visualProps,
+  /** A theme preset for svg elements. */
+  style: idSchema.optional(),
   src: assetRefSchema.optional(),
   content: z.string().optional(),
   viewBox: z.strictObject({ minX: z.number(), minY: z.number(), width: z.number().positive(), height: z.number().positive() }).optional(),
@@ -106,6 +111,8 @@ export const stickerSchema = z.strictObject({
   ...timedProps,
   ...visualProps,
   ...entranceProps,
+  /** A theme preset for stickers. */
+  style: idSchema.optional(),
   src: z.string().min(1),
   category: z.string().optional(),
   name: z.string().optional(),

@@ -25,6 +25,8 @@ export const CASES: Partial<Record<ActionType, ActionInput>> = {
   "composition/updateSettings": { type: "composition/updateSettings", params: { fps: 25 } },
   "composition/setBackground": { type: "composition/setBackground", params: { mode: "blur" } },
   "composition/setProps": { type: "composition/setProps", params: { defaults: { title: "New", accent: "#000000" } } },
+  "composition/setTheme": { type: "composition/setTheme", params: { theme: { extends: "paper", palette: { primary: "#0055ff" } } } },
+  "theme/setToken": { type: "theme/setToken", params: { token: "$primary", value: "#ff5a1f" } },
   "batch/apply": { type: "batch/apply", params: { actions: [
     { type: "clip/trim", params: { id: "c2", edge: "out", value: 4.5 } },
     { type: "audio/setVolume", params: { id: "a1", volume: 0.3 } },
