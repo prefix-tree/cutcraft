@@ -8,6 +8,10 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- `loadModule(source)` in `@cutcut/kit/source`: a cut file's source as a running module, through
+  Sucrase and a `require` that offers only react, zod and the kit, so an editor's preview and a
+  server-side check load a file the same way and refuse the same imports.
+
 - SMIL in `<Svg>` plays on the element's own clock: animations are evaluated at each frame and
   written into the markup, so the preview, scrubbing and the export agree. CSS animations in SVG
   are removed with a warning instead of playing on the browser's clock alone.
