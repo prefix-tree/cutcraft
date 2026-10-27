@@ -65,7 +65,7 @@ export const speechBubble = defineKind({
     const sx = p.tail === "left" ? cx - rx * 0.45 : cx + rx * 0.45, dir = p.tail === "left" ? -1 : 1;
     const tail = `M${n(sx - 18)} ${n(cy + ry * 0.75)}L${n(sx + dir * 30)} ${n(H - b)}L${n(sx + 22)} ${n(cy + ry * 0.8)}Z`;
     const stroke = ctx.value(p.border), fill = ctx.value(p.fill);
-    const outline = b > 0 && stroke !== "none" ? { stroke, "stroke-width": b * 2, "stroke-linejoin": "round" } : {};
+    const outline = b > 0 && stroke !== "none" ? { stroke, "stroke-width": b * 2, "stroke-linejoin": "round" } : ({} as Record<string, string | number>);
     // Outline both parts first, then fill them, so the seam between ellipse and tail does not show.
     const shapes = (attrs: Record<string, string | number>) => el("ellipse", { cx, cy, rx, ry, ...attrs }) + el("path", { d: tail, ...attrs });
     const body = (Object.keys(outline).length ? shapes({ fill, ...outline }) : "") + shapes({ fill });
