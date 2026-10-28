@@ -8,6 +8,19 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- `anchor="id.end"` places an overlay relative to another element's end, so an end card or a
+  closing title needs no arithmetic on the clip's length.
+
+- `<Title width height>`: the text box in composition pixels, the whole frame when left out, so
+  `background`, `align` and `valign` apply inside a lower third instead of the frame.
+
+- `<Clip frame={{ focus }}>` reframes a clip to the composition's aspect: the resolver writes
+  `transform.crop` from the source size and the focus (`left`, `center`, `right` or `{ x, y }`);
+  a written crop wins, so the editor's crop drag keeps working.
+
+- `duck.under` resolves a track id first, then a track role (`dialogue`), and the resolver reports
+  a name that is neither. Clips at `volume={0}` no longer duck the bed.
+
 - `loadModule(source)` in `@cutcut/kit/source`: a cut file's source as a running module, through
   Sucrase and a `require` that offers only react, zod and the kit, so an editor's preview and a
   server-side check load a file the same way and refuse the same imports.

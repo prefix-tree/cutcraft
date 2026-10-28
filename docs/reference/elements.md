@@ -67,7 +67,7 @@ Generated from the Zod schemas in `packages/kit/src/jsx/schemas` and the capabil
 |---|---|---|---|
 | `id` | string |  | yes |
 | `start` | number (0..∞) |  |  |
-| `anchor` | string \| "start" |  |  |
+| `anchor` | "start" \| string |  |  |
 | `offset` | number |  |  |
 | `duration` | number \| "fill" \| "source" \| { match } |  |  |
 | `src` | string |  | yes |
@@ -86,6 +86,7 @@ Generated from the Zod schemas in `packages/kit/src/jsx/schemas` and the capabil
 | `fade` | { in, out } |  |  |
 | `automation` | { volume, pan } |  |  |
 | `duck` | { under, to, attack, release } |  |  |
+| `frame` | { focus } |  |  |
 | `smoothSlowMo` | boolean | `false` |  |
 | `interpolation` | "low" \| "medium" \| "high" |  |  |
 | `stabilize` | { enabled, strength, crop } |  |  |
@@ -98,7 +99,7 @@ Generated from the Zod schemas in `packages/kit/src/jsx/schemas` and the capabil
 |---|---|---|---|
 | `id` | string |  | yes |
 | `start` | number (0..∞) |  |  |
-| `anchor` | string \| "start" |  |  |
+| `anchor` | "start" \| string |  |  |
 | `offset` | number |  |  |
 | `duration` | number \| "fill" \| "source" \| { match } |  |  |
 | `src` | string |  | yes |
@@ -137,7 +138,7 @@ Generated from the Zod schemas in `packages/kit/src/jsx/schemas` and the capabil
 |---|---|---|---|
 | `id` | string |  | yes |
 | `start` | number (0..∞) |  |  |
-| `anchor` | string \| "start" |  |  |
+| `anchor` | "start" \| string |  |  |
 | `offset` | number |  |  |
 | `duration` | number \| "fill" \| "source" \| { match } |  |  |
 | `transform` | { position, scale, rotation, anchor, opacity, borderRadius, crop, rotate3d, perspective, transformStyle } |  |  |
@@ -158,6 +159,8 @@ Generated from the Zod schemas in `packages/kit/src/jsx/schemas` and the capabil
 | `shadow` | { color, blur, x, y, spread, inset } |  |  |
 | `align` | "left" \| "center" \| "right" \| "justify" | `"center"` |  |
 | `valign` | "top" \| "middle" \| "bottom" | `"middle"` |  |
+| `width` | number |  |  |
+| `height` | number |  |  |
 | `lineHeight` | number (0.1..10) | `1.2` |  |
 | `letterSpacing` | number (-100..100) | `0` |  |
 | `decoration` | "none" \| "underline" \| "line-through" \| "overline" |  |  |
@@ -171,7 +174,7 @@ Generated from the Zod schemas in `packages/kit/src/jsx/schemas` and the capabil
 |---|---|---|---|
 | `id` | string |  | yes |
 | `start` | number (0..∞) |  |  |
-| `anchor` | string \| "start" |  |  |
+| `anchor` | "start" \| string |  |  |
 | `offset` | number |  |  |
 | `duration` | number \| "fill" \| "source" \| { match } |  |  |
 | `transform` | { position, scale, rotation, anchor, opacity, borderRadius, crop, rotate3d, perspective, transformStyle } |  |  |
@@ -201,7 +204,7 @@ Generated from the Zod schemas in `packages/kit/src/jsx/schemas` and the capabil
 |---|---|---|---|
 | `id` | string |  | yes |
 | `start` | number (0..∞) |  |  |
-| `anchor` | string \| "start" |  |  |
+| `anchor` | "start" \| string |  |  |
 | `offset` | number |  |  |
 | `duration` | number \| "fill" \| "source" \| { match } |  |  |
 | `transform` | { position, scale, rotation, anchor, opacity, borderRadius, crop, rotate3d, perspective, transformStyle } |  |  |
@@ -224,7 +227,7 @@ Generated from the Zod schemas in `packages/kit/src/jsx/schemas` and the capabil
 |---|---|---|---|
 | `id` | string |  | yes |
 | `start` | number (0..∞) |  |  |
-| `anchor` | string \| "start" |  |  |
+| `anchor` | "start" \| string |  |  |
 | `offset` | number |  |  |
 | `duration` | number \| "fill" \| "source" \| { match } |  |  |
 | `transform` | { position, scale, rotation, anchor, opacity, borderRadius, crop, rotate3d, perspective, transformStyle } |  |  |
@@ -247,7 +250,7 @@ Plus the props of its `kind`: see [Graphics](./graphics).
 |---|---|---|---|
 | `id` | string |  | yes |
 | `start` | number (0..∞) |  |  |
-| `anchor` | string \| "start" |  |  |
+| `anchor` | "start" \| string |  |  |
 | `offset` | number |  |  |
 | `duration` | number \| "fill" \| "source" \| { match } |  |  |
 | `transform` | { position, scale, rotation, anchor, opacity, borderRadius, crop, rotate3d, perspective, transformStyle } |  |  |
@@ -299,7 +302,7 @@ Plus the props of its `kind`: see [Graphics](./graphics).
 |---|---|---|---|
 | `id` | string |  | yes |
 | `start` | number (0..∞) |  |  |
-| `anchor` | string \| "start" |  |  |
+| `anchor` | "start" \| string |  |  |
 | `offset` | number |  |  |
 | `duration` | number \| "fill" \| "source" \| { match } |  |  |
 | `affects` | "all" \| string[] | `"all"` |  |
@@ -329,7 +332,7 @@ Plus the props of its `kind`: see [Graphics](./graphics).
 |---|---|---|---|
 | `id` | string |  | yes |
 | `start` | number (0..∞) |  |  |
-| `anchor` | string \| "start" |  |  |
+| `anchor` | "start" \| string |  |  |
 | `offset` | number |  |  |
 | `duration` | number \| "fill" \| "source" \| { match } |  |  |
 | `transform` | { position, scale, rotation, anchor, opacity, borderRadius, crop, rotate3d, perspective, transformStyle } |  |  |
@@ -375,7 +378,7 @@ Plus the props of its `kind`: see [Graphics](./graphics).
 |---|---|---|---|
 | `id` | string |  | yes |
 | `start` | number (0..∞) |  |  |
-| `anchor` | string \| "start" |  |  |
+| `anchor` | "start" \| string |  |  |
 | `offset` | number |  |  |
 | `duration` | number \| "fill" \| "source" \| { match } |  |  |
 | `enter` | { type, duration, easing } |  |  |

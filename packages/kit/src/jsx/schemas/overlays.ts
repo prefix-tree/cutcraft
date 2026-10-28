@@ -45,6 +45,9 @@ export const titleSchema = z.strictObject({
   shadow: shadowSchema.optional(),
   align: zTextAlign.default("center"),
   valign: zTextValign.default("middle"),
+  /** The text box, in composition pixels; the whole frame when left out, so background, align and valign work inside it. */
+  width: z.number().positive().optional(),
+  height: z.number().positive().optional(),
   lineHeight: z.number().min(0.1).max(10).default(1.2),
   letterSpacing: z.number().min(-100).max(100).default(0),
   decoration: zTextDecoration.optional(),

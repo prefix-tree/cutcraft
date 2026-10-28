@@ -5,7 +5,7 @@
  */
 export { OVERLAY_KINDS, clipPathCss, overlayLayout, type ElementProps, type OverlayLayout } from "./overlays/layout";
 export { motionAt, type ClipRect, type GraphicAnimation, type Motion } from "./model/motion";
-export { captionsContent, layerContent, stickerPlaceholder, stickerSize, titleContent } from "./overlays/content";
+export { captionsContent, layerContent, stickerPlaceholder, stickerSize, titleBox, titleContent } from "./overlays/content";
 export { shapeDrawing, shapeMarkup, shapeSize, type ShapeDrawing, type ShapeMarkup } from "./overlays/shape";
 export { indexLayerInteriors } from "./overlays/layer-interiors";
 export { layerClock } from "./model/time";

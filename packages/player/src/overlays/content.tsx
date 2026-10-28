@@ -1,6 +1,6 @@
 /** @jsxRuntime automatic */
 /** @jsxImportSource react */
-import type { Placement } from "@cutcut/kit";
+import { RENDERED_TITLE_ANIMATIONS, type Placement } from "@cutcut/kit";
 import { Children, cloneElement, isValidElement, type CSSProperties, type ReactNode } from "react";
 import { isVisibleAt } from "../model/visible";
 import { devWarn } from "../warn";
@@ -12,7 +12,12 @@ import type { ElementProps } from "./layout";
  * hands the same trees to Satori and draws the result with the same layout.
  */
 
-const SUPPORTED = new Set(["none", "fade", "slide-up", "slide-down", "slide-left", "slide-right", "scale", "typewriter", "word-by-word"]);
+const SUPPORTED: ReadonlySet<string> = new Set(RENDERED_TITLE_ANIMATIONS);
+
+/** A title's box: its width and height props, the whole frame when left out. */
+export function titleBox(props: Readonly<Record<string, unknown>>, comp: { width: number; height: number }): { width: number; height: number } {
+  return { width: typeof props.width === "number" ? props.width : comp.width, height: typeof props.height === "number" ? props.height : comp.height };
+}
 
 /** Text title: the file's text content with font props; entrance/exit presets as CSS transforms. */
 export function titleContent(p: ElementProps & { readonly text: string }): ReactNode {

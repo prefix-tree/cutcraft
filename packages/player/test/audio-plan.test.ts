@@ -63,6 +63,18 @@ describe("buildGainEnvelope", () => {
     expect(env[env.length - 1]).toEqual([4, 1]);
   });
 
+  it("ducks under a track role and ignores muted clips", () => {
+    const s = makeState({ tracks: [
+      { id: "talk", role: "dialogue", items: [
+        { id: "c1", kind: "clip", source: { in: 0, out: 4, asset: "a" } },
+        { id: "broll", kind: "clip", source: { in: 0, out: 3, asset: "b" }, props: { volume: 0 } },
+      ] },
+      { id: "music", layout: "free", items: [{ id: "bed", kind: "audio", start: 0, source: { in: 0, out: 90, asset: "tone" }, props: { duck: { under: "dialogue", to: 0.2 } } }] },
+    ] });
+    expect(duckIntervals(s, "dialogue", "bed")).toEqual([[0, 4]]);
+    expect(duckIntervals(s, "nothing", "bed")).toEqual([]);
+  });
+
   it("ducks under the main track with attack and release", () => {
     expect(duckIntervals(state, "main", "bed")).toEqual([[0, 4], [6, 11]]);
     const bed = state.items.get("bed")!;
