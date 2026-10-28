@@ -33,7 +33,7 @@ describe("resolve", () => {
       ),
     );
     const state = resolve(collect(el), manifest);
-    expect(state.items.get("x")).toMatchObject({ start: 3, end: 4, between: ["a", "b"] });
+    expect(state.items.get("x")).toMatchObject({ start: 3, end: 4, between: ["a", "b"], props: { params: { curve: "ease" } } });
     expect(state.items.get("b")?.start).toBe(3);
     expect(state.composition.duration).toBe(7);
   });

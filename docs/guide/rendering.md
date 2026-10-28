@@ -112,4 +112,6 @@ Transition types other than crossfade (drawn as a crossfade), effects without
 a CSS filter equivalent, colour wheels, curves and LUTs, matte masks, audio
 effects, pitch correction, reversed audio, 3D text, most text animation
 presets, `emphasis` animations, `background.mode: "blur"`, sticker packs other than `icon:`, `<animateMotion>` and CSS animation in SVG, and `file:` nested
-references. Each warns once and is listed in the plan's `warnings`.
+references. The check reports each one in your file as a `not-rendered` lint
+warning that says what will happen instead (the list is `jsx/rendering.ts` in
+the kit); at play time a few also land in the plan's `warnings`.

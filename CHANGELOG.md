@@ -8,6 +8,10 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- A `not-rendered` lint: one table in the kit (`jsx/rendering.ts`) lists what the player and the
+  renderer draw and play, the player reads it for its warnings, and the lint reports every other
+  value or prop in a file with what happens instead, so a file that checks clean renders as written.
+
 - `anchor="id.end"` places an overlay relative to another element's end, so an end card or a
   closing title needs no arithmetic on the clip's length.
 

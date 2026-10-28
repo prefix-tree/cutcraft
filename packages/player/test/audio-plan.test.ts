@@ -45,6 +45,14 @@ describe("buildAudioPlan", () => {
     expect(buildAudioPlan(solo, 0, 1).map((o) => o.id)).toEqual(["s1"]);
   });
 
+  it("skips hidden tracks, as the picture does", () => {
+    const hidden = makeState({ tracks: [
+      { id: "a", hidden: true, items: [{ id: "h1", kind: "clip", source: { in: 0, out: 1, asset: "a" } }] },
+      { id: "b", items: [{ id: "v1", kind: "clip", source: { in: 0, out: 1, asset: "a" } }] },
+    ] });
+    expect(buildAudioPlan(hidden, 0, 1).map((o) => o.id)).toEqual(["v1"]);
+  });
+
   it("skips reversed audio with a warning", () => {
     const warnings: string[] = [];
     captureWarnings((m) => warnings.push(m));

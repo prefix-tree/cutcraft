@@ -1,4 +1,4 @@
-import type { Placement } from "@cutcut/kit";
+import type { Placement, RENDERED_EFFECTS } from "@cutcut/kit";
 import { devWarn } from "../warn";
 
 export interface FilterResult { readonly filter: string; readonly unsupported: readonly string[] }
@@ -13,7 +13,8 @@ function num(params: Params, keys: readonly string[], fallback: number): number 
   return fallback;
 }
 
-const CANVAS_FILTERABLE: Readonly<Record<string, (p: Params) => string>> = {
+/** One filter per rendered effect type: kit's RENDERED_EFFECTS, which the `not-rendered` lint reads. */
+const CANVAS_FILTERABLE: Readonly<Record<(typeof RENDERED_EFFECTS)[number], (p: Params) => string>> = {
   brightness: (p) => `brightness(${1 + num(p, ["amount", "value"], 0) / 100})`,
   contrast: (p) => `contrast(${1 + num(p, ["amount", "value"], 0) / 100})`,
   saturation: (p) => `saturate(${1 + num(p, ["amount", "value"], 0) / 100})`,
@@ -33,7 +34,7 @@ export function filterString(children: readonly Placement[], elementId: string):
     if (c.kind === "effect") {
       if (c.props.enabled === false) continue;
       const type = String(c.props.type);
-      const make = CANVAS_FILTERABLE[type];
+      const make = CANVAS_FILTERABLE[type as keyof typeof CANVAS_FILTERABLE] as ((p: Params) => string) | undefined;
       if (make) parts.push(make((c.props.params ?? {}) as Params));
       else {
         unsupported.push(type);

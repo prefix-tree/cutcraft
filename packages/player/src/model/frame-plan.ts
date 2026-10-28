@@ -1,4 +1,4 @@
-import { lookupAsset, type BlendMode, type FitMode, type Placement, type ResolvedState, type Transform } from "@cutcut/kit";
+import { RENDERED_MASK_TYPES, RENDERED_TRANSITIONS, lookupAsset, type BlendMode, type FitMode, type Placement, type ResolvedState, type Transform } from "@cutcut/kit";
 import { devWarn } from "../warn";
 import { filterString } from "./effects";
 import { frameIndex, nestedSourceTime, placementSourceTime } from "./time";
@@ -112,7 +112,7 @@ function mediaOp(state: ResolvedState, item: VisibleItem, t: number, resolveNest
   if (item.transition) {
     const x = item.transition.placement;
     const type = String(x.props.type ?? "crossfade");
-    if (type !== "crossfade") {
+    if (!(RENDERED_TRANSITIONS as readonly string[]).includes(type)) {
       const key = `transition:${x.id}:${type}`;
       devWarn(key, `transition "${type}" on "${x.id}" is drawn as a crossfade`);
       warnings.push(`transition ${x.id}: ${type} drawn as crossfade`);
@@ -156,7 +156,7 @@ function mediaOp(state: ResolvedState, item: VisibleItem, t: number, resolveNest
 function maskOf(children: readonly Placement[], warnings: string[]): MaskSpec | undefined {
   const m = children.find((c) => c.kind === "mask");
   if (!m) return undefined;
-  if (m.props.type === "matte" || m.props.matte) {
+  if (!(RENDERED_MASK_TYPES as readonly unknown[]).includes(m.props.type ?? "shape") || m.props.matte) {
     warnings.push(`mask ${m.id}: matte masks are not rendered`);
     return undefined;
   }

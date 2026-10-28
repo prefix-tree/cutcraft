@@ -1,6 +1,7 @@
 export * from "./jsx/define";
 export * from "./jsx/enums";
 export * from "./jsx/capabilities";
+export * from "./jsx/rendering";
 export * from "./jsx/elements";
 export * from "./jsx/use-t";
 export { TRANSITION_PARAMS, defaultTransitionParams } from "./jsx/schemas/transition";
