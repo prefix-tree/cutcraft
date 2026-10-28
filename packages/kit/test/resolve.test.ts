@@ -33,7 +33,7 @@ describe("resolve", () => {
       ),
     );
     const state = resolve(collect(el), manifest);
-    expect(state.items.get("x")).toMatchObject({ start: 3, end: 4, between: ["a", "b"] });
+    expect(state.items.get("x")).toMatchObject({ start: 3, end: 4, between: ["a", "b"], props: { params: { curve: "ease" } } });
     expect(state.items.get("b")?.start).toBe(3);
     expect(state.composition.duration).toBe(7);
   });
@@ -48,6 +48,25 @@ describe("resolve", () => {
     expect(state.items.get("c1")?.source).toMatchObject({ in: 2, out: 3.5 });
     expect(round(state.items.get("t")?.start ?? 0)).toBe(0.5);
     expect(round(state.items.get("t")?.end ?? 0)).toBe(1.5);
+  });
+
+  it("anchors to an element's end, reframes a clip to the composition and checks duck targets", () => {
+    const el = h(Composition, { fps: 30, width: 1080, height: 1920 },
+      h(Track, { id: "t1", role: "dialogue" }, h(Clip, { id: "c1", src: "asset:city", in: 0, out: 4, frame: { focus: "left" } })),
+      h(Track, { id: "t2" }, h(Title, { id: "t", anchor: "c1.end", offset: -1, duration: 2, width: 1080, height: 200 }, "Bye")),
+      h(Track, { id: "t3", layout: "free" },
+        h(Audio, { id: "bed", src: "asset:bed", start: 0, duration: 2, duck: { under: "dialogue", to: 0.2 } }),
+        h(Audio, { id: "bad", src: "asset:bed", start: 0, duration: 2, duck: { under: "nothing", to: 0.2 } }),
+      ),
+    );
+    const state = resolve(collect(el), manifest);
+    expect(state.items.get("t")).toMatchObject({ start: 3, end: 5 });
+    expect(state.composition.duration).toBe(5);
+    expect(state.tracks[0]?.role).toBe("dialogue");
+    const crop = (state.items.get("c1")?.props.transform as { crop: { x: number; y: number; width: number; height: number } }).crop;
+    expect(crop).toMatchObject({ x: 0, y: 0, height: 1 });
+    expect(crop.width).toBeCloseTo((1080 / 1920) / (3840 / 2160));
+    expect(state.errors.map((e) => [e.id, e.code])).toEqual([["bad", "UNKNOWN_REF"]]);
   });
 
   it("gives a filling audio placement the source range it plays", () => {

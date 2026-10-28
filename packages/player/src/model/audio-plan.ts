@@ -28,7 +28,7 @@ export function buildAudioPlan(state: ResolvedState, from: number, to: number, r
   const out: AudioOccurrence[] = [];
   const anySolo = state.tracks.some((t) => t.solo);
   for (const track of state.tracks) {
-    if (track.muted || (anySolo && !track.solo)) continue;
+    if (track.hidden || track.muted || (anySolo && !track.solo)) continue;
     for (const p of [...state.items.values()].filter((q) => q.track === track.id && q.parent !== null && q.kind !== "transition")) {
       if (!capabilitiesOf(p.kind).audio) continue;
       if (p.end <= from || p.start >= to) continue;
@@ -169,10 +169,11 @@ export function buildGainEnvelope(p: Placement, track: ResolvedTrack, state: Res
   return [...sampled].sort((a, b) => a - b).map((t) => [round(t), round(value(t))] as const);
 }
 
-/** Composition intervals where a placement on `trackId` plays sound; silent assets do not duck. */
-export function duckIntervals(state: ResolvedState, trackId: string, exceptId: string): [number, number][] {
+/** Composition intervals where sound plays on the track `under` names by id, else on the tracks of that role; silent assets and muted clips do not duck. */
+export function duckIntervals(state: ResolvedState, under: string, exceptId: string): [number, number][] {
+  const tracks = state.tracks.some((t) => t.id === under) ? [under] : state.tracks.filter((t) => t.role === under).map((t) => t.id);
   const ranges = [...state.items.values()]
-    .filter((q) => q.track === trackId && q.id !== exceptId && q.parent !== null && capabilitiesOf(q.kind).audio && hasSound(state, q))
+    .filter((q) => q.track !== null && tracks.includes(q.track) && q.id !== exceptId && q.parent !== null && capabilitiesOf(q.kind).audio && hasSound(state, q))
     .filter((q) => q.end > q.start)
     .map((q) => [q.start, q.end] as [number, number])
     .sort((a, b) => a[0] - b[0]);
@@ -188,7 +189,7 @@ export function duckIntervals(state: ResolvedState, trackId: string, exceptId: s
 function hasSound(state: ResolvedState, p: Placement): boolean {
   if (p.kind === "nested") return true;
   const asset = p.source ? lookupAsset(state.manifest, p.source.asset) : null;
-  return asset !== null && asset.kind !== "image" && (asset.kind === "audio" || asset.audio !== undefined);
+  return asset !== null && asset.kind !== "image" && (asset.kind === "audio" || asset.audio !== undefined) && p.props.volume !== 0;
 }
 
 function panEnvelope(p: Placement): GainPoint[] | undefined {

@@ -1,6 +1,7 @@
 import type { z } from "zod";
 import { SCHEMAS_BY_KIND } from "../jsx/elements";
-import type { TrackLayout } from "../jsx/enums";
+import type { TrackLayout, TrackRole, TransitionType } from "../jsx/enums";
+import { defaultTransitionParams } from "../jsx/schemas/transition";
 import { capabilitiesOf } from "../jsx/capabilities";
 import { assetIdOf, lookupAsset, type AssetEntry, type AssetManifest } from "../manifest/types";
 import { resolveTimeRef } from "../manifest/timeref";
@@ -45,6 +46,7 @@ export interface ResolvedTrack {
   readonly hidden: boolean;
   readonly muted: boolean;
   readonly solo: boolean;
+  readonly role?: TrackRole;
   readonly group?: string;
   readonly items: readonly string[];
 }
@@ -76,7 +78,7 @@ interface Pending {
   duration?: number;
   durationDep?: { kind: "match"; id: string } | { kind: "fill" };
   start?: number;
-  anchorDep?: { id: string | "start"; offset: number };
+  anchorDep?: { id: string | "start"; offset: number; edge?: "end" };
   between?: readonly [string, string];
 }
 
@@ -149,6 +151,7 @@ function compute(original: CollectedTree, manifest: AssetManifest, log: PatchLog
         layout: (p.layout as TrackLayout) ?? "sequence",
         order: order++,
         locked: Boolean(p.locked), hidden: Boolean(p.hidden), muted: Boolean(p.muted), solo: Boolean(p.solo),
+        ...(typeof p.role === "string" ? { role: p.role as TrackRole } : {}),
         ...(typeof p.group === "string" ? { group: p.group } : {}),
         items: child.children.map((c) => c.id),
       });
@@ -160,6 +163,14 @@ function compute(original: CollectedTree, manifest: AssetManifest, log: PatchLog
     } else if (child.kind !== "marker") {
       errors.push({ code: "INVALID_CHILD", id: child.id, message: `<Composition> cannot contain <${child.kind}>` });
     }
+  }
+
+  for (const p of pending.values()) {
+    const duck = p.props.duck as { under: string } | undefined;
+    if (duck && !tracks.some((t) => t.id === duck.under || t.role === duck.under)) {
+      p.errors.push({ code: "UNKNOWN_REF", id: p.node.id, prop: "duck.under", message: `duck.under "${duck.under}" is neither a track id nor a track role` });
+    }
+    if (p.props.frame && p.source) p.props = framed(p.props, manifest.assets[p.source.asset], compParsed);
   }
 
   // Place track children: sequence cursors, free starts; anchors and dependent durations by iteration.
@@ -268,8 +279,11 @@ function parseProps(node: CollectedNode, errors: ResolveError[], theme: Resolved
   if (!schema) data = { ...themed.props };
   else {
     const result = schema.safeParse(themed.props);
-    if (result.success) data = result.data as Record<string, unknown>;
-    else {
+    if (result.success) {
+      data = result.data as Record<string, unknown>;
+      // A transition's params are validated per type but not filled by its schema; fill them here like any other default.
+      if (node.kind === "transition") data = { ...data, params: { ...defaultTransitionParams(data.type as TransitionType), ...(data.params as Record<string, unknown>) } };
+    } else {
       data = { ...themed.props };
       own.push(...result.error.issues.map((issue) => ({ code: "SCHEMA", id: node.id, prop: issue.path.map(String).join(".") || undefined, message: issue.message }) as ResolveError));
     }
@@ -365,7 +379,8 @@ function intrinsicCompute(
 
   const dur = props.duration;
   if (typeof props.anchor === "string") {
-    p.anchorDep = { id: props.anchor, offset: Number(props.offset ?? 0) };
+    const end = props.anchor.endsWith(".end");
+    p.anchorDep = { id: end ? props.anchor.slice(0, -4) : props.anchor, offset: Number(props.offset ?? 0), ...(end ? { edge: "end" as const } : {}) };
   }
 
   if (caps.trimSource && typeof props.src === "string") {
@@ -398,6 +413,25 @@ function intrinsicCompute(
     else if (typeof dur === "object" && dur && "match" in dur) p.durationDep = { kind: "match", id: String((dur as { match: string }).match) };
   }
   return p;
+}
+
+const framedByProps = new WeakMap<Record<string, unknown>, { key: string; props: Record<string, unknown> }>();
+
+/** `frame` as a `transform.crop`: a window of the composition's aspect over the source, slid to the focus. A written crop wins. Memoised so an unchanged clip keeps its placement. */
+function framed(props: Record<string, unknown>, asset: AssetEntry | undefined, comp: Record<string, unknown>): Record<string, unknown> {
+  const transform = (props.transform ?? {}) as Record<string, unknown>;
+  if (transform.crop || !asset?.width || !asset.height) return props;
+  const key = `${comp.width}x${comp.height}`;
+  const cached = framedByProps.get(props);
+  if (cached?.key === key) return cached.props;
+  const { focus } = props.frame as { focus: "left" | "center" | "right" | { x: number; y?: number } };
+  const fx = focus === "left" ? 0 : focus === "right" ? 1 : typeof focus === "object" ? focus.x : 0.5;
+  const fy = typeof focus === "object" ? focus.y ?? 0.5 : 0.5;
+  const ratio = (Number(comp.width) / Number(comp.height)) / (asset.width / asset.height);
+  const width = Math.min(1, ratio), height = Math.min(1, 1 / ratio);
+  const out = { ...props, transform: { ...transform, crop: { x: fx * (1 - width), y: fy * (1 - height), width, height } } };
+  framedByProps.set(props, { key, props: out });
+  return out;
 }
 
 function sourceRange(p: Pending, asset: AssetEntry, markers: ReadonlyMap<string, number>): void {
@@ -566,13 +600,13 @@ function iterateDependencies(pending: Map<string, Pending>, _errors: ResolveErro
           progressed = true;
           continue;
         }
-        if (target.start !== undefined && (target.duration !== undefined || p.node.kind !== "transition")) {
+        if (target.start !== undefined && (target.duration !== undefined || (p.node.kind !== "transition" && dep.edge !== "end"))) {
           if (p.node.kind === "transition") {
             const edge = p.props.edge === "in" ? "in" : "out";
             const d = p.duration ?? 0;
             p.start = edge === "in" ? target.start : target.start + (target.duration ?? 0) - d;
           } else {
-            p.start = Math.max(0, target.start + dep.offset);
+            p.start = Math.max(0, target.start + (dep.edge === "end" ? (target.duration ?? 0) : 0) + dep.offset);
           }
           progressed = true;
         }

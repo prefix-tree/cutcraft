@@ -33,6 +33,7 @@ export interface TrackSpec {
   hidden?: boolean;
   muted?: boolean;
   solo?: boolean;
+  role?: ResolvedTrack["role"];
   items: ItemSpec[];
 }
 
@@ -126,7 +127,7 @@ export function makeState(spec: StateSpec): ResolvedState {
     }
     const trackNode = node(t.id, "track", "composition", { id: t.id, layout }, placed.map((p) => byId.get(p.id)!));
     trackNodes.push(trackNode);
-    tracks.push({ id: t.id, layout, order, locked: false, hidden: t.hidden ?? false, muted: t.muted ?? false, solo: t.solo ?? false, items: placed.map((p) => p.id) });
+    tracks.push({ id: t.id, layout, order, locked: false, hidden: t.hidden ?? false, muted: t.muted ?? false, solo: t.solo ?? false, ...(t.role ? { role: t.role } : {}), items: placed.map((p) => p.id) });
   });
 
   const duration = Math.max(0, ...[...items.values()].filter((i) => i.kind !== "transition").map((i) => i.end));

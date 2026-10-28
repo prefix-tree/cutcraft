@@ -24,7 +24,7 @@ function overlayHandlers(ns: keyof typeof KIND_OF_NS) {
       const place: PlacementSpec = a.params.place;
       if ("start" in place && track.layout !== "free") return invalid({ code: "UNSUPPORTED_ON_LAYOUT", message: "start needs a free track" });
       if ("after" in place && track.layout !== "sequence") return invalid({ code: "UNSUPPORTED_ON_LAYOUT", message: "after needs a sequence track" });
-      if ("anchor" in place && place.anchor !== "start" && !state.items.has(place.anchor)) return invalid({ code: "ELEMENT_NOT_FOUND", message: `anchor "${place.anchor}" does not exist` });
+      if ("anchor" in place && place.anchor !== "start" && !state.items.has(place.anchor.replace(/\.end$/, ""))) return invalid({ code: "ELEMENT_NOT_FOUND", message: `anchor "${place.anchor}" does not exist` });
       return ok;
     },
     apply: (a, log, ctx) => placeNode(log, ctx.before, a.params.trackId, a.params.place, {

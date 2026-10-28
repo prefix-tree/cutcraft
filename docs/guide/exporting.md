@@ -84,7 +84,8 @@ and with captions on top:
 Not drawn, in the export as in the preview: transition types other than
 crossfade (drawn as one), effects with no CSS filter equivalent, colour wheels
 and LUTs, matte masks, audio effects, pitch correction, reversed audio, 3D
-text and most text animation presets. In the export only: an adjustment's
+text and most text animation presets. The check reports each of these in your
+file as a `not-rendered` lint warning. In the export only: an adjustment's
 backdrop filter does not reach overlays (it is a DOM-only effect), and text
 will differ from the browser's by anti-aliasing and sub-pixel placement.
 

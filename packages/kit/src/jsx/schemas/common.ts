@@ -33,8 +33,8 @@ export const timedProps = {
   id: idSchema,
   /** Free-layout tracks only. */
   start: z.number().nonnegative().optional(),
-  /** Overlays: start relative to another element. */
-  anchor: z.union([idSchema, z.literal("start")]).optional(),
+  /** Overlays: start relative to another element's start, or to its end with `id.end`. */
+  anchor: z.union([z.literal("start"), z.string().regex(/^[A-Za-z_][A-Za-z0-9_-]*(\.end)?$/, 'anchors look like "hook", "hook.end" or "start"')]).optional(),
   offset: z.number().optional(),
   duration: durationSchema.optional(),
 };

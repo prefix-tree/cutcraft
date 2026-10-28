@@ -45,6 +45,14 @@ describe("buildAudioPlan", () => {
     expect(buildAudioPlan(solo, 0, 1).map((o) => o.id)).toEqual(["s1"]);
   });
 
+  it("skips hidden tracks, as the picture does", () => {
+    const hidden = makeState({ tracks: [
+      { id: "a", hidden: true, items: [{ id: "h1", kind: "clip", source: { in: 0, out: 1, asset: "a" } }] },
+      { id: "b", items: [{ id: "v1", kind: "clip", source: { in: 0, out: 1, asset: "a" } }] },
+    ] });
+    expect(buildAudioPlan(hidden, 0, 1).map((o) => o.id)).toEqual(["v1"]);
+  });
+
   it("skips reversed audio with a warning", () => {
     const warnings: string[] = [];
     captureWarnings((m) => warnings.push(m));
@@ -61,6 +69,18 @@ describe("buildGainEnvelope", () => {
     expect(env[0]).toEqual([0, 0]);
     expect(env.find(([t]) => t === 1)).toEqual([1, 1]);
     expect(env[env.length - 1]).toEqual([4, 1]);
+  });
+
+  it("ducks under a track role and ignores muted clips", () => {
+    const s = makeState({ tracks: [
+      { id: "talk", role: "dialogue", items: [
+        { id: "c1", kind: "clip", source: { in: 0, out: 4, asset: "a" } },
+        { id: "broll", kind: "clip", source: { in: 0, out: 3, asset: "b" }, props: { volume: 0 } },
+      ] },
+      { id: "music", layout: "free", items: [{ id: "bed", kind: "audio", start: 0, source: { in: 0, out: 90, asset: "tone" }, props: { duck: { under: "dialogue", to: 0.2 } } }] },
+    ] });
+    expect(duckIntervals(s, "dialogue", "bed")).toEqual([[0, 4]]);
+    expect(duckIntervals(s, "nothing", "bed")).toEqual([]);
   });
 
   it("ducks under the main track with attack and release", () => {

@@ -3,7 +3,7 @@ import { buildSourceIndex, lint } from "@cutcut/kit/source";
 import { fixtureText, manifest } from "./helpers";
 
 const wrap = (body: string, extra = "") => `
-import { Composition, Track, Clip, Layer, Title } from "@cutcut/kit";
+import { Composition, Track, Clip, Layer, Title, Transition, Effect, AudioEffect, Adjustment, SpeedKey, Freeze, Mask, ColorGrade, Keyframe } from "@cutcut/kit";
 ${extra}
 export default function V() {
   return (<Composition fps={30} width={1920} height={1080}>${body}</Composition>);
@@ -11,9 +11,10 @@ export default function V() {
 `;
 
 describe("lint", () => {
-  it("accepts the sample file, warning only about the gap on its main track", () => {
+  it("accepts the sample file, warning only about the gap on its main track and what does not render", () => {
     const d = lint(fixtureText, { manifest });
-    expect(d.map((x) => `${x.severity}:${x.rule}:${x.id}`)).toEqual(["warning:sequence-gap:g1"]);
+    expect(d.filter((x) => x.rule !== "not-rendered").map((x) => `${x.severity}:${x.rule}:${x.id}`)).toEqual(["warning:sequence-gap:g1"]);
+    expect(d.filter((x) => x.rule === "not-rendered").map((x) => x.id)).toEqual(["sk1", "sk2", "fr1", "st1", "adj1", "fx2", "ae1"]);
   });
 
   it("flags missing and non-literal ids", () => {
@@ -57,6 +58,44 @@ describe("lint", () => {
     expect(d.map((x) => `${x.rule}:${x.id}.${x.prop}`)).toEqual(["cut-inside-word:c.in"]);
     expect(d[0]!.message).toContain(`word:${w.i}`);
     expect(lint(wrap(`<Track id="t"><Clip id="c" src="asset:interview" in={${inside}} /></Track>`))).toEqual([]);
+  });
+
+  describe("not-rendered", () => {
+    const notRendered = (body: string) => lint(wrap(body)).filter((d) => d.rule === "not-rendered").map((d) => `${d.severity}:${d.id}.${d.prop ?? ""}: ${d.message}`);
+
+    it("warns on enum values that draw as something else", () => {
+      expect(notRendered('<Track id="t"><Clip id="a" src="asset:city" /><Transition id="x" type="wipe" /><Clip id="b" src="asset:city" /></Track>'))
+        .toEqual(['warning:x.type: "x" <Transition> type "wipe" draws as a crossfade']);
+      expect(notRendered('<Track id="t"><Clip id="c" src="asset:city"><Effect id="v" type="vignette" /><AudioEffect id="r" type="reverb" /></Clip></Track>'))
+        .toEqual(['warning:v.type: "v" <Effect> type "vignette" is ignored: the picture renders without it', 'warning:r.type: "r" <AudioEffect> type "reverb" is ignored: the audio plays without it']);
+      expect(notRendered('<Track id="t"><Title id="h" animation={{ preset: "bounce" }}>Hi</Title></Track>')).toEqual(['warning:h.animation: "h" <Title> animation.preset "bounce" shows as a fade']);
+    });
+
+    it("warns on accepted props that are ignored, but not on values that ask for nothing", () => {
+      expect(notRendered('<Track id="t"><Clip id="c" src="asset:city" reverse emphasis="pulse" chromaKey={{ color: "#0f0" }} transform={{ rotate3d: { x: 0, y: 1, z: 0 } }} /></Track>').map((d) => d.split(":")[1]))
+        .toEqual(["c.reverse", "c.emphasis", "c.chromaKey", "c.transform"]);
+      expect(notRendered('<Track id="t"><Clip id="c" src="asset:city" reverse={false} emphasis="none" audioTrack={0} /><Adjustment id="a" affects="all" duration={1} /></Track>')).toEqual([]);
+      expect(notRendered('<Track id="t"><Adjustment id="a" affects={["c"]} duration={1} /></Track>')).toHaveLength(1);
+    });
+
+    it("warns on SpeedKey and Freeze, and on masks that do not render", () => {
+      const d = notRendered(`<Track id="t">
+        <Clip id="c" src="asset:city"><SpeedKey id="s" at={1} speed={2} /><Freeze id="f" at={1} start={0} duration={1} /><Mask id="m1" /><Mask id="m2" /><Mask id="m3" type="matte" matte={{ source: "c" }} /></Clip>
+        <Title id="h">Hi<Mask id="m4" /></Title>
+      </Track>`);
+      expect(d.map((x) => x.split(":")[1])).toEqual(["s.", "f.", "m2.", "m3.", "m3.type", "m3.matte", "m4."]);
+      expect(d[0]).toContain("the clip length, audio and captions ignore it");
+      expect(d[6]).toContain("masks render on clips and nested sequences only");
+    });
+
+    it("says nothing about a file that only uses what renders", () => {
+      expect(notRendered(`<Track id="t">
+        <Clip id="a" src="asset:city" speed={2}><Effect id="e" type="blur" /><ColorGrade id="g" temperature={20} /><Mask id="m" shape={{ rect: { x: 0, y: 0, width: 1, height: 1 } }} /><Keyframe id="k" property="transform.position.x" at={0} value={0} /></Clip>
+        <Transition id="x" type="crossfade" />
+        <Clip id="b" src="asset:city" />
+        <Title id="h" animation={{ preset: "fade" }}>Hi</Title>
+      </Track>`)).toEqual([]);
+    });
   });
 
   it("indexes elements with prop sites, locked props and schema bindings", () => {

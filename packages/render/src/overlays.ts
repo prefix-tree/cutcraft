@@ -3,7 +3,7 @@ import type { ResolvedState } from "@cutcut/kit";
 import { BUNDLED_FONTS, BUNDLED_FONT_WEIGHTS, installLayerClock } from "@cutcut/kit";
 import { backdropTracks, isVisibleAt, visiblePlacements, type MediaResolver, type VisibleItem } from "@cutcut/player/engine";
 import {
-  OVERLAY_KINDS, captionsContent, graphicDrawing, graphicLabels, iconStickerDrawing, parseSvg, serialize, shapeDrawing, svgDrawing, layerClock, layerContent, overlayLayout, stickerPlaceholder, stickerSize, titleContent,
+  OVERLAY_KINDS, captionsContent, graphicDrawing, graphicLabels, iconStickerDrawing, parseSvg, serialize, shapeDrawing, svgDrawing, layerClock, layerContent, overlayLayout, stickerPlaceholder, stickerSize, titleBox, titleContent,
   type ElementProps, type GraphicDrawing, type OverlayLayout,
 } from "@cutcut/player/overlays";
 import { readFileSync } from "node:fs";
@@ -126,7 +126,7 @@ export class OverlayPlane {
     const full = { width: comp.width, height: comp.height };
     switch (placement.kind) {
       case "title": {
-        const layout = overlayLayout(props, full);
+        const layout = overlayLayout(props, titleBox(placement.props, comp));
         const text = state.tree.byId.get(placement.id)?.text ?? "";
         this.checkFont(placement.id, placement.props.font);
         this.place(ctx, layout, await this.layoutImage(titleContent({ ...props, text }), layout.rect.w, layout.rect.h));
