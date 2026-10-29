@@ -8,6 +8,10 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- `<Effect>` types `temperature`, `tint` (`params.amount`, as on `<ColorGrade>`) and `levels`
+  (`params.black`, `params.white` on 0..1) render in the preview and the export. A levels `gamma`
+  has no filter form and the `not-rendered` lint reports it; `sharpen` stays unrendered.
+
 - A `not-rendered` lint: one table in the kit (`jsx/rendering.ts`) lists what the player and the
   renderer draw and play, the player reads it for its warnings, and the lint reports every other
   value or prop in a file with what happens instead, so a file that checks clean renders as written.

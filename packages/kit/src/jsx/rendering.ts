@@ -7,7 +7,7 @@ import type { CAPTION_ANIMATIONS, MASK_TYPES, TEXT_ANIMATION_PRESETS, Transition
  */
 
 export const RENDERED_TRANSITIONS = ["crossfade"] as const satisfies readonly TransitionType[];
-export const RENDERED_EFFECTS = ["brightness", "contrast", "saturation", "hue", "blur", "grayscale", "sepia", "invert", "shadow"] as const satisfies readonly VideoEffectType[];
+export const RENDERED_EFFECTS = ["brightness", "contrast", "saturation", "hue", "blur", "grayscale", "sepia", "invert", "shadow", "temperature", "tint", "levels"] as const satisfies readonly VideoEffectType[];
 export const RENDERED_AUDIO_EFFECTS = [] as const satisfies readonly AudioEffectType[];
 export const RENDERED_TITLE_ANIMATIONS = ["none", "fade", "slide-up", "slide-down", "slide-left", "slide-right", "scale", "typewriter", "word-by-word"] as const satisfies readonly (typeof TEXT_ANIMATION_PRESETS)[number][];
 export const RENDERED_CAPTION_ANIMATIONS = ["none", "word-highlight", "word-by-word", "karaoke"] as const satisfies readonly (typeof CAPTION_ANIMATIONS)[number][];
@@ -74,6 +74,7 @@ export const NOT_RENDERED: readonly NotRendered[] = [
   { kind: "audio", prop: "reverse", reason: "renders silent: reversed audio is not played" },
   { kind: "speedKey", reason: "changes the picture only: the clip length, audio and captions ignore it" },
   { kind: "freeze", reason: "holds the picture only: the clip length, audio and captions ignore it" },
+  { kind: "effect", prop: "params.gamma", reason: "is ignored: levels render their black and white points only" },
   { kind: "adjustment", prop: "affects", reason: "is ignored: the adjustment filters every track below it" },
   { kind: "composition", prop: "background.mode", value: "blur", reason: "draws as the plain background colour" },
   { kind: "mask", prop: "matte", reason: "is ignored: matte masks are not rendered, the element shows unmasked" },

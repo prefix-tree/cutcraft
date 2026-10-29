@@ -13,6 +13,18 @@ function num(params: Params, keys: readonly string[], fallback: number): number 
   return fallback;
 }
 
+/**
+ * Levels as `brightness(k) contrast(c)`: out = (in − black) / (white − black), with c = 1 + 2·black·s
+ * and k = s/c for s = 1/(white − black). Gamma has no filter form; the lint reports it.
+ */
+function levels(p: Params): string {
+  const black = Math.max(0, Math.min(1, num(p, ["black"], 0))), white = Math.max(0, Math.min(1, num(p, ["white"], 1)));
+  if (white <= black) return "";
+  const s = 1 / (white - black), c = 1 + 2 * black * s;
+  return `brightness(${s / c}) contrast(${c})`;
+}
+
+// TODO(sharpen): no CSS filter form; needs a getImageData unsharp-mask pass in the painter (slow on 1080p, preview and export). Until then the not-rendered lint reports it.
 /** One filter per rendered effect type: kit's RENDERED_EFFECTS, which the `not-rendered` lint reads. */
 const CANVAS_FILTERABLE: Readonly<Record<(typeof RENDERED_EFFECTS)[number], (p: Params) => string>> = {
   brightness: (p) => `brightness(${1 + num(p, ["amount", "value"], 0) / 100})`,
@@ -23,6 +35,9 @@ const CANVAS_FILTERABLE: Readonly<Record<(typeof RENDERED_EFFECTS)[number], (p: 
   grayscale: (p) => `grayscale(${num(p, ["amount", "value"], 100) / 100})`,
   sepia: (p) => `sepia(${num(p, ["amount", "value"], 100) / 100})`,
   invert: (p) => `invert(${num(p, ["amount", "value"], 100) / 100})`,
+  temperature: (p) => colorGradeFilters({ temperature: num(p, ["amount", "value"], 0) }).join(" "),
+  tint: (p) => colorGradeFilters({ tint: num(p, ["amount", "value"], 0) }).join(" "),
+  levels,
   shadow: (p) => `drop-shadow(${num(p, ["x"], 0)}px ${num(p, ["y"], 4)}px ${num(p, ["blur"], 8)}px ${typeof p.color === "string" ? p.color : "rgba(0,0,0,0.5)"})`,
 };
 
@@ -35,8 +50,10 @@ export function filterString(children: readonly Placement[], elementId: string):
       if (c.props.enabled === false) continue;
       const type = String(c.props.type);
       const make = CANVAS_FILTERABLE[type as keyof typeof CANVAS_FILTERABLE] as ((p: Params) => string) | undefined;
-      if (make) parts.push(make((c.props.params ?? {}) as Params));
-      else {
+      if (make) {
+        const f = make((c.props.params ?? {}) as Params);
+        if (f) parts.push(f);
+      } else {
         unsupported.push(type);
         devWarn(`effect:${elementId}:${type}`, `effect "${type}" on "${elementId}" is not rendered by the browser player`);
       }

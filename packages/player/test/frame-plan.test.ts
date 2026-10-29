@@ -57,6 +57,21 @@ describe("buildFramePlan", () => {
     expect(plan.ops[0]!.filter).toBe("blur(2px)");
   });
 
+  it("draws temperature, tint and levels as filters, levels mapping black to 0 and white to 1", () => {
+    const s = makeState({ width: 640, height: 360, tracks: [{ id: "main", items: [{ id: "c", kind: "clip", source: { in: 0, out: 4, asset: "a" }, children: [
+      { id: "t", kind: "effect", props: { type: "temperature", params: { amount: 40 } } },
+      { id: "n", kind: "effect", props: { type: "tint", params: { amount: 20 } } },
+      { id: "l", kind: "effect", props: { type: "levels", params: { black: 0.1, white: 0.6, gamma: 1.2 } } },
+    ] }] }] });
+    const filter = buildFramePlan(s, 1).ops[0]!.filter;
+    expect(filter).toMatch(/^sepia\(0\.2\) hue-rotate\(5deg\) brightness\([\d.]+\) contrast\([\d.]+\)$/);
+    const [k, c] = [/brightness\(([\d.]+)\)/, /contrast\(([\d.]+)\)/].map((r) => Number(r.exec(filter)![1]));
+    const level = (v: number) => (Math.min(1, k! * v) - 0.5) * c! + 0.5;
+    expect(level(0.1)).toBeCloseTo(0);
+    expect(level(0.35)).toBeCloseTo(0.5);
+    expect(level(0.6)).toBeCloseTo(1);
+  });
+
   it("maps source time through speed and resolves nested compositions", () => {
     const inner = makeState({ width: 640, height: 360, tracks: [{ id: "i", items: [{ id: "ic", kind: "clip", source: { in: 0, out: 3, asset: "a" } }] }] });
     const outer = makeState({ tracks: [{ id: "main", items: [
