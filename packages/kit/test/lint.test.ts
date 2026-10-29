@@ -60,6 +60,26 @@ describe("lint", () => {
     expect(lint(wrap(`<Track id="t"><Clip id="c" src="asset:interview" in={${inside}} /></Track>`))).toEqual([]);
   });
 
+  it("warns on a cut a few frames off a source shot change, on the side that flashes the other shot", () => {
+    // interview shots: 0–9.5, 9.5–21, 21–26, 26–60
+    const near = (body: string) => lint(wrap(body), { manifest, rules: ["cut-near-shot"] }).map((d) => `${d.id}.${d.prop}`);
+    expect(near('<Track id="t"><Clip id="c" src="asset:interview" in={9.4} out={21.1} /></Track>')).toEqual(["c.in", "c.out"]);
+    const d = lint(wrap('<Track id="t"><Clip id="c" src="asset:interview" in={9.4} /></Track>'), { manifest, rules: ["cut-near-shot"] });
+    expect(d[0]!.message).toContain('use in="shot:1"');
+    // The safe side of the edge, exactly on it, or by reference: nothing to say.
+    expect(near('<Track id="t"><Clip id="c" src="asset:interview" in={9.6} out={20.9} /><Clip id="d" src="asset:interview" in={9.5} out={21} /><Clip id="e" src="asset:interview" in="shot:1" out="shot:1.end" /></Track>')).toEqual([]);
+    expect(near('<Track id="t"><Clip id="c" src="asset:city" in={1} /></Track>')).toEqual([]);
+  });
+
+  it("warns on one crop over a range the camera cuts inside", () => {
+    const inside = (body: string) => lint(wrap(body), { manifest, rules: ["shot-change-inside-crop"] }).map((d) => `${d.id}.${d.prop}: ${d.message}`);
+    const d = inside('<Track id="t"><Clip id="c" src="asset:interview" in={5} out={15} transform={{ crop: { x: 0, y: 0, width: 0.5, height: 1 } }} /></Track>');
+    expect(d).toHaveLength(1);
+    expect(d[0]).toContain("c.transform: ");
+    expect(d[0]).toContain("shot:1 (9.5)");
+    expect(inside('<Track id="t"><Clip id="c" src="asset:interview" in={5} out={15} /><Clip id="d" src="asset:interview" in="shot:1" out="shot:1.end" transform={{ crop: { x: 0, y: 0, width: 0.5, height: 1 } }} /></Track>')).toEqual([]);
+  });
+
   describe("not-rendered", () => {
     const notRendered = (body: string) => lint(wrap(body)).filter((d) => d.rule === "not-rendered").map((d) => `${d.severity}:${d.id}.${d.prop ?? ""}: ${d.message}`);
 

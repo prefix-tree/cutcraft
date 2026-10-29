@@ -94,4 +94,9 @@ model's prompt lists the same ones. Two warnings check the cut rather than
 the file: `sequence-gap` (a `<Gap>` on the first sequence track, which is
 black unless another track covers it) and `cut-inside-word` (a numeric `in`
 or `out` that lands strictly inside a transcript word; it needs the manifest
-and names the `word:N` reference to use instead).
+and names the `word:N` reference to use instead). Two more read the
+source's own cuts from the manifest's shots: `cut-near-shot` (an `in` just
+before a shot change or an `out` just after one, which flashes a few frames
+of the other shot; it names the `shot:N` edge to use) and
+`shot-change-inside-crop` (one `transform.crop` over a range the camera cuts
+inside, so the framing the crop was set for ends mid-clip; split there).

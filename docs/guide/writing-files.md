@@ -157,6 +157,9 @@ A `<Gap>` on this track is black unless another track covers it, so the lint
 warns (`sequence-gap`); pauses belong inside clips, as trailing silence kept
 in the trim. A numeric trim that lands inside a transcript word gets a
 warning too (`cut-inside-word`), with the `word:N` reference to use instead.
+So does a cut within 0.3 s of one of the source's own shot changes on the
+side that flashes the other shot (`cut-near-shot`, naming the `shot:N` edge),
+and a crop over a range the camera cuts inside (`shot-change-inside-crop`).
 
 `music` is a free track: the bed has `start={0}` and `duration="fill"`, so it
 runs to the end of whatever the sequence became.
