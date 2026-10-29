@@ -1,5 +1,6 @@
 import type { ResolvedState } from "@cutcut/kit";
-import { buildFramePlan, captureWarnings } from "@cutcut/player";
+import { buildFramePlan, captureWarnings, visiblePlacements } from "@cutcut/player";
+import { overlayLayout } from "@cutcut/player/overlays";
 import { fixtureState, makeState } from "./helpers/state";
 
 const state = makeState({
@@ -12,7 +13,7 @@ const state = makeState({
       ] },
       { id: "x1", kind: "transition", duration: 1, props: { type: "crossfade", params: { curve: "linear" } } },
       { id: "c2", kind: "clip", source: { in: 0, out: 4, asset: "img" }, duration: 4, props: { transform: { opacity: 0.5 } } },
-      { id: "x2", kind: "transition", duration: 1, props: { type: "dipToBlack", params: {} } },
+      { id: "x2", kind: "transition", duration: 1, props: { type: "pixelate", params: {} } },
       { id: "c3", kind: "clip", source: { in: 0, out: 4, asset: "b" } },
     ] },
     { id: "fx", layout: "free", items: [{ id: "adj", kind: "adjustment", start: 0, duration: 10, children: [{ id: "e1", kind: "effect", props: { type: "blur", params: { radius: 4 } } }] }] },
@@ -49,7 +50,63 @@ describe("buildFramePlan", () => {
   it("falls back to a crossfade for other transition types with a warning", () => {
     const plan = buildFramePlan(state, 6.5);
     expect(plan.ops.map((o) => o.id)).toEqual(["c2", "c3", "adj"]);
-    expect(plan.warnings.some((w) => w.includes("dipToBlack"))).toBe(true);
+    expect(plan.warnings.some((w) => w.includes("pixelate"))).toBe(true);
+  });
+
+  describe("transitions", () => {
+    const between = (type: string, params: object = {}) => makeState({ width: 640, height: 360, tracks: [{ id: "main", items: [
+      { id: "a", kind: "clip", source: { in: 0, out: 4, asset: "a" } },
+      { id: "x", kind: "transition", duration: 1, props: { type, params: { curve: "linear", ...params } } },
+      { id: "b", kind: "clip", source: { in: 0, out: 4, asset: "a" } },
+    ] }] });
+    // The transition runs 3..4; at 3.25 it is a quarter through.
+    const at = (type: string, params?: object, t = 3.25) => buildFramePlan(between(type, params), t);
+
+    it("wipes the incoming clip in behind a growing rect, the outgoing one untouched", () => {
+      const [a, b] = at("wipe").ops;
+      expect(a).not.toHaveProperty("clip");
+      expect(b!.clip).toEqual([{ x: 480, y: 0, w: 160, h: 360 }]);
+      expect(b!.opacity).toBe(1);
+      expect(at("wipe", { direction: "down" }).ops[1]!.clip).toEqual([{ x: 0, y: 0, w: 640, h: 90 }]);
+      expect(at("wipe").warnings).toEqual([]);
+    });
+
+    it("slides the incoming clip in, and moves the outgoing one too for push", () => {
+      const [a, b] = at("slide").ops;
+      expect(b!.matrix.e - a!.matrix.e).toBeCloseTo(480);
+      expect(a!.matrix.e).toBe(0);
+      const [pa, pb] = at("push", { direction: "up" }).ops;
+      expect(pa!.matrix.f).toBeCloseTo(-90);
+      expect(pb!.matrix.f).toBeCloseTo(270);
+      expect(at("slide", { pushOut: true }).ops[0]!.matrix.e).toBeCloseTo(-160);
+    });
+
+    it("dips through black with an adjustment, showing the incoming clip from the midpoint", () => {
+      const early = at("dipToBlack", { holdDuration: 0 });
+      expect(early.ops.map((o) => [o.id, o.kind])).toEqual([["a", "video"], ["b", "video"], ["x", "adjustment"]]);
+      expect(early.ops[1]!.opacity).toBe(0);
+      expect(early.ops[2]).toMatchObject({ filter: "brightness(0)", opacity: 0.5 });
+      const late = at("dipToWhite", { holdDuration: 0.5 }, 3.6);
+      expect(late.ops[1]!.opacity).toBe(1);
+      expect(late.ops[2]).toMatchObject({ filter: "brightness(0) invert(1)", opacity: 1 });
+    });
+
+    it("plays the same look on overlays across their box, a dip as a fade", () => {
+      const titles = (type: string) => makeState({ width: 640, height: 360, tracks: [{ id: "main", items: [
+        { id: "a", kind: "title", duration: 4, text: "A" },
+        { id: "x", kind: "transition", duration: 1, props: { type, params: { curve: "linear" } } },
+        { id: "b", kind: "title", duration: 4, text: "B" },
+      ] }] });
+      const layoutOf = (type: string, t: number) => {
+        const state = titles(type);
+        const item = visiblePlacements(state, t).find((v) => v.placement.id === "b")!;
+        return overlayLayout({ placement: item.placement, children: item.children, state, time: t, transition: item.transition }, { width: 640, height: 360 });
+      };
+      expect(layoutOf("wipe", 3.25).clip).toEqual([{ x: 480, y: 0, w: 160, h: 360 }]);
+      expect(layoutOf("push", 3.25).matrix.e).toBeCloseTo(480);
+      expect(layoutOf("dipToBlack", 3.25).opacity).toBe(0);
+      expect(layoutOf("dipToBlack", 3.75).opacity).toBeGreaterThan(0);
+    });
   });
 
   it("builds filters and lists unsupported effects", () => {

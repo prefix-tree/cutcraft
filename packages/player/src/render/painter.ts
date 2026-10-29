@@ -46,6 +46,7 @@ export class CanvasPainter {
     ctx.globalAlpha = op.opacity;
     ctx.globalCompositeOperation = op.blend;
     ctx.filter = op.filter || "none";
+    clipFrame(ctx, op);
     setMatrix(ctx, op.matrix);
     const clipped = this.clip(ctx, op);
     if (op.mask && op.mask.feather > 0 && clipped) {
@@ -123,6 +124,13 @@ export class CanvasPainter {
     ctx.globalAlpha = op.opacity;
     ctx.globalCompositeOperation = op.blend;
     ctx.filter = op.filter || "none";
+    clipFrame(ctx, op);
+    if (op.borderRadius > 0) {
+      setMatrix(ctx, op.matrix);
+      ctx.beginPath();
+      roundedRect(ctx, 0, 0, op.rect.w, op.rect.h, op.borderRadius);
+      ctx.clip();
+    }
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.drawImage(layer, 0, 0);
     ctx.restore();
@@ -152,6 +160,15 @@ export function setMatrix(ctx: Ctx2D, m: Matrix2D): void {
   ctx.setTransform(m.a, m.b, m.c, m.d, m.e, m.f);
 }
 
+/** Clips to the op's shown part in composition pixels (a wipe), leaving the transform at identity. */
+function clipFrame(ctx: Ctx2D, op: DrawOp): void {
+  if (!op.clip) return;
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.beginPath();
+  for (const r of op.clip) ctx.rect(r.x, r.y, r.w, r.h);
+  ctx.clip();
+}
+
 function canvasOf(ctx: Ctx2D): AnyCanvas {
   return ctx.canvas as AnyCanvas;
 }
@@ -161,7 +178,7 @@ export function coversCanvas(op: DrawOp, width: number, height: number): boolean
   const m = op.matrix;
   return m.a === 1 && m.b === 0 && m.c === 0 && m.d === 1 && m.e === 0 && m.f === 0
     && op.rect.w === width && op.rect.h === height && !op.crop
-    && op.opacity >= 1 && op.blend === "source-over" && !op.filter && op.borderRadius === 0 && !op.mask;
+    && op.opacity >= 1 && op.blend === "source-over" && !op.filter && op.borderRadius === 0 && !op.mask && !op.clip;
 }
 
 /** The composition background (a colour or a gradient) over the whole frame. */

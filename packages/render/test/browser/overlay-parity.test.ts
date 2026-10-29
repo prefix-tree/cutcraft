@@ -164,7 +164,7 @@ const cases: Case[] = [
 
 function domOf(state: ResolvedState, Component: (props: never) => ReactElement | null, extra: Record<string, unknown>): ReactElement {
   const item = visiblePlacements(state, T).find((v) => v.placement.id === "e")!;
-  return h(Component as never, { placement: item.placement, children: item.children, state, time: T, transitionOpacity: 1, ...extra });
+  return h(Component as never, { placement: item.placement, children: item.children, state, time: T, ...extra });
 }
 
 interface Ink { readonly box: readonly [number, number, number, number] | null; readonly coverage: number }

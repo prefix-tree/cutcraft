@@ -1,8 +1,10 @@
 import type { FitMode, Placement, ResolvedState, Transform } from "@cutcut/kit";
 import type { CSSProperties } from "react";
 import { filterString } from "../model/effects";
-import { motionAt, type ClipRect, type GraphicAnimation } from "../model/motion";
-import { animatedTransform, layoutRect, matrixToCss, multiply, type Box, type Matrix2D } from "../model/transform";
+import { combine, motionAt, STILL, type ClipRect, type GraphicAnimation, type Motion } from "../model/motion";
+import { transitionLook } from "../model/transition";
+import { animatedTransform, layoutRect, matrixToCss, multiply, translate, type Box, type Matrix2D } from "../model/transform";
+import type { TransitionRole } from "../model/visible";
 import { blendOf } from "../model/frame-plan";
 
 /** Placement kinds drawn above the canvas plane, besides captions. */
@@ -14,8 +16,8 @@ export interface ElementProps {
   readonly state: ResolvedState;
   /** Composition time. */
   readonly time: number;
-  /** Transition opacity factor, 1 when none. */
-  readonly transitionOpacity: number;
+  /** The transition the element is in, if any. */
+  readonly transition?: TransitionRole | undefined;
 }
 
 /** Where and how an overlay of `size` composition pixels is drawn: its box, matrix, opacity, filter, blend and corner radius. */
@@ -45,18 +47,28 @@ export function overlayLayout(p: ElementProps, size: Box, fit: FitMode = "none",
   const { filter } = filterString(p.children, p.placement.id);
   const blend = p.placement.props.blend;
   const props = p.placement.props as { enter?: GraphicAnimation; exit?: GraphicAnimation };
-  const motion = motionAt(props.enter, props.exit, rel, p.placement.duration, layout.rect.w, layout.rect.h);
+  const motion = combine(motionAt(props.enter, props.exit, rel, p.placement.duration, layout.rect.w, layout.rect.h), transitionMotion(p.transition, layout.rect.w, layout.rect.h));
   const fadeForDraw = !drawable && motion.draw !== null ? motion.draw : 1;
   return {
     rect: { w: layout.rect.w, h: layout.rect.h },
     matrix: multiply(layout.matrix, motion.matrix),
-    opacity: (transform.opacity ?? 1) * p.transitionOpacity * motion.opacity * fadeForDraw,
+    opacity: (transform.opacity ?? 1) * motion.opacity * fadeForDraw,
     filter: filter || null,
     blend: blend && blend !== "normal" ? blendOf(blend) : null,
     borderRadius: transform.borderRadius ?? 0,
     clip: motion.clip,
     draw: drawable ? motion.draw : null,
   };
+}
+
+/**
+ * A transition as an entrance or exit: the footage's look, played across the element's box.
+ * shortcut: an overlay slides and wipes across its own box, not the frame, and a dip shows as a fade; fine for full-frame titles, measure against the frame if small overlays need it.
+ */
+function transitionMotion(t: TransitionRole | undefined, w: number, h: number): Motion {
+  if (!t) return STILL;
+  const look = transitionLook(t, w, h);
+  return { opacity: look.opacity * (1 - (look.dip ?? 0)), matrix: translate(look.offset?.x ?? 0, look.offset?.y ?? 0), clip: look.clip ?? null, draw: null };
 }
 
 /** A clip as a CSS `path()`: rectangles in the element's own pixels, an empty one when nothing shows. */

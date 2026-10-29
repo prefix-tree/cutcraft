@@ -2,7 +2,9 @@ import { RENDERED_MASK_TYPES, RENDERED_TRANSITIONS, lookupAsset, type BlendMode,
 import { devWarn } from "../warn";
 import { filterString } from "./effects";
 import { frameIndex, nestedSourceTime, placementSourceTime } from "./time";
-import { animatedTransform, layoutRect, type DrawRect, type Matrix2D } from "./transform";
+import type { ClipRect } from "./motion";
+import { transitionLook } from "./transition";
+import { animatedTransform, layoutRect, multiply, translate, type DrawRect, type Matrix2D } from "./transform";
 import { backdropTracks } from "./backdrop";
 import { visiblePlacements, type VisibleItem } from "./visible";
 
@@ -29,6 +31,8 @@ export interface DrawOp {
   readonly filter: string;
   readonly borderRadius: number;
   readonly mask?: MaskSpec;
+  /** The part shown, in composition pixels (a wipe). */
+  readonly clip?: readonly ClipRect[];
 }
 
 /** A composition background gradient, as the schema writes it. CSS angles: 0 points up, 180 (the default) runs down. */
@@ -86,6 +90,8 @@ export function buildFramePlan(state: ResolvedState, t: number, resolveNested?: 
     if (p.kind === "clip" || p.kind === "nested") {
       const op = mediaOp(state, item, t, resolveNested, warnings);
       if (op) ops.push(op);
+      const dip = item.transition && transitionLook(item.transition, comp.width, comp.height).dip;
+      if (op && dip) ops.push(dipOp(item.transition!.placement, dip, comp.width, comp.height));
     } else if (p.kind === "adjustment") {
       if (p.props.enabled === false) continue;
       const { filter } = filterString(item.children, p.id);
@@ -117,6 +123,7 @@ function mediaOp(state: ResolvedState, item: VisibleItem, t: number, resolveNest
   const transform = animatedTransform(p.props.transform as Transform | undefined, item.children, rel);
   const fit = (p.props.fit as FitMode | undefined) ?? "contain";
   let opacity = (transform.opacity ?? 1) * (typeof p.props.blendOpacity === "number" ? p.props.blendOpacity : 1);
+  let look: ReturnType<typeof transitionLook> | undefined;
   if (item.transition) {
     const x = item.transition.placement;
     const type = String(x.props.type ?? "crossfade");
@@ -125,30 +132,31 @@ function mediaOp(state: ResolvedState, item: VisibleItem, t: number, resolveNest
       devWarn(key, `transition "${type}" on "${x.id}" is drawn as a crossfade`);
       warnings.push(`transition ${x.id}: ${type} drawn as crossfade`);
     }
-    // Between two clips the incoming one fades in over the outgoing one, which stays opaque, so the
-    // result is (1 − p)·A + p·B. Only an edge transition fades a clip against the background.
-    if (item.transition.role === "in") opacity *= item.transition.progress;
-    else if (!x.between) opacity *= 1 - item.transition.progress;
+    // A crossfade between two clips fades the incoming one over the outgoing one, which stays opaque:
+    // (1 − p)·A + p·B. Only an edge transition fades a clip against the background.
+    look = transitionLook(item.transition, comp.width, comp.height);
+    opacity *= look.opacity;
   }
   const { filter } = filterString(item.children, p.id);
   const mask = maskOf(item.children, warnings);
-  const common = { id: p.id, fit, opacity, blend: blendOf(p.props.blend), filter, borderRadius: transform.borderRadius ?? 0, ...(mask ? { mask } : {}) };
+  const common = { id: p.id, fit, opacity, blend: blendOf(p.props.blend), filter, borderRadius: transform.borderRadius ?? 0, ...(mask ? { mask } : {}), ...(look?.clip ? { clip: look.clip } : {}) };
+  const shift = (m: Matrix2D): Matrix2D => (look?.offset ? multiply(translate(look.offset.x, look.offset.y), m) : m);
 
   if (p.kind === "nested") {
     const nested = resolveNested?.(p) ?? null;
     if (!nested) {
       warnings.push(`nested ${p.id}: no resolver`);
       const layout = layoutRect(comp, comp, fit, transform);
-      return { ...common, kind: "error", rect: layout.rect, matrix: layout.matrix };
+      return { ...common, kind: "error", rect: layout.rect, matrix: shift(layout.matrix) };
     }
     const layout = layoutRect(comp, nested.composition, fit, transform);
-    return { ...common, kind: "nested", nested: { state: nested, time: nestedSourceTime(p, t) }, rect: layout.rect, matrix: layout.matrix, ...(layout.crop ? { crop: layout.crop } : {}) };
+    return { ...common, kind: "nested", nested: { state: nested, time: nestedSourceTime(p, t) }, rect: layout.rect, matrix: shift(layout.matrix), ...(layout.crop ? { crop: layout.crop } : {}) };
   }
   const src = p.source;
   const asset = src ? lookupAsset(state.manifest, src.asset) : null;
   if (!src || !asset) {
     const layout = layoutRect(comp, comp, "contain", transform);
-    return { ...common, kind: "error", ...(src ? { asset: src.asset } : {}), rect: layout.rect, matrix: layout.matrix };
+    return { ...common, kind: "error", ...(src ? { asset: src.asset } : {}), rect: layout.rect, matrix: shift(layout.matrix) };
   }
   const size = { width: asset.width ?? comp.width, height: asset.height ?? comp.height };
   const layout = layoutRect(comp, size, fit, transform);
@@ -157,7 +165,15 @@ function mediaOp(state: ResolvedState, item: VisibleItem, t: number, resolveNest
     kind: asset.kind === "image" ? "image" : "video",
     asset: asset.id,
     sourceTime: placementSourceTime(p, item.children, t),
-    rect: layout.rect, matrix: layout.matrix, ...(layout.crop ? { crop: layout.crop } : {}),
+    rect: layout.rect, matrix: shift(layout.matrix), ...(layout.crop ? { crop: layout.crop } : {}),
+  };
+}
+
+/** A dip to black or white over everything drawn so far: an adjustment that maps the picture to the colour, `amount` of the way. */
+function dipOp(x: Placement, amount: number, width: number, height: number): DrawOp {
+  return {
+    id: x.id, kind: "adjustment", rect: { x: 0, y: 0, w: width, h: height }, matrix: { a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 },
+    fit: "stretch", opacity: amount, blend: "source-over", filter: x.props.type === "dipToWhite" ? "brightness(0) invert(1)" : "brightness(0)", borderRadius: 0,
   };
 }
 

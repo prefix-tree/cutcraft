@@ -12,8 +12,9 @@ clock in seconds (`elapsed`, `remaining`, `duration`, `time`, `fps`).
    the audio clock, re-anchored on play, pause, seek and rate change.
 2. **Plan**: `buildFramePlan(state, t)` is pure and lists draw ops in order:
    tracks in document order, each clip with its animated transform, crop, fit,
-   opacity, blend, filter and mask; crossfades as the incoming clip over the
-   outgoing one; adjustments re-filtering what is below.
+   opacity, blend, filter and mask; transitions as the incoming clip over the
+   outgoing one (faded, wiped, slid or pushed, with a dip as an adjustment to
+   black or white); adjustments re-filtering what is below.
 3. **Frames**: the `DecoderPool` keeps a `ClipDecoder` for every clip within
    two seconds of the play head. Each streams a `VideoSampleSink` into a short
    queue. While playing the compositor takes the newest frame at or before the
@@ -108,7 +109,7 @@ for the DOM and an offline mixer for Web Audio. See [Exporting](/guide/exporting
 
 ## What is not rendered yet
 
-Transition types other than crossfade (drawn as a crossfade), effects without
+Transition types other than crossfade, dips to black or white, wipe, slide and push (drawn as a crossfade), effects without
 a CSS filter equivalent, colour wheels, curves and LUTs, matte masks, audio
 effects, pitch correction, 3D text, most text animation
 presets, `emphasis` animations, `background.mode: "blur"` when an overlay sits beneath the footage (the plain colour then), sticker packs other than `icon:`, `<animateMotion>` and CSS animation in SVG, and `file:` nested

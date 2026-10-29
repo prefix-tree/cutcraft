@@ -82,7 +82,7 @@ and with captions on top:
   preview) and sample-rate conversion. Mute and solo apply.
 
 Not drawn, in the export as in the preview: transition types other than
-crossfade (drawn as one), effects with no CSS filter equivalent, colour wheels
+crossfade, dips to black or white, wipe, slide and push (drawn as a crossfade), effects with no CSS filter equivalent, colour wheels
 and LUTs, matte masks, audio effects, pitch correction, 3D text and most text
 animation presets. The check reports each of these in your
 file as a `not-rendered` lint warning. An adjustment filters the footage

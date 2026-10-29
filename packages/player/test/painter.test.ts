@@ -1,4 +1,4 @@
-import { CanvasPainter, buildFramePlan, type Ctx2D, type Frame } from "@cutcut/player";
+import { CanvasPainter, buildFramePlan, type Ctx2D, type DrawOp, type Frame, type FramePlan } from "@cutcut/player";
 import { FakeFrame, FakeFrameSource, recorderCanvas, recorderContext } from "./helpers/fakes";
 import { makeState } from "./helpers/state";
 
@@ -63,5 +63,30 @@ describe("CanvasPainter blur background", () => {
     const calls = paintBlur();
     expect(calls.filter((c) => c.name === "drawImage")).toHaveLength(1);
     expect(calls.some((c) => c.name === "set:filter" && String(c.args[0]).startsWith("blur("))).toBe(false);
+  });
+});
+
+describe("CanvasPainter clips", () => {
+  function paintOp(op: Partial<DrawOp>) {
+    const rec = recorderContext();
+    const base: DrawOp = { id: "c", kind: "video", rect: { x: 0, y: 0, w: 640, h: 360 }, matrix: { a: 0.5, b: 0, c: 0, d: 0.5, e: 10, f: 20 }, fit: "contain", opacity: 1, blend: "source-over", filter: "", borderRadius: 0 };
+    const plan: FramePlan = { time: 0, frame: 0, background: "#000", ops: [{ ...base, ...op }], warnings: [] };
+    new CanvasPainter(640, 360, recorderCanvas).paint(rec.ctx, plan, { frames: new Map<string, Frame | null>([["c", new FakeFrame(new FakeFrameSource("a"), 0, 1 / 30)]]), nested: new Map() });
+    return rec.calls;
+  }
+
+  it("clips a wipe in composition pixels before the element's matrix", () => {
+    const calls = paintOp({ clip: [{ x: 320, y: 0, w: 320, h: 360 }] });
+    const rect = calls.findIndex((c) => c.name === "rect" && c.args[0] === 320);
+    expect(calls[rect - 2]).toEqual({ name: "setTransform", args: [1, 0, 0, 1, 0, 0] });
+    expect(calls.findIndex((c) => c.name === "setTransform" && c.args[0] === 0.5)).toBeGreaterThan(rect);
+  });
+
+  it("keeps the corner radius and the wipe when a feathered mask goes through the layer", () => {
+    const calls = paintOp({ borderRadius: 12, clip: [{ x: 320, y: 0, w: 320, h: 360 }], mask: { shape: { rect: { x: 0, y: 0, width: 1, height: 1 } }, feather: 8, inverted: false, opacity: 1 } });
+    const last = calls.map((c) => c.name).lastIndexOf("drawImage");
+    const before = calls.slice(0, last).map((c) => c.name);
+    expect(before.lastIndexOf("clip")).toBeGreaterThan(before.lastIndexOf("restore"));
+    expect(calls.slice(before.lastIndexOf("restore"), last).filter((c) => c.name === "clip")).toHaveLength(2);
   });
 });

@@ -6,7 +6,7 @@ import type { CAPTION_ANIMATIONS, MASK_TYPES, TEXT_ANIMATION_PRESETS, Transition
  * reports everything else, so a file that checks clean renders as written.
  */
 
-export const RENDERED_TRANSITIONS = ["crossfade"] as const satisfies readonly TransitionType[];
+export const RENDERED_TRANSITIONS = ["crossfade", "dipToBlack", "dipToWhite", "wipe", "slide", "push"] as const satisfies readonly TransitionType[];
 export const RENDERED_EFFECTS = ["brightness", "contrast", "saturation", "hue", "blur", "grayscale", "sepia", "invert", "shadow", "temperature", "tint", "levels"] as const satisfies readonly VideoEffectType[];
 export const RENDERED_AUDIO_EFFECTS = [] as const satisfies readonly AudioEffectType[];
 export const RENDERED_TITLE_ANIMATIONS = ["none", "fade", "slide-up", "slide-down", "slide-left", "slide-right", "scale", "typewriter", "word-by-word"] as const satisfies readonly (typeof TEXT_ANIMATION_PRESETS)[number][];
@@ -73,6 +73,8 @@ export const NOT_RENDERED: readonly NotRendered[] = [
   { kind: "speedKey", reason: "changes the picture only: the clip length, audio and captions ignore it" },
   { kind: "freeze", reason: "holds the picture only: the clip length, audio and captions ignore it" },
   { kind: "effect", prop: "params.gamma", reason: "is ignored: levels render their black and white points only" },
+  { kind: "transition", prop: "params.direction", value: "diagonal", reason: "draws as a wipe to the left" },
+  { kind: "transition", prop: "params.softness", reason: "is ignored: the wipe has a hard edge" },
   { kind: "adjustment", prop: "affects", reason: "is ignored: the adjustment filters every track below it" },
   // shortcut: the lint cannot see which tracks sit beneath the footage, so it reports every blur; drop this when the blur also paints under backdrop overlays (frame-plan.ts).
   { kind: "composition", prop: "background.mode", value: "blur", reason: "draws as the plain colour when an overlay sits beneath the footage" },

@@ -40,8 +40,8 @@ const state = resolve(collectModule(file), manifest);
   once the gesture has been quiet for 120 ms.
 - **Compositing.** `buildFramePlan(state, t)` is pure and deterministic: tracks
   in document order (the first track is the bottom), each clip with its
-  animated transform, crop, fit, opacity, blend, filter and mask; crossfades
-  fade the incoming clip over the outgoing one; adjustments re-filter what is
+  animated transform, crop, fit, opacity, blend, filter and mask; transitions
+  draw the incoming clip over the outgoing one; adjustments re-filter what is
   below them. `CanvasPainter` executes it. Titles, shapes, SVG, stickers,
   layers and captions are DOM elements positioned with the same matrix math.
 - **Audio.** `buildAudioPlan` lists every audio-bearing chunk in a window with
@@ -78,7 +78,7 @@ Mounting a Player installs the kit's `useT()` and `useLayer()`.
 
 ## Not rendered yet
 
-Transition types other than crossfade (drawn as a crossfade), effects that
+Transition types other than crossfade, dips to black or white, wipe, slide and push (drawn as a crossfade), effects that
 have no CSS filter equivalent (vignette, grain, sharpen, glow, …),
 colour wheels, curves and LUTs, matte masks, audio effects, pitch correction,
 3D text, most text animation presets (shown as a fade),

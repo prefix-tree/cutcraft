@@ -8,6 +8,13 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- Transitions `dipToBlack`, `dipToWhite`, `wipe`, `slide` and `push` render in the preview and the
+  export, on footage and overlays. A dip hides the incoming clip until the midpoint under an
+  adjustment to black or white that holds for `holdDuration`; overlays show a dip as a fade and
+  play wipes and slides across their own box. A `diagonal` or `softness` wipe draws as a hard wipe
+  to the left, and the `not-rendered` lint says so. A feathered mask no longer drops the element's
+  corner radius.
+
 - `background.mode: "blur"` renders: the first footage on screen, blurred and scaled to cover the frame,
   fills the space around footage that does not cover it, in the preview and the export. With an
   overlay beneath the footage the ground stays the plain colour, and the `not-rendered` lint says so.

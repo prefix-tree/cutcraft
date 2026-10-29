@@ -119,9 +119,7 @@ export class OverlayPlane {
   private async drawItem(ctx: CanvasRenderingContext2D, item: VisibleItem, t: number): Promise<void> {
     const { state } = this.options;
     const { placement } = item;
-    const tr = item.transition;
-    const transitionOpacity = tr ? (tr.role === "in" ? tr.progress : tr.placement.between ? 1 : 1 - tr.progress) : 1;
-    const props: ElementProps = { placement, children: item.children, state, time: t, transitionOpacity };
+    const props: ElementProps = { placement, children: item.children, state, time: t, transition: item.transition };
     const comp = state.composition;
     const full = { width: comp.width, height: comp.height };
     switch (placement.kind) {

@@ -84,8 +84,8 @@ describe("lint", () => {
     const notRendered = (body: string) => lint(wrap(body)).filter((d) => d.rule === "not-rendered").map((d) => `${d.severity}:${d.id}.${d.prop ?? ""}: ${d.message}`);
 
     it("warns on enum values that draw as something else", () => {
-      expect(notRendered('<Track id="t"><Clip id="a" src="asset:city" /><Transition id="x" type="wipe" /><Clip id="b" src="asset:city" /></Track>'))
-        .toEqual(['warning:x.type: "x" <Transition> type "wipe" draws as a crossfade']);
+      expect(notRendered('<Track id="t"><Clip id="a" src="asset:city" /><Transition id="x" type="glitch" /><Clip id="b" src="asset:city" /></Track>'))
+        .toEqual(['warning:x.type: "x" <Transition> type "glitch" draws as a crossfade']);
       expect(notRendered('<Track id="t"><Clip id="c" src="asset:city"><Effect id="v" type="vignette" /><AudioEffect id="r" type="reverb" /></Clip></Track>'))
         .toEqual(['warning:v.type: "v" <Effect> type "vignette" is ignored: the picture renders without it', 'warning:r.type: "r" <AudioEffect> type "reverb" is ignored: the audio plays without it']);
       expect(notRendered('<Track id="t"><Title id="h" animation={{ preset: "bounce" }}>Hi</Title></Track>')).toEqual(['warning:h.animation: "h" <Title> animation.preset "bounce" shows as a fade']);
@@ -108,6 +108,11 @@ describe("lint", () => {
       expect(d[6]).toContain("masks render on clips and nested sequences only");
     });
 
+    it("warns on a diagonal or soft wipe, which draws as a hard wipe to the left", () => {
+      expect(notRendered('<Track id="t"><Clip id="a" src="asset:city" /><Transition id="x" type="wipe" params={{ direction: "diagonal", softness: 0.3 }} /><Clip id="b" src="asset:city" /></Track>').map((d) => d.split(":")[1]))
+        .toEqual(["x.params", "x.params"]);
+    });
+
     it("warns on a levels gamma, which has no filter form", () => {
       expect(notRendered('<Track id="t"><Clip id="c" src="asset:city"><Effect id="lv" type="levels" params={{ black: 0.1, gamma: 1.2 }} /></Clip></Track>'))
         .toEqual(['warning:lv.params: "lv" <Effect> params.gamma is ignored: levels render their black and white points only']);
@@ -123,6 +128,12 @@ describe("lint", () => {
         <Clip id="a" src="asset:city" speed={2}><Effect id="e" type="blur" /><Effect id="tp" type="temperature" params={{ amount: 20 }} /><Effect id="tn" type="tint" params={{ amount: -10 }} /><Effect id="lv" type="levels" params={{ black: 0.05, white: 0.95 }} /><ColorGrade id="g" temperature={20} /><Mask id="m" shape={{ rect: { x: 0, y: 0, width: 1, height: 1 } }} /><Keyframe id="k" property="transform.position.x" at={0} value={0} /></Clip>
         <Transition id="x" type="crossfade" />
         <Clip id="b" src="asset:city" />
+        <Transition id="w" type="wipe" params={{ direction: "up" }} />
+        <Clip id="b2" src="asset:city" />
+        <Transition id="s" type="slide" params={{ direction: "right", pushOut: true }} />
+        <Clip id="b3" src="asset:city" />
+        <Transition id="d" type="dipToWhite" params={{ holdDuration: 0.2 }} />
+        <Clip id="b4" src="asset:city" />
         <Title id="h" animation={{ preset: "fade" }}>Hi</Title>
       </Track>`)).toEqual([]);
     });

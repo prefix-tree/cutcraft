@@ -59,9 +59,7 @@ export interface ElementCellProps { item: VisibleItem; state: ResolvedState; tim
 /** Re-renders only when the element's own relative frame or placement changes. */
 const Element = memo(
   function Element({ item, state, time, interior }: ElementCellProps) {
-    const t = item.transition;
-    const transitionOpacity = t ? (t.role === "in" ? t.progress : t.placement.between ? 1 : 1 - t.progress) : 1;
-    const props: ElementProps = { placement: item.placement, children: item.children, state, time, transitionOpacity };
+    const props: ElementProps = { placement: item.placement, children: item.children, state, time, transition: item.transition };
     switch (item.placement.kind) {
       case "title": return <Title {...props} text={state.tree.byId.get(item.placement.id)?.text ?? ""} />;
       case "shape": return <Shape {...props} />;

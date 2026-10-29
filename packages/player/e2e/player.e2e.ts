@@ -217,6 +217,22 @@ test.describe("player", () => {
     expect(Math.abs(screenBlue - canvasBlue)).toBeLessThanOrEqual(4);
   });
 
+  test("blurs the footage behind itself and wipes to the next clip", async ({ page }) => {
+    await page.goto("/?comp=transitions");
+    await page.waitForSelector("body[data-ready='1']");
+    const pixel = (x: number, y: number) => page.evaluate(([x, y]) => Array.from((document.querySelector("canvas[data-el='composition']") as HTMLCanvasElement).getContext("2d")!.getImageData(x!, y!, 1, 1).data), [x, y]);
+    await seek(page, 0.5);
+    // The corner is outside the half-size footage: the blurred footage, not the black background.
+    expect((await pixel(10, 10))[2]).toBeGreaterThan(150);
+    await seek(page, 1.5);
+    // Halfway through a left wipe the red image shows on the right half only.
+    const right = await pixel(600, 180), left = await pixel(40, 180);
+    expect(right[0]).toBeGreaterThan(200);
+    expect(right[2]).toBeLessThan(60);
+    expect(left[0]).toBeLessThan(60);
+    expect(left[2]).toBeGreaterThan(150);
+  });
+
   test("decodes h264 when the browser can", async ({ page }) => {
     test.skip(!existsSync(join(mediaDir, "bars.mp4")), "no bars.mp4");
     await page.goto("/");

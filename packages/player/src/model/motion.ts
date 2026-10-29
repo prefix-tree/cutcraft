@@ -51,7 +51,7 @@ export function motionAt(enter: GraphicAnimation | undefined, exit: GraphicAnima
 }
 
 /** One animation at raw progress `x` (0 hidden, 1 fully shown). */
-function effect(anim: GraphicAnimation, x: number, w: number, h: number): Motion {
+export function effect(anim: GraphicAnimation, x: number, w: number, h: number): Motion {
   const raw = Math.max(0, Math.min(1, x));
   if (raw >= 1) return STILL;
   const k = ease(anim.easing ?? "ease-out", raw);
@@ -82,7 +82,7 @@ function effect(anim: GraphicAnimation, x: number, w: number, h: number): Motion
 }
 
 /** Both effects at once: opacities and draw amounts multiply, matrices compose, clips intersect. */
-function combine(a: Motion, b: Motion): Motion {
+export function combine(a: Motion, b: Motion): Motion {
   if (b === STILL) return a;
   if (a === STILL) return b;
   return {
