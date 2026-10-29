@@ -195,7 +195,8 @@ export class PlayerCore {
     const t = this.transport.time();
     if (this.transport.playing) this.engine.reseek();
     await this.compositor.seek(t);
-    await this.compositor.tick(t, { wait: true });
+    // Exact: a cold decoder would otherwise hand back the best frame it has when the frame deadline passes.
+    await this.compositor.tick(t, { wait: true, exact: true });
     this.publish(t, frameIndex(t, this._state.composition.fps));
     this.emit("seeked", { time: t });
   }
