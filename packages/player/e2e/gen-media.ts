@@ -19,6 +19,8 @@ const COUNTER = "drawtext=text='%{n}':x=10:y=60:fontsize=36:fontcolor=white:box=
 
 export default function generate(): void {
   mkdirSync(mediaDir, { recursive: true });
+  // The counter is for humans; an ffmpeg built without freetype (Homebrew's bottle) has no drawtext, so leave it out there.
+  const counter = execFileSync("ffmpeg", ["-hide_banner", "-filters"], { encoding: "utf8" }).includes(" drawtext ") ? `,${COUNTER}` : "";
   const run = (name: string, args: string[]): void => {
     const out = join(mediaDir, name);
     if (existsSync(out)) return;
@@ -35,7 +37,7 @@ export default function generate(): void {
   run("bars.webm", [
     "-f", "lavfi", "-i", "testsrc2=size=640x360:rate=30:duration=10",
     "-f", "lavfi", "-i", "sine=frequency=440:sample_rate=48000:duration=10",
-    "-vf", `${STRIP},${COUNTER}`, "-c:v", "libvpx-vp9", "-g", "30", "-keyint_min", "30", "-b:v", "1M", "-pix_fmt", "yuv420p",
+    "-vf", `${STRIP}${counter}`, "-c:v", "libvpx-vp9", "-g", "30", "-keyint_min", "30", "-b:v", "1M", "-pix_fmt", "yuv420p",
     "-c:a", "libopus", "-shortest",
   ]);
   run("tone.ogg", ["-f", "lavfi", "-i", "sine=frequency=660:sample_rate=48000:duration=20", "-c:a", "libopus"]);
@@ -45,7 +47,7 @@ export default function generate(): void {
     run("bars.mp4", [
       "-f", "lavfi", "-i", "testsrc2=size=640x360:rate=30:duration=10",
       "-f", "lavfi", "-i", "sine=frequency=440:sample_rate=48000:duration=10",
-      "-vf", `${STRIP},${COUNTER}`, "-c:v", "libx264", "-profile:v", "baseline", "-g", "30", "-pix_fmt", "yuv420p", "-c:a", "aac", "-shortest", "-movflags", "+faststart",
+      "-vf", `${STRIP}${counter}`, "-c:v", "libx264", "-profile:v", "baseline", "-g", "30", "-pix_fmt", "yuv420p", "-c:a", "aac", "-shortest", "-movflags", "+faststart",
     ]);
   } catch {
     // Optional: the mp4 test skips when the file or the decoder is missing.
