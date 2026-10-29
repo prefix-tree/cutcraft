@@ -49,7 +49,7 @@ function Helper(...) {...}                       // pure helpers (no hooks excep
 
 | Element | OpenReel kind | Key props beyond id/placement |
 |---|---|---|
-| `<Composition>` | Project settings + Timeline | `fps`, `width`, `height`, `sampleRate=48000`, `channels=2`, `background={{ mode: "color"\|"blur"\|"gradient", color, gradient }}`, `theme={{ extends, palette, fonts, radius, motion, styles }}` (see the Themes guide); children `<Track>`, `<Marker>`, `<Multicam>` |
+| `<Composition>` | Project settings + Timeline | `fps`, `width`, `height`, `sampleRate=48000`, `channels=2`, `background={{ mode: "color"\|"blur"\|"gradient", color, gradient }}`, `theme={{ extends, palette, fonts, radius, motion, styles }}` (see the Themes guide); children `<Track>`, `<Marker>` (a `<Multicam>` goes inside a `<Track>`) |
 | `<Track>` | Track (universal) | `layout`, `name`, `role: general\|captions\|dialogue\|music\|effects\|ambience`, `locked`, `hidden`, `muted`, `solo`, `group`. Child order = compositing order, first on top. Any item kind on any track. |
 | `<Clip>` (alias `<Audio>`) | Clip (video/image/audio media) | `src="asset:ID"`, `in`, `out`, `duration`, `speed` 0.1–20, `reverse`, `pitchCorrection`, `smoothSlowMo`, `interpolation`, `transform`, `fit`, `blend`, `blendOpacity`, `volume` 0–4, `fade={{in,out}}`, `automation={{volume:[[t,v]], pan:[[t,v]]}}`, `duck={{ under: trackId, to, attack?, release? }}`, `audioTrack`, `stabilize`, `chromaKey`, `emphasis`, `behindSubject`; children `<Effect>`, `<AudioEffect>`, `<ColorGrade>`, `<Keyframe>`, `<Mask>`, `<SpeedKey>`, `<Freeze>` |
 | `<Gap>` | (gaps) | `duration` |
