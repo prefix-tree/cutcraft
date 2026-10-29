@@ -8,6 +8,7 @@ import { resolveTimeRef } from "../manifest/timeref";
 import type { PatchLog } from "../patches/types";
 import type { ResolveError } from "./errors";
 import { overlay } from "./overlay";
+import { freezeHoldsOf, holdTotal, rampAdvance, rampInverse, speedKeysOf } from "./speed";
 import type { CollectedNode, CollectedTree, Editable, LayerInterior } from "./tree";
 import { cueNodes, onTimeline, planCues, playsKey, sameAsset, timelineWords, type AssetPlay, type CueOptions } from "./captions";
 import { parseTimeRef } from "../manifest/timeref";
@@ -188,7 +189,7 @@ function compute(original: CollectedTree, manifest: AssetManifest, log: PatchLog
   for (const p of pending.values()) {
     if (p.durationDep?.kind === "fill" && p.start !== undefined) {
       p.duration = Math.max(0, compositionEnd - p.start);
-      if (p.source) p.source = { ...p.source, out: p.source.in + p.duration * p.source.speed };
+      if (p.source) p.source = { ...p.source, out: p.source.in + sourceSpan(p.node, p.duration, p.source.speed) };
       delete p.durationDep;
     }
   }
@@ -440,7 +441,11 @@ function sourceRange(p: Pending, asset: AssetEntry, markers: ReadonlyMap<string,
   const inT = resolveTimeRef(inRaw, asset, markers, { id: node.id, prop: "in" });
   const inSec = typeof inT === "number" ? inT : (p.errors.push(inT), 0);
   const dur = props.duration;
+  const keys = speedKeysOf(node.children);
+  const holds = holdTotal(freezeHoldsOf(node.children));
   let outSec: number;
+  /** Timeline seconds the source plays, when `duration` gave them exactly. */
+  let played: number | undefined;
   if (props.out !== undefined && dur !== undefined) {
     p.errors.push({ code: "AMBIGUOUS_DURATION", id: node.id, prop: "duration", message: "give either out or duration, not both" });
   }
@@ -448,7 +453,8 @@ function sourceRange(p: Pending, asset: AssetEntry, markers: ReadonlyMap<string,
     const o = resolveTimeRef(props.out, asset, markers, { id: node.id, prop: "out" });
     outSec = typeof o === "number" ? o : (p.errors.push(o), inSec);
   } else if (typeof dur === "number") {
-    outSec = inSec + dur * speed;
+    played = dur;
+    outSec = inSec + (keys.length > 0 ? rampAdvance(keys, dur) : dur * speed);
   } else if (dur === "fill" || (typeof dur === "object" && dur !== null)) {
     p.durationDep = dur === "fill" ? { kind: "fill" } : { kind: "match", id: String((dur as { match: string }).match) };
     p.source = { in: inSec, out: inSec, speed, asset: asset.id };
@@ -459,13 +465,23 @@ function sourceRange(p: Pending, asset: AssetEntry, markers: ReadonlyMap<string,
   if (asset.kind !== "image" && outSec > asset.duration + 0.05) {
     p.errors.push({ code: "TRIM_PAST_SOURCE", id: node.id, prop: "out", message: `out ${outSec}s is past the end of ${asset.id} (${asset.duration}s)` });
     outSec = asset.duration;
+    played = undefined;
   }
   if (outSec <= inSec) {
     p.errors.push({ code: "TRIM_PAST_SOURCE", id: node.id, prop: "out", message: "out must be after in" });
     outSec = inSec;
+    played = undefined;
   }
   p.source = { in: inSec, out: outSec, speed, asset: asset.id };
-  p.duration = (outSec - inSec) / speed;
+  // Speed keys replace `speed`; freeze holds are inserted, so they lengthen the clip.
+  p.duration = (played ?? (keys.length > 0 ? rampInverse(keys, outSec - inSec) : (outSec - inSec) / speed)) + holds;
+}
+
+/** Source seconds a clip plays over `length` timeline seconds: its freeze holds play none, its speed keys replace `speed`. */
+function sourceSpan(node: CollectedNode, length: number, speed: number): number {
+  const keys = speedKeysOf(node.children);
+  const rel = Math.max(0, length - holdTotal(freezeHoldsOf(node.children)));
+  return keys.length > 0 ? rampAdvance(keys, rel) : rel * speed;
 }
 
 function placeTrack(trackNode: CollectedNode, track: ResolvedTrack, pending: Map<string, Pending>, theme: ResolvedTheme, errors: ResolveError[]): void {
@@ -616,7 +632,7 @@ function iterateDependencies(pending: Map<string, Pending>, _errors: ResolveErro
           progressed = true;
         } else if (target.duration !== undefined) {
           p.duration = target.duration;
-          if (p.source) p.source = { ...p.source, out: p.source.in + p.duration * p.source.speed };
+          if (p.source) p.source = { ...p.source, out: p.source.in + sourceSpan(p.node, p.duration, p.source.speed) };
           delete p.durationDep;
           progressed = true;
         }
@@ -750,7 +766,11 @@ function assetPlays(src: string, pending: Map<string, Pending>, tracks: readonly
     if (!p.source || p.start === undefined || !sameAsset(p.source.asset, src)) continue;
     if (p.track && hidden.has(p.track)) continue;
     if (p.node.kind !== "clip" && p.node.kind !== "audio") continue;
-    plays.push({ id: p.node.id, start: p.start, in: p.source.in, out: p.duration === undefined ? Number.POSITIVE_INFINITY : p.source.out, speed: p.source.speed });
+    const keys = speedKeysOf(p.node.children), holds = freezeHoldsOf(p.node.children);
+    plays.push({
+      id: p.node.id, start: p.start, in: p.source.in, out: p.duration === undefined ? Number.POSITIVE_INFINITY : p.source.out, speed: p.source.speed,
+      ...(keys.length > 0 ? { keys } : {}), ...(holds.length > 0 ? { holds } : {}),
+    });
   }
   return plays.sort((a, b) => a.start - b.start);
 }

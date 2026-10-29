@@ -1,3 +1,4 @@
+import { rampAdvance, rampInverse, speedKeysOf } from "@cutcut/kit";
 import { frameIndex, frameTime, layerClock, localT, placementSourceTime, timecode } from "@cutcut/player";
 import { childrenOf, fixtureState, makeState } from "./helpers/state";
 
@@ -7,11 +8,12 @@ const state = makeState({
       { id: "c1", kind: "clip", source: { in: 2, out: 6, asset: "a" } },
       { id: "c2", kind: "clip", source: { in: 0, out: 8, speed: 2, asset: "b" } },
       { id: "c3", kind: "clip", source: { in: 1, out: 5, asset: "a" }, props: { reverse: true } },
-      { id: "c4", kind: "clip", source: { in: 0, out: 10, asset: "b" }, duration: 4, children: [
+      // makeState does not time ramps or holds; these are the lengths resolve gives.
+      { id: "c4", kind: "clip", source: { in: 0, out: 2.5, asset: "b" }, duration: 4, children: [
         { id: "sk1", kind: "speedKey", props: { at: 0, speed: 1 } },
         { id: "sk2", kind: "speedKey", props: { at: 2, speed: 0.5 } },
       ] },
-      { id: "c5", kind: "clip", source: { in: 0, out: 10, asset: "b" }, duration: 6, children: [
+      { id: "c5", kind: "clip", source: { in: 0, out: 6, asset: "b" }, duration: 6.5, children: [
         { id: "fr1", kind: "freeze", props: { at: 1.5, start: 3, duration: 0.5 } },
       ] },
     ],
@@ -51,13 +53,20 @@ describe("placementSourceTime", () => {
     expect(placementSourceTime(c4, kids, c4.start + 4)).toBeCloseTo(2.5, 3);
   });
 
-  it("holds a freeze and resumes without shifting", () => {
+  it("inserts a freeze hold and pushes the rest of the clip later", () => {
     const c5 = item("c5");
     const kids = childrenOf(state, "c5");
+    expect(c5.duration).toBeCloseTo(6.5);
     expect(placementSourceTime(c5, kids, c5.start + 2.9)).toBeCloseTo(2.9);
     expect(placementSourceTime(c5, kids, c5.start + 3)).toBe(1.5);
     expect(placementSourceTime(c5, kids, c5.start + 3.4)).toBe(1.5);
-    expect(placementSourceTime(c5, kids, c5.start + 3.5)).toBeCloseTo(3.5);
+    expect(placementSourceTime(c5, kids, c5.start + 3.5)).toBeCloseTo(3);
+    expect(placementSourceTime(c5, kids, c5.end)).toBeCloseTo(6);
+  });
+
+  it("inverts a speed ramp: advance then inverse round-trips", () => {
+    const keys = speedKeysOf(childrenOf(state, "c4"));
+    for (const rel of [0.3, 1, 2, 3.7]) expect(rampInverse(keys, rampAdvance(keys, rel))).toBeCloseTo(rel, 5);
   });
 
   it("works on the kit fixture", () => {

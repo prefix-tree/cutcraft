@@ -19,6 +19,18 @@ describe("captions from the transcript", () => {
     ]));
   });
 
+  it("maps words through a speed ramp and pushes them past a freeze hold", () => {
+    const at = (plays: Parameters<typeof timelineWords>[1]) => timelineWords(interview, plays).map((x) => [x.text, x.start, x.end]);
+    // A key at half speed replaces `speed`: every word plays twice as late.
+    expect(at([{ id: "a", start: 0, in: 2.0, out: 3.5, speed: 1, keys: [{ at: 0, speed: 0.5 }] }])).toEqual([
+      ["Hello", 0, 0.8], ["and", 1, 1.2], ["welcome", 1.4, 2.2], ["back", 2.4, 3],
+    ]);
+    // A 1 s hold at 0.6 s: the words after it play 1 s later.
+    expect(at([{ id: "a", start: 0, in: 2.0, out: 3.5, speed: 1, holds: [{ at: 2.5, start: 0.6, duration: 1 }] }])).toEqual([
+      ["Hello", 0, 0.4], ["and", 0.5, 0.6], ["welcome", 1.7, 2.1], ["back", 2.2, 2.5],
+    ]);
+  });
+
   it("breaks cues at sentence ends, pauses, play boundaries and limits", () => {
     const sentence = planCues([w(0, "Hello.", 0, 0.3), w(1, "World", 0.4, 0.7)]);
     expect(sentence.map((c) => c.text)).toEqual(["Hello.", "World"]);

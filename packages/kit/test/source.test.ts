@@ -96,7 +96,7 @@ describe("fold, structural cases", () => {
     exec.execute({ type: "source/setProps", params: { id: "c2", props: { fit: undefined, transform: undefined } } });
     exec.execute({ type: "clip/setSource", params: { id: "c3", src: 'asset:we"ird' } });
     const { text } = foldToSource(fixtureText, exec.log(), exec.state());
-    expect(text).toContain('<Clip id="c2" src="asset:city" duration={4}>');
+    expect(text).toContain('<Clip id="c2" src="asset:city" duration={3.5}>');
     expect(text).toContain('src={"asset:we\\"ird"}');
   });
 

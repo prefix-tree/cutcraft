@@ -114,7 +114,7 @@ describe("fold, layout conversion, flatten and extract", () => {
       expect: (text) => {
         expect(text).toContain('<Track id="main" name="Main" layout="free">');
         expect(text).toContain('<Transition id="x1" type="crossfade" duration={0.5} on="c1" edge="out" />');
-        expect(text).toContain('<Clip id="c2" src="asset:city" duration={4} fit="cover" transform={{ scale: 1.1 }} start={5}>');
+        expect(text).toContain('<Clip id="c2" src="asset:city" duration={3.5} fit="cover" transform={{ scale: 1.1 }} start={5}>');
         expect(text).not.toContain('<Gap id="g1"');
       },
     },

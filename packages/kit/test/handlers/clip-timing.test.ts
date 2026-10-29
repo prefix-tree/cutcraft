@@ -11,15 +11,16 @@ describe("clip timing", () => {
     const r = exec.execute({ type: "clip/trim", params: { id: "c2", edge: "out", value: 4.4 } });
     expect(r.ok).toBe(true);
     const after = exec.state();
-    expect(after.items.get("c2")?.end).toBeCloseTo(9.4);
-    expect(after.items.get("g1")?.start).toBeCloseTo(9.4);
-    expect(after.items.get("c3")?.start).toBeCloseTo(10.4);
+    // c2 slows to half speed at 2 s and holds 0.5 s, so 4.4 source seconds take 7.8 s plus the hold.
+    expect(after.items.get("c2")?.end).toBeCloseTo(13.3);
+    expect(after.items.get("g1")?.start).toBeCloseTo(13.3);
+    expect(after.items.get("c3")?.start).toBeCloseTo(14.3);
     expect(after.items.get("l1")?.start).toBe(5);
     expect(exec.undo()?.ok).toBe(true);
     expect(serialize(exec.state())).toEqual(before);
-    expect(exec.log().net.get("c2")?.props.get("duration")).toBe(4);
+    expect(exec.log().net.get("c2")?.props.get("duration")).toBe(3.5);
     expect(exec.redo()?.ok).toBe(true);
-    expect(exec.state().items.get("c2")?.end).toBeCloseTo(9.4);
+    expect(exec.state().items.get("c2")?.end).toBeCloseTo(13.3);
   });
 
   it("trims a word reference to seconds and refuses out-of-range values", () => {
@@ -68,11 +69,14 @@ describe("clip timing", () => {
     const exec = fixtureExecutor();
     exec.execute({ type: "clip/remove", params: { id: "g1" } });
     exec.execute({ type: "transition/remove", params: { transitionId: "x1" } });
+    // Roll moves source edges at the clip's constant speed; take c2's ramp and hold off.
+    exec.execute({ type: "speed/setKeys", params: { id: "c2", keys: [] } });
+    exec.execute({ type: "speed/setFreezes", params: { id: "c2", freezes: [] } });
     const total = exec.state().composition.duration;
     expect(exec.execute({ type: "clip/roll", params: { leftId: "c2", rightId: "c3", delta: 0.5 } }).ok).toBe(true);
     const s = exec.state();
-    expect(s.items.get("c2")?.end).toBeCloseTo(10);
-    expect(s.items.get("c3")?.start).toBeCloseTo(10);
+    expect(s.items.get("c2")?.end).toBeCloseTo(9.5);
+    expect(s.items.get("c3")?.start).toBeCloseTo(9.5);
     expect(s.composition.duration).toBeCloseTo(total);
   });
 

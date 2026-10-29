@@ -1,4 +1,5 @@
 import { assetIdOf, type AssetEntry, type TranscriptWord } from "../manifest/types";
+import { freezeUnshift, rampInverse, type FreezeHold, type RampKey } from "./speed";
 import type { CollectedNode } from "./tree";
 
 /** Where an asset plays on the timeline: enough of a placement to map asset seconds to composition seconds. */
@@ -9,6 +10,10 @@ export interface AssetPlay {
   /** Infinity while the placement's length is still open (`duration="fill"`). */
   readonly out: number;
   readonly speed: number;
+  /** `<SpeedKey>` children, which replace `speed`. */
+  readonly keys?: readonly RampKey[];
+  /** `<Freeze>` children, inserted holds that push later words back. */
+  readonly holds?: readonly FreezeHold[];
 }
 
 /** A transcript word at the composition time it plays. */
@@ -42,7 +47,7 @@ const SENTENCE_END = /[.!?…]["')\]]?$/;
 export function onTimeline(sec: number, plays: readonly AssetPlay[]): number | null {
   const EPS = 1e-6;
   for (const p of plays) {
-    if (sec >= p.in - EPS && sec <= p.out + EPS) return ms(p.start + Math.max(0, sec - p.in) / p.speed);
+    if (sec >= p.in - EPS && sec <= p.out + EPS) return ms(playTime(p, sec));
   }
   return null;
 }
@@ -103,7 +108,7 @@ export function cueNodes(captions: CollectedNode, cues: readonly Cue[], taken: (
 /** A stable key for the plays of one asset, so an unchanged timeline reuses the generated nodes. */
 export function playsKey(plays: readonly AssetPlay[]): string {
   let key = "";
-  for (const p of plays) key += `${p.id}:${p.start}:${p.in}:${p.out}:${p.speed};`;
+  for (const p of plays) key += `${p.id}:${p.start}:${p.in}:${p.out}:${p.speed}:${JSON.stringify(p.keys ?? [])}:${JSON.stringify(p.holds ?? [])};`;
   return key;
 }
 
@@ -117,7 +122,14 @@ function ms(x: number): number {
 }
 
 function wordOn(w: TranscriptWord, play: AssetPlay): TimelineWord {
-  const start = ms(play.start + (w.start - play.in) / play.speed);
-  const end = ms(play.start + (w.end - play.in) / play.speed);
+  const start = ms(playTime(play, w.start));
+  const end = ms(playTime(play, w.end));
   return { i: w.i, text: w.text, start, end, play: play.id, ...(w.speaker !== undefined ? { speaker: w.speaker } : {}) };
+}
+
+/** Composition time at which asset second `sec` plays in `play`: through the speed ramp, then past the holds before it. */
+function playTime(play: AssetPlay, sec: number): number {
+  const advance = Math.max(0, sec - play.in);
+  const rel = play.keys ? rampInverse(play.keys, advance) : advance / play.speed;
+  return play.start + (play.holds ? freezeUnshift(play.holds, rel) : rel);
 }

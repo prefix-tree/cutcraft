@@ -72,8 +72,9 @@ describe("ClipDecoder", () => {
     expect(a!.timestamp).toBe(1.5);
     expect(source.retains).toBe(1);
     expect(source.frameAtCalls.filter((t) => t === 1.5)).toHaveLength(1);
+    // The hold is inserted: 0.1 s after it ends the clip is 0.1 s past where it stopped.
     const after = await d.frameFor(p.start + 1.6, true);
-    expect(after!.timestamp).toBeCloseTo(1.6);
+    expect(after!.timestamp).toBeCloseTo(1.1);
   });
 
   it("returns the stale frame while a slow stream catches up", async () => {

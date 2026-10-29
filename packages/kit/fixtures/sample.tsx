@@ -24,7 +24,7 @@ export default function Video({ title, accent }: z.infer<typeof schema>) {
           <Mask id="mk1" shape={{ rect: { x: 0.1, y: 0.1, width: 0.8, height: 0.8 } }} feather={12} />
         </Clip>
         <Transition id="x1" type="crossfade" duration={0.5} />
-        <Clip id="c2" src="asset:city" duration={4} fit="cover" transform={{ scale: 1.1 }}>
+        <Clip id="c2" src="asset:city" duration={3.5} fit="cover" transform={{ scale: 1.1 }}>
           <SpeedKey id="sk1" at={0} speed={1} />
           <SpeedKey id="sk2" at={2} speed={0.5} easing="easeInOutQuad" />
           <Freeze id="fr1" at={1.5} start={3} duration={0.5} />

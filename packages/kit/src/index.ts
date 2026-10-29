@@ -16,6 +16,7 @@ export * from "./resolve/errors";
 export * from "./resolve/resolve";
 export * from "./resolve/scene";
 export * from "./resolve/captions";
+export * from "./resolve/speed";
 
 export * from "./theme";
 
