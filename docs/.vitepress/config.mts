@@ -33,6 +33,7 @@ export default defineConfig({
           { text: "Elements", link: "/reference/elements" },
           { text: "Actions", link: "/reference/actions" },
           { text: "Graphics", link: "/reference/graphics" },
+          { text: "Rendering", link: "/reference/rendering" },
           { text: "Specification (kit)", link: "https://github.com/bsnisar/cutcut/blob/main/packages/kit/docs/spec.md" },
           { text: "OpenReel parity (kit)", link: "https://github.com/bsnisar/cutcut/blob/main/packages/kit/docs/parity.md" },
         ] },

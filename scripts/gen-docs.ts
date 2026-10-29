@@ -1,15 +1,16 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { z } from "zod";
-import { ELEMENTS, KIND_CAPABILITIES, listHandlers } from "../packages/kit/src/index";
+import { ELEMENTS, KIND_CAPABILITIES, MASKED_KINDS, MASK_NOT_RENDERED, NOT_RENDERED, RENDERED_VALUES, listHandlers } from "../packages/kit/src/index";
 import { OURS_ONLY, PARITY } from "../packages/kit/scripts/parity-table";
 import { GRAPHIC_KINDS, GRAPHIC_KIND_NAMES } from "../packages/graphics/src/index";
 
 /**
  * Generated reference pages: the element table from the Zod schemas and the
  * capabilities table, the action list from the registered handlers and the
- * parity table. Committed; CI fails when they drift from the code. The kit's
- * spec and parity documents are linked from the sidebar rather than copied:
+ * parity table, and what renders from `rendering.ts` (the backend copies that
+ * page into the agent's SKILL.md). Committed; CI fails when they drift from
+ * the code. The kit's spec and parity documents are linked from the sidebar rather than copied:
  * their prose carries JSX and braces that VitePress would compile as Vue.
  */
 const root = join(import.meta.dirname, "..");
@@ -106,6 +107,39 @@ function actionsPage(): string {
   return lines.join("\n");
 }
 
+/** Written for an LLM editor: the backend copies it into SKILL.md. Rows that differ only by element are merged. */
+function renderingPage(): string {
+  const names = new Map(Object.entries(ELEMENTS).map(([name, c]) => [c.kind, `\`<${name}>\``] as const));
+  const on = (kinds: string[]): string => kinds.map((k) => (k === "*" ? "any element" : names.get(k) ?? k)).join(", ");
+  const merge = <T extends { kind: string }>(rows: readonly T[], key: (r: T) => string): [T, string[]][] => {
+    const groups = new Map<string, [T, string[]]>();
+    for (const r of rows) {
+      const g = groups.get(key(r));
+      if (g) g[1].push(r.kind);
+      else groups.set(key(r), [r, [r.kind]]);
+    }
+    return [...groups.values()];
+  };
+  const code = (v: string): string => `\`${v}\``;
+  const why = (reason: string): string => reason.replace(/<\w+>/g, code);
+  const lines = [
+    "# What renders", "",
+    "What the player and the export draw, out of what the schemas accept. Generated from `packages/kit/src/jsx/rendering.ts` by `pnpm docs:gen`; do not edit by hand.", "",
+    "The check's `not-rendered` warning reports everything outside these lists, so a file that checks clean renders as written.", "",
+    "## Values that render", "",
+  ];
+  for (const [r, kinds] of merge(RENDERED_VALUES, (r) => `${r.prop}|${r.values.join()}|${r.reason}`)) {
+    const only = r.values.length ? `only ${r.values.map(code).join(", ")} render${r.values.length === 1 ? "s" : ""}; any other value` : "no value renders; any value";
+    lines.push(`- ${code(r.prop)} on ${on(kinds)}: ${only} ${why(r.reason)}.`);
+  }
+  lines.push(`- A \`<Mask>\` on an element other than ${on([...MASKED_KINDS])} ${why(MASK_NOT_RENDERED.kind)}; a second \`<Mask>\` ${why(MASK_NOT_RENDERED.second)}.`);
+  lines.push("", "## Accepted but not rendered", "", "No value means any value except one that asks for nothing (`false`, `0`, `\"none\"`, `\"all\"`).", "", "| element | prop | value | what happens |", "|---|---|---|---|");
+  for (const [r, kinds] of merge(NOT_RENDERED, (r) => `${r.prop}|${r.value}|${r.reason}`)) {
+    lines.push(`| ${on(kinds)} | ${r.prop ? code(r.prop) : "the element"} | ${r.value ? code(r.value) : ""} | ${why(r.reason)} |`);
+  }
+  return lines.join("\n") + "\n";
+}
+
 /** VitePress compiles markdown as Vue, so a bare `<Layer>` or `{{ … }}` in prose must be escaped; code spans and fences are left alone. */
 function escapeTags(markdown: string): string {
   let fenced = false;
@@ -120,4 +154,5 @@ function escapeTags(markdown: string): string {
 writeFileSync(join(out, "elements.md"), escapeTags(elementsPage()));
 writeFileSync(join(out, "actions.md"), escapeTags(actionsPage()));
 writeFileSync(join(out, "graphics.md"), escapeTags(graphicsPage()));
-console.log("docs/reference: elements.md actions.md graphics.md");
+writeFileSync(join(out, "rendering.md"), escapeTags(renderingPage()));
+console.log("docs/reference: elements.md actions.md graphics.md rendering.md");
