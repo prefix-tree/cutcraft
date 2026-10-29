@@ -1,5 +1,5 @@
 import type { BackgroundGradient, DrawOp, FramePlan } from "../model/frame-plan";
-import type { Matrix2D } from "../model/transform";
+import { fitRect, type Matrix2D } from "../model/transform";
 import type { AnyCanvas, CreateCanvas, Ctx2D, Frame } from "../types";
 import { roundedRect, traceMask } from "./masks";
 
@@ -29,6 +29,7 @@ export class CanvasPainter {
     ctx.filter = "none";
     if (plan.clear) ctx.clearRect(0, 0, this.width, this.height);
     else paintBackground(ctx, plan, this.width, this.height);
+    if (plan.backgroundBlur) this.blurBackground(ctx, plan, plan.backgroundBlur.id, inputs);
     for (const op of plan.ops) {
       if (op.kind === "adjustment") this.adjust(ctx, op);
       else this.drawOp(ctx, op, inputs);
@@ -54,6 +55,25 @@ export class CanvasPainter {
       return;
     }
     this.blit(ctx, op, frame, nested);
+    ctx.restore();
+  }
+
+  /** The footage's picture, blurred and scaled to cover the frame, under everything; skipped when the footage covers the frame itself. */
+  private blurBackground(ctx: Ctx2D, plan: FramePlan, id: string, inputs: PaintInputs): void {
+    const op = plan.ops.find((o) => o.id === id);
+    if (!op || coversCanvas(op, this.width, this.height)) return;
+    const nested = op.kind === "nested" ? inputs.nested.get(id) ?? null : null;
+    const frame = op.kind === "nested" ? null : inputs.frames.get(id) ?? null;
+    const picture = nested ?? frame;
+    if (!picture) return;
+    const r = Math.round(0.04 * this.height);
+    // Grown by 2r on each side, so the blur's transparent fringe falls outside the frame.
+    const { x, y, w, h } = fitRect(this, picture, "cover");
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.filter = `blur(${r}px)`;
+    if (nested) ctx.drawImage(nested, x - 2 * r, y - 2 * r, w + 4 * r, h + 4 * r);
+    else frame!.draw(ctx, x - 2 * r, y - 2 * r, w + 4 * r, h + 4 * r);
     ctx.restore();
   }
 
