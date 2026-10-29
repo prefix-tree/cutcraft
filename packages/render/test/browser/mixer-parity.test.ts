@@ -8,7 +8,11 @@ const RATE = 48000;
 const SECONDS = 2;
 
 interface Source { readonly rate: number; readonly freqs: readonly number[]; readonly seconds: number }
-interface Case { readonly name: string; readonly source: Source; readonly occurrence: AudioOccurrence }
+/**
+ * `levelsOnly`: Web Audio steps `playbackRate` once per 128-frame quantum, so on a ramp it trails the exact
+ * integral by about a millisecond; the phases drift apart, so compare levels up to `compEnd`, not samples.
+ */
+interface Case { readonly name: string; readonly source: Source; readonly occurrence: AudioOccurrence; readonly levelsOnly?: true }
 
 const occ = (o: Partial<AudioOccurrence> & Pick<AudioOccurrence, "compStart" | "compEnd" | "bufferFrom" | "bufferTo" | "speed" | "gain">): AudioOccurrence => ({ id: "o", asset: "a", chunk: 0, ...o });
 
@@ -32,6 +36,12 @@ const cases: Case[] = [
     name: "a stereo source with no pan, faded out",
     source: { rate: 48000, freqs: [500, 700], seconds: 1 },
     occurrence: occ({ compStart: 0.5, compEnd: 1.5, bufferFrom: 0, bufferTo: 1, speed: 1, gain: [[0.5, 1], [1.0, 1], [1.5, 0]] }),
+  },
+  {
+    name: "a mono source on a speed-key ramp from 1x to 2x",
+    source: { rate: 48000, freqs: [220], seconds: 2.4 },
+    occurrence: occ({ compStart: 0.2, compEnd: 1.8, bufferFrom: 0, bufferTo: 2.4, speed: 1, rate: [[0.2, 1], [0.6, 1.25], [1, 1.5], [1.4, 1.75], [1.8, 2]], gain: [[0.2, 1], [1.8, 1]] }),
+    levelsOnly: true,
   },
 ];
 
@@ -68,7 +78,7 @@ async function webAudio(args: { source: Source; occurrence: AudioOccurrence; rat
   };
   const src = ctx.createBufferSource();
   src.buffer = buffer;
-  src.playbackRate.value = o.speed;
+  automate(src.playbackRate, o.rate ?? [], o.compStart, o.speed);
   const gain = ctx.createGain();
   automate(gain.gain, o.gain, o.compStart, 1);
   src.connect(gain);
@@ -80,7 +90,7 @@ async function webAudio(args: { source: Source; occurrence: AudioOccurrence; rat
     tail = panner;
   }
   tail.connect(ctx.destination);
-  src.start(o.compStart, 0, (o.compEnd - o.compStart) * o.speed);
+  src.start(o.compStart, 0, o.bufferTo - o.bufferFrom);
   const out = await ctx.startRendering();
   return [Array.from(out.getChannelData(0)), Array.from(out.getChannelData(1))];
 }
@@ -91,12 +101,18 @@ function rms(a: ArrayLike<number>, from: number, to: number): number {
   return Math.sqrt(sum / Math.max(1, to - from));
 }
 
+function crossings(a: ArrayLike<number>, from: number, to: number): number {
+  let n = 0;
+  for (let i = from + 1; i < to; i++) if ((a[i - 1] as number) < 0 && (a[i] as number) >= 0) n++;
+  return n;
+}
+
 let browser: Browser;
 beforeAll(async () => { browser = await chromium.launch(); }, 60_000);
 afterAll(async () => { await browser.close(); });
 
 describe("offline mixer against Web Audio's OfflineAudioContext", () => {
-  it.each(cases)("$name", async ({ source, occurrence }) => {
+  it.each(cases)("$name", async ({ source, occurrence, levelsOnly }) => {
     const page = await browser.newPage();
     const expected = await page.evaluate(webAudio, { source, occurrence, rate: RATE, seconds: SECONDS });
     await page.close();
@@ -114,13 +130,16 @@ describe("offline mixer against Web Audio's OfflineAudioContext", () => {
       expect(Math.abs(peakWant - peakGot), `channel ${ch} peak: web audio ${peakWant.toFixed(3)}, mixer ${peakGot.toFixed(3)}`).toBeLessThan(0.05);
       // Per 100 ms window, the levels agree to 1 dB wherever there is sound to compare.
       const win = RATE / 10;
-      for (let from = 0; from + win <= frames; from += win) {
+      const until = levelsOnly ? Math.floor(occurrence.compEnd * RATE) : frames;
+      for (let from = 0; from + win <= until; from += win) {
         const a = rms(want, from, from + win), b = rms(got, from, from + win);
         if (a < 0.01 && b < 0.01) continue;
         const db = Math.abs(20 * Math.log10((b + 1e-9) / (a + 1e-9)));
         expect(db, `channel ${ch}, window at ${(from / RATE).toFixed(1)} s: web audio ${a.toFixed(4)}, mixer ${b.toFixed(4)}`).toBeLessThan(1);
+        // On a ramp the pitch is the rate: the same zero crossings per window, give or take the drift.
+        if (levelsOnly) expect(Math.abs(crossings(want, from, from + win) - crossings(got, from, from + win)), `channel ${ch}, crossings at ${(from / RATE).toFixed(1)} s`).toBeLessThanOrEqual(1);
       }
-      expect(worst, `channel ${ch} worst sample difference`).toBeLessThan(0.03);
+      if (!levelsOnly) expect(worst, `channel ${ch} worst sample difference`).toBeLessThan(0.03);
     }
   }, 60_000);
 });

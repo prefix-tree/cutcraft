@@ -103,7 +103,9 @@ export interface ScheduledSource {
   readonly when: number;
   readonly offset: number;
   readonly duration: number;
+  /** The rate at `when`; `rate`, when set, automates it from there. */
   readonly playbackRate: number;
+  readonly rate?: readonly EnvelopePoint[];
   readonly envelope: readonly EnvelopePoint[];
   readonly pan?: readonly EnvelopePoint[];
 }

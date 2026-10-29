@@ -78,8 +78,9 @@ and with captions on top:
   [Themes](/guide/themes#fonts)). A title that names another font is set in
   Inter with a warning unless you pass the font with `--font` or `fonts`.
 - **Sound** is mixed by `mixPlan`, a pure function of the audio plan: volume,
-  fades, automation, ducking, pan, speed (pitch follows speed, as in the
-  preview) and sample-rate conversion. Mute and solo apply.
+  fades, automation, ducking, pan, speed and speed-key ramps (pitch follows
+  speed, as in the preview), silence through freeze holds, and sample-rate
+  conversion. Mute and solo apply.
 
 Not drawn, in the export as in the preview: transition types other than
 crossfade, dips to black or white, wipe, slide and push (drawn as a crossfade), effects with no CSS filter equivalent (besides vignette and grain), colour wheels

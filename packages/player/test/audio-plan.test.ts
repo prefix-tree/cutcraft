@@ -58,6 +58,28 @@ describe("buildAudioPlan", () => {
     const plan = buildAudioPlan(rev, 0, 45);
     expect(plan.map((o) => [o.chunk, o.bufferFrom, o.bufferTo, o.compStart, o.compEnd, o.reverse])).toEqual([[0, 0, 30, 30, 45, true], [1, 30, 60, 15, 30, true], [2, 60, 90, 0, 15, true]]);
   });
+
+  it("follows a speed-key ramp with a rate envelope", () => {
+    // Speed 1 → 2 over 2 s: plays u + u²/4 source seconds, so 3 s of source take 2 s.
+    const s = makeState({ tracks: [{ id: "a", items: [{ id: "r", kind: "clip", duration: 2, source: { in: 0, out: 3, asset: "a" }, children: [
+      { id: "k1", kind: "speedKey", props: { at: 0, speed: 1 } }, { id: "k2", kind: "speedKey", props: { at: 2, speed: 2 } },
+    ] }] }] });
+    const [o] = buildAudioPlan(s, 0, 2);
+    expect(o).toMatchObject({ compStart: 0, compEnd: 2, bufferFrom: 0, bufferTo: 3 });
+    expect(o!.rate![0]).toEqual([0, 1]);
+    expect(o!.rate!.find(([t]) => t === 1)).toEqual([1, 1.5]);
+    expect(o!.rate![o!.rate!.length - 1]).toEqual([2, 2]);
+    expect(o!.rate!.length).toBe(41);
+  });
+
+  it("splits at a freeze so the hold is silent, forwards and reversed", () => {
+    const freeze = (reverse: boolean) => makeState({ tracks: [{ id: "a", items: [{ id: "f", kind: "clip", duration: 4.5, source: { in: 0, out: 4, asset: "a" }, props: reverse ? { reverse } : {}, children: [
+      { id: "fr", kind: "freeze", props: { at: 1, start: 1, duration: 0.5 } },
+    ] }] }] });
+    const pieces = (reverse: boolean) => buildAudioPlan(freeze(reverse), 0, 5).map((o) => [o.chunk, o.bufferFrom, o.bufferTo, o.compStart, o.compEnd]);
+    expect(pieces(false)).toEqual([[0, 0, 1, 0, 1], [1, 1, 4, 1.5, 4.5]]);
+    expect(pieces(true)).toEqual([[0, 0, 3, 1.5, 4.5], [1, 3, 4, 0, 1]]);
+  });
 });
 
 describe("buildGainEnvelope", () => {

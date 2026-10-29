@@ -45,6 +45,8 @@ export interface NotRendered {
   readonly kind: string;
   readonly prop?: string;
   readonly value?: string;
+  /** Only on an element inside this kind. */
+  readonly parent?: string;
   readonly reason: string;
 }
 
@@ -70,8 +72,9 @@ export const NOT_RENDERED: readonly NotRendered[] = [
   { kind: "audio", prop: "pitchCorrection", reason: "is ignored: sped-up or slowed audio changes pitch" },
   { kind: "clip", prop: "audioTrack", reason: "is ignored: the asset's first audio stream plays" },
   { kind: "audio", prop: "audioTrack", reason: "is ignored: the asset's first audio stream plays" },
-  { kind: "speedKey", reason: "changes the picture only: the clip length, audio and captions ignore it" },
-  { kind: "freeze", reason: "holds the picture only: the clip length, audio and captions ignore it" },
+  // shortcut: nested sequences play at their constant source speed (time.ts nestedSourceTime, audio-plan.ts nestedOccurrences); drop these when they map through the ramp.
+  { kind: "speedKey", parent: "nested", reason: "is ignored inside <Nested>: the sequence plays at its constant speed" },
+  { kind: "freeze", parent: "nested", reason: "is ignored inside <Nested>: the sequence plays at its constant speed" },
   { kind: "effect", prop: "params.gamma", reason: "is ignored: levels render their black and white points only" },
   { kind: "transition", prop: "params.direction", value: "diagonal", reason: "draws as a wipe to the left" },
   { kind: "transition", prop: "params.softness", reason: "is ignored: the wipe has a hard edge" },

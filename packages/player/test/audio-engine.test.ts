@@ -11,14 +11,14 @@ const state = makeState({ tracks: [
   { id: "music", layout: "free", items: [{ id: "bed", kind: "audio", start: 0, source: { in: 0, out: 90, asset: "tone" }, props: { volume: 0.5 } }] },
 ] });
 
-function setup() {
+function setup(s = state) {
   const clock = new ManualClock();
-  const transport = new Transport(clock, state.composition.duration);
+  const transport = new Transport(clock, s.composition.duration);
   const output = new FakeAudioOutput();
   const sources = new Map<string, FakeAudioSource>();
   const timers: (() => void)[] = [];
   const engine = new AudioEngine({
-    output, transport, toContextTime: (t) => t, state: () => state,
+    output, transport, toContextTime: (t) => t, state: () => s,
     audioSource: (id) => { let s = sources.get(id); if (!s) { s = new FakeAudioSource(id, 90); sources.set(id, s); } return Promise.resolve(s); },
     setInterval: (fn) => { timers.push(fn); return timers.length; },
     clearInterval: () => { timers.length = 0; },
@@ -104,6 +104,24 @@ describe("AudioEngine", () => {
     const c2 = output.scheduled.find((s) => s.key.startsWith("c2"))!;
     expect(c2.when).toBeCloseTo(3);
     expect(c2.playbackRate).toBeCloseTo(2.4);
+  });
+
+  it("offsets into a speed-key ramp by the integral of its rate and automates the rate", async () => {
+    // Speed 1 → 2 over 2 s: u + u²/4 source seconds by clip time u.
+    const ramp = makeState({ tracks: [{ id: "a", items: [{ id: "r", kind: "clip", duration: 2, source: { in: 0, out: 3, asset: "a" }, children: [
+      { id: "k1", kind: "speedKey", props: { at: 0, speed: 1 } }, { id: "k2", kind: "speedKey", props: { at: 2, speed: 2 } },
+    ] }] }] });
+    const { transport, engine, output } = setup(ramp);
+    transport.seek(1);
+    transport.setRate(2);
+    transport.play();
+    engine.start();
+    await flush();
+    const r = output.scheduled.find((x) => x.key.startsWith("r"))!;
+    expect(r.offset).toBeCloseTo(1.25, 6);
+    expect(r.duration).toBeCloseTo(1.75, 6);
+    expect(r.playbackRate).toBeCloseTo(3, 6);
+    expect(r.rate![r.rate!.length - 1]!.value).toBeCloseTo(4, 6);
   });
 
   it("caches decoded ranges and drives the master gain", async () => {

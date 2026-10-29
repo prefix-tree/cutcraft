@@ -47,6 +47,7 @@ export function placementSourceTime(p: Placement, children: readonly Placement[]
   return clampSource(reverse ? src.out - advance : src.in + advance, src);
 }
 
+// shortcut: a nested placement plays at its constant speed, its own speed keys and freezes are ignored; use placementSourceTime's mapping if nested ramps are wanted.
 export function nestedSourceTime(p: Placement, t: number): number {
   const src = p.source;
   if (!src) return Math.max(0, t - p.start);

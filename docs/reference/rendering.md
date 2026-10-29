@@ -38,8 +38,7 @@ No value means any value except one that asks for nothing (`false`, `0`, `"none"
 | `<Clip>` | `interpolation` |  | is ignored: slow motion repeats frames |
 | `<Clip>`, `<Audio>` | `pitchCorrection` |  | is ignored: sped-up or slowed audio changes pitch |
 | `<Clip>`, `<Audio>` | `audioTrack` |  | is ignored: the asset's first audio stream plays |
-| `<SpeedKey>` | the element |  | changes the picture only: the clip length, audio and captions ignore it |
-| `<Freeze>` | the element |  | holds the picture only: the clip length, audio and captions ignore it |
+| `<SpeedKey>`, `<Freeze>` | the element |  | is ignored inside `<Nested>`: the sequence plays at its constant speed |
 | `<Effect>` | `params.gamma` |  | is ignored: levels render their black and white points only |
 | `<Transition>` | `params.direction` | `diagonal` | draws as a wipe to the left |
 | `<Transition>` | `params.softness` |  | is ignored: the wipe has a hard edge |

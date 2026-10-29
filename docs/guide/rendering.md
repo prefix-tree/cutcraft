@@ -30,6 +30,7 @@ clock in seconds (`elapsed`, `remaining`, `duration`, `time`, `fps`).
    same order.
 6. **Audio**: the engine schedules each audio chunk once per play session,
    200 ms ahead, on Web Audio with offset, duration, `playbackRate = speed × rate`
+   (automated along a `<SpeedKey>` ramp, silent through a `<Freeze>` hold)
    and a gain envelope (volume, fades, automation, ducking, mute and solo).
 
 ## Determinism

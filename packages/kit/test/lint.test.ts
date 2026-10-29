@@ -14,7 +14,7 @@ describe("lint", () => {
   it("accepts the sample file, warning only about the gap on its main track and what does not render", () => {
     const d = lint(fixtureText, { manifest });
     expect(d.filter((x) => x.rule !== "not-rendered").map((x) => `${x.severity}:${x.rule}:${x.id}`)).toEqual(["warning:sequence-gap:g1"]);
-    expect(d.filter((x) => x.rule === "not-rendered").map((x) => x.id)).toEqual(["sk1", "sk2", "fr1", "st1", "adj1", "ae1"]);
+    expect(d.filter((x) => x.rule === "not-rendered").map((x) => x.id)).toEqual(["st1", "adj1", "ae1"]);
   });
 
   it("flags missing and non-literal ids", () => {
@@ -98,14 +98,15 @@ describe("lint", () => {
       expect(notRendered('<Track id="t"><Adjustment id="a" affects={["c"]} duration={1} /></Track>')).toHaveLength(1);
     });
 
-    it("warns on SpeedKey and Freeze, and on masks that do not render", () => {
+    it("warns on SpeedKey and Freeze inside a Nested only, and on masks that do not render", () => {
       const d = notRendered(`<Track id="t">
         <Clip id="c" src="asset:city"><SpeedKey id="s" at={1} speed={2} /><Freeze id="f" at={1} start={0} duration={1} /><Mask id="m1" /><Mask id="m2" /><Mask id="m3" type="matte" matte={{ source: "c" }} /></Clip>
         <Title id="h">Hi<Mask id="m4" /></Title>
+        <Nested id="n" duration={3}><SpeedKey id="ns" at={1} speed={2} /><Freeze id="nf" at={1} start={0} duration={1} /></Nested>
       </Track>`);
-      expect(d.map((x) => x.split(":")[1])).toEqual(["s.", "f.", "m2.", "m3.", "m3.type", "m3.matte", "m4."]);
-      expect(d[0]).toContain("the clip length, audio and captions ignore it");
-      expect(d[6]).toContain("masks render on clips and nested sequences only");
+      expect(d.map((x) => x.split(":")[1])).toEqual(["m2.", "m3.", "m3.type", "m3.matte", "m4.", "ns.", "nf."]);
+      expect(d[5]).toContain("is ignored inside <Nested>");
+      expect(d[4]).toContain("masks render on clips and nested sequences only");
     });
 
     it("warns on a diagonal or soft wipe, which draws as a hard wipe to the left", () => {

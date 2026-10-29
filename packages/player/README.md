@@ -48,7 +48,8 @@ const state = resolve(collectModule(file), manifest);
   its gain envelope (volume, fades, automation, ducking, keyframes, mute and
   solo). `AudioEngine` schedules each chunk once per play session, 200 ms
   ahead, as an `AudioBufferSourceNode` with the right offset, duration and
-  `playbackRate = clipSpeed × rate`; PCM is decoded per source range with
+  `playbackRate = clipSpeed × rate`, automated along a speed-key ramp and
+  split around freeze holds, which are silent; PCM is decoded per source range with
   `AudioBufferSink` and cached. Pause stops everything; seek reschedules once.
 - **Addressability.** Every DOM element carries `data-el` and `data-kind`; the
   root carries `data-time` and `data-frame`; the canvas is

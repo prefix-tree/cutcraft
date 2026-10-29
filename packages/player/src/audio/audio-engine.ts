@@ -1,4 +1,4 @@
-import type { ResolvedState } from "@cutcut/kit";
+import { rampAdvance, rampSpeed, type ResolvedState } from "@cutcut/kit";
 import { AUDIO_CACHE_S, AUDIO_PRIME_S, LOOKAHEAD_S, PLAY_PRIME_TIMEOUT_MS, SCHEDULER_MS } from "../constants";
 import type { Transport } from "../clock/transport";
 import { buildAudioPlan, type AudioOccurrence } from "../model/audio-plan";
@@ -119,13 +119,18 @@ export class AudioEngine {
     const ctxTime = (t: number): number => this.deps.toContextTime(transport.clockTimeFor(t));
     const envelope: EnvelopePoint[] = occ.gain.map(([t, value]) => ({ at: ctxTime(t), value }));
     const pan = occ.pan?.map(([t, value]) => ({ at: ctxTime(t), value }));
+    // A ramp's rate envelope is linear between points, which rampAdvance integrates exactly.
+    const keys = occ.rate?.map(([t, speed]) => ({ at: t - occ.compStart, speed }));
+    const played = (t: number): number => (keys ? rampAdvance(keys, t - occ.compStart) : (t - occ.compStart) * occ.speed);
+    const offset = played(startComp);
     this.deps.output.schedule({
       key: `${key}#${session}`,
       buffer,
       when: ctxTime(startComp),
-      offset: (startComp - occ.compStart) * occ.speed,
-      duration: (occ.compEnd - startComp) * occ.speed,
-      playbackRate: occ.speed * transport.rate,
+      offset,
+      duration: played(occ.compEnd) - offset,
+      playbackRate: (keys ? rampSpeed(keys, startComp - occ.compStart) : occ.speed) * transport.rate,
+      ...(occ.rate ? { rate: occ.rate.map(([t, value]) => ({ at: ctxTime(t), value: value * transport.rate })) } : {}),
       envelope,
       ...(pan ? { pan } : {}),
     });

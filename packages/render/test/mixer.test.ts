@@ -73,6 +73,18 @@ describe("mixBlock", () => {
     expect(rms(l, 24100, SR)).toBe(0);
   });
 
+  it("reads a speed-key ramp at the integral of its rate", () => {
+    // Each PCM sample holds a quarter of its buffer second; speed 1 → 2 over 2 s plays u + u²/4 seconds by u.
+    const data = new Float32Array(3 * SR);
+    for (let i = 0; i < data.length; i++) data[i] = (0.25 * i) / SR;
+    const o = occ({ compEnd: 2, bufferTo: 3, rate: [[0, 1], [2, 2]] });
+    const [l] = mixBlock([source(o, { sampleRate: SR, channels: [data] })], 0, 2 * SR, SR);
+    expect(l[SR] as number).toBeCloseTo(0.25 * 1.25, 5);
+    expect(l[1.6 * SR] as number).toBeCloseTo(0.25 * 2.24, 5);
+    const [late] = mixBlock([source(o, { sampleRate: SR, channels: [data] })], 1.6 * SR, 10, SR);
+    expect(late[0]).toBe(l[1.6 * SR]);
+  });
+
   it("converts sample rates without changing pitch", () => {
     const [l] = mixBlock([source(occ(), sine(440, 1, 44100))], 0, SR, SR);
     expect(crossings(l)).toBeGreaterThan(438);

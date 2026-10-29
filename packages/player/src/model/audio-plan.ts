@@ -1,4 +1,4 @@
-import { capabilitiesOf, lookupAsset, type Placement, type ResolvedState, type ResolvedTrack } from "@cutcut/kit";
+import { capabilitiesOf, freezeHoldsOf, lookupAsset, rampAdvance, rampInverse, rampSpeed, speedKeysOf, type FreezeHold, type Placement, type RampKey, type ResolvedState, type ResolvedTrack } from "@cutcut/kit";
 import { AUDIO_CHUNK_S, DUCK_ATTACK_S, DUCK_RELEASE_S, ENVELOPE_STEP_S } from "../constants";
 import { keyframedValue } from "./keyframes";
 import type { ResolveNested } from "./frame-plan";
@@ -16,8 +16,10 @@ export interface AudioOccurrence {
   /** Source seconds of the chunk's buffer; stable across windows so decoded PCM caches. */
   readonly bufferFrom: number;
   readonly bufferTo: number;
-  /** Placement speed; the engine multiplies in the transport rate. */
+  /** Placement speed; the engine multiplies in the transport rate. Ignored when `rate` is set. */
   readonly speed: number;
+  /** Speed-key ramp: buffer seconds per composition second, piecewise linear over [compStart, compEnd]. */
+  readonly rate?: readonly GainPoint[];
   readonly gain: readonly GainPoint[];
   readonly pan?: readonly GainPoint[];
   /** The buffer plays backwards: the engine reverses the decoded PCM. */
@@ -44,13 +46,14 @@ export function buildAudioPlan(state: ResolvedState, from: number, to: number, r
       const reverse = p.props.reverse === true;
       const envelope = buildGainEnvelope(p, track, state, p.start, p.end);
       const pan = panEnvelope(p);
-      for (const chunk of chunksOf(p, src, reverse)) {
+      const children = p.children.map((id) => state.items.get(id)).filter((c): c is Placement => c !== undefined);
+      for (const chunk of chunksOf(p, src, reverse, speedKeysOf(children), freezeHoldsOf(children))) {
         if (chunk.compEnd <= from || chunk.compStart >= to) continue;
         out.push({
           id: p.id, asset: asset.id, chunk: chunk.index,
           compStart: chunk.compStart, compEnd: chunk.compEnd,
           bufferFrom: chunk.bufferFrom, bufferTo: chunk.bufferTo,
-          speed: src.speed, gain: envelope, ...(pan ? { pan } : {}), ...(reverse ? { reverse } : {}),
+          speed: src.speed, ...(chunk.rate ? { rate: chunk.rate } : {}), gain: envelope, ...(pan ? { pan } : {}), ...(reverse ? { reverse } : {}),
         });
       }
     }
@@ -58,25 +61,60 @@ export function buildAudioPlan(state: ResolvedState, from: number, to: number, r
   return out;
 }
 
-interface Chunk { index: number; compStart: number; compEnd: number; bufferFrom: number; bufferTo: number }
+interface Chunk { index: number; compStart: number; compEnd: number; bufferFrom: number; bufferTo: number; rate?: GainPoint[] }
 
-/** A reversed placement plays its last chunk first, so a chunk's composition range counts back from `src.out`. */
-function chunksOf(p: Placement, src: NonNullable<Placement["source"]>, reverse: boolean): Chunk[] {
+/**
+ * Pieces of the source range in source order: cut every `AUDIO_CHUNK_S` when
+ * long, and where each freeze hold starts, so a hold is a gap with no audio.
+ * A piece maps to composition time through the speed (or the speed-key ramp's
+ * inverse) plus the holds before it. A reversed placement plays its last
+ * piece first, so its range counts back from `src.out`.
+ */
+function chunksOf(p: Placement, src: NonNullable<Placement["source"]>, reverse: boolean, keys: readonly RampKey[], holds: readonly FreezeHold[]): Chunk[] {
   const length = src.out - src.in;
-  if (length <= 2 * AUDIO_CHUNK_S) return [{ index: 0, compStart: p.start, compEnd: p.end, bufferFrom: src.in, bufferTo: src.out }];
+  const ramp = keys.length > 0;
+  const advance = (u: number): number => (ramp ? rampAdvance(keys, u) : u * src.speed);
+  const inverse = (a: number): number => (ramp ? rampInverse(keys, a) : a / src.speed);
+  // Where each hold starts, with the holds before it taken out.
+  let before = 0;
+  const holdAt = holds.map((h) => { const u = h.start - before; before += h.duration; return { u, duration: h.duration }; });
+  const cuts = new Set<number>([0, length]);
+  if (length > 2 * AUDIO_CHUNK_S) for (let s = AUDIO_CHUNK_S; s < length; s += AUDIO_CHUNK_S) cuts.add(s);
+  for (const { u } of holdAt) {
+    const a = Math.min(length, Math.max(0, advance(u)));
+    cuts.add(reverse ? length - a : a);
+  }
+  const sorted = [...cuts].sort((x, y) => x - y);
   const chunks: Chunk[] = [];
-  for (let i = 0, from = src.in; from < src.out; i++, from += AUDIO_CHUNK_S) {
-    const to = Math.min(src.out, from + AUDIO_CHUNK_S);
-    const [a, b] = reverse ? [src.out - to, src.out - from] : [from - src.in, to - src.in];
-    chunks.push({ index: i, compStart: p.start + a / src.speed, compEnd: p.start + b / src.speed, bufferFrom: from, bufferTo: to });
+  for (let i = 0; i < sorted.length - 1; i++) {
+    const s1 = sorted[i]!, s2 = sorted[i + 1]!;
+    if (s2 - s1 < 1e-9) continue;
+    const [u1, u2] = (reverse ? [length - s2, length - s1] : [s1, s2]).map(inverse) as [number, number];
+    const mid = (u1 + u2) / 2;
+    const offset = p.start + holdAt.reduce((n, h) => (h.u <= mid ? n + h.duration : n), 0);
+    const compStart = round(offset + u1), compEnd = round(offset + u2);
+    const rate = ramp ? rateEnvelope(keys, u1, u2).map(([u, v]) => [round(offset + u), v] as const) : undefined;
+    chunks.push({ index: chunks.length, compStart, compEnd, bufferFrom: src.in + s1, bufferTo: src.in + s2, ...(rate ? { rate } : {}) });
   }
   return chunks;
+}
+
+/** Ramp speed over clip seconds [u1, u2] (holds taken out): the key times plus a fixed step inside ramps, as the gain envelope samples. */
+function rateEnvelope(keys: readonly RampKey[], u1: number, u2: number): GainPoint[] {
+  const times = new Set<number>([u1, u2]);
+  for (let i = 0; i < keys.length; i++) {
+    const a = keys[i]!, b = keys[i + 1];
+    if (a.at > u1 && a.at < u2) times.add(a.at);
+    if (b && a.speed !== b.speed) for (let u = a.at + ENVELOPE_STEP_S; u < b.at; u += ENVELOPE_STEP_S) if (u > u1 && u < u2) times.add(u);
+  }
+  return [...times].sort((x, y) => x - y).map((u) => [u, round(rampSpeed(keys, u))] as const);
 }
 
 function nestedOccurrences(state: ResolvedState, p: Placement, track: ResolvedTrack, from: number, to: number, resolveNested: ResolveNested | undefined): AudioOccurrence[] {
   const inner = resolveNested?.(p);
   const src = p.source;
   if (!inner || !src) return [];
+  // shortcut: a nested placement plays at its constant speed, its own speed keys and freezes are ignored; map through rampInverse/freezeShift if nested ramps are wanted.
   const toInner = (t: number): number => src.in + (t - p.start) * src.speed;
   const toOuter = (t: number): number => p.start + (t - src.in) / src.speed;
   const outerEnvelope = buildGainEnvelope(p, track, state, p.start, p.end);
@@ -87,6 +125,7 @@ function nestedOccurrences(state: ResolvedState, p: Placement, track: ResolvedTr
       const inner = o.gain.map(([t, v]) => [toOuter(t), v] as const);
       return {
         ...o, id: `${p.id}/${o.id}`, compStart, compEnd, speed: o.speed * src.speed,
+        ...(o.rate ? { rate: o.rate.map(([t, v]) => [round(toOuter(t)), v * src.speed] as const) } : {}),
         gain: multiplyEnvelopes([inner, outerEnvelope], compStart, compEnd),
       };
     })

@@ -19,7 +19,7 @@ export class WebAudioOutput implements AudioOutput {
     this.cancel(src.key);
     const source = this.ctx.createBufferSource();
     source.buffer = src.buffer;
-    source.playbackRate.value = src.playbackRate;
+    automate(source.playbackRate, src.rate ?? [], src.when, src.playbackRate);
     const gain = this.ctx.createGain();
     automate(gain.gain, src.envelope, src.when, 1);
     const nodes: AudioNode[] = [gain];

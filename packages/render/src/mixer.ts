@@ -34,13 +34,45 @@ export function envelopeAt(points: readonly GainPoint[], t: number, fallback: nu
 }
 
 /**
+ * Buffer seconds an occurrence has played by composition time `t`: the
+ * integral of its `rate` from `compStart` (a prefix integral per point plus a
+ * binary search, exact for the piecewise linear envelope that Web Audio
+ * automates), or `(t - compStart) * speed` without one.
+ */
+export function playedAt(o: AudioOccurrence): (t: number) => number {
+  const r = o.rate;
+  if (!r || r.length === 0) return (t) => (t - o.compStart) * o.speed;
+  const n = r.length;
+  const cum = new Float64Array(n);
+  for (let i = 1; i < n; i++) {
+    const a = r[i - 1] as GainPoint, b = r[i] as GainPoint;
+    cum[i] = (cum[i - 1] as number) + ((b[0] - a[0]) * (a[1] + b[1])) / 2;
+  }
+  const first = r[0] as GainPoint, last = r[n - 1] as GainPoint;
+  const integral = (t: number): number => {
+    if (t <= first[0]) return (t - first[0]) * first[1];
+    if (t >= last[0]) return (cum[n - 1] as number) + (t - last[0]) * last[1];
+    let lo = 0, hi = n - 1;
+    while (hi - lo > 1) {
+      const mid = (lo + hi) >> 1;
+      if ((r[mid] as GainPoint)[0] <= t) lo = mid;
+      else hi = mid;
+    }
+    const a = r[lo] as GainPoint, b = r[hi] as GainPoint;
+    const v = a[1] + ((b[1] - a[1]) * (t - a[0])) / (b[0] - a[0]);
+    return (cum[lo] as number) + ((t - a[0]) * (a[1] + v)) / 2;
+  };
+  const base = integral(o.compStart);
+  return (t) => integral(t) - base;
+}
+
+/**
  * Mixes `frames` output frames starting at output frame `startFrame` into stereo.
  * Every output sample is computed from the time alone, so the result does not
  * depend on how the output is cut into blocks.
  *
  * For an occurrence, composition time t reads source time
- * `bufferFrom + (t - compStart) * speed`; pitch follows speed, as in the
- * preview. Samples are linearly interpolated, which also converts sample
+ * `bufferFrom + playedAt(o)(t)`; pitch follows speed, as in the preview. Samples are linearly interpolated, which also converts sample
  * rates. Pan follows the Web Audio StereoPanner rules, so mono and stereo
  * sources pan the same way as in the player.
  */
@@ -60,11 +92,12 @@ export function mixBlock(sources: readonly MixSource[], startFrame: number, fram
     const length = c0.length;
     const stereo = nCh > 1;
     const hasPan = (o.pan?.length ?? 0) > 0;
+    const played = playedAt(o);
     for (let i = first; i < last; i++) {
       // From the absolute frame index, so no block size changes a sample.
       const t = (startFrame + i) / sampleRate;
       // Seconds into the chunk's buffer, then samples at the buffer's own rate.
-      const pos = (t - o.compStart) * o.speed * pcm.sampleRate;
+      const pos = played(t) * pcm.sampleRate;
       if (pos < 0 || pos > length - 1) continue;
       const k = Math.floor(pos), f = pos - k;
       const k2 = k + 1 < length ? k + 1 : k;

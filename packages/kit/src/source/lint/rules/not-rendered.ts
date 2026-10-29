@@ -35,6 +35,7 @@ export const notRendered: Rule = {
       }
       for (const n of NOT_RENDERED) {
         if (n.kind !== "*" && n.kind !== site.kind) continue;
+        if (n.parent && index.elements.get(site.parent ?? "")?.kind !== n.parent) continue;
         if (!n.prop) { warn(site, "", n.reason); continue; }
         const at = literalAt(site, n.prop);
         if (!at || (n.prop.includes(".") && at.value === undefined)) continue;
