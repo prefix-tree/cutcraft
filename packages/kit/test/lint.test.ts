@@ -14,7 +14,7 @@ describe("lint", () => {
   it("accepts the sample file, warning only about the gap on its main track and what does not render", () => {
     const d = lint(fixtureText, { manifest });
     expect(d.filter((x) => x.rule !== "not-rendered").map((x) => `${x.severity}:${x.rule}:${x.id}`)).toEqual(["warning:sequence-gap:g1"]);
-    expect(d.filter((x) => x.rule === "not-rendered").map((x) => x.id)).toEqual(["sk1", "sk2", "fr1", "st1", "adj1", "fx2", "ae1"]);
+    expect(d.filter((x) => x.rule === "not-rendered").map((x) => x.id)).toEqual(["sk1", "sk2", "fr1", "st1", "adj1", "ae1"]);
   });
 
   it("flags missing and non-literal ids", () => {
@@ -86,8 +86,8 @@ describe("lint", () => {
     it("warns on enum values that draw as something else", () => {
       expect(notRendered('<Track id="t"><Clip id="a" src="asset:city" /><Transition id="x" type="glitch" /><Clip id="b" src="asset:city" /></Track>'))
         .toEqual(['warning:x.type: "x" <Transition> type "glitch" draws as a crossfade']);
-      expect(notRendered('<Track id="t"><Clip id="c" src="asset:city"><Effect id="v" type="vignette" /><AudioEffect id="r" type="reverb" /></Clip></Track>'))
-        .toEqual(['warning:v.type: "v" <Effect> type "vignette" is ignored: the picture renders without it', 'warning:r.type: "r" <AudioEffect> type "reverb" is ignored: the audio plays without it']);
+      expect(notRendered('<Track id="t"><Clip id="c" src="asset:city"><Effect id="v" type="glow" /><AudioEffect id="r" type="reverb" /></Clip></Track>'))
+        .toEqual(['warning:v.type: "v" <Effect> type "glow" is ignored: the picture renders without it', 'warning:r.type: "r" <AudioEffect> type "reverb" is ignored: the audio plays without it']);
       expect(notRendered('<Track id="t"><Title id="h" animation={{ preset: "bounce" }}>Hi</Title></Track>')).toEqual(['warning:h.animation: "h" <Title> animation.preset "bounce" shows as a fade']);
     });
 
@@ -125,7 +125,7 @@ describe("lint", () => {
 
     it("says nothing about a file that only uses what renders", () => {
       expect(notRendered(`<Track id="t">
-        <Clip id="a" src="asset:city" speed={2}><Effect id="e" type="blur" /><Effect id="tp" type="temperature" params={{ amount: 20 }} /><Effect id="tn" type="tint" params={{ amount: -10 }} /><Effect id="lv" type="levels" params={{ black: 0.05, white: 0.95 }} /><ColorGrade id="g" temperature={20} /><Mask id="m" shape={{ rect: { x: 0, y: 0, width: 1, height: 1 } }} /><Keyframe id="k" property="transform.position.x" at={0} value={0} /></Clip>
+        <Clip id="a" src="asset:city" speed={2}><Effect id="e" type="blur" /><Effect id="tp" type="temperature" params={{ amount: 20 }} /><Effect id="tn" type="tint" params={{ amount: -10 }} /><Effect id="lv" type="levels" params={{ black: 0.05, white: 0.95 }} /><Effect id="vg" type="vignette" params={{ amount: 40 }} /><Effect id="gr" type="grain" /><ColorGrade id="g" temperature={20} /><Mask id="m" shape={{ rect: { x: 0, y: 0, width: 1, height: 1 } }} /><Keyframe id="k" property="transform.position.x" at={0} value={0} /></Clip>
         <Transition id="x" type="crossfade" />
         <Clip id="b" src="asset:city" />
         <Transition id="w" type="wipe" params={{ direction: "up" }} />

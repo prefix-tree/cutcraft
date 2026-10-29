@@ -15,6 +15,9 @@ export interface PaintInputs {
  */
 export class CanvasPainter {
   private scratch: AnyCanvas | null = null;
+  /** An element drawn on its own before compositing: a feathered mask, vignette, grain. */
+  private layer: AnyCanvas | null = null;
+  private grain: AnyCanvas | null = null;
 
   constructor(
     readonly width: number,
@@ -49,10 +52,10 @@ export class CanvasPainter {
     clipFrame(ctx, op);
     setMatrix(ctx, op.matrix);
     const clipped = this.clip(ctx, op);
-    if (op.mask && op.mask.feather > 0 && clipped) {
-      // Feathered masks: draw the element into a scratch layer, blur its clip there, then composite.
+    const feathered = !!op.mask && op.mask.feather > 0 && clipped;
+    if (feathered || op.post) {
       ctx.restore();
-      this.drawFeathered(ctx, op, frame, nested);
+      this.drawLayered(ctx, op, frame, nested, feathered);
       return;
     }
     this.blit(ctx, op, frame, nested);
@@ -103,23 +106,51 @@ export class CanvasPainter {
     return true;
   }
 
-  private drawFeathered(ctx: Ctx2D, op: DrawOp, frame: Frame | null, nested: AnyCanvas | null): void {
-    const layer = this.createCanvas(this.width, this.height);
+  /**
+   * The element alone on the layer canvas, then composited: a feathered mask punches it out with a
+   * blurred alpha there, and vignette and grain darken or speckle only its own pixels.
+   */
+  private drawLayered(ctx: Ctx2D, op: DrawOp, frame: Frame | null, nested: AnyCanvas | null, feathered: boolean): void {
+    this.layer ??= this.createCanvas(this.width, this.height);
+    const layer = this.layer;
     const lctx = layer.getContext("2d") as Ctx2D | null;
     if (!lctx) return;
+    lctx.setTransform(1, 0, 0, 1, 0, 0);
+    lctx.clearRect(0, 0, this.width, this.height);
     lctx.save();
     setMatrix(lctx, op.matrix);
+    if (!feathered) this.clip(lctx, op);
     this.blit(lctx, op, frame, nested);
     lctx.restore();
-    // Punch the mask through with a blurred alpha: draw the mask shape blurred, keep the element where it lands.
-    lctx.save();
-    lctx.globalCompositeOperation = "destination-in";
-    lctx.filter = `blur(${op.mask!.feather}px)`;
-    setMatrix(lctx, op.matrix);
-    lctx.beginPath();
-    traceMask(lctx, op.mask!, op.rect);
-    if (op.mask!.inverted) { lctx.rect(0, 0, op.rect.w, op.rect.h); lctx.fill("evenodd"); } else lctx.fill();
-    lctx.restore();
+    if (feathered) {
+      // Punch the mask through with a blurred alpha: draw the mask shape blurred, keep the element where it lands.
+      lctx.save();
+      lctx.globalCompositeOperation = "destination-in";
+      lctx.filter = `blur(${op.mask!.feather}px)`;
+      setMatrix(lctx, op.matrix);
+      lctx.beginPath();
+      traceMask(lctx, op.mask!, op.rect);
+      if (op.mask!.inverted) { lctx.rect(0, 0, op.rect.w, op.rect.h); lctx.fill("evenodd"); } else lctx.fill();
+      lctx.restore();
+    }
+    for (const fx of op.post ?? []) {
+      lctx.save();
+      lctx.globalCompositeOperation = "source-atop";
+      if (fx.type === "vignette") {
+        setMatrix(lctx, op.matrix);
+        const { w, h } = op.rect;
+        const r = Math.hypot(w, h) / 2;
+        const g = lctx.createRadialGradient(w / 2, h / 2, r * 0.4, w / 2, h / 2, r);
+        g.addColorStop(0, "rgba(0,0,0,0)");
+        g.addColorStop(1, `rgba(0,0,0,${fx.amount})`);
+        lctx.fillStyle = g;
+        lctx.fillRect(0, 0, w, h);
+      } else {
+        const pattern = lctx.createPattern(this.noise(fx.seed, fx.amount), "repeat");
+        if (pattern) { lctx.fillStyle = pattern; lctx.fillRect(0, 0, this.width, this.height); }
+      }
+      lctx.restore();
+    }
     ctx.save();
     ctx.globalAlpha = op.opacity;
     ctx.globalCompositeOperation = op.blend;
@@ -134,6 +165,23 @@ export class CanvasPainter {
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.drawImage(layer, 0, 0);
     ctx.restore();
+  }
+
+  /** A tile of black and white specks, the same for the same seed; alpha up to `amount`. */
+  private noise(seed: number, amount: number): AnyCanvas {
+    this.grain ??= this.createCanvas(GRAIN_TILE, GRAIN_TILE);
+    const gctx = this.grain.getContext("2d") as Ctx2D | null;
+    if (!gctx) return this.grain;
+    const img = gctx.createImageData(GRAIN_TILE, GRAIN_TILE);
+    const rand = mulberry32(seed);
+    for (let i = 0; i < img.data.length; i += 4) {
+      const r = rand();
+      const v = r < 0.5 ? 0 : 255;
+      img.data[i] = img.data[i + 1] = img.data[i + 2] = v;
+      img.data[i + 3] = Math.round(Math.abs(r - 0.5) * 2 * amount * 255);
+    }
+    gctx.putImageData(img, 0, 0);
+    return this.grain;
   }
 
   private adjust(ctx: Ctx2D, op: DrawOp): void {
@@ -154,6 +202,20 @@ export class CanvasPainter {
     ctx.drawImage(this.scratch, 0, 0);
     ctx.restore();
   }
+}
+
+const GRAIN_TILE = 128;
+
+/** A small seeded PRNG on 0..1. */
+function mulberry32(seed: number): () => number {
+  let a = seed >>> 0;
+  return () => {
+    a = (a + 0x6d2b79f5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
 }
 
 export function setMatrix(ctx: Ctx2D, m: Matrix2D): void {
@@ -178,7 +240,7 @@ export function coversCanvas(op: DrawOp, width: number, height: number): boolean
   const m = op.matrix;
   return m.a === 1 && m.b === 0 && m.c === 0 && m.d === 1 && m.e === 0 && m.f === 0
     && op.rect.w === width && op.rect.h === height && !op.crop
-    && op.opacity >= 1 && op.blend === "source-over" && !op.filter && op.borderRadius === 0 && !op.mask && !op.clip;
+    && op.opacity >= 1 && op.blend === "source-over" && !op.filter && op.borderRadius === 0 && !op.mask && !op.clip && !op.post;
 }
 
 /** The composition background (a colour or a gradient) over the whole frame. */

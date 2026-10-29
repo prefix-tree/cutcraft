@@ -1,6 +1,6 @@
 import { RENDERED_MASK_TYPES, RENDERED_TRANSITIONS, lookupAsset, type BlendMode, type FitMode, type Placement, type ResolvedState, type Transform } from "@cutcut/kit";
 import { devWarn } from "../warn";
-import { filterString } from "./effects";
+import { filterString, postEffects, type PostEffect } from "./effects";
 import { frameIndex, nestedSourceTime, placementSourceTime } from "./time";
 import type { ClipRect } from "./motion";
 import { transitionLook } from "./transition";
@@ -33,6 +33,8 @@ export interface DrawOp {
   readonly mask?: MaskSpec;
   /** The part shown, in composition pixels (a wipe). */
   readonly clip?: readonly ClipRect[];
+  /** Vignette and grain, drawn over the element's own pixels. */
+  readonly post?: readonly PostEffect[];
 }
 
 /** A composition background gradient, as the schema writes it. CSS angles: 0 points up, 180 (the default) runs down. */
@@ -139,7 +141,8 @@ function mediaOp(state: ResolvedState, item: VisibleItem, t: number, resolveNest
   }
   const { filter } = filterString(item.children, p.id);
   const mask = maskOf(item.children, warnings);
-  const common = { id: p.id, fit, opacity, blend: blendOf(p.props.blend), filter, borderRadius: transform.borderRadius ?? 0, ...(mask ? { mask } : {}), ...(look?.clip ? { clip: look.clip } : {}) };
+  const post = postEffects(item.children, frameIndex(t, comp.fps));
+  const common = { id: p.id, fit, opacity, blend: blendOf(p.props.blend), filter, borderRadius: transform.borderRadius ?? 0, ...(mask ? { mask } : {}), ...(look?.clip ? { clip: look.clip } : {}), ...(post ? { post } : {}) };
   const shift = (m: Matrix2D): Matrix2D => (look?.offset ? multiply(translate(look.offset.x, look.offset.y), m) : m);
 
   if (p.kind === "nested") {

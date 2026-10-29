@@ -8,6 +8,10 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- `<Effect>` types `vignette` and `grain` render in the preview and the export (`params.amount`,
+  0..100; 50 and 20 by default). They darken or speckle only the element's own pixels, and the
+  grain is seeded by the frame, so a frame always looks the same.
+
 - Transitions `dipToBlack`, `dipToWhite`, `wipe`, `slide` and `push` render in the preview and the
   export, on footage and overlays. A dip hides the incoming clip until the midpoint under an
   adjustment to black or white that holds for `holdDuration`; overlays show a dip as a fade and

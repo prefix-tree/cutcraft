@@ -109,6 +109,19 @@ describe("buildFramePlan", () => {
     });
   });
 
+  it("draws vignette and grain after the element, the grain seeded by the frame", () => {
+    const s = makeState({ width: 640, height: 360, tracks: [{ id: "main", items: [{ id: "c", kind: "clip", source: { in: 0, out: 4, asset: "a" }, children: [
+      { id: "v", kind: "effect", props: { type: "vignette", params: { amount: 30 } } },
+      { id: "g", kind: "effect", props: { type: "grain" } },
+      { id: "off", kind: "effect", props: { type: "grain", params: { amount: 0 } } },
+    ] }] }] });
+    const op = buildFramePlan(s, 1).ops[0]!;
+    expect(op.post).toEqual([{ type: "vignette", amount: 0.3 }, { type: "grain", amount: 0.2, seed: 30 }]);
+    expect(op.filter).toBe("");
+    expect(buildFramePlan(s, 1).warnings).toEqual([]);
+    expect(buildFramePlan(s, 1.5).ops[0]!.post![1]).toMatchObject({ seed: 45 });
+  });
+
   it("builds filters and lists unsupported effects", () => {
     const plan = buildFramePlan(state, 0.5);
     expect(plan.ops[0]!.filter).toBe("blur(2px)");

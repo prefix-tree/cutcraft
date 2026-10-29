@@ -110,7 +110,7 @@ for the DOM and an offline mixer for Web Audio. See [Exporting](/guide/exporting
 ## What is not rendered yet
 
 Transition types other than crossfade, dips to black or white, wipe, slide and push (drawn as a crossfade), effects without
-a CSS filter equivalent, colour wheels, curves and LUTs, matte masks, audio
+a CSS filter equivalent (besides vignette and grain), colour wheels, curves and LUTs, matte masks, audio
 effects, pitch correction, 3D text, most text animation
 presets, `emphasis` animations, `background.mode: "blur"` when an overlay sits beneath the footage (the plain colour then), sticker packs other than `icon:`, `<animateMotion>` and CSS animation in SVG, and `file:` nested
 references. The check reports each one in your file as a `not-rendered` lint

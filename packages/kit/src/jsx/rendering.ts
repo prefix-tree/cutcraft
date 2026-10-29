@@ -7,7 +7,7 @@ import type { CAPTION_ANIMATIONS, MASK_TYPES, TEXT_ANIMATION_PRESETS, Transition
  */
 
 export const RENDERED_TRANSITIONS = ["crossfade", "dipToBlack", "dipToWhite", "wipe", "slide", "push"] as const satisfies readonly TransitionType[];
-export const RENDERED_EFFECTS = ["brightness", "contrast", "saturation", "hue", "blur", "grayscale", "sepia", "invert", "shadow", "temperature", "tint", "levels"] as const satisfies readonly VideoEffectType[];
+export const RENDERED_EFFECTS = ["brightness", "contrast", "saturation", "hue", "blur", "grayscale", "sepia", "invert", "shadow", "temperature", "tint", "levels", "vignette", "grain"] as const satisfies readonly VideoEffectType[];
 export const RENDERED_AUDIO_EFFECTS = [] as const satisfies readonly AudioEffectType[];
 export const RENDERED_TITLE_ANIMATIONS = ["none", "fade", "slide-up", "slide-down", "slide-left", "slide-right", "scale", "typewriter", "word-by-word"] as const satisfies readonly (typeof TEXT_ANIMATION_PRESETS)[number][];
 export const RENDERED_CAPTION_ANIMATIONS = ["none", "word-highlight", "word-by-word", "karaoke"] as const satisfies readonly (typeof CAPTION_ANIMATIONS)[number][];

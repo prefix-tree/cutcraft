@@ -129,7 +129,14 @@ export function recorderContext(): { ctx: Ctx2D; calls: Recorded[]; canvas: obje
   const ctx = new Proxy(target, {
     get(t, prop: string) {
       if (prop in t) return t[prop];
-      return (...args: unknown[]) => { calls.push({ name: prop, args }); };
+      return (...args: unknown[]) => {
+        calls.push({ name: prop, args });
+        // Stubs for the calls whose result the painter uses.
+        if (prop === "createRadialGradient" || prop === "createLinearGradient") return { addColorStop: (...a: unknown[]) => calls.push({ name: "addColorStop", args: a }) };
+        if (prop === "createPattern") return { fake: "pattern" };
+        if (prop === "createImageData") return { width: args[0], height: args[1], data: new Uint8ClampedArray((args[0] as number) * (args[1] as number) * 4) };
+        return undefined;
+      };
     },
     set(t, prop: string, value) {
       calls.push({ name: `set:${prop}`, args: [value] });

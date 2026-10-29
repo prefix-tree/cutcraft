@@ -90,3 +90,44 @@ describe("CanvasPainter clips", () => {
     expect(calls.slice(before.lastIndexOf("restore"), last).filter((c) => c.name === "clip")).toHaveLength(2);
   });
 });
+
+describe("CanvasPainter vignette and grain", () => {
+  function paintPost(t: number) {
+    const canvases: ReturnType<typeof recorderContext>[] = [];
+    const create = (width: number, height: number) => {
+      const rec = recorderContext();
+      Object.assign(rec.canvas, { width, height });
+      canvases.push(rec);
+      return rec.canvas as unknown as OffscreenCanvas;
+    };
+    const state = makeState({ width: 640, height: 360, tracks: [{ id: "main", items: [{ id: "c", kind: "clip", source: { in: 0, out: 4, asset: "a" }, children: [
+      { id: "v", kind: "effect", props: { type: "vignette" } },
+      { id: "g", kind: "effect", props: { type: "grain" } },
+    ] }] }] });
+    const main = recorderContext();
+    const painter = new CanvasPainter(640, 360, create);
+    const frames = new Map<string, Frame | null>([["c", new FakeFrame(new FakeFrameSource("a"), 0, 1 / 30)]]);
+    painter.paint(main.ctx, buildFramePlan(state, t), { frames, nested: new Map() });
+    painter.paint(main.ctx, buildFramePlan(state, t), { frames, nested: new Map() });
+    return { main: main.calls, canvases };
+  }
+  const tiles = (r: ReturnType<typeof paintPost>) => r.canvases[1]!.calls.filter((c) => c.name === "putImageData").map((c) => (c.args[0] as ImageData).data);
+
+  it("darkens and speckles only the element's pixels on a reused layer, then composites it", () => {
+    const r = paintPost(1);
+    expect(r.canvases).toHaveLength(2);
+    const layer = r.canvases[0]!.calls;
+    expect(layer.filter((c) => c.name === "drawImage")).toHaveLength(2);
+    expect(layer.filter((c) => c.name === "set:globalCompositeOperation" && c.args[0] === "source-atop")).toHaveLength(4);
+    expect(layer.some((c) => c.name === "createRadialGradient")).toBe(true);
+    expect(layer.some((c) => c.name === "createPattern")).toBe(true);
+    expect(r.main.filter((c) => c.name === "drawImage").map((c) => c.args[0])).toEqual([r.canvases[0]!.canvas, r.canvases[0]!.canvas]);
+  });
+
+  it("draws the same grain for the same frame and new grain for the next", () => {
+    const [a, b] = tiles(paintPost(1));
+    expect(a).toEqual(b);
+    expect(a!.some((v, i) => i % 4 === 3 && v > 0)).toBe(true);
+    expect(tiles(paintPost(1 + 1 / 30))[0]).not.toEqual(a);
+  });
+});

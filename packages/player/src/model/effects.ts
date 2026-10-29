@@ -25,8 +25,11 @@ function levels(p: Params): string {
 }
 
 // TODO(sharpen): no CSS filter form; needs a getImageData unsharp-mask pass in the painter (slow on 1080p, preview and export). Until then the not-rendered lint reports it.
-/** One filter per rendered effect type: kit's RENDERED_EFFECTS, which the `not-rendered` lint reads. */
-const CANVAS_FILTERABLE: Readonly<Record<(typeof RENDERED_EFFECTS)[number], (p: Params) => string>> = {
+/** Effects the painter draws over the element after it (`postEffects`), not as filters. */
+const POST_TYPES = ["vignette", "grain"] as const;
+
+/** One filter per rendered effect type: kit's RENDERED_EFFECTS, which the `not-rendered` lint reads, less the post effects. */
+const CANVAS_FILTERABLE: Readonly<Record<Exclude<(typeof RENDERED_EFFECTS)[number], (typeof POST_TYPES)[number]>, (p: Params) => string>> = {
   brightness: (p) => `brightness(${1 + num(p, ["amount", "value"], 0) / 100})`,
   contrast: (p) => `contrast(${1 + num(p, ["amount", "value"], 0) / 100})`,
   saturation: (p) => `saturate(${1 + num(p, ["amount", "value"], 0) / 100})`,
@@ -49,6 +52,7 @@ export function filterString(children: readonly Placement[], elementId: string):
     if (c.kind === "effect") {
       if (c.props.enabled === false) continue;
       const type = String(c.props.type);
+      if ((POST_TYPES as readonly string[]).includes(type)) continue;
       const make = CANVAS_FILTERABLE[type as keyof typeof CANVAS_FILTERABLE] as ((p: Params) => string) | undefined;
       if (make) {
         const f = make((c.props.params ?? {}) as Params);
@@ -62,6 +66,21 @@ export function filterString(children: readonly Placement[], elementId: string):
     }
   }
   return { filter: parts.join(" "), unsupported };
+}
+
+export type PostEffect = { readonly type: "vignette"; readonly amount: number } | { readonly type: "grain"; readonly amount: number; readonly seed: number };
+
+/** Vignette and grain, in order, with `amount` on 0..1; grain is seeded by the frame, so a frame always looks the same. */
+export function postEffects(children: readonly Placement[], frame: number): PostEffect[] | undefined {
+  const out: PostEffect[] = [];
+  for (const c of children) {
+    if (c.kind !== "effect" || c.props.enabled === false) continue;
+    const amount = Math.max(0, Math.min(1, num((c.props.params ?? {}) as Params, ["amount", "intensity", "value"], c.props.type === "grain" ? 20 : 50) / 100));
+    if (amount <= 0) continue;
+    if (c.props.type === "vignette") out.push({ type: "vignette", amount });
+    else if (c.props.type === "grain") out.push({ type: "grain", amount, seed: frame });
+  }
+  return out.length ? out : undefined;
 }
 
 /**
