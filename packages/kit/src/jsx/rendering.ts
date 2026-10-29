@@ -74,7 +74,8 @@ export const NOT_RENDERED: readonly NotRendered[] = [
   { kind: "freeze", reason: "holds the picture only: the clip length, audio and captions ignore it" },
   { kind: "effect", prop: "params.gamma", reason: "is ignored: levels render their black and white points only" },
   { kind: "adjustment", prop: "affects", reason: "is ignored: the adjustment filters every track below it" },
-  { kind: "composition", prop: "background.mode", value: "blur", reason: "draws as the plain background colour" },
+  // shortcut: the lint cannot see which tracks sit beneath the footage, so it reports every blur; drop this when the blur also paints under backdrop overlays (frame-plan.ts).
+  { kind: "composition", prop: "background.mode", value: "blur", reason: "draws as the plain colour when an overlay sits beneath the footage" },
   { kind: "mask", prop: "matte", reason: "is ignored: matte masks are not rendered, the element shows unmasked" },
   { kind: "captions", prop: "animation", value: "bounce", reason: "has no motion: it shows as karaoke" },
   { kind: "captions", prop: "animation", value: "typewriter", reason: "types out only cues without word timings; cues with words show as karaoke" },

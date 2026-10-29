@@ -41,3 +41,27 @@ describe("CanvasPainter fast path for a picture that fills the canvas", () => {
     expect(names).toContain("drawImage");
   });
 });
+
+describe("CanvasPainter blur background", () => {
+  function paintBlur(transform?: object) {
+    const state = makeState({ width: 640, height: 360, background: { mode: "blur" }, tracks: [{ id: "main", items: [{ id: "c", kind: "clip", source: { in: 0, out: 4, asset: "a" }, ...(transform ? { props: { transform } } : {}) }] }] });
+    const rec = recorderContext();
+    new CanvasPainter(640, 360, recorderCanvas).paint(rec.ctx, buildFramePlan(state, 1), { frames: new Map<string, Frame | null>([["c", new FakeFrame(new FakeFrameSource("a"), 0, 1 / 30)]]), nested: new Map() });
+    return rec.calls;
+  }
+
+  it("draws the footage blurred and grown past the frame before the footage itself", () => {
+    const calls = paintBlur({ scale: 0.5 });
+    const draws = calls.filter((c) => c.name === "drawImage");
+    expect(draws).toHaveLength(2);
+    // r = round(0.04 · 360) = 14; the cover rect of a 640×360 frame, grown by 2r each side.
+    expect(draws[0]!.args.slice(1)).toEqual([-28, -28, 696, 416]);
+    expect(calls.findIndex((c) => c.name === "set:filter" && c.args[0] === "blur(14px)")).toBeLessThan(calls.indexOf(draws[0]!));
+  });
+
+  it("skips the blur when the footage covers the frame", () => {
+    const calls = paintBlur();
+    expect(calls.filter((c) => c.name === "drawImage")).toHaveLength(1);
+    expect(calls.some((c) => c.name === "set:filter" && String(c.args[0]).startsWith("blur("))).toBe(false);
+  });
+});

@@ -82,7 +82,8 @@ Transition types other than crossfade (drawn as a crossfade), effects that
 have no CSS filter equivalent (vignette, grain, sharpen, glow, …),
 colour wheels, curves and LUTs, matte masks, audio effects, pitch correction,
 3D text, most text animation presets (shown as a fade),
-`background.mode: "blur"`, sticker packs and `file:` nested references. The
+`background.mode: "blur"` under overlays that sit beneath the footage (the
+plain colour), sticker packs and `file:` nested references. The
 kit's `not-rendered` lint warning reports these in the file before anything
 plays, from the same table (`RENDERED_*` in `@cutcut/kit`) the player reads.
 

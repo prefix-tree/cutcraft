@@ -72,6 +72,18 @@ describe("buildFramePlan", () => {
     expect(level(0.6)).toBeCloseTo(1);
   });
 
+  it("blurs the first footage behind everything, unless an overlay sits beneath the footage", () => {
+    const main = { id: "main", items: [{ id: "c", kind: "clip", source: { in: 0, out: 4, asset: "a" } }, { id: "d", kind: "clip", source: { in: 0, out: 4, asset: "b" } }] };
+    const blurred = buildFramePlan(makeState({ background: { mode: "blur" }, tracks: [main] }), 1);
+    expect(blurred.backgroundBlur).toEqual({ id: "c" });
+    expect(blurred.warnings).toEqual([]);
+    expect(buildFramePlan(makeState({ tracks: [main] }), 1).backgroundBlur).toBeUndefined();
+    const under = buildFramePlan(makeState({ background: { mode: "blur" }, tracks: [{ id: "bg", items: [{ id: "h", kind: "title", duration: 4, text: "Hi" }] }, main] }), 1);
+    expect(under.clear).toBe(true);
+    expect(under.backgroundBlur).toBeUndefined();
+    expect(under.warnings).toEqual(["background mode blur is drawn as a colour under backdrop overlays"]);
+  });
+
   it("maps source time through speed and resolves nested compositions", () => {
     const inner = makeState({ width: 640, height: 360, tracks: [{ id: "i", items: [{ id: "ic", kind: "clip", source: { in: 0, out: 3, asset: "a" } }] }] });
     const outer = makeState({ tracks: [{ id: "main", items: [

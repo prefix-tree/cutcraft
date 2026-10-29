@@ -8,6 +8,10 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- `background.mode: "blur"` renders: the first footage on screen, blurred and scaled to cover the frame,
+  fills the space around footage that does not cover it, in the preview and the export. With an
+  overlay beneath the footage the ground stays the plain colour, and the `not-rendered` lint says so.
+
 - A reversed clip plays its audio backwards, in the preview and the export, instead of going silent.
 
 - `<Effect>` types `temperature`, `tint` (`params.amount`, as on `<ColorGrade>`) and `levels`
