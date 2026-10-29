@@ -131,6 +131,7 @@ OpenReel executable action types: 115. Ours: 125.
 | `clip/setSource` | media-slot replacement |
 | `clip/setAnchor` | connected clips (anchors) have no OpenReel equivalent |
 | `audio/setDuck` | OpenReel's ducking bypasses its action system |
+| `audio/add` | sound-only media (<Audio>) placed like clip/add; OpenReel adds audio as a clip |
 | `keyframe/move` | named but never implemented in OpenReel |
 | `keyframe/restore` | undo of keyframe/remove keeps easing and handles |
 | `caption/setAnimation` | caption animation style as its own action |

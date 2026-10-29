@@ -293,6 +293,8 @@ function propEdit(site: Pick<ElementSite, "id" | "props" | "openingTag">, prop: 
     // Expression container `{...}` or a string literal that must become `{...}`.
     const r = existing.valueRange;
     const wrapped = text[r[0] - 1] === "{" && text[r[1]] === "}";
+    // A plain string replacing `{...}` drops the braces: `out={6}` becomes `out="word:2"`, as a person writes it.
+    if (wrapped && typeof value === "string" && !value.includes('"') && !value.includes("\n")) return { kind: "prop", id: site.id, prop, range: [r[0] - 1, r[1] + 1], text: `"${value}"` };
     if (wrapped) return { kind: "prop", id: site.id, prop, range: r, text: replacement };
     return { kind: "prop", id: site.id, prop, range: r, text: `{${replacement}}` };
   }

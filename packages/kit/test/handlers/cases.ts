@@ -107,6 +107,7 @@ export const CASES: Partial<Record<ActionType, ActionInput>> = {
   "transition/restore": { type: "transition/restore", params: { transitionId: "x8", node: { id: "x8", kind: "transition", props: { id: "x8", type: "dipToBlack", duration: 0.3, params: {} } }, trackId: "main", after: "c2" } },
   "transition/update": { type: "transition/update", params: { transitionId: "x1", type: "zoom", duration: 0.8 } },
 
+  "audio/add": { type: "audio/add", params: { id: "bed2", trackId: "music", src: "asset:bed", place: { start: 2 }, in: 0, out: 4 } },
   "audio/setVolume": { type: "audio/setVolume", params: { id: "a1", volume: 0.5 } },
   "audio/setFade": { type: "audio/setFade", params: { id: "a1", in: 1, out: 2 } },
   "audio/setAutomation": { type: "audio/setAutomation", params: { id: "a1", lane: "volume", points: [[0, 1], [5, 0.2]] } },

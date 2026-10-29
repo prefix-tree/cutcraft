@@ -36,6 +36,8 @@ export interface TrackActions {
 
 export interface ClipActions {
   "clip/add": { id: Id; trackId: Id; src: string; place: PlacementSpec; in?: TimeRef; out?: TimeRef; duration?: number };
+  /** An <Audio> (sound only: music, a voice-over), placed like a clip; `duration: "fill"` runs to the composition's end. */
+  "audio/add": { id: Id; trackId: Id; src: string; place: PlacementSpec; in?: TimeRef; out?: TimeRef; duration?: number | "fill" };
   "clip/remove": { id: Id };
   "clip/restore": { id: Id; node: NodeSpec; trackId: Id; place: PlacementSpec };
   "clip/rippleDelete": { id: Id };

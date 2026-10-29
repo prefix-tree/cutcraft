@@ -16,6 +16,7 @@ Every action has `validate`, `apply`, `invert` and `fold`; the inverse is never 
 
 | action | OpenReel counterpart | note |
 |---|---|---|
+| `audio/add` | — | an `<Audio>` placed like `clip/add`; `duration: "fill"` runs to the end |
 | `audio/setAutomation` | `audio/addAutomation` |  |
 | `audio/setDuck` | — | OpenReel's ducking bypasses its action system |
 | `audio/setFade` | `audio/setFade` |  |

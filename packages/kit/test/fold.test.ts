@@ -38,6 +38,18 @@ describe("fold", () => {
     expect(changedLines(fixtureText, result.text)).toBe(1);
   });
 
+  it("writes a reference that replaces a number as a plain string attribute", () => {
+    const exec = fixtureExecutor();
+    exec.execute({ type: "clip/trim", params: { id: "c3", edge: "out", value: 25 } });
+    const seconds = foldToSource(fixtureText, exec.log(), exec.state()).text;
+    expect(seconds).toContain("out={25}");
+    const back = new Executor({ tree: exec.state().tree, manifest });
+    expect(back.execute({ type: "clip/trim", params: { id: "c3", edge: "out", value: "shot:2.end" } }).ok).toBe(true);
+    const result = foldToSource(seconds, back.log(), back.state());
+    expect(result.text).toContain('out="shot:2.end"');
+    expect(result.text).toBe(fixtureText);
+  });
+
   it("re-resolving the folded text equals the patched state", async () => {
     const exec = fixtureExecutor();
     exec.execute({ type: "clip/trim", params: { id: "c2", edge: "out", value: 4.4 } });

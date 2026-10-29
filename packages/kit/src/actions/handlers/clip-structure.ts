@@ -13,25 +13,31 @@ function placementErrors(state: Parameters<typeof rawNode>[0], trackId: string, 
   return null;
 }
 
-define({
-  type: "clip/add",
-  validate: (a, state) => {
-    if (state.tree.byId.has(a.params.id)) return invalid({ code: "DUPLICATE_ID", message: `"${a.params.id}" exists` });
-    if (a.params.in !== undefined && a.params.out !== undefined && a.params.duration !== undefined) return invalid({ code: "INVALID_PARAMS", message: "give out or duration, not both" });
-    const e = placementErrors(state, a.params.trackId, a.params.place);
-    return e ? invalid(e) : ok;
-  },
-  apply: (a, log, ctx) => {
-    const props: Record<string, never> = { id: a.params.id, src: a.params.src } as never;
-    const p = props as Record<string, unknown>;
-    if (a.params.in !== undefined) p.in = a.params.in;
-    if (a.params.out !== undefined) p.out = a.params.out;
-    if (a.params.duration !== undefined) p.duration = a.params.duration;
-    placeNode(log, ctx.before, a.params.trackId, a.params.place, { id: a.params.id, kind: "clip", props, children: [] });
-  },
-  invert: (a) => ({ type: "clip/remove", params: { id: a.params.id } }),
-  fold: () => [],
-});
+/** A media element on a track: a <Clip> (picture and sound) or an <Audio> (sound only). */
+function addMedia<T extends "clip/add" | "audio/add">(type: T, kind: "clip" | "audio") {
+  define({
+    type,
+    validate: (a, state) => {
+      if (state.tree.byId.has(a.params.id)) return invalid({ code: "DUPLICATE_ID", message: `"${a.params.id}" exists` });
+      if (a.params.in !== undefined && a.params.out !== undefined && a.params.duration !== undefined) return invalid({ code: "INVALID_PARAMS", message: "give out or duration, not both" });
+      const e = placementErrors(state, a.params.trackId, a.params.place);
+      return e ? invalid(e) : ok;
+    },
+    apply: (a, log, ctx) => {
+      const props: Record<string, never> = { id: a.params.id, src: a.params.src } as never;
+      const p = props as Record<string, unknown>;
+      if (a.params.in !== undefined) p.in = a.params.in;
+      if (a.params.out !== undefined) p.out = a.params.out;
+      if (a.params.duration !== undefined) p.duration = a.params.duration;
+      placeNode(log, ctx.before, a.params.trackId, a.params.place, { id: a.params.id, kind, props, children: [] });
+    },
+    invert: (a) => ({ type: "clip/remove", params: { id: a.params.id } }),
+    fold: () => [],
+  });
+}
+
+addMedia("clip/add", "clip");
+addMedia("audio/add", "audio");
 
 define({
   type: "clip/remove",

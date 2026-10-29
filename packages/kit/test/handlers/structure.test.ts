@@ -12,6 +12,16 @@ describe("structure on free and sequence tracks", () => {
     expect(exec.state().items.get("f1")).toMatchObject({ start: 3, end: 5, track: "music" });
   });
 
+  it("adds sound only: an <Audio> on the music track, filling to the end, removed by undo", () => {
+    const exec = fixtureExecutor();
+    expect(exec.execute({ type: "audio/add", params: { id: "bed2", trackId: "music", src: "asset:bed", place: { start: 0 }, duration: "fill" } }).ok).toBe(true);
+    const bed = exec.state().items.get("bed2");
+    expect(bed).toMatchObject({ kind: "audio", track: "music", start: 0, end: exec.state().composition.duration });
+    expect(exec.execute({ type: "audio/add", params: { id: "bed2", trackId: "music", src: "asset:bed", place: { start: 0 } } }).errors?.[0]?.code).toBe("DUPLICATE_ID");
+    expect(exec.undo()?.ok).toBe(true);
+    expect(exec.state().items.has("bed2")).toBe(false);
+  });
+
   it("moves a clip to another track and back", () => {
     const exec = fixtureExecutor();
     const before = serialize(exec.state());
