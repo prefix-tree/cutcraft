@@ -53,12 +53,10 @@ describe("buildAudioPlan", () => {
     expect(buildAudioPlan(hidden, 0, 1).map((o) => o.id)).toEqual(["v1"]);
   });
 
-  it("skips reversed audio with a warning", () => {
-    const warnings: string[] = [];
-    captureWarnings((m) => warnings.push(m));
-    const rev = makeState({ tracks: [{ id: "a", items: [{ id: "r", kind: "clip", source: { in: 0, out: 1, asset: "a" }, props: { reverse: true } }] }] });
-    expect(buildAudioPlan(rev, 0, 1)).toEqual([]);
-    expect(warnings).toHaveLength(1);
+  it("plays reversed audio from its last chunk first, each chunk's PCM reversed", () => {
+    const rev = makeState({ tracks: [{ id: "a", layout: "free", items: [{ id: "r", kind: "audio", start: 0, source: { in: 0, out: 90, speed: 2, asset: "tone" }, props: { reverse: true } }] }] });
+    const plan = buildAudioPlan(rev, 0, 45);
+    expect(plan.map((o) => [o.chunk, o.bufferFrom, o.bufferTo, o.compStart, o.compEnd, o.reverse])).toEqual([[0, 0, 30, 30, 45, true], [1, 30, 60, 15, 30, true], [2, 60, 90, 0, 15, true]]);
   });
 });
 

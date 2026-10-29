@@ -129,4 +129,13 @@ describe("mixPlan", () => {
     for await (const _ of gen) { void _; }
     expect(calls).toEqual(["a", "b"]);
   });
+
+  it("plays a reversed chunk's PCM backwards and leaves the provider's copy alone", async () => {
+    const ramp = new Float32Array(SR).map((_, i) => i / SR);
+    const [left] = await mixAll([occ({ reverse: true })], { range: async () => ({ sampleRate: SR, channels: [ramp] }) }, 4096);
+    expect(left[0]).toBeCloseTo(1, 3);
+    expect(left[SR / 2]).toBeCloseTo(0.5, 3);
+    expect(left[SR - 1]).toBeCloseTo(0, 3);
+    expect(ramp[0]).toBe(0);
+  });
 });

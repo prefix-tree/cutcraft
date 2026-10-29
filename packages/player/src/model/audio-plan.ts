@@ -1,6 +1,5 @@
 import { capabilitiesOf, lookupAsset, type Placement, type ResolvedState, type ResolvedTrack } from "@cutcut/kit";
 import { AUDIO_CHUNK_S, DUCK_ATTACK_S, DUCK_RELEASE_S, ENVELOPE_STEP_S } from "../constants";
-import { devWarn } from "../warn";
 import { keyframedValue } from "./keyframes";
 import type { ResolveNested } from "./frame-plan";
 
@@ -21,6 +20,8 @@ export interface AudioOccurrence {
   readonly speed: number;
   readonly gain: readonly GainPoint[];
   readonly pan?: readonly GainPoint[];
+  /** The buffer plays backwards: the engine reverses the decoded PCM. */
+  readonly reverse?: true;
 }
 
 /** Every audio-bearing chunk that overlaps [from, to). */
@@ -40,19 +41,16 @@ export function buildAudioPlan(state: ResolvedState, from: number, to: number, r
       if (!src || src.out <= src.in) continue;
       const asset = lookupAsset(state.manifest, src.asset);
       if (!asset || asset.kind === "image" || (asset.kind === "video" && !asset.audio)) continue;
-      if (p.props.reverse === true) {
-        devWarn(`reverse-audio:${p.id}`, `reversed audio on "${p.id}" is not played`);
-        continue;
-      }
+      const reverse = p.props.reverse === true;
       const envelope = buildGainEnvelope(p, track, state, p.start, p.end);
       const pan = panEnvelope(p);
-      for (const chunk of chunksOf(p, src)) {
+      for (const chunk of chunksOf(p, src, reverse)) {
         if (chunk.compEnd <= from || chunk.compStart >= to) continue;
         out.push({
           id: p.id, asset: asset.id, chunk: chunk.index,
           compStart: chunk.compStart, compEnd: chunk.compEnd,
           bufferFrom: chunk.bufferFrom, bufferTo: chunk.bufferTo,
-          speed: src.speed, gain: envelope, ...(pan ? { pan } : {}),
+          speed: src.speed, gain: envelope, ...(pan ? { pan } : {}), ...(reverse ? { reverse } : {}),
         });
       }
     }
@@ -62,13 +60,15 @@ export function buildAudioPlan(state: ResolvedState, from: number, to: number, r
 
 interface Chunk { index: number; compStart: number; compEnd: number; bufferFrom: number; bufferTo: number }
 
-function chunksOf(p: Placement, src: NonNullable<Placement["source"]>): Chunk[] {
+/** A reversed placement plays its last chunk first, so a chunk's composition range counts back from `src.out`. */
+function chunksOf(p: Placement, src: NonNullable<Placement["source"]>, reverse: boolean): Chunk[] {
   const length = src.out - src.in;
   if (length <= 2 * AUDIO_CHUNK_S) return [{ index: 0, compStart: p.start, compEnd: p.end, bufferFrom: src.in, bufferTo: src.out }];
   const chunks: Chunk[] = [];
   for (let i = 0, from = src.in; from < src.out; i++, from += AUDIO_CHUNK_S) {
     const to = Math.min(src.out, from + AUDIO_CHUNK_S);
-    chunks.push({ index: i, compStart: p.start + (from - src.in) / src.speed, compEnd: p.start + (to - src.in) / src.speed, bufferFrom: from, bufferTo: to });
+    const [a, b] = reverse ? [src.out - to, src.out - from] : [from - src.in, to - src.in];
+    chunks.push({ index: i, compStart: p.start + a / src.speed, compEnd: p.start + b / src.speed, bufferFrom: from, bufferTo: to });
   }
   return chunks;
 }

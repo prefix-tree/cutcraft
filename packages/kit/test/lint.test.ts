@@ -93,7 +93,7 @@ describe("lint", () => {
 
     it("warns on accepted props that are ignored, but not on values that ask for nothing", () => {
       expect(notRendered('<Track id="t"><Clip id="c" src="asset:city" reverse emphasis="pulse" chromaKey={{ color: "#0f0" }} transform={{ rotate3d: { x: 0, y: 1, z: 0 } }} /></Track>').map((d) => d.split(":")[1]))
-        .toEqual(["c.reverse", "c.emphasis", "c.chromaKey", "c.transform"]);
+        .toEqual(["c.emphasis", "c.chromaKey", "c.transform"]);
       expect(notRendered('<Track id="t"><Clip id="c" src="asset:city" reverse={false} emphasis="none" audioTrack={0} /><Adjustment id="a" affects="all" duration={1} /></Track>')).toEqual([]);
       expect(notRendered('<Track id="t"><Adjustment id="a" affects={["c"]} duration={1} /></Track>')).toHaveLength(1);
     });

@@ -70,8 +70,6 @@ export const NOT_RENDERED: readonly NotRendered[] = [
   { kind: "audio", prop: "pitchCorrection", reason: "is ignored: sped-up or slowed audio changes pitch" },
   { kind: "clip", prop: "audioTrack", reason: "is ignored: the asset's first audio stream plays" },
   { kind: "audio", prop: "audioTrack", reason: "is ignored: the asset's first audio stream plays" },
-  { kind: "clip", prop: "reverse", reason: "plays the picture backwards but renders silent: reversed audio is not played" },
-  { kind: "audio", prop: "reverse", reason: "renders silent: reversed audio is not played" },
   { kind: "speedKey", reason: "changes the picture only: the clip length, audio and captions ignore it" },
   { kind: "freeze", reason: "holds the picture only: the clip length, audio and captions ignore it" },
   { kind: "effect", prop: "params.gamma", reason: "is ignored: levels render their black and white points only" },

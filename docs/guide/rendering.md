@@ -110,7 +110,7 @@ for the DOM and an offline mixer for Web Audio. See [Exporting](/guide/exporting
 
 Transition types other than crossfade (drawn as a crossfade), effects without
 a CSS filter equivalent, colour wheels, curves and LUTs, matte masks, audio
-effects, pitch correction, reversed audio, 3D text, most text animation
+effects, pitch correction, 3D text, most text animation
 presets, `emphasis` animations, `background.mode: "blur"`, sticker packs other than `icon:`, `<animateMotion>` and CSS animation in SVG, and `file:` nested
 references. The check reports each one in your file as a `not-rendered` lint
 warning that says what will happen instead (the list is `jsx/rendering.ts` in

@@ -132,7 +132,7 @@ export class AudioEngine {
   }
 
   private buffer(occ: AudioOccurrence): Promise<AudioBuffer> {
-    const key = `${occ.asset}|${occ.bufferFrom}|${occ.bufferTo}`;
+    const key = `${occ.asset}|${occ.bufferFrom}|${occ.bufferTo}${occ.reverse ? "|r" : ""}`;
     const hit = this.cache.get(key);
     if (hit) {
       this.cache.delete(key);
@@ -140,7 +140,10 @@ export class AudioEngine {
       return hit.buffer;
     }
     const seconds = occ.bufferTo - occ.bufferFrom;
-    const buffer = this.deps.audioSource(occ.asset).then((s) => s.range(occ.bufferFrom, occ.bufferTo));
+    const buffer = this.deps.audioSource(occ.asset).then((s) => s.range(occ.bufferFrom, occ.bufferTo)).then((b) => {
+      if (occ.reverse) for (let ch = 0; ch < b.numberOfChannels; ch++) b.getChannelData(ch).reverse();
+      return b;
+    });
     buffer.catch(() => { this.cache.delete(key); this.cacheSeconds -= seconds; });
     this.cache.set(key, { buffer, seconds });
     this.cacheSeconds += seconds;

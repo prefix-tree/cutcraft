@@ -134,7 +134,7 @@ export async function* mixPlan(plan: readonly AudioOccurrence[], pcm: PcmProvide
     const t0 = f / sr, t1 = (f + frames) / sr;
     const active = sorted.filter((o) => o.compEnd > t0 && o.compStart < t1);
     for (const o of active) {
-      if (!loading.has(key(o))) loading.set(key(o), pcm.range(o.asset, o.bufferFrom, o.bufferTo).then((buf) => ({ occurrence: o, pcm: buf })));
+      if (!loading.has(key(o))) loading.set(key(o), pcm.range(o.asset, o.bufferFrom, o.bufferTo).then((buf) => ({ occurrence: o, pcm: o.reverse ? { ...buf, channels: buf.channels.map((c) => c.slice().reverse()) } : buf })));
     }
     const sources = await Promise.all(active.map((o) => loading.get(key(o)) as Promise<MixSource>));
     for (const [k, p] of loading) {

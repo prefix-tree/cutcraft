@@ -8,6 +8,8 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- A reversed clip plays its audio backwards, in the preview and the export, instead of going silent.
+
 - `<Effect>` types `temperature`, `tint` (`params.amount`, as on `<ColorGrade>`) and `levels`
   (`params.black`, `params.white` on 0..1) render in the preview and the export. A levels `gamma`
   has no filter form and the `not-rendered` lint reports it; `sharpen` stays unrendered.
