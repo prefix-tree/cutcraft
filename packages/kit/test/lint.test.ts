@@ -108,6 +108,11 @@ describe("lint", () => {
       expect(d[6]).toContain("masks render on clips and nested sequences only");
     });
 
+    it("warns on an overlay's blend, which mixes with the footage in the export only", () => {
+      expect(notRendered('<Track id="t"><Clip id="c" src="asset:city" blend="screen" /><Title id="h" blend="screen">Hi</Title><Title id="n" blend="normal">Hi</Title></Track>'))
+        .toEqual(['warning:h.blend: "h" <Title> blend "screen" blends with the footage in the export only: the preview draws it unblended over the footage']);
+    });
+
     it("says nothing about a file that only uses what renders", () => {
       expect(notRendered(`<Track id="t">
         <Clip id="a" src="asset:city" speed={2}><Effect id="e" type="blur" /><ColorGrade id="g" temperature={20} /><Mask id="m" shape={{ rect: { x: 0, y: 0, width: 1, height: 1 } }} /><Keyframe id="k" property="transform.position.x" at={0} value={0} /></Clip>

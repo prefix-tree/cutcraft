@@ -32,6 +32,8 @@ export const RENDERED_VALUES: readonly RenderedValues[] = [
   { kind: "title", prop: "animation.preset", values: RENDERED_TITLE_ANIMATIONS, reason: "shows as a fade" },
   { kind: "captions", prop: "animation", values: RENDERED_CAPTION_ANIMATIONS, reason: "shows as karaoke" },
   { kind: "mask", prop: "type", values: RENDERED_MASK_TYPES, reason: "is ignored: matte masks are not rendered, the element shows unmasked" },
+  // shortcut: the preview's DOM overlay plane is its own stacking context (scaled, z-indexed), so CSS blends never reach the canvas; un-isolate it to drop these rows.
+  ...(["title", "shape", "svg", "sticker", "graphic", "layer"] as const).map((kind) => ({ kind, prop: "blend", values: ["normal"], reason: "blends with the footage in the export only: the preview draws it unblended over the footage" })),
 ];
 
 /**

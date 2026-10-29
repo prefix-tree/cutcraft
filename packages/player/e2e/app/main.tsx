@@ -2,7 +2,8 @@ import { collectModule, resolve } from "@cutcut/kit";
 import { Player, type PlayerRef } from "@cutcut/player";
 import { createRef } from "react";
 import { createRoot } from "react-dom/client";
-import * as file from "./composition";
+import * as bars from "./composition";
+import * as overlays from "./overlays";
 
 declare global {
   interface Window {
@@ -21,6 +22,7 @@ console.error = (...args: unknown[]) => { window.__errors.push(args.map(String).
 async function main(): Promise<void> {
   const params = new URLSearchParams(location.search);
   const video = params.get("video") ?? "bars.webm";
+  const file = params.get("comp") === "overlays" ? overlays : bars;
   const blob = await (await fetch(`/${video}`)).blob();
   const media = { bars: blob, tone: "/tone.ogg", logo: "/logo.png", solid: "/solid.webm" };
   const state = resolve(collectModule(file), file.manifest);

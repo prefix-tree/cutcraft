@@ -197,6 +197,26 @@ test.describe("player", () => {
     expect(Math.abs((await readCounter(page)) - 30)).toBeLessThanOrEqual(1);
   });
 
+  test("an adjustment filters the footage once, as the export does", async ({ page }) => {
+    await page.goto("/?comp=overlays");
+    await page.waitForSelector("body[data-ready='1']");
+    await seek(page, 0.5);
+    const canvasBlue = await page.evaluate(() => (document.querySelector("canvas[data-el='composition']") as HTMLCanvasElement).getContext("2d")!.getImageData(320, 180, 1, 1).data[2]!);
+    // What the viewer sees: the canvas and the DOM above it, composited.
+    const png = (await page.locator("[data-player]").screenshot()).toString("base64");
+    const screenBlue = await page.evaluate(async (b64) => {
+      const img = new Image();
+      img.src = `data:image/png;base64,${b64}`;
+      await img.decode();
+      const ctx = Object.assign(document.createElement("canvas"), { width: img.width, height: img.height }).getContext("2d")!;
+      ctx.drawImage(img, 0, 0);
+      return ctx.getImageData(320, 180, 1, 1).data[2]!;
+    }, png);
+    expect(canvasBlue).toBeGreaterThan(100);
+    expect(canvasBlue).toBeLessThan(150);
+    expect(Math.abs(screenBlue - canvasBlue)).toBeLessThanOrEqual(4);
+  });
+
   test("decodes h264 when the browser can", async ({ page }) => {
     test.skip(!existsSync(join(mediaDir, "bars.mp4")), "no bars.mp4");
     await page.goto("/");

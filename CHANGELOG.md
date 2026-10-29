@@ -154,6 +154,12 @@ All notable changes to this project are documented here. The format follows
 
 ### Fixed
 
+- The preview filtered footage under an `<Adjustment>` twice: the painter filtered the canvas and
+  a CSS backdrop filter filtered it again. The backdrop filter is gone, so the preview matches the
+  export: the adjustment filters the footage beneath it, not the overlays.
+- An overlay's `blend` mixes with the footage in the export but not in the preview, whose overlay
+  plane is isolated from the canvas; the `not-rendered` lint now says so.
+
 - A parallel export that fails no longer cuts off the other workers mid-frame: a busy worker
   finishes its run (or a minute passes) before the pool terminates it, since terminating a thread
   inside a skia call can abort the whole process.
