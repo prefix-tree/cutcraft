@@ -139,6 +139,9 @@ All notable changes to this project are documented here. The format follows
 
 ### Changed
 
+- `<Marker at>` and `<Cut at>` take seconds only, like `<Keyframe at>`: the schema rejects a
+  reference (`"word:3"`), where before it passed the schema and the resolver reported it.
+
 - A timing prop that references a `schema` prop (`out={closeOut}`) is bound,
   not locked: the timeline drags it and the fold writes the value into
   `defaults`. Placements carry `boundProps`; `expression-locked` no longer

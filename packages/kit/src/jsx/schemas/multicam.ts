@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { assetRefSchema, colorSchema, idSchema, timeRefSchema } from "./common";
+import { assetRefSchema, colorSchema, idSchema } from "./common";
 
 export const multicamSchema = z.strictObject({
   id: idSchema,
@@ -20,6 +20,6 @@ export const angleSchema = z.strictObject({
 
 export const cutSchema = z.strictObject({
   id: idSchema,
-  at: timeRefSchema,
+  at: z.number().nonnegative(),
   angle: idSchema,
 });

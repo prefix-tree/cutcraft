@@ -96,6 +96,18 @@ describe("resolve", () => {
     expect(state.items.get("mc.c2")).toMatchObject({ start: 2, end: 5, source: { asset: "interview", in: 2, out: 5 } });
   });
 
+  it("reports a reference in a cut's `at` as a schema error: cuts take seconds", () => {
+    const el = h(Composition, { fps: 30, width: 1920, height: 1080 },
+      h(Track, { id: "t1", layout: "free" },
+        h(Multicam, { id: "mc", sync: 0 },
+          h(Angle, { id: "a", src: "asset:city" }),
+          h(Cut, { id: "c1", at: "word:3" as never, angle: "a" }),
+        ),
+      ),
+    );
+    expect(new Set(resolve(collect(el), manifest).errors.map((e) => `${e.code} ${e.id}.${e.prop}`))).toEqual(new Set(["SCHEMA c1.at"]));
+  });
+
   it("reports typed errors instead of throwing", () => {
     const el = h(Composition, { fps: 30, width: 1920, height: 1080 },
       h(Track, { id: "t1" },

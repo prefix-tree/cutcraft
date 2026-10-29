@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { zTrackLayout, zTrackRole } from "../enums";
 import { themeSchema } from "../../theme/schema";
-import { colorSchema, gradientSchema, idSchema, timeRefSchema } from "./common";
+import { colorSchema, gradientSchema, idSchema } from "./common";
 
 export const compositionSchema = z.strictObject({
   id: idSchema.default("composition"),
@@ -33,7 +33,7 @@ export const trackSchema = z.strictObject({
 
 export const markerSchema = z.strictObject({
   id: idSchema,
-  at: timeRefSchema,
+  at: z.number().nonnegative(),
   label: z.string().default(""),
   color: colorSchema.optional(),
 });

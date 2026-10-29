@@ -292,7 +292,7 @@ Plus the props of its `kind`: see [Graphics](./graphics).
 | prop | type | default | required |
 |---|---|---|---|
 | `id` | string |  | yes |
-| `at` | number (0..∞) \| string |  | yes |
+| `at` | number (0..∞) |  | yes |
 | `label` | string | `""` |  |
 | `color` | string |  |  |
 
@@ -369,7 +369,7 @@ Plus the props of its `kind`: see [Graphics](./graphics).
 | prop | type | default | required |
 |---|---|---|---|
 | `id` | string |  | yes |
-| `at` | number (0..∞) \| string |  | yes |
+| `at` | number (0..∞) |  | yes |
 | `angle` | string |  | yes |
 
 ## `<Layer>`

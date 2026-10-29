@@ -134,10 +134,9 @@ function compute(original: CollectedTree, manifest: AssetManifest, log: PatchLog
 
   for (const child of root.children) {
     if (child.kind === "marker") {
-      const p = parseProps(child, errors, theme);
-      const at = p.at;
+      // A failed parse returns the raw props; the schema error already names a non-numeric `at`.
+      const at = parseProps(child, errors, theme).at;
       if (typeof at === "number") markers.set(child.id, at);
-      else errors.push({ code: "UNKNOWN_REF", id: child.id, prop: "at", message: "markers take seconds, not references" });
     }
   }
 
@@ -553,10 +552,7 @@ function placeMulticam(node: CollectedNode, p: Pending, track: ResolvedTrack, pe
   for (const child of node.children) {
     const cp = parseProps(child, errors, theme);
     if (child.kind === "angle") angles.set(child.id, cp);
-    else if (child.kind === "cut") {
-      if (typeof cp.at !== "number") { errors.push({ code: "UNKNOWN_REF", id: child.id, prop: "at", message: "cuts take seconds" }); continue; }
-      cuts.push({ node: child, at: cp.at, angle: String(cp.angle) });
-    }
+    else if (child.kind === "cut" && typeof cp.at === "number") cuts.push({ node: child, at: cp.at, angle: String(cp.angle) });
   }
   cuts.sort((a, b) => a.at - b.at);
   const sync = Number(p.props.sync ?? 0);
