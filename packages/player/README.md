@@ -79,7 +79,7 @@ Mounting a Player installs the kit's `useT()` and `useLayer()`.
 ## Not rendered yet
 
 Transition types other than crossfade (drawn as a crossfade), effects that
-have no CSS filter equivalent (vignette, grain, sharpen, glow, levels, …),
+have no CSS filter equivalent (vignette, grain, sharpen, glow, …),
 colour wheels, curves and LUTs, matte masks, audio effects, pitch correction,
 reversed audio, 3D text, most text animation presets (shown as a fade),
 `background.mode: "blur"`, sticker packs and `file:` nested references. The
