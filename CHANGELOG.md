@@ -12,9 +12,10 @@ All notable changes to this project are documented here. The format follows
   leaves the frame, leaves a safe zone (`tiktok`, `reels`, `shorts`, `title-safe`, `action-safe` or
   custom margins), covers captions, or covers the subject, as runs with the element's id and the
   first and last offending time. It measures the pixels an element draws, after its animation and
-  transform, cell by cell so a hollow frame around the subject does not cover it. Each issue carries
-  a sentence on what is wrong, the smallest fix in `transform` props, and the boxes at its worst
-  moment, for the editing agent to act on. Subjects come from a new manifest field, `subjects`
+  transform, cell by cell so a hollow frame around the subject does not cover it. It prints like a
+  compiler: each issue at its `file:line:column` in the JSX (the element's `transform`, or the
+  helper call that made it) with the line and a caret, a one-sentence message, and the smallest fix
+  in `transform` props; `--json` gives the same with the boxes at the worst moment. Subjects come from a new manifest field, `subjects`
   (boxes over source time), mapped through each clip's crop, fit and transform, or from a fixed
   region for footage without them.
 

@@ -55,12 +55,15 @@ describe("cutcut-render", () => {
   });
 
   it("checks the layout and prints the issues as JSON", () => {
-    const r = run(composition, "--media", mediaDir, "--check-layout", "--safe-zone", "0.1,0.1,0.1,0.1", "--subject", "0.4,0.2,0.2,0.6", "--step", "0.5");
+    const r = run(composition, "--media", mediaDir, "--check-layout", "--safe-zone", "0.1,0.1,0.1,0.1", "--subject", "0.4,0.2,0.2,0.6", "--step", "0.5", "--json");
     expect(r.status).toBe(0);
     const result = JSON.parse(r.stdout) as { samples: number; issues: { rule: string; id: string; from: number; to: number }[] };
     expect(result.samples).toBe(14);
     for (const i of result.issues) expect(i.to).toBeGreaterThanOrEqual(i.from);
     expect(run(composition, "--check-layout", "--safe-zone", "nowhere").stderr).toContain("--safe-zone wants tiktok");
+    const text = run(composition, "--media", mediaDir, "--check-layout", "--safe-zone", "tiktok", "--step", "0.5").stdout;
+    expect(text).toMatch(/composition\.tsx:\d+:\d+: safe-zone: layer "l1" sticks out of the tiktok safe zone/);
+    expect(text).toMatch(/ {2}fix: move it /);
   });
 
   it("explains a missing asset and exits non-zero", () => {

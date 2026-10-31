@@ -147,23 +147,35 @@ pixels each element actually draws (titles, shapes, SVG, stickers, graphics,
 layers and captions) after its entrance, exit, keyframes and transform, so a
 slide that crosses the edge between two spot checks is caught. Hollow
 graphics count by the cells their ink touches, so corner brackets around a
-face do not cover it. It writes no file and prints JSON written for a reader
-that cannot see the frame, such as the editing agent: each issue says what is
-wrong in a sentence, the smallest fix in `transform` props, and the
-measurements at its worst moment.
+face do not cover it. It writes no file. Like a compiler, it points each
+issue at its place in the file (the element's `transform`, or the helper call
+that made it), says what is wrong in one sentence, and gives the smallest fix:
 
 ```sh
 cutcut-render video.tsx --check-layout --safe-zone tiktok --subject 0.2,0.18,0.6,0.37
 ```
 
+```text
+video.tsx:30:9: subject: title "t1" covers the subject from 0.53 s to 2.40 s.
+  30 |         <Title id="t1" anchor="v1" offset={0.5} duration={2} size={40}>Hello</Title>
+     |         ^
+  fix: move it down 89 px (transform.position.y +89), then check again: the move may run into something else
+
+1 layout issue on 1 element in 900 samples (every frame, safe zone tiktok).
+```
+
+`--json` prints the same as data, for a program or an agent that wants the
+numbers:
+
 ```json
 {
-  "summary": "1 layout issue on 1 element in 900 samples (every frame, safe zone tiktok); each has a message and a fix.",
+  "summary": "1 layout issue on 1 element in 900 samples (every frame, safe zone tiktok).",
   "issues": [{
     "rule": "subject", "id": "t1", "kind": "title", "with": "subject", "from": 0.533, "to": 2.4, "at": 0.533,
     "box": { "x": 273, "y": 165, "w": 96, "h": 30 }, "area": { "x": 224, "y": 72, "w": 192, "h": 180 },
-    "message": "title \"t1\" covers the subject from 0.53 s to 2.40 s. At 0.53 s its ink (x 273..369, y 165..195) overlaps the subject (x 224..416, y 72..252).",
-    "fix": "move it down 89 px (transform.position.y +89), then check again: the move may run into something else"
+    "message": "title \"t1\" covers the subject from 0.53 s to 2.40 s.",
+    "fix": "move it down 89 px (transform.position.y +89), then check again: the move may run into something else",
+    "source": { "file": "video.tsx", "line": 30, "column": 9, "code": "        <Title id=\"t1\" …>Hello</Title>" }
   }],
   "samples": 900,
   "warnings": []
@@ -189,7 +201,8 @@ the check maps them through each clip's crop, fit and transform. Footage whose
 manifest entry has none uses `--subject x,y,w,h`, fractions of the frame,
 while it is on screen. Overlays beneath the footage and ones that fill the
 frame (backgrounds) are not checked, and neither is an element fainter than
-10%. From code: `checkLayout({ state, media, interiors, safeZone, subject })`.
+10%. From code: `checkLayout({ state, media, interiors, safeZone, subject, source: { file, text } })`,
+and `formatLayout(result)` for the text.
 
 ## Checking an export
 

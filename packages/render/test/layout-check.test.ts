@@ -2,7 +2,7 @@ import { createElement as h } from "react";
 import { Caption, Captions, Clip, Composition, Graphic, Keyframe, Shape, Title, Track, collect, resolve, type AssetManifest } from "@cutcut/kit";
 import { mediaDir } from "../../player/e2e/gen-media";
 import { manifest } from "../../player/e2e/app/composition";
-import { checkLayout, directoryResolver, subjectRects, type LayoutIssue } from "../src";
+import { checkLayout, directoryResolver, formatLayout, subjectRects, type LayoutIssue } from "../src";
 
 const box = (id: string, x: number, y: number, w: number, hgt: number, start = 0, duration = 1, children: unknown[] = []) =>
   h(Shape, { id, shape: "rectangle", width: w, height: hgt, fill: "#ff0000", start, duration, transform: { position: { x, y } } }, ...(children as []));
@@ -34,7 +34,7 @@ describe("checkLayout", () => {
     expect(issues).toContain("safe-zone:margin>title-safe@0.00-0.97");
     expect(issues).toContain("captions:low>caps@0.50-0.97");
     expect(issues.filter((i) => i.includes(":fine") || i.includes(":hi") || i.includes(":caps"))).toEqual([]);
-    expect(result.summary).toBe("3 layout issues on 3 elements in 30 samples (every frame, safe zone title-safe); each has a message and a fix.");
+    expect(result.summary).toBe("3 layout issues on 3 elements in 30 samples (every frame, safe zone title-safe).");
   });
 
   it("says what is wrong and how to fix it, in words and transform props", async () => {
@@ -44,12 +44,53 @@ describe("checkLayout", () => {
     ));
     const edge = issues.find((i) => i.id === "edge")!;
     expect(edge).toMatchObject({ rule: "frame-edge", at: 0, box: { x: 570, y: 70, w: 100, h: 100 }, area: { x: 0, y: 0, w: 640, h: 360 } });
-    expect(edge.message).toBe('shape "edge" runs off the frame from 0.00 s to 0.90 s. At 0.00 s its ink (x 570..670, y 70..170) reaches 30 px past the right of the 640×360 frame.');
+    expect(edge.message).toBe('shape "edge" runs off the frame on the right by 30 px, from 0.00 s to 0.90 s.');
     expect(edge.fix).toBe("move it left 30 px (transform.position.x -30)");
     expect(issues.find((i) => i.id === "wide")!.fix).toMatch(/^it is 700×40 px but the frame is 640×360: scale it to 0\.91 or less \(transform\.scale\)/);
     const low = issues.find((i) => i.rule === "captions")!;
-    expect(low.message).toMatch(/^shape "low" covers captions "caps" from 0\.00 s to 0\.90 s\. At 0\.00 s its ink \(x \d+\.\.\d+, y 295\.\.325\) overlaps captions "caps"/);
+    expect(low.message).toBe('shape "low" covers captions "caps" from 0.00 s to 0.90 s.');
+    expect(low.box.y).toBe(295);
     expect(low.fix).toMatch(/^move it (up|down) \d+ px \(transform\.position\.y [+-]\d+\), then check again/);
+  });
+
+  it("points each issue at its place in the JSX, as a compiler does", async () => {
+    const text = [
+      'import { Composition, Shape, Track } from "@cutcut/kit";',
+      "",
+      "function Dot({ id }: { id: string }) {",
+      '  return <Shape id={id} shape="circle" width={60} height={60} fill="#f00" start={0} duration={1} transform={{ position: { x: 300, y: 0 } }} />;',
+      "}",
+      "",
+      "export default function Video() {",
+      "  return (",
+      '    <Composition id="v" fps={10} width={640} height={360}>',
+      '      <Track id="t" layout="free">',
+      '        <Shape id="edge" shape="rectangle" width={100} height={100} fill="#f00" start={0} duration={1} transform={{ position: { x: 300, y: -60 } }} />',
+      '        <Dot id="d1" />',
+      '        <Dot id="d2" />',
+      "      </Track>",
+      "    </Composition>",
+      "  );",
+      "}",
+    ].join("\n");
+    const Dot = ({ id }: { id: string }) => h(Shape, { id, shape: "circle", width: 60, height: 60, fill: "#f00", start: 0, duration: 1, transform: { position: { x: 300, y: 0 } } });
+    const el = h(Composition, { id: "v", fps: 10, width: 640, height: 360 },
+      h(Track, { id: "t", layout: "free" },
+        box("edge", 300, -60, 100, 100),
+        h(Dot, { id: "d1" }),
+        h(Dot, { id: "d2" }),
+      ),
+    );
+    const result = await check(el, manifest, { source: { file: "video.tsx", text } });
+    const edge = result.issues.find((i) => i.id === "edge")!;
+    // The spot is the element's transform, which the fix edits.
+    expect(edge.source).toMatchObject({ file: "video.tsx", line: 11, column: text.split("\n")[10]!.indexOf("transform=") + 1 });
+    const d2 = result.issues.find((i) => i.id === "d2")!;
+    expect(d2.source).toMatchObject({ line: 13, column: 9, helper: "Dot" });
+    const printed = formatLayout(result);
+    expect(printed).toContain(`video.tsx:11:${edge.source!.column}: frame-edge: shape "edge" runs off the frame on the right by 30 px, from 0.00 s to 0.90 s.\n  11 | ${text.split("\n")[10]}\n     | ${" ".repeat(edge.source!.column - 1)}^\n  fix: move it left 30 px (transform.position.x -30)`);
+    expect(printed).toContain("^ made by Dot()");
+    expect(printed.trimEnd().endsWith(result.summary)).toBe(true);
   });
 
   it("refuses a step or range that is not a number instead of checking nothing", async () => {

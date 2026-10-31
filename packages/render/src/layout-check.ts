@@ -1,5 +1,6 @@
 import { lookupAsset, type ResolvedState, type SubjectBox } from "@cutcut/kit";
 import { FRAME_EPS, boundsOf, buildFramePlan, captureWarnings, type DrawOp, type DrawRect, type MediaResolver } from "@cutcut/player/engine";
+import { buildSourceIndex, type SourceIndex } from "@cutcut/kit/source";
 import type { ReactNode } from "react";
 import { initEnv } from "./env";
 import { OverlayPlane, type OverlayBounds, type OverlayFont } from "./overlays";
@@ -45,8 +46,23 @@ export interface LayoutIssue {
   readonly box: DrawRect;
   /** What it breaks at `at`: the frame, the safe zone, or the captions' or subject's box it overlaps. */
   readonly area: DrawRect;
+  /** What is wrong, in one plain sentence. */
   readonly message: string;
+  /** The smallest change that clears it at `at`, in props to edit. */
   readonly fix: string;
+  /** Where to make the fix in the file, when the check was given the source. */
+  readonly source?: SourceSpot;
+}
+
+/** A place in the cut file, as a compiler reports it. Line and column count from 1. */
+export interface SourceSpot {
+  readonly file: string;
+  readonly line: number;
+  readonly column: number;
+  /** That line of the file. */
+  readonly code: string;
+  /** Set when a helper generated the element: the spot is the call to it, not the element. */
+  readonly helper?: string;
 }
 
 export interface LayoutCheckOptions {
@@ -62,6 +78,8 @@ export interface LayoutCheckOptions {
   readonly step?: number;
   readonly from?: number;
   readonly to?: number;
+  /** The cut file's path (as it should be printed) and text, to point each issue at its place in the JSX. */
+  readonly source?: { readonly file: string; readonly text: string };
 }
 
 export interface LayoutCheckResult {
@@ -149,12 +167,17 @@ export async function checkLayout(options: LayoutCheckOptions): Promise<LayoutCh
     captureWarnings(null);
   }
   const ms = (t: number): number => Math.round(t * 1000) / 1000;
-  const result = issues.map(({ n: _n, worst: _w, ...issue }) => describe({ ...issue, from: ms(issue.from), to: ms(issue.to), at: ms(issue.at), box: rounded(issue.box), area: rounded(issue.area) }, W, H));
+  const index = options.source ? buildSourceIndex(options.source.text) : null;
+  const result = issues.map(({ n: _n, worst: _w, ...issue }) => {
+    const described = describe({ ...issue, from: ms(issue.from), to: ms(issue.to), at: ms(issue.at), box: rounded(issue.box), area: rounded(issue.area) });
+    const spot = options.source && index ? locate(options.source.file, index, state, issue.id, issue.kind) : null;
+    return spot ? { ...described, source: spot } : described;
+  });
   const ids = new Set(result.map((i) => i.id));
   const every = step === 1 ? "every frame" : `every ${(step / fps).toFixed(2)} s`;
   const summary = result.length === 0
     ? `No layout issues in ${samples} samples (${every}, safe zone ${zoneName}).`
-    : `${result.length} layout issue${result.length === 1 ? "" : "s"} on ${ids.size} element${ids.size === 1 ? "" : "s"} in ${samples} samples (${every}, safe zone ${zoneName}); each has a message and a fix.`;
+    : `${result.length} layout issue${result.length === 1 ? "" : "s"} on ${ids.size} element${ids.size === 1 ? "" : "s"} in ${samples} samples (${every}, safe zone ${zoneName}).`;
   return { summary, issues: result, samples, warnings };
 }
 
@@ -206,6 +229,7 @@ function rounded(r: DrawRect): DrawRect {
 
 const s2 = (t: number): string => `${t.toFixed(2)} s`;
 const rect = (r: DrawRect): string => `x ${r.x}..${r.x + r.w}, y ${r.y}..${r.y + r.h}`;
+const SIDE = { left: "on the left", top: "at the top", right: "on the right", bottom: "at the bottom" } as const;
 const signed = (v: number): string => (v > 0 ? `+${v}` : `${v}`);
 
 /** A move of the element by (dx, dy) pixels in words, with the transform props that make it. */
@@ -217,15 +241,14 @@ function moveText(kind: string, dx: number, dy: number): string {
 }
 
 /** Fills in `message` and `fix` from the measurements. */
-function describe(issue: LayoutIssue, W: number, H: number): LayoutIssue {
+function describe(issue: LayoutIssue): LayoutIssue {
   const { box, area } = issue;
   const who = `${issue.kind} "${issue.id}"`;
   const when = issue.from === issue.to ? `at ${s2(issue.from)}` : `from ${s2(issue.from)} to ${s2(issue.to)}`;
   if (issue.rule === "frame-edge" || issue.rule === "safe-zone") {
     const past = [["left", area.x - box.x], ["top", area.y - box.y], ["right", box.x + box.w - (area.x + area.w)], ["bottom", box.y + box.h - (area.y + area.h)]] as const;
-    const sides = past.filter(([, v]) => v > SLACK).map(([side, v]) => `${v} px past the ${side}`).join(" and ");
-    const where = issue.rule === "frame-edge" ? `the ${W}×${H} frame` : `the ${issue.with} safe zone (${rect(area)})`;
-    const message = `${who} ${issue.rule === "frame-edge" ? "runs off the frame" : `leaves the ${issue.with} safe zone`} ${when}. At ${s2(issue.at)} its ink (${rect(box)}) reaches ${sides} of ${where}.`;
+    const sides = past.filter(([, v]) => v > SLACK).map(([side, v]) => `${SIDE[side]} by ${v} px`).join(" and ");
+    const message = `${who} ${issue.rule === "frame-edge" ? "runs off the frame" : `sticks out of the ${issue.with} safe zone`} ${sides}, ${when}.`;
     if (box.w > area.w || box.h > area.h) {
       const scale = Math.floor(Math.min(area.w / box.w, area.h / box.h) * 100) / 100;
       return { ...issue, message, fix: `it is ${box.w}×${box.h} px but the ${issue.rule === "frame-edge" ? "frame" : "zone"} is ${Math.round(area.w)}×${Math.round(area.h)}: scale it to ${scale} or less (transform.scale) and keep it within ${rect(area)}` };
@@ -235,11 +258,55 @@ function describe(issue: LayoutIssue, W: number, H: number): LayoutIssue {
     return { ...issue, message, fix: moveText(issue.kind, dx, dy) };
   }
   const other = issue.rule === "subject" ? "the subject" : `captions "${issue.with}"`;
-  const message = `${who} covers ${other} ${when}. At ${s2(issue.at)} its ink (${rect(box)}) overlaps ${other} (${rect(area)}).`;
+  const message = `${who} covers ${other} ${when}.`;
   // The shortest way out of the overlap, one axis at a time.
   const moves: [number, number][] = [[0, area.y - (box.y + box.h)], [0, area.y + area.h - box.y], [area.x - (box.x + box.w), 0], [area.x + area.w - box.x, 0]];
   const [dx, dy] = moves.map(([x, y]) => [x && x + Math.sign(x) * SLACK, y && y + Math.sign(y) * SLACK] as [number, number]).sort((p, q) => Math.abs(p[0] + p[1]) - Math.abs(q[0] + q[1]))[0]!;
   return { ...issue, message, fix: `${moveText(issue.kind, Math.round(dx), Math.round(dy))}, then check again: the move may run into something else` };
+}
+
+/**
+ * Where to fix an element in the file: its `transform` (its `style` for captions), else its opening tag; for an
+ * element a helper generated, the call to the helper. Null when the file does not show it (a loop, say).
+ */
+function locate(file: string, index: SourceIndex, state: ResolvedState, id: string, kind: string): SourceSpot | null {
+  const node = state.tree.byId.get(id);
+  const site = node?.editable === "generated" ? undefined : index.elements.get(id);
+  let at: number, helper: string | undefined;
+  if (site) {
+    at = (site.props.get(kind === "captions" ? "style" : "transform") ?? site).range[0];
+  } else {
+    const origin = node?.origin;
+    const call = origin && index.calls.find((c) => c.helper === origin.helper && c.callIndex === origin.callIndex);
+    if (!call) return null;
+    at = call.range[0];
+    helper = call.helper;
+  }
+  const before = index.text.slice(0, at);
+  const lineStart = before.lastIndexOf("\n") + 1;
+  const lineEnd = index.text.indexOf("\n", at);
+  return {
+    file, line: before.split("\n").length, column: at - lineStart + 1, code: index.text.slice(lineStart, lineEnd < 0 ? undefined : lineEnd),
+    ...(helper ? { helper } : {}),
+  };
+}
+
+/**
+ * The result as a compiler prints it: per issue `file:line:column`, the rule and the message, the line of JSX with a
+ * caret under the spot, and the fix; then the summary.
+ */
+export function formatLayout(result: LayoutCheckResult): string {
+  const blocks = result.issues.map((i) => {
+    const where = i.source ? `${i.source.file}:${i.source.line}:${i.source.column}` : `<${i.kind} id="${i.id}">`;
+    const lines = [`${where}: ${i.rule}: ${i.message}`];
+    if (i.source) {
+      const n = String(i.source.line);
+      lines.push(`  ${n} | ${i.source.code}`, `  ${" ".repeat(n.length)} | ${" ".repeat(i.source.column - 1)}^${i.source.helper ? ` made by ${i.source.helper}()` : ""}`);
+    }
+    lines.push(`  fix: ${i.fix}`);
+    return lines.join("\n");
+  });
+  return [...blocks, ...result.warnings.map((w) => `warning: ${w}`), result.summary].join("\n\n") + "\n";
 }
 
 /**

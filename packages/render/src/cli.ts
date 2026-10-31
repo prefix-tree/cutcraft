@@ -9,17 +9,18 @@ import type { FontWeight, OverlayFont } from "./overlays";
 import { renderVideo, type VideoCodec } from "./renderer";
 import { QUALITIES, type QualityName } from "./segment";
 import { renderStill } from "./still";
-import { SAFE_ZONES, checkLayout, type Insets, type SafeZoneName } from "./layout-check";
+import { SAFE_ZONES, checkLayout, formatLayout, type Insets, type SafeZoneName } from "./layout-check";
 
 const USAGE = `Usage: cutcut-render <file.tsx> --out <video.webm|.mp4|.mov|.mp3|.wav> [options]
        cutcut-render <file.tsx> --still <seconds> --out <image.png|.jpg> [options]
-       cutcut-render <file.tsx> --check-layout [--safe-zone <zone>] [--subject <x,y,w,h>] [options]
+       cutcut-render <file.tsx> --check-layout [--safe-zone <zone>] [--subject <x,y,w,h>] [--json] [options]
 
   --out <file>          where to write; the extension picks the container: .webm, .mp4, .mov (ProRes),
                         or .mp3/.wav for the soundtrack alone
   --still <s>           write the frame at this time as a PNG or JPEG instead of a video
-  --check-layout        print, as JSON, every overlay that leaves the frame or the safe zone, or covers captions or
-                        the subject, with the times it does; writes no file
+  --check-layout        print every overlay that leaves the frame or the safe zone, or covers captions or the
+                        subject: where it is in the file, when, and how to fix it, as a compiler does; writes no file
+  --json                print the layout check as JSON instead
   --safe-zone <zone>    tiktok, reels, shorts, title-safe (default) or action-safe, or top,right,bottom,left fractions
   --subject <x,y,w,h>   where the subject is, as fractions of the frame, for footage the manifest has no subjects for
   --step <s>            seconds between layout samples (default: every frame)
@@ -48,7 +49,7 @@ async function main(): Promise<number> {
     options: {
       out: { type: "string" }, workers: { type: "string" }, speed: { type: "string" }, keyframe: { type: "string" }, manifest: { type: "string" }, media: { type: "string" }, props: { type: "string" },
       from: { type: "string" }, to: { type: "string" }, codec: { type: "string" }, bitrate: { type: "string" }, quality: { type: "string" }, still: { type: "string" },
-      "check-layout": { type: "boolean" }, "safe-zone": { type: "string" }, subject: { type: "string" }, step: { type: "string" },
+      "check-layout": { type: "boolean" }, json: { type: "boolean" }, "safe-zone": { type: "string" }, subject: { type: "string" }, step: { type: "string" },
       silent: { type: "boolean" }, font: { type: "string", multiple: true }, tsconfig: { type: "string" },
       continue: { type: "boolean" }, copy: { type: "boolean" }, quiet: { type: "boolean" }, help: { type: "boolean", short: "h" },
     },
@@ -75,8 +76,9 @@ async function main(): Promise<number> {
       ...(values.step ? { step: Number(values.step) } : {}),
       ...(values.from ? { from: Number(values.from) } : {}),
       ...(values.to ? { to: Number(values.to) } : {}),
+      source: { file, text: readFileSync(file, "utf8") },
     });
-    process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
+    process.stdout.write(values.json ? `${JSON.stringify(result, null, 2)}\n` : formatLayout(result));
     return 0;
   }
   const out = values.out as string; // the usage check above: only --check-layout runs without --out
