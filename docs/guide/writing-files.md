@@ -218,6 +218,27 @@ function Countdown() {
 Both hooks read the player's time, so scrubbing shows the right value and
 pausing freezes it; a `setInterval` would drift and ignore seeks.
 
+To shape that time, `@cutcut/kit` exports three pure helpers. `interpolate(x,
+inputRange, outputRange, { easing, extrapolateLeft, extrapolateRight })` maps a
+value piecewise across ranges, extending past the ends unless told to
+`"clamp"`, with any keyframe easing inside. `spring({ time, from, to, mass,
+damping, stiffness, overshootClamping })` is a physical spring `time` seconds
+after it is let go (mass 1, damping 10, stiffness 100 by default). `random(seed)`
+is a number in [0, 1) fixed by its seed, so scattered things stay put from frame
+to frame. They are plain functions, so they run in the export too:
+
+```tsx
+function Badge() {
+  const { elapsed, remaining } = useLayer();
+  const scale = spring({ time: elapsed, damping: 12 });
+  const opacity = interpolate(remaining, [0, 0.4], [0, 1], { extrapolateRight: "clamp" });
+  return <div style={{ transform: `scale(${scale})`, opacity }}>New</div>;
+}
+```
+
+A `<Keyframe>` can ease with `"spring"` too: the default spring, settling as
+the next key arrives.
+
 The interior's body is opaque to the editor, but its props are not. A Layer
 whose interior is exactly one component gets *handles*: that component's
 literal props are editable (`layer/setProps`), props that reference a

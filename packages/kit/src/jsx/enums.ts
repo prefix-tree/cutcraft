@@ -14,7 +14,7 @@ export const BLEND_MODES = [
 ] as const;
 
 export const EASINGS = [
-  "linear", "ease", "ease-in", "ease-out", "ease-in-out", "hold", "bezier", "smoothstep", "smootherstep", "snappy", "smooth",
+  "linear", "ease", "ease-in", "ease-out", "ease-in-out", "hold", "bezier", "smoothstep", "smootherstep", "snappy", "smooth", "spring",
   "easeInQuad", "easeOutQuad", "easeInOutQuad",
   "easeInCubic", "easeOutCubic", "easeInOutCubic",
   "easeInQuart", "easeOutQuart", "easeInOutQuart",

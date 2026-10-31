@@ -8,6 +8,16 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- `interpolate()`, `spring()` and `random()` for `<Layer>` code, exported from `@cutcut/kit`: a
+  piecewise map across ranges with easing and clamping, a physical spring in seconds (mass,
+  damping, stiffness, overshoot clamping), and a number fixed by its seed. They are pure, so they
+  run under the export's Satori too. Keyframes and speed keys take a `"spring"` easing.
+
+- `@cutcut/render` writes `.mov` (ProRes with 16-bit PCM), the soundtrack alone to `.mp3` or
+  `.wav`, and one frame to a PNG or JPEG (`renderStill`, `--still <seconds>`). `quality`
+  (`--quality`) takes an encoder preset in place of a bitrate, and a codec the container cannot
+  hold is refused with the ones it can.
+
 - `<SpeedKey>` ramps and `<Freeze>` holds set a clip's length and its captions' times. A ramp
   times the clip by how long it takes to play its source, and a `duration` sets how much source it
   plays. A freeze is an insert hold: the held frame shows for `duration`, the rest of the clip plays
@@ -191,6 +201,9 @@ All notable changes to this project are documented here. The format follows
 
 ### Fixed
 
+- Keyframes on `effect.<id>.<param>`, `colorGrade.temperature` and `colorGrade.tint`, and
+  `audio.pan` animate in the preview and the export; they were accepted and ignored. Path
+  keyframes and a keyframe's `handles` and `roving` are reported by the `not-rendered` lint.
 - The preview filtered footage under an `<Adjustment>` twice: the painter filtered the canvas and
   a CSS backdrop filter filtered it again. The backdrop filter is gone, so the preview matches the
   export: the adjustment filters the footage beneath it, not the overlays.

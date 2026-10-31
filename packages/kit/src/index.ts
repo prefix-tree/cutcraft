@@ -4,6 +4,7 @@ export * from "./jsx/capabilities";
 export * from "./jsx/rendering";
 export * from "./jsx/elements";
 export * from "./jsx/use-t";
+export * from "./jsx/animate";
 export { TRANSITION_PARAMS, defaultTransitionParams } from "./jsx/schemas/transition";
 export type { Transform } from "./jsx/schemas/common";
 

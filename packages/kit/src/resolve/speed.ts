@@ -41,6 +41,29 @@ const bounceFull: Fn = (x) => {
 /** A bounce blended toward linear by `1 - h`: `h = 1` is the full bounce, smaller values damp it. */
 const bounceOut = (h: number): Fn => (x) => x + (bounceFull(x) - x) * h;
 
+/** A spring's physics: mass, damping and stiffness, as Remotion's `spring()` takes them. */
+export interface SpringConfig { readonly mass?: number; readonly damping?: number; readonly stiffness?: number }
+
+/**
+ * Where a spring released at rest from `from` toward `to` is after `time` seconds: the closed-form
+ * damped oscillator, under-, critically or over-damped. Defaults are mass 1, damping 10, stiffness 100.
+ */
+export function springAt(time: number, from: number, to: number, { mass = 1, damping = 10, stiffness = 100 }: SpringConfig = {}): number {
+  if (time <= 0) return from;
+  const w0 = Math.sqrt(stiffness / mass), zeta = damping / (2 * Math.sqrt(stiffness * mass)), x0 = from - to;
+  if (zeta < 1) {
+    const wd = w0 * Math.sqrt(1 - zeta * zeta);
+    return to + Math.exp(-zeta * w0 * time) * (x0 * Math.cos(wd * time) + ((zeta * w0 * x0) / wd) * Math.sin(wd * time));
+  }
+  if (zeta === 1) return to + Math.exp(-w0 * time) * (x0 + w0 * x0 * time);
+  const r1 = -w0 * (zeta - Math.sqrt(zeta * zeta - 1)), r2 = -w0 * (zeta + Math.sqrt(zeta * zeta - 1));
+  return to + ((-r2 * x0) / (r1 - r2)) * Math.exp(r1 * time) + ((r1 * x0) / (r1 - r2)) * Math.exp(r2 * time);
+}
+
+/** The default spring squeezed into 0..1: it settles (to about 0.1%) at x = 1, overshooting about 16% on the way. */
+const SPRING_SETTLE = Math.log(1000) / 5;
+const springEase: Fn = (x) => (x >= 1 ? 1 : springAt(x * SPRING_SETTLE, 0, 1));
+
 const quadIn = pow(2), cubicIn = pow(3), quartIn = pow(4), quintIn = pow(5);
 const back = backIn(1.70158), backStrong = backIn(2.6);
 const elastic = elasticIn(3), elasticSoft = elasticIn(4.5);
@@ -58,6 +81,7 @@ export const EASING_FN: Readonly<Record<Easing, Fn>> = {
   smootherstep: (x) => x * x * x * (x * (x * 6 - 15) + 10),
   snappy: bezier(0.2, 0.9, 0.3, 1),
   smooth: inOut(sineIn),
+  spring: springEase,
   easeInQuad: quadIn, easeOutQuad: out(quadIn), easeInOutQuad: inOut(quadIn),
   easeInCubic: cubicIn, easeOutCubic: out(cubicIn), easeInOutCubic: inOut(cubicIn),
   easeInQuart: quartIn, easeOutQuart: out(quartIn), easeInOutQuart: inOut(quartIn),

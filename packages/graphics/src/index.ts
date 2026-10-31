@@ -12,6 +12,7 @@ import { hash } from "./util";
 
 export type { Drawn, GraphicContext, GraphicKind, KindCategory, Label } from "./types";
 export { iconNames, isIcon } from "./kinds/icon";
+export { hash, random } from "./util";
 
 /** Every built-in kind, in catalog order. */
 export const GRAPHIC_KINDS = {

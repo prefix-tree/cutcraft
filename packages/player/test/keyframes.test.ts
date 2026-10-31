@@ -27,6 +27,16 @@ describe("keyframedValue", () => {
     expect(keyframedValue(kids, "transform.opacity", 1.5, 0)).toBeCloseTo(0.75);
   });
 
+  it("eases with a spring, overshooting before it lands", () => {
+    const s = makeState({ tracks: [{ id: "main", items: [{ id: "c", kind: "clip", source: { in: 0, out: 5, asset: "a" }, children: [
+      { id: "a", kind: "keyframe", props: { property: "transform.scale.x", at: 0, value: 0, easing: "spring" } },
+      { id: "b", kind: "keyframe", props: { property: "transform.scale.x", at: 1, value: 2 } },
+    ] }] }] });
+    const k = childrenOf(s, "c");
+    expect(keyframedValue(k, "transform.scale.x", 0.3, 0)).toBeGreaterThan(2);
+    expect(keyframedValue(k, "transform.scale.x", 1, 0)).toBe(2);
+  });
+
   it("steps non-numeric values", () => {
     expect(keyframedValue(kids, "path", 0.9, "")).toBe("M0 0");
     expect(keyframedValue(kids, "path", 1, "")).toBe("M1 1");
@@ -39,7 +49,7 @@ describe("easings", () => {
       expect(fn(0), name).toBeCloseTo(0, 5);
       expect(fn(1), name).toBeCloseTo(1, 5);
     }
-    expect(Object.keys(EASING_FN)).toHaveLength(50);
+    expect(Object.keys(EASING_FN)).toHaveLength(51);
   });
 
   it("warns once on an unknown easing and uses linear", () => {

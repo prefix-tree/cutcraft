@@ -80,6 +80,7 @@ Every action in the spec is registered, applies, and round-trips through
 undo/redo against `fixtures/sample.tsx` (which uses every element).
 There is
 no renderer: `useT()` and `useLayer()` throw until a Player installs one.
+`interpolate()`, `spring()` and `random()` are pure and work anywhere.
 
 ```
 pnpm typecheck
