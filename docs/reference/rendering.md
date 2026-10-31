@@ -29,6 +29,9 @@ No value means any value except one that asks for nothing (`false`, `0`, `"none"
 | `<Keyframe>` | `property` | `transform.rotation.x` | is ignored: 3D transforms are not rendered |
 | `<Keyframe>` | `property` | `transform.rotation.y` | is ignored: 3D transforms are not rendered |
 | `<Keyframe>` | `property` | `transform.perspective` | is ignored: 3D transforms are not rendered |
+| `<Keyframe>` | `property` | `path` | is ignored: paths do not animate |
+| `<Keyframe>` | `handles` |  | is ignored: the segment follows its easing |
+| `<Keyframe>` | `roving` |  | is ignored: the key stays at its time |
 | `<Clip>` | `chromaKey` |  | is ignored: the green screen stays in the picture |
 | `<Clip>` | `stabilize` |  | is ignored: the footage renders unstabilised |
 | `<Clip>` | `behindSubject` |  | is ignored: the clip draws in its track order |

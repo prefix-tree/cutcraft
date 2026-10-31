@@ -45,8 +45,8 @@ export function buildAudioPlan(state: ResolvedState, from: number, to: number, r
       if (!asset || asset.kind === "image" || (asset.kind === "video" && !asset.audio)) continue;
       const reverse = p.props.reverse === true;
       const envelope = buildGainEnvelope(p, track, state, p.start, p.end);
-      const pan = panEnvelope(p);
       const children = p.children.map((id) => state.items.get(id)).filter((c): c is Placement => c !== undefined);
+      const pan = panEnvelope(p, children);
       for (const chunk of chunksOf(p, src, reverse, speedKeysOf(children), freezeHoldsOf(children))) {
         if (chunk.compEnd <= from || chunk.compStart >= to) continue;
         out.push({
@@ -231,7 +231,14 @@ function hasSound(state: ResolvedState, p: Placement): boolean {
   return asset !== null && asset.kind !== "image" && (asset.kind === "audio" || asset.audio !== undefined) && p.props.volume !== 0;
 }
 
-function panEnvelope(p: Placement): GainPoint[] | undefined {
+/** Pan over the placement: its `audio.pan` keyframes (sampled inside each segment), else `automation.pan`; keyframes win when both are written. */
+function panEnvelope(p: Placement, children: readonly Placement[]): GainPoint[] | undefined {
+  const ats = children.filter((c) => c.kind === "keyframe" && c.props.property === "audio.pan").map((k) => Number(k.props.at ?? 0)).sort((a, b) => a - b);
+  if (ats.length > 0) {
+    const rels = new Set(ats);
+    for (let i = 0; i < ats.length - 1; i++) for (let r = ats[i]! + ENVELOPE_STEP_S; r < ats[i + 1]!; r += ENVELOPE_STEP_S) rels.add(r);
+    return [...rels].sort((a, b) => a - b).map((rel) => [round(p.start + rel), round(Number(keyframedValue(children, "audio.pan", rel, 0)))] as const);
+  }
   const automation = (p.props.automation as { pan?: [number, number][] } | undefined)?.pan;
   if (!automation || automation.length === 0) return undefined;
   return [...automation].sort((x, y) => x[0] - y[0]).map(([rel, v]) => [round(p.start + rel), v] as const);

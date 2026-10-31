@@ -124,6 +124,18 @@ describe("buildGainEnvelope", () => {
     expect(env).toEqual([[0, 0.5], [2, 0], [4, 0]]);
   });
 
+  it("pans by audio.pan keyframes, sampled inside each segment, over automation", () => {
+    const s = makeState({ tracks: [{ id: "a", layout: "free", items: [{ id: "x", kind: "audio", start: 1, source: { in: 0, out: 4, asset: "tone" }, props: { automation: { pan: [[0, 1]] } }, children: [
+      { id: "k1", kind: "keyframe", props: { property: "audio.pan", at: 0, value: -1 } },
+      { id: "k2", kind: "keyframe", props: { property: "audio.pan", at: 2, value: 1 } },
+    ] }] }] });
+    const pan = buildAudioPlan(s, 0, 5)[0]!.pan!;
+    expect(pan[0]).toEqual([1, -1]);
+    expect(pan.at(-1)).toEqual([3, 1]);
+    expect(pan.find(([t]) => t === 2)?.[1]).toBeCloseTo(0);
+    expect(pan.length).toBeGreaterThan(3);
+  });
+
   it("multiplies nested volume into inner occurrences", () => {
     const inner = makeState({ tracks: [{ id: "i", items: [{ id: "ic", kind: "clip", source: { in: 0, out: 4, asset: "a" }, props: { volume: 0.5 } }] }] });
     const outer = makeState({ tracks: [{ id: "main", items: [{ id: "n", kind: "nested", source: { in: 1, out: 3, asset: "nested" }, duration: 2, props: { of: () => null, volume: 0.5 } }] }] });

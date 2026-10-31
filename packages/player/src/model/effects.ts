@@ -1,5 +1,6 @@
 import type { Placement, RENDERED_EFFECTS } from "@cutcut/kit";
 import { devWarn } from "../warn";
+import { keyframedValue } from "./keyframes";
 
 export interface FilterResult { readonly filter: string; readonly unsupported: readonly string[] }
 
@@ -44,8 +45,23 @@ const CANVAS_FILTERABLE: Readonly<Record<Exclude<(typeof RENDERED_EFFECTS)[numbe
   shadow: (p) => `drop-shadow(${num(p, ["x"], 0)}px ${num(p, ["y"], 4)}px ${num(p, ["blur"], 8)}px ${typeof p.color === "string" ? p.color : "rgba(0,0,0,0.5)"})`,
 };
 
-/** A single canvas/CSS `filter` string for an element's effect and colour-grade children; unsupported types are listed. */
-export function filterString(children: readonly Placement[], elementId: string): FilterResult {
+/** An effect's params with its keyframed ones (`effect.<id>.<param>` keyframes on the element) evaluated at element-relative `rel`. */
+function paramsAt(children: readonly Placement[], effect: Placement, rel: number): Params {
+  const base = (effect.props.params ?? {}) as Params;
+  const prefix = `effect.${effect.id}.`;
+  let out: Record<string, unknown> | null = null;
+  for (const k of children) {
+    const property = k.kind === "keyframe" ? String(k.props.property) : "";
+    if (!property.startsWith(prefix)) continue;
+    const name = property.slice(prefix.length);
+    out ??= { ...base };
+    out[name] = keyframedValue(children, property, rel, base[name]);
+  }
+  return out ?? base;
+}
+
+/** A single canvas/CSS `filter` string for an element's effect and colour-grade children at element-relative `rel`; unsupported types are listed. */
+export function filterString(children: readonly Placement[], elementId: string, rel: number): FilterResult {
   const parts: string[] = [];
   const unsupported: string[] = [];
   for (const c of children) {
@@ -55,14 +71,17 @@ export function filterString(children: readonly Placement[], elementId: string):
       if ((POST_TYPES as readonly string[]).includes(type)) continue;
       const make = CANVAS_FILTERABLE[type as keyof typeof CANVAS_FILTERABLE] as ((p: Params) => string) | undefined;
       if (make) {
-        const f = make((c.props.params ?? {}) as Params);
+        const f = make(paramsAt(children, c, rel));
         if (f) parts.push(f);
       } else {
         unsupported.push(type);
         devWarn(`effect:${elementId}:${type}`, `effect "${type}" on "${elementId}" is not rendered by the browser player`);
       }
     } else if (c.kind === "colorGrade") {
-      parts.push(...colorGradeFilters(c.props));
+      parts.push(...colorGradeFilters({
+        temperature: keyframedValue(children, "colorGrade.temperature", rel, c.props.temperature),
+        tint: keyframedValue(children, "colorGrade.tint", rel, c.props.tint),
+      }));
     }
   }
   return { filter: parts.join(" "), unsupported };
@@ -71,11 +90,11 @@ export function filterString(children: readonly Placement[], elementId: string):
 export type PostEffect = { readonly type: "vignette"; readonly amount: number } | { readonly type: "grain"; readonly amount: number; readonly seed: number };
 
 /** Vignette and grain, in order, with `amount` on 0..1; grain is seeded by the frame, so a frame always looks the same. */
-export function postEffects(children: readonly Placement[], frame: number): PostEffect[] | undefined {
+export function postEffects(children: readonly Placement[], frame: number, rel: number): PostEffect[] | undefined {
   const out: PostEffect[] = [];
   for (const c of children) {
     if (c.kind !== "effect" || c.props.enabled === false) continue;
-    const amount = Math.max(0, Math.min(1, num((c.props.params ?? {}) as Params, ["amount", "intensity", "value"], c.props.type === "grain" ? 20 : 50) / 100));
+    const amount = Math.max(0, Math.min(1, num(paramsAt(children, c, rel), ["amount", "intensity", "value"], c.props.type === "grain" ? 20 : 50) / 100));
     if (amount <= 0) continue;
     if (c.props.type === "vignette") out.push({ type: "vignette", amount });
     else if (c.props.type === "grain") out.push({ type: "grain", amount, seed: frame });

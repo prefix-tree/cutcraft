@@ -142,6 +142,22 @@ describe("buildFramePlan", () => {
     expect(level(0.6)).toBeCloseTo(1);
   });
 
+  it("animates effect params and colour grade by their keyframes", () => {
+    const s = makeState({ width: 640, height: 360, tracks: [{ id: "main", items: [{ id: "c", kind: "clip", source: { in: 0, out: 4, asset: "a" }, children: [
+      { id: "b", kind: "effect", props: { type: "blur", params: { radius: 2 } } },
+      { id: "v", kind: "effect", props: { type: "vignette" } },
+      { id: "g", kind: "colorGrade", props: { temperature: 0 } },
+      { id: "k1", kind: "keyframe", props: { property: "effect.b.radius", at: 0, value: 0 } },
+      { id: "k2", kind: "keyframe", props: { property: "effect.b.radius", at: 2, value: 8 } },
+      { id: "k3", kind: "keyframe", props: { property: "effect.v.amount", at: 2, value: 80 } },
+      { id: "k4", kind: "keyframe", props: { property: "colorGrade.temperature", at: 0, value: 0 } },
+      { id: "k5", kind: "keyframe", props: { property: "colorGrade.temperature", at: 2, value: 40 } },
+    ] }] }] });
+    expect(buildFramePlan(s, 0).ops[0]!.filter).toBe("blur(0px)");
+    expect(buildFramePlan(s, 1).ops[0]).toMatchObject({ filter: "blur(4px) sepia(0.1)", post: [{ type: "vignette", amount: 0.8 }] });
+    expect(buildFramePlan(s, 3).ops[0]!.filter).toBe("blur(8px) sepia(0.2)");
+  });
+
   it("blurs the first footage behind everything, unless an overlay sits beneath the footage", () => {
     const main = { id: "main", items: [{ id: "c", kind: "clip", source: { in: 0, out: 4, asset: "a" } }, { id: "d", kind: "clip", source: { in: 0, out: 4, asset: "b" } }] };
     const blurred = buildFramePlan(makeState({ background: { mode: "blur" }, tracks: [main] }), 1);

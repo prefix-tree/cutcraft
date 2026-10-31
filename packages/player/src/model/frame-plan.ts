@@ -96,7 +96,7 @@ export function buildFramePlan(state: ResolvedState, t: number, resolveNested?: 
       if (op && dip) ops.push(dipOp(item.transition!.placement, dip, comp.width, comp.height));
     } else if (p.kind === "adjustment") {
       if (p.props.enabled === false) continue;
-      const { filter } = filterString(item.children, p.id);
+      const { filter } = filterString(item.children, p.id, t - p.start);
       if (ops.length === 0) continue;
       ops.push({
         id: p.id, kind: "adjustment", rect: { x: 0, y: 0, w: comp.width, h: comp.height }, matrix: { a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 },
@@ -139,9 +139,9 @@ function mediaOp(state: ResolvedState, item: VisibleItem, t: number, resolveNest
     look = transitionLook(item.transition, comp.width, comp.height);
     opacity *= look.opacity;
   }
-  const { filter } = filterString(item.children, p.id);
+  const { filter } = filterString(item.children, p.id, rel);
   const mask = maskOf(item.children, warnings);
-  const post = postEffects(item.children, frameIndex(t, comp.fps));
+  const post = postEffects(item.children, frameIndex(t, comp.fps), rel);
   const common = { id: p.id, fit, opacity, blend: blendOf(p.props.blend), filter, borderRadius: transform.borderRadius ?? 0, ...(mask ? { mask } : {}), ...(look?.clip ? { clip: look.clip } : {}), ...(post ? { post } : {}) };
   const shift = (m: Matrix2D): Matrix2D => (look?.offset ? multiply(translate(look.offset.x, look.offset.y), m) : m);
 

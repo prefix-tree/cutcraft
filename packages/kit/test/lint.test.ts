@@ -119,6 +119,11 @@ describe("lint", () => {
         .toEqual(['warning:lv.params: "lv" <Effect> params.gamma is ignored: levels render their black and white points only']);
     });
 
+    it("warns on path keyframes and on keyframe handles and roving, which do not render", () => {
+      expect(notRendered('<Track id="t"><Clip id="c" src="asset:city"><Keyframe id="p" property="path" at={0} value="M0 0" /><Keyframe id="h" property="transform.opacity" at={0} value={1} handles={{ in: { x: 0, y: 0 }, out: { x: 1, y: 1 } }} roving /><Keyframe id="f" property="effect.e.radius" at={0} value={2} /></Clip></Track>').map((d) => d.split(":")[1]))
+        .toEqual(["p.property", "h.handles", "h.roving"]);
+    });
+
     it("warns on an overlay's blend, which mixes with the footage in the export only", () => {
       expect(notRendered('<Track id="t"><Clip id="c" src="asset:city" blend="screen" /><Title id="h" blend="screen">Hi</Title><Title id="n" blend="normal">Hi</Title></Track>'))
         .toEqual(['warning:h.blend: "h" <Title> blend "screen" blends with the footage in the export only: the preview draws it unblended over the footage']);
