@@ -1,7 +1,7 @@
 import { createRequire } from "node:module";
 import type { ResolvedState } from "@cutcut/kit";
 import { BUNDLED_FONTS, BUNDLED_FONT_WEIGHTS, installLayerClock } from "@cutcut/kit";
-import { backdropTracks, isVisibleAt, visiblePlacements, type MediaResolver, type VisibleItem } from "@cutcut/player/engine";
+import { backdropTracks, isVisibleAt, visiblePlacements, type DrawRect, type MediaResolver, type VisibleItem } from "@cutcut/player/engine";
 import {
   OVERLAY_KINDS, captionsContent, graphicDrawing, graphicLabels, iconStickerDrawing, parseSvg, serialize, shapeDrawing, svgDrawing, layerClock, layerContent, overlayLayout, stickerPlaceholder, stickerSize, titleBox, titleContent,
   type ElementProps, type GraphicDrawing, type OverlayLayout,
@@ -38,6 +38,46 @@ const LAYOUT_CACHE = 32;
 /** How much layout work the plane did: Satori runs against pictures reused from earlier frames. */
 export interface OverlayStats { layouts: number; reused: number }
 
+/** Where an overlay's visible pixels fall at one moment: a box in composition pixels, which may reach past the frame. */
+export interface OverlayBounds {
+  readonly id: string;
+  readonly kind: string;
+  readonly rect: DrawRect;
+  /** On a track beneath the footage. */
+  readonly backdrop: boolean;
+}
+
+/** Below this opacity an element counts as not showing. */
+const VISIBLE_OPACITY = 0.1;
+/** Pictures are scanned for their ink at most this many pixels on a side: a few pixels of slack at 1080p. */
+const INK_SIDE = 512;
+const INK_ALPHA = 8;
+const inkCache = new WeakMap<Image | Canvas, Box | null>();
+
+/** The part of a picture that is not transparent, as fractions of its size; null when it is all transparent. */
+function inkOf(image: Image | Canvas): Box | null {
+  const hit = inkCache.get(image);
+  if (hit !== undefined) return hit;
+  const s = Math.min(1, INK_SIDE / Math.max(image.width, image.height, 1));
+  const w = Math.max(1, Math.round(image.width * s)), h = Math.max(1, Math.round(image.height * s));
+  const ctx = new Canvas(w, h).getContext("2d");
+  ctx.drawImage(image, 0, 0, w, h);
+  const data = ctx.getImageData(0, 0, w, h).data;
+  let x0 = w, y0 = h, x1 = -1, y1 = -1;
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      if ((data[(y * w + x) * 4 + 3] as number) <= INK_ALPHA) continue;
+      if (x < x0) x0 = x;
+      if (x > x1) x1 = x;
+      if (y < y0) y0 = y;
+      if (y > y1) y1 = y;
+    }
+  }
+  const ink = x1 < 0 ? null : { x: x0 / w, y: y0 / h, w: (x1 + 1 - x0) / w, h: (y1 + 1 - y0) / h };
+  inkCache.set(image, ink);
+  return ink;
+}
+
 /**
  * The overlay plane in Node: titles, layers and captions are laid out by
  * Satori from the same React trees the browser mounts; shapes and SVG are
@@ -56,6 +96,8 @@ export class OverlayPlane {
   /** Layer interiors that never read the clock: one picture serves every frame. */
   private readonly steady = new Set<string>();
   private clockRead = false;
+  /** Set while `bounds` runs: `place` records where the element's ink lands instead of drawing it. */
+  private measuring: { readonly id: string; readonly kind: string; readonly backdrop: boolean; readonly out: OverlayBounds[] } | null = null;
   readonly stats: OverlayStats = { layouts: 0, reused: 0 };
 
   constructor(private readonly options: OverlayOptions) {
@@ -92,6 +134,35 @@ export class OverlayPlane {
         ctx.drawImage(image, 0, 0, comp.width, comp.height);
       });
     }
+  }
+
+  /**
+   * Where each overlay visible at `t` shows, captions included: the box around its non-transparent pixels after its
+   * layout, entrance or exit, and transform, in composition pixels. Elements fainter than 10% opacity are left out.
+   */
+  async bounds(t: number): Promise<OverlayBounds[]> {
+    const { state } = this.options;
+    const comp = state.composition;
+    const backdrop = backdropTracks(state);
+    const out: OverlayBounds[] = [];
+    const scratch = new Canvas(1, 1).getContext("2d");
+    for (const item of visiblePlacements(state, t)) {
+      if (!OVERLAY_KINDS.has(item.placement.kind)) continue;
+      this.measuring = { id: item.placement.id, kind: item.placement.kind, backdrop: backdrop.has(item.track.id), out };
+      try {
+        await this.guard(item.placement.id, () => this.drawItem(scratch, item, t));
+      } finally {
+        this.measuring = null;
+      }
+    }
+    for (const captions of state.items.values()) {
+      if (captions.kind !== "captions") continue;
+      await this.guard(captions.id, async () => {
+        const ink = inkOf(await this.layoutImage(captionsContent({ placement: captions, state, time: t }), comp.width, comp.height));
+        if (ink) out.push({ id: captions.id, kind: "captions", backdrop: false, rect: { x: ink.x * comp.width, y: ink.y * comp.height, w: ink.w * comp.width, h: ink.h * comp.height } });
+      });
+    }
+    return out;
   }
 
   dispose(): void {
@@ -210,6 +281,7 @@ export class OverlayPlane {
 
   /** Draws `image` into `box` (default: the layout rect) under the element's matrix, opacity, filter, blend and corner radius. */
   private place(ctx: CanvasRenderingContext2D, layout: OverlayLayout, image: Image | Canvas, box?: Box, extraFilter: string | null = null): void {
+    if (this.measuring) { this.record(this.measuring, layout, image, box); return; }
     const { rect, matrix: m } = layout;
     ctx.save();
     ctx.setTransform(m.a, m.b, m.c, m.d, m.e, m.f);
@@ -231,6 +303,30 @@ export class OverlayPlane {
     const b = box ?? { x: 0, y: 0, w: rect.w, h: rect.h };
     ctx.drawImage(image, b.x, b.y, b.w, b.h);
     ctx.restore();
+  }
+
+  /** What `place` would draw, as the box around its ink in composition pixels. */
+  private record(m: NonNullable<OverlayPlane["measuring"]>, layout: OverlayLayout, image: Image | Canvas, box?: Box): void {
+    if (layout.opacity < VISIBLE_OPACITY) return;
+    const ink = inkOf(image);
+    if (!ink) return;
+    const b = box ?? { x: 0, y: 0, w: layout.rect.w, h: layout.rect.h };
+    let x0 = b.x + ink.x * b.w, y0 = b.y + ink.y * b.h, x1 = x0 + ink.w * b.w, y1 = y0 + ink.h * b.h;
+    if (layout.clip) {
+      // A wipe or reveal shows only these rectangles: keep the ink inside the box around them.
+      if (layout.clip.length === 0) return;
+      x0 = Math.max(x0, Math.min(...layout.clip.map((r) => r.x)));
+      y0 = Math.max(y0, Math.min(...layout.clip.map((r) => r.y)));
+      x1 = Math.min(x1, Math.max(...layout.clip.map((r) => r.x + r.w)));
+      y1 = Math.min(y1, Math.max(...layout.clip.map((r) => r.y + r.h)));
+      if (x1 <= x0 || y1 <= y0) return;
+    }
+    // shortcut: a rotated element is measured by the upright box around its rotated ink box, a little generous; trace the ink in composition space if that reports false overlaps.
+    const { a, b: mb, c, d, e, f } = layout.matrix;
+    const xs = [x0, x1, x0, x1].map((x, i) => a * x + c * (i < 2 ? y0 : y1) + e);
+    const ys = [x0, x1, x0, x1].map((x, i) => mb * x + d * (i < 2 ? y0 : y1) + f);
+    const left = Math.min(...xs), top = Math.min(...ys);
+    m.out.push({ id: m.id, kind: m.kind, backdrop: m.backdrop, rect: { x: left, y: top, w: Math.max(...xs) - left, h: Math.max(...ys) - top } });
   }
 
   /** Satori: a React tree laid out in a `width`×`height` box, as an image. Trees of plain elements are remembered by content. */

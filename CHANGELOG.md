@@ -8,6 +8,13 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- `checkLayout` (`cutcut-render --check-layout`) samples every frame and reports each overlay that
+  leaves the frame, leaves a safe zone (`tiktok`, `reels`, `shorts`, `title-safe`, `action-safe` or
+  custom margins), covers captions, or covers the subject, as runs with the element's id and the
+  first and last offending time. It measures the pixels an element draws, after its animation and
+  transform. Subjects come from a new manifest field, `subjects` (boxes over source time), mapped
+  through each clip's crop, fit and transform, or from a fixed region for footage without them.
+
 - `interpolate()`, `spring()` and `random()` for `<Layer>` code, exported from `@cutcut/kit`: a
   piecewise map across ranges with easing and clamping, a physical spring in seconds (mass,
   damping, stiffness, overshoot clamping), and a number fixed by its seed. They are pure, so they

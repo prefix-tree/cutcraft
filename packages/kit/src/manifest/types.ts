@@ -20,7 +20,12 @@ export interface AssetEntry {
   readonly shots?: readonly Shot[];
   readonly silences?: readonly Silence[];
   readonly waveform?: WaveformSummary;
+  /** Where the subject (a face, a person) sits in the picture, sampled over time; several boxes may share a `t`. */
+  readonly subjects?: readonly SubjectBox[];
 }
+
+/** A subject's box at source second `t`, as fractions of the source picture (0..1 from its top left). */
+export interface SubjectBox { readonly t: number; readonly x: number; readonly y: number; readonly w: number; readonly h: number }
 
 export interface TranscriptWord {
   readonly i: number;

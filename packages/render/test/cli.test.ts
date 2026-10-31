@@ -54,6 +54,15 @@ describe("cutcut-render", () => {
     expect(q.stderr).toContain("pass one");
   });
 
+  it("checks the layout and prints the issues as JSON", () => {
+    const r = run(composition, "--media", mediaDir, "--check-layout", "--safe-zone", "0.1,0.1,0.1,0.1", "--subject", "0.4,0.2,0.2,0.6", "--step", "0.5");
+    expect(r.status).toBe(0);
+    const result = JSON.parse(r.stdout) as { samples: number; issues: { rule: string; id: string; from: number; to: number }[] };
+    expect(result.samples).toBe(14);
+    for (const i of result.issues) expect(i.to).toBeGreaterThanOrEqual(i.from);
+    expect(run(composition, "--check-layout", "--safe-zone", "nowhere").stderr).toContain("--safe-zone wants tiktok");
+  });
+
   it("explains a missing asset and exits non-zero", () => {
     const r = run(composition, "--media", join(dir, "nowhere"), "--out", join(dir, "x.webm"), "--to", "1", "--quiet");
     expect(r.status).toBe(1);

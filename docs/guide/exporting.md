@@ -138,6 +138,39 @@ falling back.
 `pnpm --filter @cutcut/render bench` measures these on your machine, with the
 time per frame spent in each stage.
 
+## Checking the layout
+
+`--check-layout` samples every frame (or every `--step` seconds) and reports
+each overlay that leaves the frame, leaves the safe zone, covers the captions
+or covers the subject, with the first and last time it does. It measures the
+pixels each element actually draws (titles, shapes, SVG, stickers, graphics,
+layers and captions) after its entrance, exit, keyframes and transform, so a
+slide that crosses the edge between two spot checks is caught. It writes no
+file and prints JSON:
+
+```sh
+cutcut-render video.tsx --check-layout --safe-zone tiktok --subject 0.2,0.18,0.6,0.37
+```
+
+```json
+{ "issues": [{ "rule": "captions", "id": "stat", "kind": "title", "with": "caps", "from": 4.2, "to": 5.03 }], "samples": 900, "warnings": [] }
+```
+
+| Rule | |
+|---|---|
+| `frame-edge` | Part of the element is outside the frame. |
+| `safe-zone` | Inside the frame but outside the zone; `with` names it. `--safe-zone` takes `tiktok`, `reels`, `shorts` (the platforms' published zones for 1080×1920), `title-safe` (the default) or `action-safe`, or `top,right,bottom,left` fractions. |
+| `captions` | The element overlaps a captions line; `with` is the captions element. |
+| `subject` | The element overlaps the subject. |
+
+The subject comes from the manifest: an asset's `subjects` are boxes sampled
+over its source time, as fractions of its picture (`{ t, x, y, w, h }`), and
+the check maps them through each clip's crop, fit and transform. Footage whose
+manifest entry has none uses `--subject x,y,w,h`, fractions of the frame,
+while it is on screen. Overlays beneath the footage and ones that fill the
+frame (backgrounds) are not checked, and neither is an element fainter than
+10%. From code: `checkLayout({ state, media, interiors, safeZone, subject })`.
+
 ## Checking an export
 
 The test media's source video paints its frame number into a strip, and the

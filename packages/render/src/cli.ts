@@ -9,13 +9,20 @@ import type { FontWeight, OverlayFont } from "./overlays";
 import { renderVideo, type VideoCodec } from "./renderer";
 import { QUALITIES, type QualityName } from "./segment";
 import { renderStill } from "./still";
+import { SAFE_ZONES, checkLayout, type Insets, type SafeZoneName } from "./layout-check";
 
 const USAGE = `Usage: cutcut-render <file.tsx> --out <video.webm|.mp4|.mov|.mp3|.wav> [options]
        cutcut-render <file.tsx> --still <seconds> --out <image.png|.jpg> [options]
+       cutcut-render <file.tsx> --check-layout [--safe-zone <zone>] [--subject <x,y,w,h>] [options]
 
   --out <file>          where to write; the extension picks the container: .webm, .mp4, .mov (ProRes),
                         or .mp3/.wav for the soundtrack alone
   --still <s>           write the frame at this time as a PNG or JPEG instead of a video
+  --check-layout        print, as JSON, every overlay that leaves the frame or the safe zone, or covers captions or
+                        the subject, with the times it does; writes no file
+  --safe-zone <zone>    tiktok, reels, shorts, title-safe (default) or action-safe, or top,right,bottom,left fractions
+  --subject <x,y,w,h>   where the subject is, as fractions of the frame, for footage the manifest has no subjects for
+  --step <s>            seconds between layout samples (default: every frame)
   --manifest <file>     asset manifest JSON (default: the file's \`manifest\` export)
   --media <dir>         folder holding one file per asset id (default: the file's folder)
   --props <json>        props for the file's component
@@ -41,12 +48,13 @@ async function main(): Promise<number> {
     options: {
       out: { type: "string" }, workers: { type: "string" }, speed: { type: "string" }, keyframe: { type: "string" }, manifest: { type: "string" }, media: { type: "string" }, props: { type: "string" },
       from: { type: "string" }, to: { type: "string" }, codec: { type: "string" }, bitrate: { type: "string" }, quality: { type: "string" }, still: { type: "string" },
+      "check-layout": { type: "boolean" }, "safe-zone": { type: "string" }, subject: { type: "string" }, step: { type: "string" },
       silent: { type: "boolean" }, font: { type: "string", multiple: true }, tsconfig: { type: "string" },
       continue: { type: "boolean" }, copy: { type: "boolean" }, quiet: { type: "boolean" }, help: { type: "boolean", short: "h" },
     },
   });
   const [file] = positionals;
-  if (values.help || !file || !values.out) {
+  if (values.help || !file || (!values.out && !values["check-layout"])) {
     process.stderr.write(USAGE);
     return values.help ? 0 : 2;
   }
@@ -59,10 +67,23 @@ async function main(): Promise<number> {
   for (const e of loaded.state.errors) process.stderr.write(`warning: ${e.id ?? "?"}: ${e.message}\n`);
   const media = directoryResolver(resolve(values.media ?? dirname(file)), loaded.manifest);
   const fonts = (values.font ?? []).map(readFont);
+  if (values["check-layout"]) {
+    const result = await checkLayout({
+      state: loaded.state, media, interiors: loaded.interiors, fonts,
+      ...(values["safe-zone"] ? { safeZone: readZone(values["safe-zone"]) } : {}),
+      ...(values.subject ? { subject: readSubject(values.subject) } : {}),
+      ...(values.step ? { step: Number(values.step) } : {}),
+      ...(values.from ? { from: Number(values.from) } : {}),
+      ...(values.to ? { to: Number(values.to) } : {}),
+    });
+    process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
+    return 0;
+  }
+  const out = values.out as string; // the usage check above: only --check-layout runs without --out
   if (values.still !== undefined) {
     const time = Number(values.still);
     if (!Number.isFinite(time)) throw new Error(`--still wants seconds, got "${values.still}"`);
-    const still = await renderStill({ state: loaded.state, media, out: resolve(values.out), interiors: loaded.interiors, time, fonts, ...(values.continue ? { onAssetError: "continue" as const } : {}) });
+    const still = await renderStill({ state: loaded.state, media, out: resolve(out), interiors: loaded.interiors, time, fonts, ...(values.continue ? { onAssetError: "continue" as const } : {}) });
     for (const w of still.warnings) process.stderr.write(`warning: ${w}\n`);
     process.stderr.write(`${values.out}: frame ${still.frame}, ${still.width}x${still.height}\n`);
     return 0;
@@ -74,7 +95,7 @@ async function main(): Promise<number> {
   if (!Number.isFinite(workers)) throw new Error(`--workers wants a number, got "${values.workers}"`);
   if (values.speed !== undefined && values.speed !== "fast" && values.speed !== "quality") throw new Error(`--speed wants fast or quality, got "${values.speed}"`);
   const result = await renderVideo({
-    state: loaded.state, media, out: resolve(values.out), interiors: loaded.interiors,
+    state: loaded.state, media, out: resolve(out), interiors: loaded.interiors,
     ...(values.from ? { from: Number(values.from) } : {}),
     ...(values.to ? { to: Number(values.to) } : {}),
     ...(values.codec ? { videoCodec: values.codec as VideoCodec } : {}),
@@ -94,6 +115,24 @@ async function main(): Promise<number> {
   const seconds = (result.wallMs / 1000).toFixed(1);
   process.stderr.write(`${values.out}: ${result.frames} frames, ${result.width}x${result.height} at ${result.fps} fps${result.audio ? ", with sound" : ""}, in ${seconds}s${result.workers > 1 ? ` on ${result.workers} threads` : ""}${result.copiedFrames > 0 ? `, ${result.copiedFrames} frames copied` : ""} (${(result.frames / (result.wallMs / 1000)).toFixed(1)} fps)\n`);
   return 0;
+}
+
+function numbers(spec: string, flag: string): number[] {
+  const parts = spec.split(",").map(Number);
+  if (parts.length !== 4 || !parts.every((v) => Number.isFinite(v) && v >= 0 && v <= 1)) throw new Error(`${flag} wants four fractions 0..1 separated by commas, got "${spec}"`);
+  return parts;
+}
+
+function readZone(spec: string): SafeZoneName | Insets {
+  if (spec in SAFE_ZONES) return spec as SafeZoneName;
+  if (!spec.includes(",")) throw new Error(`--safe-zone wants ${Object.keys(SAFE_ZONES).join(", ")} or top,right,bottom,left, got "${spec}"`);
+  const [top = 0, right = 0, bottom = 0, left = 0] = numbers(spec, "--safe-zone");
+  return { top, right, bottom, left };
+}
+
+function readSubject(spec: string): { x: number; y: number; w: number; h: number } {
+  const [x = 0, y = 0, w = 0, h = 0] = numbers(spec, "--subject");
+  return { x, y, w, h };
 }
 
 function readFont(spec: string): OverlayFont {
