@@ -1,7 +1,7 @@
 import type { ResolvedState } from "@cutcut/kit";
 import type { ReactNode } from "react";
 import { FRAME_EPS, buildAudioPlan, captureWarnings, makeNestedResolver, type MediaResolver, type PlayerErrorEvent } from "@cutcut/player/engine";
-import { AudioSample, AudioSampleSource, EncodedVideoPacketSource, FilePathTarget, Mp4OutputFormat, Output, WebMOutputFormat, canEncodeAudio } from "mediabunny";
+import { AudioSample, AudioSampleSource, EncodedVideoPacketSource, FilePathTarget, Mp3OutputFormat, Output, WavOutputFormat, canEncodeAudio, type AudioCodec } from "mediabunny";
 import { encodeFrames } from "./encode";
 import { initEnv } from "./env";
 import { mixPlan, type MixedBlock } from "./mixer";
@@ -10,17 +10,29 @@ import { MediabunnyPcm } from "./pcm";
 import { feedCopy, planCopy, type Run } from "./copy";
 import { feedSegment, planSegments, SegmentPool, defaultWorkers, type ParallelOptions, type SegmentOutcome } from "./parallel";
 import { FramePipeline } from "./pipeline";
-import { encodeSegment, videoSource, type VideoCodec, type VideoEncoding } from "./segment";
+import { encodeSegment, outputFormat, videoSource, type QualityName, type VideoCodec, type VideoContainer, type VideoEncoding } from "./segment";
+
+export type Container = VideoContainer | "mp3" | "wav";
+const AUDIO_CODEC: Record<Container, AudioCodec> = { webm: "opus", mp4: "aac", mov: "pcm-s16", mp3: "mp3", wav: "pcm-s16" };
+
+/** The container a file name asks for: .mp4, .mov, .mp3 and .wav by extension, WebM otherwise. */
+export function containerOf(out: string): Container {
+  const ext = /\.([a-z0-9]+)$/i.exec(out)?.[1]?.toLowerCase();
+  return ext === "mp4" || ext === "mov" || ext === "mp3" || ext === "wav" ? ext : "webm";
+}
 
 export interface RenderOptions {
   readonly state: ResolvedState;
   readonly media: MediaResolver;
-  /** The file to write; its extension picks the container unless `container` is given. */
+  /** The file to write; its extension picks the container unless `container` is given. MP3 and WAV hold only the soundtrack. */
   readonly out: string;
-  readonly container?: "webm" | "mp4";
+  readonly container?: Container;
+  /** Default VP9 in WebM, AVC in MP4, ProRes in MOV. */
   readonly videoCodec?: VideoCodec;
   /** Bits per second; default about 0.1 bits per pixel per frame. */
   readonly bitrate?: number;
+  /** One of the encoder's quality presets, in place of `bitrate`. */
+  readonly quality?: QualityName;
   /** Seconds between keyframes; default 2. */
   readonly keyFrameInterval?: number;
   /** Render only this part of the composition, in composition seconds. */
@@ -53,6 +65,7 @@ export interface RenderOptions {
 }
 
 export interface RenderResult {
+  /** Pictures written: 0 for an MP3 or WAV. */
   readonly frames: number;
   /** Whether the file has an audio track. */
   readonly audio: boolean;
@@ -75,14 +88,21 @@ export async function renderVideo(options: RenderOptions): Promise<RenderResult>
   initEnv();
   const { state } = options;
   const { fps, width, height } = state.composition;
-  const container = options.container ?? (options.out.toLowerCase().endsWith(".mp4") ? "mp4" : "webm");
+  const container = options.container ?? containerOf(options.out);
+  const audioOnly = container === "mp3" || container === "wav";
+  const videoContainer: VideoContainer = audioOnly ? "webm" : container;
   const encoding: VideoEncoding = {
-    container,
-    codec: options.videoCodec ?? (container === "mp4" ? "avc" : "vp9"),
+    container: videoContainer,
+    codec: options.videoCodec ?? (container === "mp4" ? "avc" : container === "mov" ? "prores" : "vp9"),
     bitrate: options.bitrate ?? Math.round(width * height * fps * 0.1),
+    quality: options.quality,
     keyFrameInterval: options.keyFrameInterval ?? 2,
     speed: options.speed,
   };
+  if (!audioOnly && !outputFormat(videoContainer).getSupportedVideoCodecs().includes(encoding.codec)) {
+    throw new Error(`a .${container} file cannot hold ${encoding.codec} video; use ${outputFormat(videoContainer).getSupportedVideoCodecs().join(", ")}`);
+  }
+  if (audioOnly && options.silent) throw new Error(`nothing to render: a .${container} file holds only the soundtrack`);
   const from = Math.max(0, options.from ?? 0);
   const to = Math.min(state.composition.duration, options.to ?? state.composition.duration);
   const first = Math.round(from * fps);
@@ -96,23 +116,23 @@ export async function renderVideo(options: RenderOptions): Promise<RenderResult>
   captureWarnings((m) => warnings.push(m));
   const errors: PlayerErrorEvent[] = [];
   // Which frames are copied, which are rendered, and how the rendered ones are cut into runs for workers.
-  const sharedOverlays = options.smartCopy ? new OverlayPlane({ state, media: options.media, warn: (m) => warnings.push(m), ...(options.interiors ? { interiors: options.interiors } : {}), ...(options.fonts ? { fonts: options.fonts } : {}) }) : null;
+  const sharedOverlays = options.smartCopy && !audioOnly ? new OverlayPlane({ state, media: options.media, warn: (m) => warnings.push(m), ...(options.interiors ? { interiors: options.interiors } : {}), ...(options.fonts ? { fonts: options.fonts } : {}) }) : null;
   const copyPlan = sharedOverlays ? await planCopy({ state, media: options.media, overlays: sharedOverlays, codec: encoding.codec, first, last }) : null;
   const runs: readonly Run[] = copyPlan?.runs ?? [{ kind: "render", first, last }];
   const pieces: Run[] = runs.flatMap((run) => (run.kind === "copy" || wanted === 1 ? [run] : planSegments(run.first, run.last, gopFrames, wanted, options.parallel?.segmentFrames).map((r): Run => ({ kind: "render", ...r }))));
   const renderPieces = pieces.filter((p) => p.kind === "render").length;
   const threads = options.parallel && wanted > 1 && renderPieces > 1 ? Math.min(wanted, renderPieces) : 1;
   const joined = (copyPlan?.copied ?? 0) > 0 || threads > 1;
-  const output = new Output({ format: container === "mp4" ? new Mp4OutputFormat() : new WebMOutputFormat(), target: new FilePathTarget(options.out) });
+  const output = new Output({ format: container === "mp3" ? new Mp3OutputFormat() : container === "wav" ? new WavOutputFormat() : outputFormat(container), target: new FilePathTarget(options.out) });
 
   // Audio: the player's own plan, mixed by us and handed to the encoder block by block, a little ahead of the picture.
   const sampleRate = Number(state.items.get(state.composition.id)?.props.sampleRate ?? 48000);
   const plan = options.silent ? [] : buildAudioPlan(state, from, to, makeNestedResolver(() => state));
-  const audioCodec = container === "mp4" ? "aac" : "opus";
+  const audioCodec = AUDIO_CODEC[container];
   const withAudio = plan.length > 0 && (await canEncodeAudio(audioCodec, { numberOfChannels: 2, sampleRate }));
   if (plan.length > 0 && !withAudio) warnings.push(`no ${audioCodec} encoder for ${sampleRate} Hz stereo: the file has no sound`);
   const pcm = withAudio ? new MediabunnyPcm(options.media) : null;
-  const audioSource = withAudio ? new AudioSampleSource({ codec: audioCodec, bitrate: options.audioBitrate ?? 128_000 }) : null;
+  const audioSource = withAudio ? new AudioSampleSource({ codec: audioCodec, ...(audioCodec.startsWith("pcm-") ? {} : { bitrate: options.audioBitrate ?? 128_000 }) }) : null;
   const mix = pcm ? mixPlan(plan, pcm, { sampleRate, from, to }) : null;
   let mixedUntil = 0;
   let audioDone = !mix;
@@ -141,7 +161,13 @@ export async function renderVideo(options: RenderOptions): Promise<RenderResult>
   let pool: SegmentPool | null = null;
   let pipeline: FramePipeline | null = null;
   try {
-    if (joined) {
+    if (audioOnly) {
+      if (!audioSource) throw new Error(`nothing to render: ${plan.length > 0 ? `no ${audioCodec} encoder for ${sampleRate} Hz stereo` : "the composition has no sound in this range"}`);
+      output.addAudioTrack(audioSource);
+      await output.start();
+      await timed("audio", () => pumpAudio(Number.POSITIVE_INFINITY));
+      await timed("encode", () => output.finalize());
+    } else if (joined) {
       // Pieces joined in order: runs a worker (or this thread) renders and encodes, and runs copied from the source.
       // This thread writes them to the file and mixes the sound.
       const source = new EncodedVideoPacketSource(encoding.codec);
@@ -207,7 +233,7 @@ export async function renderVideo(options: RenderOptions): Promise<RenderResult>
     pcm?.dispose();
     captureWarnings(null);
   }
-  return { frames: total, audio: withAudio, fps, width, height, wallMs: performance.now() - started, workers: pool ? threads : 1, copiedFrames: copyPlan?.copied ?? 0, stagesMs: stages, warnings, errors };
+  return { frames: audioOnly ? 0 : total, audio: withAudio, fps, width, height, wallMs: performance.now() - started, workers: pool ? threads : 1, copiedFrames: copyPlan?.copied ?? 0, stagesMs: stages, warnings, errors };
 }
 
 export type { VideoCodec };

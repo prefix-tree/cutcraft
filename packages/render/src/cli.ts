@@ -7,16 +7,22 @@ import { defaultWorkers } from "./parallel";
 import { directoryResolver } from "./media";
 import type { FontWeight, OverlayFont } from "./overlays";
 import { renderVideo, type VideoCodec } from "./renderer";
+import { QUALITIES, type QualityName } from "./segment";
+import { renderStill } from "./still";
 
-const USAGE = `Usage: cutcut-render <file.tsx> --out <video.webm|video.mp4> [options]
+const USAGE = `Usage: cutcut-render <file.tsx> --out <video.webm|.mp4|.mov|.mp3|.wav> [options]
+       cutcut-render <file.tsx> --still <seconds> --out <image.png|.jpg> [options]
 
-  --out <file>          where to write; .webm or .mp4 picks the container
+  --out <file>          where to write; the extension picks the container: .webm, .mp4, .mov (ProRes),
+                        or .mp3/.wav for the soundtrack alone
+  --still <s>           write the frame at this time as a PNG or JPEG instead of a video
   --manifest <file>     asset manifest JSON (default: the file's \`manifest\` export)
   --media <dir>         folder holding one file per asset id (default: the file's folder)
   --props <json>        props for the file's component
   --from <s> --to <s>   render only this part of the composition
-  --codec <name>        vp9 (default for webm), vp8, av1, avc (default for mp4), hevc
+  --codec <name>        vp9 (default for webm), vp8, av1, avc (default for mp4), hevc, prores (default for mov)
   --bitrate <bps>       video bits per second (default: about 0.1 per pixel per frame)
+  --quality <preset>    very-low, low, medium, high or very-high, in place of --bitrate
   --speed <fast>        the encoder's real-time mode: faster, larger files at the same quality
   --workers <n>         render in n threads (default: one fewer than the cores, at most 4; 1 renders in this one)
   --copy                copy encoded pictures from the source where a cut shows nothing else (VP8/VP9 at the composition's
@@ -34,7 +40,7 @@ async function main(): Promise<number> {
     allowPositionals: true,
     options: {
       out: { type: "string" }, workers: { type: "string" }, speed: { type: "string" }, keyframe: { type: "string" }, manifest: { type: "string" }, media: { type: "string" }, props: { type: "string" },
-      from: { type: "string" }, to: { type: "string" }, codec: { type: "string" }, bitrate: { type: "string" },
+      from: { type: "string" }, to: { type: "string" }, codec: { type: "string" }, bitrate: { type: "string" }, quality: { type: "string" }, still: { type: "string" },
       silent: { type: "boolean" }, font: { type: "string", multiple: true }, tsconfig: { type: "string" },
       continue: { type: "boolean" }, copy: { type: "boolean" }, quiet: { type: "boolean" }, help: { type: "boolean", short: "h" },
     },
@@ -52,6 +58,17 @@ async function main(): Promise<number> {
   const loaded = await loadVideo(file, loadOptions);
   for (const e of loaded.state.errors) process.stderr.write(`warning: ${e.id ?? "?"}: ${e.message}\n`);
   const media = directoryResolver(resolve(values.media ?? dirname(file)), loaded.manifest);
+  const fonts = (values.font ?? []).map(readFont);
+  if (values.still !== undefined) {
+    const time = Number(values.still);
+    if (!Number.isFinite(time)) throw new Error(`--still wants seconds, got "${values.still}"`);
+    const still = await renderStill({ state: loaded.state, media, out: resolve(values.out), interiors: loaded.interiors, time, fonts, ...(values.continue ? { onAssetError: "continue" as const } : {}) });
+    for (const w of still.warnings) process.stderr.write(`warning: ${w}\n`);
+    process.stderr.write(`${values.out}: frame ${still.frame}, ${still.width}x${still.height}\n`);
+    return 0;
+  }
+  if (values.quality !== undefined && !(values.quality in QUALITIES)) throw new Error(`--quality wants ${Object.keys(QUALITIES).join(", ")}, got "${values.quality}"`);
+  if (values.quality !== undefined && values.bitrate !== undefined) throw new Error("--quality and --bitrate both set the size; pass one");
   const tty = process.stderr.isTTY && !values.quiet;
   const workers = values.workers === undefined ? defaultWorkers() : Math.max(1, Math.floor(Number(values.workers)));
   if (!Number.isFinite(workers)) throw new Error(`--workers wants a number, got "${values.workers}"`);
@@ -62,13 +79,14 @@ async function main(): Promise<number> {
     ...(values.to ? { to: Number(values.to) } : {}),
     ...(values.codec ? { videoCodec: values.codec as VideoCodec } : {}),
     ...(values.bitrate ? { bitrate: Number(values.bitrate) } : {}),
+    ...(values.quality ? { quality: values.quality as QualityName } : {}),
     ...(values.silent ? { silent: true } : {}),
     ...(values.speed === "fast" ? { speed: "fast" as const } : {}),
     ...(values.copy ? { smartCopy: true } : {}),
     ...(values.keyframe ? { keyFrameInterval: Number(values.keyframe) } : {}),
     ...(workers > 1 ? { parallel: { file: resolve(file), load: loadOptions, mediaDir: resolve(values.media ?? dirname(file)), workers } } : {}),
     ...(values.continue ? { onAssetError: "continue" as const } : {}),
-    fonts: (values.font ?? []).map(readFont),
+    fonts,
     onProgress: tty ? (p) => process.stderr.write(`\rframe ${p.frame}/${p.frames}`) : () => undefined,
   });
   if (tty) process.stderr.write("\n");

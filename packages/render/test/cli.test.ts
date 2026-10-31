@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import generateMedia, { mediaDir } from "../../player/e2e/gen-media";
 import { probe } from "./helpers/output";
@@ -41,6 +41,17 @@ describe("cutcut-render", () => {
     expect(r.stderr).toContain("15 frames");
     expect(r.status).toBe(0);
     expect(probe(out)).toMatchObject({ codec: "h264", frames: 15, audioStreams: 0 });
+  });
+
+  it("writes a still, and refuses a quality preset alongside a bitrate", () => {
+    const out = join(dir, "frame.jpg");
+    const r = run(composition, "--media", mediaDir, "--still", "1", "--out", out);
+    expect(r.stderr).toContain("frame 30, 640x360");
+    expect(r.status).toBe(0);
+    expect(readFileSync(out).subarray(0, 2)).toEqual(Buffer.from([0xff, 0xd8]));
+    const q = run(composition, "--media", mediaDir, "--out", join(dir, "q.webm"), "--quality", "high", "--bitrate", "1000000");
+    expect(q.status).toBe(1);
+    expect(q.stderr).toContain("pass one");
   });
 
   it("explains a missing asset and exits non-zero", () => {

@@ -1,6 +1,7 @@
 # Exporting
 
-`@cutcut/render` turns a file into a WebM or MP4 in Node, with no browser. It
+`@cutcut/render` turns a file into a WebM, MP4 or MOV, a soundtrack (MP3 or WAV)
+or a still (PNG or JPEG) in Node, with no browser. It
 runs the same engine as the preview (the plan, the painter, the compositor and
 the audio plan) on different surfaces, so what the preview shows is what the
 file holds. Why it is built this way is [decision 0015](/decisions/0015-a-headless-engine-renders-the-export).
@@ -16,7 +17,8 @@ pnpm --filter @cutcut/render exec cutcut-render video.tsx --manifest manifest.js
 
 | Option | |
 |---|---|
-| `--out <file>` | Where to write. `.webm` gives VP9 and Opus, `.mp4` gives H.264 and AAC. |
+| `--out <file>` | Where to write. `.webm` gives VP9 and Opus, `.mp4` H.264 and AAC, `.mov` ProRes and 16-bit PCM. `.mp3` and `.wav` hold the soundtrack alone. |
+| `--still <s>` | Write the frame at this time instead, to a `.png` or `.jpg` `--out`. |
 | `--manifest <file>` | The asset manifest. Without it the file's own `manifest` export is used. |
 | `--media <dir>` | One file per asset id, with or without an extension (`podcast.webm`, `podcast`). Default: the file's folder. |
 | `--props <json>` | Props for the file's component, over its `defaults`. |
@@ -24,8 +26,9 @@ pnpm --filter @cutcut/render exec cutcut-render video.tsx --manifest manifest.js
 | `--workers <n>` | Threads. Default: one fewer than the cores, at most four. `1` renders in the main thread. |
 | `--speed fast` | The encoder's real-time mode: much faster, larger files for the same quality. |
 | `--copy` | Smart copy, below. |
-| `--codec <name>` | `vp9`, `vp8`, `av1`, `avc`, `hevc`. |
+| `--codec <name>` | `vp9`, `vp8`, `av1`, `avc`, `hevc`, `prores`. A codec the container cannot hold (ProRes in WebM) is an error. |
 | `--bitrate <bps>` | Video bits per second. Default: about 0.1 per pixel per frame. |
+| `--quality <preset>` | `very-low`, `low`, `medium`, `high` or `very-high`: the encoder picks the bitrate for the size and codec. In place of `--bitrate`. |
 | `--keyframe <s>` | Seconds between keyframes. Default 2. |
 | `--silent` | No soundtrack. |
 | `--font Name[:weight[:style]]=file` | A font for titles, repeatable. TTF, OTF or WOFF (not WOFF2). |
@@ -37,7 +40,7 @@ A file that imports its own packages is compiled with the nearest
 ## From code
 
 ```ts
-import { defaultWorkers, directoryResolver, loadVideo, renderVideo } from "@cutcut/render";
+import { defaultWorkers, directoryResolver, loadVideo, renderStill, renderVideo } from "@cutcut/render";
 
 const video = await loadVideo("video.tsx", { manifest: "manifest.json" });
 const result = await renderVideo({
@@ -51,6 +54,9 @@ const result = await renderVideo({
   onProgress: ({ frame, frames }) => console.log(frame, frames),
 });
 // result: frames, fps, width, height, wallMs, workers, copiedFrames, stagesMs, warnings
+
+// One frame, through the same pipeline:
+await renderStill({ state: video.state, media: directoryResolver("media", video.manifest), interiors: video.interiors, out: "poster.png", time: 2 });
 ```
 
 `renderVideo` stops with an error when an asset cannot be opened or decoded,

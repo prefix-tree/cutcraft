@@ -6,4 +6,6 @@ export { envelopeAt, mixBlock, mixPlan, type MixOptions, type MixSource, type Mi
 export { OverlayPlane, inlineSvgImages, safeSvgFonts, treeKey, type OverlayFont, type OverlayOptions, type OverlayStats } from "./overlays";
 export { MediabunnyPcm } from "./pcm";
 export { defaultWorkers, planSegments, type ParallelOptions } from "./parallel";
-export { renderVideo, type RenderOptions, type RenderResult, type VideoCodec } from "./renderer";
+export { containerOf, renderVideo, type Container, type RenderOptions, type RenderResult, type VideoCodec } from "./renderer";
+export { QUALITIES, type QualityName } from "./segment";
+export { renderStill, type StillOptions, type StillResult } from "./still";

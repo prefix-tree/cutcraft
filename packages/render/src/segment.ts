@@ -1,20 +1,30 @@
 import type { ResolvedState } from "@cutcut/kit";
 import { captureWarnings, type MediaResolver, type PlayerErrorEvent } from "@cutcut/player/engine";
-import { BufferTarget, Mp4OutputFormat, Output, VideoSampleSource, WebMOutputFormat } from "mediabunny";
+import { BufferTarget, MovOutputFormat, Mp4OutputFormat, Output, QUALITY_HIGH, QUALITY_LOW, QUALITY_MEDIUM, QUALITY_VERY_HIGH, QUALITY_VERY_LOW, VideoSampleSource, WebMOutputFormat } from "mediabunny";
 import type { ReactNode } from "react";
 import { encodeFrames } from "./encode";
 import { initEnv } from "./env";
 import type { OverlayFont, OverlayPlane } from "./overlays";
 import { FramePipeline, type PipelineStages } from "./pipeline";
 
-export type VideoCodec = "vp9" | "vp8" | "av1" | "avc" | "hevc";
+export type VideoCodec = "vp9" | "vp8" | "av1" | "avc" | "hevc" | "prores";
+export type VideoContainer = "webm" | "mp4" | "mov";
+
+/** Mediabunny's quality presets by name; a name, not the object, travels to the workers. */
+export const QUALITIES = { "very-low": QUALITY_VERY_LOW, low: QUALITY_LOW, medium: QUALITY_MEDIUM, high: QUALITY_HIGH, "very-high": QUALITY_VERY_HIGH } as const;
+export type QualityName = keyof typeof QUALITIES;
+
+export function outputFormat(container: VideoContainer): Mp4OutputFormat | MovOutputFormat | WebMOutputFormat {
+  return container === "mp4" ? new Mp4OutputFormat() : container === "mov" ? new MovOutputFormat() : new WebMOutputFormat();
+}
 
 /** How the picture is encoded: shared by a whole render and by each of its segments. */
 export interface VideoEncoding {
-  readonly container: "webm" | "mp4";
+  readonly container: VideoContainer;
   readonly codec: VideoCodec;
-  /** Bits per second. */
+  /** Bits per second; `quality`, when set, replaces it. */
   readonly bitrate: number;
+  readonly quality?: QualityName | undefined;
   /** Seconds between keyframes. */
   readonly keyFrameInterval: number;
   /** `fast` trades compression for speed (the encoder's real-time mode). */
@@ -24,7 +34,7 @@ export interface VideoEncoding {
 export function videoSource(encoding: VideoEncoding): VideoSampleSource {
   return new VideoSampleSource({
     codec: encoding.codec,
-    bitrate: encoding.bitrate,
+    ...(encoding.quality ? { quality: QUALITIES[encoding.quality] } : { bitrate: encoding.bitrate }),
     keyFrameInterval: encoding.keyFrameInterval,
     hardwareAcceleration: "prefer-software",
     ...(encoding.speed === "fast" ? { latencyMode: "realtime" as const } : {}),
@@ -47,7 +57,7 @@ export interface SegmentOptions {
 export interface SegmentStages extends PipelineStages { encode: number }
 
 export interface SegmentResult {
-  /** A complete WebM or MP4 file holding just these frames, the first at time 0. */
+  /** A complete file in the render's container holding just these frames, the first at time 0. */
   readonly bytes: Uint8Array;
   readonly stages: SegmentStages;
   readonly warnings: readonly string[];
@@ -63,7 +73,7 @@ export async function encodeSegment(options: SegmentOptions): Promise<SegmentRes
   captureWarnings((m) => warnings.push(m));
   const pipeline = new FramePipeline({ ...options, warn: (m) => warnings.push(m) });
   const target = new BufferTarget();
-  const output = new Output({ format: encoding.container === "mp4" ? new Mp4OutputFormat() : new WebMOutputFormat(), target });
+  const output = new Output({ format: outputFormat(encoding.container), target });
   const source = videoSource(encoding);
   output.addVideoTrack(source, { frameRate: fps });
   try {

@@ -88,6 +88,12 @@ export class FramePipeline {
     return new Uint8Array(data.buffer, data.byteOffset, data.length);
   }
 
+  /** Frame `n` as a PNG or JPEG file's bytes. */
+  async image(n: number, type: "png" | "jpg"): Promise<Buffer> {
+    await this.frame(n);
+    return this.canvas.toBuffer(type);
+  }
+
   dispose(): void {
     if (this.ownsOverlays) this.overlays.dispose();
     this.compositor.dispose();

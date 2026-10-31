@@ -1,3 +1,4 @@
+import { execFileSync } from "node:child_process";
 import { mkdtempSync, rmSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -5,7 +6,8 @@ import { collectModule, resolve } from "@cutcut/kit";
 import generateMedia, { mediaDir } from "../../player/e2e/gen-media";
 import * as file from "../../player/e2e/app/composition";
 import { indexLayerInteriors } from "@cutcut/player/overlays";
-import { directoryResolver, renderVideo } from "../src";
+import { Canvas, loadImage } from "skia-canvas";
+import { directoryResolver, renderStill, renderVideo } from "../src";
 import { checkExactFrames } from "./helpers/exact";
 import { decodeAudio, decodeFrames, type DecodedFrame, decodesClean, pixel, probe, readStrip, rmsOf, tonePower } from "./helpers/output";
 
@@ -96,6 +98,47 @@ describe("renderVideo", () => {
     expect(rmsOf(audio, 6.2, 6.9)).toBeLessThan(0.0265 * 1.15);
     // While the clips play the bed sits at a tenth of that.
     expect(rmsOf(audio, 1, 2)).toBeGreaterThan(0.125 * Math.SQRT1_2 * 0.85);
+  });
+
+  it("writes ProRes in a MOV, with PCM sound", async () => {
+    const out = join(dir, "pro.mov");
+    expect(await renderVideo({ state, media, out, to: 1 })).toMatchObject({ frames: 30, audio: true });
+    expect(probe(out)).toMatchObject({ codec: "prores", width: 640, height: 360, frames: 30, audioStreams: 1 });
+    decodesClean(out);
+  });
+
+  it("writes the soundtrack alone to MP3 and WAV", async () => {
+    for (const ext of ["mp3", "wav"]) {
+      const out = join(dir, `sound.${ext}`);
+      expect(await renderVideo({ state, media, out, to: 2 })).toMatchObject({ frames: 0, audio: true });
+      expect(execFileSync("ffprobe", ["-v", "error", "-select_streams", "v", "-show_entries", "stream=codec_name", "-of", "csv=p=0", out], { encoding: "utf8" }).trim()).toBe("");
+      const sound = decodeAudio(out);
+      expect(sound.length / 48000).toBeCloseTo(2, 1);
+      expect(rmsOf(sound, 0, 2)).toBeGreaterThan(0.01);
+    }
+    await expect(renderVideo({ state, media, out: join(dir, "none.mp3"), silent: true })).rejects.toThrow(/holds only the soundtrack/);
+  });
+
+  it("rejects a codec the container cannot hold", async () => {
+    await expect(renderVideo({ state, media, out: join(dir, "bad.webm"), videoCodec: "prores", to: 1 })).rejects.toThrow(/\.webm file cannot hold prores/);
+  });
+
+  it("encodes to a quality preset in place of a bitrate", async () => {
+    const low = join(dir, "low.webm"), high = join(dir, "high.webm");
+    await renderVideo({ state, media, out: low, quality: "very-low", to: 1, silent: true });
+    await renderVideo({ state, media, out: high, quality: "very-high", to: 1, silent: true });
+    expect(statSync(high).size).toBeGreaterThan(statSync(low).size * 2);
+  });
+
+  it("draws one frame to a PNG: the frame the video shows at that time", async () => {
+    const out = join(dir, "still.png");
+    expect(await renderStill({ state, media, out, time: 1.5 })).toMatchObject({ frame: 45, width: 640, height: 360 });
+    const canvas = new Canvas(640, 360);
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(await loadImage(out), 0, 0);
+    const rgba = new Uint8Array(ctx.getImageData(0, 0, 640, 360).data.buffer);
+    expect(readStrip({ timestamp: 1.5, width: 640, height: 360, rgba })).toBe(45);
+    await expect(renderStill({ state, media, out, time: 7 })).rejects.toThrow(/outside the composition/);
   });
 
   it("writes no audio track when asked to be silent", async () => {
