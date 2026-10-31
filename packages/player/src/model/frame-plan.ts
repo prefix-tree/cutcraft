@@ -25,6 +25,8 @@ export interface DrawOp {
   readonly rect: DrawRect;
   readonly matrix: Matrix2D;
   readonly crop?: DrawRect;
+  /** Dimensions used to express crop pixels; decoded proxies can have another resolution. */
+  readonly cropReference?: { readonly width: number; readonly height: number };
   readonly fit: FitMode;
   readonly opacity: number;
   readonly blend: GlobalCompositeOperation;
@@ -168,7 +170,7 @@ function mediaOp(state: ResolvedState, item: VisibleItem, t: number, resolveNest
     kind: asset.kind === "image" ? "image" : "video",
     asset: asset.id,
     sourceTime: placementSourceTime(p, item.children, t),
-    rect: layout.rect, matrix: shift(layout.matrix), ...(layout.crop ? { crop: layout.crop } : {}),
+    rect: layout.rect, matrix: shift(layout.matrix), ...(layout.crop ? { crop: layout.crop, cropReference: size } : {}),
   };
 }
 

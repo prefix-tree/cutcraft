@@ -748,7 +748,7 @@ function placeCaptions(root: CollectedNode, pending: Map<string, Pending>, track
     let nodes: readonly CollectedNode[];
     if (hit && hit.key === key && hit.manifest === manifest && hit.props === cp.props) nodes = hit.nodes;
     else {
-      const options: CueOptions = { maxChars: Number(cp.props.maxChars ?? 42), maxDuration: Number(cp.props.maxDuration ?? 5), maxGap: Number(cp.props.maxGap ?? 0.8) };
+      const options: CueOptions = { maxChars: Number(cp.props.maxChars ?? lineChars(root, cp.props.style)), maxDuration: Number(cp.props.maxDuration ?? 5), maxGap: Number(cp.props.maxGap ?? 0.8) };
       nodes = cueNodes(node, planCues(timelineWords(asset, plays), options), (id) => pending.has(id));
       cuesByCaptions.set(node, { key, manifest, props: cp.props, nodes });
     }
@@ -756,6 +756,16 @@ function placeCaptions(root: CollectedNode, pending: Map<string, Pending>, track
       pending.set(cue.id, { node: cue, track: null, parent: node.id, props: cue.props as Record<string, unknown>, errors: [], start: Number(cue.props.start), duration: Number(cue.props.end) - Number(cue.props.start) });
     }
   }
+}
+
+/**
+ * How many characters fit on one caption line: the player's side margins (12% a side on vertical video, 8% otherwise)
+ * and cue padding (1 em), at about 0.55 em a character. Never more than the old fixed 42.
+ */
+function lineChars(root: CollectedNode, style: unknown): number {
+  const width = Number(root.props.width ?? 1920), height = Number(root.props.height ?? 1080);
+  const size = Number((typeof style === "object" && style !== null ? (style as { size?: unknown }).size : undefined) ?? Math.round(height / 24));
+  return Math.max(8, Math.min(42, Math.floor((width * (height > width ? 0.76 : 0.84) - size) / (size * 0.55))));
 }
 
 /** Where an asset plays: media placements on visible tracks that draw from it, in start order. */

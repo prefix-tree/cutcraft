@@ -27,7 +27,7 @@ const recipes: { name: string; file: string; mod: Module; check: (state: Resolve
       expect(at("bed").end).toBeCloseTo(s.composition.duration);
       expect(cues(s).map((c) => c.props.text)).toEqual([
         "Welcome back to the show.", "Thanks for having me.", "So what is cutcut, in one sentence?",
-        "It is a video file a model can write and a", "person can still edit.", "Why a file?",
+        "It is a video file a model can write", "and a person can still edit.", "Why a file?",
         "Because the model is good at code and bad", "at documents.", "And the editor?",
         "The editor writes back into the same file,", "one token at a time.", "That is the whole idea.",
       ]);

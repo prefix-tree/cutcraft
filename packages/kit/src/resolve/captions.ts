@@ -59,35 +59,120 @@ export function timelineWords(asset: AssetEntry, plays: readonly AssetPlay[]): T
   const sorted = [...plays].sort((a, b) => a.start - b.start);
   for (const play of sorted) {
     for (const w of words) {
-      if (w.start < play.in - 1e-6 || w.end > play.out + 1e-6) continue;
+      if (!audible(w, play)) continue;
       out.push(wordOn(w, play));
     }
   }
   return out;
 }
 
-/** Group timeline words into cues: a new cue at a sentence end, a play boundary, a long pause, or when a limit would be exceeded. */
+/**
+ * Group timeline words into cues: a new cue at a sentence end, a play boundary, a long pause or the duration limit.
+ * A cue that would pass `maxChars` breaks at its best point: after punctuation, never after a word that leads into
+ * the next ("of", "a", "to"), else as full as it fits. A cue too short to read joins the one before it in the same
+ * sentence (on one line, else re-split into two lines that each stay up longer, else as one two-line cue), or the
+ * next one when it opens the sentence, or stays up into the pause after it; a cue that starts a sentence starts
+ * with a capital.
+ */
 export function planCues(words: readonly TimelineWord[], options: CueOptions = DEFAULT_CUE_OPTIONS): Cue[] {
-  const cues: Cue[] = [];
+  const lines: TimelineWord[][] = [];
   let current: TimelineWord[] = [];
-  const flush = () => {
-    if (current.length === 0) return;
-    const first = current[0] as TimelineWord, last = current[current.length - 1] as TimelineWord;
-    cues.push({ start: first.start, end: last.end, text: current.map((w) => w.text).join(" "), words: current.map((w) => ({ text: w.text, start: w.start, end: w.end })) });
-    current = [];
-  };
   for (const w of words) {
     const prev = current[current.length - 1];
     if (prev) {
-      const chars = current.reduce((n, x) => n + x.text.length, current.length - 1) + 1 + w.text.length;
-      const breaks = prev.play !== w.play || SENTENCE_END.test(prev.text) || w.start - prev.end > options.maxGap
-        || chars > options.maxChars || w.end - (current[0] as TimelineWord).start > options.maxDuration;
-      if (breaks) flush();
+      if (prev.play !== w.play || SENTENCE_END.test(prev.text) || w.start - prev.end > options.maxGap || w.end - (current[0] as TimelineWord).start > options.maxDuration) {
+        lines.push(current);
+        current = [];
+      } else if (chars(current) + 1 + w.text.length > options.maxChars) {
+        const k = breakAt(current, options.maxChars);
+        lines.push(current.slice(0, k));
+        current = current.slice(k);
+      }
     }
     current.push(w);
   }
-  flush();
-  return cues;
+  if (current.length > 0) lines.push(current);
+
+  const merged: TimelineWord[][] = [];
+  for (const line of lines) {
+    const prev = merged[merged.length - 1], last = prev?.[prev.length - 1], first = line[0] as TimelineWord;
+    const joins = prev && last && span(line) < MIN_CUE && last.play === first.play && !SENTENCE_END.test(last.text) && first.start - last.end <= options.maxGap;
+    if (!joins) { merged.push([...line]); continue; }
+    // A short cue joins the one before it when that stays near the limit, else the two share their words anew.
+    if (chars(prev) + 1 + chars(line) <= options.maxChars + Math.max(4, Math.round(options.maxChars / 4))) { prev.push(...line); continue; }
+    const split = rebalance([...prev, ...line], options.maxChars, span(line));
+    if (split) merged.splice(merged.length - 1, 1, ...split);
+    // Speech too fast for one-line cues: the two make one cue on two lines.
+    else if (chars(prev) + 1 + chars(line) <= 2 * options.maxChars) prev.push(...line);
+    else merged.push([...line]);
+  }
+  // A short cue that opens its sentence joins the next cue of that sentence instead.
+  for (let n = merged.length - 2; n >= 0; n--) {
+    const line = merged[n] as TimelineWord[], next = merged[n + 1] as TimelineWord[];
+    const last = line[line.length - 1] as TimelineWord, first = next[0] as TimelineWord;
+    if (span(line) >= MIN_CUE || SENTENCE_END.test(last.text) || last.play !== first.play || first.start - last.end > options.maxGap) continue;
+    if (chars(line) + 1 + chars(next) <= 2 * options.maxChars) merged.splice(n, 2, [...line, ...next]);
+  }
+
+  return merged.map((line, n) => {
+    const first = line[0] as TimelineWord, last = line[line.length - 1] as TimelineWord;
+    const next = merged[n + 1]?.[0];
+    // Held into the pause after it, never over the next cue; the last cue keeps its words' end.
+    const end = last.end - first.start < MIN_CUE && next ? Math.min(first.start + MIN_CUE, next.start) : last.end;
+    const opens = n === 0 || SENTENCE_END.test((merged[n - 1]?.[merged[n - 1]!.length - 1] as TimelineWord).text);
+    const cueWords = line.map((w, i) => ({ text: i === 0 && opens ? capitalise(w.text) : w.text, start: w.start, end: w.end }));
+    return { start: first.start, end: ms(end), text: cueWords.map((w) => w.text).join(" "), words: cueWords };
+  });
+}
+
+/** Shorter than this a cue flashes by unread (seconds). Short-form captions change every 0.3–0.5 s; a lone word
+ * under 0.4 s is what the eye misses. */
+const MIN_CUE = 0.4;
+/** Words that lead into the next one: a line does not end on them. */
+const LEADING = new Set(["a", "an", "the", "of", "to", "in", "on", "at", "for", "by", "from", "with", "into", "and", "or", "but", "so", "if", "than", "as", "i", "my", "your", "our", "their", "his", "her", "its"]);
+
+function span(line: readonly TimelineWord[]): number {
+  return (line[line.length - 1] as TimelineWord).end - (line[0] as TimelineWord).start;
+}
+
+/** Two lines within the limit from the words of a cue and the short one after it, the shorter on screen longest; null when no split beats `shortest`. */
+function rebalance(words: readonly TimelineWord[], maxChars: number, shortest: number): [TimelineWord[], TimelineWord[]] | null {
+  let best: [TimelineWord[], TimelineWord[]] | null = null;
+  for (let k = 1; k < words.length; k++) {
+    const left = words.slice(0, k), right = words.slice(k);
+    if (chars(left) > maxChars || chars(right) > maxChars || LEADING.has((left[k - 1] as TimelineWord).text.toLowerCase())) continue;
+    const m = Math.min(span(left), span(right));
+    if (m > shortest) { shortest = m; best = [left, right]; }
+  }
+  return best;
+}
+
+function chars(line: readonly TimelineWord[]): number {
+  return line.reduce((n, w) => n + w.text.length, line.length - 1);
+}
+
+/** Where to end a line that overflows: the fullest prefix that ends on punctuation or a word that ends a phrase. */
+function breakAt(line: readonly TimelineWord[], maxChars: number): number {
+  let best = line.length, bestScore = Number.POSITIVE_INFINITY;
+  for (let k = 1; k <= line.length; k++) {
+    const last = (line[k - 1] as TimelineWord).text;
+    let score = (maxChars - chars(line.slice(0, k))) / maxChars;
+    if (/[,;:]$/.test(last)) score -= 0.5;
+    if (LEADING.has(last.toLowerCase())) score += 1;
+    if (score < bestScore) { bestScore = score; best = k; }
+  }
+  return best;
+}
+
+function capitalise(text: string): string {
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
+/** Whether enough of a word plays inside `play` to caption it. A transcriber stretches a word over the pause next to
+ * it, so a cut in that pause still keeps the word; a word only grazed by the cut is left out. */
+function audible(w: TranscriptWord, play: AssetPlay): boolean {
+  const inside = Math.min(w.end, play.out) - Math.max(w.start, play.in);
+  return inside >= Math.min(0.15, (w.end - w.start) / 2) - 1e-6;
 }
 
 /** Generated `<Caption>` nodes for the cues, as children of the captions node. */
@@ -122,8 +207,8 @@ function ms(x: number): number {
 }
 
 function wordOn(w: TranscriptWord, play: AssetPlay): TimelineWord {
-  const start = ms(playTime(play, w.start));
-  const end = ms(playTime(play, w.end));
+  const start = ms(playTime(play, Math.max(w.start, play.in)));
+  const end = ms(playTime(play, Math.min(w.end, play.out)));
   return { i: w.i, text: w.text, start, end, play: play.id, ...(w.speaker !== undefined ? { speaker: w.speaker } : {}) };
 }
 

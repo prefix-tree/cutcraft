@@ -84,7 +84,17 @@ export class CanvasPainter {
   private blit(ctx: Ctx2D, op: DrawOp, frame: Frame | null, nested: AnyCanvas | null): void {
     const { w, h } = op.rect;
     if (nested) ctx.drawImage(nested, 0, 0, w, h);
-    else if (frame && !(coversCanvas(op, this.width, this.height) && frame.paintFull?.(ctx, this.width, this.height))) frame.draw(ctx, 0, 0, w, h, op.crop);
+    else if (frame && !(coversCanvas(op, this.width, this.height) && frame.paintFull?.(ctx, this.width, this.height))) {
+      // The manifest describes the original, while a normalized file or proxy may decode at a different size.
+      const reference = op.cropReference;
+      const crop = op.crop && reference ? {
+        x: op.crop.x * frame.width / reference.width,
+        y: op.crop.y * frame.height / reference.height,
+        w: op.crop.w * frame.width / reference.width,
+        h: op.crop.h * frame.height / reference.height,
+      } : op.crop;
+      frame.draw(ctx, 0, 0, w, h, crop);
+    }
   }
 
   /** Applies the border radius and mask as a clip in local coordinates. Returns true when a mask clip was set. */

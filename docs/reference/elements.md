@@ -271,9 +271,9 @@ Plus the props of its `kind`: see [Graphics](./graphics).
 |---|---|---|---|
 | `id` | string |  | yes |
 | `src` | string |  |  |
-| `style` | string \| { font, size, color, background, position, highlight, upcoming } |  |  |
+| `style` | string \| { font, size, weight, color, background, shadow, stroke, position, highlight, upcoming } |  |  |
 | `animation` | "none" \| "word-highlight" \| "word-by-word" \| "karaoke" \| "bounce" \| "typewriter" | `"none"` |  |
-| `maxChars` | integer | `42` |  |
+| `maxChars` | integer |  |  |
 | `maxDuration` | number | `5` |  |
 | `maxGap` | number (0..∞) | `0.8` |  |
 

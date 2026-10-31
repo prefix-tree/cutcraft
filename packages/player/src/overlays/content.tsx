@@ -86,24 +86,32 @@ function words(text: string, rel: number, anim: { in: number; stagger?: number }
 /** The active caption lines, positioned by the captions style; karaoke colours words by their timing. */
 export function captionsContent(p: { readonly placement: Placement; readonly state: ElementProps["state"]; readonly time: number }): ReactNode {
   const props = p.placement.props as Record<string, unknown>;
-  const style = (props.style ?? {}) as { font?: string; size?: number; color?: string; background?: string; position?: string; highlight?: string; upcoming?: string };
+  const style = (props.style ?? {}) as { font?: string; size?: number; weight?: number | string; color?: string; background?: string; shadow?: { color: string; blur?: number; x?: number; y?: number }; stroke?: { color: string; width: number }; position?: string; highlight?: string; upcoming?: string };
   const animation = String(props.animation ?? "none");
   // Cues are the captions' children in the file, or the ones the resolver generated from the transcript.
   const active = [...p.state.items.values()]
     .filter((c): c is Placement => c.parent === p.placement.id && c.kind === "caption" && isVisibleAt(c, p.time, p.state.composition.duration))
     .sort((a, b) => a.start - b.start);
   const comp = p.state.composition;
+  // Vertical video: the platform's own UI covers the bottom fifth and the right edge, so captions sit above it.
+  const portrait = comp.height > comp.width;
+  // Without a shadow of its own, a tight dark halo under a soft drop: it reads as an outline on a white shirt or sky.
+  const shadow = style.shadow ? `${style.shadow.x ?? 0}px ${style.shadow.y ?? 0}px ${style.shadow.blur ?? 0}px ${style.shadow.color}` : "0 0 3px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.55), 0 2px 14px rgba(0,0,0,0.75)";
   const container: CSSProperties = {
-    position: "absolute", left: 0, right: 0,
-    ...(style.position === "top" ? { top: comp.height * 0.08 } : style.position === "center" ? { top: "50%", transform: "translateY(-50%)" } : { bottom: comp.height * 0.08 }),
+    position: "absolute", left: 0, right: 0, padding: portrait ? "0 12%" : "0 8%",
+    ...(style.position === "top" ? { top: comp.height * 0.08 } : style.position === "center" ? { top: "50%", transform: "translateY(-50%)" } : { bottom: comp.height * (portrait ? 0.2 : 0.08) }),
     display: "flex", flexDirection: "column", alignItems: "center", gap: 8, pointerEvents: "none",
     fontFamily: style.font ?? "Inter", fontSize: style.size ?? Math.round(comp.height / 24), color: style.color ?? "#ffffff",
-    textAlign: "center",
+    fontWeight: style.weight === "normal" ? 400 : style.weight === "bold" ? 700 : Number(style.weight ?? 800),
+    textShadow: shadow,
+    // The outline is painted under the letters, so it does not eat into them.
+    ...(style.stroke ? { WebkitTextStroke: `${style.stroke.width}px ${style.stroke.color}`, paintOrder: "stroke fill" } : {}),
+    textAlign: "center", lineHeight: 1.15,
   };
   return (
     <div data-el={p.placement.id} data-kind="captions" style={container}>
       {active.map((c) => (
-        <div key={c.id} data-el={c.id} data-kind="caption" style={{ padding: "0.2em 0.5em", borderRadius: 6, background: style.background ?? "rgba(0,0,0,0.6)" }}>
+        <div key={c.id} data-el={c.id} data-kind="caption" style={{ padding: "0.2em 0.5em", borderRadius: 6, textWrap: "balance", ...(style.background ? { background: style.background } : {}) } as CSSProperties}>
           {line(c, p.time, animation, style)}
         </div>
       ))}

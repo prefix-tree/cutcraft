@@ -131,3 +131,21 @@ describe("CanvasPainter vignette and grain", () => {
     expect(tiles(paintPost(1 + 1 / 30))[0]).not.toEqual(a);
   });
 });
+
+describe("CanvasPainter proxy crop coordinates", () => {
+  it.each([[1920, 1080], [640, 360]])("preserves a normalized crop on a %i × %i decoded frame", (width, height) => {
+    const state = makeState({ width: 1080, height: 1920, tracks: [{ id: "main", items: [{
+      id: "c", kind: "clip", source: { in: 0, out: 4, asset: "a" },
+      props: { transform: { crop: { x: 0.35, y: 0.1, width: 0.3, height: 0.8 } } },
+    }] }] });
+    const draw = vi.fn();
+    const frame: Frame = { width, height, timestamp: 1, duration: 1 / 30, draw, retain() { return this; }, close() {} };
+    const plan = buildFramePlan(state, 1);
+    new CanvasPainter(1080, 1920, recorderCanvas).paint(recorderContext().ctx, plan, { frames: new Map([["c", frame]]), nested: new Map() });
+    const crop = draw.mock.calls[0]![5];
+    expect(crop.x / width).toBeCloseTo(0.35);
+    expect(crop.y / height).toBeCloseTo(0.1);
+    expect(crop.w / width).toBeCloseTo(0.3);
+    expect(crop.h / height).toBeCloseTo(0.8);
+  });
+});

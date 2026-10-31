@@ -78,6 +78,7 @@ export class PlayerCore {
   private readonly setTimeoutFn: (fn: () => void, ms: number) => unknown;
   private readonly clearTimeoutFn: (id: unknown) => void;
   private settleTimer: unknown = null;
+  private seekGeneration = 0;
   private snapshot: TimeSnapshot = { time: 0, frame: 0 };
   private _muted: boolean;
   private _volume = 1;
@@ -191,11 +192,15 @@ export class PlayerCore {
   /** Jump to `time` and draw its exact frame before resolving, playing or not. */
   async seekTo(time: number): Promise<void> {
     if (this.disposed) return;
+    const generation = ++this.seekGeneration;
     this.transport.seek(time);
     const t = this.transport.time();
     if (this.transport.playing) this.engine.reseek();
     await this.compositor.seek(t);
+    // A slower, older decode must not repaint or publish over a newer scrub position.
+    if (this.disposed || generation !== this.seekGeneration) return;
     await this.compositor.tick(t, { wait: true });
+    if (this.disposed || generation !== this.seekGeneration) return;
     this.publish(t, frameIndex(t, this._state.composition.fps));
     this.emit("seeked", { time: t });
   }

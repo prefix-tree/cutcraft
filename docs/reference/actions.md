@@ -1,6 +1,6 @@
 # Actions
 
-Generated from the registered handlers (130) and the parity table. Do not edit by hand; run `pnpm docs:gen`.
+Generated from the registered handlers (131) and the parity table. Do not edit by hand; run `pnpm docs:gen`.
 
 Every action has `validate`, `apply`, `invert` and `fold`; the inverse is never null. Params are typed in `packages/kit/src/actions/types/index.ts`.
 
@@ -16,7 +16,7 @@ Every action has `validate`, `apply`, `invert` and `fold`; the inverse is never 
 
 | action | OpenReel counterpart | note |
 |---|---|---|
-| `audio/add` | — | an `<Audio>` placed like `clip/add`; `duration: "fill"` runs to the end |
+| `audio/add` | — | sound-only media (&lt;Audio>) placed like clip/add; OpenReel adds audio as a clip |
 | `audio/setAutomation` | `audio/addAutomation` |  |
 | `audio/setDuck` | — | OpenReel's ducking bypasses its action system |
 | `audio/setFade` | `audio/setFade` |  |

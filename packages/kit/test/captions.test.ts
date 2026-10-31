@@ -35,15 +35,49 @@ describe("captions from the transcript", () => {
     const sentence = planCues([w(0, "Hello.", 0, 0.3), w(1, "World", 0.4, 0.7)]);
     expect(sentence.map((c) => c.text)).toEqual(["Hello.", "World"]);
     const pause = planCues([w(0, "a", 0, 0.3), w(1, "b", 1.5, 1.8)]);
-    expect(pause.map((c) => c.text)).toEqual(["a", "b"]);
+    expect(pause.map((c) => c.text)).toEqual(["A", "b"]); // the first cue opens a sentence
     const plays = planCues([w(0, "a", 0, 0.3, "x"), w(1, "b", 0.4, 0.7, "y")]);
-    expect(plays.map((c) => c.text)).toEqual(["a", "b"]);
-    const chars = planCues([w(0, "aaaa", 0, 0.1), w(1, "bbbb", 0.2, 0.3), w(2, "cccc", 0.4, 0.5)], { maxChars: 9, maxDuration: 5, maxGap: 1 });
-    expect(chars.map((c) => c.text)).toEqual(["aaaa bbbb", "cccc"]);
+    expect(plays.map((c) => c.text)).toEqual(["A", "b"]);
+    const chars = planCues([w(0, "aaaa", 0, 0.8), w(1, "bbbb", 0.9, 1.7), w(2, "cccc", 1.8, 2.6)], { maxChars: 9, maxDuration: 5, maxGap: 1 });
+    expect(chars.map((c) => c.text)).toEqual(["Aaaa bbbb", "cccc"]);
     const long = planCues([w(0, "a", 0, 1), w(1, "b", 1.2, 2.2), w(2, "c", 2.4, 3.4)], { maxChars: 42, maxDuration: 3, maxGap: 1 });
-    expect(long.map((c) => c.text)).toEqual(["a b", "c"]);
+    expect(long.map((c) => c.text)).toEqual(["A b", "c"]);
     const one = planCues([w(0, "a", 0, 0.3), w(1, "b", 0.4, 0.7)])[0]!;
-    expect(one).toEqual({ start: 0, end: 0.7, text: "a b", words: [{ text: "a", start: 0, end: 0.3 }, { text: "b", start: 0.4, end: 0.7 }] });
+    expect(one).toEqual({ start: 0, end: 0.7, text: "A b", words: [{ text: "A", start: 0, end: 0.3 }, { text: "b", start: 0.4, end: 0.7 }] });
+  });
+
+  it("keeps a word a cut lands inside when most of what plays of it is speech", () => {
+    // A transcriber stretched "most" over the pause before it (1.0–2.2); the clip starts in that pause, at 1.7.
+    const asset = { ...interview, transcript: { words: [{ i: 0, text: "so", start: 0.6, end: 1.0 }, { i: 1, text: "most", start: 1.0, end: 2.2 }, { i: 2, text: "volume.", start: 2.3, end: 2.8 }, { i: 3, text: "grazed", start: 2.9, end: 3.5 }] } } as AssetEntry;
+    const words = timelineWords(asset, [{ id: "c", start: 0, in: 1.7, out: 2.95, speed: 1 }]);
+    expect(words.map((x) => [x.text, x.start, x.end])).toEqual([["most", 0, 0.5], ["volume.", 0.6, 1.1]]);
+  });
+
+  it("breaks a long cue after a phrase, not on a word that leads into the next", () => {
+    const at = (texts: string[]) => texts.map((t, i) => w(i, t, i, i + 0.9));
+    expect(planCues(at(["How", "many", "pieces", "of", "content", "are", "you"]), { maxChars: 18, maxDuration: 30, maxGap: 1 }).map((c) => c.text))
+      .toEqual(["How many pieces", "of content are you"]);
+    expect(planCues(at(["Focus,", "then", "scale", "the", "thing"]), { maxChars: 16, maxDuration: 30, maxGap: 1 }).map((c) => c.text))
+      .toEqual(["Focus,", "then scale", "the thing"]);
+  });
+
+  it("joins a cue too short to read to its sentence, holds it into a pause, or puts fast speech on two lines", () => {
+    const opts = (maxChars: number) => ({ maxChars, maxDuration: 30, maxGap: 1 });
+    // "go." alone would flash for 0.1 s: it joins its line, a little past the limit.
+    const joined = planCues([w(0, "Two", 0, 0.5), w(1, "words", 0.5, 1), w(2, "then", 1, 1.5), w(3, "go.", 1.5, 1.6)], opts(14));
+    expect(joined.map((c) => c.text)).toEqual(["Two words then go."]);
+    // "65." is its own sentence after a cut: it stays up into the pause, never over the next cue.
+    const held = planCues([w(0, "media?", 0, 0.5, "a"), w(1, "65.", 1, 1.2, "b"), w(2, "If", 2, 2.4, "c")]);
+    expect(held.map((c) => [c.text, c.start, c.end])).toEqual([["Media?", 0, 0.5], ["65.", 1, 1.4], ["If", 2, 2.4]]);
+    // A sentence spoken in half a second: one cue on two lines, not two flashes.
+    const fast = planCues([w(0, "better", 0, 0.2), w(1, "at", 0.2, 0.25), w(2, "it", 0.25, 0.3), w(3, "than", 0.3, 0.4), w(4, "I", 0.4, 0.45), w(5, "am.", 0.45, 0.52)], opts(16));
+    expect(fast.map((c) => c.text)).toEqual(["Better at it than I am."]);
+  });
+
+  it("starts a cue that opens a sentence with a capital", () => {
+    const cues = planCues([w(0, "volume.", 0, 0.8, "a"), w(1, "it's", 1, 1.4, "b"), w(2, "just", 1.5, 2.2, "b")]);
+    expect(cues.map((c) => c.text)).toEqual(["Volume.", "It's just"]);
+    expect(cues[1]!.words[0]!.text).toBe("It's");
   });
 
   it("times a literal cue's word references where the words play", () => {
@@ -81,10 +115,11 @@ describe("captions from the transcript", () => {
     const exec = fixtureExecutor();
     exec.execute({ type: "caption/setAll", params: { captionsId: "cap", nodes: [] } });
     exec.execute({ type: "clip/trim", params: { id: "c1", edge: "in", value: "word:5" } });
-    expect(exec.state().items.get("cap-1")?.props.text).toBe("welcome back to the show today we are");
+    expect(exec.state().items.get("cap-1")?.props.text).toBe("Welcome back to the show today we are");
     exec.execute({ type: "source/setProps", params: { id: "cap", props: { maxChars: 12 } } });
     const texts = [...exec.state().items.values()].filter((p) => p.parent === "cap").map((p) => p.props.text);
-    expect(texts).toEqual(["welcome back", "to the show", "today we are", "talking", "about why we", "built"]);
+    // "talking" and "built" alone would flash by: each shares a line with the words before it, within the limit.
+    expect(texts).toEqual(["Welcome back", "to the show", "today we", "are talking", "about why", "we built"]);
   });
 
   it("makes the cues literal on the first edit and regenerates on undo", () => {

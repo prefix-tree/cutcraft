@@ -89,6 +89,27 @@ describe("PlayerCore", () => {
     expect(output.scheduled.some((s) => s.key.startsWith("c2"))).toBe(true);
   });
 
+  it("keeps the newest seek when an older decode finishes after it", async () => {
+    const { core, events } = setup();
+    await core.seekTo(0.5);
+    const seek = core.compositor.seek.bind(core.compositor);
+    let release!: () => void;
+    const blocked = new Promise<void>((resolve) => { release = resolve; });
+    core.compositor.seek = async (t) => {
+      await seek(t);
+      if (t === 1) await blocked;
+    };
+    const older = core.seekTo(1);
+    await core.seekTo(2);
+    release();
+    await older;
+    expect(core.getCurrentTime()).toBe(2);
+    expect(core.getTime()).toEqual({ time: 2, frame: 60 });
+    expect(core.compositor.renderedFrame).toBe(60);
+    expect(events.filter((event) => event.type === "seeked").map((event) => event.e)).toEqual([{ time: 0.5 }, { time: 2 }]);
+    core.dispose();
+  });
+
   it("changes rate, volume and mute with events", async () => {
     const { core, output, types } = setup();
     core.playbackRate = 2;
