@@ -145,16 +145,36 @@ each overlay that leaves the frame, leaves the safe zone, covers the captions
 or covers the subject, with the first and last time it does. It measures the
 pixels each element actually draws (titles, shapes, SVG, stickers, graphics,
 layers and captions) after its entrance, exit, keyframes and transform, so a
-slide that crosses the edge between two spot checks is caught. It writes no
-file and prints JSON:
+slide that crosses the edge between two spot checks is caught. Hollow
+graphics count by the cells their ink touches, so corner brackets around a
+face do not cover it. It writes no file and prints JSON written for a reader
+that cannot see the frame, such as the editing agent: each issue says what is
+wrong in a sentence, the smallest fix in `transform` props, and the
+measurements at its worst moment.
 
 ```sh
 cutcut-render video.tsx --check-layout --safe-zone tiktok --subject 0.2,0.18,0.6,0.37
 ```
 
 ```json
-{ "issues": [{ "rule": "captions", "id": "stat", "kind": "title", "with": "caps", "from": 4.2, "to": 5.03 }], "samples": 900, "warnings": [] }
+{
+  "summary": "1 layout issue on 1 element in 900 samples (every frame, safe zone tiktok); each has a message and a fix.",
+  "issues": [{
+    "rule": "subject", "id": "t1", "kind": "title", "with": "subject", "from": 0.533, "to": 2.4, "at": 0.533,
+    "box": { "x": 273, "y": 165, "w": 96, "h": 30 }, "area": { "x": 224, "y": 72, "w": 192, "h": 180 },
+    "message": "title \"t1\" covers the subject from 0.53 s to 2.40 s. At 0.53 s its ink (x 273..369, y 165..195) overlaps the subject (x 224..416, y 72..252).",
+    "fix": "move it down 89 px (transform.position.y +89), then check again: the move may run into something else"
+  }],
+  "samples": 900,
+  "warnings": []
+}
 ```
+
+`from` and `to` are the first and last offending samples; `at` is the worst
+one, where `box` is the element's ink and `area` is what it breaks (the
+frame, the zone, or the captions' or subject's box). Pixels are composition
+pixels from the top left. A bad `--step`, `--from` or `--to` is an error, not
+an empty report.
 
 | Rule | |
 |---|---|

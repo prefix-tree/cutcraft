@@ -1,5 +1,5 @@
 import { createElement as h } from "react";
-import { Caption, Captions, Clip, Composition, Keyframe, Shape, Title, Track, collect, resolve, type AssetManifest } from "@cutcut/kit";
+import { Caption, Captions, Clip, Composition, Graphic, Keyframe, Shape, Title, Track, collect, resolve, type AssetManifest } from "@cutcut/kit";
 import { mediaDir } from "../../player/e2e/gen-media";
 import { manifest } from "../../player/e2e/app/composition";
 import { checkLayout, directoryResolver, subjectRects, type LayoutIssue } from "../src";
@@ -34,6 +34,29 @@ describe("checkLayout", () => {
     expect(issues).toContain("safe-zone:margin>title-safe@0.00-0.97");
     expect(issues).toContain("captions:low>caps@0.50-0.97");
     expect(issues.filter((i) => i.includes(":fine") || i.includes(":hi") || i.includes(":caps"))).toEqual([]);
+    expect(result.summary).toBe("3 layout issues on 3 elements in 30 samples (every frame, safe zone title-safe); each has a message and a fix.");
+  });
+
+  it("says what is wrong and how to fix it, in words and transform props", async () => {
+    const { issues } = await check(h(Composition, { fps: 10, width: 640, height: 360 },
+      h(Track, { id: "t", layout: "free" }, box("edge", 300, -60, 100, 100), box("wide", 0, 0, 700, 40), box("low", 0, 130, 400, 30)),
+      h(Captions, { id: "caps", style: { position: "bottom", size: 30 } }, h(Caption, { id: "c1", start: 0, end: 1, text: "Hello world" })),
+    ));
+    const edge = issues.find((i) => i.id === "edge")!;
+    expect(edge).toMatchObject({ rule: "frame-edge", at: 0, box: { x: 570, y: 70, w: 100, h: 100 }, area: { x: 0, y: 0, w: 640, h: 360 } });
+    expect(edge.message).toBe('shape "edge" runs off the frame from 0.00 s to 0.90 s. At 0.00 s its ink (x 570..670, y 70..170) reaches 30 px past the right of the 640×360 frame.');
+    expect(edge.fix).toBe("move it left 30 px (transform.position.x -30)");
+    expect(issues.find((i) => i.id === "wide")!.fix).toMatch(/^it is 700×40 px but the frame is 640×360: scale it to 0\.91 or less \(transform\.scale\)/);
+    const low = issues.find((i) => i.rule === "captions")!;
+    expect(low.message).toMatch(/^shape "low" covers captions "caps" from 0\.00 s to 0\.90 s\. At 0\.00 s its ink \(x \d+\.\.\d+, y 295\.\.325\) overlaps captions "caps"/);
+    expect(low.fix).toMatch(/^move it (up|down) \d+ px \(transform\.position\.y [+-]\d+\), then check again/);
+  });
+
+  it("refuses a step or range that is not a number instead of checking nothing", async () => {
+    const el = h(Composition, { fps: 10, width: 640, height: 360 }, h(Track, { id: "t", layout: "free" }, box("a", 0, 0, 10, 10)));
+    await expect(check(el, manifest, { step: Number("0,5") })).rejects.toThrow(/step must be above 0 seconds, got NaN/);
+    await expect(check(el, manifest, { from: Number("abc") })).rejects.toThrow(/from must be 0 or more/);
+    await expect(check(el, manifest, { step: 0 })).rejects.toThrow(/step/);
   });
 
   it("catches what happens between samples a person would take: a slide into the edge", async () => {
@@ -87,6 +110,19 @@ describe("checkLayout", () => {
     expect(r!.y).toBeCloseTo(126);
     expect(r!.w).toBeCloseTo(64);
     expect(r!.h).toBeCloseTo(90);
+  });
+
+  it("does not count a hollow frame around the subject as covering it", async () => {
+    const el = h(Composition, { fps: 10, width: 640, height: 360 },
+      h(Track, { id: "v" }, h(Clip, { id: "c", src: "asset:bars", in: 0, out: 1 })),
+      h(Track, { id: "t", layout: "free" },
+        h(Graphic, { id: "brackets", kind: "corner-brackets", width: 300, height: 260, start: 0, duration: 1 }),
+        box("solid", 0, 0, 40, 40),
+      ),
+    );
+    // The subject fills the middle of the brackets, clear of their corner marks.
+    const result = await check(el, manifest, { subject: { x: 0.35, y: 0.25, w: 0.3, h: 0.5 } });
+    expect(brief(result.issues)).toEqual(["subject:solid>subject@0.00-0.90"]);
   });
 
   it("falls back to a given subject region while footage without subject boxes shows", async () => {

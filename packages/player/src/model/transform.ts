@@ -85,6 +85,14 @@ export function transformMatrix(rect: DrawRect, t: Transform | undefined): Matri
   return multiply(m, translate(rect.x, rect.y));
 }
 
+/** The upright box around `rect` after `m`: where a rectangle of an element's local pixels lands in the composition. */
+export function boundsOf(rect: DrawRect, m: Matrix2D): DrawRect {
+  const xs = [rect.x, rect.x + rect.w, rect.x, rect.x + rect.w], ys = [rect.y, rect.y, rect.y + rect.h, rect.y + rect.h];
+  const px = xs.map((x, i) => m.a * x + m.c * ys[i]! + m.e), py = xs.map((x, i) => m.b * x + m.d * ys[i]! + m.f);
+  const x = Math.min(...px), y = Math.min(...py);
+  return { x, y, w: Math.max(...px) - x, h: Math.max(...py) - y };
+}
+
 /** The transform with its keyframed properties evaluated at element-relative time `rel`. */
 export function animatedTransform(base: Transform | undefined, children: readonly Placement[], rel: number): Transform {
   if (!children.some((c) => c.kind === "keyframe")) return base ?? {};

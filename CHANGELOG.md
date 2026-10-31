@@ -12,8 +12,11 @@ All notable changes to this project are documented here. The format follows
   leaves the frame, leaves a safe zone (`tiktok`, `reels`, `shorts`, `title-safe`, `action-safe` or
   custom margins), covers captions, or covers the subject, as runs with the element's id and the
   first and last offending time. It measures the pixels an element draws, after its animation and
-  transform. Subjects come from a new manifest field, `subjects` (boxes over source time), mapped
-  through each clip's crop, fit and transform, or from a fixed region for footage without them.
+  transform, cell by cell so a hollow frame around the subject does not cover it. Each issue carries
+  a sentence on what is wrong, the smallest fix in `transform` props, and the boxes at its worst
+  moment, for the editing agent to act on. Subjects come from a new manifest field, `subjects`
+  (boxes over source time), mapped through each clip's crop, fit and transform, or from a fixed
+  region for footage without them.
 
 - `interpolate()`, `spring()` and `random()` for `<Layer>` code, exported from `@cutcut/kit`: a
   piecewise map across ranges with easing and clamping, a physical spring in seconds (mass,
