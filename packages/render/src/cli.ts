@@ -11,6 +11,9 @@ import { QUALITIES, type QualityName } from "./segment";
 import { renderStill } from "./still";
 import { SAFE_ZONES, checkLayout, formatLayout, type Insets, type SafeZoneName } from "./layout-check";
 
+/** --check-layout found issues: apart from 1 (an error) and 2 (usage), so a script can tell them apart. */
+const EXIT_LAYOUT_ISSUES = 3;
+
 const USAGE = `Usage: cutcut-render <file.tsx> --out <video.webm|.mp4|.mov|.mp3|.wav> [options]
        cutcut-render <file.tsx> --still <seconds> --out <image.png|.jpg> [options]
        cutcut-render <file.tsx> --check-layout [--safe-zone <zone>] [--subject <x,y,w,h>] [--json] [options]
@@ -20,7 +23,7 @@ const USAGE = `Usage: cutcut-render <file.tsx> --out <video.webm|.mp4|.mov|.mp3|
   --still <s>           write the frame at this time as a PNG or JPEG instead of a video
   --check-layout        print every overlay that leaves the frame or the safe zone, or covers captions or the
                         subject: where it is in the file, when, and how to fix it, as a compiler does; writes no file
-  --json                print the layout check as JSON instead
+  --json                print the layout check as JSON instead; it exits 3 when it finds issues
   --safe-zone <zone>    tiktok, reels, shorts, title-safe (default) or action-safe, or top,right,bottom,left fractions
   --subject <x,y,w,h>   where the subject is, as fractions of the frame, for footage the manifest has no subjects for
   --step <s>            seconds between layout samples (default: every frame)
@@ -79,7 +82,7 @@ async function main(): Promise<number> {
       source: { file, text: readFileSync(file, "utf8") },
     });
     process.stdout.write(values.json ? `${JSON.stringify(result, null, 2)}\n` : formatLayout(result));
-    return 0;
+    return result.issues.length > 0 ? EXIT_LAYOUT_ISSUES : 0;
   }
   const out = values.out as string; // the usage check above: only --check-layout runs without --out
   if (values.still !== undefined) {

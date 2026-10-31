@@ -148,8 +148,11 @@ layers and captions) after its entrance, exit, keyframes and transform, so a
 slide that crosses the edge between two spot checks is caught. Hollow
 graphics count by the cells their ink touches, so corner brackets around a
 face do not cover it. It writes no file. Like a compiler, it points each
-issue at its place in the file (the element's `transform`, or the helper call
-that made it), says what is wrong in one sentence, and gives the smallest fix:
+issue at its place in the file (the element's `transform`, the helper call
+that made it, or the JSX in the loop that made it), lists issues by line,
+says what is wrong in one sentence, and gives the smallest fix. It exits 3
+when it finds issues (1 is an error, 2 the usage text), so a script can stop
+on them:
 
 ```sh
 cutcut-render video.tsx --check-layout --safe-zone tiktok --subject 0.2,0.18,0.6,0.37

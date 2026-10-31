@@ -93,6 +93,39 @@ describe("checkLayout", () => {
     expect(printed.trimEnd().endsWith(result.summary)).toBe(true);
   });
 
+  it("points an element a loop made at the JSX in the loop, and lists issues by line", async () => {
+    const text = [
+      'import { Composition, Shape, Track } from "@cutcut/kit";',
+      "export default function Video() {",
+      "  return (",
+      '    <Composition id="v" fps={10} width={640} height={360}>',
+      '      <Track id="t" layout="free">',
+      '        <Shape id="late" shape="rectangle" width={40} height={40} fill="#f00" start={0.5} duration={0.5} transform={{ position: { x: 330, y: 0 } }} />',
+      "        {[0, 1].map((i) => (",
+      '          <Shape key={i} id={`dot-${i}`} shape="circle" width={40} height={40} fill="#f00" start={0} duration={1} transform={{ position: { x: 200 + 130 * i, y: -60 } }} />',
+      "        ))}",
+      "        {[0, 1].map((i) => (",
+      '          <Shape key={i} id={`bar-${i}`} shape="rectangle" width={40} height={10} fill="#00f" start={0} duration={1} transform={{ position: { x: -100 * i, y: 100 } }} />',
+      "        ))}",
+      "      </Track>",
+      "    </Composition>",
+      "  );",
+      "}",
+    ].join("\n");
+    const el = h(Composition, { id: "v", fps: 10, width: 640, height: 360 },
+      h(Track, { id: "t", layout: "free" },
+        box("late", 330, 0, 40, 40, 0.5, 0.5),
+        ...[0, 1].map((i) => h(Shape, { key: `d${i}`, id: `dot-${i}`, shape: "circle", width: 40, height: 40, fill: "#f00", start: 0, duration: 1, transform: { position: { x: 200 + 130 * i, y: -60 } } })),
+        ...[0, 1].map((i) => h(Shape, { key: `b${i}`, id: `bar-${i}`, shape: "rectangle", width: 40, height: 10, fill: "#00f", start: 0, duration: 1, transform: { position: { x: -100 * i, y: 100 } } })),
+      ),
+    );
+    const result = await check(el, manifest, { source: { file: "video.tsx", text } });
+    // "late" breaks from 0.5 s and "dot-1" from 0 s, but "late" comes first in the file.
+    expect(result.issues.map((i) => `${i.id}@${i.source?.line}`)).toEqual(["late@6", "dot-1@8"]);
+    expect(result.issues[1]!.source).toMatchObject({ line: 8, column: 11, loop: true });
+    expect(formatLayout(result)).toContain('^ made in a loop, as "dot-1"');
+  });
+
   it("refuses a step or range that is not a number instead of checking nothing", async () => {
     const el = h(Composition, { fps: 10, width: 640, height: 360 }, h(Track, { id: "t", layout: "free" }, box("a", 0, 0, 10, 10)));
     await expect(check(el, manifest, { step: Number("0,5") })).rejects.toThrow(/step must be above 0 seconds, got NaN/);

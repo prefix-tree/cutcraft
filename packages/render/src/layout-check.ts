@@ -63,6 +63,8 @@ export interface SourceSpot {
   readonly code: string;
   /** Set when a helper generated the element: the spot is the call to it, not the element. */
   readonly helper?: string;
+  /** Set when the element is one of several a loop makes: the spot is the JSX in the loop. */
+  readonly loop?: true;
 }
 
 export interface LayoutCheckOptions {
@@ -173,6 +175,9 @@ export async function checkLayout(options: LayoutCheckOptions): Promise<LayoutCh
     const spot = options.source && index ? locate(options.source.file, index, state, issue.id, issue.kind) : null;
     return spot ? { ...described, source: spot } : described;
   });
+  // As a compiler lists them: by place in the file, then by time; issues with no place come last, by time.
+  const place = (i: LayoutIssue): number => (i.source ? i.source.line * 1e6 + i.source.column : Number.POSITIVE_INFINITY);
+  result.sort((a, b) => place(a) - place(b) || a.from - b.from);
   const ids = new Set(result.map((i) => i.id));
   const every = step === 1 ? "every frame" : `every ${(step / fps).toFixed(2)} s`;
   const summary = result.length === 0
@@ -267,28 +272,46 @@ function describe(issue: LayoutIssue): LayoutIssue {
 
 /**
  * Where to fix an element in the file: its `transform` (its `style` for captions), else its opening tag; for an
- * element a helper generated, the call to the helper. Null when the file does not show it (a loop, say).
+ * element a helper generated, the call to the helper; for one a loop made, the JSX in the loop. Null when the file
+ * shows no single place for it.
  */
 function locate(file: string, index: SourceIndex, state: ResolvedState, id: string, kind: string): SourceSpot | null {
   const node = state.tree.byId.get(id);
   const site = node?.editable === "generated" ? undefined : index.elements.get(id);
-  let at: number, helper: string | undefined;
+  const origin = node?.origin;
+  const call = !site && origin ? index.calls.find((c) => c.helper === origin.helper && c.callIndex === origin.callIndex) : undefined;
+  let at: number, helper: string | undefined, loop = false;
   if (site) {
     at = (site.props.get(kind === "captions" ? "style" : "transform") ?? site).range[0];
-  } else {
-    const origin = node?.origin;
-    const call = origin && index.calls.find((c) => c.helper === origin.helper && c.callIndex === origin.callIndex);
-    if (!call) return null;
+  } else if (call) {
     at = call.range[0];
     helper = call.helper;
+  } else {
+    const r = loopSite(index, state, id, kind);
+    if (r === null) return null;
+    at = r;
+    loop = true;
   }
   const before = index.text.slice(0, at);
   const lineStart = before.lastIndexOf("\n") + 1;
   const lineEnd = index.text.indexOf("\n", at);
   return {
     file, line: before.split("\n").length, column: at - lineStart + 1, code: index.text.slice(lineStart, lineEnd < 0 ? undefined : lineEnd),
-    ...(helper ? { helper } : {}),
+    ...(helper ? { helper } : {}), ...(loop ? { loop: true as const } : {}),
   };
+}
+
+/**
+ * The JSX in a loop that made element `id`: of the elements of its kind with an expression id inside its parent,
+ * the one whose id template starts the way `id` does (`` `dot-${i}` `` for "dot-3"). Null unless exactly one fits.
+ */
+function loopSite(index: SourceIndex, state: ResolvedState, id: string, kind: string): number | null {
+  const parent = state.tree.byId.get(id)?.parent;
+  const within = parent ? index.elements.get(parent)?.range : undefined;
+  const fits = index.dynamic.filter((d) => d.kind === kind && (!within || (d.range[0] >= within[0] && d.range[1] <= within[1])));
+  const prefixed = fits.filter((d) => id.startsWith(/^[`'"]([^`'"$]*)/.exec(d.idText)?.[1] ?? ""));
+  const pick = fits.length === 1 ? fits : prefixed;
+  return pick.length === 1 ? pick[0]!.range[0] : null;
 }
 
 /**
@@ -301,7 +324,8 @@ export function formatLayout(result: LayoutCheckResult): string {
     const lines = [`${where}: ${i.rule}: ${i.message}`];
     if (i.source) {
       const n = String(i.source.line);
-      lines.push(`  ${n} | ${i.source.code}`, `  ${" ".repeat(n.length)} | ${" ".repeat(i.source.column - 1)}^${i.source.helper ? ` made by ${i.source.helper}()` : ""}`);
+      const note = i.source.helper ? ` made by ${i.source.helper}()` : i.source.loop ? ` made in a loop, as "${i.id}"` : "";
+      lines.push(`  ${n} | ${i.source.code}`, `  ${" ".repeat(n.length)} | ${" ".repeat(i.source.column - 1)}^${note}`);
     }
     lines.push(`  fix: ${i.fix}`);
     return lines.join("\n");

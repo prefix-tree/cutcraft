@@ -85,6 +85,8 @@ export interface SourceIndex {
   readonly compositionId: string | null;
   /** Vocabulary elements without a literal id, for the lint. */
   readonly anonymous: readonly { readonly kind: string; readonly range: Range; readonly reason: string }[];
+  /** Vocabulary elements whose id is an expression (`id={id}` in a helper, `` id={`dot-${i}`} `` in a loop): the JSX that makes them, with the id's source text. */
+  readonly dynamic: readonly { readonly kind: string; readonly range: Range; readonly idText: string }[];
 }
 
 /**
@@ -99,6 +101,7 @@ export function buildSourceIndex(text: string): SourceIndex {
   const calls: HelperCallSite[] = [];
   const helpers = new Map<string, HelperSite>();
   const anonymous: { kind: string; range: Range; reason: string }[] = [];
+  const dynamic: { kind: string; range: Range; idText: string }[] = [];
   let defaults: SourceIndex["defaults"] = null;
   let hasSchema = false;
   let hasDefaultExport = false;
@@ -193,6 +196,7 @@ export function buildSourceIndex(text: string): SourceIndex {
       let id = typeof idSite?.literal === "string" ? idSite.literal : null;
       if (id === null && kind === "composition" && !idSite) id = "composition";
       if (id === null) {
+        if (idSite?.isExpression && idSite.valueRange) dynamic.push({ kind, range: rangeOf(path.node), idText: text.slice(idSite.valueRange[0], idSite.valueRange[1]) });
         // Inside a helper, `id={id}` is the generated-element pattern: ids come from the call site.
         const fn = path.getFunctionParent();
         const inHelper = Boolean(fn && !fn.isExportDefaultDeclaration() && !fn.parentPath?.isExportDefaultDeclaration());
@@ -245,7 +249,7 @@ export function buildSourceIndex(text: string): SourceIndex {
     return { component: name, range: rangeOf(only), openingTag: rangeOf(only.openingElement), props, lockedProps: locked, boundProps: bound };
   }
 
-  return { text, ast, elements, calls, helpers, defaults, hasSchema, hasDefaultExport, compositionId, anonymous };
+  return { text, ast, elements, calls, helpers, defaults, hasSchema, hasDefaultExport, compositionId, anonymous, dynamic };
 }
 
 function jsxName(name: t.JSXOpeningElement["name"]): string | null {
