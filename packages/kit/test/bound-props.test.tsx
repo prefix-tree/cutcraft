@@ -50,13 +50,17 @@ const m: AssetManifest = manifest;
 describe("props bound to schema keys", () => {
   const index = buildSourceIndex(text);
 
-  it("are indexed as bound, not locked, and the lint does not warn", () => {
+  it("are indexed as bound, not locked, and only intentional source reuse is warned", () => {
     const close = index.elements.get("close")!;
     expect(close.boundProps).toEqual({ out: "closeOut" });
     expect(close.lockedProps).toEqual([]);
     expect(close.props.get("out")).toMatchObject({ isExpression: true, binding: "closeOut" });
     expect(index.elements.get("t")!.lockedProps).toEqual([]);
-    expect(lint(text, { manifest: m })).toEqual([]);
+    // This fixture intentionally reuses footage to exercise one binding shared by multiple clips.
+    expect(lint(text, { manifest: m }).map(({ rule, id }) => ({ rule, id }))).toEqual([
+      { rule: "repeated-source", id: "close" },
+      { rule: "repeated-source", id: "tail" },
+    ]);
   });
 
   it("resolve carries the binding and the trim is allowed", () => {
@@ -102,7 +106,7 @@ describe("props bound to schema keys", () => {
     const i2 = buildSourceIndex(helperText);
     expect(i2.elements.get("tail")!.boundProps).toEqual({});
     expect(i2.elements.get("tail")!.lockedProps).toEqual(["duration"]);
-    expect(lint(helperText, { manifest: m }).map((d) => d.rule)).toEqual(["expression-locked"]);
+    expect(lint(helperText, { manifest: m }).map((d) => d.rule)).toEqual(["repeated-source", "expression-locked"]);
   });
 
   it("binds through a props object too", () => {
