@@ -19,13 +19,13 @@ function sourceTime(site: ElementSite, prop: "in" | "out", asset: AssetEntry): n
 }
 
 /** Clips that draw a picture, with their asset's shot list. */
-function* cutClips(index: Parameters<Rule["check"]>[0], manifest: NonNullable<Parameters<Rule["check"]>[1]["manifest"]>) {
+function* cutClips(index: Parameters<Rule["check"]>[0], manifest: NonNullable<Parameters<Rule["check"]>[1]["manifest"]>, needShots = true) {
   for (const site of index.elements.values()) {
     if (site.kind !== "clip") continue;
     const src = site.props.get("src")?.literal;
     if (typeof src !== "string") continue;
     const asset = lookupAsset(manifest, src);
-    if (asset?.shots?.length) yield { site, asset, shots: asset.shots };
+    if (asset && (!needShots || asset.shots?.length)) yield { site, asset, shots: asset.shots ?? [] };
   }
 }
 
@@ -70,6 +70,34 @@ export const shotChangeInsideCrop: Rule = {
       if (inside.length === 0) continue;
       const names = inside.map((s) => `shot:${s.i} (${r2(s.start)})`).join(", ");
       out.push({ rule: "shot-change-inside-crop", severity: "warning", message: `"${site.id}" has one crop over ${r2(start)}–${r2(end)}, but the camera cuts inside it at ${names}; the framing changes there, so split the clip at the shot (out="shot:N.end", then in="shot:N+1") and crop each part`, range: transform.range, id: site.id, prop: "transform" });
+    }
+    return out;
+  },
+};
+
+/** Two clips on one track playing overlapping stretches of the same asset: the same footage twice, usually a split that left the old line in. */
+export const repeatedSource: Rule = {
+  name: "repeated-source",
+  check: (index, options) => {
+    if (!options.manifest) return [];
+    const out: Diagnostic[] = [];
+    const byTrack = new Map<string, { site: ElementSite; src: string; start: number; end: number }[]>();
+    for (const { site, asset } of cutClips(index, options.manifest, false)) {
+      const start = sourceTime(site, "in", asset) ?? 0;
+      const end = sourceTime(site, "out", asset) ?? asset.duration;
+      const list = byTrack.get(site.parent ?? "") ?? [];
+      list.push({ site, src: asset.id, start, end });
+      byTrack.set(site.parent ?? "", list);
+    }
+    for (const clips of byTrack.values()) {
+      for (let i = 1; i < clips.length; i++) {
+        const b = clips[i]!;
+        const a = clips.slice(0, i).find((x) => x.src === b.src && Math.min(x.end, b.end) - Math.max(x.start, b.start) > 1);
+        if (!a) continue;
+        const from = Math.max(a.start, b.start);
+        const to = Math.min(a.end, b.end);
+        out.push({ rule: "repeated-source", severity: "warning", message: `"${b.site.id}" plays ${r2(from)}–${r2(to)} of ${b.src} again after "${a.site.id}" did; the same footage twice on one track is usually a split that kept the old clip. Remove one.`, range: b.site.range, id: b.site.id });
+      }
     }
     return out;
   },

@@ -99,4 +99,5 @@ source's own cuts from the manifest's shots: `cut-near-shot` (an `in` just
 before a shot change or an `out` just after one, which flashes a few frames
 of the other shot; it names the `shot:N` edge to use) and
 `shot-change-inside-crop` (one `transform.crop` over a range the camera cuts
-inside, so the framing the crop was set for ends mid-clip; split there).
+inside, so the framing the crop was set for ends mid-clip; split there), and `repeated-source` (two clips on
+one track playing overlapping stretches of the same asset, usually a split that kept the old clip).

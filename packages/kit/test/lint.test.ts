@@ -80,6 +80,13 @@ describe("lint", () => {
     expect(inside('<Track id="t"><Clip id="c" src="asset:interview" in={5} out={15} /><Clip id="d" src="asset:interview" in="shot:1" out="shot:1.end" transform={{ crop: { x: 0, y: 0, width: 0.5, height: 1 } }} /></Track>')).toEqual([]);
   });
 
+  it("warns when one track plays the same stretch of an asset twice", () => {
+    const repeated = (body: string) => lint(wrap(body), { manifest, rules: ["repeated-source"] }).map((d) => d.id);
+    expect(repeated('<Track id="t"><Clip id="a" src="asset:interview" in={0} out={9.5} /><Clip id="b" src="asset:interview" in={21} out={26} /><Clip id="c" src="asset:interview" in="shot:1" out="shot:1.end" /><Clip id="d" src="asset:interview" in={22} out={30} /></Track>')).toEqual(["d"]);
+    // Adjacent ranges, another asset, or another track: not a repeat.
+    expect(repeated('<Track id="t"><Clip id="a" src="asset:interview" in={0} out={9.5} /><Clip id="b" src="asset:interview" in={9.5} out={21} /><Clip id="c" src="asset:city" in={0} out={5} /></Track><Track id="u" layout="free"><Clip id="e" src="asset:interview" start={0} in={0} out={9.5} /></Track>')).toEqual([]);
+  });
+
   describe("not-rendered", () => {
     const notRendered = (body: string) => lint(wrap(body)).filter((d) => d.rule === "not-rendered").map((d) => `${d.severity}:${d.id}.${d.prop ?? ""}: ${d.message}`);
 
