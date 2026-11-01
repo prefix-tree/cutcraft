@@ -126,7 +126,9 @@ Give the video one look, the way a designer would, and say it once.
    `badge`, `pill`, `burst`), lower thirds (`lower-third`, `-card`, `-split`),
    frames (`corner-brackets`, `frame`, `device-frame`), highlights
    (`underline`, `circle-scribble`, `marker`, `strike`), `progress-bar`,
-   `countdown`, `steps`, `divider`, backgrounds (`gradient-background`,
+   `countdown`, `steps`, `divider`, data (`counter`, `unit-grid`,
+   `comparison`, `sample-size`: write the numbers as props, not a `<Layer>`, so
+   they stay editable), backgrounds (`gradient-background`,
    `dots-background`, `grid-background`, `waves-background`,
    `blobs-background`), `confetti`, `sparkles` and `icon` (any Lucide name;
    `<Sticker src="icon:check">` too). Each takes a few props (`text`, `name`,

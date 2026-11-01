@@ -417,6 +417,105 @@ A row of dots for steps in a sequence, the `active` one (1-based) filled and lar
 | `inactive` | string | `"$muted"` |
 | `line` | boolean | `true` |
 
+## Data
+
+### `counter`
+
+A number that counts from `from` to `to` over `countFor` seconds, with an optional prefix, suffix and caption under it. Animated.
+
+![Counter](/graphics/counter.png)
+
+```tsx
+<Graphic id="g1" kind="counter" to={1250} suffix="+" label="customers" start={0} duration={3} />
+```
+
+| prop | type | default |
+|---|---|---|
+| `from` | number | `0` |
+| `to` | number | `100` |
+| `decimals` | integer | `0` |
+| `prefix` | string | `""` |
+| `suffix` | string | `""` |
+| `label` | string | `""` |
+| `countFor` | number (0..60) | `1.5` |
+| `grouping` | boolean | `true` |
+| `color` | string | `"$text"` |
+| `labelColor` | string | `"$muted"` |
+| `font` | string | `"$heading"` |
+| `labelFont` | string | `"$body"` |
+
+### `unit-grid`
+
+`total` units in a grid with `filled` of them coloured, one by one over `fillFor` seconds: "7 in 10". A fractional `filled` colours part of the last unit. Animated.
+
+![Unit grid](/graphics/unit-grid.png)
+
+```tsx
+<Graphic id="g1" kind="unit-grid" total={10} filled={7} label="7 in 10 viewers" start={0} duration={3} />
+```
+
+| prop | type | default |
+|---|---|---|
+| `total` | integer | `10` |
+| `filled` | number (0..400) | `3` |
+| `columns` | integer |  |
+| `unit` | "person" \| "circle" \| "square" | `"person"` |
+| `gap` | number (0..0.8) | `0.25` |
+| `fillFor` | number (0..60) | `1` |
+| `label` | string | `""` |
+| `color` | string | `"$primary"` |
+| `empty` | string | `"$surface"` |
+| `labelColor` | string | `"$text"` |
+| `font` | string | `"$body"` |
+
+### `comparison`
+
+Bars side by side for a few values, each with its label and value, growing over `growFor` seconds. `max` sets the scale (default: the largest value). Animated.
+
+![Comparison](/graphics/comparison.png)
+
+```tsx
+<Graphic id="g1" kind="comparison" items={[{"label":"Manual edit","value":6,"color":"$muted"},{"label":"With cutcut","value":1.5}]} suffix=" h" decimals={1} start={0} duration={3} />
+```
+
+| prop | type | default |
+|---|---|---|
+| `items` | { label, value, color }[] | `[{"label":"Before","value":40},{"label":"After","value":75}]` |
+| `orientation` | "horizontal" \| "vertical" | `"horizontal"` |
+| `max` | number |  |
+| `showValues` | boolean | `true` |
+| `decimals` | integer | `0` |
+| `prefix` | string | `""` |
+| `suffix` | string | `""` |
+| `growFor` | number (0..60) | `1` |
+| `color` | string | `"$primary"` |
+| `track` | string | `"$surface"` |
+| `labelColor` | string | `"$text"` |
+| `font` | string | `"$body"` |
+
+### `sample-size`
+
+A field of dots for a sample of `n`, with `share` of them highlighted, appearing over `appearFor` seconds. Past 1,000 each dot stands for several (`perDot`), and the note says so. The label may use `{n}` and `{share}`. Animated.
+
+![Sample size](/graphics/sample-size.png)
+
+```tsx
+<Graphic id="g1" kind="sample-size" n={1200} share={0.38} label="{share} of {n} said yes" start={0} duration={3} />
+```
+
+| prop | type | default |
+|---|---|---|
+| `n` | integer | `1200` |
+| `share` | number (0..1) |  |
+| `perDot` | integer |  |
+| `layout` | "grid" \| "scatter" | `"grid"` |
+| `appearFor` | number (0..60) | `1.5` |
+| `label` | string | `"n = {n}"` |
+| `color` | string | `"$muted"` |
+| `highlight` | string | `"$primary"` |
+| `labelColor` | string | `"$text"` |
+| `font` | string | `"$body"` |
+
 ## Dividers
 
 ### `divider`

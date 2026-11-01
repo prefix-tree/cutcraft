@@ -5,6 +5,8 @@ export * from "./jsx/rendering";
 export * from "./jsx/elements";
 export * from "./jsx/use-t";
 export * from "./jsx/animate";
+// What an editor shows for a <Graphic>'s own props, read from its kind's schema.
+export { graphicControls, type GraphicControl } from "@cutcut/graphics";
 export { TRANSITION_PARAMS, defaultTransitionParams } from "./jsx/schemas/transition";
 export type { Transform } from "./jsx/schemas/common";
 

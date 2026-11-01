@@ -38,7 +38,7 @@ export interface Drawn {
   readonly labels: readonly Label[];
 }
 
-export type KindCategory = "arrows" | "callouts" | "lower thirds" | "frames" | "highlights" | "progress" | "dividers" | "backgrounds" | "effects" | "icons";
+export type KindCategory = "arrows" | "callouts" | "lower thirds" | "frames" | "highlights" | "progress" | "data" | "dividers" | "backgrounds" | "effects" | "icons";
 
 export interface GraphicKind<S extends z.ZodRawShape = z.ZodRawShape> {
   readonly kind: string;

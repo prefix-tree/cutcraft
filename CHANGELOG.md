@@ -8,6 +8,14 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- Data graphics: `<Graphic kind="counter">` counts to a number, `unit-grid` colours `filled` of
+  `total` units ("7 in 10"), `comparison` draws a few labelled bars to scale, and `sample-size`
+  draws a sample of `n` as dots with a `share` highlighted (one dot standing for several past
+  1,000). Each animates over a few seconds, draws in the theme, and is plain props, so the editor
+  can change it without code. `graphicControls(kind)` (from `@cutcut/graphics`, and `@cutcut/kit`)
+  describes the editor control for each of a kind's props from its schema: number bounds and
+  steps, colours and fonts (now marked in the schema), switches, choices, and lists of items.
+
 - `checkLayout` (`cutcut-render --check-layout`) samples every frame and reports each overlay that
   leaves the frame, leaves a safe zone (`tiktok`, `reels`, `shorts`, `title-safe`, `action-safe` or
   custom margins), covers captions, or covers the subject, as runs with the element's id and the

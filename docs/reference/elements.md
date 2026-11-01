@@ -263,7 +263,7 @@ Plus the props of its `kind`: see [Graphics](./graphics).
 | `style` | string |  |  |
 | `width` | number |  |  |
 | `height` | number |  |  |
-| `kind` | "arrow" \| "curved-arrow" \| "hand-arrow" \| "callout" \| "speech-bubble" \| "badge" \| "pill" \| "burst" \| "lower-third" \| "lower-third-card" \| "lower-third-split" \| "corner-brackets" \| "frame" \| "device-frame" \| "underline" \| "circle-scribble" \| "marker" \| "strike" \| "progress-bar" \| "countdown" \| "steps" \| "divider" \| "gradient-background" \| "dots-background" \| "grid-background" \| "waves-background" \| "blobs-background" \| "confetti" \| "sparkles" \| "icon" |  | yes |
+| `kind` | "arrow" \| "curved-arrow" \| "hand-arrow" \| "callout" \| "speech-bubble" \| "badge" \| "pill" \| "burst" \| "lower-third" \| "lower-third-card" \| "lower-third-split" \| "corner-brackets" \| "frame" \| "device-frame" \| "underline" \| "circle-scribble" \| "marker" \| "strike" \| "progress-bar" \| "countdown" \| "steps" \| "counter" \| "unit-grid" \| "comparison" \| "sample-size" \| "divider" \| "gradient-background" \| "dots-background" \| "grid-background" \| "waves-background" \| "blobs-background" \| "confetti" \| "sparkles" \| "icon" |  | yes |
 
 ## `<Captions>`
 

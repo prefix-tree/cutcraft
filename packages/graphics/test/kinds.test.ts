@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { GRAPHIC_BASE_PROPS, GRAPHIC_KINDS, GRAPHIC_KIND_NAMES, drawGraphic, graphicSize, iconNames, isIcon } from "../src";
+import { GRAPHIC_BASE_PROPS, GRAPHIC_KINDS, GRAPHIC_KIND_NAMES, drawGraphic, graphicControls, graphicSize, iconNames, isIcon } from "../src";
 
 const tokens = { primary: "#6c8cff", secondary: "#22d3ee", accent: "#ffb020", background: "#0b1020", surface: "#161d33", text: "#f5f7ff", muted: "#9aa3c0", onPrimary: "#ffffff", heading: "Space Grotesk", body: "Inter", mono: "JetBrains Mono", radius: 16 };
 const frame = { width: 1920, height: 1080 };
@@ -40,7 +40,8 @@ describe("graphic kinds", () => {
   const moving: Record<string, Record<string, unknown>> = { "progress-bar": { value: undefined }, "dots-background": { drift: 30 }, "marker": { sweep: 1 } };
 
   it.each(GRAPHIC_KIND_NAMES.filter((k) => GRAPHIC_KINDS[k].animated))("%s moves with time", (name) => {
-    expect(draw(name, 0.3, moving[name]).svg).not.toBe(draw(name, 1.7, moving[name]).svg);
+    const look = (t: number) => { const d = draw(name, t, moving[name]); return JSON.stringify([d.svg, d.labels]); };
+    expect(look(0.3)).not.toBe(look(1.7));
   });
 
   it("leaves the props every graphic takes to the element", () => {
@@ -71,6 +72,76 @@ describe("graphic kinds", () => {
     expect(draw("callout", 1, { text: "A much longer callout text" }).size.width).toBeGreaterThan(draw("callout", 1, { text: "Hi" }).size.width);
     expect(graphicSize({ ...parsed("callout"), width: 500, height: 90 }, frame)).toEqual({ width: 500, height: 90 });
     expect(graphicSize(parsed("gradient-background"), frame)).toEqual(frame);
+  });
+
+  describe("data kinds", () => {
+    const fills = (svg: string, color: string) => svg.split(`fill="${color}"`).length - 1;
+
+    it("counts to the number, grouped, at a size that holds still", () => {
+      const at = (t: number) => draw("counter", t, { countFor: 1.5 }).labels;
+      expect(at(0)[0]!.text).toBe("0+");
+      expect(at(0.75)[0]!.text).toMatch(/^1,\d{3}\+$/);
+      expect(at(2)[0]!.text).toBe("1,250+");
+      expect(at(0.2)[0]!.size).toBe(at(2)[0]!.size);
+      expect(at(2)[1]).toMatchObject({ text: "customers", color: tokens.muted });
+      expect(draw("counter", 2, { to: 3.14159, decimals: 2, prefix: "$", suffix: "", label: "" }).labels.map((l) => l.text)).toEqual(["$3.14"]);
+    });
+
+    it("fills a unit grid one by one, part of the last unit for a fraction", () => {
+      expect(fills(draw("unit-grid", 0).svg, tokens.primary)).toBe(0);
+      expect(fills(draw("unit-grid", 2).svg, tokens.primary)).toBe(7);
+      const part = draw("unit-grid", 2, { filled: 2.5, unit: "square" }).svg;
+      expect(fills(part, tokens.primary)).toBe(3);
+      expect(part).toContain('<clipPath id="part2"><rect');
+    });
+
+    it("scales comparison bars to the largest value, or to max", () => {
+      // A rounded bar's path runs M(x + r) … H(x + w − r) A r …: its width is the straight part plus both corners.
+      const widths = (extra: Record<string, unknown>) => [...draw("comparison", 2, extra).svg.matchAll(/<path d="M([\d.]+) [\d.]+H([\d.]+)A([\d.]+)/g)].map((m) => Number(m[2]) - Number(m[1]) + 2 * Number(m[3]));
+      const [trackA, barA, trackB, barB] = widths({});
+      expect(trackA).toBe(trackB);
+      expect(barA! / barB!).toBeCloseTo(6 / 1.5, 0);
+      expect(widths({ max: 12 })[1]! / trackA!).toBeLessThan(0.55);
+      expect(draw("comparison", 2).labels.map((l) => l.text)).toEqual(["Manual edit", "6.0 h", "With cutcut", "1.5 h"]);
+      expect(draw("comparison", 0, { orientation: "vertical" }).labels.filter((l) => l.text.endsWith(" h")).map((l) => l.text)).toEqual(["0.0 h", "0.0 h"]);
+    });
+
+    it("draws a sample as dots, a share highlighted, each dot standing for several past 1,000", () => {
+      const end = draw("sample-size", 2);
+      // 1,200 people at 2 a dot: 600 dots, 228 of them the 38%.
+      expect(fills(end.svg, tokens.primary)).toBe(228);
+      expect(fills(end.svg, tokens.muted)).toBe(372);
+      expect(end.labels[0]!.text).toBe("38% of 1,200 said yes  ·  1 dot = 2");
+      expect(fills(draw("sample-size", 0).svg, tokens.muted)).toBe(0);
+      expect(draw("sample-size", 0.7).svg).toBe(draw("sample-size", 0.7).svg);
+      expect(fills(draw("sample-size", 2, { n: 10_000_000, perDot: 1 }).svg, tokens.muted) + fills(draw("sample-size", 2, { n: 10_000_000, perDot: 1 }).svg, tokens.primary)).toBeLessThanOrEqual(4000);
+    });
+  });
+
+  describe("graphicControls", () => {
+    it("gives every kind controls for its props, in their order, colours and fonts marked", () => {
+      for (const name of GRAPHIC_KIND_NAMES) {
+        const shape = Object.keys(GRAPHIC_KINDS[name].shape);
+        const controls = graphicControls(name);
+        expect(controls.map((c) => c.name)).toEqual(shape.filter((k) => controls.some((c) => c.name === k)));
+      }
+      expect(graphicControls("progress-bar").find((c) => c.name === "fill")).toMatchObject({ type: "color", default: "$primary" });
+      expect(graphicControls("countdown").find((c) => c.name === "font")).toMatchObject({ type: "font" });
+    });
+
+    it("reads bounds, steps, units, choices and list items from the schema", () => {
+      const byName = (kind: keyof typeof GRAPHIC_KINDS) => Object.fromEntries(graphicControls(kind).map((c) => [c.name, c]));
+      const counter = byName("counter");
+      expect(counter.decimals).toEqual({ name: "decimals", label: "Decimals", default: 0, type: "number", min: 0, max: 4, step: 1 });
+      expect(counter.countFor).toMatchObject({ label: "Count for", min: 0, max: 60, unit: "s" });
+      expect(counter.labelColor).toMatchObject({ label: "Label color", type: "color" });
+      const sample = byName("sample-size");
+      expect(sample.share).toMatchObject({ type: "number", min: 0, max: 1, step: 0.01, optional: true });
+      expect(sample.perDot).toEqual({ name: "perDot", label: "Per dot", type: "number", min: 1, step: 1, optional: true });
+      expect(sample.layout).toMatchObject({ type: "choice", options: ["grid", "scatter"] });
+      expect(graphicControls("no-such-kind")).toEqual([]);
+      expect(byName("comparison").items).toMatchObject({ type: "list", min: 1, max: 8, fields: [{ name: "label", type: "text" }, { name: "value", type: "number", min: 0 }, { name: "color", type: "color", optional: true }] });
+    });
   });
 
   it("knows Lucide's icons by kebab-case name", () => {

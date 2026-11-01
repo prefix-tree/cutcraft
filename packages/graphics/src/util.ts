@@ -1,10 +1,10 @@
 import { z } from "zod";
 import type { GraphicContext } from "./types";
 
-/** A colour or a `$token`. */
-export const color = (fallback: string) => z.string().min(1).default(fallback);
-/** A font family or a `$token`. */
-export const font = (fallback: string) => z.string().min(1).default(fallback);
+/** A colour or a `$token`; marked so an editor shows a colour control. */
+export const color = (fallback: string) => z.string().min(1).default(fallback).meta({ control: "color" });
+/** A font family or a `$token`; marked so an editor shows a font control. */
+export const font = (fallback: string) => z.string().min(1).default(fallback).meta({ control: "font" });
 export const text = (fallback: string) => z.string().default(fallback);
 export const px = (fallback: number, max = 4000) => z.number().min(0).max(max).default(fallback);
 export const weight = (fallback: number) => z.number().int().min(100).max(900).default(fallback);
@@ -109,3 +109,11 @@ function rgb(c: string): [number, number, number] | null {
 
 export const clamp01 = (v: number): number => Math.max(0, Math.min(1, v));
 export const easeOut = (v: number): number => 1 - (1 - clamp01(v)) ** 3;
+
+/** How far an animation of `seconds` is at `t`, eased out; 1 when it takes no time. */
+export const progress = (t: number, seconds: number): number => (seconds > 0 ? easeOut(t / seconds) : 1);
+
+/** A number with `decimals` places, grouped in thousands (`1,234.5`) unless `grouping` is false; the same in every locale. */
+export function formatNumber(v: number, decimals: number, grouping = true): string {
+  return v.toLocaleString("en-US", { minimumFractionDigits: decimals, maximumFractionDigits: decimals, useGrouping: grouping });
+}

@@ -5,6 +5,7 @@ import { lowerThird, lowerThirdCard, lowerThirdSplit } from "./kinds/lower-third
 import { cornerBrackets, deviceFrame, frame } from "./kinds/frames";
 import { circleScribble, marker, strike, underline } from "./kinds/highlights";
 import { countdown, divider, progressBar, steps } from "./kinds/progress";
+import { comparison, counter, sampleSize, unitGrid } from "./kinds/data";
 import { blobsBackground, dotsBackground, gradientBackground, gridBackground, wavesBackground } from "./kinds/backgrounds";
 import { confetti, sparkles } from "./kinds/effects";
 import { icon } from "./kinds/icon";
@@ -13,6 +14,7 @@ import { hash } from "./util";
 export type { Drawn, GraphicContext, GraphicKind, KindCategory, Label } from "./types";
 export { iconNames, isIcon } from "./kinds/icon";
 export { hash, random } from "./util";
+export { graphicControls, type GraphicControl } from "./controls";
 
 /** Every built-in kind, in catalog order. */
 export const GRAPHIC_KINDS = {
@@ -37,6 +39,10 @@ export const GRAPHIC_KINDS = {
   "progress-bar": progressBar,
   "countdown": countdown,
   "steps": steps,
+  "counter": counter,
+  "unit-grid": unitGrid,
+  "comparison": comparison,
+  "sample-size": sampleSize,
   "divider": divider,
   "gradient-background": gradientBackground,
   "dots-background": dotsBackground,
