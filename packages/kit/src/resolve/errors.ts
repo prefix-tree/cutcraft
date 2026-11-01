@@ -1,5 +1,9 @@
 export type ResolveErrorCode =
   | "DANGLING_ANCHOR"
+  /** `at` names a moment the anchor does not play: trimmed out, or the anchor is not footage. */
+  | "INVALID_ANCHOR"
+  /** `at` on an anchor the first version cannot map: reversed, or with speed keys or freezes. */
+  | "UNSUPPORTED_ANCHOR"
   | "CYCLE"
   | "TRIM_PAST_SOURCE"
   | "UNKNOWN_REF"

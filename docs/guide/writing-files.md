@@ -174,6 +174,23 @@ The title anchors to `"start"`, the tagline to the title, the lower third to
 follows; the file holds no absolute times for overlays at all. An anchor that
 points at nothing or forms a cycle is a resolve error.
 
+A graphic that belongs to a spoken word anchors to the clip that says it and
+names the word with `at`:
+
+```tsx
+<Title id="ten-outputs" anchor="make-1" at="word:14655" duration={3}>10× output</Title>
+```
+
+`anchor` picks the clip occurrence (the same footage may play twice), `at` a
+word, shot or silence of that clip's source, and the resolver starts the
+graphic where the clip plays it: clip start + (word time − clip in) / speed,
+plus `offset` if there is one (a drag in the editor writes `offset`, so the
+graphic stays tied to its word). Move the clip and the graphic follows; trim
+before the word and it adjusts. A word the clip no longer plays is an
+`INVALID_ANCHOR` error, and the graphic is held to the nearest part the clip
+plays. Reversed clips and clips with speed keys or freezes are not supported
+yet (`UNSUPPORTED_ANCHOR`): use `offset` there.
+
 ## Transitions are siblings
 
 `<Transition>` sits between the two clips it joins. The resolver overlaps them

@@ -77,7 +77,9 @@ Children that the inspector edits one by one: `<Keyframe property at value easin
    `duration`; a bed takes `duration="fill"`.
 5. **Overlays anchor.** `anchor="hook" offset={0.4}` places an element relative
    to another; `anchor="start"` is the composition start. Anchored elements
-   move with what they anchor to when the edit changes.
+   move with what they anchor to when the edit changes. A graphic for a spoken
+   word anchors to the clip that says it and names the word:
+   `anchor="hook" at="word:12"` starts it where that clip plays word 12.
 6. **Transitions are siblings** between two adjacent clips of a sequence track;
    the clips overlap by the transition's duration.
 7. **Helpers used once stay editable** (their elements are ordinary literals).

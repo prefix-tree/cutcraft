@@ -165,7 +165,7 @@ function extractionPlan(state: ResolvedState, id: string): { tracks: NodeSpec[];
       if (start >= item.end - EPS) continue;
       const limit = item.end - start;
       const spec = prefixed(nodeSpecOf(rn));
-      const props: Record<string, Json | undefined> = { ...spec.props, anchor: undefined, offset: undefined, start };
+      const props: Record<string, Json | undefined> = { ...spec.props, anchor: undefined, offset: undefined, at: undefined, start };
       if (p.duration > limit + EPS) {
         if (p.source) { props.in = p.source.in; props.out = p.source.in + limit * p.source.speed; props.duration = undefined; }
         else props.duration = limit;

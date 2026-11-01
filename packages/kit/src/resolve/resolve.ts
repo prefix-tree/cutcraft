@@ -79,7 +79,8 @@ interface Pending {
   duration?: number;
   durationDep?: { kind: "match"; id: string } | { kind: "fill" };
   start?: number;
-  anchorDep?: { id: string | "start"; offset: number; edge?: "end" };
+  /** `at` is a word, shot or silence of the anchor's source: the start is where the anchor plays it, plus `offset`. */
+  anchorDep?: { id: string | "start"; offset: number; edge?: "end"; at?: string };
   between?: readonly [string, string];
 }
 
@@ -179,7 +180,7 @@ function compute(original: CollectedTree, manifest: AssetManifest, log: PatchLog
     if (!trackNode) continue;
     placeTrack(trackNode, track, pending, theme, errors);
   }
-  iterateDependencies(pending, errors);
+  iterateDependencies(pending, manifest);
   placeCaptions(root, pending, tracks, manifest, markers);
 
   let compositionEnd = 0;
@@ -381,6 +382,14 @@ function intrinsicCompute(
   if (typeof props.anchor === "string") {
     const end = props.anchor.endsWith(".end");
     p.anchorDep = { id: end ? props.anchor.slice(0, -4) : props.anchor, offset: Number(props.offset ?? 0), ...(end ? { edge: "end" as const } : {}) };
+  }
+  if (typeof props.at === "string") {
+    // `at` names a moment of the anchor's own footage, so it needs a plain anchor: an element, not the start or an end.
+    if (!p.anchorDep || p.anchorDep.id === "start" || p.anchorDep.edge === "end") {
+      own.push({ code: "SCHEMA", id: node.id, prop: "at", message: `at="${props.at}" needs anchor set to the clip that plays it (not "start" or an ".end")` });
+    } else {
+      p.anchorDep.at = props.at;
+    }
   }
 
   if (caps.trimSource && typeof props.src === "string") {
@@ -597,7 +606,7 @@ function placeMulticam(node: CollectedNode, p: Pending, track: ResolvedTrack, pe
   p.durationDep = { kind: "fill" };
 }
 
-function iterateDependencies(pending: Map<string, Pending>, _errors: ResolveError[]): void {
+function iterateDependencies(pending: Map<string, Pending>, manifest: AssetManifest): void {
   for (let pass = 0; pass < MAX_PASSES; pass++) {
     let progressed = false;
     for (const p of pending.values()) {
@@ -618,7 +627,8 @@ function iterateDependencies(pending: Map<string, Pending>, _errors: ResolveErro
             const d = p.duration ?? 0;
             p.start = edge === "in" ? target.start : target.start + (target.duration ?? 0) - d;
           } else {
-            p.start = Math.max(0, target.start + (dep.edge === "end" ? (target.duration ?? 0) : 0) + dep.offset);
+            const base = dep.at !== undefined ? playedAt(p, target, dep.at, manifest) : dep.edge === "end" ? (target.duration ?? 0) : 0;
+            p.start = Math.max(0, target.start + base + dep.offset);
           }
           progressed = true;
         }
@@ -649,6 +659,31 @@ function iterateDependencies(pending: Map<string, Pending>, _errors: ResolveErro
       delete p.durationDep;
     }
   }
+}
+
+/**
+ * Seconds after `target` starts at which it plays `at`, a word, shot or silence of its source:
+ * (source time − source in) / speed. A target that is not footage, plays the moment reversed or through a speed ramp,
+ * or has trimmed it out is reported on `p`; then the moment is held to the nearest part the target plays.
+ */
+function playedAt(p: Pending, target: Pending, at: string, manifest: AssetManifest): number {
+  const src = target.source;
+  const fail = (code: "INVALID_ANCHOR" | "UNSUPPORTED_ANCHOR", message: string): number => {
+    p.errors.push({ code, id: p.node.id, prop: "at", message });
+    return 0;
+  };
+  if (!src) return fail("INVALID_ANCHOR", `at="${at}" needs anchor "${target.node.id}" to be a clip or audio cut from an asset`);
+  if (target.props.reverse === true) return fail("UNSUPPORTED_ANCHOR", `at="${at}" on reversed "${target.node.id}" is not supported yet; use offset`);
+  if (target.node.children.some((c) => c.kind === "speedKey" || c.kind === "freeze")) {
+    return fail("UNSUPPORTED_ANCHOR", `at="${at}" on "${target.node.id}", which has speed keys or freezes, is not supported yet; use offset`);
+  }
+  const t = resolveTimeRef(at, lookupAsset(manifest, src.asset), new Map(), { id: p.node.id, prop: "at" });
+  if (typeof t !== "number") { p.errors.push(t); return 0; }
+  const EPS = 1e-6;
+  if (t < src.in - EPS || t > src.out + EPS) {
+    p.errors.push({ code: "INVALID_ANCHOR", id: p.node.id, prop: "at", message: `${at} (${t.toFixed(2)} s) is not in what "${target.node.id}" plays (${src.in.toFixed(2)}–${src.out.toFixed(2)} s of ${src.asset}): it was trimmed out` });
+  }
+  return (Math.max(src.in, Math.min(src.out, t)) - src.in) / src.speed;
 }
 
 /** Whether two placements would render and edit the same; used to hand back the previous object. */

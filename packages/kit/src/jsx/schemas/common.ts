@@ -35,6 +35,8 @@ export const timedProps = {
   start: z.number().nonnegative().optional(),
   /** Overlays: start relative to another element's start, or to its end with `id.end`. */
   anchor: z.union([z.literal("start"), z.string().regex(/^[A-Za-z_][A-Za-z0-9_-]*(\.end)?$/, 'anchors look like "hook", "hook.end" or "start"')]).optional(),
+  /** With `anchor`: a word, shot or silence of the anchor's source (`word:14655`); the start is where the anchor plays it, plus `offset`. */
+  at: z.string().regex(/^(word|shot|silence):\d+(\.end)?$/, 'at looks like "word:12", "word:12.end", "shot:3" or "silence:1"').optional(),
   offset: z.number().optional(),
   duration: durationSchema.optional(),
 };

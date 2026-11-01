@@ -8,6 +8,13 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- `at` times an anchored element by a word of its anchor's footage: `<Title anchor="make-1"
+  at="word:14655">` starts where clip `make-1` plays that word (clip start + (word time − clip in)
+  / speed, plus any `offset`), so it follows the clip when it moves or is trimmed, and `anchor`
+  picks the occurrence when the footage plays twice. Shots and silences work too. A word the clip
+  no longer plays is an `INVALID_ANCHOR` error; reversed and speed-ramped anchors are
+  `UNSUPPORTED_ANCHOR` for now. Re-anchoring an element in the editor drops its `at`.
+
 - Data graphics: `<Graphic kind="counter">` counts to a number, `unit-grid` colours `filled` of
   `total` units ("7 in 10"), `comparison` draws a few labelled bars to scale, and `sample-size`
   draws a sample of `n` as dots with a `share` highlighted (one dot standing for several past

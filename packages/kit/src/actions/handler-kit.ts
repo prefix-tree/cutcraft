@@ -86,9 +86,10 @@ export function siblingAfter(state: ResolvedState, id: string): string | null {
 }
 
 export function placementProps(place: PlacementSpec): Record<string, Json | undefined> {
-  if ("start" in place) return { start: place.start, anchor: undefined, offset: undefined };
+  // `at` only means something beside its anchor, so a placement without one drops it.
+  if ("start" in place) return { start: place.start, anchor: undefined, offset: undefined, at: undefined };
   if ("anchor" in place) return { anchor: place.anchor, offset: place.offset, start: undefined };
-  return { start: undefined, anchor: undefined, offset: undefined };
+  return { start: undefined, anchor: undefined, offset: undefined, at: undefined };
 }
 
 export function placementOf(state: ResolvedState, id: string): PlacementSpec {

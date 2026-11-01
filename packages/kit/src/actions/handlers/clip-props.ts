@@ -30,7 +30,8 @@ define(makePropHandler({ type: "clip/setFit", kinds: ["clip", "nested"], write: 
 define(makePropHandler({ type: "clip/setSource", kinds: ["clip", "audio", "svg", "sticker"], write: (p) => ({ src: p.src }) }));
 define(makePropHandler({
   type: "clip/setAnchor",
-  write: (p) => ({ anchor: p.anchor, offset: p.anchor === undefined ? undefined : (p.offset ?? 0) }),
+  // A word `at` names belongs to the anchor's footage: anchoring elsewhere drops it.
+  write: (p, state) => ({ anchor: p.anchor, offset: p.anchor === undefined ? undefined : (p.offset ?? 0), ...(p.anchor !== rawProp(state, p.id, "anchor") ? { at: undefined } : {}) }),
   validate: (a, state) => (a.params.anchor === undefined || a.params.anchor === "start" || state.items.has(a.params.anchor)
     ? ok : invalid({ code: "ELEMENT_NOT_FOUND", message: `anchor "${a.params.anchor}" does not exist`, path: "anchor" })),
 }));
@@ -53,7 +54,10 @@ define(makePropHandler({
 define(makePropHandler({
   type: "layer/setTiming",
   kinds: ["layer"],
-  write: (p) => ({ ...("duration" in p ? { duration: p.duration } : {}), ...("anchor" in p ? { anchor: p.anchor } : {}), ...("offset" in p ? { offset: p.offset } : {}), ...("start" in p ? { start: p.start } : {}) }),
+  write: (p, state) => ({
+    ...("duration" in p ? { duration: p.duration } : {}), ...("anchor" in p ? { anchor: p.anchor } : {}), ...("offset" in p ? { offset: p.offset } : {}), ...("start" in p ? { start: p.start } : {}),
+    ...("anchor" in p && p.anchor !== rawProp(state, p.id, "anchor") ? { at: undefined } : {}),
+  }),
 }));
 
 define(makePropHandler({
