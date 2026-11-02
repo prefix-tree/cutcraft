@@ -5,6 +5,8 @@ export default defineConfig({
   description: "Video editor as code: a model writes a TSX file with words and shots instead of seconds, the browser plays it, an editor edits the same file, and Node exports it.",
   base: "/cutcraft/",
   cleanUrls: true,
+  // The decision records' index is a README so it shows on GitHub; the site serves it as the folder's page.
+  rewrites: { "decisions/README.md": "decisions/index.md" },
   lastUpdated: true,
   head: [
     ["link", { rel: "icon", type: "image/svg+xml", href: "/cutcraft/favicon.svg" }],

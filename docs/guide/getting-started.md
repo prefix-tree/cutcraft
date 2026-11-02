@@ -1,16 +1,40 @@
 # Getting started
 
-```
-git clone https://github.com/bsnisar/cutcut && cd cutcut
+You need Node 22.19 or later, pnpm 10 (`corepack enable` picks the pinned version), and `ffmpeg` for the generated
+footage. The launch-recap example's footage also needs ffmpeg's `drawtext` filter, which some builds (Homebrew's, for
+one) leave out; the showcase's footage does not.
+
+```sh
+git clone https://github.com/prefix-tree/cutcraft && cd cutcraft
 pnpm install
-pnpm check                                     # typecheck, lint, every test suite
-pnpm --filter @cutcut/example-launch-recap gen    # placeholder footage (needs ffmpeg)
+pnpm check                                        # typecheck, lint, every test suite
+pnpm --filter @cutcut/example-launch-recap gen    # placeholder footage
 pnpm --filter @cutcut/example-launch-recap dev    # http://localhost:5180
 ```
 
 The example plays a file a model wrote from a brief; the page shows the lint
 result, the resolve result and a tweaks form bound to the file's `schema`.
 [Writing a file](./writing-files.md) walks through it.
+
+## Rendering the examples
+
+The videos on the [examples page](../examples) are files in `examples/showcase`. Make their footage and render them:
+
+```sh
+pnpm --filter @cutcut/example-showcase gen       # footage from ffmpeg's own sources
+pnpm --filter @cutcut/example-showcase render    # WebM and a poster each, into docs/public/showcase
+pnpm docs:bench                                  # the benchmarks on the home page, for your machine
+```
+
+## Exporting a file
+
+The renderer's CLI exports any cut file in Node, with no browser; [Exporting](./exporting.md) lists every option.
+
+```sh
+pnpm --filter @cutcut/render exec cutcut-render video.tsx --out video.mp4    # or .webm, .mov, .mp3, .wav
+pnpm --filter @cutcut/render exec cutcut-render video.tsx --still 2 --out poster.png
+pnpm --filter @cutcut/render exec cutcut-render video.tsx --check-layout --safe-zone tiktok
+```
 
 ## Using the kit
 
