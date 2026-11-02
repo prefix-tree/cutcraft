@@ -1,4 +1,4 @@
-import { capabilitiesOf, freezeHoldsOf, lookupAsset, rampAdvance, rampInverse, rampSpeed, speedKeysOf, type FreezeHold, type Placement, type RampKey, type ResolvedState, type ResolvedTrack } from "@cutcut/kit";
+import { capabilitiesOf, freezeHoldsOf, lookupAsset, rampAdvance, rampInverse, rampSpeed, speedKeysOf, type FreezeHold, type Placement, type RampKey, type ResolvedState, type ResolvedTrack } from "@cutcraft/kit";
 import { AUDIO_CHUNK_S, DUCK_ATTACK_S, DUCK_RELEASE_S, ENVELOPE_STEP_S } from "../constants";
 import { keyframedValue } from "./keyframes";
 import type { ResolveNested } from "./frame-plan";

@@ -1,4 +1,4 @@
-import { hash, random as generator } from "@cutcut/graphics";
+import { hash, random as generator } from "@cutcraft/graphics";
 import { EASING_FN, springAt, type SpringConfig } from "../resolve/speed";
 import type { Easing } from "./enums";
 

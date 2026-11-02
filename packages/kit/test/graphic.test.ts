@@ -1,7 +1,7 @@
 import { createElement } from "react";
 import { describe, expect, it } from "vitest";
-import { Composition, Graphic, Track, collect, resolve } from "@cutcut/kit";
-import { lint } from "@cutcut/kit/source";
+import { Composition, Graphic, Track, collect, resolve } from "@cutcraft/kit";
+import { lint } from "@cutcraft/kit/source";
 import { manifest } from "./helpers";
 
 const h = createElement;
@@ -28,7 +28,7 @@ describe("<Graphic>", () => {
   });
 
   it("lints kinds, props, values and icon names before anything renders", () => {
-    const text = `import { Composition, Graphic, Sticker, Track } from "@cutcut/kit";
+    const text = `import { Composition, Graphic, Sticker, Track } from "@cutcraft/kit";
 export default function Video() {
   return (
     <Composition fps={30} width={1920} height={1080}>

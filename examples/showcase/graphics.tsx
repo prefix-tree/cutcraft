@@ -1,4 +1,4 @@
-import { Composition, Graphic, Track } from "@cutcut/kit";
+import { Composition, Graphic, Track } from "@cutcraft/kit";
 
 /** Numbers as props: each data graphic animates in on its own and stays editable in the inspector. */
 export default function Video() {

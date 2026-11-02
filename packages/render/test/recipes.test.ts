@@ -1,7 +1,7 @@
 import { spawnSync } from "node:child_process";
 import { readFileSync, mkdirSync, rmSync } from "node:fs";
 import { join } from "node:path";
-import type { AssetManifest } from "@cutcut/kit";
+import type { AssetManifest } from "@cutcraft/kit";
 import { decodeFrames, decodesClean, pixel, probe } from "./helpers/output";
 import { makePlaceholders } from "./helpers/placeholders";
 

@@ -39,7 +39,7 @@ titles in the theme's presets.
 
 ```sh
 for t in midnight paper neon; do
-  cutcut-render recipes/brand-spot.tsx --manifest recipes/manifest.json --media <dir> --props "{\"theme\":\"$t\"}" --out spot-$t.mp4
+  cutcraft recipes/brand-spot.tsx --manifest recipes/manifest.json --media <dir> --props "{\"theme\":\"$t\"}" --out spot-$t.mp4
 done
 ```
 

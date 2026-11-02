@@ -1,6 +1,6 @@
 # Exporting
 
-`@cutcut/render` turns a file into a WebM, MP4 or MOV, a soundtrack (MP3 or WAV)
+`@cutcraft/render` turns a file into a WebM, MP4 or MOV, a soundtrack (MP3 or WAV)
 or a still (PNG or JPEG) in Node, with no browser. It
 runs the same engine as the preview (the plan, the painter, the compositor and
 the audio plan) on different surfaces, so what the preview shows is what the
@@ -9,11 +9,11 @@ file holds. Why it is built this way is [decision 0015](/decisions/0015-a-headle
 ## From the command line
 
 ```sh
-pnpm --filter @cutcut/render exec cutcut-render video.tsx --manifest manifest.json --media ./media --out video.webm
+npx cutcraft video.tsx --manifest manifest.json --media ./media --out video.webm
 ```
 
-(`cutcut-render` is the package's binary; it is TypeScript run through `tsx`, so
-`tsx packages/render/src/cli.ts …` is the same command.)
+(`cutcraft` is the CLI package's binary. The file imports `@cutcraft/kit`, so install it next to the file:
+`npm install cutcraft @cutcraft/kit react`. In this repo, `pnpm exec tsx packages/render/src/cli.ts …` is the same command.)
 
 | Option | |
 |---|---|
@@ -41,7 +41,7 @@ A file that imports its own packages is compiled with the nearest
 ## From code
 
 ```ts
-import { directoryResolver, loadVideo, renderStill, renderVideo } from "@cutcut/render";
+import { directoryResolver, loadVideo, renderStill, renderVideo } from "@cutcraft/render";
 
 const video = await loadVideo("video.tsx", { manifest: "manifest.json" });
 const result = await renderVideo({
@@ -150,7 +150,7 @@ falling back.
 | the same with crossfades and a title on each | 37 | 98 |
 | moving shapes and titles, no footage | 61 | 117 |
 
-`pnpm --filter @cutcut/render bench:scenarios` measures these on your machine,
+`pnpm --filter @cutcraft/render bench:scenarios` measures these on your machine,
 with the time per frame spent in each stage and a sweep of worker counts; CI
 runs it on request (`gh workflow run ci.yml`).
 
@@ -171,7 +171,7 @@ when it finds issues (1 is an error, 2 the usage text), so a script can stop
 on them:
 
 ```sh
-cutcut-render video.tsx --check-layout --safe-zone tiktok --subject 0.2,0.18,0.6,0.37
+cutcraft video.tsx --check-layout --safe-zone tiktok --subject 0.2,0.18,0.6,0.37
 ```
 
 ```text

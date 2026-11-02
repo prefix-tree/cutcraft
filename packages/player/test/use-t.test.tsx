@@ -1,4 +1,4 @@
-import { Composition, Executor, Layer, Track, collectModule, useLayer, useT } from "@cutcut/kit";
+import { Composition, Executor, Layer, Track, collectModule, useLayer, useT } from "@cutcraft/kit";
 import * as sample from "../../kit/fixtures/sample";
 import { fixtureElement, fixtureManifest, fixtureState, makeState } from "./helpers/state";
 import { mountPlayer } from "./helpers/react";

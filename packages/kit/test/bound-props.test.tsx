@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
-import { Clip, Composition, Executor, Title, Track, collectModule, resolve, type AssetManifest } from "@cutcut/kit";
-import { buildSourceIndex, foldToSource, lint } from "@cutcut/kit/source";
+import { Clip, Composition, Executor, Title, Track, collectModule, resolve, type AssetManifest } from "@cutcraft/kit";
+import { buildSourceIndex, foldToSource, lint } from "@cutcraft/kit/source";
 import { manifest } from "./helpers";
 
 /** The text and the module must agree: the index reads the text, collect evaluates the module. */
 const text = `
 import { z } from "zod";
-import { Clip, Composition, Title, Track } from "@cutcut/kit";
+import { Clip, Composition, Title, Track } from "@cutcraft/kit";
 
 export const schema = z.object({ closeOut: z.number(), label: z.string() });
 export const defaults = { closeOut: 6, label: "Hi" };

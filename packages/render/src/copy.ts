@@ -1,5 +1,5 @@
-import type { ResolvedState } from "@cutcut/kit";
-import { PICK_EPS, buildFramePlan, coversCanvas, makeNestedResolver, type MediaResolver } from "@cutcut/player/engine";
+import type { ResolvedState } from "@cutcraft/kit";
+import { PICK_EPS, buildFramePlan, coversCanvas, makeNestedResolver, type MediaResolver } from "@cutcraft/player/engine";
 import { ALL_FORMATS, EncodedPacketSink, FilePathSource, Input, type EncodedPacket, type EncodedVideoPacketSource, type InputVideoTrack } from "mediabunny";
 import type { OverlayPlane } from "./overlays";
 import { compatibleConfig } from "./parallel";

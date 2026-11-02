@@ -2,8 +2,8 @@ import { createElement } from "react";
 import { describe, expect, it } from "vitest";
 import {
   Captions, Clip, Composition, Executor, Shape, Title, Track, Transition, applyTheme, collect, resolve, resolveTheme, THEMES, type ThemeInput,
-} from "@cutcut/kit";
-import { foldToSource, lint } from "@cutcut/kit/source";
+} from "@cutcraft/kit";
+import { foldToSource, lint } from "@cutcraft/kit/source";
 import { fixtureExecutor, fixtureText, manifest } from "./helpers";
 
 const h = createElement;
@@ -125,7 +125,7 @@ describe("theme", () => {
   });
 
   it("lints unknown tokens and styles, literal colours and fonts under a theme, and fonts no renderer ships", () => {
-    const text = `import { Composition, Shape, Title, Track } from "@cutcut/kit";
+    const text = `import { Composition, Shape, Title, Track } from "@cutcraft/kit";
 export default function Video() {
   return (
     <Composition fps={30} width={1920} height={1080} theme={{ extends: "paper", fonts: { mono: "Comic Mono" } }}>

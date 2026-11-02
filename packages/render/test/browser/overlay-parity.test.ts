@@ -5,9 +5,9 @@ import { createElement as h, type ReactElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { chromium, type Browser } from "@playwright/test";
 import { Canvas, loadImage } from "skia-canvas";
-import { Caption, Captions, Composition, Graphic, Layer, Shape, Sticker, Svg, Title, Track, collect, installLayerClock, resolve, type ResolvedState } from "@cutcut/kit";
-import { visiblePlacements } from "@cutcut/player/engine";
-import { indexLayerInteriors, layerClock } from "@cutcut/player/overlays";
+import { Caption, Captions, Composition, Graphic, Layer, Shape, Sticker, Svg, Title, Track, collect, installLayerClock, resolve, type ResolvedState } from "@cutcraft/kit";
+import { visiblePlacements } from "@cutcraft/player/engine";
+import { indexLayerInteriors, layerClock } from "@cutcraft/player/overlays";
 import { Captions as DomCaptions } from "../../../player/src/react/elements/Captions";
 import { Layer as DomLayerElement } from "../../../player/src/react/elements/Layer";
 import { Shape as DomShape } from "../../../player/src/react/elements/Shape";
@@ -17,7 +17,7 @@ import { Graphic as DomGraphic } from "../../../player/src/react/elements/Graphi
 import { Sticker as DomSticker } from "../../../player/src/react/elements/Sticker";
 import { PlayerContext } from "../../../player/src/react/context";
 import { OverlayPlane, directoryResolver } from "../../src";
-import { BUNDLED_FONTS, BUNDLED_FONT_WEIGHTS, useT } from "@cutcut/kit";
+import { BUNDLED_FONTS, BUNDLED_FONT_WEIGHTS, useT } from "@cutcraft/kit";
 
 const W = 640, H = 360, T = 1;
 const manifest = { assets: {} };

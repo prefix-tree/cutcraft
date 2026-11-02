@@ -1,7 +1,6 @@
 {
-  "name": "@cutcut/kit",
+  "name": "@cutcraft/kit",
   "version": "0.1.0",
-  "private": true,
   "description": "Vocabulary, resolver, action system and source tools for the cut video DSL.",
   "license": "MIT",
   "homepage": "https://prefix-tree.github.io/cutcraft/",
@@ -15,14 +14,27 @@
   },
   "type": "module",
   "sideEffects": [
-    "./src/actions/handlers/index.ts"
+    "./src/actions/handlers/index.ts",
+    "./dist/**"
   ],
   "exports": {
     ".": "./src/index.ts",
     "./source": "./src/source/index-public.ts",
     "./jsx-runtime": "react/jsx-runtime"
   },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "exports": {
+      ".": "./dist/index.mjs",
+      "./source": "./dist/source/index-public.mjs"
+    }
+  },
   "scripts": {
+    "build": "tsdown src/index.ts src/source/index-public.ts --dts",
+    "prepack": "pnpm run build",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "lint": "eslint . --max-warnings 0",
     "test": "vitest run",
@@ -37,7 +49,7 @@
     "@babel/parser": "^7.29.9",
     "@babel/traverse": "^7.29.10",
     "@babel/types": "^7.29.8",
-    "@cutcut/graphics": "workspace:*",
+    "@cutcraft/graphics": "workspace:*",
     "sucrase": "^3.35.1",
     "zod": "^4.6.7"
   },

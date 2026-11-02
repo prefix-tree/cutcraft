@@ -10,7 +10,7 @@ work on it.
 
 ```tsx
 import { z } from "zod";
-import { Clip, Composition, Title, Track, Transition } from "@cutcut/kit";
+import { Clip, Composition, Title, Track, Transition } from "@cutcraft/kit";
 
 export const schema = z.object({ title: z.string() });   // the tweaks panel
 export const defaults = { title: "Why we built it" };     // a JSON literal
@@ -49,7 +49,7 @@ children), `<Shape shape width height fill stroke cornerRadius>`, `<Svg>`,
 `<Sticker>`, `<Graphic kind>` (a built-in graphic: see below), `<Adjustment>`, `<Nested of>`, `<Layer>` (arbitrary React inside;
 call `useT()` for 0..1 progress or `useLayer()` for `elapsed`, `remaining`,
 `duration` and `time` in seconds; shape them with `interpolate()`,
-`spring()` and `random(seed)` from `@cutcut/kit`). Give a Layer one component child whose
+`spring()` and `random(seed)` from `@cutcraft/kit`). Give a Layer one component child whose
 props are literals or schema props: those props are the editor's handles,
 the component's body is not.
 

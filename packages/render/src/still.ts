@@ -1,6 +1,6 @@
 import { writeFile } from "node:fs/promises";
-import type { ResolvedState } from "@cutcut/kit";
-import { FRAME_EPS, captureWarnings, type MediaResolver, type PlayerErrorEvent } from "@cutcut/player/engine";
+import type { ResolvedState } from "@cutcraft/kit";
+import { FRAME_EPS, captureWarnings, type MediaResolver, type PlayerErrorEvent } from "@cutcraft/player/engine";
 import type { ReactNode } from "react";
 import { initEnv } from "./env";
 import type { OverlayFont } from "./overlays";

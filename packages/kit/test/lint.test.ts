@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { buildSourceIndex, lint } from "@cutcut/kit/source";
+import { buildSourceIndex, lint } from "@cutcraft/kit/source";
 import { fixtureText, manifest } from "./helpers";
 
 const wrap = (body: string, extra = "") => `
-import { Composition, Track, Clip, Layer, Title, Transition, Effect, AudioEffect, Adjustment, SpeedKey, Freeze, Mask, ColorGrade, Keyframe } from "@cutcut/kit";
+import { Composition, Track, Clip, Layer, Title, Transition, Effect, AudioEffect, Adjustment, SpeedKey, Freeze, Mask, ColorGrade, Keyframe } from "@cutcraft/kit";
 ${extra}
 export default function V() {
   return (<Composition fps={30} width={1920} height={1080}>${body}</Composition>);
@@ -33,7 +33,7 @@ describe("lint", () => {
   });
 
   it("lets a Layer interior call useT and useLayer but no other hook", () => {
-    const text = wrap('<Track id="t"><Layer id="l" duration={3}><Clock /></Layer></Track>', 'import { useLayer } from "@cutcut/kit";\nfunction Clock() { const { remaining } = useLayer(); return <div>{Math.ceil(remaining)}</div>; }');
+    const text = wrap('<Track id="t"><Layer id="l" duration={3}><Clock /></Layer></Track>', 'import { useLayer } from "@cutcraft/kit";\nfunction Clock() { const { remaining } = useLayer(); return <div>{Math.ceil(remaining)}</div>; }');
     expect(lint(text).filter((d) => d.rule === "pure-helpers")).toEqual([]);
   });
 

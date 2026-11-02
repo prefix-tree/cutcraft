@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { applyEdits, bake, buildSourceIndex, foldToSource, lineRange, literalOf, printElement, printLiteral } from "@cutcut/kit/source";
+import { applyEdits, bake, buildSourceIndex, foldToSource, lineRange, literalOf, printElement, printLiteral } from "@cutcraft/kit/source";
 import { parseSource } from "../src/source/parse";
 import { fixtureExecutor, fixtureText } from "./helpers";
 
@@ -64,7 +64,7 @@ describe("index", () => {
   });
 
   it("treats a bare attribute as true", () => {
-    const index = buildSourceIndex('import { Track } from "@cutcut/kit";\nexport default () => <Track id="t" hidden />;');
+    const index = buildSourceIndex('import { Track } from "@cutcraft/kit";\nexport default () => <Track id="t" hidden />;');
     expect(index.elements.get("t")?.props.get("hidden")).toMatchObject({ literal: true, valueRange: null, isExpression: false });
   });
 });

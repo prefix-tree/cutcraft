@@ -9,8 +9,8 @@ import { withBase } from "vitepress";
 # Examples
 
 Each video is one file in [`examples/showcase`](https://github.com/prefix-tree/cutcraft/tree/main/examples/showcase), rendered by
-the export engine with `pnpm --filter @cutcut/example-showcase render`. The footage is made by `ffmpeg`'s own
-sources (`pnpm --filter @cutcut/example-showcase gen`), so you can render them all yourself.
+the export engine with `pnpm --filter @cutcraft/example-showcase render`. The footage is made by `ffmpeg`'s own
+sources (`pnpm --filter @cutcraft/example-showcase gen`), so you can render them all yourself.
 
 ## An edit
 

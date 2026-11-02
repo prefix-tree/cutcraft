@@ -1,8 +1,8 @@
 // Renders each showcase file for the documentation site: a looping WebM and a poster frame in docs/public/showcase,
-// through the same loader and renderer as `cutcut-render`. A file that does not resolve cleanly stops the run.
+// through the same loader and renderer as `cutcraft`. A file that does not resolve cleanly stops the run.
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
-import { directoryResolver, loadVideo, renderStill, renderVideo } from "@cutcut/render";
+import { directoryResolver, loadVideo, renderStill, renderVideo } from "@cutcraft/render";
 
 const here = import.meta.dirname;
 const out = join(here, "..", "..", "docs", "public", "showcase");

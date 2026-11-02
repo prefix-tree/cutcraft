@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { Executor, collectModule } from "@cutcut/kit";
-import { buildSourceIndex } from "@cutcut/kit/source";
+import { Executor, collectModule } from "@cutcraft/kit";
+import { buildSourceIndex } from "@cutcraft/kit/source";
 import * as sample from "../../fixtures/sample";
 import { fixtureExecutor, fixtureText, manifest, serialize, round } from "../helpers";
 

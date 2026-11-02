@@ -1,4 +1,4 @@
-import { GRAPHIC_BASE_PROPS, GRAPHIC_KINDS, GRAPHIC_KIND_NAMES, isIcon } from "@cutcut/graphics";
+import { GRAPHIC_BASE_PROPS, GRAPHIC_KINDS, GRAPHIC_KIND_NAMES, isIcon } from "@cutcraft/graphics";
 import type { z } from "zod";
 import type { Diagnostic } from "../index";
 import type { Rule } from "./index";

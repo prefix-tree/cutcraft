@@ -26,9 +26,9 @@ function elementImports(text: string): SourceEdit[] {
   });
   if (!missing.size) return [];
   const imports = ast.program.body.filter(t.isImportDeclaration);
-  const kitImport = imports.find((node) => node.source.value === "@cutcut/kit" || node.source.value === "@cut/kit");
+  const kitImport = imports.find((node) => node.source.value === "@cutcraft/kit" || node.source.value === "@cut/kit");
   const pos = (imports.at(-1)?.end ?? ast.program.directives.at(-1)?.end) ?? 0;
-  const moduleName = kitImport?.source.value ?? "@cutcut/kit";
+  const moduleName = kitImport?.source.value ?? "@cutcraft/kit";
   return [{ kind: "insert", id: "composition", range: [pos, pos], text: `\nimport { ${[...missing].sort().join(", ")} } from ${JSON.stringify(moduleName)};\n` }];
 }
 

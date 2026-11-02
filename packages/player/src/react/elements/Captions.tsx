@@ -1,4 +1,4 @@
-import type { Placement, ResolvedState } from "@cutcut/kit";
+import type { Placement, ResolvedState } from "@cutcraft/kit";
 import { captionsContent } from "../../overlays/content";
 
 export interface CaptionsProps {

@@ -1,5 +1,5 @@
-import type { ResolvedState } from "@cutcut/kit";
-import { captureWarnings, type MediaResolver, type PlayerErrorEvent } from "@cutcut/player/engine";
+import type { ResolvedState } from "@cutcraft/kit";
+import { captureWarnings, type MediaResolver, type PlayerErrorEvent } from "@cutcraft/player/engine";
 import { BufferTarget, MovOutputFormat, Mp4OutputFormat, Output, QUALITY_HIGH, VideoSample, QUALITY_LOW, QUALITY_MEDIUM, QUALITY_VERY_HIGH, QUALITY_VERY_LOW, VideoSampleSource, WebMOutputFormat } from "mediabunny";
 import type { ReactNode } from "react";
 import { encodeFrames } from "./encode";

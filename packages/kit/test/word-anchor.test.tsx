@@ -1,6 +1,6 @@
 import { createElement as h } from "react";
 import { describe, expect, it } from "vitest";
-import { Clip, Composition, Executor, Gap, SpeedKey, Title, Track, collect, resolve } from "@cutcut/kit";
+import { Clip, Composition, Executor, Gap, SpeedKey, Title, Track, collect, resolve } from "@cutcraft/kit";
 import { manifest } from "./helpers";
 
 // The interview's words: 3 starts at 2.0 s, 9 at 4.0 s, 13 ends at 6.0 s; 1 is at 0.8 s.

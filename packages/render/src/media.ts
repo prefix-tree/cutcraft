@@ -1,7 +1,7 @@
 import { existsSync, statSync } from "node:fs";
 import { join } from "node:path";
-import type { AssetManifest } from "@cutcut/kit";
-import type { MediaResolver } from "@cutcut/player/engine";
+import type { AssetManifest } from "@cutcraft/kit";
+import type { MediaResolver } from "@cutcraft/player/engine";
 
 const EXTENSIONS = [".webm", ".mp4", ".mov", ".mkv", ".m4v", ".ogg", ".opus", ".mp3", ".wav", ".m4a", ".aac", ".flac", ".png", ".jpg", ".jpeg", ".webp", ".gif", ".svg"];
 

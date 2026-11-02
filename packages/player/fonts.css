@@ -1,7 +1,7 @@
 /*
- * The bundled font families (BUNDLED_FONTS in @cutcut/kit), so the preview sets
+ * The bundled font families (BUNDLED_FONTS in @cutcraft/kit), so the preview sets
  * text in the same faces as the export. Import once in the app:
- *   import "@cutcut/player/fonts.css";
+ *   import "@cutcraft/player/fonts.css";
  */
 @import "@fontsource/inter/400.css";
 @import "@fontsource/inter/700.css";

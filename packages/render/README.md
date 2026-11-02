@@ -1,20 +1,20 @@
 <p align="center"><img src="../../docs/public/logo.svg" alt="cutcut" width="64" height="64"></p>
 
-# @cutcut/render
+# @cutcraft/render
 
 Export for cutcut: a cut file to WebM or MP4 in Node, with no browser. It runs
 the player's own engine (the frame plan, the painter, the compositor and the
 audio plan) on different surfaces, so the file holds what the preview shows.
-Private for now; the design is
+The design is
 [decision 0015](../../docs/decisions/0015-a-headless-engine-renders-the-export.md)
 and the user guide is [Exporting](../../docs/guide/exporting.md).
 
 ```sh
-pnpm --filter @cutcut/render exec cutcut-render video.tsx --manifest manifest.json --media ./media --out video.webm
+npx cutcraft video.tsx --manifest manifest.json --media ./media --out video.webm
 ```
 
 ```ts
-import { directoryResolver, loadVideo, renderVideo } from "@cutcut/render";
+import { directoryResolver, loadVideo, renderVideo } from "@cutcraft/render";
 
 const video = await loadVideo("video.tsx", { manifest: "manifest.json" });
 await renderVideo({
@@ -43,9 +43,9 @@ await renderVideo({
 ## Tests
 
 ```sh
-pnpm --filter @cutcut/render test           # needs ffmpeg on the PATH, to make test media
-pnpm --filter @cutcut/render test:browser   # needs Chromium: overlay and mixer parity with the browser
-pnpm --filter @cutcut/render bench          # frames per second, and where the time goes
+pnpm --filter @cutcraft/render test           # needs ffmpeg on the PATH, to make test media
+pnpm --filter @cutcraft/render test:browser   # needs Chromium: overlay and mixer parity with the browser
+pnpm --filter @cutcraft/render bench          # frames per second, and where the time goes
 ```
 
 The source video the tests render paints its frame number into a strip; the

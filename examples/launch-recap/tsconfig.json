@@ -5,9 +5,9 @@
     "types": ["node", "vite/client", "vitest/globals"],
     "baseUrl": ".",
     "paths": {
-      "@cutcut/kit": ["../../packages/kit/src/index.ts"],
-      "@cutcut/kit/source": ["../../packages/kit/src/source/index-public.ts"],
-      "@cutcut/player": ["../../packages/player/src/index.ts"]
+      "@cutcraft/kit": ["../../packages/kit/src/index.ts"],
+      "@cutcraft/kit/source": ["../../packages/kit/src/source/index-public.ts"],
+      "@cutcraft/player": ["../../packages/player/src/index.ts"]
     }
   },
   "include": ["src", "test", "media", "video.tsx", "vite.config.ts", "vitest.config.ts", "eslint.config.js"]

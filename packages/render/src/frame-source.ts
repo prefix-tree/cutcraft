@@ -1,4 +1,4 @@
-import type { AnyCanvas, Ctx2D, Frame, FrameSourceHooks, MediaHandle } from "@cutcut/player/engine";
+import type { AnyCanvas, Ctx2D, Frame, FrameSourceHooks, MediaHandle } from "@cutcraft/player/engine";
 import { AvFrameVideoSampleResource, toAvFrame } from "@mediabunny/server";
 import { VideoSample } from "mediabunny";
 import { AVCOL_PRI_BT709, AVCOL_RANGE_MPEG, AVCOL_SPC_BT709, AVCOL_TRC_BT709, Frame as AvFrame } from "node-av";

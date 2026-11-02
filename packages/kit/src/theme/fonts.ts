@@ -1,6 +1,6 @@
 /**
  * The font families every renderer ships: the export hands them to Satori and
- * the preview loads them from `@cutcut/player/fonts.css`. All are under the SIL
+ * the preview loads them from `@cutcraft/player/fonts.css`. All are under the SIL
  * Open Font License, from the `@fontsource` packages named here. Each comes in
  * regular and bold, and italic where the family has one.
  */

@@ -10,11 +10,11 @@ the file is the video. The guide that explains every choice in it is
 
 ```
 pnpm install
-pnpm --filter @cutcut/example-launch-recap gen    # placeholder footage via ffmpeg → public/
-pnpm --filter @cutcut/example-launch-recap dev    # http://localhost:5180
+pnpm --filter @cutcraft/example-launch-recap gen    # placeholder footage via ffmpeg → public/
+pnpm --filter @cutcraft/example-launch-recap dev    # http://localhost:5180
 ```
 
-The page plays the file with `@cutcut/player`, shows the lint and resolve
+The page plays the file with `@cutcraft/player`, shows the lint and resolve
 results, and has a tweaks form bound to the file's `schema`.
 
 To use real footage, drop files with the same names into `public/` and update

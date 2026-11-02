@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Audio, Captions, Clip, Composition, Keyframe, Marker, Shape, Title, Track } from "@cutcut/kit";
+import { Audio, Captions, Clip, Composition, Keyframe, Marker, Shape, Title, Track } from "@cutcraft/kit";
 
 export const schema = z.object({
   accent: z.string().describe("Highlight ring colour"),

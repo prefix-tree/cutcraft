@@ -1,5 +1,5 @@
 import { createElement as h } from "react";
-import { Caption, Captions, Clip, Composition, Graphic, Keyframe, Shape, Title, Track, collect, resolve, type AssetManifest } from "@cutcut/kit";
+import { Caption, Captions, Clip, Composition, Graphic, Keyframe, Shape, Title, Track, collect, resolve, type AssetManifest } from "@cutcraft/kit";
 import { mediaDir } from "../../player/e2e/gen-media";
 import { manifest } from "../../player/e2e/app/composition";
 import { checkLayout, directoryResolver, formatLayout, subjectRects, type LayoutIssue } from "../src";
@@ -55,7 +55,7 @@ describe("checkLayout", () => {
 
   it("points each issue at its place in the JSX, as a compiler does", async () => {
     const text = [
-      'import { Composition, Shape, Track } from "@cutcut/kit";',
+      'import { Composition, Shape, Track } from "@cutcraft/kit";',
       "",
       "function Dot({ id }: { id: string }) {",
       '  return <Shape id={id} shape="circle" width={60} height={60} fill="#f00" start={0} duration={1} transform={{ position: { x: 300, y: 0 } }} />;',
@@ -95,7 +95,7 @@ describe("checkLayout", () => {
 
   it("points an element a loop made at the JSX in the loop, and lists issues by line", async () => {
     const text = [
-      'import { Composition, Shape, Track } from "@cutcut/kit";',
+      'import { Composition, Shape, Track } from "@cutcraft/kit";',
       "export default function Video() {",
       "  return (",
       '    <Composition id="v" fps={10} width={640} height={360}>',

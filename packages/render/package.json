@@ -1,7 +1,6 @@
 {
-  "name": "@cutcut/render",
+  "name": "@cutcraft/render",
   "version": "0.1.0",
-  "private": true,
   "description": "A headless render engine: a cut file to MP4 or WebM in Node, with no browser.",
   "license": "MIT",
   "homepage": "https://prefix-tree.github.io/cutcraft/",
@@ -15,12 +14,22 @@
   },
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./cli": "./src/cli.ts"
   },
-  "bin": {
-    "cutcut-render": "./src/cli.ts"
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "exports": {
+      ".": "./dist/index.mjs",
+      "./cli": "./dist/cli.mjs"
+    }
   },
   "scripts": {
+    "build": "tsdown src/index.ts src/cli.ts src/worker.ts --dts",
+    "prepack": "pnpm run build",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "lint": "eslint . --max-warnings 0",
     "test": "vitest run",
@@ -30,9 +39,9 @@
     "catalog": "tsx scripts/graphics-catalog.ts"
   },
   "dependencies": {
-    "@cutcut/graphics": "workspace:*",
-    "@cutcut/kit": "workspace:*",
-    "@cutcut/player": "workspace:*",
+    "@cutcraft/graphics": "workspace:*",
+    "@cutcraft/kit": "workspace:*",
+    "@cutcraft/player": "workspace:*",
     "@fontsource/dm-sans": "^5.3.0",
     "@fontsource/inter": "^5.2.0",
     "@fontsource/jetbrains-mono": "^5.3.0",

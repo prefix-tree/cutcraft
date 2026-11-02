@@ -55,7 +55,8 @@ export class SegmentPool {
   private failure: Error | null = null;
 
   constructor(count: number, init: WorkerInit) {
-    const url = new URL("./worker-entry.mjs", import.meta.url);
+    // From source the worker needs tsx registered first; the published build is plain JS with the worker beside it.
+    const url = new URL(import.meta.url.endsWith(".ts") ? "./worker-entry.mjs" : "./worker.mjs", import.meta.url);
     for (let i = 0; i < count; i++) {
       const worker = new Worker(url, { workerData: init });
       worker.on("message", (reply: SegmentReply) => this.settle(worker, reply));

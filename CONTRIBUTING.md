@@ -12,14 +12,14 @@ focused pull request with a test.
 - The export (`packages/render`) loads native binaries (`skia-canvas`, `node-av` with
   its FFmpeg) with the install; its tests make their media with the system `ffmpeg`
   (`sudo apt-get install ffmpeg`), which needs the `drawtext` filter (FFmpeg built with libfreetype; Homebrew's
-  `ffmpeg` may lack it). `pnpm --filter @cutcut/render test:browser` also
+  `ffmpeg` may lack it). `pnpm --filter @cutcraft/render test:browser` also
   needs Playwright's Chromium, and `bench` measures frames per second.
-- Browser tests: `pnpm --filter @cutcut/player test:e2e` needs `ffmpeg` on the
+- Browser tests: `pnpm --filter @cutcraft/player test:e2e` needs `ffmpeg` on the
   path and Playwright's Chromium (`pnpm exec playwright install --with-deps chromium`
   from `packages/player`). They generate their media on first run.
 - Docs: `pnpm docs:dev` serves the site; `pnpm docs:gen` regenerates the
   reference pages from the code and must leave `git diff` empty (CI checks).
-- The example: `pnpm --filter @cutcut/example-launch-recap gen` then `dev`.
+- The example: `pnpm --filter @cutcraft/example-launch-recap gen` then `dev`.
 
 ## Where things live
 

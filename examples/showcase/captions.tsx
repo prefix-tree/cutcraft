@@ -1,4 +1,4 @@
-import { Captions, Clip, Composition, Title, Track } from "@cutcut/kit";
+import { Captions, Clip, Composition, Title, Track } from "@cutcraft/kit";
 
 /** A vertical short: captions come from the words the clip plays, and the key point starts on the word that names it. */
 export default function Video() {

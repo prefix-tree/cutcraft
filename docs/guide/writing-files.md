@@ -235,7 +235,7 @@ function Countdown() {
 Both hooks read the player's time, so scrubbing shows the right value and
 pausing freezes it; a `setInterval` would drift and ignore seeks.
 
-To shape that time, `@cutcut/kit` exports three pure helpers. `interpolate(x,
+To shape that time, `@cutcraft/kit` exports three pure helpers. `interpolate(x,
 inputRange, outputRange, { easing, extrapolateLeft, extrapolateRight })` maps a
 value piecewise across ranges, extending past the ends unless told to
 `"clamp"`, with any keyframe easing inside. `spring({ time, from, to, mass,

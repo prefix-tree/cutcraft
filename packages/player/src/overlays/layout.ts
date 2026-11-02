@@ -1,4 +1,4 @@
-import type { FitMode, Placement, ResolvedState, Transform } from "@cutcut/kit";
+import type { FitMode, Placement, ResolvedState, Transform } from "@cutcraft/kit";
 import type { CSSProperties } from "react";
 import { filterString } from "../model/effects";
 import { combine, motionAt, STILL, type ClipRect, type GraphicAnimation, type Motion } from "../model/motion";

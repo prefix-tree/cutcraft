@@ -1,4 +1,4 @@
-import { ManualClock, Transport } from "@cutcut/player";
+import { ManualClock, Transport } from "@cutcraft/player";
 
 describe("Transport", () => {
   it("derives time from the clock while playing and holds while paused", () => {

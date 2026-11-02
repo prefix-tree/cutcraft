@@ -1,6 +1,6 @@
 /** @jsxRuntime automatic */
 /** @jsxImportSource react */
-import { GRAPHIC_KINDS, drawGraphic, graphicSize, isIcon, type Label } from "@cutcut/graphics";
+import { GRAPHIC_KINDS, drawGraphic, graphicSize, isIcon, type Label } from "@cutcraft/graphics";
 import type { ReactNode } from "react";
 import { z } from "zod";
 import { overlayLayout, type ElementProps, type OverlayLayout } from "./layout";

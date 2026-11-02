@@ -2,8 +2,8 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { createElement as h } from "react";
 import { z } from "zod";
-import { GRAPHIC_KINDS, GRAPHIC_KIND_NAMES, graphicSize } from "@cutcut/graphics";
-import { Composition, Graphic, THEMES, Track, collect, resolve, type ThemeName } from "@cutcut/kit";
+import { GRAPHIC_KINDS, GRAPHIC_KIND_NAMES, graphicSize } from "@cutcraft/graphics";
+import { Composition, Graphic, THEMES, Track, collect, resolve, type ThemeName } from "@cutcraft/kit";
 import { OverlayPlane, createCanvas, directoryResolver } from "../src/index";
 
 /**

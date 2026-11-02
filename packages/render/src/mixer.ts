@@ -1,4 +1,4 @@
-import type { AudioOccurrence, GainPoint } from "@cutcut/player/engine";
+import type { AudioOccurrence, GainPoint } from "@cutcraft/player/engine";
 
 /** Planar PCM of one decoded source range, at the source's own sample rate. */
 export interface PcmBuffer {

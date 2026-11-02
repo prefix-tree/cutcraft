@@ -2,10 +2,10 @@ import { execFileSync } from "node:child_process";
 import { mkdtempSync, readFileSync, rmSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { collectModule, resolve } from "@cutcut/kit";
+import { collectModule, resolve } from "@cutcraft/kit";
 import generateMedia, { mediaDir } from "../../player/e2e/gen-media";
 import * as file from "../../player/e2e/app/composition";
-import { indexLayerInteriors } from "@cutcut/player/overlays";
+import { indexLayerInteriors } from "@cutcraft/player/overlays";
 import { Canvas, loadImage } from "skia-canvas";
 import { VideoSample } from "mediabunny";
 import { directoryResolver, renderStill, renderVideo } from "../src";
@@ -20,7 +20,7 @@ let dir = "";
 
 beforeAll(() => {
   generateMedia();
-  dir = mkdtempSync(join(tmpdir(), "cutcut-render-"));
+  dir = mkdtempSync(join(tmpdir(), "cutcraft-"));
 });
 afterAll(() => rmSync(dir, { recursive: true, force: true }));
 

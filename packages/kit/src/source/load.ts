@@ -24,7 +24,7 @@ export const ALLOWED_IMPORTS: Readonly<Record<string, unknown>> = {
   react: React,
   "react/jsx-runtime": jsxRuntime,
   zod,
-  "@cutcut/kit": kit,
+  "@cutcraft/kit": kit,
   "@cut/kit": kit,
 };
 

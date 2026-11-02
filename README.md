@@ -107,17 +107,18 @@ media.
 ```sh
 pnpm install
 pnpm check                                          # typecheck, lint and every test suite
-pnpm --filter @cutcut/example-launch-recap gen      # placeholder footage for the example
-pnpm --filter @cutcut/example-launch-recap dev      # the example, at http://localhost:5180
+pnpm --filter @cutcraft/example-launch-recap gen      # placeholder footage for the example
+pnpm --filter @cutcraft/example-launch-recap dev      # the example, at http://localhost:5180
 pnpm docs:dev                                       # this documentation, locally
 ```
 
-Export a file with the renderer's CLI, `cutcut-render`:
+Export a file with the renderer's CLI, `cutcraft`:
 
 ```sh
-pnpm --filter @cutcut/render exec cutcut-render video.tsx --out video.mp4    # or .webm, .mov, .mp3, .wav
-pnpm --filter @cutcut/render exec cutcut-render video.tsx --still 2 --out poster.png
-pnpm --filter @cutcut/render exec cutcut-render video.tsx --check-layout --safe-zone tiktok   # exits 3 on issues
+npm install cutcraft @cutcraft/kit react   # in your project; the file imports @cutcraft/kit
+npx cutcraft video.tsx --out video.mp4    # or .webm, .mov, .mp3, .wav
+npx cutcraft video.tsx --still 2 --out poster.png
+npx cutcraft video.tsx --check-layout --safe-zone tiktok   # exits 3 on issues
 ```
 
 The example is a 25-second launch recap a model wrote from a brief under the authoring prompt;
@@ -125,7 +126,7 @@ The example is a 25-second launch recap a model wrote from a brief under the aut
 
 ## Packages
 
-The packages keep the `@cutcut/` scope and are not on npm yet; use them from the workspace.
+The packages keep the `@cutcraft/` scope and are not on npm yet; use them from the workspace.
 
 | Package | What it is | Docs |
 |---|---|---|

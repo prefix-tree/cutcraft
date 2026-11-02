@@ -1,4 +1,4 @@
-import type { AssetEntry } from "@cutcut/kit";
+import type { AssetEntry } from "@cutcraft/kit";
 
 export interface PlayerErrorEvent {
   readonly id?: string;

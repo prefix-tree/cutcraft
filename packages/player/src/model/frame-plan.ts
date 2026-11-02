@@ -1,4 +1,4 @@
-import { RENDERED_MASK_TYPES, RENDERED_TRANSITIONS, lookupAsset, type BlendMode, type FitMode, type Placement, type ResolvedState, type Transform } from "@cutcut/kit";
+import { RENDERED_MASK_TYPES, RENDERED_TRANSITIONS, lookupAsset, type BlendMode, type FitMode, type Placement, type ResolvedState, type Transform } from "@cutcraft/kit";
 import { devWarn } from "../warn";
 import { filterString, postEffects, type PostEffect } from "./effects";
 import { frameIndex, nestedSourceTime, placementSourceTime } from "./time";

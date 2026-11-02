@@ -1,4 +1,4 @@
-import type { ResolvedState } from "@cutcut/kit";
+import type { ResolvedState } from "@cutcraft/kit";
 import { memo, type ReactNode } from "react";
 import { backdropTracks } from "../model/backdrop";
 import { frameIndex } from "../model/time";

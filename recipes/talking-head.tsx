@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Audio, Captions, Clip, Composition, Title, Track } from "@cutcut/kit";
+import { Audio, Captions, Clip, Composition, Title, Track } from "@cutcraft/kit";
 
 export const schema = z.object({
   title: z.string().describe("Episode title shown over the first sentence"),

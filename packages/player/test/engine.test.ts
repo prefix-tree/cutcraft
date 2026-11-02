@@ -23,7 +23,7 @@ function reachable(entry: string): string[] {
   return [...seen];
 }
 
-describe("@cutcut/player/engine", () => {
+describe("@cutcraft/player/engine", () => {
   it("reaches no React layer, react-dom, Web Audio output or PlayerCore", () => {
     const files = reachable(join(src, "engine.ts"));
     expect(files.length).toBeGreaterThan(20);
@@ -46,7 +46,7 @@ describe("@cutcut/player/engine", () => {
   });
 });
 
-describe("@cutcut/player/overlays", () => {
+describe("@cutcraft/player/overlays", () => {
   it("reaches no hooks, react-dom, React layer or browser globals, so Node can render it", async () => {
     const files = reachable(join(src, "overlays.ts"));
     expect(files.length).toBeGreaterThan(5);

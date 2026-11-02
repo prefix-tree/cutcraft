@@ -5,8 +5,8 @@
     "types": ["node", "vitest/globals"],
     "baseUrl": ".",
     "paths": {
-      "@cutcut/kit": ["../packages/kit/src/index.ts"],
-      "@cutcut/kit/source": ["../packages/kit/src/source/index-public.ts"]
+      "@cutcraft/kit": ["../packages/kit/src/index.ts"],
+      "@cutcraft/kit/source": ["../packages/kit/src/source/index-public.ts"]
     }
   },
   "include": ["*.tsx", "test", "vitest.config.ts", "eslint.config.js"]

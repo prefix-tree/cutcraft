@@ -23,13 +23,13 @@ smart copy for cuts, overlay caching and parallel workers.
 
 ## Decision
 
-`@cutcut/render` runs the player's own engine in Node:
+`@cutcraft/render` runs the player's own engine in Node:
 
 - **One renderer.** The export calls the same `buildFramePlan`,
   `CanvasPainter`, `Compositor` and `buildAudioPlan` as the preview. Only the
   surfaces differ: a skia canvas for the browser's, Satori for the DOM, an
-  offline mixer for Web Audio. `@cutcut/player/engine` is the DOM-free entry
-  (a test walks its import graph); `@cutcut/player/overlays` holds the trees
+  offline mixer for Web Audio. `@cutcraft/player/engine` is the DOM-free entry
+  (a test walks its import graph); `@cutcraft/player/overlays` holds the trees
   the overlay elements draw, with no hooks, so the browser mounts them and
   the Node renderer rasterises them.
 - **Decode and encode with Mediabunny and `@mediabunny/server`** (FFmpeg
@@ -70,9 +70,9 @@ smart copy for cuts, overlay caching and parallel workers.
 - **Licence of the FFmpeg binary.** `node-av` bundles a Jellyfin FFmpeg 6.1
   configured with `--enable-gpl --enable-version3` (x264, x265, libvpx, libopus
   among others). The packages are MIT and MPL-2.0, but the binary they load is
-  GPLv3. That matters to anyone who ships `@cutcut/render` inside a product
+  GPLv3. That matters to anyone who ships `@cutcraft/render` inside a product
   (and the reason MP4 with H.264 is not the default: the default codecs are
-  libvpx and libopus). `@cutcut/render` is private and not published; before
+  libvpx and libopus). `@cutcraft/render` is private and not published; before
   it is, either document the obligation or load an LGPL FFmpeg.
 - **Satori is a subset of CSS.** Flexbox, not grid; no hooks or state in a
   layer; images inside a layer as data URLs. What sits outside it renders

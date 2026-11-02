@@ -1,5 +1,5 @@
 // The comparison's scenarios (see the bench/compare branch), CutCraft alone: one cut file builds the one named in its props.
-import { Clip, Composition, Keyframe, Shape, Title, Track, Transition, type AssetManifest } from "@cutcut/kit";
+import { Clip, Composition, Keyframe, Shape, Title, Track, Transition, type AssetManifest } from "@cutcraft/kit";
 import { GRAPHIC_TITLES, GRAPHIC_TITLE_LENGTH, HEIGHT, SCENARIOS, WIDTH, FPS } from "./scenarios";
 
 export const manifest: AssetManifest = {

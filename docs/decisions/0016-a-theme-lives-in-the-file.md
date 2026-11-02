@@ -23,7 +23,7 @@ renders it, and the export runs without the host's React tree.
   file give the same result, and the theme folds back as a literal like any
   other prop.
 - **Built-ins are a starting point, not a dependency.** Six named themes and
-  five motion styles live in `@cutcut/kit`. `extends` picks one; the file's
+  five motion styles live in `@cutcraft/kit`. `extends` picks one; the file's
   palette, fonts and presets merge over it. A file with no theme renders as it
   did before: tokens resolve against the default theme, but no preset or
   motion is applied that the file did not ask for.
@@ -41,7 +41,7 @@ renders it, and the export runs without the host's React tree.
   theme keeps its parsed props and its placement (0011).
 - **Fonts ship with the renderers.** A theme is only as good as the faces it
   names, so five OFL families are bundled in both the export (Satori reads the
-  `@fontsource` files) and the preview (`@cutcut/player/fonts.css`).
+  `@fontsource` files) and the preview (`@cutcraft/player/fonts.css`).
 
 ## Consequences
 

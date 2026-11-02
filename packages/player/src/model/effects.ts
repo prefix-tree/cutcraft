@@ -1,4 +1,4 @@
-import type { Placement, RENDERED_EFFECTS } from "@cutcut/kit";
+import type { Placement, RENDERED_EFFECTS } from "@cutcraft/kit";
 import { devWarn } from "../warn";
 import { keyframedValue } from "./keyframes";
 
