@@ -159,3 +159,8 @@
 .vp-doc .cc-bench .cc-bench-group { margin: 14px 0 2px; font-family: var(--cc-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--cc-grey); }
 .vp-doc .cc-bench .row { margin: 0; }
 .vp-doc .cc-bench .bar.other { background: var(--cc-grey); opacity: 0.55; }
+
+/* The landing page's example grid: three across, two on a phone. */
+.home .home-cards { grid-template-columns: repeat(3, 1fr); margin-top: 22px; }
+.home .home-chart.cc-bench .row { grid-template-columns: 130px 1fr 44px; }
+@media (max-width: 640px) { .home .home-cards { grid-template-columns: repeat(2, 1fr); } }
