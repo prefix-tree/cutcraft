@@ -2,7 +2,8 @@ import js from "@eslint/js";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-  { ignores: ["node_modules/**", "dist/**"] },
+  // The browser-export spike is throwaway measurement code (see spike/README.md), not part of the package.
+  { ignores: ["node_modules/**", "dist/**", "spike/**"] },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
