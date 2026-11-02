@@ -75,9 +75,13 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: sudo apt-get update && sudo apt-get install -y ffmpeg
       - run: pnpm --filter @cutcut/render bench --json bench-results.json | tee bench.md
+      # The comparison's scenarios (cuts, crossfades, graphics) as H.264, with a worker sweep and a stage breakdown:
+      # the before and after of every export performance change, on this runner.
+      - run: pnpm --filter @cutcut/render bench:scenarios --json scenarios-results.json | tee -a bench.md
       - uses: actions/upload-artifact@v4
         with:
           name: render-bench
           path: |
             packages/render/bench-results.json
+            packages/render/scenarios-results.json
             bench.md
