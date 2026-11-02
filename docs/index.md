@@ -83,7 +83,7 @@ renders faster than real time.
 In the editor, one drag step on a composition of {{ drag.nodes.toLocaleString("en-US") }} elements (validate the action,
 patch the file, resolve everything again) takes {{ (drag.usPerStep / 1000).toFixed(2) }} ms.
 
-<p class="home-note">Measured {{ bench.measured }} on {{ bench.machine }}{{ bench.ci ? " (GitHub Actions)" : "" }}, Node {{ bench.node }}. The docs build measures again on every push; <code>pnpm docs:bench</code> measures your machine.</p>
+<p class="home-note">Measured {{ bench.measured }} on {{ bench.machine }}{{ bench.ci ? " (GitHub Actions)" : "" }}, Node {{ bench.node }}. <code>pnpm docs:bench</code> measures your machine.</p>
 
 ## Read more
 

@@ -4,6 +4,8 @@ on:
   push:
     branches: [main]
   pull_request:
+  # Benchmarks run only on request: Actions → CI → Run workflow, or `gh workflow run ci.yml`.
+  workflow_dispatch:
 
 jobs:
   check:
@@ -63,7 +65,7 @@ jobs:
 
   # Not a gate: records how fast the export is on a CI machine, for comparison over time.
   bench:
-    if: github.event_name == 'push'
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7

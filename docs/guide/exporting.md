@@ -152,7 +152,7 @@ falling back.
 
 `pnpm --filter @cutcut/render bench:scenarios` measures these on your machine,
 with the time per frame spent in each stage and a sweep of worker counts; CI
-runs it on every push to `main`.
+runs it on request (`gh workflow run ci.yml`).
 
 ## Checking the layout
 

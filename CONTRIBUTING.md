@@ -61,3 +61,11 @@ focused pull request with a test.
 
 The `docs` workflow deploys the site to GitHub Pages on every push to `main`.
 It needs Pages enabled for the repository with "GitHub Actions" as the source.
+
+## Benchmarks
+
+Benchmarks run only on request. `gh workflow run ci.yml` runs the export
+benchmarks on a 4-core runner (results in the job log and the `render-bench`
+artifact); `gh workflow run docs.yml -f bench=true` measures the landing page's
+numbers again before deploying. Otherwise the site uses the committed
+`docs/bench.json`.
