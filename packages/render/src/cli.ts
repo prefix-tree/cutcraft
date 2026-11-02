@@ -35,7 +35,8 @@ const USAGE = `Usage: cutcut-render <file.tsx> --out <video.webm|.mp4|.mov|.mp3|
   --bitrate <bps>       video bits per second (default: about 0.1 per pixel per frame)
   --quality <preset>    very-low, low, medium, high or very-high, in place of --bitrate
   --speed <fast>        the encoder's real-time mode: faster, larger files at the same quality
-  --workers <n>         render in n threads (default: one fewer than the cores, at most 4; 1 renders in this one)
+  --software            encode H.264 and HEVC in software even where the machine has a hardware encoder
+  --workers <n>         render in n threads (default 1, this one; more rarely helps, as the encoder is threaded itself)
   --copy                copy encoded pictures from the source where a cut shows nothing else (VP8/VP9 at the composition's
                         size and rate), and render only the ends; fast for plain cuts
   --keyframe <seconds>  seconds between keyframes (default 2)
@@ -54,7 +55,7 @@ async function main(): Promise<number> {
       from: { type: "string" }, to: { type: "string" }, codec: { type: "string" }, bitrate: { type: "string" }, quality: { type: "string" }, still: { type: "string" },
       "check-layout": { type: "boolean" }, json: { type: "boolean" }, "safe-zone": { type: "string" }, subject: { type: "string" }, step: { type: "string" },
       silent: { type: "boolean" }, font: { type: "string", multiple: true }, tsconfig: { type: "string" },
-      continue: { type: "boolean" }, copy: { type: "boolean" }, quiet: { type: "boolean" }, help: { type: "boolean", short: "h" },
+      continue: { type: "boolean" }, copy: { type: "boolean" }, software: { type: "boolean" }, quiet: { type: "boolean" }, help: { type: "boolean", short: "h" },
     },
   });
   const [file] = positionals;
@@ -109,6 +110,7 @@ async function main(): Promise<number> {
     ...(values.silent ? { silent: true } : {}),
     ...(values.speed === "fast" ? { speed: "fast" as const } : {}),
     ...(values.copy ? { smartCopy: true } : {}),
+    ...(values.software ? { hardware: false } : {}),
     ...(values.keyframe ? { keyFrameInterval: Number(values.keyframe) } : {}),
     ...(workers > 1 ? { parallel: { file: resolve(file), load: loadOptions, mediaDir: resolve(values.media ?? dirname(file)), workers } } : {}),
     ...(values.continue ? { onAssetError: "continue" as const } : {}),

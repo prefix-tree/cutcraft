@@ -14,7 +14,7 @@ pnpm --filter @cutcut/render exec cutcut-render video.tsx --manifest manifest.js
 ```
 
 ```ts
-import { defaultWorkers, directoryResolver, loadVideo, renderVideo } from "@cutcut/render";
+import { directoryResolver, loadVideo, renderVideo } from "@cutcut/render";
 
 const video = await loadVideo("video.tsx", { manifest: "manifest.json" });
 await renderVideo({
@@ -22,7 +22,6 @@ await renderVideo({
   media: directoryResolver("media", video.manifest),
   interiors: video.interiors,
   out: "video.webm",
-  parallel: { file: "video.tsx", load: { manifest: "manifest.json" }, mediaDir: "media", workers: defaultWorkers() },
 });
 ```
 
