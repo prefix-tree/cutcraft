@@ -205,7 +205,8 @@ describe("overlay parity between the browser DOM and the Node renderer", () => {
     const markup = renderToStaticMarkup(h(PlayerContext.Provider, { value: {} as never }, dom(state)));
     installLayerClock(null);
     const page = await browser.newPage({ viewport: { width: W, height: H } });
-    await page.setContent(`<!doctype html><style>${fontFaces()}html,body{margin:0;background:transparent}#root{position:relative;width:${W}px;height:${H}px;overflow:hidden;font-family:Inter}</style><div id="root">${markup}</div>`);
+    // macOS Chrome thickens glyphs by default (font smoothing); skia and Linux Chrome do not, so it would skew the ink.
+    await page.setContent(`<!doctype html><style>${fontFaces()}html,body{margin:0;background:transparent;-webkit-font-smoothing:antialiased}#root{position:relative;width:${W}px;height:${H}px;overflow:hidden;font-family:Inter}</style><div id="root">${markup}</div>`);
     await page.evaluate(() => document.fonts.ready);
     const shot = await page.screenshot({ omitBackground: true, clip: { x: 0, y: 0, width: W, height: H } });
     await page.close();
