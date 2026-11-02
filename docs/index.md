@@ -85,6 +85,8 @@ patch the file, resolve everything again) takes {{ (drag.usPerStep / 1000).toFix
 
 <p class="home-note">Measured {{ bench.measured }} on {{ bench.machine }}{{ bench.ci ? " (GitHub Actions)" : "" }}, Node {{ bench.node }}. <code>pnpm docs:bench</code> measures your machine.</p>
 
+Against Remotion and Diffusion Studio on the same three videos: [Export speed](./comparisons/export-speed).
+
 ## Read more
 
 - [Getting started](./guide/getting-started): install, run the example, export a file.
