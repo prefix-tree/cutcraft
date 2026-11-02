@@ -1,4 +1,166 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="cutcut">
-  <path fill="#ff5a1f" d="M26 32 L44.02 19.38 A22 22 0 1 0 44.02 44.62 Z"/>
-  <rect fill="#ff5a1f" x="52" y="27" width="10" height="10" rx="2.5"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="CutCraft">
+  <!-- A woodblock-print icon: a sun cut in two by a katana over seigaiha waves, ink and washi on a vermilion tile. -->
+  <defs>
+    <clipPath id="tile"><rect width="512" height="512" rx="112"/></clipPath>
+    <!-- The two sides of the cut: a line from the hilt to past the tip. -->
+    <clipPath id="above"><path d="M-60 552 L600 -100 L-60 -100Z"/></clipPath>
+    <clipPath id="below"><path d="M-60 552 L600 -100 L600 600 L-60 600Z"/></clipPath>
+    <clipPath id="sea"><rect x="0" y="352" width="512" height="160"/></clipPath>
+    <pattern id="grain" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(35)">
+      <path d="M0 0V6" stroke="#1b1712" stroke-width="1.2" opacity=".22"/>
+    </pattern>
+  </defs>
+  <g clip-path="url(#tile)">
+    <rect width="512" height="512" fill="#c8402a"/>
+    <rect width="512" height="512" fill="url(#grain)" opacity=".35"/>
+
+    <!-- The sun, in two halves slid apart along the cut. -->
+    <g transform="translate(-15 -15)" clip-path="url(#above)">
+      <circle cx="262" cy="206" r="118" fill="#f3ead6" stroke="#1b1712" stroke-width="7"/>
+      <path d="M170 142a118 118 0 0 1 120-52" fill="none" stroke="#1b1712" stroke-width="3" opacity=".5"/>
+    </g>
+    <g transform="translate(15 15)" clip-path="url(#below)">
+      <circle cx="262" cy="206" r="118" fill="#f3ead6" stroke="#1b1712" stroke-width="7"/>
+      <circle cx="262" cy="206" r="118" fill="url(#grain)"/>
+    </g>
+
+    <!-- The sea. -->
+    <g clip-path="url(#sea)" stroke="#1b1712" stroke-width="3">
+      <rect y="352" width="512" height="160" fill="#f3ead6" stroke="none"/>
+      <g transform="translate(-60 368)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(0 368)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(60 368)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(120 368)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(180 368)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(240 368)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(300 368)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(360 368)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(420 368)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(480 368)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(540 368)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(-30 386)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(30 386)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(90 386)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(150 386)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(210 386)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(270 386)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(330 386)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(390 386)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(450 386)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(510 386)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(570 386)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(-60 404)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(0 404)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(60 404)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(120 404)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(180 404)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(240 404)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(300 404)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(360 404)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(420 404)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(480 404)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(540 404)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(-30 422)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(30 422)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(90 422)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(150 422)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(210 422)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(270 422)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(330 422)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(390 422)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(450 422)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(510 422)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(570 422)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(-60 440)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(0 440)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(60 440)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(120 440)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(180 440)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(240 440)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(300 440)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(360 440)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(420 440)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(480 440)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(540 440)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(-30 458)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(30 458)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(90 458)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(150 458)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(210 458)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(270 458)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(330 458)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(390 458)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(450 458)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(510 458)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(570 458)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(-60 476)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(0 476)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(60 476)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(120 476)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(180 476)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(240 476)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(300 476)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(360 476)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(420 476)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(480 476)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(540 476)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(-30 494)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(30 494)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(90 494)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(150 494)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(210 494)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(270 494)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(330 494)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(390 494)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(450 494)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(510 494)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(570 494)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(-60 512)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(0 512)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(60 512)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(120 512)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(180 512)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(240 512)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(300 512)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(360 512)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(420 512)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(480 512)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(540 512)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(-30 530)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(30 530)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(90 530)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(150 530)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(210 530)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(270 530)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(330 530)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(390 530)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(450 530)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(510 530)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(570 530)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(-60 548)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(0 548)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(60 548)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(120 548)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(180 548)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(240 548)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(300 548)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(360 548)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(420 548)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(480 548)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+      <g transform="translate(540 548)"><circle r="30" fill="#f3ead6"/><circle r="30" fill="none"/><circle r="21" fill="none"/><circle r="12" fill="none"/></g>
+    </g>
+    <path d="M0 352H512" stroke="#1b1712" stroke-width="7"/>
+
+    <!-- The katana, below the cut it made: wrapped hilt, guard, collar, and a curved blade with its temper line. -->
+    <g transform="translate(70 470) rotate(-44.6)">
+      <rect x="-70" y="-13" width="128" height="26" rx="6" fill="#1b1712"/>
+      <path d="M-62 0l10-10 10 10-10 10ZM-38 0l10-10 10 10-10 10ZM-14 0l10-10 10 10-10 10ZM10 0l10-10 10 10-10 10ZM34 0l10-10 10 10-10 10Z" fill="#f3ead6"/>
+      <ellipse cx="66" cy="0" rx="10" ry="30" fill="#1b1712"/>
+      <rect x="76" y="-11" width="14" height="22" rx="2" fill="#f3ead6" stroke="#1b1712" stroke-width="4"/>
+      <path d="M90 -10Q300 -20 506 -6L528 2Q300 14 90 10Z" fill="#f3ead6" stroke="#1b1712" stroke-width="6" stroke-linejoin="round"/>
+      <path d="M96 4Q130 0 160 5T224 5T288 6T352 6T416 5T490 2" fill="none" stroke="#1b1712" stroke-width="2.5"/>
+    </g>
+
+    <rect x="18" y="18" width="476" height="476" rx="96" fill="none" stroke="#1b1712" stroke-width="5" opacity=".55"/>
+  </g>
 </svg>

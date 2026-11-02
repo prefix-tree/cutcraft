@@ -1,6 +1,6 @@
-// The default theme in Swiss dress: a neo-grotesk set flush left on a strict grid, black on white, one accent, rules
-// instead of cards. Only styles change; the layout and components are VitePress's own.
+// The default theme dressed as a Craft app: warm paper, ink, one vermilion accent from the icon, a wide display face for
+// headlines, monospaced labels and hairline rules. Only styles change; the layout and components are VitePress's own.
 import DefaultTheme from "vitepress/theme";
-import "./swiss.css";
+import "./craft.css";
 
 export default DefaultTheme;

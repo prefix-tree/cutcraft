@@ -9,12 +9,13 @@ export default defineConfig({
   head: [
     ["link", { rel: "icon", type: "image/svg+xml", href: "/cutcraft/favicon.svg" }],
     ["link", { rel: "preconnect", href: "https://fonts.gstatic.com", crossorigin: "" }],
-    ["link", { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@600;700;800&display=swap" }],
+    ["link", { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,600..900&family=Geist+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap" }],
   ],
   themeConfig: {
     logo: "/logo.svg",
     nav: [
       { text: "Guide", link: "/guide/getting-started" },
+      { text: "Examples", link: "/examples" },
       { text: "Reference", link: "/reference/elements" },
       { text: "Decisions", link: "/decisions/" },
       { text: "Recipes", link: "/recipes/" },
