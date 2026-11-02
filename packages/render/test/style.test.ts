@@ -1,10 +1,10 @@
 // Shape styling, entrances and exits, and gradient backgrounds, as the export draws them.
 import { createElement as h, type ReactElement } from "react";
 import type { Canvas, CanvasRenderingContext2D } from "skia-canvas";
-import { join } from "node:path";
 import { Clip, Composition, Graphic, Shape, Sticker, Svg, THEMES, Title, Track, collect, resolve } from "@cutcut/kit";
 import { indexLayerInteriors } from "@cutcut/player/overlays";
 import { manifest } from "../../player/e2e/app/composition";
+import generateMedia, { mediaDir } from "../../player/e2e/gen-media";
 import { FramePipeline } from "../src/pipeline";
 import { OverlayPlane, createCanvas, directoryResolver } from "../src";
 
@@ -193,7 +193,8 @@ describe("graphics in the export", () => {
 });
 
 describe("overlays beneath the footage", () => {
-  const mediaDir = join(import.meta.dirname, "..", "..", "player", "e2e", "app", "public");
+  // The footage and the logo are generated: a clean checkout has none until a test makes them.
+  beforeAll(() => generateMedia());
 
   async function frameOf(...tracks: ReactElement[]) {
     const state = resolve(collect(h(Composition, { fps: 30, width: W, height: H, background: { mode: "color", color: "#0000ff" } }, ...tracks)), manifest);
