@@ -34,7 +34,7 @@ const USAGE = `Usage: cutcut-render <file.tsx> --out <video.webm|.mp4|.mov|.mp3|
   --codec <name>        vp9 (default for webm), vp8, av1, avc (default for mp4), hevc, prores (default for mov)
   --bitrate <bps>       video bits per second (default: about 0.1 per pixel per frame)
   --quality <preset>    very-low, low, medium, high or very-high, in place of --bitrate
-  --speed <s>           quality (default), balanced (about twice as fast, slightly larger) or fast (real-time mode)
+  --speed <s>           balanced (default), quality (x264's medium: smaller, about half as fast) or fast (real-time mode)
   --software            encode H.264 and HEVC in software even where the machine has a hardware encoder
   --workers <n>         render in n threads (default 1, this one; more rarely helps, as the encoder is threaded itself)
   --copy                copy encoded pictures from the source where a cut shows nothing else (VP8/VP9 at the composition's

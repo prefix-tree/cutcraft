@@ -39,7 +39,8 @@ export async function encodeFrames(options: EncodeFramesOptions): Promise<number
       sample.setTimestamp(timestamp);
       sample.setDuration(1 / fps);
     } else {
-      sample = new VideoSample(raw, { format: "RGBA", codedWidth: width, codedHeight: height, timestamp, duration: 1 / fps });
+      // The readback is a fresh buffer each frame, so the sample may keep it rather than copy it (an internal flag).
+      sample = new VideoSample(raw, { format: "RGBA", codedWidth: width, codedHeight: height, timestamp, duration: 1 / fps, ...{ _doNotCopy: true } });
     }
     await settle();
     encoding = source.add(sample).finally(() => sample.close());

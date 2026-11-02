@@ -78,13 +78,13 @@ jobs:
       # The comparison's scenarios (cuts, crossfades, graphics) as H.264, with a worker sweep and a stage breakdown:
       # the before and after of every export performance change, on this runner.
       - run: pnpm --filter @cutcut/render bench:scenarios --json scenarios-results.json | tee -a bench.md
-      # The same on one thread with x264's veryfast preset (--speed balanced), against the default's medium.
-      - run: pnpm --filter @cutcut/render bench:scenarios --workers 1 --speed balanced --json scenarios-balanced.json | tee -a bench.md
+      # The same on one thread with x264's medium preset (--speed quality), against the default's veryfast.
+      - run: pnpm --filter @cutcut/render bench:scenarios --workers 1 --speed quality --json scenarios-quality.json | tee -a bench.md
       - uses: actions/upload-artifact@v4
         with:
           name: render-bench
           path: |
             packages/render/bench-results.json
             packages/render/scenarios-results.json
-            packages/render/scenarios-balanced.json
+            packages/render/scenarios-quality.json
             bench.md

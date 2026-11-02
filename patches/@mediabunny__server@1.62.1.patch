@@ -1,5 +1,5 @@
 diff --git a/dist/bundles/mediabunny-server.cjs b/dist/bundles/mediabunny-server.cjs
-index a1518a3e8857738fa63e08628b7e033433e3c200..463ee2d636c9523e0b34adbce09ee45177a7eca6 100644
+index a1518a3e8857738fa63e08628b7e033433e3c200..12941048212da63a6f2d256797465baeef5b4691 100644
 --- a/dist/bundles/mediabunny-server.cjs
 +++ b/dist/bundles/mediabunny-server.cjs
 @@ -3048,12 +3048,18 @@ var MediabunnyServer = (() => {
@@ -21,8 +21,17 @@ index a1518a3e8857738fa63e08628b7e033433e3c200..463ee2d636c9523e0b34adbce09ee451
          }
        } else if (this.avCodec.name === "libvpx") {
          if (isRealtime) {
+@@ -3192,6 +3198,8 @@ var MediabunnyServer = (() => {
+           this.scaler = new NodeAv4.SoftwareScaleContext();
+           this.scaler.allocContext();
+           this.scaler.setOption("sws_flags", "fast_bilinear");
++          // cutcut patch: slice threads, so converting a drawn frame does not hold up the encoder
++          this.scaler.setOption("threads", "auto");
+         }
+         if (!this.dstFrame) {
+           this.dstFrame = new NodeAv4.Frame();
 diff --git a/dist/bundles/mediabunny-server.mjs b/dist/bundles/mediabunny-server.mjs
-index 6601214a8f6c97bd550dc1bae4ec6a828449168d..43baaa05b59de081137ede7e1e030f525cec8376 100644
+index 6601214a8f6c97bd550dc1bae4ec6a828449168d..d775e2320703cc7383751a0b26ce2cc7bb7125db 100644
 --- a/dist/bundles/mediabunny-server.mjs
 +++ b/dist/bundles/mediabunny-server.mjs
 @@ -3020,12 +3020,18 @@ var NodeAvVideoEncoder = class extends CustomVideoEncoder {
@@ -44,8 +53,17 @@ index 6601214a8f6c97bd550dc1bae4ec6a828449168d..43baaa05b59de081137ede7e1e030f52
        }
      } else if (this.avCodec.name === "libvpx") {
        if (isRealtime) {
+@@ -3164,6 +3170,8 @@ var NodeAvVideoEncoder = class extends CustomVideoEncoder {
+         this.scaler = new NodeAv4.SoftwareScaleContext();
+         this.scaler.allocContext();
+         this.scaler.setOption("sws_flags", "fast_bilinear");
++        // cutcut patch: slice threads, so converting a drawn frame does not hold up the encoder
++        this.scaler.setOption("threads", "auto");
+       }
+       if (!this.dstFrame) {
+         this.dstFrame = new NodeAv4.Frame();
 diff --git a/dist/modules/src/video-encoder.js b/dist/modules/src/video-encoder.js
-index 25f3c7e5601ca6db5a3169069b358f5202e2fc4c..550773e12a2fc967dd6f49175b6be7a3cfb872a8 100644
+index 25f3c7e5601ca6db5a3169069b358f5202e2fc4c..b110a3aabad2383ddd8485fa47891f50da3d5fb6 100644
 --- a/dist/modules/src/video-encoder.js
 +++ b/dist/modules/src/video-encoder.js
 @@ -159,6 +159,9 @@ class NodeAvVideoEncoder extends mediabunny_1.CustomVideoEncoder {
@@ -68,3 +86,12 @@ index 25f3c7e5601ca6db5a3169069b358f5202e2fc4c..550773e12a2fc967dd6f49175b6be7a3
              }
          }
          else if (this.avCodec.name === 'libvpx') {
+@@ -349,6 +355,8 @@ class NodeAvVideoEncoder extends mediabunny_1.CustomVideoEncoder {
+                 this.scaler = new NodeAv.SoftwareScaleContext();
+                 this.scaler.allocContext();
+                 this.scaler.setOption('sws_flags', 'fast_bilinear');
++                // cutcut patch: slice threads, so converting a drawn frame does not hold up the encoder
++                this.scaler.setOption('threads', 'auto');
+             }
+             if (!this.dstFrame) {
+                 this.dstFrame = new NodeAv.Frame();

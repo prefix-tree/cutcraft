@@ -2,17 +2,15 @@ import type { AnyCanvas, Ctx2D, Frame, FrameSourceHooks, MediaHandle } from "@cu
 import { AvFrameVideoSampleResource, toAvFrame } from "@mediabunny/server";
 import { VideoSample } from "mediabunny";
 import { AVCOL_PRI_BT709, AVCOL_RANGE_MPEG, AVCOL_SPC_BT709, AVCOL_TRC_BT709, Frame as AvFrame } from "node-av";
-import { Canvas, ImageData, loadImage } from "skia-canvas";
+import { ImageData, loadImage } from "skia-canvas";
 
 type Crop = { x: number; y: number; w: number; h: number };
 
 /**
  * A decoded picture held as RGBA pixels. When it fills the output untransformed it is put straight onto the canvas;
- * otherwise it is drawn through a canvas built on first use, like any image.
+ * otherwise skia draws the pixels like any image.
  */
 export class RgbaFrame implements Frame {
-  private canvas: Canvas | null = null;
-
   constructor(
     private readonly pixels: ImageData,
     readonly timestamp: number,
@@ -29,24 +27,15 @@ export class RgbaFrame implements Frame {
   }
 
   draw(ctx: Ctx2D, dx: number, dy: number, dw: number, dh: number, crop?: Crop): void {
-    const canvas = this.asCanvas();
-    const image = canvas as unknown as CanvasImageSource;
-    // The crop is in display pixels; the canvas holds coded pixels, which differ only for anamorphic video.
-    const sx = canvas.width / this.width, sy = canvas.height / this.height;
+    const image = this.pixels as unknown as CanvasImageSource;
+    // The crop is in display pixels; the pixels are coded ones, which differ only for anamorphic video.
+    const sx = this.pixels.width / this.width, sy = this.pixels.height / this.height;
     if (crop) ctx.drawImage(image, crop.x * sx, crop.y * sy, crop.w * sx, crop.h * sy, dx, dy, dw, dh);
     else ctx.drawImage(image, dx, dy, dw, dh);
   }
 
   retain(): Frame { return this; }
   close(): void { /* the pixels are garbage collected */ }
-
-  private asCanvas(): Canvas {
-    if (!this.canvas) {
-      this.canvas = new Canvas(this.pixels.width, this.pixels.height);
-      this.canvas.getContext("2d").putImageData(this.pixels, 0, 0);
-    }
-    return this.canvas;
-  }
 }
 
 /**

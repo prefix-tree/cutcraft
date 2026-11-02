@@ -8,8 +8,8 @@ import type { OverlayFont, OverlayPlane } from "./overlays";
 import { FramePipeline, type PipelineStages } from "./pipeline";
 
 /**
- * How hard the software H.264 and HEVC encoders work: `quality` is x264's medium preset, `balanced` veryfast (about
- * twice as fast, a little larger for the same picture), `fast` the real-time mode (ultrafast, no look-ahead). VP9 and
+ * How hard the software H.264 and HEVC encoders work: `quality` is x264's medium preset, `balanced` (the default)
+ * veryfast (about twice as fast, a little larger for the same picture), `fast` the real-time mode (ultrafast, no look-ahead). VP9 and
  * AV1 know only `fast` and the rest.
  */
 export type Speed = "quality" | "balanced" | "fast";
@@ -49,7 +49,7 @@ export function videoSource(encoding: VideoEncoding): VideoSampleSource {
     keyFrameInterval: encoding.keyFrameInterval,
     hardwareAcceleration: encoding.hardware ? "prefer-hardware" : "prefer-software",
     // Read by the patched @mediabunny/server encoder (patches/), which has no preset option of its own.
-    onEncoderConfig: (c) => { if (encoding.speed !== "fast") (c as { ffmpegPreset?: string }).ffmpegPreset = PRESETS[encoding.speed ?? "quality"]; },
+    onEncoderConfig: (c) => { if (encoding.speed !== "fast") (c as { ffmpegPreset?: string }).ffmpegPreset = PRESETS[encoding.speed ?? "balanced"]; },
     ...(encoding.speed === "fast" ? { latencyMode: "realtime" as const } : {}),
   });
 }

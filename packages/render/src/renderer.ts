@@ -42,7 +42,7 @@ export interface RenderOptions {
   readonly interiors?: ReadonlyMap<string, ReactNode>;
   /** Fonts beyond the bundled Inter, picked by a title's `font` prop. */
   readonly fonts?: readonly OverlayFont[];
-  /** Compression against speed for the software H.264 and HEVC encoders: `quality` (default), `balanced` or `fast`. */
+  /** Compression against speed for the software H.264 and HEVC encoders: `quality`, `balanced` (default) or `fast`. */
   readonly speed?: Speed;
   /** H.264 and HEVC go through the machine's hardware encoder when it has one that works (default); false keeps software. */
   readonly hardware?: boolean;
