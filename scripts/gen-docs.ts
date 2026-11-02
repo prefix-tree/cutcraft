@@ -51,7 +51,7 @@ const ELEMENT_DOCS: Record<string, readonly (readonly [element: string, summary:
     ["Shape", "A vector shape (rectangle, circle, star, polygon, path) with fill, stroke and shadow."],
     ["Svg", "One-off vector art from inline SVG markup or a file."],
     ["Sticker", "A ready-made icon or sticker by name."],
-    ["Layer", "Any React in the frame, for what no element covers; `useT()` is its time."],
+    ["Layer", "Free code in the frame: any React, CSS, canvas or WebGL, placed on the timeline like any overlay; `useT()` is its time."],
   ],
   "Effects and colour": [
     ["Effect", "A filter on its parent: brightness, blur, grayscale, vignette, grain and more."],

@@ -93,15 +93,19 @@ What goes wrong without it: a user drags a clip, the document changes, the
 model's next edit is based on the file it wrote an hour ago, and one of the two
 edits is lost.
 
-## A fixed vocabulary, not free React
+## A skeleton for time, free code for pictures
 
-`<Clip>`, `<Title>`, `<Track>` are components with Zod schemas that render
-nothing. The resolver reads their props without running anything but pure
-helpers. Free React (`<div>`s with styles) would be more expressive and
-impossible to edit from a timeline: nothing says which `div` is the clip or
-where its timing lives.
+`<Clip>`, `<Track>`, `<Audio>` and the other timeline elements are components
+with Zod schemas that render nothing. The resolver reads their props to place
+footage and sound in time, and the editor edits them from the timeline. A
+`<div>` there would be impossible to edit: nothing says which one is the clip
+or where its timing lives.
 
-The model keeps React where React is needed: inside `<Layer>` (below).
+Pictures need none of that. Anything drawn over or instead of the footage can
+be code: put it in a `<Layer>` (below), and any React, CSS, canvas or WebGL
+renders. `<Title>`, `<Graphic>`, `<Shape>` and the rest are a ready-made library
+the inspector can edit; use them when they fit and write code when they do not
+([decision 0018](../decisions/0018-free-code-in-a-timeline-skeleton.md)).
 
 ## Every element has a literal id
 
@@ -218,9 +222,11 @@ Helpers must be pure: no state, no effects, no hooks except `useT()` and
 `useLayer()`. The lint checks (`pure-helpers`). The resolver expands them by calling them, so a helper
 that reads the clock would resolve differently every time.
 
-## `<Layer>` is the escape hatch
+## `<Layer>` holds free code
 
-The call to action is a `<div>` with a progress bar, inside `<Layer id="cta">`.
+A Layer's interior is any React: hooks, CSS 3D, filters and blend modes, a
+`<canvas>` with WebGL, a chart. The call to action is a `<div>` with a progress
+bar, inside `<Layer id="cta">`.
 `useT()` returns 0..1 over the layer's duration; `useLayer()` returns the
 clock in full: `t`, `elapsed` and `remaining` in seconds, the layer's
 `duration`, the composition `time` and `fps`. A countdown is one line:
@@ -233,7 +239,16 @@ function Countdown() {
 ```
 
 Both hooks read the player's time, so scrubbing shows the right value and
-pausing freezes it; a `setInterval` would drift and ignore seeks.
+pausing freezes it; a `setInterval` would drift and ignore seeks. In the
+export, `requestAnimationFrame`, `Date`, `performance.now()` and CSS
+animations follow the video's clock too; the lint warns about what does not
+(timers, `<video>` and `<audio>` elements, canvases made with
+`willReadFrequently`). Free code that is a function of time renders the same
+every time; state that builds up from frame to frame does not survive a seek.
+
+The export renders free code in a browser (headless Chrome, frame by frame).
+Until that engine ships, the Node export draws a Layer through Satori, which
+supports flexbox CSS and no hooks, and warns about what it leaves out.
 
 To shape that time, `@cutcraft/kit` exports three pure helpers. `interpolate(x,
 inputRange, outputRange, { easing, extrapolateLeft, extrapolateRight })` maps a

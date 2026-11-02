@@ -34,7 +34,7 @@ A video file is:
 export const schema = z.object({...});          // tweakable props → inspector/tweaks panel
 export const defaults = { ... };                // JSON literal; composition/setProps rewrites it
 export default function Video(props) { return <Composition ...>...</Composition>; }
-function Helper(...) {...}                       // pure helpers (no hooks except useT in Layer interiors)
+function Helper(...) {...}                       // helpers that make elements are pure; free code inside a Layer may use any hook
 ```
 
 - **`id`**: required string literal on every vocabulary element, unique per file. Editor-generated ids derive from the parent (`c2` split → `c2`, `c2_b`). Every create action carries its id in params (no `__LAST_ADDED__`).
@@ -64,7 +64,7 @@ function Helper(...) {...}                       // pure helpers (no hooks excep
 | `<Mask>` | Mask | child of a visual element: `type: shape\|drawn\|matte`, `shape` or `path={{ points, closed }}`, `feather` 0–100, `inverted`, `expansion` −100..100, `opacity`, `matte={{ source, channel: alpha\|luminance\|bounds }}`; children `<Keyframe property="path">` |
 | `<Nested>` | CompoundClip + instance | `of={SceneHelper}` (pure helper returning tracks/composition), `in`, `out`, `transform`, `volume` |
 | `<Multicam>` + `<Angle>` + `<Cut>` | MultiCamGroup + angles + switches | `<Multicam id name sync>` with `<Angle id src offset color/>` and `<Cut id at angle/>`; the resolver expands cuts into generated clips on the containing track; angle sources render hidden |
-| `<Layer>` | — (ours) | `duration`, `anchor`/`offset`, `transform`, `enter`, `exit`; arbitrary React interior using `useT()` (0..1) or `useLayer()` (seconds elapsed, remaining, duration); one component child gives the Layer handles (`layer/setProps`) |
+| `<Layer>` | — (ours) | `duration`, `anchor`/`offset`, `transform`, `enter`, `exit`; free code inside (any React, hooks, CSS, canvas, WebGL, host-offered libraries; decision 0018), timed by `useT()` (0..1) or `useLayer()` (seconds elapsed, remaining, duration); one component child gives the Layer handles (`layer/setProps`) |
 | `<Effect>` / `<AudioEffect>` | Effect | `type`, `params`, `enabled`; order = stack order |
 | `<ColorGrade>` | ClipColorGrading | `wheels`, `curves`, `lut`, `hsl`, `temperature`, `tint` |
 | `<Keyframe>` | Keyframe | `property`, `at` (element-relative), `value`, `easing`, `handles`, `roving` |

@@ -1,6 +1,6 @@
 # `<Layer>`
 
-Any React in the frame, for what no element covers; `useT()` is its time.
+Free code in the frame: any React, CSS, canvas or WebGL, placed on the timeline like any overlay; `useT()` is its time.
 
 <Example src="previews/elements/layer" alt="<Layer>">
 

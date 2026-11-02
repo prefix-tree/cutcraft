@@ -69,8 +69,9 @@ the word it was timed to, the bed still fills to the end. The model reads the ne
 
 Models are good at writing code and bad at math and at driving a hundred tools. A cut written as seconds the model
 computed lands inside a word; a cut written as `word:12` lands on it. Editors are good at direct manipulation and
-bad at explaining themselves to a model. CutCraft puts both on one artifact: a file in a fixed vocabulary with literal ids, so
-a gesture can find its element and change one value, and a model can read the result as the code it wrote. The reasoning
+bad at explaining themselves to a model. CutCraft puts both on one artifact: a file whose timeline (clips, tracks, time
+references) has literal ids, so a gesture can find its element and change one value, and whose pictures can be any
+React, CSS or WebGL the model writes; the model reads the result as the code it wrote. The reasoning
 behind each choice is in the [decision records](docs/decisions/README.md).
 
 ## How it works

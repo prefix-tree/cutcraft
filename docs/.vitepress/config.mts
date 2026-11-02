@@ -79,6 +79,7 @@ export default defineConfig({
           { text: "0015 A headless engine exports", link: "/decisions/0015-a-headless-engine-renders-the-export" },
           { text: "0016 A theme lives in the file", link: "/decisions/0016-a-theme-lives-in-the-file" },
           { text: "0017 Graphics are SVG generators", link: "/decisions/0017-graphics-are-svg-generators" },
+          { text: "0018 Free code in a timeline skeleton", link: "/decisions/0018-free-code-in-a-timeline-skeleton" },
         ] },
       ],
       "/recipes/": [
