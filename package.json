@@ -27,6 +27,7 @@
     "docs:gen": "tsx scripts/gen-docs.ts",
     "docs:bench": "tsx scripts/site-bench.ts",
     "docs:graphics": "pnpm --filter @cutcraft/render catalog",
+    "docs:previews": "pnpm --filter @cutcraft/render previews",
     "build": "pnpm -r build"
   },
   "devDependencies": {

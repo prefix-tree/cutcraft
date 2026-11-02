@@ -131,7 +131,7 @@ The packages keep the `@cutcraft/` scope and are not on npm yet; use them from t
 | Package | What it is | Docs |
 |---|---|---|
 | [`packages/kit`](packages/kit) | The vocabulary, manifest and time references, resolver, patches and actions, source tools and lint. No DOM. | [README](packages/kit/README.md), [spec](packages/kit/docs/spec.md) |
-| [`packages/graphics`](packages/graphics) | The built-in `<Graphic>` kinds (arrows, callouts, lower thirds, frames, highlights, progress, data graphics, backgrounds, icons) as pure functions from props and theme to SVG, and the editor controls for their props. No DOM. | [catalog](https://prefix-tree.github.io/cutcraft/reference/graphics) |
+| [`packages/graphics`](packages/graphics) | The built-in `<Graphic>` kinds (arrows, callouts, lower thirds, frames, highlights, progress, data graphics, backgrounds, icons) as pure functions from props and theme to SVG, and the editor controls for their props. No DOM. | [catalog](https://prefix-tree.github.io/cutcraft/reference/graphics/) |
 | [`packages/player`](packages/player) | The browser renderer and the React `<Player>`; `./engine` and `./overlays` are the parts a Node renderer shares. | [README](packages/player/README.md) |
 | [`packages/render`](packages/render) | Export in Node: video, soundtracks and stills, the audio mix, workers, smart copy, and the layout check. | [README](packages/render/README.md), [guide](https://prefix-tree.github.io/cutcraft/guide/exporting) |
 | [`examples/launch-recap`](examples/launch-recap) | The worked example: brief, prompt, manifest, file and a runnable page. | [README](examples/launch-recap/README.md) |

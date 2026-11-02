@@ -1,4 +1,5 @@
 import { defineConfig } from "vitepress";
+import generated from "./sidebar.generated.json";
 
 export default defineConfig({
   title: "CutCraft",
@@ -8,6 +9,8 @@ export default defineConfig({
   // The decision records' index is a README so it shows on GitHub; the site serves it as the folder's page.
   rewrites: { "decisions/README.md": "decisions/index.md" },
   lastUpdated: true,
+  // Code in one dark style in both colour schemes, so it reads as the screen it describes and joins the videos above it.
+  markdown: { theme: { light: "vitesse-dark", dark: "vitesse-dark" } },
   head: [
     ["link", { rel: "icon", type: "image/svg+xml", href: "/cutcraft/favicon.svg" }],
     ["link", { rel: "preconnect", href: "https://fonts.gstatic.com", crossorigin: "" }],
@@ -35,11 +38,17 @@ export default defineConfig({
           { text: "Exporting", link: "/guide/exporting" },
         ] },
       ],
+      // Before "/reference/": the most specific prefix wins only when it comes first.
+      "/reference/graphics/": [
+        { text: "Graphics", items: [{ text: "All graphics", link: "/reference/graphics/" }] },
+        ...generated.graphics.map((group) => ({ ...group, collapsed: false })),
+        { text: "Reference", items: [{ text: "Elements", link: "/reference/elements" }, { text: "Actions", link: "/reference/actions" }, { text: "Rendering", link: "/reference/rendering" }] },
+      ],
       "/reference/": [
         { text: "Reference", items: [
           { text: "Elements", link: "/reference/elements" },
           { text: "Actions", link: "/reference/actions" },
-          { text: "Graphics", link: "/reference/graphics" },
+          { text: "Graphics", link: "/reference/graphics/" },
           { text: "Rendering", link: "/reference/rendering" },
           { text: "Specification (kit)", link: "https://github.com/prefix-tree/cutcraft/blob/main/packages/kit/docs/spec.md" },
           { text: "OpenReel parity (kit)", link: "https://github.com/prefix-tree/cutcraft/blob/main/packages/kit/docs/parity.md" },
@@ -84,6 +93,7 @@ export default defineConfig({
         { text: "Comparisons", items: [
           { text: "Diffusion Studio", link: "/comparisons/diffusion-studio" },
           { text: "Remotion", link: "/comparisons/remotion" },
+          { text: "Export speed", link: "/comparisons/export-speed" },
         ] },
       ],
     },

@@ -125,3 +125,31 @@
   .cc-crumb, .cc-head, .cc-note, .cc-foot, .cc-start > div { padding-left: 20px; padding-right: 20px; }
   .cc-hero { padding: 48px 20px; }
 }
+
+/* Rendered previews and the reference indexes' cards. */
+.cc-preview { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: contain; border-radius: 6px; background: #0b1120; }
+.vp-doc .cc-preview { margin: 8px 0 20px; }
+.cc-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 22px 18px; margin: 18px 0 8px; }
+.vp-doc a.cc-card { display: flex; flex-direction: column; gap: 6px; text-decoration: none; color: var(--cc-ink); }
+.vp-doc a.cc-card .cc-preview { margin: 0 0 4px; transition: outline-color 0.15s; outline: 1px solid transparent; outline-offset: 2px; }
+.vp-doc a.cc-card:hover .cc-preview { outline-color: var(--cc-accent); }
+.cc-card-title { font-weight: 600; font-size: 14.5px; line-height: 1.3; }
+.cc-card-title code { font-size: 13.5px !important; }
+.cc-card-text { font-size: 13px; line-height: 1.45; color: var(--cc-grey); }
+
+/* An example: the rendered video on top, its code joined underneath as one block. */
+.vp-doc .cc-example { margin: 16px 0 24px; border: 1px solid var(--cc-rule); border-radius: 8px; overflow: hidden; background: var(--vp-code-block-bg); }
+.vp-doc .cc-example .cc-preview { margin: 0; border-radius: 0; }
+.vp-doc .cc-example-code div[class*="language-"] { margin: 0 !important; border-radius: 0 !important; }
+
+/* Code blocks: ink panels with a mono label, comfortable padding and line height, in both colour schemes. */
+:root, .dark { --vp-code-block-bg: #14141a; --vp-code-block-color: #e6e3dc; --vp-code-line-height: 1.75; --vp-code-font-size: 13.5px; --vp-code-copy-code-bg: #1d1d25; --vp-code-copy-code-hover-bg: #26262f; --vp-code-copy-code-active-text: var(--cc-ink-2); }
+.vp-doc div[class*="language-"] { border-radius: 8px !important; border: 1px solid #23232c; }
+.vp-doc div[class*="language-"] pre { padding: 18px 0 !important; }
+.vp-doc div[class*="language-"] code { padding: 0 22px !important; }
+.vp-doc div[class*="language-"] > span.lang { top: 10px; right: 14px; font-family: var(--cc-mono); font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; color: #8b8794; }
+.vp-doc div[class*="language-"] > button.copy { border-radius: 4px; }
+.vp-doc .cc-example { border-color: #23232c; background: #14141a; }
+.vp-doc .cc-example-code div[class*="language-"] { border: 0; border-top: 1px solid #23232c; }
+/* Inline code stays light: a paper chip with ink text. */
+.vp-doc :not(pre) > code { background: var(--vp-code-bg) !important; color: var(--cc-ink) !important; padding: 2px 6px; font-size: 0.86em; }

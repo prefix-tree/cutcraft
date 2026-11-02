@@ -36,7 +36,8 @@
     "bench": "tsx bench/render.bench.ts",
     "bench:scenarios": "tsx bench/scenarios.bench.ts",
     "test:browser": "vitest run -c vitest.browser.config.ts",
-    "catalog": "tsx scripts/graphics-catalog.ts"
+    "catalog": "tsx scripts/graphics-catalog.ts",
+    "previews": "tsx scripts/docs-previews.ts"
   },
   "dependencies": {
     "@cutcraft/graphics": "workspace:*",

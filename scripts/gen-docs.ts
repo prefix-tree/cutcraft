@@ -1,9 +1,10 @@
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { z } from "zod";
 import { ELEMENTS, KIND_CAPABILITIES, MASKED_KINDS, MASK_NOT_RENDERED, NOT_RENDERED, RENDERED_VALUES, listHandlers } from "../packages/kit/src/index";
 import { OURS_ONLY, PARITY } from "../packages/kit/scripts/parity-table";
-import { GRAPHIC_KINDS, GRAPHIC_KIND_NAMES } from "../packages/graphics/src/index";
+import { GRAPHIC_KINDS, GRAPHIC_KIND_NAMES, type GraphicKindName } from "../packages/graphics/src/index";
+import { graphicExample } from "./graphic-example";
 
 /**
  * Generated reference pages: the element table from the Zod schemas and the
@@ -48,7 +49,7 @@ function elementsPage(): string {
       const first = (schema.oneOf ?? schema.anyOf ?? [])[0] ?? {};
       const properties = Object.fromEntries(Object.entries(first.properties ?? {}).filter(([k]) => !own.has(k)));
       schema = { ...first, properties: { ...properties, kind: { enum: [...GRAPHIC_KIND_NAMES] } } };
-      lines.push("Plus the props of its `kind`: see [Graphics](./graphics).", "");
+      lines.push("Plus the props of its `kind`: see [Graphics](/reference/graphics/).", "");
     }
     lines.push("| prop | type | default | required |", "|---|---|---|---|");
     const required = new Set(schema.required ?? []);
@@ -60,27 +61,47 @@ function elementsPage(): string {
   return lines.join("\n") + "\n";
 }
 
-function graphicsPage(): string {
-  const lines = [
-    "# Graphics", "",
-    "The built-in kinds of `<Graphic>`, generated from `packages/graphics`. Do not edit by hand; run `pnpm docs:gen` (and `pnpm docs:graphics` for the pictures).", "",
-    "Every graphic also takes the props on the [Graphic element](./elements#graphic): timing, `transform`, `enter`/`exit`, `style`, and `width`/`height` to size its box. Colour and font defaults are theme tokens, so a graphic follows the theme unless you set them.", "",
-    "![Every kind in the midnight theme](/graphics/sheet.png)", "",
-  ];
+/** A Vue attribute value: quotes and braces escaped, Markdown code ticks dropped. */
+const attr = (text: string): string => text.replace(/`/g, "").replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/\{\{/g, "&#123;&#123;");
+/** The first sentence, for a card. */
+const firstSentence = (text: string): string => /^.*?[.;](?=\s|$)/.exec(text)?.[0].replace(/;$/, ".") ?? text;
+const capital = (s: string): string => `${s[0]!.toUpperCase()}${s.slice(1)}`;
+
+function graphicCategories(): Map<string, string[]> {
   const categories = new Map<string, string[]>();
   for (const name of GRAPHIC_KIND_NAMES) categories.set(GRAPHIC_KINDS[name].category, [...(categories.get(GRAPHIC_KINDS[name].category) ?? []), name]);
-  for (const [category, names] of categories) {
-    lines.push(`## ${category[0]!.toUpperCase()}${category.slice(1)}`, "");
-    for (const name of names) {
-      const kind = GRAPHIC_KINDS[name];
-      const schema = z.toJSONSchema(z.strictObject(kind.shape), { unrepresentable: "any", io: "input" }) as JsonSchema;
-      const example = Object.entries(kind.example).map(([k, v]) => (typeof v === "string" ? ` ${k}="${v}"` : ` ${k}={${JSON.stringify(v)}}`)).join("");
-      lines.push(`### \`${name}\``, "", `${kind.description}${kind.animated ? " Animated." : ""}`, "", `![${kind.title}](/graphics/${name}.png)`, "", "```tsx", `<Graphic id="g1" kind="${name}"${example} start={0} duration={3} />`, "```", "");
-      lines.push("| prop | type | default |", "|---|---|---|");
-      for (const [prop, ps] of Object.entries(schema.properties ?? {})) lines.push(`| \`${prop}\` | ${typeOf(ps)} | ${ps.default === undefined ? "" : `\`${JSON.stringify(ps.default)}\``} |`);
-      lines.push("");
-    }
+  return categories;
+}
+
+/** A rendered example: the video, then the code that made it (both from `graphicExample`). */
+const example = (src: string, alt: string, code: string): string[] => [`<Example src="${src}" alt="${attr(alt)}">`, "", "```tsx", code, "```", "", "</Example>"];
+
+function graphicsIndex(): string {
+  const lines = [
+    "# Graphics", "",
+    "Built-in kinds of `<Graphic>`: pure functions from props and the theme to SVG, drawn the same in the preview and the export. Each card plays its example as the export renders it; its page has the code. Generated from `packages/graphics`; run `pnpm docs:gen` and `pnpm docs:previews`.", "",
+    ...example("previews/graphics/lower-third", "A lower third", graphicExample("lower-third").code), "",
+    "Every kind also takes the [`<Graphic>` props](/reference/elements#graphic): timing, `transform`, `enter`/`exit`, `style`, and `width`/`height` for its box. Colours and fonts default to theme tokens.", "",
+  ];
+  for (const [category, names] of graphicCategories()) {
+    lines.push(`## ${capital(category)}`, "", '<div class="cc-cards">');
+    for (const name of names) lines.push(`<PreviewCard code title="${name}" link="/reference/graphics/${name}" src="previews/graphics/${name}" text="${attr(firstSentence(GRAPHIC_KINDS[name].description))}" />`);
+    lines.push("</div>", "");
   }
+  return lines.join("\n");
+}
+
+function graphicPage(name: GraphicKindName): string {
+  const kind = GRAPHIC_KINDS[name];
+  const schema = z.toJSONSchema(z.strictObject(kind.shape), { unrepresentable: "any", io: "input" }) as JsonSchema;
+  const lines = [
+    `# ${kind.title}`, "",
+    `${kind.description}${kind.animated ? " Animated: it changes over its whole duration." : ""}`, "",
+    ...example(`previews/graphics/${name}`, kind.title, graphicExample(name).code), "",
+    "## Props", "", "| prop | type | default |", "|---|---|---|",
+  ];
+  for (const [prop, ps] of Object.entries(schema.properties ?? {})) lines.push(`| \`${prop}\` | ${typeOf(ps)} | ${ps.default === undefined ? "" : `\`${JSON.stringify(ps.default)}\``} |`);
+  lines.push("", `Plus the [\`<Graphic>\` props](/reference/elements#graphic) every kind takes. More in [${capital(kind.category)}](/reference/graphics/#${kind.category.replace(/ /g, "-")}).`, "");
   return lines.join("\n");
 }
 
@@ -146,6 +167,8 @@ function escapeTags(markdown: string): string {
   return markdown.split("\n").map((line) => {
     if (line.trimStart().startsWith("```")) { fenced = !fenced; return line; }
     if (fenced) return line;
+    // Our own components and their grid are written on lines of their own, as they are.
+    if (/^<\/?(Example|Preview|PreviewCard|div)[\s>]/.test(line)) return line;
     // Outside code: `<Tag` would be a Vue component and `{{ x }}` a Vue interpolation.
     return line.split("`").map((part, i) => (i % 2 === 1 ? part : part.replace(/<(?=[A-Za-z/])/g, "&lt;").replace(/\{\{/g, "&#123;&#123;"))).join("`");
   }).join("\n");
@@ -153,6 +176,14 @@ function escapeTags(markdown: string): string {
 
 writeFileSync(join(out, "elements.md"), escapeTags(elementsPage()));
 writeFileSync(join(out, "actions.md"), escapeTags(actionsPage()));
-writeFileSync(join(out, "graphics.md"), escapeTags(graphicsPage()));
+rmSync(join(out, "graphics"), { recursive: true, force: true });
+mkdirSync(join(out, "graphics"));
+writeFileSync(join(out, "graphics", "index.md"), escapeTags(graphicsIndex()));
+for (const name of GRAPHIC_KIND_NAMES) writeFileSync(join(out, "graphics", `${name}.md`), escapeTags(graphicPage(name)));
+// The sidebars of the generated sections, read by the site's config.
+const sidebar = {
+  graphics: [...graphicCategories()].map(([category, names]) => ({ text: capital(category), items: names.map((name) => ({ text: GRAPHIC_KINDS[name].title, link: `/reference/graphics/${name}` })) })),
+};
+writeFileSync(join(root, "docs", ".vitepress", "sidebar.generated.json"), `${JSON.stringify(sidebar, null, 2)}\n`);
 writeFileSync(join(out, "rendering.md"), escapeTags(renderingPage()));
-console.log("docs/reference: elements.md actions.md graphics.md rendering.md");
+console.log(`docs/reference: elements.md actions.md rendering.md, graphics/ (${GRAPHIC_KIND_NAMES.length + 1} pages)`);

@@ -250,7 +250,7 @@ Generated from the Zod schemas in `packages/kit/src/jsx/schemas` and the capabil
 
 ## `<Graphic>`
 
-Plus the props of its `kind`: see [Graphics](./graphics).
+Plus the props of its `kind`: see [Graphics](/reference/graphics/).
 
 | prop | type | default | required |
 |---|---|---|---|
