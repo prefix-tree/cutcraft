@@ -52,6 +52,11 @@ export interface Frame {
    * normally blended: replace the canvas content with it and return true, or return false to be drawn with `draw`.
    */
   paintFull?(ctx: Ctx2D, width: number, height: number): boolean;
+  /**
+   * Makes the picture drawable, for a frame that defers work until it is drawn (the Node renderer converts decoded
+   * pictures to RGBA only then). The compositor awaits it before painting the frame.
+   */
+  prepare?(): Promise<void>;
   /** A copy that outlives the source's pools and the original's `close()`. */
   retain(): Frame;
   close(): void;

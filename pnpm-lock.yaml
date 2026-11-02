@@ -298,6 +298,9 @@ importers:
       mediabunny:
         specifier: 1.62.0
         version: 1.62.0
+      node-av:
+        specifier: ^6.1.1
+        version: 6.1.1
       react:
         specifier: ^19.3.1
         version: 19.3.1

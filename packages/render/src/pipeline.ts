@@ -1,12 +1,13 @@
 import type { ResolvedState } from "@cutcut/kit";
 import {
-  AssetSources, Compositor, ManualClock, MediabunnyInputs, backdropTracks, compositionBackground, makeNestedResolver, mediabunnyFrameSourceFactory, paintBackground,
-  type MediaResolver, type PlayerErrorEvent,
+  AssetSources, Compositor, ManualClock, MediabunnyInputs, backdropTracks, compositionBackground, coversCanvas, makeNestedResolver, mediabunnyFrameSourceFactory,
+  paintBackground, type FrameIntercept, type MediaResolver, type PlayerErrorEvent,
 } from "@cutcut/player/engine";
+import type { VideoSample } from "mediabunny";
 import type { ReactNode } from "react";
 import type { Canvas, CanvasRenderingContext2D } from "skia-canvas";
 import { createCanvas, initEnv } from "./env";
-import { frameSourceHooks } from "./frame-source";
+import { DecodedFrame, frameSourceHooks, tagBt709 } from "./frame-source";
 import { OverlayPlane, type OverlayFont } from "./overlays";
 
 export interface PipelineOptions {
@@ -61,16 +62,33 @@ export class FramePipeline {
     this.overlays = options.overlays ?? new OverlayPlane({ state, media: options.media, warn: options.warn, ...(options.interiors ? { interiors: options.interiors } : {}), ...(options.fonts ? { fonts: options.fonts } : {}) });
   }
 
-  /** The RGBA pixels of frame `n` (time n / fps). Frames are asked for in increasing order. */
-  async frame(n: number): Promise<Uint8Array> {
+  /**
+   * Frame `n` (time n / fps): its RGBA pixels, or, with `passThrough` and when the frame is one decoded picture shown
+   * as it is (nothing over, under or applied to it), that picture as a sample the caller owns. Frames are asked for in
+   * increasing order.
+   */
+  async frame(n: number): Promise<Uint8Array>;
+  async frame(n: number, passThrough: boolean): Promise<Uint8Array | VideoSample>;
+  async frame(n: number, passThrough = false): Promise<Uint8Array | VideoSample> {
     const { fps, width, height } = this.options.state.composition;
     const t = n / fps;
     let at = performance.now();
-    await this.compositor.step(t);
+    let taken = null as VideoSample | null;
+    const intercept: FrameIntercept = (plan, frames) => {
+      const op = plan.ops.length === 1 ? plan.ops[0]! : null;
+      if (!op || op.kind !== "video" || plan.backgroundBlur || plan.clear || !coversCanvas(op, width, height)) return false;
+      const frame = frames.get(op.id);
+      if (!(frame instanceof DecodedFrame) || this.overlays.hasOverlays(t)) return false;
+      taken = frame.passThrough(width, height);
+      return taken !== null;
+    };
+    await this.compositor.step(t, passThrough && !this.footage ? intercept : undefined);
     if (this.errors.length > 0 && this.options.onAssetError !== "continue") {
+      taken?.close();
       throw new Error(`cannot render: ${this.errors.map((e) => `${e.asset ?? e.id ?? "?"}: ${e.error.message}`).join("; ")}`);
     }
     this.stages.composite += performance.now() - at;
+    if (taken) return tagBt709(taken);
     at = performance.now();
     if (this.footage) {
       // Overlays beneath the footage: the background, those overlays, then the footage over them.

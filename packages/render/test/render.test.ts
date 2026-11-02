@@ -7,7 +7,9 @@ import generateMedia, { mediaDir } from "../../player/e2e/gen-media";
 import * as file from "../../player/e2e/app/composition";
 import { indexLayerInteriors } from "@cutcut/player/overlays";
 import { Canvas, loadImage } from "skia-canvas";
+import { VideoSample } from "mediabunny";
 import { directoryResolver, renderStill, renderVideo } from "../src";
+import { FramePipeline } from "../src/pipeline";
 import { checkExactFrames } from "./helpers/exact";
 import { decodeAudio, decodeFrames, type DecodedFrame, decodesClean, pixel, probe, readStrip, rmsOf, tonePower } from "./helpers/output";
 
@@ -67,6 +69,21 @@ describe("renderVideo", () => {
     // The strip's last cell is black for these frame numbers, so what is white there is the counter's digits.
     expect(frames[10]?.white).toBeGreaterThan(30);
     expect(frames[45]?.white).toBeGreaterThan(30);
+  });
+
+  it("hands a frame that is one picture shown as it is to the encoder as decoded, and paints the rest", async () => {
+    const pipeline = new FramePipeline({ state, media, warn: () => undefined });
+    try {
+      const plain = await pipeline.frame(96, true); // v1 alone, after the title and the layer
+      expect(plain).toBeInstanceOf(VideoSample);
+      const sample = plain as VideoSample;
+      expect([sample.format, sample.codedWidth, sample.codedHeight, sample.colorSpace.matrix, sample.colorSpace.fullRange]).toEqual(["I420", 640, 360, "bt709", false]);
+      sample.close();
+      expect(await pipeline.frame(112, true)).toBeInstanceOf(Uint8Array); // the crossfade into v2
+      expect(await pipeline.frame(180, true)).toBeInstanceOf(Uint8Array); // the logo, a still
+    } finally {
+      pipeline.dispose();
+    }
   });
 
   it("renders a time range", async () => {
