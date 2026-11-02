@@ -77,7 +77,7 @@ on shapes warn). The composition's `background` can be a `gradient` too.
 ## SVG
 
 `<Svg>` draws inline `content` or an SVG asset read as text. Before either surface draws it,
-`prepareSvg` (in `@cutcut/player/overlays`) turns it into the markup both draw:
+`prepareSvg` (in `@cutcraft/player/overlays`) turns it into the markup both draw:
 
 - **Removed:** scripts, `foreignObject`, event attributes, links outside the file (a `#id` and an
   embedded PNG, JPEG, GIF or WebP stay). Each removal warns once.

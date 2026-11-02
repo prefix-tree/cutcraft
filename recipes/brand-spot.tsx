@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Clip, Composition, Graphic, THEME_NAMES, Title, Track } from "@cutcut/kit";
+import { Clip, Composition, Graphic, THEME_NAMES, Title, Track } from "@cutcraft/kit";
 
 /**
  * A twelve-second spot made of graphics around one screen recording. The look

@@ -1,4 +1,4 @@
-import type { FitMode, ResolvedTheme } from "@cutcut/kit";
+import type { FitMode, ResolvedTheme } from "@cutcraft/kit";
 import { overlayLayout, type ElementProps, type OverlayLayout } from "./layout";
 import { prepareSvg, svgAnimated, svgIntrinsicSize, type PreparedSvg, type SvgColor, type SvgViewBox } from "./svg";
 

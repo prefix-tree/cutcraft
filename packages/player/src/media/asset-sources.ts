@@ -1,4 +1,4 @@
-import { lookupAsset, type AssetManifest } from "@cutcut/kit";
+import { lookupAsset, type AssetManifest } from "@cutcraft/kit";
 import { INPUT_IDLE_CLOSE_S, MAX_OPEN_INPUTS } from "../constants";
 import type { Clock, Frame, FrameSource, FrameSourceFactory, FrameSourceInfo, MediaResolver, PlayerErrorEvent } from "../types";
 import { ErrorFrameSource } from "./frame-source";

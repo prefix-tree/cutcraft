@@ -1,4 +1,4 @@
-import { Audio, Clip, Composition, Effect, Keyframe, Title, Track } from "@cutcut/kit";
+import { Audio, Clip, Composition, Effect, Keyframe, Title, Track } from "@cutcraft/kit";
 import type { ReactElement } from "react";
 
 /**

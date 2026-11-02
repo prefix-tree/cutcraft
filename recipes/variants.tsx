@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Captions, Clip, Composition, THEME_NAMES, Title, Track } from "@cutcut/kit";
+import { Captions, Clip, Composition, THEME_NAMES, Title, Track } from "@cutcraft/kit";
 
 /**
  * One cut, many variants. Everything that changes between a brand, a market

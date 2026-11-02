@@ -1,4 +1,4 @@
-import type { AnyCanvas, Ctx2D, Frame, FrameSourceHooks, MediaHandle } from "@cutcut/player/engine";
+import type { AnyCanvas, Ctx2D, Frame, FrameSourceHooks, MediaHandle } from "@cutcraft/player/engine";
 import type { VideoSample } from "mediabunny";
 import { Canvas, ImageData, loadImage } from "skia-canvas";
 

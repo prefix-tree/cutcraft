@@ -1,18 +1,18 @@
 <p align="center"><img src="../../docs/public/logo.svg" width="64" alt="cutcut logo"></p>
 
-# @cutcut/player
+# @cutcraft/player
 
-The browser player for cut files. It takes a `ResolvedState` from `@cutcut/kit`
+The browser player for cut files. It takes a `ResolvedState` from `@cutcraft/kit`
 and plays it: footage decoded with WebCodecs through mediabunny and composited
 on one canvas, overlays rendered as React DOM above it, sound mixed and
 clocked by Web Audio. The editor's preview and the model's filmstrip drive the
-same `PlayerCore`; the export (`@cutcut/render`) runs the same engine in Node
-through `@cutcut/player/engine` and `@cutcut/player/overlays`, which have no
+same `PlayerCore`; the export (`@cutcraft/render`) runs the same engine in Node
+through `@cutcraft/player/engine` and `@cutcraft/player/overlays`, which have no
 React layer, DOM or Web Audio in them.
 
 ```tsx
-import { collectModule, resolve } from "@cutcut/kit";
-import { Player } from "@cutcut/player";
+import { collectModule, resolve } from "@cutcraft/kit";
+import { Player } from "@cutcraft/player";
 import * as file from "./video";          // the TSX file the model wrote
 
 const state = resolve(collectModule(file), manifest);
@@ -86,13 +86,13 @@ colour wheels, curves and LUTs, matte masks, audio effects, pitch correction,
 `background.mode: "blur"` under overlays that sit beneath the footage (the
 plain colour), sticker packs and `file:` nested references. The
 kit's `not-rendered` lint warning reports these in the file before anything
-plays, from the same table (`RENDERED_*` in `@cutcut/kit`) the player reads.
+plays, from the same table (`RENDERED_*` in `@cutcraft/kit`) the player reads.
 
 ## Tests
 
 ```
-pnpm --filter @cutcut/player test        # vitest over jsdom with fakes (part of `pnpm check`)
-pnpm --filter @cutcut/player test:e2e    # Playwright: ffmpeg-generated media, Vite, headless Chromium
+pnpm --filter @cutcraft/player test        # vitest over jsdom with fakes (part of `pnpm check`)
+pnpm --filter @cutcraft/player test:e2e    # Playwright: ffmpeg-generated media, Vite, headless Chromium
 ```
 
 The browser suite generates `bars.webm` (frame number encoded in a binary

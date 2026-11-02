@@ -1,5 +1,5 @@
 import { registerMediabunnyServer } from "@mediabunny/server";
-import type { AnyCanvas, CreateCanvas } from "@cutcut/player/engine";
+import type { AnyCanvas, CreateCanvas } from "@cutcraft/player/engine";
 import { Canvas } from "skia-canvas";
 
 let registered = false;

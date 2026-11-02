@@ -1,4 +1,4 @@
-import type { LayerClock } from "@cutcut/kit";
+import type { LayerClock } from "@cutcraft/kit";
 import { createContext } from "react";
 import type { PlayerCore } from "../player";
 

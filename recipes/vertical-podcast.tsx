@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Captions, Clip, Composition, Title, Track } from "@cutcut/kit";
+import { Captions, Clip, Composition, Title, Track } from "@cutcraft/kit";
 
 export const schema = z.object({
   accent: z.string().describe("Name-tag and karaoke colour"),

@@ -19,11 +19,11 @@ All notable changes to this project are documented here. The format follows
   `total` units ("7 in 10"), `comparison` draws a few labelled bars to scale, and `sample-size`
   draws a sample of `n` as dots with a `share` highlighted (one dot standing for several past
   1,000). Each animates over a few seconds, draws in the theme, and is plain props, so the editor
-  can change it without code. `graphicControls(kind)` (from `@cutcut/graphics`, and `@cutcut/kit`)
+  can change it without code. `graphicControls(kind)` (from `@cutcraft/graphics`, and `@cutcraft/kit`)
   describes the editor control for each of a kind's props from its schema: number bounds and
   steps, colours and fonts (now marked in the schema), switches, choices, and lists of items.
 
-- `checkLayout` (`cutcut-render --check-layout`) samples every frame and reports each overlay that
+- `checkLayout` (`cutcraft --check-layout`) samples every frame and reports each overlay that
   leaves the frame, leaves a safe zone (`tiktok`, `reels`, `shorts`, `title-safe`, `action-safe` or
   custom margins), covers captions, or covers the subject, as runs with the element's id and the
   first and last offending time. It measures the pixels an element draws, after its animation and
@@ -35,12 +35,12 @@ All notable changes to this project are documented here. The format follows
   (boxes over source time), mapped through each clip's crop, fit and transform, or from a fixed
   region for footage without them.
 
-- `interpolate()`, `spring()` and `random()` for `<Layer>` code, exported from `@cutcut/kit`: a
+- `interpolate()`, `spring()` and `random()` for `<Layer>` code, exported from `@cutcraft/kit`: a
   piecewise map across ranges with easing and clamping, a physical spring in seconds (mass,
   damping, stiffness, overshoot clamping), and a number fixed by its seed. They are pure, so they
   run under the export's Satori too. Keyframes and speed keys take a `"spring"` easing.
 
-- `@cutcut/render` writes `.mov` (ProRes with 16-bit PCM), the soundtrack alone to `.mp3` or
+- `@cutcraft/render` writes `.mov` (ProRes with 16-bit PCM), the soundtrack alone to `.mp3` or
   `.wav`, and one frame to a PNG or JPEG (`renderStill`, `--still <seconds>`). `quality`
   (`--quality`) takes an encoder preset in place of a bitrate, and a codec the container cannot
   hold is refused with the ones it can.
@@ -49,7 +49,7 @@ All notable changes to this project are documented here. The format follows
   times the clip by how long it takes to play its source, and a `duration` sets how much source it
   plays. A freeze is an insert hold: the held frame shows for `duration`, the rest of the clip plays
   after it, and the clip grows by the hold, so later clips and caption words move back. The math is
-  exported from `@cutcut/kit` (`rampAdvance`, `rampInverse`, `freezeShift`, `freezeUnshift`,
+  exported from `@cutcraft/kit` (`rampAdvance`, `rampInverse`, `freezeShift`, `freezeUnshift`,
   `holdTotal`, `speedKeysOf`, `freezeHoldsOf`, `EASING_FN`).
 
 - Audio follows `<SpeedKey>` ramps and `<Freeze>` holds in the preview and the export. An audio
@@ -99,7 +99,7 @@ All notable changes to this project are documented here. The format follows
 - `duck.under` resolves a track id first, then a track role (`dialogue`), and the resolver reports
   a name that is neither. Clips at `volume={0}` no longer duck the bed.
 
-- `loadModule(source)` in `@cutcut/kit/source`: a cut file's source as a running module, through
+- `loadModule(source)` in `@cutcraft/kit/source`: a cut file's source as a running module, through
   Sucrase and a `require` that offers only react, zod and the kit, so an editor's preview and a
   server-side check load a file the same way and refuse the same imports.
 
@@ -113,7 +113,7 @@ All notable changes to this project are documented here. The format follows
   kinds, backgrounds, SVG rules); a new recipe, a brand spot that one prop renders in any
   theme; the variants recipe takes a theme beside its brand colour.
 
-- `<Graphic kind>`: thirty built-in graphics from the new `@cutcut/graphics` package (arrows,
+- `<Graphic kind>`: thirty built-in graphics from the new `@cutcraft/graphics` package (arrows,
   callouts, speech bubbles, badges, pills, bursts, three lower thirds, corner brackets, frames,
   device frames, underline and circle scribbles, marker sweeps, strikes, progress bars,
   countdowns, step dots, dividers, five backgrounds, confetti, sparkles and Lucide icons). Each
@@ -131,7 +131,7 @@ All notable changes to this project are documented here. The format follows
   `composition/setTheme` and `theme/setToken` fold into the theme literal; new lint rules
   `theme-refs`, `theme-literals` and `font-available`. Four OFL families ship beside Inter
   (Space Grotesk, Playfair Display, DM Sans, JetBrains Mono) in the export and, through
-  `@cutcut/player/fonts.css`, in the preview.
+  `@cutcraft/player/fonts.css`, in the preview.
 
 - Entrances and exits (`enter`, `exit`) on titles, shapes, SVG, stickers and layers, all
   twenty presets including wipes, reveals and `draw`, computed in the shared layout so the
@@ -145,13 +145,13 @@ All notable changes to this project are documented here. The format follows
   The preview inlines SVG assets instead of loading them as images. In the export, an inline
   `<svg>` inside a Layer is drawn (Satori embedded it as an image skia could not read).
 
-- `@cutcut/render`: export to WebM (VP9 and Opus) or MP4 (H.264 and AAC) in Node,
+- `@cutcraft/render`: export to WebM (VP9 and Opus) or MP4 (H.264 and AAC) in Node,
   with no browser. It runs the player's engine through the new
-  `@cutcut/player/engine` and `@cutcut/player/overlays` entries; titles, layers
+  `@cutcraft/player/engine` and `@cutcraft/player/overlays` entries; titles, layers
   and captions are laid out by Satori from the trees the browser mounts and drawn
   with the layout the DOM gives them (blend modes included); the soundtrack is
   mixed by our own offline mixer (bit-exact against Web Audio's
-  `OfflineAudioContext` at 1x and 1.5x); `cutcut-render` loads a TSX file and
+  `OfflineAudioContext` at 1x and 1.5x); `cutcraft` loads a TSX file and
   renders it. Workers render runs of whole keyframe intervals and the main
   thread joins them (1.6 to 2.2 times one thread on four cores); `--copy` copies
   the encoded pictures of plain cuts of a VP8/VP9 source (460 fps against 12 on
@@ -184,7 +184,7 @@ All notable changes to this project are documented here. The format follows
   `elapsed`, `remaining` and `duration` in seconds, the composition `time`
   and `fps`, so a countdown or a timer reads real time off the player.
 
-- `@cutcut/kit`: `track/setLayout`, `multicam/flatten` and `nested/extract`
+- `@cutcraft/kit`: `track/setLayout`, `multicam/flatten` and `nested/extract`
   apply (they were validated stubs), with `resolveScene` resolving a
   `<Nested>` interior for the kit and the player alike. The fold prints
   chained inserts and reorders as one group and an inserted node as it
@@ -195,13 +195,13 @@ All notable changes to this project are documented here. The format follows
   policy in the prompt, `sequence-gap` and `cut-inside-word` lint rules,
   `PlayerCore.captureSheet`.
 
-- `@cutcut/kit`: the JSX vocabulary (26 elements with Zod schemas), the asset
+- `@cutcraft/kit`: the JSX vocabulary (26 elements with Zod schemas), the asset
   manifest and `TimeRef` resolution, the resolver (sequence and free tracks,
   gaps, transitions, anchors, fill and match durations, multicam cuts), the
   patch log, the action system (124 actions with validate, apply, invert and
   fold), history with gesture grouping, the executor, the source index, fold,
   bake and lint.
-- `@cutcut/player`: the browser renderer. WebCodecs decoding through mediabunny,
+- `@cutcraft/player`: the browser renderer. WebCodecs decoding through mediabunny,
   per-clip decoders, canvas compositing with transforms, masks, crossfades and
   adjustments, DOM overlays, a Web Audio clock and mixer with ducking, the
   framework-free `PlayerCore` and the React `<Player>`.
@@ -220,7 +220,7 @@ All notable changes to this project are documented here. The format follows
   not locked: the timeline drags it and the fold writes the value into
   `defaults`. Placements carry `boundProps`; `expression-locked` no longer
   warns on it.
-- The project and its packages are named cutcut (`@cutcut/kit`, `@cutcut/player`); the TSX file is still called a cut file.
+- The project and its packages are named cutcut (`@cutcraft/kit`, `@cutcraft/player`); the TSX file is still called a cut file.
 - Resolve caches parsed props and intrinsic timing per node and keeps
   placement identity, so a drag step costs about 1 µs per element.
 - Decoders survive trims; a paused preview repaints without waiting and

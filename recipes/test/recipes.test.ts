@@ -1,8 +1,8 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { THEMES, collectModule, resolve, type AssetManifest, type ResolvedState } from "@cutcut/kit";
-import { buildSourceIndex, lint } from "@cutcut/kit/source";
+import { THEMES, collectModule, resolve, type AssetManifest, type ResolvedState } from "@cutcraft/kit";
+import { buildSourceIndex, lint } from "@cutcraft/kit/source";
 import * as talkingHead from "../talking-head";
 import * as productDemo from "../product-demo";
 import * as verticalPodcast from "../vertical-podcast";

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Audio, Caption, Captions, Clip, Composition, Keyframe, Layer, Marker, Shape, Title, Track, Transition, useT } from "@cutcut/kit";
+import { Audio, Caption, Captions, Clip, Composition, Keyframe, Layer, Marker, Shape, Title, Track, Transition, useT } from "@cutcraft/kit";
 
 export const schema = z.object({
   product: z.string().describe("Product name on the title card"),

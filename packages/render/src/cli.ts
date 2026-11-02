@@ -1,4 +1,3 @@
-#!/usr/bin/env tsx
 import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { parseArgs } from "node:util";
@@ -14,9 +13,9 @@ import { SAFE_ZONES, checkLayout, formatLayout, type Insets, type SafeZoneName }
 /** --check-layout found issues: apart from 1 (an error) and 2 (usage), so a script can tell them apart. */
 const EXIT_LAYOUT_ISSUES = 3;
 
-const USAGE = `Usage: cutcut-render <file.tsx> --out <video.webm|.mp4|.mov|.mp3|.wav> [options]
-       cutcut-render <file.tsx> --still <seconds> --out <image.png|.jpg> [options]
-       cutcut-render <file.tsx> --check-layout [--safe-zone <zone>] [--subject <x,y,w,h>] [--json] [options]
+const USAGE = `Usage: cutcraft <file.tsx> --out <video.webm|.mp4|.mov|.mp3|.wav> [options]
+       cutcraft <file.tsx> --still <seconds> --out <image.png|.jpg> [options]
+       cutcraft <file.tsx> --check-layout [--safe-zone <zone>] [--subject <x,y,w,h>] [--json] [options]
 
   --out <file>          where to write; the extension picks the container: .webm, .mp4, .mov (ProRes),
                         or .mp3/.wav for the soundtrack alone

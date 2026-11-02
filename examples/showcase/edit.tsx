@@ -1,4 +1,4 @@
-import { Clip, Composition, Graphic, Keyframe, Title, Track, Transition } from "@cutcut/kit";
+import { Clip, Composition, Graphic, Keyframe, Title, Track, Transition } from "@cutcraft/kit";
 
 /** An edit: three shots cut back to back, a wipe and a slide between them, a slow push-in, a title and a lower third. */
 export default function Video() {

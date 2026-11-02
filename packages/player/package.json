@@ -1,7 +1,6 @@
 {
-  "name": "@cutcut/player",
+  "name": "@cutcraft/player",
   "version": "0.1.0",
-  "private": true,
   "description": "Browser player for the cut video DSL: WebCodecs decode through mediabunny, canvas compositing, DOM overlays, Web Audio clock.",
   "license": "MIT",
   "homepage": "https://prefix-tree.github.io/cutcraft/",
@@ -20,7 +19,22 @@
     "./overlays": "./src/overlays.ts",
     "./fonts.css": "./fonts.css"
   },
+  "files": [
+    "dist",
+    "fonts.css"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "exports": {
+      ".": "./dist/index.mjs",
+      "./engine": "./dist/engine.mjs",
+      "./overlays": "./dist/overlays.mjs",
+      "./fonts.css": "./fonts.css"
+    }
+  },
   "scripts": {
+    "build": "tsdown src/index.ts src/engine.ts src/overlays.ts --dts",
+    "prepack": "pnpm run build",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "lint": "eslint . --max-warnings 0",
     "test": "vitest run",
@@ -32,8 +46,8 @@
     "react-dom": "^19.0.0"
   },
   "dependencies": {
-    "@cutcut/graphics": "workspace:*",
-    "@cutcut/kit": "workspace:*",
+    "@cutcraft/graphics": "workspace:*",
+    "@cutcraft/kit": "workspace:*",
     "@fontsource/dm-sans": "^5.3.0",
     "@fontsource/inter": "^5.3.0",
     "@fontsource/jetbrains-mono": "^5.3.0",

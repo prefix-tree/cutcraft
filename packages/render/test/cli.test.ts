@@ -5,7 +5,7 @@ import generateMedia, { mediaDir } from "../../player/e2e/gen-media";
 import { probe } from "./helpers/output";
 
 const root = join(import.meta.dirname, "..");
-// Inside the package so the file can import @cutcut/kit.
+// Inside the package so the file can import @cutcraft/kit.
 const scratch = join(root, "test", ".tmp", "cli");
 const cli = join(root, "src", "cli.ts");
 const composition = join(root, "..", "player", "e2e", "app", "composition.tsx");
@@ -22,7 +22,7 @@ beforeAll(() => {
 });
 afterAll(() => rmSync(scratch, { recursive: true, force: true }));
 
-describe("cutcut-render", () => {
+describe("cutcraft", () => {
   it("renders a TSX file with its own manifest and the asset folder", () => {
     const out = join(dir, "one.webm");
     const r = run(composition, "--media", mediaDir, "--out", out, "--to", "1", "--quiet");
@@ -35,7 +35,7 @@ describe("cutcut-render", () => {
     const manifest = join(dir, "manifest.json");
     writeFileSync(manifest, JSON.stringify({ assets: { bars: { id: "bars", kind: "video", duration: 10, fps: 30, width: 640, height: 360 } } }));
     const file = join(dir, "tiny.tsx");
-    writeFileSync(file, `import { Clip, Composition, Track } from "@cutcut/kit";\nexport default function Video() { return <Composition fps={30} width={640} height={360}><Track id="t"><Clip id="c" src="asset:bars" in={0} out={0.5} /></Track></Composition>; }\n`);
+    writeFileSync(file, `import { Clip, Composition, Track } from "@cutcraft/kit";\nexport default function Video() { return <Composition fps={30} width={640} height={360}><Track id="t"><Clip id="c" src="asset:bars" in={0} out={0.5} /></Track></Composition>; }\n`);
     const out = join(dir, "tiny.mp4");
     const r = run(file, "--manifest", manifest, "--media", mediaDir, "--out", out, "--silent", "--quiet");
     expect(r.stderr).toContain("15 frames");
@@ -80,6 +80,6 @@ describe("cutcut-render", () => {
   it("prints usage when there is nothing to render", () => {
     const r = run();
     expect(r.status).toBe(2);
-    expect(r.stderr).toContain("Usage: cutcut-render");
+    expect(r.stderr).toContain("Usage: cutcraft");
   });
 });

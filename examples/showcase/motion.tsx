@@ -1,4 +1,4 @@
-import { Composition, Graphic, Layer, Track, interpolate, spring, useLayer } from "@cutcut/kit";
+import { Composition, Graphic, Layer, Track, interpolate, spring, useLayer } from "@cutcraft/kit";
 
 const BARS = [
   { label: "Mon", value: 0.42 },

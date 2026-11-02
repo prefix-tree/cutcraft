@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Clip, Composition, Layer, Title, Track, useLayer } from "@cutcut/kit";
+import { Clip, Composition, Layer, Title, Track, useLayer } from "@cutcraft/kit";
 
 export const schema = z.object({
   accent: z.string().describe("Number colour"),

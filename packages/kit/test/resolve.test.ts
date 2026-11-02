@@ -2,8 +2,8 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { createElement } from "react";
 import { describe, expect, it } from "vitest";
-import { Angle, Audio, Clip, Cut, Freeze, Multicam, Composition, Gap, SpeedKey, Title, Track, Transition, collect, resolve, resolveScene, type SceneFn } from "@cutcut/kit";
-import { lint } from "@cutcut/kit/source";
+import { Angle, Audio, Clip, Cut, Freeze, Multicam, Composition, Gap, SpeedKey, Title, Track, Transition, collect, resolve, resolveScene, type SceneFn } from "@cutcraft/kit";
+import { lint } from "@cutcraft/kit/source";
 import { fixtureText, fixtureTree, fixturesDir, manifest, serialize, round } from "./helpers";
 
 const h = createElement;

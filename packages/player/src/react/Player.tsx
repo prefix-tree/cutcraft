@@ -1,4 +1,4 @@
-import type { ResolvedState } from "@cutcut/kit";
+import type { ResolvedState } from "@cutcraft/kit";
 import { forwardRef, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { PlayerCore, type PlayerOptions } from "../player";
 import type { MediaResolver, PlayerEvents } from "../types";

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Audio, Clip, Composition, Keyframe, Title, Track, Transition } from "@cutcut/kit";
+import { Audio, Clip, Composition, Keyframe, Title, Track, Transition } from "@cutcraft/kit";
 
 export const schema = z.object({
   title: z.string().describe("Opening title"),

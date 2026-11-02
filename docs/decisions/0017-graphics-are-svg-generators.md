@@ -23,7 +23,7 @@ rendered by the overlay plane like a Layer, or functions that produce markup.
 
 ## Decision
 
-- **`@cutcut/graphics` holds the kinds.** Each kind is a zod shape for its own
+- **`@cutcraft/graphics` holds the kinds.** Each kind is a zod shape for its own
   props and a pure function `(props, { width, height, t, duration, seed,
   value }) → { svg, labels }`. It has no DOM and no React; it depends on zod
   and on Lucide's icon data (ISC).

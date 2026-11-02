@@ -1,4 +1,4 @@
-import { Clip, Composition, Track, Transition } from "@cutcut/kit";
+import { Clip, Composition, Track, Transition } from "@cutcraft/kit";
 export { manifest } from "./composition";
 
 export const defaults = {};

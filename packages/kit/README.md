@@ -1,6 +1,6 @@
 <p align="center"><img src="../../docs/public/logo.svg" width="64" alt="cutcut logo"></p>
 
-# @cutcut/kit
+# @cutcraft/kit
 
 The shared core of the cutcut editor: the JSX vocabulary a model writes, the
 resolver that turns a file into absolute placements, the invertible action
@@ -14,7 +14,7 @@ set is in [`docs/parity.md`](docs/parity.md) (`pnpm parity` regenerates it).
 
 ```tsx
 import { z } from "zod";
-import { Clip, Composition, Title, Track, Transition } from "@cutcut/kit";
+import { Clip, Composition, Title, Track, Transition } from "@cutcraft/kit";
 
 export const schema = z.object({ title: z.string(), accent: z.string() });
 export const defaults = { title: "Why we built it", accent: "#ff5a1f" };

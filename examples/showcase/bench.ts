@@ -4,7 +4,7 @@
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { cpus, tmpdir } from "node:os";
 import { join } from "node:path";
-import { directoryResolver, loadVideo, renderVideo } from "@cutcut/render";
+import { directoryResolver, loadVideo, renderVideo } from "@cutcraft/render";
 
 const here = import.meta.dirname;
 const scratch = mkdtempSync(join(tmpdir(), "cutcraft-bench-"));

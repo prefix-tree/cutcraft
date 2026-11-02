@@ -1,5 +1,5 @@
-import { rampAdvance, rampInverse, speedKeysOf } from "@cutcut/kit";
-import { frameIndex, frameTime, layerClock, localT, placementSourceTime, timecode } from "@cutcut/player";
+import { rampAdvance, rampInverse, speedKeysOf } from "@cutcraft/kit";
+import { frameIndex, frameTime, layerClock, localT, placementSourceTime, timecode } from "@cutcraft/player";
 import { childrenOf, fixtureState, makeState } from "./helpers/state";
 
 const state = makeState({

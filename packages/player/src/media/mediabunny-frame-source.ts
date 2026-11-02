@@ -1,4 +1,4 @@
-import type { AssetEntry } from "@cutcut/kit";
+import type { AssetEntry } from "@cutcraft/kit";
 import { CanvasSink, VideoSampleSink, type Input, type InputVideoTrack, type VideoSample } from "mediabunny";
 import { PICK_EPS } from "../constants";
 import type { CreateCanvas, Ctx2D, Frame, FrameSource, FrameSourceFactory, FrameSourceInfo, MediaHandle } from "../types";

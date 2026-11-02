@@ -1,0 +1,28 @@
+{
+  "name": "cutcraft",
+  "version": "0.1.0",
+  "description": "The CutCraft command line: render a TSX video file to MP4, WebM, audio or a still, or check its layout.",
+  "license": "MIT",
+  "homepage": "https://prefix-tree.github.io/cutcraft/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/prefix-tree/cutcraft.git",
+    "directory": "packages/cli"
+  },
+  "bugs": {
+    "url": "https://github.com/prefix-tree/cutcraft/issues"
+  },
+  "type": "module",
+  "bin": {
+    "cutcraft": "./cli.js"
+  },
+  "files": [
+    "cli.js"
+  ],
+  "engines": {
+    "node": ">=22.19"
+  },
+  "dependencies": {
+    "@cutcraft/render": "workspace:*"
+  }
+}

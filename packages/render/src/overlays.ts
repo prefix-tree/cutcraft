@@ -1,11 +1,11 @@
 import { createRequire } from "node:module";
-import type { ResolvedState } from "@cutcut/kit";
-import { BUNDLED_FONTS, BUNDLED_FONT_WEIGHTS, installLayerClock } from "@cutcut/kit";
-import { backdropTracks, boundsOf, isVisibleAt, visiblePlacements, type DrawRect, type MediaResolver, type VisibleItem } from "@cutcut/player/engine";
+import type { ResolvedState } from "@cutcraft/kit";
+import { BUNDLED_FONTS, BUNDLED_FONT_WEIGHTS, installLayerClock } from "@cutcraft/kit";
+import { backdropTracks, boundsOf, isVisibleAt, visiblePlacements, type DrawRect, type MediaResolver, type VisibleItem } from "@cutcraft/player/engine";
 import {
   OVERLAY_KINDS, captionsContent, graphicDrawing, graphicLabels, iconStickerDrawing, parseSvg, serialize, shapeDrawing, svgDrawing, layerClock, layerContent, overlayLayout, stickerPlaceholder, stickerSize, titleBox, titleContent,
   type ElementProps, type GraphicDrawing, type OverlayLayout,
-} from "@cutcut/player/overlays";
+} from "@cutcraft/player/overlays";
 import { readFileSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { createElement, isValidElement, type ReactElement, type ReactNode } from "react";

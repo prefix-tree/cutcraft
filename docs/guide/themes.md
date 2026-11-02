@@ -106,7 +106,7 @@ Five families ship with both renderers, all under the SIL Open Font License:
 Inter, Space Grotesk, Playfair Display, DM Sans and JetBrains Mono, in regular
 and bold (and italic, except Space Grotesk). The export reads them from the
 `@fontsource` packages; the preview loads them once the app imports
-`@cutcut/player/fonts.css`. Another family works in the preview if the page
+`@cutcraft/player/fonts.css`. Another family works in the preview if the page
 loads it, and in the export if you pass it (`--font`, `fonts`); otherwise the
 export sets it in Inter and warns. The `font-available` lint names such fonts.
 

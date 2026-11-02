@@ -1,6 +1,6 @@
-import type { ResolvedState } from "@cutcut/kit";
+import type { ResolvedState } from "@cutcraft/kit";
 import type { ReactNode } from "react";
-import { FRAME_EPS, buildAudioPlan, captureWarnings, makeNestedResolver, type MediaResolver, type PlayerErrorEvent } from "@cutcut/player/engine";
+import { FRAME_EPS, buildAudioPlan, captureWarnings, makeNestedResolver, type MediaResolver, type PlayerErrorEvent } from "@cutcraft/player/engine";
 import { AudioSample, AudioSampleSource, EncodedVideoPacketSource, FilePathTarget, Mp3OutputFormat, Output, WavOutputFormat, canEncodeAudio, type AudioCodec } from "mediabunny";
 import { encodeFrames } from "./encode";
 import { initEnv } from "./env";

@@ -10,7 +10,7 @@ import { decodeAudio, decodeFrames, decodesClean, probe, rmsOf, tonePower } from
 
 // The e2e composition without its overlays, so the frame strip stays readable. Inside the package so it can import the kit.
 const scratch = join(import.meta.dirname, ".tmp", "parallel");
-const SOURCE = `import { Audio, Clip, Composition, Track, Transition } from "@cutcut/kit";
+const SOURCE = `import { Audio, Clip, Composition, Track, Transition } from "@cutcraft/kit";
 export const manifest = ${JSON.stringify(manifest)};
 export default function Video() {
   return (

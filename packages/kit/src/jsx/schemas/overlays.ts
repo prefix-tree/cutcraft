@@ -1,4 +1,4 @@
-import { GRAPHIC_KINDS, GRAPHIC_KIND_NAMES } from "@cutcut/graphics";
+import { GRAPHIC_KINDS, GRAPHIC_KIND_NAMES } from "@cutcraft/graphics";
 import { z } from "zod";
 import { zBlendMode, zShapeType, zTextAnimationPreset } from "../enums";
 import { zAnimationUnit, zSvgColorMode, zTextAlign, zTextDecoration, zTextValign } from "./enums-local";
@@ -127,7 +127,7 @@ type KindShape<K extends keyof Kinds> = Kinds[K]["shape"] extends infer S extend
 type GraphicVariant<K extends keyof Kinds> = z.ZodObject<typeof graphicBase & { kind: z.ZodLiteral<K> } & KindShape<K>, z.core.$strict>;
 type GraphicVariants = { [K in keyof Kinds]: GraphicVariant<K> }[keyof Kinds];
 
-/** `<Graphic kind>`: the props every graphic takes, and the kind's own (see `@cutcut/graphics`). */
+/** `<Graphic kind>`: the props every graphic takes, and the kind's own (see `@cutcraft/graphics`). */
 export const graphicSchema = z.discriminatedUnion(
   "kind",
   GRAPHIC_KIND_NAMES.map((k) => z.strictObject({ ...graphicBase, kind: z.literal(k), ...GRAPHIC_KINDS[k].shape })) as unknown as [GraphicVariants, ...GraphicVariants[]],

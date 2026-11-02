@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { collectModule, resolve } from "@cutcut/kit";
-import { loadModule } from "@cutcut/kit/source";
+import { collectModule, resolve } from "@cutcraft/kit";
+import { loadModule } from "@cutcraft/kit/source";
 import { fixtureText, manifest } from "./helpers";
 
 describe("loadModule", () => {

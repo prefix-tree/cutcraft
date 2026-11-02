@@ -2,8 +2,8 @@ import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "no
 import { tmpdir } from "node:os";
 import { dirname, join, parse, resolve as resolvePath } from "node:path";
 import { pathToFileURL } from "node:url";
-import { collectModule, resolve, type AssetManifest, type ResolvedState } from "@cutcut/kit";
-import { indexLayerInteriors } from "@cutcut/player/overlays";
+import { collectModule, resolve, type AssetManifest, type ResolvedState } from "@cutcraft/kit";
+import { indexLayerInteriors } from "@cutcraft/player/overlays";
 import type { ReactNode } from "react";
 import { tsImport } from "tsx/esm/api";
 

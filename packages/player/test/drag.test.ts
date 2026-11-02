@@ -1,4 +1,4 @@
-import { ManualClock, PlayerCore } from "@cutcut/player";
+import { ManualClock, PlayerCore } from "@cutcraft/player";
 import { FakeAudioOutput, FakeAudioSource, FakeFrameSource, fakeResolver, flush, recorderCanvas, recorderContext } from "./helpers/fakes";
 import { makeState } from "./helpers/state";
 

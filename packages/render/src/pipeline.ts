@@ -1,8 +1,8 @@
-import type { ResolvedState } from "@cutcut/kit";
+import type { ResolvedState } from "@cutcraft/kit";
 import {
   AssetSources, Compositor, ManualClock, MediabunnyInputs, backdropTracks, compositionBackground, makeNestedResolver, mediabunnyFrameSourceFactory, paintBackground,
   type MediaResolver, type PlayerErrorEvent,
-} from "@cutcut/player/engine";
+} from "@cutcraft/player/engine";
 import type { ReactNode } from "react";
 import type { Canvas, CanvasRenderingContext2D } from "skia-canvas";
 import { createCanvas, initEnv } from "./env";

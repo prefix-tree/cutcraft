@@ -1,4 +1,4 @@
-import { AssetSources, DecoderPool, ErrorFrame, INPUT_IDLE_CLOSE_S, ManualClock, type PlayerErrorEvent } from "@cutcut/player";
+import { AssetSources, DecoderPool, ErrorFrame, INPUT_IDLE_CLOSE_S, ManualClock, type PlayerErrorEvent } from "@cutcraft/player";
 import { FakeFrameSource, fakeResolver, flush } from "./helpers/fakes";
 import { DEFAULT_MANIFEST, makeState } from "./helpers/state";
 

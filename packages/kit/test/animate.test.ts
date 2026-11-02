@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { EASING_FN, interpolate, random, spring } from "@cutcut/kit";
+import { EASING_FN, interpolate, random, spring } from "@cutcraft/kit";
 
 describe("interpolate", () => {
   it("maps across a range, piecewise", () => {

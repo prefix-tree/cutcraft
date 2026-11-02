@@ -1,4 +1,4 @@
-import { visiblePlacements } from "@cutcut/player";
+import { visiblePlacements } from "@cutcraft/player";
 import { fixtureState, makeState } from "./helpers/state";
 
 describe("visiblePlacements", () => {

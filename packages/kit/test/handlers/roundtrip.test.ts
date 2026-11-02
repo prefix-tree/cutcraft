@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { listHandlers, type ActionType } from "@cutcut/kit";
+import { listHandlers, type ActionType } from "@cutcraft/kit";
 import { CASES, NO_STATE_CHANGE, SETUP, STUBS } from "./cases";
 import { fixtureExecutor, serialize } from "../helpers";
 

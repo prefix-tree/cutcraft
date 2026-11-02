@@ -1,10 +1,10 @@
 // Renders fixed compositions and reports frames per second, peak memory and where the time goes.
-//   pnpm --filter @cutcut/render bench [--only <name>] [--workers <n>] [--speed fast] [--copy] [--json <file>]
+//   pnpm --filter @cutcraft/render bench [--only <name>] [--workers <n>] [--speed fast] [--copy] [--json <file>]
 import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { parseArgs } from "node:util";
-import type { AssetManifest } from "@cutcut/kit";
+import type { AssetManifest } from "@cutcraft/kit";
 import { readFileSync } from "node:fs";
 import { loadVideo } from "../src/load";
 import { directoryResolver } from "../src/media";
@@ -16,7 +16,7 @@ const cache = join(import.meta.dirname, ".cache");
 
 interface Case { readonly name: string; readonly file: string; readonly manifest: string; readonly media: string; readonly seconds: number; readonly prepare?: () => void }
 
-const CUTS = `import { Clip, Composition, Track } from "@cutcut/kit";
+const CUTS = `import { Clip, Composition, Track } from "@cutcraft/kit";
 export default function Video() {
   return (
     <Composition fps={30} width={1920} height={1080}>

@@ -1,7 +1,7 @@
 // Export speed on the comparison's three scenarios (cuts, crossfades with titles, motion graphics), CutCraft alone:
 // H.264 MP4 at 1080p30 and 8 Mb/s, as the comparison renders them. For each scenario: the shipped defaults, a sweep of
 // worker counts, the time per frame in each stage on one thread, and the output checked frame by frame.
-//   pnpm --filter @cutcut/render bench:scenarios [--only <name>] [--runs <n>] [--workers 1,2,4] [--json <file>]
+//   pnpm --filter @cutcraft/render bench:scenarios [--only <name>] [--runs <n>] [--workers 1,2,4] [--json <file>]
 import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { cpus } from "node:os";

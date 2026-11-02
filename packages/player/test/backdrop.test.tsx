@@ -1,4 +1,4 @@
-import { buildFramePlan, backdropTracks } from "@cutcut/player";
+import { buildFramePlan, backdropTracks } from "@cutcraft/player";
 import { makeState } from "./helpers/state";
 import { mountPlayer } from "./helpers/react";
 

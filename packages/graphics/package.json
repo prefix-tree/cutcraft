@@ -1,7 +1,6 @@
 {
-  "name": "@cutcut/graphics",
+  "name": "@cutcraft/graphics",
   "version": "0.1.0",
-  "private": true,
   "description": "The built-in graphic kinds for the cut video DSL: arrows, callouts, badges, lower thirds, frames, highlights, progress, backgrounds, confetti and icons, each a pure function from props and theme to SVG and text labels.",
   "license": "MIT",
   "homepage": "https://prefix-tree.github.io/cutcraft/",
@@ -17,7 +16,18 @@
   "exports": {
     ".": "./src/index.ts"
   },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "exports": {
+      ".": "./dist/index.mjs"
+    }
+  },
   "scripts": {
+    "build": "tsdown src/index.ts --dts",
+    "prepack": "pnpm run build",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "lint": "eslint . --max-warnings 0",
     "test": "vitest run"
