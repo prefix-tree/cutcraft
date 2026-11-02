@@ -123,7 +123,7 @@ were no faster than one, or slower.
 
 **`--speed`.** Trades compression for speed in the software encoder. The
 default, `balanced`, is x264's veryfast preset; on 4-core Linux it rendered the
-cuts at 87 fps against medium's 48, and the crossfades at 31 against 23, with
+cuts at 111 fps against medium's 61, and the crossfades at 37 against 31, with
 the cuts scoring 53.3 dB against 56.4 at the same 8 Mb/s. `quality` is medium,
 for the smallest file at a bitrate. `fast` is the real-time mode: faster again,
 at larger files. VP9 knows only `fast` and the rest.
@@ -146,9 +146,9 @@ falling back.
 
 | 1080p30 H.264 at 8 Mb/s, one thread | 4-core Linux, software | Apple M3 Pro, hardware |
 |---|---|---|
-| five cuts from one file | 63 | 203 |
-| the same with crossfades and a title on each | 27 | 98 |
-| moving shapes and titles, no footage | 44 | 117 |
+| five cuts from one file | 111 | 203 |
+| the same with crossfades and a title on each | 37 | 98 |
+| moving shapes and titles, no footage | 61 | 117 |
 
 `pnpm --filter @cutcut/render bench:scenarios` measures these on your machine,
 with the time per frame spent in each stage and a sweep of worker counts; CI
