@@ -32,9 +32,32 @@ describe("lint", () => {
     expect(d.map((x) => `${x.severity}:${x.rule}`).sort()).toEqual(["error:ambiguous-duration", "error:pure-helpers", "warning:expression-locked"]);
   });
 
-  it("lets a Layer interior call useT and useLayer but no other hook", () => {
-    const text = wrap('<Track id="t"><Layer id="l" duration={3}><Clock /></Layer></Track>', 'import { useLayer } from "@cutcraft/kit";\nfunction Clock() { const { remaining } = useLayer(); return <div>{Math.ceil(remaining)}</div>; }');
-    expect(lint(text).filter((d) => d.rule === "pure-helpers")).toEqual([]);
+  it("lets free code in a Layer use any hook, HTML ids and libraries", () => {
+    const extra = [
+      'import { useEffect, useRef } from "react";',
+      'import { useT } from "@cutcraft/kit";',
+      "function Scene() { const t = useT(); const ref = useRef(null); useEffect(() => {}, [t]); return <div id=\"stage\"><canvas ref={ref} id=\"stage-2\" /><Spark /></div>; }",
+      "function Spark() { const [x] = useState(0); return <div id=\"stage\">{x}</div>; }",
+      'import { useState } from "react";',
+    ].join("\n");
+    const d = lint(wrap('<Track id="t"><Layer id="l" duration={3}><Scene /></Layer></Track>', extra));
+    expect(d.filter((x) => ["pure-helpers", "unique-ids", "stray-html", "free-code-clock"].includes(x.rule))).toEqual([]);
+  });
+
+  it("warns about HTML straight in a track, where nothing draws it", () => {
+    const d = lint(wrap('<Track id="t"><Clip id="c" src="asset:city" /><div>lost</div></Track>'));
+    expect(d.filter((x) => x.rule === "stray-html").map((x) => x.message)).toEqual([expect.stringContaining("put free code inside a <Layer>")]);
+  });
+
+  it("warns about free code that runs off the video's clock", () => {
+    const extra = "function Bad() { setTimeout(() => {}, 10); const c = document.createElement(\"canvas\").getContext(\"2d\", { willReadFrequently: true }); return <video src=\"x.mp4\" />; }";
+    const d = lint(wrap('<Track id="t"><Layer id="l" duration={3}><Bad /></Layer></Track>', extra));
+    expect(d.filter((x) => x.rule === "free-code-clock").map((x) => x.message.split(" ")[0])).toEqual(["setTimeout", "a", "<video>"]);
+  });
+
+  it("finds an element's parent through the HTML it is wrapped in, as the resolver does", () => {
+    const index = buildSourceIndex(wrap('<Track id="t"><div><Clip id="c" src="asset:city" /></div></Track>'));
+    expect(index.elements.get("c")?.parent).toBe("t");
   });
 
   it("checks assets against the manifest and the file shape", () => {

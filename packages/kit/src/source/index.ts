@@ -70,6 +70,8 @@ export interface HelperSite {
   readonly range: Range;
   readonly pure: boolean;
   readonly hooks: readonly string[];
+  /** Whether its JSX names vocabulary elements: such a helper is expanded by the resolver, not mounted by React. */
+  readonly producesElements: boolean;
 }
 
 export interface SourceIndex {
@@ -85,6 +87,10 @@ export interface SourceIndex {
   readonly compositionId: string | null;
   /** Vocabulary elements without a literal id, for the lint. */
   readonly anonymous: readonly { readonly kind: string; readonly range: Range; readonly reason: string }[];
+  /** Every vocabulary element's literal `id` attribute, in source order, duplicates included. */
+  readonly idSites: readonly { readonly id: string; readonly range: Range }[];
+  /** HTML (`<div>`, `<span>`…) placed straight in a `<Track>` or `<Composition>`, where nothing draws it. */
+  readonly strays: readonly { readonly name: string; readonly range: Range; readonly parent: string }[];
   /** Vocabulary elements whose id is an expression (`id={id}` in a helper, `` id={`dot-${i}`} `` in a loop): the JSX that makes them, with the id's source text. */
   readonly dynamic: readonly { readonly kind: string; readonly range: Range; readonly idText: string }[];
 }
@@ -102,6 +108,8 @@ export function buildSourceIndex(text: string): SourceIndex {
   const helpers = new Map<string, HelperSite>();
   const anonymous: { kind: string; range: Range; reason: string }[] = [];
   const dynamic: { kind: string; range: Range; idText: string }[] = [];
+  const idSites: { id: string; range: Range }[] = [];
+  const strays: { name: string; range: Range; parent: string }[] = [];
   let defaults: SourceIndex["defaults"] = null;
   let hasSchema = false;
   let hasDefaultExport = false;
@@ -167,19 +175,24 @@ export function buildSourceIndex(text: string): SourceIndex {
     FunctionDeclaration(path) {
       if (!path.node.id || path.parentPath.isExportDefaultDeclaration()) return;
       const hooks = hookCalls(path.node);
-      helpers.set(path.node.id.name, { name: path.node.id.name, range: rangeOf(path.node), pure: hooks.length === 0, hooks });
+      helpers.set(path.node.id.name, { name: path.node.id.name, range: rangeOf(path.node), pure: hooks.length === 0, hooks, producesElements: namesElements(path.node) });
     },
     VariableDeclarator(path) {
       const init = path.node.init;
       if (!t.isIdentifier(path.node.id) || !(t.isArrowFunctionExpression(init) || t.isFunctionExpression(init))) return;
       if (!helperNames.has(path.node.id.name)) return;
       const hooks = hookCalls(init);
-      helpers.set(path.node.id.name, { name: path.node.id.name, range: rangeOf(path.node), pure: hooks.length === 0, hooks });
+      helpers.set(path.node.id.name, { name: path.node.id.name, range: rangeOf(path.node), pure: hooks.length === 0, hooks, producesElements: namesElements(init) });
     },
     JSXElement(path) {
       const opening = path.node.openingElement;
       const name = jsxName(opening.name);
       if (name === null) return;
+      if (/^[a-z]/.test(name)) {
+        const host = nearestElement(path);
+        if (host === "Track" || host === "Composition") strays.push({ name, range: rangeOf(path.node), parent: host });
+        return;
+      }
       const parent = enclosingElementId(path);
       const siblingIndex = siblingIndexOf(path);
       const indent = indentOf(text, path.node.start ?? 0);
@@ -206,6 +219,7 @@ export function buildSourceIndex(text: string): SourceIndex {
         return;
       }
       if (kind === "composition") compositionId = id;
+      if (idSite) idSites.push({ id, range: idSite.range });
       const closing = path.node.closingElement;
       const childrenRange: Range | null = closing ? [opening.end ?? 0, closing.start ?? 0] : null;
       const interior = kind === "layer" ? interiorOf(path.node, inSchemaFn) : null;
@@ -249,7 +263,7 @@ export function buildSourceIndex(text: string): SourceIndex {
     return { component: name, range: rangeOf(only), openingTag: rangeOf(only.openingElement), props, lockedProps: locked, boundProps: bound };
   }
 
-  return { text, ast, elements, calls, helpers, defaults, hasSchema, hasDefaultExport, compositionId, anonymous, dynamic };
+  return { text, ast, elements, calls, helpers, defaults, hasSchema, hasDefaultExport, compositionId, anonymous, dynamic, idSites, strays };
 }
 
 function jsxName(name: t.JSXOpeningElement["name"]): string | null {
@@ -305,6 +319,28 @@ export function literalOf(node: t.Node | null | undefined): { ok: boolean; value
   return { ok: false, value: undefined };
 }
 
+function isVocabularyTag(node: t.JSXElement): boolean {
+  const name = jsxName(node.openingElement.name);
+  return name !== null && KIND_BY_NAME.has(name);
+}
+
+/** Whether a function's JSX names any vocabulary element. */
+function namesElements(fn: t.Function): boolean {
+  let found = false;
+  t.traverseFast(fn.body, (node) => { if (!found && t.isJSXElement(node) && isVocabularyTag(node)) found = true; });
+  return found;
+}
+
+/** The tag name of the JSX element this one sits in, within the same function; null at the function's edge. */
+function nearestElement(path: { parentPath: unknown }): string | null {
+  let p = (path as { parentPath: { node: t.Node; parentPath: unknown } | null }).parentPath;
+  while (p && !t.isFunction(p.node)) {
+    if (t.isJSXElement(p.node)) return jsxName(p.node.openingElement.name);
+    p = p.parentPath as typeof p;
+  }
+  return null;
+}
+
 function hookCalls(fn: t.Function): string[] {
   const hooks: string[] = [];
   t.traverseFast(fn.body, (node) => {
@@ -313,9 +349,14 @@ function hookCalls(fn: t.Function): string[] {
   return hooks;
 }
 
+/** The id of the vocabulary element this JSX sits in, looking through HTML and other components as `collect` does. */
 function enclosingElementId(path: { parentPath: unknown }): string | null {
   let p = (path as { parentPath: { node: t.Node; parentPath: unknown } | null }).parentPath;
   while (p) {
+    if (t.isJSXElement(p.node) && !isVocabularyTag(p.node)) {
+      p = p.parentPath as typeof p;
+      continue;
+    }
     if (t.isJSXElement(p.node)) {
       const attrs = p.node.openingElement.attributes;
       for (const attr of attrs) {

@@ -1,6 +1,7 @@
 // A cut file's source as a running module, the same way everywhere it runs: the editor's preview and a server-side
 // check. Sucrase removes TypeScript types and compiles JSX and imports; the result runs with a `require` that offers
-// react, zod and the kit and nothing else, so a file that imports anything more fails here as it would in the browser.
+// react, zod and the kit, plus whatever modules the host passes (a page that bundled three.js offers it here), so a
+// file that imports anything else fails here as it would in the browser.
 //
 // This evaluates the source in the caller's realm. A host that loads files it does not trust runs this in a sandbox
 // (an iframe, a permission-less Deno).
@@ -28,7 +29,12 @@ export const ALLOWED_IMPORTS: Readonly<Record<string, unknown>> = {
   "@cut/kit": kit,
 };
 
-export function loadModule(source: string): CutModule {
+export interface LoadOptions {
+  /** Modules the host offers beyond `ALLOWED_IMPORTS`, by import name: the libraries free code in a Layer may use. */
+  readonly imports?: Readonly<Record<string, unknown>>;
+}
+
+export function loadModule(source: string, options: LoadOptions = {}): CutModule {
   const { code } = transform(source, {
     transforms: ["typescript", "jsx", "imports"],
     keepUnusedImports: true,
@@ -36,9 +42,10 @@ export function loadModule(source: string): CutModule {
     production: true,
   });
   const module = { exports: {} as Record<string, unknown> };
+  const offered = { ...ALLOWED_IMPORTS, ...options.imports };
   const require = (name: string) => {
-    if (!(name in ALLOWED_IMPORTS)) throw new Error(`The file imports “${name}”, which a cut file may not.`);
-    return ALLOWED_IMPORTS[name];
+    if (!(name in offered)) throw new Error(`The file imports “${name}”, which this host does not offer (it offers ${Object.keys(offered).join(", ")}).`);
+    return offered[name];
   };
   new Function("require", "exports", "module", code)(require, module.exports, module);
   if (typeof module.exports.default !== "function") throw new Error("The file has no default export (the video).");

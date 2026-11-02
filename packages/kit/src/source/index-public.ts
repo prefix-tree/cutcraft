@@ -5,4 +5,4 @@ export { printElement, printLiteral, printProp, elementName } from "./print";
 export { fold, foldToSource, type FoldResult } from "./fold";
 export { bake } from "./bake";
 export { lint, rules, type Diagnostic, type LintOptions, type LintRule } from "./lint/index";
-export { loadModule, ALLOWED_IMPORTS, type CutModule } from "./load";
+export { loadModule, ALLOWED_IMPORTS, type CutModule, type LoadOptions } from "./load";

@@ -1,6 +1,7 @@
 import type { Diagnostic, LintOptions } from "../index";
 import type { ElementSite, SourceIndex } from "../../index";
 import { lookupAsset } from "../../../manifest/types";
+import { freeCodeClock, strayHtml } from "./free-code";
 import { graphicProps } from "./graphic";
 import { notRendered } from "./not-rendered";
 import { cutNearShot, repeatedSource, shotChangeInsideCrop } from "./shots";
@@ -21,15 +22,13 @@ export const literalIds: Rule = {
 export const uniqueIds: Rule = {
   name: "unique-ids",
   check: (index) => {
-    // The index keeps the last site per id; find duplicates by rescanning element names in order.
+    // Vocabulary elements only: an HTML `id` in free code is the page's business.
     const seen = new Map<string, number>();
     const out: Diagnostic[] = [];
-    const re = /\bid=(?:"([^"]+)"|\{"([^"]+)"\})/g;
-    for (const m of index.text.matchAll(re)) {
-      const id = (m[1] ?? m[2]) as string;
+    for (const { id, range } of index.idSites) {
       const count = (seen.get(id) ?? 0) + 1;
       seen.set(id, count);
-      if (count === 2) out.push({ rule: "unique-ids", severity: "error", message: `id "${id}" is used more than once`, range: [m.index ?? 0, (m.index ?? 0) + m[0].length], id });
+      if (count === 2) out.push({ rule: "unique-ids", severity: "error", message: `id "${id}" is used more than once`, range, id });
     }
     return out;
   },
@@ -53,13 +52,17 @@ export const noStartOnSequence: Rule = {
   },
 };
 
-/** The hooks a Layer interior may call: they read the player's clock, nothing else. */
+/** The hooks a helper that makes elements may call: they read the player's clock, nothing else. */
 const LAYER_HOOKS: ReadonlySet<string> = new Set(["useT", "useLayer"]);
 
+/**
+ * A helper that makes vocabulary elements is called by the resolver as a plain function, so it cannot use hooks.
+ * Free code (a component inside a `<Layer>`, which makes HTML, canvas or WebGL) is mounted by React and may use any.
+ */
 export const pureHelpers: Rule = {
   name: "pure-helpers",
-  check: (index) => [...index.helpers.values()].filter((h) => !h.pure && h.hooks.some((n) => !LAYER_HOOKS.has(n))).map((h) => ({
-    rule: "pure-helpers", severity: "error", message: `helper ${h.name} calls ${h.hooks.filter((n) => !LAYER_HOOKS.has(n)).join(", ")}; helpers must be pure so the resolver can expand them`, range: h.range,
+  check: (index) => [...index.helpers.values()].filter((h) => h.producesElements && h.hooks.some((n) => !LAYER_HOOKS.has(n))).map((h) => ({
+    rule: "pure-helpers", severity: "error", message: `helper ${h.name} makes timeline elements and calls ${h.hooks.filter((n) => !LAYER_HOOKS.has(n)).join(", ")}; the resolver expands it as a plain function, so keep hooks in the free code inside a <Layer>`, range: h.range,
   } satisfies Diagnostic)),
 };
 
@@ -164,7 +167,7 @@ export const cutInsideWord: Rule = {
   },
 };
 
-export const rules: readonly Rule[] = [literalIds, uniqueIds, noStartOnSequence, pureHelpers, expressionLocked, oneCaptions, ambiguousDuration, fileShape, missingAsset, sequenceGap, cutInsideWord, cutNearShot, shotChangeInsideCrop, repeatedSource, themeRefs, themeLiterals, fontAvailable, graphicProps, notRendered];
+export const rules: readonly Rule[] = [literalIds, uniqueIds, noStartOnSequence, pureHelpers, strayHtml, freeCodeClock, expressionLocked, oneCaptions, ambiguousDuration, fileShape, missingAsset, sequenceGap, cutInsideWord, cutNearShot, shotChangeInsideCrop, repeatedSource, themeRefs, themeLiterals, fontAvailable, graphicProps, notRendered];
 
 /** The composition's first track in document order that lays out as a sequence and is not hidden: the one under everything else. */
 function firstSequenceTrack(index: SourceIndex): ElementSite | null {

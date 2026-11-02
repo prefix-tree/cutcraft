@@ -9,9 +9,15 @@ describe("loadModule", () => {
     expect(state.items.size).toBeGreaterThan(0);
   });
 
-  it("refuses an import outside react, zod and the kit", () => {
+  it("refuses an import the host does not offer", () => {
     const source = `import { helper } from "../lib/helper";\nexport default function V() { return helper(); }`;
-    expect(() => loadModule(source)).toThrow("which a cut file may not");
+    expect(() => loadModule(source)).toThrow("which this host does not offer");
+  });
+
+  it("offers the modules the host passes, for free code in a Layer", () => {
+    const source = `import { wave } from "shader-lib";\nexport default function V() { return wave; }`;
+    const mod = loadModule(source, { imports: { "shader-lib": { wave: "sin" } } });
+    expect(mod.default({})).toBe("sin");
   });
 
   it("requires a default export", () => {
