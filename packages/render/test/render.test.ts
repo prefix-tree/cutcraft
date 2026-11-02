@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, rmSync, statSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { collectModule, resolve } from "@cutcraft/kit";
@@ -7,7 +7,9 @@ import generateMedia, { mediaDir } from "../../player/e2e/gen-media";
 import * as file from "../../player/e2e/app/composition";
 import { indexLayerInteriors } from "@cutcraft/player/overlays";
 import { Canvas, loadImage } from "skia-canvas";
+import { VideoSample } from "mediabunny";
 import { directoryResolver, renderStill, renderVideo } from "../src";
+import { FramePipeline } from "../src/pipeline";
 import { checkExactFrames } from "./helpers/exact";
 import { decodeAudio, decodeFrames, type DecodedFrame, decodesClean, pixel, probe, readStrip, rmsOf, tonePower } from "./helpers/output";
 
@@ -69,6 +71,21 @@ describe("renderVideo", () => {
     expect(frames[45]?.white).toBeGreaterThan(30);
   });
 
+  it("hands a frame that is one picture shown as it is to the encoder as decoded, and paints the rest", async () => {
+    const pipeline = new FramePipeline({ state, media, warn: () => undefined });
+    try {
+      const plain = await pipeline.frame(96, true); // v1 alone, after the title and the layer
+      expect(plain).toBeInstanceOf(VideoSample);
+      const sample = plain as VideoSample;
+      expect([sample.format, sample.codedWidth, sample.codedHeight, sample.colorSpace.matrix, sample.colorSpace.fullRange]).toEqual(["I420", 640, 360, "bt709", false]);
+      sample.close();
+      expect(await pipeline.frame(112, true)).toBeInstanceOf(Uint8Array); // the crossfade into v2
+      expect(await pipeline.frame(180, true)).toBeInstanceOf(Uint8Array); // the logo, a still
+    } finally {
+      pipeline.dispose();
+    }
+  });
+
   it("renders a time range", async () => {
     const out = join(dir, "range.webm");
     const result = await renderVideo({ state, media, out, from: 1, to: 2 });
@@ -128,6 +145,17 @@ describe("renderVideo", () => {
     await renderVideo({ state, media, out: low, quality: "very-low", to: 1, silent: true });
     await renderVideo({ state, media, out: high, quality: "very-high", to: 1, silent: true });
     expect(statSync(high).size).toBeGreaterThan(statSync(low).size * 2);
+  });
+
+  it("picks x264's preset from the speed (through the patched encoder)", async () => {
+    // x264 writes its settings into the stream; medium searches sub-pixels at level 7, veryfast at 2.
+    const subme = async (speed: "quality" | "balanced"): Promise<string | undefined> => {
+      const out = join(dir, `${speed}.mp4`);
+      await renderVideo({ state, media, out, speed, hardware: false, to: 0.5, silent: true });
+      return /subme=(\d+)/.exec(readFileSync(out, "latin1"))?.[1];
+    };
+    expect(await subme("quality")).toBe("7");
+    expect(await subme("balanced")).toBe("2");
   });
 
   it("draws one frame to a PNG: the frame the video shows at that time", async () => {

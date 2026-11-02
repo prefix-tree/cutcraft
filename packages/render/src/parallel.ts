@@ -1,4 +1,3 @@
-import { availableParallelism } from "node:os";
 import { Worker } from "node:worker_threads";
 import { ALL_FORMATS, BufferSource, EncodedPacketSink, Input, type EncodedVideoPacketSource, type VideoCodec as MediabunnyCodec } from "mediabunny";
 import type { LoadOptions } from "./load";
@@ -20,9 +19,12 @@ export interface ParallelOptions {
   readonly segmentFrames?: number;
 }
 
-/** One less than the cores, at most four: the encoders are threaded themselves. */
+/**
+ * One: the encoder already uses every core, and a frame that passes straight to it leaves the thread little else to
+ * do. Workers measured slower or no faster on 4-core Linux and a 12-core Mac (`pnpm bench:scenarios`).
+ */
 export function defaultWorkers(): number {
-  return Math.max(1, Math.min(4, availableParallelism() - 1));
+  return 1;
 }
 
 /** Splits frames [first, last) into runs of whole keyframe intervals, so each run starts on a keyframe the encoder would make anyway. */

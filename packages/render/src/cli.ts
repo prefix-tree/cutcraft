@@ -6,7 +6,7 @@ import { defaultWorkers } from "./parallel";
 import { directoryResolver } from "./media";
 import type { FontWeight, OverlayFont } from "./overlays";
 import { renderVideo, type VideoCodec } from "./renderer";
-import { QUALITIES, type QualityName } from "./segment";
+import { QUALITIES, type QualityName, type Speed } from "./segment";
 import { renderStill } from "./still";
 import { SAFE_ZONES, checkLayout, formatLayout, type Insets, type SafeZoneName } from "./layout-check";
 
@@ -33,8 +33,9 @@ const USAGE = `Usage: cutcraft <file.tsx> --out <video.webm|.mp4|.mov|.mp3|.wav>
   --codec <name>        vp9 (default for webm), vp8, av1, avc (default for mp4), hevc, prores (default for mov)
   --bitrate <bps>       video bits per second (default: about 0.1 per pixel per frame)
   --quality <preset>    very-low, low, medium, high or very-high, in place of --bitrate
-  --speed <fast>        the encoder's real-time mode: faster, larger files at the same quality
-  --workers <n>         render in n threads (default: one fewer than the cores, at most 4; 1 renders in this one)
+  --speed <s>           balanced (default), quality (x264's medium: smaller, about half as fast) or fast (real-time mode)
+  --software            encode H.264 and HEVC in software even where the machine has a hardware encoder
+  --workers <n>         render in n threads (default 1, this one; more rarely helps, as the encoder is threaded itself)
   --copy                copy encoded pictures from the source where a cut shows nothing else (VP8/VP9 at the composition's
                         size and rate), and render only the ends; fast for plain cuts
   --keyframe <seconds>  seconds between keyframes (default 2)
@@ -53,7 +54,7 @@ async function main(): Promise<number> {
       from: { type: "string" }, to: { type: "string" }, codec: { type: "string" }, bitrate: { type: "string" }, quality: { type: "string" }, still: { type: "string" },
       "check-layout": { type: "boolean" }, json: { type: "boolean" }, "safe-zone": { type: "string" }, subject: { type: "string" }, step: { type: "string" },
       silent: { type: "boolean" }, font: { type: "string", multiple: true }, tsconfig: { type: "string" },
-      continue: { type: "boolean" }, copy: { type: "boolean" }, quiet: { type: "boolean" }, help: { type: "boolean", short: "h" },
+      continue: { type: "boolean" }, copy: { type: "boolean" }, software: { type: "boolean" }, quiet: { type: "boolean" }, help: { type: "boolean", short: "h" },
     },
   });
   const [file] = positionals;
@@ -97,7 +98,7 @@ async function main(): Promise<number> {
   const tty = process.stderr.isTTY && !values.quiet;
   const workers = values.workers === undefined ? defaultWorkers() : Math.max(1, Math.floor(Number(values.workers)));
   if (!Number.isFinite(workers)) throw new Error(`--workers wants a number, got "${values.workers}"`);
-  if (values.speed !== undefined && values.speed !== "fast" && values.speed !== "quality") throw new Error(`--speed wants fast or quality, got "${values.speed}"`);
+  if (values.speed !== undefined && !["quality", "balanced", "fast"].includes(values.speed)) throw new Error(`--speed wants quality, balanced or fast, got "${values.speed}"`);
   const result = await renderVideo({
     state: loaded.state, media, out: resolve(out), interiors: loaded.interiors,
     ...(values.from ? { from: Number(values.from) } : {}),
@@ -106,8 +107,9 @@ async function main(): Promise<number> {
     ...(values.bitrate ? { bitrate: Number(values.bitrate) } : {}),
     ...(values.quality ? { quality: values.quality as QualityName } : {}),
     ...(values.silent ? { silent: true } : {}),
-    ...(values.speed === "fast" ? { speed: "fast" as const } : {}),
+    ...(values.speed ? { speed: values.speed as Speed } : {}),
     ...(values.copy ? { smartCopy: true } : {}),
+    ...(values.software ? { hardware: false } : {}),
     ...(values.keyframe ? { keyFrameInterval: Number(values.keyframe) } : {}),
     ...(workers > 1 ? { parallel: { file: resolve(file), load: loadOptions, mediaDir: resolve(values.media ?? dirname(file)), workers } } : {}),
     ...(values.continue ? { onAssetError: "continue" as const } : {}),

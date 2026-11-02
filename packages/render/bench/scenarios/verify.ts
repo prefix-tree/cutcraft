@@ -1,14 +1,14 @@
 // Checks an output before its time counts: H.264 at 1920x1080 and 30 fps with the frames its own timeline says, and,
 // for footage, the middle frame of every shot matching the source frame it should show: of the source frames around
-// it, the expected one must score the highest PSNR, clearly. The test pattern's fine detail keeps the absolute PSNR of
-// any 8 Mb/s re-encode in the mid-20s, so the score itself is reported as a quality figure, not a pass mark.
+// it, the expected one must score the highest PSNR, clearly. The score itself is reported as a quality figure, not a
+// pass mark.
 // The shots' places are found from the frame count: back to back when crossfades overlap them, end to end when not.
 import { execFileSync } from "node:child_process";
 import { join } from "node:path";
 import { FPS, HEIGHT, WIDTH, type Scenario } from "./scenarios";
 
 const FOOTAGE = join(import.meta.dirname, "..", ".cache", "scenarios", "footage.mp4");
-/** How far the expected source frame must score above its neighbours (measured: 3 to 4 dB for a right frame). */
+/** How far the expected source frame must score above its neighbours (a right frame scores well over 10 dB above them). */
 const MARGIN_DB = 1.5;
 
 function probe(file: string): { codec: string; width: number; height: number; fps: number; frames: number } {
@@ -18,12 +18,26 @@ function probe(file: string): { codec: string; width: number; height: number; fp
   return { codec: s.codec_name, width: s.width, height: s.height, fps: n! / d!, frames: Number(s.nb_read_frames) };
 }
 
-/** PSNR of frame `frame` of `file` against frame `sourceFrame` of the footage. */
+/** Frame `n` of `file`, decoded on its own to 8-bit 4:2:0. */
+function yuv(file: string, n: number): Buffer {
+  return execFileSync("ffmpeg", ["-v", "error", "-i", file, "-vf", `select=eq(n\\,${n})`, "-frames:v", "1", "-f", "rawvideo", "-pix_fmt", "yuv420p", "-"], { maxBuffer: 64 << 20 });
+}
+
+const sources = new Map<number, Buffer>();
+
+/**
+ * PSNR over all three planes of frame `frame` of `file` against frame `sourceFrame` of the footage. Each frame is
+ * decoded on its own: ffmpeg's psnr filter fed by two selected streams paired the wrong frames and scored a matching
+ * one in the low 20s.
+ */
 function psnr(file: string, frame: number, sourceFrame: number): number {
-  const out = execFileSync("ffmpeg", ["-v", "error", "-i", file, "-i", FOOTAGE, "-filter_complex",
-    `[0:v]select=eq(n\\,${frame}),setpts=PTS-STARTPTS[a];[1:v]select=eq(n\\,${sourceFrame}),setpts=PTS-STARTPTS[b];[a][b]psnr=stats_file=-`, "-frames:v", "1", "-f", "null", "-"], { encoding: "utf8" });
-  const m = /psnr_avg:([\d.]+|inf)/.exec(out);
-  return m ? (m[1] === "inf" ? 99 : Number(m[1])) : 0;
+  const a = yuv(file, frame);
+  let b = sources.get(sourceFrame);
+  if (!b) sources.set(sourceFrame, b = yuv(FOOTAGE, sourceFrame));
+  if (a.length !== b.length || a.length === 0) return 0;
+  let se = 0;
+  for (let i = 0; i < a.length; i++) { const d = a[i]! - b[i]!; se += d * d; }
+  return se === 0 ? 99 : 10 * Math.log10((255 * 255 * a.length) / se);
 }
 
 export function verify(file: string, s: Scenario): { ok: boolean; frames: number; psnr: number | null; problems: string[] } {

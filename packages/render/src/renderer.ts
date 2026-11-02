@@ -10,7 +10,7 @@ import { MediabunnyPcm } from "./pcm";
 import { feedCopy, planCopy, type Run } from "./copy";
 import { feedSegment, planSegments, SegmentPool, defaultWorkers, type ParallelOptions, type SegmentOutcome } from "./parallel";
 import { FramePipeline } from "./pipeline";
-import { encodeSegment, outputFormat, videoSource, type QualityName, type VideoCodec, type VideoContainer, type VideoEncoding } from "./segment";
+import { encodeSegment, hardwareEncodes, outputFormat, videoSource, type QualityName, type Speed, type VideoCodec, type VideoContainer, type VideoEncoding } from "./segment";
 
 export type Container = VideoContainer | "mp3" | "wav";
 const AUDIO_CODEC: Record<Container, AudioCodec> = { webm: "opus", mp4: "aac", mov: "pcm-s16", mp3: "mp3", wav: "pcm-s16" };
@@ -42,8 +42,10 @@ export interface RenderOptions {
   readonly interiors?: ReadonlyMap<string, ReactNode>;
   /** Fonts beyond the bundled Inter, picked by a title's `font` prop. */
   readonly fonts?: readonly OverlayFont[];
-  /** `fast` trades compression for speed: the encoder's real-time mode. */
-  readonly speed?: "quality" | "fast";
+  /** Compression against speed for the software H.264 and HEVC encoders: `quality`, `balanced` (default) or `fast`. */
+  readonly speed?: Speed;
+  /** H.264 and HEVC go through the machine's hardware encoder when it has one that works (default); false keeps software. */
+  readonly hardware?: boolean;
   /**
    * Render in worker threads. Needs the file the state came from, because every worker loads it for itself;
    * the result is the same pictures, in pieces joined at keyframes.
@@ -91,7 +93,7 @@ export async function renderVideo(options: RenderOptions): Promise<RenderResult>
   const container = options.container ?? containerOf(options.out);
   const audioOnly = container === "mp3" || container === "wav";
   const videoContainer: VideoContainer = audioOnly ? "webm" : container;
-  const encoding: VideoEncoding = {
+  const base: VideoEncoding = {
     container: videoContainer,
     codec: options.videoCodec ?? (container === "mp4" ? "avc" : container === "mov" ? "prores" : "vp9"),
     bitrate: options.bitrate ?? Math.round(width * height * fps * 0.1),
@@ -99,6 +101,7 @@ export async function renderVideo(options: RenderOptions): Promise<RenderResult>
     keyFrameInterval: options.keyFrameInterval ?? 2,
     speed: options.speed,
   };
+  const encoding: VideoEncoding = { ...base, hardware: !audioOnly && options.hardware !== false && (await hardwareEncodes(base, width, height)) };
   if (!audioOnly && !outputFormat(videoContainer).getSupportedVideoCodecs().includes(encoding.codec)) {
     throw new Error(`a .${container} file cannot hold ${encoding.codec} video; use ${outputFormat(videoContainer).getSupportedVideoCodecs().join(", ")}`);
   }

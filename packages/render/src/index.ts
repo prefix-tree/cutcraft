@@ -1,5 +1,5 @@
 export { createCanvas, initEnv } from "./env";
-export { RgbaFrame, frameSourceHooks, makeRgbaFrame } from "./frame-source";
+export { DecodedFrame, RgbaFrame, frameSourceHooks, makeDecodedFrame } from "./frame-source";
 export { loadVideo, type LoadOptions, type LoadedVideo } from "./load";
 export { directoryResolver } from "./media";
 export { envelopeAt, mixBlock, mixPlan, type MixOptions, type MixSource, type MixedBlock, type PcmBuffer, type PcmProvider } from "./mixer";
@@ -7,6 +7,6 @@ export { OverlayPlane, inlineSvgImages, safeSvgFonts, treeKey, type OverlayBound
 export { MediabunnyPcm } from "./pcm";
 export { defaultWorkers, planSegments, type ParallelOptions } from "./parallel";
 export { containerOf, renderVideo, type Container, type RenderOptions, type RenderResult, type VideoCodec } from "./renderer";
-export { QUALITIES, type QualityName } from "./segment";
+export { QUALITIES, type QualityName, type Speed } from "./segment";
 export { renderStill, type StillOptions, type StillResult } from "./still";
 export { SAFE_ZONES, checkLayout, formatLayout, subjectRects, type Insets, type LayoutCheckOptions, type LayoutCheckResult, type LayoutIssue, type LayoutRule, type SafeZoneName, type SourceSpot } from "./layout-check";

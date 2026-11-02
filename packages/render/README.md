@@ -14,7 +14,7 @@ npx cutcraft video.tsx --manifest manifest.json --media ./media --out video.webm
 ```
 
 ```ts
-import { defaultWorkers, directoryResolver, loadVideo, renderVideo } from "@cutcraft/render";
+import { directoryResolver, loadVideo, renderVideo } from "@cutcraft/render";
 
 const video = await loadVideo("video.tsx", { manifest: "manifest.json" });
 await renderVideo({
@@ -22,7 +22,6 @@ await renderVideo({
   media: directoryResolver("media", video.manifest),
   interiors: video.interiors,
   out: "video.webm",
-  parallel: { file: "video.tsx", load: { manifest: "manifest.json" }, mediaDir: "media", workers: defaultWorkers() },
 });
 ```
 
@@ -31,8 +30,8 @@ await renderVideo({
 | | |
 |---|---|
 | `env.ts` | Registers FFmpeg-backed decoders and encoders with Mediabunny; the skia `createCanvas` the painter uses. |
-| `frame-source.ts` | A decoded sample converted to RGBA once; a picture that fills the canvas is put straight on it. |
-| `pipeline.ts` | One composition frame by frame: step the compositor, draw overlays, read pixels back. |
+| `frame-source.ts` | A decoded sample kept as decoded and converted to RGBA only when drawn; a picture that fills the canvas is put straight on it. |
+| `pipeline.ts` | One composition frame by frame: step the compositor, draw overlays, read pixels back; a frame that is one picture shown as it is goes to the encoder as decoded, never converted to RGBA. |
 | `overlays.ts` | Titles, layers and captions laid out by Satori from the trees the browser mounts; shapes, SVG and stickers drawn natively; layout cached. |
 | `mixer.ts`, `pcm.ts` | The offline mixer: a pure function of the audio plan and decoded PCM. |
 | `encode.ts`, `segment.ts` | Frames into an encoder, one in flight; a run of frames into a small container of its own. |

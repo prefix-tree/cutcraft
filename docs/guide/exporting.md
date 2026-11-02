@@ -23,8 +23,9 @@ npx cutcraft video.tsx --manifest manifest.json --media ./media --out video.webm
 | `--media <dir>` | One file per asset id, with or without an extension (`podcast.webm`, `podcast`). Default: the file's folder. |
 | `--props <json>` | Props for the file's component, over its `defaults`. |
 | `--from <s>` `--to <s>` | Render only this part of the composition. |
-| `--workers <n>` | Threads. Default: one fewer than the cores, at most four. `1` renders in the main thread. |
-| `--speed fast` | The encoder's real-time mode: much faster, larger files for the same quality. |
+| `--workers <n>` | Threads. Default 1, the main thread; more rarely helps (below). |
+| `--software` | Encode H.264 and HEVC in software even where the machine has a hardware encoder. |
+| `--speed <s>` | How hard the software H.264/HEVC encoder works: `balanced` (default, x264's veryfast), `quality` (medium: smaller files, about half as fast) or `fast` (real-time mode, larger files). |
 | `--copy` | Smart copy, below. |
 | `--codec <name>` | `vp9`, `vp8`, `av1`, `avc`, `hevc`, `prores`. A codec the container cannot hold (ProRes in WebM) is an error. |
 | `--bitrate <bps>` | Video bits per second. Default: about 0.1 per pixel per frame. |
@@ -40,7 +41,7 @@ A file that imports its own packages is compiled with the nearest
 ## From code
 
 ```ts
-import { defaultWorkers, directoryResolver, loadVideo, renderStill, renderVideo } from "@cutcraft/render";
+import { directoryResolver, loadVideo, renderStill, renderVideo } from "@cutcraft/render";
 
 const video = await loadVideo("video.tsx", { manifest: "manifest.json" });
 const result = await renderVideo({
@@ -48,8 +49,8 @@ const result = await renderVideo({
   media: directoryResolver("media", video.manifest),
   interiors: video.interiors,           // the children of each <Layer>
   out: "video.webm",
-  // Threads need the file, because each loads it for itself:
-  parallel: { file: "video.tsx", load: { manifest: "manifest.json" }, mediaDir: "media", workers: defaultWorkers() },
+  // Worker threads (rarely faster; see below) need the file, because each loads it for itself:
+  // parallel: { file: "video.tsx", load: { manifest: "manifest.json" }, mediaDir: "media", workers: 2 },
   smartCopy: true,
   onProgress: ({ frame, frames }) => console.log(frame, frames),
 });
@@ -99,17 +100,33 @@ by anti-aliasing and sub-pixel placement.
 
 ## Faster
 
-Three things, in the order to try them:
+Most of an export's time is the encoder's. Two things are automatic:
+
+- **Pictures pass straight through.** A frame that is one source picture shown
+  as it is (full frame, untransformed, with nothing over, under or applied to
+  it) goes from the decoder to the encoder as decoded: never converted to RGBA,
+  drawn or read back. Other frames convert only the pictures they draw.
+- **Hardware encoding.** H.264 and HEVC go through the machine's hardware
+  encoder when it has one that starts (Apple's VideoToolbox, NVIDIA, VA-API).
+  It is faster and spends its bits a little less well; `--software` turns it
+  off. Most Linux servers have none and encode in software.
+
+Then, in the order to try them:
 
 **Workers.** The frames are cut into runs of whole keyframe intervals. Each
 worker renders and encodes runs into small containers; the main thread joins
 them in order and mixes the sound. The pictures are the same as one thread's,
 frame for frame; only where the keyframes fall differs. Each worker holds its
-own decoders and encoder, about 1 GB at 1080p. Cores are the limit: four
-workers on four cores gave 1.6 to 2.2 times one thread.
+own decoders and encoder, about 1 GB at 1080p. The encoder already uses every
+core, so workers rarely help: on 4-core Linux and a 12-core Mac, two or four
+were no faster than one, or slower.
 
-**`--speed fast`.** Trades compression for speed in the encoder: about 1.4 times
-faster on one thread for both VP9 and H.264, at larger files.
+**`--speed`.** Trades compression for speed in the software encoder. The
+default, `balanced`, is x264's veryfast preset; on 4-core Linux it rendered the
+cuts at 111 fps against medium's 61, and the crossfades at 37 against 31, with
+the cuts scoring 53.3 dB against 56.4 at the same 8 Mb/s. `quality` is medium,
+for the smallest file at a bitrate. `fast` is the real-time mode: faster again,
+at larger files. VP9 knows only `fast` and the rest.
 
 **`--copy`.** Where the picture is nothing but a stretch of one source file,
 the encoded packets of whole groups of pictures are copied and only the ends
@@ -127,16 +144,15 @@ qualify is rendered as usual. `--copy` is opt-in because a source whose stream
 the encoder's does not match fails when the pieces are joined instead of
 falling back.
 
-| 20 s of 1080p30, 4 cores | frames per second |
-|---|---|
-| five cuts, one thread | 12 |
-| five cuts, four workers | 21 |
-| five cuts, `--speed fast`, four workers | 23.5 |
-| talking head with captions throughout, one thread / four workers | 9 / 21 |
-| five cuts on keyframes, `--copy` | 460 |
+| 1080p30 H.264 at 8 Mb/s, one thread | 4-core Linux, software | Apple M3 Pro, hardware |
+|---|---|---|
+| five cuts from one file | 111 | 203 |
+| the same with crossfades and a title on each | 37 | 98 |
+| moving shapes and titles, no footage | 61 | 117 |
 
-`pnpm --filter @cutcraft/render bench` measures these on your machine, with the
-time per frame spent in each stage.
+`pnpm --filter @cutcraft/render bench:scenarios` measures these on your machine,
+with the time per frame spent in each stage and a sweep of worker counts; CI
+runs it on request (`gh workflow run ci.yml`).
 
 ## Checking the layout
 
