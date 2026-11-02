@@ -38,4 +38,4 @@
 | `labelColor` | string | `"$text"` |
 | `font` | string | `"$body"` |
 
-Plus the [`<Graphic>` props](/reference/elements#graphic) every kind takes. More in [Data](/reference/graphics/#data).
+Plus the [`<Graphic>` props](/reference/elements/graphic) every kind takes. More in [Data](/reference/graphics/#data).

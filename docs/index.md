@@ -89,7 +89,7 @@ patch the file, resolve everything again) takes {{ (drag.usPerStep / 1000).toFix
 
 - [Getting started](./guide/getting-started): install, run the example, export a file.
 - [Writing a file](./guide/writing-files): one file from brief to pixels, and why each convention exists.
-- [Elements](./reference/elements) and [graphics](./reference/graphics/): every element, prop and built-in graphic.
+- [Elements](./reference/elements/) and [graphics](./reference/graphics/): every element, prop and built-in graphic.
 - [Exporting](./guide/exporting): formats, speed, and the layout check.
 - [Decisions](./decisions/): why it is built this way.
 

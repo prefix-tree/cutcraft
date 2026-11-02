@@ -28,4 +28,4 @@ A full-frame linear or radial gradient between two colours. Put it on the lowest
 | `type` | "linear" \| "radial" | `"linear"` |
 | `angle` | number | `135` |
 
-Plus the [`<Graphic>` props](/reference/elements#graphic) every kind takes. More in [Backgrounds](/reference/graphics/#backgrounds).
+Plus the [`<Graphic>` props](/reference/elements/graphic) every kind takes. More in [Backgrounds](/reference/graphics/#backgrounds).

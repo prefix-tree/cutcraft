@@ -29,4 +29,4 @@ A rounded border around a region, solid or dashed.
 | `radius` | number (0..∞) \| string | `"$radius"` |
 | `dashed` | boolean | `false` |
 
-Plus the [`<Graphic>` props](/reference/elements#graphic) every kind takes. More in [Frames](/reference/graphics/#frames).
+Plus the [`<Graphic>` props](/reference/elements/graphic) every kind takes. More in [Frames](/reference/graphics/#frames).

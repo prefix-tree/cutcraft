@@ -19,7 +19,7 @@
   <a href="https://prefix-tree.github.io/cutcraft/">Documentation</a> ·
   <a href="https://prefix-tree.github.io/cutcraft/examples">Examples</a> ·
   <a href="https://prefix-tree.github.io/cutcraft/guide/writing-files">Writing a file</a> ·
-  <a href="https://prefix-tree.github.io/cutcraft/reference/elements">Reference</a> ·
+  <a href="https://prefix-tree.github.io/cutcraft/reference/elements/">Reference</a> ·
   <a href="docs/decisions/README.md">Decisions</a> ·
   <a href="CHANGELOG.md">Changelog</a>
 </p>

@@ -14,7 +14,7 @@ Built-in kinds of `<Graphic>`: pure functions from props and the theme to SVG, d
 
 </Example>
 
-Every kind also takes the [`<Graphic>` props](/reference/elements#graphic): timing, `transform`, `enter`/`exit`, `style`, and `width`/`height` for its box. Colours and fonts default to theme tokens.
+Every kind also takes the [`<Graphic>` props](/reference/elements/graphic): timing, `transform`, `enter`/`exit`, `style`, and `width`/`height` for its box. Colours and fonts default to theme tokens.
 
 ## Arrows
 

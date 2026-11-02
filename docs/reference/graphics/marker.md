@@ -28,4 +28,4 @@ A translucent highlighter stroke with ragged ends that sweeps across in `sweep` 
 | `opacity` | number (0..1) | `0.45` |
 | `sweep` | number (0..30) | `0.5` |
 
-Plus the [`<Graphic>` props](/reference/elements#graphic) every kind takes. More in [Highlights](/reference/graphics/#highlights).
+Plus the [`<Graphic>` props](/reference/elements/graphic) every kind takes. More in [Highlights](/reference/graphics/#highlights).

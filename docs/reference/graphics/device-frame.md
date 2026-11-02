@@ -28,4 +28,4 @@ A phone or a browser window drawn around an open screen; put footage under it on
 | `color` | string | `"$surface"` |
 | `detail` | string | `"$muted"` |
 
-Plus the [`<Graphic>` props](/reference/elements#graphic) every kind takes. More in [Frames](/reference/graphics/#frames).
+Plus the [`<Graphic>` props](/reference/elements/graphic) every kind takes. More in [Frames](/reference/graphics/#frames).

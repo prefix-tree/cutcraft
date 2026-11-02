@@ -28,4 +28,4 @@ A rule between things: a line, a dotted line, a line with a diamond, or a line t
 | `color` | string | `"$muted"` |
 | `thickness` | number (0..100) | `4` |
 
-Plus the [`<Graphic>` props](/reference/elements#graphic) every kind takes. More in [Dividers](/reference/graphics/#dividers).
+Plus the [`<Graphic>` props](/reference/elements/graphic) every kind takes. More in [Dividers](/reference/graphics/#dividers).

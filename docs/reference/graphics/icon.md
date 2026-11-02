@@ -31,4 +31,4 @@ One of Lucide's line icons by name (`check`, `arrow-right`, `sparkles`, `play`, 
 | `plate` | "none" \| "circle" \| "square" | `"none"` |
 | `plateColor` | string | `"$surface"` |
 
-Plus the [`<Graphic>` props](/reference/elements#graphic) every kind takes. More in [Icons](/reference/graphics/#icons).
+Plus the [`<Graphic>` props](/reference/elements/graphic) every kind takes. More in [Icons](/reference/graphics/#icons).

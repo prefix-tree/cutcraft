@@ -33,4 +33,4 @@ A fully rounded label, with an optional dot before the text (a live indicator, a
 | `fill` | string | `"$primary"` |
 | `dot` | string | `"none"` |
 
-Plus the [`<Graphic>` props](/reference/elements#graphic) every kind takes. More in [Callouts](/reference/graphics/#callouts).
+Plus the [`<Graphic>` props](/reference/elements/graphic) every kind takes. More in [Callouts](/reference/graphics/#callouts).

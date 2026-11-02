@@ -37,4 +37,4 @@ A field of dots for a sample of `n`, with `share` of them highlighted, appearing
 | `labelColor` | string | `"$text"` |
 | `font` | string | `"$body"` |
 
-Plus the [`<Graphic>` props](/reference/elements#graphic) every kind takes. More in [Data](/reference/graphics/#data).
+Plus the [`<Graphic>` props](/reference/elements/graphic) every kind takes. More in [Data](/reference/graphics/#data).

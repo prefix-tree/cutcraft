@@ -1,4 +1,144 @@
 {
+  "elements": [
+    {
+      "text": "Timeline",
+      "items": [
+        {
+          "text": "Composition",
+          "link": "/reference/elements/composition"
+        },
+        {
+          "text": "Track",
+          "link": "/reference/elements/track"
+        },
+        {
+          "text": "Clip",
+          "link": "/reference/elements/clip"
+        },
+        {
+          "text": "Gap",
+          "link": "/reference/elements/gap"
+        },
+        {
+          "text": "Transition",
+          "link": "/reference/elements/transition"
+        },
+        {
+          "text": "Marker",
+          "link": "/reference/elements/marker"
+        }
+      ]
+    },
+    {
+      "text": "Text and graphics",
+      "items": [
+        {
+          "text": "Title",
+          "link": "/reference/elements/title"
+        },
+        {
+          "text": "Captions",
+          "link": "/reference/elements/captions"
+        },
+        {
+          "text": "Caption",
+          "link": "/reference/elements/caption"
+        },
+        {
+          "text": "Graphic",
+          "link": "/reference/elements/graphic"
+        },
+        {
+          "text": "Shape",
+          "link": "/reference/elements/shape"
+        },
+        {
+          "text": "Svg",
+          "link": "/reference/elements/svg"
+        },
+        {
+          "text": "Sticker",
+          "link": "/reference/elements/sticker"
+        },
+        {
+          "text": "Layer",
+          "link": "/reference/elements/layer"
+        }
+      ]
+    },
+    {
+      "text": "Effects and colour",
+      "items": [
+        {
+          "text": "Effect",
+          "link": "/reference/elements/effect"
+        },
+        {
+          "text": "Adjustment",
+          "link": "/reference/elements/adjustment"
+        },
+        {
+          "text": "ColorGrade",
+          "link": "/reference/elements/colorgrade"
+        },
+        {
+          "text": "Mask",
+          "link": "/reference/elements/mask"
+        }
+      ]
+    },
+    {
+      "text": "Motion and time",
+      "items": [
+        {
+          "text": "Keyframe",
+          "link": "/reference/elements/keyframe"
+        },
+        {
+          "text": "SpeedKey",
+          "link": "/reference/elements/speedkey"
+        },
+        {
+          "text": "Freeze",
+          "link": "/reference/elements/freeze"
+        }
+      ]
+    },
+    {
+      "text": "Structure",
+      "items": [
+        {
+          "text": "Nested",
+          "link": "/reference/elements/nested"
+        },
+        {
+          "text": "Multicam",
+          "link": "/reference/elements/multicam"
+        },
+        {
+          "text": "Angle",
+          "link": "/reference/elements/angle"
+        },
+        {
+          "text": "Cut",
+          "link": "/reference/elements/cut"
+        }
+      ]
+    },
+    {
+      "text": "Sound",
+      "items": [
+        {
+          "text": "Audio",
+          "link": "/reference/elements/audio"
+        },
+        {
+          "text": "AudioEffect",
+          "link": "/reference/elements/audioeffect"
+        }
+      ]
+    }
+  ],
   "graphics": [
     {
       "text": "Arrows",

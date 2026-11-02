@@ -31,4 +31,4 @@ A bar that fills from `from` to `to` over the element's duration; give `value` t
 | `track` | string | `"$surface"` |
 | `rounded` | boolean | `true` |
 
-Plus the [`<Graphic>` props](/reference/elements#graphic) every kind takes. More in [Progress](/reference/graphics/#progress).
+Plus the [`<Graphic>` props](/reference/elements/graphic) every kind takes. More in [Progress](/reference/graphics/#progress).

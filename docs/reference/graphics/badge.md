@@ -32,4 +32,4 @@ A round badge with a short word or two, and a ring inside its edge.
 | `fill` | string | `"$accent"` |
 | `ring` | boolean | `true` |
 
-Plus the [`<Graphic>` props](/reference/elements#graphic) every kind takes. More in [Callouts](/reference/graphics/#callouts).
+Plus the [`<Graphic>` props](/reference/elements/graphic) every kind takes. More in [Callouts](/reference/graphics/#callouts).

@@ -30,4 +30,4 @@ A full-frame grid of small dots on a solid colour; `drift` scrolls it (pixels pe
 | `opacity` | number (0..1) | `0.5` |
 | `drift` | number (-1000..1000) | `0` |
 
-Plus the [`<Graphic>` props](/reference/elements#graphic) every kind takes. More in [Backgrounds](/reference/graphics/#backgrounds).
+Plus the [`<Graphic>` props](/reference/elements/graphic) every kind takes. More in [Backgrounds](/reference/graphics/#backgrounds).

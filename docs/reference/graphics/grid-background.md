@@ -29,4 +29,4 @@ A full-frame grid of thin lines on a solid colour, like graph paper.
 | `thickness` | number (0..20) | `1` |
 | `opacity` | number (0..1) | `0.25` |
 
-Plus the [`<Graphic>` props](/reference/elements#graphic) every kind takes. More in [Backgrounds](/reference/graphics/#backgrounds).
+Plus the [`<Graphic>` props](/reference/elements/graphic) every kind takes. More in [Backgrounds](/reference/graphics/#backgrounds).

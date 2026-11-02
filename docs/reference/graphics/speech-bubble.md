@@ -34,4 +34,4 @@ A round comic-style bubble with a tail to one side below it.
 | `borderWidth` | number (0..50) | `4` |
 | `tail` | "left" \| "right" | `"left"` |
 
-Plus the [`<Graphic>` props](/reference/elements#graphic) every kind takes. More in [Callouts](/reference/graphics/#callouts).
+Plus the [`<Graphic>` props](/reference/elements/graphic) every kind takes. More in [Callouts](/reference/graphics/#callouts).

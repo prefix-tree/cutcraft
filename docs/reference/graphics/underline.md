@@ -23,4 +23,4 @@ A hand-drawn underline to put under a word. The `draw` entrance writes it on.
 | `wobble` | number (0..40) | `4` |
 | `double` | boolean | `false` |
 
-Plus the [`<Graphic>` props](/reference/elements#graphic) every kind takes. More in [Highlights](/reference/graphics/#highlights).
+Plus the [`<Graphic>` props](/reference/elements/graphic) every kind takes. More in [Highlights](/reference/graphics/#highlights).

@@ -21,7 +21,7 @@ export default defineConfig({
     nav: [
       { text: "Guide", link: "/guide/getting-started" },
       { text: "Examples", link: "/examples" },
-      { text: "Reference", link: "/reference/elements" },
+      { text: "Reference", link: "/reference/elements/" },
       { text: "Decisions", link: "/decisions/" },
       { text: "Recipes", link: "/recipes/" },
       { text: "Comparisons", link: "/comparisons/diffusion-studio" },
@@ -39,14 +39,19 @@ export default defineConfig({
         ] },
       ],
       // Before "/reference/": the most specific prefix wins only when it comes first.
+      "/reference/elements/": [
+        { text: "Elements", items: [{ text: "All elements", link: "/reference/elements/" }] },
+        ...generated.elements.map((group) => ({ ...group, collapsed: false })),
+        { text: "Reference", items: [{ text: "Graphics", link: "/reference/graphics/" }, { text: "Actions", link: "/reference/actions" }, { text: "Rendering", link: "/reference/rendering" }] },
+      ],
       "/reference/graphics/": [
         { text: "Graphics", items: [{ text: "All graphics", link: "/reference/graphics/" }] },
         ...generated.graphics.map((group) => ({ ...group, collapsed: false })),
-        { text: "Reference", items: [{ text: "Elements", link: "/reference/elements" }, { text: "Actions", link: "/reference/actions" }, { text: "Rendering", link: "/reference/rendering" }] },
+        { text: "Reference", items: [{ text: "Elements", link: "/reference/elements/" }, { text: "Actions", link: "/reference/actions" }, { text: "Rendering", link: "/reference/rendering" }] },
       ],
       "/reference/": [
         { text: "Reference", items: [
-          { text: "Elements", link: "/reference/elements" },
+          { text: "Elements", link: "/reference/elements/" },
           { text: "Actions", link: "/reference/actions" },
           { text: "Graphics", link: "/reference/graphics/" },
           { text: "Rendering", link: "/reference/rendering" },

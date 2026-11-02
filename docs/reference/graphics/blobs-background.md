@@ -29,4 +29,4 @@ Large blurred colour fields that drift slowly: a soft, modern backdrop. `seed` p
 | `speed` | number (0..10) | `0.2` |
 | `seed` | integer |  |
 
-Plus the [`<Graphic>` props](/reference/elements#graphic) every kind takes. More in [Backgrounds](/reference/graphics/#backgrounds).
+Plus the [`<Graphic>` props](/reference/elements/graphic) every kind takes. More in [Backgrounds](/reference/graphics/#backgrounds).

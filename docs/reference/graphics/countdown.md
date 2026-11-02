@@ -31,4 +31,4 @@ A ring that empties over the element's duration around the seconds left, countin
 | `font` | string | `"$heading"` |
 | `thickness` | number (0..200) | `14` |
 
-Plus the [`<Graphic>` props](/reference/elements#graphic) every kind takes. More in [Progress](/reference/graphics/#progress).
+Plus the [`<Graphic>` props](/reference/elements/graphic) every kind takes. More in [Progress](/reference/graphics/#progress).

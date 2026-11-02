@@ -24,4 +24,4 @@ Four-pointed stars that twinkle in and out across the box. Size the box to the a
 | `speed` | number (0..10) | `1.2` |
 | `seed` | integer |  |
 
-Plus the [`<Graphic>` props](/reference/elements#graphic) every kind takes. More in [Effects](/reference/graphics/#effects).
+Plus the [`<Graphic>` props](/reference/elements/graphic) every kind takes. More in [Effects](/reference/graphics/#effects).

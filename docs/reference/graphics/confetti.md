@@ -23,4 +23,4 @@ Confetti thrown up from the bottom centre that tumbles down across the frame ove
 | `spread` | number (0..1) | `0.7` |
 | `seed` | integer |  |
 
-Plus the [`<Graphic>` props](/reference/elements#graphic) every kind takes. More in [Effects](/reference/graphics/#effects).
+Plus the [`<Graphic>` props](/reference/elements/graphic) every kind takes. More in [Effects](/reference/graphics/#effects).

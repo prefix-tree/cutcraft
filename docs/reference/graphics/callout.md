@@ -37,4 +37,4 @@ Text in a rounded box with a pointer on one side; `tailAt` slides the pointer al
 | `tail` | "bottom" \| "top" \| "left" \| "right" \| "none" | `"bottom"` |
 | `tailAt` | number (0..1) | `0.5` |
 
-Plus the [`<Graphic>` props](/reference/elements#graphic) every kind takes. More in [Callouts](/reference/graphics/#callouts).
+Plus the [`<Graphic>` props](/reference/elements/graphic) every kind takes. More in [Callouts](/reference/graphics/#callouts).

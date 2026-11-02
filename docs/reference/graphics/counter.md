@@ -39,4 +39,4 @@ A number that counts from `from` to `to` over `countFor` seconds, with an option
 | `font` | string | `"$heading"` |
 | `labelFont` | string | `"$body"` |
 
-Plus the [`<Graphic>` props](/reference/elements#graphic) every kind takes. More in [Data](/reference/graphics/#data).
+Plus the [`<Graphic>` props](/reference/elements/graphic) every kind takes. More in [Data](/reference/graphics/#data).

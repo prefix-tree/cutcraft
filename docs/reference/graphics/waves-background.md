@@ -28,4 +28,4 @@ Three soft waves in the palette's colours across the bottom of the frame, rising
 | `level` | number (0..1) | `0.45` |
 | `speed` | number (0..10) | `0.3` |
 
-Plus the [`<Graphic>` props](/reference/elements#graphic) every kind takes. More in [Backgrounds](/reference/graphics/#backgrounds).
+Plus the [`<Graphic>` props](/reference/elements/graphic) every kind takes. More in [Backgrounds](/reference/graphics/#backgrounds).

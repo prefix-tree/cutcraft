@@ -1,0 +1,27 @@
+# `<Audio>`
+
+A stretch of a sound asset: volume, fades, ducking under another track, automation.
+
+## Props
+
+| prop | type | default | required |
+|---|---|---|---|
+| `id` | string |  | yes |
+| `start` | number (0..∞) |  |  |
+| `anchor` | "start" \| string |  |  |
+| `at` | string |  |  |
+| `offset` | number |  |  |
+| `duration` | number \| "fill" \| "source" \| { match } |  |  |
+| `src` | string |  | yes |
+| `in` | number (0..∞) \| string |  |  |
+| `out` | number (0..∞) \| string |  |  |
+| `speed` | number (0.1..20) | `1` |  |
+| `reverse` | boolean | `false` |  |
+| `pitchCorrection` | boolean | `false` |  |
+| `audioTrack` | integer | `0` |  |
+| `volume` | number (0..4) |  |  |
+| `fade` | { in, out } |  |  |
+| `automation` | { volume, pan } |  |  |
+| `duck` | { under, to, attack, release } |  |  |
+
+Timed, audible, trims its source. Children: `audioEffect`, `keyframe`. [All elements](/reference/elements/)

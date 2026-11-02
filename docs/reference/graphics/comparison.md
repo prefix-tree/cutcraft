@@ -39,4 +39,4 @@ Bars side by side for a few values, each with its label and value, growing over 
 | `labelColor` | string | `"$text"` |
 | `font` | string | `"$body"` |
 
-Plus the [`<Graphic>` props](/reference/elements#graphic) every kind takes. More in [Data](/reference/graphics/#data).
+Plus the [`<Graphic>` props](/reference/elements/graphic) every kind takes. More in [Data](/reference/graphics/#data).

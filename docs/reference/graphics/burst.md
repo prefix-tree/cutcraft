@@ -33,4 +33,4 @@ A starburst sticker with a word on it, for prices, offers and shouts.
 | `points` | integer | `18` |
 | `depth` | number (0..1) | `0.16` |
 
-Plus the [`<Graphic>` props](/reference/elements#graphic) every kind takes. More in [Callouts](/reference/graphics/#callouts).
+Plus the [`<Graphic>` props](/reference/elements/graphic) every kind takes. More in [Callouts](/reference/graphics/#callouts).

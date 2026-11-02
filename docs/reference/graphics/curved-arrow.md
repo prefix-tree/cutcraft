@@ -24,4 +24,4 @@ An arrow that arcs from the bottom left to the bottom right of its box; `flip` a
 | `flip` | boolean | `false` |
 | `head` | "triangle" \| "open" \| "none" | `"triangle"` |
 
-Plus the [`<Graphic>` props](/reference/elements#graphic) every kind takes. More in [Arrows](/reference/graphics/#arrows).
+Plus the [`<Graphic>` props](/reference/elements/graphic) every kind takes. More in [Arrows](/reference/graphics/#arrows).

@@ -29,4 +29,4 @@ A straight arrow across its box, pointing right; turn it with `transform.rotatio
 | `head` | "triangle" \| "open" \| "none" | `"triangle"` |
 | `tail` | "none" \| "dot" | `"none"` |
 
-Plus the [`<Graphic>` props](/reference/elements#graphic) every kind takes. More in [Arrows](/reference/graphics/#arrows).
+Plus the [`<Graphic>` props](/reference/elements/graphic) every kind takes. More in [Arrows](/reference/graphics/#arrows).

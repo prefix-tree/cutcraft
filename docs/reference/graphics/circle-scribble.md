@@ -27,4 +27,4 @@ A loose hand-drawn loop around something, overshooting where it closes.
 | `thickness` | number (0..100) | `7` |
 | `wobble` | number (0..60) | `6` |
 
-Plus the [`<Graphic>` props](/reference/elements#graphic) every kind takes. More in [Highlights](/reference/graphics/#highlights).
+Plus the [`<Graphic>` props](/reference/elements/graphic) every kind takes. More in [Highlights](/reference/graphics/#highlights).

@@ -27,4 +27,4 @@ Four corner marks framing a region, like a viewfinder. Size it to the region it 
 | `thickness` | number (0..100) | `8` |
 | `length` | number (0..0.5) | `0.16` |
 
-Plus the [`<Graphic>` props](/reference/elements#graphic) every kind takes. More in [Frames](/reference/graphics/#frames).
+Plus the [`<Graphic>` props](/reference/elements/graphic) every kind takes. More in [Frames](/reference/graphics/#frames).

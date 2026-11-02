@@ -22,4 +22,4 @@ A loose, marker-drawn arrow with a slight curve. The `draw` entrance traces it.
 | `thickness` | number (0..200) | `7` |
 | `wobble` | number (0..50) | `5` |
 
-Plus the [`<Graphic>` props](/reference/elements#graphic) every kind takes. More in [Arrows](/reference/graphics/#arrows).
+Plus the [`<Graphic>` props](/reference/elements/graphic) every kind takes. More in [Arrows](/reference/graphics/#arrows).

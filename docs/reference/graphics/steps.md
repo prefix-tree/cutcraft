@@ -31,4 +31,4 @@ A row of dots for steps in a sequence, the `active` one (1-based) filled and lar
 | `inactive` | string | `"$muted"` |
 | `line` | boolean | `true` |
 
-Plus the [`<Graphic>` props](/reference/elements#graphic) every kind takes. More in [Progress](/reference/graphics/#progress).
+Plus the [`<Graphic>` props](/reference/elements/graphic) every kind takes. More in [Progress](/reference/graphics/#progress).

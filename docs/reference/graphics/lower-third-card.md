@@ -35,4 +35,4 @@ A name and a role on a rounded card, with an accent dot before the name.
 | `weight` | integer | `700` |
 | `radius` | number (0..∞) \| string | `"$radius"` |
 
-Plus the [`<Graphic>` props](/reference/elements#graphic) every kind takes. More in [Lower thirds](/reference/graphics/#lower-thirds).
+Plus the [`<Graphic>` props](/reference/elements/graphic) every kind takes. More in [Lower thirds](/reference/graphics/#lower-thirds).

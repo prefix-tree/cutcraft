@@ -22,4 +22,4 @@ A hand-drawn line through a word, slightly rising, to cross it out.
 | `thickness` | number (0..100) | `8` |
 | `wobble` | number (0..40) | `3` |
 
-Plus the [`<Graphic>` props](/reference/elements#graphic) every kind takes. More in [Highlights](/reference/graphics/#highlights).
+Plus the [`<Graphic>` props](/reference/elements/graphic) every kind takes. More in [Highlights](/reference/graphics/#highlights).
