@@ -1,4 +1,5 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
+import { cpus } from "node:os";
 import { join } from "node:path";
 import { performance } from "node:perf_hooks";
 import { Executor, collectModule, resolve, type AssetManifest, type CollectedTree } from "../src/index";
@@ -9,8 +10,9 @@ import * as sample from "../fixtures/sample";
 /**
  * Per-step cost of the editor's drag loop: one action through the Executor
  * (validate, invert, patch, resolve). Run before and after a change to
- * resolve() or overlay().
+ * resolve() or overlay(). `--json <file>` also writes the rows, with the machine, for the site's benchmarks.
  */
+const results: { fixture: string; nodes: number; step: string; usPerStep: number; usPerNode: number }[] = [];
 const fixtures = join(import.meta.dirname, "..", "fixtures");
 const manifest = JSON.parse(readFileSync(join(fixtures, "sample.manifest.json"), "utf8")) as AssetManifest;
 
@@ -38,8 +40,14 @@ function report(name: string, tree: CollectedTree, trimId: string, transformId: 
   })]);
   console.log(`\n${name}: ${nodes} nodes`);
   for (const [label, us] of rows) console.log(`  ${label.padEnd(36)} ${us.toFixed(0).padStart(7)} µs/step  ${(us / nodes).toFixed(2).padStart(6)} µs/node`);
+  for (const [step, us] of rows) results.push({ fixture: name, nodes, step, usPerStep: Math.round(us), usPerNode: Math.round((us / nodes) * 100) / 100 });
 }
 
 const sampleTree = collectModule(sample, {}, { index: buildSourceIndex(readFileSync(join(fixtures, "sample.tsx"), "utf8")) });
 report("sample fixture", sampleTree, "c2", "c2");
 report("large(500)", collectModule(buildLarge(500)), "c3", "c3");
+
+const json = process.argv.indexOf("--json");
+if (json >= 0 && process.argv[json + 1]) {
+  writeFileSync(process.argv[json + 1]!, `${JSON.stringify({ machine: `${cpus()[0]?.model ?? "?"}, ${cpus().length} cores`, node: process.version, results }, null, 2)}\n`);
+}

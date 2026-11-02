@@ -1,0 +1,30 @@
+{
+  "name": "@cutcut/example-showcase",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Short cut files rendered for the documentation site: each video beside the file that made it.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "gen": "tsx media.ts",
+    "render": "tsx render.ts",
+    "bench": "tsx bench.ts",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "lint": "eslint . --max-warnings 0"
+  },
+  "dependencies": {
+    "@cutcut/kit": "workspace:*",
+    "@cutcut/render": "workspace:*",
+    "react": "^19.3.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.0.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.3.0",
+    "eslint": "^9.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.72.0"
+  }
+}

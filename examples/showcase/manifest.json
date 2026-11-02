@@ -1,0 +1,190 @@
+{
+  "assets": {
+    "aurora": {
+      "id": "aurora",
+      "kind": "video",
+      "duration": 8,
+      "fps": 30,
+      "width": 960,
+      "height": 540
+    },
+    "spiral": {
+      "id": "spiral",
+      "kind": "video",
+      "duration": 8,
+      "fps": 30,
+      "width": 960,
+      "height": 540
+    },
+    "cells": {
+      "id": "cells",
+      "kind": "video",
+      "duration": 8,
+      "fps": 30,
+      "width": 960,
+      "height": 540
+    },
+    "speaker": {
+      "id": "speaker",
+      "kind": "video",
+      "duration": 12,
+      "fps": 30,
+      "width": 540,
+      "height": 960,
+      "transcript": {
+        "words": [
+          {
+            "i": 0,
+            "text": "Every",
+            "start": 0.4,
+            "end": 0.8
+          },
+          {
+            "i": 1,
+            "text": "cut",
+            "start": 0.88,
+            "end": 1.2
+          },
+          {
+            "i": 2,
+            "text": "is",
+            "start": 1.28,
+            "end": 1.57
+          },
+          {
+            "i": 3,
+            "text": "a",
+            "start": 1.65,
+            "end": 1.91
+          },
+          {
+            "i": 4,
+            "text": "line",
+            "start": 1.99,
+            "end": 2.35
+          },
+          {
+            "i": 5,
+            "text": "of",
+            "start": 2.43,
+            "end": 2.72
+          },
+          {
+            "i": 6,
+            "text": "code.",
+            "start": 2.8,
+            "end": 3.16
+          },
+          {
+            "i": 7,
+            "text": "Move",
+            "start": 3.61,
+            "end": 3.97
+          },
+          {
+            "i": 8,
+            "text": "a",
+            "start": 4.05,
+            "end": 4.3
+          },
+          {
+            "i": 9,
+            "text": "clip",
+            "start": 4.38,
+            "end": 4.74
+          },
+          {
+            "i": 10,
+            "text": "and",
+            "start": 4.82,
+            "end": 5.15
+          },
+          {
+            "i": 11,
+            "text": "the",
+            "start": 5.23,
+            "end": 5.55
+          },
+          {
+            "i": 12,
+            "text": "words",
+            "start": 5.63,
+            "end": 6.03
+          },
+          {
+            "i": 13,
+            "text": "move",
+            "start": 6.11,
+            "end": 6.47
+          },
+          {
+            "i": 14,
+            "text": "with",
+            "start": 6.55,
+            "end": 6.91
+          },
+          {
+            "i": 15,
+            "text": "it.",
+            "start": 6.99,
+            "end": 7.28
+          },
+          {
+            "i": 16,
+            "text": "The",
+            "start": 7.73,
+            "end": 8.05
+          },
+          {
+            "i": 17,
+            "text": "point",
+            "start": 8.13,
+            "end": 8.53
+          },
+          {
+            "i": 18,
+            "text": "lands",
+            "start": 8.61,
+            "end": 9.0
+          },
+          {
+            "i": 19,
+            "text": "on",
+            "start": 9.08,
+            "end": 9.37
+          },
+          {
+            "i": 20,
+            "text": "the",
+            "start": 9.45,
+            "end": 9.78
+          },
+          {
+            "i": 21,
+            "text": "word",
+            "start": 9.86,
+            "end": 10.21
+          },
+          {
+            "i": 22,
+            "text": "that",
+            "start": 10.29,
+            "end": 10.65
+          },
+          {
+            "i": 23,
+            "text": "names",
+            "start": 10.73,
+            "end": 11.13
+          },
+          {
+            "i": 24,
+            "text": "it.",
+            "start": 11.21,
+            "end": 11.5
+          }
+        ]
+      }
+    }
+  }
+}

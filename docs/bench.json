@@ -1,0 +1,84 @@
+{
+  "measured": "2026-11-02",
+  "machine": "Apple M3 Pro, 12 cores",
+  "node": "v22.23.4",
+  "ci": false,
+  "editor": [
+    {
+      "fixture": "sample fixture",
+      "nodes": 39,
+      "step": "resolve, memo defeated",
+      "usPerStep": 80,
+      "usPerNode": 2.06
+    },
+    {
+      "fixture": "sample fixture",
+      "nodes": 39,
+      "step": "clip/trim out (edge drag)",
+      "usPerStep": 160,
+      "usPerNode": 4.09
+    },
+    {
+      "fixture": "sample fixture",
+      "nodes": 39,
+      "step": "transform/update (position drag)",
+      "usPerStep": 115,
+      "usPerNode": 2.96
+    },
+    {
+      "fixture": "large(500)",
+      "nodes": 1007,
+      "step": "resolve, memo defeated",
+      "usPerStep": 625,
+      "usPerNode": 0.62
+    },
+    {
+      "fixture": "large(500)",
+      "nodes": 1007,
+      "step": "clip/trim out (edge drag)",
+      "usPerStep": 740,
+      "usPerNode": 0.73
+    },
+    {
+      "fixture": "large(500)",
+      "nodes": 1007,
+      "step": "transform/update (position drag)",
+      "usPerStep": 517,
+      "usPerNode": 0.51
+    }
+  ],
+  "export": [
+    {
+      "file": "edit",
+      "width": 960,
+      "height": 540,
+      "frames": 237,
+      "fps1": 55,
+      "fps4": 94
+    },
+    {
+      "file": "graphics",
+      "width": 960,
+      "height": 540,
+      "frames": 150,
+      "fps1": 131,
+      "fps4": 82
+    },
+    {
+      "file": "captions",
+      "width": 540,
+      "height": 960,
+      "frames": 333,
+      "fps1": 79,
+      "fps4": 100
+    },
+    {
+      "file": "motion",
+      "width": 960,
+      "height": 540,
+      "frames": 150,
+      "fps1": 106,
+      "fps4": 81
+    }
+  ]
+}

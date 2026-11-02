@@ -25,6 +25,7 @@
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs",
     "docs:gen": "tsx scripts/gen-docs.ts",
+    "docs:bench": "tsx scripts/site-bench.ts",
     "docs:graphics": "pnpm --filter @cutcut/render catalog"
   },
   "devDependencies": {
