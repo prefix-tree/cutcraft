@@ -7,6 +7,15 @@ import { initEnv } from "./env";
 import type { OverlayFont, OverlayPlane } from "./overlays";
 import { FramePipeline, type PipelineStages } from "./pipeline";
 
+/**
+ * How hard the software H.264 and HEVC encoders work: `quality` is x264's medium preset, `balanced` veryfast (about
+ * twice as fast, a little larger for the same picture), `fast` the real-time mode (ultrafast, no look-ahead). VP9 and
+ * AV1 know only `fast` and the rest.
+ */
+export type Speed = "quality" | "balanced" | "fast";
+
+const PRESETS: Readonly<Record<Exclude<Speed, "fast">, string>> = { quality: "medium", balanced: "veryfast" };
+
 export type VideoCodec = "vp9" | "vp8" | "av1" | "avc" | "hevc" | "prores";
 export type VideoContainer = "webm" | "mp4" | "mov";
 
@@ -27,8 +36,8 @@ export interface VideoEncoding {
   readonly quality?: QualityName | undefined;
   /** Seconds between keyframes. */
   readonly keyFrameInterval: number;
-  /** `fast` trades compression for speed (the encoder's real-time mode). */
-  readonly speed?: "quality" | "fast" | undefined;
+  /** Compression against speed; see `Speed`. */
+  readonly speed?: Speed | undefined;
   /** The machine's hardware encoder, when it has one; decided once per render (`hardwareEncodes`), so every segment matches. */
   readonly hardware?: boolean | undefined;
 }
@@ -39,6 +48,8 @@ export function videoSource(encoding: VideoEncoding): VideoSampleSource {
     ...(encoding.quality ? { quality: QUALITIES[encoding.quality] } : { bitrate: encoding.bitrate }),
     keyFrameInterval: encoding.keyFrameInterval,
     hardwareAcceleration: encoding.hardware ? "prefer-hardware" : "prefer-software",
+    // Read by the patched @mediabunny/server encoder (patches/), which has no preset option of its own.
+    onEncoderConfig: (c) => { if (encoding.speed !== "fast") (c as { ffmpegPreset?: string }).ffmpegPreset = PRESETS[encoding.speed ?? "quality"]; },
     ...(encoding.speed === "fast" ? { latencyMode: "realtime" as const } : {}),
   });
 }

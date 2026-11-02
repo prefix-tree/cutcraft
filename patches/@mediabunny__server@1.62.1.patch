@@ -1,0 +1,70 @@
+diff --git a/dist/bundles/mediabunny-server.cjs b/dist/bundles/mediabunny-server.cjs
+index a1518a3e8857738fa63e08628b7e033433e3c200..463ee2d636c9523e0b34adbce09ee45177a7eca6 100644
+--- a/dist/bundles/mediabunny-server.cjs
++++ b/dist/bundles/mediabunny-server.cjs
+@@ -3048,12 +3048,18 @@ var MediabunnyServer = (() => {
+         if (isRealtime) {
+           codecContext.setOption("tune", "zerolatency");
+           codecContext.setOption("preset", "ultrafast");
++        } else if (this.config.ffmpegPreset) {
++          // cutcut patch: a preset for quality mode, set through onEncoderConfig
++          codecContext.setOption("preset", this.config.ffmpegPreset);
+         }
+       } else if (this.avCodec.name === "libx265") {
+         codecContext.setOption("x265-params", "log-level=error");
+         if (isRealtime) {
+           codecContext.setOption("tune", "zerolatency");
+           codecContext.setOption("preset", "ultrafast");
++        } else if (this.config.ffmpegPreset) {
++          // cutcut patch: a preset for quality mode, set through onEncoderConfig
++          codecContext.setOption("preset", this.config.ffmpegPreset);
+         }
+       } else if (this.avCodec.name === "libvpx") {
+         if (isRealtime) {
+diff --git a/dist/bundles/mediabunny-server.mjs b/dist/bundles/mediabunny-server.mjs
+index 6601214a8f6c97bd550dc1bae4ec6a828449168d..43baaa05b59de081137ede7e1e030f525cec8376 100644
+--- a/dist/bundles/mediabunny-server.mjs
++++ b/dist/bundles/mediabunny-server.mjs
+@@ -3020,12 +3020,18 @@ var NodeAvVideoEncoder = class extends CustomVideoEncoder {
+       if (isRealtime) {
+         codecContext.setOption("tune", "zerolatency");
+         codecContext.setOption("preset", "ultrafast");
++      } else if (this.config.ffmpegPreset) {
++        // cutcut patch: a preset for quality mode, set through onEncoderConfig
++        codecContext.setOption("preset", this.config.ffmpegPreset);
+       }
+     } else if (this.avCodec.name === "libx265") {
+       codecContext.setOption("x265-params", "log-level=error");
+       if (isRealtime) {
+         codecContext.setOption("tune", "zerolatency");
+         codecContext.setOption("preset", "ultrafast");
++      } else if (this.config.ffmpegPreset) {
++        // cutcut patch: a preset for quality mode, set through onEncoderConfig
++        codecContext.setOption("preset", this.config.ffmpegPreset);
+       }
+     } else if (this.avCodec.name === "libvpx") {
+       if (isRealtime) {
+diff --git a/dist/modules/src/video-encoder.js b/dist/modules/src/video-encoder.js
+index 25f3c7e5601ca6db5a3169069b358f5202e2fc4c..550773e12a2fc967dd6f49175b6be7a3cfb872a8 100644
+--- a/dist/modules/src/video-encoder.js
++++ b/dist/modules/src/video-encoder.js
+@@ -159,6 +159,9 @@ class NodeAvVideoEncoder extends mediabunny_1.CustomVideoEncoder {
+             if (isRealtime) {
+                 codecContext.setOption('tune', 'zerolatency');
+                 codecContext.setOption('preset', 'ultrafast');
++            } else if (this.config.ffmpegPreset) {
++                // cutcut patch: a preset for quality mode, set through onEncoderConfig
++                codecContext.setOption('preset', this.config.ffmpegPreset);
+             }
+         }
+         else if (this.avCodec.name === 'libx265') {
+@@ -166,6 +169,9 @@ class NodeAvVideoEncoder extends mediabunny_1.CustomVideoEncoder {
+             if (isRealtime) {
+                 codecContext.setOption('tune', 'zerolatency');
+                 codecContext.setOption('preset', 'ultrafast');
++            } else if (this.config.ffmpegPreset) {
++                // cutcut patch: a preset for quality mode, set through onEncoderConfig
++                codecContext.setOption('preset', this.config.ffmpegPreset);
+             }
+         }
+         else if (this.avCodec.name === 'libvpx') {

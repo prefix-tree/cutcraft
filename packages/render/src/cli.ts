@@ -7,7 +7,7 @@ import { defaultWorkers } from "./parallel";
 import { directoryResolver } from "./media";
 import type { FontWeight, OverlayFont } from "./overlays";
 import { renderVideo, type VideoCodec } from "./renderer";
-import { QUALITIES, type QualityName } from "./segment";
+import { QUALITIES, type QualityName, type Speed } from "./segment";
 import { renderStill } from "./still";
 import { SAFE_ZONES, checkLayout, formatLayout, type Insets, type SafeZoneName } from "./layout-check";
 
@@ -34,7 +34,7 @@ const USAGE = `Usage: cutcut-render <file.tsx> --out <video.webm|.mp4|.mov|.mp3|
   --codec <name>        vp9 (default for webm), vp8, av1, avc (default for mp4), hevc, prores (default for mov)
   --bitrate <bps>       video bits per second (default: about 0.1 per pixel per frame)
   --quality <preset>    very-low, low, medium, high or very-high, in place of --bitrate
-  --speed <fast>        the encoder's real-time mode: faster, larger files at the same quality
+  --speed <s>           quality (default), balanced (about twice as fast, slightly larger) or fast (real-time mode)
   --software            encode H.264 and HEVC in software even where the machine has a hardware encoder
   --workers <n>         render in n threads (default 1, this one; more rarely helps, as the encoder is threaded itself)
   --copy                copy encoded pictures from the source where a cut shows nothing else (VP8/VP9 at the composition's
@@ -99,7 +99,7 @@ async function main(): Promise<number> {
   const tty = process.stderr.isTTY && !values.quiet;
   const workers = values.workers === undefined ? defaultWorkers() : Math.max(1, Math.floor(Number(values.workers)));
   if (!Number.isFinite(workers)) throw new Error(`--workers wants a number, got "${values.workers}"`);
-  if (values.speed !== undefined && values.speed !== "fast" && values.speed !== "quality") throw new Error(`--speed wants fast or quality, got "${values.speed}"`);
+  if (values.speed !== undefined && !["quality", "balanced", "fast"].includes(values.speed)) throw new Error(`--speed wants quality, balanced or fast, got "${values.speed}"`);
   const result = await renderVideo({
     state: loaded.state, media, out: resolve(out), interiors: loaded.interiors,
     ...(values.from ? { from: Number(values.from) } : {}),
@@ -108,7 +108,7 @@ async function main(): Promise<number> {
     ...(values.bitrate ? { bitrate: Number(values.bitrate) } : {}),
     ...(values.quality ? { quality: values.quality as QualityName } : {}),
     ...(values.silent ? { silent: true } : {}),
-    ...(values.speed === "fast" ? { speed: "fast" as const } : {}),
+    ...(values.speed ? { speed: values.speed as Speed } : {}),
     ...(values.copy ? { smartCopy: true } : {}),
     ...(values.software ? { hardware: false } : {}),
     ...(values.keyframe ? { keyFrameInterval: Number(values.keyframe) } : {}),

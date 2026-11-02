@@ -4,6 +4,11 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  '@mediabunny/server@1.62.1':
+    hash: 4d989124227d2b7f8fc34c4e009902c61b8a1a72860e198dcbde98d3fd89d1c9
+    path: patches/@mediabunny__server@1.62.1.patch
+
 importers:
 
   .:
@@ -294,7 +299,7 @@ importers:
         version: 5.3.0
       '@mediabunny/server':
         specifier: ^1.62.1
-        version: 1.62.1(mediabunny@1.62.0)
+        version: 1.62.1(patch_hash=4d989124227d2b7f8fc34c4e009902c61b8a1a72860e198dcbde98d3fd89d1c9)(mediabunny@1.62.0)
       mediabunny:
         specifier: 1.62.0
         version: 1.62.0
@@ -3538,7 +3543,7 @@ snapshots:
       mediabunny: 1.62.0
       turbores: 1.2.4
 
-  '@mediabunny/server@1.62.1(mediabunny@1.62.0)':
+  '@mediabunny/server@1.62.1(patch_hash=4d989124227d2b7f8fc34c4e009902c61b8a1a72860e198dcbde98d3fd89d1c9)(mediabunny@1.62.0)':
     dependencies:
       '@mediabunny/prores': 1.62.1(mediabunny@1.62.0)
       mediabunny: 1.62.0

@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, rmSync, statSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { collectModule, resolve } from "@cutcut/kit";
@@ -145,6 +145,17 @@ describe("renderVideo", () => {
     await renderVideo({ state, media, out: low, quality: "very-low", to: 1, silent: true });
     await renderVideo({ state, media, out: high, quality: "very-high", to: 1, silent: true });
     expect(statSync(high).size).toBeGreaterThan(statSync(low).size * 2);
+  });
+
+  it("picks x264's preset from the speed (through the patched encoder)", async () => {
+    // x264 writes its settings into the stream; medium searches sub-pixels at level 7, veryfast at 2.
+    const subme = async (speed: "quality" | "balanced"): Promise<string | undefined> => {
+      const out = join(dir, `${speed}.mp4`);
+      await renderVideo({ state, media, out, speed, hardware: false, to: 0.5, silent: true });
+      return /subme=(\d+)/.exec(readFileSync(out, "latin1"))?.[1];
+    };
+    expect(await subme("quality")).toBe("7");
+    expect(await subme("balanced")).toBe("2");
   });
 
   it("draws one frame to a PNG: the frame the video shows at that time", async () => {

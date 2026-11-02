@@ -10,7 +10,7 @@ import { MediabunnyPcm } from "./pcm";
 import { feedCopy, planCopy, type Run } from "./copy";
 import { feedSegment, planSegments, SegmentPool, defaultWorkers, type ParallelOptions, type SegmentOutcome } from "./parallel";
 import { FramePipeline } from "./pipeline";
-import { encodeSegment, hardwareEncodes, outputFormat, videoSource, type QualityName, type VideoCodec, type VideoContainer, type VideoEncoding } from "./segment";
+import { encodeSegment, hardwareEncodes, outputFormat, videoSource, type QualityName, type Speed, type VideoCodec, type VideoContainer, type VideoEncoding } from "./segment";
 
 export type Container = VideoContainer | "mp3" | "wav";
 const AUDIO_CODEC: Record<Container, AudioCodec> = { webm: "opus", mp4: "aac", mov: "pcm-s16", mp3: "mp3", wav: "pcm-s16" };
@@ -42,8 +42,8 @@ export interface RenderOptions {
   readonly interiors?: ReadonlyMap<string, ReactNode>;
   /** Fonts beyond the bundled Inter, picked by a title's `font` prop. */
   readonly fonts?: readonly OverlayFont[];
-  /** `fast` trades compression for speed: the encoder's real-time mode. */
-  readonly speed?: "quality" | "fast";
+  /** Compression against speed for the software H.264 and HEVC encoders: `quality` (default), `balanced` or `fast`. */
+  readonly speed?: Speed;
   /** H.264 and HEVC go through the machine's hardware encoder when it has one that works (default); false keeps software. */
   readonly hardware?: boolean;
   /**

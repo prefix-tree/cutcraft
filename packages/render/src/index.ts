@@ -7,6 +7,6 @@ export { OverlayPlane, inlineSvgImages, safeSvgFonts, treeKey, type OverlayBound
 export { MediabunnyPcm } from "./pcm";
 export { defaultWorkers, planSegments, type ParallelOptions } from "./parallel";
 export { containerOf, renderVideo, type Container, type RenderOptions, type RenderResult, type VideoCodec } from "./renderer";
-export { QUALITIES, type QualityName } from "./segment";
+export { QUALITIES, type QualityName, type Speed } from "./segment";
 export { renderStill, type StillOptions, type StillResult } from "./still";
 export { SAFE_ZONES, checkLayout, formatLayout, subjectRects, type Insets, type LayoutCheckOptions, type LayoutCheckResult, type LayoutIssue, type LayoutRule, type SafeZoneName, type SourceSpot } from "./layout-check";

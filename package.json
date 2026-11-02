@@ -36,6 +36,9 @@
   "pnpm": {
     "ignoredBuiltDependencies": [
       "node-av"
-    ]
+    ],
+    "patchedDependencies": {
+      "@mediabunny/server@1.62.1": "patches/@mediabunny__server@1.62.1.patch"
+    }
   }
 }

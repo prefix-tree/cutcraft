@@ -25,7 +25,7 @@ pnpm --filter @cutcut/render exec cutcut-render video.tsx --manifest manifest.js
 | `--from <s>` `--to <s>` | Render only this part of the composition. |
 | `--workers <n>` | Threads. Default 1, the main thread; more rarely helps (below). |
 | `--software` | Encode H.264 and HEVC in software even where the machine has a hardware encoder. |
-| `--speed fast` | The encoder's real-time mode: much faster, larger files for the same quality. |
+| `--speed <s>` | How hard the software H.264/HEVC encoder works: `quality` (default, x264's medium), `balanced` (veryfast) or `fast` (real-time mode, larger files). |
 | `--copy` | Smart copy, below. |
 | `--codec <name>` | `vp9`, `vp8`, `av1`, `avc`, `hevc`, `prores`. A codec the container cannot hold (ProRes in WebM) is an error. |
 | `--bitrate <bps>` | Video bits per second. Default: about 0.1 per pixel per frame. |
@@ -121,8 +121,11 @@ own decoders and encoder, about 1 GB at 1080p. The encoder already uses every
 core, so workers rarely help: on 4-core Linux and a 12-core Mac, two or four
 were no faster than one, or slower.
 
-**`--speed fast`.** Trades compression for speed in the encoder: about 1.4 times
-faster on one thread for both VP9 and H.264, at larger files.
+**`--speed`.** Trades compression for speed in the software encoder. `balanced`
+uses x264's veryfast preset: on a Mac, one thread, cuts went from 188 to 229
+fps and crossfades from 66 to 88, and the cuts scored 52.3 dB against 54.5 at
+the same 8 Mb/s. `fast` is the real-time mode: about 1.4 times faster again,
+at larger files. VP9 knows only `fast`.
 
 **`--copy`.** Where the picture is nothing but a stretch of one source file,
 the encoded packets of whole groups of pictures are copied and only the ends
