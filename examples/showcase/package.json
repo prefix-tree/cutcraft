@@ -9,6 +9,7 @@
     "gen": "tsx media.ts",
     "render": "tsx render.ts",
     "bench": "tsx bench.ts",
+    "gif": "tsx gif.ts",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "lint": "eslint . --max-warnings 0"
   },

@@ -56,9 +56,14 @@ Drag the end of `hook` in the timeline and the file changes by one token. The b-
 the word it was timed to, the bed still fills to the end. The model reads the new file and sees what you did.
 
 <p align="center">
-  <img src="docs/public/readme/graphics.png" width="720" alt="A counter reading 1,250+ customers, a grid of ten figures with seven and a half filled, two bars comparing 6.0 h and 1.5 h, and a field of dots with 38% highlighted">
-  <br><sub>Four <code>&lt;Graphic&gt;</code> elements (<code>counter</code>, <code>unit-grid</code>, <code>comparison</code>, <code>sample-size</code>), drawn by <code>cutcut-render --still</code>.</sub>
+  <img src="docs/public/readme/edit.gif" width="640" alt="An edit: three abstract shots cut together with a wipe and a slide, a slow push-in, a title that builds word by word, and a lower third">
 </p>
+<p align="center">
+  <img src="docs/public/readme/graphics.gif" width="300" alt="Data graphics animating in: a counter to 1,250+ customers, seven and a half of ten figures filled, two bars comparing 6.0 h and 1.5 h, and a field of dots with 38% highlighted">
+  <img src="docs/public/readme/motion.gif" width="300" alt="Five bars springing up one after another, a callout pointing at the tallest, and confetti">
+  <img src="docs/public/readme/captions.gif" width="95" alt="A vertical short with karaoke captions and a key point that appears on the word that names it">
+</p>
+<p align="center"><sub>Each is one short TSX file rendered by CutCraft's export engine: an edit, data graphics, a spring-driven chart, and a vertical short with captions. <a href="https://prefix-tree.github.io/cutcraft/examples">See them with their files</a>.</sub></p>
 
 ## Why
 
