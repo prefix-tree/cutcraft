@@ -2,7 +2,7 @@ import { defineConfig } from "vitepress";
 
 export default defineConfig({
   title: "CutCraft",
-  description: "A video-editing DSL: a model writes a TSX file, the browser renders it, the editor edits the same file.",
+  description: "Video editor as code: a model writes a TSX file with words and shots instead of seconds, the browser plays it, an editor edits the same file, and Node exports it.",
   base: "/cutcraft/",
   cleanUrls: true,
   lastUpdated: true,

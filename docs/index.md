@@ -1,7 +1,7 @@
 ---
 layout: page
 title: CutCraft
-titleTemplate: The file is the video
+titleTemplate: Video editor as code
 footer: false
 ---
 
@@ -17,13 +17,13 @@ const realtime = (r) => (r.fps1 / 30).toFixed(1);
 </script>
 
 <div class="cc">
-<div class="cc-crumb"><span>01 / <b>CutCraft</b></span><span>Video editing, as code</span></div>
+<div class="cc-crumb"><span>01 / <b>CutCraft</b></span><span>The file is the video</span></div>
 <section class="cc-hero">
 <div class="cc-hero-side">CUTCRAFT</div>
 <img class="cc-icon" :src="withBase('/logo.svg')" alt="CutCraft">
 <div class="cc-name"><span class="cc-num">01</span><span>Cut<em>Craft</em></span></div>
-<h1 class="cc-display">The file <em>is</em> the video.</h1>
-<p class="cc-lede">A model writes a TSX file. The browser plays it, an editor's timeline and inspector edit that same file, and Node exports it with the same engine. No project document, no tool catalog, no second renderer.</p>
+<h1 class="cc-display">Video editor <em>as&nbsp;code</em>.</h1>
+<p class="cc-lede">LLMs are good at writing code and bad at math. So the model writes the video as a TSX file that names what it means (a word, a shot, the clip a title belongs to), and CutCraft does the arithmetic. The browser plays the file, the editor edits the same file, and Node exports it.</p>
 <div class="cc-actions">
 <a class="cc-btn primary" :href="withBase('/guide/getting-started')">Get started</a>
 <a class="cc-btn" :href="withBase('/examples')">See the examples</a>
@@ -62,7 +62,7 @@ const realtime = (r) => (r.fps1 / 30).toFixed(1);
 <div class="cc-head"><h2 class="cc-display">What's <em>inside</em>.</h2><div class="cc-side">HIGHLIGHTS</div></div>
 <div class="cc-grid">
 <div class="cc-cell"><span class="cc-label">01</span><h3>One file, three authors</h3><p>The model writes it, the editor's gestures become actions that fold back as one-token edits, and the model reads what you did as the code it wrote.</p></div>
-<div class="cc-cell"><span class="cc-label">02</span><h3>Time by meaning</h3><p>Trim by transcript words and camera shots (<code>in="word:12"</code>), and time a graphic to a word of its clip, so cuts and overlays follow every trim.</p></div>
+<div class="cc-cell"><span class="cc-label">02</span><h3>No math for the model</h3><p>Cuts name transcript words and camera shots (<code>in="word:12"</code>), a title names the word it belongs to (<code>at="word:14"</code>), and the resolver turns them into seconds, through every trim and speed change.</p></div>
 <div class="cc-cell"><span class="cc-label">03</span><h3>Every action undoes</h3><p>131 editor actions, each with validate, apply, invert and fold. A drag is one undo step and one small diff.</p></div>
 <div class="cc-cell"><span class="cc-label">04</span><h3>Plays in the browser</h3><p>WebCodecs through mediabunny, a canvas for footage, DOM for overlays, Web Audio as the clock, and a frame-exact <code>seekTo(t)</code>.</p></div>
 <div class="cc-cell"><span class="cc-label">05</span><h3>Exports in Node</h3><p>The same engine, headless: WebM, MP4, MOV, MP3 or WAV soundtracks and stills, with its own audio mix and worker threads.</p></div>
