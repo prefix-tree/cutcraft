@@ -157,7 +157,9 @@ const cases: Case[] = [
   },
   {
     name: "a caption line",
-    element: h(Composition, { fps: 30, width: W, height: H }, h(Captions, { id: "e", style: { position: "bottom", size: 30 } }, h(Caption, { id: "k", start: 0, end: 2, text: "Captions follow the clips" }))),
+    // Boxed, without the default halo: bare text and soft blurs rasterize a few percent apart in Chrome and in the
+    // export (more on Linux), which a text-only case measures instead of layout. The box shows where the line sits.
+    element: h(Composition, { fps: 30, width: W, height: H }, h(Captions, { id: "e", style: { position: "bottom", size: 30, background: "rgba(0,0,0,0.6)", shadow: { color: "rgba(0,0,0,0)" } } }, h(Caption, { id: "k", start: 0, end: 2, text: "Captions follow the clips" }))),
     dom: (s) => h(DomCaptions, { placement: s.items.get("e")!, state: s, time: T }),
   },
 ];
