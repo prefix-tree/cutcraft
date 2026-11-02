@@ -200,7 +200,15 @@ export class ClipDecoder {
     const run = async (): Promise<void> => {
       try {
         while (this.queue.length < QUEUE_TARGET && this.gen === gen) {
-          const next = await gen.next();
+          let next: IteratorResult<Frame>;
+          try {
+            next = await gen.next();
+          } catch (error) {
+            // Disposing the decoder (or seeking past this stream) closes its input under a pending read; that read's
+            // error is the expected end of the stream, not a failure.
+            if (generation !== this.generation || this.disposed) return;
+            throw error;
+          }
           if (generation !== this.generation || this.disposed) { if (!next.done) next.value.close(); return; }
           if (next.done) { this.gen = null; return; }
           const frame = next.value;

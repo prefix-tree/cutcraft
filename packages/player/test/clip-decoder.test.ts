@@ -32,6 +32,29 @@ describe("ClipDecoder", () => {
     expect(source.live.size).toBe(0);
   });
 
+  it("ends a read-ahead quietly when disposed under it, as an input that closes rejects the pending read", async () => {
+    const source = new FakeFrameSource("a");
+    const p = state.items.get("c1")!;
+    let release: (error: Error) => void = () => undefined;
+    // The stream yields nothing until the decoder is disposed, then fails the way a disposed input does.
+    source.stream = async function* () {
+      await new Promise<never>((_, reject) => { release = reject; });
+      yield* [];
+    };
+    const d = new ClipDecoder(source, p, childrenOf(state, "c1"), () => 1);
+    const unhandled: unknown[] = [];
+    const onUnhandled = (reason: unknown) => unhandled.push(reason);
+    process.on("unhandledRejection", onUnhandled);
+    void d.prime(p.start);
+    await flush();
+    d.dispose();
+    release(new Error("Input has been disposed."));
+    await flush();
+    await new Promise((r) => setTimeout(r, 0));
+    process.off("unhandledRejection", onUnhandled);
+    expect(unhandled).toEqual([]);
+  });
+
   it("drops frames at double speed", async () => {
     const { source, d, p } = decoder("c2", 2);
     await d.prime(p.start);
