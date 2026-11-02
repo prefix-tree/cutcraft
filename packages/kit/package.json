@@ -3,6 +3,16 @@
   "version": "0.1.0",
   "private": true,
   "description": "Vocabulary, resolver, action system and source tools for the cut video DSL.",
+  "license": "MIT",
+  "homepage": "https://prefix-tree.github.io/cutcraft/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/prefix-tree/cutcraft.git",
+    "directory": "packages/kit"
+  },
+  "bugs": {
+    "url": "https://github.com/prefix-tree/cutcraft/issues"
+  },
   "type": "module",
   "sideEffects": [
     "./src/actions/handlers/index.ts"

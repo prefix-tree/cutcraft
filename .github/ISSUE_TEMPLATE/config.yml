@@ -1,5 +1,8 @@
 blank_issues_enabled: true
 contact_links:
+  - name: Documentation
+    url: https://prefix-tree.github.io/cutcraft/
+    about: Guides, the element and action reference, and what renders.
   - name: Design and decisions
-    url: https://github.com/bsnisar/cutcut/tree/main/docs/decisions
+    url: https://github.com/prefix-tree/cutcraft/tree/main/docs/decisions
     about: Read the decision records before proposing a change to the model.

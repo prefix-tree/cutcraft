@@ -1,11 +1,20 @@
 {
   "name": "cutcut",
-  "private": true,
   "version": "0.0.0",
+  "private": true,
   "description": "A video-editing DSL: a model writes a TSX file, the browser renders it, the editor edits the same file.",
+  "license": "MIT",
+  "homepage": "https://prefix-tree.github.io/cutcraft/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/prefix-tree/cutcraft.git"
+  },
+  "bugs": {
+    "url": "https://github.com/prefix-tree/cutcraft/issues"
+  },
   "packageManager": "pnpm@10.28.0",
   "engines": {
-    "node": ">=22"
+    "node": ">=22.19"
   },
   "scripts": {
     "typecheck": "pnpm -r typecheck",
@@ -23,15 +32,6 @@
     "vitepress": "1.6.4",
     "zod": "^4.6.7"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/bsnisar/cutcut.git"
-  },
-  "homepage": "https://bsnisar.github.io/cutcut/",
-  "bugs": {
-    "url": "https://github.com/bsnisar/cutcut/issues"
-  },
-  "license": "MIT",
   "pnpm": {
     "ignoredBuiltDependencies": [
       "node-av"
