@@ -1,7 +1,7 @@
 ---
 layout: home
 hero:
-  name: cutcut
+  name: CutCraft
   text: The file is the video.
   tagline: A model writes a TSX file. The browser renders it. The editor's timeline, inspector and preview edit that same file. No project document, no tool catalog, no second renderer.
   actions:

@@ -1,0 +1,126 @@
+/* Swiss typography: one grotesk family, sizes on a scale, flush left, black and white with one accent, rules as structure. */
+
+:root {
+  --sw-ink: #0b0b0b;
+  --sw-paper: #ffffff;
+  --sw-grey: #6b6b6b;
+  --sw-rule: #0b0b0b;
+  --sw-hairline: #dcdcdc;
+  --sw-accent: #ff4b12;
+
+  --vp-font-family-base: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --vp-font-family-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --sw-display: "Inter Tight", "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
+
+  --vp-c-bg: var(--sw-paper);
+  --vp-c-bg-alt: #f4f4f2;
+  --vp-c-bg-soft: #f4f4f2;
+  --vp-c-bg-elv: var(--sw-paper);
+  --vp-c-text-1: var(--sw-ink);
+  --vp-c-text-2: #3c3c3c;
+  --vp-c-text-3: var(--sw-grey);
+  --vp-c-divider: var(--sw-hairline);
+  --vp-c-gutter: var(--sw-hairline);
+  --vp-c-border: var(--sw-ink);
+
+  --vp-c-brand-1: var(--sw-accent);
+  --vp-c-brand-2: #e63d08;
+  --vp-c-brand-3: var(--sw-accent);
+  --vp-c-brand-soft: rgba(255, 75, 18, 0.1);
+
+  --vp-button-brand-bg: var(--sw-ink);
+  --vp-button-brand-text: var(--sw-paper);
+  --vp-button-brand-border: var(--sw-ink);
+  --vp-button-brand-hover-bg: var(--sw-accent);
+  --vp-button-brand-hover-text: var(--sw-paper);
+  --vp-button-brand-hover-border: var(--sw-accent);
+  --vp-button-alt-bg: transparent;
+  --vp-button-alt-text: var(--sw-ink);
+  --vp-button-alt-border: var(--sw-ink);
+  --vp-button-alt-hover-bg: var(--sw-ink);
+  --vp-button-alt-hover-text: var(--sw-paper);
+  --vp-button-alt-hover-border: var(--sw-ink);
+
+  --vp-code-block-bg: #f4f4f2;
+  --vp-code-bg: #f0f0ee;
+  --vp-code-color: var(--sw-ink);
+  --vp-home-hero-name-color: var(--sw-ink);
+  --vp-shadow-1: none; --vp-shadow-2: none; --vp-shadow-3: none; --vp-shadow-4: none; --vp-shadow-5: none;
+}
+
+.dark {
+  --sw-ink: #f4f4f2;
+  --sw-paper: #0b0b0b;
+  --sw-grey: #9a9a9a;
+  --sw-rule: #f4f4f2;
+  --sw-hairline: #2a2a2a;
+  --vp-c-bg-alt: #121212;
+  --vp-c-bg-soft: #161616;
+  --vp-c-text-2: #c8c8c8;
+  --vp-code-block-bg: #141414;
+  --vp-code-bg: #1a1a1a;
+}
+
+/* Square corners and no soft depth anywhere. */
+.VPButton, .VPFeature, .vp-doc div[class*="language-"], .custom-block, .vp-doc :not(pre) > code, .DocSearch-Button, .VPLocalSearchBox .shell,
+.VPNavBarSearch .DocSearch-Button, .VPSidebarItem .item, .vp-doc table, img.VPImage { border-radius: 0 !important; box-shadow: none !important; }
+
+/* Headings: one family, tight tracking, a clear scale. */
+.vp-doc h1, .vp-doc h2, .vp-doc h3, .vp-doc h4, .VPHero .name, .VPHero .text, .VPFeature .title, .VPNavBarTitle .title {
+  font-family: var(--sw-display);
+  letter-spacing: -0.025em;
+}
+.vp-doc h1 { font-size: clamp(40px, 5vw, 64px); line-height: 1; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 32px; }
+.vp-doc h2 { font-size: 30px; line-height: 1.1; font-weight: 700; border-top: 2px solid var(--sw-rule); padding-top: 20px; margin-top: 56px; }
+.vp-doc h3 { font-size: 20px; font-weight: 700; }
+.vp-doc h4 { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; }
+.vp-doc p, .vp-doc li { font-size: 16px; line-height: 1.6; }
+.vp-doc a { color: var(--sw-ink); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.vp-doc a:hover { color: var(--sw-accent); }
+.vp-doc table { border-collapse: collapse; border-top: 2px solid var(--sw-rule); }
+.vp-doc tr { background: transparent !important; border-top: 1px solid var(--sw-hairline); }
+.vp-doc th, .vp-doc td { border: none; border-bottom: 1px solid var(--sw-hairline); }
+.vp-doc th { font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--sw-grey); background: transparent; }
+.vp-doc blockquote { border-left: 4px solid var(--sw-accent); }
+.vp-doc .header-anchor { color: var(--sw-accent); }
+
+/* Navigation: a hairline, a bold wordmark, small labels. */
+.VPNavBar, .VPNavBar.has-sidebar .content-body, .VPNavBar .divider-line { background: var(--vp-c-bg) !important; }
+.VPNavBar .divider-line { background: var(--sw-rule) !important; height: 2px; }
+.VPNavBarTitle .title { font-weight: 800; font-size: 18px; }
+.VPNavBarMenuLink, .VPNavBarMenuGroup .text { font-size: 13px; font-weight: 600; letter-spacing: 0.02em; }
+.VPNavBarMenuLink.active { color: var(--sw-accent); }
+
+/* Sidebar: group labels in small capitals over a rule. */
+.VPSidebarItem.level-0 > .item > .text { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--sw-grey); border-top: 2px solid var(--sw-rule); padding-top: 10px; }
+.VPSidebarItem.is-active > .item .link > .text { color: var(--sw-accent); font-weight: 600; }
+.VPSidebar { background: var(--vp-c-bg) !important; border-right: 1px solid var(--sw-hairline); }
+
+/* Home: a flush-left poster. The name is a label, the claim is the headline. */
+.VPHome { padding-bottom: 96px; }
+.VPHero { padding-top: 96px !important; }
+.VPHero .container { flex-direction: column !important; align-items: flex-start !important; }
+.VPHero .main { max-width: 1100px !important; text-align: left !important; }
+.VPHero .name { font-size: 14px !important; line-height: 1 !important; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em !important; color: var(--sw-accent) !important; }
+.VPHero .name .clip { -webkit-text-fill-color: currentColor; background: none; }
+.VPHero .text { font-size: clamp(56px, 10vw, 136px) !important; line-height: 0.95 !important; font-weight: 800 !important; letter-spacing: -0.035em !important; word-spacing: 0.04em; max-width: none !important; margin-top: 20px; }
+.VPHero .tagline { font-size: 20px !important; line-height: 1.45 !important; max-width: 640px !important; color: var(--vp-c-text-2) !important; margin-top: 32px !important; padding-top: 24px !important; border-top: 2px solid var(--sw-rule); }
+.VPHero .actions { justify-content: flex-start !important; margin-top: 32px; }
+.VPHero .image { display: none; }
+.VPButton { font-weight: 600 !important; letter-spacing: 0.01em; border-width: 2px !important; }
+
+/* Features: three numbered columns under a rule, no boxes. */
+.VPFeatures .container { border-top: 2px solid var(--sw-rule); padding-top: 0; }
+.VPFeatures .items { counter-reset: feature; margin: 0 !important; }
+.VPFeatures .item { padding: 0 !important; }
+.VPFeature { background: transparent !important; border: none !important; border-right: 1px solid var(--sw-hairline) !important; padding: 24px 24px 0 0 !important; }
+.VPFeature .box { padding: 0 !important; counter-increment: feature; }
+.VPFeature .box::before { content: counter(feature, decimal-leading-zero); display: block; font-family: var(--sw-display); font-size: 48px; font-weight: 800; letter-spacing: -0.04em; color: var(--sw-accent); margin-bottom: 16px; }
+.VPFeature .title { font-size: 20px; font-weight: 700; }
+.VPFeature .details { font-size: 15px; line-height: 1.55; }
+.VPFeatures .item:last-child .VPFeature { border-right: none !important; }
+/* Stacked on a phone, the columns lose their dividers and keep a rule between them. */
+@media (max-width: 639px) {
+  .VPFeature { border-right: none !important; padding-right: 0 !important; }
+  .VPFeatures .item + .item .VPFeature { border-top: 1px solid var(--sw-hairline) !important; margin-top: 24px; }
+}

@@ -1,12 +1,16 @@
 import { defineConfig } from "vitepress";
 
 export default defineConfig({
-  title: "cutcut",
+  title: "CutCraft",
   description: "A video-editing DSL: a model writes a TSX file, the browser renders it, the editor edits the same file.",
   base: "/cutcut/",
   cleanUrls: true,
   lastUpdated: true,
-  head: [["link", { rel: "icon", type: "image/svg+xml", href: "/cutcut/favicon.svg" }]],
+  head: [
+    ["link", { rel: "icon", type: "image/svg+xml", href: "/cutcut/favicon.svg" }],
+    ["link", { rel: "preconnect", href: "https://fonts.gstatic.com", crossorigin: "" }],
+    ["link", { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@600;700;800&display=swap" }],
+  ],
   themeConfig: {
     logo: "/logo.svg",
     nav: [
@@ -15,7 +19,7 @@ export default defineConfig({
       { text: "Decisions", link: "/decisions/" },
       { text: "Recipes", link: "/recipes/" },
       { text: "Comparisons", link: "/comparisons/diffusion-studio" },
-      { text: "GitHub", link: "https://github.com/bsnisar/cutcut" },
+      { text: "GitHub", link: "https://github.com/prefix-tree/cutcut" },
     ],
     sidebar: {
       "/guide/": [
@@ -34,8 +38,8 @@ export default defineConfig({
           { text: "Actions", link: "/reference/actions" },
           { text: "Graphics", link: "/reference/graphics" },
           { text: "Rendering", link: "/reference/rendering" },
-          { text: "Specification (kit)", link: "https://github.com/bsnisar/cutcut/blob/main/packages/kit/docs/spec.md" },
-          { text: "OpenReel parity (kit)", link: "https://github.com/bsnisar/cutcut/blob/main/packages/kit/docs/parity.md" },
+          { text: "Specification (kit)", link: "https://github.com/prefix-tree/cutcut/blob/main/packages/kit/docs/spec.md" },
+          { text: "OpenReel parity (kit)", link: "https://github.com/prefix-tree/cutcut/blob/main/packages/kit/docs/parity.md" },
         ] },
       ],
       "/decisions/": [
@@ -80,9 +84,9 @@ export default defineConfig({
         ] },
       ],
     },
-    socialLinks: [{ icon: "github", link: "https://github.com/bsnisar/cutcut" }],
+    socialLinks: [{ icon: "github", link: "https://github.com/prefix-tree/cutcut" }],
     search: { provider: "local" },
-    editLink: { pattern: "https://github.com/bsnisar/cutcut/edit/main/docs/:path" },
+    editLink: { pattern: "https://github.com/prefix-tree/cutcut/edit/main/docs/:path" },
     footer: { message: "MIT licensed." },
   },
 });
