@@ -123,7 +123,7 @@ export const comparison = defineKind({
     labelColor: color("$text"),
     font: font("$body"),
   },
-  example: { items: [{ label: "Manual edit", value: 6, color: "$muted" }, { label: "With cutcut", value: 1.5 }], suffix: " h", decimals: 1 },
+  example: { items: [{ label: "Manual edit", value: 6, color: "$muted" }, { label: "With CutCraft", value: 1.5 }], suffix: " h", decimals: 1 },
   size: (p) => (p.orientation === "vertical" ? { width: p.items.length * 160, height: 480 } : { width: 900, height: p.items.length * 90 }),
   draw: (p, ctx) => {
     const W = ctx.width, H = ctx.height, count = p.items.length;

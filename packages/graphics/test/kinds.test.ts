@@ -102,7 +102,7 @@ describe("graphic kinds", () => {
       expect(trackA).toBe(trackB);
       expect(barA! / barB!).toBeCloseTo(6 / 1.5, 0);
       expect(widths({ max: 12 })[1]! / trackA!).toBeLessThan(0.55);
-      expect(draw("comparison", 2).labels.map((l) => l.text)).toEqual(["Manual edit", "6.0 h", "With cutcut", "1.5 h"]);
+      expect(draw("comparison", 2).labels.map((l) => l.text)).toEqual(["Manual edit", "6.0 h", "With CutCraft", "1.5 h"]);
       expect(draw("comparison", 0, { orientation: "vertical" }).labels.filter((l) => l.text.endsWith(" h")).map((l) => l.text)).toEqual(["0.0 h", "0.0 h"]);
     });
 
