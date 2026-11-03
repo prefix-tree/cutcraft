@@ -223,6 +223,12 @@ export class OverlayPlane {
         return;
       }
       case "layer": {
+        const engine = placement.props.engine;
+        if (typeof engine === "string") {
+          // WebGL and Motion need a browser; the browser export engine draws them.
+          this.warnOnce(`engine:${placement.id}`, `layer "${placement.id}" is drawn by the ${engine} engine, which needs a browser; the Node export leaves it out`);
+          return;
+        }
         const layout = overlayLayout(props, full);
         const clock = layerClock(placement, t, comp.fps);
         const interior = this.options.interiors?.get(placement.id);

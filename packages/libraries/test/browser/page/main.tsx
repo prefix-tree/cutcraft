@@ -1,5 +1,5 @@
 // A Player with free code in three Layers: a three.js scene, a Motion timeline and a CSS animation. The test seeks it.
-import { Composition, Layer, Track, collect, resolve } from "@cutcraft/kit";
+import { Composition, Layer, Motion, Three, Track, collect, resolve } from "@cutcraft/kit";
 import { Player, type PlayerRef } from "@cutcraft/player";
 import { useFrame } from "@react-three/fiber";
 import { createRef, useRef } from "react";
@@ -8,6 +8,9 @@ import type { Mesh, MeshBasicMaterial } from "three";
 import { useLayerTime, useTimeline } from "../../../src/motion";
 import { ThreeScene } from "../../../src/three";
 import { useTransform, motion } from "motion/react";
+import { installFreeCodeLibraries } from "../../../src";
+
+installFreeCodeLibraries();
 
 declare global { interface Window { __ready?: boolean; __seek(t: number): Promise<void> } }
 
@@ -48,6 +51,15 @@ const element = (
       <Layer id="three" start={0} duration={4}><ThreeScene camera={{ position: [0, 0, 5] }} onCreated={() => { sceneReady = true; }}><Plane /></ThreeScene></Layer>
       <Layer id="motion" start={0} duration={4}><Timeline /></Layer>
       <Layer id="css" start={0} duration={4}><Keyframes /></Layer>
+      {/* The tags, as a file writes them: plain three.js pasted into setup, and a Motion sequence. */}
+      <Three id="plain" start={0} duration={4} camera={{ position: [0, 0, 5] }} setup={({ scene, THREE }) => {
+        const material = new THREE.MeshBasicMaterial();
+        scene.add(new THREE.Mesh(new THREE.PlaneGeometry(100, 100), material));
+        return ({ time }) => { material.color.setRGB(0, Math.min(1, time / 4), 0); };
+      }} />
+      <Motion id="tagged" start={0} duration={4} sequence={[["#tagged-box", { opacity: [0, 1] }, { duration: 2, ease: "linear" }]]}>
+        <div id="tagged-box" style={{ position: "absolute", top: 180, width: 50, height: 50, background: "#ff0" }} />
+      </Motion>
     </Track>
   </Composition>
 );
@@ -57,5 +69,19 @@ createRoot(document.getElementById("root")!).render(<Player ref={ref} state={sta
 
 const frames = (n: number): Promise<void> => new Promise((r) => { const step = (): void => { if (--n <= 0) r(); else requestAnimationFrame(step); }; requestAnimationFrame(step); });
 window.__seek = async (t) => { await ref.current!.seekTo(t); await frames(3); };
-const wait = (): void => { if (ref.current && sceneReady && document.querySelector("#motion-box")) window.__ready = true; else requestAnimationFrame(wait); };
-wait();
+// The <Three> tag's canvas is ready once a seek draws its green.
+const plainDrawn = (): boolean => {
+  const gl = document.querySelector<HTMLCanvasElement>(`[data-el="plain"] canvas`);
+  if (!gl) return false;
+  const probe = document.createElement("canvas"); probe.width = gl.width; probe.height = gl.height;
+  const ctx = probe.getContext("2d")!; ctx.drawImage(gl, 0, 0);
+  return ctx.getImageData(gl.width >> 1, gl.height >> 1, 1, 1).data[1]! > 0;
+};
+const wait = async (): Promise<void> => {
+  if (ref.current && sceneReady && document.querySelector("#motion-box")) {
+    await window.__seek(2);
+    if (plainDrawn()) { window.__ready = true; return; }
+  }
+  requestAnimationFrame(() => void wait());
+};
+void wait();

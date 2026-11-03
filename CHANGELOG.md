@@ -8,15 +8,19 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
-- three.js and Motion in free code. `@cutcraft/libraries` exports `FREE_CODE_LIBRARIES`, the
-  imports a host passes to `loadModule` so a file may import `three`, `@react-three/fiber`,
-  `motion` and `motion/react`, with adapters that put each on the video's clock:
-  `<ThreeScene>` (`@cutcraft/libraries/three`) is a React Three Fiber canvas advanced to the
-  layer's time on every frame, and `useTimeline` and `useLayerTime`
-  (`@cutcraft/libraries/motion`) play a Motion sequence, or feed Motion values, from it. They
-  scrub both ways. The `free-code-clock` lint warns about a bare `<Canvas>`, Motion's
-  `animate()` and `motion` elements with `animate` or `whileInView`, and names the adapter. The
-  Node export does not draw WebGL yet; the browser export engine will.
+- `<Three>` and `<Motion>`: three.js and Motion on the timeline. Both are Layers to the
+  resolver, the timeline and the editor (placed, anchored, trimmed and folded like one), with
+  literal props the inspector edits. `<Three setup>` runs plain three.js once with `{ scene,
+  camera, renderer, THREE }` and its returned `update({ time, t, ... })` on every frame;
+  React Three Fiber children work too; `camera` and `background` are props. `<Motion
+  sequence>` animates its children with a Motion sequence. Both follow the video's clock and
+  scrub both ways. A host draws them by calling `installFreeCodeLibraries()` from the new
+  `@cutcraft/libraries`, which installs their engines (`installLayerEngine`) and returns the
+  imports to pass to `loadModule` (`three`, `@react-three/fiber`, `motion`, `motion/react`).
+  Inside a plain `<Layer>`, `<ThreeScene>`, `useTimeline` and `useLayerTime` do the same. The
+  `free-code-clock` lint warns about a bare `<Canvas>`, Motion's `animate()` and `motion`
+  elements with `animate` or `whileInView`. The Node export leaves the tags out with a
+  warning; the browser export engine will draw them.
 
 - CSS animations inside a `<Layer>` are held at the layer's time in the player: they count from
   the layer's start, pause with the video and scrub both ways.

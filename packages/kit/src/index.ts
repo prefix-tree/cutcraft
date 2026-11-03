@@ -4,6 +4,8 @@ export * from "./jsx/capabilities";
 export * from "./jsx/rendering";
 export * from "./jsx/elements";
 export * from "./jsx/use-t";
+export * from "./jsx/engines";
+export type { ThreeFrameArgs, ThreeSetupArgs, ThreeSetupFunction } from "./jsx/schemas/overlays";
 export * from "./jsx/animate";
 // What an editor shows for a <Graphic>'s own props, read from its kind's schema.
 export { graphicControls, type GraphicControl } from "@cutcraft/graphics";

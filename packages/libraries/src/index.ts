@@ -1,3 +1,4 @@
+import { installLayerEngine, type LayerEngine } from "@cutcraft/kit";
 import * as fiber from "@react-three/fiber";
 import * as motion from "motion";
 import * as motionReact from "motion/react";
@@ -25,5 +26,20 @@ export const FREE_CODE_LIBRARIES: Readonly<Record<string, unknown>> = {
   "@cutcraft/libraries/motion": cutMotion,
 };
 
-export { ThreeScene, type ThreeSceneProps } from "./three";
-export { useLayerTime, useTimeline } from "./motion";
+/**
+ * Make `<Three>` and `<Motion>` draw (installs their layer engines) and return the imports a host passes to
+ * `loadModule`. Call it once, before the Player mounts:
+ *
+ * ```ts
+ * const imports = installFreeCodeLibraries();
+ * const video = loadModule(source, { imports });
+ * ```
+ */
+export function installFreeCodeLibraries(): Readonly<Record<string, unknown>> {
+  installLayerEngine("three", cutThree.ThreeLayer as LayerEngine);
+  installLayerEngine("motion", cutMotion.MotionLayer as LayerEngine);
+  return FREE_CODE_LIBRARIES;
+}
+
+export { ThreeLayer, ThreeScene, type ThreeCamera, type ThreeFrame, type ThreeSceneProps, type ThreeSetup, type ThreeSetupFn, type ThreeUpdate } from "./three";
+export { MotionLayer, useLayerTime, useTimeline } from "./motion";

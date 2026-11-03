@@ -22,18 +22,22 @@ afterAll(async () => {
   await server?.close();
 });
 
-async function at(t: number): Promise<{ red: number; motionOpacity: number; motionX: number; cssOpacity: number }> {
+async function at(t: number): Promise<{ red: number; green: number; motionOpacity: number; motionX: number; cssOpacity: number; taggedOpacity: number }> {
   await page.evaluate((s) => window.__seek(s), t);
   return page.evaluate(() => {
-    const gl = document.querySelector<HTMLCanvasElement>(`[data-el="three"] canvas`)!;
-    const probe = document.createElement("canvas");
-    probe.width = gl.width; probe.height = gl.height;
-    const ctx = probe.getContext("2d")!;
-    ctx.drawImage(gl, 0, 0);
-    const [red] = ctx.getImageData(gl.width >> 1, gl.height >> 1, 1, 1).data;
+    const pixel = (layer: string): Uint8ClampedArray => {
+      const gl = document.querySelector<HTMLCanvasElement>(`[data-el="${layer}"] canvas`)!;
+      const probe = document.createElement("canvas");
+      probe.width = gl.width; probe.height = gl.height;
+      const ctx = probe.getContext("2d")!;
+      ctx.drawImage(gl, 0, 0);
+      return ctx.getImageData(gl.width >> 1, gl.height >> 1, 1, 1).data;
+    };
     const x = new DOMMatrix(getComputedStyle(document.querySelector("#motion-value")!).transform).m41;
     return {
-      red: red!,
+      red: pixel("three")[0]!,
+      green: pixel("plain")[1]!,
+      taggedOpacity: Number(getComputedStyle(document.querySelector("#tagged-box")!).opacity),
       motionOpacity: Number(getComputedStyle(document.querySelector("#motion-box")!).opacity),
       motionX: x,
       cssOpacity: Number(getComputedStyle(document.querySelector("#css-box")!).opacity),
@@ -58,6 +62,18 @@ describe("free code on the video's clock", () => {
   it("drives Motion values from the layer's time", async () => {
     expect((await at(2)).motionX).toBeCloseTo(200, 0);
     expect((await at(1)).motionX).toBeCloseTo(100, 0);
+  });
+
+  it("runs plain three.js pasted into <Three setup>, at the layer's time, both ways", async () => {
+    const one = await at(1), three = await at(3), back = await at(1);
+    expect(three.green).toBeGreaterThan(one.green + 20);
+    expect(back.green).toBe(one.green);
+  });
+
+  it("plays a <Motion> tag's sequence at the layer's time, both ways", async () => {
+    expect((await at(1)).taggedOpacity).toBeCloseTo(0.5, 1);
+    expect((await at(3)).taggedOpacity).toBe(1);
+    expect((await at(0.5)).taggedOpacity).toBeCloseTo(0.25, 1);
   });
 
   it("holds CSS animations at the layer's time, both ways", async () => {

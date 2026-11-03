@@ -169,3 +169,62 @@ export const layerSchema = z.strictObject({
   transform: transformSchema.optional(),
   blend: zBlendMode.optional(),
 });
+
+const vec3Schema = z.tuple([z.number(), z.number(), z.number()]);
+
+/* eslint-disable @typescript-eslint/no-explicit-any -- the kit does not depend on three; its objects are any here so pasted three.js type-checks */
+/** What `<Three setup>` gets once: the scene, its camera and renderer, and the three.js namespace. */
+export interface ThreeSetupArgs {
+  readonly scene: any;
+  readonly camera: any;
+  readonly renderer: any;
+  readonly THREE: any;
+  /** The canvas size in composition pixels. */
+  readonly width: number;
+  readonly height: number;
+}
+/* eslint-enable @typescript-eslint/no-explicit-any */
+
+/** What the update `setup` returns gets on every frame: `time` is seconds since the layer started. */
+export interface ThreeFrameArgs extends ThreeSetupArgs {
+  readonly time: number;
+  /** 0..1 through the layer. */
+  readonly t: number;
+  readonly duration: number;
+  /** Seconds since the previous frame drawn; negative after a scrub back. Prefer `time`. */
+  readonly delta: number;
+}
+
+export type ThreeSetupFunction = (setup: ThreeSetupArgs) => ((frame: ThreeFrameArgs) => void) | { update?: (frame: ThreeFrameArgs) => void; dispose?: () => void } | void;
+
+/**
+ * `<Three>`: a Layer that holds a three.js scene. `setup` takes `{ scene, camera, renderer, THREE, width, height }`
+ * once and may return `update(frame)`, called on every frame with the layer's time; JSX children are React Three
+ * Fiber. The camera and background are literal props, so the inspector edits them.
+ */
+export const threeSchema = layerSchema.extend({
+  engine: z.literal("three"),
+  camera: z.strictObject({
+    position: vec3Schema.optional(),
+    lookAt: vec3Schema.optional(),
+    fov: z.number().min(1).max(179).optional(),
+    near: z.number().positive().optional(),
+    far: z.number().positive().optional(),
+    zoom: z.number().positive().optional(),
+    orthographic: z.boolean().optional(),
+  }).optional(),
+  background: colorSchema.optional(),
+  setup: z.custom<ThreeSetupFunction>((v) => typeof v === "function", "setup must be a function").optional(),
+});
+
+/** One step of a Motion sequence: a selector inside the tag, its keyframes, and options (`duration`, `at`, `ease`…). */
+const motionStepSchema = z.union([
+  z.tuple([z.string(), z.record(z.string(), z.unknown())]),
+  z.tuple([z.string(), z.record(z.string(), z.unknown()), z.record(z.string(), z.unknown())]),
+]);
+
+/** `<Motion>`: a Layer whose children are animated by a Motion sequence on the video's clock. */
+export const motionSchema = layerSchema.extend({
+  engine: z.literal("motion"),
+  sequence: z.array(motionStepSchema).default([]),
+});
