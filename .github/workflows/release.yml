@@ -20,6 +20,9 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      # The render tests generate their test media with ffmpeg.
+      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - run: pnpm check
       # pnpm (10.13+) does the OIDC exchange itself, builds each package (prepack), swaps workspace:* for versions,
       # and skips versions already on npm. A tag checkout is a detached HEAD, hence --no-git-checks.
       - run: pnpm -r publish --access public --no-git-checks

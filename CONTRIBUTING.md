@@ -69,3 +69,9 @@ benchmarks on a 4-core runner (results in the job log and the `render-bench`
 artifact); `gh workflow run docs.yml -f bench=true` measures the landing page's
 numbers again before deploying. Otherwise the site uses the committed
 `docs/bench.json`.
+
+## Releasing
+
+`pnpm release 0.2.0` on a clean `main`: it sets every published package to that version, dates the changelog's
+Unreleased section, commits, tags `v0.2.0` and pushes. The tag starts the Release workflow, which runs `pnpm check` and
+publishes to npm with trusted publishing.
