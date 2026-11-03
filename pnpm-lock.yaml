@@ -4,6 +4,66 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+catalogs:
+  default:
+    '@fontsource/dm-sans':
+      specifier: ^5.3.0
+      version: 5.3.0
+    '@fontsource/inter':
+      specifier: ^5.3.0
+      version: 5.3.0
+    '@fontsource/jetbrains-mono':
+      specifier: ^5.3.0
+      version: 5.3.0
+    '@fontsource/playfair-display':
+      specifier: ^5.3.0
+      version: 5.3.0
+    '@fontsource/space-grotesk':
+      specifier: ^5.3.0
+      version: 5.3.0
+    '@playwright/test':
+      specifier: 1.56.1
+      version: 1.56.1
+    '@types/node':
+      specifier: ^22.0.0
+      version: 22.20.5
+    '@types/react':
+      specifier: ^19.3.0
+      version: 19.3.0
+    '@types/react-dom':
+      specifier: ^19.3.0
+      version: 19.3.0
+    '@vitejs/plugin-react':
+      specifier: ^5.2.0
+      version: 5.2.0
+    jsdom:
+      specifier: ^30.1.3
+      version: 30.1.3
+    mediabunny:
+      specifier: 1.62.0
+      version: 1.62.0
+    react:
+      specifier: ^19.3.1
+      version: 19.3.1
+    react-dom:
+      specifier: ^19.3.1
+      version: 19.3.1
+    tsx:
+      specifier: ^4.23.15
+      version: 4.23.15
+    typescript:
+      specifier: ^5.9.3
+      version: 5.9.3
+    vite:
+      specifier: ^8.3.5
+      version: 8.3.5
+    vitest:
+      specifier: ^5.0.5
+      version: 5.0.5
+    zod:
+      specifier: ^4.6.7
+      version: 4.6.7
+
 patchedDependencies:
   '@mediabunny/server@1.62.1':
     hash: a81a491e437a68a0b57c9bd7d719081a81789ca3eb9bdeb1bedbac3efa4fa19b
@@ -23,13 +83,13 @@ importers:
         specifier: ^0.23.4
         version: 0.23.4(tsx@4.23.15)(typescript@5.9.3)
       tsx:
-        specifier: ^4.23.15
+        specifier: 'catalog:'
         version: 4.23.15
       vitepress:
         specifier: 1.6.4
         version: 1.6.4(@algolia/client-search@5.60.0)(@types/node@22.20.5)(lightningcss@1.33.0)(postcss@8.5.31)(search-insights@2.17.3)(typescript@5.9.3)
       zod:
-        specifier: ^4.6.7
+        specifier: 'catalog:'
         version: 4.6.7
 
   examples/launch-recap:
@@ -41,38 +101,38 @@ importers:
         specifier: workspace:*
         version: link:../../packages/player
       react:
-        specifier: ^19.3.1
+        specifier: 'catalog:'
         version: 19.3.1
       react-dom:
-        specifier: ^19.3.1
+        specifier: 'catalog:'
         version: 19.3.1(react@19.3.1)
       zod:
-        specifier: ^4.6.7
+        specifier: 'catalog:'
         version: 4.6.7
     devDependencies:
       '@types/node':
-        specifier: ^22.0.0
+        specifier: 'catalog:'
         version: 22.20.5
       '@types/react':
-        specifier: ^19.3.0
+        specifier: 'catalog:'
         version: 19.3.0
       '@types/react-dom':
-        specifier: ^19.3.0
+        specifier: 'catalog:'
         version: 19.3.0(@types/react@19.3.0)
       '@vitejs/plugin-react':
-        specifier: ^5.0.0
+        specifier: 'catalog:'
         version: 5.2.0(vite@8.3.5(@types/node@22.20.5)(esbuild@0.28.2)(tsx@4.23.15))
       tsx:
-        specifier: ^4.0.0
+        specifier: 'catalog:'
         version: 4.23.15
       typescript:
-        specifier: ^5.9.3
+        specifier: 'catalog:'
         version: 5.9.3
       vite:
-        specifier: ^8.3.5
+        specifier: 'catalog:'
         version: 8.3.5(@types/node@22.20.5)(esbuild@0.28.2)(tsx@4.23.15)
       vitest:
-        specifier: ^5.0.5
+        specifier: 'catalog:'
         version: 5.0.5(@types/node@22.20.5)(jsdom@30.1.3(@noble/hashes@1.8.0))(vite@8.3.5(@types/node@22.20.5)(esbuild@0.28.2)(tsx@4.23.15))
 
   examples/showcase:
@@ -84,23 +144,23 @@ importers:
         specifier: workspace:*
         version: link:../../packages/render
       react:
-        specifier: ^19.3.1
+        specifier: 'catalog:'
         version: 19.3.1
       zod:
-        specifier: ^4.6.7
+        specifier: 'catalog:'
         version: 4.6.7
     devDependencies:
       '@types/node':
-        specifier: ^22.0.0
+        specifier: 'catalog:'
         version: 22.20.5
       '@types/react':
-        specifier: ^19.3.0
+        specifier: 'catalog:'
         version: 19.3.0
       tsx:
-        specifier: ^4.0.0
+        specifier: 'catalog:'
         version: 4.23.15
       typescript:
-        specifier: ^5.9.3
+        specifier: 'catalog:'
         version: 5.9.3
 
   packages/cli:
@@ -115,17 +175,17 @@ importers:
         specifier: ^1.61.0
         version: 1.61.0
       zod:
-        specifier: ^4.6.7
+        specifier: 'catalog:'
         version: 4.6.7
     devDependencies:
       '@types/node':
-        specifier: ^22.0.0
+        specifier: 'catalog:'
         version: 22.20.5
       typescript:
-        specifier: ^5.9.3
+        specifier: 'catalog:'
         version: 5.9.3
       vitest:
-        specifier: ^5.0.5
+        specifier: 'catalog:'
         version: 5.0.5(@types/node@22.20.5)(jsdom@30.1.3(@noble/hashes@1.8.0))(vite@8.3.5(@types/node@22.20.5)(esbuild@0.28.2)(tsx@4.23.15))
 
   packages/kit:
@@ -146,32 +206,32 @@ importers:
         specifier: ^3.35.1
         version: 3.35.1
       zod:
-        specifier: ^4.6.7
+        specifier: 'catalog:'
         version: 4.6.7
     devDependencies:
       '@types/babel__traverse':
         specifier: ^7.28.0
         version: 7.28.0
       '@types/node':
-        specifier: ^22.0.0
+        specifier: 'catalog:'
         version: 22.20.5
       '@types/react':
-        specifier: ^19.3.0
+        specifier: 'catalog:'
         version: 19.3.0
       jsdom:
-        specifier: ^30.1.3
+        specifier: 'catalog:'
         version: 30.1.3(@noble/hashes@1.8.0)
       react:
-        specifier: ^19.3.1
+        specifier: 'catalog:'
         version: 19.3.1
       tsx:
-        specifier: ^4.0.0
+        specifier: 'catalog:'
         version: 4.23.15
       typescript:
-        specifier: ^5.9.3
+        specifier: 'catalog:'
         version: 5.9.3
       vitest:
-        specifier: ^5.0.5
+        specifier: 'catalog:'
         version: 5.0.5(@types/node@22.20.5)(jsdom@30.1.3(@noble/hashes@1.8.0))(vite@8.3.5(@types/node@22.20.5)(esbuild@0.28.2)(tsx@4.23.15))
 
   packages/libraries:
@@ -193,40 +253,40 @@ importers:
         specifier: workspace:*
         version: link:../player
       '@playwright/test':
-        specifier: 1.56.1
+        specifier: 'catalog:'
         version: 1.56.1
       '@types/node':
-        specifier: ^22.0.0
+        specifier: 'catalog:'
         version: 22.20.5
       '@types/react':
-        specifier: ^19.3.0
+        specifier: 'catalog:'
         version: 19.3.0
       '@types/react-dom':
-        specifier: ^19.3.0
+        specifier: 'catalog:'
         version: 19.3.0(@types/react@19.3.0)
       '@types/three':
         specifier: 0.180.0
         version: 0.180.0
       '@vitejs/plugin-react':
-        specifier: ^5.2.0
+        specifier: 'catalog:'
         version: 5.2.0(vite@8.3.5(@types/node@22.20.5)(esbuild@0.28.2)(tsx@4.23.15))
       jsdom:
-        specifier: ^30.1.3
+        specifier: 'catalog:'
         version: 30.1.3(@noble/hashes@1.8.0)
       react:
-        specifier: ^19.3.1
+        specifier: 'catalog:'
         version: 19.3.1
       react-dom:
-        specifier: ^19.3.1
+        specifier: 'catalog:'
         version: 19.3.1(react@19.3.1)
       typescript:
-        specifier: ^5.9.3
+        specifier: 'catalog:'
         version: 5.9.3
       vite:
-        specifier: ^8.3.5
+        specifier: 'catalog:'
         version: 8.3.5(@types/node@22.20.5)(esbuild@0.28.2)(tsx@4.23.15)
       vitest:
-        specifier: ^5.0.5
+        specifier: 'catalog:'
         version: 5.0.5(@types/node@22.20.5)(jsdom@30.1.3(@noble/hashes@1.8.0))(vite@8.3.5(@types/node@22.20.5)(esbuild@0.28.2)(tsx@4.23.15))
 
   packages/player:
@@ -238,62 +298,62 @@ importers:
         specifier: workspace:*
         version: link:../kit
       '@fontsource/dm-sans':
-        specifier: ^5.3.0
+        specifier: 'catalog:'
         version: 5.3.0
       '@fontsource/inter':
-        specifier: ^5.3.0
+        specifier: 'catalog:'
         version: 5.3.0
       '@fontsource/jetbrains-mono':
-        specifier: ^5.3.0
+        specifier: 'catalog:'
         version: 5.3.0
       '@fontsource/playfair-display':
-        specifier: ^5.3.0
+        specifier: 'catalog:'
         version: 5.3.0
       '@fontsource/space-grotesk':
-        specifier: ^5.3.0
+        specifier: 'catalog:'
         version: 5.3.0
       mediabunny:
-        specifier: 1.62.0
+        specifier: 'catalog:'
         version: 1.62.0
       saxes:
         specifier: ^6.0.0
         version: 6.0.0
       zod:
-        specifier: ^4.6.7
+        specifier: 'catalog:'
         version: 4.6.7
     devDependencies:
       '@playwright/test':
-        specifier: 1.56.1
+        specifier: 'catalog:'
         version: 1.56.1
       '@types/node':
-        specifier: ^22.0.0
+        specifier: 'catalog:'
         version: 22.20.5
       '@types/react':
-        specifier: ^19.3.0
+        specifier: 'catalog:'
         version: 19.3.0
       '@types/react-dom':
-        specifier: ^19.3.0
+        specifier: 'catalog:'
         version: 19.3.0(@types/react@19.3.0)
       '@vitejs/plugin-react':
-        specifier: ^5.0.0
+        specifier: 'catalog:'
         version: 5.2.0(vite@8.3.5(@types/node@22.20.5)(esbuild@0.28.2)(tsx@4.23.15))
       jsdom:
-        specifier: ^30.1.3
+        specifier: 'catalog:'
         version: 30.1.3(@noble/hashes@1.8.0)
       react:
-        specifier: ^19.3.1
+        specifier: 'catalog:'
         version: 19.3.1
       react-dom:
-        specifier: ^19.3.1
+        specifier: 'catalog:'
         version: 19.3.1(react@19.3.1)
       typescript:
-        specifier: ^5.9.3
+        specifier: 'catalog:'
         version: 5.9.3
       vite:
-        specifier: ^8.3.5
+        specifier: 'catalog:'
         version: 8.3.5(@types/node@22.20.5)(esbuild@0.28.2)(tsx@4.23.15)
       vitest:
-        specifier: ^5.0.5
+        specifier: 'catalog:'
         version: 5.0.5(@types/node@22.20.5)(jsdom@30.1.3(@noble/hashes@1.8.0))(vite@8.3.5(@types/node@22.20.5)(esbuild@0.28.2)(tsx@4.23.15))
 
   packages/render:
@@ -308,31 +368,31 @@ importers:
         specifier: workspace:*
         version: link:../player
       '@fontsource/dm-sans':
-        specifier: ^5.3.0
+        specifier: 'catalog:'
         version: 5.3.0
       '@fontsource/inter':
-        specifier: ^5.2.0
+        specifier: 'catalog:'
         version: 5.3.0
       '@fontsource/jetbrains-mono':
-        specifier: ^5.3.0
+        specifier: 'catalog:'
         version: 5.3.0
       '@fontsource/playfair-display':
-        specifier: ^5.3.0
+        specifier: 'catalog:'
         version: 5.3.0
       '@fontsource/space-grotesk':
-        specifier: ^5.3.0
+        specifier: 'catalog:'
         version: 5.3.0
       '@mediabunny/server':
         specifier: ^1.62.1
         version: 1.62.1(patch_hash=a81a491e437a68a0b57c9bd7d719081a81789ca3eb9bdeb1bedbac3efa4fa19b)(mediabunny@1.62.0)
       mediabunny:
-        specifier: 1.62.0
+        specifier: 'catalog:'
         version: 1.62.0
       node-av:
         specifier: ^6.1.1
         version: 6.1.1
       react:
-        specifier: ^19.3.1
+        specifier: 'catalog:'
         version: 19.3.1
       satori:
         specifier: ^0.63.2
@@ -341,38 +401,38 @@ importers:
         specifier: ^4.0.0
         version: 4.0.0
       zod:
-        specifier: ^4.6.7
+        specifier: 'catalog:'
         version: 4.6.7
     devDependencies:
       '@playwright/test':
-        specifier: 1.56.1
+        specifier: 'catalog:'
         version: 1.56.1
       '@types/node':
-        specifier: ^22.0.0
+        specifier: 'catalog:'
         version: 22.20.5
       '@types/react':
-        specifier: ^19.3.0
+        specifier: 'catalog:'
         version: 19.3.0
       '@types/react-dom':
-        specifier: ^19.3.0
+        specifier: 'catalog:'
         version: 19.3.0(@types/react@19.3.0)
       '@vitejs/plugin-react':
-        specifier: ^5.2.0
+        specifier: 'catalog:'
         version: 5.2.0(vite@8.3.5(@types/node@22.20.5)(esbuild@0.28.2)(tsx@4.23.15))
       react-dom:
-        specifier: ^19.3.1
+        specifier: 'catalog:'
         version: 19.3.1(react@19.3.1)
       tsx:
-        specifier: ^4.0.0
+        specifier: 'catalog:'
         version: 4.23.15
       typescript:
-        specifier: ^5.9.3
+        specifier: 'catalog:'
         version: 5.9.3
       vite:
-        specifier: ^8.3.5
+        specifier: 'catalog:'
         version: 8.3.5(@types/node@22.20.5)(esbuild@0.28.2)(tsx@4.23.15)
       vitest:
-        specifier: ^5.0.5
+        specifier: 'catalog:'
         version: 5.0.5(@types/node@22.20.5)(jsdom@30.1.3(@noble/hashes@1.8.0))(vite@8.3.5(@types/node@22.20.5)(esbuild@0.28.2)(tsx@4.23.15))
 
   recipes:
@@ -381,23 +441,23 @@ importers:
         specifier: workspace:*
         version: link:../packages/kit
       react:
-        specifier: ^19.3.1
+        specifier: 'catalog:'
         version: 19.3.1
       zod:
-        specifier: ^4.6.7
+        specifier: 'catalog:'
         version: 4.6.7
     devDependencies:
       '@types/node':
-        specifier: ^22.0.0
+        specifier: 'catalog:'
         version: 22.20.5
       '@types/react':
-        specifier: ^19.3.0
+        specifier: 'catalog:'
         version: 19.3.0
       typescript:
-        specifier: ^5.9.3
+        specifier: 'catalog:'
         version: 5.9.3
       vitest:
-        specifier: ^5.0.5
+        specifier: 'catalog:'
         version: 5.0.5(@types/node@22.20.5)(jsdom@30.1.3(@noble/hashes@1.8.0))(vite@8.3.5(@types/node@22.20.5)(esbuild@0.28.2)(tsx@4.23.15))
 
 packages:
