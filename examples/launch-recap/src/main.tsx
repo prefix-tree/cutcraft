@@ -22,7 +22,6 @@ function App() {
   const [tweaks, setTweaks] = useState<Record<string, string>>({});
   const props = { ...file.defaults, ...tweaks };
   const state: ResolvedState = useMemo(() => resolve(collectModule(file, tweaks), manifest), [tweaks]);
-  // biome-ignore lint/correctness/useExhaustiveDependencies: re-render the video only when one of its props changes, not on every new `props` object.
   const element = useMemo(
     () => file.default(props as typeof file.defaults),
     [props.product, props.tagline, props.accent, props.cta],

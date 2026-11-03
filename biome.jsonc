@@ -14,7 +14,9 @@
       "!docs/bench.json",
       "!**/fixtures/*.placement.json",
       // Biome reads only a Vue file's script, so every import its template uses looks unused.
-      "!**/*.vue"
+      "!**/*.vue",
+      // pnpm rewrites this file in its own style whenever it adds a catalog entry.
+      "!pnpm-workspace.yaml"
     ]
   },
   "formatter": {
