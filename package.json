@@ -36,7 +36,8 @@
     "changeset": "changeset",
     "release": "changeset publish",
     "check:packages": "node scripts/check-packages.mjs",
-    "knip": "knip"
+    "knip": "knip",
+    "test:coverage": "pnpm -r test --coverage --coverage.reporter=text-summary --coverage.reporter=json-summary --coverage.reporter=html"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.5",
