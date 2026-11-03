@@ -5,10 +5,10 @@ import { useFrame } from "@react-three/fiber";
 import { createRef, useRef } from "react";
 import { createRoot } from "react-dom/client";
 import type { Mesh, MeshBasicMaterial } from "three";
-import { useLayerTime, useTimeline } from "../../../src/motion";
-import { ThreeScene } from "../../../src/three";
+import { useLayerTime, useTimeline } from "../../../src/libraries/motion";
+import { ThreeScene } from "../../../src/libraries/three";
 import { useTransform, motion } from "motion/react";
-import { installFreeCodeLibraries } from "../../../src";
+import { installFreeCodeLibraries } from "../../../src/libraries";
 
 installFreeCodeLibraries();
 

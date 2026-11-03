@@ -45,7 +45,7 @@ jobs:
       # The export is checked against the browser here: overlay layout and the audio mix.
       - run: pnpm --filter @cutcraft/render test:browser
       # Free code on the video's clock: three.js, Motion and CSS animations in the real Player.
-      - run: pnpm --filter @cutcraft/libraries test:browser
+      - run: pnpm --filter @cutcraft/graphics test:browser
       - uses: actions/upload-artifact@v4
         if: failure()
         with:

@@ -254,7 +254,7 @@ supports flexbox CSS and no hooks, and warns about what it leaves out.
 
 ### three.js and Motion: `<Three>` and `<Motion>`
 
-A host that calls `installFreeCodeLibraries()` from `@cutcraft/libraries` gives
+A host that calls `installFreeCodeLibraries()` from `@cutcraft/graphics/libraries` gives
 the file two more tags. They sit on the timeline like a `<Layer>` (`id`,
 `start` or `anchor` and `at`, `duration`, `transform`, `enter`, `exit`), so the
 editor moves, trims and anchors them, and their literal props show in the
@@ -307,8 +307,8 @@ inspector edits it:
 ```
 
 Inside an ordinary `<Layer>`, the same libraries come as adapters:
-`<ThreeScene>` (`@cutcraft/libraries/three`) is the React Three Fiber canvas
-`<Three>` draws with, `useTimeline(sequence)` (`@cutcraft/libraries/motion`)
+`<ThreeScene>` (`@cutcraft/graphics/three`) is the React Three Fiber canvas
+`<Three>` draws with, `useTimeline(sequence)` (`@cutcraft/graphics/motion`)
 plays a sequence scoped to the ref it returns, and `useLayerTime()` is the
 layer's seconds as a Motion value, for `useTransform`. The lint warns about a
 bare `<Canvas>`, Motion's `animate()` and a `motion` element with `animate` or

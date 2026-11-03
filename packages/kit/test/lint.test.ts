@@ -63,16 +63,16 @@ describe("lint", () => {
     ].join("\n");
     const d = lint(wrap('<Track id="t"><Layer id="l" duration={3}><Bad /></Layer></Track>', extra));
     expect(d.filter((x) => x.rule === "free-code-clock").map((x) => x.message.split(";")[1]?.trim())).toEqual([
-      "use useTimeline or useLayerTime from @cutcraft/libraries/motion",
-      "use <ThreeScene> from @cutcraft/libraries/three",
-      "drive it with useTimeline or useLayerTime from @cutcraft/libraries/motion",
+      "use useTimeline or useLayerTime from @cutcraft/graphics/motion",
+      "use <ThreeScene> from @cutcraft/graphics/three",
+      "drive it with useTimeline or useLayerTime from @cutcraft/graphics/motion",
     ]);
   });
 
   it("lets three.js and Motion run through the adapters", () => {
     const extra = [
-      'import { ThreeScene } from "@cutcraft/libraries/three";',
-      'import { useTimeline, useLayerTime } from "@cutcraft/libraries/motion";',
+      'import { ThreeScene } from "@cutcraft/graphics/three";',
+      'import { useTimeline, useLayerTime } from "@cutcraft/graphics/motion";',
       'import { motion, useTransform } from "motion/react";',
       "function Good() { const scope = useTimeline([]); const x = useTransform(useLayerTime(), [0, 1], [0, 9]); return <div ref={scope}><ThreeScene /><motion.div style={{ x }} /></div>; }",
     ].join("\n");

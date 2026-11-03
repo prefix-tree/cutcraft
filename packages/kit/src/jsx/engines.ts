@@ -2,7 +2,7 @@ import type { ComponentType, ReactNode } from "react";
 
 /**
  * What draws an engine Layer (`<Three>`, `<Motion>`): a component given the Layer's resolved props (functions
- * included) and its children. The kit draws nothing; a host installs engines, as `@cutcraft/libraries` does.
+ * included) and its children. The kit draws nothing; a host installs engines, as `@cutcraft/graphics/libraries` does.
  */
 export type LayerEngine = ComponentType<Readonly<Record<string, unknown>> & { readonly children?: ReactNode }>;
 

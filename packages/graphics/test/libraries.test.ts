@@ -1,11 +1,12 @@
+// @vitest-environment jsdom
 import { collectModule, resolve } from "@cutcraft/kit";
 import { loadModule } from "@cutcraft/kit/source";
-import { FREE_CODE_LIBRARIES } from "../src";
+import { FREE_CODE_LIBRARIES } from "../src/libraries";
 
 const file = `
 import { Composition, Layer, Track } from "@cutcraft/kit";
-import { ThreeScene } from "@cutcraft/libraries/three";
-import { useTimeline } from "@cutcraft/libraries/motion";
+import { ThreeScene } from "@cutcraft/graphics/three";
+import { useTimeline } from "@cutcraft/graphics/motion";
 import { useFrame } from "@react-three/fiber";
 import { motion } from "motion/react";
 import { Color } from "three";

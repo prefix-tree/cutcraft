@@ -30,7 +30,7 @@ export function Layer(p: ElementProps & { readonly interior: ReactNode }) {
 function Engine({ name, props, children }: { readonly name: string; readonly props: Readonly<Record<string, unknown>>; readonly children: ReactNode }) {
   const Draw = layerEngine(name);
   if (!Draw) {
-    devWarn(`engine:${name}`, `no layer engine "${name}" is installed, so <${name === "three" ? "Three" : name === "motion" ? "Motion" : name}> draws nothing; the host installs it (installFreeCodeLibraries from @cutcraft/libraries)`);
+    devWarn(`engine:${name}`, `no layer engine "${name}" is installed, so <${name === "three" ? "Three" : name === "motion" ? "Motion" : name}> draws nothing; the host installs it (installFreeCodeLibraries from @cutcraft/graphics/libraries)`);
     return null;
   }
   return <Draw {...props}>{children}</Draw>;
