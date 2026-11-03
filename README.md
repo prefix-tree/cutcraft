@@ -19,7 +19,7 @@
 <p align="center">
   <a href="https://prefix-tree.github.io/cutcraft/">Documentation</a> ·
   <a href="https://prefix-tree.github.io/cutcraft/examples">Examples</a> ·
-  <a href="https://prefix-tree.github.io/cutcraft/guide/writing-files">Writing a file</a> ·
+  <a href="https://prefix-tree.github.io/cutcraft/guide/introduction">Guide</a> ·
   <a href="https://prefix-tree.github.io/cutcraft/reference/elements/">Reference</a> ·
   <a href="CHANGELOG.md">Changelog</a>
 </p>
@@ -99,7 +99,7 @@ CSS animation shows exactly the frame for that time. These layers are still time
 trims and anchors them to words like everything else; only what they draw is up to you.
 
 [`@cutcraft/graphics`](packages/graphics) has the host setup, and
-[Writing a file](https://prefix-tree.github.io/cutcraft/guide/writing-files#layer-holds-free-code) has the details.
+[Free code](https://prefix-tree.github.io/cutcraft/guide/free-code) has the details.
 The player draws all of this today. The Node export draws a `<Layer>` with a subset of CSS and skips `<Three>` and
 `<Motion>`; an export through headless Chrome that draws everything is next.
 
@@ -125,9 +125,9 @@ npx cutcraft video.tsx --still 2 --out poster.png
 npx cutcraft video.tsx --check-layout --safe-zone tiktok
 ```
 
-[Exporting](https://prefix-tree.github.io/cutcraft/guide/exporting) lists every option, and
-[Writing a file](https://prefix-tree.github.io/cutcraft/guide/writing-files) walks through a 25-second launch video
-line by line.
+The [CLI reference](https://prefix-tree.github.io/cutcraft/reference/cli) lists every option, and
+[A launch video, line by line](https://prefix-tree.github.io/cutcraft/guide/writing-files) walks through a 25-second
+video.
 
 To run the examples from this repository you need Node 22.19 or later, pnpm 10 (`corepack enable`), and `ffmpeg`
 with the `drawtext` filter for the placeholder footage:

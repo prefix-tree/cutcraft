@@ -1,9 +1,9 @@
 # Editing
 
-The editor's state is the file plus a patch log. Gestures dispatch actions;
-the resolver applies the log's net effect over the file; the log is folded into
-the file at sync points. [Decision 0003](../decisions/0003-patch-log-and-four-faced-actions.md)
-gives the reasoning; this page gives the mechanics.
+`@cutcraft/kit` has what an editor needs: a resolver that places every element in time, actions for every
+gesture with undo, and a fold that writes the result back into the file. An editor's state is the file plus a log of
+patches. Gestures run actions, the resolver applies the log over the file, and at sync points the log is folded
+into the file's text.
 
 ## Resolve
 
@@ -15,8 +15,8 @@ const state = resolve(tree, manifest, log); // absolute placements, memoised per
 `ResolvedState` holds the composition settings, the tracks, `items`
 (`Map<id, Placement>` with `start`, `end`, `duration`, `source`, parsed `props`,
 `editable`, `lockedProps`, `errors`) and the typed error list. Placements that
-did not change between resolves are the same object (see
-[decision 0011](../decisions/0011-performance-contract.md)).
+did not change between resolves are the same object, so a UI can memoise on them. A change costs about 2 µs per
+element.
 
 ## Actions
 
@@ -38,8 +38,7 @@ Every handler has four faces:
 | `invert` | action, state before | the inverse action, never null |
 | `fold` | action, source index | source edits, when the generic fold is not enough |
 
-The [action reference](../reference/actions.md) lists all of them with their
-OpenReel counterparts. History auto-groups rapid same-type, same-target
+The [action reference](../reference/actions.md) lists all 131. History auto-groups rapid same-type, same-target
 updates (a slider drag) within 100 ms and keeps explicit groups for gestures.
 
 ## Patches
@@ -89,8 +88,7 @@ lint(text, { manifest })   // Diagnostic[] with rule, severity, message, range, 
 
 Rules: `literal-ids`, `unique-ids`, `no-start-on-sequence`, `pure-helpers`,
 `expression-locked`, `one-captions`, `ambiguous-duration`, `file-shape`,
-`missing-asset`. They are the conventions that keep a file editable; the
-model's prompt lists the same ones. Two warnings check the cut rather than
+`missing-asset`. They are the conventions that keep a file editable. Two warnings check the cut rather than
 the file: `sequence-gap` (a `<Gap>` on the first sequence track, which is
 black unless another track covers it) and `cut-inside-word` (a numeric `in`
 or `out` that lands strictly inside a transcript word; it needs the manifest
@@ -101,3 +99,7 @@ of the other shot; it names the `shot:N` edge to use) and
 `shot-change-inside-crop` (one `transform.crop` over a range the camera cuts
 inside, so the framing the crop was set for ends mid-clip; split there), and `repeated-source` (two clips on
 one track playing overlapping stretches of the same asset, usually a split that kept the old clip).
+
+Three more look at what will be drawn: `stray-html` (HTML straight in a track, where nothing draws it),
+`free-code-clock` (free code off the video's clock; see [Free code](./free-code#the-video-s-clock)) and
+`not-rendered` (a prop that is accepted but not drawn yet, from [What renders](/reference/rendering)).

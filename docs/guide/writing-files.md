@@ -1,15 +1,12 @@
-# Writing a file
+# A launch video, line by line
 
-This page follows one file from brief to pixels: the launch recap in
-[`examples/launch-recap`](https://github.com/bsnisar/cutcut/tree/main/examples/launch-recap).
-The brief is a paragraph a person wrote; the prompt is what the model was
-given; the file is what it wrote. Every convention in the file exists for a
-reason, and this page gives the reason, the alternative we rejected, and what
-goes wrong without it.
+This page follows one file from a brief to a finished video: the launch recap in
+[`examples/launch-recap`](https://github.com/prefix-tree/cutcraft/tree/main/examples/launch-recap), which a model
+wrote. It shows what each part of the file does and links to the guide page that covers it in full.
 
 ## The brief
 
-> Make a 25–30 second launch recap for Shed, a cloud for small software. Open
+> Make a 25 to 30 second launch recap for Shed, a cloud for small software. Open
 > on the founder's key sentence from the interview. Cut to product b-roll with
 > a slow push-in, then the screen demo, then back to the founder for the close.
 > Put the product name and tagline on a title card at the top, a lower third
@@ -18,17 +15,8 @@ goes wrong without it.
 > The product name, the tagline, the accent colour and the call to action must
 > be tweakable afterwards without touching the edit.
 
-With it came `manifest.json`: five assets, the founder interview with sixty
-timed words, three shots and four silences; product b-roll with three shots;
-a screen recording; a music track; the logo.
-
-## The prompt
-
-The model receives [`prompt.md`](https://github.com/bsnisar/cutcut/blob/main/examples/launch-recap/prompt.md):
-the file shape, the vocabulary, ten conventions and the instruction to check
-its own work the way the lint will. It is short enough to read in a minute,
-and it explains what the editor will do with each construct rather than
-listing rules.
+With it came `manifest.json`: five assets. The founder interview has sixty timed words, three shots and four silences;
+the product b-roll has three shots; then a screen recording, a music track and the logo.
 
 ## The file
 
@@ -79,294 +67,36 @@ export default function Video({ product, tagline, accent, cta }: z.infer<typeof 
 }
 ```
 
-The whole file is 95 lines. It resolves to 29 addressable elements and
-25.6 seconds. Now the choices, one at a time.
+The whole file is 95 lines. It resolves to 29 elements and 25.6 seconds.
 
-## The file is the video
+## What each part does
 
-There is no project JSON beside this file. The resolver reads it, the editor
-edits it, the player plays it, the model rewrites it. The alternative, a
-document with a code export, means two sources of truth and a model that
-cannot see what the user changed. See [decision 0001](../decisions/0001-the-file-is-the-video.md).
+The four values the brief wanted tweakable are the `schema`. An inspector shows a field for each, and saving one
+rewrites `defaults` and nothing else ([The file](./the-file#schema-and-defaults-are-the-knobs)).
 
-What goes wrong without it: a user drags a clip, the document changes, the
-model's next edit is based on the file it wrote an hour ago, and one of the two
-edits is lost.
+`in="word:12" out="word:23.end"` is the sentence "Small software still deserves a real cloud. It should take one
+file." CutCraft turns it into 5.6 to 10.8 seconds of the interview. `in="shot:1"` is the b-roll's second shot. The
+screen recording has no transcript, so `demo` uses seconds ([Time by meaning](./time#time-references)).
 
-## A skeleton for time, free code for pictures
+`main` is a sequence track. `hook`, `broll`, `demo`, `close` and `outro` play back to back, and the two crossfades
+overlap their neighbours by 0.4 seconds. No clip has a `start`, so trimming `hook` moves everything after it
+([Sequence tracks](./time#sequence-tracks-place-by-order)).
 
-`<Clip>`, `<Track>`, `<Audio>` and the other timeline elements are components
-with Zod schemas that render nothing. The resolver reads their props to place
-footage and sound in time, and the editor edits them from the timeline. A
-`<div>` there would be impossible to edit: nothing says which one is the clip
-or where its timing lives.
+The overlays anchor. The title starts with the video, the tagline after the title, the lower third with `close`, the
+call to action with `outro`. Move the close and the lower third follows; no overlay has an absolute time
+([Overlays anchor](./time#overlays-anchor)).
 
-Pictures need none of that. Anything drawn over or instead of the footage can
-be code: put it in a `<Layer>` (below), and any React, CSS, canvas or WebGL
-renders. `<Title>`, `<Graphic>`, `<Shape>` and the rest are a ready-made library
-the inspector can edit; use them when they fit and write code when they do not
-([decision 0018](../decisions/0018-free-code-in-a-timeline-skeleton.md)).
+The push-in is four `<Keyframe>` children on `broll`, so an editor can change one key
+([Children for collections](./the-file#children-for-collections)).
 
-## Every element has a literal id
+`LowerThird` is a helper that returns a shape and two titles. It is used once, so its elements stay as editable as
+any other ([Helpers](./the-file#helpers)).
 
-`hook`, `broll`, `lt-bg`, `cap-3`. A gesture on the timeline finds its target
-by id; a patch names its target by id; the preview puts `data-el="hook"` on
-the DOM; the model replaces `out="word:23.end"` on the element whose id it
-knows. An expression as an id (`id={`clip-${i}`}`) cannot be addressed and is
-a lint error (`literal-ids`), except as the generated pattern inside a helper.
+The call to action is free code: a `<div>` with a progress bar inside `<Layer id="cta">`, timed by `useT()`. The Layer
+holds one component, so an inspector can edit its `text` and `accent` props ([Free code](./free-code)).
 
-Diffusion Studio stamps missing ids into the file on first save. We prefer
-that the author write them, so that the file the model handed over is the
-file that runs.
-
-## `schema` and `defaults` are the tweaks contract
-
-The brief asked for four things to be tweakable "without touching the edit".
-They are `z.object` fields with descriptions; the inspector grows a control
-for each (the example app's form). Changing one re-resolves the file with
-overrides; saving rewrites the `defaults` literal and nothing else. This is
-Claude Design's `EDITMODE` literal done as a typed export, and Diffusion
-Studio's `@inspect` consts done as a schema.
-
-## Schema props bind, expressions lock
-
-`out={closeOut}` where `closeOut` is a `schema` prop is *bound*: the index
-records which key the prop reads, the timeline drags it like a literal, and
-the fold writes the new value into `defaults` so every element reading
-`closeOut` follows. `out={start + 2}` is an *expression*: nothing in the file
-says what a new value should become, so the prop shows locked and the editor
-offers to bake it into a literal first. The lint warns on the second, not the
-first.
-
-## Trim by meaning: time references
-
-`in="word:12" out="word:23.end"` is the sentence "Small software still deserves
-a real cloud. It should take one file." The resolver turns it into 5.6–10.8 s
-against the manifest. `in="shot:1"` is the second shot of the b-roll. The
-screen recording has no transcript, so `demo` uses numbers.
-
-Why: the model reasons in words and shots, not in seconds, and a
-re-transcription or a re-ingest must not move the cut. When the user drags that
-edge in the timeline, the editor writes seconds, because that is what the
-gesture said. See [decision 0006](../decisions/0006-time-references-against-a-manifest.md).
-
-## Sequence tracks place by order
-
-`main` is a sequence track: `hook`, then `broll`, then `demo`, then `close`,
-then `outro`, back to back, with the two crossfades overlapping their
-neighbours by 0.4 s. No clip has a `start`; writing one is a lint error
-(`no-start-on-sequence`). Trim `hook` and everything after it moves.
-
-A `<Gap>` on this track is black unless another track covers it, so the lint
-warns (`sequence-gap`); pauses belong inside clips, as trailing silence kept
-in the trim. A numeric trim that lands inside a transcript word gets a
-warning too (`cut-inside-word`), with the `word:N` reference to use instead.
-So does a cut within 0.3 s of one of the source's own shot changes on the
-side that flashes the other shot (`cut-near-shot`, naming the `shot:N` edge),
-and a crop over a range the camera cuts inside (`shot-change-inside-crop`).
-
-`music` is a free track: the bed has `start={0}` and `duration="fill"`, so it
-runs to the end of whatever the sequence became.
-
-What goes wrong without it: every trim becomes arithmetic across the file, and
-the model gets it wrong.
-
-## Overlays anchor
-
-The title anchors to `"start"`, the tagline to the title, the lower third to
-`close`, the call to action to `outro`. Move the close and the lower third
-follows; the file holds no absolute times for overlays at all. An anchor that
-points at nothing or forms a cycle is a resolve error.
-
-A graphic that belongs to a spoken word anchors to the clip that says it and
-names the word with `at`:
-
-```tsx
-<Title id="ten-outputs" anchor="make-1" at="word:14655" duration={3}>10× output</Title>
-```
-
-`anchor` picks the clip occurrence (the same footage may play twice), `at` a
-word, shot or silence of that clip's source, and the resolver starts the
-graphic where the clip plays it: clip start + (word time − clip in) / speed,
-plus `offset` if there is one (a drag in the editor writes `offset`, so the
-graphic stays tied to its word). Move the clip and the graphic follows; trim
-before the word and it adjusts. A word the clip no longer plays is an
-`INVALID_ANCHOR` error, and the graphic is held to the nearest part the clip
-plays. Reversed clips and clips with speed keys or freezes are not supported
-yet (`UNSUPPORTED_ANCHOR`): use `offset` there.
-
-## Transitions are siblings
-
-`<Transition>` sits between the two clips it joins. The resolver overlaps them
-by the transition's duration and checks both have the handles. The player
-fades the incoming clip over the outgoing one, which stays opaque, so the
-crossfade never dips to black.
-
-## Children for collections
-
-The push-in is four `<Keyframe>` children on `broll`, not a `keyframes={[…]}`
-prop. Captions are `<Caption>` children. Effects, masks, speed keys and freezes
-work the same way. The reason is the inspector: it edits one keyframe, moves
-one caption, toggles one effect, and each needs an id and a place in the file.
-
-## Helpers used once stay editable
-
-`LowerThird` is a function returning a `<Shape>` and two `<Title>`s with literal
-ids and literal timing. It is used once, so its three elements are ordinary
-literals in the resolved state and the editor edits them directly. Used twice,
-they would be `generated`, and the editor would bake the helper's output into
-the file before the first gesture on one copy. The prompt tells the model to
-prefer writing elements out when there are only two.
-
-Helpers must be pure: no state, no effects, no hooks except `useT()` and
-`useLayer()`. The lint checks (`pure-helpers`). The resolver expands them by calling them, so a helper
-that reads the clock would resolve differently every time.
-
-## `<Layer>` holds free code
-
-A Layer's interior is any React: hooks, CSS 3D, filters and blend modes, a
-`<canvas>` with WebGL, a chart. The call to action is a `<div>` with a progress
-bar, inside `<Layer id="cta">`.
-`useT()` returns 0..1 over the layer's duration; `useLayer()` returns the
-clock in full: `t`, `elapsed` and `remaining` in seconds, the layer's
-`duration`, the composition `time` and `fps`. A countdown is one line:
-
-```tsx
-function Countdown() {
-  const { remaining } = useLayer();
-  return <div>{Math.ceil(remaining)}</div>;
-}
-```
-
-Both hooks read the player's time, so scrubbing shows the right value and
-pausing freezes it; a `setInterval` would drift and ignore seeks. CSS
-animations inside a Layer count from the layer's start and are held at its
-time, so they pause and scrub with the video. In the export,
-`requestAnimationFrame`, `Date` and `performance.now()` follow the video's
-clock too; the lint warns about what does not
-(timers, `<video>` and `<audio>` elements, canvases made with
-`willReadFrequently`). Free code that is a function of time renders the same
-every time; state that builds up from frame to frame does not survive a seek.
-
-The export renders free code in a browser (headless Chrome, frame by frame).
-Until that engine ships, the Node export draws a Layer through Satori, which
-supports flexbox CSS and no hooks, and warns about what it leaves out.
-
-### three.js and Motion: `<Three>` and `<Motion>`
-
-A host that calls `installFreeCodeLibraries()` from `@cutcraft/graphics/libraries` gives
-the file two more tags. They sit on the timeline like a `<Layer>` (`id`,
-`start` or `anchor` and `at`, `duration`, `transform`, `enter`, `exit`), so the
-editor moves, trims and anchors them, and their literal props show in the
-inspector.
-
-`<Three>` holds a three.js scene. Paste plain three.js into `setup`: it runs
-once with `{ scene, camera, renderer, THREE, width, height }`, and the function
-it returns runs on every frame with `{ time, t, duration, ... }`, where `time`
-is seconds since the layer started:
-
-```tsx
-<Three id="cube" anchor="hook" at="word:14" duration={4}
-  camera={{ position: [0, 0, 5], fov: 40 }} background="#101010"
-  setup={({ scene, THREE }) => {
-    const cube = new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshNormalMaterial());
-    scene.add(cube);
-    return ({ time }) => { cube.rotation.set(time * 0.6, time, 0); };
-  }}
-/>
-```
-
-Set the scene from `time` rather than adding up steps: the player calls
-`update` for whatever frame it shows, backwards after a scrub too. What `setup`
-added to the scene is removed when the tag goes. `camera` (`position`,
-`lookAt`, `fov`, `near`, `far`, `zoom`, `orthographic`) and `background` are
-literal props the inspector edits. React Three Fiber works as children instead
-of, or beside, `setup`; `useFrame`'s `clock.elapsedTime` is the same `time`:
-
-```tsx
-<Three id="logo" start={2} duration={3} camera={{ position: [0, 0, 4] }}>
-  <ambientLight />
-  <Logo />
-</Three>
-```
-
-`<Motion>` animates its children with a Motion `sequence` on the video's clock.
-Each step names a selector inside the tag, its keyframes and options
-(`duration`, `at`, `ease`, `delay`). The sequence is a literal prop, so the
-inspector edits it:
-
-```tsx
-<Motion id="headline" anchor="hook" duration={3}
-  sequence={[
-    ["h1", { opacity: [0, 1], y: [40, 0] }, { duration: 0.6 }],
-    [".rule", { scaleX: [0, 1] }, { at: 0.3, duration: 0.8 }],
-  ]}>
-  <h1>Launch</h1>
-  <div className="rule" />
-</Motion>
-```
-
-Inside an ordinary `<Layer>`, the same libraries come as adapters:
-`<ThreeScene>` (`@cutcraft/graphics/three`) is the React Three Fiber canvas
-`<Three>` draws with, `useTimeline(sequence)` (`@cutcraft/graphics/motion`)
-plays a sequence scoped to the ref it returns, and `useLayerTime()` is the
-layer's seconds as a Motion value, for `useTransform`. The lint warns about a
-bare `<Canvas>`, Motion's `animate()` and a `motion` element with `animate` or
-`whileInView`, which play on their library's own clock.
-
-The Node export leaves `<Three>` and `<Motion>` out with a warning; the browser
-export engine draws them.
-
-To shape that time, `@cutcraft/kit` exports three pure helpers. `interpolate(x,
-inputRange, outputRange, { easing, extrapolateLeft, extrapolateRight })` maps a
-value piecewise across ranges, extending past the ends unless told to
-`"clamp"`, with any keyframe easing inside. `spring({ time, from, to, mass,
-damping, stiffness, overshootClamping })` is a physical spring `time` seconds
-after it is let go (mass 1, damping 10, stiffness 100 by default). `random(seed)`
-is a number in [0, 1) fixed by its seed, so scattered things stay put from frame
-to frame. They are plain functions, so they run in the export too:
-
-```tsx
-function Badge() {
-  const { elapsed, remaining } = useLayer();
-  const scale = spring({ time: elapsed, damping: 12 });
-  const opacity = interpolate(remaining, [0, 0.4], [0, 1], { extrapolateRight: "clamp" });
-  return <div style={{ transform: `scale(${scale})`, opacity }}>New</div>;
-}
-```
-
-A `<Keyframe>` can ease with `"spring"` too: the default spring, settling as
-the next key arrives.
-
-The interior's body is opaque to the editor, but its props are not. A Layer
-whose interior is exactly one component gets *handles*: that component's
-literal props are editable (`layer/setProps`), props that reference a
-`schema` prop are bound and fold into `defaults`, and expressions are
-locked. `<Layer id="cta"><CallToAction text={cta} accent={accent} /></Layer>`
-gives the inspector `text` and `accent` without reading `CallToAction`. Wrap
-the component in a `<div>` or give the Layer two children and there are no
-handles; the editor can still move, trim and anchor the layer, and to change
-what is inside it asks the model. The layer's own timing stays literal so it
-remains a timeline item.
-
-## Captions follow the clips
-
-`<Captions src="asset:founder">` names the transcript. A literal
-`<Caption start="word:12" end="word:18.end">` then means *where those words
-play*: the resolver finds the clip that shows word 12 (`hook`, trimmed to
-start there) and puts the cue at 0–3.0 s. Trim or move the clip and the cue
-follows. A word that no clip plays is an `UNKNOWN_REF` error. Numbers are
-still composition seconds, and `marker:` references still name markers.
-
-Leave the element empty, `<Captions src="asset:founder" />`, and the
-resolver generates the cues: every word the timeline plays, grouped into
-cues that break at a sentence end (`.`, `?`, `!`), at a pause longer than
-`maxGap` (0.8 s), at a clip boundary, or when a cue would pass `maxChars`
-(42) or `maxDuration` (5 s). Generated cues carry `words` with composition
-times, so karaoke colouring works, and they show as generated in the
-editor. The first edit to one of them (a text change, a move, a delete)
-writes all of them into the file as literal `<Caption>` children and then
-applies the edit; undo removes the literals and generation resumes.
+The music bed starts at 0, runs to the end with `duration="fill"`, and ducks under the interview; the captions come
+from the founder's words ([Captions and sound](./captions-and-sound)).
 
 ## What the player does with it
 
@@ -375,7 +105,7 @@ player draws `main`'s clips on a canvas (bottom track first), the overlays as
 DOM above it, the captions above those, and schedules the bed on Web Audio
 with a gain envelope that ducks to 15 % under the two interview segments and
 fades in and out. `data-el` on every DOM element and `data-time` on the root
-make the preview addressable from the editor.
+let an editor find each element in the preview.
 
 ## How a drag becomes a diff
 
@@ -399,5 +129,5 @@ At the sync point, `foldToSource` turns the net patch into a source edit:
 +        <Clip id="hook" src="asset:founder" in="word:12" out="word:22.end" />
 ```
 
-One token. The example's test asserts exactly this: one edit, one changed line.
-The model reads the new file and sees what the user did.
+One token changes, and the example's test checks exactly that. Whoever reads the file next, you or the model, sees
+what the drag did. [Editing](./editing) covers actions, undo and the fold in full.

@@ -67,7 +67,7 @@ file in the browser, and [`cutcraft`](https://www.npmjs.com/package/cutcraft) ex
 
 ## Docs
 
-- [Writing a file](https://prefix-tree.github.io/cutcraft/guide/writing-files)
+- [The file](https://prefix-tree.github.io/cutcraft/guide/the-file) and [Time by meaning](https://prefix-tree.github.io/cutcraft/guide/time)
 - [Editing](https://prefix-tree.github.io/cutcraft/guide/editing)
 - [Elements](https://prefix-tree.github.io/cutcraft/reference/elements/) and [actions](https://prefix-tree.github.io/cutcraft/reference/actions)
 

@@ -1,9 +1,8 @@
 # Recipes
 
-Complete cut files for the videos cutcut is made for. Each is a file a model
-could have written from a brief: it passes the lint with no warnings, resolves
-with no errors, and a test in `recipes/test` pins what it places. Read them
-as the prompt's conventions in use; copy them as starting points.
+Complete files for the videos CutCraft is made for. Each one passes the lint
+with no warnings, resolves with no errors, and has a test that pins what it
+places. Copy them as starting points.
 
 | Recipe | What it shows |
 |---|---|

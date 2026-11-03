@@ -18,12 +18,11 @@ const drag = bench.editor.find((r) => r.nodes > 500 && r.step.startsWith("transf
 
 # Video editor as code
 
-LLMs are good at writing code and bad at math. So in CutCraft the model writes the video as a TSX file that names
-what it means (a transcript word, a camera shot, the clip a title belongs to), and CutCraft does the arithmetic. The
-browser plays the file, an editor's timeline and inspector edit the same file, and Node exports it with the same
-engine.
+A video is a TSX file. Clips are cut on transcript words and camera shots, titles land on the word they belong to,
+and anything you draw can be free code: React, CSS, three.js or Motion. The browser plays the file, an editor edits
+the same file, and Node exports it with the same engine.
 
-<p class="home-links"><a :href="withBase('/guide/getting-started')">Get started</a> · <a :href="withBase('/examples')">Examples</a> · <a :href="withBase('/guide/writing-files')">Writing a file</a> · <a href="https://github.com/prefix-tree/cutcraft">GitHub</a></p>
+<p class="home-links"><a :href="withBase('/guide/getting-started')">Quick start</a> · <a :href="withBase('/examples')">Examples</a> · <a :href="withBase('/guide/introduction')">Introduction</a> · <a href="https://github.com/prefix-tree/cutcraft">GitHub</a></p>
 
 ```tsx
 <Composition fps={30} width={1080} height={1920}>
@@ -104,7 +103,7 @@ per second ([method and every variant](./comparisons/export-speed)).
 <div class="row"><span class="name">Remotion</span><span class="track"><span class="bar other" style="width: 39%"></span></span><span class="value">85</span></div>
 </div>
 
-<p class="home-note">Apple M3 Pro, 2 November 2026. On a 4-core Linux server with no GPU, CutCraft renders the same videos at 111, 37 and 61 fps. A browser export engine in the works rendered them at 191, 185 and 202 fps in a first test.</p>
+<p class="home-note">Apple M3 Pro, 2 November 2026. On a 4-core Linux server with no GPU, CutCraft renders the same videos at 111, 37 and 61 fps. An export through headless Chrome, in the works, rendered them at 191, 185 and 202 fps in a first test.</p>
 
 In the editor, one drag step on a composition of {{ drag.nodes.toLocaleString("en-US") }} elements (validate the action,
 patch the file, resolve everything again) takes {{ (drag.usPerStep / 1000).toFixed(2) }} ms
@@ -112,11 +111,11 @@ patch the file, resolve everything again) takes {{ (drag.usPerStep / 1000).toFix
 
 ## Read more
 
-- [Getting started](./guide/getting-started): install, run the example, export a file.
-- [Writing a file](./guide/writing-files): one file from brief to pixels, and why each convention exists.
-- [Elements](./reference/elements/) and [graphics](./reference/graphics/): every element, prop and built-in graphic.
-- [Exporting](./guide/exporting): formats, speed, and the layout check.
-- [Decisions](./decisions/): why it is built this way.
+- [Quick start](./guide/getting-started): install, write a first file, export it.
+- [Free code](./guide/free-code): any React, three.js or Motion, on the video's clock.
+- [A launch video, line by line](./guide/writing-files): one file from a brief to a finished video.
+- [Elements](./reference/elements/), [CLI](./reference/cli) and [API](./reference/api): every element, option and function.
+- [Compare](./comparisons/remotion): how CutCraft differs from Remotion and Diffusion Studio.
 
 <p class="home-foot">CutCraft is free and open source under the MIT licence.</p>
 

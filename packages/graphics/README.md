@@ -80,7 +80,7 @@ Both sit on the timeline like any overlay, so an editor can move, trim and ancho
 you the same clock.
 
 The player draws both tags. The Node export (`cutcraft`) leaves them out with a warning for now.
-[Writing a file](https://prefix-tree.github.io/cutcraft/guide/writing-files#layer-holds-free-code) covers free code
+[Free code](https://prefix-tree.github.io/cutcraft/guide/free-code) covers it
 in more depth.
 
 MIT licensed.
