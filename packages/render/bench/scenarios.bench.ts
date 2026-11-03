@@ -29,7 +29,7 @@ function footage(): void {
 }
 
 async function render(scenario: string, workers: number, speed?: Speed): Promise<RenderResult> {
-  const load = { props: { scenario } };
+  const load = { props: { scenario }, imports: { "./scenarios": "./scenarios.ts" } };
   const video = await loadVideo(file, load);
   if (video.state.errors.length > 0) throw new Error(`${scenario}: ${video.state.errors.map((e) => e.message).join("; ")}`);
   return renderVideo({
