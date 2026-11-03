@@ -16,8 +16,7 @@
   "dependencies": {
     "@cutcraft/kit": "workspace:*",
     "@cutcraft/render": "workspace:*",
-    "react": "catalog:",
-    "zod": "catalog:"
+    "react": "catalog:"
   },
   "devDependencies": {
     "@types/node": "catalog:",

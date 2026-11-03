@@ -2,6 +2,17 @@
   "name": "@cutcraft/libraries",
   "version": "0.1.0",
   "description": "Libraries a cut file's free code may import, on the video's clock: three.js through React Three Fiber, and Motion.",
+  "keywords": [
+    "video",
+    "video-editing",
+    "react",
+    "tsx",
+    "llm",
+    "ai-video",
+    "three",
+    "motion",
+    "animation"
+  ],
   "license": "MIT",
   "homepage": "https://prefix-tree.github.io/cutcraft/",
   "repository": {

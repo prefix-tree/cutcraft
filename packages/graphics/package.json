@@ -2,6 +2,17 @@
   "name": "@cutcraft/graphics",
   "version": "0.1.0",
   "description": "The built-in graphic kinds for the cut video DSL: arrows, callouts, badges, lower thirds, frames, highlights, progress, backgrounds, confetti and icons, each a pure function from props and theme to SVG and text labels.",
+  "keywords": [
+    "video",
+    "video-editing",
+    "react",
+    "tsx",
+    "llm",
+    "ai-video",
+    "svg",
+    "motion-graphics",
+    "lower-third"
+  ],
   "license": "MIT",
   "homepage": "https://prefix-tree.github.io/cutcraft/",
   "repository": {
@@ -13,6 +24,7 @@
     "url": "https://github.com/prefix-tree/cutcraft/issues"
   },
   "type": "module",
+  "sideEffects": false,
   "exports": {
     ".": "./src/index.ts"
   },

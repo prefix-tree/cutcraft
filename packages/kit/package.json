@@ -2,6 +2,18 @@
   "name": "@cutcraft/kit",
   "version": "0.1.0",
   "description": "Vocabulary, resolver, action system and source tools for the cut video DSL.",
+  "keywords": [
+    "video",
+    "video-editing",
+    "react",
+    "tsx",
+    "llm",
+    "ai-video",
+    "timeline",
+    "dsl",
+    "resolver",
+    "undo"
+  ],
   "license": "MIT",
   "homepage": "https://prefix-tree.github.io/cutcraft/",
   "repository": {

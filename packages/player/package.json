@@ -2,6 +2,18 @@
   "name": "@cutcraft/player",
   "version": "0.1.0",
   "description": "Browser player for the cut video DSL: WebCodecs decode through mediabunny, canvas compositing, DOM overlays, Web Audio clock.",
+  "keywords": [
+    "video",
+    "video-editing",
+    "react",
+    "tsx",
+    "llm",
+    "ai-video",
+    "webcodecs",
+    "player",
+    "web-audio",
+    "canvas"
+  ],
   "license": "MIT",
   "homepage": "https://prefix-tree.github.io/cutcraft/",
   "repository": {
@@ -67,7 +79,6 @@
     "react-dom": "catalog:",
     "typescript": "catalog:",
     "vite": "catalog:",
-    "vitest": "catalog:",
-    "zod": "catalog:"
+    "vitest": "catalog:"
   }
 }
