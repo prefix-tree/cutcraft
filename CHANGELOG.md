@@ -2,7 +2,10 @@
 
 All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow
-[Semantic Versioning](https://semver.org/). Nothing has been published yet.
+[Semantic Versioning](https://semver.org/). 0.1.0 is on npm.
+
+From the release after 0.1.0 on, each package keeps its own changelog (`packages/*/CHANGELOG.md`), written by
+[changesets](.changeset/README.md) from the changeset each pull request adds. This file holds the history before it.
 
 ## [Unreleased]
 
