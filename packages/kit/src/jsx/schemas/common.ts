@@ -1,4 +1,5 @@
 import { z } from "zod";
+
 import { zBlendMode, zEasing, zEmphasisAnimation, zFitMode, zGraphicAnimation } from "../enums";
 
 export const ID_PATTERN = /^[A-Za-z_][A-Za-z0-9_-]*$/;
@@ -13,7 +14,8 @@ export const colorSchema = z.string().min(1);
  * resolver replaces tokens before parsing; one it cannot resolve is reported
  * there and reads as 0.
  */
-export const themedLengthSchema = z.union([z.number().nonnegative(), z.string().regex(/^\$[A-Za-z][A-Za-z0-9_-]*$/, 'theme tokens look like "$radius"')])
+export const themedLengthSchema = z
+  .union([z.number().nonnegative(), z.string().regex(/^\$[A-Za-z][A-Za-z0-9_-]*$/, 'theme tokens look like "$radius"')])
   .transform((v) => (typeof v === "number" ? v : 0));
 
 export const timeRefSchema = z.union([
@@ -34,9 +36,17 @@ export const timedProps = {
   /** Free-layout tracks only. */
   start: z.number().nonnegative().optional(),
   /** Overlays: start relative to another element's start, or to its end with `id.end`. */
-  anchor: z.union([z.literal("start"), z.string().regex(/^[A-Za-z_][A-Za-z0-9_-]*(\.end)?$/, 'anchors look like "hook", "hook.end" or "start"')]).optional(),
+  anchor: z
+    .union([
+      z.literal("start"),
+      z.string().regex(/^[A-Za-z_][A-Za-z0-9_-]*(\.end)?$/, 'anchors look like "hook", "hook.end" or "start"'),
+    ])
+    .optional(),
   /** With `anchor`: a word, shot or silence of the anchor's source (`word:14655`); the start is where the anchor plays it, plus `offset`. */
-  at: z.string().regex(/^(word|shot|silence):\d+(\.end)?$/, 'at looks like "word:12", "word:12.end", "shot:3" or "silence:1"').optional(),
+  at: z
+    .string()
+    .regex(/^(word|shot|silence):\d+(\.end)?$/, 'at looks like "word:12", "word:12.end", "shot:3" or "silence:1"')
+    .optional(),
   offset: z.number().optional(),
   duration: durationSchema.optional(),
 };
@@ -51,7 +61,14 @@ export const transformSchema = z.strictObject({
   anchor: vec2Schema.optional(),
   opacity: z.number().min(0).max(1).optional(),
   borderRadius: themedLengthSchema.optional(),
-  crop: z.strictObject({ x: z.number().min(0).max(1), y: z.number().min(0).max(1), width: z.number().min(0).max(1), height: z.number().min(0).max(1) }).optional(),
+  crop: z
+    .strictObject({
+      x: z.number().min(0).max(1),
+      y: z.number().min(0).max(1),
+      width: z.number().min(0).max(1),
+      height: z.number().min(0).max(1),
+    })
+    .optional(),
   rotate3d: vec3Schema.optional(),
   perspective: z.number().min(100).max(5000).optional(),
   transformStyle: z.enum(["flat", "preserve-3d"]).optional(),
@@ -62,34 +79,42 @@ export const visualProps = {
   fit: zFitMode.optional(),
   blend: zBlendMode.optional(),
   blendOpacity: z.number().min(0).max(1).optional(),
-  emphasis: z.union([
-    zEmphasisAnimation,
-    z.strictObject({
-      type: zEmphasisAnimation,
-      speed: z.number().positive().optional(),
-      intensity: z.number().min(0).optional(),
-      loop: z.boolean().optional(),
-      focusPoint: vec2Schema.optional(),
-      zoomScale: z.number().positive().optional(),
-      holdDuration: z.number().nonnegative().optional(),
-      startTime: z.number().nonnegative().optional(),
-      animationDuration: z.number().positive().optional(),
-    }),
-  ]).optional(),
+  emphasis: z
+    .union([
+      zEmphasisAnimation,
+      z.strictObject({
+        type: zEmphasisAnimation,
+        speed: z.number().positive().optional(),
+        intensity: z.number().min(0).optional(),
+        loop: z.boolean().optional(),
+        focusPoint: vec2Schema.optional(),
+        zoomScale: z.number().positive().optional(),
+        holdDuration: z.number().nonnegative().optional(),
+        startTime: z.number().nonnegative().optional(),
+        animationDuration: z.number().positive().optional(),
+      }),
+    ])
+    .optional(),
 };
 
 export const automationPointsSchema = z.array(z.tuple([z.number().nonnegative(), z.number()]));
 
 export const audioProps = {
   volume: z.number().min(0).max(4).optional(),
-  fade: z.strictObject({ in: z.number().nonnegative().optional(), out: z.number().nonnegative().optional() }).optional(),
-  automation: z.strictObject({ volume: automationPointsSchema.optional(), pan: automationPointsSchema.optional() }).optional(),
-  duck: z.strictObject({
-    under: idSchema,
-    to: z.number().min(0).max(1),
-    attack: z.number().nonnegative().optional(),
-    release: z.number().nonnegative().optional(),
-  }).optional(),
+  fade: z
+    .strictObject({ in: z.number().nonnegative().optional(), out: z.number().nonnegative().optional() })
+    .optional(),
+  automation: z
+    .strictObject({ volume: automationPointsSchema.optional(), pan: automationPointsSchema.optional() })
+    .optional(),
+  duck: z
+    .strictObject({
+      under: idSchema,
+      to: z.number().min(0).max(1),
+      attack: z.number().nonnegative().optional(),
+      release: z.number().nonnegative().optional(),
+    })
+    .optional(),
 };
 
 export const shadowSchema = z.strictObject({
@@ -105,7 +130,15 @@ export const gradientSchema = z.strictObject({
   type: z.enum(["linear", "radial", "conic"]),
   angle: z.number().optional(),
   center: vec2Schema.optional(),
-  stops: z.array(z.strictObject({ offset: z.number().min(0).max(1), color: colorSchema, opacity: z.number().min(0).max(1).optional() })).min(2),
+  stops: z
+    .array(
+      z.strictObject({
+        offset: z.number().min(0).max(1),
+        color: colorSchema,
+        opacity: z.number().min(0).max(1).optional(),
+      }),
+    )
+    .min(2),
 });
 
 export type Transform = z.output<typeof transformSchema>;
@@ -121,4 +154,3 @@ export const entranceProps = {
   enter: graphicAnimationSchema.optional(),
   exit: graphicAnimationSchema.optional(),
 };
-

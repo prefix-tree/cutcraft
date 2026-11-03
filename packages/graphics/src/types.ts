@@ -38,7 +38,18 @@ export interface Drawn {
   readonly labels: readonly Label[];
 }
 
-export type KindCategory = "arrows" | "callouts" | "lower thirds" | "frames" | "highlights" | "progress" | "data" | "dividers" | "backgrounds" | "effects" | "icons";
+export type KindCategory =
+  | "arrows"
+  | "callouts"
+  | "lower thirds"
+  | "frames"
+  | "highlights"
+  | "progress"
+  | "data"
+  | "dividers"
+  | "backgrounds"
+  | "effects"
+  | "icons";
 
 export interface GraphicKind<S extends z.ZodRawShape = z.ZodRawShape> {
   readonly kind: string;
@@ -52,7 +63,10 @@ export interface GraphicKind<S extends z.ZodRawShape = z.ZodRawShape> {
   /** Whether the drawing changes with time (the export redraws it every frame). */
   readonly animated?: boolean;
   /** The box when the element gives no `width`/`height`; `frame` is the composition size. */
-  size(props: z.output<z.ZodObject<S>>, frame: { readonly width: number; readonly height: number }): { width: number; height: number };
+  size(
+    props: z.output<z.ZodObject<S>>,
+    frame: { readonly width: number; readonly height: number },
+  ): { width: number; height: number };
   draw(props: z.output<z.ZodObject<S>>, ctx: GraphicContext): Drawn;
 }
 

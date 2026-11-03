@@ -1,6 +1,9 @@
 import type { AudioOutput, EnvelopePoint, ScheduledSource } from "../types";
 
-interface Live { source: AudioBufferSourceNode; nodes: AudioNode[] }
+interface Live {
+  source: AudioBufferSourceNode;
+  nodes: AudioNode[];
+}
 
 /** Web Audio graph: per scheduled chunk `source → gain(envelope) → [pan] → master → destination`. */
 export class WebAudioOutput implements AudioOutput {
@@ -12,8 +15,12 @@ export class WebAudioOutput implements AudioOutput {
     this.master.connect(ctx.destination);
   }
 
-  get contextTime(): number { return this.ctx.currentTime; }
-  get running(): boolean { return this.ctx.state === "running"; }
+  get contextTime(): number {
+    return this.ctx.currentTime;
+  }
+  get running(): boolean {
+    return this.ctx.state === "running";
+  }
 
   schedule(src: ScheduledSource): void {
     this.cancel(src.key);
@@ -63,7 +70,11 @@ export class WebAudioOutput implements AudioOutput {
 
   async resume(): Promise<void> {
     if (this.ctx.state === "suspended") {
-      try { await this.ctx.resume(); } catch { /* needs a user gesture; the clock falls back to performance time */ }
+      try {
+        await this.ctx.resume();
+      } catch {
+        /* needs a user gesture; the clock falls back to performance time */
+      }
     }
   }
 
@@ -77,7 +88,11 @@ export class WebAudioOutput implements AudioOutput {
 
   private stop(entry: Live): void {
     entry.source.onended = null;
-    try { entry.source.stop(); } catch { /* not started yet */ }
+    try {
+      entry.source.stop();
+    } catch {
+      /* not started yet */
+    }
     this.disconnect(entry);
   }
 
@@ -89,20 +104,26 @@ export class WebAudioOutput implements AudioOutput {
 
 /** Set an AudioParam from envelope points: the value at `when` first, then linear ramps for later points. */
 function automate(param: AudioParam, points: readonly EnvelopePoint[], when: number, fallback: number): void {
-  if (points.length === 0) { param.value = fallback; return; }
+  if (points.length === 0) {
+    param.value = fallback;
+    return;
+  }
   const sorted = [...points].sort((a, b) => a.at - b.at);
   param.setValueAtTime(valueAt(sorted, when, fallback), Math.max(0, when));
   for (const p of sorted) if (p.at > when) param.linearRampToValueAtTime(p.value, p.at);
 }
 
 function valueAt(points: readonly EnvelopePoint[], at: number, fallback: number): number {
-  const first = points[0], last = points[points.length - 1];
+  const first = points[0],
+    last = points[points.length - 1];
   if (!first || !last) return fallback;
   if (at <= first.at) return first.value;
   if (at >= last.at) return last.value;
   for (let i = 0; i < points.length - 1; i++) {
-    const a = points[i]!, b = points[i + 1]!;
-    if (at >= a.at && at < b.at) return b.at === a.at ? b.value : a.value + ((b.value - a.value) * (at - a.at)) / (b.at - a.at);
+    const a = points[i]!,
+      b = points[i + 1]!;
+    if (at >= a.at && at < b.at)
+      return b.at === a.at ? b.value : a.value + ((b.value - a.value) * (at - a.at)) / (b.at - a.at);
   }
   return last.value;
 }

@@ -6,7 +6,13 @@ export type Json = null | boolean | number | string | Json[] | { [key: string]: 
 export type Patch =
   | { readonly op: "set"; readonly id: string; readonly prop: string; readonly value: Json | undefined }
   | { readonly op: "text"; readonly id: string; readonly text: string }
-  | { readonly op: "insert"; readonly id: string; readonly parent: string; readonly after: string | null; readonly node: CollectedNode }
+  | {
+      readonly op: "insert";
+      readonly id: string;
+      readonly parent: string;
+      readonly after: string | null;
+      readonly node: CollectedNode;
+    }
   | { readonly op: "remove"; readonly id: string }
   | { readonly op: "move"; readonly id: string; readonly parent: string; readonly after: string | null }
   | { readonly op: "bake"; readonly id: string };

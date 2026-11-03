@@ -53,7 +53,12 @@ export function nodeSpecOf(node: CollectedNode): NodeSpec {
   // Function-valued props (`of={Outro}`) survive as references; they print by name at fold time.
   const props: Record<string, Json | undefined> = {};
   for (const [k, v] of Object.entries(node.props)) {
-    props[k] = typeof v === "function" ? (v as unknown as Json) : v === undefined ? undefined : (JSON.parse(JSON.stringify(v)) as Json);
+    props[k] =
+      typeof v === "function"
+        ? (v as unknown as Json)
+        : v === undefined
+          ? undefined
+          : (JSON.parse(JSON.stringify(v)) as Json);
   }
   return {
     id: node.id,

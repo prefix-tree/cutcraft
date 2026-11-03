@@ -1,4 +1,4 @@
-import { effect, type ClipRect } from "./motion";
+import { type ClipRect, effect } from "./motion";
 import type { TransitionRole } from "./visible";
 
 /** What a transition does to one side of it at one moment, in a `W`×`H` box. */
@@ -12,7 +12,12 @@ export interface TransitionLook {
   readonly dip?: number;
 }
 
-const DIRECTION: Readonly<Record<string, readonly [number, number]>> = { left: [-1, 0], right: [1, 0], up: [0, -1], down: [0, 1] };
+const DIRECTION: Readonly<Record<string, readonly [number, number]>> = {
+  left: [-1, 0],
+  right: [1, 0],
+  up: [0, -1],
+  down: [0, 1],
+};
 
 /**
  * One side of a transition at its eased progress. Between two clips the
@@ -21,7 +26,10 @@ const DIRECTION: Readonly<Record<string, readonly [number, number]>> = { left: [
  * Types without a look of their own draw as a crossfade.
  */
 export function transitionLook(t: TransitionRole, W: number, H: number): TransitionLook {
-  const x = t.placement, p = t.progress, role = t.role, between = x.between !== undefined;
+  const x = t.placement,
+    p = t.progress,
+    role = t.role,
+    between = x.between !== undefined;
   const type = String(x.props.type ?? "crossfade");
   const params = (x.props.params ?? {}) as Record<string, unknown>;
   const dir = DIRECTION[String(params.direction)] ?? DIRECTION.left!;
@@ -40,7 +48,12 @@ export function transitionLook(t: TransitionRole, W: number, H: number): Transit
       if (role === "out" && between) return { opacity: 1 };
       // shortcut: a diagonal wipe draws as a left wipe and softness is ignored (the not-rendered lint says so); a path clip would do both.
       const name = `wipe-${params.direction === "diagonal" || params.direction === undefined ? "left" : String(params.direction)}`;
-      return { opacity: 1, clip: effect({ type: name, easing: "linear" }, role === "in" ? p : 1 - p, W, H).clip ?? [{ x: 0, y: 0, w: W, h: H }] };
+      return {
+        opacity: 1,
+        clip: effect({ type: name, easing: "linear" }, role === "in" ? p : 1 - p, W, H).clip ?? [
+          { x: 0, y: 0, w: W, h: H },
+        ],
+      };
     }
     case "slide":
     case "push": {

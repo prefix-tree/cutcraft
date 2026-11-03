@@ -1,4 +1,5 @@
-import { CanvasPainter, buildFramePlan, type Ctx2D, type DrawOp, type Frame, type FramePlan } from "@cutcraft/player";
+import { buildFramePlan, CanvasPainter, type Ctx2D, type DrawOp, type Frame, type FramePlan } from "@cutcraft/player";
+
 import { FakeFrame, FakeFrameSource, recorderCanvas, recorderContext } from "./helpers/fakes";
 import { makeState } from "./helpers/state";
 
@@ -13,11 +14,31 @@ class FullFrame extends FakeFrame {
 }
 
 function paint(items: object[], transform?: object, width = 640, height = 360) {
-  const state = makeState({ width, height, tracks: [{ id: "main", items: [{ id: "c", kind: "clip", source: { in: 0, out: 4, asset: "a" }, ...(transform ? { props: { transform } } : {}), ...items }] }] });
+  const state = makeState({
+    width,
+    height,
+    tracks: [
+      {
+        id: "main",
+        items: [
+          {
+            id: "c",
+            kind: "clip",
+            source: { in: 0, out: 4, asset: "a" },
+            ...(transform ? { props: { transform } } : {}),
+            ...items,
+          },
+        ],
+      },
+    ],
+  });
   const source = new FakeFrameSource("a");
   const frame = new FullFrame(source, 0, 1 / 30);
   const rec = recorderContext();
-  new CanvasPainter(width, height, recorderCanvas).paint(rec.ctx, buildFramePlan(state, 1), { frames: new Map<string, Frame | null>([["c", frame]]), nested: new Map() });
+  new CanvasPainter(width, height, recorderCanvas).paint(rec.ctx, buildFramePlan(state, 1), {
+    frames: new Map<string, Frame | null>([["c", frame]]),
+    nested: new Map(),
+  });
   return { frame, names: rec.calls.map((c) => c.name) };
 }
 
@@ -44,9 +65,29 @@ describe("CanvasPainter fast path for a picture that fills the canvas", () => {
 
 describe("CanvasPainter blur background", () => {
   function paintBlur(transform?: object) {
-    const state = makeState({ width: 640, height: 360, background: { mode: "blur" }, tracks: [{ id: "main", items: [{ id: "c", kind: "clip", source: { in: 0, out: 4, asset: "a" }, ...(transform ? { props: { transform } } : {}) }] }] });
+    const state = makeState({
+      width: 640,
+      height: 360,
+      background: { mode: "blur" },
+      tracks: [
+        {
+          id: "main",
+          items: [
+            {
+              id: "c",
+              kind: "clip",
+              source: { in: 0, out: 4, asset: "a" },
+              ...(transform ? { props: { transform } } : {}),
+            },
+          ],
+        },
+      ],
+    });
     const rec = recorderContext();
-    new CanvasPainter(640, 360, recorderCanvas).paint(rec.ctx, buildFramePlan(state, 1), { frames: new Map<string, Frame | null>([["c", new FakeFrame(new FakeFrameSource("a"), 0, 1 / 30)]]), nested: new Map() });
+    new CanvasPainter(640, 360, recorderCanvas).paint(rec.ctx, buildFramePlan(state, 1), {
+      frames: new Map<string, Frame | null>([["c", new FakeFrame(new FakeFrameSource("a"), 0, 1 / 30)]]),
+      nested: new Map(),
+    });
     return rec.calls;
   }
 
@@ -56,7 +97,9 @@ describe("CanvasPainter blur background", () => {
     expect(draws).toHaveLength(2);
     // r = round(0.04 · 360) = 14; the cover rect of a 640×360 frame, grown by 2r each side.
     expect(draws[0]!.args.slice(1)).toEqual([-28, -28, 696, 416]);
-    expect(calls.findIndex((c) => c.name === "set:filter" && c.args[0] === "blur(14px)")).toBeLessThan(calls.indexOf(draws[0]!));
+    expect(calls.findIndex((c) => c.name === "set:filter" && c.args[0] === "blur(14px)")).toBeLessThan(
+      calls.indexOf(draws[0]!),
+    );
   });
 
   it("skips the blur when the footage covers the frame", () => {
@@ -69,9 +112,22 @@ describe("CanvasPainter blur background", () => {
 describe("CanvasPainter clips", () => {
   function paintOp(op: Partial<DrawOp>) {
     const rec = recorderContext();
-    const base: DrawOp = { id: "c", kind: "video", rect: { x: 0, y: 0, w: 640, h: 360 }, matrix: { a: 0.5, b: 0, c: 0, d: 0.5, e: 10, f: 20 }, fit: "contain", opacity: 1, blend: "source-over", filter: "", borderRadius: 0 };
+    const base: DrawOp = {
+      id: "c",
+      kind: "video",
+      rect: { x: 0, y: 0, w: 640, h: 360 },
+      matrix: { a: 0.5, b: 0, c: 0, d: 0.5, e: 10, f: 20 },
+      fit: "contain",
+      opacity: 1,
+      blend: "source-over",
+      filter: "",
+      borderRadius: 0,
+    };
     const plan: FramePlan = { time: 0, frame: 0, background: "#000", ops: [{ ...base, ...op }], warnings: [] };
-    new CanvasPainter(640, 360, recorderCanvas).paint(rec.ctx, plan, { frames: new Map<string, Frame | null>([["c", new FakeFrame(new FakeFrameSource("a"), 0, 1 / 30)]]), nested: new Map() });
+    new CanvasPainter(640, 360, recorderCanvas).paint(rec.ctx, plan, {
+      frames: new Map<string, Frame | null>([["c", new FakeFrame(new FakeFrameSource("a"), 0, 1 / 30)]]),
+      nested: new Map(),
+    });
     return rec.calls;
   }
 
@@ -83,7 +139,11 @@ describe("CanvasPainter clips", () => {
   });
 
   it("keeps the corner radius and the wipe when a feathered mask goes through the layer", () => {
-    const calls = paintOp({ borderRadius: 12, clip: [{ x: 320, y: 0, w: 320, h: 360 }], mask: { shape: { rect: { x: 0, y: 0, width: 1, height: 1 } }, feather: 8, inverted: false, opacity: 1 } });
+    const calls = paintOp({
+      borderRadius: 12,
+      clip: [{ x: 320, y: 0, w: 320, h: 360 }],
+      mask: { shape: { rect: { x: 0, y: 0, width: 1, height: 1 } }, feather: 8, inverted: false, opacity: 1 },
+    });
     const last = calls.map((c) => c.name).lastIndexOf("drawImage");
     const before = calls.slice(0, last).map((c) => c.name);
     expect(before.lastIndexOf("clip")).toBeGreaterThan(before.lastIndexOf("restore"));
@@ -100,10 +160,26 @@ describe("CanvasPainter vignette and grain", () => {
       canvases.push(rec);
       return rec.canvas as unknown as OffscreenCanvas;
     };
-    const state = makeState({ width: 640, height: 360, tracks: [{ id: "main", items: [{ id: "c", kind: "clip", source: { in: 0, out: 4, asset: "a" }, children: [
-      { id: "v", kind: "effect", props: { type: "vignette" } },
-      { id: "g", kind: "effect", props: { type: "grain" } },
-    ] }] }] });
+    const state = makeState({
+      width: 640,
+      height: 360,
+      tracks: [
+        {
+          id: "main",
+          items: [
+            {
+              id: "c",
+              kind: "clip",
+              source: { in: 0, out: 4, asset: "a" },
+              children: [
+                { id: "v", kind: "effect", props: { type: "vignette" } },
+                { id: "g", kind: "effect", props: { type: "grain" } },
+              ],
+            },
+          ],
+        },
+      ],
+    });
     const main = recorderContext();
     const painter = new CanvasPainter(640, 360, create);
     const frames = new Map<string, Frame | null>([["c", new FakeFrame(new FakeFrameSource("a"), 0, 1 / 30)]]);
@@ -111,17 +187,23 @@ describe("CanvasPainter vignette and grain", () => {
     painter.paint(main.ctx, buildFramePlan(state, t), { frames, nested: new Map() });
     return { main: main.calls, canvases };
   }
-  const tiles = (r: ReturnType<typeof paintPost>) => r.canvases[1]!.calls.filter((c) => c.name === "putImageData").map((c) => (c.args[0] as ImageData).data);
+  const tiles = (r: ReturnType<typeof paintPost>) =>
+    r.canvases[1]!.calls.filter((c) => c.name === "putImageData").map((c) => (c.args[0] as ImageData).data);
 
   it("darkens and speckles only the element's pixels on a reused layer, then composites it", () => {
     const r = paintPost(1);
     expect(r.canvases).toHaveLength(2);
     const layer = r.canvases[0]!.calls;
     expect(layer.filter((c) => c.name === "drawImage")).toHaveLength(2);
-    expect(layer.filter((c) => c.name === "set:globalCompositeOperation" && c.args[0] === "source-atop")).toHaveLength(4);
+    expect(layer.filter((c) => c.name === "set:globalCompositeOperation" && c.args[0] === "source-atop")).toHaveLength(
+      4,
+    );
     expect(layer.some((c) => c.name === "createRadialGradient")).toBe(true);
     expect(layer.some((c) => c.name === "createPattern")).toBe(true);
-    expect(r.main.filter((c) => c.name === "drawImage").map((c) => c.args[0])).toEqual([r.canvases[0]!.canvas, r.canvases[0]!.canvas]);
+    expect(r.main.filter((c) => c.name === "drawImage").map((c) => c.args[0])).toEqual([
+      r.canvases[0]!.canvas,
+      r.canvases[0]!.canvas,
+    ]);
   });
 
   it("draws the same grain for the same frame and new grain for the next", () => {
@@ -133,15 +215,44 @@ describe("CanvasPainter vignette and grain", () => {
 });
 
 describe("CanvasPainter proxy crop coordinates", () => {
-  it.each([[1920, 1080], [640, 360]])("preserves a normalized crop on a %i × %i decoded frame", (width, height) => {
-    const state = makeState({ width: 1080, height: 1920, tracks: [{ id: "main", items: [{
-      id: "c", kind: "clip", source: { in: 0, out: 4, asset: "a" },
-      props: { transform: { crop: { x: 0.35, y: 0.1, width: 0.3, height: 0.8 } } },
-    }] }] });
+  it.each([
+    [1920, 1080],
+    [640, 360],
+  ])("preserves a normalized crop on a %i × %i decoded frame", (width, height) => {
+    const state = makeState({
+      width: 1080,
+      height: 1920,
+      tracks: [
+        {
+          id: "main",
+          items: [
+            {
+              id: "c",
+              kind: "clip",
+              source: { in: 0, out: 4, asset: "a" },
+              props: { transform: { crop: { x: 0.35, y: 0.1, width: 0.3, height: 0.8 } } },
+            },
+          ],
+        },
+      ],
+    });
     const draw = vi.fn();
-    const frame: Frame = { width, height, timestamp: 1, duration: 1 / 30, draw, retain() { return this; }, close() {} };
+    const frame: Frame = {
+      width,
+      height,
+      timestamp: 1,
+      duration: 1 / 30,
+      draw,
+      retain() {
+        return this;
+      },
+      close() {},
+    };
     const plan = buildFramePlan(state, 1);
-    new CanvasPainter(1080, 1920, recorderCanvas).paint(recorderContext().ctx, plan, { frames: new Map([["c", frame]]), nested: new Map() });
+    new CanvasPainter(1080, 1920, recorderCanvas).paint(recorderContext().ctx, plan, {
+      frames: new Map([["c", frame]]),
+      nested: new Map(),
+    });
     const crop = draw.mock.calls[0]![5];
     expect(crop.x / width).toBeCloseTo(0.35);
     expect(crop.y / height).toBeCloseTo(0.1);

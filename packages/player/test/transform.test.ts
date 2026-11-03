@@ -1,4 +1,5 @@
 import { animatedTransform, cssTransform, fitRect, layoutRect, matrixToCss } from "@cutcraft/player";
+
 import { childrenOf, makeState } from "./helpers/state";
 
 const comp = { width: 1920, height: 1080 };
@@ -15,7 +16,11 @@ describe("fitRect", () => {
 
 describe("layoutRect", () => {
   it("maps local pixels through position, scale and rotation about the anchor", () => {
-    const l = layoutRect(comp, { width: 1920, height: 1080 }, "contain", { position: { x: 10, y: 20 }, scale: 2, rotation: 90 });
+    const l = layoutRect(comp, { width: 1920, height: 1080 }, "contain", {
+      position: { x: 10, y: 20 },
+      scale: 2,
+      rotation: 90,
+    });
     const m = l.matrix;
     const centre = { x: m.a * 960 + m.c * 540 + m.e, y: m.b * 960 + m.d * 540 + m.f };
     expect(centre.x).toBeCloseTo(970);
@@ -26,7 +31,9 @@ describe("layoutRect", () => {
   });
 
   it("crops in source pixels and fits the cropped box", () => {
-    const l = layoutRect(comp, { width: 1000, height: 1000 }, "contain", { crop: { x: 0.25, y: 0, width: 0.5, height: 0.5 } });
+    const l = layoutRect(comp, { width: 1000, height: 1000 }, "contain", {
+      crop: { x: 0.25, y: 0, width: 0.5, height: 0.5 },
+    });
     expect(l.crop).toEqual({ x: 250, y: 0, w: 500, h: 500 });
     expect(l.rect).toEqual({ x: 420, y: 0, w: 1080, h: 1080 });
     expect(l.opacity).toBe(1);
@@ -40,13 +47,26 @@ describe("layoutRect", () => {
 });
 
 describe("animatedTransform", () => {
-  const state = makeState({ tracks: [{ id: "main", items: [
-    { id: "c1", kind: "clip", source: { in: 0, out: 5, asset: "a" }, props: { transform: { scale: 1.5 } }, children: [
-      { id: "k1", kind: "keyframe", props: { property: "transform.position.x", at: 0, value: 0 } },
-      { id: "k2", kind: "keyframe", props: { property: "transform.position.x", at: 2, value: 100 } },
-    ] },
-    { id: "c2", kind: "clip", source: { in: 0, out: 5, asset: "a" }, props: { transform: { rotation: 10 } } },
-  ] }] });
+  const state = makeState({
+    tracks: [
+      {
+        id: "main",
+        items: [
+          {
+            id: "c1",
+            kind: "clip",
+            source: { in: 0, out: 5, asset: "a" },
+            props: { transform: { scale: 1.5 } },
+            children: [
+              { id: "k1", kind: "keyframe", props: { property: "transform.position.x", at: 0, value: 0 } },
+              { id: "k2", kind: "keyframe", props: { property: "transform.position.x", at: 2, value: 100 } },
+            ],
+          },
+          { id: "c2", kind: "clip", source: { in: 0, out: 5, asset: "a" }, props: { transform: { rotation: 10 } } },
+        ],
+      },
+    ],
+  });
 
   it("evaluates keyframes against the base transform", () => {
     const c1 = state.items.get("c1")!;

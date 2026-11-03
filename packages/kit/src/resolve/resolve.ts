@@ -1,18 +1,27 @@
 import type { z } from "zod";
+
+import { capabilitiesOf } from "../jsx/capabilities";
 import { ENGINE_SCHEMAS, SCHEMAS_BY_KIND } from "../jsx/elements";
 import type { TrackLayout, TrackRole, TransitionType } from "../jsx/enums";
 import { defaultTransitionParams } from "../jsx/schemas/transition";
-import { capabilitiesOf } from "../jsx/capabilities";
-import { assetIdOf, lookupAsset, type AssetEntry, type AssetManifest } from "../manifest/types";
-import { resolveTimeRef } from "../manifest/timeref";
+import { parseTimeRef, resolveTimeRef } from "../manifest/timeref";
+import { type AssetEntry, type AssetManifest, assetIdOf, lookupAsset } from "../manifest/types";
 import type { PatchLog } from "../patches/types";
+import { applyTheme, type ResolvedTheme, resolveTheme, type ThemeOrigin } from "../theme/theme";
+import {
+  type AssetPlay,
+  type CueOptions,
+  cueNodes,
+  onTimeline,
+  planCues,
+  playsKey,
+  sameAsset,
+  timelineWords,
+} from "./captions";
 import type { ResolveError } from "./errors";
 import { overlay } from "./overlay";
 import { freezeHoldsOf, holdTotal, rampAdvance, rampInverse, speedKeysOf } from "./speed";
 import type { CollectedNode, CollectedTree, Editable, LayerInterior } from "./tree";
-import { cueNodes, onTimeline, planCues, playsKey, sameAsset, timelineWords, type AssetPlay, type CueOptions } from "./captions";
-import { parseTimeRef } from "../manifest/timeref";
-import { applyTheme, resolveTheme, type ResolvedTheme, type ThemeOrigin } from "../theme/theme";
 
 export interface Placement {
   readonly id: string;
@@ -53,7 +62,13 @@ export interface ResolvedTrack {
 }
 
 export interface ResolvedState {
-  readonly composition: { readonly id: string; readonly fps: number; readonly width: number; readonly height: number; readonly duration: number };
+  readonly composition: {
+    readonly id: string;
+    readonly fps: number;
+    readonly width: number;
+    readonly height: number;
+    readonly duration: number;
+  };
   readonly tracks: readonly ResolvedTrack[];
   readonly items: ReadonlyMap<string, Placement>;
   readonly errors: readonly ResolveError[];
@@ -84,14 +99,20 @@ interface Pending {
   between?: readonly [string, string];
 }
 
-interface Memo { readonly tree: CollectedTree; readonly manifest: AssetManifest; readonly version: number; readonly state: ResolvedState }
+interface Memo {
+  readonly tree: CollectedTree;
+  readonly manifest: AssetManifest;
+  readonly version: number;
+  readonly state: ResolvedState;
+}
 const byLog = new WeakMap<PatchLog, Memo>();
 const byTree = new WeakMap<CollectedTree, Memo>();
 
 /** Absolute placements for every element, computed from the tree, the manifests and the patch log. Memoised per log on its version. */
 export function resolve(tree: CollectedTree, manifest: AssetManifest, log?: PatchLog): ResolvedState {
   const cached = log ? byLog.get(log) : byTree.get(tree);
-  if (cached && cached.tree === tree && cached.manifest === manifest && cached.version === (log?.version ?? -1)) return cached.state;
+  if (cached && cached.tree === tree && cached.manifest === manifest && cached.version === (log?.version ?? -1))
+    return cached.state;
   // A log's first resolve may still reuse the plain resolve of the same tree.
   const previous = cached?.state.items ?? (log ? byTree.get(tree)?.state.items : undefined);
   const state = compute(tree, manifest, log, previous);
@@ -107,7 +128,12 @@ export function resolve(tree: CollectedTree, manifest: AssetManifest, log?: Patc
  * allocates only for the elements it moved and consumers can memoise on
  * `Placement` identity.
  */
-function compute(original: CollectedTree, manifest: AssetManifest, log: PatchLog | undefined, previous?: ReadonlyMap<string, Placement>): ResolvedState {
+function compute(
+  original: CollectedTree,
+  manifest: AssetManifest,
+  log: PatchLog | undefined,
+  previous?: ReadonlyMap<string, Placement>,
+): ResolvedState {
   const tree = overlay(original, log);
   const errors: ResolveError[] = [...tree.errors];
   const root = tree.root;
@@ -121,15 +147,54 @@ function compute(original: CollectedTree, manifest: AssetManifest, log: PatchLog
     return prev && samePlacement(prev, placement) ? prev : placement;
   };
   // Decide reuse before allocating: for an untouched element the previous placement is returned without building a new one.
-  const place = (node: CollectedNode, track: string | null, parent: string | null, start: number, length: number, props: Record<string, unknown>, errors: readonly ResolveError[], source: Placement["source"], between: Placement["between"]): Placement => {
+  const place = (
+    node: CollectedNode,
+    track: string | null,
+    parent: string | null,
+    start: number,
+    length: number,
+    props: Record<string, unknown>,
+    errors: readonly ResolveError[],
+    source: Placement["source"],
+    between: Placement["between"],
+  ): Placement => {
     const prev = previous?.get(node.id);
-    if (prev && prev.kind === node.kind && prev.track === track && prev.parent === parent && prev.start === start && prev.duration === length && prev.props === props
-      && prev.editable === node.editable && prev.lockedProps === node.lockedProps && prev.boundProps === node.boundProps && sameSource(prev.source, source) && sameBetween(prev.between, between)
-      && prev.interior === node.interior && sameChildIds(prev.children, node.children) && sameErrors(prev.errors, errors)) return prev;
+    if (
+      prev &&
+      prev.kind === node.kind &&
+      prev.track === track &&
+      prev.parent === parent &&
+      prev.start === start &&
+      prev.duration === length &&
+      prev.props === props &&
+      prev.editable === node.editable &&
+      prev.lockedProps === node.lockedProps &&
+      prev.boundProps === node.boundProps &&
+      sameSource(prev.source, source) &&
+      sameBetween(prev.between, between) &&
+      prev.interior === node.interior &&
+      sameChildIds(prev.children, node.children) &&
+      sameErrors(prev.errors, errors)
+    )
+      return prev;
     const placement: Placement = {
-      id: node.id, kind: node.kind, track, parent, children: node.children.map((c) => c.id),
-      start, end: start + length, duration: length, props, editable: node.editable, lockedProps: node.lockedProps, boundProps: node.boundProps, errors,
-      ...(source ? { source } : {}), ...(between ? { between } : {}), ...(node.interior ? { interior: node.interior } : {}), ...themedField(props),
+      id: node.id,
+      kind: node.kind,
+      track,
+      parent,
+      children: node.children.map((c) => c.id),
+      start,
+      end: start + length,
+      duration: length,
+      props,
+      editable: node.editable,
+      lockedProps: node.lockedProps,
+      boundProps: node.boundProps,
+      errors,
+      ...(source ? { source } : {}),
+      ...(between ? { between } : {}),
+      ...(node.interior ? { interior: node.interior } : {}),
+      ...themedField(props),
     };
     return placement;
   };
@@ -151,12 +216,16 @@ function compute(original: CollectedTree, manifest: AssetManifest, log: PatchLog
         id: child.id,
         layout: (p.layout as TrackLayout) ?? "sequence",
         order: order++,
-        locked: Boolean(p.locked), hidden: Boolean(p.hidden), muted: Boolean(p.muted), solo: Boolean(p.solo),
+        locked: Boolean(p.locked),
+        hidden: Boolean(p.hidden),
+        muted: Boolean(p.muted),
+        solo: Boolean(p.solo),
         ...(typeof p.role === "string" ? { role: p.role as TrackRole } : {}),
         ...(typeof p.group === "string" ? { group: p.group } : {}),
         items: child.children.map((c) => c.id),
       });
-      for (const item of child.children) intrinsic(item, child.id, pending, manifest, markers, markersKey, theme, errors);
+      for (const item of child.children)
+        intrinsic(item, child.id, pending, manifest, markers, markersKey, theme, errors);
     } else if (child.kind === "captions") {
       intrinsic(child, null, pending, manifest, markers, markersKey, theme, errors);
     } else if (child.kind === "multicam") {
@@ -169,7 +238,12 @@ function compute(original: CollectedTree, manifest: AssetManifest, log: PatchLog
   for (const p of pending.values()) {
     const duck = p.props.duck as { under: string } | undefined;
     if (duck && !tracks.some((t) => t.id === duck.under || t.role === duck.under)) {
-      p.errors.push({ code: "UNKNOWN_REF", id: p.node.id, prop: "duck.under", message: `duck.under "${duck.under}" is neither a track id nor a track role` });
+      p.errors.push({
+        code: "UNKNOWN_REF",
+        id: p.node.id,
+        prop: "duck.under",
+        message: `duck.under "${duck.under}" is neither a track id nor a track role`,
+      });
     }
     if (p.props.frame && p.source) p.props = framed(p.props, manifest.assets[p.source.asset], compParsed);
   }
@@ -185,7 +259,8 @@ function compute(original: CollectedTree, manifest: AssetManifest, log: PatchLog
 
   let compositionEnd = 0;
   for (const p of pending.values()) {
-    if (p.start !== undefined && p.duration !== undefined && p.node.kind !== "transition") compositionEnd = Math.max(compositionEnd, p.start + p.duration);
+    if (p.start !== undefined && p.duration !== undefined && p.node.kind !== "transition")
+      compositionEnd = Math.max(compositionEnd, p.start + p.duration);
   }
   for (const p of pending.values()) {
     if (p.durationDep?.kind === "fill" && p.start !== undefined) {
@@ -196,7 +271,11 @@ function compute(original: CollectedTree, manifest: AssetManifest, log: PatchLog
   }
   for (const p of pending.values()) {
     if (p.start === undefined || p.duration === undefined) {
-      p.errors.push({ code: p.anchorDep ? "DANGLING_ANCHOR" : "MISSING_START", id: p.node.id, message: `could not place <${p.node.kind} id="${p.node.id}">` });
+      p.errors.push({
+        code: p.anchorDep ? "DANGLING_ANCHOR" : "MISSING_START",
+        id: p.node.id,
+        message: `could not place <${p.node.kind} id="${p.node.id}">`,
+      });
       p.start ??= 0;
       p.duration ??= 0;
     }
@@ -209,12 +288,42 @@ function compute(original: CollectedTree, manifest: AssetManifest, log: PatchLog
     if (child.kind === "track") {
       const own: ResolveError[] = [];
       const props = parseProps(child, own, theme);
-      structural.push({ id: child.id, kind: "track", track: child.id, parent: root.id, children: child.children.map((c) => c.id), start: 0, end: 0, duration: 0, props, editable: child.editable, lockedProps: child.lockedProps, boundProps: child.boundProps, errors: own, ...themedField(props) });
+      structural.push({
+        id: child.id,
+        kind: "track",
+        track: child.id,
+        parent: root.id,
+        children: child.children.map((c) => c.id),
+        start: 0,
+        end: 0,
+        duration: 0,
+        props,
+        editable: child.editable,
+        lockedProps: child.lockedProps,
+        boundProps: child.boundProps,
+        errors: own,
+        ...themedField(props),
+      });
     } else if (child.kind === "marker") {
       const own: ResolveError[] = [];
       const props = parseProps(child, own, theme);
       const at = markers.get(child.id) ?? 0;
-      structural.push({ id: child.id, kind: "marker", track: null, parent: root.id, children: [], start: at, end: at, duration: 0, props, editable: child.editable, lockedProps: child.lockedProps, boundProps: child.boundProps, errors: own, ...themedField(props) });
+      structural.push({
+        id: child.id,
+        kind: "marker",
+        track: null,
+        parent: root.id,
+        children: [],
+        start: at,
+        end: at,
+        duration: 0,
+        props,
+        editable: child.editable,
+        lockedProps: child.lockedProps,
+        boundProps: child.boundProps,
+        errors: own,
+        ...themedField(props),
+      });
     }
   }
   let duration = 0;
@@ -232,10 +341,25 @@ function compute(original: CollectedTree, manifest: AssetManifest, log: PatchLog
     items.set(s.id, reuse(s.kind === "track" ? { ...s, end: duration, duration } : s));
     errors.push(...s.errors);
   }
-  items.set(root.id, reuse({
-    id: root.id, kind: "composition", track: null, parent: null, children: root.children.map((c) => c.id),
-    start: 0, end: duration, duration, props: compParsed, editable: root.editable, lockedProps: root.lockedProps, boundProps: root.boundProps, errors: [], ...themedField(compParsed),
-  }));
+  items.set(
+    root.id,
+    reuse({
+      id: root.id,
+      kind: "composition",
+      track: null,
+      parent: null,
+      children: root.children.map((c) => c.id),
+      start: 0,
+      end: duration,
+      duration,
+      props: compParsed,
+      editable: root.editable,
+      lockedProps: root.lockedProps,
+      boundProps: root.boundProps,
+      errors: [],
+      ...themedField(compParsed),
+    }),
+  );
   return {
     composition: {
       id: root.id,
@@ -244,11 +368,22 @@ function compute(original: CollectedTree, manifest: AssetManifest, log: PatchLog
       height: Number(compParsed.height ?? 1080),
       duration,
     },
-    tracks, items, errors, tree, manifest, log, theme,
+    tracks,
+    items,
+    errors,
+    tree,
+    manifest,
+    log,
+    theme,
   };
 }
 
-interface ParsedProps { readonly theme: ResolvedTheme; readonly unthemed: boolean; readonly data: Record<string, unknown>; readonly errors: readonly ResolveError[] }
+interface ParsedProps {
+  readonly theme: ResolvedTheme;
+  readonly unthemed: boolean;
+  readonly data: Record<string, unknown>;
+  readonly errors: readonly ResolveError[];
+}
 
 /**
  * Parsed props are cached per raw props object and theme: the overlay keeps
@@ -269,12 +404,17 @@ function parseProps(node: CollectedNode, errors: ResolveError[], theme: Resolved
   }
   const themed = applyTheme(node.kind, node.props, theme);
   // A theme change keeps the parse of an element the theme touches under neither theme.
-  if (cached && cached.unthemed && themed.props === node.props) {
+  if (cached?.unthemed && themed.props === node.props) {
     parsedByProps.set(node.props, { ...cached, theme });
     errors.push(...cached.errors);
     return cached.data;
   }
-  const own: ResolveError[] = themed.issues.map((issue) => ({ code: issue.code, id: node.id, prop: issue.prop, message: issue.message }));
+  const own: ResolveError[] = themed.issues.map((issue) => ({
+    code: issue.code,
+    id: node.id,
+    prop: issue.prop,
+    message: issue.message,
+  }));
   const engine = node.kind === "layer" && typeof node.props.engine === "string" ? node.props.engine : null;
   const schema = (engine ? ENGINE_SCHEMAS[engine] : SCHEMAS_BY_KIND[node.kind]) as z.ZodType | undefined;
   let data: Record<string, unknown>;
@@ -284,10 +424,27 @@ function parseProps(node: CollectedNode, errors: ResolveError[], theme: Resolved
     if (result.success) {
       data = result.data as Record<string, unknown>;
       // A transition's params are validated per type but not filled by its schema; fill them here like any other default.
-      if (node.kind === "transition") data = { ...data, params: { ...defaultTransitionParams(data.type as TransitionType), ...(data.params as Record<string, unknown>) } };
+      if (node.kind === "transition")
+        data = {
+          ...data,
+          params: {
+            ...defaultTransitionParams(data.type as TransitionType),
+            ...(data.params as Record<string, unknown>),
+          },
+        };
     } else {
       data = { ...themed.props };
-      own.push(...result.error.issues.map((issue) => ({ code: "SCHEMA", id: node.id, prop: issue.path.map(String).join(".") || undefined, message: issue.message }) as ResolveError));
+      own.push(
+        ...result.error.issues.map(
+          (issue) =>
+            ({
+              code: "SCHEMA",
+              id: node.id,
+              prop: issue.path.map(String).join(".") || undefined,
+              message: issue.message,
+            }) as ResolveError,
+        ),
+      );
     }
   }
   if (Object.keys(themed.from).length > 0) themedByData.set(data, themed.from);
@@ -309,7 +466,9 @@ interface IntrinsicEntry {
   readonly theme: ResolvedTheme;
   /** The parent's parsed props a caption's transcript references were resolved against. */
   readonly parentProps: Record<string, unknown> | undefined;
-  readonly template: Readonly<Pick<Pending, "props" | "errors" | "source" | "start" | "duration" | "durationDep" | "anchorDep">>;
+  readonly template: Readonly<
+    Pick<Pending, "props" | "errors" | "source" | "start" | "duration" | "durationDep" | "anchorDep">
+  >;
 }
 const intrinsicByNode = new WeakMap<CollectedNode, IntrinsicEntry>();
 
@@ -337,7 +496,13 @@ function intrinsic(
 ): void {
   const parentProps = node.kind === "caption" && node.parent ? pending.get(node.parent)?.props : undefined;
   const hit = intrinsicByNode.get(node);
-  if (hit && hit.manifest === manifest && hit.markersKey === markersKey && hit.theme === theme && hit.parentProps === parentProps) {
+  if (
+    hit &&
+    hit.manifest === manifest &&
+    hit.markersKey === markersKey &&
+    hit.theme === theme &&
+    hit.parentProps === parentProps
+  ) {
     const t = hit.template;
     const p: Pending = { node, track, parent: node.parent, props: t.props, errors: [...t.errors] };
     if (t.source) p.source = t.source;
@@ -346,14 +511,20 @@ function intrinsic(
     if (t.durationDep) p.durationDep = { ...t.durationDep };
     if (t.anchorDep) p.anchorDep = { ...t.anchorDep };
     pending.set(node.id, p);
-    if (node.kind === "captions") for (const child of node.children) if (child.kind === "caption") intrinsic(child, track, pending, manifest, markers, markersKey, theme, errors);
+    if (node.kind === "captions")
+      for (const child of node.children)
+        if (child.kind === "caption") intrinsic(child, track, pending, manifest, markers, markersKey, theme, errors);
     return;
   }
   const p = intrinsicCompute(node, track, pending, manifest, markers, markersKey, theme, errors);
   intrinsicByNode.set(node, {
-    manifest, markersKey, theme, parentProps,
+    manifest,
+    markersKey,
+    theme,
+    parentProps,
     template: {
-      props: p.props, errors: [...p.errors],
+      props: p.props,
+      errors: [...p.errors],
       ...(p.source ? { source: p.source } : {}),
       ...(p.start !== undefined ? { start: p.start } : {}),
       ...(p.duration !== undefined ? { duration: p.duration } : {}),
@@ -382,12 +553,21 @@ function intrinsicCompute(
   const dur = props.duration;
   if (typeof props.anchor === "string") {
     const end = props.anchor.endsWith(".end");
-    p.anchorDep = { id: end ? props.anchor.slice(0, -4) : props.anchor, offset: Number(props.offset ?? 0), ...(end ? { edge: "end" as const } : {}) };
+    p.anchorDep = {
+      id: end ? props.anchor.slice(0, -4) : props.anchor,
+      offset: Number(props.offset ?? 0),
+      ...(end ? { edge: "end" as const } : {}),
+    };
   }
   if (typeof props.at === "string") {
     // `at` names a moment of the anchor's own footage, so it needs a plain anchor: an element, not the start or an end.
     if (!p.anchorDep || p.anchorDep.id === "start" || p.anchorDep.edge === "end") {
-      own.push({ code: "SCHEMA", id: node.id, prop: "at", message: `at="${props.at}" needs anchor set to the clip that plays it (not "start" or an ".end")` });
+      own.push({
+        code: "SCHEMA",
+        id: node.id,
+        prop: "at",
+        message: `at="${props.at}" needs anchor set to the clip that plays it (not "start" or an ".end")`,
+      });
     } else {
       p.anchorDep.at = props.at;
     }
@@ -396,7 +576,12 @@ function intrinsicCompute(
   if (caps.trimSource && typeof props.src === "string") {
     const asset = lookupAsset(manifest, props.src);
     if (!asset) {
-      own.push({ code: "MISSING_ASSET", id: node.id, prop: "src", message: `asset ${props.src} is not in the manifest` });
+      own.push({
+        code: "MISSING_ASSET",
+        id: node.id,
+        prop: "src",
+        message: `asset ${props.src} is not in the manifest`,
+      });
       p.duration = typeof dur === "number" ? dur : 0;
     } else {
       sourceRange(p, asset, markers);
@@ -410,7 +595,8 @@ function intrinsicCompute(
   } else if (node.kind === "captions") {
     p.start = 0;
     p.durationDep = { kind: "fill" };
-    for (const child of node.children) if (child.kind === "caption") intrinsic(child, track, pending, manifest, markers, markersKey, theme, errors);
+    for (const child of node.children)
+      if (child.kind === "caption") intrinsic(child, track, pending, manifest, markers, markersKey, theme, errors);
     return p;
   } else if (node.kind === "multicam") {
     p.start = 0;
@@ -419,8 +605,16 @@ function intrinsicCompute(
     if (dur === undefined) p.duration = DEFAULT_OVERLAY_DURATION;
     else if (typeof dur === "number") p.duration = dur;
     else if (dur === "fill") p.durationDep = { kind: "fill" };
-    else if (dur === "source") { own.push({ code: "AMBIGUOUS_DURATION", id: node.id, prop: "duration", message: `<${node.kind}> has no source to take a duration from` }); p.duration = DEFAULT_OVERLAY_DURATION; }
-    else if (typeof dur === "object" && dur && "match" in dur) p.durationDep = { kind: "match", id: String((dur as { match: string }).match) };
+    else if (dur === "source") {
+      own.push({
+        code: "AMBIGUOUS_DURATION",
+        id: node.id,
+        prop: "duration",
+        message: `<${node.kind}> has no source to take a duration from`,
+      });
+      p.duration = DEFAULT_OVERLAY_DURATION;
+    } else if (typeof dur === "object" && dur && "match" in dur)
+      p.durationDep = { kind: "match", id: String((dur as { match: string }).match) };
   }
   return p;
 }
@@ -428,7 +622,11 @@ function intrinsicCompute(
 const framedByProps = new WeakMap<Record<string, unknown>, { key: string; props: Record<string, unknown> }>();
 
 /** `frame` as a `transform.crop`: a window of the composition's aspect over the source, slid to the focus. A written crop wins. Memoised so an unchanged clip keeps its placement. */
-function framed(props: Record<string, unknown>, asset: AssetEntry | undefined, comp: Record<string, unknown>): Record<string, unknown> {
+function framed(
+  props: Record<string, unknown>,
+  asset: AssetEntry | undefined,
+  comp: Record<string, unknown>,
+): Record<string, unknown> {
   const transform = (props.transform ?? {}) as Record<string, unknown>;
   if (transform.crop || !asset?.width || !asset.height) return props;
   const key = `${comp.width}x${comp.height}`;
@@ -436,12 +634,23 @@ function framed(props: Record<string, unknown>, asset: AssetEntry | undefined, c
   if (cached?.key === key) return cached.props;
   const { focus } = props.frame as { focus: "left" | "center" | "right" | { x: number; y?: number } };
   const fx = focus === "left" ? 0 : focus === "right" ? 1 : typeof focus === "object" ? focus.x : 0.5;
-  const fy = typeof focus === "object" ? focus.y ?? 0.5 : 0.5;
-  const ratio = (Number(comp.width) / Number(comp.height)) / (asset.width / asset.height);
-  const width = Math.min(1, ratio), height = Math.min(1, 1 / ratio);
-  const out = { ...props, transform: { ...transform, crop: { x: fx * (1 - width), y: fy * (1 - height), width, height } } };
+  const fy = typeof focus === "object" ? (focus.y ?? 0.5) : 0.5;
+  const ratio = Number(comp.width) / Number(comp.height) / (asset.width / asset.height);
+  const width = Math.min(1, ratio),
+    height = Math.min(1, 1 / ratio);
+  const out = {
+    ...props,
+    transform: { ...transform, crop: { x: fx * (1 - width), y: fy * (1 - height), width, height } },
+  };
   framedByProps.set(props, { key, props: out });
   return out;
+}
+
+/** The seconds a time reference resolved to, or `fallback` with its error recorded. */
+function secondsOr(p: Pending, resolved: ReturnType<typeof resolveTimeRef>, fallback: number): number {
+  if (typeof resolved === "number") return resolved;
+  p.errors.push(resolved);
+  return fallback;
 }
 
 function sourceRange(p: Pending, asset: AssetEntry, markers: ReadonlyMap<string, number>): void {
@@ -449,7 +658,7 @@ function sourceRange(p: Pending, asset: AssetEntry, markers: ReadonlyMap<string,
   const speed = Number(props.speed ?? 1);
   const inRaw = props.in ?? 0;
   const inT = resolveTimeRef(inRaw, asset, markers, { id: node.id, prop: "in" });
-  const inSec = typeof inT === "number" ? inT : (p.errors.push(inT), 0);
+  const inSec = secondsOr(p, inT, 0);
   const dur = props.duration;
   const keys = speedKeysOf(node.children);
   const holds = holdTotal(freezeHoldsOf(node.children));
@@ -457,11 +666,16 @@ function sourceRange(p: Pending, asset: AssetEntry, markers: ReadonlyMap<string,
   /** Timeline seconds the source plays, when `duration` gave them exactly. */
   let played: number | undefined;
   if (props.out !== undefined && dur !== undefined) {
-    p.errors.push({ code: "AMBIGUOUS_DURATION", id: node.id, prop: "duration", message: "give either out or duration, not both" });
+    p.errors.push({
+      code: "AMBIGUOUS_DURATION",
+      id: node.id,
+      prop: "duration",
+      message: "give either out or duration, not both",
+    });
   }
   if (props.out !== undefined) {
     const o = resolveTimeRef(props.out, asset, markers, { id: node.id, prop: "out" });
-    outSec = typeof o === "number" ? o : (p.errors.push(o), inSec);
+    outSec = secondsOr(p, o, inSec);
   } else if (typeof dur === "number") {
     played = dur;
     outSec = inSec + (keys.length > 0 ? rampAdvance(keys, dur) : dur * speed);
@@ -473,7 +687,12 @@ function sourceRange(p: Pending, asset: AssetEntry, markers: ReadonlyMap<string,
     outSec = asset.kind === "image" ? inSec + IMAGE_DEFAULT_DURATION * speed : asset.duration;
   }
   if (asset.kind !== "image" && outSec > asset.duration + 0.05) {
-    p.errors.push({ code: "TRIM_PAST_SOURCE", id: node.id, prop: "out", message: `out ${outSec}s is past the end of ${asset.id} (${asset.duration}s)` });
+    p.errors.push({
+      code: "TRIM_PAST_SOURCE",
+      id: node.id,
+      prop: "out",
+      message: `out ${outSec}s is past the end of ${asset.id} (${asset.duration}s)`,
+    });
     outSec = asset.duration;
     played = undefined;
   }
@@ -494,7 +713,13 @@ function sourceSpan(node: CollectedNode, length: number, speed: number): number 
   return keys.length > 0 ? rampAdvance(keys, rel) : rel * speed;
 }
 
-function placeTrack(trackNode: CollectedNode, track: ResolvedTrack, pending: Map<string, Pending>, theme: ResolvedTheme, errors: ResolveError[]): void {
+function placeTrack(
+  trackNode: CollectedNode,
+  track: ResolvedTrack,
+  pending: Map<string, Pending>,
+  theme: ResolvedTheme,
+  errors: ResolveError[],
+): void {
   let cursor = 0;
   let prevClip: Pending | null = null;
   let pendingTransition: Pending | null = null;
@@ -513,32 +738,62 @@ function placeTrack(trackNode: CollectedNode, track: ResolvedTrack, pending: Map
         continue;
       }
       if (track.layout !== "sequence") {
-        p.errors.push({ code: "NOT_ADJACENT", id: child.id, message: "a transition between siblings needs a sequence track; use on/edge on free tracks" });
+        p.errors.push({
+          code: "NOT_ADJACENT",
+          id: child.id,
+          message: "a transition between siblings needs a sequence track; use on/edge on free tracks",
+        });
         continue;
       }
       pendingTransition = p;
       continue;
     }
     if (p.anchorDep) {
-      if (typeof p.props.start === "number") p.errors.push({ code: "SCHEMA", id: child.id, prop: "start", message: "anchored elements take offset, not start" });
+      if (typeof p.props.start === "number")
+        p.errors.push({
+          code: "SCHEMA",
+          id: child.id,
+          prop: "start",
+          message: "anchored elements take offset, not start",
+        });
       continue;
     }
     if (!caps.timed) continue;
     if (track.layout === "free") {
-      if (typeof p.props.start !== "number") p.errors.push({ code: "MISSING_START", id: child.id, prop: "start", message: "elements on a free track need start" });
+      if (typeof p.props.start !== "number")
+        p.errors.push({
+          code: "MISSING_START",
+          id: child.id,
+          prop: "start",
+          message: "elements on a free track need start",
+        });
       p.start = typeof p.props.start === "number" ? p.props.start : 0;
       continue;
     }
     if (typeof p.props.start === "number") {
-      p.errors.push({ code: "START_ON_SEQUENCE", id: child.id, prop: "start", message: "sequence tracks derive start from order; remove start or use a free track" });
+      p.errors.push({
+        code: "START_ON_SEQUENCE",
+        id: child.id,
+        prop: "start",
+        message: "sequence tracks derive start from order; remove start or use a free track",
+      });
     }
     if (p.durationDep?.kind === "fill") {
-      p.errors.push({ code: "AMBIGUOUS_DURATION", id: child.id, prop: "duration", message: '"fill" is not meaningful inside a sequence' });
+      p.errors.push({
+        code: "AMBIGUOUS_DURATION",
+        id: child.id,
+        prop: "duration",
+        message: '"fill" is not meaningful inside a sequence',
+      });
       p.duration = 0;
       delete p.durationDep;
     }
     if (pendingTransition && child.kind === "gap") {
-      pendingTransition.errors.push({ code: "NOT_ADJACENT", id: pendingTransition.node.id, message: "a transition needs a clip on each side, not a gap" });
+      pendingTransition.errors.push({
+        code: "NOT_ADJACENT",
+        id: pendingTransition.node.id,
+        message: "a transition needs a clip on each side, not a gap",
+      });
       pendingTransition.start = cursor;
       pendingTransition = null;
     }
@@ -548,11 +803,19 @@ function placeTrack(trackNode: CollectedNode, track: ResolvedTrack, pending: Map
       pendingTransition.start = start;
       pendingTransition.between = [prevClip.node.id, child.id];
       if (d > (prevClip.duration ?? 0) || (p.duration !== undefined && d > p.duration)) {
-        pendingTransition.errors.push({ code: "INSUFFICIENT_HANDLES", id: pendingTransition.node.id, message: "transition is longer than one of its clips" });
+        pendingTransition.errors.push({
+          code: "INSUFFICIENT_HANDLES",
+          id: pendingTransition.node.id,
+          message: "transition is longer than one of its clips",
+        });
       }
       cursor = start;
     } else if (pendingTransition) {
-      pendingTransition.errors.push({ code: "NOT_ADJACENT", id: pendingTransition.node.id, message: "a transition needs a clip on each side" });
+      pendingTransition.errors.push({
+        code: "NOT_ADJACENT",
+        id: pendingTransition.node.id,
+        message: "a transition needs a clip on each side",
+      });
       pendingTransition.start = cursor;
     }
     pendingTransition = null;
@@ -560,25 +823,42 @@ function placeTrack(trackNode: CollectedNode, track: ResolvedTrack, pending: Map
     if (p.duration !== undefined) cursor += p.duration;
     else p.durationDep ??= { kind: "fill" }; // match deps settle later; cursor cannot advance past an unknown length
     if (p.durationDep?.kind === "match") {
-      p.errors.push({ code: "AMBIGUOUS_DURATION", id: child.id, prop: "duration", message: "match durations are not allowed inside a sequence" });
+      p.errors.push({
+        code: "AMBIGUOUS_DURATION",
+        id: child.id,
+        prop: "duration",
+        message: "match durations are not allowed inside a sequence",
+      });
       p.duration = 0;
       delete p.durationDep;
     }
     prevClip = child.kind === "gap" ? null : p;
   }
   if (pendingTransition) {
-    pendingTransition.errors.push({ code: "NOT_ADJACENT", id: pendingTransition.node.id, message: "a transition needs a clip on each side" });
+    pendingTransition.errors.push({
+      code: "NOT_ADJACENT",
+      id: pendingTransition.node.id,
+      message: "a transition needs a clip on each side",
+    });
     pendingTransition.start = cursor;
   }
 }
 
-function placeMulticam(node: CollectedNode, p: Pending, track: ResolvedTrack, pending: Map<string, Pending>, theme: ResolvedTheme, errors: ResolveError[]): void {
+function placeMulticam(
+  node: CollectedNode,
+  p: Pending,
+  track: ResolvedTrack,
+  pending: Map<string, Pending>,
+  theme: ResolvedTheme,
+  errors: ResolveError[],
+): void {
   const angles = new Map<string, Record<string, unknown>>();
   const cuts: { node: CollectedNode; at: number; angle: string }[] = [];
   for (const child of node.children) {
     const cp = parseProps(child, errors, theme);
     if (child.kind === "angle") angles.set(child.id, cp);
-    else if (child.kind === "cut" && typeof cp.at === "number") cuts.push({ node: child, at: cp.at, angle: String(cp.angle) });
+    else if (child.kind === "cut" && typeof cp.at === "number")
+      cuts.push({ node: child, at: cp.at, angle: String(cp.angle) });
   }
   cuts.sort((a, b) => a.at - b.at);
   const sync = Number(p.props.sync ?? 0);
@@ -586,15 +866,36 @@ function placeMulticam(node: CollectedNode, p: Pending, track: ResolvedTrack, pe
   cuts.forEach((cut, i) => {
     const next = cuts[i + 1];
     const angle = angles.get(cut.angle);
-    if (!angle) { errors.push({ code: "DANGLING_ANCHOR", id: cut.node.id, prop: "angle", message: `angle "${cut.angle}" is not in this multicam` }); return; }
+    if (!angle) {
+      errors.push({
+        code: "DANGLING_ANCHOR",
+        id: cut.node.id,
+        prop: "angle",
+        message: `angle "${cut.angle}" is not in this multicam`,
+      });
+      return;
+    }
     const id = `${node.id}.${cut.node.id}`;
     const inSec = Math.max(0, cut.at - sync + Number(angle.offset ?? 0));
     const generated: CollectedNode = {
-      id, kind: "clip", parent: node.id, children: [], editable: "generated", lockedProps: [], boundProps: {},
+      id,
+      kind: "clip",
+      parent: node.id,
+      children: [],
+      editable: "generated",
+      lockedProps: [],
+      boundProps: {},
       props: { id, src: angle.src, in: inSec },
       origin: { helper: "multicam", callerId: node.id, callIndex: 0 },
     };
-    const gp: Pending = { node: generated, track: track.id, parent: node.id, props: generated.props as Record<string, unknown>, errors: [], start: cut.at };
+    const gp: Pending = {
+      node: generated,
+      track: track.id,
+      parent: node.id,
+      props: generated.props as Record<string, unknown>,
+      errors: [],
+      start: cut.at,
+    };
     gp.source = { in: inSec, out: inSec, speed: 1, asset: assetIdOf(String(angle.src)) };
     if (next) {
       gp.duration = next.at - cut.at;
@@ -613,22 +914,39 @@ function iterateDependencies(pending: Map<string, Pending>, manifest: AssetManif
     for (const p of pending.values()) {
       if (p.anchorDep && p.start === undefined) {
         const dep = p.anchorDep;
-        if (dep.id === "start") { p.start = Math.max(0, dep.offset); progressed = true; continue; }
+        if (dep.id === "start") {
+          p.start = Math.max(0, dep.offset);
+          progressed = true;
+          continue;
+        }
         const target = pending.get(dep.id);
         if (!target) {
-          p.errors.push({ code: "DANGLING_ANCHOR", id: p.node.id, prop: p.node.kind === "transition" ? "on" : "anchor", message: `anchor "${dep.id}" does not exist` });
+          p.errors.push({
+            code: "DANGLING_ANCHOR",
+            id: p.node.id,
+            prop: p.node.kind === "transition" ? "on" : "anchor",
+            message: `anchor "${dep.id}" does not exist`,
+          });
           p.start = 0;
           delete p.anchorDep;
           progressed = true;
           continue;
         }
-        if (target.start !== undefined && (target.duration !== undefined || (p.node.kind !== "transition" && dep.edge !== "end"))) {
+        if (
+          target.start !== undefined &&
+          (target.duration !== undefined || (p.node.kind !== "transition" && dep.edge !== "end"))
+        ) {
           if (p.node.kind === "transition") {
             const edge = p.props.edge === "in" ? "in" : "out";
             const d = p.duration ?? 0;
             p.start = edge === "in" ? target.start : target.start + (target.duration ?? 0) - d;
           } else {
-            const base = dep.at !== undefined ? playedAt(p, target, dep.at, manifest) : dep.edge === "end" ? (target.duration ?? 0) : 0;
+            const base =
+              dep.at !== undefined
+                ? playedAt(p, target, dep.at, manifest)
+                : dep.edge === "end"
+                  ? (target.duration ?? 0)
+                  : 0;
             p.start = Math.max(0, target.start + base + dep.offset);
           }
           progressed = true;
@@ -637,7 +955,12 @@ function iterateDependencies(pending: Map<string, Pending>, manifest: AssetManif
       if (p.durationDep?.kind === "match" && p.duration === undefined) {
         const target = pending.get(p.durationDep.id);
         if (!target) {
-          p.errors.push({ code: "DANGLING_ANCHOR", id: p.node.id, prop: "duration", message: `match target "${p.durationDep.id}" does not exist` });
+          p.errors.push({
+            code: "DANGLING_ANCHOR",
+            id: p.node.id,
+            prop: "duration",
+            message: `match target "${p.durationDep.id}" does not exist`,
+          });
           p.duration = 0;
           delete p.durationDep;
           progressed = true;
@@ -653,7 +976,11 @@ function iterateDependencies(pending: Map<string, Pending>, manifest: AssetManif
   }
   for (const p of pending.values()) {
     if ((p.anchorDep && p.start === undefined) || (p.durationDep?.kind === "match" && p.duration === undefined)) {
-      p.errors.push({ code: "CYCLE", id: p.node.id, message: `"${p.node.id}" depends on itself through anchors or match durations` });
+      p.errors.push({
+        code: "CYCLE",
+        id: p.node.id,
+        message: `"${p.node.id}" depends on itself through anchors or match durations`,
+      });
       p.start ??= 0;
       p.duration ??= 0;
       delete p.anchorDep;
@@ -673,16 +1000,32 @@ function playedAt(p: Pending, target: Pending, at: string, manifest: AssetManife
     p.errors.push({ code, id: p.node.id, prop: "at", message });
     return 0;
   };
-  if (!src) return fail("INVALID_ANCHOR", `at="${at}" needs anchor "${target.node.id}" to be a clip or audio cut from an asset`);
-  if (target.props.reverse === true) return fail("UNSUPPORTED_ANCHOR", `at="${at}" on reversed "${target.node.id}" is not supported yet; use offset`);
+  if (!src)
+    return fail(
+      "INVALID_ANCHOR",
+      `at="${at}" needs anchor "${target.node.id}" to be a clip or audio cut from an asset`,
+    );
+  if (target.props.reverse === true)
+    return fail("UNSUPPORTED_ANCHOR", `at="${at}" on reversed "${target.node.id}" is not supported yet; use offset`);
   if (target.node.children.some((c) => c.kind === "speedKey" || c.kind === "freeze")) {
-    return fail("UNSUPPORTED_ANCHOR", `at="${at}" on "${target.node.id}", which has speed keys or freezes, is not supported yet; use offset`);
+    return fail(
+      "UNSUPPORTED_ANCHOR",
+      `at="${at}" on "${target.node.id}", which has speed keys or freezes, is not supported yet; use offset`,
+    );
   }
   const t = resolveTimeRef(at, lookupAsset(manifest, src.asset), new Map(), { id: p.node.id, prop: "at" });
-  if (typeof t !== "number") { p.errors.push(t); return 0; }
+  if (typeof t !== "number") {
+    p.errors.push(t);
+    return 0;
+  }
   const EPS = 1e-6;
   if (t < src.in - EPS || t > src.out + EPS) {
-    p.errors.push({ code: "INVALID_ANCHOR", id: p.node.id, prop: "at", message: `${at} (${t.toFixed(2)} s) is not in what "${target.node.id}" plays (${src.in.toFixed(2)}–${src.out.toFixed(2)} s of ${src.asset}): it was trimmed out` });
+    p.errors.push({
+      code: "INVALID_ANCHOR",
+      id: p.node.id,
+      prop: "at",
+      message: `${at} (${t.toFixed(2)} s) is not in what "${target.node.id}" plays (${src.in.toFixed(2)}–${src.out.toFixed(2)} s of ${src.asset}): it was trimmed out`,
+    });
   }
   return (Math.max(src.in, Math.min(src.out, t)) - src.in) / src.speed;
 }
@@ -692,7 +1035,13 @@ export function samePlacement(a: Placement, b: Placement): boolean {
   if (a === b) return true;
   if (a.id !== b.id || a.kind !== b.kind || a.track !== b.track || a.parent !== b.parent) return false;
   if (a.start !== b.start || a.end !== b.end || a.duration !== b.duration) return false;
-  if (a.props !== b.props || a.editable !== b.editable || a.lockedProps !== b.lockedProps || a.boundProps !== b.boundProps) return false;
+  if (
+    a.props !== b.props ||
+    a.editable !== b.editable ||
+    a.lockedProps !== b.lockedProps ||
+    a.boundProps !== b.boundProps
+  )
+    return false;
   if (!sameSource(a.source, b.source) || !sameBetween(a.between, b.between) || a.interior !== b.interior) return false;
   if (a.children.length !== b.children.length || a.children.some((id, i) => id !== b.children[i])) return false;
   return sameErrors(a.errors, b.errors);
@@ -717,16 +1066,35 @@ function sameChildIds(ids: readonly string[], children: readonly CollectedNode[]
 function sameErrors(a: readonly ResolveError[], b: readonly ResolveError[]): boolean {
   if (a.length !== b.length) return false;
   for (let i = 0; i < a.length; i++) {
-    const x = a[i]!, y = b[i]!;
+    const x = a[i]!,
+      y = b[i]!;
     if (x.code !== y.code || x.prop !== y.prop || x.message !== y.message) return false;
   }
   return true;
 }
 
-type Place = (node: CollectedNode, track: string | null, parent: string | null, start: number, length: number, props: Record<string, unknown>, errors: readonly ResolveError[], source: Placement["source"], between: Placement["between"]) => Placement;
+type Place = (
+  node: CollectedNode,
+  track: string | null,
+  parent: string | null,
+  start: number,
+  length: number,
+  props: Record<string, unknown>,
+  errors: readonly ResolveError[],
+  source: Placement["source"],
+  between: Placement["between"],
+) => Placement;
 
 /** Non-timed children get the parent's range so the editor can address them; keyframes sit at their `at`. Returns the running composition end. */
-function placeChildren(node: CollectedNode, parent: Placement, items: Map<string, Placement>, errors: ResolveError[], place: Place, end: number, theme: ResolvedTheme): number {
+function placeChildren(
+  node: CollectedNode,
+  parent: Placement,
+  items: Map<string, Placement>,
+  errors: ResolveError[],
+  place: Place,
+  end: number,
+  theme: ResolvedTheme,
+): number {
   for (const child of node.children) {
     if (items.has(child.id)) continue;
     const own: ResolveError[] = [];
@@ -737,8 +1105,14 @@ function placeChildren(node: CollectedNode, parent: Placement, items: Map<string
     }
     let start = parent.start;
     let duration = parent.duration;
-    if (child.kind === "keyframe" || child.kind === "speedKey") { start = parent.start + Number(props.at ?? 0); duration = 0; }
-    if (child.kind === "freeze") { start = parent.start + Number(props.start ?? 0); duration = Number(props.duration ?? 0); }
+    if (child.kind === "keyframe" || child.kind === "speedKey") {
+      start = parent.start + Number(props.at ?? 0);
+      duration = 0;
+    }
+    if (child.kind === "freeze") {
+      start = parent.start + Number(props.start ?? 0);
+      duration = Number(props.duration ?? 0);
+    }
     const placement = place(child, parent.track, node.id, start, duration, props, own, undefined, undefined);
     items.set(child.id, placement);
     if (own.length > 0) errors.push(...own);
@@ -748,7 +1122,12 @@ function placeChildren(node: CollectedNode, parent: Placement, items: Map<string
   return end;
 }
 
-interface CueMemo { readonly key: string; readonly manifest: AssetManifest; readonly props: Record<string, unknown>; readonly nodes: readonly CollectedNode[] }
+interface CueMemo {
+  readonly key: string;
+  readonly manifest: AssetManifest;
+  readonly props: Record<string, unknown>;
+  readonly nodes: readonly CollectedNode[];
+}
 const cuesByCaptions = new WeakMap<CollectedNode, CueMemo>();
 
 /**
@@ -756,7 +1135,13 @@ const cuesByCaptions = new WeakMap<CollectedNode, CueMemo>();
  * the composition time at which that word plays, and <Captions src> with no
  * literal cues generates them from the asset's transcript along the timeline.
  */
-function placeCaptions(root: CollectedNode, pending: Map<string, Pending>, tracks: readonly ResolvedTrack[], manifest: AssetManifest, markers: ReadonlyMap<string, number>): void {
+function placeCaptions(
+  root: CollectedNode,
+  pending: Map<string, Pending>,
+  tracks: readonly ResolvedTrack[],
+  manifest: AssetManifest,
+  markers: ReadonlyMap<string, number>,
+): void {
   for (const node of root.children) {
     if (node.kind !== "captions") continue;
     const cp = pending.get(node.id);
@@ -784,12 +1169,24 @@ function placeCaptions(root: CollectedNode, pending: Map<string, Pending>, track
     let nodes: readonly CollectedNode[];
     if (hit && hit.key === key && hit.manifest === manifest && hit.props === cp.props) nodes = hit.nodes;
     else {
-      const options: CueOptions = { maxChars: Number(cp.props.maxChars ?? lineChars(root, cp.props.style)), maxDuration: Number(cp.props.maxDuration ?? 5), maxGap: Number(cp.props.maxGap ?? 0.8) };
+      const options: CueOptions = {
+        maxChars: Number(cp.props.maxChars ?? lineChars(root, cp.props.style)),
+        maxDuration: Number(cp.props.maxDuration ?? 5),
+        maxGap: Number(cp.props.maxGap ?? 0.8),
+      };
       nodes = cueNodes(node, planCues(timelineWords(asset, plays), options), (id) => pending.has(id));
       cuesByCaptions.set(node, { key, manifest, props: cp.props, nodes });
     }
     for (const cue of nodes) {
-      pending.set(cue.id, { node: cue, track: null, parent: node.id, props: cue.props as Record<string, unknown>, errors: [], start: Number(cue.props.start), duration: Number(cue.props.end) - Number(cue.props.start) });
+      pending.set(cue.id, {
+        node: cue,
+        track: null,
+        parent: node.id,
+        props: cue.props as Record<string, unknown>,
+        errors: [],
+        start: Number(cue.props.start),
+        duration: Number(cue.props.end) - Number(cue.props.start),
+      });
     }
   }
 }
@@ -799,8 +1196,12 @@ function placeCaptions(root: CollectedNode, pending: Map<string, Pending>, track
  * and cue padding (1 em), at about 0.55 em a character. Never more than the old fixed 42.
  */
 function lineChars(root: CollectedNode, style: unknown): number {
-  const width = Number(root.props.width ?? 1920), height = Number(root.props.height ?? 1080);
-  const size = Number((typeof style === "object" && style !== null ? (style as { size?: unknown }).size : undefined) ?? Math.round(height / 24));
+  const width = Number(root.props.width ?? 1920),
+    height = Number(root.props.height ?? 1080);
+  const size = Number(
+    (typeof style === "object" && style !== null ? (style as { size?: unknown }).size : undefined) ??
+      Math.round(height / 24),
+  );
   return Math.max(8, Math.min(42, Math.floor((width * (height > width ? 0.76 : 0.84) - size) / (size * 0.55))));
 }
 
@@ -812,21 +1213,40 @@ function assetPlays(src: string, pending: Map<string, Pending>, tracks: readonly
     if (!p.source || p.start === undefined || !sameAsset(p.source.asset, src)) continue;
     if (p.track && hidden.has(p.track)) continue;
     if (p.node.kind !== "clip" && p.node.kind !== "audio") continue;
-    const keys = speedKeysOf(p.node.children), holds = freezeHoldsOf(p.node.children);
+    const keys = speedKeysOf(p.node.children),
+      holds = freezeHoldsOf(p.node.children);
     plays.push({
-      id: p.node.id, start: p.start, in: p.source.in, out: p.duration === undefined ? Number.POSITIVE_INFINITY : p.source.out, speed: p.source.speed,
-      ...(keys.length > 0 ? { keys } : {}), ...(holds.length > 0 ? { holds } : {}),
+      id: p.node.id,
+      start: p.start,
+      in: p.source.in,
+      out: p.duration === undefined ? Number.POSITIVE_INFINITY : p.source.out,
+      speed: p.source.speed,
+      ...(keys.length > 0 ? { keys } : {}),
+      ...(holds.length > 0 ? { holds } : {}),
     });
   }
   return plays.sort((a, b) => a.start - b.start);
 }
 
-function captionTime(ref: unknown, asset: AssetEntry | null, plays: readonly AssetPlay[], markers: ReadonlyMap<string, number>, ctx: { id: string; prop: string; src: string | null }): number | ResolveError {
+function captionTime(
+  ref: unknown,
+  asset: AssetEntry | null,
+  plays: readonly AssetPlay[],
+  markers: ReadonlyMap<string, number>,
+  ctx: { id: string; prop: string; src: string | null },
+): number | ResolveError {
   const parsed = parseTimeRef(ref);
-  if (parsed.kind === "seconds" || parsed.kind === "marker" || parsed.kind === "invalid") return resolveTimeRef(ref as never, asset, markers, ctx);
+  if (parsed.kind === "seconds" || parsed.kind === "marker" || parsed.kind === "invalid")
+    return resolveTimeRef(ref as never, asset, markers, ctx);
   const sec = resolveTimeRef(ref as never, asset, markers, ctx);
   if (typeof sec !== "number") return sec;
   const at = onTimeline(sec, plays);
-  if (at === null) return { code: "UNKNOWN_REF", id: ctx.id, prop: ctx.prop, message: `${String(ref)} of ${ctx.src ?? "the asset"} is not on the timeline` };
+  if (at === null)
+    return {
+      code: "UNKNOWN_REF",
+      id: ctx.id,
+      prop: ctx.prop,
+      message: `${String(ref)} of ${ctx.src ?? "the asset"} is not on the timeline`,
+    };
   return at;
 }

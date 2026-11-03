@@ -1,41 +1,142 @@
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+
 import { createElement as h, type ReactElement } from "react";
 import type { Canvas, CanvasRenderingContext2D } from "skia-canvas";
-import { Caption, Captions, Composition, Layer, Motion, Shape, Sticker, Svg, Three, Title, Track, collect, resolve, useT, type AssetManifest } from "@cutcraft/kit";
+
+import {
+  type AssetManifest,
+  Caption,
+  Captions,
+  Composition,
+  collect,
+  Layer,
+  Motion,
+  resolve,
+  Shape,
+  Sticker,
+  Svg,
+  Three,
+  Title,
+  Track,
+  useT,
+} from "@cutcraft/kit";
 import { indexLayerInteriors } from "@cutcraft/player/overlays";
-import generateMedia, { mediaDir } from "../../player/e2e/gen-media";
+
 import { manifest } from "../../player/e2e/app/composition";
-import { OverlayPlane, createCanvas, directoryResolver, safeSvgFonts, treeKey } from "../src";
+import generateMedia, { mediaDir } from "../../player/e2e/gen-media";
+import { createCanvas, directoryResolver, OverlayPlane, safeSvgFonts, treeKey } from "../src";
 
 type Rgb = readonly [number, number, number];
 
-const green = '<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80"><rect width="80" height="80" fill="#00ff00"/></svg>';
+const green =
+  '<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80"><rect width="80" height="80" fill="#00ff00"/></svg>';
 
 function element() {
   const at = (x: number, y: number) => ({ position: { x, y } });
-  return h(Composition, { fps: 30, width: 640, height: 360 },
-    h(Track, { id: "a", layout: "free" },
-      h(Shape, { id: "red", shape: "rectangle", width: 100, height: 100, fill: "#ff0000", start: 0, duration: 2, transform: at(-200, -100) }),
-      h(Shape, { id: "disc", shape: "circle", width: 100, height: 100, fill: "#0000ff", stroke: { color: "#ffffff", width: 20 }, start: 0, duration: 2, transform: at(200, -100) }),
-      h(Shape, { id: "bar", shape: "rectangle", width: 100, height: 40, fill: "#ff00ff", start: 0, duration: 2, transform: { position: { x: 0, y: 100 }, rotation: 90 } }),
+  return h(
+    Composition,
+    { fps: 30, width: 640, height: 360 },
+    h(
+      Track,
+      { id: "a", layout: "free" },
+      h(Shape, {
+        id: "red",
+        shape: "rectangle",
+        width: 100,
+        height: 100,
+        fill: "#ff0000",
+        start: 0,
+        duration: 2,
+        transform: at(-200, -100),
+      }),
+      h(Shape, {
+        id: "disc",
+        shape: "circle",
+        width: 100,
+        height: 100,
+        fill: "#0000ff",
+        stroke: { color: "#ffffff", width: 20 },
+        start: 0,
+        duration: 2,
+        transform: at(200, -100),
+      }),
+      h(Shape, {
+        id: "bar",
+        shape: "rectangle",
+        width: 100,
+        height: 40,
+        fill: "#ff00ff",
+        start: 0,
+        duration: 2,
+        transform: { position: { x: 0, y: 100 }, rotation: 90 },
+      }),
       h(Svg, { id: "svg", content: green, start: 0, duration: 2, transform: at(-250, 100) }),
       h(Sticker, { id: "pack", src: "pack:smile", name: "ok", start: 0, duration: 2, transform: at(250, 100) }),
       h(Sticker, { id: "logo", src: "asset:logo", start: 0, duration: 2, transform: at(0, -130) }),
-      h(Title, { id: "hi", start: 0, duration: 2, size: 60, color: "#ffff00", stroke: { color: "#000000", width: 2 }, shadow: { color: "#000000", blur: 4, x: 2, y: 2 } }, "Hi"),
-      h(Shape, { id: "half", shape: "rectangle", width: 60, height: 60, fill: "#ffffff", start: 0, duration: 2, transform: { position: { x: -120, y: 100 }, opacity: 0.5 } }),
-      h(Shape, { id: "under", shape: "rectangle", width: 60, height: 60, fill: "#ff0000", start: 0, duration: 2, transform: at(120, 100) }),
-      h(Shape, { id: "mult", shape: "rectangle", width: 60, height: 60, fill: "#00ff00", start: 0, duration: 2, blend: "multiply", transform: at(120, 100) }),
+      h(
+        Title,
+        {
+          id: "hi",
+          start: 0,
+          duration: 2,
+          size: 60,
+          color: "#ffff00",
+          stroke: { color: "#000000", width: 2 },
+          shadow: { color: "#000000", blur: 4, x: 2, y: 2 },
+        },
+        "Hi",
+      ),
+      h(Shape, {
+        id: "half",
+        shape: "rectangle",
+        width: 60,
+        height: 60,
+        fill: "#ffffff",
+        start: 0,
+        duration: 2,
+        transform: { position: { x: -120, y: 100 }, opacity: 0.5 },
+      }),
+      h(Shape, {
+        id: "under",
+        shape: "rectangle",
+        width: 60,
+        height: 60,
+        fill: "#ff0000",
+        start: 0,
+        duration: 2,
+        transform: at(120, 100),
+      }),
+      h(Shape, {
+        id: "mult",
+        shape: "rectangle",
+        width: 60,
+        height: 60,
+        fill: "#00ff00",
+        start: 0,
+        duration: 2,
+        blend: "multiply",
+        transform: at(120, 100),
+      }),
     ),
-    h(Captions, { id: "caps", style: { position: "bottom", size: 30 } }, h(Caption, { id: "k1", start: 0, end: 2, text: "Hello world" })),
+    h(
+      Captions,
+      { id: "caps", style: { position: "bottom", size: 30 } },
+      h(Caption, { id: "k1", start: 0, end: 2, text: "Hello world" }),
+    ),
   );
 }
 
 const el = element();
 const state = resolve(collect(el), manifest);
 const warnings: string[] = [];
-const plane = new OverlayPlane({ state, media: directoryResolver(mediaDir, manifest), interiors: indexLayerInteriors(el), warn: (m) => warnings.push(m) });
+const plane = new OverlayPlane({
+  state,
+  media: directoryResolver(mediaDir, manifest),
+  interiors: indexLayerInteriors(el),
+  warn: (m) => warnings.push(m),
+});
 const canvas = createCanvas(640, 360) as unknown as Canvas;
 const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
 
@@ -43,7 +144,9 @@ function px(x: number, y: number): Rgb {
   const d = ctx.getImageData(x, y, 1, 1).data;
   return [d[0] as number, d[1] as number, d[2] as number];
 }
-function near(c: Rgb, want: Rgb, tol = 12): boolean { return c.every((v, i) => Math.abs(v - (want[i] as number)) <= tol); }
+function near(c: Rgb, want: Rgb, tol = 12): boolean {
+  return c.every((v, i) => Math.abs(v - (want[i] as number)) <= tol);
+}
 
 beforeAll(async () => {
   generateMedia();
@@ -85,7 +188,11 @@ describe("OverlayPlane", () => {
 
   it("sets a title in Inter over the footage", () => {
     let yellow = 0;
-    for (let y = 150; y < 210; y++) for (let x = 280; x < 360; x++) { const [r, g, b] = px(x, y); if (r > 200 && g > 200 && b < 80) yellow++; }
+    for (let y = 150; y < 210; y++)
+      for (let x = 280; x < 360; x++) {
+        const [r, g, b] = px(x, y);
+        if (r > 200 && g > 200 && b < 80) yellow++;
+      }
     expect(yellow).toBeGreaterThan(150);
   });
 
@@ -99,8 +206,14 @@ describe("OverlayPlane", () => {
   });
 
   it("draws the active caption in the captions style", () => {
-    let white = 0, lit = 0;
-    for (let y = 290; y < 345; y++) for (let x = 100; x < 540; x++) { const [r, g, b] = px(x, y); if (r > 220 && g > 220 && b > 220) white++; if (r + g + b > 0) lit++; }
+    let white = 0,
+      lit = 0;
+    for (let y = 290; y < 345; y++)
+      for (let x = 100; x < 540; x++) {
+        const [r, g, b] = px(x, y);
+        if (r > 220 && g > 220 && b > 220) white++;
+        if (r + g + b > 0) lit++;
+      }
     expect(white).toBeGreaterThan(100);
     expect(lit).toBeGreaterThan(white);
   });
@@ -114,19 +227,40 @@ describe("OverlayPlane", () => {
 });
 
 describe("layout reuse", () => {
-  function Steady() { return h("div", { style: { position: "absolute", left: 20, top: 20, color: "#ffffff", fontSize: 40 } }, "same every frame"); }
-  function Ticking() { const t = useT(); return h("div", { style: { position: "absolute", left: 20, top: 20, color: "#ffffff", fontSize: 40 } }, String(Math.round(t * 100))); }
+  function Steady() {
+    return h(
+      "div",
+      { style: { position: "absolute", left: 20, top: 20, color: "#ffffff", fontSize: 40 } },
+      "same every frame",
+    );
+  }
+  function Ticking() {
+    const t = useT();
+    return h(
+      "div",
+      { style: { position: "absolute", left: 20, top: 20, color: "#ffffff", fontSize: 40 } },
+      String(Math.round(t * 100)),
+    );
+  }
 
   function planeFor(...children: ReactElement[]) {
     const el = h(Composition, { fps: 30, width: 640, height: 360 }, h(Track, { id: "a", layout: "free" }, ...children));
     const st = resolve(collect(el), manifest);
-    return new OverlayPlane({ state: st, media: directoryResolver(mediaDir, manifest), interiors: indexLayerInteriors(el), warn: () => undefined });
+    return new OverlayPlane({
+      state: st,
+      media: directoryResolver(mediaDir, manifest),
+      interiors: indexLayerInteriors(el),
+      warn: () => undefined,
+    });
   }
 
   async function frames(plane: OverlayPlane, times: number[]): Promise<void> {
     const c = createCanvas(640, 360) as unknown as Canvas;
     const context = c.getContext("2d") as CanvasRenderingContext2D;
-    for (const t of times) { context.clearRect(0, 0, 640, 360); await plane.draw(context, t); }
+    for (const t of times) {
+      context.clearRect(0, 0, 640, 360);
+      await plane.draw(context, t);
+    }
   }
 
   it("lays a still title out once, however many frames show it", async () => {
@@ -134,17 +268,28 @@ describe("layout reuse", () => {
     await frames(plane, [0.1, 0.5, 1, 2, 3]);
     expect(plane.stats).toEqual({ layouts: 1, reused: 4 });
     // A picture from the cache is the picture a fresh layout would give.
-    const cached = createCanvas(640, 360) as unknown as Canvas, fresh = createCanvas(640, 360) as unknown as Canvas;
+    const cached = createCanvas(640, 360) as unknown as Canvas,
+      fresh = createCanvas(640, 360) as unknown as Canvas;
     await plane.draw(cached.getContext("2d") as CanvasRenderingContext2D, 2.5);
     const other = planeFor(h(Title, { id: "e", start: 0, duration: 4, size: 50 }, "Still"));
     await other.draw(fresh.getContext("2d") as CanvasRenderingContext2D, 2.5);
-    expect(Buffer.from((cached.getContext("2d") as CanvasRenderingContext2D).getImageData(0, 0, 640, 360).data).equals(Buffer.from((fresh.getContext("2d") as CanvasRenderingContext2D).getImageData(0, 0, 640, 360).data))).toBe(true);
+    expect(
+      Buffer.from((cached.getContext("2d") as CanvasRenderingContext2D).getImageData(0, 0, 640, 360).data).equals(
+        Buffer.from((fresh.getContext("2d") as CanvasRenderingContext2D).getImageData(0, 0, 640, 360).data),
+      ),
+    ).toBe(true);
     plane.dispose();
     other.dispose();
   });
 
   it("lays an animated title out again only while it animates", async () => {
-    const plane = planeFor(h(Title, { id: "e", start: 0, duration: 4, size: 50, animation: { preset: "fade", in: 0.5, out: 0.5 } }, "Fading"));
+    const plane = planeFor(
+      h(
+        Title,
+        { id: "e", start: 0, duration: 4, size: 50, animation: { preset: "fade", in: 0.5, out: 0.5 } },
+        "Fading",
+      ),
+    );
     await frames(plane, [0.1, 0.3, 1, 2, 3]);
     expect(plane.stats.layouts).toBe(3);
     expect(plane.stats.reused).toBe(2);
@@ -166,41 +311,80 @@ describe("layout reuse", () => {
     const tree = (text: string) => h("div", { style: { color: "#fff", fontSize: 20 } }, text);
     expect(treeKey(tree("a"))).toBe(treeKey(tree("a")));
     expect(treeKey(tree("a"))).not.toBe(treeKey(tree("b")));
-    expect(treeKey(h("div", { style: { color: "#fff" } }, "a"))).not.toBe(treeKey(h("div", { style: { color: "#000" } }, "a")));
+    expect(treeKey(h("div", { style: { color: "#fff" } }, "a"))).not.toBe(
+      treeKey(h("div", { style: { color: "#000" } }, "a")),
+    );
     expect(treeKey(h(Steady))).toBeNull();
   });
 });
 
 describe("SVG in the export", () => {
-  const icon = '<svg viewBox="0 0 10 10"><rect width="10" height="10" fill="#2080ff"/><rect x="2.5" y="2.5" width="5" height="5" fill="#ffffff"/></svg>';
+  const icon =
+    '<svg viewBox="0 0 10 10"><rect width="10" height="10" fill="#2080ff"/><rect x="2.5" y="2.5" width="5" height="5" fill="#ffffff"/></svg>';
   const scratch = mkdtempSync(join(tmpdir(), "cutcut-svg-"));
   writeFileSync(join(scratch, "badge.svg"), icon);
-  const svgManifest: AssetManifest = { assets: { ...manifest.assets, badge: { id: "badge", kind: "image", duration: 0, width: 10, height: 10 } } };
+  const svgManifest: AssetManifest = {
+    assets: { ...manifest.assets, badge: { id: "badge", kind: "image", duration: 0, width: 10, height: 10 } },
+  };
   afterAll(() => rmSync(scratch, { recursive: true, force: true }));
 
-  function Inline() { return h("div", { style: { display: "flex", position: "absolute", left: 300, top: 100 } }, h("svg", { width: 40, height: 40, viewBox: "0 0 10 10" }, h("rect", { width: 10, height: 10, fill: "#00ff00" }))); }
+  function Inline() {
+    return h(
+      "div",
+      { style: { display: "flex", position: "absolute", left: 300, top: 100 } },
+      h("svg", { width: 40, height: 40, viewBox: "0 0 10 10" }, h("rect", { width: 10, height: 10, fill: "#00ff00" })),
+    );
+  }
 
   async function draw(...children: ReactElement[]) {
     const el = h(Composition, { fps: 30, width: 640, height: 360 }, h(Track, { id: "a", layout: "free" }, ...children));
     const st = resolve(collect(el), svgManifest);
     expect(st.errors).toEqual([]);
     const seen: string[] = [];
-    const plane = new OverlayPlane({ state: st, media: directoryResolver(scratch, svgManifest), interiors: indexLayerInteriors(el), warn: (m) => seen.push(m) });
+    const plane = new OverlayPlane({
+      state: st,
+      media: directoryResolver(scratch, svgManifest),
+      interiors: indexLayerInteriors(el),
+      warn: (m) => seen.push(m),
+    });
     const c = createCanvas(640, 360) as unknown as Canvas;
     const context = c.getContext("2d") as CanvasRenderingContext2D;
     await plane.draw(context, 1);
     plane.dispose();
-    const at = (x: number, y: number): Rgb => { const d = context.getImageData(x, y, 1, 1).data; return [d[0] as number, d[1] as number, d[2] as number]; };
+    const at = (x: number, y: number): Rgb => {
+      const d = context.getImageData(x, y, 1, 1).data;
+      return [d[0] as number, d[1] as number, d[2] as number];
+    };
     return { at, seen };
   }
 
   it("draws SVG text in a bundled font, and in sans-serif (with a warning) for a font it lacks", async () => {
     // Skia aborts the process on SVG text in a family it has no font for; reaching the assertions is the test.
-    const text = (family: string) => `<svg width="300" height="80"><text x="10" y="60" font-family="${family}" font-size="56" fill="#ffffff">Hamburg</text></svg>`;
+    const text = (family: string) =>
+      `<svg width="300" height="80"><text x="10" y="60" font-family="${family}" font-size="56" fill="#ffffff">Hamburg</text></svg>`;
     const { at, seen } = await draw(
-      h(Svg, { id: "known", content: text("Playfair Display, serif"), start: 0, duration: 2, transform: { position: { x: 0, y: -100 } } }),
-      h(Svg, { id: "unknown", content: text("Comic Neue"), start: 0, duration: 2, transform: { position: { x: 0, y: 60 } } }),
-      h(Svg, { id: "styled", content: '<svg width="300" height="80"><style>text { font: 40px "Nope"; font-family: Nope, \'Also Nope\' }</style><text x="10" y="60" style="font-family: &quot;Nope&quot;" fill="#fff">Hi</text></svg>', start: 0, duration: 2, transform: { position: { x: 200, y: 140 } } }),
+      h(Svg, {
+        id: "known",
+        content: text("Playfair Display, serif"),
+        start: 0,
+        duration: 2,
+        transform: { position: { x: 0, y: -100 } },
+      }),
+      h(Svg, {
+        id: "unknown",
+        content: text("Comic Neue"),
+        start: 0,
+        duration: 2,
+        transform: { position: { x: 0, y: 60 } },
+      }),
+      h(Svg, {
+        id: "styled",
+        content:
+          '<svg width="300" height="80"><style>text { font: 40px "Nope"; font-family: Nope, \'Also Nope\' }</style><text x="10" y="60" style="font-family: &quot;Nope&quot;" fill="#fff">Hi</text></svg>',
+        start: 0,
+        duration: 2,
+        transform: { position: { x: 200, y: 140 } },
+      }),
     );
     expect(seen.filter((m) => m.includes("svg") || m.includes("SVG"))).toEqual([
       'SVG text in font "Comic Neue" is drawn in sans-serif; the export has no such font',
@@ -213,11 +397,20 @@ describe("SVG in the export", () => {
   });
 
   it("plays SMIL on the element's own clock", async () => {
-    const pulse = '<svg width="100" height="100"><rect width="100" height="100" fill="#ff0000"><animate attributeName="fill" values="#ff0000;#0000ff" dur="2s" fill="freeze"/></rect></svg>';
+    const pulse =
+      '<svg width="100" height="100"><rect width="100" height="100" fill="#ff0000"><animate attributeName="fill" values="#ff0000;#0000ff" dur="2s" fill="freeze"/></rect></svg>';
     const svgAt = async (t: number) => {
-      const el = h(Composition, { fps: 30, width: 640, height: 360 }, h(Track, { id: "a", layout: "free" }, h(Svg, { id: "p", content: pulse, start: 1, duration: 4 })));
+      const el = h(
+        Composition,
+        { fps: 30, width: 640, height: 360 },
+        h(Track, { id: "a", layout: "free" }, h(Svg, { id: "p", content: pulse, start: 1, duration: 4 })),
+      );
       const st = resolve(collect(el), svgManifest);
-      const plane = new OverlayPlane({ state: st, media: directoryResolver(scratch, svgManifest), warn: () => undefined });
+      const plane = new OverlayPlane({
+        state: st,
+        media: directoryResolver(scratch, svgManifest),
+        warn: () => undefined,
+      });
       const c = createCanvas(640, 360) as unknown as Canvas;
       const context = c.getContext("2d") as CanvasRenderingContext2D;
       await plane.draw(context, t);
@@ -232,17 +425,47 @@ describe("SVG in the export", () => {
 
   it("narrows SVG font lists to a family skia knows", () => {
     const known = (f: string) => f === "Inter" || f === "sans-serif" || f === "serif";
-    expect(safeSvgFonts('<text font-family="Foo, Inter">x</text>', known)).toEqual({ svg: '<text font-family="Inter">x</text>', replaced: [] });
-    expect(safeSvgFonts("<text font-family='Foo'>x</text>", known)).toEqual({ svg: "<text font-family='sans-serif'>x</text>", replaced: ["Foo"] });
-    expect(safeSvgFonts('<text style="font: bold 12px Foo; fill: red">font: kept</text>', known).svg).toBe('<text style=" fill: red">font: kept</text>');
+    expect(safeSvgFonts('<text font-family="Foo, Inter">x</text>', known)).toEqual({
+      svg: '<text font-family="Inter">x</text>',
+      replaced: [],
+    });
+    expect(safeSvgFonts("<text font-family='Foo'>x</text>", known)).toEqual({
+      svg: "<text font-family='sans-serif'>x</text>",
+      replaced: ["Foo"],
+    });
+    expect(safeSvgFonts('<text style="font: bold 12px Foo; fill: red">font: kept</text>', known).svg).toBe(
+      '<text style=" fill: red">font: kept</text>',
+    );
     const plain = '<svg><rect width="1" height="1"/></svg>';
     expect(safeSvgFonts(plain, known).svg).toBe(plain);
+    // A value ends at its own closing quote, whichever kind; an unclosed one is left as it is.
+    expect(safeSvgFonts(`<text font-family='"Foo", Inter'>x</text>`, known).svg).toBe(
+      "<text font-family='Inter'>x</text>",
+    );
+    expect(safeSvgFonts("<text style='font-family: Foo; fill: red'>x</text>", known).svg).toBe(
+      "<text style='font-family: sans-serif; fill: red'>x</text>",
+    );
+    const unclosed = '<text font-family="Foo, Inter>x</text>';
+    expect(safeSvgFonts(unclosed, known).svg).toBe(unclosed);
   });
 
   it("draws an SVG at the size it asks for, or fitted to the frame", async () => {
     const { at } = await draw(
-      h(Svg, { id: "small", content: icon.replace('viewBox="0 0 10 10"', 'width="40" height="40" viewBox="0 0 10 10"'), start: 0, duration: 2, transform: { position: { x: -200, y: 0 } } }),
-      h(Svg, { id: "big", content: icon, fit: "contain", start: 0, duration: 2, transform: { position: { x: 140, y: 0 } } }),
+      h(Svg, {
+        id: "small",
+        content: icon.replace('viewBox="0 0 10 10"', 'width="40" height="40" viewBox="0 0 10 10"'),
+        start: 0,
+        duration: 2,
+        transform: { position: { x: -200, y: 0 } },
+      }),
+      h(Svg, {
+        id: "big",
+        content: icon,
+        fit: "contain",
+        start: 0,
+        duration: 2,
+        transform: { position: { x: 140, y: 0 } },
+      }),
     );
     // "small" is 40 px, centred 200 px left of the middle: blue edge at x=105, white centre at 120.
     expect(near(at(105, 180), [32, 128, 255])).toBe(true);
@@ -255,9 +478,33 @@ describe("SVG in the export", () => {
 
   it("replaces every colour with the tint, or tints keeping the shading", async () => {
     const { at } = await draw(
-      h(Svg, { id: "rep", content: icon, start: 0, duration: 2, fit: "contain", transform: { scale: 0.3, position: { x: -200, y: 0 } }, color: { mode: "replace", tint: "#ff0000" } }),
-      h(Svg, { id: "tin", content: icon, start: 0, duration: 2, fit: "contain", transform: { scale: 0.3 }, color: { mode: "tint", tint: "#ff0000" } }),
-      h(Svg, { id: "half", content: icon, start: 0, duration: 2, fit: "contain", transform: { scale: 0.3, position: { x: 200, y: 0 } }, color: { mode: "replace", tint: "#ff0000", opacity: 0.5 } }),
+      h(Svg, {
+        id: "rep",
+        content: icon,
+        start: 0,
+        duration: 2,
+        fit: "contain",
+        transform: { scale: 0.3, position: { x: -200, y: 0 } },
+        color: { mode: "replace", tint: "#ff0000" },
+      }),
+      h(Svg, {
+        id: "tin",
+        content: icon,
+        start: 0,
+        duration: 2,
+        fit: "contain",
+        transform: { scale: 0.3 },
+        color: { mode: "tint", tint: "#ff0000" },
+      }),
+      h(Svg, {
+        id: "half",
+        content: icon,
+        start: 0,
+        duration: 2,
+        fit: "contain",
+        transform: { scale: 0.3, position: { x: 200, y: 0 } },
+        color: { mode: "replace", tint: "#ff0000", opacity: 0.5 },
+      }),
     );
     expect(near(at(120 - 45, 180), [255, 0, 0])).toBe(true);
     expect(near(at(120, 180), [255, 0, 0])).toBe(true);
@@ -279,7 +526,9 @@ describe("SVG in the export", () => {
   });
 
   it("warns once about what it removed from the markup", async () => {
-    const { seen } = await draw(h(Svg, { id: "bad", content: '<svg viewBox="0 0 1 1"><script>x()</script></svg>', start: 0, duration: 2 }));
+    const { seen } = await draw(
+      h(Svg, { id: "bad", content: '<svg viewBox="0 0 1 1"><script>x()</script></svg>', start: 0, duration: 2 }),
+    );
     expect(seen).toEqual(['svg "bad": <script> is not drawn and was removed']);
   });
 
@@ -292,8 +541,12 @@ describe("SVG in the export", () => {
 
 describe("OverlayPlane and engine layers", () => {
   it("leaves <Three> and <Motion> out with a warning, since they need a browser", async () => {
-    const tree = h(Composition, { fps: 30, width: 640, height: 360 },
-      h(Track, { id: "fx", layout: "free" },
+    const tree = h(
+      Composition,
+      { fps: 30, width: 640, height: 360 },
+      h(
+        Track,
+        { id: "fx", layout: "free" },
         h(Three, { id: "cube", start: 0, duration: 2, setup: () => undefined }),
         h(Motion, { id: "words", start: 0, duration: 2, sequence: [["h1", { opacity: [0, 1] }]] }, h("h1", null, "Hi")),
       ),
@@ -301,10 +554,18 @@ describe("OverlayPlane and engine layers", () => {
     const engineState = resolve(collect(tree), manifest);
     expect(engineState.errors).toEqual([]);
     const said: string[] = [];
-    const engines = new OverlayPlane({ state: engineState, media: directoryResolver(mediaDir, manifest), interiors: indexLayerInteriors(tree), warn: (m) => said.push(m) });
+    const engines = new OverlayPlane({
+      state: engineState,
+      media: directoryResolver(mediaDir, manifest),
+      interiors: indexLayerInteriors(tree),
+      warn: (m) => said.push(m),
+    });
     const c = createCanvas(640, 360) as unknown as Canvas;
     await engines.draw(c.getContext("2d") as CanvasRenderingContext2D, 1);
     engines.dispose();
-    expect(said).toEqual([expect.stringContaining("three engine, which needs a browser"), expect.stringContaining("motion engine, which needs a browser")]);
+    expect(said).toEqual([
+      expect.stringContaining("three engine, which needs a browser"),
+      expect.stringContaining("motion engine, which needs a browser"),
+    ]);
   });
 });

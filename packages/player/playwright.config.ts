@@ -13,7 +13,13 @@ export default defineConfig({
     headless: true,
     browserName: "chromium",
     launchOptions: {
-      args: ["--autoplay-policy=no-user-gesture-required", "--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"],
+      args: [
+        "--autoplay-policy=no-user-gesture-required",
+        "--use-gl=angle",
+        "--use-angle=swiftshader",
+        "--enable-unsafe-swiftshader",
+        "--ignore-gpu-blocklist",
+      ],
     },
   },
   webServer: {

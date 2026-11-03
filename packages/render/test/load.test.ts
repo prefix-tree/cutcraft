@@ -1,6 +1,8 @@
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+
 import { loadVideo } from "../src";
 
 const scratch = join(import.meta.dirname, ".tmp", "load");
@@ -10,7 +12,9 @@ const MANIFEST = `export const manifest = { assets: { bars: { id: "bars", kind: 
 
 function cut(name: string, imports: string, duration = "1"): string {
   const file = join(dir, name);
-  writeFileSync(file, `${imports}
+  writeFileSync(
+    file,
+    `${imports}
 import { Clip, Composition, Title, Track } from "@cutcraft/kit";
 ${MANIFEST}
 export default function Video() {
@@ -21,7 +25,8 @@ export default function Video() {
     </Composition>
   );
 }
-`);
+`,
+  );
   return file;
 }
 

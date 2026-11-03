@@ -1,4 +1,5 @@
-import { freezeHoldsOf, freezeShift, rampAdvance, speedKeysOf, type LayerClock, type Placement } from "@cutcraft/kit";
+import { freezeHoldsOf, freezeShift, type LayerClock, type Placement, rampAdvance, speedKeysOf } from "@cutcraft/kit";
+
 import { FRAME_EPS } from "../constants";
 
 export function frameIndex(t: number, fps: number): number {
@@ -12,7 +13,9 @@ export function frameTime(frame: number, fps: number): number {
 /** `mm:ss.ff` for a composition time, what the controls show and the contact sheet labels. */
 export function timecode(t: number, fps: number): string {
   const total = Math.max(0, t);
-  const m = Math.floor(total / 60), s = Math.floor(total % 60), f = Math.floor((total - Math.floor(total)) * fps + 1e-6);
+  const m = Math.floor(total / 60),
+    s = Math.floor(total % 60),
+    f = Math.floor((total - Math.floor(total)) * fps + 1e-6);
   return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}.${String(f).padStart(2, "0")}`;
 }
 

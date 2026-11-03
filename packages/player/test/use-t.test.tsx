@@ -1,7 +1,8 @@
-import { Composition, Executor, Layer, Track, collectModule, useLayer, useT } from "@cutcraft/kit";
+import { Composition, collectModule, Executor, Layer, Track, useLayer, useT } from "@cutcraft/kit";
+
 import * as sample from "../../kit/fixtures/sample";
-import { fixtureElement, fixtureManifest, fixtureState, makeState } from "./helpers/state";
 import { mountPlayer } from "./helpers/react";
+import { fixtureElement, fixtureManifest, fixtureState, makeState } from "./helpers/state";
 
 describe("useT", () => {
   it("throws without a Player", () => {
@@ -31,14 +32,20 @@ describe("useT", () => {
   });
 
   it("useLayer gives the clock in seconds, clamped to the layer", async () => {
-    const state = makeState({ tracks: [{ id: "main", layout: "free", items: [{ id: "l1", kind: "layer", start: 5, duration: 3 }] }] });
+    const state = makeState({
+      tracks: [{ id: "main", layout: "free", items: [{ id: "l1", kind: "layer", start: 5, duration: 3 }] }],
+    });
     function Countdown() {
       const { remaining, elapsed, duration, time } = useLayer();
       return <span>{`${Math.ceil(remaining)}/${elapsed.toFixed(1)}/${duration}/${time}`}</span>;
     }
     const element = (
       <Composition fps={30} width={640} height={360}>
-        <Track id="main" layout="free"><Layer id="l1" start={5} duration={3}><Countdown /></Layer></Track>
+        <Track id="main" layout="free">
+          <Layer id="l1" start={5} duration={3}>
+            <Countdown />
+          </Layer>
+        </Track>
       </Composition>
     );
     const m = await mountPlayer(state, element);

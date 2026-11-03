@@ -1,5 +1,6 @@
-import { Audio, Clip, Composition, Effect, Keyframe, Title, Track } from "@cutcraft/kit";
 import type { ReactElement } from "react";
+
+import { Audio, Clip, Composition, Effect, Keyframe, Title, Track } from "@cutcraft/kit";
 
 /**
  * A synthetic project of `n` clips for benchmarks: three sequence tracks of
@@ -13,22 +14,32 @@ export function buildLarge(n: number): { default: () => ReactElement; defaults: 
     const city = i % 2 === 1;
     const inSec = city ? (i * 3) % 9 : (i * 7) % 50;
     const length = 1 + (i % 3);
-    const children = i % 4 === 0
-      ? [
-        <Keyframe key="k1" id={`c${i}k1`} property="transform.opacity" at={0} value={0} easing="easeOutCubic" />,
-        <Keyframe key="k2" id={`c${i}k2`} property="transform.opacity" at={0.5} value={1} />,
-        <Effect key="fx" id={`c${i}fx`} type="blur" params={{ radius: 2 }} />,
-      ]
-      : [];
+    const children =
+      i % 4 === 0
+        ? [
+            <Keyframe key="k1" id={`c${i}k1`} property="transform.opacity" at={0} value={0} easing="easeOutCubic" />,
+            <Keyframe key="k2" id={`c${i}k2`} property="transform.opacity" at={0.5} value={1} />,
+            <Effect key="fx" id={`c${i}fx`} type="blur" params={{ radius: 2 }} />,
+          ]
+        : [];
     tracks[i % 3]!.push(
-      <Clip key={`c${i}`} id={`c${i}`} src={city ? "asset:city" : "asset:interview"} in={inSec} out={inSec + length} fit="cover">
+      <Clip
+        key={`c${i}`}
+        id={`c${i}`}
+        src={city ? "asset:city" : "asset:interview"}
+        in={inSec}
+        out={inSec + length}
+        fit="cover"
+      >
         {children}
       </Clip>,
     );
   }
   const titles: ReactElement[] = [];
   for (let k = 0; k * 4 < n; k++) {
-    titles.push(<Title key={`t${k}`} id={`t${k}`} anchor={`c${k * 4}`} offset={0.2} duration={1} size={40}>{`Title ${k}`}</Title>);
+    titles.push(
+      <Title key={`t${k}`} id={`t${k}`} anchor={`c${k * 4}`} offset={0.2} duration={1} size={40}>{`Title ${k}`}</Title>,
+    );
   }
   const element = (
     <Composition fps={30} width={1920} height={1080}>

@@ -1,4 +1,5 @@
 import { capabilitiesOf, type Placement, type ResolvedState, type ResolvedTrack } from "@cutcraft/kit";
+
 import { ease } from "./keyframes";
 
 export interface TransitionRole {
@@ -28,7 +29,8 @@ export function visiblePlacements(state: ResolvedState, t: number): VisibleItem[
       if (!isVisibleAt(placement, t, state.composition.duration)) continue;
       const role = roles.get(placement.id);
       out.push({
-        placement, track,
+        placement,
+        track,
         children: placement.children.map((id) => state.items.get(id)).filter((c): c is Placement => c !== undefined),
         ...(role ? { transition: role } : {}),
       });
@@ -49,7 +51,9 @@ export function trackItems(state: ResolvedState, track: ResolvedTrack): Placemen
     const p = state.items.get(id);
     if (!p) continue;
     if (p.kind === "multicam") {
-      const generated = [...state.items.values()].filter((q) => q.parent === id && q.kind === "clip").sort((a, b) => a.start - b.start);
+      const generated = [...state.items.values()]
+        .filter((q) => q.parent === id && q.kind === "clip")
+        .sort((a, b) => a.start - b.start);
       out.push(...generated);
       continue;
     }
@@ -62,7 +66,7 @@ function transitionRoles(state: ResolvedState, track: ResolvedTrack, t: number):
   const roles = new Map<string, TransitionRole>();
   for (const id of track.items) {
     const x = state.items.get(id);
-    if (!x || x.kind !== "transition" || x.duration <= 0) continue;
+    if (x?.kind !== "transition" || x.duration <= 0) continue;
     if (t < x.start || t >= x.end) continue;
     const params = (x.props.params ?? {}) as Record<string, unknown>;
     const progress = ease(typeof params.curve === "string" ? params.curve : "linear", (t - x.start) / x.duration);

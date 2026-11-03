@@ -2,6 +2,19 @@
   "name": "@cutcraft/render",
   "version": "0.1.0",
   "description": "A headless render engine: a cut file to MP4 or WebM in Node, with no browser.",
+  "keywords": [
+    "video",
+    "video-editing",
+    "react",
+    "tsx",
+    "llm",
+    "ai-video",
+    "export",
+    "mp4",
+    "webm",
+    "ffmpeg",
+    "headless"
+  ],
   "license": "MIT",
   "homepage": "https://prefix-tree.github.io/cutcraft/",
   "repository": {
@@ -13,6 +26,9 @@
     "url": "https://github.com/prefix-tree/cutcraft/issues"
   },
   "type": "module",
+  "engines": {
+    "node": ">=22.19"
+  },
   "exports": {
     ".": "./src/index.ts",
     "./cli": "./src/cli.ts"
@@ -31,7 +47,6 @@
     "build": "tsdown src/index.ts src/cli.ts src/worker.ts --dts",
     "prepack": "pnpm run build",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "lint": "eslint . --max-warnings 0",
     "test": "vitest run",
     "bench": "tsx bench/render.bench.ts",
     "bench:scenarios": "tsx bench/scenarios.bench.ts",
@@ -43,32 +58,30 @@
     "@cutcraft/graphics": "workspace:*",
     "@cutcraft/kit": "workspace:*",
     "@cutcraft/player": "workspace:*",
-    "@fontsource/dm-sans": "^5.3.0",
-    "@fontsource/inter": "^5.2.0",
-    "@fontsource/jetbrains-mono": "^5.3.0",
-    "@fontsource/playfair-display": "^5.3.0",
-    "@fontsource/space-grotesk": "^5.3.0",
+    "@fontsource/dm-sans": "catalog:",
+    "@fontsource/inter": "catalog:",
+    "@fontsource/jetbrains-mono": "catalog:",
+    "@fontsource/playfair-display": "catalog:",
+    "@fontsource/space-grotesk": "catalog:",
     "@mediabunny/server": "^1.62.1",
-    "mediabunny": "1.62.0",
+    "mediabunny": "catalog:",
     "node-av": "^6.1.1",
-    "react": "^19.3.1",
+    "react": "catalog:",
     "satori": "^0.63.2",
     "skia-canvas": "^4.0.0",
-    "zod": "^4.6.7"
+    "zod": "catalog:"
   },
   "devDependencies": {
-    "@eslint/js": "^9.0.0",
-    "@playwright/test": "1.56.1",
-    "@types/node": "^22.0.0",
-    "@types/react": "^19.3.0",
-    "@types/react-dom": "^19.3.0",
-    "@vitejs/plugin-react": "^5.2.0",
-    "eslint": "^9.0.0",
-    "react-dom": "^19.3.1",
-    "tsx": "^4.0.0",
-    "typescript": "^5.9.3",
-    "typescript-eslint": "^8.72.0",
-    "vite": "^8.3.5",
-    "vitest": "^5.0.5"
+    "@playwright/test": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@vitejs/plugin-react": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
+    "react-dom": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vitest": "catalog:"
   }
 }

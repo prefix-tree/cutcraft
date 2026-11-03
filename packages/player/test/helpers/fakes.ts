@@ -1,12 +1,31 @@
-import type { AudioOutput, AudioSource, AudioSourceInfo, Ctx2D, Frame, FrameSource, FrameSourceInfo, MediaResolver, ScheduledSource } from "@cutcraft/player";
+import type {
+  AudioOutput,
+  AudioSource,
+  AudioSourceInfo,
+  Ctx2D,
+  Frame,
+  FrameSource,
+  FrameSourceInfo,
+  MediaResolver,
+  ScheduledSource,
+} from "@cutcraft/player";
 
 export class FakeFrame implements Frame {
   closed = false;
-  constructor(readonly source: FakeFrameSource, readonly timestamp: number, readonly duration: number, readonly retained = false) {
+  constructor(
+    readonly source: FakeFrameSource,
+    readonly timestamp: number,
+    readonly duration: number,
+    readonly retained = false,
+  ) {
     source.live.add(this);
   }
-  get width(): number { return this.source.width; }
-  get height(): number { return this.source.height; }
+  get width(): number {
+    return this.source.width;
+  }
+  get height(): number {
+    return this.source.height;
+  }
   draw(ctx: Ctx2D, dx: number, dy: number, dw: number, dh: number): void {
     if (this.closed) throw new Error(`drawing a closed frame (${this.source.id}@${this.timestamp})`);
     ctx.drawImage({ fake: this.source.id, timestamp: this.timestamp } as unknown as CanvasImageSource, dx, dy, dw, dh);
@@ -41,11 +60,20 @@ export class FakeFrameSource implements FrameSource {
   private credits = 0;
   private waiters: (() => void)[] = [];
 
-  constructor(readonly id: string, readonly duration = 10) {}
+  constructor(
+    readonly id: string,
+    readonly duration = 10,
+  ) {}
 
   open(): Promise<FrameSourceInfo> {
     this.opened++;
-    return Promise.resolve({ width: this.width, height: this.height, duration: this.duration, fps: this.fps, decodable: this.decodable });
+    return Promise.resolve({
+      width: this.width,
+      height: this.height,
+      duration: this.duration,
+      fps: this.fps,
+      decodable: this.decodable,
+    });
   }
 
   frameAt(t: number): Promise<Frame | null> {
@@ -80,7 +108,9 @@ export class FakeFrameSource implements FrameSource {
     }
   }
 
-  close(): void { this.closed = true; }
+  close(): void {
+    this.closed = true;
+  }
 
   private make(i: number): FakeFrame {
     return new FakeFrame(this, i / this.fps, 1 / this.fps);
@@ -90,14 +120,30 @@ export class FakeFrameSource implements FrameSource {
 export class FakeAudioSource implements AudioSource {
   rangeCalls: [number, number][] = [];
   closed = false;
-  constructor(readonly id: string, readonly duration = 10, readonly sampleRate = 48000) {}
-  open(): Promise<AudioSourceInfo> { return Promise.resolve({ sampleRate: this.sampleRate, channels: 2, duration: this.duration, decodable: true }); }
+  constructor(
+    readonly id: string,
+    readonly duration = 10,
+    readonly sampleRate = 48000,
+  ) {}
+  open(): Promise<AudioSourceInfo> {
+    return Promise.resolve({ sampleRate: this.sampleRate, channels: 2, duration: this.duration, decodable: true });
+  }
   range(from: number, to: number): Promise<AudioBuffer> {
     this.rangeCalls.push([from, to]);
     const length = Math.round((to - from) * this.sampleRate);
-    return Promise.resolve({ sampleRate: this.sampleRate, numberOfChannels: 2, duration: to - from, length, id: this.id, from, to } as unknown as AudioBuffer);
+    return Promise.resolve({
+      sampleRate: this.sampleRate,
+      numberOfChannels: 2,
+      duration: to - from,
+      length,
+      id: this.id,
+      from,
+      to,
+    } as unknown as AudioBuffer);
   }
-  close(): void { this.closed = true; }
+  close(): void {
+    this.closed = true;
+  }
 }
 
 export class FakeAudioOutput implements AudioOutput {
@@ -108,18 +154,37 @@ export class FakeAudioOutput implements AudioOutput {
   cancelAllCount = 0;
   master: number[] = [];
   resumed = 0;
-  schedule(src: ScheduledSource): void { this.scheduled.push(src); }
-  cancel(keyPrefix: string): void { this.cancelled.push(keyPrefix); this.scheduled = this.scheduled.filter((s) => !s.key.startsWith(keyPrefix)); }
-  cancelAll(): void { this.cancelAllCount++; this.scheduled = []; }
-  setMaster(gain: number): void { this.master.push(gain); }
-  resume(): Promise<void> { this.resumed++; return Promise.resolve(); }
+  schedule(src: ScheduledSource): void {
+    this.scheduled.push(src);
+  }
+  cancel(keyPrefix: string): void {
+    this.cancelled.push(keyPrefix);
+    this.scheduled = this.scheduled.filter((s) => !s.key.startsWith(keyPrefix));
+  }
+  cancelAll(): void {
+    this.cancelAllCount++;
+    this.scheduled = [];
+  }
+  setMaster(gain: number): void {
+    this.master.push(gain);
+  }
+  resume(): Promise<void> {
+    this.resumed++;
+    return Promise.resolve();
+  }
 }
 
 export function fakeResolver(ids: string[]): MediaResolver {
-  return { resolve: (id) => (ids.includes(id) ? Promise.resolve({ kind: "url", url: `/${id}` }) : Promise.reject(new Error(`no media ${id}`))) };
+  return {
+    resolve: (id) =>
+      ids.includes(id) ? Promise.resolve({ kind: "url", url: `/${id}` }) : Promise.reject(new Error(`no media ${id}`)),
+  };
 }
 
-export interface Recorded { name: string; args: unknown[] }
+export interface Recorded {
+  name: string;
+  args: unknown[];
+}
 
 /** A 2D context stand-in that records every call and property set. */
 export function recorderContext(): { ctx: Ctx2D; calls: Recorded[]; canvas: object } {
@@ -132,9 +197,15 @@ export function recorderContext(): { ctx: Ctx2D; calls: Recorded[]; canvas: obje
       return (...args: unknown[]) => {
         calls.push({ name: prop, args });
         // Stubs for the calls whose result the painter uses.
-        if (prop === "createRadialGradient" || prop === "createLinearGradient") return { addColorStop: (...a: unknown[]) => calls.push({ name: "addColorStop", args: a }) };
+        if (prop === "createRadialGradient" || prop === "createLinearGradient")
+          return { addColorStop: (...a: unknown[]) => calls.push({ name: "addColorStop", args: a }) };
         if (prop === "createPattern") return { fake: "pattern" };
-        if (prop === "createImageData") return { width: args[0], height: args[1], data: new Uint8ClampedArray((args[0] as number) * (args[1] as number) * 4) };
+        if (prop === "createImageData")
+          return {
+            width: args[0],
+            height: args[1],
+            data: new Uint8ClampedArray((args[0] as number) * (args[1] as number) * 4),
+          };
         return undefined;
       };
     },

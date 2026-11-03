@@ -16,7 +16,13 @@ function reachable(entry: string): string[] {
     for (const m of text.matchAll(/(?:from|import)\s*\(?\s*["'](\.{1,2}\/[^"']*)["']/g)) {
       const base = resolve(dirname(file), m[1] as string);
       for (const candidate of [`${base}.ts`, `${base}.tsx`, join(base, "index.ts")]) {
-        try { readFileSync(candidate); queue.push(candidate); break; } catch { /* next candidate */ }
+        try {
+          readFileSync(candidate);
+          queue.push(candidate);
+          break;
+        } catch {
+          /* next candidate */
+        }
       }
     }
   }
@@ -29,7 +35,10 @@ describe("@cutcraft/player/engine", () => {
     expect(files.length).toBeGreaterThan(20);
     expect(files.filter((f) => f.includes(`${join(src, "react")}`))).toEqual([]);
     for (const banned of ["player.ts", "web-audio-output.ts", "audio-engine.ts", "audio-clock.ts", "transport.ts"]) {
-      expect(files.filter((f) => f.endsWith(`/${banned}`)), banned).toEqual([]);
+      expect(
+        files.filter((f) => f.endsWith(`/${banned}`)),
+        banned,
+      ).toEqual([]);
     }
     for (const f of files) expect(readFileSync(f, "utf8"), f).not.toMatch(/from\s+["']react-dom/);
   });
@@ -38,7 +47,18 @@ describe("@cutcraft/player/engine", () => {
     expect(typeof document).toBe("undefined");
     expect(typeof window).toBe("undefined");
     const engine = await import("../src/engine");
-    for (const name of ["Compositor", "CanvasPainter", "DecoderPool", "AssetSources", "buildFramePlan", "buildAudioPlan", "frameIndex", "PICK_EPS", "ManualClock", "makeNestedResolver"]) {
+    for (const name of [
+      "Compositor",
+      "CanvasPainter",
+      "DecoderPool",
+      "AssetSources",
+      "buildFramePlan",
+      "buildAudioPlan",
+      "frameIndex",
+      "PICK_EPS",
+      "ManualClock",
+      "makeNestedResolver",
+    ]) {
       expect(engine, name).toHaveProperty(name);
     }
     expect(engine).not.toHaveProperty("PlayerCore");
@@ -59,6 +79,15 @@ describe("@cutcraft/player/overlays", () => {
     }
     expect(typeof document).toBe("undefined");
     const overlays = await import("../src/overlays");
-    for (const name of ["overlayLayout", "titleContent", "shapeDrawing", "prepareSvg", "captionsContent", "layerContent", "indexLayerInteriors"]) expect(overlays, name).toHaveProperty(name);
+    for (const name of [
+      "overlayLayout",
+      "titleContent",
+      "shapeDrawing",
+      "prepareSvg",
+      "captionsContent",
+      "layerContent",
+      "indexLayerInteriors",
+    ])
+      expect(overlays, name).toHaveProperty(name);
   });
 });

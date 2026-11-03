@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { listHandlers, type ActionType } from "@cutcraft/kit";
-import { CASES, NO_STATE_CHANGE, SETUP, STUBS } from "./cases";
+
+import { type ActionType, listHandlers } from "@cutcraft/kit";
+
 import { fixtureExecutor, serialize } from "../helpers";
+import { CASES, NO_STATE_CHANGE, SETUP, STUBS } from "./cases";
 
 const registered = listHandlers();
 

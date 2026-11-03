@@ -2,16 +2,29 @@ import { execFileSync } from "node:child_process";
 import { mkdtempSync, readFileSync, rmSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { collectModule, resolve } from "@cutcraft/kit";
-import generateMedia, { mediaDir } from "../../player/e2e/gen-media";
-import * as file from "../../player/e2e/app/composition";
-import { indexLayerInteriors } from "@cutcraft/player/overlays";
-import { Canvas, loadImage } from "skia-canvas";
+
 import { VideoSample } from "mediabunny";
+import { Canvas, loadImage } from "skia-canvas";
+
+import { collectModule, resolve } from "@cutcraft/kit";
+import { indexLayerInteriors } from "@cutcraft/player/overlays";
+
+import * as file from "../../player/e2e/app/composition";
+import generateMedia, { mediaDir } from "../../player/e2e/gen-media";
 import { directoryResolver, renderStill, renderVideo } from "../src";
 import { FramePipeline } from "../src/pipeline";
 import { checkExactFrames } from "./helpers/exact";
-import { decodeAudio, decodeFrames, type DecodedFrame, decodesClean, pixel, probe, readStrip, rmsOf, tonePower } from "./helpers/output";
+import {
+  type DecodedFrame,
+  decodeAudio,
+  decodeFrames,
+  decodesClean,
+  pixel,
+  probe,
+  readStrip,
+  rmsOf,
+  tonePower,
+} from "./helpers/output";
 
 const CRISP = 4_000_000;
 const state = resolve(collectModule(file), file.manifest);
@@ -52,9 +65,17 @@ describe("renderVideo", () => {
     const result = await renderVideo({ state, media, out, interiors, to: 3 });
     expect(result.errors).toEqual([]);
     expect(result.warnings).toEqual([]);
-    const lit = (frame: DecodedFrame, test: (r: number, g: number, b: number) => boolean, box: [number, number, number, number]): number => {
+    const lit = (
+      frame: DecodedFrame,
+      test: (r: number, g: number, b: number) => boolean,
+      box: [number, number, number, number],
+    ): number => {
       let n = 0;
-      for (let y = box[1]; y < box[3]; y++) for (let x = box[0]; x < box[2]; x++) { const [r, g, b] = pixel(frame, x, y); if (test(r, g, b)) n++; }
+      for (let y = box[1]; y < box[3]; y++)
+        for (let x = box[0]; x < box[2]; x++) {
+          const [r, g, b] = pixel(frame, x, y);
+          if (test(r, g, b)) n++;
+        }
       return n;
     };
     const green = (r: number, g: number, b: number): boolean => g > 230 && r < 40 && b < 40;
@@ -62,7 +83,8 @@ describe("renderVideo", () => {
     const frames: Record<number, { green: number; white: number }> = {};
     await decodeFrames(out, (frame, n) => {
       // The title (0.5-2.5 s) is green text at the centre; the counter (0-3 s) is white text at the top right.
-      if (n === 10 || n === 45) frames[n] = { green: lit(frame, green, [250, 150, 390, 210]), white: lit(frame, white, [596, 8, 640, 36]) };
+      if (n === 10 || n === 45)
+        frames[n] = { green: lit(frame, green, [250, 150, 390, 210]), white: lit(frame, white, [596, 8, 640, 36]) };
     });
     expect(frames[10]?.green).toBe(0);
     expect(frames[45]?.green).toBeGreaterThan(150);
@@ -77,7 +99,13 @@ describe("renderVideo", () => {
       const plain = await pipeline.frame(96, true); // v1 alone, after the title and the layer
       expect(plain).toBeInstanceOf(VideoSample);
       const sample = plain as VideoSample;
-      expect([sample.format, sample.codedWidth, sample.codedHeight, sample.colorSpace.matrix, sample.colorSpace.fullRange]).toEqual(["I420", 640, 360, "bt709", false]);
+      expect([
+        sample.format,
+        sample.codedWidth,
+        sample.codedHeight,
+        sample.colorSpace.matrix,
+        sample.colorSpace.fullRange,
+      ]).toEqual(["I420", 640, 360, "bt709", false]);
       sample.close();
       expect(await pipeline.frame(112, true)).toBeInstanceOf(Uint8Array); // the crossfade into v2
       expect(await pipeline.frame(180, true)).toBeInstanceOf(Uint8Array); // the logo, a still
@@ -91,13 +119,17 @@ describe("renderVideo", () => {
     const result = await renderVideo({ state, media, out, from: 1, to: 2 });
     expect(result.frames).toBe(30);
     const first: number[] = [];
-    await decodeFrames(out, (frame, n) => { if (n === 0 || n === 29) first.push(readStrip(frame)); });
+    await decodeFrames(out, (frame, n) => {
+      if (n === 0 || n === 29) first.push(readStrip(frame));
+    });
     expect(first).toEqual([30, 59]);
   });
 
   it("fails instead of drawing a placeholder when an asset is missing", async () => {
     const out = join(dir, "missing.webm");
-    await expect(renderVideo({ state, media: directoryResolver(join(dir, "nowhere"), file.manifest), out })).rejects.toThrow(/no media file for asset "bars"/);
+    await expect(
+      renderVideo({ state, media: directoryResolver(join(dir, "nowhere"), file.manifest), out }),
+    ).rejects.toThrow(/no media file for asset "bars"/);
   });
 
   it("mixes the soundtrack from the plan: clip audio, speed-shifted pitch, a bed that ducks under it", async () => {
@@ -128,20 +160,31 @@ describe("renderVideo", () => {
     for (const ext of ["mp3", "wav"]) {
       const out = join(dir, `sound.${ext}`);
       expect(await renderVideo({ state, media, out, to: 2 })).toMatchObject({ frames: 0, audio: true });
-      expect(execFileSync("ffprobe", ["-v", "error", "-select_streams", "v", "-show_entries", "stream=codec_name", "-of", "csv=p=0", out], { encoding: "utf8" }).trim()).toBe("");
+      expect(
+        execFileSync(
+          "ffprobe",
+          ["-v", "error", "-select_streams", "v", "-show_entries", "stream=codec_name", "-of", "csv=p=0", out],
+          { encoding: "utf8" },
+        ).trim(),
+      ).toBe("");
       const sound = decodeAudio(out);
       expect(sound.length / 48000).toBeCloseTo(2, 1);
       expect(rmsOf(sound, 0, 2)).toBeGreaterThan(0.01);
     }
-    await expect(renderVideo({ state, media, out: join(dir, "none.mp3"), silent: true })).rejects.toThrow(/holds only the soundtrack/);
+    await expect(renderVideo({ state, media, out: join(dir, "none.mp3"), silent: true })).rejects.toThrow(
+      /holds only the soundtrack/,
+    );
   });
 
   it("rejects a codec the container cannot hold", async () => {
-    await expect(renderVideo({ state, media, out: join(dir, "bad.webm"), videoCodec: "prores", to: 1 })).rejects.toThrow(/\.webm file cannot hold prores/);
+    await expect(
+      renderVideo({ state, media, out: join(dir, "bad.webm"), videoCodec: "prores", to: 1 }),
+    ).rejects.toThrow(/\.webm file cannot hold prores/);
   });
 
   it("encodes to a quality preset in place of a bitrate", async () => {
-    const low = join(dir, "low.webm"), high = join(dir, "high.webm");
+    const low = join(dir, "low.webm"),
+      high = join(dir, "high.webm");
     await renderVideo({ state, media, out: low, quality: "very-low", to: 1, silent: true });
     await renderVideo({ state, media, out: high, quality: "very-high", to: 1, silent: true });
     expect(statSync(high).size).toBeGreaterThan(statSync(low).size * 2);

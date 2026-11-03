@@ -1,20 +1,46 @@
 import { existsSync, statSync } from "node:fs";
 import { join } from "node:path";
+
 import type { AssetManifest } from "@cutcraft/kit";
 import type { MediaResolver } from "@cutcraft/player/engine";
 
-const EXTENSIONS = [".webm", ".mp4", ".mov", ".mkv", ".m4v", ".ogg", ".opus", ".mp3", ".wav", ".m4a", ".aac", ".flac", ".png", ".jpg", ".jpeg", ".webp", ".gif", ".svg"];
+const EXTENSIONS = [
+  ".webm",
+  ".mp4",
+  ".mov",
+  ".mkv",
+  ".m4v",
+  ".ogg",
+  ".opus",
+  ".mp3",
+  ".wav",
+  ".m4a",
+  ".aac",
+  ".flac",
+  ".png",
+  ".jpg",
+  ".jpeg",
+  ".webp",
+  ".gif",
+  ".svg",
+];
 
 /**
  * Finds each asset's file in a directory: `<dir>/<id>` with or without one of
  * the usual media extensions, or the path given for it in `overrides`.
  */
-export function directoryResolver(dir: string, manifest: AssetManifest, overrides: Readonly<Record<string, string>> = {}): MediaResolver {
+export function directoryResolver(
+  dir: string,
+  manifest: AssetManifest,
+  overrides: Readonly<Record<string, string>> = {},
+): MediaResolver {
   return {
     resolve: (assetId) => {
       const direct = overrides[assetId];
       if (direct !== undefined) {
-        return existsSync(direct) ? Promise.resolve({ kind: "path", path: direct }) : Promise.reject(new Error(`asset "${assetId}": ${direct} does not exist`));
+        return existsSync(direct)
+          ? Promise.resolve({ kind: "path", path: direct })
+          : Promise.reject(new Error(`asset "${assetId}": ${direct} does not exist`));
       }
       const base = join(dir, assetId);
       const hit = [base, ...EXTENSIONS.map((e) => `${base}${e}`)].find((p) => existsSync(p) && statSync(p).isFile());

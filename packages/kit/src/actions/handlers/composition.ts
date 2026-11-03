@@ -1,19 +1,34 @@
-import { getHandler, inverseOf } from "../registry";
-import { define, isError, makePropHandler, rawNode, rawProp, requireElement, setProps, validateTarget } from "../handler-kit";
-import { invalid, ok, type Action, type ActionInput } from "../types";
 import type { Json } from "../../patches/types";
 import { FONT_KEYS } from "../../theme/builtins";
 import { themeSchema } from "../../theme/schema";
+import {
+  define,
+  isError,
+  makePropHandler,
+  rawNode,
+  rawProp,
+  requireElement,
+  setProps,
+  validateTarget,
+} from "../handler-kit";
+import { getHandler, inverseOf } from "../registry";
+import { type Action, type ActionInput, invalid, ok } from "../types";
 
 define(makePropHandler({
   type: "composition/updateSettings",
   target: (_p) => "composition",
-  write: (p) => ({ ...(p.fps !== undefined ? { fps: p.fps } : {}), ...(p.width !== undefined ? { width: p.width } : {}),
-    ...(p.height !== undefined ? { height: p.height } : {}), ...(p.sampleRate !== undefined ? { sampleRate: p.sampleRate } : {}),
-    ...(p.channels !== undefined ? { channels: p.channels } : {}) }),
+  write: (p) => ({
+    ...(p.fps !== undefined ? { fps: p.fps } : {}),
+    ...(p.width !== undefined ? { width: p.width } : {}),
+    ...(p.height !== undefined ? { height: p.height } : {}),
+    ...(p.sampleRate !== undefined ? { sampleRate: p.sampleRate } : {}),
+    ...(p.channels !== undefined ? { channels: p.channels } : {}),
+  }),
   validate: (a) => {
     const p = a.params;
-    const bad = [p.fps, p.width, p.height, p.sampleRate, p.channels].some((v) => v !== undefined && !(Number.isFinite(v) && (v as number) > 0));
+    const bad = [p.fps, p.width, p.height, p.sampleRate, p.channels].some(
+      (v) => v !== undefined && !(Number.isFinite(v) && (v as number) > 0),
+    );
     return bad ? invalid({ code: "INVALID_PARAMS", message: "settings must be positive numbers" }) : ok;
   },
 }));
@@ -23,7 +38,11 @@ define(makePropHandler({
   target: () => "composition",
   write: (p, state) => {
     const prior = (rawProp(state, "composition", "background") ?? {}) as Record<string, unknown>;
-    const next = { ...prior, ...(p.mode !== undefined ? { mode: p.mode } : {}), ...(p.color !== undefined ? { color: p.color } : {}) };
+    const next = {
+      ...prior,
+      ...(p.mode !== undefined ? { mode: p.mode } : {}),
+      ...(p.color !== undefined ? { color: p.color } : {}),
+    };
     return { background: Object.keys(next).length ? (next as never) : undefined };
   },
 }));
@@ -31,12 +50,20 @@ define(makePropHandler({
 define(makePropHandler({
   type: "composition/setTheme",
   target: () => "composition",
-  write: (p, state) => ({ theme: p.theme === null ? undefined : p.merge ? mergeTheme(currentTheme(state), p.theme) : p.theme as Json }),
+  write: (p, state) => ({
+    theme: p.theme === null ? undefined : p.merge ? mergeTheme(currentTheme(state), p.theme) : (p.theme as Json),
+  }),
   validate: (a, state) => {
     if (a.params.theme === null) return ok;
     const next = a.params.merge ? mergeTheme(currentTheme(state), a.params.theme) : a.params.theme;
     const result = themeSchema.safeParse(next);
-    return result.success ? ok : invalid({ code: "INVALID_PARAMS", path: "theme", message: result.error.issues.map((i) => `${i.path.join(".") || "theme"}: ${i.message}`).join("; ") });
+    return result.success
+      ? ok
+      : invalid({
+          code: "INVALID_PARAMS",
+          path: "theme",
+          message: result.error.issues.map((i) => `${i.path.join(".") || "theme"}: ${i.message}`).join("; "),
+        });
   },
 }));
 
@@ -47,15 +74,21 @@ define(makePropHandler({
     const theme = currentTheme(state);
     const name = p.token.replace(/^\$/, "");
     if (name === "radius") return { theme: { ...theme, radius: p.value } };
-    const group = (FONT_KEYS as readonly string[]).includes(name) || Object.hasOwn(state.theme.fonts, name) ? "fonts" : "palette";
+    const group =
+      (FONT_KEYS as readonly string[]).includes(name) || Object.hasOwn(state.theme.fonts, name) ? "fonts" : "palette";
     const prior = (theme[group] ?? {}) as Record<string, Json>;
     return { theme: { ...theme, [group]: { ...prior, [name]: p.value } } };
   },
   validate: (a) => {
     const name = a.params.token.replace(/^\$/, "");
-    if (!/^[A-Za-z][A-Za-z0-9_-]*$/.test(name)) return invalid({ code: "INVALID_PARAMS", path: "token", message: `"${a.params.token}" is not a token name` });
+    if (!/^[A-Za-z][A-Za-z0-9_-]*$/.test(name))
+      return invalid({ code: "INVALID_PARAMS", path: "token", message: `"${a.params.token}" is not a token name` });
     if (name === "radius" ? typeof a.params.value !== "number" : typeof a.params.value !== "string") {
-      return invalid({ code: "INVALID_PARAMS", path: "value", message: name === "radius" ? "radius takes a number" : `${name} takes a string` });
+      return invalid({
+        code: "INVALID_PARAMS",
+        path: "value",
+        message: name === "radius" ? "radius takes a number" : `${name} takes a string`,
+      });
     }
     return ok;
   },
@@ -64,7 +97,7 @@ define(makePropHandler({
 /** The file's own theme literal, after patches; empty when it has none. */
 function currentTheme(state: Parameters<typeof rawProp>[0]): Record<string, Json> {
   const raw = rawProp(state, "composition", "theme");
-  return raw && typeof raw === "object" && !Array.isArray(raw) ? raw as Record<string, Json> : {};
+  return raw && typeof raw === "object" && !Array.isArray(raw) ? (raw as Record<string, Json>) : {};
 }
 
 /** `over` laid on `base`: palette, fonts and styles merge one level down, the rest replaces. */
@@ -85,7 +118,10 @@ function isObject(v: Json | undefined): v is Record<string, Json> {
 /** The tweaks panel. Stored as a prop patch on the composition; fold rewrites the `defaults` literal. */
 define({
   type: "composition/setProps",
-  validate: (a) => (a.params.defaults && typeof a.params.defaults === "object" ? ok : invalid({ code: "INVALID_PARAMS", message: "defaults must be an object" })),
+  validate: (a) =>
+    a.params.defaults && typeof a.params.defaults === "object"
+      ? ok
+      : invalid({ code: "INVALID_PARAMS", message: "defaults must be an object" }),
   apply: (a, log) => log.append({ op: "set", id: "composition", prop: "$defaults", value: a.params.defaults }),
   invert: (_a, before) => {
     const prior = rawProp(before, "composition", "$defaults");
@@ -102,7 +138,8 @@ define({
   apply: (a, log) => setProps(log, a.params.id, a.params.props),
   invert: (a, before) => {
     const prior: Record<string, never> = {};
-    for (const prop of Object.keys(a.params.props)) (prior as Record<string, unknown>)[prop] = rawProp(before, a.params.id, prop);
+    for (const prop of Object.keys(a.params.props))
+      (prior as Record<string, unknown>)[prop] = rawProp(before, a.params.id, prop);
     return { type: "source/setProps", params: { id: a.params.id, props: prior } };
   },
   fold: () => [],
@@ -112,7 +149,10 @@ define({
   type: "source/setProp",
   validate: (a, state) => validateTarget(state, a.params.id, [a.params.prop]),
   apply: (a, log) => log.append({ op: "set", id: a.params.id, prop: a.params.prop, value: a.params.value }),
-  invert: (a, before) => ({ type: "source/setProp", params: { id: a.params.id, prop: a.params.prop, value: rawProp(before, a.params.id, a.params.prop) } }),
+  invert: (a, before) => ({
+    type: "source/setProp",
+    params: { id: a.params.id, prop: a.params.prop, value: rawProp(before, a.params.id, a.params.prop) },
+  }),
   fold: () => [],
 });
 
@@ -122,7 +162,9 @@ define({
   validate: (a, state) => {
     const item = requireElement(state, a.params.id);
     if (isError(item)) return invalid(item);
-    return item.editable === "generated" ? ok : invalid({ code: "INVALID_PARAMS", message: `"${a.params.id}" is already literal` });
+    return item.editable === "generated"
+      ? ok
+      : invalid({ code: "INVALID_PARAMS", message: `"${a.params.id}" is already literal` });
   },
   apply: (a, log) => log.append({ op: "bake", id: a.params.id }),
   // Baking changes the source, not the timeline; its undo is a file-version revert, so the inverse is a no-op write.
@@ -150,7 +192,7 @@ define({
 });
 
 import { createPatchLog } from "../../patches/log";
-import { resolve, type ResolvedState } from "../../resolve/resolve";
+import { type ResolvedState, resolve } from "../../resolve/resolve";
 import type { ValidationResult } from "../types";
 
 /**
@@ -159,7 +201,10 @@ import type { ValidationResult } from "../types";
  * The resolved tree already carries the real log's net effect, so the scratch
  * log starts empty on top of it.
  */
-function replay(actions: readonly ActionInput[], before: ResolvedState): { inverses: ActionInput[]; error?: ValidationResult } {
+function replay(
+  actions: readonly ActionInput[],
+  before: ResolvedState,
+): { inverses: ActionInput[]; error?: ValidationResult } {
   const inverses: ActionInput[] = [];
   const log = createPatchLog({ isSource: (id) => before.tree.byId.has(id) });
   const tree = before.tree;
@@ -167,10 +212,18 @@ function replay(actions: readonly ActionInput[], before: ResolvedState): { inver
   let state = before;
   for (const [i, sub] of actions.entries()) {
     const handler = getHandler(sub.type);
-    if (!handler) return { inverses, error: invalid({ code: "UNKNOWN_ACTION", message: `no handler for ${sub.type}` }) };
+    if (!handler)
+      return { inverses, error: invalid({ code: "UNKNOWN_ACTION", message: `no handler for ${sub.type}` }) };
     const action = { ...sub, actionId: `batch-${i}`, ts: 0 } as Action;
     const result = handler.validate(action, state);
-    if (!result.valid) return { inverses, error: { valid: false, errors: result.errors.map((e) => ({ ...e, path: `actions[${i}]${e.path ? "." + e.path : ""}` })) } };
+    if (!result.valid)
+      return {
+        inverses,
+        error: {
+          valid: false,
+          errors: result.errors.map((e) => ({ ...e, path: `actions[${i}]${e.path ? `.${e.path}` : ""}` })),
+        },
+      };
     inverses.push(inverseOf(action, state));
     handler.apply(action, log, { before: state, manifest: before.manifest, current });
     state = current();

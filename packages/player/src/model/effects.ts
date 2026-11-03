@@ -1,8 +1,12 @@
 import type { Placement, RENDERED_EFFECTS } from "@cutcraft/kit";
+
 import { devWarn } from "../warn";
 import { keyframedValue } from "./keyframes";
 
-export interface FilterResult { readonly filter: string; readonly unsupported: readonly string[] }
+export interface FilterResult {
+  readonly filter: string;
+  readonly unsupported: readonly string[];
+}
 
 type Params = Readonly<Record<string, unknown>>;
 
@@ -19,9 +23,11 @@ function num(params: Params, keys: readonly string[], fallback: number): number 
  * and k = s/c for s = 1/(white − black). Gamma has no filter form; the lint reports it.
  */
 function levels(p: Params): string {
-  const black = Math.max(0, Math.min(1, num(p, ["black"], 0))), white = Math.max(0, Math.min(1, num(p, ["white"], 1)));
+  const black = Math.max(0, Math.min(1, num(p, ["black"], 0))),
+    white = Math.max(0, Math.min(1, num(p, ["white"], 1)));
   if (white <= black) return "";
-  const s = 1 / (white - black), c = 1 + 2 * black * s;
+  const s = 1 / (white - black),
+    c = 1 + 2 * black * s;
   return `brightness(${s / c}) contrast(${c})`;
 }
 
@@ -30,7 +36,9 @@ function levels(p: Params): string {
 const POST_TYPES = ["vignette", "grain"] as const;
 
 /** One filter per rendered effect type: kit's RENDERED_EFFECTS, which the `not-rendered` lint reads, less the post effects. */
-const CANVAS_FILTERABLE: Readonly<Record<Exclude<(typeof RENDERED_EFFECTS)[number], (typeof POST_TYPES)[number]>, (p: Params) => string>> = {
+const CANVAS_FILTERABLE: Readonly<
+  Record<Exclude<(typeof RENDERED_EFFECTS)[number], (typeof POST_TYPES)[number]>, (p: Params) => string>
+> = {
   brightness: (p) => `brightness(${1 + num(p, ["amount", "value"], 0) / 100})`,
   contrast: (p) => `contrast(${1 + num(p, ["amount", "value"], 0) / 100})`,
   saturation: (p) => `saturate(${1 + num(p, ["amount", "value"], 0) / 100})`,
@@ -42,7 +50,8 @@ const CANVAS_FILTERABLE: Readonly<Record<Exclude<(typeof RENDERED_EFFECTS)[numbe
   temperature: (p) => colorGradeFilters({ temperature: num(p, ["amount", "value"], 0) }).join(" "),
   tint: (p) => colorGradeFilters({ tint: num(p, ["amount", "value"], 0) }).join(" "),
   levels,
-  shadow: (p) => `drop-shadow(${num(p, ["x"], 0)}px ${num(p, ["y"], 4)}px ${num(p, ["blur"], 8)}px ${typeof p.color === "string" ? p.color : "rgba(0,0,0,0.5)"})`,
+  shadow: (p) =>
+    `drop-shadow(${num(p, ["x"], 0)}px ${num(p, ["y"], 4)}px ${num(p, ["blur"], 8)}px ${typeof p.color === "string" ? p.color : "rgba(0,0,0,0.5)"})`,
 };
 
 /** An effect's params with its keyframed ones (`effect.<id>.<param>` keyframes on the element) evaluated at element-relative `rel`. */
@@ -75,26 +84,39 @@ export function filterString(children: readonly Placement[], elementId: string, 
         if (f) parts.push(f);
       } else {
         unsupported.push(type);
-        devWarn(`effect:${elementId}:${type}`, `effect "${type}" on "${elementId}" is not rendered by the browser player`);
+        devWarn(
+          `effect:${elementId}:${type}`,
+          `effect "${type}" on "${elementId}" is not rendered by the browser player`,
+        );
       }
     } else if (c.kind === "colorGrade") {
-      parts.push(...colorGradeFilters({
-        temperature: keyframedValue(children, "colorGrade.temperature", rel, c.props.temperature),
-        tint: keyframedValue(children, "colorGrade.tint", rel, c.props.tint),
-      }));
+      parts.push(
+        ...colorGradeFilters({
+          temperature: keyframedValue(children, "colorGrade.temperature", rel, c.props.temperature),
+          tint: keyframedValue(children, "colorGrade.tint", rel, c.props.tint),
+        }),
+      );
     }
   }
   return { filter: parts.join(" "), unsupported };
 }
 
-export type PostEffect = { readonly type: "vignette"; readonly amount: number } | { readonly type: "grain"; readonly amount: number; readonly seed: number };
+export type PostEffect =
+  | { readonly type: "vignette"; readonly amount: number }
+  | { readonly type: "grain"; readonly amount: number; readonly seed: number };
 
 /** Vignette and grain, in order, with `amount` on 0..1; grain is seeded by the frame, so a frame always looks the same. */
 export function postEffects(children: readonly Placement[], frame: number, rel: number): PostEffect[] | undefined {
   const out: PostEffect[] = [];
   for (const c of children) {
     if (c.kind !== "effect" || c.props.enabled === false) continue;
-    const amount = Math.max(0, Math.min(1, num(paramsAt(children, c, rel), ["amount", "intensity", "value"], c.props.type === "grain" ? 20 : 50) / 100));
+    const amount = Math.max(
+      0,
+      Math.min(
+        1,
+        num(paramsAt(children, c, rel), ["amount", "intensity", "value"], c.props.type === "grain" ? 20 : 50) / 100,
+      ),
+    );
     if (amount <= 0) continue;
     if (c.props.type === "vignette") out.push({ type: "vignette", amount });
     else if (c.props.type === "grain") out.push({ type: "grain", amount, seed: frame });

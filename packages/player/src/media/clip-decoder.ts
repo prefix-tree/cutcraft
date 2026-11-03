@@ -1,5 +1,14 @@
 import type { Placement } from "@cutcraft/kit";
-import { FRAME_WAIT_MS, PICK_EPS, QUEUE_MAX, QUEUE_TARGET, REVERSE_WINDOW_FRAMES, REVERSE_WINDOW_S, SEEK_MODE_SPEED } from "../constants";
+
+import {
+  FRAME_WAIT_MS,
+  PICK_EPS,
+  QUEUE_MAX,
+  QUEUE_TARGET,
+  REVERSE_WINDOW_FRAMES,
+  REVERSE_WINDOW_S,
+  SEEK_MODE_SPEED,
+} from "../constants";
 import { placementSourceTime } from "../model/time";
 import type { Frame, FrameSource } from "../types";
 
@@ -47,10 +56,16 @@ export class ClipDecoder {
   }
 
   /** Asset and direction: everything else (trim, speed, freezes) may change under a live decoder. */
-  static sourceKey(p: Placement): string { return sourceKeyOf(p); }
+  static sourceKey(p: Placement): string {
+    return sourceKeyOf(p);
+  }
 
-  get placement(): Placement { return this._placement; }
-  get children(): readonly Placement[] { return this._children; }
+  get placement(): Placement {
+    return this._placement;
+  }
+  get children(): readonly Placement[] {
+    return this._children;
+  }
 
   /**
    * Take a new resolve of the same placement. A trim or speed change moves
@@ -67,8 +82,12 @@ export class ClipDecoder {
     return Math.abs(this.effectiveSpeed()) > SEEK_MODE_SPEED ? "seek" : "forward";
   }
 
-  get queued(): number { return this.queue.length; }
-  get ready(): Promise<void> { return this.primed ?? Promise.resolve(); }
+  get queued(): number {
+    return this.queue.length;
+  }
+  get ready(): Promise<void> {
+    return this.primed ?? Promise.resolve();
+  }
 
   sourceTime(t: number): number {
     return placementSourceTime(this.placement, this.children, t);
@@ -81,10 +100,15 @@ export class ClipDecoder {
     const run = async (): Promise<void> => {
       const gen = this.generation;
       const frame = await this.source.frameAt(st);
-      if (gen !== this.generation || this.disposed) { frame?.close(); return; }
+      if (gen !== this.generation || this.disposed) {
+        frame?.close();
+        return;
+      }
       this.setCurrent(frame);
       if (this.mode === "forward") this.startStream(st);
-      else if (this.mode === "reverse") { this.reverseLow = st; }
+      else if (this.mode === "reverse") {
+        this.reverseLow = st;
+      }
     };
     this.primed = run();
     return this.primed;
@@ -109,7 +133,12 @@ export class ClipDecoder {
   advance(t: number): void {
     if (this.mode !== "forward") return;
     const st = this.sourceTime(t);
-    while (this.queue.length > 0 && this.queue[0]!.timestamp + this.queue[0]!.duration <= st && this.queue.length > 1 && this.queue[1]!.timestamp <= st + PICK_EPS) {
+    while (
+      this.queue.length > 0 &&
+      this.queue[0]!.timestamp + this.queue[0]!.duration <= st &&
+      this.queue.length > 1 &&
+      this.queue[1]!.timestamp <= st + PICK_EPS
+    ) {
       this.queue.shift()!.close();
     }
     this.pump();
@@ -126,14 +155,23 @@ export class ClipDecoder {
   private async forwardFrame(st: number, wait: boolean, exact = false): Promise<Frame | null> {
     const newest = this.queue[this.queue.length - 1] ?? this.current;
     const behind = newest !== null && st - (newest.timestamp + newest.duration) > BEHIND_RESEEK_S;
-    const before = this.current !== null && st + PICK_EPS < this.current.timestamp && !this.queue.some((f) => f.timestamp <= st + PICK_EPS);
+    const before =
+      this.current !== null &&
+      st + PICK_EPS < this.current.timestamp &&
+      !this.queue.some((f) => f.timestamp <= st + PICK_EPS);
     if (this.gen === null && this.queue.length === 0 && this.current === null) {
-      if (wait) { await this.primeAtSource(st); return this.current; }
+      if (wait) {
+        await this.primeAtSource(st);
+        return this.current;
+      }
       void this.primeAtSource(st);
       return null;
     }
     if (behind || before) {
-      if (wait) { await this.primeAtSource(st); return this.current; }
+      if (wait) {
+        await this.primeAtSource(st);
+        return this.current;
+      }
       void this.primeAtSource(st);
       return this.current;
     }
@@ -148,8 +186,14 @@ export class ClipDecoder {
       const next = this.queue[0];
       // A frame that starts within PICK_EPS after `st` is the one to pick, so the picked frame is final only if
       // it lasts past that tolerance too; otherwise the next frame may simply not be decoded yet.
-      const settled = (next !== undefined && next.timestamp > st + PICK_EPS) || this.gen === null || (picked !== null && picked.timestamp + picked.duration > st + PICK_EPS);
-      if (settled || Date.now() >= deadline || this.disposed) { this.pump(); return picked ?? this.current; }
+      const settled =
+        (next !== undefined && next.timestamp > st + PICK_EPS) ||
+        this.gen === null ||
+        (picked !== null && picked.timestamp + picked.duration > st + PICK_EPS);
+      if (settled || Date.now() >= deadline || this.disposed) {
+        this.pump();
+        return picked ?? this.current;
+      }
       await this.pumpOnce();
     }
   }
@@ -159,7 +203,10 @@ export class ClipDecoder {
     let best: Frame | null = null;
     let index = -1;
     for (let i = 0; i < this.queue.length; i++) {
-      if (this.queue[i]!.timestamp <= st + PICK_EPS) { best = this.queue[i]!; index = i; } else break;
+      if (this.queue[i]!.timestamp <= st + PICK_EPS) {
+        best = this.queue[i]!;
+        index = i;
+      } else break;
     }
     if (!best) return null;
     for (let i = 0; i < index; i++) this.queue[i]!.close();
@@ -172,7 +219,10 @@ export class ClipDecoder {
     this.cancelStream();
     const gen = this.generation;
     this.primed = this.source.frameAt(st).then((frame) => {
-      if (gen !== this.generation || this.disposed) { frame?.close(); return; }
+      if (gen !== this.generation || this.disposed) {
+        frame?.close();
+        return;
+      }
       this.setCurrent(frame);
       this.startStream(st);
     });
@@ -196,7 +246,8 @@ export class ClipDecoder {
   private pumpOnce(): Promise<void> {
     if (this.pumping) return this.pumping;
     if (this.gen === null) return Promise.resolve();
-    const gen = this.gen, generation = this.generation;
+    const gen = this.gen,
+      generation = this.generation;
     const run = async (): Promise<void> => {
       try {
         while (this.queue.length < QUEUE_TARGET && this.gen === gen) {
@@ -209,11 +260,20 @@ export class ClipDecoder {
             if (generation !== this.generation || this.disposed) return;
             throw error;
           }
-          if (generation !== this.generation || this.disposed) { if (!next.done) next.value.close(); return; }
-          if (next.done) { this.gen = null; return; }
+          if (generation !== this.generation || this.disposed) {
+            if (!next.done) next.value.close();
+            return;
+          }
+          if (next.done) {
+            this.gen = null;
+            return;
+          }
           const frame = next.value;
           const last = this.queue[this.queue.length - 1];
-          if (last && frame.timestamp <= last.timestamp) { frame.close(); continue; }
+          if (last && frame.timestamp <= last.timestamp) {
+            frame.close();
+            continue;
+          }
           this.queue.push(frame);
           while (this.queue.length > QUEUE_MAX) this.queue.shift()!.close();
         }
@@ -226,12 +286,20 @@ export class ClipDecoder {
   }
 
   private seekFrame(st: number, wait: boolean): Promise<Frame | null> {
-    if (this.current && this.current.timestamp <= st + PICK_EPS && st + PICK_EPS < this.current.timestamp + this.current.duration) return Promise.resolve(this.current);
+    if (
+      this.current &&
+      this.current.timestamp <= st + PICK_EPS &&
+      st + PICK_EPS < this.current.timestamp + this.current.duration
+    )
+      return Promise.resolve(this.current);
     if (!this.seekPending) {
       const gen = this.generation;
       this.seekPending = this.source.frameAt(st).then((frame) => {
         this.seekPending = null;
-        if (gen !== this.generation || this.disposed) { frame?.close(); return; }
+        if (gen !== this.generation || this.disposed) {
+          frame?.close();
+          return;
+        }
         this.setCurrent(frame);
       });
     }
@@ -243,7 +311,10 @@ export class ClipDecoder {
       let best: Frame | null = null;
       let index = -1;
       for (let i = 0; i < this.queue.length; i++) {
-        if (this.queue[i]!.timestamp <= st) { best = this.queue[i]!; index = i; }
+        if (this.queue[i]!.timestamp <= st) {
+          best = this.queue[i]!;
+          index = i;
+        }
       }
       if (!best) return null;
       for (let i = index + 1; i < this.queue.length; i++) {
@@ -263,7 +334,10 @@ export class ClipDecoder {
       this.reverseLoading = this.loadReverseWindow(Math.min(low, st + 1e-6), src.in);
     }
     if (have && (!needEarlier || !wait)) return have;
-    if (wait && this.reverseLoading) { await this.reverseLoading; return pick() ?? this.current; }
+    if (wait && this.reverseLoading) {
+      await this.reverseLoading;
+      return pick() ?? this.current;
+    }
     return have ?? this.current;
   }
 
@@ -273,12 +347,21 @@ export class ClipDecoder {
     const frames: Frame[] = [];
     try {
       for await (const f of this.source.stream(from, to)) {
-        if (gen !== this.generation || this.disposed) { f.close(); return; }
-        if (f.timestamp >= to) { f.close(); break; }
+        if (gen !== this.generation || this.disposed) {
+          f.close();
+          return;
+        }
+        if (f.timestamp >= to) {
+          f.close();
+          break;
+        }
         frames.push(f);
         if (frames.length > REVERSE_WINDOW_FRAMES) frames.shift()!.close();
       }
-      if (gen !== this.generation || this.disposed) { frames.forEach((f) => f.close()); return; }
+      if (gen !== this.generation || this.disposed) {
+        frames.forEach((f) => f.close());
+        return;
+      }
       this.queue = [...frames, ...this.queue];
       this.reverseLow = from;
     } finally {
@@ -290,7 +373,8 @@ export class ClipDecoder {
     const rel = t - this.placement.start;
     for (const c of this.children) {
       if (c.kind !== "freeze") continue;
-      const fs = Number(c.props.start ?? 0), fd = Number(c.props.duration ?? 0);
+      const fs = Number(c.props.start ?? 0),
+        fd = Number(c.props.duration ?? 0);
       if (rel >= fs && rel < fs + fd) return c;
     }
     return null;

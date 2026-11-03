@@ -1,4 +1,11 @@
-import type { CAPTION_ANIMATIONS, MASK_TYPES, TEXT_ANIMATION_PRESETS, TransitionType, VideoEffectType, AudioEffectType } from "./enums";
+import type {
+  AudioEffectType,
+  CAPTION_ANIMATIONS,
+  MASK_TYPES,
+  TEXT_ANIMATION_PRESETS,
+  TransitionType,
+  VideoEffectType,
+} from "./enums";
 
 /**
  * What the player and the renderer actually draw and play, out of what the
@@ -6,11 +13,48 @@ import type { CAPTION_ANIMATIONS, MASK_TYPES, TEXT_ANIMATION_PRESETS, Transition
  * reports everything else, so a file that checks clean renders as written.
  */
 
-export const RENDERED_TRANSITIONS = ["crossfade", "dipToBlack", "dipToWhite", "wipe", "slide", "push"] as const satisfies readonly TransitionType[];
-export const RENDERED_EFFECTS = ["brightness", "contrast", "saturation", "hue", "blur", "grayscale", "sepia", "invert", "shadow", "temperature", "tint", "levels", "vignette", "grain"] as const satisfies readonly VideoEffectType[];
+export const RENDERED_TRANSITIONS = [
+  "crossfade",
+  "dipToBlack",
+  "dipToWhite",
+  "wipe",
+  "slide",
+  "push",
+] as const satisfies readonly TransitionType[];
+export const RENDERED_EFFECTS = [
+  "brightness",
+  "contrast",
+  "saturation",
+  "hue",
+  "blur",
+  "grayscale",
+  "sepia",
+  "invert",
+  "shadow",
+  "temperature",
+  "tint",
+  "levels",
+  "vignette",
+  "grain",
+] as const satisfies readonly VideoEffectType[];
 export const RENDERED_AUDIO_EFFECTS = [] as const satisfies readonly AudioEffectType[];
-export const RENDERED_TITLE_ANIMATIONS = ["none", "fade", "slide-up", "slide-down", "slide-left", "slide-right", "scale", "typewriter", "word-by-word"] as const satisfies readonly (typeof TEXT_ANIMATION_PRESETS)[number][];
-export const RENDERED_CAPTION_ANIMATIONS = ["none", "word-highlight", "word-by-word", "karaoke"] as const satisfies readonly (typeof CAPTION_ANIMATIONS)[number][];
+export const RENDERED_TITLE_ANIMATIONS = [
+  "none",
+  "fade",
+  "slide-up",
+  "slide-down",
+  "slide-left",
+  "slide-right",
+  "scale",
+  "typewriter",
+  "word-by-word",
+] as const satisfies readonly (typeof TEXT_ANIMATION_PRESETS)[number][];
+export const RENDERED_CAPTION_ANIMATIONS = [
+  "none",
+  "word-highlight",
+  "word-by-word",
+  "karaoke",
+] as const satisfies readonly (typeof CAPTION_ANIMATIONS)[number][];
 export const RENDERED_MASK_TYPES = ["shape", "drawn"] as const satisfies readonly (typeof MASK_TYPES)[number][];
 export const RENDERED_COLOR_GRADE = ["temperature", "tint"] as const;
 /** Masks render on these kinds, one per element. */
@@ -28,12 +72,27 @@ export interface RenderedValues {
 export const RENDERED_VALUES: readonly RenderedValues[] = [
   { kind: "transition", prop: "type", values: RENDERED_TRANSITIONS, reason: "draws as a crossfade" },
   { kind: "effect", prop: "type", values: RENDERED_EFFECTS, reason: "is ignored: the picture renders without it" },
-  { kind: "audioEffect", prop: "type", values: RENDERED_AUDIO_EFFECTS, reason: "is ignored: the audio plays without it" },
+  {
+    kind: "audioEffect",
+    prop: "type",
+    values: RENDERED_AUDIO_EFFECTS,
+    reason: "is ignored: the audio plays without it",
+  },
   { kind: "title", prop: "animation.preset", values: RENDERED_TITLE_ANIMATIONS, reason: "shows as a fade" },
   { kind: "captions", prop: "animation", values: RENDERED_CAPTION_ANIMATIONS, reason: "shows as karaoke" },
-  { kind: "mask", prop: "type", values: RENDERED_MASK_TYPES, reason: "is ignored: matte masks are not rendered, the element shows unmasked" },
+  {
+    kind: "mask",
+    prop: "type",
+    values: RENDERED_MASK_TYPES,
+    reason: "is ignored: matte masks are not rendered, the element shows unmasked",
+  },
   // shortcut: the preview's DOM overlay plane is its own stacking context (scaled, z-indexed), so CSS blends never reach the canvas; un-isolate it to drop these rows.
-  ...(["title", "shape", "svg", "sticker", "graphic", "layer"] as const).map((kind) => ({ kind, prop: "blend", values: ["normal"], reason: "blends with the footage in the export only: the preview draws it unblended over the footage" })),
+  ...(["title", "shape", "svg", "sticker", "graphic", "layer"] as const).map((kind) => ({
+    kind,
+    prop: "blend",
+    values: ["normal"],
+    reason: "blends with the footage in the export only: the preview draws it unblended over the footage",
+  })),
 ];
 
 /**
@@ -76,18 +135,36 @@ export const NOT_RENDERED: readonly NotRendered[] = [
   { kind: "clip", prop: "audioTrack", reason: "is ignored: the asset's first audio stream plays" },
   { kind: "audio", prop: "audioTrack", reason: "is ignored: the asset's first audio stream plays" },
   // shortcut: nested sequences play at their constant source speed (time.ts nestedSourceTime, audio-plan.ts nestedOccurrences); drop these when they map through the ramp.
-  { kind: "speedKey", parent: "nested", reason: "is ignored inside <Nested>: the sequence plays at its constant speed" },
+  {
+    kind: "speedKey",
+    parent: "nested",
+    reason: "is ignored inside <Nested>: the sequence plays at its constant speed",
+  },
   { kind: "freeze", parent: "nested", reason: "is ignored inside <Nested>: the sequence plays at its constant speed" },
   { kind: "effect", prop: "params.gamma", reason: "is ignored: levels render their black and white points only" },
   { kind: "transition", prop: "params.direction", value: "diagonal", reason: "draws as a wipe to the left" },
   { kind: "transition", prop: "params.softness", reason: "is ignored: the wipe has a hard edge" },
   { kind: "adjustment", prop: "affects", reason: "is ignored: the adjustment filters every track below it" },
   // shortcut: the lint cannot see which tracks sit beneath the footage, so it reports every blur; drop this when the blur also paints under backdrop overlays (frame-plan.ts).
-  { kind: "composition", prop: "background.mode", value: "blur", reason: "draws as the plain colour when an overlay sits beneath the footage" },
+  {
+    kind: "composition",
+    prop: "background.mode",
+    value: "blur",
+    reason: "draws as the plain colour when an overlay sits beneath the footage",
+  },
   { kind: "mask", prop: "matte", reason: "is ignored: matte masks are not rendered, the element shows unmasked" },
   { kind: "captions", prop: "animation", value: "bounce", reason: "has no motion: it shows as karaoke" },
-  { kind: "captions", prop: "animation", value: "typewriter", reason: "types out only cues without word timings; cues with words show as karaoke" },
-  ...(["wheels", "curves", "lut", "hsl"] as const).map((prop) => ({ kind: "colorGrade", prop, reason: `is ignored: only ${RENDERED_COLOR_GRADE.join(" and ")} render` })),
+  {
+    kind: "captions",
+    prop: "animation",
+    value: "typewriter",
+    reason: "types out only cues without word timings; cues with words show as karaoke",
+  },
+  ...(["wheels", "curves", "lut", "hsl"] as const).map((prop) => ({
+    kind: "colorGrade",
+    prop,
+    reason: `is ignored: only ${RENDERED_COLOR_GRADE.join(" and ")} render`,
+  })),
 ];
 
 export const MASK_NOT_RENDERED = {

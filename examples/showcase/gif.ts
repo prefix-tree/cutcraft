@@ -22,6 +22,22 @@ const GIFS: Record<string, { width: number; fps: number; colors: number }> = {
 
 for (const [name, { width, fps, colors }] of Object.entries(GIFS)) {
   const filter = `fps=${fps},scale=${width}:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=${colors}:stats_mode=diff[p];[b][p]paletteuse=dither=bayer:bayer_scale=5:diff_mode=rectangle`;
-  execFileSync("ffmpeg", ["-hide_banner", "-loglevel", "error", "-y", "-i", join(from, `${name}.webm`), "-vf", filter, "-loop", "0", join(to, `${name}.gif`)], { stdio: "inherit" });
+  execFileSync(
+    "ffmpeg",
+    [
+      "-hide_banner",
+      "-loglevel",
+      "error",
+      "-y",
+      "-i",
+      join(from, `${name}.webm`),
+      "-vf",
+      filter,
+      "-loop",
+      "0",
+      join(to, `${name}.gif`),
+    ],
+    { stdio: "inherit" },
+  );
   process.stdout.write(`${name}.gif\n`);
 }

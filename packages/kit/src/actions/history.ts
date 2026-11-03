@@ -1,4 +1,4 @@
-import { AUTO_GROUP_TYPES, describeAction, targetIdOf, type Action, type ActionInput } from "./types";
+import { type Action, type ActionInput, AUTO_GROUP_TYPES, describeAction, targetIdOf } from "./types";
 
 export interface HistoryEntry {
   readonly action: Action;
@@ -41,7 +41,13 @@ export class ActionHistory {
     const ts = this.now();
     const last = this.undoStack[this.undoStack.length - 1];
     let groupId = this.currentGroup;
-    if (!groupId && last && ts - this.lastTs < this.autoGroupWindowMs && last.action.type === action.type && AUTO_GROUP_TYPES.has(action.type)) {
+    if (
+      !groupId &&
+      last &&
+      ts - this.lastTs < this.autoGroupWindowMs &&
+      last.action.type === action.type &&
+      AUTO_GROUP_TYPES.has(action.type)
+    ) {
       const a = targetIdOf(last.action);
       const b = targetIdOf(action);
       if (a !== null && a === b) {
@@ -50,7 +56,14 @@ export class ActionHistory {
       }
     }
     this.lastTs = ts;
-    const entry: HistoryEntry = { action, inverse, ts, description: describeAction(action), patchMark, ...(groupId ? { groupId } : {}) };
+    const entry: HistoryEntry = {
+      action,
+      inverse,
+      ts,
+      description: describeAction(action),
+      patchMark,
+      ...(groupId ? { groupId } : {}),
+    };
     this.undoStack.push(entry);
     this.redoStack.length = 0;
     if (this.undoStack.length > this.max) this.undoStack.shift();
@@ -102,9 +115,15 @@ export class ActionHistory {
     return taken;
   }
 
-  canUndo(): boolean { return this.undoStack.length > 0; }
-  canRedo(): boolean { return this.redoStack.length > 0; }
-  entries(): readonly HistoryEntry[] { return this.undoStack; }
+  canUndo(): boolean {
+    return this.undoStack.length > 0;
+  }
+  canRedo(): boolean {
+    return this.redoStack.length > 0;
+  }
+  entries(): readonly HistoryEntry[] {
+    return this.undoStack;
+  }
 
   createSnapshot(name: string): HistorySnapshot {
     const snap = { id: `snap-${this.counter++}`, name, ts: this.now(), stackIndex: this.undoStack.length };
@@ -112,7 +131,9 @@ export class ActionHistory {
     return snap;
   }
 
-  listSnapshots(): readonly HistorySnapshot[] { return this.snapshots; }
+  listSnapshots(): readonly HistorySnapshot[] {
+    return this.snapshots;
+  }
 
   clear(): void {
     this.undoStack.length = 0;

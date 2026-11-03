@@ -1,4 +1,5 @@
 import { z } from "zod";
+
 import { assetRefSchema, colorSchema, idSchema } from "./common";
 
 export const multicamSchema = z.strictObject({

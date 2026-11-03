@@ -8,11 +8,15 @@ import type { Ctx2D } from "../types";
  * are in pixels with handles. Returns false when the spec has no usable shape.
  */
 export function traceMask(ctx: Ctx2D, mask: MaskSpec, rect: DrawRect): boolean {
-  const w = rect.w, h = rect.h;
+  const w = rect.w,
+    h = rect.h;
   const shape = mask.shape ?? {};
   if ("rect" in shape && shape.rect) {
     const r = shape.rect as { x: number; y: number; width: number; height: number; cornerRadius?: number };
-    const x = r.x * w, y = r.y * h, rw = r.width * w, rh = r.height * h;
+    const x = r.x * w,
+      y = r.y * h,
+      rw = r.width * w,
+      rh = r.height * h;
     if (r.cornerRadius && r.cornerRadius > 0) roundedRect(ctx, x, y, rw, rh, r.cornerRadius);
     else ctx.rect(x, y, rw, rh);
     return true;
@@ -32,8 +36,10 @@ export function traceMask(ctx: Ctx2D, mask: MaskSpec, rect: DrawRect): boolean {
     const pts = mask.path.points;
     ctx.moveTo(pts[0]!.x, pts[0]!.y);
     for (let i = 1; i <= (mask.path.closed ? pts.length : pts.length - 1); i++) {
-      const a = pts[(i - 1) % pts.length]!, b = pts[i % pts.length]!;
-      const c1 = a.handleOut ?? a, c2 = b.handleIn ?? b;
+      const a = pts[(i - 1) % pts.length]!,
+        b = pts[i % pts.length]!;
+      const c1 = a.handleOut ?? a,
+        c2 = b.handleIn ?? b;
       ctx.bezierCurveTo(c1.x, c1.y, c2.x, c2.y, b.x, b.y);
     }
     if (mask.path.closed) ctx.closePath();

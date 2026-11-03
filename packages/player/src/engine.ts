@@ -5,11 +5,12 @@
  * renderer can build on it. `defaultCreateCanvas` is the one browser-only
  * function; pass `createCanvas` instead.
  */
-export * from "./constants";
-export { devWarn, captureWarnings } from "./warn";
-export * from "./types";
-export * from "./model";
+
 export { ManualClock, PerformanceClock } from "./clock/clock";
+export * from "./constants";
 export * from "./media";
-export * from "./render";
+export * from "./model";
 export * from "./nested";
+export * from "./render";
+export * from "./types";
+export { captureWarnings, devWarn } from "./warn";

@@ -1,4 +1,5 @@
 import { z } from "zod";
+
 import { Audio, Clip, Composition, Keyframe, Title, Track, Transition } from "@cutcraft/kit";
 
 export const schema = z.object({
@@ -22,7 +23,15 @@ export default function Video({ title }: z.infer<typeof schema>) {
       </Track>
 
       <Track id="overlays" name="Overlays">
-        <Title id="title" anchor="start" offset={0.5} duration={3} size={110} weight={300} animation={{ preset: "fade", in: 0.8, out: 0.6 }}>
+        <Title
+          id="title"
+          anchor="start"
+          offset={0.5}
+          duration={3}
+          size={110}
+          weight={300}
+          animation={{ preset: "fade", in: 0.8, out: 0.6 }}
+        >
           {title}
         </Title>
       </Track>
