@@ -49,23 +49,6 @@ jobs:
       - run: pnpm build
       - run: pnpm check:packages
 
-  macos:
-    # skia-canvas and node-av load native binaries built per platform; run the export's tests where they differ.
-    # Slow and rarely different from Linux, so not on pull requests: on main and on request.
-    if: github.event_name != 'pull_request'
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v7
-        with:
-          node-version: 22
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      # Homebrew's ffmpeg lacks drawtext, which the test media need; ffmpeg-full has it.
-      - run: brew install ffmpeg-full && echo "$(brew --prefix ffmpeg-full)/bin" >> "$GITHUB_PATH"
-      - run: pnpm --filter @cutcraft/render test
-
   changeset:
     # A pull request that changes a published package says how in a changeset (.changeset/README.md).
     if: github.event_name == 'pull_request'

@@ -14,7 +14,6 @@
   <a href="https://prefix-tree.github.io/cutcraft/"><img alt="Docs" src="https://github.com/prefix-tree/cutcraft/actions/workflows/docs.yml/badge.svg"></a>
   <a href="LICENSE"><img alt="MIT License" src="https://img.shields.io/badge/license-MIT-black"></a>
   <img alt="Node 22.19 or later" src="https://img.shields.io/badge/node-%E2%89%A522.19-black">
-  <a href="https://scorecard.dev/viewer/?uri=github.com/prefix-tree/cutcraft"><img alt="OpenSSF Scorecard" src="https://api.scorecard.dev/projects/github.com/prefix-tree/cutcraft/badge"></a>
 </p>
 
 <p align="center">
