@@ -63,6 +63,7 @@ export interface ThreeFrame extends ThreeSetup {
 
 export type ThreeUpdate = (frame: ThreeFrame) => void;
 /** Return an update function, or `{ update, dispose }`; objects `setup` added to the scene are removed after it. */
+// biome-ignore lint/suspicious/noConfusingVoidType: a setup may return nothing; `void` lets one without a return statement type-check.
 export type ThreeSetupFn = (setup: ThreeSetup) => ThreeUpdate | { update?: ThreeUpdate; dispose?: () => void } | void;
 
 export interface ThreeCamera {
@@ -92,6 +93,7 @@ export function ThreeLayer(props: { readonly setup?: unknown; readonly camera?: 
 /** The literal camera props, applied on every change, so the inspector can move the camera. */
 function CameraRig({ position, lookAt, fov, near, far, zoom }: ThreeCamera) {
   const camera = useThree((s) => s.camera);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: the tuples are compared by value, so a new array with the same numbers does not re-apply the camera.
   useLayoutEffect(() => {
     if (position) camera.position.set(...position);
     if (camera instanceof THREE.PerspectiveCamera && fov !== undefined) camera.fov = fov;
@@ -111,6 +113,7 @@ function Setup({ setup }: { readonly setup: ThreeSetupFn }) {
   const update = useRef<ThreeUpdate | null>(null);
   const layer = useRef(clock);
   layer.current = clock;
+  // biome-ignore lint/correctness/useExhaustiveDependencies: setup runs once per scene; a resize must not rebuild what it added.
   useLayoutEffect(() => {
     const before = new Set(scene.children);
     const result = setup({ scene, camera, renderer: gl, THREE, width: size.width, height: size.height });

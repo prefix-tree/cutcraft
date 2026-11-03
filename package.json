@@ -18,7 +18,7 @@
   },
   "scripts": {
     "typecheck": "pnpm -r typecheck",
-    "lint": "pnpm -r lint",
+    "lint": "biome check .",
     "test": "pnpm -r test",
     "check": "pnpm typecheck && pnpm lint && pnpm test",
     "docs:dev": "vitepress dev docs",
@@ -29,9 +29,12 @@
     "docs:graphics": "pnpm --filter @cutcraft/render catalog",
     "docs:previews": "pnpm --filter @cutcraft/render previews",
     "docs:examples": "pnpm --filter @cutcraft/example-showcase docs",
-    "build": "pnpm -r build"
+    "build": "pnpm -r build",
+    "format": "biome format --write .",
+    "fix": "biome check --write ."
   },
   "devDependencies": {
+    "@biomejs/biome": "2.6.4",
     "tsdown": "^0.23.4",
     "tsx": "^4.23.15",
     "vitepress": "1.6.4",

@@ -29,7 +29,7 @@ export function useTimeline<T extends Element = HTMLDivElement>(sequence: Animat
     c.pause();
     controls.current = c;
     return () => { c.stop(); controls.current = null; };
-    // The caller names what rebuilds the sequence, as with useEffect.
+    // biome-ignore lint/correctness/useExhaustiveDependencies: the caller names what rebuilds the sequence, as with useEffect.
   }, deps);
   useLayoutEffect(() => { if (controls.current) controls.current.time = elapsed; });
   return scope as RefObject<T | null>;

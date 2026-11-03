@@ -172,7 +172,7 @@ export const layerSchema = z.strictObject({
 
 const vec3Schema = z.tuple([z.number(), z.number(), z.number()]);
 
-/* eslint-disable @typescript-eslint/no-explicit-any -- the kit does not depend on three; its objects are any here so pasted three.js type-checks */
+// biome-ignore-start lint/suspicious/noExplicitAny: the kit does not depend on three; its objects are any here so pasted three.js type-checks.
 /** What `<Three setup>` gets once: the scene, its camera and renderer, and the three.js namespace. */
 export interface ThreeSetupArgs {
   readonly scene: any;
@@ -183,7 +183,7 @@ export interface ThreeSetupArgs {
   readonly width: number;
   readonly height: number;
 }
-/* eslint-enable @typescript-eslint/no-explicit-any */
+// biome-ignore-end lint/suspicious/noExplicitAny: end of the three.js setup types.
 
 /** What the update `setup` returns gets on every frame: `time` is seconds since the layer started. */
 export interface ThreeFrameArgs extends ThreeSetupArgs {
@@ -195,6 +195,7 @@ export interface ThreeFrameArgs extends ThreeSetupArgs {
   readonly delta: number;
 }
 
+// biome-ignore lint/suspicious/noConfusingVoidType: a setup may return nothing; `void` lets one without a return statement type-check.
 export type ThreeSetupFunction = (setup: ThreeSetupArgs) => ((frame: ThreeFrameArgs) => void) | { update?: (frame: ThreeFrameArgs) => void; dispose?: () => void } | void;
 
 /**
