@@ -34,9 +34,11 @@ npx cutcraft video.tsx --manifest manifest.json --media ./media --out video.webm
 | `--silent` | No soundtrack. |
 | `--font Name[:weight[:style]]=file` | A font for titles, repeatable. TTF, OTF or WOFF (not WOFF2). |
 | `--continue` | Draw the grey placeholder for an asset that cannot be read, instead of stopping. |
+| `--import <spec>` | A module the file may import beyond `react`, `zod` and `@cutcraft/kit`, repeatable: `three`, or `name=specifier` for a package or a path relative to the file. |
 
-A file that imports its own packages is compiled with the nearest
-`tsconfig.json` (for `paths` and `target`) and React's automatic JSX runtime.
+The export loads a file the way the editor does: it may import `react`, `zod` and
+`@cutcraft/kit`, plus what `--import` offers. A file that imports anything else
+fails with the same message in both, so a file that exports also opens in the editor.
 
 ## From code
 

@@ -41,7 +41,8 @@ const USAGE = `Usage: cutcraft <file.tsx> --out <video.webm|.mp4|.mov|.mp3|.wav>
   --keyframe <seconds>  seconds between keyframes (default 2)
   --silent              no soundtrack
   --font <spec>         extra font for titles: Name=file.ttf, Name:700=file.ttf or Name:700:italic=file.ttf
-  --tsconfig <file>     how to compile the file (default: the nearest tsconfig.json)
+  --import <spec>       a module the file may import beyond react, zod and the kit: three, or name=specifier
+                        (a package, or a path relative to the file); the editor must offer the same modules
   --continue            draw the grey placeholder for an asset that cannot be read, instead of failing
   --quiet               no progress
 `;
@@ -53,7 +54,7 @@ async function main(): Promise<number> {
       out: { type: "string" }, workers: { type: "string" }, speed: { type: "string" }, keyframe: { type: "string" }, manifest: { type: "string" }, media: { type: "string" }, props: { type: "string" },
       from: { type: "string" }, to: { type: "string" }, codec: { type: "string" }, bitrate: { type: "string" }, quality: { type: "string" }, still: { type: "string" },
       "check-layout": { type: "boolean" }, json: { type: "boolean" }, "safe-zone": { type: "string" }, subject: { type: "string" }, step: { type: "string" },
-      silent: { type: "boolean" }, font: { type: "string", multiple: true }, tsconfig: { type: "string" },
+      silent: { type: "boolean" }, font: { type: "string", multiple: true }, import: { type: "string", multiple: true },
       continue: { type: "boolean" }, copy: { type: "boolean" }, software: { type: "boolean" }, quiet: { type: "boolean" }, help: { type: "boolean", short: "h" },
     },
   });
@@ -65,7 +66,7 @@ async function main(): Promise<number> {
   const loadOptions = {
     ...(values.manifest ? { manifest: resolve(values.manifest) } : {}),
     ...(values.props ? { props: JSON.parse(values.props) as Record<string, unknown> } : {}),
-    ...(values.tsconfig ? { tsconfig: resolve(values.tsconfig) } : {}),
+    ...(values.import ? { imports: Object.fromEntries(values.import.map(readImport)) } : {}),
   };
   const loaded = await loadVideo(file, loadOptions);
   for (const e of loaded.state.errors) process.stderr.write(`warning: ${e.id ?? "?"}: ${e.message}\n`);
@@ -149,6 +150,13 @@ function readFont(spec: string): OverlayFont {
   if (![100, 200, 300, 400, 500, 600, 700, 800, 900].includes(w)) throw new Error(`--font weight must be 100 to 900, got "${weight}"`);
   if (style && style !== "normal" && style !== "italic") throw new Error(`--font style must be normal or italic, got "${style}"`);
   return { name, data: readFileSync(spec.slice(eq + 1)), weight: w as FontWeight, style: style === "italic" ? "italic" : "normal" };
+}
+
+/** `three` offers the package under its own name; `name=specifier` offers a package or a file under the name the cut imports. */
+function readImport(spec: string): [string, string] {
+  const eq = spec.indexOf("=");
+  if (eq === 0) throw new Error(`--import wants name or name=specifier, got "${spec}"`);
+  return eq < 0 ? [spec, spec] : [spec.slice(0, eq), spec.slice(eq + 1)];
 }
 
 main().then((code) => process.exit(code), (error: unknown) => {

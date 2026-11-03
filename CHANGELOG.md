@@ -213,6 +213,13 @@ All notable changes to this project are documented here. The format follows
 
 ### Changed
 
+- The export loads a cut file the way the editor does, with the kit's `loadModule`: the file may
+  import `react`, `zod` and `@cutcraft/kit`, plus what the host offers (`loadVideo(file, { imports })`,
+  `cutcraft --import three` or `--import name=specifier`). A file that imports anything else now
+  fails in the export with the editor's message, where it used to export and then fail in the
+  editor. `--tsconfig` and `LoadOptions.tsconfig` are gone, and `tsx` is no longer a runtime
+  dependency of `@cutcraft/render`.
+
 - `<Marker at>` and `<Cut at>` take seconds only, like `<Keyframe at>`: the schema rejects a
   reference (`"word:3"`), where before it passed the schema and the resolver reported it.
 

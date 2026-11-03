@@ -7,7 +7,7 @@ import type { SegmentReply, SegmentRequest, WorkerInit } from "./worker";
 
 /** Render in several threads: the cut file is loaded again in each, and each encodes whole runs of frames. */
 export interface ParallelOptions {
-  /** The cut file (TSX), as given to `loadVideo`. Each worker imports it itself: a React tree cannot cross threads. */
+  /** The cut file (TSX), as given to `loadVideo`. Each worker loads it itself: a React tree cannot cross threads. */
   readonly file: string;
   readonly load?: LoadOptions;
   /** The folder holding one media file per asset id, and any per-asset paths, as for `directoryResolver`. */
