@@ -2,6 +2,7 @@
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
   "files": {
+    "ignoreUnknown": true,
     "includes": [
       "**",
       "!**/__snapshots__",
@@ -24,31 +25,56 @@
     "indentStyle": "space",
     "indentWidth": 2,
     "lineEnding": "lf",
-    "lineWidth": 120
+    "lineWidth": 120,
+    "useEditorconfig": true
   },
   "javascript": {
     "formatter": { "quoteStyle": "double", "semicolons": "always", "trailingCommas": "all" }
   },
   // Prose is written by hand (decision records, guides); the formatter would reflow emphasis and tables.
   "markdown": { "formatter": { "enabled": false }, "linter": { "enabled": false } },
-  "assist": { "enabled": true, "actions": { "source": { "organizeImports": "off" } } },
+  "assist": {
+    "enabled": true,
+    "actions": {
+      "source": {
+        // Imports in four groups: Node built-ins, packages, the workspace's own packages, then relative paths.
+        "organizeImports": {
+          "level": "on",
+          "options": {
+            "groups": [":NODE:", ":BLANK_LINE:", [":PACKAGE:", "!@cutcraft/**"], ":BLANK_LINE:", "@cutcraft/**", ":BLANK_LINE:", ":PATH:"]
+          }
+        }
+      }
+    }
+  },
   "linter": {
     "enabled": true,
     "rules": {
       "preset": "recommended",
       "style": {
         "useImportType": "error",
+        "useConst": "error",
+        "useArrayLiterals": "error",
+        "useAsConstAssertion": "error",
+        "noNamespace": "error",
+        "useSpreadOverApply": "error",
         // `noUncheckedIndexedAccess` is on; an index the code has just bounded is asserted with `!`.
         "noNonNullAssertion": "off"
       },
       "correctness": {
         "noUnusedVariables": "error",
         "noUnusedImports": "error",
+        "noUnusedFunctionParameters": "error",
+        "useHookAtTopLevel": "error",
+        "useJsxKeyInIterable": "error",
         // Playwright's rules misread any `describe`-shaped call; the e2e override turns them back on.
         "usePlaywrightValidDescribeCallback": "off"
       },
       "suspicious": {
         "noExplicitAny": "error",
+        "noTsIgnore": "error",
+        "noVar": "error",
+        "noUnusedExpressions": "warn",
         // House style: `(cache[k] ??= make())` and `while ((m = re.exec(s)))`. TypeScript's strict mode catches
         // the mistaken `if (a = b)` this rule exists for when `a` is not boolean.
         "noAssignInExpressions": "off",
