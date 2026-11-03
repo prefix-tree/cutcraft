@@ -51,7 +51,7 @@ export function collect(element: ReactElement, options: CollectOptions = {}): Co
 }
 
 export interface VideoModule {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // biome-ignore lint/suspicious/noExplicitAny: a cut file's component takes its own props type; `unknown` would reject every one.
   readonly default: (props: any) => ReactElement | null;
   readonly defaults?: Readonly<Record<string, unknown>> | undefined;
 }

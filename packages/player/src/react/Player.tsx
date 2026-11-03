@@ -54,6 +54,7 @@ export const Player = forwardRef<PlayerRef, PlayerProps>(function Player(props, 
   const [scale, setScale] = useState(1);
 
   // One core per media/audio context; state updates are pushed into it.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: the other props are initial values; the effects below push their changes into the existing core.
   useLayoutEffect(() => {
     const c = new PlayerCore({ state, media, ...(audioContext ? { audioContext } : {}), loop: loop ?? false, initiallyMuted: initiallyMuted ?? false, ...(playbackRate !== undefined ? { playbackRate } : {}), ...(coreOptions ?? {}) });
     const release = retainUseT();

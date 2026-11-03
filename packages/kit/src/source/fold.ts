@@ -269,7 +269,7 @@ function insertEdit(index: SourceIndex, id: string, target: InsertionPoint, prin
 function bindingEdit(index: SourceIndex, id: string, prop: string, key: string, value: Json | undefined, skipped: { id: string; reason: string }[]): SourceEdit | null {
   const target = index.defaults?.props.get(key);
   if (value === undefined) { skipped.push({ id, reason: `cannot unset "${prop}": it is bound to defaults.${key}` }); return null; }
-  if (!target || !target.valueRange) { skipped.push({ id, reason: `"${prop}" is bound to defaults.${key}, which has no literal` }); return null; }
+  if (!target?.valueRange) { skipped.push({ id, reason: `"${prop}" is bound to defaults.${key}, which has no literal` }); return null; }
   return { kind: "defaults", id, range: target.valueRange, text: printLiteral(value) };
 }
 

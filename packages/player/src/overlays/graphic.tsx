@@ -44,6 +44,7 @@ function drawingOf(p: ElementProps, props: Readonly<Record<string, unknown>>, si
 /** A graphic's labels as positioned text, a tree both the DOM and Satori lay out. */
 export function graphicLabels(labels: readonly Label[]): ReactNode {
   return labels.map((l, i) => (
+    // biome-ignore lint/suspicious/noArrayIndexKey: a graphic's labels come from one draw, in a fixed order.
     <div key={i} style={{
       position: "absolute", left: l.x, top: l.y, width: l.w, height: l.h, display: "flex",
       alignItems: l.valign === "top" ? "flex-start" : l.valign === "bottom" ? "flex-end" : "center",

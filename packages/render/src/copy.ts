@@ -102,7 +102,7 @@ function plainFrame(state: ResolvedState, t: number, width: number, height: numb
 }
 
 async function wholeGroups(s: Stretch, media: MediaResolver, codec: VideoCodec, fps: number, width: number, height: number, min: number): Promise<CopyRun | null> {
-  let handle;
+  let handle: Awaited<ReturnType<MediaResolver["resolve"]>>;
   try { handle = await media.resolve(s.asset); } catch { return null; }
   if (handle.kind !== "path") return null;
   const input = new Input({ source: new FilePathSource(handle.path), formats: ALL_FORMATS });

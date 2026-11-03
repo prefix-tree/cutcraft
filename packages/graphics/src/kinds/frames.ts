@@ -51,7 +51,7 @@ export const deviceFrame = defineKind({
       return { svg: svg(W, H, el("path", { d, fill: body, "fill-rule": "evenodd" }) + notch + edge), labels: [] };
     }
     const bar = Math.max(36, H * 0.07), r = 14, edge = 3;
-    const d = roundRect(0, 0, W, H, r) + `M${n(edge)} ${n(bar)}H${n(W - edge)}V${n(H - edge)}H${n(edge)}Z`;
+    const d = `${roundRect(0, 0, W, H, r)}M${n(edge)} ${n(bar)}H${n(W - edge)}V${n(H - edge)}H${n(edge)}Z`;
     let art = el("path", { d, fill: body, "fill-rule": "evenodd" });
     ["#ff5f57", "#febc2e", "#28c840"].forEach((c, i) => { art += el("circle", { cx: bar * 0.55 + i * bar * 0.5, cy: bar / 2, r: bar * 0.15, fill: c }); });
     art += el("path", { d: roundRect(W * 0.25, bar * 0.2, W * 0.5, bar * 0.6, bar * 0.3), fill: detail, opacity: 0.35 });

@@ -99,10 +99,10 @@ describe("props bound to schema keys", () => {
   });
 
   it("does not bind inside helpers or outside the default export", () => {
-    const helperText = text.replace(
+    const helperText = `${text.replace(
       '<Clip id="tail" src="asset:city" in={1} out={closeOut} />',
       '<Tail />',
-    ) + '\nfunction Tail() { const closeOut = 3; return <Clip id="tail" src="asset:city" in={0} duration={closeOut} />; }\n';
+    )}\nfunction Tail() { const closeOut = 3; return <Clip id="tail" src="asset:city" in={0} duration={closeOut} />; }\n`;
     const i2 = buildSourceIndex(helperText);
     expect(i2.elements.get("tail")!.boundProps).toEqual({});
     expect(i2.elements.get("tail")!.lockedProps).toEqual(["duration"]);

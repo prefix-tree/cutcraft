@@ -103,7 +103,7 @@ function elementsIndex(): string {
     const yes = (b: boolean): string => (b ? "yes" : "");
     lines.push(`| [\`<${name}>\`](/reference/elements/${slug(name)}) | ${yes(c.timed)} | ${yes(c.visual)} | ${yes(c.audio)} | ${yes(c.trimSource)} | ${yes(c.transformable)} | ${c.childKinds.map((k) => `\`${k}\``).join(", ")} |`);
   }
-  return lines.join("\n") + "\n";
+  return `${lines.join("\n")}\n`;
 }
 
 function elementPage(name: string, summary: string): string {
@@ -230,7 +230,7 @@ function renderingPage(): string {
   for (const [r, kinds] of merge(NOT_RENDERED, (r) => `${r.prop}|${r.value}|${r.reason}`)) {
     lines.push(`| ${on(kinds)} | ${r.prop ? code(r.prop) : "the element"} | ${r.value ? code(r.value) : ""} | ${why(r.reason)} |`);
   }
-  return lines.join("\n") + "\n";
+  return `${lines.join("\n")}\n`;
 }
 
 /** VitePress compiles markdown as Vue, so a bare `<Layer>` or `{{ … }}` in prose must be escaped; code spans and fences are left alone. */

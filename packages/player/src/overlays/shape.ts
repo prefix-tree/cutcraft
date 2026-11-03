@@ -99,7 +99,7 @@ export function shapeDrawing(p: ElementProps, tokens?: Readonly<Record<string, s
 function geometry(shape: string, w: number, h: number, props: Readonly<Record<string, unknown>>, a: Record<string, string>): string {
   const el = (name: string, own: Record<string, string | number>): string => {
     const all = { ...Object.fromEntries(Object.entries(own).map(([k, v]) => [k, typeof v === "number" ? num(v) : v])), ...a };
-    return `<${name}${Object.entries(all).map(([k, v]) => ` ${k}="${escape(v)}"`).join("")}/>`;
+    return `<${name}${Object.entries(all).map(([k, v]) => ` ${k}="${escapeXml(v)}"`).join("")}/>`;
   };
   const pts = (list: readonly (readonly [number, number])[]): string => list.map(([x, y]) => `${num(x)},${num(y)}`).join(" ");
   switch (shape) {
@@ -157,7 +157,7 @@ function roundedRect(w: number, h: number, r: Radii): string {
 /** CSS angles: 0 points up, 90 right; the default, 180, runs top to bottom. */
 function gradient(id: string, g: Gradient, warnings: string[]): string {
   const stops = [...g.stops].sort((a, b) => a.offset - b.offset)
-    .map((s) => `<stop offset="${num(s.offset)}" stop-color="${escape(s.color)}"${s.opacity !== undefined ? ` stop-opacity="${num(s.opacity)}"` : ""}/>`).join("");
+    .map((s) => `<stop offset="${num(s.offset)}" stop-color="${escapeXml(s.color)}"${s.opacity !== undefined ? ` stop-opacity="${num(s.opacity)}"` : ""}/>`).join("");
   if (g.type === "radial") {
     const c = g.center ?? { x: 0.5, y: 0.5 };
     return `<radialGradient id="${id}" cx="${num(c.x)}" cy="${num(c.y)}" r="0.5">${stops}</radialGradient>`;
@@ -178,7 +178,7 @@ function shadowFilter(shadows: readonly Shadow[], region: { x: number; y: number
     parts.push(
       `<feGaussianBlur in="${src}" stdDeviation="${num((s.blur ?? 0) / 2)}" result="blur${i}"/>`,
       `<feOffset in="blur${i}" dx="${num(s.x ?? 0)}" dy="${num(s.y ?? 0)}" result="offset${i}"/>`,
-      `<feFlood flood-color="${escape(s.color)}" result="colour${i}"/>`,
+      `<feFlood flood-color="${escapeXml(s.color)}" result="colour${i}"/>`,
       `<feComposite in="colour${i}" in2="offset${i}" operator="in" result="shadow${i}"/>`,
     );
     merged.push(`<feMergeNode in="shadow${i}"/>`);
@@ -186,7 +186,7 @@ function shadowFilter(shadows: readonly Shadow[], region: { x: number; y: number
   return `<filter id="shadow" filterUnits="userSpaceOnUse" x="${num(region.x)}" y="${num(region.y)}" width="${num(region.w)}" height="${num(region.h)}" color-interpolation-filters="sRGB">${parts.join("")}<feMerge>${merged.join("")}<feMergeNode in="SourceGraphic"/></feMerge></filter>`;
 }
 
-function escape(v: string): string {
+function escapeXml(v: string): string {
   return v.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
 }
 

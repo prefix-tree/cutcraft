@@ -13,6 +13,7 @@ export function Svg(p: ElementProps) {
   if (markup === null) return <div {...dataAttrs(p.placement)} style={overlayStyle(p, { width: 0, height: 0 })} />;
   const drawing = svgDrawing(p, markup);
   for (const w of drawing.prepared.warnings) devWarn(`svg:${p.placement.id}:${w}`, `svg "${p.placement.id}": ${w}`);
+  // biome-ignore lint/security/noDangerouslySetInnerHtml: prepareSvg (overlays/svg.ts) parses the markup and drops scripts, foreignObject, frames and event handlers.
   return <div {...dataAttrs(p.placement)} style={{ ...layoutStyle(drawing.layout), lineHeight: 0 }} dangerouslySetInnerHTML={{ __html: drawing.prepared.markup }} />;
 }
 

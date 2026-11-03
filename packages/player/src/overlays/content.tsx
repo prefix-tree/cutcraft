@@ -76,9 +76,11 @@ function words(text: string, rel: number, anim: { in: number; stagger?: number }
   const stagger = anim.stagger ?? (wordCount > 0 ? anim.in / wordCount : 0);
   let i = 0;
   return parts.map((part, idx) => {
+    // biome-ignore lint/suspicious/noArrayIndexKey: the parts of one fixed string, never reordered.
     if (part.trim().length === 0) return <span key={idx}>{part}</span>;
     const start = i++ * stagger;
     const shown = rel >= start && rel <= duration;
+    // biome-ignore lint/suspicious/noArrayIndexKey: the parts of one fixed string, never reordered.
     return <span key={idx} style={{ opacity: shown ? 1 : 0 }}>{part}</span>;
   });
 }
@@ -130,6 +132,7 @@ function line(c: Placement, time: number, animation: string, style: { highlight?
     const done = time >= w.end, current = time >= w.start && time < w.end;
     const color = current ? style.highlight ?? "#ffd400" : done || animation === "word-highlight" ? undefined : style.upcoming ?? "rgba(255,255,255,0.5)";
     const hidden = animation === "word-by-word" && time < w.start;
+    // biome-ignore lint/suspicious/noArrayIndexKey: a caption's words in time order, never reordered.
     return <span key={i} style={{ ...(color ? { color } : {}), ...(hidden ? { opacity: 0 } : {}) }}>{w.text}{i < words.length - 1 ? " " : ""}</span>;
   });
 }

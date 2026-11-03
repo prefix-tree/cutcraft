@@ -1,11 +1,10 @@
-import { AudioBufferSink, type Input, type InputAudioTrack } from "mediabunny";
+import { AudioBufferSink, type Input } from "mediabunny";
 import type { AudioSource, AudioSourceFactory, AudioSourceInfo, MediaHandle } from "../types";
 import type { MediabunnyInputs } from "./mediabunny-input";
 
 /** PCM ranges of one audio track, decoded on demand into AudioBuffers of the track's sample rate. */
 export class MediabunnyAudioSource implements AudioSource {
   private input: Input | null = null;
-  private track: InputAudioTrack | null = null;
   private sink: AudioBufferSink | null = null;
   private sampleRate = 48000;
   private channels = 2;
@@ -24,7 +23,6 @@ export class MediabunnyAudioSource implements AudioSource {
     const track = tracks[this.trackIndex] ?? (await this.input.getPrimaryAudioTrack());
     if (!track) return { sampleRate: 0, channels: 0, duration: 0, decodable: false };
     const [decodable, sampleRate, channels, duration] = await Promise.all([track.canDecode(), track.getSampleRate(), track.getNumberOfChannels(), track.computeDuration()]);
-    this.track = track;
     this.sampleRate = sampleRate;
     this.channels = channels;
     this.sink = new AudioBufferSink(track);
@@ -52,7 +50,6 @@ export class MediabunnyAudioSource implements AudioSource {
 
   close(): void {
     this.sink = null;
-    this.track = null;
     if (this.input) this.inputs.release(this.assetId);
     this.input = null;
   }

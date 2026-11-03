@@ -84,7 +84,7 @@ describe("graphic kinds", () => {
       expect(at(2)[0]!.text).toBe("1,250+");
       expect(at(0.2)[0]!.size).toBe(at(2)[0]!.size);
       expect(at(2)[1]).toMatchObject({ text: "customers", color: tokens.muted });
-      expect(draw("counter", 2, { to: 3.14159, decimals: 2, prefix: "$", suffix: "", label: "" }).labels.map((l) => l.text)).toEqual(["$3.14"]);
+      expect(draw("counter", 2, { to: 12.3456, decimals: 2, prefix: "$", suffix: "", label: "" }).labels.map((l) => l.text)).toEqual(["$12.35"]);
     });
 
     it("fills a unit grid one by one, part of the last unit for a fraction", () => {

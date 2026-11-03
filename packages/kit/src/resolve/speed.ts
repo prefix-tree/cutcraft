@@ -24,12 +24,12 @@ function bezier(x1: number, y1: number, x2: number, y2: number): Fn {
 
 const inOut = (f: Fn): Fn => (x) => (x < 0.5 ? f(2 * x) / 2 : 1 - f(2 - 2 * x) / 2);
 const out = (f: Fn): Fn => (x) => 1 - f(1 - x);
-const pow = (n: number): Fn => (x) => Math.pow(x, n);
+const pow = (n: number): Fn => (x) => x ** n;
 const sineIn: Fn = (x) => 1 - Math.cos((x * Math.PI) / 2);
-const expoIn: Fn = (x) => (x === 0 ? 0 : Math.pow(2, 10 * x - 10));
+const expoIn: Fn = (x) => (x === 0 ? 0 : 2 ** (10 * x - 10));
 const circIn: Fn = (x) => 1 - Math.sqrt(1 - x * x);
 const backIn = (s: number): Fn => (x) => (s + 1) * x * x * x - s * x * x;
-const elasticIn = (p: number): Fn => (x) => (x === 0 ? 0 : x === 1 ? 1 : -Math.pow(2, 10 * x - 10) * Math.sin(((x * 10 - 10.75) * (2 * Math.PI)) / p));
+const elasticIn = (p: number): Fn => (x) => (x === 0 ? 0 : x === 1 ? 1 : -(2 ** (10 * x - 10)) * Math.sin(((x * 10 - 10.75) * (2 * Math.PI)) / p));
 const bounceFull: Fn = (x) => {
   const n1 = 7.5625, d1 = 2.75;
   if (x < 1 / d1) return n1 * x * x;

@@ -355,7 +355,7 @@ function parse(markup: string): Parsed {
     return { root: null, warnings };
   }
   const found = root as SvgNode | null;
-  if (!found || found.name !== "svg") {
+  if (found?.name !== "svg") {
     warnings.push("the markup is not an <svg> element");
     return { root: null, warnings };
   }

@@ -330,7 +330,7 @@ export function formatLayout(result: LayoutCheckResult): string {
     lines.push(`  fix: ${i.fix}`);
     return lines.join("\n");
   });
-  return [...blocks, ...result.warnings.map((w) => `warning: ${w}`), result.summary].join("\n\n") + "\n";
+  return `${[...blocks, ...result.warnings.map((w) => `warning: ${w}`), result.summary].join("\n\n")}\n`;
 }
 
 /**

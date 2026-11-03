@@ -37,7 +37,7 @@ export function parityGaps(): { unmappedOurs: string[]; unknownOurs: string[] } 
   };
 }
 
-if (process.argv[1] && process.argv[1].endsWith("parity.ts")) {
+if (process.argv[1]?.endsWith("parity.ts")) {
   await import("../src/actions/handlers");
   writeFileSync(new URL("../docs/parity.md", import.meta.url), parityMarkdown());
   console.log(parityGaps());

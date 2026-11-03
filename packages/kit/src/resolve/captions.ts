@@ -119,7 +119,7 @@ export function planCues(words: readonly TimelineWord[], options: CueOptions = D
     const next = merged[n + 1]?.[0];
     // Held into the pause after it, never over the next cue; the last cue keeps its words' end.
     const end = last.end - first.start < MIN_CUE && next ? Math.min(first.start + MIN_CUE, next.start) : last.end;
-    const opens = n === 0 || SENTENCE_END.test((merged[n - 1]?.[merged[n - 1]!.length - 1] as TimelineWord).text);
+    const opens = n === 0 || SENTENCE_END.test((merged[n - 1]!.at(-1) as TimelineWord).text);
     const cueWords = line.map((w, i) => ({ text: i === 0 && opens ? capitalise(w.text) : w.text, start: w.start, end: w.end }));
     return { start: first.start, end: ms(end), text: cueWords.map((w) => w.text).join(" "), words: cueWords };
   });

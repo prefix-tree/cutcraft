@@ -269,7 +269,7 @@ function parseProps(node: CollectedNode, errors: ResolveError[], theme: Resolved
   }
   const themed = applyTheme(node.kind, node.props, theme);
   // A theme change keeps the parse of an element the theme touches under neither theme.
-  if (cached && cached.unthemed && themed.props === node.props) {
+  if (cached?.unthemed && themed.props === node.props) {
     parsedByProps.set(node.props, { ...cached, theme });
     errors.push(...cached.errors);
     return cached.data;
@@ -444,12 +444,19 @@ function framed(props: Record<string, unknown>, asset: AssetEntry | undefined, c
   return out;
 }
 
+/** The seconds a time reference resolved to, or `fallback` with its error recorded. */
+function secondsOr(p: Pending, resolved: ReturnType<typeof resolveTimeRef>, fallback: number): number {
+  if (typeof resolved === "number") return resolved;
+  p.errors.push(resolved);
+  return fallback;
+}
+
 function sourceRange(p: Pending, asset: AssetEntry, markers: ReadonlyMap<string, number>): void {
   const { node, props } = p;
   const speed = Number(props.speed ?? 1);
   const inRaw = props.in ?? 0;
   const inT = resolveTimeRef(inRaw, asset, markers, { id: node.id, prop: "in" });
-  const inSec = typeof inT === "number" ? inT : (p.errors.push(inT), 0);
+  const inSec = secondsOr(p, inT, 0);
   const dur = props.duration;
   const keys = speedKeysOf(node.children);
   const holds = holdTotal(freezeHoldsOf(node.children));
@@ -461,7 +468,7 @@ function sourceRange(p: Pending, asset: AssetEntry, markers: ReadonlyMap<string,
   }
   if (props.out !== undefined) {
     const o = resolveTimeRef(props.out, asset, markers, { id: node.id, prop: "out" });
-    outSec = typeof o === "number" ? o : (p.errors.push(o), inSec);
+    outSec = secondsOr(p, o, inSec);
   } else if (typeof dur === "number") {
     played = dur;
     outSec = inSec + (keys.length > 0 ? rampAdvance(keys, dur) : dur * speed);

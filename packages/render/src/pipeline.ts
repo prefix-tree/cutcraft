@@ -76,7 +76,7 @@ export class FramePipeline {
     let taken = null as VideoSample | null;
     const intercept: FrameIntercept = (plan, frames) => {
       const op = plan.ops.length === 1 ? plan.ops[0]! : null;
-      if (!op || op.kind !== "video" || plan.backgroundBlur || plan.clear || !coversCanvas(op, width, height)) return false;
+      if (op?.kind !== "video" || plan.backgroundBlur || plan.clear || !coversCanvas(op, width, height)) return false;
       const frame = frames.get(op.id);
       if (!(frame instanceof DecodedFrame) || this.overlays.hasOverlays(t)) return false;
       taken = frame.passThrough(width, height);

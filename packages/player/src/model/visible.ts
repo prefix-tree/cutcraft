@@ -62,7 +62,7 @@ function transitionRoles(state: ResolvedState, track: ResolvedTrack, t: number):
   const roles = new Map<string, TransitionRole>();
   for (const id of track.items) {
     const x = state.items.get(id);
-    if (!x || x.kind !== "transition" || x.duration <= 0) continue;
+    if (x?.kind !== "transition" || x.duration <= 0) continue;
     if (t < x.start || t >= x.end) continue;
     const params = (x.props.params ?? {}) as Record<string, unknown>;
     const progress = ease(typeof params.curve === "string" ? params.curve : "linear", (t - x.start) / x.duration);

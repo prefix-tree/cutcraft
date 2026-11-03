@@ -39,7 +39,7 @@ export function printElement(spec: NodeSpec, indent = "", step = "  "): string {
     .filter(([k, v]) => v !== undefined && !(k === "id" && false))
     .map(([k, v]) => printProp(k, v))
     .filter(Boolean);
-  const open = `${indent}<${name}${attrs.length ? " " + attrs.join(" ") : ""}`;
+  const open = `${indent}<${name}${attrs.length ? ` ${attrs.join(" ")}` : ""}`;
   const children = spec.children ?? [];
   if (children.length === 0 && spec.text === undefined) return `${open} />`;
   if (children.length === 0) return `${open}>${escapeText(spec.text ?? "")}</${name}>`;

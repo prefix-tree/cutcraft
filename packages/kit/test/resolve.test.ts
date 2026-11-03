@@ -83,7 +83,7 @@ describe("resolve", () => {
     expect(state.items.get("t")).toMatchObject({ start: 3, end: 5 });
     expect(state.composition.duration).toBe(5);
     expect(state.tracks[0]?.role).toBe("dialogue");
-    const crop = (state.items.get("c1")?.props.transform as { crop: { x: number; y: number; width: number; height: number } }).crop;
+    const crop = (state.items.get("c1")!.props.transform as { crop: { x: number; y: number; width: number; height: number } }).crop;
     expect(crop).toMatchObject({ x: 0, y: 0, height: 1 });
     expect(crop.width).toBeCloseTo((1080 / 1920) / (3840 / 2160));
     expect(state.errors.map((e) => [e.id, e.code])).toEqual([["bad", "UNKNOWN_REF"]]);
@@ -145,7 +145,7 @@ describe("resolve", () => {
     const expected = JSON.parse(readFileSync(join(fixturesDir, "sample.placement.json"), "utf8"));
     const state = resolve(fixtureTree(), manifest);
     expect(state.errors).toEqual([]);
-    expect(serialize(state, false).map(({ props, ...rest }) => (void props, rest))).toEqual(expected);
+    expect(serialize(state, false).map(({ props: _props, ...rest }) => rest)).toEqual(expected);
     expect(lint(fixtureText, { manifest }).filter((d) => d.severity === "error")).toEqual([]);
   });
 

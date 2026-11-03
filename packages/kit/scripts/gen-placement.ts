@@ -7,6 +7,6 @@ if (state.errors.length) {
   console.error(state.errors);
   process.exit(1);
 }
-const rows = serialize(state, false).map(({ props, ...rest }) => (void props, rest));
-writeFileSync(new URL("../fixtures/sample.placement.json", import.meta.url), JSON.stringify(rows, null, 2) + "\n");
+const rows = serialize(state, false).map(({ props: _props, ...rest }) => rest);
+writeFileSync(new URL("../fixtures/sample.placement.json", import.meta.url), `${JSON.stringify(rows, null, 2)}\n`);
 console.log(`wrote ${rows.length} placements`);

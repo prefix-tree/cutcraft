@@ -104,7 +104,7 @@ describe("captions from the transcript", () => {
       ["cap-1", "generated", "Hello and welcome back to the show today", 0, 3],
       ["cap-2", "generated", "we are talking about why we built", 3.2, 5.4],
     ]);
-    expect((s.items.get("cap-1")?.props.words as unknown[])[0]).toEqual({ text: "Hello", start: 0, end: 0.4 });
+    expect((s.items.get("cap-1")!.props.words as unknown[])[0]).toEqual({ text: "Hello", start: 0, end: 0.4 });
     const again = exec.state();
     expect(again.items.get("cap-1")).toBe(s.items.get("cap-1"));
     exec.execute({ type: "caption/setStyle", params: { captionsId: "cap", style: { size: 30 } } });

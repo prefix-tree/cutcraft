@@ -170,7 +170,7 @@ function replay(actions: readonly ActionInput[], before: ResolvedState): { inver
     if (!handler) return { inverses, error: invalid({ code: "UNKNOWN_ACTION", message: `no handler for ${sub.type}` }) };
     const action = { ...sub, actionId: `batch-${i}`, ts: 0 } as Action;
     const result = handler.validate(action, state);
-    if (!result.valid) return { inverses, error: { valid: false, errors: result.errors.map((e) => ({ ...e, path: `actions[${i}]${e.path ? "." + e.path : ""}` })) } };
+    if (!result.valid) return { inverses, error: { valid: false, errors: result.errors.map((e) => ({ ...e, path: `actions[${i}]${e.path ? `.${e.path}` : ""}` })) } };
     inverses.push(inverseOf(action, state));
     handler.apply(action, log, { before: state, manifest: before.manifest, current });
     state = current();

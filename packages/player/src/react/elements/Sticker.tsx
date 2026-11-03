@@ -11,6 +11,7 @@ export function Sticker(p: ElementProps) {
   const isAsset = src.startsWith("asset:");
   const url = useMediaUrl(isAsset ? src : null);
   const icon = iconStickerDrawing(p, stickerSize(p));
+  // biome-ignore lint/security/noDangerouslySetInnerHtml: prepareSvg (overlays/svg.ts) parses the markup and drops scripts, foreignObject, frames and event handlers.
   if (icon) return <div {...dataAttrs(p.placement)} style={{ ...layoutStyle(icon.layout), lineHeight: 0 }} dangerouslySetInnerHTML={{ __html: icon.prepared.markup }} />;
   if (!isAsset) devWarn(`sticker:${p.placement.id}`, `sticker "${src}" on "${p.placement.id}" has no media; showing a placeholder`);
   const size = stickerSize(p);
