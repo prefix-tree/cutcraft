@@ -1,5 +1,5 @@
-import { overlayLayout, type ElementProps, type OverlayLayout } from "./layout";
-import { prepareSvg, type PreparedSvg } from "./svg";
+import { type ElementProps, type OverlayLayout, overlayLayout } from "./layout";
+import { type PreparedSvg, prepareSvg } from "./svg";
 
 /**
  * A `<Shape>` as SVG markup, drawn through `prepareSvg` like any SVG so the

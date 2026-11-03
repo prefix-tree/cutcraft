@@ -1,4 +1,5 @@
 import { z } from "zod";
+
 import { graphicKind } from "./index";
 
 interface ControlBase {

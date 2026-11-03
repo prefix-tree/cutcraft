@@ -1,4 +1,5 @@
 import { z } from "zod";
+
 import { zTransitionType } from "../jsx/enums";
 import { colorSchema, graphicAnimationSchema } from "../jsx/schemas/common";
 import { MOTION_NAMES, THEME_NAMES } from "./builtins";

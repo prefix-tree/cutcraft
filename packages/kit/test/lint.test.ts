@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
+
 import { buildSourceIndex, lint } from "@cutcraft/kit/source";
+
 import { fixtureText, manifest } from "./helpers";
 
 const wrap = (body: string, extra = "") => `

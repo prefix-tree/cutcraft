@@ -1,4 +1,4 @@
-import { AUTO_GROUP_TYPES, describeAction, targetIdOf, type Action, type ActionInput } from "./types";
+import { type Action, type ActionInput, AUTO_GROUP_TYPES, describeAction, targetIdOf } from "./types";
 
 export interface HistoryEntry {
   readonly action: Action;

@@ -1,5 +1,5 @@
-import { assetIdOf, type AssetEntry, type TranscriptWord } from "../manifest/types";
-import { freezeUnshift, rampInverse, type FreezeHold, type RampKey } from "./speed";
+import { type AssetEntry, assetIdOf, type TranscriptWord } from "../manifest/types";
+import { type FreezeHold, freezeUnshift, type RampKey, rampInverse } from "./speed";
 import type { CollectedNode } from "./tree";
 
 /** Where an asset plays on the timeline: enough of a placement to map asset seconds to composition seconds. */

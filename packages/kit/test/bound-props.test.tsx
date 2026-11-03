@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
-import { Clip, Composition, Executor, Title, Track, collectModule, resolve, type AssetManifest } from "@cutcraft/kit";
+
+import { type AssetManifest, Clip, Composition, collectModule, Executor, resolve, Title, Track } from "@cutcraft/kit";
 import { buildSourceIndex, foldToSource, lint } from "@cutcraft/kit/source";
+
 import { manifest } from "./helpers";
 
 /** The text and the module must agree: the index reads the text, collect evaluates the module. */

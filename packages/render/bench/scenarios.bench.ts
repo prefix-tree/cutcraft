@@ -7,10 +7,11 @@ import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { cpus } from "node:os";
 import { join } from "node:path";
 import { parseArgs } from "node:util";
+
 import { loadVideo } from "../src/load";
 import { directoryResolver } from "../src/media";
 import { defaultWorkers } from "../src/parallel";
-import { renderVideo, type RenderResult } from "../src/renderer";
+import { type RenderResult, renderVideo } from "../src/renderer";
 import type { Speed } from "../src/segment";
 import { SCENARIOS } from "./scenarios/scenarios";
 import { verify } from "./scenarios/verify";

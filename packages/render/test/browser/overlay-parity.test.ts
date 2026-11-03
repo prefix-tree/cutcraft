@@ -1,38 +1,43 @@
 // Renders the same overlay elements with Chromium's DOM and with the Node overlay plane, and compares where the ink is.
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
+
+import { type Browser, chromium } from "@playwright/test";
 import { createElement as h, type ReactElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { chromium, type Browser } from "@playwright/test";
 import { Canvas, loadImage } from "skia-canvas";
+
 import {
+  BUNDLED_FONT_WEIGHTS,
+  BUNDLED_FONTS,
   Caption,
   Captions,
   Composition,
+  collect,
   Graphic,
+  installLayerClock,
   Layer,
+  type ResolvedState,
+  resolve,
   Shape,
   Sticker,
   Svg,
   Title,
   Track,
-  collect,
-  installLayerClock,
-  resolve,
-  type ResolvedState,
+  useT,
 } from "@cutcraft/kit";
 import { visiblePlacements } from "@cutcraft/player/engine";
 import { indexLayerInteriors, layerClock } from "@cutcraft/player/overlays";
+
+import { PlayerContext } from "../../../player/src/react/context";
 import { Captions as DomCaptions } from "../../../player/src/react/elements/Captions";
+import { Graphic as DomGraphic } from "../../../player/src/react/elements/Graphic";
 import { Layer as DomLayerElement } from "../../../player/src/react/elements/Layer";
 import { Shape as DomShape } from "../../../player/src/react/elements/Shape";
-import { Title as DomTitle } from "../../../player/src/react/elements/Title";
-import { Svg as DomSvg } from "../../../player/src/react/elements/Svg";
-import { Graphic as DomGraphic } from "../../../player/src/react/elements/Graphic";
 import { Sticker as DomSticker } from "../../../player/src/react/elements/Sticker";
-import { PlayerContext } from "../../../player/src/react/context";
-import { OverlayPlane, directoryResolver } from "../../src";
-import { BUNDLED_FONTS, BUNDLED_FONT_WEIGHTS, useT } from "@cutcraft/kit";
+import { Svg as DomSvg } from "../../../player/src/react/elements/Svg";
+import { Title as DomTitle } from "../../../player/src/react/elements/Title";
+import { directoryResolver, OverlayPlane } from "../../src";
 
 const W = 640,
   H = 360,

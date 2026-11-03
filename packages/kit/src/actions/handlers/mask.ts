@@ -1,4 +1,5 @@
 import { capabilitiesOf } from "../../jsx/capabilities";
+import type { Json } from "../../patches/types";
 import {
   define,
   isError,
@@ -11,7 +12,6 @@ import {
 } from "../handler-kit";
 import { invalid, nodeOfSpec, nodeSpecOf, ok } from "../types";
 import { lastNonStack } from "./effect";
-import type { Json } from "../../patches/types";
 
 define({
   type: "mask/create",

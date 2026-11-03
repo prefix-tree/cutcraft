@@ -1,7 +1,8 @@
-import { Composition, Executor, Layer, Track, collectModule, useLayer, useT } from "@cutcraft/kit";
+import { Composition, collectModule, Executor, Layer, Track, useLayer, useT } from "@cutcraft/kit";
+
 import * as sample from "../../kit/fixtures/sample";
-import { fixtureElement, fixtureManifest, fixtureState, makeState } from "./helpers/state";
 import { mountPlayer } from "./helpers/react";
+import { fixtureElement, fixtureManifest, fixtureState, makeState } from "./helpers/state";
 
 describe("useT", () => {
   it("throws without a Player", () => {

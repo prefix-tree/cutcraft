@@ -1,4 +1,5 @@
 import { SaxesParser } from "saxes";
+
 import { freezeSmil, hasSmil } from "./smil";
 import { shapeLength } from "./svg-length";
 

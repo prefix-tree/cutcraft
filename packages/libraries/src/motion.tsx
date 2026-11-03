@@ -1,12 +1,13 @@
-import { useLayer } from "@cutcraft/kit";
 import {
-  useAnimate,
-  useMotionValue,
   type AnimationPlaybackControls,
   type AnimationSequence,
   type MotionValue,
+  useAnimate,
+  useMotionValue,
 } from "motion/react";
-import { useLayoutEffect, useRef, type DependencyList, type ReactNode, type RefObject } from "react";
+import { type DependencyList, type ReactNode, type RefObject, useLayoutEffect, useRef } from "react";
+
+import { useLayer } from "@cutcraft/kit";
 
 /**
  * Seconds since the layer started, as a Motion value: feed it to `useTransform` and style a `motion` element with

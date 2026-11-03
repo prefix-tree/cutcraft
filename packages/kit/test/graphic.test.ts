@@ -1,7 +1,9 @@
 import { createElement } from "react";
 import { describe, expect, it } from "vitest";
-import { Composition, Graphic, Track, collect, resolve } from "@cutcraft/kit";
+
+import { Composition, collect, Graphic, resolve, Track } from "@cutcraft/kit";
 import { lint } from "@cutcraft/kit/source";
+
 import { manifest } from "./helpers";
 
 const h = createElement;

@@ -1,6 +1,7 @@
 // The comparison's scenarios (see the bench/compare branch), CutCraft alone: one cut file builds the one named in its props.
-import { Clip, Composition, Keyframe, Shape, Title, Track, Transition, type AssetManifest } from "@cutcraft/kit";
-import { GRAPHIC_TITLES, GRAPHIC_TITLE_LENGTH, HEIGHT, SCENARIOS, WIDTH, FPS } from "./scenarios";
+import { type AssetManifest, Clip, Composition, Keyframe, Shape, Title, Track, Transition } from "@cutcraft/kit";
+
+import { FPS, GRAPHIC_TITLE_LENGTH, GRAPHIC_TITLES, HEIGHT, SCENARIOS, WIDTH } from "./scenarios";
 
 export const manifest: AssetManifest = {
   assets: { footage: { id: "footage", kind: "video", duration: 60, fps: 30, width: 1920, height: 1080 } },

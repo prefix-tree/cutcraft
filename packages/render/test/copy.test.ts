@@ -1,8 +1,9 @@
 import { execFileSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import generateMedia, { mediaDir } from "../../player/e2e/gen-media";
+
 import { manifest } from "../../player/e2e/app/composition";
+import generateMedia, { mediaDir } from "../../player/e2e/gen-media";
 import { directoryResolver, loadVideo, renderVideo } from "../src";
 import { decodeFrames, decodesClean, probe, readStrip } from "./helpers/output";
 

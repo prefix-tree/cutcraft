@@ -1,6 +1,7 @@
 import { execFileSync } from "node:child_process";
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
+
 import type { AssetManifest } from "@cutcraft/kit";
 
 /** Writes a small stand-in file for every asset in a manifest: test patterns with the declared length, channels and tone. */

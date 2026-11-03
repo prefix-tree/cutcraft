@@ -1,4 +1,5 @@
 import { z } from "zod";
+
 import { Audio, Clip, Composition, Keyframe, Title, Track, Transition } from "@cutcraft/kit";
 
 export const schema = z.object({

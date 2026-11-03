@@ -12,7 +12,7 @@ import {
   siblingAfter,
   uniqueId,
 } from "../handler-kit";
-import { invalid, nodeSpecOf, ok, type ActionInput, type NodeSpec } from "../types";
+import { type ActionInput, invalid, type NodeSpec, nodeSpecOf, ok } from "../types";
 import { restoreTiming } from "./clip-timing";
 
 const EPS = 1e-6;

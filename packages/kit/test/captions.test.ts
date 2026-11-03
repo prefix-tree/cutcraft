@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { collectModule, planCues, resolve, timelineWords, type AssetEntry, type TimelineWord } from "@cutcraft/kit";
+
+import { type AssetEntry, collectModule, planCues, resolve, type TimelineWord, timelineWords } from "@cutcraft/kit";
 import { applyEdits, bake, buildSourceIndex, foldToSource, lint } from "@cutcraft/kit/source";
+
 import * as sample from "../fixtures/sample";
 import { fixtureExecutor, fixtureText, manifest, serialize } from "./helpers";
 

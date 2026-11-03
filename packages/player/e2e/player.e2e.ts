@@ -1,6 +1,8 @@
-import { expect, test, type Page } from "@playwright/test";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
+
+import { expect, type Page, test } from "@playwright/test";
+
 import { mediaDir } from "./gen-media";
 
 /** Composition time → frame number painted by bars.webm for v1 (source 0–4) and v2 (source 6–9 at 1.5×). */

@@ -2,6 +2,7 @@
 // through the same loader and renderer as `cutcraft`. A file that does not resolve cleanly stops the run.
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
+
 import { directoryResolver, loadVideo, renderStill, renderVideo } from "@cutcraft/render";
 
 const here = import.meta.dirname;

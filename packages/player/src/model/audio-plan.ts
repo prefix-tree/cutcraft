@@ -1,20 +1,21 @@
 import {
   capabilitiesOf,
+  type FreezeHold,
   freezeHoldsOf,
   lookupAsset,
-  rampAdvance,
-  rampInverse,
-  rampSpeed,
-  speedKeysOf,
-  type FreezeHold,
   type Placement,
   type RampKey,
   type ResolvedState,
   type ResolvedTrack,
+  rampAdvance,
+  rampInverse,
+  rampSpeed,
+  speedKeysOf,
 } from "@cutcraft/kit";
+
 import { AUDIO_CHUNK_S, DUCK_ATTACK_S, DUCK_RELEASE_S, ENVELOPE_STEP_S } from "../constants";
-import { keyframedValue } from "./keyframes";
 import type { ResolveNested } from "./frame-plan";
+import { keyframedValue } from "./keyframes";
 
 /** A gain breakpoint in composition seconds. */
 export type GainPoint = readonly [t: number, value: number];

@@ -1,4 +1,5 @@
 import { defineConfig } from "vitepress";
+
 import generated from "./sidebar.generated.json";
 
 export default defineConfig({

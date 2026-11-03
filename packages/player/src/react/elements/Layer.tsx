@@ -1,11 +1,13 @@
+import { type ReactNode, useLayoutEffect, useRef } from "react";
+
 import { layerEngine } from "@cutcraft/kit";
-import { useLayoutEffect, useRef, type ReactNode } from "react";
-import { layerContent } from "../../overlays/content";
-import { dataAttrs, overlayStyle, type ElementProps } from "../../overlays/layout";
+
 import { layerClock } from "../../model/time";
+import { layerContent } from "../../overlays/content";
+import { dataAttrs, type ElementProps, overlayStyle } from "../../overlays/layout";
+import { devWarn } from "../../warn";
 import { LayerContext } from "../context";
 import { holdCssAnimations } from "../hold-animations";
-import { devWarn } from "../../warn";
 
 /** Arbitrary React inside the composition, driven by `useLayer()` and `useT()` through LayerContext. */
 export function Layer(p: ElementProps & { readonly interior: ReactNode }) {

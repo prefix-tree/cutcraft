@@ -1,4 +1,5 @@
-import { CanvasPainter, buildFramePlan, type Ctx2D, type DrawOp, type Frame, type FramePlan } from "@cutcraft/player";
+import { buildFramePlan, CanvasPainter, type Ctx2D, type DrawOp, type Frame, type FramePlan } from "@cutcraft/player";
+
 import { FakeFrame, FakeFrameSource, recorderCanvas, recorderContext } from "./helpers/fakes";
 import { makeState } from "./helpers/state";
 

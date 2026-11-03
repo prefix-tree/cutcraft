@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { Executor, collectModule } from "@cutcraft/kit";
+
+import { collectModule, Executor } from "@cutcraft/kit";
 import { buildSourceIndex } from "@cutcraft/kit/source";
+
 import * as sample from "../../fixtures/sample";
-import { fixtureExecutor, fixtureText, manifest, serialize, round } from "../helpers";
+import { fixtureExecutor, fixtureText, manifest, round, serialize } from "../helpers";
 
 describe("clip timing", () => {
   it("trim → undo restores the state and keeps the inverse in the log", () => {

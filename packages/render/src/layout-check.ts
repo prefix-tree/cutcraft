@@ -1,17 +1,19 @@
+import type { ReactNode } from "react";
+
 import { lookupAsset, type ResolvedState, type SubjectBox } from "@cutcraft/kit";
+import { buildSourceIndex, type SourceIndex } from "@cutcraft/kit/source";
 import {
-  FRAME_EPS,
   boundsOf,
   buildFramePlan,
   captureWarnings,
   type DrawOp,
   type DrawRect,
+  FRAME_EPS,
   type MediaResolver,
 } from "@cutcraft/player/engine";
-import { buildSourceIndex, type SourceIndex } from "@cutcraft/kit/source";
-import type { ReactNode } from "react";
+
 import { initEnv } from "./env";
-import { OverlayPlane, type OverlayBounds, type OverlayFont } from "./overlays";
+import { type OverlayBounds, type OverlayFont, OverlayPlane } from "./overlays";
 
 /** Margins as fractions of the frame's height (top, bottom) and width (left, right). */
 export interface Insets {

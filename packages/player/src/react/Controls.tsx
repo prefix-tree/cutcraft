@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState, type CSSProperties } from "react";
-import { useCompositionTime, usePlayer } from "./hooks";
+import { type CSSProperties, useEffect, useRef, useState } from "react";
+
 import { timecode } from "../model/time";
+import { useCompositionTime, usePlayer } from "./hooks";
 
 const bar: CSSProperties = {
   display: "flex",

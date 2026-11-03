@@ -1,10 +1,13 @@
 /** @jsxRuntime automatic */
 /** @jsxImportSource react */
-import { GRAPHIC_KINDS, drawGraphic, graphicSize, isIcon, type Label } from "@cutcraft/graphics";
+
 import type { ReactNode } from "react";
 import { z } from "zod";
-import { overlayLayout, type ElementProps, type OverlayLayout } from "./layout";
-import { prepareSvg, type PreparedSvg } from "./svg";
+
+import { drawGraphic, GRAPHIC_KINDS, graphicSize, isIcon, type Label } from "@cutcraft/graphics";
+
+import { type ElementProps, type OverlayLayout, overlayLayout } from "./layout";
+import { type PreparedSvg, prepareSvg } from "./svg";
 
 export interface GraphicDrawing {
   readonly layout: OverlayLayout;

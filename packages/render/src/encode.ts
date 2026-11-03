@@ -1,4 +1,5 @@
 import { VideoSample, type VideoSampleSource } from "mediabunny";
+
 import type { FramePipeline } from "./pipeline";
 
 export interface EncodeFramesOptions {

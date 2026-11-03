@@ -1,6 +1,6 @@
 import type { AssetManifest } from "../../manifest/types";
-import type { Range } from "../parse";
 import { buildSourceIndex, type SourceIndex } from "../index";
+import type { Range } from "../parse";
 import { rules } from "./rules";
 
 export interface Diagnostic {

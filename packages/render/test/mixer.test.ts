@@ -1,5 +1,6 @@
 import type { AudioOccurrence } from "@cutcraft/player/engine";
-import { envelopeAt, mixBlock, mixPlan, type MixSource, type PcmBuffer, type PcmProvider } from "../src/mixer";
+
+import { envelopeAt, type MixSource, mixBlock, mixPlan, type PcmBuffer, type PcmProvider } from "../src/mixer";
 
 const SR = 48000;
 

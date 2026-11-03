@@ -1,6 +1,8 @@
 import { capabilitiesOf } from "../../jsx/capabilities";
-import { lookupAsset } from "../../manifest/types";
 import { parseTimeRef } from "../../manifest/timeref";
+import { lookupAsset } from "../../manifest/types";
+import type { Json } from "../../patches/types";
+import type { Placement as ResolvedPlacement, ResolvedState } from "../../resolve/resolve";
 import {
   define,
   insertNode,
@@ -14,9 +16,7 @@ import {
   setProps,
   validateTarget,
 } from "../handler-kit";
-import { invalid, nodeSpecOf, ok, type ActionError, type ActionInput, type NodeSpec } from "../types";
-import type { Placement as ResolvedPlacement, ResolvedState } from "../../resolve/resolve";
-import type { Json } from "../../patches/types";
+import { type ActionError, type ActionInput, invalid, type NodeSpec, nodeSpecOf, ok } from "../types";
 
 const TIMING_PROPS = ["in", "out", "duration", "start", "offset"] as const;
 
@@ -554,4 +554,4 @@ define({
   fold: () => [],
 });
 
-export { requireLayout, placementOf, restoreTiming, timingOf };
+export { placementOf, requireLayout, restoreTiming, timingOf };

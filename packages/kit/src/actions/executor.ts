@@ -1,10 +1,10 @@
 import type { AssetManifest } from "../manifest/types";
 import { createPatchLog } from "../patches/log";
 import type { PatchLog } from "../patches/types";
-import { resolve, type ResolvedState } from "../resolve/resolve";
+import { type ResolvedState, resolve } from "../resolve/resolve";
 import type { CollectedTree } from "../resolve/tree";
 import { ActionHistory, type HistoryEntry } from "./history";
-import { getHandler, inverseOf, type ApplyContext } from "./registry";
+import { type ApplyContext, getHandler, inverseOf } from "./registry";
 import type { Action, ActionError, ActionInput, ActionType } from "./types";
 
 export interface ActionResult {

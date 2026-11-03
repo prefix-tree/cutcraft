@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { fixtureExecutor } from "../helpers";
 
 describe("transitions", () => {

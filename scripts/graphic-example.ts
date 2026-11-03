@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { GRAPHIC_KINDS, graphicSize, type GraphicKindName } from "../packages/graphics/src/index";
+
+import { GRAPHIC_KINDS, type GraphicKindName, graphicSize } from "../packages/graphics/src/index";
 
 /**
  * Frame widths an example may take, 16:9; the smallest that holds the graphic wins, so small ones are not lost. Not

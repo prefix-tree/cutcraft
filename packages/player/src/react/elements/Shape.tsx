@@ -1,4 +1,4 @@
-import { dataAttrs, layoutStyle, type ElementProps } from "../../overlays/layout";
+import { dataAttrs, type ElementProps, layoutStyle } from "../../overlays/layout";
 import { shapeDrawing } from "../../overlays/shape";
 import { devWarn } from "../../warn";
 

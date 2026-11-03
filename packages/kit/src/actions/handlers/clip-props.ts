@@ -1,8 +1,8 @@
-import { define, makePropHandler, rawNode, rawProp, validateTarget } from "../handler-kit";
-import { INTERIOR_PREFIX } from "../../resolve/tree";
-import { invalid, nodeSpecOf, ok, type NodeSpec } from "../types";
-import { replaceAll, stackPosition } from "./effect";
 import type { Json } from "../../patches/types";
+import { INTERIOR_PREFIX } from "../../resolve/tree";
+import { define, makePropHandler, rawNode, rawProp, validateTarget } from "../handler-kit";
+import { invalid, type NodeSpec, nodeSpecOf, ok } from "../types";
+import { replaceAll, stackPosition } from "./effect";
 
 const SOURCE_KINDS = ["clip", "audio", "nested"];
 const VISUAL_KINDS = ["clip", "title", "shape", "svg", "sticker", "graphic", "nested", "layer", "adjustment"];

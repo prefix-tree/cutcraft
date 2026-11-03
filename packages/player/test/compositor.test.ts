@@ -1,4 +1,5 @@
 import { AssetSources, Compositor, ManualClock } from "@cutcraft/player";
+
 import { FakeFrameSource, fakeResolver, flush, recorderCanvas, recorderContext } from "./helpers/fakes";
 import { DEFAULT_MANIFEST, makeState } from "./helpers/state";
 

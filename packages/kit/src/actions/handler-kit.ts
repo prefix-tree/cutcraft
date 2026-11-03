@@ -1,16 +1,16 @@
 import { asJson } from "../patches/log";
 import type { Json, PatchLog } from "../patches/types";
 import type { Placement as ResolvedPlacement, ResolvedState } from "../resolve/resolve";
-import { INTERIOR_PREFIX, type CollectedNode } from "../resolve/tree";
-import { registerHandler, type ActionHandler, type ApplyContext } from "./registry";
+import { type CollectedNode, INTERIOR_PREFIX } from "../resolve/tree";
+import { type ActionHandler, type ApplyContext, registerHandler } from "./registry";
 import {
-  invalid,
-  nodeOfSpec,
-  ok,
   type Action,
   type ActionError,
   type ActionType,
+  invalid,
   type NodeSpec,
+  nodeOfSpec,
+  ok,
   type PlacementSpec,
   type ValidationResult,
 } from "./types";

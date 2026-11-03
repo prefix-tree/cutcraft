@@ -1,4 +1,6 @@
-import { getHandler, inverseOf } from "../registry";
+import type { Json } from "../../patches/types";
+import { FONT_KEYS } from "../../theme/builtins";
+import { themeSchema } from "../../theme/schema";
 import {
   define,
   isError,
@@ -9,10 +11,8 @@ import {
   setProps,
   validateTarget,
 } from "../handler-kit";
-import { invalid, ok, type Action, type ActionInput } from "../types";
-import type { Json } from "../../patches/types";
-import { FONT_KEYS } from "../../theme/builtins";
-import { themeSchema } from "../../theme/schema";
+import { getHandler, inverseOf } from "../registry";
+import { type Action, type ActionInput, invalid, ok } from "../types";
 
 define(makePropHandler({
   type: "composition/updateSettings",
@@ -192,7 +192,7 @@ define({
 });
 
 import { createPatchLog } from "../../patches/log";
-import { resolve, type ResolvedState } from "../../resolve/resolve";
+import { type ResolvedState, resolve } from "../../resolve/resolve";
 import type { ValidationResult } from "../types";
 
 /**

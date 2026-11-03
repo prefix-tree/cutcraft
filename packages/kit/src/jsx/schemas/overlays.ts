@@ -1,7 +1,8 @@
-import { GRAPHIC_KINDS, GRAPHIC_KIND_NAMES } from "@cutcraft/graphics";
 import { z } from "zod";
+
+import { GRAPHIC_KIND_NAMES, GRAPHIC_KINDS } from "@cutcraft/graphics";
+
 import { zBlendMode, zShapeType, zTextAnimationPreset } from "../enums";
-import { zAnimationUnit, zSvgColorMode, zTextAlign, zTextDecoration, zTextValign } from "./enums-local";
 import {
   assetRefSchema,
   colorSchema,
@@ -9,13 +10,14 @@ import {
   gradientSchema,
   idSchema,
   shadowSchema,
+  themedLengthSchema,
   timedProps,
   timeRefSchema,
-  themedLengthSchema,
   transformSchema,
   vec2Schema,
   visualProps,
 } from "./common";
+import { zAnimationUnit, zSvgColorMode, zTextAlign, zTextDecoration, zTextValign } from "./enums-local";
 
 export const textAnimationSchema = z.strictObject({
   preset: zTextAnimationPreset,

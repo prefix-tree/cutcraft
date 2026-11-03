@@ -1,29 +1,32 @@
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+
 import { createElement as h, type ReactElement } from "react";
 import type { Canvas, CanvasRenderingContext2D } from "skia-canvas";
+
 import {
+  type AssetManifest,
   Caption,
   Captions,
   Composition,
+  collect,
   Layer,
   Motion,
+  resolve,
   Shape,
   Sticker,
   Svg,
   Three,
   Title,
   Track,
-  collect,
-  resolve,
   useT,
-  type AssetManifest,
 } from "@cutcraft/kit";
 import { indexLayerInteriors } from "@cutcraft/player/overlays";
-import generateMedia, { mediaDir } from "../../player/e2e/gen-media";
+
 import { manifest } from "../../player/e2e/app/composition";
-import { OverlayPlane, createCanvas, directoryResolver, safeSvgFonts, treeKey } from "../src";
+import generateMedia, { mediaDir } from "../../player/e2e/gen-media";
+import { createCanvas, directoryResolver, OverlayPlane, safeSvgFonts, treeKey } from "../src";
 
 type Rgb = readonly [number, number, number];
 

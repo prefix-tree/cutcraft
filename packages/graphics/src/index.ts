@@ -1,11 +1,4 @@
-import type { GraphicKind, Label } from "./types";
 import { arrow, curvedArrow, handArrow } from "./kinds/arrows";
-import { badge, burst, callout, pill, speechBubble } from "./kinds/callouts";
-import { lowerThird, lowerThirdCard, lowerThirdSplit } from "./kinds/lower-thirds";
-import { cornerBrackets, deviceFrame, frame } from "./kinds/frames";
-import { circleScribble, marker, strike, underline } from "./kinds/highlights";
-import { countdown, divider, progressBar, steps } from "./kinds/progress";
-import { comparison, counter, sampleSize, unitGrid } from "./kinds/data";
 import {
   blobsBackground,
   dotsBackground,
@@ -13,14 +6,21 @@ import {
   gridBackground,
   wavesBackground,
 } from "./kinds/backgrounds";
+import { badge, burst, callout, pill, speechBubble } from "./kinds/callouts";
+import { comparison, counter, sampleSize, unitGrid } from "./kinds/data";
 import { confetti, sparkles } from "./kinds/effects";
+import { cornerBrackets, deviceFrame, frame } from "./kinds/frames";
+import { circleScribble, marker, strike, underline } from "./kinds/highlights";
 import { icon } from "./kinds/icon";
+import { lowerThird, lowerThirdCard, lowerThirdSplit } from "./kinds/lower-thirds";
+import { countdown, divider, progressBar, steps } from "./kinds/progress";
+import type { GraphicKind, Label } from "./types";
 import { hash } from "./util";
 
-export type { Drawn, GraphicContext, GraphicKind, KindCategory, Label } from "./types";
+export { type GraphicControl, graphicControls } from "./controls";
 export { iconNames, isIcon } from "./kinds/icon";
+export type { Drawn, GraphicContext, GraphicKind, KindCategory, Label } from "./types";
 export { hash, random } from "./util";
-export { graphicControls, type GraphicControl } from "./controls";
 
 /** Every built-in kind, in catalog order. */
 export const GRAPHIC_KINDS = {

@@ -1,4 +1,5 @@
 import { capabilitiesOf, type Placement, type ResolvedState, type ResolvedTrack } from "@cutcraft/kit";
+
 import { ease } from "./keyframes";
 
 export interface TransitionRole {

@@ -1,20 +1,22 @@
-import type { ResolvedState } from "@cutcraft/kit";
-import {
-  PICK_EPS,
-  buildFramePlan,
-  coversCanvas,
-  makeNestedResolver,
-  type MediaResolver,
-} from "@cutcraft/player/engine";
 import {
   ALL_FORMATS,
+  type EncodedPacket,
   EncodedPacketSink,
+  type EncodedVideoPacketSource,
   FilePathSource,
   Input,
-  type EncodedPacket,
-  type EncodedVideoPacketSource,
   type InputVideoTrack,
 } from "mediabunny";
+
+import type { ResolvedState } from "@cutcraft/kit";
+import {
+  buildFramePlan,
+  coversCanvas,
+  type MediaResolver,
+  makeNestedResolver,
+  PICK_EPS,
+} from "@cutcraft/player/engine";
+
 import type { OverlayPlane } from "./overlays";
 import { compatibleConfig } from "./parallel";
 import type { VideoCodec } from "./segment";

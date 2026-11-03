@@ -1,7 +1,8 @@
 import { parentPort, workerData } from "node:worker_threads";
-import { loadVideo, type LoadedVideo, type LoadOptions } from "./load";
+
+import { type LoadedVideo, type LoadOptions, loadVideo } from "./load";
 import { directoryResolver } from "./media";
-import { OverlayPlane, type OverlayFont } from "./overlays";
+import { type OverlayFont, OverlayPlane } from "./overlays";
 import { encodeSegment, type SegmentStages, type VideoEncoding } from "./segment";
 
 /** What a render worker needs to know before its first segment. */

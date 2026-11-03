@@ -1,5 +1,7 @@
-import { installLayerClock, type LayerClock } from "@cutcraft/kit";
 import { useContext, useSyncExternalStore } from "react";
+
+import { installLayerClock, type LayerClock } from "@cutcraft/kit";
+
 import type { PlayerCore } from "../player";
 import { LayerContext, PlayerContext } from "./context";
 

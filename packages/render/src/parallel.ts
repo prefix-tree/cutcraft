@@ -1,15 +1,17 @@
 import { Worker } from "node:worker_threads";
+
 import {
   ALL_FORMATS,
   BufferSource,
   EncodedPacketSink,
-  Input,
   type EncodedVideoPacketSource,
+  Input,
   type VideoCodec as MediabunnyCodec,
 } from "mediabunny";
+
 import type { LoadOptions } from "./load";
 import type { OverlayFont } from "./overlays";
-import type { VideoEncoding, SegmentStages } from "./segment";
+import type { SegmentStages, VideoEncoding } from "./segment";
 import type { SegmentReply, SegmentRequest, WorkerInit } from "./worker";
 
 /** Render in several threads: the cut file is loaded again in each, and each encodes whole runs of frames. */

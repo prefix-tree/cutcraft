@@ -1,5 +1,5 @@
-import { fixtureState } from "./helpers/state";
 import { mountPlayer } from "./helpers/react";
+import { fixtureState } from "./helpers/state";
 
 describe("DomLayer", () => {
   it("renders the fixture's overlays at a time with data-el and data-kind", async () => {

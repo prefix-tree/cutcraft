@@ -1,4 +1,4 @@
-import { effect, type ClipRect } from "./motion";
+import { type ClipRect, effect } from "./motion";
 import type { TransitionRole } from "./visible";
 
 /** What a transition does to one side of it at one moment, in a `W`×`H` box. */

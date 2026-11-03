@@ -1,7 +1,8 @@
 import { z } from "zod";
+
 import { zAudioEffectType, zEasing, zKeyframeProperty, zMaskEasing, zVideoEffectType } from "../enums";
-import { zMaskType, zMatteChannel } from "./enums-local";
 import { idSchema, vec2Schema } from "./common";
+import { zMaskType, zMatteChannel } from "./enums-local";
 
 const paramValue = z.union([
   z.number(),

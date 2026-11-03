@@ -1,14 +1,15 @@
 import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { parseArgs } from "node:util";
+
+import { checkLayout, formatLayout, type Insets, SAFE_ZONES, type SafeZoneName } from "./layout-check";
 import { loadVideo } from "./load";
-import { defaultWorkers } from "./parallel";
 import { directoryResolver } from "./media";
 import type { FontWeight, OverlayFont } from "./overlays";
+import { defaultWorkers } from "./parallel";
 import { renderVideo, type VideoCodec } from "./renderer";
 import { QUALITIES, type QualityName, type Speed } from "./segment";
 import { renderStill } from "./still";
-import { SAFE_ZONES, checkLayout, formatLayout, type Insets, type SafeZoneName } from "./layout-check";
 
 /** --check-layout found issues: apart from 1 (an error) and 2 (usage), so a script can tell them apart. */
 const EXIT_LAYOUT_ISSUES = 3;

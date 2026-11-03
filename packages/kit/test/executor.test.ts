@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { Executor, ok, registerHandler, type ActionInput, type PatchLog } from "@cutcraft/kit";
+
+import { type ActionInput, Executor, ok, type PatchLog, registerHandler } from "@cutcraft/kit";
+
 import { fixtureExecutor, fixtureTree, manifest, serialize } from "./helpers";
 
 describe("Executor", () => {

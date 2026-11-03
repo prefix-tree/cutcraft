@@ -1,25 +1,27 @@
-import type { ResolvedState } from "@cutcraft/kit";
 import {
+  type CSSProperties,
   forwardRef,
+  type ReactNode,
   useEffect,
   useImperativeHandle,
   useLayoutEffect,
   useMemo,
   useRef,
   useState,
-  type CSSProperties,
-  type ReactNode,
 } from "react";
-import { PlayerCore, type PlayerOptions } from "../player";
-import type { MediaResolver, PlayerEvents } from "../types";
-import { PlayerContext } from "./context";
-import { Controls } from "./Controls";
-import { DomLayer } from "./DomLayer";
-import { retainUseT, usePlayer } from "./hooks";
-import { indexLayerInteriors } from "../overlays/layer-interiors";
+
+import type { ResolvedState } from "@cutcraft/kit";
+
 import { backdropTracks } from "../model/backdrop";
 import { compositionBackground } from "../model/frame-plan";
+import { indexLayerInteriors } from "../overlays/layer-interiors";
+import { PlayerCore, type PlayerOptions } from "../player";
 import { backgroundCss } from "../render/painter";
+import type { MediaResolver, PlayerEvents } from "../types";
+import { Controls } from "./Controls";
+import { PlayerContext } from "./context";
+import { DomLayer } from "./DomLayer";
+import { retainUseT, usePlayer } from "./hooks";
 
 export interface PlayerProps {
   readonly state: ResolvedState;

@@ -1,25 +1,27 @@
-import type { ResolvedState } from "@cutcraft/kit";
-import {
-  AssetSources,
-  Compositor,
-  ManualClock,
-  MediabunnyInputs,
-  backdropTracks,
-  compositionBackground,
-  coversCanvas,
-  makeNestedResolver,
-  mediabunnyFrameSourceFactory,
-  paintBackground,
-  type FrameIntercept,
-  type MediaResolver,
-  type PlayerErrorEvent,
-} from "@cutcraft/player/engine";
 import type { VideoSample } from "mediabunny";
 import type { ReactNode } from "react";
 import type { Canvas, CanvasRenderingContext2D } from "skia-canvas";
+
+import type { ResolvedState } from "@cutcraft/kit";
+import {
+  AssetSources,
+  backdropTracks,
+  Compositor,
+  compositionBackground,
+  coversCanvas,
+  type FrameIntercept,
+  ManualClock,
+  MediabunnyInputs,
+  type MediaResolver,
+  makeNestedResolver,
+  mediabunnyFrameSourceFactory,
+  type PlayerErrorEvent,
+  paintBackground,
+} from "@cutcraft/player/engine";
+
 import { createCanvas, initEnv } from "./env";
 import { DecodedFrame, frameSourceHooks, tagBt709 } from "./frame-source";
-import { OverlayPlane, type OverlayFont } from "./overlays";
+import { type OverlayFont, OverlayPlane } from "./overlays";
 
 export interface PipelineOptions {
   readonly state: ResolvedState;

@@ -1,5 +1,5 @@
-import { DEFAULT_THEME, MOTIONS, THEMES, type MotionStyle, type Presets } from "./builtins";
-import { themeSchema, TOKEN_PATTERN, type ThemeProps } from "./schema";
+import { DEFAULT_THEME, MOTIONS, type MotionStyle, type Presets, THEMES } from "./builtins";
+import { type ThemeProps, TOKEN_PATTERN, themeSchema } from "./schema";
 
 /** A file's theme with its base theme merged in: what tokens, presets and motion defaults resolve against. */
 export interface ResolvedTheme {

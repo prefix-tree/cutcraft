@@ -1,5 +1,5 @@
 import type { NetPatch, PatchLog } from "../patches/types";
-import { INTERIOR_PREFIX, type CollectedNode, type CollectedTree } from "./tree";
+import { type CollectedNode, type CollectedTree, INTERIOR_PREFIX } from "./tree";
 
 /**
  * The collected tree with the patch log's net effect applied: removed nodes

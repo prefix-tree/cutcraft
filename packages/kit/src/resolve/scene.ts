@@ -1,8 +1,9 @@
 import { createElement, type ReactElement } from "react";
+
 import { Composition } from "../jsx/elements";
 import type { AssetManifest } from "../manifest/types";
 import { collect } from "./collect";
-import { resolve, type ResolvedState } from "./resolve";
+import { type ResolvedState, resolve } from "./resolve";
 
 export type SceneFn = (props: Record<string, unknown>) => ReactElement | null;
 

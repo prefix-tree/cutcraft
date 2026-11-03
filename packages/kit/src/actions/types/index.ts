@@ -1,5 +1,5 @@
-import type { TimeRef } from "../../manifest/timeref";
 import type { TrackFlag, TrackLayout, TrackRole, TransitionType } from "../../jsx/enums";
+import type { TimeRef } from "../../manifest/timeref";
 import type { Json } from "../../patches/types";
 import type { NodeSpec, PlacementSpec } from "./base";
 

@@ -1,4 +1,5 @@
-import { freezeHoldsOf, freezeShift, rampAdvance, speedKeysOf, type LayerClock, type Placement } from "@cutcraft/kit";
+import { freezeHoldsOf, freezeShift, type LayerClock, type Placement, rampAdvance, speedKeysOf } from "@cutcraft/kit";
+
 import { FRAME_EPS } from "../constants";
 
 export function frameIndex(t: number, fps: number): number {

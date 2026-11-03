@@ -4,6 +4,7 @@
 //   pnpm --filter @cutcraft/example-showcase docs [name…]
 import { mkdirSync, readdirSync } from "node:fs";
 import { basename, join } from "node:path";
+
 import { directoryResolver, loadVideo, renderStill, renderVideo } from "@cutcraft/render";
 
 const here = import.meta.dirname;

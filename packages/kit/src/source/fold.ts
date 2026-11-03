@@ -1,16 +1,17 @@
+import traverseModule from "@babel/traverse";
+import * as t from "@babel/types";
+
 import { nodeSpecOf } from "../actions/types";
+import { ELEMENTS } from "../jsx/elements";
 import type { Json, NetPatch, PatchLog } from "../patches/types";
 import type { ResolvedState } from "../resolve/resolve";
 import { INTERIOR_PREFIX } from "../resolve/tree";
 import { bake } from "./bake";
 import { applyEdits, lineRange, type SourceEdit } from "./edits";
-import type { Range } from "./parse";
 import { buildSourceIndex, type ElementSite, type SourceIndex } from "./index";
-import { printElement, printLiteral, printProp } from "./print";
-import traverseModule from "@babel/traverse";
-import * as t from "@babel/types";
-import { ELEMENTS } from "../jsx/elements";
+import type { Range } from "./parse";
 import { parseSource } from "./parse";
+import { printElement, printLiteral, printProp } from "./print";
 
 const traverse = ((traverseModule as unknown as { default?: typeof traverseModule }).default ??
   traverseModule) as typeof traverseModule;

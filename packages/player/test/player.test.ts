@@ -1,4 +1,5 @@
 import { ManualClock, PlayerCore, type PlayerEvents } from "@cutcraft/player";
+
 import {
   FakeAudioOutput,
   FakeAudioSource,

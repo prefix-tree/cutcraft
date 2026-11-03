@@ -1,14 +1,15 @@
 // Renders fixed compositions and reports frames per second, peak memory and where the time goes.
 //   pnpm --filter @cutcraft/render bench [--only <name>] [--workers <n>] [--speed fast] [--copy] [--json <file>]
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { parseArgs } from "node:util";
+
 import type { AssetManifest } from "@cutcraft/kit";
-import { readFileSync } from "node:fs";
+
 import { loadVideo } from "../src/load";
 import { directoryResolver } from "../src/media";
-import { renderVideo, type RenderResult } from "../src/renderer";
+import { type RenderResult, renderVideo } from "../src/renderer";
 import { makePlaceholders } from "../test/helpers/placeholders";
 
 const root = join(import.meta.dirname, "..", "..", "..");

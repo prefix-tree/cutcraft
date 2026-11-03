@@ -1,5 +1,6 @@
-import { isVocabulary } from "@cutcraft/kit";
 import { Children, Fragment, isValidElement, type ReactElement, type ReactNode } from "react";
+
+import { isVocabulary } from "@cutcraft/kit";
 
 /**
  * Walk the file's element tree the way the kit's `collect` does (fragments,

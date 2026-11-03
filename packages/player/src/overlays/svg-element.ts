@@ -1,6 +1,7 @@
 import type { FitMode, ResolvedTheme } from "@cutcraft/kit";
-import { overlayLayout, type ElementProps, type OverlayLayout } from "./layout";
-import { prepareSvg, svgAnimated, svgIntrinsicSize, type PreparedSvg, type SvgColor, type SvgViewBox } from "./svg";
+
+import { type ElementProps, type OverlayLayout, overlayLayout } from "./layout";
+import { type PreparedSvg, prepareSvg, type SvgColor, type SvgViewBox, svgAnimated, svgIntrinsicSize } from "./svg";
 
 export interface SvgDrawing {
   /** The size the SVG asks for, before `fit`. */

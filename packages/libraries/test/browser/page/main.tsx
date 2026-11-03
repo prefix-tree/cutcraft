@@ -1,14 +1,17 @@
 // A Player with free code in three Layers: a three.js scene, a Motion timeline and a CSS animation. The test seeks it.
-import { Composition, Layer, Motion, Three, Track, collect, resolve } from "@cutcraft/kit";
-import { Player, type PlayerRef } from "@cutcraft/player";
+
 import { useFrame } from "@react-three/fiber";
+import { motion, useTransform } from "motion/react";
 import { createRef, useRef } from "react";
 import { createRoot } from "react-dom/client";
 import type { Mesh, MeshBasicMaterial } from "three";
+
+import { Composition, collect, Layer, Motion, resolve, Three, Track } from "@cutcraft/kit";
+import { Player, type PlayerRef } from "@cutcraft/player";
+
+import { installFreeCodeLibraries } from "../../../src";
 import { useLayerTime, useTimeline } from "../../../src/motion";
 import { ThreeScene } from "../../../src/three";
-import { useTransform, motion } from "motion/react";
-import { installFreeCodeLibraries } from "../../../src";
 
 installFreeCodeLibraries();
 

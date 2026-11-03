@@ -1,4 +1,5 @@
 import { writeFileSync } from "node:fs";
+
 import { resolve } from "../src/index";
 import { fixtureTree, manifest, serialize } from "../test/helpers";
 

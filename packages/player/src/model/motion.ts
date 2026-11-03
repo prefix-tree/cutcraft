@@ -1,5 +1,5 @@
 import { ease } from "./keyframes";
-import { IDENTITY, multiply, rotate, scaleM, translate, type Matrix2D } from "./transform";
+import { IDENTITY, type Matrix2D, multiply, rotate, scaleM, translate } from "./transform";
 
 /** An entrance or exit as the schema writes it. */
 export interface GraphicAnimation {

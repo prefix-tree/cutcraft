@@ -1,14 +1,16 @@
-import type { ResolvedState } from "@cutcraft/kit";
 import { memo, type ReactNode } from "react";
+
+import type { ResolvedState } from "@cutcraft/kit";
+
 import { backdropTracks } from "../model/backdrop";
 import { frameIndex } from "../model/time";
-import { visiblePlacements, type VisibleItem } from "../model/visible";
+import { type VisibleItem, visiblePlacements } from "../model/visible";
+import { type ElementProps, OVERLAY_KINDS } from "../overlays/layout";
 import { Adjustment } from "./elements/Adjustment";
 import { Captions } from "./elements/Captions";
+import { Graphic } from "./elements/Graphic";
 import { Layer } from "./elements/Layer";
 import { Shape } from "./elements/Shape";
-import { OVERLAY_KINDS, type ElementProps } from "../overlays/layout";
-import { Graphic } from "./elements/Graphic";
 import { Sticker } from "./elements/Sticker";
 import { Svg } from "./elements/Svg";
 import { Title } from "./elements/Title";

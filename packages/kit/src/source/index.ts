@@ -1,9 +1,10 @@
 import traverseModule from "@babel/traverse";
 import * as t from "@babel/types";
+
 import { ELEMENTS, ENGINE_LAYERS } from "../jsx/elements";
-import { INTERIOR_PREFIX } from "../resolve/tree";
 import type { Json } from "../patches/types";
-import { parseSource, rangeOf, type Range } from "./parse";
+import { INTERIOR_PREFIX } from "../resolve/tree";
+import { parseSource, type Range, rangeOf } from "./parse";
 
 // @babel/traverse ships a CommonJS default that bundlers surface differently.
 const traverse = ((traverseModule as unknown as { default?: typeof traverseModule }).default ??

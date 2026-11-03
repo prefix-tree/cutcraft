@@ -1,15 +1,17 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+
 import {
-  collectModule,
-  resolve,
-  resolveTheme,
   type AssetManifest,
   type CollectedNode,
+  collectModule,
   type Placement,
   type ResolvedState,
   type ResolvedTrack,
+  resolve,
+  resolveTheme,
 } from "@cutcraft/kit";
+
 import * as sample from "../../../kit/fixtures/sample";
 
 export const kitFixturesDir = join(import.meta.dirname, "..", "..", "..", "kit", "fixtures");

@@ -1,4 +1,5 @@
 import { animatedTransform, cssTransform, fitRect, layoutRect, matrixToCss } from "@cutcraft/player";
+
 import { childrenOf, makeState } from "./helpers/state";
 
 const comp = { width: 1920, height: 1080 };

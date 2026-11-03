@@ -1,5 +1,7 @@
 import { performance } from "node:perf_hooks";
-import { Executor, collectModule, createPatchLog, resolve, samePlacement } from "@cutcraft/kit";
+
+import { collectModule, createPatchLog, Executor, resolve, samePlacement } from "@cutcraft/kit";
+
 import { buildLarge } from "../fixtures/large";
 import { manifest } from "./helpers";
 

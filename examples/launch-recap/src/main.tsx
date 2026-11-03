@@ -1,12 +1,14 @@
-import { collectModule, resolve, type AssetManifest, type ResolvedState } from "@cutcraft/kit";
+import { type AssetManifest, collectModule, type ResolvedState, resolve } from "@cutcraft/kit";
 import { lint } from "@cutcraft/kit/source";
 import { Player } from "@cutcraft/player";
 import "@cutcraft/player/fonts.css";
+
 import { useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
+
 import manifestJson from "../manifest.json";
-import text from "../video.tsx?raw";
 import * as file from "../video";
+import text from "../video.tsx?raw";
 
 const manifest = manifestJson as AssetManifest;
 const media = {

@@ -1,6 +1,7 @@
 import { z } from "zod";
-import { zTrackLayout, zTrackRole } from "../enums";
+
 import { themeSchema } from "../../theme/schema";
+import { zTrackLayout, zTrackRole } from "../enums";
 import { colorSchema, gradientSchema, idSchema } from "./common";
 
 export const compositionSchema = z.strictObject({

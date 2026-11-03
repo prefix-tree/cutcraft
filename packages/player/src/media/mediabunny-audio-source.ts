@@ -1,4 +1,5 @@
 import { AudioBufferSink, type Input } from "mediabunny";
+
 import type { AudioSource, AudioSourceFactory, AudioSourceInfo, MediaHandle } from "../types";
 import type { MediabunnyInputs } from "./mediabunny-input";
 

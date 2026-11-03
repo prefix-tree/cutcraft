@@ -1,10 +1,13 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+
 import { createElement as h } from "react";
 import { z } from "zod";
-import { GRAPHIC_KINDS, GRAPHIC_KIND_NAMES, graphicSize } from "@cutcraft/graphics";
-import { Composition, Graphic, THEMES, Track, collect, resolve, type ThemeName } from "@cutcraft/kit";
-import { OverlayPlane, createCanvas, directoryResolver } from "../src/index";
+
+import { GRAPHIC_KIND_NAMES, GRAPHIC_KINDS, graphicSize } from "@cutcraft/graphics";
+import { Composition, collect, Graphic, resolve, THEMES, type ThemeName, Track } from "@cutcraft/kit";
+
+import { createCanvas, directoryResolver, OverlayPlane } from "../src/index";
 
 /**
  * Pictures for the graphics catalog: each kind drawn by the export (`OverlayPlane`)

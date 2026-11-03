@@ -1,7 +1,9 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { Executor, collectModule, resolve, type AssetManifest } from "@cutcraft/kit";
+
+import { type AssetManifest, collectModule, Executor, resolve } from "@cutcraft/kit";
 import { buildSourceIndex, foldToSource, lint } from "@cutcraft/kit/source";
+
 import * as file from "../video";
 
 const root = join(import.meta.dirname, "..");

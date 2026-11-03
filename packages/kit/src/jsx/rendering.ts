@@ -1,10 +1,10 @@
 import type {
+  AudioEffectType,
   CAPTION_ANIMATIONS,
   MASK_TYPES,
   TEXT_ANIMATION_PRESETS,
   TransitionType,
   VideoEffectType,
-  AudioEffectType,
 } from "./enums";
 
 /**

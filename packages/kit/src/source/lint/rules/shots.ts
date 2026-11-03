@@ -1,5 +1,5 @@
 import { resolveTimeRef } from "../../../manifest/timeref";
-import { lookupAsset, type AssetEntry } from "../../../manifest/types";
+import { type AssetEntry, lookupAsset } from "../../../manifest/types";
 import type { ElementSite } from "../../index";
 import type { Diagnostic } from "../index";
 import type { Rule } from "./index";

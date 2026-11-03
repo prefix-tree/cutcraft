@@ -1,6 +1,6 @@
+import type { Json } from "../../patches/types";
 import { define, insertNode, makePropHandler, rawNode, siblingAfter } from "../handler-kit";
 import { invalid, nodeOfSpec, nodeSpecOf, ok } from "../types";
-import type { Json } from "../../patches/types";
 
 define({
   type: "marker/add",

@@ -1,17 +1,19 @@
 import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+
 import { z } from "zod";
+
+import { GRAPHIC_KIND_NAMES, GRAPHIC_KINDS, type GraphicKindName } from "../packages/graphics/src/index";
+import { OURS_ONLY, PARITY } from "../packages/kit/scripts/parity-table";
 import {
   ELEMENTS,
   KIND_CAPABILITIES,
-  MASKED_KINDS,
+  listHandlers,
   MASK_NOT_RENDERED,
+  MASKED_KINDS,
   NOT_RENDERED,
   RENDERED_VALUES,
-  listHandlers,
 } from "../packages/kit/src/index";
-import { OURS_ONLY, PARITY } from "../packages/kit/scripts/parity-table";
-import { GRAPHIC_KINDS, GRAPHIC_KIND_NAMES, type GraphicKindName } from "../packages/graphics/src/index";
 import { graphicExample } from "./graphic-example";
 
 /**

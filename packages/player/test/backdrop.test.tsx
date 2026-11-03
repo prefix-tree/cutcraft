@@ -1,6 +1,7 @@
-import { buildFramePlan, backdropTracks } from "@cutcraft/player";
-import { makeState } from "./helpers/state";
+import { backdropTracks, buildFramePlan } from "@cutcraft/player";
+
 import { mountPlayer } from "./helpers/react";
+import { makeState } from "./helpers/state";
 
 const under = {
   id: "under",

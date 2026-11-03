@@ -1,6 +1,8 @@
 import { createElement, Fragment } from "react";
 import { describe, expect, it } from "vitest";
-import { Clip, Composition, Layer, Title, Track, collect, createPatchLog, resolve } from "@cutcraft/kit";
+
+import { Clip, Composition, collect, createPatchLog, Layer, resolve, Title, Track } from "@cutcraft/kit";
+
 import { overlay } from "../src/resolve/overlay";
 import { fixtureTree, manifest } from "./helpers";
 

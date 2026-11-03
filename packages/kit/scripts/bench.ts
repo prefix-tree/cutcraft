@@ -2,10 +2,11 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { cpus } from "node:os";
 import { join } from "node:path";
 import { performance } from "node:perf_hooks";
-import { Executor, collectModule, resolve, type AssetManifest, type CollectedTree } from "../src/index";
-import { buildSourceIndex } from "../src/source/index-public";
+
 import { buildLarge } from "../fixtures/large";
 import * as sample from "../fixtures/sample";
+import { type AssetManifest, type CollectedTree, collectModule, Executor, resolve } from "../src/index";
+import { buildSourceIndex } from "../src/source/index-public";
 
 /**
  * Per-step cost of the editor's drag loop: one action through the Executor

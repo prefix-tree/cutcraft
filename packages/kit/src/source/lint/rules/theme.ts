@@ -1,9 +1,9 @@
-import type { Diagnostic } from "../index";
-import type { SourceIndex } from "../../index";
 import type { Json } from "../../../patches/types";
 import { isBundledFont } from "../../../theme/fonts";
 import { STYLED_KINDS, TOKEN_PATTERN } from "../../../theme/schema";
-import { resolveTheme, themeToken, type ResolvedTheme } from "../../../theme/theme";
+import { type ResolvedTheme, resolveTheme, themeToken } from "../../../theme/theme";
+import type { SourceIndex } from "../../index";
+import type { Diagnostic } from "../index";
 import type { Rule } from "./index";
 
 /** Keys whose string values are colours. */

@@ -1,16 +1,19 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+
 import { describe, expect, it } from "vitest";
-import { THEMES, collectModule, resolve, type AssetManifest, type ResolvedState } from "@cutcraft/kit";
+
+import { type AssetManifest, collectModule, type ResolvedState, resolve, THEMES } from "@cutcraft/kit";
 import { buildSourceIndex, lint } from "@cutcraft/kit/source";
-import * as talkingHead from "../talking-head";
+
+import * as brandSpot from "../brand-spot";
+import * as highlights from "../highlights";
 import * as productDemo from "../product-demo";
-import * as verticalPodcast from "../vertical-podcast";
 import * as slideshow from "../slideshow";
 import * as stats from "../stats";
+import * as talkingHead from "../talking-head";
 import * as variants from "../variants";
-import * as highlights from "../highlights";
-import * as brandSpot from "../brand-spot";
+import * as verticalPodcast from "../vertical-podcast";
 
 const root = join(import.meta.dirname, "..");
 const manifest = JSON.parse(readFileSync(join(root, "manifest.json"), "utf8")) as AssetManifest;

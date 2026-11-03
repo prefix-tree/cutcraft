@@ -1,6 +1,6 @@
-import type { Diagnostic, LintOptions } from "../index";
-import type { ElementSite, SourceIndex } from "../../index";
 import { lookupAsset } from "../../../manifest/types";
+import type { ElementSite, SourceIndex } from "../../index";
+import type { Diagnostic, LintOptions } from "../index";
 import { freeCodeClock, strayHtml } from "./free-code";
 import { graphicProps } from "./graphic";
 import { notRendered } from "./not-rendered";

@@ -5,7 +5,8 @@
 // The shots' places are found from the frame count: back to back when crossfades overlap them, end to end when not.
 import { execFileSync } from "node:child_process";
 import { join } from "node:path";
-import { FPS, HEIGHT, WIDTH, type Scenario } from "./scenarios";
+
+import { FPS, HEIGHT, type Scenario, WIDTH } from "./scenarios";
 
 const FOOTAGE = join(import.meta.dirname, "..", ".cache", "scenarios", "footage.mp4");
 /** How far the expected source frame must score above its neighbours (a right frame scores well over 10 dB above them). */

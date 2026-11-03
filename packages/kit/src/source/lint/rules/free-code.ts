@@ -1,4 +1,5 @@
 import * as t from "@babel/types";
+
 import { rangeOf } from "../../parse";
 import type { Diagnostic } from "../index";
 import type { Rule } from "./index";

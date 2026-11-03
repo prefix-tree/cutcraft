@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { Executor, collectModule, resolve } from "@cutcraft/kit";
+
+import { collectModule, Executor, resolve } from "@cutcraft/kit";
 import { applyEdits, buildSourceIndex, foldToSource, lint, printElement, printProp } from "@cutcraft/kit/source";
-import { fixtureExecutor, fixtureText, fixturesDir, manifest, serialize } from "./helpers";
+
+import { fixtureExecutor, fixturesDir, fixtureText, manifest, serialize } from "./helpers";
 
 function changedLines(a: string, b: string): number {
   const x = a.split("\n"),

@@ -1,4 +1,5 @@
 import { EASING_FN, type Easing, type Placement } from "@cutcraft/kit";
+
 import { devWarn } from "../warn";
 
 export { EASING_FN };

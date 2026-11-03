@@ -1,6 +1,6 @@
 import { writeFileSync } from "node:fs";
-import { listHandlers } from "../src/index";
 
+import { listHandlers } from "../src/index";
 import { OURS_ONLY, PARITY } from "./parity-table";
 
 export { OURS_ONLY, PARITY };

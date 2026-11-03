@@ -1,7 +1,8 @@
 import { z } from "zod";
+
 import { zCaptionAnimation } from "../enums";
-import { zCaptionPosition } from "./enums-local";
 import { assetRefSchema, colorSchema, idSchema, shadowSchema, timeRefSchema } from "./common";
+import { zCaptionPosition } from "./enums-local";
 
 export const captionStyleSchema = z.strictObject({
   font: z.string().optional(),

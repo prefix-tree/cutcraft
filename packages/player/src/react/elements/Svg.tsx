@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { usePlayer } from "../hooks";
-import { dataAttrs, layoutStyle, overlayStyle, type ElementProps } from "../../overlays/layout";
+
+import { dataAttrs, type ElementProps, layoutStyle, overlayStyle } from "../../overlays/layout";
 import { svgDrawing } from "../../overlays/svg-element";
 import { devWarn } from "../../warn";
+import { usePlayer } from "../hooks";
 
 /** Inline SVG markup, or an SVG asset read as text, prepared the way the export prepares it. */
 export function Svg(p: ElementProps) {

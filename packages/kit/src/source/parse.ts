@@ -1,4 +1,4 @@
-import { parse, type ParseResult } from "@babel/parser";
+import { type ParseResult, parse } from "@babel/parser";
 import type * as t from "@babel/types";
 
 export interface ParsedSource {

@@ -2,16 +2,16 @@ import { capabilitiesOf } from "../../jsx/capabilities";
 import {
   define,
   isError,
-  placeNode,
   placementOf,
   placementProps,
+  placeNode,
   rawNode,
   requireElement,
   requireUnlocked,
   setProps,
   siblingAfter,
 } from "../handler-kit";
-import { invalid, nodeSpecOf, ok, type ActionError, type PlacementSpec } from "../types";
+import { type ActionError, invalid, nodeSpecOf, ok, type PlacementSpec } from "../types";
 
 function placementErrors(
   state: Parameters<typeof rawNode>[0],

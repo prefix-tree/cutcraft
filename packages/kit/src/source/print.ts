@@ -1,6 +1,6 @@
+import type { NodeSpec } from "../actions/types";
 import { ELEMENTS } from "../jsx/elements";
 import type { Json } from "../patches/types";
-import type { NodeSpec } from "../actions/types";
 
 const NAME_BY_KIND: ReadonlyMap<string, string> = new Map(Object.entries(ELEMENTS).map(([name, c]) => [c.kind, name]));
 

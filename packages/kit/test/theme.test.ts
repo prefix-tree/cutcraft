@@ -1,22 +1,24 @@
 import { createElement } from "react";
 import { describe, expect, it } from "vitest";
+
 import {
+  applyTheme,
   Captions,
   Clip,
   Composition,
+  collect,
   Executor,
+  resolve,
+  resolveTheme,
   Shape,
+  THEMES,
+  type ThemeInput,
   Title,
   Track,
   Transition,
-  applyTheme,
-  collect,
-  resolve,
-  resolveTheme,
-  THEMES,
-  type ThemeInput,
 } from "@cutcraft/kit";
 import { foldToSource, lint } from "@cutcraft/kit/source";
+
 import { fixtureExecutor, fixtureText, manifest } from "./helpers";
 
 const h = createElement;

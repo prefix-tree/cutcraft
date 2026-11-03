@@ -1,7 +1,9 @@
-import { collectModule, resolve } from "@cutcraft/kit";
-import { Player, type PlayerRef } from "@cutcraft/player";
 import { createRef } from "react";
 import { createRoot } from "react-dom/client";
+
+import { collectModule, resolve } from "@cutcraft/kit";
+import { Player, type PlayerRef } from "@cutcraft/player";
+
 import * as bars from "./composition";
 import * as overlays from "./overlays";
 import * as transitions from "./transitions";

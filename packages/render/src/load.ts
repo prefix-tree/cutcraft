@@ -2,10 +2,12 @@ import { existsSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { dirname, isAbsolute, join, resolve as resolvePath } from "node:path";
 import { pathToFileURL } from "node:url";
-import { collectModule, resolve, type AssetManifest, type ResolvedState } from "@cutcraft/kit";
+
+import type { ReactNode } from "react";
+
+import { type AssetManifest, collectModule, type ResolvedState, resolve } from "@cutcraft/kit";
 import { loadModule } from "@cutcraft/kit/source";
 import { indexLayerInteriors } from "@cutcraft/player/overlays";
-import type { ReactNode } from "react";
 
 export interface LoadOptions {
   /** A manifest file, or the manifest itself; default: the file's own `manifest` export. */

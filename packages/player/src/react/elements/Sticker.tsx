@@ -1,6 +1,6 @@
 import { stickerPlaceholder, stickerSize } from "../../overlays/content";
 import { iconStickerDrawing } from "../../overlays/graphic";
-import { dataAttrs, layoutStyle, overlayStyle, type ElementProps } from "../../overlays/layout";
+import { dataAttrs, type ElementProps, layoutStyle, overlayStyle } from "../../overlays/layout";
 import { devWarn } from "../../warn";
 import { useMediaUrl } from "./Svg";
 

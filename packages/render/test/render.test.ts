@@ -2,19 +2,22 @@ import { execFileSync } from "node:child_process";
 import { mkdtempSync, readFileSync, rmSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { collectModule, resolve } from "@cutcraft/kit";
-import generateMedia, { mediaDir } from "../../player/e2e/gen-media";
-import * as file from "../../player/e2e/app/composition";
-import { indexLayerInteriors } from "@cutcraft/player/overlays";
-import { Canvas, loadImage } from "skia-canvas";
+
 import { VideoSample } from "mediabunny";
+import { Canvas, loadImage } from "skia-canvas";
+
+import { collectModule, resolve } from "@cutcraft/kit";
+import { indexLayerInteriors } from "@cutcraft/player/overlays";
+
+import * as file from "../../player/e2e/app/composition";
+import generateMedia, { mediaDir } from "../../player/e2e/gen-media";
 import { directoryResolver, renderStill, renderVideo } from "../src";
 import { FramePipeline } from "../src/pipeline";
 import { checkExactFrames } from "./helpers/exact";
 import {
+  type DecodedFrame,
   decodeAudio,
   decodeFrames,
-  type DecodedFrame,
   decodesClean,
   pixel,
   probe,

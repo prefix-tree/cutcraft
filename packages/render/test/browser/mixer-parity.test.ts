@@ -1,7 +1,9 @@
 // Mixes the same synthetic occurrences with Web Audio's OfflineAudioContext (built as the player's WebAudioOutput builds
 // its graph) and with the Node mixer, and compares the two.
-import { chromium, type Browser } from "@playwright/test";
+import { type Browser, chromium } from "@playwright/test";
+
 import type { AudioOccurrence } from "@cutcraft/player/engine";
+
 import { mixBlock, type PcmBuffer } from "../../src";
 
 const RATE = 48000;

@@ -1,9 +1,11 @@
 // A file made of copied and re-encoded pieces must play in a browser straight through its joins, and seek across them.
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+
 import { chromium } from "@playwright/test";
-import generateMedia, { mediaDir } from "../../../player/e2e/gen-media";
+
 import { manifest } from "../../../player/e2e/app/composition";
+import generateMedia, { mediaDir } from "../../../player/e2e/gen-media";
 import { directoryResolver, loadVideo, renderVideo } from "../../src";
 
 const scratch = join(import.meta.dirname, "..", ".tmp", "join-playback");

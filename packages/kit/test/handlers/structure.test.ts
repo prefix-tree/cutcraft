@@ -1,6 +1,8 @@
-import { describe, expect, it } from "vitest";
 import { createElement as h } from "react";
-import { Composition, Executor, Layer, Track, collect } from "@cutcraft/kit";
+import { describe, expect, it } from "vitest";
+
+import { Composition, collect, Executor, Layer, Track } from "@cutcraft/kit";
+
 import { fixtureExecutor, manifest, serialize } from "../helpers";
 
 describe("structure on free and sequence tracks", () => {

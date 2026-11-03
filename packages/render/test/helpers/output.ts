@@ -1,5 +1,7 @@
 import { execFileSync } from "node:child_process";
+
 import { ALL_FORMATS, FilePathSource, Input, VideoSampleSink } from "mediabunny";
+
 import { initEnv } from "../../src";
 
 export interface Probe {

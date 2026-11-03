@@ -1,6 +1,6 @@
 // The libraries on the video's clock, in the real Player in Chromium: seek to a time, read what is drawn, seek away
 // and back, and expect the same picture.
-import { chromium, type Browser, type Page } from "@playwright/test";
+import { type Browser, chromium, type Page } from "@playwright/test";
 import { createServer, type ViteDevServer } from "vite";
 
 let server: ViteDevServer, browser: Browser, page: Page;

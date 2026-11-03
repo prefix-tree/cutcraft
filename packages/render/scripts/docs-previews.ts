@@ -1,8 +1,11 @@
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
+
 import { createElement as h } from "react";
+
 import { GRAPHIC_KIND_NAMES } from "@cutcraft/graphics";
-import { Composition, Graphic, Track, collect, resolve } from "@cutcraft/kit";
+import { Composition, collect, Graphic, resolve, Track } from "@cutcraft/kit";
+
 import { EXAMPLE_SECONDS, graphicExample } from "../../../scripts/graphic-example";
 import { directoryResolver, renderStill, renderVideo } from "../src/index";
 

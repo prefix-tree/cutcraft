@@ -1,41 +1,43 @@
+import { readFileSync } from "node:fs";
+import { readFile } from "node:fs/promises";
 import { createRequire } from "node:module";
+
+import { createElement, isValidElement, type ReactElement, type ReactNode } from "react";
+import satori, { type Font } from "satori";
+import { Canvas, type CanvasRenderingContext2D, FontLibrary, type Image, loadImage } from "skia-canvas";
+
 import type { ResolvedState } from "@cutcraft/kit";
-import { BUNDLED_FONTS, BUNDLED_FONT_WEIGHTS, installLayerClock } from "@cutcraft/kit";
+import { BUNDLED_FONT_WEIGHTS, BUNDLED_FONTS, installLayerClock } from "@cutcraft/kit";
 import {
   backdropTracks,
   boundsOf,
-  isVisibleAt,
-  visiblePlacements,
   type DrawRect,
+  isVisibleAt,
   type MediaResolver,
   type VisibleItem,
+  visiblePlacements,
 } from "@cutcraft/player/engine";
 import {
-  OVERLAY_KINDS,
   captionsContent,
+  type ElementProps,
+  type GraphicDrawing,
   graphicDrawing,
   graphicLabels,
   iconStickerDrawing,
+  layerClock,
+  layerContent,
+  OVERLAY_KINDS,
+  type OverlayLayout,
+  overlayLayout,
   parseSvg,
   serialize,
   shapeDrawing,
-  svgDrawing,
-  layerClock,
-  layerContent,
-  overlayLayout,
   stickerPlaceholder,
   stickerSize,
+  svgDrawing,
   titleBox,
   titleContent,
-  type ElementProps,
-  type GraphicDrawing,
-  type OverlayLayout,
 } from "@cutcraft/player/overlays";
-import { readFileSync } from "node:fs";
-import { readFile } from "node:fs/promises";
-import { createElement, isValidElement, type ReactElement, type ReactNode } from "react";
-import satori, { type Font } from "satori";
-import { Canvas, FontLibrary, loadImage, type CanvasRenderingContext2D, type Image } from "skia-canvas";
 
 /** A font handed to Satori. Satori reads TTF, OTF and WOFF, not WOFF2. */
 export type FontWeight = 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900;

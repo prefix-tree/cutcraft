@@ -1,6 +1,6 @@
-import { EASING_FN, ease, keyframedValue } from "@cutcraft/player";
-import { captureWarnings } from "@cutcraft/player";
-import { makeState, childrenOf } from "./helpers/state";
+import { captureWarnings, EASING_FN, ease, keyframedValue } from "@cutcraft/player";
+
+import { childrenOf, makeState } from "./helpers/state";
 
 const state = makeState({
   tracks: [

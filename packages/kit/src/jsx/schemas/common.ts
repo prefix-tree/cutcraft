@@ -1,4 +1,5 @@
 import { z } from "zod";
+
 import { zBlendMode, zEasing, zEmphasisAnimation, zFitMode, zGraphicAnimation } from "../enums";
 
 export const ID_PATTERN = /^[A-Za-z_][A-Za-z0-9_-]*$/;

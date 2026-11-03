@@ -2,8 +2,9 @@ import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import generateMedia, { mediaDir } from "../../player/e2e/gen-media";
+
 import { manifest } from "../../player/e2e/app/composition";
+import generateMedia, { mediaDir } from "../../player/e2e/gen-media";
 import { defaultWorkers, directoryResolver, loadVideo, planSegments, renderVideo } from "../src";
 import { checkExactFrames } from "./helpers/exact";
 import { decodeAudio, decodeFrames, decodesClean, probe, rmsOf, tonePower } from "./helpers/output";

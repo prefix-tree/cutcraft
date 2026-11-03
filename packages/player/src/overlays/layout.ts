@@ -1,19 +1,21 @@
-import type { FitMode, Placement, ResolvedState, Transform } from "@cutcraft/kit";
 import type { CSSProperties } from "react";
+
+import type { FitMode, Placement, ResolvedState, Transform } from "@cutcraft/kit";
+
 import { filterString } from "../model/effects";
-import { combine, motionAt, STILL, type ClipRect, type GraphicAnimation, type Motion } from "../model/motion";
-import { transitionLook } from "../model/transition";
+import { blendOf } from "../model/frame-plan";
+import { type ClipRect, combine, type GraphicAnimation, type Motion, motionAt, STILL } from "../model/motion";
 import {
   animatedTransform,
+  type Box,
   layoutRect,
+  type Matrix2D,
   matrixToCss,
   multiply,
   translate,
-  type Box,
-  type Matrix2D,
 } from "../model/transform";
+import { transitionLook } from "../model/transition";
 import type { TransitionRole } from "../model/visible";
-import { blendOf } from "../model/frame-plan";
 
 /** Placement kinds drawn above the canvas plane, besides captions. */
 export { OVERLAY_KINDS } from "../model/backdrop";

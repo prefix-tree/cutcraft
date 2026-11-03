@@ -1,4 +1,4 @@
-import { MASKED_KINDS, MASK_NOT_RENDERED, NOT_RENDERED, RENDERED_VALUES } from "../../../jsx/rendering";
+import { MASK_NOT_RENDERED, MASKED_KINDS, NOT_RENDERED, RENDERED_VALUES } from "../../../jsx/rendering";
 import type { Json } from "../../../patches/types";
 import type { ElementSite } from "../../index";
 import type { Diagnostic } from "../index";

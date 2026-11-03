@@ -1,14 +1,16 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+
 import {
-  Executor,
-  collectModule,
-  resolve,
   type AssetManifest,
   type CollectedTree,
+  collectModule,
+  Executor,
   type ResolvedState,
+  resolve,
 } from "@cutcraft/kit";
 import { buildSourceIndex } from "@cutcraft/kit/source";
+
 import * as sample from "../fixtures/sample";
 
 export const fixturesDir = join(import.meta.dirname, "..", "fixtures");

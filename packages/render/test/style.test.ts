@@ -1,12 +1,14 @@
 // Shape styling, entrances and exits, and gradient backgrounds, as the export draws them.
 import { createElement as h, type ReactElement } from "react";
 import type { Canvas, CanvasRenderingContext2D } from "skia-canvas";
-import { Clip, Composition, Graphic, Shape, Sticker, Svg, THEMES, Title, Track, collect, resolve } from "@cutcraft/kit";
+
+import { Clip, Composition, collect, Graphic, resolve, Shape, Sticker, Svg, THEMES, Title, Track } from "@cutcraft/kit";
 import { indexLayerInteriors } from "@cutcraft/player/overlays";
+
 import { manifest } from "../../player/e2e/app/composition";
 import generateMedia, { mediaDir } from "../../player/e2e/gen-media";
+import { createCanvas, directoryResolver, OverlayPlane } from "../src";
 import { FramePipeline } from "../src/pipeline";
-import { OverlayPlane, createCanvas, directoryResolver } from "../src";
 
 type Rgba = readonly [number, number, number, number];
 const W = 640,

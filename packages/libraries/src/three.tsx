@@ -1,7 +1,8 @@
-import { useLayer } from "@cutcraft/kit";
-import { Canvas, useFrame, useThree, type CanvasProps } from "@react-three/fiber";
-import { useLayoutEffect, useRef, type CSSProperties, type ReactNode } from "react";
+import { Canvas, type CanvasProps, useFrame, useThree } from "@react-three/fiber";
+import { type CSSProperties, type ReactNode, useLayoutEffect, useRef } from "react";
 import * as THREE from "three";
+
+import { useLayer } from "@cutcraft/kit";
 
 export type ThreeSceneProps = Omit<CanvasProps, "frameloop">;
 

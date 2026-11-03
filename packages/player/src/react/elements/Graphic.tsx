@@ -1,5 +1,5 @@
 import { graphicDrawing, graphicLabels } from "../../overlays/graphic";
-import { dataAttrs, layoutStyle, type ElementProps } from "../../overlays/layout";
+import { dataAttrs, type ElementProps, layoutStyle } from "../../overlays/layout";
 import { devWarn } from "../../warn";
 
 /** A built-in graphic: the kind's art from the same markup as the export, its labels as text above it. */

@@ -1,7 +1,10 @@
 /** @jsxRuntime automatic */
 /** @jsxImportSource react */
-import { RENDERED_TITLE_ANIMATIONS, type Placement } from "@cutcraft/kit";
-import { Children, cloneElement, isValidElement, type CSSProperties, type ReactNode } from "react";
+
+import { Children, type CSSProperties, cloneElement, isValidElement, type ReactNode } from "react";
+
+import { type Placement, RENDERED_TITLE_ANIMATIONS } from "@cutcraft/kit";
+
 import { isVisibleAt } from "../model/visible";
 import { devWarn } from "../warn";
 import type { ElementProps } from "./layout";

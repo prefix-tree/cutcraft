@@ -1,21 +1,23 @@
 import { createElement as h } from "react";
+
 import {
+  type AssetManifest,
   Caption,
   Captions,
   Clip,
   Composition,
+  collect,
   Graphic,
   Keyframe,
+  resolve,
   Shape,
   Title,
   Track,
-  collect,
-  resolve,
-  type AssetManifest,
 } from "@cutcraft/kit";
-import { mediaDir } from "../../player/e2e/gen-media";
+
 import { manifest } from "../../player/e2e/app/composition";
-import { checkLayout, directoryResolver, formatLayout, subjectRects, type LayoutIssue } from "../src";
+import { mediaDir } from "../../player/e2e/gen-media";
+import { checkLayout, directoryResolver, formatLayout, type LayoutIssue, subjectRects } from "../src";
 
 const box = (
   id: string,

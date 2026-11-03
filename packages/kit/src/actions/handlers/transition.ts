@@ -1,19 +1,19 @@
 import { TRANSITION_TYPES } from "../../jsx/enums";
 import { defaultTransitionParams, TRANSITION_PARAMS } from "../../jsx/schemas/transition";
+import type { Json } from "../../patches/types";
+import type { ResolvedState } from "../../resolve/resolve";
 import {
   define,
   insertNode,
+  isError,
   rawNode,
   rawProp,
   requireElement,
   requireUnlocked,
   setProps,
   siblingAfter,
-  isError,
 } from "../handler-kit";
-import { invalid, nodeSpecOf, ok, type ActionError } from "../types";
-import type { ResolvedState } from "../../resolve/resolve";
-import type { Json } from "../../patches/types";
+import { type ActionError, invalid, nodeSpecOf, ok } from "../types";
 
 function requireTransition(state: ResolvedState, id: string): ActionError | null {
   const node = rawNode(state, id);

@@ -1,4 +1,5 @@
-import { lookupAsset, type AssetManifest } from "@cutcraft/kit";
+import { type AssetManifest, lookupAsset } from "@cutcraft/kit";
+
 import { INPUT_IDLE_CLOSE_S, MAX_OPEN_INPUTS } from "../constants";
 import type {
   Clock,

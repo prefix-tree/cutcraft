@@ -1,21 +1,22 @@
 import {
-  RENDERED_MASK_TYPES,
-  RENDERED_TRANSITIONS,
-  lookupAsset,
   type BlendMode,
   type FitMode,
+  lookupAsset,
   type Placement,
+  RENDERED_MASK_TYPES,
+  RENDERED_TRANSITIONS,
   type ResolvedState,
   type Transform,
 } from "@cutcraft/kit";
+
 import { devWarn } from "../warn";
-import { filterString, postEffects, type PostEffect } from "./effects";
-import { frameIndex, nestedSourceTime, placementSourceTime } from "./time";
-import type { ClipRect } from "./motion";
-import { transitionLook } from "./transition";
-import { animatedTransform, layoutRect, multiply, translate, type DrawRect, type Matrix2D } from "./transform";
 import { backdropTracks } from "./backdrop";
-import { visiblePlacements, type VisibleItem } from "./visible";
+import { filterString, type PostEffect, postEffects } from "./effects";
+import type { ClipRect } from "./motion";
+import { frameIndex, nestedSourceTime, placementSourceTime } from "./time";
+import { animatedTransform, type DrawRect, layoutRect, type Matrix2D, multiply, translate } from "./transform";
+import { transitionLook } from "./transition";
+import { type VisibleItem, visiblePlacements } from "./visible";
 
 export interface MaskSpec {
   readonly shape?: Record<string, unknown> | undefined;

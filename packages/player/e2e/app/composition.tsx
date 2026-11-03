@@ -1,4 +1,4 @@
-import { Audio, Clip, Composition, Layer, Title, Track, Transition, useT, type AssetManifest } from "@cutcraft/kit";
+import { type AssetManifest, Audio, Clip, Composition, Layer, Title, Track, Transition, useT } from "@cutcraft/kit";
 
 export const manifest: AssetManifest = {
   assets: {

@@ -1,14 +1,16 @@
 import { describe, expect, it } from "vitest";
+
 import {
+  capabilitiesOf,
+  defaultTransitionParams,
   ELEMENTS,
+  isKeyframeProperty,
+  isVocabulary,
   SCHEMAS_BY_KIND,
   TRANSITION_PARAMS,
   TRANSITION_TYPES,
-  capabilitiesOf,
-  defaultTransitionParams,
-  isKeyframeProperty,
-  isVocabulary,
 } from "@cutcraft/kit";
+
 import { fixtureTree } from "./helpers";
 
 describe("element schemas", () => {

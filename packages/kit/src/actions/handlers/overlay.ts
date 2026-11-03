@@ -1,10 +1,13 @@
 import { capabilitiesOf } from "../../jsx/capabilities";
+import type { Json } from "../../patches/types";
+import type { Placement, ResolvedState } from "../../resolve/resolve";
+import { resolveScene, type SceneFn } from "../../resolve/scene";
 import {
   define,
   insertNode,
   isError,
-  placeNode,
   placementOf,
+  placeNode,
   rawNode,
   rawProp,
   requireElement,
@@ -15,17 +18,14 @@ import {
   validateTarget,
 } from "../handler-kit";
 import {
-  invalid,
-  nodeSpecOf,
-  ok,
   type ActionInput,
   type ActionType,
+  invalid,
   type NodeSpec,
+  nodeSpecOf,
+  ok,
   type PlacementSpec,
 } from "../types";
-import type { Json } from "../../patches/types";
-import type { Placement, ResolvedState } from "../../resolve/resolve";
-import { resolveScene, type SceneFn } from "../../resolve/scene";
 
 const EPS = 1e-6;
 /** Nested props that re-time or re-draw the scene as a whole; the extracted elements could not carry them. */

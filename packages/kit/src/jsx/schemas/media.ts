@@ -1,6 +1,7 @@
 import { z } from "zod";
-import { zInterpolation, zStabilizeCrop } from "./enums-local";
+
 import { assetRefSchema, audioProps, colorSchema, timedProps, timeRefSchema, visualProps } from "./common";
+import { zInterpolation, zStabilizeCrop } from "./enums-local";
 
 export const chromaKeySchema = z.strictObject({
   enabled: z.boolean().default(true),
