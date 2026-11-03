@@ -263,7 +263,8 @@ export function interpolate(a: string, b: string, k: number): string {
   return k < 0.5 ? a : b;
 }
 
-const NUMBER = /[-+]?(?:\d*\.\d+|\d+\.?)(?:[eE][-+]?\d+)?/g;
+// Each number has one way to match (digits first, or a leading dot), so a long run of digits never backtracks.
+const NUMBER = /[-+]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][-+]?\d+)?/g;
 
 /** A value as the text between its numbers, and the numbers. */
 function split(v: string): { text: string[]; nums: number[] } {

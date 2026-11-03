@@ -438,6 +438,15 @@ describe("SVG in the export", () => {
     );
     const plain = '<svg><rect width="1" height="1"/></svg>';
     expect(safeSvgFonts(plain, known).svg).toBe(plain);
+    // A value ends at its own closing quote, whichever kind; an unclosed one is left as it is.
+    expect(safeSvgFonts(`<text font-family='"Foo", Inter'>x</text>`, known).svg).toBe(
+      "<text font-family='Inter'>x</text>",
+    );
+    expect(safeSvgFonts("<text style='font-family: Foo; fill: red'>x</text>", known).svg).toBe(
+      "<text style='font-family: sans-serif; fill: red'>x</text>",
+    );
+    const unclosed = '<text font-family="Foo, Inter>x</text>';
+    expect(safeSvgFonts(unclosed, known).svg).toBe(unclosed);
   });
 
   it("draws an SVG at the size it asks for, or fitted to the frame", async () => {

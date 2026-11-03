@@ -730,9 +730,14 @@ export function safeSvgFonts(svg: string, known: (family: string) => boolean): {
       .replace(/font-family\s*:\s*([^;}]+)/g, (_m, list: string) => `font-family: ${pick(list)}`)
       .replace(/(^|[;{\s])font\s*:[^;}]*;?/g, "$1");
   const out = svg
-    .replace(/font-family=(["'])(.*?)\1/g, (_m, q: string, list: string) => `font-family=${q}${pick(list)}${q}`)
-    .replace(/\sstyle=(["'])(.*?)\1/g, (_m, q: string, text: string) => {
-      return ` style=${q}${css(text.replace(/&quot;/g, ""))}${q}`;
+    // A quoted value ends at its first closing quote: `[^"]*`, not a lazy `.*?` that rescans the rest of the file.
+    .replace(/font-family=(?:"([^"]*)"|'([^']*)')/g, (_m, dq?: string, sq?: string) => {
+      const q = dq === undefined ? "'" : '"';
+      return `font-family=${q}${pick(dq ?? sq ?? "")}${q}`;
+    })
+    .replace(/\sstyle=(?:"([^"]*)"|'([^']*)')/g, (_m, dq?: string, sq?: string) => {
+      const q = dq === undefined ? "'" : '"';
+      return ` style=${q}${css((dq ?? sq ?? "").replace(/&quot;/g, ""))}${q}`;
     })
     .replace(
       /(<style[^>]*>)([\s\S]*?)(<\/style>)/g,
