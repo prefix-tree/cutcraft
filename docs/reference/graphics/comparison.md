@@ -10,7 +10,7 @@ Bars side by side for a few values, each with its label and value, growing over 
     <Graphic
       id="g1"
       kind="comparison"
-      items={[{"label":"Manual edit","value":6,"color":"$muted"},{"label":"With cutcut","value":1.5}]}
+      items={[{"label":"Manual edit","value":6,"color":"$muted"},{"label":"With CutCraft","value":1.5}]}
       suffix=" h"
       decimals={1}
       start={0}

@@ -217,7 +217,7 @@ export const comparison = defineKind({
   example: {
     items: [
       { label: "Manual edit", value: 6, color: "$muted" },
-      { label: "With cutcut", value: 1.5 },
+      { label: "With CutCraft", value: 1.5 },
     ],
     suffix: " h",
     decimals: 1,

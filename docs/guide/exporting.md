@@ -4,37 +4,19 @@
 or a still (PNG or JPEG) in Node, with no browser. It
 runs the same engine as the preview (the plan, the painter, the compositor and
 the audio plan) on different surfaces, so what the preview shows is what the
-file holds. Why it is built this way is [decision 0015](/decisions/0015-a-headless-engine-renders-the-export).
+file holds.
 
 ## From the command line
 
 ```sh
+npm install cutcraft
 npx cutcraft video.tsx --manifest manifest.json --media ./media --out video.webm
 ```
 
-(`cutcraft` is the CLI package's binary. The file imports `@cutcraft/kit`, so install it next to the file:
-`npm install cutcraft @cutcraft/kit react`. In this repo, `pnpm exec tsx packages/render/src/cli.ts …` is the same command.)
-
-| Option | |
-|---|---|
-| `--out <file>` | Where to write. `.webm` gives VP9 and Opus, `.mp4` H.264 and AAC, `.mov` ProRes and 16-bit PCM. `.mp3` and `.wav` hold the soundtrack alone. |
-| `--still <s>` | Write the frame at this time instead, to a `.png` or `.jpg` `--out`. |
-| `--manifest <file>` | The asset manifest. Without it the file's own `manifest` export is used. |
-| `--media <dir>` | One file per asset id, with or without an extension (`podcast.webm`, `podcast`). Default: the file's folder. |
-| `--props <json>` | Props for the file's component, over its `defaults`. |
-| `--from <s>` `--to <s>` | Render only this part of the composition. |
-| `--workers <n>` | Threads. Default 1, the main thread; more rarely helps (below). |
-| `--software` | Encode H.264 and HEVC in software even where the machine has a hardware encoder. |
-| `--speed <s>` | How hard the software H.264/HEVC encoder works: `balanced` (default, x264's veryfast), `quality` (medium: smaller files, about half as fast) or `fast` (real-time mode, larger files). |
-| `--copy` | Smart copy, below. |
-| `--codec <name>` | `vp9`, `vp8`, `av1`, `avc`, `hevc`, `prores`. A codec the container cannot hold (ProRes in WebM) is an error. |
-| `--bitrate <bps>` | Video bits per second. Default: about 0.1 per pixel per frame. |
-| `--quality <preset>` | `very-low`, `low`, `medium`, `high` or `very-high`: the encoder picks the bitrate for the size and codec. In place of `--bitrate`. |
-| `--keyframe <s>` | Seconds between keyframes. Default 2. |
-| `--silent` | No soundtrack. |
-| `--font Name[:weight[:style]]=file` | A font for titles, repeatable. TTF, OTF or WOFF (not WOFF2). |
-| `--continue` | Draw the grey placeholder for an asset that cannot be read, instead of stopping. |
-| `--import <spec>` | A module the file may import beyond `react`, `zod` and `@cutcraft/kit`, repeatable: `three`, or `name=specifier` for a package or a path relative to the file. |
+`--out` picks the format by its extension: `.webm` (VP9 and Opus), `.mp4` (H.264 and AAC), `.mov` (ProRes and
+16-bit PCM), or `.mp3` and `.wav` for the soundtrack alone. `--still 2 --out poster.png` writes one frame. The
+manifest comes from `--manifest` or the file's own `manifest` export, and the media from `--media`, one file per
+asset id, or else the file's folder. The [CLI reference](/reference/cli) lists every option.
 
 The export loads a file the way the editor does: it may import `react`, `zod` and
 `@cutcraft/kit`, plus what `--import` offers. A file that imports anything else
@@ -73,20 +55,21 @@ Everything the preview draws. Footage, transitions, effects, crops, masks,
 blend modes and fades go through the same painter. Above them, in track order
 and with captions on top:
 
-- **Titles, layers and captions** are laid out by [Satori](https://github.com/vercel/satori)
+- Titles, layers and captions are laid out by [Satori](https://github.com/vercel/satori)
   from the same React trees the browser mounts, then drawn with the element's
   matrix, opacity, filter, blend and corner radius. Satori reads a subset of
   CSS: flexbox, not grid, and no state or effects inside a layer (only
   `useT()` and `useLayer()`). Put images in a layer as data URLs. An element
-  Satori cannot draw is left out with a warning that names it.
-- **Shapes and SVG** are drawn as vectors (SVG through the same preparation as the
-  preview; see [Rendering](/guide/rendering#svg)), **stickers** and image assets as
+  Satori cannot draw is left out with a warning that names it, and so are
+  `<Three>` and `<Motion>` for now ([Free code](/guide/free-code#in-the-export)).
+- Shapes and SVG are drawn as vectors (SVG through the same preparation as the
+  preview; see [Titles and graphics](/guide/titles-and-graphics#svg)), stickers and image assets as
   images.
-- **Fonts**: Inter, Space Grotesk, Playfair Display, DM Sans and JetBrains
+- Fonts: Inter, Space Grotesk, Playfair Display, DM Sans and JetBrains
   Mono are bundled (regular and bold, italic where the family has one; see
   [Themes](/guide/themes#fonts)). A title that names another font is set in
   Inter with a warning unless you pass the font with `--font` or `fonts`.
-- **Sound** is mixed by `mixPlan`, a pure function of the audio plan: volume,
+- Sound is mixed by `mixPlan`, a pure function of the audio plan: volume,
   fades, automation, ducking, pan, speed and speed-key ramps (pitch follows
   speed, as in the preview), silence through freeze holds, and sample-rate
   conversion. Mute and solo apply.
@@ -104,18 +87,20 @@ by anti-aliasing and sub-pixel placement.
 
 Most of an export's time is the encoder's. Two things are automatic:
 
-- **Pictures pass straight through.** A frame that is one source picture shown
+- Pictures pass straight through. A frame that is one source picture shown
   as it is (full frame, untransformed, with nothing over, under or applied to
   it) goes from the decoder to the encoder as decoded: never converted to RGBA,
   drawn or read back. Other frames convert only the pictures they draw.
-- **Hardware encoding.** H.264 and HEVC go through the machine's hardware
+- Hardware encoding: H.264 and HEVC go through the machine's hardware
   encoder when it has one that starts (Apple's VideoToolbox, NVIDIA, VA-API).
   It is faster and spends its bits a little less well; `--software` turns it
   off. Most Linux servers have none and encode in software.
 
 Then, in the order to try them:
 
-**Workers.** The frames are cut into runs of whole keyframe intervals. Each
+### Workers
+
+The frames are cut into runs of whole keyframe intervals. Each
 worker renders and encodes runs into small containers; the main thread joins
 them in order and mixes the sound. The pictures are the same as one thread's,
 frame for frame; only where the keyframes fall differs. Each worker holds its
@@ -123,14 +108,18 @@ own decoders and encoder, about 1 GB at 1080p. The encoder already uses every
 core, so workers rarely help: on 4-core Linux and a 12-core Mac, two or four
 were no faster than one, or slower.
 
-**`--speed`.** Trades compression for speed in the software encoder. The
+### `--speed`
+
+It trades compression for speed in the software encoder. The
 default, `balanced`, is x264's veryfast preset; on 4-core Linux it rendered the
 cuts at 111 fps against medium's 61, and the crossfades at 37 against 31, with
 the cuts scoring 53.3 dB against 56.4 at the same 8 Mb/s. `quality` is medium,
 for the smallest file at a bitrate. `fast` is the real-time mode: faster again,
 at larger files. VP9 knows only `fast` and the rest.
 
-**`--copy`.** Where the picture is nothing but a stretch of one source file,
+### `--copy`
+
+Where the picture is nothing but a stretch of one source file,
 the encoded packets of whole groups of pictures are copied and only the ends
 are rendered. It applies when all of these hold for a stretch of frames:
 
@@ -152,9 +141,7 @@ falling back.
 | the same with crossfades and a title on each | 37 | 98 |
 | moving shapes and titles, no footage | 61 | 117 |
 
-`pnpm --filter @cutcraft/render bench:scenarios` measures these on your machine,
-with the time per frame spent in each stage and a sweep of worker counts; CI
-runs it on request (`gh workflow run ci.yml`).
+[Export speed](/comparisons/export-speed) compares these with Remotion and Diffusion Studio.
 
 ## Checking the layout
 
@@ -227,9 +214,7 @@ and `formatLayout(result)` for the text.
 
 ## Checking an export
 
-The test media's source video paints its frame number into a strip, and the
-tests read it back out of the decoded file, so a frame that is one off fails.
-For your own files:
+To check a file you exported:
 
 ```sh
 ffprobe -v error -show_streams video.webm                 # codec, size, frame count, one video and one audio stream
@@ -239,7 +224,6 @@ ffmpeg -i video.webm -vf "select=eq(n\,90)" -frames:v 1 frame.png   # one frame,
 
 ## Requirements
 
-Node 22. `skia-canvas` and `node-av` ship a binary per platform and are
-installed with the package; the FFmpeg inside `node-av` is GPLv3-configured, see
-the decision record before you ship it inside a product. The tests generate
-their media with the system `ffmpeg`.
+Node 22.19 or later. `skia-canvas` and `node-av` ship a binary per platform and are installed with the package,
+so there is no system FFmpeg to install. The FFmpeg inside `node-av` is built with GPLv3 options: check what that
+means for you before you ship it inside a product.

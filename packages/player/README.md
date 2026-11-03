@@ -57,7 +57,7 @@ in the file. [What renders](https://prefix-tree.github.io/cutcraft/reference/ren
 
 ## Docs
 
-- [Rendering](https://prefix-tree.github.io/cutcraft/guide/rendering)
-- [Writing a file](https://prefix-tree.github.io/cutcraft/guide/writing-files)
+- [Player](https://prefix-tree.github.io/cutcraft/guide/player) and the [API reference](https://prefix-tree.github.io/cutcraft/reference/api)
+- [Free code](https://prefix-tree.github.io/cutcraft/guide/free-code)
 
 MIT licensed.

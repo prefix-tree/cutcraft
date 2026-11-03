@@ -29,7 +29,7 @@ it restyles every element that uses it without touching the edit.
 
 | Part | What it is | Used as |
 |---|---|---|
-| `extends` | A built-in theme to start from: `midnight` (the default), `paper`, `neon`, `pastel`, `mono`, `bold` | — |
+| `extends` | A built-in theme to start from: `midnight` (the default), `paper`, `neon`, `pastel`, `mono`, `bold` |  |
 | `palette` | Colours by name, merged over the base: `primary`, `secondary`, `accent`, `background`, `surface`, `text`, `muted`, `onPrimary`, and any names you add | `$primary`, `$brand` |
 | `fonts` | Families by role: `heading`, `body`, `mono` | `$heading`, `$body`, `$mono` |
 | `radius` | Corner radius in pixels | `$radius` |

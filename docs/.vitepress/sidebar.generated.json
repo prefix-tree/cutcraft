@@ -30,6 +30,23 @@
       ]
     },
     {
+      "text": "Free code",
+      "items": [
+        {
+          "text": "Layer",
+          "link": "/reference/elements/layer"
+        },
+        {
+          "text": "Three",
+          "link": "/reference/elements/three"
+        },
+        {
+          "text": "Motion",
+          "link": "/reference/elements/motion"
+        }
+      ]
+    },
+    {
       "text": "Text and graphics",
       "items": [
         {
@@ -59,10 +76,6 @@
         {
           "text": "Sticker",
           "link": "/reference/elements/sticker"
-        },
-        {
-          "text": "Layer",
-          "link": "/reference/elements/layer"
         }
       ]
     },
