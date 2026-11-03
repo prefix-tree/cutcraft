@@ -1,18 +1,16 @@
 import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { z } from "zod";
-import { ELEMENTS, KIND_CAPABILITIES, MASKED_KINDS, MASK_NOT_RENDERED, NOT_RENDERED, RENDERED_VALUES, listHandlers } from "../packages/kit/src/index";
-import { OURS_ONLY, PARITY } from "../packages/kit/scripts/parity-table";
+import { ELEMENTS, ENGINE_LAYERS, KIND_CAPABILITIES, MASKED_KINDS, MASK_NOT_RENDERED, NOT_RENDERED, RENDERED_VALUES, listHandlers } from "../packages/kit/src/index";
+import { OURS_ONLY } from "../packages/kit/scripts/parity-table";
 import { GRAPHIC_KINDS, GRAPHIC_KIND_NAMES, type GraphicKindName } from "../packages/graphics/src/index";
 import { graphicExample } from "./graphic-example";
 
 /**
  * Generated reference pages: the element table from the Zod schemas and the
- * capabilities table, the action list from the registered handlers and the
- * parity table, and what renders from `rendering.ts` (the backend copies that
+ * capabilities table, the action list from the registered handlers, and what renders from `rendering.ts` (the backend copies that
  * page into the agent's SKILL.md). Committed; CI fails when they drift from
- * the code. The kit's spec and parity documents are linked from the sidebar rather than copied:
- * their prose carries JSX and braces that VitePress would compile as Vue.
+ * the code.
  */
 const root = join(import.meta.dirname, "..");
 const out = join(root, "docs", "reference");
@@ -43,6 +41,11 @@ const ELEMENT_DOCS: Record<string, readonly (readonly [element: string, summary:
     ["Transition", "A blend between the two clips it sits between on a sequence track."],
     ["Marker", "A named point on the timeline."],
   ],
+  "Free code": [
+    ["Layer", "Free code in the frame: any React, CSS, canvas or WebGL, placed on the timeline like any overlay; `useT()` is its time."],
+    ["Three", "A three.js scene on the timeline: plain three.js in `setup`, or React Three Fiber children, on the video's clock."],
+    ["Motion", "Children animated by a Motion `sequence` on the video's clock."],
+  ],
   "Text and graphics": [
     ["Title", "Text over the picture in the theme's type, with entrances by letter, word or line."],
     ["Captions", "Subtitles from an asset's transcript that follow the clips through every trim."],
@@ -51,7 +54,6 @@ const ELEMENT_DOCS: Record<string, readonly (readonly [element: string, summary:
     ["Shape", "A vector shape (rectangle, circle, star, polygon, path) with fill, stroke and shadow."],
     ["Svg", "One-off vector art from inline SVG markup or a file."],
     ["Sticker", "A ready-made icon or sticker by name."],
-    ["Layer", "Free code in the frame: any React, CSS, canvas or WebGL, placed on the timeline like any overlay; `useT()` is its time."],
   ],
   "Effects and colour": [
     ["Effect", "A filter on its parent: brightness, blur, grayscale, vignette, grain and more."],
@@ -75,6 +77,25 @@ const ELEMENT_DOCS: Record<string, readonly (readonly [element: string, summary:
     ["AudioEffect", "An effect on an `<Audio>`'s sound."],
   ],
 };
+/** Elements with no rendered example (the Node export does not draw them yet): code, and a note. */
+const CODE_ONLY: Record<string, string> = {
+  Three: `<Three id="cube" anchor="hook" at="word:14" duration={4}
+  camera={{ position: [0, 0, 5], fov: 40 }} background="#101010"
+  setup={({ scene, THREE }) => {
+    const cube = new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshNormalMaterial());
+    scene.add(cube);
+    return ({ time }) => { cube.rotation.set(time * 0.6, time, 0); };
+  }}
+/>`,
+  Motion: `<Motion id="headline" anchor="hook" duration={3}
+  sequence={[
+    ["h1", { opacity: [0, 1], y: [40, 0] }, { duration: 0.6 }],
+    [".rule", { scaleX: [0, 1] }, { at: 0.3, duration: 0.8 }],
+  ]}>
+  <h1>Launch</h1>
+  <div className="rule" />
+</Motion>`,
+};
 /** Elements shown by another's example: the parent they live in. */
 const EXAMPLE_OF: Record<string, string> = { Angle: "multicam", Cut: "multicam", Caption: "captions" };
 const EXAMPLES = join(root, "examples", "showcase", "docs");
@@ -87,7 +108,7 @@ const slug = (name: string): string => name.toLowerCase();
 function elementsIndex(): string {
   const lines = [
     "# Elements", "",
-    "The fixed vocabulary of a cut file. Each page shows an example as the export renders it, with the file that made it, then the element's props. Generated from the Zod schemas in `packages/kit/src/jsx/schemas`; run `pnpm docs:gen`, and `pnpm docs:examples` for the videos.", "",
+    "The elements a file is written in: the timeline (clips, tracks, transitions, captions), free code, and ready-made titles, graphics and effects. Each page shows an example as the export renders it, with the file that made it, then the element's props. Generated from the Zod schemas in `packages/kit/src/jsx/schemas`; run `pnpm docs:gen`, and `pnpm docs:examples` for the videos.", "",
   ];
   for (const [group, items] of Object.entries(ELEMENT_DOCS)) {
     lines.push(`## ${group}`, "", '<div class="cc-cards">');
@@ -107,11 +128,12 @@ function elementsIndex(): string {
 }
 
 function elementPage(name: string, summary: string): string {
-  const component = ELEMENTS[name as keyof typeof ELEMENTS];
+  const component = { ...ELEMENTS, ...ENGINE_LAYERS }[name as keyof typeof ELEMENTS];
   let schema = z.toJSONSchema(component.schema as z.ZodType, { unrepresentable: "any", io: "input" }) as JsonSchema;
   const lines = [`# \`<${name}>\``, "", summary, ""];
   const ex = exampleFor(name);
   if (ex) lines.push(`<Example src="previews/elements/${ex}" alt="${attr(`<${name}>`)}">`, "", `<<< @/../examples/showcase/docs/${ex}.tsx`, "", "</Example>", "");
+  else if (CODE_ONLY[name]) lines.push("```tsx", CODE_ONLY[name], "```", "", "The player draws it once the host calls `installFreeCodeLibraries()` ([Free code](/guide/free-code#three-js-and-motion)). The Node export leaves it out with a warning for now.", "");
   if (name === "Graphic") {
     // One schema per kind: show the props every graphic takes; the kinds' own are on the graphics pages.
     const own = new Set(GRAPHIC_KIND_NAMES.flatMap((k) => Object.keys(GRAPHIC_KINDS[k].shape)));
@@ -178,23 +200,17 @@ function graphicPage(name: GraphicKindName): string {
 }
 
 function actionsPage(): string {
-  const byOurs = new Map<string, string[]>();
-  for (const [openreel, ours] of PARITY) {
-    for (const key of ours.split(",").map((s) => s.trim().split(" ")[0]!)) byOurs.set(key, [...(byOurs.get(key) ?? []), openreel]);
-  }
-  const notes = new Map(OURS_ONLY.map(([type, note]) => [type, note] as const));
+  // Notes that compare with another editor are for contributors (the kit's parity table), not for this page.
+  const notes = new Map(OURS_ONLY.filter(([, note]) => !/openreel/i.test(note)).map(([type, note]) => [type, note] as const));
   const groups = new Map<string, string[]>();
   for (const type of listHandlers()) {
     const ns = type.split("/")[0]!;
     groups.set(ns, [...(groups.get(ns) ?? []), type]);
   }
-  const lines = ["# Actions", "", `Generated from the registered handlers (${listHandlers().length}) and the parity table. Do not edit by hand; run \`pnpm docs:gen\`.`, "", "Every action has `validate`, `apply`, `invert` and `fold`; the inverse is never null. Params are typed in `packages/kit/src/actions/types/index.ts`.", ""];
+  const lines = ["# Actions", "", `Generated from the registered handlers (${listHandlers().length}). Do not edit by hand; run \`pnpm docs:gen\`.`, "", "Every action has `validate`, `apply`, `invert` and `fold`; the inverse is never null. Params are typed in `packages/kit/src/actions/types/index.ts`.", ""];
   for (const [ns, types] of [...groups].sort()) {
-    lines.push(`## \`${ns}/\``, "", "| action | OpenReel counterpart | note |", "|---|---|---|");
-    for (const type of [...types].sort()) {
-      const counterparts = byOurs.get(type) ?? [];
-      lines.push(`| \`${type}\` | ${counterparts.map((c) => `\`${c}\``).join(", ") || "—"} | ${notes.get(type) ?? ""} |`);
-    }
+    lines.push(`## \`${ns}/\``, "", "| action | note |", "|---|---|");
+    for (const type of [...types].sort()) lines.push(`| \`${type}\` | ${notes.get(type) ?? ""} |`);
     lines.push("");
   }
   return lines.join("\n");
