@@ -1,8 +1,11 @@
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
+
 import { createElement as h } from "react";
+
 import { GRAPHIC_KIND_NAMES } from "@cutcraft/graphics";
-import { Composition, Graphic, Track, collect, resolve } from "@cutcraft/kit";
+import { Composition, collect, Graphic, resolve, Track } from "@cutcraft/kit";
+
 import { EXAMPLE_SECONDS, graphicExample } from "../../../scripts/graphic-example";
 import { directoryResolver, renderStill, renderVideo } from "../src/index";
 
@@ -22,8 +25,11 @@ const media = directoryResolver("/nowhere", { assets: {} });
 for (const name of GRAPHIC_KIND_NAMES) {
   if (only && name !== only) continue;
   const example = graphicExample(name);
-  const el = h(Composition, { fps: 30, width: example.width, height: example.height },
-    h(Track, { id: "main", layout: "free" }, h(Graphic, example.props as never)));
+  const el = h(
+    Composition,
+    { fps: 30, width: example.width, height: example.height },
+    h(Track, { id: "main", layout: "free" }, h(Graphic, example.props as never)),
+  );
   const state = resolve(collect(el), { assets: {} });
   if (state.errors.length) throw new Error(`${name}: ${state.errors.map((e) => e.message).join("; ")}`);
   const r = await renderVideo({ state, media, out: join(out, `${name}.webm`), silent: true, quality: "high" });

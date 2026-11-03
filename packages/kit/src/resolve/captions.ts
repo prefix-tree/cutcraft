@@ -1,5 +1,5 @@
-import { assetIdOf, type AssetEntry, type TranscriptWord } from "../manifest/types";
-import { freezeUnshift, rampInverse, type FreezeHold, type RampKey } from "./speed";
+import { type AssetEntry, assetIdOf, type TranscriptWord } from "../manifest/types";
+import { type FreezeHold, freezeUnshift, type RampKey, rampInverse } from "./speed";
 import type { CollectedNode } from "./tree";
 
 /** Where an asset plays on the timeline: enough of a placement to map asset seconds to composition seconds. */
@@ -80,7 +80,12 @@ export function planCues(words: readonly TimelineWord[], options: CueOptions = D
   for (const w of words) {
     const prev = current[current.length - 1];
     if (prev) {
-      if (prev.play !== w.play || SENTENCE_END.test(prev.text) || w.start - prev.end > options.maxGap || w.end - (current[0] as TimelineWord).start > options.maxDuration) {
+      if (
+        prev.play !== w.play ||
+        SENTENCE_END.test(prev.text) ||
+        w.start - prev.end > options.maxGap ||
+        w.end - (current[0] as TimelineWord).start > options.maxDuration
+      ) {
         lines.push(current);
         current = [];
       } else if (chars(current) + 1 + w.text.length > options.maxChars) {
@@ -95,11 +100,25 @@ export function planCues(words: readonly TimelineWord[], options: CueOptions = D
 
   const merged: TimelineWord[][] = [];
   for (const line of lines) {
-    const prev = merged[merged.length - 1], last = prev?.[prev.length - 1], first = line[0] as TimelineWord;
-    const joins = prev && last && span(line) < MIN_CUE && last.play === first.play && !SENTENCE_END.test(last.text) && first.start - last.end <= options.maxGap;
-    if (!joins) { merged.push([...line]); continue; }
+    const prev = merged[merged.length - 1],
+      last = prev?.[prev.length - 1],
+      first = line[0] as TimelineWord;
+    const joins =
+      prev &&
+      last &&
+      span(line) < MIN_CUE &&
+      last.play === first.play &&
+      !SENTENCE_END.test(last.text) &&
+      first.start - last.end <= options.maxGap;
+    if (!joins) {
+      merged.push([...line]);
+      continue;
+    }
     // A short cue joins the one before it when that stays near the limit, else the two share their words anew.
-    if (chars(prev) + 1 + chars(line) <= options.maxChars + Math.max(4, Math.round(options.maxChars / 4))) { prev.push(...line); continue; }
+    if (chars(prev) + 1 + chars(line) <= options.maxChars + Math.max(4, Math.round(options.maxChars / 4))) {
+      prev.push(...line);
+      continue;
+    }
     const split = rebalance([...prev, ...line], options.maxChars, span(line));
     if (split) merged.splice(merged.length - 1, 1, ...split);
     // Speech too fast for one-line cues: the two make one cue on two lines.
@@ -108,19 +127,32 @@ export function planCues(words: readonly TimelineWord[], options: CueOptions = D
   }
   // A short cue that opens its sentence joins the next cue of that sentence instead.
   for (let n = merged.length - 2; n >= 0; n--) {
-    const line = merged[n] as TimelineWord[], next = merged[n + 1] as TimelineWord[];
-    const last = line[line.length - 1] as TimelineWord, first = next[0] as TimelineWord;
-    if (span(line) >= MIN_CUE || SENTENCE_END.test(last.text) || last.play !== first.play || first.start - last.end > options.maxGap) continue;
+    const line = merged[n] as TimelineWord[],
+      next = merged[n + 1] as TimelineWord[];
+    const last = line[line.length - 1] as TimelineWord,
+      first = next[0] as TimelineWord;
+    if (
+      span(line) >= MIN_CUE ||
+      SENTENCE_END.test(last.text) ||
+      last.play !== first.play ||
+      first.start - last.end > options.maxGap
+    )
+      continue;
     if (chars(line) + 1 + chars(next) <= 2 * options.maxChars) merged.splice(n, 2, [...line, ...next]);
   }
 
   return merged.map((line, n) => {
-    const first = line[0] as TimelineWord, last = line[line.length - 1] as TimelineWord;
+    const first = line[0] as TimelineWord,
+      last = line[line.length - 1] as TimelineWord;
     const next = merged[n + 1]?.[0];
     // Held into the pause after it, never over the next cue; the last cue keeps its words' end.
     const end = last.end - first.start < MIN_CUE && next ? Math.min(first.start + MIN_CUE, next.start) : last.end;
-    const opens = n === 0 || SENTENCE_END.test((merged[n - 1]?.[merged[n - 1]!.length - 1] as TimelineWord).text);
-    const cueWords = line.map((w, i) => ({ text: i === 0 && opens ? capitalise(w.text) : w.text, start: w.start, end: w.end }));
+    const opens = n === 0 || SENTENCE_END.test((merged[n - 1]!.at(-1) as TimelineWord).text);
+    const cueWords = line.map((w, i) => ({
+      text: i === 0 && opens ? capitalise(w.text) : w.text,
+      start: w.start,
+      end: w.end,
+    }));
     return { start: first.start, end: ms(end), text: cueWords.map((w) => w.text).join(" "), words: cueWords };
   });
 }
@@ -129,20 +161,62 @@ export function planCues(words: readonly TimelineWord[], options: CueOptions = D
  * under 0.4 s is what the eye misses. */
 const MIN_CUE = 0.4;
 /** Words that lead into the next one: a line does not end on them. */
-const LEADING = new Set(["a", "an", "the", "of", "to", "in", "on", "at", "for", "by", "from", "with", "into", "and", "or", "but", "so", "if", "than", "as", "i", "my", "your", "our", "their", "his", "her", "its"]);
+const LEADING = new Set([
+  "a",
+  "an",
+  "the",
+  "of",
+  "to",
+  "in",
+  "on",
+  "at",
+  "for",
+  "by",
+  "from",
+  "with",
+  "into",
+  "and",
+  "or",
+  "but",
+  "so",
+  "if",
+  "than",
+  "as",
+  "i",
+  "my",
+  "your",
+  "our",
+  "their",
+  "his",
+  "her",
+  "its",
+]);
 
 function span(line: readonly TimelineWord[]): number {
   return (line[line.length - 1] as TimelineWord).end - (line[0] as TimelineWord).start;
 }
 
 /** Two lines within the limit from the words of a cue and the short one after it, the shorter on screen longest; null when no split beats `shortest`. */
-function rebalance(words: readonly TimelineWord[], maxChars: number, shortest: number): [TimelineWord[], TimelineWord[]] | null {
+function rebalance(
+  words: readonly TimelineWord[],
+  maxChars: number,
+  shortest: number,
+): [TimelineWord[], TimelineWord[]] | null {
   let best: [TimelineWord[], TimelineWord[]] | null = null;
   for (let k = 1; k < words.length; k++) {
-    const left = words.slice(0, k), right = words.slice(k);
-    if (chars(left) > maxChars || chars(right) > maxChars || LEADING.has((left[k - 1] as TimelineWord).text.toLowerCase())) continue;
+    const left = words.slice(0, k),
+      right = words.slice(k);
+    if (
+      chars(left) > maxChars ||
+      chars(right) > maxChars ||
+      LEADING.has((left[k - 1] as TimelineWord).text.toLowerCase())
+    )
+      continue;
     const m = Math.min(span(left), span(right));
-    if (m > shortest) { shortest = m; best = [left, right]; }
+    if (m > shortest) {
+      shortest = m;
+      best = [left, right];
+    }
   }
   return best;
 }
@@ -153,13 +227,17 @@ function chars(line: readonly TimelineWord[]): number {
 
 /** Where to end a line that overflows: the fullest prefix that ends on punctuation or a word that ends a phrase. */
 function breakAt(line: readonly TimelineWord[], maxChars: number): number {
-  let best = line.length, bestScore = Number.POSITIVE_INFINITY;
+  let best = line.length,
+    bestScore = Number.POSITIVE_INFINITY;
   for (let k = 1; k <= line.length; k++) {
     const last = (line[k - 1] as TimelineWord).text;
     let score = (maxChars - chars(line.slice(0, k))) / maxChars;
     if (/[,;:]$/.test(last)) score -= 0.5;
     if (LEADING.has(last.toLowerCase())) score += 1;
-    if (score < bestScore) { bestScore = score; best = k; }
+    if (score < bestScore) {
+      bestScore = score;
+      best = k;
+    }
   }
   return best;
 }
@@ -176,14 +254,24 @@ function audible(w: TranscriptWord, play: AssetPlay): boolean {
 }
 
 /** Generated `<Caption>` nodes for the cues, as children of the captions node. */
-export function cueNodes(captions: CollectedNode, cues: readonly Cue[], taken: (id: string) => boolean): CollectedNode[] {
+export function cueNodes(
+  captions: CollectedNode,
+  cues: readonly Cue[],
+  taken: (id: string) => boolean,
+): CollectedNode[] {
   const used = new Set<string>();
   return cues.map((cue, n) => {
     let id = `${captions.id}-${n + 1}`;
     for (let k = 2; taken(id) || used.has(id); k++) id = `${captions.id}-${n + 1}-${k}`;
     used.add(id);
     return {
-      id, kind: "caption", parent: captions.id, children: [], editable: "generated", lockedProps: [], boundProps: {},
+      id,
+      kind: "caption",
+      parent: captions.id,
+      children: [],
+      editable: "generated",
+      lockedProps: [],
+      boundProps: {},
       props: { id, start: cue.start, end: cue.end, text: cue.text, words: cue.words },
       origin: { helper: "captions", callerId: captions.id, callIndex: 0 },
     };
@@ -193,7 +281,8 @@ export function cueNodes(captions: CollectedNode, cues: readonly Cue[], taken: (
 /** A stable key for the plays of one asset, so an unchanged timeline reuses the generated nodes. */
 export function playsKey(plays: readonly AssetPlay[]): string {
   let key = "";
-  for (const p of plays) key += `${p.id}:${p.start}:${p.in}:${p.out}:${p.speed}:${JSON.stringify(p.keys ?? [])}:${JSON.stringify(p.holds ?? [])};`;
+  for (const p of plays)
+    key += `${p.id}:${p.start}:${p.in}:${p.out}:${p.speed}:${JSON.stringify(p.keys ?? [])}:${JSON.stringify(p.holds ?? [])};`;
   return key;
 }
 
@@ -209,7 +298,14 @@ function ms(x: number): number {
 function wordOn(w: TranscriptWord, play: AssetPlay): TimelineWord {
   const start = ms(playTime(play, Math.max(w.start, play.in)));
   const end = ms(playTime(play, Math.min(w.end, play.out)));
-  return { i: w.i, text: w.text, start, end, play: play.id, ...(w.speaker !== undefined ? { speaker: w.speaker } : {}) };
+  return {
+    i: w.i,
+    text: w.text,
+    start,
+    end,
+    play: play.id,
+    ...(w.speaker !== undefined ? { speaker: w.speaker } : {}),
+  };
 }
 
 /** Composition time at which asset second `sec` plays in `play`: through the speed ramp, then past the holds before it. */

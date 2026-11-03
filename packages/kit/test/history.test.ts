@@ -1,7 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { ActionHistory, type Action, type ActionInput } from "@cutcraft/kit";
 
-const trim = (id: string, out: number, actionId = "a"): Action => ({ type: "clip/trim", actionId, ts: 0, params: { id, edge: "out", value: out } });
+import { type Action, ActionHistory, type ActionInput } from "@cutcraft/kit";
+
+const trim = (id: string, out: number, actionId = "a"): Action => ({
+  type: "clip/trim",
+  actionId,
+  ts: 0,
+  params: { id, edge: "out", value: out },
+});
 const inverse: ActionInput = { type: "source/setProps", params: { id: "c1", props: {} } };
 
 describe("ActionHistory", () => {
@@ -9,10 +15,18 @@ describe("ActionHistory", () => {
     let t = 0;
     const h = new ActionHistory(1000, 100, () => t);
     h.push(trim("c1", 1, "a1"), inverse, [0, 1]);
-    t = 50; h.push(trim("c1", 2, "a2"), inverse, [1, 2]);
-    t = 90; h.push(trim("c1", 3, "a3"), inverse, [2, 3]);
-    t = 400; h.push(trim("c1", 4, "a4"), inverse, [3, 4]);
-    expect(h.entries().map((e) => e.groupId)).toEqual([expect.any(String), expect.any(String), expect.any(String), undefined]);
+    t = 50;
+    h.push(trim("c1", 2, "a2"), inverse, [1, 2]);
+    t = 90;
+    h.push(trim("c1", 3, "a3"), inverse, [2, 3]);
+    t = 400;
+    h.push(trim("c1", 4, "a4"), inverse, [3, 4]);
+    expect(h.entries().map((e) => e.groupId)).toEqual([
+      expect.any(String),
+      expect.any(String),
+      expect.any(String),
+      undefined,
+    ]);
     expect(h.undoGroup().map((e) => e.action.actionId)).toEqual(["a4"]);
     expect(h.undoGroup().map((e) => e.action.actionId)).toEqual(["a3", "a2", "a1"]);
     expect(h.canUndo()).toBe(false);
@@ -38,7 +52,14 @@ describe("ActionHistory", () => {
     h.push(trim("c3", 1, "a3"), inverse, [2, 3]);
     h.endGroup();
     h.push(trim("c4", 1, "a4"), inverse, [3, 4]);
-    expect(new Set(h.entries().slice(0, 3).map((e) => e.groupId)).size).toBe(1);
+    expect(
+      new Set(
+        h
+          .entries()
+          .slice(0, 3)
+          .map((e) => e.groupId),
+      ).size,
+    ).toBe(1);
     h.undoGroup();
     expect(h.undoGroup().map((e) => e.action.actionId)).toEqual(["a3", "a2", "a1"]);
   });

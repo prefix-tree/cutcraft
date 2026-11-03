@@ -1,15 +1,27 @@
 import { AudioEngine, ManualClock, Transport } from "@cutcraft/player";
+
 import { FakeAudioOutput, FakeAudioSource, flush } from "./helpers/fakes";
 import { makeState } from "./helpers/state";
 
-const state = makeState({ tracks: [
-  { id: "main", items: [
-    { id: "c1", kind: "clip", source: { in: 0, out: 4, asset: "a" } },
-    { id: "g", kind: "gap", duration: 2 },
-    { id: "c2", kind: "clip", source: { in: 0, out: 6, speed: 1.2, asset: "b" } },
-  ] },
-  { id: "music", layout: "free", items: [{ id: "bed", kind: "audio", start: 0, source: { in: 0, out: 90, asset: "tone" }, props: { volume: 0.5 } }] },
-] });
+const state = makeState({
+  tracks: [
+    {
+      id: "main",
+      items: [
+        { id: "c1", kind: "clip", source: { in: 0, out: 4, asset: "a" } },
+        { id: "g", kind: "gap", duration: 2 },
+        { id: "c2", kind: "clip", source: { in: 0, out: 6, speed: 1.2, asset: "b" } },
+      ],
+    },
+    {
+      id: "music",
+      layout: "free",
+      items: [
+        { id: "bed", kind: "audio", start: 0, source: { in: 0, out: 90, asset: "tone" }, props: { volume: 0.5 } },
+      ],
+    },
+  ],
+});
 
 function setup(s = state) {
   const clock = new ManualClock();
@@ -18,10 +30,25 @@ function setup(s = state) {
   const sources = new Map<string, FakeAudioSource>();
   const timers: (() => void)[] = [];
   const engine = new AudioEngine({
-    output, transport, toContextTime: (t) => t, state: () => s,
-    audioSource: (id) => { let s = sources.get(id); if (!s) { s = new FakeAudioSource(id, 90); sources.set(id, s); } return Promise.resolve(s); },
-    setInterval: (fn) => { timers.push(fn); return timers.length; },
-    clearInterval: () => { timers.length = 0; },
+    output,
+    transport,
+    toContextTime: (t) => t,
+    state: () => s,
+    audioSource: (id) => {
+      let s = sources.get(id);
+      if (!s) {
+        s = new FakeAudioSource(id, 90);
+        sources.set(id, s);
+      }
+      return Promise.resolve(s);
+    },
+    setInterval: (fn) => {
+      timers.push(fn);
+      return timers.length;
+    },
+    clearInterval: () => {
+      timers.length = 0;
+    },
   });
   const keys = () => output.scheduled.map((s) => s.key).sort();
   return { clock, transport, output, engine, sources, timers, keys };
@@ -108,9 +135,25 @@ describe("AudioEngine", () => {
 
   it("offsets into a speed-key ramp by the integral of its rate and automates the rate", async () => {
     // Speed 1 → 2 over 2 s: u + u²/4 source seconds by clip time u.
-    const ramp = makeState({ tracks: [{ id: "a", items: [{ id: "r", kind: "clip", duration: 2, source: { in: 0, out: 3, asset: "a" }, children: [
-      { id: "k1", kind: "speedKey", props: { at: 0, speed: 1 } }, { id: "k2", kind: "speedKey", props: { at: 2, speed: 2 } },
-    ] }] }] });
+    const ramp = makeState({
+      tracks: [
+        {
+          id: "a",
+          items: [
+            {
+              id: "r",
+              kind: "clip",
+              duration: 2,
+              source: { in: 0, out: 3, asset: "a" },
+              children: [
+                { id: "k1", kind: "speedKey", props: { at: 0, speed: 1 } },
+                { id: "k2", kind: "speedKey", props: { at: 2, speed: 2 } },
+              ],
+            },
+          ],
+        },
+      ],
+    });
     const { transport, engine, output } = setup(ramp);
     transport.seek(1);
     transport.setRate(2);

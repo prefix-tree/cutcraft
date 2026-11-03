@@ -1,6 +1,6 @@
 import { writeFileSync } from "node:fs";
-import { listHandlers } from "../src/index";
 
+import { listHandlers } from "../src/index";
 import { OURS_ONLY, PARITY } from "./parity-table";
 
 export { OURS_ONLY, PARITY };
@@ -14,7 +14,17 @@ export function parityMarkdown(): string {
     "",
     "| OpenReel | Ours |",
     "|---|---|",
-    ...PARITY.map(([a, b]) => `| \`${a}\` | ${b.startsWith("out:") || b.startsWith("—") ? b : b.split(/,| \/ | \+ /).map((s) => `\`${s.trim()}\``).join(", ")} |`),
+    ...PARITY.map(
+      ([a, b]) =>
+        `| \`${a}\` | ${
+          b.startsWith("out:") || b.startsWith("—")
+            ? b
+            : b
+                .split(/,| \/ | \+ /)
+                .map((s) => `\`${s.trim()}\``)
+                .join(", ")
+        } |`,
+    ),
     "",
     "## Ours with no OpenReel equivalent",
     "",
@@ -37,7 +47,7 @@ export function parityGaps(): { unmappedOurs: string[]; unknownOurs: string[] } 
   };
 }
 
-if (process.argv[1] && process.argv[1].endsWith("parity.ts")) {
+if (process.argv[1]?.endsWith("parity.ts")) {
   await import("../src/actions/handlers");
   writeFileSync(new URL("../docs/parity.md", import.meta.url), parityMarkdown());
   console.log(parityGaps());

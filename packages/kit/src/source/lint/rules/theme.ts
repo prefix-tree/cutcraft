@@ -1,13 +1,22 @@
-import type { Diagnostic } from "../index";
-import type { SourceIndex } from "../../index";
 import type { Json } from "../../../patches/types";
 import { isBundledFont } from "../../../theme/fonts";
 import { STYLED_KINDS, TOKEN_PATTERN } from "../../../theme/schema";
-import { resolveTheme, themeToken, type ResolvedTheme } from "../../../theme/theme";
+import { type ResolvedTheme, resolveTheme, themeToken } from "../../../theme/theme";
+import type { SourceIndex } from "../../index";
+import type { Diagnostic } from "../index";
 import type { Rule } from "./index";
 
 /** Keys whose string values are colours. */
-const COLOR_KEYS: ReadonlySet<string> = new Set(["color", "fill", "background", "tint", "highlight", "upcoming", "frontColor", "sideColor"]);
+const COLOR_KEYS: ReadonlySet<string> = new Set([
+  "color",
+  "fill",
+  "background",
+  "tint",
+  "highlight",
+  "upcoming",
+  "frontColor",
+  "sideColor",
+]);
 /** Subtrees where a literal colour is expected even with a theme: shadows are usually black, whatever the palette. */
 const SKIP_KEYS: ReadonlySet<string> = new Set(["shadow", "shadows", "theme", "text", "content", "src"]);
 const THEMED_KINDS: ReadonlySet<string> = new Set([...STYLED_KINDS, "composition", "marker"]);
@@ -26,14 +35,34 @@ export const themeRefs: Rule = {
         walk(prop.literal, name, (value, path) => {
           const m = typeof value === "string" ? TOKEN_PATTERN.exec(value) : null;
           if (m && themeToken(theme, m[1] as string) === undefined) {
-            out.push({ rule: "theme-refs", severity: "error", message: `"${site.id}.${path}": ${value} is not a theme token (${Object.keys(theme.tokens).map((k) => `$${k}`).join(", ")})`, range: prop.range, id: site.id, prop: name });
+            out.push({
+              rule: "theme-refs",
+              severity: "error",
+              message: `"${site.id}.${path}": ${value} is not a theme token (${Object.keys(theme.tokens)
+                .map((k) => `$${k}`)
+                .join(", ")})`,
+              range: prop.range,
+              id: site.id,
+              prop: name,
+            });
           }
         });
       }
       const style = site.props.get("style");
-      if ((STYLED_KINDS as readonly string[]).includes(site.kind) && typeof style?.literal === "string" && !theme.styles[site.kind]?.[style.literal]) {
+      if (
+        (STYLED_KINDS as readonly string[]).includes(site.kind) &&
+        typeof style?.literal === "string" &&
+        !theme.styles[site.kind]?.[style.literal]
+      ) {
         const known = Object.keys(theme.styles[site.kind] ?? {});
-        out.push({ rule: "theme-refs", severity: "error", message: `"${site.id}": no ${site.kind} style "${style.literal}" in the theme${known.length ? ` (${known.join(", ")})` : ""}`, range: style.range, id: site.id, prop: "style" });
+        out.push({
+          rule: "theme-refs",
+          severity: "error",
+          message: `"${site.id}": no ${site.kind} style "${style.literal}" in the theme${known.length ? ` (${known.join(", ")})` : ""}`,
+          range: style.range,
+          id: site.id,
+          prop: "style",
+        });
       }
     }
     return out;
@@ -48,7 +77,8 @@ export const themeLiterals: Rule = {
     if (!theme?.declared) return [];
     const out: Diagnostic[] = [];
     const byValue = new Map<string, string>();
-    for (const [k, v] of Object.entries(theme.palette)) if (!byValue.has(v.toLowerCase())) byValue.set(v.toLowerCase(), k);
+    for (const [k, v] of Object.entries(theme.palette))
+      if (!byValue.has(v.toLowerCase())) byValue.set(v.toLowerCase(), k);
     for (const site of index.elements.values()) {
       if (!THEMED_KINDS.has(site.kind)) continue;
       for (const [name, prop] of site.props) {
@@ -56,10 +86,24 @@ export const themeLiterals: Rule = {
         walk(prop.literal, name, (value, path, key) => {
           if (typeof value !== "string" || value.startsWith("$")) return;
           if (key === "font") {
-            out.push({ rule: "theme-literals", severity: "warning", message: `"${site.id}.${path}" names font "${value}"; use $heading, $body or $mono so the theme sets it`, range: prop.range, id: site.id, prop: name });
+            out.push({
+              rule: "theme-literals",
+              severity: "warning",
+              message: `"${site.id}.${path}" names font "${value}"; use $heading, $body or $mono so the theme sets it`,
+              range: prop.range,
+              id: site.id,
+              prop: name,
+            });
           } else if (COLOR_KEYS.has(key) && !NOT_COLORS.has(value)) {
             const token = byValue.get(value.toLowerCase());
-            out.push({ rule: "theme-literals", severity: "warning", message: `"${site.id}.${path}" is the literal colour ${value}; use ${token ? `$${token}` : "a palette token"} so a theme change reaches it`, range: prop.range, id: site.id, prop: name });
+            out.push({
+              rule: "theme-literals",
+              severity: "warning",
+              message: `"${site.id}.${path}" is the literal colour ${value}; use ${token ? `$${token}` : "a palette token"} so a theme change reaches it`,
+              range: prop.range,
+              id: site.id,
+              prop: name,
+            });
           }
         });
       }
@@ -75,10 +119,23 @@ export const fontAvailable: Rule = {
     const theme = fileTheme(index) ?? resolveTheme(undefined);
     const out: Diagnostic[] = [];
     const seen = new Set<string>();
-    const check = (family: string, site: { id: string }, prop: { range: readonly [number, number] }, name: string, path: string): void => {
+    const check = (
+      family: string,
+      site: { id: string },
+      prop: { range: readonly [number, number] },
+      name: string,
+      path: string,
+    ): void => {
       if (isBundledFont(family) || seen.has(`${site.id}.${path}`)) return;
       seen.add(`${site.id}.${path}`);
-      out.push({ rule: "font-available", severity: "warning", message: `"${site.id}.${path}" uses font "${family}", which is not bundled; the export sets it in Inter unless the font is passed to it`, range: [prop.range[0], prop.range[1]], id: site.id, prop: name });
+      out.push({
+        rule: "font-available",
+        severity: "warning",
+        message: `"${site.id}.${path}" uses font "${family}", which is not bundled; the export sets it in Inter unless the font is passed to it`,
+        range: [prop.range[0], prop.range[1]],
+        id: site.id,
+        prop: name,
+      });
     };
     for (const site of index.elements.values()) {
       for (const [name, prop] of site.props) {
@@ -94,7 +151,8 @@ export const fontAvailable: Rule = {
     const comp = index.compositionId ? index.elements.get(index.compositionId) : undefined;
     const themeProp = comp?.props.get("theme");
     if (comp && themeProp && theme.declared) {
-      for (const [role, family] of Object.entries(theme.fonts)) check(family, comp, themeProp, "theme", `theme.fonts.${role}`);
+      for (const [role, family] of Object.entries(theme.fonts))
+        check(family, comp, themeProp, "theme", `theme.fonts.${role}`);
     }
     return out;
   },

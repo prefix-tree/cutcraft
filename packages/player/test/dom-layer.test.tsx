@@ -1,5 +1,5 @@
-import { fixtureState } from "./helpers/state";
 import { mountPlayer } from "./helpers/react";
+import { fixtureState } from "./helpers/state";
 
 describe("DomLayer", () => {
   it("renders the fixture's overlays at a time with data-el and data-kind", async () => {
@@ -22,7 +22,9 @@ describe("DomLayer", () => {
     await m.seek(0.5);
     const overlays = m.container.querySelector('[data-track="overlays"]') as HTMLElement;
     expect(overlays.style.zIndex).toBe("2");
-    expect(m.container.querySelector('[data-el="cp1"][data-kind="caption"]')?.textContent).toBe("Hello and welcome back");
+    expect(m.container.querySelector('[data-el="cp1"][data-kind="caption"]')?.textContent).toBe(
+      "Hello and welcome back",
+    );
     expect(m.container.querySelector('[data-el="cp2"]')).toBeNull();
     await m.seek(2.1);
     expect(m.container.querySelector('[data-el="cp1"]')).toBeNull();

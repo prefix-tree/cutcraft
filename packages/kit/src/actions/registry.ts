@@ -56,5 +56,7 @@ export function inverseOf<T extends ActionType>(action: Action<T>, before: Resol
   const handler = getHandler(action.type);
   if (!handler) throw new Error(`no handler for ${action.type}`);
   const inv = handler.invert(action, before);
-  return Array.isArray(inv) ? { type: "batch/apply", params: { actions: inv as readonly ActionInput[] } } : (inv as ActionInput);
+  return Array.isArray(inv)
+    ? { type: "batch/apply", params: { actions: inv as readonly ActionInput[] } }
+    : (inv as ActionInput);
 }

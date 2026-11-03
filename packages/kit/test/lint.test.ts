@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
+
 import { buildSourceIndex, lint } from "@cutcraft/kit/source";
+
 import { fixtureText, manifest } from "./helpers";
 
 const wrap = (body: string, extra = "") => `
@@ -13,7 +15,9 @@ export default function V() {
 describe("lint", () => {
   it("accepts the sample file, warning only about the gap on its main track and what does not render", () => {
     const d = lint(fixtureText, { manifest });
-    expect(d.filter((x) => x.rule !== "not-rendered").map((x) => `${x.severity}:${x.rule}:${x.id}`)).toEqual(["warning:sequence-gap:g1"]);
+    expect(d.filter((x) => x.rule !== "not-rendered").map((x) => `${x.severity}:${x.rule}:${x.id}`)).toEqual([
+      "warning:sequence-gap:g1",
+    ]);
     expect(d.filter((x) => x.rule === "not-rendered").map((x) => x.id)).toEqual(["st1", "adj1", "ae1"]);
   });
 
@@ -23,43 +27,65 @@ describe("lint", () => {
   });
 
   it("flags duplicate ids and start on sequence tracks", () => {
-    const d = lint(wrap('<Track id="t"><Clip id="c" src="asset:city" start={1} /><Clip id="d" src="asset:city" /><Clip id="d" src="asset:city" /></Track>'));
+    const d = lint(
+      wrap(
+        '<Track id="t"><Clip id="c" src="asset:city" start={1} /><Clip id="d" src="asset:city" /><Clip id="d" src="asset:city" /></Track>',
+      ),
+    );
     expect(d.map((x) => x.rule).sort()).toEqual(["no-start-on-sequence", "unique-ids"]);
   });
 
   it("flags impure helpers and ambiguous durations, warns on expression timing", () => {
-    const d = lint(wrap('<Track id="t"><Clip id="c" src="asset:city" out={4} duration={3} in={x} /></Track>', "const x = 1;\nfunction H() { const [s] = useState(0); return <Title id=\"h\">{s}</Title>; }\nimport { useState } from \"react\";"));
-    expect(d.map((x) => `${x.severity}:${x.rule}`).sort()).toEqual(["error:ambiguous-duration", "error:pure-helpers", "warning:expression-locked"]);
+    const d = lint(
+      wrap(
+        '<Track id="t"><Clip id="c" src="asset:city" out={4} duration={3} in={x} /></Track>',
+        'const x = 1;\nfunction H() { const [s] = useState(0); return <Title id="h">{s}</Title>; }\nimport { useState } from "react";',
+      ),
+    );
+    expect(d.map((x) => `${x.severity}:${x.rule}`).sort()).toEqual([
+      "error:ambiguous-duration",
+      "error:pure-helpers",
+      "warning:expression-locked",
+    ]);
   });
 
   it("lets free code in a Layer use any hook, HTML ids and libraries", () => {
     const extra = [
       'import { useEffect, useRef } from "react";',
       'import { useT } from "@cutcraft/kit";',
-      "function Scene() { const t = useT(); const ref = useRef(null); useEffect(() => {}, [t]); return <div id=\"stage\"><canvas ref={ref} id=\"stage-2\" /><Spark /></div>; }",
-      "function Spark() { const [x] = useState(0); return <div id=\"stage\">{x}</div>; }",
+      'function Scene() { const t = useT(); const ref = useRef(null); useEffect(() => {}, [t]); return <div id="stage"><canvas ref={ref} id="stage-2" /><Spark /></div>; }',
+      'function Spark() { const [x] = useState(0); return <div id="stage">{x}</div>; }',
       'import { useState } from "react";',
     ].join("\n");
     const d = lint(wrap('<Track id="t"><Layer id="l" duration={3}><Scene /></Layer></Track>', extra));
-    expect(d.filter((x) => ["pure-helpers", "unique-ids", "stray-html", "free-code-clock"].includes(x.rule))).toEqual([]);
+    expect(d.filter((x) => ["pure-helpers", "unique-ids", "stray-html", "free-code-clock"].includes(x.rule))).toEqual(
+      [],
+    );
   });
 
   it("warns about HTML straight in a track, where nothing draws it", () => {
     const d = lint(wrap('<Track id="t"><Clip id="c" src="asset:city" /><div>lost</div></Track>'));
-    expect(d.filter((x) => x.rule === "stray-html").map((x) => x.message)).toEqual([expect.stringContaining("put free code inside a <Layer>")]);
+    expect(d.filter((x) => x.rule === "stray-html").map((x) => x.message)).toEqual([
+      expect.stringContaining("put free code inside a <Layer>"),
+    ]);
   });
 
   it("warns about free code that runs off the video's clock", () => {
-    const extra = "function Bad() { setTimeout(() => {}, 10); const c = document.createElement(\"canvas\").getContext(\"2d\", { willReadFrequently: true }); return <video src=\"x.mp4\" />; }";
+    const extra =
+      'function Bad() { setTimeout(() => {}, 10); const c = document.createElement("canvas").getContext("2d", { willReadFrequently: true }); return <video src="x.mp4" />; }';
     const d = lint(wrap('<Track id="t"><Layer id="l" duration={3}><Bad /></Layer></Track>', extra));
-    expect(d.filter((x) => x.rule === "free-code-clock").map((x) => x.message.split(" ")[0])).toEqual(["setTimeout", "a", "<video>"]);
+    expect(d.filter((x) => x.rule === "free-code-clock").map((x) => x.message.split(" ")[0])).toEqual([
+      "setTimeout",
+      "a",
+      "<video>",
+    ]);
   });
 
   it("warns about three.js and Motion on their own clocks, and names the adapter", () => {
     const extra = [
       'import { Canvas } from "@react-three/fiber";',
       'import { motion, animate as play } from "motion/react";',
-      "function Bad() { play(\"#x\", { opacity: 1 }); return <div><Canvas /><motion.div animate={{ x: 10 }} /><motion.div style={{ x: 1 }} /></div>; }",
+      'function Bad() { play("#x", { opacity: 1 }); return <div><Canvas /><motion.div animate={{ x: 10 }} /><motion.div style={{ x: 1 }} /></div>; }',
     ].join("\n");
     const d = lint(wrap('<Track id="t"><Layer id="l" duration={3}><Bad /></Layer></Track>', extra));
     expect(d.filter((x) => x.rule === "free-code-clock").map((x) => x.message.split(";")[1]?.trim())).toEqual([
@@ -86,15 +112,22 @@ describe("lint", () => {
   });
 
   it("checks assets against the manifest and the file shape", () => {
-    const d = lint(wrap('<Track id="t"><Clip id="c" src="asset:missing" /></Track>', "export const schema = 1;"), { manifest });
+    const d = lint(wrap('<Track id="t"><Clip id="c" src="asset:missing" /></Track>', "export const schema = 1;"), {
+      manifest,
+    });
     expect(d.map((x) => x.rule).sort()).toEqual(["file-shape", "missing-asset"]);
   });
 
   it("warns on gaps on the first sequence track only", () => {
-    const gap = (track: string) => `<Track id="${track}"><Clip id="c-${track}" src="asset:city" duration={2} /><Gap id="g-${track}" duration={1} /></Track>`;
+    const gap = (track: string) =>
+      `<Track id="${track}"><Clip id="c-${track}" src="asset:city" duration={2} /><Gap id="g-${track}" duration={1} /></Track>`;
     const d = lint(wrap(`${gap("a")}${gap("b")}`).replace("Clip, Title", "Clip, Gap, Title"));
     expect(d.map((x) => `${x.rule}:${x.id}`)).toEqual(["sequence-gap:g-a"]);
-    const free = lint(wrap(`<Track id="z" layout="free">${""}</Track>${gap("hid").replace('id="hid"', 'id="hid" hidden')}${gap("a")}`).replace("Clip, Title", "Clip, Gap, Title"));
+    const free = lint(
+      wrap(
+        `<Track id="z" layout="free">${""}</Track>${gap("hid").replace('id="hid"', 'id="hid" hidden')}${gap("a")}`,
+      ).replace("Clip, Title", "Clip, Gap, Title"),
+    );
     expect(free.map((x) => `${x.rule}:${x.id}`)).toEqual(["sequence-gap:g-a"]);
   });
 
@@ -102,7 +135,12 @@ describe("lint", () => {
     const words = manifest.assets.interview!.transcript!.words;
     const w = words[1]!;
     const inside = (w.start + w.end) / 2;
-    const d = lint(wrap(`<Track id="t"><Clip id="c" src="asset:interview" in={${inside}} out={${w.end}} /><Clip id="d" src="asset:city" in={${inside}} /></Track>`), { manifest });
+    const d = lint(
+      wrap(
+        `<Track id="t"><Clip id="c" src="asset:interview" in={${inside}} out={${w.end}} /><Clip id="d" src="asset:city" in={${inside}} /></Track>`,
+      ),
+      { manifest },
+    );
     expect(d.map((x) => `${x.rule}:${x.id}.${x.prop}`)).toEqual(["cut-inside-word:c.in"]);
     expect(d[0]!.message).toContain(`word:${w.i}`);
     expect(lint(wrap(`<Track id="t"><Clip id="c" src="asset:interview" in={${inside}} /></Track>`))).toEqual([]);
@@ -110,46 +148,93 @@ describe("lint", () => {
 
   it("warns on a cut a few frames off a source shot change, on the side that flashes the other shot", () => {
     // interview shots: 0–9.5, 9.5–21, 21–26, 26–60
-    const near = (body: string) => lint(wrap(body), { manifest, rules: ["cut-near-shot"] }).map((d) => `${d.id}.${d.prop}`);
-    expect(near('<Track id="t"><Clip id="c" src="asset:interview" in={9.4} out={21.1} /></Track>')).toEqual(["c.in", "c.out"]);
-    const d = lint(wrap('<Track id="t"><Clip id="c" src="asset:interview" in={9.4} /></Track>'), { manifest, rules: ["cut-near-shot"] });
+    const near = (body: string) =>
+      lint(wrap(body), { manifest, rules: ["cut-near-shot"] }).map((d) => `${d.id}.${d.prop}`);
+    expect(near('<Track id="t"><Clip id="c" src="asset:interview" in={9.4} out={21.1} /></Track>')).toEqual([
+      "c.in",
+      "c.out",
+    ]);
+    const d = lint(wrap('<Track id="t"><Clip id="c" src="asset:interview" in={9.4} /></Track>'), {
+      manifest,
+      rules: ["cut-near-shot"],
+    });
     expect(d[0]!.message).toContain('use in="shot:1"');
     // The safe side of the edge, exactly on it, or by reference: nothing to say.
-    expect(near('<Track id="t"><Clip id="c" src="asset:interview" in={9.6} out={20.9} /><Clip id="d" src="asset:interview" in={9.5} out={21} /><Clip id="e" src="asset:interview" in="shot:1" out="shot:1.end" /></Track>')).toEqual([]);
+    expect(
+      near(
+        '<Track id="t"><Clip id="c" src="asset:interview" in={9.6} out={20.9} /><Clip id="d" src="asset:interview" in={9.5} out={21} /><Clip id="e" src="asset:interview" in="shot:1" out="shot:1.end" /></Track>',
+      ),
+    ).toEqual([]);
     expect(near('<Track id="t"><Clip id="c" src="asset:city" in={1} /></Track>')).toEqual([]);
   });
 
   it("warns on one crop over a range the camera cuts inside", () => {
-    const inside = (body: string) => lint(wrap(body), { manifest, rules: ["shot-change-inside-crop"] }).map((d) => `${d.id}.${d.prop}: ${d.message}`);
-    const d = inside('<Track id="t"><Clip id="c" src="asset:interview" in={5} out={15} transform={{ crop: { x: 0, y: 0, width: 0.5, height: 1 } }} /></Track>');
+    const inside = (body: string) =>
+      lint(wrap(body), { manifest, rules: ["shot-change-inside-crop"] }).map((d) => `${d.id}.${d.prop}: ${d.message}`);
+    const d = inside(
+      '<Track id="t"><Clip id="c" src="asset:interview" in={5} out={15} transform={{ crop: { x: 0, y: 0, width: 0.5, height: 1 } }} /></Track>',
+    );
     expect(d).toHaveLength(1);
     expect(d[0]).toContain("c.transform: ");
     expect(d[0]).toContain("shot:1 (9.5)");
-    expect(inside('<Track id="t"><Clip id="c" src="asset:interview" in={5} out={15} /><Clip id="d" src="asset:interview" in="shot:1" out="shot:1.end" transform={{ crop: { x: 0, y: 0, width: 0.5, height: 1 } }} /></Track>')).toEqual([]);
+    expect(
+      inside(
+        '<Track id="t"><Clip id="c" src="asset:interview" in={5} out={15} /><Clip id="d" src="asset:interview" in="shot:1" out="shot:1.end" transform={{ crop: { x: 0, y: 0, width: 0.5, height: 1 } }} /></Track>',
+      ),
+    ).toEqual([]);
   });
 
   it("warns when one track plays the same stretch of an asset twice", () => {
     const repeated = (body: string) => lint(wrap(body), { manifest, rules: ["repeated-source"] }).map((d) => d.id);
-    expect(repeated('<Track id="t"><Clip id="a" src="asset:interview" in={0} out={9.5} /><Clip id="b" src="asset:interview" in={21} out={26} /><Clip id="c" src="asset:interview" in="shot:1" out="shot:1.end" /><Clip id="d" src="asset:interview" in={22} out={30} /></Track>')).toEqual(["d"]);
+    expect(
+      repeated(
+        '<Track id="t"><Clip id="a" src="asset:interview" in={0} out={9.5} /><Clip id="b" src="asset:interview" in={21} out={26} /><Clip id="c" src="asset:interview" in="shot:1" out="shot:1.end" /><Clip id="d" src="asset:interview" in={22} out={30} /></Track>',
+      ),
+    ).toEqual(["d"]);
     // Adjacent ranges, another asset, or another track: not a repeat.
-    expect(repeated('<Track id="t"><Clip id="a" src="asset:interview" in={0} out={9.5} /><Clip id="b" src="asset:interview" in={9.5} out={21} /><Clip id="c" src="asset:city" in={0} out={5} /></Track><Track id="u" layout="free"><Clip id="e" src="asset:interview" start={0} in={0} out={9.5} /></Track>')).toEqual([]);
+    expect(
+      repeated(
+        '<Track id="t"><Clip id="a" src="asset:interview" in={0} out={9.5} /><Clip id="b" src="asset:interview" in={9.5} out={21} /><Clip id="c" src="asset:city" in={0} out={5} /></Track><Track id="u" layout="free"><Clip id="e" src="asset:interview" start={0} in={0} out={9.5} /></Track>',
+      ),
+    ).toEqual([]);
   });
 
   describe("not-rendered", () => {
-    const notRendered = (body: string) => lint(wrap(body)).filter((d) => d.rule === "not-rendered").map((d) => `${d.severity}:${d.id}.${d.prop ?? ""}: ${d.message}`);
+    const notRendered = (body: string) =>
+      lint(wrap(body))
+        .filter((d) => d.rule === "not-rendered")
+        .map((d) => `${d.severity}:${d.id}.${d.prop ?? ""}: ${d.message}`);
 
     it("warns on enum values that draw as something else", () => {
-      expect(notRendered('<Track id="t"><Clip id="a" src="asset:city" /><Transition id="x" type="glitch" /><Clip id="b" src="asset:city" /></Track>'))
-        .toEqual(['warning:x.type: "x" <Transition> type "glitch" draws as a crossfade']);
-      expect(notRendered('<Track id="t"><Clip id="c" src="asset:city"><Effect id="v" type="glow" /><AudioEffect id="r" type="reverb" /></Clip></Track>'))
-        .toEqual(['warning:v.type: "v" <Effect> type "glow" is ignored: the picture renders without it', 'warning:r.type: "r" <AudioEffect> type "reverb" is ignored: the audio plays without it']);
-      expect(notRendered('<Track id="t"><Title id="h" animation={{ preset: "bounce" }}>Hi</Title></Track>')).toEqual(['warning:h.animation: "h" <Title> animation.preset "bounce" shows as a fade']);
+      expect(
+        notRendered(
+          '<Track id="t"><Clip id="a" src="asset:city" /><Transition id="x" type="glitch" /><Clip id="b" src="asset:city" /></Track>',
+        ),
+      ).toEqual(['warning:x.type: "x" <Transition> type "glitch" draws as a crossfade']);
+      expect(
+        notRendered(
+          '<Track id="t"><Clip id="c" src="asset:city"><Effect id="v" type="glow" /><AudioEffect id="r" type="reverb" /></Clip></Track>',
+        ),
+      ).toEqual([
+        'warning:v.type: "v" <Effect> type "glow" is ignored: the picture renders without it',
+        'warning:r.type: "r" <AudioEffect> type "reverb" is ignored: the audio plays without it',
+      ]);
+      expect(notRendered('<Track id="t"><Title id="h" animation={{ preset: "bounce" }}>Hi</Title></Track>')).toEqual([
+        'warning:h.animation: "h" <Title> animation.preset "bounce" shows as a fade',
+      ]);
     });
 
     it("warns on accepted props that are ignored, but not on values that ask for nothing", () => {
-      expect(notRendered('<Track id="t"><Clip id="c" src="asset:city" reverse emphasis="pulse" chromaKey={{ color: "#0f0" }} transform={{ rotate3d: { x: 0, y: 1, z: 0 } }} /></Track>').map((d) => d.split(":")[1]))
-        .toEqual(["c.emphasis", "c.chromaKey", "c.transform"]);
-      expect(notRendered('<Track id="t"><Clip id="c" src="asset:city" reverse={false} emphasis="none" audioTrack={0} /><Adjustment id="a" affects="all" duration={1} /></Track>')).toEqual([]);
+      expect(
+        notRendered(
+          '<Track id="t"><Clip id="c" src="asset:city" reverse emphasis="pulse" chromaKey={{ color: "#0f0" }} transform={{ rotate3d: { x: 0, y: 1, z: 0 } }} /></Track>',
+        ).map((d) => d.split(":")[1]),
+      ).toEqual(["c.emphasis", "c.chromaKey", "c.transform"]);
+      expect(
+        notRendered(
+          '<Track id="t"><Clip id="c" src="asset:city" reverse={false} emphasis="none" audioTrack={0} /><Adjustment id="a" affects="all" duration={1} /></Track>',
+        ),
+      ).toEqual([]);
       expect(notRendered('<Track id="t"><Adjustment id="a" affects={["c"]} duration={1} /></Track>')).toHaveLength(1);
     });
 
@@ -165,27 +250,44 @@ describe("lint", () => {
     });
 
     it("warns on a diagonal or soft wipe, which draws as a hard wipe to the left", () => {
-      expect(notRendered('<Track id="t"><Clip id="a" src="asset:city" /><Transition id="x" type="wipe" params={{ direction: "diagonal", softness: 0.3 }} /><Clip id="b" src="asset:city" /></Track>').map((d) => d.split(":")[1]))
-        .toEqual(["x.params", "x.params"]);
+      expect(
+        notRendered(
+          '<Track id="t"><Clip id="a" src="asset:city" /><Transition id="x" type="wipe" params={{ direction: "diagonal", softness: 0.3 }} /><Clip id="b" src="asset:city" /></Track>',
+        ).map((d) => d.split(":")[1]),
+      ).toEqual(["x.params", "x.params"]);
     });
 
     it("warns on a levels gamma, which has no filter form", () => {
-      expect(notRendered('<Track id="t"><Clip id="c" src="asset:city"><Effect id="lv" type="levels" params={{ black: 0.1, gamma: 1.2 }} /></Clip></Track>'))
-        .toEqual(['warning:lv.params: "lv" <Effect> params.gamma is ignored: levels render their black and white points only']);
+      expect(
+        notRendered(
+          '<Track id="t"><Clip id="c" src="asset:city"><Effect id="lv" type="levels" params={{ black: 0.1, gamma: 1.2 }} /></Clip></Track>',
+        ),
+      ).toEqual([
+        'warning:lv.params: "lv" <Effect> params.gamma is ignored: levels render their black and white points only',
+      ]);
     });
 
     it("warns on path keyframes and on keyframe handles and roving, which do not render", () => {
-      expect(notRendered('<Track id="t"><Clip id="c" src="asset:city"><Keyframe id="p" property="path" at={0} value="M0 0" /><Keyframe id="h" property="transform.opacity" at={0} value={1} handles={{ in: { x: 0, y: 0 }, out: { x: 1, y: 1 } }} roving /><Keyframe id="f" property="effect.e.radius" at={0} value={2} /></Clip></Track>').map((d) => d.split(":")[1]))
-        .toEqual(["p.property", "h.handles", "h.roving"]);
+      expect(
+        notRendered(
+          '<Track id="t"><Clip id="c" src="asset:city"><Keyframe id="p" property="path" at={0} value="M0 0" /><Keyframe id="h" property="transform.opacity" at={0} value={1} handles={{ in: { x: 0, y: 0 }, out: { x: 1, y: 1 } }} roving /><Keyframe id="f" property="effect.e.radius" at={0} value={2} /></Clip></Track>',
+        ).map((d) => d.split(":")[1]),
+      ).toEqual(["p.property", "h.handles", "h.roving"]);
     });
 
     it("warns on an overlay's blend, which mixes with the footage in the export only", () => {
-      expect(notRendered('<Track id="t"><Clip id="c" src="asset:city" blend="screen" /><Title id="h" blend="screen">Hi</Title><Title id="n" blend="normal">Hi</Title></Track>'))
-        .toEqual(['warning:h.blend: "h" <Title> blend "screen" blends with the footage in the export only: the preview draws it unblended over the footage']);
+      expect(
+        notRendered(
+          '<Track id="t"><Clip id="c" src="asset:city" blend="screen" /><Title id="h" blend="screen">Hi</Title><Title id="n" blend="normal">Hi</Title></Track>',
+        ),
+      ).toEqual([
+        'warning:h.blend: "h" <Title> blend "screen" blends with the footage in the export only: the preview draws it unblended over the footage',
+      ]);
     });
 
     it("says nothing about a file that only uses what renders", () => {
-      expect(notRendered(`<Track id="t">
+      expect(
+        notRendered(`<Track id="t">
         <Clip id="a" src="asset:city" speed={2}><Effect id="e" type="blur" /><Effect id="tp" type="temperature" params={{ amount: 20 }} /><Effect id="tn" type="tint" params={{ amount: -10 }} /><Effect id="lv" type="levels" params={{ black: 0.05, white: 0.95 }} /><Effect id="vg" type="vignette" params={{ amount: 40 }} /><Effect id="gr" type="grain" /><ColorGrade id="g" temperature={20} /><Mask id="m" shape={{ rect: { x: 0, y: 0, width: 1, height: 1 } }} /><Keyframe id="k" property="transform.position.x" at={0} value={0} /></Clip>
         <Transition id="x" type="crossfade" />
         <Clip id="b" src="asset:city" />
@@ -196,7 +298,8 @@ describe("lint", () => {
         <Transition id="d" type="dipToWhite" params={{ holdDuration: 0.2 }} />
         <Clip id="b4" src="asset:city" />
         <Title id="h" animation={{ preset: "fade" }}>Hi</Title>
-      </Track>`)).toEqual([]);
+      </Track>`),
+      ).toEqual([]);
     });
   });
 
@@ -220,11 +323,21 @@ describe("lint", () => {
     expect([...l1.interior!.props.keys()]).toEqual(["from", "to"]);
     expect(l1.interior?.props.get("to")?.literal).toBe(1200);
     expect(l1.lockedProps).toEqual([]);
-    const bound = buildSourceIndex(wrap('<Track id="t"><Layer id="l" duration={2}><Clock total={limit} label="go" step={1 + 1} /></Layer></Track>', 'export const schema = 1;\nexport const defaults = { limit: 90 };\nfunction Clock() { return null; }').replace("export default function V() {", "export default function V({ limit }: { limit: number }) {")).elements.get("l")!;
+    const bound = buildSourceIndex(
+      wrap(
+        '<Track id="t"><Layer id="l" duration={2}><Clock total={limit} label="go" step={1 + 1} /></Layer></Track>',
+        "export const schema = 1;\nexport const defaults = { limit: 90 };\nfunction Clock() { return null; }",
+      ).replace("export default function V() {", "export default function V({ limit }: { limit: number }) {"),
+    ).elements.get("l")!;
     expect(bound.interior?.boundProps).toEqual({ total: "limit" });
     expect(bound.boundProps).toEqual({ "interior.total": "limit" });
     expect(bound.lockedProps).toEqual(["interior.step"]);
-    const none = buildSourceIndex(wrap('<Track id="t"><Layer id="l" duration={2}><div><Clock /></div></Layer><Layer id="m" duration={2}><Clock /><Clock /></Layer></Track>', "function Clock() { return null; }"));
+    const none = buildSourceIndex(
+      wrap(
+        '<Track id="t"><Layer id="l" duration={2}><div><Clock /></div></Layer><Layer id="m" duration={2}><Clock /><Clock /></Layer></Track>',
+        "function Clock() { return null; }",
+      ),
+    );
     expect(none.elements.get("l")?.interior).toBeUndefined();
     expect(none.elements.get("m")?.interior).toBeUndefined();
   });

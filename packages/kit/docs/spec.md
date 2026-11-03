@@ -217,13 +217,13 @@ Behaviours we add beyond OpenReel: magnetic sequence tracks (ripple on move/dele
 
 ### D.1 Workspace and tooling
 
-`/home/user/cutcut`: `pnpm-workspace.yaml` (`packages/*`), root `package.json` (scripts fan out with `pnpm -r`), `tsconfig.base.json`. Package: React 19, Zod, `@babel/parser`, `@babel/traverse`, `@babel/types`, `recast`; dev: vitest, typescript, eslint + typescript-eslint. `tsconfig`: strict, `jsx: react-jsx`, `moduleResolution: bundler`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`. ESLint flat config bans DOM and `node:` imports under `src/`. Vitest runs the same tests in `node` and `jsdom` projects to prove resolver parity.
+`/home/user/cutcut`: `pnpm-workspace.yaml` (`packages/*`), root `package.json` (scripts fan out with `pnpm -r`), `tsconfig.base.json`. Package: React 19, Zod, `@babel/parser`, `@babel/traverse`, `@babel/types`, `recast`; dev: vitest, typescript; Biome (repository root) formats and lints. `tsconfig`: strict, `jsx: react-jsx`, `moduleResolution: bundler`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`. `biome.jsonc` bans DOM globals and `node:` imports under `src/`. Vitest runs the same tests in `node` and `jsdom` projects to prove resolver parity.
 
 ### D.2 Directory tree
 
 ```
 packages/kit/
-  package.json  tsconfig.json  eslint.config.js  vitest.config.ts
+  package.json  tsconfig.json  vitest.config.ts
   src/
     index.ts
     jsx/

@@ -7,7 +7,8 @@ import type { ComponentType, ReactNode } from "react";
 export type LayerEngine = ComponentType<Readonly<Record<string, unknown>> & { readonly children?: ReactNode }>;
 
 /** On `globalThis`, like the layer clock: a file loaded with its own copy of the kit still finds the host's engines. */
-const engines = ((globalThis as Record<symbol, Map<string, LayerEngine>>)[Symbol.for("@cutcraft/kit/layer-engines")] ??= new Map());
+const engines = ((globalThis as Record<symbol, Map<string, LayerEngine>>)[Symbol.for("@cutcraft/kit/layer-engines")] ??=
+  new Map());
 
 /** Install (or with `null`, remove) the engine that draws `<Layer engine={name}>` tags such as `<Three>`. */
 export function installLayerEngine(name: string, engine: LayerEngine | null): void {

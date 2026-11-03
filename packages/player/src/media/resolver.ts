@@ -12,5 +12,7 @@ export function fromMap(map: Readonly<Record<string, Blob | string>>): MediaReso
 }
 
 export function toResolver(media: MediaResolver | Readonly<Record<string, Blob | string>>): MediaResolver {
-  return typeof (media as MediaResolver).resolve === "function" ? (media as MediaResolver) : fromMap(media as Record<string, Blob | string>);
+  return typeof (media as MediaResolver).resolve === "function"
+    ? (media as MediaResolver)
+    : fromMap(media as Record<string, Blob | string>);
 }

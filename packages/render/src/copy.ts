@@ -1,6 +1,22 @@
+import {
+  ALL_FORMATS,
+  type EncodedPacket,
+  EncodedPacketSink,
+  type EncodedVideoPacketSource,
+  FilePathSource,
+  Input,
+  type InputVideoTrack,
+} from "mediabunny";
+
 import type { ResolvedState } from "@cutcraft/kit";
-import { PICK_EPS, buildFramePlan, coversCanvas, makeNestedResolver, type MediaResolver } from "@cutcraft/player/engine";
-import { ALL_FORMATS, EncodedPacketSink, FilePathSource, Input, type EncodedPacket, type EncodedVideoPacketSource, type InputVideoTrack } from "mediabunny";
+import {
+  buildFramePlan,
+  coversCanvas,
+  type MediaResolver,
+  makeNestedResolver,
+  PICK_EPS,
+} from "@cutcraft/player/engine";
+
 import type { OverlayPlane } from "./overlays";
 import { compatibleConfig } from "./parallel";
 import type { VideoCodec } from "./segment";
@@ -24,7 +40,11 @@ export interface CopyRun {
   readonly sourceFirst: number;
 }
 
-export interface RenderRun { readonly kind: "render"; readonly first: number; readonly last: number }
+export interface RenderRun {
+  readonly kind: "render";
+  readonly first: number;
+  readonly last: number;
+}
 
 export type Run = CopyRun | RenderRun;
 
@@ -37,7 +57,12 @@ export interface CopyPlan {
 /** Codecs whose packets are one picture each and carry what they need in-stream, so pieces from different encoders join. */
 const COPYABLE: ReadonlySet<VideoCodec> = new Set<VideoCodec>(["vp8", "vp9"]);
 
-interface Stretch { asset: string; first: number; last: number; sourceFirst: number }
+interface Stretch {
+  asset: string;
+  first: number;
+  last: number;
+  sourceFirst: number;
+}
 
 export async function planCopy(options: {
   readonly state: ResolvedState;
@@ -63,7 +88,8 @@ export async function planCopy(options: {
   for (let n = first; n < last; n++) {
     const t = n / fps;
     const shown = options.overlays.hasOverlays(t) ? null : plainFrame(state, t, width, height, fps, resolveNested);
-    if (shown && cur && shown.asset === cur.asset && shown.frame === cur.sourceFirst + (n - cur.first)) cur.last = n + 1;
+    if (shown && cur && shown.asset === cur.asset && shown.frame === cur.sourceFirst + (n - cur.first))
+      cur.last = n + 1;
     else {
       if (cur) stretches.push(cur);
       cur = shown ? { asset: shown.asset, first: n, last: n + 1, sourceFirst: shown.frame } : null;
@@ -92,23 +118,57 @@ export async function planCopy(options: {
 }
 
 /** The one source frame an output frame shows if it shows nothing else, as the decoder would pick it. */
-function plainFrame(state: ResolvedState, t: number, width: number, height: number, fps: number, resolveNested: ReturnType<typeof makeNestedResolver>): { asset: string; frame: number } | null {
+function plainFrame(
+  state: ResolvedState,
+  t: number,
+  width: number,
+  height: number,
+  fps: number,
+  resolveNested: ReturnType<typeof makeNestedResolver>,
+): { asset: string; frame: number } | null {
   const plan = buildFramePlan(state, t, resolveNested);
   const op = plan.ops[0];
-  if (plan.ops.length !== 1 || !op || op.kind !== "video" || !op.asset || op.sourceTime === undefined || !coversCanvas(op, width, height)) return null;
+  if (
+    plan.ops.length !== 1 ||
+    !op ||
+    op.kind !== "video" ||
+    !op.asset ||
+    op.sourceTime === undefined ||
+    !coversCanvas(op, width, height)
+  )
+    return null;
   const asset = state.manifest.assets[op.asset];
   if (!asset || asset.fps === undefined || Math.abs(asset.fps - fps) > 1e-6 || asset.kind !== "video") return null;
   return { asset: op.asset, frame: Math.floor(op.sourceTime * fps + PICK_EPS * fps + 1e-9) };
 }
 
-async function wholeGroups(s: Stretch, media: MediaResolver, codec: VideoCodec, fps: number, width: number, height: number, min: number): Promise<CopyRun | null> {
-  let handle;
-  try { handle = await media.resolve(s.asset); } catch { return null; }
+async function wholeGroups(
+  s: Stretch,
+  media: MediaResolver,
+  codec: VideoCodec,
+  fps: number,
+  width: number,
+  height: number,
+  min: number,
+): Promise<CopyRun | null> {
+  let handle: Awaited<ReturnType<MediaResolver["resolve"]>>;
+  try {
+    handle = await media.resolve(s.asset);
+  } catch {
+    return null;
+  }
   if (handle.kind !== "path") return null;
   const input = new Input({ source: new FilePathSource(handle.path), formats: ALL_FORMATS });
   try {
     const track = await input.getPrimaryVideoTrack();
-    if (!track || track.codec !== codec || (await track.getCodedWidth()) !== width || (await track.getCodedHeight()) !== height || (await track.getRotation()) !== 0) return null;
+    if (
+      !track ||
+      track.codec !== codec ||
+      (await track.getCodedWidth()) !== width ||
+      (await track.getCodedHeight()) !== height ||
+      (await track.getRotation()) !== 0
+    )
+      return null;
     const sink = new EncodedPacketSink(track);
     const frameOf = (p: EncodedPacket): number => Math.floor(p.timestamp * fps + PICK_EPS * fps + 1e-9);
     const sourceLast = s.sourceFirst + (s.last - s.first);
@@ -117,7 +177,8 @@ async function wholeGroups(s: Stretch, media: MediaResolver, codec: VideoCodec, 
     if (start && frameOf(start) < s.sourceFirst) start = await sink.getNextKeyPacket(start, { metadataOnly: true });
     const stop = await sink.getKeyPacket(sourceLast / fps + PICK_EPS, { metadataOnly: true });
     if (!start || !stop) return null;
-    const from = frameOf(start), to = frameOf(stop);
+    const from = frameOf(start),
+      to = frameOf(stop);
     if (to - from < min || from < s.sourceFirst || to > sourceLast) return null;
     // One packet per picture, in order: anything else (a hidden frame of its own) and the pieces would not line up.
     let expected = from;
@@ -125,7 +186,14 @@ async function wholeGroups(s: Stretch, media: MediaResolver, codec: VideoCodec, 
       if (frameOf(packet) !== expected++) return null;
     }
     if (expected !== to) return null;
-    return { kind: "copy", first: s.first + (from - s.sourceFirst), last: s.first + (to - s.sourceFirst), asset: s.asset, path: handle.path, sourceFirst: from };
+    return {
+      kind: "copy",
+      first: s.first + (from - s.sourceFirst),
+      last: s.first + (to - s.sourceFirst),
+      asset: s.asset,
+      path: handle.path,
+      sourceFirst: from,
+    };
   } finally {
     input.dispose();
   }
@@ -134,7 +202,12 @@ async function wholeGroups(s: Stretch, media: MediaResolver, codec: VideoCodec, 
 /** Writes the packets of a copy run into the output's video track, at the frames they are shown. */
 export async function feedCopy(
   run: CopyRun,
-  into: { source: EncodedVideoPacketSource; fps: number; /** The composition frame the output starts at. */ originFrame: number; config: { current: VideoDecoderConfig | null } },
+  into: {
+    source: EncodedVideoPacketSource;
+    fps: number /** The composition frame the output starts at. */;
+    originFrame: number;
+    config: { current: VideoDecoderConfig | null };
+  },
   before: (timestamp: number) => Promise<void>,
 ): Promise<void> {
   const input = new Input({ source: new FilePathSource(run.path), formats: ALL_FORMATS });
@@ -149,11 +222,17 @@ export async function feedCopy(
     const stop = await sink.getKeyPacket(run.sourceFirst / fps + (run.last - run.first) / fps + PICK_EPS);
     if (!start || !stop) throw new Error(`${run.asset} lost its keyframes between planning and copying`);
     const first = into.config.current;
-    if (first && !compatibleConfig(first, config)) throw new Error(`${run.asset} is encoded differently from the rest of the output (${config.codec} against ${first.codec}); it cannot be copied`);
+    if (first && !compatibleConfig(first, config))
+      throw new Error(
+        `${run.asset} is encoded differently from the rest of the output (${config.codec} against ${first.codec}); it cannot be copied`,
+      );
     for await (const packet of sink.packets(start, stop)) {
       const timestamp = (frameOf(packet) - run.sourceFirst + run.first - into.originFrame) / fps;
       await before(timestamp);
-      await into.source.add(packet.clone({ timestamp, duration: 1 / fps }), first ? undefined : { decoderConfig: config });
+      await into.source.add(
+        packet.clone({ timestamp, duration: 1 / fps }),
+        first ? undefined : { decoderConfig: config },
+      );
     }
     into.config.current ??= config;
   } finally {

@@ -1,4 +1,5 @@
 import { lookupAsset, type Placement, type ResolvedState } from "@cutcraft/kit";
+
 import { MOUNT_AHEAD_S, UNMOUNT_BEHIND_S } from "../constants";
 import { trackItems } from "../model/visible";
 import type { AssetSources } from "./asset-sources";
@@ -15,7 +16,9 @@ export class DecoderPool {
 
   constructor(readonly sources: AssetSources) {}
 
-  setRate(rate: number): void { this.rate = rate; }
+  setRate(rate: number): void {
+    this.rate = rate;
+  }
 
   /** Mount decoders for placements within the window around `t`; unmount the rest. */
   sync(state: ResolvedState, t: number): void {
@@ -27,7 +30,10 @@ export class DecoderPool {
         const asset = lookupAsset(state.manifest, p.source.asset);
         if (!asset) continue;
         if (t < p.start - MOUNT_AHEAD_S || t >= p.end + UNMOUNT_BEHIND_S) continue;
-        want.set(p.id, { p, children: p.children.map((id) => state.items.get(id)).filter((c): c is Placement => c !== undefined) });
+        want.set(p.id, {
+          p,
+          children: p.children.map((id) => state.items.get(id)).filter((c): c is Placement => c !== undefined),
+        });
       }
     }
     for (const [id, d] of this.decoders) {
@@ -49,11 +55,15 @@ export class DecoderPool {
     return this.decoders.get(id);
   }
 
-  get mounted(): string[] { return [...this.decoders.keys()]; }
+  get mounted(): string[] {
+    return [...this.decoders.keys()];
+  }
 
   /** After a seek: every decoder jumps to `t`. */
   seekAll(t: number): Promise<void> {
-    return Promise.all([...this.decoders.values()].map((d) => d.prime(Math.max(t, d.placement.start)))).then(() => undefined);
+    return Promise.all([...this.decoders.values()].map((d) => d.prime(Math.max(t, d.placement.start)))).then(
+      () => undefined,
+    );
   }
 
   /** Resolves when every decoder has its first frame. */

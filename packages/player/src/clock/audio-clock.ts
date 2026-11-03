@@ -12,7 +12,9 @@ export class AudioContextClock implements Clock {
 
   constructor(private readonly ctx: BaseAudioContext) {}
 
-  get running(): boolean { return this.ctx.state === "running"; }
+  get running(): boolean {
+    return this.ctx.state === "running";
+  }
 
   now(): number {
     const running = this.running;

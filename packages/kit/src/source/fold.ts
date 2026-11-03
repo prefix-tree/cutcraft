@@ -1,18 +1,20 @@
+import traverseModule from "@babel/traverse";
+import * as t from "@babel/types";
+
 import { nodeSpecOf } from "../actions/types";
+import { ELEMENTS } from "../jsx/elements";
 import type { Json, NetPatch, PatchLog } from "../patches/types";
 import type { ResolvedState } from "../resolve/resolve";
 import { INTERIOR_PREFIX } from "../resolve/tree";
 import { bake } from "./bake";
 import { applyEdits, lineRange, type SourceEdit } from "./edits";
-import type { Range } from "./parse";
 import { buildSourceIndex, type ElementSite, type SourceIndex } from "./index";
-import { printElement, printLiteral, printProp } from "./print";
-import traverseModule from "@babel/traverse";
-import * as t from "@babel/types";
-import { ELEMENTS } from "../jsx/elements";
+import type { Range } from "./parse";
 import { parseSource } from "./parse";
+import { printElement, printLiteral, printProp } from "./print";
 
-const traverse = ((traverseModule as unknown as { default?: typeof traverseModule }).default ?? traverseModule) as typeof traverseModule;
+const traverse = ((traverseModule as unknown as { default?: typeof traverseModule }).default ??
+  traverseModule) as typeof traverseModule;
 
 /** Structural edits can introduce vocabulary tags the original file never imported. */
 function elementImports(text: string): SourceEdit[] {
@@ -21,15 +23,23 @@ function elementImports(text: string): SourceEdit[] {
   traverse(ast, {
     JSXOpeningElement(path) {
       const name = path.node.name;
-      if (t.isJSXIdentifier(name) && Object.hasOwn(ELEMENTS, name.name) && !path.scope.hasBinding(name.name)) missing.add(name.name);
+      if (t.isJSXIdentifier(name) && Object.hasOwn(ELEMENTS, name.name) && !path.scope.hasBinding(name.name))
+        missing.add(name.name);
     },
   });
   if (!missing.size) return [];
   const imports = ast.program.body.filter(t.isImportDeclaration);
   const kitImport = imports.find((node) => node.source.value === "@cutcraft/kit" || node.source.value === "@cut/kit");
-  const pos = (imports.at(-1)?.end ?? ast.program.directives.at(-1)?.end) ?? 0;
+  const pos = imports.at(-1)?.end ?? ast.program.directives.at(-1)?.end ?? 0;
   const moduleName = kitImport?.source.value ?? "@cutcraft/kit";
-  return [{ kind: "insert", id: "composition", range: [pos, pos], text: `\nimport { ${[...missing].sort().join(", ")} } from ${JSON.stringify(moduleName)};\n` }];
+  return [
+    {
+      kind: "insert",
+      id: "composition",
+      range: [pos, pos],
+      text: `\nimport { ${[...missing].sort().join(", ")} } from ${JSON.stringify(moduleName)};\n`,
+    },
+  ];
 }
 
 export interface FoldResult {
@@ -45,7 +55,11 @@ export interface FoldResult {
  * Targets without a literal site are reported, not folded; `foldToSource`
  * bakes them first and folds again.
  */
-export function fold(log: PatchLog, index: SourceIndex, state: ResolvedState): { edits: SourceEdit[]; needsBake: string[]; skipped: FoldResult["skipped"] } {
+export function fold(
+  log: PatchLog,
+  index: SourceIndex,
+  state: ResolvedState,
+): { edits: SourceEdit[]; needsBake: string[]; skipped: FoldResult["skipped"] } {
   const edits: SourceEdit[] = [];
   const needsBake: string[] = [];
   const skipped: { id: string; reason: string }[] = [];
@@ -59,7 +73,12 @@ export function fold(log: PatchLog, index: SourceIndex, state: ResolvedState): {
    * group keeps the order the overlay produces: an element placed after that
    * anchor goes first, one placed after a queued sibling goes right behind it.
    */
-  const place = (id: string, at: { parent: string; after: string | null }, print: (indent: string) => string, from: Range | null): boolean => {
+  const place = (
+    id: string,
+    at: { parent: string; after: string | null },
+    print: (indent: string) => string,
+    from: Range | null,
+  ): boolean => {
     let anchor = at.after;
     while (anchor !== null) {
       const sibling = log.net.get(anchor);
@@ -70,7 +89,10 @@ export function fold(log: PatchLog, index: SourceIndex, state: ResolvedState): {
     if (!point) return false;
     const key = `${at.parent}\u0000${anchor ?? ""}`;
     let group = groups.get(key);
-    if (!group) { group = { point, ids: [], texts: new Map(), moved: new Map() }; groups.set(key, group); }
+    if (!group) {
+      group = { point, ids: [], texts: new Map(), moved: new Map() };
+      groups.set(key, group);
+    }
     group.texts.set(id, print(point.indent));
     if (from) group.moved.set(id, from);
     const behind = at.after === anchor ? -1 : group.ids.indexOf(at.after as string);
@@ -87,11 +109,16 @@ export function fold(log: PatchLog, index: SourceIndex, state: ResolvedState): {
   };
 
   for (const [id, net] of log.net) {
-    if (net.bake) { needsBake.push(id); continue; }
+    if (net.bake) {
+      needsBake.push(id);
+      continue;
+    }
     if (id === "composition" && net.props.has("$defaults")) {
       const value = net.props.get("$defaults");
-      if (value === undefined) { /* the panel change was undone; nothing to write */ }
-      else if (index.defaults) edits.push({ kind: "defaults", id, range: index.defaults.range, text: printLiteral(value) });
+      if (value === undefined) {
+        /* the panel change was undone; nothing to write */
+      } else if (index.defaults)
+        edits.push({ kind: "defaults", id, range: index.defaults.range, text: printLiteral(value) });
       else skipped.push({ id, reason: "no `export const defaults` literal to rewrite" });
       net.props.delete("$defaults");
       if (net.props.size === 0 && net.presence === "present" && !net.place && net.text === undefined) continue;
@@ -99,21 +126,31 @@ export function fold(log: PatchLog, index: SourceIndex, state: ResolvedState): {
     switch (net.presence) {
       case "removed": {
         const site = index.elements.get(id);
-        if (!site) { needsBake.push(id); break; }
+        if (!site) {
+          needsBake.push(id);
+          break;
+        }
         edits.push({ kind: "remove", id, range: lineRange(text, site.range), text: "" });
         break;
       }
       case "inserted": {
-        if (!net.node || !net.place) { skipped.push({ id, reason: "insert without a node" }); break; }
+        if (!net.node || !net.place) {
+          skipped.push({ id, reason: "insert without a node" });
+          break;
+        }
         if (insertedAncestor(id)) break;
         // The node as it stands now, with the props and children later patches gave it.
         const node = state.tree.byId.get(id) ?? net.node;
-        if (!place(id, net.place, (indent) => printElement(nodeSpecOf(node), indent), null)) needsBake.push(net.place.parent);
+        if (!place(id, net.place, (indent) => printElement(nodeSpecOf(node), indent), null))
+          needsBake.push(net.place.parent);
         break;
       }
       case "present": {
         const site = index.elements.get(id);
-        if (!site) { needsBake.push(id); break; }
+        if (!site) {
+          needsBake.push(id);
+          break;
+        }
         if (insertedAncestor(id)) {
           // Moved into a subtree this net inserts; the subtree's print carries it, the original goes.
           edits.push({ kind: "remove", id, range: lineRange(text, site.range), text: "" });
@@ -121,20 +158,30 @@ export function fold(log: PatchLog, index: SourceIndex, state: ResolvedState): {
         }
         if (net.place) {
           const original = text.slice(site.range[0], site.range[1]);
-          if (!place(id, net.place, (indent) => reindent(original, site.indent, indent), lineRange(text, site.range))) needsBake.push(net.place.parent);
+          if (!place(id, net.place, (indent) => reindent(original, site.indent, indent), lineRange(text, site.range)))
+            needsBake.push(net.place.parent);
         }
         let newAttrs = -1;
         for (const [prop, value] of net.props) {
           const key = site.boundProps[prop];
           const handle = prop.startsWith(INTERIOR_PREFIX);
-          if (handle && !site.interior && key === undefined) { skipped.push({ id, reason: `"${id}" has no handles` }); continue; }
+          if (handle && !site.interior && key === undefined) {
+            skipped.push({ id, reason: `"${id}" has no handles` });
+            continue;
+          }
           const target = handle ? { id, props: site.interior!.props, openingTag: site.interior!.openingTag } : site;
-          const e = key !== undefined ? bindingEdit(index, id, prop, key, value, skipped) : propEdit(target, handle ? prop.slice(INTERIOR_PREFIX.length) : prop, value, text);
+          const e =
+            key !== undefined
+              ? bindingEdit(index, id, prop, key, value, skipped)
+              : propEdit(target, handle ? prop.slice(INTERIOR_PREFIX.length) : prop, value, text);
           if (!e) continue;
           if (e.kind === "prop" && e.range[0] === e.range[1]) {
             // New attributes share one insertion point; one edit keeps them in write order.
             const prev = edits[newAttrs];
-            if (prev?.kind === "prop" && prev.range[0] === e.range[0]) { edits[newAttrs] = { ...prev, text: prev.text + e.text }; continue; }
+            if (prev?.kind === "prop" && prev.range[0] === e.range[0]) {
+              edits[newAttrs] = { ...prev, text: prev.text + e.text };
+              continue;
+            }
             newAttrs = edits.length;
           }
           edits.push(e);
@@ -169,11 +216,17 @@ function lastWriteWins(edits: SourceEdit[]): SourceEdit[] {
   const byRange = new Map<string, number>();
   const keep: SourceEdit[] = [];
   for (const e of edits) {
-    if (e.kind !== "defaults") { keep.push(e); continue; }
+    if (e.kind !== "defaults") {
+      keep.push(e);
+      continue;
+    }
     const k = `${e.range[0]}:${e.range[1]}`;
     const prev = byRange.get(k);
     if (prev !== undefined) keep[prev] = e;
-    else { byRange.set(k, keep.length); keep.push(e); }
+    else {
+      byRange.set(k, keep.length);
+      keep.push(e);
+    }
   }
   return keep;
 }
@@ -195,7 +248,13 @@ export function foldToSource(text: string, log: PatchLog, state: ResolvedState, 
     let bakeEdits: SourceEdit[] = [];
     for (const id of needsBake) {
       const result = bake(current, id, state, index);
-      if (result.length === 0) return { text: applyEdits(current, edits), edits: [...allEdits, ...edits], baked, skipped: [...skipped, { id, reason: "cannot bake" }] };
+      if (result.length === 0)
+        return {
+          text: applyEdits(current, edits),
+          edits: [...allEdits, ...edits],
+          baked,
+          skipped: [...skipped, { id, reason: "cannot bake" }],
+        };
       bakeEdits = [...bakeEdits, ...result];
       baked.push(id);
     }
@@ -207,7 +266,12 @@ export function foldToSource(text: string, log: PatchLog, state: ResolvedState, 
 
 function dedupe(edits: SourceEdit[]): SourceEdit[] {
   const seen = new Set<string>();
-  return edits.filter((e) => { const k = `${e.range[0]}:${e.range[1]}`; if (seen.has(k)) return false; seen.add(k); return true; });
+  return edits.filter((e) => {
+    const k = `${e.range[0]}:${e.range[1]}`;
+    if (seen.has(k)) return false;
+    seen.add(k);
+    return true;
+  });
 }
 
 interface InsertionPoint {
@@ -266,14 +330,32 @@ function insertEdit(index: SourceIndex, id: string, target: InsertionPoint, prin
  * elements writing the same key in one fold would collide on the same
  * range, so the later write wins and the earlier edit is dropped.
  */
-function bindingEdit(index: SourceIndex, id: string, prop: string, key: string, value: Json | undefined, skipped: { id: string; reason: string }[]): SourceEdit | null {
+function bindingEdit(
+  index: SourceIndex,
+  id: string,
+  prop: string,
+  key: string,
+  value: Json | undefined,
+  skipped: { id: string; reason: string }[],
+): SourceEdit | null {
   const target = index.defaults?.props.get(key);
-  if (value === undefined) { skipped.push({ id, reason: `cannot unset "${prop}": it is bound to defaults.${key}` }); return null; }
-  if (!target || !target.valueRange) { skipped.push({ id, reason: `"${prop}" is bound to defaults.${key}, which has no literal` }); return null; }
+  if (value === undefined) {
+    skipped.push({ id, reason: `cannot unset "${prop}": it is bound to defaults.${key}` });
+    return null;
+  }
+  if (!target?.valueRange) {
+    skipped.push({ id, reason: `"${prop}" is bound to defaults.${key}, which has no literal` });
+    return null;
+  }
   return { kind: "defaults", id, range: target.valueRange, text: printLiteral(value) };
 }
 
-function propEdit(site: Pick<ElementSite, "id" | "props" | "openingTag">, prop: string, value: Json | undefined, text: string): SourceEdit | null {
+function propEdit(
+  site: Pick<ElementSite, "id" | "props" | "openingTag">,
+  prop: string,
+  value: Json | undefined,
+  text: string,
+): SourceEdit | null {
   const existing = site.props.get(prop);
   if (value === undefined) {
     if (!existing) return null;
@@ -287,14 +369,19 @@ function propEdit(site: Pick<ElementSite, "id" | "props" | "openingTag">, prop: 
       // Bare attribute (`reverse`): rewrite the whole attribute.
       return { kind: "prop", id: site.id, prop, range: existing.range, text: printProp(prop, value) };
     }
-    const asString = typeof value === "string" && text[existing.valueRange[0]] === '"' && !value.includes('"') && !value.includes("\n");
+    const asString =
+      typeof value === "string" &&
+      text[existing.valueRange[0]] === '"' &&
+      !value.includes('"') &&
+      !value.includes("\n");
     const replacement = asString ? `"${value}"` : printLiteral(value);
     if (asString) return { kind: "prop", id: site.id, prop, range: existing.valueRange, text: replacement };
     // Expression container `{...}` or a string literal that must become `{...}`.
     const r = existing.valueRange;
     const wrapped = text[r[0] - 1] === "{" && text[r[1]] === "}";
     // A plain string replacing `{...}` drops the braces: `out={6}` becomes `out="word:2"`, as a person writes it.
-    if (wrapped && typeof value === "string" && !value.includes('"') && !value.includes("\n")) return { kind: "prop", id: site.id, prop, range: [r[0] - 1, r[1] + 1], text: `"${value}"` };
+    if (wrapped && typeof value === "string" && !value.includes('"') && !value.includes("\n"))
+      return { kind: "prop", id: site.id, prop, range: [r[0] - 1, r[1] + 1], text: `"${value}"` };
     if (wrapped) return { kind: "prop", id: site.id, prop, range: r, text: replacement };
     return { kind: "prop", id: site.id, prop, range: r, text: `{${replacement}}` };
   }
@@ -317,7 +404,10 @@ function textEdit(site: ElementSite, value: string): SourceEdit | null {
 
 function reindent(source: string, from: string, to: string): string {
   if (from === to) return source;
-  return source.split("\n").map((line, i) => (i === 0 ? line : line.startsWith(from) ? to + line.slice(from.length) : line)).join("\n");
+  return source
+    .split("\n")
+    .map((line, i) => (i === 0 ? line : line.startsWith(from) ? to + line.slice(from.length) : line))
+    .join("\n");
 }
 
 export type { NetPatch };

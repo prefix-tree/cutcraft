@@ -1,10 +1,22 @@
 import { capabilitiesOf } from "../../jsx/capabilities";
-import { lookupAsset } from "../../manifest/types";
 import { parseTimeRef } from "../../manifest/timeref";
-import { define, insertNode, isError, placementOf, rawNode, rawProp, requireElement, requireLayout, requireUnlocked, setProps, validateTarget } from "../handler-kit";
-import { invalid, nodeSpecOf, ok, type ActionError, type ActionInput, type NodeSpec } from "../types";
-import type { Placement as ResolvedPlacement, ResolvedState } from "../../resolve/resolve";
+import { lookupAsset } from "../../manifest/types";
 import type { Json } from "../../patches/types";
+import type { Placement as ResolvedPlacement, ResolvedState } from "../../resolve/resolve";
+import {
+  define,
+  insertNode,
+  isError,
+  placementOf,
+  rawNode,
+  rawProp,
+  requireElement,
+  requireLayout,
+  requireUnlocked,
+  setProps,
+  validateTarget,
+} from "../handler-kit";
+import { type ActionError, type ActionInput, invalid, type NodeSpec, nodeSpecOf, ok } from "../types";
 
 const TIMING_PROPS = ["in", "out", "duration", "start", "offset"] as const;
 
@@ -36,25 +48,42 @@ function sourceLimit(state: ResolvedState, item: ResolvedPlacement): number {
 define({
   type: "clip/trim",
   validate: (a, state) => {
-    const base = validateTarget(state, a.params.id, a.params.edge === "in" ? ["in", "start", "offset"] : ["out", "duration"]);
+    const base = validateTarget(
+      state,
+      a.params.id,
+      a.params.edge === "in" ? ["in", "start", "offset"] : ["out", "duration"],
+    );
     if (!base.valid) return base;
     const item = state.items.get(a.params.id)!;
     const caps = capabilitiesOf(item.kind);
     const errors: ActionError[] = [];
-    if (!caps.timed || item.kind === "transition") errors.push({ code: "INVALID_PARAMS", message: `<${item.kind}> cannot be trimmed` });
+    if (!caps.timed || item.kind === "transition")
+      errors.push({ code: "INVALID_PARAMS", message: `<${item.kind}> cannot be trimmed` });
     const parsed = parseTimeRef(a.params.value);
     if (parsed.kind === "invalid") errors.push({ code: "INVALID_PARAMS", message: parsed.reason, path: "value" });
-    if (!caps.trimSource && typeof a.params.value !== "number") errors.push({ code: "INVALID_PARAMS", message: "only source clips take references", path: "value" });
+    if (!caps.trimSource && typeof a.params.value !== "number")
+      errors.push({ code: "INVALID_PARAMS", message: "only source clips take references", path: "value" });
     if (caps.trimSource && item.source && typeof a.params.value === "number") {
       const v = a.params.value;
-      if (a.params.edge === "out" && (v <= item.source.in || v > sourceLimit(state, item) + 0.05)) errors.push({ code: "OUT_OF_BOUNDS", message: `out must be within (${item.source.in}, ${sourceLimit(state, item)}]` });
-      if (a.params.edge === "in" && (v < 0 || v >= item.source.out)) errors.push({ code: "OUT_OF_BOUNDS", message: `in must be within [0, ${item.source.out})` });
+      if (a.params.edge === "out" && (v <= item.source.in || v > sourceLimit(state, item) + 0.05))
+        errors.push({
+          code: "OUT_OF_BOUNDS",
+          message: `out must be within (${item.source.in}, ${sourceLimit(state, item)}]`,
+        });
+      if (a.params.edge === "in" && (v < 0 || v >= item.source.out))
+        errors.push({ code: "OUT_OF_BOUNDS", message: `in must be within [0, ${item.source.out})` });
     }
     if (!caps.trimSource && typeof a.params.value === "number") {
       const v = a.params.value;
-      if (a.params.edge === "out" && v <= item.start) errors.push({ code: "INVALID_TIME_RANGE", message: "the out edge must stay after the start" });
-      if (a.params.edge === "in" && (v >= item.end || v < 0)) errors.push({ code: "INVALID_TIME_RANGE", message: "the in edge must stay before the end" });
-      if (a.params.edge === "in" && layoutOf(state, item) === "sequence") errors.push({ code: "UNSUPPORTED_ON_LAYOUT", message: "an element without a source cannot move its start inside a sequence" });
+      if (a.params.edge === "out" && v <= item.start)
+        errors.push({ code: "INVALID_TIME_RANGE", message: "the out edge must stay after the start" });
+      if (a.params.edge === "in" && (v >= item.end || v < 0))
+        errors.push({ code: "INVALID_TIME_RANGE", message: "the in edge must stay before the end" });
+      if (a.params.edge === "in" && layoutOf(state, item) === "sequence")
+        errors.push({
+          code: "UNSUPPORTED_ON_LAYOUT",
+          message: "an element without a source cannot move its start inside a sequence",
+        });
     }
     return invalid(...errors);
   },
@@ -99,7 +128,8 @@ define({
     const base = validateTarget(state, a.params.id, ["in", "out", "duration"]);
     if (!base.valid) return base;
     const item = state.items.get(a.params.id)!;
-    if (a.params.at <= item.start || a.params.at >= item.end) return invalid({ code: "OUT_OF_BOUNDS", message: "playhead must be inside the element" });
+    if (a.params.at <= item.start || a.params.at >= item.end)
+      return invalid({ code: "OUT_OF_BOUNDS", message: "playhead must be inside the element" });
     return ok;
   },
   apply: (a, log, ctx) => {
@@ -111,9 +141,13 @@ define({
       if (a.params.edge === "out") setProps(log, item.id, { out: sourceAt, duration: undefined });
       else {
         const props: Record<string, Json | undefined> = { in: sourceAt };
-        if (rawProp(state, item.id, "duration") !== undefined) { props.out = item.source.out; props.duration = undefined; }
+        if (rawProp(state, item.id, "duration") !== undefined) {
+          props.out = item.source.out;
+          props.duration = undefined;
+        }
         if (layout === "free") props.start = a.params.at;
-        if (layout === "anchored") props.offset = Number(rawProp(state, item.id, "offset") ?? 0) + (a.params.at - item.start);
+        if (layout === "anchored")
+          props.offset = Number(rawProp(state, item.id, "offset") ?? 0) + (a.params.at - item.start);
         setProps(log, item.id, props);
       }
     } else if (a.params.edge === "out") {
@@ -121,7 +155,8 @@ define({
     } else {
       const props: Record<string, Json | undefined> = { duration: item.end - a.params.at };
       if (layout === "free") props.start = a.params.at;
-      if (layout === "anchored") props.offset = Number(rawProp(state, item.id, "offset") ?? 0) + (a.params.at - item.start);
+      if (layout === "anchored")
+        props.offset = Number(rawProp(state, item.id, "offset") ?? 0) + (a.params.at - item.start);
       setProps(log, item.id, props);
     }
   },
@@ -131,7 +166,12 @@ define({
 
 define({
   type: "clip/restoreTiming",
-  validate: (a, state) => validateTarget(state, a.params.id, TIMING_PROPS.filter((p) => p in a.params)),
+  validate: (a, state) =>
+    validateTarget(
+      state,
+      a.params.id,
+      TIMING_PROPS.filter((p) => p in a.params),
+    ),
   apply: (a, log) => {
     const props: Record<string, Json | undefined> = {};
     for (const p of TIMING_PROPS) if (p in a.params) props[p] = (a.params as Record<string, Json | undefined>)[p];
@@ -151,26 +191,35 @@ define({
     if (!item.source) return invalid({ code: "INVALID_PARAMS", message: "only source clips slip" });
     const newIn = item.source.in + a.params.delta * item.source.speed;
     const newOut = item.source.out + a.params.delta * item.source.speed;
-    if (newIn < 0 || newOut > sourceLimit(state, item) + 0.05) return invalid({ code: "OUT_OF_BOUNDS", message: "slip runs past the source" });
+    if (newIn < 0 || newOut > sourceLimit(state, item) + 0.05)
+      return invalid({ code: "OUT_OF_BOUNDS", message: "slip runs past the source" });
     return ok;
   },
   apply: (a, log, ctx) => {
     const item = ctx.before.items.get(a.params.id)!;
     const s = item.source!;
-    setProps(log, item.id, { in: s.in + a.params.delta * s.speed, out: s.out + a.params.delta * s.speed, duration: undefined });
+    setProps(log, item.id, {
+      in: s.in + a.params.delta * s.speed,
+      out: s.out + a.params.delta * s.speed,
+      duration: undefined,
+    });
   },
   invert: (a, before) => restoreTiming(before, a.params.id),
   fold: () => [],
 });
 
-function neighbours(state: ResolvedState, item: ResolvedPlacement): { prev: ResolvedPlacement | null; next: ResolvedPlacement | null } {
+function neighbours(
+  state: ResolvedState,
+  item: ResolvedPlacement,
+): { prev: ResolvedPlacement | null; next: ResolvedPlacement | null } {
   const node = rawNode(state, item.id);
   const parent = node?.parent ? rawNode(state, node.parent) : undefined;
   if (!node || !parent) return { prev: null, next: null };
   const siblings = parent.children.filter((c) => c.kind !== "transition" && typeof c.props.anchor !== "string");
   const i = siblings.findIndex((c) => c.id === item.id);
-  const prev = i > 0 ? state.items.get((siblings[i - 1] as { id: string }).id) ?? null : null;
-  const next = i >= 0 && i < siblings.length - 1 ? state.items.get((siblings[i + 1] as { id: string }).id) ?? null : null;
+  const prev = i > 0 ? (state.items.get((siblings[i - 1] as { id: string }).id) ?? null) : null;
+  const next =
+    i >= 0 && i < siblings.length - 1 ? (state.items.get((siblings[i + 1] as { id: string }).id) ?? null) : null;
   return { prev, next };
 }
 
@@ -182,11 +231,15 @@ define({
     if (!base.valid) return base;
     const item = state.items.get(a.params.id)!;
     const { prev, next } = neighbours(state, item);
-    if (!prev?.source || !next?.source) return invalid({ code: "NOT_ADJACENT", message: "slide needs source clips on both sides" });
+    if (!prev?.source || !next?.source)
+      return invalid({ code: "NOT_ADJACENT", message: "slide needs source clips on both sides" });
     const d = a.params.delta;
-    if (prev.duration + d <= 0 || next.duration - d <= 0) return invalid({ code: "OUT_OF_BOUNDS", message: "slide would collapse a neighbour" });
-    if (prev.source.out + d * prev.source.speed > sourceLimit(state, prev) + 0.05) return invalid({ code: "INSUFFICIENT_HANDLES", message: "previous clip has no handle" });
-    if (next.source.in + d * next.source.speed < 0) return invalid({ code: "INSUFFICIENT_HANDLES", message: "next clip has no handle" });
+    if (prev.duration + d <= 0 || next.duration - d <= 0)
+      return invalid({ code: "OUT_OF_BOUNDS", message: "slide would collapse a neighbour" });
+    if (prev.source.out + d * prev.source.speed > sourceLimit(state, prev) + 0.05)
+      return invalid({ code: "INSUFFICIENT_HANDLES", message: "previous clip has no handle" });
+    if (next.source.in + d * next.source.speed < 0)
+      return invalid({ code: "INSUFFICIENT_HANDLES", message: "next clip has no handle" });
     return ok;
   },
   apply: (a, log, ctx) => {
@@ -197,7 +250,11 @@ define({
     const ps = prev!.source!;
     const ns = next!.source!;
     setProps(log, prev!.id, { out: ps.out + d * ps.speed, duration: undefined });
-    setProps(log, next!.id, { in: ns.in + d * ns.speed, duration: undefined, ...(layoutOf(state, next!) === "free" ? { start: next!.start + d } : {}) });
+    setProps(log, next!.id, {
+      in: ns.in + d * ns.speed,
+      duration: undefined,
+      ...(layoutOf(state, next!) === "free" ? { start: next!.start + d } : {}),
+    });
     if (layoutOf(state, item) === "free") setProps(log, item.id, { start: item.start + d });
   },
   invert: (a, before) => {
@@ -218,12 +275,21 @@ define({
     if (isError(right)) return invalid(right);
     const locked = requireUnlocked(state, left) ?? requireUnlocked(state, right);
     if (locked) return invalid(locked);
-    if (!left.source || !right.source) return invalid({ code: "INVALID_PARAMS", message: "roll needs two source clips" });
-    const adjacent = layoutOf(state, left) === "sequence" ? neighbours(state, left).next?.id === right.id : Math.abs(left.end - right.start) <= 0.001;
+    if (!left.source || !right.source)
+      return invalid({ code: "INVALID_PARAMS", message: "roll needs two source clips" });
+    const adjacent =
+      layoutOf(state, left) === "sequence"
+        ? neighbours(state, left).next?.id === right.id
+        : Math.abs(left.end - right.start) <= 0.001;
     if (!adjacent) return invalid({ code: "NOT_ADJACENT", message: "clips must meet at a cut" });
     const d = a.params.delta;
-    if (left.duration + d <= 0 || right.duration - d <= 0) return invalid({ code: "OUT_OF_BOUNDS", message: "roll would collapse a clip" });
-    if (left.source.out + d * left.source.speed > sourceLimit(state, left) + 0.05 || right.source.in + d * right.source.speed < 0) return invalid({ code: "INSUFFICIENT_HANDLES", message: "not enough handle" });
+    if (left.duration + d <= 0 || right.duration - d <= 0)
+      return invalid({ code: "OUT_OF_BOUNDS", message: "roll would collapse a clip" });
+    if (
+      left.source.out + d * left.source.speed > sourceLimit(state, left) + 0.05 ||
+      right.source.in + d * right.source.speed < 0
+    )
+      return invalid({ code: "INSUFFICIENT_HANDLES", message: "not enough handle" });
     return ok;
   },
   apply: (a, log, ctx) => {
@@ -232,19 +298,33 @@ define({
     const right = state.items.get(a.params.rightId)!;
     const d = a.params.delta;
     setProps(log, left.id, { out: left.source!.out + d * left.source!.speed, duration: undefined });
-    setProps(log, right.id, { in: right.source!.in + d * right.source!.speed, duration: undefined, ...(layoutOf(state, right) === "free" ? { start: right.start + d } : {}) });
+    setProps(log, right.id, {
+      in: right.source!.in + d * right.source!.speed,
+      duration: undefined,
+      ...(layoutOf(state, right) === "free" ? { start: right.start + d } : {}),
+    });
   },
   invert: (a, before) => [restoreTiming(before, a.params.leftId), restoreTiming(before, a.params.rightId)],
   fold: () => [],
 });
 
-function suffixId(id: string, suffix: string): string { return `${id}_${suffix}`; }
+function suffixId(id: string, suffix: string): string {
+  return `${id}_${suffix}`;
+}
 
-function splitChildren(children: readonly NodeSpec[], atRel: number, newId: string): { left: NodeSpec[]; right: NodeSpec[] } {
+function splitChildren(
+  children: readonly NodeSpec[],
+  atRel: number,
+  newId: string,
+): { left: NodeSpec[]; right: NodeSpec[] } {
   const left: NodeSpec[] = [];
   const right: NodeSpec[] = [];
   for (const child of children) {
-    const dup = (): NodeSpec => ({ ...child, id: suffixId(child.id, "b"), props: { ...child.props, id: suffixId(child.id, "b") } });
+    const dup = (): NodeSpec => ({
+      ...child,
+      id: suffixId(child.id, "b"),
+      props: { ...child.props, id: suffixId(child.id, "b") },
+    });
     switch (child.kind) {
       case "keyframe":
       case "speedKey": {
@@ -275,9 +355,12 @@ define({
     const base = validateTarget(state, a.params.id, ["in", "out", "duration"]);
     if (!base.valid) return base;
     const item = state.items.get(a.params.id)!;
-    if (state.tree.byId.has(a.params.newId)) return invalid({ code: "DUPLICATE_ID", message: `"${a.params.newId}" exists` });
-    if (!capabilitiesOf(item.kind).timed || item.kind === "transition" || item.kind === "gap") return invalid({ code: "INVALID_PARAMS", message: `<${item.kind}> cannot be split` });
-    if (a.params.at <= item.start + 1e-6 || a.params.at >= item.end - 1e-6) return invalid({ code: "OUT_OF_BOUNDS", message: "split must fall strictly inside the element" });
+    if (state.tree.byId.has(a.params.newId))
+      return invalid({ code: "DUPLICATE_ID", message: `"${a.params.newId}" exists` });
+    if (!capabilitiesOf(item.kind).timed || item.kind === "transition" || item.kind === "gap")
+      return invalid({ code: "INVALID_PARAMS", message: `<${item.kind}> cannot be split` });
+    if (a.params.at <= item.start + 1e-6 || a.params.at >= item.end - 1e-6)
+      return invalid({ code: "OUT_OF_BOUNDS", message: "split must fall strictly inside the element" });
     return ok;
   },
   apply: (a, log, ctx) => {
@@ -304,11 +387,15 @@ define({
     if (layout === "free") rightProps.start = a.params.at;
     if (layout === "anchored") rightProps.offset = Number(rawProp(state, item.id, "offset") ?? 0) + atRel;
     setProps(log, item.id, leftProps);
-    for (const child of spec.children ?? []) if (!left.some((l) => l.id === child.id)) log.append({ op: "remove", id: child.id });
+    for (const child of spec.children ?? [])
+      if (!left.some((l) => l.id === child.id)) log.append({ op: "remove", id: child.id });
     const cleaned = Object.fromEntries(Object.entries(rightProps).filter(([, v]) => v !== undefined));
     insertNode(log, node.parent as string, item.id, { ...spec, id: a.params.newId, props: cleaned, children: right });
   },
-  invert: (a, before) => ({ type: "clip/merge", params: { id: a.params.id, rightId: a.params.newId, original: nodeSpecOf(rawNode(before, a.params.id)!) } }),
+  invert: (a, before) => ({
+    type: "clip/merge",
+    params: { id: a.params.id, rightId: a.params.newId, original: nodeSpecOf(rawNode(before, a.params.id)!) },
+  }),
   fold: () => [],
 });
 
@@ -317,18 +404,28 @@ define({
   validate: (a, state) => {
     const base = validateTarget(state, a.params.id, []);
     if (!base.valid) return base;
-    return state.items.has(a.params.rightId) ? ok : invalid({ code: "ELEMENT_NOT_FOUND", message: `"${a.params.rightId}" does not exist` });
+    return state.items.has(a.params.rightId)
+      ? ok
+      : invalid({ code: "ELEMENT_NOT_FOUND", message: `"${a.params.rightId}" does not exist` });
   },
   apply: (a, log, ctx) => {
     const node = rawNode(ctx.before, a.params.id)!;
     log.append({ op: "remove", id: a.params.rightId });
     log.append({ op: "remove", id: a.params.id });
-    insertNode(log, node.parent as string, placementOf(ctx.before, a.params.id) && siblingBefore(ctx.before, a.params.id), a.params.original);
+    insertNode(
+      log,
+      node.parent as string,
+      placementOf(ctx.before, a.params.id) && siblingBefore(ctx.before, a.params.id),
+      a.params.original,
+    );
   },
   invert: (a, before) => {
     const left = before.items.get(a.params.id)!;
     const right = before.items.get(a.params.rightId)!;
-    return { type: "clip/split", params: { id: a.params.id, at: left.end === right.start ? left.end : left.end, newId: a.params.rightId } };
+    return {
+      type: "clip/split",
+      params: { id: a.params.id, at: left.end === right.start ? left.end : left.end, newId: a.params.rightId },
+    };
   },
   fold: () => [],
 });
@@ -355,15 +452,26 @@ define({
   invert: (a, before) => {
     const item = before.items.get(a.params.id)!;
     const node = rawNode(before, item.id)!;
-    const affected = layoutOf(before, item) === "free" ? laterOnTrack(before, item).map((l) => ({ id: l.id, start: l.start })) : [];
-    return { type: "clip/rippleRestore", params: { id: item.id, node: nodeSpecOf(node), trackId: node.parent as string, place: placementOf(before, item.id), affected } };
+    const affected =
+      layoutOf(before, item) === "free" ? laterOnTrack(before, item).map((l) => ({ id: l.id, start: l.start })) : [];
+    return {
+      type: "clip/rippleRestore",
+      params: {
+        id: item.id,
+        node: nodeSpecOf(node),
+        trackId: node.parent as string,
+        place: placementOf(before, item.id),
+        affected,
+      },
+    };
   },
   fold: () => [],
 });
 
 define({
   type: "clip/rippleRestore",
-  validate: (a, state) => (state.tree.byId.has(a.params.id) ? invalid({ code: "DUPLICATE_ID", message: `"${a.params.id}" exists` }) : ok),
+  validate: (a, state) =>
+    state.tree.byId.has(a.params.id) ? invalid({ code: "DUPLICATE_ID", message: `"${a.params.id}" exists` }) : ok,
   apply: (a, log) => {
     const after = "after" in a.params.place ? a.params.place.after : null;
     insertNode(log, a.params.trackId, after, a.params.node);
@@ -376,7 +484,15 @@ define({
 function laterOnTrack(state: ResolvedState, item: ResolvedPlacement): ResolvedPlacement[] {
   const track = state.tracks.find((t) => t.id === item.track);
   if (!track) return [];
-  return track.items.map((id) => state.items.get(id)).filter((i): i is ResolvedPlacement => Boolean(i) && i!.id !== item.id && i!.start >= item.end - 1e-6 && typeof rawProp(state, i!.id, "start") === "number");
+  return track.items
+    .map((id) => state.items.get(id))
+    .filter(
+      (i): i is ResolvedPlacement =>
+        Boolean(i) &&
+        i!.id !== item.id &&
+        i!.start >= item.end - 1e-6 &&
+        typeof rawProp(state, i!.id, "start") === "number",
+    );
 }
 
 /** Free layout: shift this element and every later one left until it meets the previous element. Sequence: remove the Gap before it. */
@@ -387,10 +503,13 @@ define({
     if (!base.valid) return base;
     const item = state.items.get(a.params.id)!;
     const layout = layoutOf(state, item);
-    if (layout === "anchored") return invalid({ code: "UNSUPPORTED_ON_LAYOUT", message: "anchored elements have no gap" });
+    if (layout === "anchored")
+      return invalid({ code: "UNSUPPORTED_ON_LAYOUT", message: "anchored elements have no gap" });
     if (layout === "sequence") {
       const before = siblingBefore(state, item.id);
-      return before && rawNode(state, before)?.kind === "gap" ? ok : invalid({ code: "INVALID_PARAMS", message: "no gap before this element" });
+      return before && rawNode(state, before)?.kind === "gap"
+        ? ok
+        : invalid({ code: "INVALID_PARAMS", message: "no gap before this element" });
     }
     return ok;
   },
@@ -402,7 +521,13 @@ define({
       return;
     }
     const track = state.tracks.find((t) => t.id === item.track)!;
-    const prevEnd = Math.max(0, ...track.items.map((id) => state.items.get(id)).filter((i) => i && i.id !== item.id && i.end <= item.start + 1e-6 && i.kind !== "transition").map((i) => i!.end));
+    const prevEnd = Math.max(
+      0,
+      ...track.items
+        .map((id) => state.items.get(id))
+        .filter((i) => i && i.id !== item.id && i.end <= item.start + 1e-6 && i.kind !== "transition")
+        .map((i) => i!.end),
+    );
     const shift = item.start - prevEnd;
     if (shift <= 0) return;
     setProps(log, item.id, { start: prevEnd });
@@ -413,7 +538,15 @@ define({
     if (layoutOf(before, item) === "sequence") {
       const gapId = siblingBefore(before, item.id) as string;
       const gap = rawNode(before, gapId)!;
-      return { type: "clip/restore", params: { id: gapId, node: nodeSpecOf(gap), trackId: gap.parent as string, place: { after: siblingBefore(before, gapId) } } };
+      return {
+        type: "clip/restore",
+        params: {
+          id: gapId,
+          node: nodeSpecOf(gap),
+          trackId: gap.parent as string,
+          place: { after: siblingBefore(before, gapId) },
+        },
+      };
     }
     const positions = [item, ...laterOnTrack(before, item)].map((i) => ({ id: i.id, start: i.start }));
     return { type: "track/restorePositions", params: { trackId: item.track as string, positions } };
@@ -421,4 +554,4 @@ define({
   fold: () => [],
 });
 
-export { requireLayout, placementOf, restoreTiming, timingOf };
+export { placementOf, requireLayout, restoreTiming, timingOf };

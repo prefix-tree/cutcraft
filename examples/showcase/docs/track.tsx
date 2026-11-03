@@ -10,7 +10,16 @@ export default function Video() {
       </Track>
       {/* A free track: each element sits at its own start. */}
       <Track id="marks" layout="free">
-        <Shape id="dot" start={0.5} duration={3} shape="circle" width={90} height={90} fill="#c8402a" transform={{ position: { x: 360, y: -170 } }} />
+        <Shape
+          id="dot"
+          start={0.5}
+          duration={3}
+          shape="circle"
+          width={90}
+          height={90}
+          fill="#c8402a"
+          transform={{ position: { x: 360, y: -170 } }}
+        />
       </Track>
     </Composition>
   );

@@ -1,0 +1,16 @@
+* text=auto eol=lf
+
+# Generated: collapsed in pull request diffs and left out of the language statistics.
+docs/reference/** linguist-generated
+**/__snapshots__/** linguist-generated
+packages/kit/fixtures/*.placement.json linguist-generated
+pnpm-lock.yaml linguist-generated
+
+# Binary media.
+*.png binary
+*.gif binary
+*.jpg binary
+*.webm binary
+*.mp4 binary
+*.woff binary
+*.woff2 binary

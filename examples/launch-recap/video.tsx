@@ -1,5 +1,20 @@
 import { z } from "zod";
-import { Audio, Caption, Captions, Clip, Composition, Keyframe, Layer, Marker, Shape, Title, Track, Transition, useT } from "@cutcraft/kit";
+
+import {
+  Audio,
+  Caption,
+  Captions,
+  Clip,
+  Composition,
+  Keyframe,
+  Layer,
+  Marker,
+  Shape,
+  Title,
+  Track,
+  Transition,
+  useT,
+} from "@cutcraft/kit";
 
 export const schema = z.object({
   product: z.string().describe("Product name on the title card"),
@@ -8,7 +23,12 @@ export const schema = z.object({
   cta: z.string().describe("Call to action on the closing card"),
 });
 
-export const defaults = { product: "Shed", tagline: "A cloud for small software", accent: "#ff5a1f", cta: "getshard.sh" };
+export const defaults = {
+  product: "Shed",
+  tagline: "A cloud for small software",
+  accent: "#ff5a1f",
+  cta: "getshard.sh",
+};
 
 export default function Video({ product, tagline, accent, cta }: z.infer<typeof schema>) {
   return (
@@ -37,10 +57,31 @@ export default function Video({ product, tagline, accent, cta }: z.infer<typeof 
       </Track>
 
       <Track id="overlays" name="Overlays">
-        <Title id="title" anchor="start" offset={0.4} duration={2.8} size={120} weight={700} valign="top" transform={{ position: { x: 0, y: 140 } }} animation={{ preset: "slide-up", in: 0.4, out: 0.3 }}>
+        <Title
+          id="title"
+          anchor="start"
+          offset={0.4}
+          duration={2.8}
+          size={120}
+          weight={700}
+          valign="top"
+          transform={{ position: { x: 0, y: 140 } }}
+          animation={{ preset: "slide-up", in: 0.4, out: 0.3 }}
+        >
           {product}
         </Title>
-        <Title id="tagline" anchor="title" offset={0.5} duration={2.3} size={44} weight={400} color="#c8ccd6" valign="top" transform={{ position: { x: 0, y: 300 } }} animation={{ preset: "fade", in: 0.4, out: 0.3 }}>
+        <Title
+          id="tagline"
+          anchor="title"
+          offset={0.5}
+          duration={2.3}
+          size={44}
+          weight={400}
+          color="#c8ccd6"
+          valign="top"
+          transform={{ position: { x: 0, y: 300 } }}
+          animation={{ preset: "fade", in: 0.4, out: 0.3 }}
+        >
           {tagline}
         </Title>
         <LowerThird who="Bohdan Snisar" what="Founder, Shed" accent={accent} />
@@ -51,7 +92,15 @@ export default function Video({ product, tagline, accent, cta }: z.infer<typeof 
 
       <Track id="music" layout="free" role="music">
         {/* The bed fills the whole recap and drops under the founder's voice. */}
-        <Audio id="bed" src="asset:music" start={0} duration="fill" volume={0.35} fade={{ in: 0.5, out: 1.5 }} duck={{ under: "main", to: 0.15 }} />
+        <Audio
+          id="bed"
+          src="asset:music"
+          start={0}
+          duration="fill"
+          volume={0.35}
+          fade={{ in: 0.5, out: 1.5 }}
+          duck={{ under: "main", to: 0.15 }}
+        />
       </Track>
 
       {/* Word references on a caption mean where the word plays: the cues follow hook and close wherever they are trimmed to. */}
@@ -69,11 +118,46 @@ export default function Video({ product, tagline, accent, cta }: z.infer<typeof 
 function LowerThird({ who, what, accent }: { who: string; what: string; accent: string }) {
   return (
     <>
-      <Shape id="lt-bg" anchor="close" offset={0.4} duration={4} shape="rectangle" width={640} height={132} fill="#0b0d12" stroke={{ color: accent, width: 6 }} cornerRadius={10} transform={{ position: { x: -560, y: 290 } }} />
-      <Title id="lt-name" anchor="close" offset={0.5} duration={3.9} size={40} weight={700} align="left" valign="top" transform={{ position: { x: 120, y: 778 } }} animation={{ preset: "slide-left", in: 0.3, out: 0.2 }}>
+      <Shape
+        id="lt-bg"
+        anchor="close"
+        offset={0.4}
+        duration={4}
+        shape="rectangle"
+        width={640}
+        height={132}
+        fill="#0b0d12"
+        stroke={{ color: accent, width: 6 }}
+        cornerRadius={10}
+        transform={{ position: { x: -560, y: 290 } }}
+      />
+      <Title
+        id="lt-name"
+        anchor="close"
+        offset={0.5}
+        duration={3.9}
+        size={40}
+        weight={700}
+        align="left"
+        valign="top"
+        transform={{ position: { x: 120, y: 778 } }}
+        animation={{ preset: "slide-left", in: 0.3, out: 0.2 }}
+      >
         {who}
       </Title>
-      <Title id="lt-role" anchor="close" offset={0.6} duration={3.8} size={28} weight={400} color={accent} align="left" valign="top" transform={{ position: { x: 120, y: 836 } }} animation={{ preset: "fade", in: 0.3, out: 0.2 }}>
+      <Title
+        id="lt-role"
+        anchor="close"
+        offset={0.6}
+        duration={3.8}
+        size={28}
+        weight={400}
+        color={accent}
+        align="left"
+        valign="top"
+        transform={{ position: { x: 120, y: 836 } }}
+        animation={{ preset: "fade", in: 0.3, out: 0.2 }}
+      >
         {what}
       </Title>
     </>
@@ -84,7 +168,18 @@ function LowerThird({ who, what, accent }: { who: string; what: string; accent: 
 function CallToAction({ text, accent }: { text: string; accent: string }) {
   const t = useT();
   return (
-    <div style={{ position: "absolute", left: 0, right: 0, bottom: 160, display: "flex", flexDirection: "column", alignItems: "center", gap: 18 }}>
+    <div
+      style={{
+        position: "absolute",
+        left: 0,
+        right: 0,
+        bottom: 160,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 18,
+      }}
+    >
       <div style={{ font: "700 56px Inter, system-ui, sans-serif", color: "#ffffff", letterSpacing: 1 }}>{text}</div>
       <div style={{ width: 520, height: 8, borderRadius: 4, background: "rgba(255,255,255,0.15)", overflow: "hidden" }}>
         <div style={{ width: `${Math.round(t * 100)}%`, height: "100%", background: accent }} />

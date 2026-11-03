@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
+
 import { parseTimeRef, resolveTimeRef } from "@cutcraft/kit";
+
 import { manifest } from "./helpers";
 
 const interview = manifest.assets.interview!;
@@ -30,7 +32,11 @@ describe("resolveTimeRef", () => {
   });
 
   it("returns a typed error for unknown references", () => {
-    expect(resolveTimeRef("word:999", interview, new Map(), ctx)).toMatchObject({ code: "UNKNOWN_REF", id: "c1", prop: "in" });
+    expect(resolveTimeRef("word:999", interview, new Map(), ctx)).toMatchObject({
+      code: "UNKNOWN_REF",
+      id: "c1",
+      prop: "in",
+    });
     expect(resolveTimeRef("word:1", null, new Map(), ctx)).toMatchObject({ code: "UNKNOWN_REF" });
   });
 });

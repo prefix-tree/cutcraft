@@ -1,8 +1,16 @@
-import { Audio, Clip, Composition, Layer, Title, Track, Transition, useT, type AssetManifest } from "@cutcraft/kit";
+import { type AssetManifest, Audio, Clip, Composition, Layer, Title, Track, Transition, useT } from "@cutcraft/kit";
 
 export const manifest: AssetManifest = {
   assets: {
-    bars: { id: "bars", kind: "video", duration: 10, fps: 30, width: 640, height: 360, audio: { sampleRate: 48000, channels: 1, streams: 1 } },
+    bars: {
+      id: "bars",
+      kind: "video",
+      duration: 10,
+      fps: 30,
+      width: 640,
+      height: 360,
+      audio: { sampleRate: 48000, channels: 1, streams: 1 },
+    },
     tone: { id: "tone", kind: "audio", duration: 20, audio: { sampleRate: 48000, channels: 1, streams: 1 } },
     logo: { id: "logo", kind: "image", duration: 0, width: 128, height: 128 },
     solid: { id: "solid", kind: "video", duration: 2, fps: 30, width: 640, height: 360 },
@@ -27,7 +35,9 @@ export default function Video() {
         <Clip id="solid" src="asset:solid" in={0} out={1} />
       </Track>
       <Track id="overlays">
-        <Title id="t1" anchor="v1" offset={0.5} duration={2} size={40} color="#00ff00">Hello</Title>
+        <Title id="t1" anchor="v1" offset={0.5} duration={2} size={40} color="#00ff00">
+          Hello
+        </Title>
         <Layer id="l1" anchor="start" duration={3}>
           <Counter />
         </Layer>
@@ -41,5 +51,9 @@ export default function Video() {
 
 function Counter() {
   const t = useT();
-  return <div style={{ position: "absolute", right: 10, top: 10, color: "#fff", font: "20px monospace" }} data-counter="">{Math.round(1200 * t)}</div>;
+  return (
+    <div style={{ position: "absolute", right: 10, top: 10, color: "#fff", font: "20px monospace" }} data-counter="">
+      {Math.round(1200 * t)}
+    </div>
+  );
 }

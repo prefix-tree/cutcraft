@@ -2,8 +2,9 @@ import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import generateMedia, { mediaDir } from "../../player/e2e/gen-media";
+
 import { manifest } from "../../player/e2e/app/composition";
+import generateMedia, { mediaDir } from "../../player/e2e/gen-media";
 import { defaultWorkers, directoryResolver, loadVideo, planSegments, renderVideo } from "../src";
 import { checkExactFrames } from "./helpers/exact";
 import { decodeAudio, decodeFrames, decodesClean, probe, rmsOf, tonePower } from "./helpers/output";
@@ -45,27 +46,47 @@ afterAll(() => rmSync(scratch, { recursive: true, force: true }));
 async function render(out: string, workers: number, extra: Record<string, unknown> = {}) {
   const loaded = await loadVideo(file);
   return renderVideo({
-    state: loaded.state, media: directoryResolver(mediaDir, loaded.manifest), interiors: loaded.interiors, out, keyFrameInterval: 1, bitrate: 4_000_000,
+    state: loaded.state,
+    media: directoryResolver(mediaDir, loaded.manifest),
+    interiors: loaded.interiors,
+    out,
+    keyFrameInterval: 1,
+    bitrate: 4_000_000,
     ...(workers > 1 ? { parallel: { file, mediaDir, workers, segmentFrames: 30 } } : {}),
     ...extra,
   });
 }
 
 function keyframes(out: string): number[] {
-  const text = execFileSync("ffprobe", ["-v", "error", "-select_streams", "v:0", "-show_entries", "packet=pts_time,flags", "-of", "csv=p=0", out], { encoding: "utf8" });
-  return text.trim().split("\n").filter((l) => l.includes("K")).map((l) => Number(l.split(",")[0]));
+  const text = execFileSync(
+    "ffprobe",
+    ["-v", "error", "-select_streams", "v:0", "-show_entries", "packet=pts_time,flags", "-of", "csv=p=0", out],
+    { encoding: "utf8" },
+  );
+  return text
+    .trim()
+    .split("\n")
+    .filter((l) => l.includes("K"))
+    .map((l) => Number(l.split(",")[0]));
 }
 
 async function frameHash(out: string): Promise<string> {
   const hash = createHash("sha256");
-  await decodeFrames(out, (frame) => { hash.update(frame.rgba); });
+  await decodeFrames(out, (frame) => {
+    hash.update(frame.rgba);
+  });
   return hash.digest("hex");
 }
 
 describe("planSegments", () => {
   it("cuts the range into whole keyframe intervals, the last one short", () => {
-    expect(planSegments(0, 210, 30, 3, 30)).toEqual([0, 30, 60, 90, 120, 150, 180].map((a) => ({ first: a, last: Math.min(210, a + 30) })));
-    expect(planSegments(10, 100, 30, 3, 70)).toEqual([{ first: 10, last: 70 }, { first: 70, last: 100 }]);
+    expect(planSegments(0, 210, 30, 3, 30)).toEqual(
+      [0, 30, 60, 90, 120, 150, 180].map((a) => ({ first: a, last: Math.min(210, a + 30) })),
+    );
+    expect(planSegments(10, 100, 30, 3, 70)).toEqual([
+      { first: 10, last: 70 },
+      { first: 70, last: 100 },
+    ]);
   });
 
   it("never makes a run shorter than a keyframe interval, and spreads by default", () => {
@@ -94,7 +115,11 @@ describe("parallel render", () => {
     expect(decoded).toBe(210);
     expect(wrong).toEqual([]);
     const keys = keyframes(out);
-    for (let s = 0; s < 7; s++) expect(keys.some((k) => Math.abs(k - s) < 0.02), `a keyframe at ${s} s in ${keys}`).toBe(true);
+    for (let s = 0; s < 7; s++)
+      expect(
+        keys.some((k) => Math.abs(k - s) < 0.02),
+        `a keyframe at ${s} s in ${keys}`,
+      ).toBe(true);
   });
 
   it("keeps the soundtrack whole across the joins", async () => {
@@ -108,24 +133,32 @@ describe("parallel render", () => {
   });
 
   it("is repeatable: two runs with the same workers decode to the same pictures", async () => {
-    const a = join(dir, "rep-a.webm"), b = join(dir, "rep-b.webm");
+    const a = join(dir, "rep-a.webm"),
+      b = join(dir, "rep-b.webm");
     await render(a, 3, { to: 3 });
     await render(b, 3, { to: 3 });
     expect(await frameHash(a)).toBe(await frameHash(b));
   });
 
   it("matches one thread: the same strips, and pictures within encoder noise", async () => {
-    const one = join(dir, "one.webm"), many = join(dir, "many.webm");
+    const one = join(dir, "one.webm"),
+      many = join(dir, "many.webm");
     await render(one, 1, { to: 3 });
     await render(many, 4, { to: 3 });
-    const a: Uint8Array[] = [], b: Uint8Array[] = [];
-    await decodeFrames(one, (f) => { a.push(Uint8Array.from(f.rgba)); });
-    await decodeFrames(many, (f) => { b.push(Uint8Array.from(f.rgba)); });
+    const a: Uint8Array[] = [],
+      b: Uint8Array[] = [];
+    await decodeFrames(one, (f) => {
+      a.push(Uint8Array.from(f.rgba));
+    });
+    await decodeFrames(many, (f) => {
+      b.push(Uint8Array.from(f.rgba));
+    });
     expect(b).toHaveLength(a.length);
     let worst = 0;
     for (let i = 0; i < a.length; i++) {
       let sum = 0;
-      for (let k = 0; k < (a[i] as Uint8Array).length; k += 4) sum += Math.abs((a[i] as Uint8Array)[k]! - (b[i] as Uint8Array)[k]!);
+      for (let k = 0; k < (a[i] as Uint8Array).length; k += 4)
+        sum += Math.abs((a[i] as Uint8Array)[k]! - (b[i] as Uint8Array)[k]!);
       worst = Math.max(worst, sum / ((a[i] as Uint8Array).length / 4));
     }
     expect(worst, "mean red difference between the two renders, worst frame").toBeLessThan(3);
@@ -133,10 +166,22 @@ describe("parallel render", () => {
 
   it("brings back what the workers' overlays warn about", async () => {
     const withFont = join(dir, "font.tsx");
-    writeFileSync(withFont, SOURCE.replace('import { Audio, Clip,', 'import { Title, Audio, Clip,').replace('<Track id="music"', '<Track id="o"><Title id="t" start={0} duration={5} font="Comic Neue">Hi</Title></Track>\n      <Track id="music"'));
+    writeFileSync(
+      withFont,
+      SOURCE.replace("import { Audio, Clip,", "import { Title, Audio, Clip,").replace(
+        '<Track id="music"',
+        '<Track id="o"><Title id="t" start={0} duration={5} font="Comic Neue">Hi</Title></Track>\n      <Track id="music"',
+      ),
+    );
     const loaded = await loadVideo(withFont);
     const result = await renderVideo({
-      state: loaded.state, media: directoryResolver(mediaDir, loaded.manifest), interiors: loaded.interiors, out: join(dir, "font.webm"), keyFrameInterval: 1, silent: true, to: 4,
+      state: loaded.state,
+      media: directoryResolver(mediaDir, loaded.manifest),
+      interiors: loaded.interiors,
+      out: join(dir, "font.webm"),
+      keyFrameInterval: 1,
+      silent: true,
+      to: 4,
       parallel: { file: withFont, mediaDir, workers: 2, segmentFrames: 30 },
     });
     expect(result.workers).toBe(2);
@@ -145,9 +190,13 @@ describe("parallel render", () => {
 
   it("reports a worker's failure, and leaves no threads behind", async () => {
     const loaded = await loadVideo(file);
-    await expect(renderVideo({
-      state: loaded.state, media: directoryResolver(join(dir, "nowhere"), loaded.manifest), out: join(dir, "bad.webm"),
-      parallel: { file, mediaDir: join(dir, "nowhere"), workers: 2, segmentFrames: 30 },
-    })).rejects.toThrow(/no media file for asset "bars"|cannot render/);
+    await expect(
+      renderVideo({
+        state: loaded.state,
+        media: directoryResolver(join(dir, "nowhere"), loaded.manifest),
+        out: join(dir, "bad.webm"),
+        parallel: { file, mediaDir: join(dir, "nowhere"), workers: 2, segmentFrames: 30 },
+      }),
+    ).rejects.toThrow(/no media file for asset "bars"|cannot render/);
   });
 });

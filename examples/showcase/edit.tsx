@@ -18,10 +18,26 @@ export default function Video() {
         <Clip id="close" src="asset:cells" in={0} out={2.6} fit="cover" />
       </Track>
       <Track id="text" name="Text">
-        <Title id="title" anchor="open" offset={0.3} duration={2.2} style="h1" size={64} animation={{ preset: "word-by-word" }}>
+        <Title
+          id="title"
+          anchor="open"
+          offset={0.3}
+          duration={2.2}
+          style="h1"
+          size={64}
+          animation={{ preset: "word-by-word" }}
+        >
           Cut by words
         </Title>
-        <Graphic id="who" kind="lower-third" name="Every cut is a line" role="and every line is editable" anchor="zoom" offset={0.4} duration={2.6} />
+        <Graphic
+          id="who"
+          kind="lower-third"
+          name="Every cut is a line"
+          role="and every line is editable"
+          anchor="zoom"
+          offset={0.4}
+          duration={2.6}
+        />
         <Title id="end" anchor="close" offset={0.2} duration={2.2} style="h2" animation={{ preset: "slide-up" }}>
           The file is the video.
         </Title>

@@ -1,7 +1,16 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { Executor, collectModule, resolve, type AssetManifest, type CollectedTree, type ResolvedState } from "@cutcraft/kit";
+
+import {
+  type AssetManifest,
+  type CollectedTree,
+  collectModule,
+  Executor,
+  type ResolvedState,
+  resolve,
+} from "@cutcraft/kit";
 import { buildSourceIndex } from "@cutcraft/kit/source";
+
 import * as sample from "../fixtures/sample";
 
 export const fixturesDir = join(import.meta.dirname, "..", "fixtures");
@@ -17,21 +26,37 @@ export function fixtureExecutor(): Executor {
 }
 
 export interface SerializedItem {
-  id: string; kind: string; track: string | null; parent: string | null; order: number;
-  start: number; end: number; editable: string; props: string; interior?: string; text: string | undefined; errors: string[];
+  id: string;
+  kind: string;
+  track: string | null;
+  parent: string | null;
+  order: number;
+  start: number;
+  end: number;
+  editable: string;
+  props: string;
+  interior?: string;
+  text: string | undefined;
+  errors: string[];
 }
 
 /** A stable view of a resolved state for equality checks: ids sorted, numbers rounded to the millisecond. */
 export function serialize(state: ResolvedState, withProps = true): SerializedItem[] {
   const orderOf = (id: string, parent: string | null): number => {
-    const siblings = parent ? state.tree.byId.get(parent)?.children ?? [] : [];
+    const siblings = parent ? (state.tree.byId.get(parent)?.children ?? []) : [];
     return siblings.findIndex((c) => c.id === id);
   };
   return [...state.items.values()]
     .sort((a, b) => (a.id < b.id ? -1 : 1))
     .map((p) => ({
-      id: p.id, kind: p.kind, track: p.track, parent: p.parent, order: orderOf(p.id, p.parent),
-      start: round(p.start), end: round(p.end), editable: p.editable,
+      id: p.id,
+      kind: p.kind,
+      track: p.track,
+      parent: p.parent,
+      order: orderOf(p.id, p.parent),
+      start: round(p.start),
+      end: round(p.end),
+      editable: p.editable,
       props: withProps ? stable(state.tree.byId.get(p.id)?.props ?? p.props) : "",
       ...(withProps ? { interior: p.interior ? stable(p.interior.props) : "" } : {}),
       text: state.tree.byId.get(p.id)?.text,
@@ -46,8 +71,14 @@ export function round(n: number): number {
 export function stable(value: unknown): string {
   return JSON.stringify(value, (_k, v: unknown) =>
     v && typeof v === "object" && !Array.isArray(v)
-      ? Object.fromEntries(Object.entries(v as Record<string, unknown>).filter(([, x]) => x !== undefined).sort(([a], [b]) => (a < b ? -1 : 1)))
-      : typeof v === "function" ? `[fn ${(v as { name: string }).name}]` : v,
+      ? Object.fromEntries(
+          Object.entries(v as Record<string, unknown>)
+            .filter(([, x]) => x !== undefined)
+            .sort(([a], [b]) => (a < b ? -1 : 1)),
+        )
+      : typeof v === "function"
+        ? `[fn ${(v as { name: string }).name}]`
+        : v,
   );
 }
 

@@ -1,19 +1,61 @@
-import type { ResolvedState } from "@cutcraft/kit";
+import {
+  type AudioCodec,
+  AudioSample,
+  AudioSampleSource,
+  canEncodeAudio,
+  EncodedVideoPacketSource,
+  FilePathTarget,
+  Mp3OutputFormat,
+  Output,
+  WavOutputFormat,
+} from "mediabunny";
 import type { ReactNode } from "react";
-import { FRAME_EPS, buildAudioPlan, captureWarnings, makeNestedResolver, type MediaResolver, type PlayerErrorEvent } from "@cutcraft/player/engine";
-import { AudioSample, AudioSampleSource, EncodedVideoPacketSource, FilePathTarget, Mp3OutputFormat, Output, WavOutputFormat, canEncodeAudio, type AudioCodec } from "mediabunny";
+
+import type { ResolvedState } from "@cutcraft/kit";
+import {
+  buildAudioPlan,
+  captureWarnings,
+  FRAME_EPS,
+  type MediaResolver,
+  makeNestedResolver,
+  type PlayerErrorEvent,
+} from "@cutcraft/player/engine";
+
+import { feedCopy, planCopy, type Run } from "./copy";
 import { encodeFrames } from "./encode";
 import { initEnv } from "./env";
-import { mixPlan, type MixedBlock } from "./mixer";
-import { OverlayPlane, type OverlayFont } from "./overlays";
+import { type MixedBlock, mixPlan } from "./mixer";
+import { type OverlayFont, OverlayPlane } from "./overlays";
+import {
+  defaultWorkers,
+  feedSegment,
+  type ParallelOptions,
+  planSegments,
+  type SegmentOutcome,
+  SegmentPool,
+} from "./parallel";
 import { MediabunnyPcm } from "./pcm";
-import { feedCopy, planCopy, type Run } from "./copy";
-import { feedSegment, planSegments, SegmentPool, defaultWorkers, type ParallelOptions, type SegmentOutcome } from "./parallel";
 import { FramePipeline } from "./pipeline";
-import { encodeSegment, hardwareEncodes, outputFormat, videoSource, type QualityName, type Speed, type VideoCodec, type VideoContainer, type VideoEncoding } from "./segment";
+import {
+  encodeSegment,
+  hardwareEncodes,
+  outputFormat,
+  type QualityName,
+  type Speed,
+  type VideoCodec,
+  type VideoContainer,
+  type VideoEncoding,
+  videoSource,
+} from "./segment";
 
 export type Container = VideoContainer | "mp3" | "wav";
-const AUDIO_CODEC: Record<Container, AudioCodec> = { webm: "opus", mp4: "aac", mov: "pcm-s16", mp3: "mp3", wav: "pcm-s16" };
+const AUDIO_CODEC: Record<Container, AudioCodec> = {
+  webm: "opus",
+  mp4: "aac",
+  mov: "pcm-s16",
+  mp3: "mp3",
+  wav: "pcm-s16",
+};
 
 /** The container a file name asks for: .mp4, .mov, .mp3 and .wav by extension, WebM otherwise. */
 export function containerOf(out: string): Container {
@@ -80,7 +122,13 @@ export interface RenderResult {
   /** Frames whose encoded pictures were copied from a source instead of rendered. */
   readonly copiedFrames: number;
   /** How long the frame loop was held up by each stage, summed over frames (the encoder runs beside the loop, so `encode` is only the part it did not hide). */
-  readonly stagesMs: { readonly composite: number; readonly overlays: number; readonly readback: number; readonly encode: number; readonly audio: number };
+  readonly stagesMs: {
+    readonly composite: number;
+    readonly overlays: number;
+    readonly readback: number;
+    readonly encode: number;
+    readonly audio: number;
+  };
   readonly warnings: readonly string[];
   readonly errors: readonly PlayerErrorEvent[];
 }
@@ -101,9 +149,14 @@ export async function renderVideo(options: RenderOptions): Promise<RenderResult>
     keyFrameInterval: options.keyFrameInterval ?? 2,
     speed: options.speed,
   };
-  const encoding: VideoEncoding = { ...base, hardware: !audioOnly && options.hardware !== false && (await hardwareEncodes(base, width, height)) };
+  const encoding: VideoEncoding = {
+    ...base,
+    hardware: !audioOnly && options.hardware !== false && (await hardwareEncodes(base, width, height)),
+  };
   if (!audioOnly && !outputFormat(videoContainer).getSupportedVideoCodecs().includes(encoding.codec)) {
-    throw new Error(`a .${container} file cannot hold ${encoding.codec} video; use ${outputFormat(videoContainer).getSupportedVideoCodecs().join(", ")}`);
+    throw new Error(
+      `a .${container} file cannot hold ${encoding.codec} video; use ${outputFormat(videoContainer).getSupportedVideoCodecs().join(", ")}`,
+    );
   }
   if (audioOnly && options.silent) throw new Error(`nothing to render: a .${container} file holds only the soundtrack`);
   const from = Math.max(0, options.from ?? 0);
@@ -119,35 +172,82 @@ export async function renderVideo(options: RenderOptions): Promise<RenderResult>
   captureWarnings((m) => warnings.push(m));
   const errors: PlayerErrorEvent[] = [];
   // Which frames are copied, which are rendered, and how the rendered ones are cut into runs for workers.
-  const sharedOverlays = options.smartCopy && !audioOnly ? new OverlayPlane({ state, media: options.media, warn: (m) => warnings.push(m), ...(options.interiors ? { interiors: options.interiors } : {}), ...(options.fonts ? { fonts: options.fonts } : {}) }) : null;
-  const copyPlan = sharedOverlays ? await planCopy({ state, media: options.media, overlays: sharedOverlays, codec: encoding.codec, first, last }) : null;
+  const sharedOverlays =
+    options.smartCopy && !audioOnly
+      ? new OverlayPlane({
+          state,
+          media: options.media,
+          warn: (m) => warnings.push(m),
+          ...(options.interiors ? { interiors: options.interiors } : {}),
+          ...(options.fonts ? { fonts: options.fonts } : {}),
+        })
+      : null;
+  const copyPlan = sharedOverlays
+    ? await planCopy({ state, media: options.media, overlays: sharedOverlays, codec: encoding.codec, first, last })
+    : null;
   const runs: readonly Run[] = copyPlan?.runs ?? [{ kind: "render", first, last }];
-  const pieces: Run[] = runs.flatMap((run) => (run.kind === "copy" || wanted === 1 ? [run] : planSegments(run.first, run.last, gopFrames, wanted, options.parallel?.segmentFrames).map((r): Run => ({ kind: "render", ...r }))));
+  const pieces: Run[] = runs.flatMap((run) =>
+    run.kind === "copy" || wanted === 1
+      ? [run]
+      : planSegments(run.first, run.last, gopFrames, wanted, options.parallel?.segmentFrames).map(
+          (r): Run => ({ kind: "render", ...r }),
+        ),
+  );
   const renderPieces = pieces.filter((p) => p.kind === "render").length;
   const threads = options.parallel && wanted > 1 && renderPieces > 1 ? Math.min(wanted, renderPieces) : 1;
   const joined = (copyPlan?.copied ?? 0) > 0 || threads > 1;
-  const output = new Output({ format: container === "mp3" ? new Mp3OutputFormat() : container === "wav" ? new WavOutputFormat() : outputFormat(container), target: new FilePathTarget(options.out) });
+  const output = new Output({
+    format:
+      container === "mp3"
+        ? new Mp3OutputFormat()
+        : container === "wav"
+          ? new WavOutputFormat()
+          : outputFormat(container),
+    target: new FilePathTarget(options.out),
+  });
 
   // Audio: the player's own plan, mixed by us and handed to the encoder block by block, a little ahead of the picture.
   const sampleRate = Number(state.items.get(state.composition.id)?.props.sampleRate ?? 48000);
-  const plan = options.silent ? [] : buildAudioPlan(state, from, to, makeNestedResolver(() => state));
+  const plan = options.silent
+    ? []
+    : buildAudioPlan(
+        state,
+        from,
+        to,
+        makeNestedResolver(() => state),
+      );
   const audioCodec = AUDIO_CODEC[container];
   const withAudio = plan.length > 0 && (await canEncodeAudio(audioCodec, { numberOfChannels: 2, sampleRate }));
-  if (plan.length > 0 && !withAudio) warnings.push(`no ${audioCodec} encoder for ${sampleRate} Hz stereo: the file has no sound`);
+  if (plan.length > 0 && !withAudio)
+    warnings.push(`no ${audioCodec} encoder for ${sampleRate} Hz stereo: the file has no sound`);
   const pcm = withAudio ? new MediabunnyPcm(options.media) : null;
-  const audioSource = withAudio ? new AudioSampleSource({ codec: audioCodec, ...(audioCodec.startsWith("pcm-") ? {} : { bitrate: options.audioBitrate ?? 128_000 }) }) : null;
+  const audioSource = withAudio
+    ? new AudioSampleSource({
+        codec: audioCodec,
+        ...(audioCodec.startsWith("pcm-") ? {} : { bitrate: options.audioBitrate ?? 128_000 }),
+      })
+    : null;
   const mix = pcm ? mixPlan(plan, pcm, { sampleRate, from, to }) : null;
   let mixedUntil = 0;
   let audioDone = !mix;
   const pumpAudio = async (until: number): Promise<void> => {
     while (mix && audioSource && !audioDone && mixedUntil < until) {
       const next = await mix.next();
-      if (next.done) { audioDone = true; return; }
+      if (next.done) {
+        audioDone = true;
+        return;
+      }
       const block: MixedBlock = next.value;
       const planar = new Float32Array(block.left.length * 2);
       planar.set(block.left, 0);
       planar.set(block.right, block.left.length);
-      const sample = new AudioSample({ data: planar, format: "f32-planar", numberOfChannels: 2, sampleRate, timestamp: block.timestamp });
+      const sample = new AudioSample({
+        data: planar,
+        format: "f32-planar",
+        numberOfChannels: 2,
+        sampleRate,
+        timestamp: block.timestamp,
+      });
       await audioSource.add(sample);
       sample.close();
       mixedUntil = block.timestamp + block.left.length / sampleRate;
@@ -157,7 +257,11 @@ export async function renderVideo(options: RenderOptions): Promise<RenderResult>
   const stages = { composite: 0, overlays: 0, readback: 0, encode: 0, audio: 0 };
   const timed = async <T>(stage: "encode" | "audio", work: () => Promise<T>): Promise<T> => {
     const at = performance.now();
-    try { return await work(); } finally { stages[stage] += performance.now() - at; }
+    try {
+      return await work();
+    } finally {
+      stages[stage] += performance.now() - at;
+    }
   };
   const ahead = (seconds: number): Promise<void> => timed("audio", () => pumpAudio(seconds + 0.5));
   const started = performance.now();
@@ -165,7 +269,10 @@ export async function renderVideo(options: RenderOptions): Promise<RenderResult>
   let pipeline: FramePipeline | null = null;
   try {
     if (audioOnly) {
-      if (!audioSource) throw new Error(`nothing to render: ${plan.length > 0 ? `no ${audioCodec} encoder for ${sampleRate} Hz stereo` : "the composition has no sound in this range"}`);
+      if (!audioSource)
+        throw new Error(
+          `nothing to render: ${plan.length > 0 ? `no ${audioCodec} encoder for ${sampleRate} Hz stereo` : "the composition has no sound in this range"}`,
+        );
       output.addAudioTrack(audioSource);
       await output.start();
       await timed("audio", () => pumpAudio(Number.POSITIVE_INFINITY));
@@ -180,16 +287,41 @@ export async function renderVideo(options: RenderOptions): Promise<RenderResult>
       const par = options.parallel;
       if (par && threads > 1) {
         pool = new SegmentPool(threads, {
-          file: par.file, load: par.load ?? {}, mediaDir: par.mediaDir, overrides: par.overrides ?? {}, fonts: options.fonts ?? [], encoding, onAssetError: options.onAssetError ?? "throw",
+          file: par.file,
+          load: par.load ?? {},
+          mediaDir: par.mediaDir,
+          overrides: par.overrides ?? {},
+          fonts: options.fonts ?? [],
+          encoding,
+          onAssetError: options.onAssetError ?? "throw",
         });
       }
       // Pooled pieces start at once and finish in any order; in-process ones start when their turn comes.
       const work = pieces.map((piece): (() => Promise<SegmentOutcome>) | null => {
         if (piece.kind === "copy") return null;
-        if (pool) { const started = pool.run(piece.first, piece.last); started.catch(() => undefined); return () => started; }
+        if (pool) {
+          const started = pool.run(piece.first, piece.last);
+          started.catch(() => undefined);
+          return () => started;
+        }
         return async () => {
-          const r = await encodeSegment({ state, media: options.media, interiors: options.interiors, fonts: options.fonts, overlays: sharedOverlays ?? undefined, onAssetError: options.onAssetError, encoding, first: piece.first, last: piece.last });
-          return { bytes: r.bytes, stages: r.stages, warnings: r.warnings, errors: r.errors.map((e) => `${e.asset ?? e.id ?? "?"}: ${e.error.message}`) };
+          const r = await encodeSegment({
+            state,
+            media: options.media,
+            interiors: options.interiors,
+            fonts: options.fonts,
+            overlays: sharedOverlays ?? undefined,
+            onAssetError: options.onAssetError,
+            encoding,
+            first: piece.first,
+            last: piece.last,
+          });
+          return {
+            bytes: r.bytes,
+            stages: r.stages,
+            warnings: r.warnings,
+            errors: r.errors.map((e) => `${e.asset ?? e.id ?? "?"}: ${e.error.message}`),
+          };
         };
       });
       const config = { current: null as VideoDecoderConfig | null };
@@ -200,10 +332,15 @@ export async function renderVideo(options: RenderOptions): Promise<RenderResult>
           await feedCopy(piece, { source, fps, originFrame: first, config }, ahead);
         } else {
           const outcome = await timed("encode", () => (work[i] as () => Promise<SegmentOutcome>)());
-          if (outcome.errors.length > 0 && options.onAssetError !== "continue") throw new Error(`cannot render: ${outcome.errors.join("; ")}`);
+          if (outcome.errors.length > 0 && options.onAssetError !== "continue")
+            throw new Error(`cannot render: ${outcome.errors.join("; ")}`);
           for (const w of outcome.warnings) if (!warnings.includes(w)) warnings.push(w);
           for (const k of ["composite", "overlays", "readback"] as const) stages[k] += outcome.stages[k];
-          await feedSegment(outcome, { source, codec: encoding.codec, fps, offsetFrames: piece.first - first, config }, ahead);
+          await feedSegment(
+            outcome,
+            { source, codec: encoding.codec, fps, offsetFrames: piece.first - first, config },
+            ahead,
+          );
         }
         done += piece.last - piece.first;
         options.onProgress?.({ frame: done, frames: total });
@@ -211,13 +348,27 @@ export async function renderVideo(options: RenderOptions): Promise<RenderResult>
       await timed("audio", () => pumpAudio(Number.POSITIVE_INFINITY));
       await timed("encode", () => output.finalize());
     } else {
-      pipeline = new FramePipeline({ state, media: options.media, interiors: options.interiors, fonts: options.fonts, onAssetError: options.onAssetError, warn: (m) => warnings.push(m) });
+      pipeline = new FramePipeline({
+        state,
+        media: options.media,
+        interiors: options.interiors,
+        fonts: options.fonts,
+        onAssetError: options.onAssetError,
+        warn: (m) => warnings.push(m),
+      });
       const source = videoSource(encoding);
       output.addVideoTrack(source, { frameRate: fps });
       if (audioSource) output.addAudioTrack(audioSource);
       await output.start();
       stages.encode += await encodeFrames({
-        pipeline, source, fps, width, height, first, last, signal: options.signal,
+        pipeline,
+        source,
+        fps,
+        width,
+        height,
+        first,
+        last,
+        signal: options.signal,
         before: (n) => ahead((n - first + 1) / fps),
         progress: (frame) => options.onProgress?.({ frame, frames: total }),
       });
@@ -236,7 +387,19 @@ export async function renderVideo(options: RenderOptions): Promise<RenderResult>
     pcm?.dispose();
     captureWarnings(null);
   }
-  return { frames: audioOnly ? 0 : total, audio: withAudio, fps, width, height, wallMs: performance.now() - started, workers: pool ? threads : 1, copiedFrames: copyPlan?.copied ?? 0, stagesMs: stages, warnings, errors };
+  return {
+    frames: audioOnly ? 0 : total,
+    audio: withAudio,
+    fps,
+    width,
+    height,
+    wallMs: performance.now() - started,
+    workers: pool ? threads : 1,
+    copiedFrames: copyPlan?.copied ?? 0,
+    stagesMs: stages,
+    warnings,
+    errors,
+  };
 }
 
 export type { VideoCodec };

@@ -19,7 +19,18 @@ export default function Video() {
 function Elapsed() {
   const t = useT();
   return (
-    <div style={{ display: "flex", width: "100%", height: "100%", alignItems: "center", justifyContent: "center", color: "#ffffff", fontSize: 120, fontWeight: 700 }}>
+    <div
+      style={{
+        display: "flex",
+        width: "100%",
+        height: "100%",
+        alignItems: "center",
+        justifyContent: "center",
+        color: "#ffffff",
+        fontSize: 120,
+        fontWeight: 700,
+      }}
+    >
       {t.toFixed(1)} s
     </div>
   );

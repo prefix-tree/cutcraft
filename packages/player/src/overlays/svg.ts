@@ -1,4 +1,5 @@
 import { SaxesParser } from "saxes";
+
 import { freezeSmil, hasSmil } from "./smil";
 import { shapeLength } from "./svg-length";
 
@@ -17,9 +18,18 @@ export interface SvgNode {
   readonly children: (SvgNode | string)[];
 }
 
-export interface SvgViewBox { readonly minX: number; readonly minY: number; readonly width: number; readonly height: number }
+export interface SvgViewBox {
+  readonly minX: number;
+  readonly minY: number;
+  readonly width: number;
+  readonly height: number;
+}
 
-export interface SvgColor { readonly mode: "none" | "tint" | "replace"; readonly tint?: string; readonly opacity?: number }
+export interface SvgColor {
+  readonly mode: "none" | "tint" | "replace";
+  readonly tint?: string;
+  readonly opacity?: number;
+}
 
 export interface PrepareSvgOptions {
   /** The box the root is drawn into, in pixels. */
@@ -49,11 +59,25 @@ export interface PreparedSvg {
 const SVG_NS = "http://www.w3.org/2000/svg";
 const XLINK_NS = "http://www.w3.org/1999/xlink";
 /** Elements that run code, embed other documents or reach outside the file. */
-const DROPPED = new Set(["script", "foreignObject", "iframe", "object", "embed", "audio", "video", "canvas", "handler", "listener"]);
+const DROPPED = new Set([
+  "script",
+  "foreignObject",
+  "iframe",
+  "object",
+  "embed",
+  "audio",
+  "video",
+  "canvas",
+  "handler",
+  "listener",
+]);
 const DEFAULT_SIZE = { width: 300, height: 150 };
 const PARSE_CACHE = 64;
 
-interface Parsed { readonly root: SvgNode | null; readonly warnings: readonly string[] }
+interface Parsed {
+  readonly root: SvgNode | null;
+  readonly warnings: readonly string[];
+}
 const parsed = new Map<string, Parsed>();
 
 /** Parses SVG markup into a small tree; the result is cached by the markup string. */
@@ -84,7 +108,8 @@ export function svgAnimated(markup: string): boolean {
 export function svgIntrinsicSize(markup: string, viewBox?: SvgViewBox): { width: number; height: number } {
   const root = parseSvg(markup).root;
   const box = viewBox ?? (root ? viewBoxOf(root) : null);
-  const w = root ? length(root.attrs.width) : null, h = root ? length(root.attrs.height) : null;
+  const w = root ? length(root.attrs.width) : null,
+    h = root ? length(root.attrs.height) : null;
   if (w !== null && h !== null) return { width: w, height: h };
   if (box) {
     if (w !== null) return { width: w, height: (w * box.height) / box.width };
@@ -115,16 +140,27 @@ function build(markup: string, options: PrepareSvgOptions): PreparedSvg {
   const animated = svgAnimated(markup);
   const root = animated ? freezeSmil(parsedRoot, options.time ?? 0, warnings) : parsedRoot;
   const prefix = options.idPrefix ? `${options.idPrefix.replace(/[^A-Za-z0-9_-]/g, "_")}-` : "";
-  const draw = options.draw === null || options.draw === undefined || options.draw >= 1 ? null : Math.max(0, options.draw);
+  const draw =
+    options.draw === null || options.draw === undefined || options.draw >= 1 ? null : Math.max(0, options.draw);
   const ctx: Walk = { prefix, tokens: options.tokens ?? {}, warnings, unknownTokens: new Set(), draw, inDefs: false };
   const body = root.children.map((c) => clean(c, ctx)).filter((c): c is SvgNode | string => c !== null);
 
   const box = options.viewBox ?? viewBoxOf(root) ?? { minX: 0, minY: 0, ...svgIntrinsicSize(markup) };
   const bleed = Math.max(0, options.bleed ?? 0);
-  const bx = bleed * (box.width / Math.max(1e-9, options.box.width)), by = bleed * (box.height / Math.max(1e-9, options.box.height));
+  const bx = bleed * (box.width / Math.max(1e-9, options.box.width)),
+    by = bleed * (box.height / Math.max(1e-9, options.box.height));
   const rootAttrs: Record<string, string> = {};
   for (const [k, v] of Object.entries(root.attrs)) {
-    if (k === "width" || k === "height" || k === "viewBox" || k === "preserveAspectRatio" || k === "x" || k === "y" || k.startsWith("xmlns")) continue;
+    if (
+      k === "width" ||
+      k === "height" ||
+      k === "viewBox" ||
+      k === "preserveAspectRatio" ||
+      k === "x" ||
+      k === "y" ||
+      k.startsWith("xmlns")
+    )
+      continue;
     const kept = cleanAttr(k, v, ctx);
     if (kept !== null) rootAttrs[k] = kept;
   }
@@ -138,8 +174,17 @@ function build(markup: string, options: PrepareSvgOptions): PreparedSvg {
   };
 
   let children: (SvgNode | string)[] = body;
-  const filter = colorFilter(options.color, `${prefix}cc-color`, { minX: box.minX - bx, minY: box.minY - by, width: box.width + 2 * bx, height: box.height + 2 * by });
-  if (filter) children = [{ name: "defs", attrs: {}, children: [filter] }, { name: "g", attrs: { filter: `url(#${prefix}cc-color)` }, children: body }];
+  const filter = colorFilter(options.color, `${prefix}cc-color`, {
+    minX: box.minX - bx,
+    minY: box.minY - by,
+    width: box.width + 2 * bx,
+    height: box.height + 2 * by,
+  });
+  if (filter)
+    children = [
+      { name: "defs", attrs: {}, children: [filter] },
+      { name: "g", attrs: { filter: `url(#${prefix}cc-color)` }, children: body },
+    ];
   const out = serialize({ name: "svg", attrs: { ...head, ...rootAttrs }, children });
   return { markup: out, animated, warnings };
 }
@@ -155,7 +200,17 @@ interface Walk {
   readonly inDefs: boolean;
 }
 
-const DEFINITIONS = new Set(["defs", "clipPath", "mask", "marker", "pattern", "symbol", "linearGradient", "radialGradient", "filter"]);
+const DEFINITIONS = new Set([
+  "defs",
+  "clipPath",
+  "mask",
+  "marker",
+  "pattern",
+  "symbol",
+  "linearGradient",
+  "radialGradient",
+  "filter",
+]);
 const FILLED = new Set(["path", "line", "polyline", "polygon", "circle", "ellipse", "rect", "text"]);
 
 function clean(node: SvgNode | string, ctx: Walk): SvgNode | string | null {
@@ -175,7 +230,14 @@ function clean(node: SvgNode | string, ctx: Walk): SvgNode | string | null {
     .filter((c): c is SvgNode | string => c !== null);
   if (ctx.draw !== null && !ctx.inDefs && FILLED.has(node.name)) drawProgress(node.name, attrs, ctx.draw);
   // A link cannot be followed in a video; keep what it draws.
-  if (node.name === "a") return { name: "g", attrs: Object.fromEntries(Object.entries(attrs).filter(([k]) => k !== "href" && k !== "xlink:href" && k !== "target")), children };
+  if (node.name === "a")
+    return {
+      name: "g",
+      attrs: Object.fromEntries(
+        Object.entries(attrs).filter(([k]) => k !== "href" && k !== "xlink:href" && k !== "target"),
+      ),
+      children,
+    };
   return { name: node.name, attrs, children };
 }
 
@@ -231,13 +293,18 @@ function cleanStyleSheet(css: string, ctx: Walk): string {
  */
 function withoutCssAnimation(css: string, ctx: Walk): string {
   if (!/@keyframes|animation/i.test(css)) return css;
-  let out = "", i = 0;
+  let out = "",
+    i = 0;
   const keyframes = /@(-webkit-)?keyframes\b/gi;
   for (let m = keyframes.exec(css); m; m = keyframes.exec(css)) {
     out += css.slice(i, m.index);
     const open = css.indexOf("{", m.index);
-    if (open < 0) { i = css.length; break; }
-    let depth = 0, j = open;
+    if (open < 0) {
+      i = css.length;
+      break;
+    }
+    let depth = 0,
+      j = open;
     for (; j < css.length; j++) {
       if (css[j] === "{") depth++;
       else if (css[j] === "}" && --depth === 0) break;
@@ -251,7 +318,8 @@ function withoutCssAnimation(css: string, ctx: Walk): string {
   return stripped;
 }
 
-const CSS_ANIMATION_WARNING = "CSS animations are not played; the SVG is drawn without them (use SMIL <animate>, which is)";
+const CSS_ANIMATION_WARNING =
+  "CSS animations are not played; the SVG is drawn without them (use SMIL <animate>, which is)";
 
 function prefixUrls(value: string, prefix: string): string {
   if (!prefix || !value.includes("url(")) return value;
@@ -270,7 +338,11 @@ function withTokens(value: string, ctx: Walk): string {
     return whole;
   };
   return value
-    .replace(/var\(\s*--cc-([A-Za-z][\w-]*)\s*(?:,\s*([^)]*))?\)/g, (whole, name: string, fallback: string | undefined) => ctx.tokens[name] ?? (fallback?.trim() || look(name, whole)))
+    .replace(
+      /var\(\s*--cc-([A-Za-z][\w-]*)\s*(?:,\s*([^)]*))?\)/g,
+      (whole, name: string, fallback: string | undefined) =>
+        ctx.tokens[name] ?? (fallback?.trim() || look(name, whole)),
+    )
     .replace(/\$([A-Za-z][\w-]*)/g, (whole, name: string) => look(name, whole));
 }
 
@@ -278,24 +350,64 @@ function withTokens(value: string, ctx: Walk): string {
 function colorFilter(color: SvgColor | undefined, id: string, region: SvgViewBox): SvgNode | null {
   if (!color || color.mode === "none" || !color.tint) return null;
   const amount = Math.max(0, Math.min(1, color.opacity ?? 1));
-  const recoloured: SvgNode = color.mode === "replace"
-    ? { name: "g", attrs: {}, children: [
-        { name: "feFlood", attrs: { "flood-color": color.tint, result: "flood" }, children: [] },
-        { name: "feComposite", attrs: { in: "flood", in2: "SourceAlpha", operator: "in", result: "coloured" }, children: [] },
-      ] }
-    : (() => {
-        const [r, g, b] = rgb(color.tint as string);
-        const row = (k: number): string => `${num(0.2126 * k)} ${num(0.7152 * k)} ${num(0.0722 * k)} 0 0`;
-        return { name: "g", attrs: {}, children: [
-          { name: "feColorMatrix", attrs: { in: "SourceGraphic", type: "matrix", values: `${row(r)}  ${row(g)}  ${row(b)}  0 0 0 1 0`, result: "coloured" }, children: [] },
-        ] };
-      })();
+  const recoloured: SvgNode =
+    color.mode === "replace"
+      ? {
+          name: "g",
+          attrs: {},
+          children: [
+            { name: "feFlood", attrs: { "flood-color": color.tint, result: "flood" }, children: [] },
+            {
+              name: "feComposite",
+              attrs: { in: "flood", in2: "SourceAlpha", operator: "in", result: "coloured" },
+              children: [],
+            },
+          ],
+        }
+      : (() => {
+          const [r, g, b] = rgb(color.tint as string);
+          const row = (k: number): string => `${num(0.2126 * k)} ${num(0.7152 * k)} ${num(0.0722 * k)} 0 0`;
+          return {
+            name: "g",
+            attrs: {},
+            children: [
+              {
+                name: "feColorMatrix",
+                attrs: {
+                  in: "SourceGraphic",
+                  type: "matrix",
+                  values: `${row(r)}  ${row(g)}  ${row(b)}  0 0 0 1 0`,
+                  result: "coloured",
+                },
+                children: [],
+              },
+            ],
+          };
+        })();
   const steps = (recoloured.children as SvgNode[]).slice();
   if (amount < 1) {
-    steps.push({ name: "feComposite", attrs: { in: "coloured", in2: "SourceGraphic", operator: "arithmetic", k1: "0", k2: num(amount), k3: num(1 - amount), k4: "0" }, children: [] });
+    steps.push({
+      name: "feComposite",
+      attrs: {
+        in: "coloured",
+        in2: "SourceGraphic",
+        operator: "arithmetic",
+        k1: "0",
+        k2: num(amount),
+        k3: num(1 - amount),
+        k4: "0",
+      },
+      children: [],
+    });
   }
   // The region is the visible area in user units: skia mis-sizes a region relative to the bounding box.
-  const bounds = { filterUnits: "userSpaceOnUse", x: num(region.minX), y: num(region.minY), width: num(region.width), height: num(region.height) };
+  const bounds = {
+    filterUnits: "userSpaceOnUse",
+    x: num(region.minX),
+    y: num(region.minY),
+    width: num(region.width),
+    height: num(region.height),
+  };
   return { name: "filter", attrs: { id, ...bounds, "color-interpolation-filters": "sRGB" }, children: steps };
 }
 
@@ -305,8 +417,18 @@ export function rgb(color: string): [number, number, number] {
   const hex = c.match(/^#([0-9a-f]{3,8})$/);
   if (hex) {
     const h = hex[1] as string;
-    const full = h.length <= 4 ? h.split("").map((x) => x + x).join("") : h;
-    return [parseInt(full.slice(0, 2), 16) / 255, parseInt(full.slice(2, 4), 16) / 255, parseInt(full.slice(4, 6), 16) / 255];
+    const full =
+      h.length <= 4
+        ? h
+            .split("")
+            .map((x) => x + x)
+            .join("")
+        : h;
+    return [
+      parseInt(full.slice(0, 2), 16) / 255,
+      parseInt(full.slice(2, 4), 16) / 255,
+      parseInt(full.slice(4, 6), 16) / 255,
+    ];
   }
   const fn = c.match(/^rgba?\(\s*([\d.]+)%?[\s,]+([\d.]+)%?[\s,]+([\d.]+)%?/);
   if (fn) return [Number(fn[1]) / 255, Number(fn[2]) / 255, Number(fn[3]) / 255];
@@ -316,8 +438,12 @@ export function rgb(color: string): [number, number, number] {
 function viewBoxOf(node: SvgNode): SvgViewBox | null {
   const raw = node.attrs.viewBox;
   if (!raw) return null;
-  const n = raw.trim().split(/[\s,]+/).map(Number);
-  if (n.length !== 4 || n.some((x) => !Number.isFinite(x)) || (n[2] as number) <= 0 || (n[3] as number) <= 0) return null;
+  const n = raw
+    .trim()
+    .split(/[\s,]+/)
+    .map(Number);
+  if (n.length !== 4 || n.some((x) => !Number.isFinite(x)) || (n[2] as number) <= 0 || (n[3] as number) <= 0)
+    return null;
   return { minX: n[0] as number, minY: n[1] as number, width: n[2] as number, height: n[3] as number };
 }
 
@@ -340,22 +466,28 @@ function parse(markup: string): Parsed {
     else if (!root) root = node;
     stack.push(node);
   });
-  parser.on("closetag", () => { stack.pop(); });
+  parser.on("closetag", () => {
+    stack.pop();
+  });
   const text = (t: string): void => {
     const parent = stack[stack.length - 1];
     if (parent && t.length > 0) parent.children.push(t);
   };
   parser.on("text", text);
   parser.on("cdata", text);
-  parser.on("error", (e) => { throw e; });
+  parser.on("error", (e) => {
+    throw e;
+  });
   try {
     parser.write(markup).close();
   } catch (error) {
-    warnings.push(`the SVG could not be read: ${error instanceof Error ? error.message.split("\n")[0] : String(error)}`);
+    warnings.push(
+      `the SVG could not be read: ${error instanceof Error ? error.message.split("\n")[0] : String(error)}`,
+    );
     return { root: null, warnings };
   }
   const found = root as SvgNode | null;
-  if (!found || found.name !== "svg") {
+  if (found?.name !== "svg") {
     warnings.push("the markup is not an <svg> element");
     return { root: null, warnings };
   }
@@ -364,7 +496,9 @@ function parse(markup: string): Parsed {
 
 export function serialize(node: SvgNode | string): string {
   if (typeof node === "string") return escapeText(node);
-  const attrs = Object.entries(node.attrs).map(([k, v]) => ` ${k}="${escapeAttr(v)}"`).join("");
+  const attrs = Object.entries(node.attrs)
+    .map(([k, v]) => ` ${k}="${escapeAttr(v)}"`)
+    .join("");
   if (node.children.length === 0) return `<${node.name}${attrs}/>`;
   return `<${node.name}${attrs}>${node.children.map(serialize).join("")}</${node.name}>`;
 }

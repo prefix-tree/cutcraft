@@ -1,23 +1,38 @@
 import { AssetSources, Compositor, ManualClock } from "@cutcraft/player";
+
 import { FakeFrameSource, fakeResolver, flush, recorderCanvas, recorderContext } from "./helpers/fakes";
 import { DEFAULT_MANIFEST, makeState } from "./helpers/state";
 
-const state = makeState({ tracks: [{ id: "main", items: [
-  { id: "c1", kind: "clip", source: { in: 0, out: 4, asset: "a" } },
-  { id: "x1", kind: "transition", duration: 1, props: { type: "crossfade", params: { curve: "linear" } } },
-  { id: "c2", kind: "clip", source: { in: 0, out: 4, asset: "b" } },
-] }] });
+const state = makeState({
+  tracks: [
+    {
+      id: "main",
+      items: [
+        { id: "c1", kind: "clip", source: { in: 0, out: 4, asset: "a" } },
+        { id: "x1", kind: "transition", duration: 1, props: { type: "crossfade", params: { curve: "linear" } } },
+        { id: "c2", kind: "clip", source: { in: 0, out: 4, asset: "b" } },
+      ],
+    },
+  ],
+});
 
 function setup() {
   const frames: [number, number][] = [];
-  const sources = new AssetSources({ media: fakeResolver(["a", "b"]), manifest: DEFAULT_MANIFEST, clock: new ManualClock(), onError: () => {}, frameSourceFactory: (id) => new FakeFrameSource(id) });
+  const sources = new AssetSources({
+    media: fakeResolver(["a", "b"]),
+    manifest: DEFAULT_MANIFEST,
+    clock: new ManualClock(),
+    onError: () => {},
+    frameSourceFactory: (id) => new FakeFrameSource(id),
+  });
   const comp = new Compositor(state, { sources, createCanvas: recorderCanvas, onFrame: (t, f) => frames.push([t, f]) });
   const rec = recorderContext();
   comp.attach(rec.ctx);
   return { comp, rec, frames };
 }
 
-const draws = (calls: { name: string; args: unknown[] }[]) => calls.filter((c) => c.name === "drawImage").map((c) => (c.args[0] as { fake: string }).fake);
+const draws = (calls: { name: string; args: unknown[] }[]) =>
+  calls.filter((c) => c.name === "drawImage").map((c) => (c.args[0] as { fake: string }).fake);
 
 describe("Compositor", () => {
   it("paints background then ops in plan order", async () => {
@@ -63,7 +78,18 @@ describe("Compositor", () => {
 
   it("steps through consecutive frames without restarting any decoder stream", async () => {
     const sources = new Map<string, FakeFrameSource>();
-    const make = () => new AssetSources({ media: fakeResolver(["a", "b"]), manifest: DEFAULT_MANIFEST, clock: new ManualClock(), onError: () => {}, frameSourceFactory: (id) => { const f = new FakeFrameSource(id); sources.set(id, f); return f; } });
+    const make = () =>
+      new AssetSources({
+        media: fakeResolver(["a", "b"]),
+        manifest: DEFAULT_MANIFEST,
+        clock: new ManualClock(),
+        onError: () => {},
+        frameSourceFactory: (id) => {
+          const f = new FakeFrameSource(id);
+          sources.set(id, f);
+          return f;
+        },
+      });
     const stepped = new Compositor(state, { sources: make(), createCanvas: recorderCanvas });
     stepped.attach(recorderContext().ctx);
     for (let n = 0; n < 60; n++) await stepped.step(n / 30);
@@ -74,7 +100,10 @@ describe("Compositor", () => {
 
     const seeked = new Compositor(state, { sources: make(), createCanvas: recorderCanvas });
     seeked.attach(recorderContext().ctx);
-    for (let n = 0; n < 60; n++) { await seeked.seek(n / 30); await seeked.tick(n / 30, { wait: true }); }
+    for (let n = 0; n < 60; n++) {
+      await seeked.seek(n / 30);
+      await seeked.tick(n / 30, { wait: true });
+    }
     expect(sources.get("a")!.streamsStarted).toBeGreaterThan(started * 10);
     seeked.dispose();
   });

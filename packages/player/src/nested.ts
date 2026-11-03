@@ -1,4 +1,5 @@
-import { resolveScene, type Placement, type ResolvedState, type SceneFn } from "@cutcraft/kit";
+import { type Placement, type ResolvedState, resolveScene, type SceneFn } from "@cutcraft/kit";
+
 import type { ResolveNested } from "./model/frame-plan";
 
 /**

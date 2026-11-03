@@ -1,10 +1,23 @@
 import type { FitMode, Placement, Transform } from "@cutcraft/kit";
+
 import { keyframedValue } from "./keyframes";
 
-export interface DrawRect { readonly x: number; readonly y: number; readonly w: number; readonly h: number }
+export interface DrawRect {
+  readonly x: number;
+  readonly y: number;
+  readonly w: number;
+  readonly h: number;
+}
 
 /** Row-major 2D affine matrix in the canvas/CSS `matrix(a, b, c, d, e, f)` convention. */
-export interface Matrix2D { readonly a: number; readonly b: number; readonly c: number; readonly d: number; readonly e: number; readonly f: number }
+export interface Matrix2D {
+  readonly a: number;
+  readonly b: number;
+  readonly c: number;
+  readonly d: number;
+  readonly e: number;
+  readonly f: number;
+}
 
 export interface Layout {
   /** Where the element lands in composition pixels before its transform. */
@@ -20,9 +33,12 @@ export const IDENTITY: Matrix2D = { a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 };
 
 export function multiply(m: Matrix2D, n: Matrix2D): Matrix2D {
   return {
-    a: m.a * n.a + m.c * n.b, b: m.b * n.a + m.d * n.b,
-    c: m.a * n.c + m.c * n.d, d: m.b * n.c + m.d * n.d,
-    e: m.a * n.e + m.c * n.f + m.e, f: m.b * n.e + m.d * n.f + m.f,
+    a: m.a * n.a + m.c * n.b,
+    b: m.b * n.a + m.d * n.b,
+    c: m.a * n.c + m.c * n.d,
+    d: m.b * n.c + m.d * n.d,
+    e: m.a * n.e + m.c * n.f + m.e,
+    f: m.b * n.e + m.d * n.f + m.f,
   };
 }
 
@@ -30,7 +46,8 @@ export const translate = (x: number, y: number): Matrix2D => ({ ...IDENTITY, e: 
 export const scaleM = (sx: number, sy: number): Matrix2D => ({ ...IDENTITY, a: sx, d: sy });
 export function rotate(deg: number): Matrix2D {
   const r = (deg * Math.PI) / 180;
-  const cos = Math.cos(r), sin = Math.sin(r);
+  const cos = Math.cos(r),
+    sin = Math.sin(r);
   return { a: cos, b: sin, c: -sin, d: cos, e: 0, f: 0 };
 }
 
@@ -39,17 +56,23 @@ export function matrixToCss(m: Matrix2D): string {
   return `matrix(${n(m.a)}, ${n(m.b)}, ${n(m.c)}, ${n(m.d)}, ${n(m.e)}, ${n(m.f)})`;
 }
 
-export interface Box { readonly width: number; readonly height: number }
+export interface Box {
+  readonly width: number;
+  readonly height: number;
+}
 
 /** The fitted rectangle of a source inside the composition, centred. */
 export function fitRect(comp: Box, src: Box, fit: FitMode): DrawRect {
-  const W = comp.width, H = comp.height;
-  const w = src.width > 0 ? src.width : W, h = src.height > 0 ? src.height : H;
+  const W = comp.width,
+    H = comp.height;
+  const w = src.width > 0 ? src.width : W,
+    h = src.height > 0 ? src.height : H;
   if (fit === "stretch") return { x: 0, y: 0, w: W, h: H };
   let s = 1;
   if (fit === "contain") s = Math.min(W / w, H / h);
   else if (fit === "cover") s = Math.max(W / w, H / h);
-  const dw = w * s, dh = h * s;
+  const dw = w * s,
+    dh = h * s;
   return { x: (W - dw) / 2, y: (H - dh) / 2, w: dw, h: dh };
 }
 
@@ -62,7 +85,12 @@ export function layoutRect(comp: Box, src: Box, fit: FitMode, transform?: Transf
   let crop: DrawRect | undefined;
   let effective: Box = src;
   if (t.crop && t.crop.width > 0 && t.crop.height > 0) {
-    crop = { x: t.crop.x * src.width, y: t.crop.y * src.height, w: t.crop.width * src.width, h: t.crop.height * src.height };
+    crop = {
+      x: t.crop.x * src.width,
+      y: t.crop.y * src.height,
+      w: t.crop.width * src.width,
+      h: t.crop.height * src.height,
+    };
     effective = { width: crop.w, height: crop.h };
   }
   const rect = fitRect(comp, effective, fit);
@@ -74,10 +102,12 @@ export function layoutRect(comp: Box, src: Box, fit: FitMode, transform?: Transf
 export function transformMatrix(rect: DrawRect, t: Transform | undefined): Matrix2D {
   const tr = t ?? {};
   const anchor = tr.anchor ?? { x: 0.5, y: 0.5 };
-  const ox = rect.x + anchor.x * rect.w, oy = rect.y + anchor.y * rect.h;
-  const sx = typeof tr.scale === "number" ? tr.scale : tr.scale?.x ?? 1;
-  const sy = typeof tr.scale === "number" ? tr.scale : tr.scale?.y ?? 1;
-  const px = tr.position?.x ?? 0, py = tr.position?.y ?? 0;
+  const ox = rect.x + anchor.x * rect.w,
+    oy = rect.y + anchor.y * rect.h;
+  const sx = typeof tr.scale === "number" ? tr.scale : (tr.scale?.x ?? 1);
+  const sy = typeof tr.scale === "number" ? tr.scale : (tr.scale?.y ?? 1);
+  const px = tr.position?.x ?? 0,
+    py = tr.position?.y ?? 0;
   let m = translate(px + ox, py + oy);
   if (tr.rotation) m = multiply(m, rotate(tr.rotation));
   if (sx !== 1 || sy !== 1) m = multiply(m, scaleM(sx, sy));
@@ -87,9 +117,12 @@ export function transformMatrix(rect: DrawRect, t: Transform | undefined): Matri
 
 /** The upright box around `rect` after `m`: where a rectangle of an element's local pixels lands in the composition. */
 export function boundsOf(rect: DrawRect, m: Matrix2D): DrawRect {
-  const xs = [rect.x, rect.x + rect.w, rect.x, rect.x + rect.w], ys = [rect.y, rect.y, rect.y + rect.h, rect.y + rect.h];
-  const px = xs.map((x, i) => m.a * x + m.c * ys[i]! + m.e), py = xs.map((x, i) => m.b * x + m.d * ys[i]! + m.f);
-  const x = Math.min(...px), y = Math.min(...py);
+  const xs = [rect.x, rect.x + rect.w, rect.x, rect.x + rect.w],
+    ys = [rect.y, rect.y, rect.y + rect.h, rect.y + rect.h];
+  const px = xs.map((x, i) => m.a * x + m.c * ys[i]! + m.e),
+    py = xs.map((x, i) => m.b * x + m.d * ys[i]! + m.f);
+  const x = Math.min(...px),
+    y = Math.min(...py);
   return { x, y, w: Math.max(...px) - x, h: Math.max(...py) - y };
 }
 
@@ -98,7 +131,7 @@ export function animatedTransform(base: Transform | undefined, children: readonl
   if (!children.some((c) => c.kind === "keyframe")) return base ?? {};
   const t: Record<string, unknown> = { ...(base ?? {}) };
   const num = (prop: string, fallback: number): number => Number(keyframedValue(children, prop, rel, fallback));
-  const pos = (base?.position ?? { x: 0, y: 0 });
+  const pos = base?.position ?? { x: 0, y: 0 };
   const scl = typeof base?.scale === "number" ? { x: base.scale, y: base.scale } : (base?.scale ?? { x: 1, y: 1 });
   const anc = base?.anchor ?? { x: 0.5, y: 0.5 };
   const crop = base?.crop ?? { x: 0, y: 0, width: 1, height: 1 };
@@ -108,8 +141,18 @@ export function animatedTransform(base: Transform | undefined, children: readonl
   t.opacity = num("transform.opacity", base?.opacity ?? 1);
   t.anchor = { x: num("transform.anchor.x", anc.x), y: num("transform.anchor.y", anc.y) };
   t.borderRadius = num("transform.borderRadius", base?.borderRadius ?? 0);
-  if (base?.crop || ["x", "y", "width", "height"].some((k) => children.some((c) => c.kind === "keyframe" && c.props.property === `transform.crop.${k}`))) {
-    t.crop = { x: num("transform.crop.x", crop.x), y: num("transform.crop.y", crop.y), width: num("transform.crop.width", crop.width), height: num("transform.crop.height", crop.height) };
+  if (
+    base?.crop ||
+    ["x", "y", "width", "height"].some((k) =>
+      children.some((c) => c.kind === "keyframe" && c.props.property === `transform.crop.${k}`),
+    )
+  ) {
+    t.crop = {
+      x: num("transform.crop.x", crop.x),
+      y: num("transform.crop.y", crop.y),
+      width: num("transform.crop.width", crop.width),
+      height: num("transform.crop.height", crop.height),
+    };
   }
   return t as Transform;
 }

@@ -18,15 +18,22 @@ export class ImageFrame implements Frame {
     readonly duration: number,
     private readonly owned: boolean,
   ) {}
-  get width(): number { return this.image.width; }
-  get height(): number { return this.image.height; }
+  get width(): number {
+    return this.image.width;
+  }
+  get height(): number {
+    return this.image.height;
+  }
   draw(ctx: Ctx2D, dx: number, dy: number, dw: number, dh: number, crop?: Crop): void {
     if (crop) ctx.drawImage(this.image, crop.x, crop.y, crop.w, crop.h, dx, dy, dw, dh);
     else ctx.drawImage(this.image, dx, dy, dw, dh);
   }
-  retain(): Frame { return this; }
+  retain(): Frame {
+    return this;
+  }
   close(): void {
-    if (this.owned && "close" in this.image && typeof (this.image as ImageBitmap).close === "function") (this.image as ImageBitmap).close();
+    if (this.owned && "close" in this.image && typeof (this.image as ImageBitmap).close === "function")
+      (this.image as ImageBitmap).close();
   }
 }
 
@@ -35,7 +42,12 @@ export function copyFrame(frame: Frame, createCanvas: CreateCanvas): Frame {
   const canvas = createCanvas(Math.max(1, frame.width), Math.max(1, frame.height));
   const ctx = canvas.getContext("2d") as Ctx2D | null;
   if (ctx) frame.draw(ctx, 0, 0, frame.width, frame.height);
-  return new ImageFrame(canvas as unknown as CanvasImageSource & { width: number; height: number }, frame.timestamp, frame.duration, false);
+  return new ImageFrame(
+    canvas as unknown as CanvasImageSource & { width: number; height: number },
+    frame.timestamp,
+    frame.duration,
+    false,
+  );
 }
 
 /** Still images: one bitmap, returned for every time. */
@@ -47,14 +59,26 @@ export class ImageFrameSource implements FrameSource {
     const f = await this.frame();
     return { width: f.width, height: f.height, duration: 0, decodable: true };
   }
-  async frameAt(): Promise<Frame | null> { return this.frame(); }
-  async *stream(): AsyncGenerator<Frame, void, unknown> { yield await this.frame(); }
+  async frameAt(): Promise<Frame | null> {
+    return this.frame();
+  }
+  async *stream(): AsyncGenerator<Frame, void, unknown> {
+    yield await this.frame();
+  }
   close(): void {
     void this.bitmap?.then((f) => f.close()).catch(() => undefined);
     this.bitmap = null;
   }
   private frame(): Promise<ImageFrame> {
-    this.bitmap ??= this.load().then((img) => new ImageFrame(img as CanvasImageSource & { width: number; height: number }, 0, Number.POSITIVE_INFINITY, "close" in img));
+    this.bitmap ??= this.load().then(
+      (img) =>
+        new ImageFrame(
+          img as CanvasImageSource & { width: number; height: number },
+          0,
+          Number.POSITIVE_INFINITY,
+          "close" in img,
+        ),
+    );
     return this.bitmap;
   }
 }
@@ -63,7 +87,11 @@ export class ImageFrameSource implements FrameSource {
 export class ErrorFrame implements Frame {
   readonly timestamp = 0;
   readonly duration = Number.POSITIVE_INFINITY;
-  constructor(readonly width: number, readonly height: number, private readonly label: string) {}
+  constructor(
+    readonly width: number,
+    readonly height: number,
+    private readonly label: string,
+  ) {}
   draw(ctx: Ctx2D, dx: number, dy: number, dw: number, dh: number): void {
     ctx.fillStyle = "#444444";
     ctx.fillRect(dx, dy, dw, dh);
@@ -73,7 +101,9 @@ export class ErrorFrame implements Frame {
     ctx.textBaseline = "middle";
     ctx.fillText(this.label, dx + dw / 2, dy + dh / 2);
   }
-  retain(): Frame { return this; }
+  retain(): Frame {
+    return this;
+  }
   close(): void {}
 }
 
@@ -82,8 +112,14 @@ export class ErrorFrameSource implements FrameSource {
   constructor(label: string, width = 640, height = 360) {
     this.frame = new ErrorFrame(width, height, label);
   }
-  open(): Promise<FrameSourceInfo> { return Promise.resolve({ width: this.frame.width, height: this.frame.height, duration: 0, decodable: false }); }
-  frameAt(): Promise<Frame | null> { return Promise.resolve(this.frame); }
-  async *stream(): AsyncGenerator<Frame, void, unknown> { yield this.frame; }
+  open(): Promise<FrameSourceInfo> {
+    return Promise.resolve({ width: this.frame.width, height: this.frame.height, duration: 0, decodable: false });
+  }
+  frameAt(): Promise<Frame | null> {
+    return Promise.resolve(this.frame);
+  }
+  async *stream(): AsyncGenerator<Frame, void, unknown> {
+    yield this.frame;
+  }
   close(): void {}
 }

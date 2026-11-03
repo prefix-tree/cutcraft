@@ -1,5 +1,7 @@
-import type { LayerClock } from "@cutcraft/kit";
 import { createContext } from "react";
+
+import type { LayerClock } from "@cutcraft/kit";
+
 import type { PlayerCore } from "../player";
 
 export const PlayerContext = createContext<PlayerCore | null>(null);

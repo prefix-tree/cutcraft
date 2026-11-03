@@ -1,11 +1,30 @@
 import { capabilitiesOf } from "./capabilities";
 import { defineElement } from "./define";
 import { captionSchema, captionsSchema } from "./schemas/captions";
-import { audioEffectSchema, colorGradeSchema, effectSchema, freezeSchema, keyframeSchema, maskSchema, speedKeySchema } from "./schemas/children";
+import {
+  audioEffectSchema,
+  colorGradeSchema,
+  effectSchema,
+  freezeSchema,
+  keyframeSchema,
+  maskSchema,
+  speedKeySchema,
+} from "./schemas/children";
 import { compositionSchema, gapSchema, markerSchema, trackSchema } from "./schemas/composition";
 import { audioSchema, clipSchema } from "./schemas/media";
 import { angleSchema, cutSchema, multicamSchema } from "./schemas/multicam";
-import { adjustmentSchema, graphicSchema, layerSchema, motionSchema, nestedSchema, shapeSchema, stickerSchema, svgSchema, threeSchema, titleSchema } from "./schemas/overlays";
+import {
+  adjustmentSchema,
+  graphicSchema,
+  layerSchema,
+  motionSchema,
+  nestedSchema,
+  shapeSchema,
+  stickerSchema,
+  svgSchema,
+  threeSchema,
+  titleSchema,
+} from "./schemas/overlays";
 import { transitionSchema } from "./schemas/transition";
 
 const el = <K extends string, S extends Parameters<typeof defineElement>[0]["schema"]>(kind: K, schema: S) =>
@@ -36,7 +55,10 @@ export const Layer = el("layer", layerSchema);
  * A Layer drawn by a library: kind `layer` to the resolver, the timeline and the editor, with props of its own and
  * an `engine` the Player looks up among the installed layer engines (`installLayerEngine`).
  */
-const engineLayer = <E extends string, S extends Parameters<typeof defineElement>[0]["schema"]>(engine: E, schema: S) => {
+const engineLayer = <E extends string, S extends Parameters<typeof defineElement>[0]["schema"]>(
+  engine: E,
+  schema: S,
+) => {
   const component = defineElement({ kind: "layer", schema, capabilities: capabilitiesOf("layer") });
   Object.defineProperty(component, "engine", { value: engine, enumerable: true });
   return component as typeof component & { readonly engine: E };
@@ -49,7 +71,10 @@ export const Motion = engineLayer("motion", motionSchema.omit({ engine: true }))
 
 /** The engine Layers by tag, and the schema each is checked against once collected (with its `engine`). */
 export const ENGINE_LAYERS = { Three, Motion } as const;
-export const ENGINE_SCHEMAS: Readonly<Record<string, typeof threeSchema | typeof motionSchema>> = { three: threeSchema, motion: motionSchema };
+export const ENGINE_SCHEMAS: Readonly<Record<string, typeof threeSchema | typeof motionSchema>> = {
+  three: threeSchema,
+  motion: motionSchema,
+};
 
 /** The engine a vocabulary component draws with, if it is an engine Layer. */
 export function engineOf(type: unknown): string | null {
@@ -65,8 +90,33 @@ export const SpeedKey = el("speedKey", speedKeySchema);
 export const Freeze = el("freeze", freezeSchema);
 
 export const ELEMENTS = {
-  Composition, Track, Clip, Audio, Gap, Transition, Title, Shape, Svg, Sticker, Graphic, Captions, Caption, Marker,
-  Adjustment, Mask, Nested, Multicam, Angle, Cut, Layer, Effect, AudioEffect, ColorGrade, Keyframe, SpeedKey, Freeze,
+  Composition,
+  Track,
+  Clip,
+  Audio,
+  Gap,
+  Transition,
+  Title,
+  Shape,
+  Svg,
+  Sticker,
+  Graphic,
+  Captions,
+  Caption,
+  Marker,
+  Adjustment,
+  Mask,
+  Nested,
+  Multicam,
+  Angle,
+  Cut,
+  Layer,
+  Effect,
+  AudioEffect,
+  ColorGrade,
+  Keyframe,
+  SpeedKey,
+  Freeze,
 } as const;
 
 export const SCHEMAS_BY_KIND = Object.fromEntries(

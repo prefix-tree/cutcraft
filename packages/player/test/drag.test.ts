@@ -1,29 +1,68 @@
 import { ManualClock, PlayerCore } from "@cutcraft/player";
-import { FakeAudioOutput, FakeAudioSource, FakeFrameSource, fakeResolver, flush, recorderCanvas, recorderContext } from "./helpers/fakes";
+
+import {
+  FakeAudioOutput,
+  FakeAudioSource,
+  FakeFrameSource,
+  fakeResolver,
+  flush,
+  recorderCanvas,
+  recorderContext,
+} from "./helpers/fakes";
 import { makeState } from "./helpers/state";
 
 /** A trim drag as the editor produces it: one resolved state per pointer move. */
 function trimmed(out: number, inSec = 0) {
-  return makeState({ tracks: [{ id: "main", items: [
-    { id: "c1", kind: "clip", source: { in: inSec, out, asset: "a" } },
-    { id: "c2", kind: "clip", source: { in: 0, out: 4, asset: "b" } },
-  ] }] });
+  return makeState({
+    tracks: [
+      {
+        id: "main",
+        items: [
+          { id: "c1", kind: "clip", source: { in: inSec, out, asset: "a" } },
+          { id: "c2", kind: "clip", source: { in: 0, out: 4, asset: "b" } },
+        ],
+      },
+    ],
+  });
 }
 
 function setup() {
   const frames = new Map<string, FakeFrameSource>();
   const timers: { fn: () => void; ms: number }[] = [];
   const core = new PlayerCore({
-    state: trimmed(4), media: fakeResolver(["a", "b"]), clock: new ManualClock(), audioOutput: new FakeAudioOutput(), toContextTime: (t) => t,
-    frameSourceFactory: (id) => { const f = new FakeFrameSource(id); frames.set(id, f); return f; },
+    state: trimmed(4),
+    media: fakeResolver(["a", "b"]),
+    clock: new ManualClock(),
+    audioOutput: new FakeAudioOutput(),
+    toContextTime: (t) => t,
+    frameSourceFactory: (id) => {
+      const f = new FakeFrameSource(id);
+      frames.set(id, f);
+      return f;
+    },
     audioSourceFactory: (id) => new FakeAudioSource(id),
-    createCanvas: recorderCanvas, raf: () => 0, cancelRaf: () => {}, setInterval: () => 1, clearInterval: () => {},
-    setTimeout: (fn, ms) => { const t = { fn, ms }; timers.push(t); return t; },
-    clearTimeout: (id) => { const i = timers.indexOf(id as { fn: () => void; ms: number }); if (i >= 0) timers.splice(i, 1); },
+    createCanvas: recorderCanvas,
+    raf: () => 0,
+    cancelRaf: () => {},
+    setInterval: () => 1,
+    clearInterval: () => {},
+    setTimeout: (fn, ms) => {
+      const t = { fn, ms };
+      timers.push(t);
+      return t;
+    },
+    clearTimeout: (id) => {
+      const i = timers.indexOf(id as { fn: () => void; ms: number });
+      if (i >= 0) timers.splice(i, 1);
+    },
   });
   const rec = recorderContext();
   core.attachCanvas(rec.canvas as unknown as HTMLCanvasElement);
-  const lastDraw = () => rec.calls.filter((c) => c.name === "drawImage").map((c) => c.args[0] as { fake: string; timestamp: number }).pop();
+  const lastDraw = () =>
+    rec.calls
+      .filter((c) => c.name === "drawImage")
+      .map((c) => c.args[0] as { fake: string; timestamp: number })
+      .pop();
   return { core, frames, timers, rec, lastDraw };
 }
 

@@ -4,6 +4,7 @@
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { cpus, tmpdir } from "node:os";
 import { join } from "node:path";
+
 import { directoryResolver, loadVideo, renderVideo } from "@cutcraft/render";
 
 const here = import.meta.dirname;
@@ -18,10 +19,15 @@ try {
     const video = await loadVideo(file, load);
     const media = directoryResolver(join(here, "media"), video.manifest);
     const fps = async (workers: number): Promise<{ fps: number; frames: number }> => {
-      let best = 0, frames = 0;
+      let best = 0,
+        frames = 0;
       for (let run = 0; run < 3; run++) {
         const r = await renderVideo({
-          state: video.state, media, interiors: video.interiors, out: join(scratch, `${name}-${workers}.webm`), silent: true,
+          state: video.state,
+          media,
+          interiors: video.interiors,
+          out: join(scratch, `${name}-${workers}.webm`),
+          silent: true,
           ...(workers > 1 ? { parallel: { file, load, mediaDir: join(here, "media"), workers } } : {}),
         });
         frames = r.frames;
@@ -29,15 +35,21 @@ try {
       }
       return { fps: best, frames };
     };
-    const one = await fps(1), four = await fps(4);
+    const one = await fps(1),
+      four = await fps(4);
     const { width, height } = video.state.composition;
     rows.push({ file: name, width, height, frames: one.frames, fps1: Math.round(one.fps), fps4: Math.round(four.fps) });
-    process.stdout.write(`${name.padEnd(11)} ${`${width}x${height}`.padEnd(10)} ${String(one.frames).padStart(6)}   ${one.fps.toFixed(0).padStart(5)} fps   ${four.fps.toFixed(0).padStart(5)} fps\n`);
+    process.stdout.write(
+      `${name.padEnd(11)} ${`${width}x${height}`.padEnd(10)} ${String(one.frames).padStart(6)}   ${one.fps.toFixed(0).padStart(5)} fps   ${four.fps.toFixed(0).padStart(5)} fps\n`,
+    );
   }
 } finally {
   rmSync(scratch, { recursive: true, force: true });
 }
 const json = process.argv.indexOf("--json");
 if (json >= 0 && process.argv[json + 1]) {
-  writeFileSync(process.argv[json + 1]!, `${JSON.stringify({ machine: `${cpus()[0]?.model ?? "?"}, ${cpus().length} cores`, node: process.version, rows }, null, 2)}\n`);
+  writeFileSync(
+    process.argv[json + 1]!,
+    `${JSON.stringify({ machine: `${cpus()[0]?.model ?? "?"}, ${cpus().length} cores`, node: process.version, rows }, null, 2)}\n`,
+  );
 }

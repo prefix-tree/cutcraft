@@ -1,5 +1,7 @@
 import { performance } from "node:perf_hooks";
-import { Executor, collectModule, createPatchLog, resolve, samePlacement } from "@cutcraft/kit";
+
+import { collectModule, createPatchLog, Executor, resolve, samePlacement } from "@cutcraft/kit";
+
 import { buildLarge } from "../fixtures/large";
 import { manifest } from "./helpers";
 
@@ -12,16 +14,20 @@ describe("drag-loop cost", () => {
   it("keeps a trim step on a 200-clip project under budget", () => {
     const exec = new Executor({ tree, manifest, now: () => 0 });
     const base = exec.state().items.get("c3")!.source!;
-    for (let i = 0; i < 10; i++) exec.execute({ type: "clip/trim", params: { id: "c3", edge: "out", value: base.in + 0.5 + i / 100 } });
+    for (let i = 0; i < 10; i++)
+      exec.execute({ type: "clip/trim", params: { id: "c3", edge: "out", value: base.in + 0.5 + i / 100 } });
     const t0 = performance.now();
     const steps = 60;
     for (let i = 0; i < steps; i++) {
-      const r = exec.execute({ type: "clip/trim", params: { id: "c3", edge: "out", value: base.in + 0.5 + (i % 50) / 100 } });
+      const r = exec.execute({
+        type: "clip/trim",
+        params: { id: "c3", edge: "out", value: base.in + 0.5 + (i % 50) / 100 },
+      });
       expect(r.ok).toBe(true);
     }
     const perStep = (performance.now() - t0) / steps;
     expect(perStep).toBeLessThan(STEP_BUDGET_MS);
-    expect(exec.state().items.get("c3")!.source!.out).toBeCloseTo(base.in + 0.5 + 59 % 50 / 100);
+    expect(exec.state().items.get("c3")!.source!.out).toBeCloseTo(base.in + 0.5 + (59 % 50) / 100);
   });
 
   it("keeps untouched nodes, their props and their parsed props across a prop patch", () => {

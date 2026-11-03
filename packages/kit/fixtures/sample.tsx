@@ -1,7 +1,33 @@
 import { z } from "zod";
+
 import {
-  Adjustment, Angle, Audio, AudioEffect, Caption, Captions, Clip, ColorGrade, Composition, Cut, Effect, Freeze, Gap,
-  Keyframe, Layer, Marker, Mask, Multicam, Nested, Shape, SpeedKey, Sticker, Svg, Title, Track, Transition, useT,
+  Adjustment,
+  Angle,
+  Audio,
+  AudioEffect,
+  Caption,
+  Captions,
+  Clip,
+  ColorGrade,
+  Composition,
+  Cut,
+  Effect,
+  Freeze,
+  Gap,
+  Keyframe,
+  Layer,
+  Marker,
+  Mask,
+  Multicam,
+  Nested,
+  Shape,
+  SpeedKey,
+  Sticker,
+  Svg,
+  Title,
+  Track,
+  Transition,
+  useT,
 } from "@cutcraft/kit";
 
 export const schema = z.object({
@@ -34,11 +60,34 @@ export default function Video({ title, accent }: z.infer<typeof schema>) {
         <Nested id="n1" of={Outro} duration={3} volume={0.8} />
       </Track>
       <Track id="overlays" name="Overlays">
-        <Title id="t1" anchor="c1" offset={1} duration={3} color={accent} size={64} animation={{ preset: "slide-up", in: 0.4, out: 0.3 }}>
+        <Title
+          id="t1"
+          anchor="c1"
+          offset={1}
+          duration={3}
+          color={accent}
+          size={64}
+          animation={{ preset: "slide-up", in: 0.4, out: 0.3 }}
+        >
           {title}
         </Title>
-        <Shape id="s1" anchor="c2" duration={2} shape="rectangle" width={400} height={80} fill="#ffffff" cornerRadius={12} />
-        <Svg id="v1" anchor="start" offset={0.5} duration={2} content="<svg viewBox='0 0 10 10'><circle cx='5' cy='5' r='4'/></svg>" />
+        <Shape
+          id="s1"
+          anchor="c2"
+          duration={2}
+          shape="rectangle"
+          width={400}
+          height={80}
+          fill="#ffffff"
+          cornerRadius={12}
+        />
+        <Svg
+          id="v1"
+          anchor="start"
+          offset={0.5}
+          duration={2}
+          content="<svg viewBox='0 0 10 10'><circle cx='5' cy='5' r='4'/></svg>"
+        />
         <Sticker id="st1" anchor="c3" duration={2} src="sticker:party" emphasis="pulse" />
         <Layer id="l1" anchor="c2" duration={4}>
           <Counter from={0} to={1200} />
@@ -71,11 +120,19 @@ export default function Video({ title, accent }: z.infer<typeof schema>) {
 }
 
 function Outro() {
-  return <Track id="outro"><Clip id="oc1" src="asset:city" in={0} out={3} /></Track>;
+  return (
+    <Track id="outro">
+      <Clip id="oc1" src="asset:city" in={0} out={3} />
+    </Track>
+  );
 }
 
 function Badge({ id, anchor, label }: { id: string; anchor: string; label: string }) {
-  return <Title id={id} anchor={anchor} offset={0.2} duration={1.5} size={28} color="#ffffff">{label}</Title>;
+  return (
+    <Title id={id} anchor={anchor} offset={0.2} duration={1.5} size={28} color="#ffffff">
+      {label}
+    </Title>
+  );
 }
 
 function Counter({ from, to }: { from: number; to: number }) {

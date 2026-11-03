@@ -1,4 +1,5 @@
 import { z } from "zod";
+
 import { Captions, Clip, Composition, THEME_NAMES, Title, Track } from "@cutcraft/kit";
 
 /**
@@ -20,11 +21,22 @@ export const schema = z.object({
   logo: z.string().describe("Logo asset reference"),
 });
 
-export const defaults = { headline: "Small software, real cloud", cta: "Try it today", theme: "midnight", accent: "#ff5a1f", logo: "asset:logo" };
+export const defaults = {
+  headline: "Small software, real cloud",
+  cta: "Try it today",
+  theme: "midnight",
+  accent: "#ff5a1f",
+  logo: "asset:logo",
+};
 
 export default function Video({ headline, cta, theme, accent, logo }: z.infer<typeof schema>) {
   return (
-    <Composition fps={30} width={1920} height={1080} theme={{ extends: theme, palette: { primary: accent }, motion: "none" }}>
+    <Composition
+      fps={30}
+      width={1920}
+      height={1080}
+      theme={{ extends: theme, palette: { primary: accent }, motion: "none" }}
+    >
       <Track id="main" name="Footage">
         <Clip id="open" src="asset:product" in="shot:0" out="shot:0.end" fit="cover" />
         <Clip id="detail" src="asset:product" in="shot:2" out="shot:2.end" fit="cover" />
@@ -32,10 +44,29 @@ export default function Video({ headline, cta, theme, accent, logo }: z.infer<ty
       </Track>
 
       <Track id="copy" name="Copy">
-        <Title id="headline" anchor="open" offset={0.4} duration={4} style="h1" size={104} color="$primary" animation={{ preset: "slide-up", in: 0.4, out: 0.3 }}>
+        <Title
+          id="headline"
+          anchor="open"
+          offset={0.4}
+          duration={4}
+          style="h1"
+          size={104}
+          color="$primary"
+          animation={{ preset: "slide-up", in: 0.4, out: 0.3 }}
+        >
           {headline}
         </Title>
-        <Title id="cta" anchor="card" offset={0.3} duration={2.5} style="h2" weight={500} valign="bottom" transform={{ position: { x: 0, y: -160 } }} animation={{ preset: "fade", in: 0.3, out: 0.3 }}>
+        <Title
+          id="cta"
+          anchor="card"
+          offset={0.3}
+          duration={2.5}
+          style="h2"
+          weight={500}
+          valign="bottom"
+          transform={{ position: { x: 0, y: -160 } }}
+          animation={{ preset: "fade", in: 0.3, out: 0.3 }}
+        >
           {cta}
         </Title>
       </Track>
