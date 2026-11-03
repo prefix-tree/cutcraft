@@ -70,4 +70,4 @@ without React; see [Rendering](./rendering.md).
 | `@cutcraft/kit` | vocabulary, manifest and time references, resolver, patches and actions, source tools and lint. No DOM. |
 | `@cutcraft/player` | WebCodecs decoding through mediabunny, canvas compositing, DOM overlays, Web Audio clock and mixer, `<Player>`. |
 
-Neither is published to npm yet; the workspace is the way to use them.
+Both are on npm: `npm install @cutcraft/kit @cutcraft/player react react-dom`.

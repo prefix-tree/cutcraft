@@ -75,6 +75,8 @@ it.
   small edits, and the model reads what you did as the code it wrote.
 - **No math for the model.** Cuts name transcript words and camera shots, titles name the word they belong to, and
   the resolver turns them into seconds through every trim and speed change.
+- **Free code where you want it.** A `<Layer>` takes any React, CSS or WebGL, and `<Three>` and `<Motion>` put
+  three.js and Motion on the timeline. All of it follows the video's clock, so it scrubs and seeks frame-exact.
 - **Every action undoes.** 131 editor actions, each able to validate, apply, invert and write itself back to the file.
 - **Plays in the browser.** WebCodecs decoding, a canvas for footage, DOM for overlays, Web Audio as the clock, and a
   frame-exact seek.

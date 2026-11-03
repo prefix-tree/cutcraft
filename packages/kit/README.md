@@ -1,16 +1,16 @@
-<p align="center"><img src="../../docs/public/logo.svg" width="64" alt="cutcut logo"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/prefix-tree/cutcraft/main/docs/public/logo.svg" width="64" alt="CutCraft"></p>
 
 # @cutcraft/kit
 
-The shared core of the cutcut editor: the JSX vocabulary a model writes, the
-resolver that turns a file into absolute placements, the invertible action
-system the editor dispatches, and the source tools that write those actions
-back into the file.
+The core of [CutCraft](https://prefix-tree.github.io/cutcraft/): the elements a video file is written in, the resolver
+that turns a file into exact placements, the actions an editor runs on it, and the tools that write those edits back
+into the file's text. It has no DOM and runs anywhere.
 
-The design is in [`docs/spec.md`](docs/spec.md). The mapping to OpenReel's action
-set is in [`docs/parity.md`](docs/parity.md) (`pnpm parity` regenerates it).
+```sh
+npm install @cutcraft/kit react zod
+```
 
-## The file
+## A file
 
 ```tsx
 import { z } from "zod";
@@ -35,56 +35,40 @@ export default function Video({ title, accent }: z.infer<typeof schema>) {
 }
 ```
 
-Conventions the lint enforces: every element has a literal `id`; values a
-human may edit are literals or `schema` props; helpers are pure; a sequence
-track derives `start` from order (use `layout="free"` for absolute starts);
-`in`/`out` may reference the asset manifest (`word:N`, `shot:N.end`,
-`silence:N`, `marker:ID`).
+`in` and `out` can point into the asset manifest (`word:N`, `shot:N.end`, `silence:N`, `marker:ID`), so a cut stays on
+its word when the clip moves. Each timeline element has a literal `id`. A track is a magnetic sequence unless it says
+`layout="free"`. A `<Layer>` holds any React you like.
 
-## The pipeline
+## Using it
 
+```ts
+import { collectModule, resolve, Executor } from "@cutcraft/kit";
+import { lint, foldToSource } from "@cutcraft/kit/source";
+import * as file from "./video";
+
+const state = resolve(collectModule(file), manifest);      // every element placed in time, by id
+const diagnostics = lint(text, { manifest });              // problems in the file, at their line
+
+const exec = new Executor({ tree: collectModule(file), manifest });
+exec.execute({ type: "clip/trim", params: { id: "c1", edge: "out", value: 9.5 } });
+exec.undo();
+const { text: edited } = foldToSource(text, exec.log(), exec.state());   // the edit as a text change
 ```
-file.tsx ──evaluate──▶ element tree ──collect──▶ CollectedTree ──resolve(manifest, patches)──▶ ResolvedState
-   ▲                                                                                              │
-   └── fold(patch log) ◀── Executor.execute(action) ◀── timeline / inspector / preview gestures ◀──┘
-```
 
-- `collect(element)` walks the React element tree, expands pure helpers, and
-  indexes every vocabulary element by id. `collectModule(mod)` does it for an
-  imported file.
-- `resolve(tree, manifest, log?)` places everything: sequence cursors, gaps,
-  transitions (overlap by their duration), anchors, `fill` and `match`
-  durations, transcript references, multicam cuts. Errors are typed and
-  attached to the element that caused them.
-- Cost: a resolve is linear in the number of elements, about 2 µs per node
-  (1,000 nodes in ~2 ms). Parsed props are cached per raw props object and the
-  overlay keeps every node a patch did not touch, so a drag step re-parses one
-  element and re-derives one trim; every placement whose timing, props and
-  errors did not change is returned as the same object, so consumers can
-  memoise on `Placement` identity.
-  `pnpm bench` prints per-step costs on the sample fixture and a synthetic
-  500-clip project.
-- `new Executor({ tree, manifest })` runs actions. Each handler has four faces:
-  `validate`, `apply` (appends patches), `invert` (never null), `fold`. History
-  groups gestures and auto-groups rapid same-target updates. `undo()` and
-  `redo()` re-run inverses and originals through the same path.
-- `buildSourceIndex(text)` maps ids to source ranges. `foldToSource(text, log, state)`
-  turns the patch log's net effect into text edits: a trim becomes one changed
-  token, an inserted element is printed in place, a generated element is baked
-  into literals first.
-- `lint(text, { manifest })` returns the file-contract diagnostics.
+| | |
+|---|---|
+| `collectModule(mod)`, `resolve(tree, manifest, log?)` | Read a file and place everything in it: sequences, gaps, transitions, anchors, `fill` and `match` durations, transcript references and multicam cuts. Errors are typed and point at the element that caused them. A change costs about 2 µs per element, and placements that did not change keep their identity, so a UI can memoise on them. |
+| `Executor` | Runs 131 editor actions (trim, split, move, ripple, keyframes, captions and more). Each one validates, applies and undoes; history groups a drag into one step. |
+| `@cutcraft/kit/source` | `loadModule(source, { imports })` evaluates a file's text in the browser or in Node; the file may import `react`, `zod` and the kit, plus the modules you pass in `imports`. `buildSourceIndex` maps ids to their place in the text, `foldToSource` writes edits back as small token changes, and `lint` checks the file. |
+| `interpolate`, `spring`, `random` | Pure animation helpers for free code. `useT()` and `useLayer()` give the current time once a player is mounted. |
 
-## Status
+The kit doesn't draw anything. [`@cutcraft/player`](https://www.npmjs.com/package/@cutcraft/player) plays a resolved
+file in the browser, and [`cutcraft`](https://www.npmjs.com/package/cutcraft) exports it.
 
-Every action in the spec is registered, applies, and round-trips through
-undo/redo against `fixtures/sample.tsx` (which uses every element).
-There is
-no renderer: `useT()` and `useLayer()` throw until a Player installs one.
-`interpolate()`, `spring()` and `random()` are pure and work anywhere.
+## Docs
 
-```
-pnpm typecheck
-pnpm lint
-pnpm test          # vitest, node and jsdom
-pnpm parity        # regenerate docs/parity.md
-```
+- [Writing a file](https://prefix-tree.github.io/cutcraft/guide/writing-files)
+- [Editing](https://prefix-tree.github.io/cutcraft/guide/editing)
+- [Elements](https://prefix-tree.github.io/cutcraft/reference/elements/) and [actions](https://prefix-tree.github.io/cutcraft/reference/actions)
+
+MIT licensed.

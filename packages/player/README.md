@@ -1,103 +1,63 @@
-<p align="center"><img src="../../docs/public/logo.svg" width="64" alt="cutcut logo"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/prefix-tree/cutcraft/main/docs/public/logo.svg" width="64" alt="CutCraft"></p>
 
 # @cutcraft/player
 
-The browser player for cut files. It takes a `ResolvedState` from `@cutcraft/kit`
-and plays it: footage decoded with WebCodecs through mediabunny and composited
-on one canvas, overlays rendered as React DOM above it, sound mixed and
-clocked by Web Audio. The editor's preview and the model's filmstrip drive the
-same `PlayerCore`; the export (`@cutcraft/render`) runs the same engine in Node
-through `@cutcraft/player/engine` and `@cutcraft/player/overlays`, which have no
-React layer, DOM or Web Audio in them.
+Plays a [CutCraft](https://prefix-tree.github.io/cutcraft/) video file in the browser. Footage is decoded with
+WebCodecs through [mediabunny](https://mediabunny.dev) and drawn on one canvas, overlays are React DOM on top of it,
+and Web Audio mixes the sound and keeps the time.
+
+```sh
+npm install @cutcraft/player @cutcraft/kit react react-dom
+```
 
 ```tsx
 import { collectModule, resolve } from "@cutcraft/kit";
 import { Player } from "@cutcraft/player";
-import * as file from "./video";          // the TSX file the model wrote
+import "@cutcraft/player/fonts.css";
+import * as file from "./video";
 
 const state = resolve(collectModule(file), manifest);
+
 <Player state={state} element={file.default(file.defaults)} media={{ interview: blob, bed: "/bed.ogg" }} controls />
 ```
 
-`media` maps asset ids to Blobs or URLs (or implements `MediaResolver`).
-`element` is only needed for `<Layer>` interiors, which the resolver drops.
+`media` maps asset ids to Blobs or URLs, or you can pass your own `MediaResolver`. `element` is the rendered file; the
+player needs it to draw what is inside each `<Layer>`.
 
-## What it does
+## What you get
 
-- **Clock.** Composition time is an anchor on `AudioContext.currentTime`
-  (`anchorTime + (now − anchorClock) × rate`), re-anchored on play, pause, seek
-  and rate change; it never accumulates drift. The render loop is
-  `requestAnimationFrame`; a tick that lands while a frame is in flight is
-  coalesced, and a tick on the same frame index only keeps decoders prefetching.
-- **Decoding.** One mediabunny `Input` per asset, shared by every clip of it
-  and by nested compositions, ref-counted and closed when idle. Each clip near
-  the play head has a `ClipDecoder`: a `VideoSampleSink` stream feeding a
-  short queue for forward play, pre-decoded windows for reverse, single-frame
-  fetches at high speeds and while scrubbing, one retained frame per freeze.
-  A playing tick never waits for a frame; a seek does. A trim or speed drag
-  updates the decoder in place rather than reopening it, and a paused preview
-  repaints each drag step with what is decoded, then fetches the exact frame
-  once the gesture has been quiet for 120 ms.
-- **Compositing.** `buildFramePlan(state, t)` is pure and deterministic: tracks
-  in document order (the first track is the bottom), each clip with its
-  animated transform, crop, fit, opacity, blend, filter and mask; transitions
-  draw the incoming clip over the outgoing one; adjustments re-filter what is
-  below them. `CanvasPainter` executes it. Titles, shapes, SVG, stickers,
-  layers and captions are DOM elements positioned with the same matrix math.
-- **Audio.** `buildAudioPlan` lists every audio-bearing chunk in a window with
-  its gain envelope (volume, fades, automation, ducking, keyframes, mute and
-  solo). `AudioEngine` schedules each chunk once per play session, 200 ms
-  ahead, as an `AudioBufferSourceNode` with the right offset, duration and
-  `playbackRate = clipSpeed × rate`, automated along a speed-key ramp and
-  split around freeze holds, which are silent; PCM is decoded per source range with
-  `AudioBufferSink` and cached. Pause stops everything; seek reschedules once.
-- **Addressability.** Every DOM element carries `data-el` and `data-kind`; the
-  root carries `data-time` and `data-frame`; the canvas is
-  `[data-el="composition"]`.
-- **Determinism.** `seekTo(t)` and `renderFrame(t)` draw the exact frame for
-  `t`, paused or playing. The exporter steps through frames with
-  `Compositor.step(t)`, which keeps every decoder streaming.
-- **Looking at the result.** `captureSheet(times, { columns })` returns a
-  labelled contact sheet of those frames, the way an agent or a test checks
-  a cut without exporting.
+- Frame-exact seeking. `seekTo(t)` draws the frame for `t` whether the player is paused or playing.
+- Smooth scrubbing and trimming. A drag repaints from frames already decoded, then fetches the exact frame once the
+  pointer rests.
+- Playback from 0.25× to 4× and looped, with speed ramps and freeze frames and their sound.
+- A clock that does not drift: time comes from `AudioContext.currentTime`.
+- Every overlay carries `data-el` and `data-kind`, and the root carries `data-time` and `data-frame`, so tests and
+  agents can find things on screen.
+- `captureSheet(times, { columns })` returns a labelled contact sheet of frames, a quick way to check a cut without
+  exporting it.
 
 ## API
 
-`PlayerCore` (framework-free): `play`, `pause`, `toggle`, `seekTo`,
-`seekToFrame`, `renderFrame`, `captureSheet`, `getCurrentTime`,
-`getCurrentFrame`, `isPlaying`, `duration`, `playbackRate` (0.25–4), `loop`, `muted`, `volume`,
-`setState`, `attachCanvas`, `addEventListener` (`frameupdate`, `play`,
-`pause`, `seeked`, `ended`, `ratechange`, `volumechange`, `error`),
-`subscribeTime`, `dispose`. Every browser dependency is injectable
-(`clock`, `audioOutput`, `frameSourceFactory`, `audioSourceFactory`,
-`createCanvas`, `raf`, `setInterval`), which is how the unit tests run in jsdom.
+`<Player>` takes `state`, `element`, `media`, `controls`, `loop`, `autoPlay`, `initiallyMuted`, `playbackRate`, `fit`,
+`onError` and `onFrame`, and exposes a `PlayerRef`. Hooks: `usePlayer`, `useCompositionTime`, `useCompositionFrame`, `useLayerT`.
+Mounting a player makes the kit's `useT()` and `useLayer()` return the current time.
 
-React: `<Player>` with `controls`, `loop`, `autoPlay`, `initiallyMuted`,
-`playbackRate`, `fit`, `onError`, `onFrame` and a `PlayerRef`; hooks
-`usePlayer`, `useCompositionTime`, `useCompositionFrame`, `useLayerT`.
-Mounting a Player installs the kit's `useT()` and `useLayer()`.
+`PlayerCore` is the same player without React: `play`, `pause`, `toggle`, `seekTo`, `seekToFrame`, `renderFrame`,
+`captureSheet`, `getCurrentTime`, `getCurrentFrame`, `isPlaying`, `duration`, `playbackRate`, `loop`, `muted`,
+`volume`, `setState`, `attachCanvas`, `subscribeTime`, `dispose`, and the events `frameupdate`, `play`, `pause`,
+`seeked`, `ended`, `ratechange`, `volumechange` and `error`. Every browser dependency (clock, audio output, canvas,
+decoders) can be swapped out, which is how its tests run in jsdom.
 
-## Not rendered yet
+## Not drawn yet
 
-Transition types other than crossfade, dips to black or white, wipe, slide and push (drawn as a crossfade), effects that
-have no CSS filter equivalent (sharpen, glow, …; vignette and grain are drawn),
-colour wheels, curves and LUTs, matte masks, audio effects, pitch correction,
-3D text, most text animation presets (shown as a fade),
-`background.mode: "blur"` under overlays that sit beneath the footage (the
-plain colour), sticker packs and `file:` nested references. The
-kit's `not-rendered` lint warning reports these in the file before anything
-plays, from the same table (`RENDERED_*` in `@cutcraft/kit`) the player reads.
+Some props are accepted but not drawn yet: transition types other than crossfade, dips, wipe, slide and push (shown as
+a crossfade), effects with no CSS filter (vignette and grain do draw), colour wheels, curves and LUTs, matte masks,
+audio effects, pitch correction, 3D text and most text animation presets (shown as a fade). The kit's lint flags them
+in the file. [What renders](https://prefix-tree.github.io/cutcraft/reference/rendering) has the full table.
 
-## Tests
+## Docs
 
-```
-pnpm --filter @cutcraft/player test        # vitest over jsdom with fakes (part of `pnpm check`)
-pnpm --filter @cutcraft/player test:e2e    # Playwright: ffmpeg-generated media, Vite, headless Chromium
-```
+- [Rendering](https://prefix-tree.github.io/cutcraft/guide/rendering)
+- [Writing a file](https://prefix-tree.github.io/cutcraft/guide/writing-files)
 
-The browser suite generates `bars.webm` (frame number encoded in a binary
-strip), `tone.ogg`, `logo.png` and `solid.webm` into `e2e/app/public/`, then
-checks seek accuracy, real-time playback on the audio clock, rate changes,
-crossfade blending, DOM overlays and `useT`, image clips, ended/loop and
-determinism. It needs `ffmpeg` and Playwright's Chromium (pinned to 1.56.1 to
-match the preinstalled browser).
+MIT licensed.
