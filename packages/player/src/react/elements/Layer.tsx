@@ -48,7 +48,7 @@ function Engine({
   if (!Draw) {
     devWarn(
       `engine:${name}`,
-      `no layer engine "${name}" is installed, so <${name === "three" ? "Three" : name === "motion" ? "Motion" : name}> draws nothing; the host installs it (installFreeCodeLibraries from @cutcraft/libraries)`,
+      `no layer engine "${name}" is installed, so <${name === "three" ? "Three" : name === "motion" ? "Motion" : name}> draws nothing; the host installs it (installFreeCodeLibraries from @cutcraft/graphics/libraries)`,
     );
     return null;
   }

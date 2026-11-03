@@ -9,9 +9,9 @@ import type { Mesh, MeshBasicMaterial } from "three";
 import { Composition, collect, Layer, Motion, resolve, Three, Track } from "@cutcraft/kit";
 import { Player, type PlayerRef } from "@cutcraft/player";
 
-import { installFreeCodeLibraries } from "../../../src";
-import { useLayerTime, useTimeline } from "../../../src/motion";
-import { ThreeScene } from "../../../src/three";
+import { installFreeCodeLibraries } from "../../../src/libraries";
+import { useLayerTime, useTimeline } from "../../../src/libraries/motion";
+import { ThreeScene } from "../../../src/libraries/three";
 
 installFreeCodeLibraries();
 

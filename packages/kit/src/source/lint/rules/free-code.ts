@@ -25,15 +25,15 @@ export const strayHtml: Rule = {
  */
 /** Libraries with a clock of their own, by module: the imports that run on it, and the adapter that puts them on the video's. */
 const OWN_CLOCK: Readonly<Record<string, { readonly names: readonly string[]; readonly use: string }>> = {
-  "@react-three/fiber": { names: ["Canvas"], use: "<ThreeScene> from @cutcraft/libraries/three" },
-  motion: { names: ["animate"], use: "useTimeline from @cutcraft/libraries/motion" },
+  "@react-three/fiber": { names: ["Canvas"], use: "<ThreeScene> from @cutcraft/graphics/three" },
+  motion: { names: ["animate"], use: "useTimeline from @cutcraft/graphics/motion" },
   "motion/react": {
     names: ["animate", "useAnimate"],
-    use: "useTimeline or useLayerTime from @cutcraft/libraries/motion",
+    use: "useTimeline or useLayerTime from @cutcraft/graphics/motion",
   },
   "framer-motion": {
     names: ["animate", "useAnimate"],
-    use: "useTimeline or useLayerTime from @cutcraft/libraries/motion",
+    use: "useTimeline or useLayerTime from @cutcraft/graphics/motion",
   },
 };
 /** Props that start a Motion component's own animation. */
@@ -99,7 +99,7 @@ export const freeCodeClock: Rule = {
           if (plays)
             warn(
               plays,
-              `<${el.object.name}.${el.property.name}> animates on Motion's own clock, so a scrub or an export does not follow it; drive it with useTimeline or useLayerTime from @cutcraft/libraries/motion`,
+              `<${el.object.name}.${el.property.name}> animates on Motion's own clock, so a scrub or an export does not follow it; drive it with useTimeline or useLayerTime from @cutcraft/graphics/motion`,
             );
         }
       } else if (

@@ -15,8 +15,8 @@ import * as cutThree from "./three";
  * loadModule(source, { imports: FREE_CODE_LIBRARIES });
  * ```
  *
- * three.js comes with React Three Fiber and `@cutcraft/libraries/three`, whose `<ThreeScene>` puts a scene on the
- * video's clock; Motion with `@cutcraft/libraries/motion`, whose `useTimeline` and `useLayerTime` do the same for
+ * three.js comes with React Three Fiber and `@cutcraft/graphics/three`, whose `<ThreeScene>` puts a scene on the
+ * video's clock; Motion with `@cutcraft/graphics/motion`, whose `useTimeline` and `useLayerTime` do the same for
  * animations. A host that wants fewer builds its own map from these entries.
  */
 export const FREE_CODE_LIBRARIES: Readonly<Record<string, unknown>> = {
@@ -24,8 +24,8 @@ export const FREE_CODE_LIBRARIES: Readonly<Record<string, unknown>> = {
   "@react-three/fiber": fiber,
   motion,
   "motion/react": motionReact,
-  "@cutcraft/libraries/three": cutThree,
-  "@cutcraft/libraries/motion": cutMotion,
+  "@cutcraft/graphics/three": cutThree,
+  "@cutcraft/graphics/motion": cutMotion,
 };
 
 /**

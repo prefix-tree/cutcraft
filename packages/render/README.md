@@ -1,16 +1,16 @@
-<p align="center"><img src="../../docs/public/logo.svg" alt="cutcut" width="64" height="64"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/prefix-tree/cutcraft/main/docs/public/logo.svg" width="64" alt="CutCraft"></p>
 
 # @cutcraft/render
 
-Export for cutcut: a cut file to WebM or MP4 in Node, with no browser. It runs
-the player's own engine (the frame plan, the painter, the compositor and the
-audio plan) on different surfaces, so the file holds what the preview shows.
-The design is
-[decision 0015](../../docs/decisions/0015-a-headless-engine-renders-the-export.md)
-and the user guide is [Exporting](../../docs/guide/exporting.md).
+Exports a [CutCraft](https://prefix-tree.github.io/cutcraft/) video file in Node, with no browser: MP4, WebM or MOV,
+an MP3 or WAV soundtrack, or a PNG or JPEG still. It runs the player's own engine, so the exported file matches the
+preview frame for frame.
+
+For the command line, install [`cutcraft`](https://www.npmjs.com/package/cutcraft). This package is the library behind
+it.
 
 ```sh
-npx cutcraft video.tsx --manifest manifest.json --media ./media --out video.webm
+npm install @cutcraft/render
 ```
 
 ```ts
@@ -21,35 +21,33 @@ await renderVideo({
   state: video.state,
   media: directoryResolver("media", video.manifest),
   interiors: video.interiors,
-  out: "video.webm",
+  out: "video.mp4",
+  onProgress: ({ frame, frames }) => console.log(`${frame}/${frames}`),
 });
 ```
 
-## How it is put together
+`loadVideo` reads the file the way the editor does: it may import `react`, `zod` and `@cutcraft/kit`, plus the modules
+you list in `imports`. `directoryResolver` finds one file per asset id in a folder.
 
-| | |
-|---|---|
-| `env.ts` | Registers FFmpeg-backed decoders and encoders with Mediabunny; the skia `createCanvas` the painter uses. |
-| `frame-source.ts` | A decoded sample kept as decoded and converted to RGBA only when drawn; a picture that fills the canvas is put straight on it. |
-| `pipeline.ts` | One composition frame by frame: step the compositor, draw overlays, read pixels back; a frame that is one picture shown as it is goes to the encoder as decoded, never converted to RGBA. |
-| `overlays.ts` | Titles, layers and captions laid out by Satori from the trees the browser mounts; shapes, SVG and stickers drawn natively; layout cached. |
-| `mixer.ts`, `pcm.ts` | The offline mixer: a pure function of the audio plan and decoded PCM. |
-| `encode.ts`, `segment.ts` | Frames into an encoder, one in flight; a run of frames into a small container of its own. |
-| `parallel.ts`, `worker.ts` | Worker threads rendering runs of whole keyframe intervals, and the join of their packets in order. |
-| `copy.ts` | Smart copy: which stretches of the output are plain source, and the packets of whole groups of pictures. |
-| `renderer.ts` | `renderVideo`: ties them together with the soundtrack. |
-| `load.ts`, `cli.ts` | Importing a TSX file; the command line. |
+## What it does
 
-## Tests
+- Encodes H.264, HEVC, VP8, VP9, AV1 or ProRes, with the machine's hardware encoder where it has one.
+- Mixes the soundtrack itself: volume, fades, ducking, speed ramps and freeze frames.
+- Copies untouched stretches of the source without re-encoding them (`smartCopy: true`, for VP8 and VP9).
+- A frame that is one source picture shown as it is goes from the decoder to the encoder without being drawn.
+- `renderStill` writes one frame. `checkLayout` reports overlays that leave the frame or the safe zone, or cover
+  captions or the subject, with their line in the file.
 
-```sh
-pnpm --filter @cutcraft/render test           # needs ffmpeg on the PATH, to make test media
-pnpm --filter @cutcraft/render test:browser   # needs Chromium: overlay and mixer parity with the browser
-pnpm --filter @cutcraft/render bench          # frames per second, and where the time goes
-```
+Titles, layers and captions are laid out with [Satori](https://github.com/vercel/satori), which reads a subset of CSS.
+What it can't draw is left out with a warning that names it. `<Three>` and `<Motion>` are left out the same way for now.
 
-The source video the tests render paints its frame number into a strip; the
-tests decode the output and read the strip back, so a frame that is one off
-fails. Every recipe is rendered with generated media, workers are checked
-against one thread, smart copy against the source's packets, and the output is
-played in Chromium across its joins.
+On a 4-core Linux machine with no GPU it renders 1080p H.264 at 111 fps for plain cuts, and at 37 to 61 fps when
+frames are drawn. [Export speed](https://prefix-tree.github.io/cutcraft/comparisons/export-speed) compares it with
+Remotion and Diffusion Studio.
+
+## Docs
+
+- [Exporting](https://prefix-tree.github.io/cutcraft/guide/exporting): every option, smart copy, speed, and what
+  each format holds
+
+MIT licensed.

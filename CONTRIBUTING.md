@@ -83,3 +83,4 @@ benchmarks on a 4-core runner (results in the job log and the `render-bench`
 artifact); `gh workflow run docs.yml -f bench=true` measures the landing page's
 numbers again before deploying. Otherwise the site uses the committed
 `docs/bench.json`.
+

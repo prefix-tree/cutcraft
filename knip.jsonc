@@ -32,8 +32,8 @@
       // Font files are found by package name at run time (overlays.ts); the plugin builds the spike's page.
       "ignoreDependencies": ["@fontsource/.+", "@vitejs/plugin-react"]
     },
-    "packages/libraries": {
-      "entry": ["src/index.ts", "src/three.tsx", "src/motion.tsx", "test/**/*.{ts,tsx}"]
+    "packages/graphics": {
+      "entry": ["test/**/*.{ts,tsx}"]
     },
     "examples/showcase": {
       // Cut files, loaded by path with loadVideo.

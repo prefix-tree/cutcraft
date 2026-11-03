@@ -9,7 +9,6 @@ const DIRS = [
   "packages/graphics",
   "packages/player",
   "packages/render",
-  "packages/libraries",
   "recipes",
   "examples/launch-recap",
 ];

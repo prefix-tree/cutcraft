@@ -1,29 +1,25 @@
 # Diffusion Studio
 
-[Diffusion Studio](https://github.com/diffusionstudio/editor) is the closest
-project to cutcut: an editor whose thesis is "the source is the document",
-where an agent writes JSX, the app renders it, and canvas edits are written
-back into the file. It ships as a desktop app with real users. This page
-records what it does, where cutcut differs, and what cutcut adopts from it.
-File references point into their repository at the commit of 2026-10-19;
-the conclusions are in [decision 0012](../decisions/0012-what-we-adopt-from-diffusion-studio.md).
+[Diffusion Studio](https://github.com/diffusionstudio/editor) is the project
+closest to CutCraft. It is an editor built on the idea that the source file is
+the document: an agent writes JSX, the app renders it, and edits on the canvas
+are written back into the file. It ships as a desktop app. File references
+below point into its repository as of October 2026.
 
 ## What it is
 
-Two repositories. `diffusionstudio/core` is the earlier product, an
-imperative browser engine (`new Composition()`, `new VideoClip(source, { range })`)
-shipped as the compiled npm package `@diffusionstudio/core`; its repository
-holds docs and a playground. `diffusionstudio/editor` is the current product,
-started over on the file-based idea: an Electron app (`apps/desktop`), a web
-UI (`apps/web`, about 65k lines), a koota ECS runtime (`packages/runtime`,
-about 19k lines), a Solid reconciler that mounts a project's JSX into that
-runtime (`packages/reconciler`), the type-only authoring package
-(`packages/jsx`), and a tool catalog for agents (`packages/dapi`). MPL-2.0,
-24 test files, release workflows but no CI on pull requests.
+There are two repositories. `diffusionstudio/core` is the earlier product, an
+imperative browser engine (`new Composition()`,
+`new VideoClip(source, { range })`) published as the compiled npm package
+`@diffusionstudio/core`. Without a licence key it stamps a watermark on every
+frame. `diffusionstudio/editor` is the current product, built around the
+file: an Electron app, a web UI, an ECS runtime (koota), a Solid reconciler
+that mounts a project's JSX into that runtime, and a catalog of tools for
+agents. The editor is MPL-2.0.
 
-## Same thesis, different file
+## The file
 
-Theirs:
+A Diffusion Studio project:
 
 ```tsx
 export default function Project() {
@@ -41,7 +37,7 @@ export default function Project() {
 }
 ```
 
-Ours:
+The same cut in CutCraft:
 
 ```tsx
 <Composition fps={30} width={1920} height={1080}>
@@ -56,109 +52,84 @@ Ours:
 </Composition>
 ```
 
-Their file is a scene graph: every element has absolute `x y width height`
-and absolute `start end sourceIn sourceOut`, and `<sequence>` places nothing
-(nothing in the runtime reads `Sequential` for timing; it strips transforms,
-allows a `transition` prop and settles overlaps on editor drops by trimming,
-deleting or splitting the clip underneath, `packages/runtime/src/actions/overlap.ts`).
-There is no ripple and no magnetic track; the menu item "Toggle magnetic
-track" has no handler. Ours is an edit: sequence tracks place by order,
-overlays anchor, and trims reference the transcript.
+Diffusion Studio's file is a scene graph. Every element has absolute
+`x y width height` and absolute `start end sourceIn sourceOut`. `<sequence>`
+does not place anything: when you drop a clip in the editor, overlaps are
+settled by trimming, deleting or splitting the clip underneath
+(`packages/runtime/src/actions/overlap.ts`). There is no ripple and no
+magnetic track. CutCraft's file describes an edit: sequence tracks place
+clips by order, overlays anchor to other elements, and trims reference the
+transcript and shot list.
 
-| | Diffusion Studio | cutcut |
+| | Diffusion Studio | CutCraft |
 |---|---|---|
-| placement | absolute; `start`/`end`/`sourceIn`/`sourceOut` become `Delay`/`Trim` in whole frames at 30 fps | by order on sequence tracks, `start` on free tracks, anchors for overlays; seconds, not frames |
-| trim by meaning | none; the agent greps a transcript JSON and types seconds, with a comment naming the word | `in="word:12"`, `out="shot:1.end"`, `at="marker:x"` resolved against the manifest |
-| what runs | the Solid component mounts live into the ECS; signals, effects and `useTicker` keep writing traits | a pure resolve over the file; only `<Layer>` interiors run as React |
-| the timeline as data | exists only as `Computed` traits in a live world | `ResolvedState`: a placement per id, diffable, cacheable, testable without a browser |
-| tweakable values | `@inspect` consts compiled into signals, written back into the initializer | `schema`/`defaults` exports; bound props fold into `defaults` |
-| transitions | a prop on the outgoing clip; partner found by exact frame adjacency; no handles (held frames); audio hard-cuts | a sibling element; the resolver overlaps the clips and checks handles; the player crossfades |
-| export determinism | the module is re-executed in a fresh world; the author must avoid `Math.random` in tree shape and wrap async in `hold()` | deterministic by construction: same file, manifest and patches give the same placements and frames |
+| Placement | absolute; `start`/`end`/`sourceIn`/`sourceOut` become whole frames at 30 fps | by order on sequence tracks, `start` on free tracks, anchors for overlays; in seconds |
+| Trim by meaning | none; the agent searches a transcript JSON and types seconds | `in="word:12"`, `out="shot:1.end"`, `at="word:14"`, resolved against the transcript and shot list |
+| What runs | the Solid component mounts live into the ECS, and signals and effects keep writing to it | the timeline resolves without running code; `<Layer>`, `<Three>` and `<Motion>` interiors run as React on the video's clock |
+| The timeline as data | exists only inside the live runtime | a placement per id that can be diffed, cached and tested without a browser |
+| Tweakable values | `@inspect` constants compiled into signals and written back into the initializer | `schema` and `defaults` exports |
+| Transitions | a prop on the outgoing clip; the partner must be exactly adjacent; no handles; audio hard-cuts | a sibling element; the clips overlap and both must have the handles; the player crossfades |
+| Export determinism | the author must avoid `Math.random` in the tree and wrap async work in `hold()` | the same file and media give the same frames |
 
 ## The round trip
 
-Theirs (`apps/web/src/engine/editor.ts`, `apps/web/src/projects/edits.ts`,
-`apps/desktop/src/edit.ts`): a gesture writes the ECS first, on every pointer
-frame. `EditWriter` folds the edits into maps keyed by element and prop with
-last write wins and flushes after a 120 ms debounce. In the main process
-`SourceWriter` parses the file with ts-morph, finds the element by id, prints
-the value, and writes the file atomically; a content hash lets the file
-watcher ignore the app's own write, so the canvas never remounts for an edit
-it made. Undo replays inverses through the same editor commands and is held
-in memory.
+In Diffusion Studio a gesture writes to the runtime on every pointer frame.
+The edits are collected per element and prop, last write wins, and flushed
+after a 120 ms pause. The desktop app parses the file with ts-morph, finds the
+element by id, writes the new value and saves the file atomically. Undo
+replays inverse commands and lives in memory.
 
-Ours: a gesture dispatches an action; `apply` appends patches; the resolver
-applies the net patches over the file (about a microsecond per element); the
-fold writes one-token edits at the sync point. History is the list of
-actions, each with an inverse.
+In CutCraft a gesture is one of 131 editor actions. Each action records its
+inverse, and the change is written back to the file as the smallest text
+edit at a sync point, usually once per gesture.
 
-The two are closer than they look: their `EditWriter` is a patch log with a
-fold and no resolver, because the live ECS is the overlay. The differences
-are policy:
+The two designs are close. The differences are in policy:
 
-| | Diffusion Studio | cutcut |
+| | Diffusion Studio | CutCraft |
 |---|---|---|
-| ids | stamped into the user's file before every compile (6 base-36 characters) when missing | required; a lint error when missing |
-| an expression prop (`x={MARGIN}`) | overwritten by the literal ("the user wins") | locked unless it references a `schema` prop, in which case the fold writes `defaults` |
-| an element inside a loop | the first edit unrolls the whole `<For>` in the source, irreversibly | generated elements bake to literals on the first gesture, as an action with an inverse |
-| a component used twice | no guard; both copies share one `__source` | both copies are `generated`; a gesture bakes first |
-| view state | selection, active scene, playhead, camera and timeline zoom are written into the file | never in the file |
-| when the file is written | 120 ms after the last edit; a long drag writes several times | at a sync point; the recommended policy is once per gesture (decision 0012) |
-| skipped writes | silent (duplicate ids, non-unrollable loops, an `@inspect` initializer that became an expression) | reported in `foldToSource().skipped` |
-| undo across a reload | lost; any external change clears history | the log and history are data and can be persisted with the revision |
+| Ids | added to your file automatically when missing | required; a lint error when missing |
+| A prop set from an expression (`x={MARGIN}`) | overwritten by the literal | locked, unless it refers to a `schema` prop, in which case `defaults` is updated |
+| An element inside a loop | the first edit unrolls the whole loop in the source, and this cannot be undone | generated elements become literals on the first gesture, as an action that can be undone |
+| View state (selection, playhead, zoom) | written into the file | never in the file |
+| When the file is written | 120 ms after the last edit; a long drag writes several times | at a sync point, once per gesture |
+| Edits that could not be written | skipped silently | reported back to the caller |
+| Undo after a reload | lost; any outside change to the file clears history | history is data and can be saved with the file |
 
-## Playback
+## Playback and export
 
-Their preview (`packages/runtime/src/media/video.ts`) shares a mediabunny
-`Input` and keyframe index per asset, with a decoder and a frame atlas per
-clip, scrub-to-keyframe while dragging and an exact seek after the drag
-settles, idle disposal after 10 s, and a warm handoff of the decoder when a
-clip is split. Export opens a new `Input` and `CanvasSink` per clip. Audio is
-scheduled about 15 frames ahead with WSOLA time stretch at other rates, but
-the video playhead advances on `requestAnimationFrame` wall-clock deltas and
-nothing corrects drift against the AudioContext; shuttling is silent.
+Diffusion Studio's preview has some things CutCraft does not: scrubbing snaps
+to keyframes while you drag and seeks exactly after you stop, a clip's decoder
+is handed over when the clip is split, audio plays at other speeds with WSOLA
+time stretch, and `syncTo` lines up audio by cross-correlation. On the other
+hand its video playhead runs on `requestAnimationFrame` time and nothing
+corrects drift against the audio clock. CutCraft uses Web Audio as the master
+clock and shares one decoder input per media file across clips.
 
-Ours shares one `Input` per asset across clips and nested compositions, keeps
-a per-clip decoder with a short forward queue, makes Web Audio the master
-clock, and gives every chunk an offset, duration and rate on the output. We
-do not have scrub-to-keyframe, decoder handoff on split, WSOLA, or their
-`syncTo` cross-correlation (`packages/runtime/src/media/audio-sync.ts`); the
-first and last are worth taking later.
-
-Their `check` (`apps/web/src/dapi/handlers/check.ts`) is a structural lint
-that finds black frames, never-visible nodes, zero durations and source
-errors without rendering. Their `capture` renders export-equivalent frames
-as labelled contact sheets. Both are the agent's verification loop, and both
-are cheap to provide over `ResolvedState` and `renderFrame`.
+Diffusion Studio exports in Chrome, drawing on a GPU canvas. CutCraft exports
+in Node with no browser. On one machine the two are level on plain cuts, and
+Diffusion Studio is faster on crossfades and graphics, where CutCraft draws on
+the CPU. See [Export speed](/comparisons/export-speed). CutCraft's Node export
+also draws Layers with a subset of CSS and leaves out `<Three>` and
+`<Motion>` for now ([Exporting](/guide/exporting)).
 
 ## The agent
 
-Their agent gets eighteen tools (`packages/dapi/src/catalog.ts`) and none of
-them edits. They split into evidence (`probe`, `transcribe` to a word-timed
-JSON the agent greps, `waveform` with silences, `filmstrip`, `grab` with
-settled-frame detection, `listen`, segmentation through `generate`) and
-verification (`check`, `capture`); the agent edits the file and saving is the
-edit. Our manifest is their evidence precomputed; what we lack is
-verification, which decision 0012 adds.
+Diffusion Studio gives its agent eighteen tools, and none of them edits: the
+agent edits the file, and saving is the edit. The tools gather evidence
+(probe, transcribe, waveform, filmstrip, grab a frame, listen) and verify the
+result: `check` finds black frames, invisible nodes and zero durations without
+rendering, and `capture` renders labelled contact sheets. In CutCraft the
+transcript and shot list are prepared before the model writes, and the model
+verifies with the lint and the layout check (`--check-layout`).
 
-Their skill (`docs/skills/editor.md` and the walkthroughs) carries editing
-policy that is independent of the file model and worth adopting almost
-verbatim: write a brief first; lay down the A-roll, then B-roll, captions
-last; with no target length make no editorial cuts, drop only silences and
-retakes, keep the last take; pauses live inside clips, not as gaps; leave
-0.3–0.5 s between sentences, at most 0.8 s of tail, never cut mid-word; move
-`start` and `sourceIn` together; verify after every stage, scaled to the
-change, with `check` then `capture`, never by exporting.
+## When to pick which
 
-## Verdict
+Pick Diffusion Studio if you want a desktop editor today with an agent built
+in, if your videos are graphics-heavy and export speed matters, or if you
+prefer placing everything at absolute positions and times.
 
-Keep cutcut's file model. Their design confirms the write-back idea works
-for real users and shows the cost of absolute placement: every trim is
-arithmetic the agent does by hand, a transition breaks on a one-frame gap,
-and captions drift unless two props move together. Our resolver, sequence
-tracks and transcript references exist to remove exactly that work.
-
-Adopt their editing policy, their verification loop (a `check` over the
-resolved state, a `capture` over `renderFrame`), and fold-per-gesture as the
-write policy. Watch their preview tricks (scrub-to-keyframe, handoff on
-split) and `syncTo` for a later player round.
+Pick CutCraft if your cuts should follow a transcript, so trims, transitions
+and captions keep working when the edit changes. It also fits if you want the
+timeline as plain data you can test without a browser, edits that land in the
+file as one-token changes with undo you can keep, or export on a server with
+no browser.

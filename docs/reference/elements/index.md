@@ -1,6 +1,6 @@
 # Elements
 
-The fixed vocabulary of a cut file. Each page shows an example as the export renders it, with the file that made it, then the element's props. Generated from the Zod schemas in `packages/kit/src/jsx/schemas`; run `pnpm docs:gen`, and `pnpm docs:examples` for the videos.
+The elements a file is written in: the timeline (clips, tracks, transitions, captions), free code, and ready-made titles, graphics and effects. Each page shows an example as the export renders it, with the file that made it, then the element's props. Generated from the Zod schemas in `packages/kit/src/jsx/schemas`; run `pnpm docs:gen`, and `pnpm docs:examples` for the videos.
 
 ## Timeline
 
@@ -13,6 +13,14 @@ The fixed vocabulary of a cut file. Each page shows an example as the export ren
 <PreviewCard code title="<Marker>" link="/reference/elements/marker" text="A named point on the timeline." />
 </div>
 
+## Free code
+
+<div class="cc-cards">
+<PreviewCard code title="<Layer>" link="/reference/elements/layer" src="previews/elements/layer" text="Free code in the frame: any React, CSS, canvas or WebGL, placed on the timeline like any overlay; useT() is its time." />
+<PreviewCard code title="<Three>" link="/reference/elements/three" text="A three.js scene on the timeline: plain three.js in setup, or React Three Fiber children, on the video's clock." />
+<PreviewCard code title="<Motion>" link="/reference/elements/motion" text="Children animated by a Motion sequence on the video's clock." />
+</div>
+
 ## Text and graphics
 
 <div class="cc-cards">
@@ -23,7 +31,6 @@ The fixed vocabulary of a cut file. Each page shows an example as the export ren
 <PreviewCard code title="<Shape>" link="/reference/elements/shape" src="previews/elements/shape" text="A vector shape (rectangle, circle, star, polygon, path) with fill, stroke and shadow." />
 <PreviewCard code title="<Svg>" link="/reference/elements/svg" src="previews/elements/svg" text="One-off vector art from inline SVG markup or a file." />
 <PreviewCard code title="<Sticker>" link="/reference/elements/sticker" src="previews/elements/sticker" text="A ready-made icon or sticker by name." />
-<PreviewCard code title="<Layer>" link="/reference/elements/layer" src="previews/elements/layer" text="Free code in the frame: any React, CSS, canvas or WebGL, placed on the timeline like any overlay; useT() is its time." />
 </div>
 
 ## Effects and colour

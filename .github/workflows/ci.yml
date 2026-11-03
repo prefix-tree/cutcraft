@@ -51,6 +51,8 @@ jobs:
 
   macos:
     # skia-canvas and node-av load native binaries built per platform; run the export's tests where they differ.
+    # Slow and rarely different from Linux, so not on pull requests: on main and on request.
+    if: github.event_name != 'pull_request'
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v7
@@ -101,7 +103,7 @@ jobs:
       # The export is checked against the browser here: overlay layout and the audio mix.
       - run: pnpm --filter @cutcraft/render test:browser
       # Free code on the video's clock: three.js, Motion and CSS animations in the real Player.
-      - run: pnpm --filter @cutcraft/libraries test:browser
+      - run: pnpm --filter @cutcraft/graphics test:browser
       - uses: actions/upload-artifact@v4
         if: failure()
         with:

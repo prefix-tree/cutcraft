@@ -1,7 +1,7 @@
 {
   "name": "@cutcraft/graphics",
   "version": "0.1.0",
-  "description": "The built-in graphic kinds for the cut video DSL: arrows, callouts, badges, lower thirds, frames, highlights, progress, backgrounds, confetti and icons, each a pure function from props and theme to SVG and text labels.",
+  "description": "Ready-made graphics for CutCraft files (arrows, callouts, lower thirds, data graphics, backgrounds, icons) as pure functions from props and theme to SVG, and three.js and Motion on the video's clock for free code.",
   "keywords": [
     "video",
     "video-editing",
@@ -11,7 +11,10 @@
     "ai-video",
     "svg",
     "motion-graphics",
-    "lower-third"
+    "lower-third",
+    "three",
+    "motion",
+    "animation"
   ],
   "license": "MIT",
   "homepage": "https://prefix-tree.github.io/cutcraft/",
@@ -26,7 +29,10 @@
   "type": "module",
   "sideEffects": false,
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./libraries": "./src/libraries/index.ts",
+    "./three": "./src/libraries/three.tsx",
+    "./motion": "./src/libraries/motion.tsx"
   },
   "files": [
     "dist"
@@ -34,23 +40,57 @@
   "publishConfig": {
     "access": "public",
     "exports": {
-      ".": "./dist/index.mjs"
+      ".": "./dist/index.mjs",
+      "./libraries": "./dist/libraries/index.mjs",
+      "./three": "./dist/libraries/three.mjs",
+      "./motion": "./dist/libraries/motion.mjs"
     }
   },
   "scripts": {
-    "build": "tsdown src/index.ts --dts",
+    "build": "tsdown src/index.ts src/libraries/index.ts src/libraries/three.tsx src/libraries/motion.tsx --dts",
     "prepack": "pnpm run build",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:browser": "vitest run -c vitest.browser.config.ts"
+  },
+  "peerDependencies": {
+    "@cutcraft/kit": "workspace:*",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@cutcraft/kit": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    }
   },
   "dependencies": {
+    "@react-three/fiber": "9.4.0",
     "lucide": "^1.61.0",
+    "motion": "12.23.24",
+    "three": "0.180.0",
     "zod": "catalog:"
   },
   "devDependencies": {
+    "@cutcraft/kit": "workspace:*",
+    "@cutcraft/player": "workspace:*",
+    "@playwright/test": "catalog:",
     "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@types/three": "0.180.0",
+    "@vitejs/plugin-react": "catalog:",
     "@vitest/coverage-v8": "catalog:",
+    "jsdom": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
     "typescript": "catalog:",
+    "vite": "catalog:",
     "vitest": "catalog:"
   }
 }
