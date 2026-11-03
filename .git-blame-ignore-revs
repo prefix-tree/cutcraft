@@ -1,0 +1,4 @@
+# Repository-wide formatting, skipped by `git blame` (GitHub reads this file; locally: git config blame.ignoreRevsFile .git-blame-ignore-revs).
+
+# style: format with Biome
+49afc7d7feec1fd550d36a5756cdbbe53542f1af

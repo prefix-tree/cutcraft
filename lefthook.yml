@@ -1,0 +1,19 @@
+# Git hooks, installed by `pnpm install` (the `prepare` script). CI runs the same checks, so `git commit --no-verify`
+# only moves the failure to the pull request.
+
+pre-commit:
+  commands:
+    biome:
+      glob: "*.{js,mjs,cjs,ts,mts,cts,tsx,jsx,json,jsonc,css}"
+      run: pnpm exec biome check --write --no-errors-on-unmatched --files-ignore-unknown=true {staged_files}
+      stage_fixed: true
+
+commit-msg:
+  commands:
+    conventional:
+      # CONTRIBUTING.md: `type(scope): summary`, e.g. `fix(player): …`, `docs: …`. Merges and reverts pass as git writes them.
+      run: |
+        head -n1 {1} | grep -Eq '^((feat|fix|perf|refactor|docs|test|build|ci|chore|style|revert)(\([a-z0-9/-]+\))?!?: .+|Merge .+|Revert ".+")$' || {
+          echo "Commit summary must look like 'fix(player): what changed' (feat, fix, perf, refactor, docs, test, build, ci, chore, style, revert)." >&2
+          exit 1
+        }
