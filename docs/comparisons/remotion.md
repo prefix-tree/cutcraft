@@ -1,77 +1,102 @@
 # Remotion
 
-Remotion (remotion.dev, MIT-style licence with a company tier) is a React
-renderer for video: a composition is a React component plus `fps`, size,
-`durationInFrames` and input props, and the picture at a frame is what the
-component renders for that frame. It ships a Player, a Studio with visual
-editing that writes back to source, a server renderer on headless Chromium,
-and `@remotion/web-renderer` for in-browser rendering. The facts below were
-checked against Remotion's documentation on 2026-10-23; each links to its
-page.
+[Remotion](https://www.remotion.dev) is a React framework for making video in
+code. A composition is a React component plus `fps`, a size and
+`durationInFrames`, and the picture at a frame is whatever the component
+renders for that frame. It ships a Player, a Studio, a server renderer on
+headless Chrome, and `@remotion/web-renderer` for rendering in the browser.
+Its licence has a paid tier for companies.
 
-## Same thesis, different picture
+Both Remotion and CutCraft keep a video in a TSX file. They differ in what the
+file describes and in how it becomes an MP4.
 
-Both projects say the code is the video. The difference is what the code
-describes.
+## What the file describes
 
-| | Remotion | cutcut |
+In Remotion the whole video is free code: React decides every pixel of every
+frame ([the core idea](https://www.remotion.dev/docs/idea)). In CutCraft the
+timeline is a set of elements (`<Composition>`, `<Track>`, `<Clip>`,
+`<Audio>`, `<Transition>`, `<Captions>`, `<Marker>`, `<Keyframe>` and others)
+with literal ids, and anything visual on top of it can be free code. A
+`<Layer>` holds any React, hooks, CSS, canvas or WebGL. `<Three>` and
+`<Motion>` put three.js and Motion on the timeline. All of it runs on the
+video's clock, so scrubbing and seeking show the exact frame. See
+[Free code](/guide/free-code).
+
+| | Remotion | CutCraft |
 |---|---|---|
-| Picture | `component(frame, props)`: React decides every pixel each frame ([the core idea](https://www.remotion.dev/docs/idea)) | a resolved timeline: placements with start, end, source range and props; the player paints them |
-| Placement | `<Sequence from durationInFrames>`: absolute frames ([composition](https://www.remotion.dev/docs/terminology/composition)) | sequence tracks by order, free tracks by `start`, anchors with `offset` |
-| Animation | `interpolate()` and `spring()` inline, written as literals so the Studio can read them ([best practices](https://www.remotion.dev/docs/studio/interactivity-best-practices)) | `<Keyframe>` children, `<SpeedKey>`, `<Freeze>`; `useT()`/`useLayer()` inside a Layer |
-| Inputs | `defaultProps` and a Zod schema; `calculateMetadata()` for dynamic metadata | `schema` and `defaults` exports; bound props fold into `defaults` |
-| Custom components | `Interactive.create({ Component, schema })` declares editable props ([make a component interactive](https://www.remotion.dev/docs/studio/make-component-interactive)) | a Layer's one component gets handles from its literal and schema-bound props (0013) |
-| Footage | `<Video>`/`<OffthreadVideo>` from `@remotion/media` | `<Clip>` trimmed by seconds or transcript and shot references against a manifest |
+| Placement | `<Sequence from durationInFrames>`, in absolute frames ([composition](https://www.remotion.dev/docs/terminology/composition)) | sequence tracks place clips by order; free tracks by `start`; overlays anchor to another element |
+| Trimming footage | `<Video>` or `<OffthreadVideo>` from `@remotion/media` | `<Clip>` trimmed by seconds, or by meaning: `in="word:12"`, `out="shot:3.end"` |
+| Overlay timing | frame numbers | `anchor="hook" at="word:14"`, so a graphic follows the word through every trim |
+| Animation | `interpolate()` and `spring()` inline | `<Keyframe>` children, `<SpeedKey>`, `<Freeze>`; inside a Layer, `useT()`, `useLayer()` or any animation library |
+| Inputs | `defaultProps` with a Zod schema; `calculateMetadata()` for dynamic metadata | `schema` and `defaults` exports |
+| Effects | `@remotion/effects`, about 90 GPU effects passed as `effects={[...]}` | CSS filters, vignette and grain today; other effects are accepted but not drawn yet ([what renders](/reference/rendering)) |
+| Ready-made graphics | none built in; you write components | a library of titles, shapes and graphics, next to free code |
 
-Remotion's editability rules are ours in different words: "for every clip,
-scene, layer or sequence that should be editable on its own, write a separate
-JSX node"; literal values; loops produce one item; inline styles only, no
-constants, spreading or math; keep composition metadata inline. Our lint
-checks the same things (`literal-ids`, `expression-locked`, `pure-helpers`)
-and our generated-element rule is their loop rule with a bake.
+## Editing and the round trip
 
-## The round trip
-
-Remotion Studio selects sequences, props, effects, keyframes and easing
-segments; dragging moves a sequence by updating `style.translate`, edges
-scale and corners rotate, and drags on keyframed properties create or update
-keyframes at the current frame, all written to the source with undo
+Remotion Studio edits the composition's top-level input props through their
+Zod schema. Its interactive mode goes further: you can select sequences, drag
+to move, scale or rotate them, and edit keyframes, and the change is written
+back to the source with undo
 ([interactivity](https://www.remotion.dev/docs/studio/interactivity)). What it
-cannot read as a literal it greys out. `visualControl()` (a sidebar slider
-saved to code on request) is deprecated in favour of this
-([visualControl](https://www.remotion.dev/docs/studio/visual-control)).
+cannot read as a literal value it greys out. Its
+[best practices](https://www.remotion.dev/docs/studio/interactivity-best-practices)
+ask for one JSX node per editable item and literal values, which are close to
+the rules CutCraft's lint checks.
 
-Ours differs in two ways. The write-back goes through a patch log, so a
-gesture is one history entry and one fold at its end rather than a write
-per change, and every action has an inverse that is itself an action. And
-the editor edits a timeline, not a component tree: trims ripple, transitions
-overlap neighbours, captions reference words. Remotion's Studio edits what a
-component draws; ours edits what the cut is.
+CutCraft's editor edits a timeline rather than a component tree. Trims ripple
+the clips after them, transitions overlap their neighbours, and captions and
+overlays follow the words they are anchored to. There are 131 editor actions,
+each with validation and undo. A gesture is written back into the file as the
+smallest text change, usually one token:
+
+```diff
+-<Clip id="hook" src="asset:founder" in="word:12" out="word:23.end" />
++<Clip id="hook" src="asset:founder" in="word:12" out="word:22.end" />
+```
+
+In short, Remotion's Studio edits what a component draws. CutCraft's editor
+edits the cut. See [Editing](/guide/editing).
 
 ## Rendering
 
-Remotion renders on a server with headless Chromium, or in the browser with
-`@remotion/web-renderer`, which "encodes with WebCodecs using Mediabunny"
-and is "limited to a subset of tags and CSS properties"
-([client-side rendering](https://www.remotion.dev/docs/web-renderer)). Our
-player is that second path by construction: footage decodes through
-Mediabunny and composites on a canvas, overlays are DOM, and `renderFrame(t)`
-is deterministic for an exporter to step through. The constraint is the
-same on both sides: what the DOM renders beyond the canvas has to be
-rasterised, and neither project renders arbitrary CSS to video.
+Remotion draws everything with Chrome. Its server renderer takes a screenshot
+of the page for every frame, or draws through HTML-in-Canvas with
+`<HtmlInCanvas>`. `@remotion/web-renderer` encodes in the browser with
+WebCodecs and Mediabunny and supports a subset of tags and CSS
+([client-side rendering](https://www.remotion.dev/docs/web-renderer)). Long
+renders can be split across machines with Remotion Lambda.
 
-## The model as author
+CutCraft's player runs in the browser: footage decodes through WebCodecs (via
+Mediabunny) onto a canvas, overlays are DOM, and Web Audio is the clock. The
+export runs in Node with no browser, on the same engine. It draws Layers with
+Satori, which supports a subset of CSS, and leaves out `<Three>` and
+`<Motion>` for now with a warning. An export through headless Chrome
+(HTML-in-Canvas and WebCodecs) that draws everything is on the roadmap. Until
+then, a video made mostly of free code exports completely from Remotion and
+only partly from CutCraft. See [Exporting](/guide/exporting).
 
-Remotion's answer to a model writing video is the same as its answer to a
-person: write components, keep values literal, declare controls. Its
-`InteractivitySchema` is the explicit form of what our bound props do
-implicitly. Where we go further is the vocabulary: a model writing cutcut
-writes `<Clip in="word:12" out="word:23.end">` and a resolver does the
-arithmetic; a model writing Remotion writes frame numbers it computed
-itself.
+On speed, CutCraft is about ten times faster than Remotion on plain cuts and
+faster on drawn frames too, measured on one machine. The numbers and method
+are on [Export speed](/comparisons/export-speed).
 
-## Verdict
+## A model as the author
 
-Adopt the component-level control model as Layer handles (0013). Keep the
-resolver, sequence tracks and keyframe children. Watch `web-renderer`'s
-supported subset as the benchmark for what our exporter must rasterise.
+Both work with a model that writes TSX. In Remotion the model writes
+components and the frame numbers it computed itself. In CutCraft the model
+writes `<Clip in="word:12" out="word:23.end">` against a transcript and shot
+list, and CutCraft computes the seconds. The lint and the layout check
+(`--check-layout`, which reports overlays that leave the frame or safe zone or cover the captions or subject, with the smallest fix)
+give the model something to verify against without exporting.
+
+## When to pick which
+
+Pick Remotion if your video is mostly motion graphics or templated data
+video, if you need every CSS and browser feature in the export today, if you
+want its GPU effects, or if you render at volume and want Lambda.
+
+Pick CutCraft if your video is cut from footage (talking heads, podcasts,
+product demos) and the cuts should follow the transcript. It also fits if a
+model writes the file and a person refines it in a timeline editor, with
+every edit landing back in the file, or if you need to export on a server
+without a browser.
