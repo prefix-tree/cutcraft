@@ -1,7 +1,8 @@
 import { z } from "zod";
+
 import { zCaptionAnimation } from "../enums";
-import { zCaptionPosition } from "./enums-local";
 import { assetRefSchema, colorSchema, idSchema, shadowSchema, timeRefSchema } from "./common";
+import { zCaptionPosition } from "./enums-local";
 
 export const captionStyleSchema = z.strictObject({
   font: z.string().optional(),
@@ -36,5 +37,7 @@ export const captionSchema = z.strictObject({
   start: timeRefSchema,
   end: timeRefSchema,
   text: z.string(),
-  words: z.array(z.strictObject({ text: z.string(), start: z.number().nonnegative(), end: z.number().nonnegative() })).optional(),
+  words: z
+    .array(z.strictObject({ text: z.string(), start: z.number().nonnegative(), end: z.number().nonnegative() }))
+    .optional(),
 });

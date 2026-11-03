@@ -1,10 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { Executor, collectModule, resolve } from "@cutcraft/kit";
+
+import { collectModule, Executor, resolve } from "@cutcraft/kit";
 import { applyEdits, buildSourceIndex, foldToSource, lint, printElement, printProp } from "@cutcraft/kit/source";
-import { fixtureExecutor, fixtureText, fixturesDir, manifest, serialize } from "./helpers";
+
+import { fixtureExecutor, fixturesDir, fixtureText, manifest, serialize } from "./helpers";
 
 function changedLines(a: string, b: string): number {
-  const x = a.split("\n"), y = b.split("\n");
+  const x = a.split("\n"),
+    y = b.split("\n");
   let n = 0;
   for (let i = 0; i < Math.max(x.length, y.length); i++) if (x[i] !== y[i]) n++;
   return n;
@@ -14,10 +17,13 @@ describe("fold", () => {
   it.each(["@cutcraft/kit", "@cut/kit"])("imports newly materialized captions from %s", (moduleName) => {
     const initial = fixtureExecutor();
     initial.execute({ type: "caption/setAll", params: { captionsId: "cap", nodes: [] } });
-    const generated = foldToSource(fixtureText, initial.log(), initial.state()).text
-      .replace("Caption, ", "").replaceAll("@cutcraft/kit", moduleName);
+    const generated = foldToSource(fixtureText, initial.log(), initial.state())
+      .text.replace(/\bCaption,\s*/, "")
+      .replaceAll("@cutcraft/kit", moduleName);
     const exec = new Executor({ tree: initial.state().tree, manifest });
-    expect(exec.execute({ type: "caption/update", params: { captionId: "cap-1", text: "Edited caption" } }).ok).toBe(true);
+    expect(exec.execute({ type: "caption/update", params: { captionId: "cap-1", text: "Edited caption" } }).ok).toBe(
+      true,
+    );
     const result = foldToSource(generated, exec.log(), exec.state());
     expect(result.skipped).toEqual([]);
     expect(result.text).toContain(`import { Caption } from "${moduleName}";`);
@@ -82,7 +88,9 @@ describe("fold", () => {
 
   it("writes a Layer's handles into the component tag", () => {
     const exec = fixtureExecutor();
-    expect(exec.execute({ type: "layer/setProps", params: { id: "l1", props: { to: 900, label: "go" } } }).ok).toBe(true);
+    expect(exec.execute({ type: "layer/setProps", params: { id: "l1", props: { to: 900, label: "go" } } }).ok).toBe(
+      true,
+    );
     const result = foldToSource(fixtureText, exec.log(), exec.state());
     expect(result.skipped).toEqual([]);
     expect(result.text).toContain('<Counter from={0} to={900} label="go" />');
@@ -101,20 +109,33 @@ describe("fold", () => {
     expect(printProp("src", "asset:a")).toBe('src="asset:a"');
     expect(printProp("reverse", true)).toBe("reverse");
     expect(printProp("transform", { scale: 1.1 })).toBe("transform={{ scale: 1.1 }}");
-    expect(printElement({ id: "t", kind: "title", props: { id: "t", duration: 2 }, text: "Hi" })).toBe('<Title id="t" duration={2}>Hi</Title>');
-    expect(applyEdits("abcdef", [{ kind: "text", id: "x", range: [1, 3], text: "XY" }, { kind: "insert", id: "y", range: [5, 5], text: "!" }])).toBe("aXYde!f");
+    expect(printElement({ id: "t", kind: "title", props: { id: "t", duration: 2 }, text: "Hi" })).toBe(
+      '<Title id="t" duration={2}>Hi</Title>',
+    );
+    expect(
+      applyEdits("abcdef", [
+        { kind: "text", id: "x", range: [1, 3], text: "XY" },
+        { kind: "insert", id: "y", range: [5, 5], text: "!" },
+      ]),
+    ).toBe("aXYde!f");
   });
 });
 
 describe("fold, layout conversion, flatten and extract", () => {
-  const cases: { name: string; actions: Parameters<ReturnType<typeof fixtureExecutor>["execute"]>[0][]; expect: (text: string) => void }[] = [
+  const cases: {
+    name: string;
+    actions: Parameters<ReturnType<typeof fixtureExecutor>["execute"]>[0][];
+    expect: (text: string) => void;
+  }[] = [
     {
       name: "sequence → free",
       actions: [{ type: "track/setLayout", params: { trackId: "main", layout: "free" } }],
       expect: (text) => {
         expect(text).toContain('<Track id="main" name="Main" layout="free">');
         expect(text).toContain('<Transition id="x1" type="crossfade" duration={0.5} on="c1" edge="out" />');
-        expect(text).toContain('<Clip id="c2" src="asset:city" duration={3.5} fit="cover" transform={{ scale: 1.1 }} start={5}>');
+        expect(text).toContain(
+          '<Clip id="c2" src="asset:city" duration={3.5} fit="cover" transform={{ scale: 1.1 }} start={5}>',
+        );
         expect(text).not.toContain('<Gap id="g1"');
       },
     },
@@ -127,7 +148,9 @@ describe("fold, layout conversion, flatten and extract", () => {
         { type: "track/setLayout", params: { trackId: "f", layout: "sequence" } },
       ],
       expect: (text) => {
-        expect(text).toContain('<Track id="f">\n        <Clip id="fa" src="asset:city" in={0} out={2} />\n        <Gap id="gap-f-1" duration={2} />\n        <Clip id="fb" src="asset:city" in={0} out={2} />\n      </Track>');
+        expect(text).toContain(
+          '<Track id="f">\n        <Clip id="fa" src="asset:city" in={0} out={2} />\n        <Gap id="gap-f-1" duration={2} />\n        <Clip id="fb" src="asset:city" in={0} out={2} />\n      </Track>',
+        );
       },
     },
     {
@@ -135,7 +158,9 @@ describe("fold, layout conversion, flatten and extract", () => {
       actions: [{ type: "multicam/flatten", params: { id: "mc1" } }],
       expect: (text) => {
         expect(text).not.toContain("<Multicam");
-        expect(text).toContain('<Clip id="mc1-cu1" src="asset:interview" in={0} duration={2} start={0} />\n        <Clip id="mc1-cu2" src="asset:city" in={2} duration={10} start={2} />');
+        expect(text).toContain(
+          '<Clip id="mc1-cu1" src="asset:interview" in={0} duration={2} start={0} />\n        <Clip id="mc1-cu2" src="asset:city" in={2} duration={10} start={2} />',
+        );
       },
     },
     {
@@ -143,7 +168,9 @@ describe("fold, layout conversion, flatten and extract", () => {
       actions: [{ type: "nested/extract", params: { id: "n1" } }],
       expect: (text) => {
         expect(text).not.toContain('<Nested id="n1"');
-        expect(text).toMatch(/<Gap id="n1-gap" duration=\{3\} \/>\n {6}<\/Track>\n {6}<Track id="n1-outro" layout="free">\n {8}<Clip id="n1-oc1" src="asset:city" in=\{0\} out=\{3\} start=\{14\.16666666666666\d\} volume=\{0\.8\} \/>\n {6}<\/Track>\n {6}<Track id="overlays"/);
+        expect(text).toMatch(
+          /<Gap id="n1-gap" duration=\{3\} \/>\n {6}<\/Track>\n {6}<Track id="n1-outro" layout="free">\n {8}<Clip id="n1-oc1" src="asset:city" in=\{0\} out=\{3\} start=\{14\.16666666666666\d\} volume=\{0\.8\} \/>\n {6}<\/Track>\n {6}<Track id="overlays"/,
+        );
       },
     },
   ];
@@ -164,7 +191,10 @@ describe("fold, layout conversion, flatten and extract", () => {
   }
 });
 
-async function evaluate(text: string): Promise<{ default: (props: Record<string, unknown>) => React.ReactElement | null; defaults?: Record<string, unknown> }> {
+async function evaluate(text: string): Promise<{
+  default: (props: Record<string, unknown>) => React.ReactElement | null;
+  defaults?: Record<string, unknown>;
+}> {
   // Vitest transpiles TSX on import; write the folded text next to the fixture under a unique name.
   const { writeFileSync, mkdirSync, rmSync } = await import("node:fs");
   const { join } = await import("node:path");

@@ -1,8 +1,10 @@
-import { installLayerEngine, type LayerEngine } from "@cutcraft/kit";
 import * as fiber from "@react-three/fiber";
 import * as motion from "motion";
 import * as motionReact from "motion/react";
 import * as three from "three";
+
+import { installLayerEngine, type LayerEngine } from "@cutcraft/kit";
+
 import * as cutMotion from "./motion";
 import * as cutThree from "./three";
 
@@ -41,5 +43,14 @@ export function installFreeCodeLibraries(): Readonly<Record<string, unknown>> {
   return FREE_CODE_LIBRARIES;
 }
 
-export { ThreeLayer, ThreeScene, type ThreeCamera, type ThreeFrame, type ThreeSceneProps, type ThreeSetup, type ThreeSetupFn, type ThreeUpdate } from "./three";
 export { MotionLayer, useLayerTime, useTimeline } from "./motion";
+export {
+  type ThreeCamera,
+  type ThreeFrame,
+  ThreeLayer,
+  ThreeScene,
+  type ThreeSceneProps,
+  type ThreeSetup,
+  type ThreeSetupFn,
+  type ThreeUpdate,
+} from "./three";

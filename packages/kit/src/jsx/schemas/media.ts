@@ -1,6 +1,7 @@
 import { z } from "zod";
-import { zInterpolation, zStabilizeCrop } from "./enums-local";
+
 import { assetRefSchema, audioProps, colorSchema, timedProps, timeRefSchema, visualProps } from "./common";
+import { zInterpolation, zStabilizeCrop } from "./enums-local";
 
 export const chromaKeySchema = z.strictObject({
   enabled: z.boolean().default(true),
@@ -32,7 +33,16 @@ export const clipSchema = z.strictObject({
   ...visualProps,
   ...audioProps,
   /** Reframe to the composition's aspect: the resolver writes `transform.crop` from the source size and this focus, unless a crop is written. */
-  frame: z.strictObject({ focus: z.union([z.enum(["left", "center", "right"]), z.strictObject({ x: z.number().min(0).max(1), y: z.number().min(0).max(1).optional() })]).default("center") }).optional(),
+  frame: z
+    .strictObject({
+      focus: z
+        .union([
+          z.enum(["left", "center", "right"]),
+          z.strictObject({ x: z.number().min(0).max(1), y: z.number().min(0).max(1).optional() }),
+        ])
+        .default("center"),
+    })
+    .optional(),
   smoothSlowMo: z.boolean().default(false),
   interpolation: zInterpolation.optional(),
   stabilize: stabilizeSchema.optional(),

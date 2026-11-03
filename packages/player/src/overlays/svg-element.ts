@@ -1,6 +1,7 @@
 import type { FitMode, ResolvedTheme } from "@cutcraft/kit";
-import { overlayLayout, type ElementProps, type OverlayLayout } from "./layout";
-import { prepareSvg, svgAnimated, svgIntrinsicSize, type PreparedSvg, type SvgColor, type SvgViewBox } from "./svg";
+
+import { type ElementProps, type OverlayLayout, overlayLayout } from "./layout";
+import { type PreparedSvg, prepareSvg, type SvgColor, type SvgViewBox, svgAnimated, svgIntrinsicSize } from "./svg";
 
 export interface SvgDrawing {
   /** The size the SVG asks for, before `fit`. */
@@ -15,7 +16,11 @@ export interface SvgDrawing {
  * composition with `fit`), with its `viewBox`, `preserveAspectRatio` and `color` applied, and
  * `$name` / `var(--cc-name)` filled from `tokens` (by default the composition's theme).
  */
-export function svgDrawing(p: ElementProps, markup: string, tokens: Readonly<Record<string, string>> = themeTokens(p.state.theme)): SvgDrawing {
+export function svgDrawing(
+  p: ElementProps,
+  markup: string,
+  tokens: Readonly<Record<string, string>> = themeTokens(p.state.theme),
+): SvgDrawing {
   const props = p.placement.props as Record<string, unknown>;
   const viewBox = props.viewBox as SvgViewBox | undefined;
   const size = svgIntrinsicSize(markup, viewBox);

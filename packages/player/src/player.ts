@@ -1,4 +1,5 @@
 import type { ResolvedState } from "@cutcraft/kit";
+
 import { AudioEngine } from "./audio/audio-engine";
 import { WebAudioOutput } from "./audio/web-audio-output";
 import { AudioContextClock } from "./clock/audio-clock";
@@ -15,7 +16,20 @@ import type { ResolveNested } from "./model/frame-plan";
 import { frameIndex, frameTime, timecode } from "./model/time";
 import { makeNestedResolver } from "./nested";
 import { Compositor } from "./render/compositor";
-import type { AnyCanvas, AudioOutput, AudioSource, AudioSourceFactory, Clock, CreateCanvas, Ctx2D, FrameSourceFactory, MediaHandle, MediaResolver, PlayerErrorEvent, PlayerEvents } from "./types";
+import type {
+  AnyCanvas,
+  AudioOutput,
+  AudioSource,
+  AudioSourceFactory,
+  Clock,
+  CreateCanvas,
+  Ctx2D,
+  FrameSourceFactory,
+  MediaHandle,
+  MediaResolver,
+  PlayerErrorEvent,
+  PlayerEvents,
+} from "./types";
 
 export interface CaptureSheetOptions {
   /** Cells per row; default 4, never more than the number of times. */
@@ -49,7 +63,10 @@ export interface PlayerOptions {
   readonly clearTimeout?: ((id: unknown) => void) | undefined;
 }
 
-export interface TimeSnapshot { readonly time: number; readonly frame: number }
+export interface TimeSnapshot {
+  readonly time: number;
+  readonly frame: number;
+}
 
 type Listener<K extends keyof PlayerEvents> = (e: PlayerEvents[K]) => void;
 
@@ -89,12 +106,15 @@ export class PlayerCore {
     this.media = toResolver(options.media);
     const comp = options.state.composition;
     const wantsBrowserAudio = !options.audioOutput || !options.clock || !options.audioSourceFactory;
-    this.audioContext = wantsBrowserAudio && typeof AudioContext !== "undefined"
-      ? options.audioContext ?? new AudioContext({ sampleRate: Number(options.state.items.get(comp.id)?.props.sampleRate ?? 48000) })
-      : options.audioContext ?? null;
+    this.audioContext =
+      wantsBrowserAudio && typeof AudioContext !== "undefined"
+        ? (options.audioContext ??
+          new AudioContext({ sampleRate: Number(options.state.items.get(comp.id)?.props.sampleRate ?? 48000) }))
+        : (options.audioContext ?? null);
     const audioClock = this.audioContext && !options.clock ? new AudioContextClock(this.audioContext) : null;
     this.clock = options.clock ?? audioClock ?? new PerformanceClock();
-    const toContextTime = options.toContextTime ?? (audioClock ? (t: number) => audioClock.toContextTime(t) : (t: number) => t);
+    const toContextTime =
+      options.toContextTime ?? (audioClock ? (t: number) => audioClock.toContextTime(t) : (t: number) => t);
     this.transport = new Transport(this.clock, comp.duration);
     this.transport.loop = options.loop ?? false;
     if (options.playbackRate !== undefined) this.transport.setRate(options.playbackRate);
@@ -108,13 +128,28 @@ export class PlayerCore {
     const frameSourceFactory = options.frameSourceFactory ?? mediabunnyFrameSourceFactory(this.inputs!, createCanvas);
     const audioSourceFactory = options.audioSourceFactory ?? mediabunnyAudioSourceFactory(this.inputs!);
     const resolveNested = options.resolveNested ?? makeNestedResolver(() => this._state);
-    this.sources = new AssetSources({ media: this.media, manifest: options.state.manifest, frameSourceFactory, clock: this.clock, onError: (e) => this.emit("error", e) });
-    this.compositor = new Compositor(options.state, { sources: this.sources, createCanvas, resolveNested, onFrame: (time, frame) => this.publish(time, frame) });
+    this.sources = new AssetSources({
+      media: this.media,
+      manifest: options.state.manifest,
+      frameSourceFactory,
+      clock: this.clock,
+      onError: (e) => this.emit("error", e),
+    });
+    this.compositor = new Compositor(options.state, {
+      sources: this.sources,
+      createCanvas,
+      resolveNested,
+      onFrame: (time, frame) => this.publish(time, frame),
+    });
     this.compositor.setRate(this.transport.rate);
     const output = options.audioOutput ?? (this.audioContext ? new WebAudioOutput(this.audioContext) : null);
     if (!output) throw new Error("PlayerCore needs an AudioOutput: no AudioContext in this environment");
     this.engine = new AudioEngine({
-      output, transport: this.transport, toContextTime, state: () => this._state, resolveNested,
+      output,
+      transport: this.transport,
+      toContextTime,
+      state: () => this._state,
+      resolveNested,
       audioSource: (assetId) => this.audioSource(assetId, audioSourceFactory),
       setInterval: options.setInterval ?? ((fn, ms) => setInterval(fn, ms)),
       clearInterval: options.clearInterval ?? ((id) => clearInterval(id as ReturnType<typeof setInterval>)),
@@ -124,9 +159,15 @@ export class PlayerCore {
     this.engine.setMaster(this._volume, this._muted);
   }
 
-  get state(): ResolvedState { return this._state; }
-  get duration(): number { return this.transport.duration; }
-  get playbackRate(): number { return this.transport.rate; }
+  get state(): ResolvedState {
+    return this._state;
+  }
+  get duration(): number {
+    return this.transport.duration;
+  }
+  get playbackRate(): number {
+    return this.transport.rate;
+  }
   set playbackRate(rate: number) {
     const r = Math.min(MAX_RATE, Math.max(MIN_RATE, rate));
     if (r === this.transport.rate) return;
@@ -135,16 +176,24 @@ export class PlayerCore {
     if (this.transport.playing) this.engine.reseek();
     this.emit("ratechange", { rate: r });
   }
-  get loop(): boolean { return this.transport.loop; }
-  set loop(v: boolean) { this.transport.loop = v; }
-  get muted(): boolean { return this._muted; }
+  get loop(): boolean {
+    return this.transport.loop;
+  }
+  set loop(v: boolean) {
+    this.transport.loop = v;
+  }
+  get muted(): boolean {
+    return this._muted;
+  }
   set muted(v: boolean) {
     if (v === this._muted) return;
     this._muted = v;
     this.engine.setMaster(this._volume, v);
     this.emit("volumechange", { volume: this._volume, muted: v });
   }
-  get volume(): number { return this._volume; }
+  get volume(): number {
+    return this._volume;
+  }
   set volume(v: number) {
     const vol = Math.min(1, Math.max(0, v));
     if (vol === this._volume) return;
@@ -154,12 +203,22 @@ export class PlayerCore {
   }
 
   /** The media handle for an asset id, for DOM elements that show images. */
-  resolveMedia(assetId: string): Promise<MediaHandle> { return this.media.resolve(assetId); }
+  resolveMedia(assetId: string): Promise<MediaHandle> {
+    return this.media.resolve(assetId);
+  }
 
-  getCurrentTime(): number { return this.transport.time(); }
-  getCurrentFrame(): number { return frameIndex(this.transport.time(), this._state.composition.fps); }
-  isPlaying(): boolean { return this.transport.playing; }
-  getTime(): TimeSnapshot { return this.snapshot; }
+  getCurrentTime(): number {
+    return this.transport.time();
+  }
+  getCurrentFrame(): number {
+    return frameIndex(this.transport.time(), this._state.composition.fps);
+  }
+  isPlaying(): boolean {
+    return this.transport.playing;
+  }
+  getTime(): TimeSnapshot {
+    return this.snapshot;
+  }
 
   async play(): Promise<void> {
     if (this.disposed || this.transport.playing) return;
@@ -185,7 +244,10 @@ export class PlayerCore {
   }
 
   toggle(): Promise<void> {
-    if (this.transport.playing) { this.pause(); return Promise.resolve(); }
+    if (this.transport.playing) {
+      this.pause();
+      return Promise.resolve();
+    }
     return this.play();
   }
 
@@ -245,11 +307,13 @@ export class PlayerCore {
         const x = (i % columns) * cellWidth;
         const y = Math.floor(i / columns) * cellHeight;
         ctx.drawImage(scratch, x, y, cellWidth, cellHeight);
-        if (options.labels !== false) drawLabel(ctx, timecode(Math.min(this.duration, Math.max(0, t)), comp.fps), x, y, cellWidth, cellHeight);
+        if (options.labels !== false)
+          drawLabel(ctx, timecode(Math.min(this.duration, Math.max(0, t)), comp.fps), x, y, cellWidth, cellHeight);
       }
     } finally {
       this.compositor.attach(previous);
-      if (previous && !this.disposed && !this.transport.playing) void this.compositor.tick(this.transport.time(), { wait: true });
+      if (previous && !this.disposed && !this.transport.playing)
+        void this.compositor.tick(this.transport.time(), { wait: true });
     }
     return sheet;
   }
@@ -285,7 +349,10 @@ export class PlayerCore {
 
   addEventListener<K extends keyof PlayerEvents>(type: K, fn: Listener<K>): () => void {
     let set = this.listeners.get(type);
-    if (!set) { set = new Set(); this.listeners.set(type, set); }
+    if (!set) {
+      set = new Set();
+      this.listeners.set(type, set);
+    }
     set.add(fn as Listener<keyof PlayerEvents>);
     return () => this.removeEventListener(type, fn);
   }
@@ -297,7 +364,9 @@ export class PlayerCore {
   /** For `useSyncExternalStore`: notified once per painted frame and on every seek. */
   subscribeTime(fn: () => void): () => void {
     this.timeListeners.add(fn);
-    return () => { this.timeListeners.delete(fn); };
+    return () => {
+      this.timeListeners.delete(fn);
+    };
   }
 
   dispose(): void {
@@ -360,7 +429,16 @@ export class PlayerCore {
     let p = this.audioSources.get(assetId);
     if (!p) {
       p = this.media.resolve(assetId).then(async (handle) => {
-        const source = factory(assetId, handle, this.audioContext ?? ({ createBuffer: () => { throw new Error("no AudioContext"); } } as unknown as BaseAudioContext));
+        const source = factory(
+          assetId,
+          handle,
+          this.audioContext ??
+            ({
+              createBuffer: () => {
+                throw new Error("no AudioContext");
+              },
+            } as unknown as BaseAudioContext),
+        );
         const info = await source.open();
         if (!info.decodable) throw new Error(`audio of "${assetId}" cannot be decoded`);
         return source;

@@ -1,7 +1,8 @@
-import { rampAdvance, rampSpeed, type ResolvedState } from "@cutcraft/kit";
-import { AUDIO_CACHE_S, AUDIO_PRIME_S, LOOKAHEAD_S, PLAY_PRIME_TIMEOUT_MS, SCHEDULER_MS } from "../constants";
+import { type ResolvedState, rampAdvance, rampSpeed } from "@cutcraft/kit";
+
 import type { Transport } from "../clock/transport";
-import { buildAudioPlan, type AudioOccurrence } from "../model/audio-plan";
+import { AUDIO_CACHE_S, AUDIO_PRIME_S, LOOKAHEAD_S, PLAY_PRIME_TIMEOUT_MS, SCHEDULER_MS } from "../constants";
+import { type AudioOccurrence, buildAudioPlan } from "../model/audio-plan";
 import type { ResolveNested } from "../model/frame-plan";
 import type { AudioOutput, AudioSource, EnvelopePoint, PlayerErrorEvent } from "../types";
 
@@ -38,9 +39,15 @@ export class AudioEngine {
 
   constructor(private readonly deps: AudioEngineDeps) {}
 
-  get muted(): boolean { return this._muted; }
-  get volume(): number { return this._volume; }
-  get active(): boolean { return this.running; }
+  get muted(): boolean {
+    return this._muted;
+  }
+  get volume(): number {
+    return this._volume;
+  }
+  get active(): boolean {
+    return this.running;
+  }
 
   setMaster(volume: number, muted: boolean): void {
     this._volume = volume;
@@ -108,7 +115,12 @@ export class AudioEngine {
     try {
       buffer = await this.buffer(occ);
     } catch (error) {
-      this.deps.onError?.({ id: occ.id, asset: occ.asset, error: error instanceof Error ? error : new Error(String(error)), fatal: false });
+      this.deps.onError?.({
+        id: occ.id,
+        asset: occ.asset,
+        error: error instanceof Error ? error : new Error(String(error)),
+        fatal: false,
+      });
       return;
     }
     if (session !== this.session) return;
@@ -121,7 +133,8 @@ export class AudioEngine {
     const pan = occ.pan?.map(([t, value]) => ({ at: ctxTime(t), value }));
     // A ramp's rate envelope is linear between points, which rampAdvance integrates exactly.
     const keys = occ.rate?.map(([t, speed]) => ({ at: t - occ.compStart, speed }));
-    const played = (t: number): number => (keys ? rampAdvance(keys, t - occ.compStart) : (t - occ.compStart) * occ.speed);
+    const played = (t: number): number =>
+      keys ? rampAdvance(keys, t - occ.compStart) : (t - occ.compStart) * occ.speed;
     const offset = played(startComp);
     this.deps.output.schedule({
       key: `${key}#${session}`,
@@ -145,15 +158,24 @@ export class AudioEngine {
       return hit.buffer;
     }
     const seconds = occ.bufferTo - occ.bufferFrom;
-    const buffer = this.deps.audioSource(occ.asset).then((s) => s.range(occ.bufferFrom, occ.bufferTo)).then((b) => {
-      if (occ.reverse) for (let ch = 0; ch < b.numberOfChannels; ch++) b.getChannelData(ch).reverse();
-      return b;
+    const buffer = this.deps
+      .audioSource(occ.asset)
+      .then((s) => s.range(occ.bufferFrom, occ.bufferTo))
+      .then((b) => {
+        if (occ.reverse) for (let ch = 0; ch < b.numberOfChannels; ch++) b.getChannelData(ch).reverse();
+        return b;
+      });
+    buffer.catch(() => {
+      this.cache.delete(key);
+      this.cacheSeconds -= seconds;
     });
-    buffer.catch(() => { this.cache.delete(key); this.cacheSeconds -= seconds; });
     this.cache.set(key, { buffer, seconds });
     this.cacheSeconds += seconds;
     while (this.cacheSeconds > AUDIO_CACHE_S && this.cache.size > 1) {
-      const [oldest, entry] = this.cache.entries().next().value as [string, { buffer: Promise<AudioBuffer>; seconds: number }];
+      const [oldest, entry] = this.cache.entries().next().value as [
+        string,
+        { buffer: Promise<AudioBuffer>; seconds: number },
+      ];
       this.cache.delete(oldest);
       this.cacheSeconds -= entry.seconds;
     }

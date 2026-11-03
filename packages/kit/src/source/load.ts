@@ -5,13 +5,15 @@
 //
 // This evaluates the source in the caller's realm. A host that loads files it does not trust runs this in a sandbox
 // (an iframe, a permission-less Deno).
+
+import type { ReactNode } from "react";
 import * as React from "react";
 import * as jsxRuntime from "react/jsx-runtime";
 import { transform } from "sucrase";
-import * as zod from "zod";
-import * as kit from "../index";
-import type { ReactNode } from "react";
 import type { ZodObject } from "zod";
+import * as zod from "zod";
+
+import * as kit from "../index";
 
 /** What a cut file exports: the schema of its tweakable values, their defaults, and the video itself. */
 export interface CutModule {
@@ -44,7 +46,10 @@ export function loadModule(source: string, options: LoadOptions = {}): CutModule
   const module = { exports: {} as Record<string, unknown> };
   const offered = { ...ALLOWED_IMPORTS, ...options.imports };
   const require = (name: string) => {
-    if (!(name in offered)) throw new Error(`The file imports “${name}”, which this host does not offer (it offers ${Object.keys(offered).join(", ")}).`);
+    if (!(name in offered))
+      throw new Error(
+        `The file imports “${name}”, which this host does not offer (it offers ${Object.keys(offered).join(", ")}).`,
+      );
     return offered[name];
   };
   new Function("require", "exports", "module", code)(require, module.exports, module);

@@ -7,8 +7,13 @@ focused pull request with a test.
 
 - Node 22.19 or later (`.nvmrc`; the test runner's HTTP client needs it), pnpm 10 (`corepack enable` picks the pinned
   version).
-- `pnpm install`, then `pnpm check` runs typecheck, lint and the test suites of
-  every package. CI runs the same command.
+- `pnpm install` also installs the git hooks (lefthook): before each commit Biome fixes and formats the staged files,
+  and the commit summary must be a conventional one (below).
+- `pnpm check` runs typecheck, lint and the test suites of every package. CI runs the same steps on Node 22 and 24,
+  plus `pnpm knip` (unused files, dependencies and exports) and `pnpm check:packages` (each package packed as npm
+  would get it, checked with publint and attw, after `pnpm build`).
+- `pnpm fix` formats the code and applies lint fixes; `pnpm test:coverage` writes coverage reports. In VS Code, the
+  recommended Biome extension formats on save.
 - The export (`packages/render`) loads native binaries (`skia-canvas`, `node-av` with
   its FFmpeg) with the install; its tests make their media with the system `ffmpeg`
   (`sudo apt-get install ffmpeg`), which needs the `drawtext` filter (FFmpeg built with libfreetype; Homebrew's
@@ -51,11 +56,20 @@ focused pull request with a test.
 
 ## Conventions
 
-- Strict TypeScript, no `any` in `src/`, two-space indent, double quotes, semicolons.
+- Strict TypeScript, no `any` in `src/`. Formatting is Biome's (`biome.jsonc`: two-space indent, double quotes,
+  semicolons, 120 columns); don't format by hand. A lint rule that is wrong for a line gets a
+  `// biome-ignore lint/<group>/<rule>: <why>` comment with a real reason.
 - Commits follow conventional-commit summaries (`feat(kit): …`, `fix(player): …`, `perf: …`, `docs: …`); keep each commit focused.
 - A pull request says what changed and why, lists the validation you ran, and includes before/after numbers for anything performance-related and screenshots for anything visual.
 - Design choices are recorded as decision records in `docs/decisions/`. A change that reverses one adds a new record; it does not edit the old one.
 - Claims in docs must be true of the code. If a feature is partial, say so.
+
+## Changesets and releases
+
+A pull request that changes what a published package does for its users adds a changeset: `pnpm changeset`, then
+pick the packages, the size and a sentence for the changelog ([.changeset/README.md](.changeset/README.md)). CI asks
+for one when a package changed; for a change users do not see, `pnpm changeset --empty`. All published packages share
+one version. Releases are a merge: the "Version packages" pull request that the release workflow keeps open on `main`.
 
 ## Publishing the docs
 
@@ -70,8 +84,3 @@ artifact); `gh workflow run docs.yml -f bench=true` measures the landing page's
 numbers again before deploying. Otherwise the site uses the committed
 `docs/bench.json`.
 
-## Releasing
-
-`pnpm release 0.2.0` on a clean `main`: it sets every published package to that version, dates the changelog's
-Unreleased section, commits, tags `v0.2.0` and pushes. The tag starts the Release workflow, which runs `pnpm check` and
-publishes to npm with trusted publishing.

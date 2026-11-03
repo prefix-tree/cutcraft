@@ -1,6 +1,6 @@
 // The libraries on the video's clock, in the real Player in Chromium: seek to a time, read what is drawn, seek away
 // and back, and expect the same picture.
-import { chromium, type Browser, type Page } from "@playwright/test";
+import { type Browser, chromium, type Page } from "@playwright/test";
 import { createServer, type ViteDevServer } from "vite";
 
 let server: ViteDevServer, browser: Browser, page: Page;
@@ -14,7 +14,11 @@ beforeAll(async () => {
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.goto(`http://localhost:${address.port}/`);
-  await page.waitForFunction(() => window.__ready === true, null, { timeout: 60_000 }).catch((e: unknown) => { throw new Error(`page not ready: ${errors.join("; ") || String(e)}`); });
+  await page
+    .waitForFunction(() => window.__ready === true, null, { timeout: 60_000 })
+    .catch((e: unknown) => {
+      throw new Error(`page not ready: ${errors.join("; ") || String(e)}`);
+    });
 });
 
 afterAll(async () => {
@@ -22,13 +26,21 @@ afterAll(async () => {
   await server?.close();
 });
 
-async function at(t: number): Promise<{ red: number; green: number; motionOpacity: number; motionX: number; cssOpacity: number; taggedOpacity: number }> {
+async function at(t: number): Promise<{
+  red: number;
+  green: number;
+  motionOpacity: number;
+  motionX: number;
+  cssOpacity: number;
+  taggedOpacity: number;
+}> {
   await page.evaluate((s) => window.__seek(s), t);
   return page.evaluate(() => {
     const pixel = (layer: string): Uint8ClampedArray => {
       const gl = document.querySelector<HTMLCanvasElement>(`[data-el="${layer}"] canvas`)!;
       const probe = document.createElement("canvas");
-      probe.width = gl.width; probe.height = gl.height;
+      probe.width = gl.width;
+      probe.height = gl.height;
       const ctx = probe.getContext("2d")!;
       ctx.drawImage(gl, 0, 0);
       return ctx.getImageData(gl.width >> 1, gl.height >> 1, 1, 1).data;
@@ -47,7 +59,9 @@ async function at(t: number): Promise<{ red: number; green: number; motionOpacit
 
 describe("free code on the video's clock", () => {
   it("draws a three.js scene at the layer's time, both ways", async () => {
-    const one = await at(1), three = await at(3), back = await at(1);
+    const one = await at(1),
+      three = await at(3),
+      back = await at(1);
     expect(three.red).toBeGreaterThan(one.red + 20);
     expect(back.red).toBe(one.red);
   });
@@ -65,7 +79,9 @@ describe("free code on the video's clock", () => {
   });
 
   it("runs plain three.js pasted into <Three setup>, at the layer's time, both ways", async () => {
-    const one = await at(1), three = await at(3), back = await at(1);
+    const one = await at(1),
+      three = await at(3),
+      back = await at(1);
     expect(three.green).toBeGreaterThan(one.green + 20);
     expect(back.green).toBe(one.green);
   });

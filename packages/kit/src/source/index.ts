@@ -1,14 +1,18 @@
 import traverseModule from "@babel/traverse";
 import * as t from "@babel/types";
+
 import { ELEMENTS, ENGINE_LAYERS } from "../jsx/elements";
-import { INTERIOR_PREFIX } from "../resolve/tree";
 import type { Json } from "../patches/types";
-import { parseSource, rangeOf, type Range } from "./parse";
+import { INTERIOR_PREFIX } from "../resolve/tree";
+import { parseSource, type Range, rangeOf } from "./parse";
 
 // @babel/traverse ships a CommonJS default that bundlers surface differently.
-const traverse = ((traverseModule as unknown as { default?: typeof traverseModule }).default ?? traverseModule) as typeof traverseModule;
+const traverse = ((traverseModule as unknown as { default?: typeof traverseModule }).default ??
+  traverseModule) as typeof traverseModule;
 
-const KIND_BY_NAME: ReadonlyMap<string, string> = new Map([...Object.entries(ELEMENTS), ...Object.entries(ENGINE_LAYERS)].map(([name, c]) => [name, c.kind]));
+const KIND_BY_NAME: ReadonlyMap<string, string> = new Map(
+  [...Object.entries(ELEMENTS), ...Object.entries(ENGINE_LAYERS)].map(([name, c]) => [name, c.kind]),
+);
 
 export interface PropSite {
   readonly name: string;
@@ -122,7 +126,8 @@ export function buildSourceIndex(text: string): SourceIndex {
   for (const node of ast.program.body) {
     if (!t.isExportDefaultDeclaration(node)) continue;
     const decl = node.declaration;
-    const fn = t.isFunctionDeclaration(decl) || t.isArrowFunctionExpression(decl) || t.isFunctionExpression(decl) ? decl : null;
+    const fn =
+      t.isFunctionDeclaration(decl) || t.isArrowFunctionExpression(decl) || t.isFunctionExpression(decl) ? decl : null;
     if (!fn) continue;
     schemaFn = fn;
     const param = fn.params[0];
@@ -130,14 +135,25 @@ export function buildSourceIndex(text: string): SourceIndex {
     else if (t.isObjectPattern(param)) {
       for (const p of param.properties) {
         if (!t.isObjectProperty(p) || !t.isIdentifier(p.key)) continue;
-        const local = t.isIdentifier(p.value) ? p.value : t.isAssignmentPattern(p.value) && t.isIdentifier(p.value.left) ? p.value.left : null;
+        const local = t.isIdentifier(p.value)
+          ? p.value
+          : t.isAssignmentPattern(p.value) && t.isIdentifier(p.value.left)
+            ? p.value.left
+            : null;
         if (local) paramKeys.set(local.name, p.key.name);
       }
     }
   }
   const bindingOf = (expr: t.Node | null | undefined): string | null => {
     if (t.isIdentifier(expr)) return paramKeys.get(expr.name) ?? null;
-    if (t.isMemberExpression(expr) && !expr.computed && t.isIdentifier(expr.object) && expr.object.name === propsName && t.isIdentifier(expr.property)) return expr.property.name;
+    if (
+      t.isMemberExpression(expr) &&
+      !expr.computed &&
+      t.isIdentifier(expr.object) &&
+      expr.object.name === propsName &&
+      t.isIdentifier(expr.property)
+    )
+      return expr.property.name;
     return null;
   };
 
@@ -146,7 +162,8 @@ export function buildSourceIndex(text: string): SourceIndex {
     if (t.isFunctionDeclaration(node) && node.id) helperNames.add(node.id.name);
     if (t.isVariableDeclaration(node)) {
       for (const d of node.declarations) {
-        if (t.isIdentifier(d.id) && (t.isArrowFunctionExpression(d.init) || t.isFunctionExpression(d.init))) helperNames.add(d.id.name);
+        if (t.isIdentifier(d.id) && (t.isArrowFunctionExpression(d.init) || t.isFunctionExpression(d.init)))
+          helperNames.add(d.id.name);
       }
     }
   }
@@ -165,24 +182,44 @@ export function buildSourceIndex(text: string): SourceIndex {
             const key = t.isIdentifier(p.key) ? p.key.name : t.isStringLiteral(p.key) ? p.key.value : null;
             if (key === null) continue;
             const lit = literalOf(p.value);
-            props.set(key, { name: key, range: rangeOf(p), valueRange: rangeOf(p.value), literal: lit.value, isExpression: !lit.ok });
+            props.set(key, {
+              name: key,
+              range: rangeOf(p),
+              valueRange: rangeOf(p.value),
+              literal: lit.value,
+              isExpression: !lit.ok,
+            });
           }
           defaults = { range: rangeOf(d.init), props };
         }
       }
     },
-    ExportDefaultDeclaration() { hasDefaultExport = true; },
+    ExportDefaultDeclaration() {
+      hasDefaultExport = true;
+    },
     FunctionDeclaration(path) {
       if (!path.node.id || path.parentPath.isExportDefaultDeclaration()) return;
       const hooks = hookCalls(path.node);
-      helpers.set(path.node.id.name, { name: path.node.id.name, range: rangeOf(path.node), pure: hooks.length === 0, hooks, producesElements: namesElements(path.node) });
+      helpers.set(path.node.id.name, {
+        name: path.node.id.name,
+        range: rangeOf(path.node),
+        pure: hooks.length === 0,
+        hooks,
+        producesElements: namesElements(path.node),
+      });
     },
     VariableDeclarator(path) {
       const init = path.node.init;
       if (!t.isIdentifier(path.node.id) || !(t.isArrowFunctionExpression(init) || t.isFunctionExpression(init))) return;
       if (!helperNames.has(path.node.id.name)) return;
       const hooks = hookCalls(init);
-      helpers.set(path.node.id.name, { name: path.node.id.name, range: rangeOf(path.node), pure: hooks.length === 0, hooks, producesElements: namesElements(init) });
+      helpers.set(path.node.id.name, {
+        name: path.node.id.name,
+        range: rangeOf(path.node),
+        pure: hooks.length === 0,
+        hooks,
+        producesElements: namesElements(init),
+      });
     },
     JSXElement(path) {
       const opening = path.node.openingElement;
@@ -209,12 +246,23 @@ export function buildSourceIndex(text: string): SourceIndex {
       let id = typeof idSite?.literal === "string" ? idSite.literal : null;
       if (id === null && kind === "composition" && !idSite) id = "composition";
       if (id === null) {
-        if (idSite?.isExpression && idSite.valueRange) dynamic.push({ kind, range: rangeOf(path.node), idText: text.slice(idSite.valueRange[0], idSite.valueRange[1]) });
+        if (idSite?.isExpression && idSite.valueRange)
+          dynamic.push({
+            kind,
+            range: rangeOf(path.node),
+            idText: text.slice(idSite.valueRange[0], idSite.valueRange[1]),
+          });
         // Inside a helper, `id={id}` is the generated-element pattern: ids come from the call site.
         const fn = path.getFunctionParent();
-        const inHelper = Boolean(fn && !fn.isExportDefaultDeclaration() && !fn.parentPath?.isExportDefaultDeclaration());
+        const inHelper = Boolean(
+          fn && !fn.isExportDefaultDeclaration() && !fn.parentPath?.isExportDefaultDeclaration(),
+        );
         if (!(inHelper && idSite?.isExpression)) {
-          anonymous.push({ kind, range: rangeOf(path.node), reason: idSite ? "id must be a string literal" : "missing id" });
+          anonymous.push({
+            kind,
+            range: rangeOf(path.node),
+            reason: idSite ? "id must be a string literal" : "missing id",
+          });
         }
         return;
       }
@@ -228,24 +276,44 @@ export function buildSourceIndex(text: string): SourceIndex {
         for (const [prop, key] of Object.entries(interior.boundProps)) bound[`${INTERIOR_PREFIX}${prop}`] = key;
       }
       elements.set(id, {
-        generated: false, id, kind, name,
-        range: rangeOf(path.node), openingTag: rangeOf(opening), closingTag: closing ? rangeOf(closing) : null,
-        childrenRange, props, parent, siblingIndex, lockedProps: locked, boundProps: bound, indent,
+        generated: false,
+        id,
+        kind,
+        name,
+        range: rangeOf(path.node),
+        openingTag: rangeOf(opening),
+        closingTag: closing ? rangeOf(closing) : null,
+        childrenRange,
+        props,
+        parent,
+        siblingIndex,
+        lockedProps: locked,
+        boundProps: bound,
+        indent,
         ...(interior ? { interior } : {}),
       });
     },
   });
 
   /** A tag's attributes as prop sites, with schema bindings resolved when the tag sits in the default export. */
-  function attributesOf(opening: t.JSXOpeningElement, inSchemaFn: boolean): { props: Map<string, PropSite>; locked: string[]; bound: Record<string, string> } {
+  function attributesOf(
+    opening: t.JSXOpeningElement,
+    inSchemaFn: boolean,
+  ): { props: Map<string, PropSite>; locked: string[]; bound: Record<string, string> } {
     const props = new Map<string, PropSite>();
     const locked: string[] = [];
     const bound: Record<string, string> = {};
     for (const attr of opening.attributes) {
       if (!t.isJSXAttribute(attr) || !t.isJSXIdentifier(attr.name)) continue;
       let site = propSite(attr);
-      const binding = inSchemaFn && site.isExpression && t.isJSXExpressionContainer(attr.value) ? bindingOf(attr.value.expression) : null;
-      if (binding !== null) { site = { ...site, binding }; bound[site.name] = binding; }
+      const binding =
+        inSchemaFn && site.isExpression && t.isJSXExpressionContainer(attr.value)
+          ? bindingOf(attr.value.expression)
+          : null;
+      if (binding !== null) {
+        site = { ...site, binding };
+        bound[site.name] = binding;
+      }
       props.set(site.name, site);
       if (site.isExpression && binding === null) locked.push(site.name);
     }
@@ -260,10 +328,31 @@ export function buildSourceIndex(text: string): SourceIndex {
     const name = jsxName(only.openingElement.name);
     if (name === null || !helperNames.has(name) || KIND_BY_NAME.has(name)) return null;
     const { props, locked, bound } = attributesOf(only.openingElement, inSchemaFn);
-    return { component: name, range: rangeOf(only), openingTag: rangeOf(only.openingElement), props, lockedProps: locked, boundProps: bound };
+    return {
+      component: name,
+      range: rangeOf(only),
+      openingTag: rangeOf(only.openingElement),
+      props,
+      lockedProps: locked,
+      boundProps: bound,
+    };
   }
 
-  return { text, ast, elements, calls, helpers, defaults, hasSchema, hasDefaultExport, compositionId, anonymous, dynamic, idSites, strays };
+  return {
+    text,
+    ast,
+    elements,
+    calls,
+    helpers,
+    defaults,
+    hasSchema,
+    hasDefaultExport,
+    compositionId,
+    anonymous,
+    dynamic,
+    idSites,
+    strays,
+  };
 }
 
 function jsxName(name: t.JSXOpeningElement["name"]): string | null {
@@ -276,7 +365,8 @@ function propSite(attr: t.JSXAttribute): PropSite {
   const name = (attr.name as t.JSXIdentifier).name;
   const value = attr.value;
   if (!value) return { name, range: rangeOf(attr), valueRange: null, literal: true, isExpression: false };
-  if (t.isStringLiteral(value)) return { name, range: rangeOf(attr), valueRange: rangeOf(value), literal: value.value, isExpression: false };
+  if (t.isStringLiteral(value))
+    return { name, range: rangeOf(attr), valueRange: rangeOf(value), literal: value.value, isExpression: false };
   if (t.isJSXExpressionContainer(value)) {
     const expr = value.expression;
     const lit = literalOf(expr);
@@ -292,9 +382,12 @@ export function literalOf(node: t.Node | null | undefined): { ok: boolean; value
   if (t.isNumericLiteral(node)) return { ok: true, value: node.value };
   if (t.isBooleanLiteral(node)) return { ok: true, value: node.value };
   if (t.isNullLiteral(node)) return { ok: true, value: null };
-  if (t.isTemplateLiteral(node) && node.expressions.length === 0) return { ok: true, value: node.quasis.map((q) => q.value.cooked ?? "").join("") };
-  if (t.isUnaryExpression(node) && node.operator === "-" && t.isNumericLiteral(node.argument)) return { ok: true, value: -node.argument.value };
-  if (t.isTSAsExpression(node) || t.isTSSatisfiesExpression(node) || t.isParenthesizedExpression(node)) return literalOf(node.expression);
+  if (t.isTemplateLiteral(node) && node.expressions.length === 0)
+    return { ok: true, value: node.quasis.map((q) => q.value.cooked ?? "").join("") };
+  if (t.isUnaryExpression(node) && node.operator === "-" && t.isNumericLiteral(node.argument))
+    return { ok: true, value: -node.argument.value };
+  if (t.isTSAsExpression(node) || t.isTSSatisfiesExpression(node) || t.isParenthesizedExpression(node))
+    return literalOf(node.expression);
   if (t.isArrayExpression(node)) {
     const out: Json[] = [];
     for (const el of node.elements) {
@@ -327,7 +420,9 @@ function isVocabularyTag(node: t.JSXElement): boolean {
 /** Whether a function's JSX names any vocabulary element. */
 function namesElements(fn: t.Function): boolean {
   let found = false;
-  t.traverseFast(fn.body, (node) => { if (!found && t.isJSXElement(node) && isVocabularyTag(node)) found = true; });
+  t.traverseFast(fn.body, (node) => {
+    if (!found && t.isJSXElement(node) && isVocabularyTag(node)) found = true;
+  });
   return found;
 }
 
@@ -344,7 +439,8 @@ function nearestElement(path: { parentPath: unknown }): string | null {
 function hookCalls(fn: t.Function): string[] {
   const hooks: string[] = [];
   t.traverseFast(fn.body, (node) => {
-    if (t.isCallExpression(node) && t.isIdentifier(node.callee) && /^use[A-Z]/.test(node.callee.name)) hooks.push(node.callee.name);
+    if (t.isCallExpression(node) && t.isIdentifier(node.callee) && /^use[A-Z]/.test(node.callee.name))
+      hooks.push(node.callee.name);
   });
   return hooks;
 }
@@ -362,7 +458,8 @@ function enclosingElementId(path: { parentPath: unknown }): string | null {
       for (const attr of attrs) {
         if (t.isJSXAttribute(attr) && t.isJSXIdentifier(attr.name) && attr.name.name === "id") {
           if (t.isStringLiteral(attr.value)) return attr.value.value;
-          if (t.isJSXExpressionContainer(attr.value) && t.isStringLiteral(attr.value.expression)) return attr.value.expression.value;
+          if (t.isJSXExpressionContainer(attr.value) && t.isStringLiteral(attr.value.expression))
+            return attr.value.expression.value;
         }
       }
       const name = jsxName(p.node.openingElement.name);

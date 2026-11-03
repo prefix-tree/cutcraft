@@ -1,5 +1,6 @@
 import type { AudioOccurrence } from "@cutcraft/player/engine";
-import { envelopeAt, mixBlock, mixPlan, type MixSource, type PcmBuffer, type PcmProvider } from "../src/mixer";
+
+import { envelopeAt, type MixSource, mixBlock, mixPlan, type PcmBuffer, type PcmProvider } from "../src/mixer";
 
 const SR = 48000;
 
@@ -10,16 +11,44 @@ function sine(freq: number, seconds: number, sampleRate = SR, amp = 1, channels 
 }
 
 function occ(over: Partial<AudioOccurrence> = {}): AudioOccurrence {
-  return { id: "a", asset: "a", chunk: 0, compStart: 0, compEnd: 1, bufferFrom: 0, bufferTo: 1, speed: 1, gain: [[0, 1], [1, 1]], ...over };
+  return {
+    id: "a",
+    asset: "a",
+    chunk: 0,
+    compStart: 0,
+    compEnd: 1,
+    bufferFrom: 0,
+    bufferTo: 1,
+    speed: 1,
+    gain: [
+      [0, 1],
+      [1, 1],
+    ],
+    ...over,
+  };
 }
 
 const source = (o: AudioOccurrence, pcm: PcmBuffer): MixSource => ({ occurrence: o, pcm });
-const rms = (a: Float32Array, from = 0, to = a.length): number => { let s = 0; for (let i = from; i < to; i++) s += (a[i] as number) ** 2; return Math.sqrt(s / (to - from)); };
-const crossings = (a: Float32Array): number => { let n = 0; for (let i = 1; i < a.length; i++) if ((a[i - 1] as number) < 0 && (a[i] as number) >= 0) n++; return n; };
+const rms = (a: Float32Array, from = 0, to = a.length): number => {
+  let s = 0;
+  for (let i = from; i < to; i++) s += (a[i] as number) ** 2;
+  return Math.sqrt(s / (to - from));
+};
+const crossings = (a: Float32Array): number => {
+  let n = 0;
+  for (let i = 1; i < a.length; i++) if ((a[i - 1] as number) < 0 && (a[i] as number) >= 0) n++;
+  return n;
+};
 
-async function mixAll(plan: AudioOccurrence[], pcm: PcmProvider, blockFrames: number, to = 1): Promise<[Float32Array, Float32Array]> {
+async function mixAll(
+  plan: AudioOccurrence[],
+  pcm: PcmProvider,
+  blockFrames: number,
+  to = 1,
+): Promise<[Float32Array, Float32Array]> {
   const total = Math.ceil(to * SR);
-  const l = new Float32Array(total), r = new Float32Array(total);
+  const l = new Float32Array(total),
+    r = new Float32Array(total);
   for await (const b of mixPlan(plan, pcm, { sampleRate: SR, to, blockFrames })) {
     const at = Math.round(b.timestamp * SR);
     l.set(b.left, at);
@@ -30,7 +59,11 @@ async function mixAll(plan: AudioOccurrence[], pcm: PcmProvider, blockFrames: nu
 
 describe("envelopeAt", () => {
   it("is linear between points and flat outside", () => {
-    const pts: [number, number][] = [[1, 0], [2, 1], [4, 0]];
+    const pts: [number, number][] = [
+      [1, 0],
+      [2, 1],
+      [4, 0],
+    ];
     expect(envelopeAt(pts, 0, 9)).toBe(0);
     expect(envelopeAt(pts, 1.5, 9)).toBeCloseTo(0.5);
     expect(envelopeAt(pts, 3, 9)).toBeCloseTo(0.5);
@@ -47,12 +80,23 @@ describe("mixBlock", () => {
   });
 
   it("follows a gain ramp and the fade ends at silence", () => {
-    const o = occ({ gain: [[0, 0], [1, 1]] });
+    const o = occ({
+      gain: [
+        [0, 0],
+        [1, 1],
+      ],
+    });
     const [l] = mixBlock([source(o, sine(440, 1))], 0, SR, SR);
     expect(rms(l, 0, 4800)).toBeLessThan(0.07);
     expect(rms(l, 24000 - 2400, 24000 + 2400)).toBeCloseTo(0.5 * Math.SQRT1_2, 1);
     expect(rms(l, SR - 4800, SR)).toBeGreaterThan(0.6);
-    const out = occ({ gain: [[0, 1], [0.9, 1], [1, 0]] });
+    const out = occ({
+      gain: [
+        [0, 1],
+        [0.9, 1],
+        [1, 0],
+      ],
+    });
     const [l2] = mixBlock([source(out, sine(440, 1))], 0, SR, SR);
     expect(Math.abs(l2[SR - 1] as number)).toBeLessThan(0.01);
   });
@@ -77,7 +121,14 @@ describe("mixBlock", () => {
     // Each PCM sample holds a quarter of its buffer second; speed 1 → 2 over 2 s plays u + u²/4 seconds by u.
     const data = new Float32Array(3 * SR);
     for (let i = 0; i < data.length; i++) data[i] = (0.25 * i) / SR;
-    const o = occ({ compEnd: 2, bufferTo: 3, rate: [[0, 1], [2, 2]] });
+    const o = occ({
+      compEnd: 2,
+      bufferTo: 3,
+      rate: [
+        [0, 1],
+        [2, 2],
+      ],
+    });
     const [l] = mixBlock([source(o, { sampleRate: SR, channels: [data] })], 0, 2 * SR, SR);
     expect(l[SR] as number).toBeCloseTo(0.25 * 1.25, 5);
     expect(l[1.6 * SR] as number).toBeCloseTo(0.25 * 2.24, 5);
@@ -101,15 +152,61 @@ describe("mixBlock", () => {
 
   it("pans like a Web Audio StereoPannerNode", () => {
     const mono = sine(440, 1);
-    const hard = mixBlock([source(occ({ pan: [[0, 1], [1, 1]] }), mono)], 0, 4800, SR);
+    const hard = mixBlock(
+      [
+        source(
+          occ({
+            pan: [
+              [0, 1],
+              [1, 1],
+            ],
+          }),
+          mono,
+        ),
+      ],
+      0,
+      4800,
+      SR,
+    );
     expect(rms(hard[0])).toBeLessThan(1e-6);
     expect(rms(hard[1])).toBeCloseTo(Math.SQRT1_2, 2);
-    const centre = mixBlock([source(occ({ pan: [[0, 0], [1, 0]] }), mono)], 0, 4800, SR);
+    const centre = mixBlock(
+      [
+        source(
+          occ({
+            pan: [
+              [0, 0],
+              [1, 0],
+            ],
+          }),
+          mono,
+        ),
+      ],
+      0,
+      4800,
+      SR,
+    );
     expect(rms(centre[0])).toBeCloseTo(Math.SQRT1_2 * Math.SQRT1_2, 2);
     expect(rms(centre[1])).toBeCloseTo(Math.SQRT1_2 * Math.SQRT1_2, 2);
     // A stereo source panned right keeps its right channel and folds the left into it.
-    const left = new Float32Array(4800).fill(0.5), right = new Float32Array(4800);
-    const st = mixBlock([source(occ({ pan: [[0, 1], [1, 1]] }), { sampleRate: SR, channels: [left, right] })], 0, 4800, SR);
+    const left = new Float32Array(4800).fill(0.5),
+      right = new Float32Array(4800);
+    const st = mixBlock(
+      [
+        source(
+          occ({
+            pan: [
+              [0, 1],
+              [1, 1],
+            ],
+          }),
+          { sampleRate: SR, channels: [left, right] },
+        ),
+      ],
+      0,
+      4800,
+      SR,
+    );
     expect(st[0][100]).toBeCloseTo(0, 5);
     expect(st[1][100]).toBeCloseTo(0.5, 5);
   });
@@ -117,11 +214,37 @@ describe("mixBlock", () => {
 
 describe("mixPlan", () => {
   const plan: AudioOccurrence[] = [
-    occ({ id: "a", asset: "a", compEnd: 1.5, bufferTo: 1.5, gain: [[0, 0.2], [0.7, 1], [1.5, 0.4]] }),
-    occ({ id: "b", asset: "b", compStart: 0.4, compEnd: 1.2, bufferTo: 0.8, speed: 1, pan: [[0.4, -1], [1.2, 1]], gain: [[0.4, 1], [1.2, 1]] }),
+    occ({
+      id: "a",
+      asset: "a",
+      compEnd: 1.5,
+      bufferTo: 1.5,
+      gain: [
+        [0, 0.2],
+        [0.7, 1],
+        [1.5, 0.4],
+      ],
+    }),
+    occ({
+      id: "b",
+      asset: "b",
+      compStart: 0.4,
+      compEnd: 1.2,
+      bufferTo: 0.8,
+      speed: 1,
+      pan: [
+        [0.4, -1],
+        [1.2, 1],
+      ],
+      gain: [
+        [0.4, 1],
+        [1.2, 1],
+      ],
+    }),
   ];
   const provider: PcmProvider = {
-    range: async (asset, from, to) => sine(asset === "a" ? 440 : 660, to - from, asset === "a" ? SR : 44100, 0.5, asset === "a" ? 1 : 2),
+    range: async (asset, from, to) =>
+      sine(asset === "a" ? 440 : 660, to - from, asset === "a" ? SR : 44100, 0.5, asset === "a" ? 1 : 2),
   };
 
   it("gives the same samples whatever the block size", async () => {
@@ -134,17 +257,28 @@ describe("mixPlan", () => {
 
   it("decodes a chunk only when it is reached", async () => {
     const calls: string[] = [];
-    const counting: PcmProvider = { range: async (asset, from, to) => { calls.push(asset); return provider.range(asset, from, to); } };
+    const counting: PcmProvider = {
+      range: async (asset, from, to) => {
+        calls.push(asset);
+        return provider.range(asset, from, to);
+      },
+    };
     const gen = mixPlan(plan, counting, { sampleRate: SR, to: 1.5, blockFrames: 4096 });
     await gen.next();
     expect(calls).toEqual(["a"]);
-    for await (const _ of gen) { void _; }
+    for await (const _ of gen) {
+      void _;
+    }
     expect(calls).toEqual(["a", "b"]);
   });
 
   it("plays a reversed chunk's PCM backwards and leaves the provider's copy alone", async () => {
     const ramp = new Float32Array(SR).map((_, i) => i / SR);
-    const [left] = await mixAll([occ({ reverse: true })], { range: async () => ({ sampleRate: SR, channels: [ramp] }) }, 4096);
+    const [left] = await mixAll(
+      [occ({ reverse: true })],
+      { range: async () => ({ sampleRate: SR, channels: [ramp] }) },
+      4096,
+    );
     expect(left[0]).toBeCloseTo(1, 3);
     expect(left[SR / 2]).toBeCloseTo(0.5, 3);
     expect(left[SR - 1]).toBeCloseTo(0, 3);

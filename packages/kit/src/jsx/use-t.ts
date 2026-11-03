@@ -22,7 +22,9 @@ export interface LayerClock {
  * The installed clock lives on `globalThis`, not in this module: a cut file loaded by a tool may carry its own
  * copy of the kit (a private module graph, a second install), and its `useT()` must still find the player's clock.
  */
-const slot = ((globalThis as Record<symbol, { impl: (() => LayerClock) | null }>)[Symbol.for("@cutcraft/kit/layer-clock")] ??= { impl: null });
+const slot = ((globalThis as Record<symbol, { impl: (() => LayerClock) | null }>)[
+  Symbol.for("@cutcraft/kit/layer-clock")
+] ??= { impl: null });
 
 /** The layer's clock: progress, seconds elapsed and remaining, its duration, the composition time. */
 export function useLayer(): LayerClock {

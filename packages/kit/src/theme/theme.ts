@@ -1,5 +1,5 @@
-import { DEFAULT_THEME, MOTIONS, THEMES, type MotionStyle, type Presets } from "./builtins";
-import { themeSchema, TOKEN_PATTERN, type ThemeProps } from "./schema";
+import { DEFAULT_THEME, MOTIONS, type MotionStyle, type Presets, THEMES } from "./builtins";
+import { type ThemeProps, TOKEN_PATTERN, themeSchema } from "./schema";
 
 /** A file's theme with its base theme merged in: what tokens, presets and motion defaults resolve against. */
 export interface ResolvedTheme {
@@ -19,7 +19,11 @@ export interface ResolvedTheme {
 /** Where a themed prop's value came from: `$primary`, `style:h1`, `motion` or `theme`. */
 export type ThemeOrigin = string;
 
-export interface ThemeIssue { readonly code: "UNKNOWN_TOKEN" | "UNKNOWN_STYLE"; readonly prop: string; readonly message: string }
+export interface ThemeIssue {
+  readonly code: "UNKNOWN_TOKEN" | "UNKNOWN_STYLE";
+  readonly prop: string;
+  readonly message: string;
+}
 
 export interface Themed {
   readonly props: Record<string, unknown>;
@@ -61,7 +65,8 @@ export function themeToken(theme: ResolvedTheme, name: string): string | number 
  */
 export function applyTheme(kind: string, raw: Readonly<Record<string, unknown>>, theme: ResolvedTheme): Themed {
   const named = typeof raw.style === "string" ? raw.style : null;
-  if (!theme.declared && named === null && !hasToken(raw)) return { props: raw as Record<string, unknown>, from: EMPTY, issues: [] };
+  if (!theme.declared && named === null && !hasToken(raw))
+    return { props: raw as Record<string, unknown>, from: EMPTY, issues: [] };
   const out: Record<string, unknown> = { ...raw };
   const from: Record<string, ThemeOrigin> = {};
   const issues: ThemeIssue[] = [];
@@ -73,29 +78,48 @@ export function applyTheme(kind: string, raw: Readonly<Record<string, unknown>>,
     if (preset) {
       if (kind === "captions") {
         // A captions preset is a caption style; `style` is the name or an object of overrides.
-        const own = typeof raw.style === "object" && raw.style !== null ? raw.style as Record<string, unknown> : {};
+        const own = typeof raw.style === "object" && raw.style !== null ? (raw.style as Record<string, unknown>) : {};
         out.style = { ...preset, ...own };
         from.style = `style:${presetName}`;
       } else {
         for (const [key, value] of Object.entries(preset)) {
-          if (raw[key] === undefined) { out[key] = value; from[key] = `style:${presetName}`; }
+          if (raw[key] === undefined) {
+            out[key] = value;
+            from[key] = `style:${presetName}`;
+          }
         }
       }
     } else if (named !== null) {
       const known = Object.keys(presets ?? {});
-      issues.push({ code: "UNKNOWN_STYLE", prop: "style", message: `no ${kind} style "${named}" in the theme${known.length ? ` (${known.join(", ")})` : ""}` });
+      issues.push({
+        code: "UNKNOWN_STYLE",
+        prop: "style",
+        message: `no ${kind} style "${named}" in the theme${known.length ? ` (${known.join(", ")})` : ""}`,
+      });
       if (kind === "captions") delete out.style;
     }
   }
 
   const motion = theme.declared ? theme.motion : null;
   if (motion && MOTION_KINDS.has(kind) && !(kind === "title" && out.animation !== undefined)) {
-    if (out.enter === undefined && motion.enter) { out.enter = motion.enter; from.enter = "motion"; }
-    if (out.exit === undefined && motion.exit) { out.exit = motion.exit; from.exit = "motion"; }
+    if (out.enter === undefined && motion.enter) {
+      out.enter = motion.enter;
+      from.enter = "motion";
+    }
+    if (out.exit === undefined && motion.exit) {
+      out.exit = motion.exit;
+      from.exit = "motion";
+    }
   }
   if (motion && kind === "transition" && motion.transition) {
-    if (out.type === undefined && motion.transition.type) { out.type = motion.transition.type; from.type = "motion"; }
-    if (out.duration === undefined && motion.transition.duration !== undefined) { out.duration = motion.transition.duration; from.duration = "motion"; }
+    if (out.type === undefined && motion.transition.type) {
+      out.type = motion.transition.type;
+      from.type = "motion";
+    }
+    if (out.duration === undefined && motion.transition.duration !== undefined) {
+      out.duration = motion.transition.duration;
+      from.duration = "motion";
+    }
   }
   if (kind === "composition" && theme.declared && out.background === undefined) {
     out.background = { mode: "color", color: theme.palette.background };
@@ -107,13 +131,20 @@ export function applyTheme(kind: string, raw: Readonly<Record<string, unknown>>,
     out[key] = substitute(out[key], key, theme, from, issues);
   }
   // Nothing themed: hand back the input, so a theme change leaves this element's parse (and placement) as it was.
-  if (Object.keys(from).length === 0 && issues.length === 0) return { props: raw as Record<string, unknown>, from: EMPTY, issues };
+  if (Object.keys(from).length === 0 && issues.length === 0)
+    return { props: raw as Record<string, unknown>, from: EMPTY, issues };
   return { props: out, from: Object.keys(from).length ? from : EMPTY, issues };
 }
 
 const EMPTY: Readonly<Record<string, ThemeOrigin>> = Object.freeze({});
 
-function substitute(value: unknown, path: string, theme: ResolvedTheme, from: Record<string, ThemeOrigin>, issues: ThemeIssue[]): unknown {
+function substitute(
+  value: unknown,
+  path: string,
+  theme: ResolvedTheme,
+  from: Record<string, ThemeOrigin>,
+  issues: ThemeIssue[],
+): unknown {
   if (typeof value === "string") {
     const m = TOKEN_PATTERN.exec(value);
     if (!m) return value;

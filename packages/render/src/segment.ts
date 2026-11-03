@@ -1,7 +1,22 @@
+import {
+  BufferTarget,
+  MovOutputFormat,
+  Mp4OutputFormat,
+  Output,
+  QUALITY_HIGH,
+  QUALITY_LOW,
+  QUALITY_MEDIUM,
+  QUALITY_VERY_HIGH,
+  QUALITY_VERY_LOW,
+  VideoSample,
+  VideoSampleSource,
+  WebMOutputFormat,
+} from "mediabunny";
+import type { ReactNode } from "react";
+
 import type { ResolvedState } from "@cutcraft/kit";
 import { captureWarnings, type MediaResolver, type PlayerErrorEvent } from "@cutcraft/player/engine";
-import { BufferTarget, MovOutputFormat, Mp4OutputFormat, Output, QUALITY_HIGH, VideoSample, QUALITY_LOW, QUALITY_MEDIUM, QUALITY_VERY_HIGH, QUALITY_VERY_LOW, VideoSampleSource, WebMOutputFormat } from "mediabunny";
-import type { ReactNode } from "react";
+
 import { encodeFrames } from "./encode";
 import { initEnv } from "./env";
 import type { OverlayFont, OverlayPlane } from "./overlays";
@@ -20,11 +35,21 @@ export type VideoCodec = "vp9" | "vp8" | "av1" | "avc" | "hevc" | "prores";
 export type VideoContainer = "webm" | "mp4" | "mov";
 
 /** Mediabunny's quality presets by name; a name, not the object, travels to the workers. */
-export const QUALITIES = { "very-low": QUALITY_VERY_LOW, low: QUALITY_LOW, medium: QUALITY_MEDIUM, high: QUALITY_HIGH, "very-high": QUALITY_VERY_HIGH } as const;
+export const QUALITIES = {
+  "very-low": QUALITY_VERY_LOW,
+  low: QUALITY_LOW,
+  medium: QUALITY_MEDIUM,
+  high: QUALITY_HIGH,
+  "very-high": QUALITY_VERY_HIGH,
+} as const;
 export type QualityName = keyof typeof QUALITIES;
 
 export function outputFormat(container: VideoContainer): Mp4OutputFormat | MovOutputFormat | WebMOutputFormat {
-  return container === "mp4" ? new Mp4OutputFormat() : container === "mov" ? new MovOutputFormat() : new WebMOutputFormat();
+  return container === "mp4"
+    ? new Mp4OutputFormat()
+    : container === "mov"
+      ? new MovOutputFormat()
+      : new WebMOutputFormat();
 }
 
 /** How the picture is encoded: shared by a whole render and by each of its segments. */
@@ -49,7 +74,10 @@ export function videoSource(encoding: VideoEncoding): VideoSampleSource {
     keyFrameInterval: encoding.keyFrameInterval,
     hardwareAcceleration: encoding.hardware ? "prefer-hardware" : "prefer-software",
     // Read by the patched @mediabunny/server encoder (patches/), which has no preset option of its own.
-    onEncoderConfig: (c) => { if (encoding.speed !== "fast") (c as { ffmpegPreset?: string }).ffmpegPreset = PRESETS[encoding.speed ?? "balanced"]; },
+    onEncoderConfig: (c) => {
+      if (encoding.speed !== "fast")
+        (c as { ffmpegPreset?: string }).ffmpegPreset = PRESETS[encoding.speed ?? "balanced"];
+    },
     ...(encoding.speed === "fast" ? { latencyMode: "realtime" as const } : {}),
   });
 }
@@ -67,7 +95,9 @@ export interface SegmentOptions {
   readonly last: number;
 }
 
-export interface SegmentStages extends PipelineStages { encode: number }
+export interface SegmentStages extends PipelineStages {
+  encode: number;
+}
 
 export interface SegmentResult {
   /** A complete file in the render's container holding just these frames, the first at time 0. */
@@ -93,7 +123,13 @@ export function hardwareEncodes(encoding: VideoEncoding, width: number, height: 
       const output = new Output({ format: outputFormat(encoding.container), target: new BufferTarget() });
       const source = videoSource({ ...encoding, hardware: true });
       output.addVideoTrack(source, { frameRate: 30 });
-      const sample = new VideoSample(new Uint8Array(width * height * 4), { format: "RGBA", codedWidth: width, codedHeight: height, timestamp: 0, duration: 1 / 30 });
+      const sample = new VideoSample(new Uint8Array(width * height * 4), {
+        format: "RGBA",
+        codedWidth: width,
+        codedHeight: height,
+        timestamp: 0,
+        duration: 1 / 30,
+      });
       try {
         await output.start();
         await source.add(sample);
@@ -125,11 +161,24 @@ export async function encodeSegment(options: SegmentOptions): Promise<SegmentRes
   output.addVideoTrack(source, { frameRate: fps });
   try {
     await output.start();
-    const waited = await encodeFrames({ pipeline, source, fps, width, height, first: options.first, last: options.last });
+    const waited = await encodeFrames({
+      pipeline,
+      source,
+      fps,
+      width,
+      height,
+      first: options.first,
+      last: options.last,
+    });
     const at = performance.now();
     await output.finalize();
     const encode = waited + performance.now() - at;
-    return { bytes: new Uint8Array(target.buffer as ArrayBuffer), stages: { ...pipeline.stages, encode }, warnings, errors: pipeline.errors };
+    return {
+      bytes: new Uint8Array(target.buffer as ArrayBuffer),
+      stages: { ...pipeline.stages, encode },
+      warnings,
+      errors: pipeline.errors,
+    };
   } catch (error) {
     await output.cancel().catch(() => undefined);
     throw error;

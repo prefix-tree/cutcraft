@@ -1,0 +1,19 @@
+{
+  "$schema": "https://unpkg.com/@changesets/config@4.0.1/schema.json",
+  "baseBranch": "main",
+  "access": "public",
+  "changelog": [
+    "@changesets/changelog-github",
+    {
+      "repo": "prefix-tree/cutcraft"
+    }
+  ],
+  "fixed": [["@cutcraft/kit", "@cutcraft/graphics", "@cutcraft/player", "@cutcraft/render", "cutcraft"]],
+  "updateInternalDependencies": "patch",
+  "privatePackages": {
+    "version": false,
+    "tag": false
+  },
+  "format": false,
+  "commit": false
+}

@@ -16,9 +16,15 @@ class Log implements PatchLog {
     this.isSource = options.isSource ?? (() => false);
   }
 
-  get entries(): readonly Patch[] { return this.list; }
-  get net(): ReadonlyMap<string, NetPatch> { return this.reduced; }
-  get version(): number { return this.v; }
+  get entries(): readonly Patch[] {
+    return this.list;
+  }
+  get net(): ReadonlyMap<string, NetPatch> {
+    return this.reduced;
+  }
+  get version(): number {
+    return this.v;
+  }
 
   append(patch: Patch): void {
     this.list.push(patch);
@@ -26,7 +32,9 @@ class Log implements PatchLog {
     this.v += 1;
   }
 
-  mark(): number { return this.list.length; }
+  mark(): number {
+    return this.list.length;
+  }
 
   truncate(mark: number): void {
     if (mark >= this.list.length) return;
@@ -57,7 +65,11 @@ function entry(net: Map<string, NetPatch>, id: string): NetPatch {
 }
 
 /** Keep `net` reduced: last write wins per prop, structural ops collapse, removal of an insert vanishes. */
-export function reduceInto(net: Map<string, NetPatch>, patch: Patch, isSource: (id: string) => boolean = () => false): void {
+export function reduceInto(
+  net: Map<string, NetPatch>,
+  patch: Patch,
+  isSource: (id: string) => boolean = () => false,
+): void {
   switch (patch.op) {
     case "set": {
       const e = entry(net, patch.id);
@@ -108,8 +120,14 @@ export function reduceInto(net: Map<string, NetPatch>, patch: Patch, isSource: (
 }
 
 export function nodesEqual(a: CollectedNode, b: CollectedNode): boolean {
-  return a.id === b.id && a.kind === b.kind && stableJson(a.props) === stableJson(b.props) && a.text === b.text
-    && a.children.length === b.children.length && a.children.every((c, i) => nodesEqual(c, b.children[i] as CollectedNode));
+  return (
+    a.id === b.id &&
+    a.kind === b.kind &&
+    stableJson(a.props) === stableJson(b.props) &&
+    a.text === b.text &&
+    a.children.length === b.children.length &&
+    a.children.every((c, i) => nodesEqual(c, b.children[i] as CollectedNode))
+  );
 }
 
 export function stableJson(value: unknown): string {

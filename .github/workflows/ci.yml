@@ -7,9 +7,53 @@ on:
   # Benchmarks run only on request: Actions → CI → Run workflow, or `gh workflow run ci.yml`.
   workflow_dispatch:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   check:
+    # The oldest Node the packages support and the current LTS.
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [22, 24]
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ matrix.node }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # The render tests generate their test media with ffmpeg.
+      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - run: pnpm typecheck
+      - run: pnpm lint
+      - run: pnpm knip
+      - run: pnpm test:coverage
+      - name: Coverage summary
+        if: matrix.node == 22
+        run: node scripts/coverage-summary.mjs >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: matrix.node == 22
+        with:
+          name: coverage
+          path: "**/coverage/"
+          if-no-files-found: ignore
+      # What gets published: each package's dist, built the way `pnpm publish` builds it, then checked as a tarball.
+      - run: pnpm build
+      - run: pnpm check:packages
+
+  macos:
+    # skia-canvas and node-av load native binaries built per platform; run the export's tests where they differ.
+    # Slow and rarely different from Linux, so not on pull requests: on main and on request.
+    if: github.event_name != 'pull_request'
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v4
@@ -18,11 +62,25 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      # The render tests generate their test media with ffmpeg.
-      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
-      - run: pnpm check
-      # What gets published: each package's dist, built the way `pnpm publish` builds it.
-      - run: pnpm build
+      # Homebrew's ffmpeg lacks drawtext, which the test media need; ffmpeg-full has it.
+      - run: brew install ffmpeg-full && echo "$(brew --prefix ffmpeg-full)/bin" >> "$GITHUB_PATH"
+      - run: pnpm --filter @cutcraft/render test
+
+  changeset:
+    # A pull request that changes a published package says how in a changeset (.changeset/README.md).
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm changeset status --since=origin/${{ github.base_ref }}
 
   e2e:
     # Pinned: Playwright 1.56 cannot install Chromium's system dependencies on ubuntu-latest (26.04).

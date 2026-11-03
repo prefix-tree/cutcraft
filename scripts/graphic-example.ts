@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { GRAPHIC_KINDS, graphicSize, type GraphicKindName } from "../packages/graphics/src/index";
+
+import { GRAPHIC_KINDS, type GraphicKindName, graphicSize } from "../packages/graphics/src/index";
 
 /**
  * Frame widths an example may take, 16:9; the smallest that holds the graphic wins, so small ones are not lost. Not
@@ -33,9 +34,14 @@ export function graphicExample(name: GraphicKindName): GraphicExample {
   const width = WIDTHS.find(fits) ?? WIDTHS[WIDTHS.length - 1]!;
   const height = (width * 9) / 16;
   const props = { id: "g1", kind: name, ...kind.example, start: 0, duration: EXAMPLE_SECONDS };
-  const attrs = Object.entries(props).map(([k, v]) => (typeof v === "string" ? `${k}="${v}"` : `${k}={${JSON.stringify(v)}}`));
+  const attrs = Object.entries(props).map(([k, v]) =>
+    typeof v === "string" ? `${k}="${v}"` : `${k}={${JSON.stringify(v)}}`,
+  );
   // One line while it reads as one; otherwise a prop per line, as a formatter would.
-  const graphic = `<Graphic ${attrs.join(" ")} />`.length <= 64 ? [`    <Graphic ${attrs.join(" ")} />`] : ["    <Graphic", ...attrs.map((a) => `      ${a}`), "    />"];
+  const graphic =
+    `<Graphic ${attrs.join(" ")} />`.length <= 64
+      ? [`    <Graphic ${attrs.join(" ")} />`]
+      : ["    <Graphic", ...attrs.map((a) => `      ${a}`), "    />"];
   const code = [
     `<Composition fps={30} width={${width}} height={${height}}>`,
     `  <Track id="main" layout="free">`,

@@ -1,11 +1,12 @@
+import type { Json } from "../../patches/types";
 import { define, insertNode, makePropHandler, rawNode, siblingAfter } from "../handler-kit";
 import { invalid, nodeOfSpec, nodeSpecOf, ok } from "../types";
-import type { Json } from "../../patches/types";
 
 define({
   type: "marker/add",
   validate: (a, state) => {
-    if (state.tree.byId.has(a.params.markerId)) return invalid({ code: "DUPLICATE_ID", message: `"${a.params.markerId}" exists` });
+    if (state.tree.byId.has(a.params.markerId))
+      return invalid({ code: "DUPLICATE_ID", message: `"${a.params.markerId}" exists` });
     return a.params.at >= 0 ? ok : invalid({ code: "INVALID_TIME_RANGE", message: "markers sit at or after 0" });
   },
   apply: (a, log, ctx) => {
@@ -24,21 +25,41 @@ define(makePropHandler({
   type: "marker/update",
   target: (p) => p.markerId,
   kinds: ["marker"],
-  write: (p) => ({ ...(p.at !== undefined ? { at: p.at } : {}), ...(p.label !== undefined ? { label: p.label } : {}), ...(p.color !== undefined ? { color: p.color } : {}) }),
+  write: (p) => ({
+    ...(p.at !== undefined ? { at: p.at } : {}),
+    ...(p.label !== undefined ? { label: p.label } : {}),
+    ...(p.color !== undefined ? { color: p.color } : {}),
+  }),
 }));
 
 define({
   type: "marker/remove",
-  validate: (a, state) => (rawNode(state, a.params.markerId)?.kind === "marker" ? ok : invalid({ code: "ELEMENT_NOT_FOUND", message: `marker "${a.params.markerId}" does not exist` })),
+  validate: (a, state) =>
+    rawNode(state, a.params.markerId)?.kind === "marker"
+      ? ok
+      : invalid({ code: "ELEMENT_NOT_FOUND", message: `marker "${a.params.markerId}" does not exist` }),
   apply: (a, log) => log.append({ op: "remove", id: a.params.markerId }),
-  invert: (a, before) => ({ type: "marker/restore", params: { node: nodeSpecOf(rawNode(before, a.params.markerId)!), after: siblingAfter(before, a.params.markerId) } }),
+  invert: (a, before) => ({
+    type: "marker/restore",
+    params: { node: nodeSpecOf(rawNode(before, a.params.markerId)!), after: siblingAfter(before, a.params.markerId) },
+  }),
   fold: () => [],
 });
 
 define({
   type: "marker/restore",
-  validate: (a, state) => (state.tree.byId.has(a.params.node.id) ? invalid({ code: "DUPLICATE_ID", message: `"${a.params.node.id}" exists` }) : ok),
-  apply: (a, log) => log.append({ op: "insert", id: a.params.node.id, parent: "composition", after: a.params.after, node: nodeOfSpec({ ...a.params.node, kind: "marker" }, "composition") }),
+  validate: (a, state) =>
+    state.tree.byId.has(a.params.node.id)
+      ? invalid({ code: "DUPLICATE_ID", message: `"${a.params.node.id}" exists` })
+      : ok,
+  apply: (a, log) =>
+    log.append({
+      op: "insert",
+      id: a.params.node.id,
+      parent: "composition",
+      after: a.params.after,
+      node: nodeOfSpec({ ...a.params.node, kind: "marker" }, "composition"),
+    }),
   invert: (a) => ({ type: "marker/remove", params: { markerId: a.params.node.id } }),
   fold: () => [],
 });

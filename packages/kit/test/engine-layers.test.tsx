@@ -1,4 +1,15 @@
-import { Composition, Executor, Motion, Three, Track, collect, collectModule, installLayerEngine, layerEngine, resolve } from "@cutcraft/kit";
+import {
+  Composition,
+  collect,
+  collectModule,
+  Executor,
+  installLayerEngine,
+  layerEngine,
+  Motion,
+  resolve,
+  Three,
+  Track,
+} from "@cutcraft/kit";
 import { buildSourceIndex, foldToSource, lint, loadModule } from "@cutcraft/kit/source";
 
 const manifest = { assets: {} };
@@ -28,10 +39,17 @@ describe("<Three> and <Motion>", () => {
     const cube = state.items.get("cube")!;
     expect(cube.kind).toBe("layer");
     expect(cube.start).toBe(1);
-    expect(cube.props).toMatchObject({ engine: "three", camera: { position: [0, 0, 5], fov: 40 }, background: "#101010" });
+    expect(cube.props).toMatchObject({
+      engine: "three",
+      camera: { position: [0, 0, 5], fov: 40 },
+      background: "#101010",
+    });
     expect(typeof cube.props.setup).toBe("function");
     expect(cube.interior).toBeUndefined();
-    expect(state.items.get("headline")!.props).toMatchObject({ engine: "motion", sequence: [["h1", { opacity: [0, 1] }, { duration: 0.6 }]] });
+    expect(state.items.get("headline")!.props).toMatchObject({
+      engine: "motion",
+      sequence: [["h1", { opacity: [0, 1] }, { duration: 0.6 }]],
+    });
   });
 
   it("check their props against their own schema", () => {
@@ -52,7 +70,11 @@ describe("<Three> and <Motion>", () => {
     expect(index.elements.get("cube")).toMatchObject({ kind: "layer", name: "Three" });
     expect(index.elements.get("cube")!.lockedProps).toContain("setup");
     expect(index.elements.get("headline")!.interior).toBeUndefined();
-    const exec = new Executor({ tree: collectModule(loadModule(text) as never, {}, { index }), manifest, now: () => 0 });
+    const exec = new Executor({
+      tree: collectModule(loadModule(text) as never, {}, { index }),
+      manifest,
+      now: () => 0,
+    });
     expect(exec.execute({ type: "clip/move", params: { id: "cube", place: { start: 2.5 } } }).ok).toBe(true);
     const folded = foldToSource(text, exec.log(), exec.state());
     expect(folded.skipped).toEqual([]);

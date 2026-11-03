@@ -1,7 +1,9 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { Executor, collectModule, resolve, type AssetManifest } from "@cutcraft/kit";
+
+import { type AssetManifest, collectModule, Executor, resolve } from "@cutcraft/kit";
 import { buildSourceIndex, foldToSource, lint } from "@cutcraft/kit/source";
+
 import * as file from "../video";
 
 const root = join(import.meta.dirname, "..");
@@ -41,7 +43,10 @@ describe("the launch recap file", () => {
     expect(index.elements.get("cta")?.interior?.component).toBe("CallToAction");
     expect(index.elements.get("cta")?.boundProps).toEqual({ "interior.text": "cta", "interior.accent": "accent" });
     const indexed = collectModule(file, {}, { index });
-    expect(indexed.byId.get("cta")?.interior).toEqual({ component: "CallToAction", props: { text: file.defaults.cta, accent: file.defaults.accent } });
+    expect(indexed.byId.get("cta")?.interior).toEqual({
+      component: "CallToAction",
+      props: { text: file.defaults.cta, accent: file.defaults.accent },
+    });
     const exec = new Executor({ tree: indexed, manifest, now: () => 0 });
     expect(exec.execute({ type: "layer/setProps", params: { id: "cta", props: { text: "Go" } } }).ok).toBe(true);
     const folded = foldToSource(text, exec.log(), exec.state());

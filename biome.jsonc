@@ -1,0 +1,190 @@
+{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
+  "files": {
+    "ignoreUnknown": true,
+    "includes": [
+      "**",
+      "!**/__snapshots__",
+      // Throwaway measurement code (spike/README.md), not part of the package.
+      "!packages/render/spike",
+      // Generated: media, measurements and placement fixtures.
+      "!examples/*/media",
+      "!examples/*/public",
+      "!docs/public",
+      "!docs/bench.json",
+      "!**/fixtures/*.placement.json",
+      // Biome reads only a Vue file's script, so every import its template uses looks unused.
+      "!**/*.vue",
+      // pnpm rewrites this file in its own style whenever it adds a catalog entry.
+      "!pnpm-workspace.yaml"
+    ]
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineEnding": "lf",
+    "lineWidth": 120,
+    "useEditorconfig": true
+  },
+  "javascript": {
+    "formatter": { "quoteStyle": "double", "semicolons": "always", "trailingCommas": "all" }
+  },
+  // Prose is written by hand (decision records, guides); the formatter would reflow emphasis and tables.
+  "markdown": { "formatter": { "enabled": false }, "linter": { "enabled": false } },
+  "assist": {
+    "enabled": true,
+    "actions": {
+      "source": {
+        // Imports in four groups: Node built-ins, packages, the workspace's own packages, then relative paths.
+        "organizeImports": {
+          "level": "on",
+          "options": {
+            "groups": [
+              ":NODE:",
+              ":BLANK_LINE:",
+              [":PACKAGE:", "!@cutcraft/**"],
+              ":BLANK_LINE:",
+              "@cutcraft/**",
+              ":BLANK_LINE:",
+              ":PATH:"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "preset": "recommended",
+      "style": {
+        "useImportType": "error",
+        "useConst": "error",
+        "useArrayLiterals": "error",
+        "useAsConstAssertion": "error",
+        "noNamespace": "error",
+        "useSpreadOverApply": "error",
+        // `noUncheckedIndexedAccess` is on; an index the code has just bounded is asserted with `!`.
+        "noNonNullAssertion": "off"
+      },
+      "correctness": {
+        "noUnusedVariables": "error",
+        "noUnusedImports": "error",
+        "noUnusedFunctionParameters": "error",
+        "useHookAtTopLevel": "error",
+        "useJsxKeyInIterable": "error",
+        // Playwright's rules misread any `describe`-shaped call; the e2e override turns them back on.
+        "usePlaywrightValidDescribeCallback": "off"
+      },
+      "suspicious": {
+        "noExplicitAny": "error",
+        "noTsIgnore": "error",
+        "noVar": "error",
+        "noUnusedExpressions": "warn",
+        // House style: `(cache[k] ??= make())` and `while ((m = re.exec(s)))`. TypeScript's strict mode catches
+        // the mistaken `if (a = b)` this rule exists for when `a` is not boolean.
+        "noAssignInExpressions": "off",
+        // `xs.forEach((x) => out.push(x))` is how the code is written; TypeScript catches a `map` whose callback
+        // returns nothing where a value is used.
+        "useIterableCallbackReturn": "off",
+        // A `.only` property on graphics data is not a focused test; the test override turns this back on.
+        "noFocusedTests": "off"
+      },
+      "complexity": {
+        // Clamps on the player's per-frame path are nested ternaries on purpose: no calls, and NaN stays visible.
+        "useMathMinMax": "off"
+      },
+      "a11y": {
+        // `role` is a CutCraft prop on `<Track>` and friends ("music", "voice"), not an ARIA role.
+        "useValidAriaRole": "off"
+      }
+    }
+  },
+  "overrides": [
+    {
+      "includes": ["packages/kit/src/**", "packages/graphics/src/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedGlobals": {
+              "level": "error",
+              "options": {
+                "deniedGlobals": {
+                  "window": "src/ must stay runtime-neutral: the browser preview and the Node export share it.",
+                  "document": "src/ must stay runtime-neutral: the browser preview and the Node export share it.",
+                  "navigator": "src/ must stay runtime-neutral: the browser preview and the Node export share it.",
+                  "localStorage": "src/ must stay runtime-neutral: the browser preview and the Node export share it.",
+                  "process": "src/ must stay runtime-neutral: the browser preview and the Node export share it."
+                }
+              }
+            },
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": ["node:*", "fs", "path", "os", "child_process"],
+                    "message": "src/ must stay runtime-neutral."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["packages/player/src/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedGlobals": {
+              "level": "error",
+              "options": { "deniedGlobals": { "process": "The player is browser code; it never touches Node." } }
+            },
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  { "group": ["node:*", "fs", "path", "os", "child_process"], "message": "src/ runs in the browser." }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["**/test/**", "**/e2e/**", "**/*.test.ts", "**/*.test.tsx"],
+      "linter": {
+        "rules": {
+          // Tests hold cut-file source in strings, where `${…}` is the file's own template literal.
+          "suspicious": { "noFocusedTests": "error", "noTemplateCurlyInString": "off" },
+          // Tests define throwaway components inside test bodies and build elements with explicit children.
+          "correctness": { "noComponentHookFactories": "off", "noChildrenProp": "off" }
+        }
+      }
+    },
+    {
+      "includes": ["**/e2e/**"],
+      "linter": { "rules": { "correctness": { "usePlaywrightValidDescribeCallback": "error" } } }
+    },
+    {
+      "includes": ["**/test/**", "**/fixtures/**", "**/scripts/**", "**/e2e/**", "**/bench/**", "scripts/**"],
+      "linter": {
+        "rules": {
+          "suspicious": { "noExplicitAny": "off", "noArrayIndexKey": "off" }
+        }
+      }
+    },
+    {
+      // The docs theme overrides VitePress's own styles, which needs `!important` and selector order it does not control.
+      "includes": ["docs/.vitepress/**/*.css"],
+      "linter": {
+        "rules": { "complexity": { "noImportantStyles": "off" }, "style": { "noDescendingSpecificity": "off" } }
+      }
+    }
+  ]
+}

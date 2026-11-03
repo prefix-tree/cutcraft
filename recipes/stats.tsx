@@ -1,4 +1,5 @@
 import { z } from "zod";
+
 import { Clip, Composition, Layer, Title, Track, useLayer } from "@cutcraft/kit";
 
 export const schema = z.object({
@@ -22,7 +23,16 @@ export default function Video({ accent }: z.infer<typeof schema>) {
       </Track>
 
       <Track id="numbers" name="Numbers">
-        <Title id="heading" anchor="bg" offset={0.3} duration={11} size={64} weight={600} valign="top" transform={{ position: { x: 0, y: 140 } }}>
+        <Title
+          id="heading"
+          anchor="bg"
+          offset={0.3}
+          duration={11}
+          size={64}
+          weight={600}
+          valign="top"
+          transform={{ position: { x: 0, y: 140 } }}
+        >
           Last quarter
         </Title>
         <Layer id="stat-deploys" anchor="bg" offset={0.8} duration={5} transform={{ position: { x: -360, y: 0 } }}>
@@ -42,8 +52,22 @@ function Counter({ value, label, accent }: { value: number; label: string; accen
   const shown = value * Math.min(1, t / 0.6);
   const text = Number.isInteger(value) ? Math.round(shown).toLocaleString("en-US") : shown.toFixed(2);
   return (
-    <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 12 }}>
-      <div style={{ font: "700 160px Inter, system-ui, sans-serif", color: accent, fontVariantNumeric: "tabular-nums" }}>{text}</div>
+    <div
+      style={{
+        position: "absolute",
+        inset: 0,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 12,
+      }}
+    >
+      <div
+        style={{ font: "700 160px Inter, system-ui, sans-serif", color: accent, fontVariantNumeric: "tabular-nums" }}
+      >
+        {text}
+      </div>
       <div style={{ font: "400 40px Inter, system-ui, sans-serif", color: "#c8ccd6" }}>{label}</div>
     </div>
   );

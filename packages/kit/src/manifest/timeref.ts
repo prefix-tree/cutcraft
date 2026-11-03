@@ -66,9 +66,7 @@ export function resolveTimeRef(
     case "silence": {
       if (!asset) return fail(`"${String(ref)}" needs an asset with a manifest`);
       const list =
-        parsed.kind === "word" ? asset.transcript?.words
-        : parsed.kind === "shot" ? asset.shots
-        : asset.silences;
+        parsed.kind === "word" ? asset.transcript?.words : parsed.kind === "shot" ? asset.shots : asset.silences;
       const entry = list?.find((e) => e.i === parsed.index);
       if (!entry) return fail(`${parsed.kind} ${parsed.index} is not in the manifest of ${asset.id}`);
       return parsed.edge === "end" ? entry.end : entry.start;
