@@ -1,6 +1,7 @@
 import type { ReactElement, ReactNode } from "react";
 import { Children, Fragment, isValidElement } from "react";
 import { isVocabulary } from "../jsx/define";
+import { engineOf } from "../jsx/elements";
 import type { ResolveError } from "./errors";
 import type { CollectedNode, CollectedTree, Editable, LayerInterior } from "./tree";
 
@@ -80,8 +81,10 @@ function collectChildren(
     }
     if (isVocabulary(type)) {
       if (type.kind === "layer") {
-        const node = makeNode(element, type.kind, parent, walker, origin, [], true);
-        const interior = interiorOf(element.props.children as ReactNode);
+        const engine = engineOf(type);
+        // An engine Layer's own props are its handles; its children are the engine's, not a component's.
+        const node = makeNode(engine ? withEngine(element, engine) : element, type.kind, parent, walker, origin, [], true);
+        const interior = engine ? null : interiorOf(element.props.children as ReactNode);
         if (interior) {
           const withInterior: CollectedNode = { ...node, interior };
           walker.byId.set(node.id, withInterior);
@@ -166,6 +169,11 @@ function textOf(children: ReactNode): string | undefined {
   });
   if (!onlyText || parts.length === 0) return undefined;
   return parts.join("");
+}
+
+/** The element with its engine named in its props, where the resolver, the Player and the export read it. */
+function withEngine(element: ReactElement<Record<string, unknown>>, engine: string): ReactElement<Record<string, unknown>> {
+  return { ...element, props: { ...element.props, engine } };
 }
 
 /** A Layer's handles: exactly one child element whose type is a function component (not a vocabulary element). */

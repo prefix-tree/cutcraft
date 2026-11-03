@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createElement as h, type ReactElement } from "react";
 import type { Canvas, CanvasRenderingContext2D } from "skia-canvas";
-import { Caption, Captions, Composition, Layer, Shape, Sticker, Svg, Title, Track, collect, resolve, useT, type AssetManifest } from "@cutcraft/kit";
+import { Caption, Captions, Composition, Layer, Motion, Shape, Sticker, Svg, Three, Title, Track, collect, resolve, useT, type AssetManifest } from "@cutcraft/kit";
 import { indexLayerInteriors } from "@cutcraft/player/overlays";
 import generateMedia, { mediaDir } from "../../player/e2e/gen-media";
 import { manifest } from "../../player/e2e/app/composition";
@@ -287,5 +287,24 @@ describe("SVG in the export", () => {
     const { at } = await draw(h(Layer, { id: "l", start: 0, duration: 2 }, h(Inline)));
     expect(near(at(320, 120), [0, 255, 0])).toBe(true);
     expect(near(at(290, 120), [0, 0, 0])).toBe(true);
+  });
+});
+
+describe("OverlayPlane and engine layers", () => {
+  it("leaves <Three> and <Motion> out with a warning, since they need a browser", async () => {
+    const tree = h(Composition, { fps: 30, width: 640, height: 360 },
+      h(Track, { id: "fx", layout: "free" },
+        h(Three, { id: "cube", start: 0, duration: 2, setup: () => undefined }),
+        h(Motion, { id: "words", start: 0, duration: 2, sequence: [["h1", { opacity: [0, 1] }]] }, h("h1", null, "Hi")),
+      ),
+    );
+    const engineState = resolve(collect(tree), manifest);
+    expect(engineState.errors).toEqual([]);
+    const said: string[] = [];
+    const engines = new OverlayPlane({ state: engineState, media: directoryResolver(mediaDir, manifest), interiors: indexLayerInteriors(tree), warn: (m) => said.push(m) });
+    const c = createCanvas(640, 360) as unknown as Canvas;
+    await engines.draw(c.getContext("2d") as CanvasRenderingContext2D, 1);
+    engines.dispose();
+    expect(said).toEqual([expect.stringContaining("three engine, which needs a browser"), expect.stringContaining("motion engine, which needs a browser")]);
   });
 });

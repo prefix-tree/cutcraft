@@ -1,6 +1,6 @@
 import traverseModule from "@babel/traverse";
 import * as t from "@babel/types";
-import { ELEMENTS } from "../jsx/elements";
+import { ELEMENTS, ENGINE_LAYERS } from "../jsx/elements";
 import { INTERIOR_PREFIX } from "../resolve/tree";
 import type { Json } from "../patches/types";
 import { parseSource, rangeOf, type Range } from "./parse";
@@ -8,7 +8,7 @@ import { parseSource, rangeOf, type Range } from "./parse";
 // @babel/traverse ships a CommonJS default that bundlers surface differently.
 const traverse = ((traverseModule as unknown as { default?: typeof traverseModule }).default ?? traverseModule) as typeof traverseModule;
 
-const KIND_BY_NAME: ReadonlyMap<string, string> = new Map(Object.entries(ELEMENTS).map(([name, c]) => [name, c.kind]));
+const KIND_BY_NAME: ReadonlyMap<string, string> = new Map([...Object.entries(ELEMENTS), ...Object.entries(ENGINE_LAYERS)].map(([name, c]) => [name, c.kind]));
 
 export interface PropSite {
   readonly name: string;
@@ -222,7 +222,7 @@ export function buildSourceIndex(text: string): SourceIndex {
       if (idSite) idSites.push({ id, range: idSite.range });
       const closing = path.node.closingElement;
       const childrenRange: Range | null = closing ? [opening.end ?? 0, closing.start ?? 0] : null;
-      const interior = kind === "layer" ? interiorOf(path.node, inSchemaFn) : null;
+      const interior = name === "Layer" ? interiorOf(path.node, inSchemaFn) : null;
       if (interior) {
         for (const prop of interior.lockedProps) locked.push(`${INTERIOR_PREFIX}${prop}`);
         for (const [prop, key] of Object.entries(interior.boundProps)) bound[`${INTERIOR_PREFIX}${prop}`] = key;

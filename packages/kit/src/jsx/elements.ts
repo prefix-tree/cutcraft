@@ -5,7 +5,7 @@ import { audioEffectSchema, colorGradeSchema, effectSchema, freezeSchema, keyfra
 import { compositionSchema, gapSchema, markerSchema, trackSchema } from "./schemas/composition";
 import { audioSchema, clipSchema } from "./schemas/media";
 import { angleSchema, cutSchema, multicamSchema } from "./schemas/multicam";
-import { adjustmentSchema, graphicSchema, layerSchema, nestedSchema, shapeSchema, stickerSchema, svgSchema, titleSchema } from "./schemas/overlays";
+import { adjustmentSchema, graphicSchema, layerSchema, motionSchema, nestedSchema, shapeSchema, stickerSchema, svgSchema, threeSchema, titleSchema } from "./schemas/overlays";
 import { transitionSchema } from "./schemas/transition";
 
 const el = <K extends string, S extends Parameters<typeof defineElement>[0]["schema"]>(kind: K, schema: S) =>
@@ -32,6 +32,31 @@ export const Multicam = el("multicam", multicamSchema);
 export const Angle = el("angle", angleSchema);
 export const Cut = el("cut", cutSchema);
 export const Layer = el("layer", layerSchema);
+/**
+ * A Layer drawn by a library: kind `layer` to the resolver, the timeline and the editor, with props of its own and
+ * an `engine` the Player looks up among the installed layer engines (`installLayerEngine`).
+ */
+const engineLayer = <E extends string, S extends Parameters<typeof defineElement>[0]["schema"]>(engine: E, schema: S) => {
+  const component = defineElement({ kind: "layer", schema, capabilities: capabilitiesOf("layer") });
+  Object.defineProperty(component, "engine", { value: engine, enumerable: true });
+  return component as typeof component & { readonly engine: E };
+};
+
+/** A three.js scene on the timeline: `setup` for plain three.js, or React Three Fiber children. */
+export const Three = engineLayer("three", threeSchema.omit({ engine: true }));
+/** Children animated by a Motion `sequence` on the video's clock. */
+export const Motion = engineLayer("motion", motionSchema.omit({ engine: true }));
+
+/** The engine Layers by tag, and the schema each is checked against once collected (with its `engine`). */
+export const ENGINE_LAYERS = { Three, Motion } as const;
+export const ENGINE_SCHEMAS: Readonly<Record<string, typeof threeSchema | typeof motionSchema>> = { three: threeSchema, motion: motionSchema };
+
+/** The engine a vocabulary component draws with, if it is an engine Layer. */
+export function engineOf(type: unknown): string | null {
+  const engine = (type as { engine?: unknown } | null)?.engine;
+  return typeof engine === "string" ? engine : null;
+}
+
 export const Effect = el("effect", effectSchema);
 export const AudioEffect = el("audioEffect", audioEffectSchema);
 export const ColorGrade = el("colorGrade", colorGradeSchema);

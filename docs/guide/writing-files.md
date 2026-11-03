@@ -239,9 +239,11 @@ function Countdown() {
 ```
 
 Both hooks read the player's time, so scrubbing shows the right value and
-pausing freezes it; a `setInterval` would drift and ignore seeks. In the
-export, `requestAnimationFrame`, `Date`, `performance.now()` and CSS
-animations follow the video's clock too; the lint warns about what does not
+pausing freezes it; a `setInterval` would drift and ignore seeks. CSS
+animations inside a Layer count from the layer's start and are held at its
+time, so they pause and scrub with the video. In the export,
+`requestAnimationFrame`, `Date` and `performance.now()` follow the video's
+clock too; the lint warns about what does not
 (timers, `<video>` and `<audio>` elements, canvases made with
 `willReadFrequently`). Free code that is a function of time renders the same
 every time; state that builds up from frame to frame does not survive a seek.
@@ -249,6 +251,71 @@ every time; state that builds up from frame to frame does not survive a seek.
 The export renders free code in a browser (headless Chrome, frame by frame).
 Until that engine ships, the Node export draws a Layer through Satori, which
 supports flexbox CSS and no hooks, and warns about what it leaves out.
+
+### three.js and Motion: `<Three>` and `<Motion>`
+
+A host that calls `installFreeCodeLibraries()` from `@cutcraft/libraries` gives
+the file two more tags. They sit on the timeline like a `<Layer>` (`id`,
+`start` or `anchor` and `at`, `duration`, `transform`, `enter`, `exit`), so the
+editor moves, trims and anchors them, and their literal props show in the
+inspector.
+
+`<Three>` holds a three.js scene. Paste plain three.js into `setup`: it runs
+once with `{ scene, camera, renderer, THREE, width, height }`, and the function
+it returns runs on every frame with `{ time, t, duration, ... }`, where `time`
+is seconds since the layer started:
+
+```tsx
+<Three id="cube" anchor="hook" at="word:14" duration={4}
+  camera={{ position: [0, 0, 5], fov: 40 }} background="#101010"
+  setup={({ scene, THREE }) => {
+    const cube = new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshNormalMaterial());
+    scene.add(cube);
+    return ({ time }) => { cube.rotation.set(time * 0.6, time, 0); };
+  }}
+/>
+```
+
+Set the scene from `time` rather than adding up steps: the player calls
+`update` for whatever frame it shows, backwards after a scrub too. What `setup`
+added to the scene is removed when the tag goes. `camera` (`position`,
+`lookAt`, `fov`, `near`, `far`, `zoom`, `orthographic`) and `background` are
+literal props the inspector edits. React Three Fiber works as children instead
+of, or beside, `setup`; `useFrame`'s `clock.elapsedTime` is the same `time`:
+
+```tsx
+<Three id="logo" start={2} duration={3} camera={{ position: [0, 0, 4] }}>
+  <ambientLight />
+  <Logo />
+</Three>
+```
+
+`<Motion>` animates its children with a Motion `sequence` on the video's clock.
+Each step names a selector inside the tag, its keyframes and options
+(`duration`, `at`, `ease`, `delay`). The sequence is a literal prop, so the
+inspector edits it:
+
+```tsx
+<Motion id="headline" anchor="hook" duration={3}
+  sequence={[
+    ["h1", { opacity: [0, 1], y: [40, 0] }, { duration: 0.6 }],
+    [".rule", { scaleX: [0, 1] }, { at: 0.3, duration: 0.8 }],
+  ]}>
+  <h1>Launch</h1>
+  <div className="rule" />
+</Motion>
+```
+
+Inside an ordinary `<Layer>`, the same libraries come as adapters:
+`<ThreeScene>` (`@cutcraft/libraries/three`) is the React Three Fiber canvas
+`<Three>` draws with, `useTimeline(sequence)` (`@cutcraft/libraries/motion`)
+plays a sequence scoped to the ref it returns, and `useLayerTime()` is the
+layer's seconds as a Motion value, for `useTransform`. The lint warns about a
+bare `<Canvas>`, Motion's `animate()` and a `motion` element with `animate` or
+`whileInView`, which play on their library's own clock.
+
+The Node export leaves `<Three>` and `<Motion>` out with a warning; the browser
+export engine draws them.
 
 To shape that time, `@cutcraft/kit` exports three pure helpers. `interpolate(x,
 inputRange, outputRange, { easing, extrapolateLeft, extrapolateRight })` maps a

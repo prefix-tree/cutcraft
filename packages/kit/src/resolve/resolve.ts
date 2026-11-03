@@ -1,5 +1,5 @@
 import type { z } from "zod";
-import { SCHEMAS_BY_KIND } from "../jsx/elements";
+import { ENGINE_SCHEMAS, SCHEMAS_BY_KIND } from "../jsx/elements";
 import type { TrackLayout, TrackRole, TransitionType } from "../jsx/enums";
 import { defaultTransitionParams } from "../jsx/schemas/transition";
 import { capabilitiesOf } from "../jsx/capabilities";
@@ -275,7 +275,8 @@ function parseProps(node: CollectedNode, errors: ResolveError[], theme: Resolved
     return cached.data;
   }
   const own: ResolveError[] = themed.issues.map((issue) => ({ code: issue.code, id: node.id, prop: issue.prop, message: issue.message }));
-  const schema = SCHEMAS_BY_KIND[node.kind] as z.ZodType | undefined;
+  const engine = node.kind === "layer" && typeof node.props.engine === "string" ? node.props.engine : null;
+  const schema = (engine ? ENGINE_SCHEMAS[engine] : SCHEMAS_BY_KIND[node.kind]) as z.ZodType | undefined;
   let data: Record<string, unknown>;
   if (!schema) data = { ...themed.props };
   else {

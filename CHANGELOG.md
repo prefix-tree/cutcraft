@@ -8,6 +8,23 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- `<Three>` and `<Motion>`: three.js and Motion on the timeline. Both are Layers to the
+  resolver, the timeline and the editor (placed, anchored, trimmed and folded like one), with
+  literal props the inspector edits. `<Three setup>` runs plain three.js once with `{ scene,
+  camera, renderer, THREE }` and its returned `update({ time, t, ... })` on every frame;
+  React Three Fiber children work too; `camera` and `background` are props. `<Motion
+  sequence>` animates its children with a Motion sequence. Both follow the video's clock and
+  scrub both ways. A host draws them by calling `installFreeCodeLibraries()` from the new
+  `@cutcraft/libraries`, which installs their engines (`installLayerEngine`) and returns the
+  imports to pass to `loadModule` (`three`, `@react-three/fiber`, `motion`, `motion/react`).
+  Inside a plain `<Layer>`, `<ThreeScene>`, `useTimeline` and `useLayerTime` do the same. The
+  `free-code-clock` lint warns about a bare `<Canvas>`, Motion's `animate()` and `motion`
+  elements with `animate` or `whileInView`. The Node export leaves the tags out with a
+  warning; the browser export engine will draw them.
+
+- CSS animations inside a `<Layer>` are held at the layer's time in the player: they count from
+  the layer's start, pause with the video and scrub both ways.
+
 - `at` times an anchored element by a word of its anchor's footage: `<Title anchor="make-1"
   at="word:14655">` starts where clip `make-1` plays that word (clip start + (word time − clip in)
   / speed, plus any `offset`), so it follows the clip when it moves or is trimmed, and `anchor`
