@@ -1,0 +1,29 @@
+import * as fiber from "@react-three/fiber";
+import * as motion from "motion";
+import * as motionReact from "motion/react";
+import * as three from "three";
+import * as cutMotion from "./motion";
+import * as cutThree from "./three";
+
+/**
+ * The libraries free code in a `<Layer>` may import, by import name. A host passes them to `loadModule`:
+ *
+ * ```ts
+ * loadModule(source, { imports: FREE_CODE_LIBRARIES });
+ * ```
+ *
+ * three.js comes with React Three Fiber and `@cutcraft/libraries/three`, whose `<ThreeScene>` puts a scene on the
+ * video's clock; Motion with `@cutcraft/libraries/motion`, whose `useTimeline` and `useLayerTime` do the same for
+ * animations. A host that wants fewer builds its own map from these entries.
+ */
+export const FREE_CODE_LIBRARIES: Readonly<Record<string, unknown>> = {
+  three,
+  "@react-three/fiber": fiber,
+  motion,
+  "motion/react": motionReact,
+  "@cutcraft/libraries/three": cutThree,
+  "@cutcraft/libraries/motion": cutMotion,
+};
+
+export { ThreeScene, type ThreeSceneProps } from "./three";
+export { useLayerTime, useTimeline } from "./motion";

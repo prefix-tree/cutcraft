@@ -55,6 +55,31 @@ describe("lint", () => {
     expect(d.filter((x) => x.rule === "free-code-clock").map((x) => x.message.split(" ")[0])).toEqual(["setTimeout", "a", "<video>"]);
   });
 
+  it("warns about three.js and Motion on their own clocks, and names the adapter", () => {
+    const extra = [
+      'import { Canvas } from "@react-three/fiber";',
+      'import { motion, animate as play } from "motion/react";',
+      "function Bad() { play(\"#x\", { opacity: 1 }); return <div><Canvas /><motion.div animate={{ x: 10 }} /><motion.div style={{ x: 1 }} /></div>; }",
+    ].join("\n");
+    const d = lint(wrap('<Track id="t"><Layer id="l" duration={3}><Bad /></Layer></Track>', extra));
+    expect(d.filter((x) => x.rule === "free-code-clock").map((x) => x.message.split(";")[1]?.trim())).toEqual([
+      "use useTimeline or useLayerTime from @cutcraft/libraries/motion",
+      "use <ThreeScene> from @cutcraft/libraries/three",
+      "drive it with useTimeline or useLayerTime from @cutcraft/libraries/motion",
+    ]);
+  });
+
+  it("lets three.js and Motion run through the adapters", () => {
+    const extra = [
+      'import { ThreeScene } from "@cutcraft/libraries/three";',
+      'import { useTimeline, useLayerTime } from "@cutcraft/libraries/motion";',
+      'import { motion, useTransform } from "motion/react";',
+      "function Good() { const scope = useTimeline([]); const x = useTransform(useLayerTime(), [0, 1], [0, 9]); return <div ref={scope}><ThreeScene /><motion.div style={{ x }} /></div>; }",
+    ].join("\n");
+    const d = lint(wrap('<Track id="t"><Layer id="l" duration={3}><Good /></Layer></Track>', extra));
+    expect(d.filter((x) => x.rule === "free-code-clock")).toEqual([]);
+  });
+
   it("finds an element's parent through the HTML it is wrapped in, as the resolver does", () => {
     const index = buildSourceIndex(wrap('<Track id="t"><div><Clip id="c" src="asset:city" /></div></Track>'));
     expect(index.elements.get("c")?.parent).toBe("t");

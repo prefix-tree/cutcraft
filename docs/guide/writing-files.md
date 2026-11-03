@@ -239,9 +239,11 @@ function Countdown() {
 ```
 
 Both hooks read the player's time, so scrubbing shows the right value and
-pausing freezes it; a `setInterval` would drift and ignore seeks. In the
-export, `requestAnimationFrame`, `Date`, `performance.now()` and CSS
-animations follow the video's clock too; the lint warns about what does not
+pausing freezes it; a `setInterval` would drift and ignore seeks. CSS
+animations inside a Layer count from the layer's start and are held at its
+time, so they pause and scrub with the video. In the export,
+`requestAnimationFrame`, `Date` and `performance.now()` follow the video's
+clock too; the lint warns about what does not
 (timers, `<video>` and `<audio>` elements, canvases made with
 `willReadFrequently`). Free code that is a function of time renders the same
 every time; state that builds up from frame to frame does not survive a seek.
@@ -249,6 +251,49 @@ every time; state that builds up from frame to frame does not survive a seek.
 The export renders free code in a browser (headless Chrome, frame by frame).
 Until that engine ships, the Node export draws a Layer through Satori, which
 supports flexbox CSS and no hooks, and warns about what it leaves out.
+
+### three.js and Motion
+
+A host that offers `FREE_CODE_LIBRARIES` from `@cutcraft/libraries` lets a file
+import three.js, React Three Fiber and Motion. Each runs on a clock of its own,
+so each comes with an adapter that puts it on the video's:
+
+```tsx
+import { ThreeScene } from "@cutcraft/libraries/three";
+import { useLayerTime, useTimeline } from "@cutcraft/libraries/motion";
+import { useFrame } from "@react-three/fiber";
+import { motion, useTransform } from "motion/react";
+
+function Cube() {
+  const mesh = useRef<Mesh>(null);
+  // elapsedTime is seconds since the layer started.
+  useFrame(({ clock }) => { mesh.current!.rotation.y = clock.elapsedTime; });
+  return <mesh ref={mesh}><boxGeometry /><meshNormalMaterial /></mesh>;
+}
+
+function Headline() {
+  const scope = useTimeline([
+    ["h1", { opacity: [0, 1], y: [40, 0] }, { duration: 0.6 }],
+    [".rule", { scaleX: [0, 1] }, { at: 0.3, duration: 0.8 }],
+  ]);
+  const x = useTransform(useLayerTime(), [0, 4], [0, 120]);
+  return <div ref={scope}><h1>Launch</h1><motion.div className="rule" style={{ x }} /></div>;
+}
+
+<Layer id="scene" anchor="hook" duration={4}><ThreeScene><Cube /></ThreeScene></Layer>
+<Layer id="headline" anchor="hook" duration={4}><Headline /></Layer>
+```
+
+`<ThreeScene>` is a React Three Fiber `<Canvas>` that never draws on its own:
+each frame advances it to the layer's time, so `clock.elapsedTime` in
+`useFrame` is the video's time, scrubbing back works, and it fills its Layer
+unless `style` says otherwise. Derive a scene from `elapsedTime`, not by adding
+up `delta`. `useTimeline(sequence)` builds a Motion sequence paused and sets it
+to the layer's time on every frame; its selectors are scoped to the ref it
+returns. `useLayerTime()` is the layer's seconds as a Motion value, for
+`useTransform` and `motion` styles. The lint warns about a bare `<Canvas>`, a
+Motion `animate()` and a `motion` element with `animate` or `whileInView`,
+which play on their library's clock.
 
 To shape that time, `@cutcraft/kit` exports three pure helpers. `interpolate(x,
 inputRange, outputRange, { easing, extrapolateLeft, extrapolateRight })` maps a
