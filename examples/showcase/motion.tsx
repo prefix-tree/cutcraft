@@ -13,11 +13,30 @@ function Bars({ color }: { color: string }) {
   const { elapsed, remaining } = useLayer();
   const fade = interpolate(remaining, [0, 0.4], [0, 1], { extrapolateRight: "clamp" });
   return (
-    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%", height: "100%", opacity: fade }}>
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        width: "100%",
+        height: "100%",
+        opacity: fade,
+      }}
+    >
       <div style={{ display: "flex", alignItems: "flex-end", gap: 18, height: 320 }}>
         {BARS.map((bar, i) => (
-          <div key={bar.label} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10, width: 80 }}>
-            <div style={{ width: 80, height: 260 * bar.value * spring({ time: elapsed - i * 0.12, damping: 12 }), background: color, borderRadius: 10 }} />
+          <div
+            key={bar.label}
+            style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10, width: 80 }}
+          >
+            <div
+              style={{
+                width: 80,
+                height: 260 * bar.value * spring({ time: elapsed - i * 0.12, damping: 12 }),
+                background: color,
+                borderRadius: 10,
+              }}
+            />
             <div style={{ color: "#f3ead6", fontSize: 22, fontWeight: 600 }}>{bar.label}</div>
           </div>
         ))}
@@ -37,7 +56,15 @@ export default function Video() {
         <Layer id="bars" start={0} duration={5}>
           <Bars color="#c8402a" />
         </Layer>
-        <Graphic id="peak" kind="callout" text="Best day" tail="bottom" start={1.4} duration={3.6} transform={{ position: { x: 98, y: -150 } }} />
+        <Graphic
+          id="peak"
+          kind="callout"
+          text="Best day"
+          tail="bottom"
+          start={1.4}
+          duration={3.6}
+          transform={{ position: { x: 98, y: -150 } }}
+        />
         <Graphic id="party" kind="confetti" start={1.6} duration={3.4} />
       </Track>
     </Composition>

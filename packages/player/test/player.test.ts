@@ -1,12 +1,26 @@
 import { ManualClock, PlayerCore, type PlayerEvents } from "@cutcraft/player";
-import { FakeAudioOutput, FakeAudioSource, FakeFrameSource, fakeResolver, flush, recorderContext } from "./helpers/fakes";
+import {
+  FakeAudioOutput,
+  FakeAudioSource,
+  FakeFrameSource,
+  fakeResolver,
+  flush,
+  recorderContext,
+} from "./helpers/fakes";
 import { makeState } from "./helpers/state";
 
-const state = makeState({ tracks: [{ id: "main", items: [
-  { id: "c1", kind: "clip", source: { in: 0, out: 4, asset: "a" } },
-  { id: "x1", kind: "transition", duration: 1, props: { type: "crossfade", params: { curve: "linear" } } },
-  { id: "c2", kind: "clip", source: { in: 0, out: 4, asset: "b" } },
-] }] });
+const state = makeState({
+  tracks: [
+    {
+      id: "main",
+      items: [
+        { id: "c1", kind: "clip", source: { in: 0, out: 4, asset: "a" } },
+        { id: "x1", kind: "transition", duration: 1, props: { type: "crossfade", params: { curve: "linear" } } },
+        { id: "c2", kind: "clip", source: { in: 0, out: 4, asset: "b" } },
+      ],
+    },
+  ],
+});
 
 function setup(opts: { loop?: boolean } = {}) {
   const clock = new ManualClock();
@@ -17,18 +31,51 @@ function setup(opts: { loop?: boolean } = {}) {
   const events: { type: string; e: unknown }[] = [];
   const canvases: ReturnType<typeof recorderContext>[] = [];
   const core = new PlayerCore({
-    state, media: fakeResolver(["a", "b"]), clock, audioOutput: output, toContextTime: (t) => t,
-    frameSourceFactory: (id) => { const f = new FakeFrameSource(id); frames.set(id, f); return f; },
-    audioSourceFactory: (id) => { const a = new FakeAudioSource(id); audio.set(id, a); return a; },
-    createCanvas: (w, h) => { const r = recorderContext(); (r.canvas as { width: number; height: number }).width = w; (r.canvas as { width: number; height: number }).height = h; canvases.push(r); return r.canvas as unknown as OffscreenCanvas; },
-    raf: (cb) => { rafQueue.push(cb); return rafQueue.length; },
-    cancelRaf: () => { rafQueue.length = 0; },
-    setInterval: () => 1, clearInterval: () => {},
+    state,
+    media: fakeResolver(["a", "b"]),
+    clock,
+    audioOutput: output,
+    toContextTime: (t) => t,
+    frameSourceFactory: (id) => {
+      const f = new FakeFrameSource(id);
+      frames.set(id, f);
+      return f;
+    },
+    audioSourceFactory: (id) => {
+      const a = new FakeAudioSource(id);
+      audio.set(id, a);
+      return a;
+    },
+    createCanvas: (w, h) => {
+      const r = recorderContext();
+      (r.canvas as { width: number; height: number }).width = w;
+      (r.canvas as { width: number; height: number }).height = h;
+      canvases.push(r);
+      return r.canvas as unknown as OffscreenCanvas;
+    },
+    raf: (cb) => {
+      rafQueue.push(cb);
+      return rafQueue.length;
+    },
+    cancelRaf: () => {
+      rafQueue.length = 0;
+    },
+    setInterval: () => 1,
+    clearInterval: () => {},
     ...(opts.loop ? { loop: true } : {}),
   });
   const rec = recorderContext();
   core.attachCanvas(rec.canvas as unknown as HTMLCanvasElement);
-  for (const type of ["play", "pause", "seeked", "ended", "frameupdate", "ratechange", "volumechange", "error"] as const) {
+  for (const type of [
+    "play",
+    "pause",
+    "seeked",
+    "ended",
+    "frameupdate",
+    "ratechange",
+    "volumechange",
+    "error",
+  ] as const) {
     core.addEventListener(type, (e: PlayerEvents[typeof type]) => events.push({ type, e }));
   }
   const step = async (dt: number, n = 1): Promise<void> => {
@@ -71,7 +118,9 @@ describe("PlayerCore", () => {
   it("seeks to the exact frame while paused and emits seeked after the paint", async () => {
     const { core, rec, events } = setup();
     await core.seekTo(2);
-    const draws = rec.calls.filter((c) => c.name === "drawImage").map((c) => c.args[0] as { fake: string; timestamp: number });
+    const draws = rec.calls
+      .filter((c) => c.name === "drawImage")
+      .map((c) => c.args[0] as { fake: string; timestamp: number });
     expect(draws[draws.length - 1]).toEqual({ fake: "a", timestamp: 2 });
     expect(events.find((x) => x.type === "seeked")?.e).toEqual({ time: 2 });
     expect(core.getTime()).toEqual({ time: 2, frame: 60 });
@@ -94,7 +143,9 @@ describe("PlayerCore", () => {
     await core.seekTo(0.5);
     const seek = core.compositor.seek.bind(core.compositor);
     let release!: () => void;
-    const blocked = new Promise<void>((resolve) => { release = resolve; });
+    const blocked = new Promise<void>((resolve) => {
+      release = resolve;
+    });
     core.compositor.seek = async (t) => {
       await seek(t);
       if (t === 1) await blocked;
@@ -106,7 +157,10 @@ describe("PlayerCore", () => {
     expect(core.getCurrentTime()).toBe(2);
     expect(core.getTime()).toEqual({ time: 2, frame: 60 });
     expect(core.compositor.renderedFrame).toBe(60);
-    expect(events.filter((event) => event.type === "seeked").map((event) => event.e)).toEqual([{ time: 0.5 }, { time: 2 }]);
+    expect(events.filter((event) => event.type === "seeked").map((event) => event.e)).toEqual([
+      { time: 0.5 },
+      { time: 2 },
+    ]);
     core.dispose();
   });
 
@@ -128,10 +182,19 @@ describe("PlayerCore", () => {
     await core.seekTo(0.5);
     const before = core.compositor.pool.decoderFor("c1");
     expect(before).toBeDefined();
-    core.setState(makeState({ tracks: [{ id: "main", items: [
-      { id: "c1", kind: "clip", source: { in: 0, out: 4, asset: "a" }, props: { transform: { scale: 1.2 } } },
-      { id: "c2", kind: "clip", source: { in: 1, out: 4, asset: "b" } },
-    ] }] }));
+    core.setState(
+      makeState({
+        tracks: [
+          {
+            id: "main",
+            items: [
+              { id: "c1", kind: "clip", source: { in: 0, out: 4, asset: "a" }, props: { transform: { scale: 1.2 } } },
+              { id: "c2", kind: "clip", source: { in: 1, out: 4, asset: "b" } },
+            ],
+          },
+        ],
+      }),
+    );
     await flush();
     expect(core.compositor.pool.decoderFor("c1")).toBe(before);
     expect(core.duration).toBe(7);
@@ -171,13 +234,23 @@ describe("PlayerCore", () => {
     expect(sheet.height).toBe(360);
     const sheetRec = canvases.find((c) => c.canvas === sheet)!;
     const draws = sheetRec.calls.filter((c) => c.name === "drawImage").map((c) => c.args.slice(1));
-    expect(draws).toEqual([[0, 0, 320, 180], [320, 0, 320, 180], [0, 180, 320, 180]]);
-    expect(sheetRec.calls.filter((c) => c.name === "fillText").map((c) => c.args[0])).toEqual(["00:00.15", "00:05.00", "00:06.15"]);
+    expect(draws).toEqual([
+      [0, 0, 320, 180],
+      [320, 0, 320, 180],
+      [0, 180, 320, 180],
+    ]);
+    expect(sheetRec.calls.filter((c) => c.name === "fillText").map((c) => c.args[0])).toEqual([
+      "00:00.15",
+      "00:05.00",
+      "00:06.15",
+    ]);
     expect(frames.get("a")!.frameAtCalls).toContain(0.5);
     expect(frames.get("b")!.frameAtCalls).toEqual(expect.arrayContaining([2, 3.5]));
     const after = rec.calls.slice(before);
     expect(after.filter((c) => c.name === "drawImage").length).toBeGreaterThan(0);
-    expect(after.some((c) => c.name === "drawImage" && (c.args[0] as { timestamp?: number }).timestamp === 150)).toBe(false);
+    expect(after.some((c) => c.name === "drawImage" && (c.args[0] as { timestamp?: number }).timestamp === 150)).toBe(
+      false,
+    );
   });
 
   it("captures without labels when asked and clamps columns to the cell count", async () => {

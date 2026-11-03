@@ -1,5 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { ELEMENTS, SCHEMAS_BY_KIND, TRANSITION_PARAMS, TRANSITION_TYPES, capabilitiesOf, defaultTransitionParams, isKeyframeProperty, isVocabulary } from "@cutcraft/kit";
+import {
+  ELEMENTS,
+  SCHEMAS_BY_KIND,
+  TRANSITION_PARAMS,
+  TRANSITION_TYPES,
+  capabilitiesOf,
+  defaultTransitionParams,
+  isKeyframeProperty,
+  isVocabulary,
+} from "@cutcraft/kit";
 import { fixtureTree } from "./helpers";
 
 describe("element schemas", () => {
@@ -30,22 +39,37 @@ describe("element schemas", () => {
     expect(clip.safeParse({ id: "c", src: "nope" }).success).toBe(false);
     expect(clip.safeParse({ id: "c", src: "asset:a", in: "word:x" }).success).toBe(false);
     expect(clip.safeParse({ id: "bad id", src: "asset:a" }).success).toBe(false);
-    expect(clip.safeParse({ id: "c", src: "asset:a", in: "silence:2.end", duration: { match: "d" } }).success).toBe(true);
+    expect(clip.safeParse({ id: "c", src: "asset:a", in: "silence:2.end", duration: { match: "d" } }).success).toBe(
+      true,
+    );
   });
 
   it("applies defaults", () => {
     const parsed = ELEMENTS.Title.schema.parse({ id: "t" });
     expect(parsed).toMatchObject({ font: "Inter", size: 48, weight: "bold", align: "center" });
-    expect(ELEMENTS.Track.schema.parse({ id: "t" })).toMatchObject({ layout: "sequence", role: "general", locked: false });
-    expect(ELEMENTS.Composition.schema.parse({ fps: 30, width: 1920, height: 1080 })).toMatchObject({ id: "composition", sampleRate: 48000, channels: 2 });
+    expect(ELEMENTS.Track.schema.parse({ id: "t" })).toMatchObject({
+      layout: "sequence",
+      role: "general",
+      locked: false,
+    });
+    expect(ELEMENTS.Composition.schema.parse({ fps: 30, width: 1920, height: 1080 })).toMatchObject({
+      id: "composition",
+      sampleRate: 48000,
+      channels: 2,
+    });
   });
 
   it("validates transition params per type", () => {
     for (const type of TRANSITION_TYPES) {
       expect(TRANSITION_PARAMS[type].safeParse({}).success, type).toBe(true);
-      expect(ELEMENTS.Transition.schema.safeParse({ id: "x", type, params: defaultTransitionParams(type) }).success, type).toBe(true);
+      expect(
+        ELEMENTS.Transition.schema.safeParse({ id: "x", type, params: defaultTransitionParams(type) }).success,
+        type,
+      ).toBe(true);
     }
-    expect(ELEMENTS.Transition.schema.safeParse({ id: "x", type: "wipe", params: { direction: "sideways" } }).success).toBe(false);
+    expect(
+      ELEMENTS.Transition.schema.safeParse({ id: "x", type: "wipe", params: { direction: "sideways" } }).success,
+    ).toBe(false);
     expect(ELEMENTS.Transition.schema.safeParse({ id: "x", on: "c1" }).success).toBe(false);
     expect(defaultTransitionParams("crossfade")).toEqual({ curve: "ease" });
   });

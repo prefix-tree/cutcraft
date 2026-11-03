@@ -21,19 +21,28 @@ export interface InterpolateOptions {
  * Maps `input` from `inputRange` onto `outputRange`, piecewise: `interpolate(elapsed, [0, 0.5, 2], [0, 1, 0.8])`.
  * The input range must increase. Beyond the ends the value extends linearly, unless clamped; easing applies only inside.
  */
-export function interpolate(input: number, inputRange: readonly number[], outputRange: readonly number[], options: InterpolateOptions = {}): number {
-  if (inputRange.length < 2 || inputRange.length !== outputRange.length) throw new Error("interpolate() wants input and output ranges of the same length, at least two");
+export function interpolate(
+  input: number,
+  inputRange: readonly number[],
+  outputRange: readonly number[],
+  options: InterpolateOptions = {},
+): number {
+  if (inputRange.length < 2 || inputRange.length !== outputRange.length)
+    throw new Error("interpolate() wants input and output ranges of the same length, at least two");
   for (let i = 1; i < inputRange.length; i++) {
-    if (!(inputRange[i]! > inputRange[i - 1]!)) throw new Error(`interpolate() wants an increasing input range, got [${inputRange.join(", ")}]`);
+    if (!(inputRange[i]! > inputRange[i - 1]!))
+      throw new Error(`interpolate() wants an increasing input range, got [${inputRange.join(", ")}]`);
   }
   let i = 1;
   while (i < inputRange.length - 1 && input > inputRange[i]!) i++;
-  const a = inputRange[i - 1]!, b = inputRange[i]!;
+  const a = inputRange[i - 1]!,
+    b = inputRange[i]!;
   let x = (input - a) / (b - a);
   if (x < 0 && options.extrapolateLeft === "clamp") x = 0;
   if (x > 1 && options.extrapolateRight === "clamp") x = 1;
   const k = x >= 0 && x <= 1 && options.easing ? EASING_FN[options.easing](x) : x;
-  const lo = outputRange[i - 1]!, hi = outputRange[i]!;
+  const lo = outputRange[i - 1]!,
+    hi = outputRange[i]!;
   return lo + (hi - lo) * k;
 }
 

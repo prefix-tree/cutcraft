@@ -11,12 +11,20 @@ export function usePlayer(): PlayerCore {
 
 export function useCompositionTime(): number {
   const core = usePlayer();
-  return useSyncExternalStore((fn) => core.subscribeTime(fn), () => core.getTime().time, () => core.getTime().time);
+  return useSyncExternalStore(
+    (fn) => core.subscribeTime(fn),
+    () => core.getTime().time,
+    () => core.getTime().time,
+  );
 }
 
 export function useCompositionFrame(): number {
   const core = usePlayer();
-  return useSyncExternalStore((fn) => core.subscribeTime(fn), () => core.getTime().frame, () => core.getTime().frame);
+  return useSyncExternalStore(
+    (fn) => core.subscribeTime(fn),
+    () => core.getTime().frame,
+    () => core.getTime().frame,
+  );
 }
 
 /** What the kit's `useLayer()` and `useT()` delegate to while a Player is mounted. */

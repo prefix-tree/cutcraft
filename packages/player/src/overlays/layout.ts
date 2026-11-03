@@ -3,7 +3,15 @@ import type { CSSProperties } from "react";
 import { filterString } from "../model/effects";
 import { combine, motionAt, STILL, type ClipRect, type GraphicAnimation, type Motion } from "../model/motion";
 import { transitionLook } from "../model/transition";
-import { animatedTransform, layoutRect, matrixToCss, multiply, translate, type Box, type Matrix2D } from "../model/transform";
+import {
+  animatedTransform,
+  layoutRect,
+  matrixToCss,
+  multiply,
+  translate,
+  type Box,
+  type Matrix2D,
+} from "../model/transform";
 import type { TransitionRole } from "../model/visible";
 import { blendOf } from "../model/frame-plan";
 
@@ -47,7 +55,10 @@ export function overlayLayout(p: ElementProps, size: Box, fit: FitMode = "none",
   const { filter } = filterString(p.children, p.placement.id, rel);
   const blend = p.placement.props.blend;
   const props = p.placement.props as { enter?: GraphicAnimation; exit?: GraphicAnimation };
-  const motion = combine(motionAt(props.enter, props.exit, rel, p.placement.duration, layout.rect.w, layout.rect.h), transitionMotion(p.transition, layout.rect.w, layout.rect.h));
+  const motion = combine(
+    motionAt(props.enter, props.exit, rel, p.placement.duration, layout.rect.w, layout.rect.h),
+    transitionMotion(p.transition, layout.rect.w, layout.rect.h),
+  );
   const fadeForDraw = !drawable && motion.draw !== null ? motion.draw : 1;
   return {
     rect: { w: layout.rect.w, h: layout.rect.h },
@@ -68,7 +79,12 @@ export function overlayLayout(p: ElementProps, size: Box, fit: FitMode = "none",
 function transitionMotion(t: TransitionRole | undefined, w: number, h: number): Motion {
   if (!t) return STILL;
   const look = transitionLook(t, w, h);
-  return { opacity: look.opacity * (1 - (look.dip ?? 0)), matrix: translate(look.offset?.x ?? 0, look.offset?.y ?? 0), clip: look.clip ?? null, draw: null };
+  return {
+    opacity: look.opacity * (1 - (look.dip ?? 0)),
+    matrix: translate(look.offset?.x ?? 0, look.offset?.y ?? 0),
+    clip: look.clip ?? null,
+    draw: null,
+  };
 }
 
 /** A clip as a CSS `path()`: rectangles in the element's own pixels, an empty one when nothing shows. */

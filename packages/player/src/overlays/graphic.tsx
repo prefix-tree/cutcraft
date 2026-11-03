@@ -34,23 +34,54 @@ export function iconStickerDrawing(p: ElementProps, side: number): GraphicDrawin
   return drawingOf(p, props, { width: side, height: side });
 }
 
-function drawingOf(p: ElementProps, props: Readonly<Record<string, unknown>>, size: { width: number; height: number }): GraphicDrawing {
+function drawingOf(
+  p: ElementProps,
+  props: Readonly<Record<string, unknown>>,
+  size: { width: number; height: number },
+): GraphicDrawing {
   const layout = overlayLayout(p, size, "none", true);
   const box = { width: layout.rect.w, height: layout.rect.h };
-  const drawn = drawGraphic(props, { ...box, t: p.time - p.placement.start, duration: p.placement.duration, id: p.placement.id, tokens: p.state.theme?.tokens ?? {} });
-  return { layout, prepared: prepareSvg(drawn.svg, { box, idPrefix: p.placement.id, draw: layout.draw }), labels: drawn.labels };
+  const drawn = drawGraphic(props, {
+    ...box,
+    t: p.time - p.placement.start,
+    duration: p.placement.duration,
+    id: p.placement.id,
+    tokens: p.state.theme?.tokens ?? {},
+  });
+  return {
+    layout,
+    prepared: prepareSvg(drawn.svg, { box, idPrefix: p.placement.id, draw: layout.draw }),
+    labels: drawn.labels,
+  };
 }
 
 /** A graphic's labels as positioned text, a tree both the DOM and Satori lay out. */
 export function graphicLabels(labels: readonly Label[]): ReactNode {
   return labels.map((l, i) => (
-    // biome-ignore lint/suspicious/noArrayIndexKey: a graphic's labels come from one draw, in a fixed order.
-    <div key={i} style={{
-      position: "absolute", left: l.x, top: l.y, width: l.w, height: l.h, display: "flex",
-      alignItems: l.valign === "top" ? "flex-start" : l.valign === "bottom" ? "flex-end" : "center",
-      justifyContent: l.align === "left" ? "flex-start" : l.align === "right" ? "flex-end" : "center",
-      textAlign: l.align, fontFamily: l.font, fontSize: l.size, fontWeight: l.weight, fontStyle: l.italic ? "italic" : "normal",
-      color: l.color, lineHeight: l.lineHeight ?? 1.2, letterSpacing: l.letterSpacing ?? 0, whiteSpace: "pre-wrap",
-    }}>{l.text}</div>
+    <div
+      // biome-ignore lint/suspicious/noArrayIndexKey: a graphic's labels come from one draw, in a fixed order.
+      key={i}
+      style={{
+        position: "absolute",
+        left: l.x,
+        top: l.y,
+        width: l.w,
+        height: l.h,
+        display: "flex",
+        alignItems: l.valign === "top" ? "flex-start" : l.valign === "bottom" ? "flex-end" : "center",
+        justifyContent: l.align === "left" ? "flex-start" : l.align === "right" ? "flex-end" : "center",
+        textAlign: l.align,
+        fontFamily: l.font,
+        fontSize: l.size,
+        fontWeight: l.weight,
+        fontStyle: l.italic ? "italic" : "normal",
+        color: l.color,
+        lineHeight: l.lineHeight ?? 1.2,
+        letterSpacing: l.letterSpacing ?? 0,
+        whiteSpace: "pre-wrap",
+      }}
+    >
+      {l.text}
+    </div>
   ));
 }

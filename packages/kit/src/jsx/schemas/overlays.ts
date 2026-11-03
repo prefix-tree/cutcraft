@@ -3,8 +3,18 @@ import { z } from "zod";
 import { zBlendMode, zShapeType, zTextAnimationPreset } from "../enums";
 import { zAnimationUnit, zSvgColorMode, zTextAlign, zTextDecoration, zTextValign } from "./enums-local";
 import {
-  assetRefSchema, colorSchema, entranceProps, gradientSchema, idSchema, shadowSchema, timedProps, timeRefSchema,
-  themedLengthSchema, transformSchema, vec2Schema, visualProps,
+  assetRefSchema,
+  colorSchema,
+  entranceProps,
+  gradientSchema,
+  idSchema,
+  shadowSchema,
+  timedProps,
+  timeRefSchema,
+  themedLengthSchema,
+  transformSchema,
+  vec2Schema,
+  visualProps,
 } from "./common";
 
 export const textAnimationSchema = z.strictObject({
@@ -13,7 +23,12 @@ export const textAnimationSchema = z.strictObject({
   out: z.number().nonnegative().default(0.5),
   stagger: z.number().nonnegative().optional(),
   unit: zAnimationUnit.optional(),
-  params: z.record(z.string(), z.union([z.number(), z.string(), z.boolean(), z.strictObject({ start: z.number(), end: z.number() })])).optional(),
+  params: z
+    .record(
+      z.string(),
+      z.union([z.number(), z.string(), z.boolean(), z.strictObject({ start: z.number(), end: z.number() })]),
+    )
+    .optional(),
 });
 
 export const text3dSchema = z.strictObject({
@@ -92,24 +107,31 @@ export const shapeSchema = z.strictObject({
   shadow: shadowSchema.optional(),
   shadows: z.array(shadowSchema).optional(),
   cornerRadius: themedLengthSchema.optional(),
-  cornerRadii: z.strictObject({ topLeft: z.number(), topRight: z.number(), bottomRight: z.number(), bottomLeft: z.number() }).optional(),
+  cornerRadii: z
+    .strictObject({ topLeft: z.number(), topRight: z.number(), bottomRight: z.number(), bottomLeft: z.number() })
+    .optional(),
   starPoints: z.number().int().min(3).optional(),
   innerRadius: z.number().min(0).max(1).optional(),
 });
 
-
-export const svgSchema = z.strictObject({
-  ...timedProps,
-  ...visualProps,
-  /** A theme preset for svg elements. */
-  style: idSchema.optional(),
-  src: assetRefSchema.optional(),
-  content: z.string().optional(),
-  viewBox: z.strictObject({ minX: z.number(), minY: z.number(), width: z.number().positive(), height: z.number().positive() }).optional(),
-  preserveAspectRatio: z.string().optional(),
-  color: z.strictObject({ mode: zSvgColorMode, tint: colorSchema.optional(), opacity: z.number().min(0).max(1).optional() }).optional(),
-  ...entranceProps,
-}).refine((v) => Boolean(v.src) !== Boolean(v.content), { message: "Svg takes either src or content" });
+export const svgSchema = z
+  .strictObject({
+    ...timedProps,
+    ...visualProps,
+    /** A theme preset for svg elements. */
+    style: idSchema.optional(),
+    src: assetRefSchema.optional(),
+    content: z.string().optional(),
+    viewBox: z
+      .strictObject({ minX: z.number(), minY: z.number(), width: z.number().positive(), height: z.number().positive() })
+      .optional(),
+    preserveAspectRatio: z.string().optional(),
+    color: z
+      .strictObject({ mode: zSvgColorMode, tint: colorSchema.optional(), opacity: z.number().min(0).max(1).optional() })
+      .optional(),
+    ...entranceProps,
+  })
+  .refine((v) => Boolean(v.src) !== Boolean(v.content), { message: "Svg takes either src or content" });
 
 const graphicBase = {
   ...timedProps,
@@ -124,13 +146,18 @@ const graphicBase = {
 
 type Kinds = typeof GRAPHIC_KINDS;
 type KindShape<K extends keyof Kinds> = Kinds[K]["shape"] extends infer S extends z.ZodRawShape ? S : never;
-type GraphicVariant<K extends keyof Kinds> = z.ZodObject<typeof graphicBase & { kind: z.ZodLiteral<K> } & KindShape<K>, z.core.$strict>;
+type GraphicVariant<K extends keyof Kinds> = z.ZodObject<
+  typeof graphicBase & { kind: z.ZodLiteral<K> } & KindShape<K>,
+  z.core.$strict
+>;
 type GraphicVariants = { [K in keyof Kinds]: GraphicVariant<K> }[keyof Kinds];
 
 /** `<Graphic kind>`: the props every graphic takes, and the kind's own (see `@cutcraft/graphics`). */
 export const graphicSchema = z.discriminatedUnion(
   "kind",
-  GRAPHIC_KIND_NAMES.map((k) => z.strictObject({ ...graphicBase, kind: z.literal(k), ...GRAPHIC_KINDS[k].shape })) as unknown as [GraphicVariants, ...GraphicVariants[]],
+  GRAPHIC_KIND_NAMES.map((k) =>
+    z.strictObject({ ...graphicBase, kind: z.literal(k), ...GRAPHIC_KINDS[k].shape }),
+  ) as unknown as [GraphicVariants, ...GraphicVariants[]],
 );
 
 export const stickerSchema = z.strictObject({
@@ -157,7 +184,10 @@ export const nestedSchema = z.strictObject({
   ...timedProps,
   ...visualProps,
   /** A pure helper component returning tracks, or a file reference. Validated at collect time. */
-  of: z.union([z.custom<(props: Record<string, unknown>) => unknown>((v) => typeof v === "function"), z.string().startsWith("file:")]),
+  of: z.union([
+    z.custom<(props: Record<string, unknown>) => unknown>((v) => typeof v === "function"),
+    z.string().startsWith("file:"),
+  ]),
   in: timeRefSchema.optional(),
   out: timeRefSchema.optional(),
   volume: z.number().min(0).max(4).default(1),
@@ -195,8 +225,10 @@ export interface ThreeFrameArgs extends ThreeSetupArgs {
   readonly delta: number;
 }
 
+type ThreeFrameUpdate = (frame: ThreeFrameArgs) => void;
 // biome-ignore lint/suspicious/noConfusingVoidType: a setup may return nothing; `void` lets one without a return statement type-check.
-export type ThreeSetupFunction = (setup: ThreeSetupArgs) => ((frame: ThreeFrameArgs) => void) | { update?: (frame: ThreeFrameArgs) => void; dispose?: () => void } | void;
+type ThreeSetupResult = ThreeFrameUpdate | { update?: ThreeFrameUpdate; dispose?: () => void } | void;
+export type ThreeSetupFunction = (setup: ThreeSetupArgs) => ThreeSetupResult;
 
 /**
  * `<Three>`: a Layer that holds a three.js scene. `setup` takes `{ scene, camera, renderer, THREE, width, height }`
@@ -205,15 +237,17 @@ export type ThreeSetupFunction = (setup: ThreeSetupArgs) => ((frame: ThreeFrameA
  */
 export const threeSchema = layerSchema.extend({
   engine: z.literal("three"),
-  camera: z.strictObject({
-    position: vec3Schema.optional(),
-    lookAt: vec3Schema.optional(),
-    fov: z.number().min(1).max(179).optional(),
-    near: z.number().positive().optional(),
-    far: z.number().positive().optional(),
-    zoom: z.number().positive().optional(),
-    orthographic: z.boolean().optional(),
-  }).optional(),
+  camera: z
+    .strictObject({
+      position: vec3Schema.optional(),
+      lookAt: vec3Schema.optional(),
+      fov: z.number().min(1).max(179).optional(),
+      near: z.number().positive().optional(),
+      far: z.number().positive().optional(),
+      zoom: z.number().positive().optional(),
+      orthographic: z.boolean().optional(),
+    })
+    .optional(),
   background: colorSchema.optional(),
   setup: z.custom<ThreeSetupFunction>((v) => typeof v === "function", "setup must be a function").optional(),
 });

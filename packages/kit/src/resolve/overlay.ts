@@ -9,7 +9,8 @@ import { INTERIOR_PREFIX, type CollectedNode, type CollectedTree } from "./tree"
 export function overlay(tree: CollectedTree, log: PatchLog | undefined): CollectedTree {
   if (!log || log.net.size === 0) return tree;
   const net = log.net;
-  if (![...net.values()].some((n) => n.presence !== "present" || n.place !== undefined || n.bake)) return overlayProps(tree, net);
+  if (![...net.values()].some((n) => n.presence !== "present" || n.place !== undefined || n.bake))
+    return overlayProps(tree, net);
   const byId = new Map<string, CollectedNode>();
 
   // Children added or moved under a parent, keyed by parent id.
@@ -75,7 +76,8 @@ function overlayProps(tree: CollectedTree, net: ReadonlyMap<string, NetPatch>): 
   const dirty = new Set<string>();
   for (const [id, n] of net) {
     if (n.props.size === 0 && n.text === undefined) continue;
-    for (let node = tree.byId.get(id); node; node = node.parent === null ? undefined : tree.byId.get(node.parent)) dirty.add(node.id);
+    for (let node = tree.byId.get(id); node; node = node.parent === null ? undefined : tree.byId.get(node.parent))
+      dirty.add(node.id);
   }
   if (dirty.size === 0) return tree;
   const byId = new Map(tree.byId);
@@ -87,7 +89,13 @@ function overlayProps(tree: CollectedTree, net: ReadonlyMap<string, NetPatch>): 
     let text = node.text;
     if (n && n.props.size > 0) ({ props, interior } = overlaidProps(node, n));
     if (n && n.text !== undefined) text = n.text;
-    const out: CollectedNode = { ...node, props, children: node.children.map(rebuild), ...(text !== undefined ? { text } : {}), ...(interior ? { interior } : {}) };
+    const out: CollectedNode = {
+      ...node,
+      props,
+      children: node.children.map(rebuild),
+      ...(text !== undefined ? { text } : {}),
+      ...(interior ? { interior } : {}),
+    };
     byId.set(out.id, out);
     return out;
   };
@@ -118,7 +126,10 @@ function insertAdditions(
 }
 
 /** Apply a net's prop writes: `interior.<name>` keys go to the Layer's handles, the rest to the node's own props. */
-function overlaidProps(node: CollectedNode, n: NetPatch): { props: Record<string, unknown>; interior: CollectedNode["interior"] } {
+function overlaidProps(
+  node: CollectedNode,
+  n: NetPatch,
+): { props: Record<string, unknown>; interior: CollectedNode["interior"] } {
   const props: Record<string, unknown> = { ...node.props };
   let handles: Record<string, unknown> | null = null;
   for (const [k, v] of n.props) {

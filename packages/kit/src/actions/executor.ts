@@ -51,8 +51,12 @@ export class Executor {
     return resolve(this.tree, this.manifest, this.patchLog);
   }
 
-  log(): PatchLog { return this.patchLog; }
-  history(): ActionHistory { return this.hist; }
+  log(): PatchLog {
+    return this.patchLog;
+  }
+  history(): ActionHistory {
+    return this.hist;
+  }
 
   execute<T extends ActionType>(input: ActionInput<T>): ActionResult {
     const action: Action<T> = { type: input.type, params: input.params, actionId: this.newActionId(), ts: this.now() };
@@ -81,8 +85,12 @@ export class Executor {
     return last;
   }
 
-  beginGroup(description?: string): string { return this.hist.beginGroup(description); }
-  endGroup(): void { this.hist.endGroup(); }
+  beginGroup(description?: string): string {
+    return this.hist.beginGroup(description);
+  }
+  endGroup(): void {
+    this.hist.endGroup();
+  }
 
   /** After a fold or a model write: new tree, empty log, history cleared. */
   replaceTree(tree: CollectedTree): void {
@@ -104,12 +112,18 @@ export class Executor {
       handler.apply(action, this.patchLog, ctx);
     } catch (error) {
       this.patchLog.truncate(from);
-      return { ok: false, action, errors: [{ code: "INVALID_PARAMS", message: error instanceof Error ? error.message : String(error) }] };
+      return {
+        ok: false,
+        action,
+        errors: [{ code: "INVALID_PARAMS", message: error instanceof Error ? error.message : String(error) }],
+      };
     }
     const to = this.patchLog.mark();
     if (record) this.hist.push(action, inverse, [from, to]);
     return { ok: true, action, inverse };
   }
 
-  entries(): readonly HistoryEntry[] { return this.hist.entries(); }
+  entries(): readonly HistoryEntry[] {
+    return this.hist.entries();
+  }
 }

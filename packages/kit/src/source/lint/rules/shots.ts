@@ -19,7 +19,11 @@ function sourceTime(site: ElementSite, prop: "in" | "out", asset: AssetEntry): n
 }
 
 /** Clips that draw a picture, with their asset's shot list. */
-function* cutClips(index: Parameters<Rule["check"]>[0], manifest: NonNullable<Parameters<Rule["check"]>[1]["manifest"]>, needShots = true) {
+function* cutClips(
+  index: Parameters<Rule["check"]>[0],
+  manifest: NonNullable<Parameters<Rule["check"]>[1]["manifest"]>,
+  needShots = true,
+) {
   for (const site of index.elements.values()) {
     if (site.kind !== "clip") continue;
     const src = site.props.get("src")?.literal;
@@ -45,7 +49,14 @@ export const cutNearShot: Rule = {
           if (gap <= 0 || gap >= NEAR_S || shot.i === 0) continue;
           const shown = prop === "in" ? `shot:${shot.i - 1} shows first` : `shot:${shot.i} shows last`;
           const use = prop === "in" ? `in="shot:${shot.i}"` : `out="shot:${shot.i - 1}.end"`;
-          out.push({ rule: "cut-near-shot", severity: "warning", message: `"${site.id}.${prop}" = ${r2(t)} is ${r2(gap)} s ${prop === "in" ? "before" : "after"} shot:${shot.i} starts (${r2(shot.start)}); a flash of ${shown}; use ${use}`, range: p.range, id: site.id, prop });
+          out.push({
+            rule: "cut-near-shot",
+            severity: "warning",
+            message: `"${site.id}.${prop}" = ${r2(t)} is ${r2(gap)} s ${prop === "in" ? "before" : "after"} shot:${shot.i} starts (${r2(shot.start)}); a flash of ${shown}; use ${use}`,
+            range: p.range,
+            id: site.id,
+            prop,
+          });
         }
       }
     }
@@ -62,14 +73,28 @@ export const shotChangeInsideCrop: Rule = {
     for (const { site, asset, shots } of cutClips(index, options.manifest)) {
       const transform = site.props.get("transform");
       const literal = transform?.literal;
-      if (!transform || literal === null || typeof literal !== "object" || Array.isArray(literal) || !("crop" in literal)) continue;
+      if (
+        !transform ||
+        literal === null ||
+        typeof literal !== "object" ||
+        Array.isArray(literal) ||
+        !("crop" in literal)
+      )
+        continue;
       const start = sourceTime(site, "in", asset) ?? 0;
       const end = sourceTime(site, "out", asset) ?? asset.duration;
       // A change within NEAR_S of either cut is cut-near-shot's to report.
       const inside = shots.filter((s) => s.start > start + NEAR_S && s.start < end - NEAR_S);
       if (inside.length === 0) continue;
       const names = inside.map((s) => `shot:${s.i} (${r2(s.start)})`).join(", ");
-      out.push({ rule: "shot-change-inside-crop", severity: "warning", message: `"${site.id}" has one crop over ${r2(start)}–${r2(end)}, but the camera cuts inside it at ${names}; the framing changes there, so split the clip at the shot (out="shot:N.end", then in="shot:N+1") and crop each part`, range: transform.range, id: site.id, prop: "transform" });
+      out.push({
+        rule: "shot-change-inside-crop",
+        severity: "warning",
+        message: `"${site.id}" has one crop over ${r2(start)}–${r2(end)}, but the camera cuts inside it at ${names}; the framing changes there, so split the clip at the shot (out="shot:N.end", then in="shot:N+1") and crop each part`,
+        range: transform.range,
+        id: site.id,
+        prop: "transform",
+      });
     }
     return out;
   },
@@ -92,11 +117,19 @@ export const repeatedSource: Rule = {
     for (const clips of byTrack.values()) {
       for (let i = 1; i < clips.length; i++) {
         const b = clips[i]!;
-        const a = clips.slice(0, i).find((x) => x.src === b.src && Math.min(x.end, b.end) - Math.max(x.start, b.start) > 1);
+        const a = clips
+          .slice(0, i)
+          .find((x) => x.src === b.src && Math.min(x.end, b.end) - Math.max(x.start, b.start) > 1);
         if (!a) continue;
         const from = Math.max(a.start, b.start);
         const to = Math.min(a.end, b.end);
-        out.push({ rule: "repeated-source", severity: "warning", message: `"${b.site.id}" plays ${r2(from)}–${r2(to)} of ${b.src} again after "${a.site.id}" did; the same footage twice on one track is usually a split that kept the old clip. Remove one.`, range: b.site.range, id: b.site.id });
+        out.push({
+          rule: "repeated-source",
+          severity: "warning",
+          message: `"${b.site.id}" plays ${r2(from)}–${r2(to)} of ${b.src} again after "${a.site.id}" did; the same footage twice on one track is usually a split that kept the old clip. Remove one.`,
+          range: b.site.range,
+          id: b.site.id,
+        });
       }
     }
     return out;

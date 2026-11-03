@@ -1,7 +1,18 @@
 import type { ResolvedState } from "@cutcraft/kit";
 import {
-  AssetSources, Compositor, ManualClock, MediabunnyInputs, backdropTracks, compositionBackground, coversCanvas, makeNestedResolver, mediabunnyFrameSourceFactory,
-  paintBackground, type FrameIntercept, type MediaResolver, type PlayerErrorEvent,
+  AssetSources,
+  Compositor,
+  ManualClock,
+  MediabunnyInputs,
+  backdropTracks,
+  compositionBackground,
+  coversCanvas,
+  makeNestedResolver,
+  mediabunnyFrameSourceFactory,
+  paintBackground,
+  type FrameIntercept,
+  type MediaResolver,
+  type PlayerErrorEvent,
 } from "@cutcraft/player/engine";
 import type { VideoSample } from "mediabunny";
 import type { ReactNode } from "react";
@@ -23,7 +34,11 @@ export interface PipelineOptions {
 }
 
 /** Milliseconds the pipeline spent per stage, summed over frames. */
-export interface PipelineStages { composite: number; overlays: number; readback: number }
+export interface PipelineStages {
+  composite: number;
+  overlays: number;
+  readback: number;
+}
 
 /**
  * One composition rendered frame by frame, in order: decode and composite the footage, draw the overlays,
@@ -52,14 +67,26 @@ export class FramePipeline {
       onError: (e) => this.errors.push(e),
       frameSourceFactory: mediabunnyFrameSourceFactory(this.inputs, createCanvas, frameSourceHooks),
     });
-    this.compositor = new Compositor(state, { sources: this.sources, createCanvas, resolveNested: makeNestedResolver(() => state) });
+    this.compositor = new Compositor(state, {
+      sources: this.sources,
+      createCanvas,
+      resolveNested: makeNestedResolver(() => state),
+    });
     this.canvas = createCanvas(width, height) as unknown as Canvas;
     this.ctx = this.canvas.getContext("2d") as CanvasRenderingContext2D;
     // With overlays beneath the footage, the footage is composited on its own transparent canvas first.
-    this.footage = backdropTracks(state).size ? createCanvas(width, height) as unknown as Canvas : null;
+    this.footage = backdropTracks(state).size ? (createCanvas(width, height) as unknown as Canvas) : null;
     this.compositor.attach((this.footage ? this.footage.getContext("2d") : this.ctx) as never);
     this.ownsOverlays = !options.overlays;
-    this.overlays = options.overlays ?? new OverlayPlane({ state, media: options.media, warn: options.warn, ...(options.interiors ? { interiors: options.interiors } : {}), ...(options.fonts ? { fonts: options.fonts } : {}) });
+    this.overlays =
+      options.overlays ??
+      new OverlayPlane({
+        state,
+        media: options.media,
+        warn: options.warn,
+        ...(options.interiors ? { interiors: options.interiors } : {}),
+        ...(options.fonts ? { fonts: options.fonts } : {}),
+      });
   }
 
   /**
@@ -85,7 +112,9 @@ export class FramePipeline {
     await this.compositor.step(t, passThrough && !this.footage ? intercept : undefined);
     if (this.errors.length > 0 && this.options.onAssetError !== "continue") {
       taken?.close();
-      throw new Error(`cannot render: ${this.errors.map((e) => `${e.asset ?? e.id ?? "?"}: ${e.error.message}`).join("; ")}`);
+      throw new Error(
+        `cannot render: ${this.errors.map((e) => `${e.asset ?? e.id ?? "?"}: ${e.error.message}`).join("; ")}`,
+      );
     }
     this.stages.composite += performance.now() - at;
     if (taken) return tagBt709(taken);

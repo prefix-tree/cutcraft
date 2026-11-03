@@ -15,7 +15,11 @@ export interface SvgDrawing {
  * composition with `fit`), with its `viewBox`, `preserveAspectRatio` and `color` applied, and
  * `$name` / `var(--cc-name)` filled from `tokens` (by default the composition's theme).
  */
-export function svgDrawing(p: ElementProps, markup: string, tokens: Readonly<Record<string, string>> = themeTokens(p.state.theme)): SvgDrawing {
+export function svgDrawing(
+  p: ElementProps,
+  markup: string,
+  tokens: Readonly<Record<string, string>> = themeTokens(p.state.theme),
+): SvgDrawing {
   const props = p.placement.props as Record<string, unknown>;
   const viewBox = props.viewBox as SvgViewBox | undefined;
   const size = svgIntrinsicSize(markup, viewBox);

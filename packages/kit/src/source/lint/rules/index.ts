@@ -16,7 +16,13 @@ const TIMING_PROPS = ["in", "out", "duration", "start", "offset", "anchor", "at"
 
 export const literalIds: Rule = {
   name: "literal-ids",
-  check: (index) => index.anonymous.map((a) => ({ rule: "literal-ids", severity: "error", message: `<${a.kind}>: ${a.reason}; every element needs a literal id so the editor can address it`, range: a.range })),
+  check: (index) =>
+    index.anonymous.map((a) => ({
+      rule: "literal-ids",
+      severity: "error",
+      message: `<${a.kind}>: ${a.reason}; every element needs a literal id so the editor can address it`,
+      range: a.range,
+    })),
 };
 
 export const uniqueIds: Rule = {
@@ -28,7 +34,8 @@ export const uniqueIds: Rule = {
     for (const { id, range } of index.idSites) {
       const count = (seen.get(id) ?? 0) + 1;
       seen.set(id, count);
-      if (count === 2) out.push({ rule: "unique-ids", severity: "error", message: `id "${id}" is used more than once`, range, id });
+      if (count === 2)
+        out.push({ rule: "unique-ids", severity: "error", message: `id "${id}" is used more than once`, range, id });
     }
     return out;
   },
@@ -46,7 +53,14 @@ export const noStartOnSequence: Rule = {
       const layout = parent.props.get("layout")?.literal;
       if (layout === "free") continue;
       if (site.props.has("anchor")) continue;
-      out.push({ rule: "no-start-on-sequence", severity: "error", message: `"${site.id}" has start on a sequence track; order decides start there, or use layout="free"`, range: start.range, id: site.id, prop: "start" });
+      out.push({
+        rule: "no-start-on-sequence",
+        severity: "error",
+        message: `"${site.id}" has start on a sequence track; order decides start there, or use layout="free"`,
+        range: start.range,
+        id: site.id,
+        prop: "start",
+      });
     }
     return out;
   },
@@ -61,9 +75,18 @@ const LAYER_HOOKS: ReadonlySet<string> = new Set(["useT", "useLayer"]);
  */
 export const pureHelpers: Rule = {
   name: "pure-helpers",
-  check: (index) => [...index.helpers.values()].filter((h) => h.producesElements && h.hooks.some((n) => !LAYER_HOOKS.has(n))).map((h) => ({
-    rule: "pure-helpers", severity: "error", message: `helper ${h.name} makes timeline elements and calls ${h.hooks.filter((n) => !LAYER_HOOKS.has(n)).join(", ")}; the resolver expands it as a plain function, so keep hooks in the free code inside a <Layer>`, range: h.range,
-  } satisfies Diagnostic)),
+  check: (index) =>
+    [...index.helpers.values()]
+      .filter((h) => h.producesElements && h.hooks.some((n) => !LAYER_HOOKS.has(n)))
+      .map(
+        (h) =>
+          ({
+            rule: "pure-helpers",
+            severity: "error",
+            message: `helper ${h.name} makes timeline elements and calls ${h.hooks.filter((n) => !LAYER_HOOKS.has(n)).join(", ")}; the resolver expands it as a plain function, so keep hooks in the free code inside a <Layer>`,
+            range: h.range,
+          }) satisfies Diagnostic,
+      ),
 };
 
 export const expressionLocked: Rule = {
@@ -73,7 +96,15 @@ export const expressionLocked: Rule = {
     for (const site of index.elements.values()) {
       for (const prop of TIMING_PROPS) {
         const p = site.props.get(prop);
-        if (p?.isExpression && p.binding === undefined) out.push({ rule: "expression-locked", severity: "warning", message: `"${site.id}.${prop}" is an expression; the timeline will show it locked`, range: p.range, id: site.id, prop });
+        if (p?.isExpression && p.binding === undefined)
+          out.push({
+            rule: "expression-locked",
+            severity: "warning",
+            message: `"${site.id}.${prop}" is an expression; the timeline will show it locked`,
+            range: p.range,
+            id: site.id,
+            prop,
+          });
       }
     }
     return out;
@@ -84,7 +115,16 @@ export const oneCaptions: Rule = {
   name: "one-captions",
   check: (index) => {
     const sites = [...index.elements.values()].filter((s) => s.kind === "captions");
-    return sites.slice(1).map((s) => ({ rule: "one-captions", severity: "error", message: "a composition has one <Captions>", range: s.range, id: s.id } satisfies Diagnostic));
+    return sites.slice(1).map(
+      (s) =>
+        ({
+          rule: "one-captions",
+          severity: "error",
+          message: "a composition has one <Captions>",
+          range: s.range,
+          id: s.id,
+        }) satisfies Diagnostic,
+    );
   },
 };
 
@@ -95,7 +135,15 @@ export const ambiguousDuration: Rule = {
     for (const site of index.elements.values()) {
       if (!["clip", "audio", "nested"].includes(site.kind)) continue;
       const d = site.props.get("duration");
-      if (d && site.props.has("out")) out.push({ rule: "ambiguous-duration", severity: "error", message: `"${site.id}" gives both out and duration`, range: d.range, id: site.id, prop: "duration" });
+      if (d && site.props.has("out"))
+        out.push({
+          rule: "ambiguous-duration",
+          severity: "error",
+          message: `"${site.id}" gives both out and duration`,
+          range: d.range,
+          id: site.id,
+          prop: "duration",
+        });
     }
     return out;
   },
@@ -105,9 +153,22 @@ export const fileShape: Rule = {
   name: "file-shape",
   check: (index) => {
     const out: Diagnostic[] = [];
-    if (!index.hasDefaultExport) out.push({ rule: "file-shape", severity: "error", message: "the file must default-export the video component", range: [0, 0] });
-    if (index.hasSchema && !index.defaults) out.push({ rule: "file-shape", severity: "error", message: "`export const schema` needs an `export const defaults = {…}` object literal", range: [0, 0] });
-    if (!index.compositionId) out.push({ rule: "file-shape", severity: "error", message: "no <Composition> found", range: [0, 0] });
+    if (!index.hasDefaultExport)
+      out.push({
+        rule: "file-shape",
+        severity: "error",
+        message: "the file must default-export the video component",
+        range: [0, 0],
+      });
+    if (index.hasSchema && !index.defaults)
+      out.push({
+        rule: "file-shape",
+        severity: "error",
+        message: "`export const schema` needs an `export const defaults = {…}` object literal",
+        range: [0, 0],
+      });
+    if (!index.compositionId)
+      out.push({ rule: "file-shape", severity: "error", message: "no <Composition> found", range: [0, 0] });
     return out;
   },
 };
@@ -121,7 +182,14 @@ export const missingAsset: Rule = {
       const src = site.props.get("src");
       if (typeof src?.literal !== "string" || !src.literal.startsWith("asset:")) continue;
       if (!options.manifest.assets[src.literal.slice("asset:".length)]) {
-        out.push({ rule: "missing-asset", severity: "error", message: `${src.literal} is not in the manifest`, range: src.range, id: site.id, prop: "src" });
+        out.push({
+          rule: "missing-asset",
+          severity: "error",
+          message: `${src.literal} is not in the manifest`,
+          range: src.range,
+          id: site.id,
+          prop: "src",
+        });
       }
     }
     return out;
@@ -136,7 +204,13 @@ export const sequenceGap: Rule = {
     const out: Diagnostic[] = [];
     for (const site of index.elements.values()) {
       if (site.kind !== "gap" || site.parent !== main.id) continue;
-      out.push({ rule: "sequence-gap", severity: "warning", message: `"${site.id}" is a gap on the first sequence track "${main.id}"; nothing is under it, so those frames are black unless another track covers them`, range: site.range, id: site.id });
+      out.push({
+        rule: "sequence-gap",
+        severity: "warning",
+        message: `"${site.id}" is a gap on the first sequence track "${main.id}"; nothing is under it, so those frames are black unless another track covers them`,
+        range: site.range,
+        id: site.id,
+      });
     }
     return out;
   },
@@ -160,14 +234,43 @@ export const cutInsideWord: Rule = {
         const word = words.find((w) => t > w.start && t < w.end);
         if (!word) continue;
         const ref = prop === "in" ? `word:${word.i}` : `word:${word.i}.end`;
-        out.push({ rule: "cut-inside-word", severity: "warning", message: `"${site.id}.${prop}" = ${t} cuts inside "${word.text}" (${word.start}–${word.end}); use ${ref} or a time outside the word`, range: p.range, id: site.id, prop });
+        out.push({
+          rule: "cut-inside-word",
+          severity: "warning",
+          message: `"${site.id}.${prop}" = ${t} cuts inside "${word.text}" (${word.start}–${word.end}); use ${ref} or a time outside the word`,
+          range: p.range,
+          id: site.id,
+          prop,
+        });
       }
     }
     return out;
   },
 };
 
-export const rules: readonly Rule[] = [literalIds, uniqueIds, noStartOnSequence, pureHelpers, strayHtml, freeCodeClock, expressionLocked, oneCaptions, ambiguousDuration, fileShape, missingAsset, sequenceGap, cutInsideWord, cutNearShot, shotChangeInsideCrop, repeatedSource, themeRefs, themeLiterals, fontAvailable, graphicProps, notRendered];
+export const rules: readonly Rule[] = [
+  literalIds,
+  uniqueIds,
+  noStartOnSequence,
+  pureHelpers,
+  strayHtml,
+  freeCodeClock,
+  expressionLocked,
+  oneCaptions,
+  ambiguousDuration,
+  fileShape,
+  missingAsset,
+  sequenceGap,
+  cutInsideWord,
+  cutNearShot,
+  shotChangeInsideCrop,
+  repeatedSource,
+  themeRefs,
+  themeLiterals,
+  fontAvailable,
+  graphicProps,
+  notRendered,
+];
 
 /** The composition's first track in document order that lays out as a sequence and is not hidden: the one under everything else. */
 function firstSequenceTrack(index: SourceIndex): ElementSite | null {

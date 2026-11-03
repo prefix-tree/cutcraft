@@ -14,13 +14,16 @@ import { join } from "node:path";
  */
 export const mediaDir = join(import.meta.dirname, "app", "public");
 
-const STRIP = "geq=lum='if(lt(Y,45),255*bitand(floor(N/pow(2,floor(X*10/W))),1),lum(X,Y))':cb='if(lt(Y,45),128,cb(X,Y))':cr='if(lt(Y,45),128,cr(X,Y))'";
+const STRIP =
+  "geq=lum='if(lt(Y,45),255*bitand(floor(N/pow(2,floor(X*10/W))),1),lum(X,Y))':cb='if(lt(Y,45),128,cb(X,Y))':cr='if(lt(Y,45),128,cr(X,Y))'";
 const COUNTER = "drawtext=text='%{n}':x=10:y=60:fontsize=36:fontcolor=white:box=1:boxcolor=black";
 
 export default function generate(): void {
   mkdirSync(mediaDir, { recursive: true });
   // The counter is for humans; an ffmpeg built without freetype (Homebrew's bottle) has no drawtext, so leave it out there.
-  const counter = execFileSync("ffmpeg", ["-hide_banner", "-filters"], { encoding: "utf8" }).includes(" drawtext ") ? `,${COUNTER}` : "";
+  const counter = execFileSync("ffmpeg", ["-hide_banner", "-filters"], { encoding: "utf8" }).includes(" drawtext ")
+    ? `,${COUNTER}`
+    : "";
   const run = (name: string, args: string[]): void => {
     const out = join(mediaDir, name);
     if (existsSync(out)) return;
@@ -35,19 +38,69 @@ export default function generate(): void {
     }
   };
   run("bars.webm", [
-    "-f", "lavfi", "-i", "testsrc2=size=640x360:rate=30:duration=10",
-    "-f", "lavfi", "-i", "sine=frequency=440:sample_rate=48000:duration=10",
-    "-vf", `${STRIP}${counter}`, "-c:v", "libvpx-vp9", "-g", "30", "-keyint_min", "30", "-b:v", "1M", "-pix_fmt", "yuv420p",
-    "-c:a", "libopus", "-shortest",
+    "-f",
+    "lavfi",
+    "-i",
+    "testsrc2=size=640x360:rate=30:duration=10",
+    "-f",
+    "lavfi",
+    "-i",
+    "sine=frequency=440:sample_rate=48000:duration=10",
+    "-vf",
+    `${STRIP}${counter}`,
+    "-c:v",
+    "libvpx-vp9",
+    "-g",
+    "30",
+    "-keyint_min",
+    "30",
+    "-b:v",
+    "1M",
+    "-pix_fmt",
+    "yuv420p",
+    "-c:a",
+    "libopus",
+    "-shortest",
   ]);
   run("tone.ogg", ["-f", "lavfi", "-i", "sine=frequency=660:sample_rate=48000:duration=20", "-c:a", "libopus"]);
   run("logo.png", ["-f", "lavfi", "-i", "color=c=red:size=128x128", "-frames:v", "1"]);
-  run("solid.webm", ["-f", "lavfi", "-i", "color=c=blue:size=640x360:rate=30:duration=2", "-c:v", "libvpx-vp9", "-g", "30", "-pix_fmt", "yuv420p"]);
+  run("solid.webm", [
+    "-f",
+    "lavfi",
+    "-i",
+    "color=c=blue:size=640x360:rate=30:duration=2",
+    "-c:v",
+    "libvpx-vp9",
+    "-g",
+    "30",
+    "-pix_fmt",
+    "yuv420p",
+  ]);
   try {
     run("bars.mp4", [
-      "-f", "lavfi", "-i", "testsrc2=size=640x360:rate=30:duration=10",
-      "-f", "lavfi", "-i", "sine=frequency=440:sample_rate=48000:duration=10",
-      "-vf", `${STRIP}${counter}`, "-c:v", "libx264", "-profile:v", "baseline", "-g", "30", "-pix_fmt", "yuv420p", "-c:a", "aac", "-shortest", "-movflags", "+faststart",
+      "-f",
+      "lavfi",
+      "-i",
+      "testsrc2=size=640x360:rate=30:duration=10",
+      "-f",
+      "lavfi",
+      "-i",
+      "sine=frequency=440:sample_rate=48000:duration=10",
+      "-vf",
+      `${STRIP}${counter}`,
+      "-c:v",
+      "libx264",
+      "-profile:v",
+      "baseline",
+      "-g",
+      "30",
+      "-pix_fmt",
+      "yuv420p",
+      "-c:a",
+      "aac",
+      "-shortest",
+      "-movflags",
+      "+faststart",
     ]);
   } catch {
     // Optional: the mp4 test skips when the file or the decoder is missing.

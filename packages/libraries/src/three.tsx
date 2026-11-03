@@ -16,7 +16,9 @@ const FILL: CSSProperties = { position: "absolute", inset: 0 };
  */
 export function ThreeScene({ children, gl, style, ...rest }: ThreeSceneProps) {
   // A renderer or a factory is the caller's own; options get a kept drawing buffer unless they say otherwise.
-  const options = (typeof gl === "function" || isRenderer(gl) ? gl : { preserveDrawingBuffer: true, ...(gl as object | undefined) }) as NonNullable<CanvasProps["gl"]>;
+  const options = (
+    typeof gl === "function" || isRenderer(gl) ? gl : { preserveDrawingBuffer: true, ...(gl as object | undefined) }
+  ) as NonNullable<CanvasProps["gl"]>;
   return (
     <Canvas {...rest} frameloop="never" gl={options} style={{ ...FILL, ...style }}>
       {children}
@@ -29,12 +31,16 @@ export function ThreeScene({ children, gl, style, ...rest }: ThreeSceneProps) {
 function VideoClock() {
   const { elapsed } = useLayer();
   const advance = useThree((s) => s.advance);
-  useLayoutEffect(() => { advance(elapsed, true); }, [advance, elapsed]);
+  useLayoutEffect(() => {
+    advance(elapsed, true);
+  }, [advance, elapsed]);
   return null;
 }
 
 function isRenderer(gl: unknown): boolean {
-  return typeof gl === "object" && gl !== null && "render" in gl && typeof (gl as { render: unknown }).render === "function";
+  return (
+    typeof gl === "object" && gl !== null && "render" in gl && typeof (gl as { render: unknown }).render === "function"
+  );
 }
 
 /** What `setup` gets once, when the scene is created. */
@@ -77,7 +83,12 @@ export interface ThreeCamera {
 }
 
 /** What draws `<Three>`: the tag's props, resolved, and its React Three Fiber children. */
-export function ThreeLayer(props: { readonly setup?: unknown; readonly camera?: unknown; readonly background?: unknown; readonly children?: ReactNode }) {
+export function ThreeLayer(props: {
+  readonly setup?: unknown;
+  readonly camera?: unknown;
+  readonly background?: unknown;
+  readonly children?: ReactNode;
+}) {
   const camera = (props.camera ?? {}) as ThreeCamera;
   return (
     // The camera type is fixed when the canvas is made, so switching it makes a new one.
@@ -117,17 +128,32 @@ function Setup({ setup }: { readonly setup: ThreeSetupFn }) {
   useLayoutEffect(() => {
     const before = new Set(scene.children);
     const result = setup({ scene, camera, renderer: gl, THREE, width: size.width, height: size.height });
-    update.current = typeof result === "function" ? result : result?.update ?? null;
+    update.current = typeof result === "function" ? result : (result?.update ?? null);
     const dispose = typeof result === "object" && result ? result.dispose : undefined;
     return () => {
       update.current = null;
       dispose?.();
-      for (const child of [...scene.children]) if (!before.has(child)) { scene.remove(child); disposeTree(child); }
+      for (const child of [...scene.children])
+        if (!before.has(child)) {
+          scene.remove(child);
+          disposeTree(child);
+        }
     };
   }, [setup, scene, camera, gl]);
   useFrame((state, delta) => {
     const { t, duration } = layer.current;
-    update.current?.({ scene: state.scene, camera: state.camera, renderer: state.gl, THREE, width: state.size.width, height: state.size.height, time: state.clock.elapsedTime, t, duration, delta });
+    update.current?.({
+      scene: state.scene,
+      camera: state.camera,
+      renderer: state.gl,
+      THREE,
+      width: state.size.width,
+      height: state.size.height,
+      time: state.clock.elapsedTime,
+      t,
+      duration,
+      delta,
+    });
   });
   return null;
 }

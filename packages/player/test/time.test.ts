@@ -3,21 +3,34 @@ import { frameIndex, frameTime, layerClock, localT, placementSourceTime, timecod
 import { childrenOf, fixtureState, makeState } from "./helpers/state";
 
 const state = makeState({
-  tracks: [{
-    id: "main", items: [
-      { id: "c1", kind: "clip", source: { in: 2, out: 6, asset: "a" } },
-      { id: "c2", kind: "clip", source: { in: 0, out: 8, speed: 2, asset: "b" } },
-      { id: "c3", kind: "clip", source: { in: 1, out: 5, asset: "a" }, props: { reverse: true } },
-      // makeState does not time ramps or holds; these are the lengths resolve gives.
-      { id: "c4", kind: "clip", source: { in: 0, out: 2.5, asset: "b" }, duration: 4, children: [
-        { id: "sk1", kind: "speedKey", props: { at: 0, speed: 1 } },
-        { id: "sk2", kind: "speedKey", props: { at: 2, speed: 0.5 } },
-      ] },
-      { id: "c5", kind: "clip", source: { in: 0, out: 6, asset: "b" }, duration: 6.5, children: [
-        { id: "fr1", kind: "freeze", props: { at: 1.5, start: 3, duration: 0.5 } },
-      ] },
-    ],
-  }],
+  tracks: [
+    {
+      id: "main",
+      items: [
+        { id: "c1", kind: "clip", source: { in: 2, out: 6, asset: "a" } },
+        { id: "c2", kind: "clip", source: { in: 0, out: 8, speed: 2, asset: "b" } },
+        { id: "c3", kind: "clip", source: { in: 1, out: 5, asset: "a" }, props: { reverse: true } },
+        // makeState does not time ramps or holds; these are the lengths resolve gives.
+        {
+          id: "c4",
+          kind: "clip",
+          source: { in: 0, out: 2.5, asset: "b" },
+          duration: 4,
+          children: [
+            { id: "sk1", kind: "speedKey", props: { at: 0, speed: 1 } },
+            { id: "sk2", kind: "speedKey", props: { at: 2, speed: 0.5 } },
+          ],
+        },
+        {
+          id: "c5",
+          kind: "clip",
+          source: { in: 0, out: 6, asset: "b" },
+          duration: 6.5,
+          children: [{ id: "fr1", kind: "freeze", props: { at: 1.5, start: 3, duration: 0.5 } }],
+        },
+      ],
+    },
+  ],
 });
 const item = (id: string) => state.items.get(id)!;
 
@@ -104,7 +117,14 @@ describe("frames", () => {
 
   it("layerClock gives progress and real seconds, clamped to the layer", () => {
     const c1 = item("c1");
-    expect(layerClock(c1, c1.start + 1, 30)).toEqual({ t: 0.25, elapsed: 1, remaining: 3, duration: 4, time: c1.start + 1, fps: 30 });
+    expect(layerClock(c1, c1.start + 1, 30)).toEqual({
+      t: 0.25,
+      elapsed: 1,
+      remaining: 3,
+      duration: 4,
+      time: c1.start + 1,
+      fps: 30,
+    });
     expect(layerClock(c1, c1.start - 2, 30)).toMatchObject({ t: 0, elapsed: 0, remaining: 4 });
     expect(layerClock(c1, c1.end + 2, 30)).toMatchObject({ t: 1, elapsed: 4, remaining: 0 });
   });

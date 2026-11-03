@@ -1,4 +1,11 @@
-import { AssetSources, DecoderPool, ErrorFrame, INPUT_IDLE_CLOSE_S, ManualClock, type PlayerErrorEvent } from "@cutcraft/player";
+import {
+  AssetSources,
+  DecoderPool,
+  ErrorFrame,
+  INPUT_IDLE_CLOSE_S,
+  ManualClock,
+  type PlayerErrorEvent,
+} from "@cutcraft/player";
 import { FakeFrameSource, fakeResolver, flush } from "./helpers/fakes";
 import { DEFAULT_MANIFEST, makeState } from "./helpers/state";
 
@@ -21,11 +28,18 @@ function setup(ids = ["a", "b", "silent"]) {
   return { clock, fakes, errors, sources, pool: new DecoderPool(sources) };
 }
 
-const state = makeState({ tracks: [{ id: "main", items: [
-  { id: "c1", kind: "clip", source: { in: 0, out: 4, asset: "a" } },
-  { id: "c2", kind: "clip", source: { in: 0, out: 4, asset: "b" } },
-  { id: "c3", kind: "clip", source: { in: 2, out: 6, asset: "a" } },
-] }] });
+const state = makeState({
+  tracks: [
+    {
+      id: "main",
+      items: [
+        { id: "c1", kind: "clip", source: { in: 0, out: 4, asset: "a" } },
+        { id: "c2", kind: "clip", source: { in: 0, out: 4, asset: "b" } },
+        { id: "c3", kind: "clip", source: { in: 2, out: 6, asset: "a" } },
+      ],
+    },
+  ],
+});
 
 describe("DecoderPool", () => {
   it("mounts only placements inside the lookahead window", async () => {
@@ -60,8 +74,21 @@ describe("DecoderPool", () => {
 
   it("evicts idle sources beyond the cap", async () => {
     const ids = ["q0", "q1", "q2", "q3", "q4", "q5", "q6"];
-    const manifest = { assets: Object.fromEntries(ids.map((id) => [id, { id, kind: "video" as const, duration: 10, width: 64, height: 64 }])) };
-    const many = makeState({ manifest, tracks: [{ id: "free", layout: "free", items: ids.map((id, i) => ({ id: `k${i}`, kind: "clip", start: 0, source: { in: 0, out: 1, asset: id } })) }] });
+    const manifest = {
+      assets: Object.fromEntries(
+        ids.map((id) => [id, { id, kind: "video" as const, duration: 10, width: 64, height: 64 }]),
+      ),
+    };
+    const many = makeState({
+      manifest,
+      tracks: [
+        {
+          id: "free",
+          layout: "free",
+          items: ids.map((id, i) => ({ id: `k${i}`, kind: "clip", start: 0, source: { in: 0, out: 1, asset: id } })),
+        },
+      ],
+    });
     const { pool, sources } = setup(ids);
     pool.sync(many, 0);
     await flush();
@@ -86,7 +113,9 @@ describe("DecoderPool", () => {
 
   it("substitutes an error source for undecodable assets and reports once", async () => {
     const { pool, errors } = setup();
-    const s = makeState({ tracks: [{ id: "main", items: [{ id: "s1", kind: "clip", source: { in: 0, out: 2, asset: "silent" } }] }] });
+    const s = makeState({
+      tracks: [{ id: "main", items: [{ id: "s1", kind: "clip", source: { in: 0, out: 2, asset: "silent" } }] }],
+    });
     pool.sync(s, 0);
     await flush();
     pool.sync(s, 1);
@@ -110,11 +139,15 @@ describe("DecoderPool", () => {
     const { pool } = setup();
     pool.sync(state, 0);
     const first = pool.decoderFor("c1")!;
-    const trimmed = makeState({ tracks: [{ id: "main", items: [{ id: "c1", kind: "clip", source: { in: 1, out: 4, asset: "a" } }] }] });
+    const trimmed = makeState({
+      tracks: [{ id: "main", items: [{ id: "c1", kind: "clip", source: { in: 1, out: 4, asset: "a" } }] }],
+    });
     pool.sync(trimmed, 0);
     expect(pool.decoderFor("c1")).toBe(first);
     expect(first.placement.source!.in).toBe(1);
-    const swapped = makeState({ tracks: [{ id: "main", items: [{ id: "c1", kind: "clip", source: { in: 1, out: 4, asset: "b" } }] }] });
+    const swapped = makeState({
+      tracks: [{ id: "main", items: [{ id: "c1", kind: "clip", source: { in: 1, out: 4, asset: "b" } }] }],
+    });
     pool.sync(swapped, 0);
     expect(pool.decoderFor("c1")).not.toBe(first);
     await flush();

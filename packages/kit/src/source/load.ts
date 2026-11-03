@@ -44,7 +44,10 @@ export function loadModule(source: string, options: LoadOptions = {}): CutModule
   const module = { exports: {} as Record<string, unknown> };
   const offered = { ...ALLOWED_IMPORTS, ...options.imports };
   const require = (name: string) => {
-    if (!(name in offered)) throw new Error(`The file imports “${name}”, which this host does not offer (it offers ${Object.keys(offered).join(", ")}).`);
+    if (!(name in offered))
+      throw new Error(
+        `The file imports “${name}”, which this host does not offer (it offers ${Object.keys(offered).join(", ")}).`,
+      );
     return offered[name];
   };
   new Function("require", "exports", "module", code)(require, module.exports, module);

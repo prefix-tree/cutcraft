@@ -1,5 +1,12 @@
 import { Worker } from "node:worker_threads";
-import { ALL_FORMATS, BufferSource, EncodedPacketSink, Input, type EncodedVideoPacketSource, type VideoCodec as MediabunnyCodec } from "mediabunny";
+import {
+  ALL_FORMATS,
+  BufferSource,
+  EncodedPacketSink,
+  Input,
+  type EncodedVideoPacketSource,
+  type VideoCodec as MediabunnyCodec,
+} from "mediabunny";
 import type { LoadOptions } from "./load";
 import type { OverlayFont } from "./overlays";
 import type { VideoEncoding, SegmentStages } from "./segment";
@@ -28,7 +35,13 @@ export function defaultWorkers(): number {
 }
 
 /** Splits frames [first, last) into runs of whole keyframe intervals, so each run starts on a keyframe the encoder would make anyway. */
-export function planSegments(first: number, last: number, keyFrames: number, workers: number, wanted?: number): { first: number; last: number }[] {
+export function planSegments(
+  first: number,
+  last: number,
+  keyFrames: number,
+  workers: number,
+  wanted?: number,
+): { first: number; last: number }[] {
   const total = last - first;
   const gop = Math.max(1, keyFrames);
   const even = Math.ceil(total / (workers * 3));
@@ -38,9 +51,18 @@ export function planSegments(first: number, last: number, keyFrames: number, wor
   return out;
 }
 
-export interface SegmentOutcome { readonly bytes: Uint8Array; readonly stages: SegmentStages; readonly warnings: readonly string[]; readonly errors: readonly string[] }
+export interface SegmentOutcome {
+  readonly bytes: Uint8Array;
+  readonly stages: SegmentStages;
+  readonly warnings: readonly string[];
+  readonly errors: readonly string[];
+}
 
-interface Job { readonly request: SegmentRequest; readonly resolve: (r: SegmentOutcome) => void; readonly reject: (e: Error) => void }
+interface Job {
+  readonly request: SegmentRequest;
+  readonly resolve: (r: SegmentOutcome) => void;
+  readonly reject: (e: Error) => void;
+}
 
 /** A fixed set of worker threads taking runs of frames in the order they are asked for. */
 export class SegmentPool {
@@ -86,7 +108,12 @@ export class SegmentPool {
   async terminate(patience = 60_000): Promise<void> {
     if (this.inFlight.size > 0) {
       let timer: ReturnType<typeof setTimeout> | undefined;
-      await Promise.race([new Promise<void>((resolve) => this.drained.push(resolve)), new Promise<void>((resolve) => { timer = setTimeout(resolve, patience); })]);
+      await Promise.race([
+        new Promise<void>((resolve) => this.drained.push(resolve)),
+        new Promise<void>((resolve) => {
+          timer = setTimeout(resolve, patience);
+        }),
+      ]);
       clearTimeout(timer);
     }
     await Promise.all(this.workers.map((w) => w.terminate()));
@@ -113,7 +140,8 @@ export class SegmentPool {
     this.running.delete(worker);
     this.idle.push(worker);
     if (job) {
-      if (reply.ok) job.resolve({ bytes: reply.bytes, stages: reply.stages, warnings: reply.warnings, errors: reply.errors });
+      if (reply.ok)
+        job.resolve({ bytes: reply.bytes, stages: reply.stages, warnings: reply.warnings, errors: reply.errors });
       else job.reject(new Error(reply.message));
     }
     this.dispatch();
@@ -138,7 +166,13 @@ export interface Fed {
  */
 export async function feedSegment(
   outcome: SegmentOutcome,
-  into: { source: EncodedVideoPacketSource; codec: MediabunnyCodec; fps: number; offsetFrames: number; config: { current: VideoDecoderConfig | null } },
+  into: {
+    source: EncodedVideoPacketSource;
+    codec: MediabunnyCodec;
+    fps: number;
+    offsetFrames: number;
+    config: { current: VideoDecoderConfig | null };
+  },
   before: (timestamp: number) => Promise<void>,
 ): Promise<Fed> {
   const input = new Input({ source: new BufferSource(outcome.bytes), formats: ALL_FORMATS });
@@ -148,13 +182,19 @@ export async function feedSegment(
     const config = await track.getDecoderConfig();
     if (!config) throw new Error("a render worker produced a segment with no decoder configuration");
     const first = into.config.current;
-    if (first && !compatibleConfig(first, config)) throw new Error(`render workers encoded with different settings (${first.codec} against ${config.codec}); the pieces cannot be joined`);
+    if (first && !compatibleConfig(first, config))
+      throw new Error(
+        `render workers encoded with different settings (${first.codec} against ${config.codec}); the pieces cannot be joined`,
+      );
     let end = 0;
     for await (const packet of new EncodedPacketSink(track).packets()) {
       const frame = Math.round(packet.timestamp * into.fps) + into.offsetFrames;
       const timestamp = frame / into.fps;
       await before(timestamp);
-      await into.source.add(packet.clone({ timestamp, duration: 1 / into.fps }), first ? undefined : { decoderConfig: config });
+      await into.source.add(
+        packet.clone({ timestamp, duration: 1 / into.fps }),
+        first ? undefined : { decoderConfig: config },
+      );
       end = Math.max(end, timestamp + 1 / into.fps);
     }
     into.config.current ??= config;
@@ -172,7 +212,8 @@ export async function feedSegment(
 export function compatibleConfig(a: VideoDecoderConfig, b: VideoDecoderConfig): boolean {
   if (a.codedWidth !== b.codedWidth || a.codedHeight !== b.codedHeight) return false;
   if (a.codec.startsWith("vp09") && b.codec.startsWith("vp09")) {
-    const [, pa, , da] = a.codec.split("."), [, pb, , db] = b.codec.split(".");
+    const [, pa, , da] = a.codec.split("."),
+      [, pb, , db] = b.codec.split(".");
     return pa === pb && da === db;
   }
   if (a.codec !== b.codec) return false;

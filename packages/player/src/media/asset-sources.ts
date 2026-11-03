@@ -1,6 +1,14 @@
 import { lookupAsset, type AssetManifest } from "@cutcraft/kit";
 import { INPUT_IDLE_CLOSE_S, MAX_OPEN_INPUTS } from "../constants";
-import type { Clock, Frame, FrameSource, FrameSourceFactory, FrameSourceInfo, MediaResolver, PlayerErrorEvent } from "../types";
+import type {
+  Clock,
+  Frame,
+  FrameSource,
+  FrameSourceFactory,
+  FrameSourceInfo,
+  MediaResolver,
+  PlayerErrorEvent,
+} from "../types";
 import { ErrorFrameSource } from "./frame-source";
 
 export interface AssetSourceDeps {
@@ -68,8 +76,12 @@ export class AssetSources {
     }
   }
 
-  get openCount(): number { return this.entries.size; }
-  isOpen(assetId: string): boolean { return this.entries.has(assetId); }
+  get openCount(): number {
+    return this.entries.size;
+  }
+  isOpen(assetId: string): boolean {
+    return this.entries.has(assetId);
+  }
 
   dispose(): void {
     for (const id of [...this.entries.keys()]) this.close(id);
@@ -107,7 +119,10 @@ export class AssetSources {
   }
 }
 
-interface Opened { source: FrameSource; info: FrameSourceInfo }
+interface Opened {
+  source: FrameSource;
+  info: FrameSourceInfo;
+}
 
 /** Opens the real source once, on first use, and forwards every call to it. */
 class LazyFrameSource implements FrameSource {
@@ -119,8 +134,12 @@ class LazyFrameSource implements FrameSource {
     this.inner ??= this.factory();
     return this.inner;
   }
-  async open(): Promise<FrameSourceInfo> { return (await this.get()).info; }
-  async frameAt(t: number): Promise<Frame | null> { return (await this.get()).source.frameAt(t); }
+  async open(): Promise<FrameSourceInfo> {
+    return (await this.get()).info;
+  }
+  async frameAt(t: number): Promise<Frame | null> {
+    return (await this.get()).source.frameAt(t);
+  }
   async *stream(from: number, to: number): AsyncGenerator<Frame, void, unknown> {
     const { source } = await this.get();
     yield* source.stream(from, to);

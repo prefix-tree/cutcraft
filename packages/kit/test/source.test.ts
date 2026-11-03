@@ -1,22 +1,37 @@
 import { describe, expect, it } from "vitest";
-import { applyEdits, bake, buildSourceIndex, foldToSource, lineRange, literalOf, printElement, printLiteral } from "@cutcraft/kit/source";
+import {
+  applyEdits,
+  bake,
+  buildSourceIndex,
+  foldToSource,
+  lineRange,
+  literalOf,
+  printElement,
+  printLiteral,
+} from "@cutcraft/kit/source";
 import { parseSource } from "../src/source/parse";
 import { fixtureExecutor, fixtureText } from "./helpers";
 
 describe("edits", () => {
   it("applies non-overlapping edits from the end and rejects overlaps", () => {
-    expect(applyEdits("hello world", [
-      { kind: "prop", id: "a", prop: "x", range: [0, 5], text: "bye" },
-      { kind: "insert", id: "b", range: [11, 11], text: "!" },
-    ])).toBe("bye world!");
-    expect(() => applyEdits("abc", [
-      { kind: "remove", id: "a", range: [0, 2], text: "" },
-      { kind: "remove", id: "b", range: [1, 3], text: "" },
-    ])).toThrow(/overlapping/);
+    expect(
+      applyEdits("hello world", [
+        { kind: "prop", id: "a", prop: "x", range: [0, 5], text: "bye" },
+        { kind: "insert", id: "b", range: [11, 11], text: "!" },
+      ]),
+    ).toBe("bye world!");
+    expect(() =>
+      applyEdits("abc", [
+        { kind: "remove", id: "a", range: [0, 2], text: "" },
+        { kind: "remove", id: "b", range: [1, 3], text: "" },
+      ]),
+    ).toThrow(/overlapping/);
   });
 
   it("moves text", () => {
-    expect(applyEdits("one two three", [{ kind: "move", id: "a", from: [0, 4], range: [13, 13], text: " one" }])).toBe("two three one");
+    expect(applyEdits("one two three", [{ kind: "move", id: "a", from: [0, 4], range: [13, 13], text: " one" }])).toBe(
+      "two three one",
+    );
   });
 
   it("widens a range to the whole line", () => {
@@ -30,18 +45,39 @@ describe("print", () => {
   it("prints literals, functions and nested elements", () => {
     expect(printLiteral({ a: [1, "x", null], "b-c": true })).toBe('{ a: [1, "x", null], "b-c": true }');
     expect(printLiteral({})).toBe("{}");
-    expect(printLiteral(function Outro() { return null; } as never)).toBe("Outro");
-    expect(printElement({
-      id: "c", kind: "clip", props: { id: "c", src: "asset:a", of: function Outro() { return null; } as never },
-      children: [{ id: "e", kind: "effect", props: { id: "e", type: "blur", params: { radius: 2 } } }],
-    }, "  ")).toBe('  <Clip id="c" src="asset:a" of={Outro}>\n    <Effect id="e" type="blur" params={{ radius: 2 }} />\n  </Clip>');
-    expect(printElement({ id: "t", kind: "title", props: { id: "t" }, text: "a {b}" })).toBe('<Title id="t">{"a {b}"}</Title>');
+    expect(
+      printLiteral(function Outro() {
+        return null;
+      } as never),
+    ).toBe("Outro");
+    expect(
+      printElement(
+        {
+          id: "c",
+          kind: "clip",
+          props: {
+            id: "c",
+            src: "asset:a",
+            of: function Outro() {
+              return null;
+            } as never,
+          },
+          children: [{ id: "e", kind: "effect", props: { id: "e", type: "blur", params: { radius: 2 } } }],
+        },
+        "  ",
+      ),
+    ).toBe(
+      '  <Clip id="c" src="asset:a" of={Outro}>\n    <Effect id="e" type="blur" params={{ radius: 2 }} />\n  </Clip>',
+    );
+    expect(printElement({ id: "t", kind: "title", props: { id: "t" }, text: "a {b}" })).toBe(
+      '<Title id="t">{"a {b}"}</Title>',
+    );
   });
 });
 
 describe("index", () => {
   it("evaluates literal expressions and marks the rest as expressions", () => {
-    const { ast } = parseSource("const v = [1, -2, \"s\", { a: true, b: null }, `t`];\nconst e = [x, 1 + 2];");
+    const { ast } = parseSource('const v = [1, -2, "s", { a: true, b: null }, `t`];\nconst e = [x, 1 + 2];');
     const decls = ast.program.body.map((n) => (n as { declarations: { init: unknown }[] }).declarations[0]!.init);
     expect(literalOf(decls[0] as never)).toEqual({ ok: true, value: [1, -2, "s", { a: true, b: null }, "t"] });
     expect(literalOf(decls[1] as never).ok).toBe(false);
@@ -64,18 +100,29 @@ describe("index", () => {
   });
 
   it("treats a bare attribute as true", () => {
-    const index = buildSourceIndex('import { Track } from "@cutcraft/kit";\nexport default () => <Track id="t" hidden />;');
-    expect(index.elements.get("t")?.props.get("hidden")).toMatchObject({ literal: true, valueRange: null, isExpression: false });
+    const index = buildSourceIndex(
+      'import { Track } from "@cutcraft/kit";\nexport default () => <Track id="t" hidden />;',
+    );
+    expect(index.elements.get("t")?.props.get("hidden")).toMatchObject({
+      literal: true,
+      valueRange: null,
+      isExpression: false,
+    });
   });
 });
 
 describe("fold, structural cases", () => {
   it("inserts a first child into a self-closing element", () => {
     const exec = fixtureExecutor();
-    exec.execute({ type: "keyframe/add", params: { id: "c3", keyId: "kz", property: "transform.opacity", at: 0, value: 1 } });
+    exec.execute({
+      type: "keyframe/add",
+      params: { id: "c3", keyId: "kz", property: "transform.opacity", at: 0, value: 1 },
+    });
     const { text, skipped } = foldToSource(fixtureText, exec.log(), exec.state());
     expect(skipped).toEqual([]);
-    expect(text).toContain('speed={1.2}>\n          <Keyframe id="kz" property="transform.opacity" at={0} value={1} />\n        </Clip>');
+    expect(text).toContain(
+      'speed={1.2}>\n          <Keyframe id="kz" property="transform.opacity" at={0} value={1} />\n        </Clip>',
+    );
   });
 
   it("removes an element with its line, moves a sibling, and rewrites a bare attribute", () => {
@@ -112,7 +159,10 @@ describe("fold, structural cases", () => {
   it("reports what it cannot write instead of guessing", () => {
     const exec = fixtureExecutor();
     exec.execute({ type: "composition/setProps", params: { defaults: { title: "x", accent: "y" } } });
-    const noDefaults = fixtureText.replace("export const defaults = { title: \"Why we built it\", accent: \"#ff5a1f\" };", "export const defaults = make();");
+    const noDefaults = fixtureText.replace(
+      'export const defaults = { title: "Why we built it", accent: "#ff5a1f" };',
+      "export const defaults = make();",
+    );
     const { skipped } = foldToSource(noDefaults, exec.log(), exec.state());
     expect(skipped).toEqual([{ id: "composition", reason: "no `export const defaults` literal to rewrite" }]);
   });

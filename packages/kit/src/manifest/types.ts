@@ -25,7 +25,13 @@ export interface AssetEntry {
 }
 
 /** A subject's box at source second `t`, as fractions of the source picture (0..1 from its top left). */
-export interface SubjectBox { readonly t: number; readonly x: number; readonly y: number; readonly w: number; readonly h: number }
+export interface SubjectBox {
+  readonly t: number;
+  readonly x: number;
+  readonly y: number;
+  readonly w: number;
+  readonly h: number;
+}
 
 export interface TranscriptWord {
   readonly i: number;
@@ -35,8 +41,16 @@ export interface TranscriptWord {
   readonly speaker?: string;
 }
 
-export interface Shot { readonly i: number; readonly start: number; readonly end: number }
-export interface Silence { readonly i: number; readonly start: number; readonly end: number }
+export interface Shot {
+  readonly i: number;
+  readonly start: number;
+  readonly end: number;
+}
+export interface Silence {
+  readonly i: number;
+  readonly start: number;
+  readonly end: number;
+}
 
 export interface WaveformSummary {
   readonly binSeconds: number;

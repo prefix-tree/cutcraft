@@ -1,7 +1,15 @@
 import type { AssetEntry } from "@cutcraft/kit";
 import { CanvasSink, VideoSampleSink, type Input, type InputVideoTrack, type VideoSample } from "mediabunny";
 import { PICK_EPS } from "../constants";
-import type { CreateCanvas, Ctx2D, Frame, FrameSource, FrameSourceFactory, FrameSourceInfo, MediaHandle } from "../types";
+import type {
+  CreateCanvas,
+  Ctx2D,
+  Frame,
+  FrameSource,
+  FrameSourceFactory,
+  FrameSourceInfo,
+  MediaHandle,
+} from "../types";
 import { copyFrame, ImageFrameSource } from "./frame-source";
 import type { MediabunnyInputs } from "./mediabunny-input";
 
@@ -14,7 +22,10 @@ export class SampleFrame implements Frame {
   readonly width: number;
   readonly height: number;
 
-  constructor(private readonly sample: VideoSample, private readonly createCanvas: CreateCanvas) {
+  constructor(
+    private readonly sample: VideoSample,
+    private readonly createCanvas: CreateCanvas,
+  ) {
     this.timestamp = sample.timestamp;
     this.duration = sample.duration;
     this.width = sample.displayWidth;
@@ -26,8 +37,12 @@ export class SampleFrame implements Frame {
     else this.sample.draw(ctx, dx, dy, dw, dh);
   }
 
-  retain(): Frame { return copyFrame(this, this.createCanvas); }
-  close(): void { this.sample.close(); }
+  retain(): Frame {
+    return copyFrame(this, this.createCanvas);
+  }
+  close(): void {
+    this.sample.close();
+  }
 }
 
 /** How a host customises decoding: the Node renderer converts samples itself and decodes in software. */
@@ -63,9 +78,16 @@ export class MediabunnyFrameSource implements FrameSource {
     const track = await this.input.getPrimaryVideoTrack();
     if (!track) return { width: 0, height: 0, duration: 0, decodable: false };
     const decodable = await track.canDecode();
-    const [width, height, duration] = await Promise.all([track.getDisplayWidth(), track.getDisplayHeight(), track.computeDuration()]);
+    const [width, height, duration] = await Promise.all([
+      track.getDisplayWidth(),
+      track.getDisplayHeight(),
+      track.computeDuration(),
+    ]);
     this.track = track;
-    this.sink = new VideoSampleSink(track, { hardwareAcceleration: this.hooks.hardwareAcceleration ?? "no-preference", optimizeForLatency: true });
+    this.sink = new VideoSampleSink(track, {
+      hardwareAcceleration: this.hooks.hardwareAcceleration ?? "no-preference",
+      optimizeForLatency: true,
+    });
     return { width, height, duration, decodable };
   }
 
@@ -88,7 +110,20 @@ export class MediabunnyFrameSource implements FrameSource {
     if (!wrapped) return null;
     const canvas = this.createCanvas(wrapped.canvas.width, wrapped.canvas.height);
     (canvas.getContext("2d") as Ctx2D | null)?.drawImage(wrapped.canvas, 0, 0);
-    return copyFrame({ timestamp: wrapped.timestamp, duration: wrapped.duration, width: canvas.width, height: canvas.height, draw: (ctx, dx, dy, dw, dh) => ctx.drawImage(canvas, dx, dy, dw, dh), retain: () => { throw new Error("unreachable"); }, close: () => undefined }, this.createCanvas);
+    return copyFrame(
+      {
+        timestamp: wrapped.timestamp,
+        duration: wrapped.duration,
+        width: canvas.width,
+        height: canvas.height,
+        draw: (ctx, dx, dy, dw, dh) => ctx.drawImage(canvas, dx, dy, dw, dh),
+        retain: () => {
+          throw new Error("unreachable");
+        },
+        close: () => undefined,
+      },
+      this.createCanvas,
+    );
   }
 
   close(): void {
@@ -106,7 +141,13 @@ async function loadImage(handle: MediaHandle): Promise<ImageBitmap> {
   return createImageBitmap(blob);
 }
 
-export function mediabunnyFrameSourceFactory(inputs: MediabunnyInputs, createCanvas: CreateCanvas, hooks: FrameSourceHooks = {}): FrameSourceFactory {
+export function mediabunnyFrameSourceFactory(
+  inputs: MediabunnyInputs,
+  createCanvas: CreateCanvas,
+  hooks: FrameSourceHooks = {},
+): FrameSourceFactory {
   return (assetId: string, handle: MediaHandle, kind: AssetEntry["kind"]) =>
-    kind === "image" ? new ImageFrameSource(() => (hooks.loadImage ?? loadImage)(handle)) : new MediabunnyFrameSource(assetId, handle, inputs, createCanvas, hooks);
+    kind === "image"
+      ? new ImageFrameSource(() => (hooks.loadImage ?? loadImage)(handle))
+      : new MediabunnyFrameSource(assetId, handle, inputs, createCanvas, hooks);
 }

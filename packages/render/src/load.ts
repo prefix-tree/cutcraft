@@ -46,7 +46,10 @@ export async function loadVideo(file: string, options: LoadOptions = {}): Promis
  * Imports each offered module from the file's folder, so a package resolves from the project that holds the file.
  * The namespace is marked `__esModule` so the file's default imports get its `default`, as a bundler would give them.
  */
-async function importAll(specifiers: Readonly<Record<string, string>>, folder: string): Promise<Record<string, unknown>> {
+async function importAll(
+  specifiers: Readonly<Record<string, string>>,
+  folder: string,
+): Promise<Record<string, unknown>> {
   const fromFolder = createRequire(join(folder, "noop.js"));
   const entries = Object.entries(specifiers).map(async ([name, specifier]) => {
     const local = specifier.startsWith(".") || isAbsolute(specifier);

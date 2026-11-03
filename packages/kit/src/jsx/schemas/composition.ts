@@ -10,11 +10,13 @@ export const compositionSchema = z.strictObject({
   height: z.number().int().min(16).max(8192),
   sampleRate: z.number().int().min(8000).max(192000).default(48000),
   channels: z.number().int().min(1).max(8).default(2),
-  background: z.strictObject({
-    mode: z.enum(["color", "blur", "gradient"]),
-    color: colorSchema.optional(),
-    gradient: gradientSchema.optional(),
-  }).optional(),
+  background: z
+    .strictObject({
+      mode: z.enum(["color", "blur", "gradient"]),
+      color: colorSchema.optional(),
+      gradient: gradientSchema.optional(),
+    })
+    .optional(),
   /** The video's look: palette, fonts, radius, motion style and element presets. Elements use it through `$tokens` and `style`. */
   theme: themeSchema.optional(),
 });

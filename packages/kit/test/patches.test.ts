@@ -1,8 +1,16 @@
 import { describe, expect, it } from "vitest";
 import { createPatchLog, type CollectedNode } from "@cutcraft/kit";
 
-const node = (id: string, props: Record<string, unknown> = {}): CollectedNode =>
-  ({ id, kind: "clip", props: { id, ...props }, children: [], parent: "t1", editable: "literal", lockedProps: [], boundProps: {} });
+const node = (id: string, props: Record<string, unknown> = {}): CollectedNode => ({
+  id,
+  kind: "clip",
+  props: { id, ...props },
+  children: [],
+  parent: "t1",
+  editable: "literal",
+  lockedProps: [],
+  boundProps: {},
+});
 
 describe("patch log reduction", () => {
   it("keeps the last write per prop", () => {
@@ -11,7 +19,10 @@ describe("patch log reduction", () => {
     log.append({ op: "set", id: "c1", prop: "out", value: 5 });
     log.append({ op: "set", id: "c1", prop: "in", value: 1 });
     expect(log.entries).toHaveLength(3);
-    expect([...log.net.get("c1")!.props]).toEqual([["out", 5], ["in", 1]]);
+    expect([...log.net.get("c1")!.props]).toEqual([
+      ["out", 5],
+      ["in", 1],
+    ]);
     expect(log.version).toBe(3);
   });
 

@@ -4,11 +4,14 @@ import { fixtureState, makeState } from "./helpers/state";
 describe("visiblePlacements", () => {
   const state = makeState({
     tracks: [
-      { id: "main", items: [
-        { id: "c1", kind: "clip", source: { in: 0, out: 4, asset: "a" } },
-        { id: "x1", kind: "transition", duration: 1, props: { type: "crossfade", params: { curve: "linear" } } },
-        { id: "c2", kind: "clip", source: { in: 0, out: 4, asset: "b" } },
-      ] },
+      {
+        id: "main",
+        items: [
+          { id: "c1", kind: "clip", source: { in: 0, out: 4, asset: "a" } },
+          { id: "x1", kind: "transition", duration: 1, props: { type: "crossfade", params: { curve: "linear" } } },
+          { id: "c2", kind: "clip", source: { in: 0, out: 4, asset: "b" } },
+        ],
+      },
       { id: "over", items: [{ id: "t1", kind: "title", start: 0, duration: 2 }], layout: "free" },
       { id: "hidden", hidden: true, items: [{ id: "h1", kind: "clip", source: { in: 0, out: 4, asset: "a" } }] },
     ],

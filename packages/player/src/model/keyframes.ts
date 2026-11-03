@@ -14,7 +14,11 @@ export function ease(name: string | undefined, x: number): number {
   return fn(clamp01(x));
 }
 
-interface Key { at: number; value: unknown; easing: string | undefined }
+interface Key {
+  at: number;
+  value: unknown;
+  easing: string | undefined;
+}
 
 function keysFor(children: readonly Placement[], property: string): Key[] {
   const keys: Key[] = [];
@@ -38,7 +42,8 @@ export function keyframedValue<T>(children: readonly Placement[], property: stri
   if (rel <= first.at) return first.value as T;
   if (rel >= last.at) return last.value as T;
   for (let i = 0; i < keys.length - 1; i++) {
-    const a = keys[i]!, b = keys[i + 1]!;
+    const a = keys[i]!,
+      b = keys[i + 1]!;
     if (rel < a.at || rel >= b.at) continue;
     if (typeof a.value !== "number" || typeof b.value !== "number") return a.value as T;
     const span = b.at - a.at;

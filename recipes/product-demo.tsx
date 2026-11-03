@@ -44,10 +44,53 @@ export default function Video({ accent }: z.infer<typeof schema>) {
 
       <Track id="callouts" name="Callouts">
         {/* A ring on the button for each click; anchored to the recording so a retrim moves them with it. */}
-        <Shape id="ring-new" anchor="rec" offset={3} duration={1.5} shape="circle" width={140} height={140} fill={{ type: "none" }} stroke={{ color: accent, width: 8 }} transform={{ position: { x: 520, y: -280 } }} />
-        <Shape id="ring-template" anchor="rec" offset={9} duration={1.5} shape="circle" width={140} height={140} fill={{ type: "none" }} stroke={{ color: accent, width: 8 }} transform={{ position: { x: -300, y: 40 } }} />
-        <Shape id="ring-deploy" anchor="rec" offset={15} duration={1.5} shape="circle" width={140} height={140} fill={{ type: "none" }} stroke={{ color: accent, width: 8 }} transform={{ position: { x: 640, y: 380 } }} />
-        <Title id="step-1" anchor="rec" offset={0.4} duration={2.4} size={56} weight={700} valign="top" transform={{ position: { x: 0, y: 80 } }} animation={{ preset: "fade", in: 0.3, out: 0.3 }}>
+        <Shape
+          id="ring-new"
+          anchor="rec"
+          offset={3}
+          duration={1.5}
+          shape="circle"
+          width={140}
+          height={140}
+          fill={{ type: "none" }}
+          stroke={{ color: accent, width: 8 }}
+          transform={{ position: { x: 520, y: -280 } }}
+        />
+        <Shape
+          id="ring-template"
+          anchor="rec"
+          offset={9}
+          duration={1.5}
+          shape="circle"
+          width={140}
+          height={140}
+          fill={{ type: "none" }}
+          stroke={{ color: accent, width: 8 }}
+          transform={{ position: { x: -300, y: 40 } }}
+        />
+        <Shape
+          id="ring-deploy"
+          anchor="rec"
+          offset={15}
+          duration={1.5}
+          shape="circle"
+          width={140}
+          height={140}
+          fill={{ type: "none" }}
+          stroke={{ color: accent, width: 8 }}
+          transform={{ position: { x: 640, y: 380 } }}
+        />
+        <Title
+          id="step-1"
+          anchor="rec"
+          offset={0.4}
+          duration={2.4}
+          size={56}
+          weight={700}
+          valign="top"
+          transform={{ position: { x: 0, y: 80 } }}
+          animation={{ preset: "fade", in: 0.3, out: 0.3 }}
+        >
           1. Open the dashboard
         </Title>
       </Track>
@@ -57,7 +100,15 @@ export default function Video({ accent }: z.infer<typeof schema>) {
       </Track>
 
       <Track id="music" layout="free" role="music">
-        <Audio id="bed" src="asset:music" start={0} duration="fill" volume={0.25} fade={{ in: 0.5, out: 1 }} duck={{ under: "voice", to: 0.1 }} />
+        <Audio
+          id="bed"
+          src="asset:music"
+          start={0}
+          duration="fill"
+          volume={0.25}
+          fade={{ in: 0.5, out: 1 }}
+          duck={{ under: "voice", to: 0.1 }}
+        />
       </Track>
 
       <Captions id="captions" src="asset:voice" style={{ position: "bottom", size: 40 }} />

@@ -13,7 +13,16 @@ describe("Executor", () => {
   });
 
   it("rolls back patches when apply throws", () => {
-    registerHandler({ type: "test/throws", validate: () => ok, apply: (_a: unknown, log: PatchLog) => { log.append({ op: "set", id: "c1", prop: "speed", value: 2 }); throw new Error("boom"); }, invert: (a: ActionInput) => a, fold: () => [] } as never);
+    registerHandler({
+      type: "test/throws",
+      validate: () => ok,
+      apply: (_a: unknown, log: PatchLog) => {
+        log.append({ op: "set", id: "c1", prop: "speed", value: 2 });
+        throw new Error("boom");
+      },
+      invert: (a: ActionInput) => a,
+      fold: () => [],
+    } as never);
     const exec = fixtureExecutor();
     const r = exec.execute({ type: "test/throws", params: {} } as never);
     expect(r.ok).toBe(false);
@@ -60,18 +69,28 @@ describe("Executor", () => {
   it("batch/apply validates each step against the state the previous one produced", () => {
     const exec = fixtureExecutor();
     const before = serialize(exec.state());
-    const r = exec.execute({ type: "batch/apply", params: { actions: [
-      { type: "clip/split", params: { id: "c3", at: 11, newId: "c3_b" } },
-      { type: "clip/trim", params: { id: "c3_b", edge: "out", value: 24 } },
-    ] } });
+    const r = exec.execute({
+      type: "batch/apply",
+      params: {
+        actions: [
+          { type: "clip/split", params: { id: "c3", at: 11, newId: "c3_b" } },
+          { type: "clip/trim", params: { id: "c3_b", edge: "out", value: 24 } },
+        ],
+      },
+    });
     expect(r.ok).toBe(true);
     expect(exec.state().items.get("c3_b")?.source?.out).toBe(24);
     expect(exec.undo()?.ok).toBe(true);
     expect(serialize(exec.state())).toEqual(before);
-    const bad = exec.execute({ type: "batch/apply", params: { actions: [
-      { type: "clip/remove", params: { id: "c2" } },
-      { type: "clip/trim", params: { id: "c2", edge: "out", value: 1 } },
-    ] } });
+    const bad = exec.execute({
+      type: "batch/apply",
+      params: {
+        actions: [
+          { type: "clip/remove", params: { id: "c2" } },
+          { type: "clip/trim", params: { id: "c2", edge: "out", value: 1 } },
+        ],
+      },
+    });
     expect(bad.ok).toBe(false);
     expect(exec.log().entries.filter((p) => p.id === "c2")).toHaveLength(0);
   });

@@ -28,7 +28,10 @@ interface Anim {
   readonly order: number;
 }
 
-interface Interval { readonly begin: number; readonly end: number }
+interface Interval {
+  readonly begin: number;
+  readonly end: number;
+}
 
 /** The tree with every animation applied at `time` seconds and removed. Returns a copy; the input is not changed. */
 export function freezeSmil(root: SvgNode, time: number, warnings: string[]): SvgNode {
@@ -54,18 +57,31 @@ export function freezeSmil(root: SvgNode, time: number, warnings: string[]): Svg
   }
 
   const warned = new Set<string>();
-  const warn = (key: string, message: string): void => { if (!warned.has(key)) { warned.add(key); warnings.push(message); } };
+  const warn = (key: string, message: string): void => {
+    if (!warned.has(key)) {
+      warned.add(key);
+      warnings.push(message);
+    }
+  };
   const intervals = new Map<Anim, Interval | null>();
   const resolving = new Set<Anim>();
   const intervalOf = (a: Anim): Interval | null => {
     if (intervals.has(a)) return intervals.get(a) as Interval | null;
-    if (resolving.has(a)) { warn("cycle", "SMIL animations that begin on each other in a loop are left out"); return null; }
+    if (resolving.has(a)) {
+      warn("cycle", "SMIL animations that begin on each other in a loop are left out");
+      return null;
+    }
     resolving.add(a);
-    const result = activeInterval(a, time, (id, edge) => {
-      const other = byId.get(id);
-      const iv = other ? intervalOf(other) : null;
-      return iv ? (edge === "begin" ? iv.begin : iv.end) : null;
-    }, warn);
+    const result = activeInterval(
+      a,
+      time,
+      (id, edge) => {
+        const other = byId.get(id);
+        const iv = other ? intervalOf(other) : null;
+        return iv ? (edge === "begin" ? iv.begin : iv.end) : null;
+      },
+      warn,
+    );
     resolving.delete(a);
     intervals.set(a, result);
     return result;
@@ -75,7 +91,10 @@ export function freezeSmil(root: SvgNode, time: number, warnings: string[]): Svg
   const base = new Map<SvgNode, Record<string, string>>();
   const sandwich = new Map<SvgNode, Map<string, string>>();
   for (const a of anims) {
-    if (a.node.name === "animateMotion") { warn("motion", "<animateMotion> is not played; the element stays where it is"); continue; }
+    if (a.node.name === "animateMotion") {
+      warn("motion", "<animateMotion> is not played; the element stays where it is");
+      continue;
+    }
     const name = a.node.name === "animateTransform" ? "transform" : a.node.attrs.attributeName;
     if (!name) continue;
     const iv = intervalOf(a);
@@ -99,17 +118,27 @@ export function freezeSmil(root: SvgNode, time: number, warnings: string[]): Svg
 }
 
 /** The first interval of an animation that has begun by `time` (the latest such), or null when it never applies. */
-function activeInterval(a: Anim, time: number, sync: (id: string, edge: "begin" | "end") => number | null, warn: (k: string, m: string) => void): Interval | null {
+function activeInterval(
+  a: Anim,
+  time: number,
+  sync: (id: string, edge: "begin" | "end") => number | null,
+  warn: (k: string, m: string) => void,
+): Interval | null {
   const attrs = a.node.attrs;
-  const begins = timeList(attrs.begin ?? "0", sync, (spec) => warn(`begin:${spec}`, `SMIL begin "${spec}" waits for an event or a script; that animation is left out`));
+  const begins = timeList(attrs.begin ?? "0", sync, (spec) =>
+    warn(`begin:${spec}`, `SMIL begin "${spec}" waits for an event or a script; that animation is left out`),
+  );
   const started = begins.filter((b) => b <= time + 1e-9);
   if (begins.length === 0) return null;
   const begin = started.length ? Math.max(...started) : Math.min(...begins);
   const simple = durationOf(a);
-  const repeatCount = attrs.repeatCount === "indefinite" ? Infinity : attrs.repeatCount !== undefined ? Number(attrs.repeatCount) : null;
-  const repeatDur = attrs.repeatDur === "indefinite" ? Infinity : attrs.repeatDur !== undefined ? clock(attrs.repeatDur) : null;
+  const repeatCount =
+    attrs.repeatCount === "indefinite" ? Infinity : attrs.repeatCount !== undefined ? Number(attrs.repeatCount) : null;
+  const repeatDur =
+    attrs.repeatDur === "indefinite" ? Infinity : attrs.repeatDur !== undefined ? clock(attrs.repeatDur) : null;
   let active = simple;
-  if (repeatCount !== null || repeatDur !== null) active = Math.min(repeatCount === null ? Infinity : simple * repeatCount, repeatDur ?? Infinity);
+  if (repeatCount !== null || repeatDur !== null)
+    active = Math.min(repeatCount === null ? Infinity : simple * repeatCount, repeatDur ?? Infinity);
   if (attrs.end !== undefined) {
     const ends = timeList(attrs.end, sync, () => undefined).filter((e) => e >= begin);
     if (ends.length) active = Math.min(active, Math.min(...ends) - begin);
@@ -134,19 +163,24 @@ function valueAt(a: Anim, iv: Interval, time: number, under: string, baseValue: 
 
   const dur = durationOf(a);
   const t = (frozen ? iv.end : time) - iv.begin;
-  let iteration = 0, k: number;
+  let iteration = 0,
+    k: number;
   if (!Number.isFinite(dur)) k = 0;
   else {
     iteration = Math.floor(t / dur);
     k = (t - iteration * dur) / dur;
     // Frozen at the end of a whole number of repeats: the last value, not the first of the next repeat.
-    if (frozen && iteration > 0 && k < 1e-9) { iteration -= 1; k = 1; }
+    if (frozen && iteration > 0 && k < 1e-9) {
+      iteration -= 1;
+      k = 1;
+    }
   }
 
   const list = valuesOf(a, baseValue);
   if (list.length === 0) return null;
   let value = sample(list, k, attrs);
-  if (attrs.accumulate === "sum" && iteration > 0) value = addValues(value, scaleValue(list[list.length - 1] as string, iteration));
+  if (attrs.accumulate === "sum" && iteration > 0)
+    value = addValues(value, scaleValue(list[list.length - 1] as string, iteration));
   const transform = a.node.name === "animateTransform";
   if (transform) value = `${attrs.type ?? "translate"}(${value})`;
   const additive = attrs.additive === "sum" || (!attrs.values && !attrs.from && attrs.by !== undefined);
@@ -156,7 +190,11 @@ function valueAt(a: Anim, iv: Interval, time: number, under: string, baseValue: 
 
 function valuesOf(a: Anim, baseValue: string): string[] {
   const attrs = a.node.attrs;
-  if (attrs.values) return attrs.values.split(";").map((v) => v.trim()).filter((v) => v.length > 0);
+  if (attrs.values)
+    return attrs.values
+      .split(";")
+      .map((v) => v.trim())
+      .filter((v) => v.length > 0);
   if (attrs.from !== undefined && attrs.to !== undefined) return [attrs.from, attrs.to];
   if (attrs.from !== undefined && attrs.by !== undefined) return [attrs.from, addValues(attrs.from, attrs.by)];
   if (attrs.to !== undefined) return [a.node.name === "animateTransform" ? "0" : baseValue || attrs.to, attrs.to];
@@ -172,14 +210,19 @@ function sample(values: readonly string[], k: number, attrs: Readonly<Record<str
   const times = attrs.keyTimes?.split(";").map(Number);
   const keys = times && times.length === n && times.every(Number.isFinite) ? times : null;
   if (mode === "discrete") {
-    if (keys) { let i = 0; while (i + 1 < n && (keys[i + 1] as number) <= k + 1e-9) i++; return values[i] as string; }
+    if (keys) {
+      let i = 0;
+      while (i + 1 < n && (keys[i + 1] as number) <= k + 1e-9) i++;
+      return values[i] as string;
+    }
     return values[Math.min(n - 1, Math.floor(k * n))] as string;
   }
   let i: number, local: number;
   if (keys) {
     i = 0;
     while (i + 2 < n && (keys[i + 1] as number) <= k) i++;
-    const a = keys[i] as number, b = keys[i + 1] as number;
+    const a = keys[i] as number,
+      b = keys[i + 1] as number;
     local = b > a ? (k - a) / (b - a) : 1;
   } else {
     const x = k * (n - 1);
@@ -188,23 +231,33 @@ function sample(values: readonly string[], k: number, attrs: Readonly<Record<str
   }
   local = Math.max(0, Math.min(1, local));
   if (mode === "spline") {
-    const spline = attrs.keySplines?.split(";")[i]?.trim().split(/[\s,]+/).map(Number);
-    if (spline && spline.length === 4 && spline.every(Number.isFinite)) local = bezier(local, spline as [number, number, number, number]);
+    const spline = attrs.keySplines
+      ?.split(";")
+      [i]?.trim()
+      .split(/[\s,]+/)
+      .map(Number);
+    if (spline && spline.length === 4 && spline.every(Number.isFinite))
+      local = bezier(local, spline as [number, number, number, number]);
   }
   return interpolate(values[i] as string, values[i + 1] as string, local);
 }
 
 /** Two values `k` of the way from `a` to `b`: numbers in the same places interpolate, colours mix, anything else switches halfway. */
 export function interpolate(a: string, b: string, k: number): string {
-  const ca = colour(a), cb = colour(b);
+  const ca = colour(a),
+    cb = colour(b);
   if (ca && cb) {
     const ch = (i: number) => Math.round((ca[i] as number) + ((cb[i] as number) - (ca[i] as number)) * k);
     return `rgb(${ch(0)}, ${ch(1)}, ${ch(2)})`;
   }
-  const pa = split(a), pb = split(b);
+  const pa = split(a),
+    pb = split(b);
   if (pa.text.length === pb.text.length && pa.text.every((t, i) => t === pb.text[i])) {
     let out = pa.text[0] as string;
-    for (let i = 0; i < pa.nums.length; i++) out += fmt((pa.nums[i] as number) + ((pb.nums[i] as number) - (pa.nums[i] as number)) * k) + (pa.text[i + 1] as string);
+    for (let i = 0; i < pa.nums.length; i++)
+      out +=
+        fmt((pa.nums[i] as number) + ((pb.nums[i] as number) - (pa.nums[i] as number)) * k) +
+        (pa.text[i + 1] as string);
     return out;
   }
   return k < 0.5 ? a : b;
@@ -214,7 +267,8 @@ const NUMBER = /[-+]?(?:\d*\.\d+|\d+\.?)(?:[eE][-+]?\d+)?/g;
 
 /** A value as the text between its numbers, and the numbers. */
 function split(v: string): { text: string[]; nums: number[] } {
-  const text: string[] = [], nums: number[] = [];
+  const text: string[] = [],
+    nums: number[] = [];
   let last = 0;
   for (const m of v.matchAll(NUMBER)) {
     text.push(v.slice(last, m.index));
@@ -227,12 +281,15 @@ function split(v: string): { text: string[]; nums: number[] } {
 
 function addValues(a: string, b: string): string {
   if (!a) return b;
-  const ca = colour(a), cb = colour(b);
+  const ca = colour(a),
+    cb = colour(b);
   if (ca && cb) return `rgb(${ca.map((x, i) => Math.min(255, Math.round(x + (cb[i] as number)))).join(", ")})`;
-  const pa = split(a), pb = split(b);
+  const pa = split(a),
+    pb = split(b);
   if (pa.nums.length !== pb.nums.length) return b;
   let out = pb.text[0] as string;
-  for (let i = 0; i < pb.nums.length; i++) out += fmt((pa.nums[i] as number) + (pb.nums[i] as number)) + (pb.text[i + 1] as string);
+  for (let i = 0; i < pb.nums.length; i++)
+    out += fmt((pa.nums[i] as number) + (pb.nums[i] as number)) + (pb.text[i + 1] as string);
   return out;
 }
 
@@ -244,15 +301,31 @@ function scaleValue(v: string, k: number): string {
 }
 
 const NAMED: Readonly<Record<string, [number, number, number]>> = {
-  black: [0, 0, 0], white: [255, 255, 255], red: [255, 0, 0], green: [0, 128, 0], blue: [0, 0, 255], yellow: [255, 255, 0],
-  orange: [255, 165, 0], purple: [128, 0, 128], gray: [128, 128, 128], grey: [128, 128, 128], cyan: [0, 255, 255], magenta: [255, 0, 255],
+  black: [0, 0, 0],
+  white: [255, 255, 255],
+  red: [255, 0, 0],
+  green: [0, 128, 0],
+  blue: [0, 0, 255],
+  yellow: [255, 255, 0],
+  orange: [255, 165, 0],
+  purple: [128, 0, 128],
+  gray: [128, 128, 128],
+  grey: [128, 128, 128],
+  cyan: [0, 255, 255],
+  magenta: [255, 0, 255],
 };
 
 function colour(v: string): [number, number, number] | null {
   const c = v.trim().toLowerCase();
   const hex = /^#([0-9a-f]{3}|[0-9a-f]{6})$/.exec(c);
   if (hex) {
-    const h = (hex[1] as string).length === 3 ? (hex[1] as string).split("").map((x) => x + x).join("") : (hex[1] as string);
+    const h =
+      (hex[1] as string).length === 3
+        ? (hex[1] as string)
+            .split("")
+            .map((x) => x + x)
+            .join("")
+        : (hex[1] as string);
     return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)];
   }
   const fn = /^rgb\(\s*([\d.]+)[\s,]+([\d.]+)[\s,]+([\d.]+)\s*\)$/.exec(c);
@@ -263,22 +336,32 @@ function colour(v: string): [number, number, number] | null {
 /** A cubic-bezier easing (x1 y1 x2 y2) at progress x. */
 function bezier(x: number, [x1, y1, x2, y2]: [number, number, number, number]): number {
   const at = (t: number, a: number, b: number) => 3 * (1 - t) * (1 - t) * t * a + 3 * (1 - t) * t * t * b + t * t * t;
-  let lo = 0, hi = 1, t = x;
+  let lo = 0,
+    hi = 1,
+    t = x;
   for (let i = 0; i < 30; i++) {
     t = (lo + hi) / 2;
-    if (at(t, x1, x2) < x) lo = t; else hi = t;
+    if (at(t, x1, x2) < x) lo = t;
+    else hi = t;
   }
   return at(t, y1, y2);
 }
 
 /** A begin or end list: offsets and `id.begin`/`id.end` with an offset. Event and `indefinite` entries are left out (and reported). */
-function timeList(spec: string, sync: (id: string, edge: "begin" | "end") => number | null, unsupported: (spec: string) => void): number[] {
+function timeList(
+  spec: string,
+  sync: (id: string, edge: "begin" | "end") => number | null,
+  unsupported: (spec: string) => void,
+): number[] {
   const out: number[] = [];
   for (const raw of spec.split(";")) {
     const s = raw.trim();
     if (!s) continue;
     const offset = clock(s);
-    if (offset !== null) { out.push(offset); continue; }
+    if (offset !== null) {
+      out.push(offset);
+      continue;
+    }
     const m = /^([A-Za-z_][\w-]*)\.(begin|end)\s*(?:([+-])\s*(.+))?$/.exec(s);
     if (m) {
       const at = sync(m[1] as string, m[2] as "begin" | "end");
@@ -315,15 +398,27 @@ function styleProps(style: string | undefined): Record<string, string> {
 }
 
 function withoutProp(style: string, name: string): string {
-  return style.split(";").filter((d) => d.split(":")[0]?.trim() !== name).join(";");
+  return style
+    .split(";")
+    .filter((d) => d.split(":")[0]?.trim() !== name)
+    .join(";");
 }
 
 function clone(node: SvgNode): SvgNode {
-  return { name: node.name, attrs: { ...node.attrs }, children: node.children.map((c) => (typeof c === "string" ? c : clone(c))) };
+  return {
+    name: node.name,
+    attrs: { ...node.attrs },
+    children: node.children.map((c) => (typeof c === "string" ? c : clone(c))),
+  };
 }
 
 function strip(node: SvgNode): SvgNode {
-  return { ...node, children: node.children.filter((c) => typeof c === "string" || !ANIMATIONS.has(c.name)).map((c) => (typeof c === "string" ? c : strip(c))) };
+  return {
+    ...node,
+    children: node.children
+      .filter((c) => typeof c === "string" || !ANIMATIONS.has(c.name))
+      .map((c) => (typeof c === "string" ? c : strip(c))),
+  };
 }
 
 function fmt(v: number): string {

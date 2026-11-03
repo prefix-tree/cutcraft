@@ -16,15 +16,25 @@ it("plays a file with copied pieces through to the end without an error, and see
   const dir = mkdtempSync(join(scratch, "j-"));
   const file = join(dir, "video.tsx");
   // Source frames 66-182 of bars.webm, whose keyframes are at 90 and 180: the pieces join at output frames 24 and 114.
-  writeFileSync(file, `import { Clip, Composition, Track } from "@cutcraft/kit";
+  writeFileSync(
+    file,
+    `import { Clip, Composition, Track } from "@cutcraft/kit";
 export const manifest = ${JSON.stringify(manifest)};
 export default function Video() {
   return <Composition fps={30} width={640} height={360}><Track id="m"><Clip id="c" src="asset:bars" in={2.2} out={6.1} /></Track></Composition>;
 }
-`);
+`,
+  );
   const loaded = await loadVideo(file);
   const out = join(dir, "out.webm");
-  const result = await renderVideo({ state: loaded.state, media: directoryResolver(mediaDir, loaded.manifest), out, keyFrameInterval: 1, smartCopy: true, silent: true });
+  const result = await renderVideo({
+    state: loaded.state,
+    media: directoryResolver(mediaDir, loaded.manifest),
+    out,
+    keyFrameInterval: 1,
+    smartCopy: true,
+    silent: true,
+  });
   expect(result.copiedFrames).toBe(90);
 
   const browser = await chromium.launch({ args: ["--autoplay-policy=no-user-gesture-required"] });

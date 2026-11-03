@@ -30,13 +30,32 @@ export default function Video({ title, accent }: z.infer<typeof schema>) {
       </Track>
 
       <Track id="overlays" name="Overlays">
-        <Title id="title" anchor="welcome" offset={0.3} duration={3} size={96} weight={700} color={accent} valign="top" transform={{ position: { x: 0, y: 120 } }} animation={{ preset: "slide-up", in: 0.4, out: 0.3 }}>
+        <Title
+          id="title"
+          anchor="welcome"
+          offset={0.3}
+          duration={3}
+          size={96}
+          weight={700}
+          color={accent}
+          valign="top"
+          transform={{ position: { x: 0, y: 120 } }}
+          animation={{ preset: "slide-up", in: 0.4, out: 0.3 }}
+        >
           {title}
         </Title>
       </Track>
 
       <Track id="music" layout="free" role="music">
-        <Audio id="bed" src="asset:music" start={0} duration="fill" volume={0.3} fade={{ in: 0.5, out: 1.5 }} duck={{ under: "main", to: 0.12 }} />
+        <Audio
+          id="bed"
+          src="asset:music"
+          start={0}
+          duration="fill"
+          volume={0.3}
+          fade={{ in: 0.5, out: 1.5 }}
+          duck={{ under: "main", to: 0.12 }}
+        />
       </Track>
 
       {/* Cues come from the words the timeline plays, one per sentence, and follow every trim. */}

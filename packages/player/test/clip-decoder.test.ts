@@ -2,12 +2,24 @@ import { ClipDecoder, QUEUE_MAX, QUEUE_TARGET } from "@cutcraft/player";
 import { FakeFrameSource, flush } from "./helpers/fakes";
 import { childrenOf, makeState } from "./helpers/state";
 
-const state = makeState({ tracks: [{ id: "main", items: [
-  { id: "c1", kind: "clip", source: { in: 0, out: 4, asset: "a" } },
-  { id: "c2", kind: "clip", source: { in: 0, out: 4, speed: 2, asset: "a" } },
-  { id: "c3", kind: "clip", source: { in: 0, out: 4, asset: "a" }, props: { reverse: true } },
-  { id: "c4", kind: "clip", source: { in: 0, out: 4, asset: "a" }, children: [{ id: "fr", kind: "freeze", props: { at: 1.5, start: 1, duration: 0.5 } }] },
-] }] });
+const state = makeState({
+  tracks: [
+    {
+      id: "main",
+      items: [
+        { id: "c1", kind: "clip", source: { in: 0, out: 4, asset: "a" } },
+        { id: "c2", kind: "clip", source: { in: 0, out: 4, speed: 2, asset: "a" } },
+        { id: "c3", kind: "clip", source: { in: 0, out: 4, asset: "a" }, props: { reverse: true } },
+        {
+          id: "c4",
+          kind: "clip",
+          source: { in: 0, out: 4, asset: "a" },
+          children: [{ id: "fr", kind: "freeze", props: { at: 1.5, start: 1, duration: 0.5 } }],
+        },
+      ],
+    },
+  ],
+});
 
 function decoder(id: string, speed = 1) {
   const source = new FakeFrameSource("a");
@@ -38,7 +50,9 @@ describe("ClipDecoder", () => {
     let release: (error: Error) => void = () => undefined;
     // The stream yields nothing until the decoder is disposed, then fails the way a disposed input does.
     source.stream = async function* () {
-      await new Promise<never>((_, reject) => { release = reject; });
+      await new Promise<never>((_, reject) => {
+        release = reject;
+      });
       yield* [];
     };
     const d = new ClipDecoder(source, p, childrenOf(state, "c1"), () => 1);
@@ -109,7 +123,11 @@ describe("ClipDecoder", () => {
     source.release(30);
     await flush();
     let fresh = await d.frameFor(p.start + 0.5, false);
-    for (let i = 0; i < 10 && fresh!.timestamp < 0.5; i++) { d.advance(p.start + 0.5); await flush(2); fresh = await d.frameFor(p.start + 0.5, false); }
+    for (let i = 0; i < 10 && fresh!.timestamp < 0.5; i++) {
+      d.advance(p.start + 0.5);
+      await flush(2);
+      fresh = await d.frameFor(p.start + 0.5, false);
+    }
     expect(fresh!.timestamp).toBeCloseTo(0.5);
   });
 
@@ -153,7 +171,9 @@ describe("ClipDecoder", () => {
     source.slow = true;
     const slow = d.frameFor(p.start + 1, true, true);
     let settled = false;
-    void slow.then(() => { settled = true; });
+    void slow.then(() => {
+      settled = true;
+    });
     await flush(3);
     expect(settled).toBe(false);
     source.release(40);

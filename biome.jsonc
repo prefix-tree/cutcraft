@@ -27,6 +27,8 @@
   "javascript": {
     "formatter": { "quoteStyle": "double", "semicolons": "always", "trailingCommas": "all" }
   },
+  // Prose is written by hand (decision records, guides); the formatter would reflow emphasis and tables.
+  "markdown": { "formatter": { "enabled": false }, "linter": { "enabled": false } },
   "assist": { "enabled": true, "actions": { "source": { "organizeImports": "off" } } },
   "linter": {
     "enabled": true,
@@ -144,7 +146,9 @@
     {
       // The docs theme overrides VitePress's own styles, which needs `!important` and selector order it does not control.
       "includes": ["docs/.vitepress/**/*.css"],
-      "linter": { "rules": { "complexity": { "noImportantStyles": "off" }, "style": { "noDescendingSpecificity": "off" } } }
+      "linter": {
+        "rules": { "complexity": { "noImportantStyles": "off" }, "style": { "noDescendingSpecificity": "off" } }
+      }
     }
   ]
 }

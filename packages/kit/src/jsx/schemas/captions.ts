@@ -36,5 +36,7 @@ export const captionSchema = z.strictObject({
   start: timeRefSchema,
   end: timeRefSchema,
   text: z.string(),
-  words: z.array(z.strictObject({ text: z.string(), start: z.number().nonnegative(), end: z.number().nonnegative() })).optional(),
+  words: z
+    .array(z.strictObject({ text: z.string(), start: z.number().nonnegative(), end: z.number().nonnegative() }))
+    .optional(),
 });

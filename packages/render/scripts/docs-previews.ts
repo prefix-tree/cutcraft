@@ -22,8 +22,11 @@ const media = directoryResolver("/nowhere", { assets: {} });
 for (const name of GRAPHIC_KIND_NAMES) {
   if (only && name !== only) continue;
   const example = graphicExample(name);
-  const el = h(Composition, { fps: 30, width: example.width, height: example.height },
-    h(Track, { id: "main", layout: "free" }, h(Graphic, example.props as never)));
+  const el = h(
+    Composition,
+    { fps: 30, width: example.width, height: example.height },
+    h(Track, { id: "main", layout: "free" }, h(Graphic, example.props as never)),
+  );
   const state = resolve(collect(el), { assets: {} });
   if (state.errors.length) throw new Error(`${name}: ${state.errors.map((e) => e.message).join("; ")}`);
   const r = await renderVideo({ state, media, out: join(out, `${name}.webm`), silent: true, quality: "high" });

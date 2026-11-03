@@ -41,8 +41,8 @@ export class CanvasPainter {
   }
 
   private drawOp(ctx: Ctx2D, op: DrawOp, inputs: PaintInputs): void {
-    const frame = op.kind === "nested" ? null : inputs.frames.get(op.id) ?? null;
-    const nested = op.kind === "nested" ? inputs.nested.get(op.id) ?? null : null;
+    const frame = op.kind === "nested" ? null : (inputs.frames.get(op.id) ?? null);
+    const nested = op.kind === "nested" ? (inputs.nested.get(op.id) ?? null) : null;
     if (op.kind !== "nested" && !frame) return;
     if (op.kind === "nested" && !nested) return;
     ctx.save();
@@ -66,8 +66,8 @@ export class CanvasPainter {
   private blurBackground(ctx: Ctx2D, plan: FramePlan, id: string, inputs: PaintInputs): void {
     const op = plan.ops.find((o) => o.id === id);
     if (!op || coversCanvas(op, this.width, this.height)) return;
-    const nested = op.kind === "nested" ? inputs.nested.get(id) ?? null : null;
-    const frame = op.kind === "nested" ? null : inputs.frames.get(id) ?? null;
+    const nested = op.kind === "nested" ? (inputs.nested.get(id) ?? null) : null;
+    const frame = op.kind === "nested" ? null : (inputs.frames.get(id) ?? null);
     const picture = nested ?? frame;
     if (!picture) return;
     const r = Math.round(0.04 * this.height);
@@ -87,12 +87,15 @@ export class CanvasPainter {
     else if (frame && !(coversCanvas(op, this.width, this.height) && frame.paintFull?.(ctx, this.width, this.height))) {
       // The manifest describes the original, while a normalized file or proxy may decode at a different size.
       const reference = op.cropReference;
-      const crop = op.crop && reference ? {
-        x: op.crop.x * frame.width / reference.width,
-        y: op.crop.y * frame.height / reference.height,
-        w: op.crop.w * frame.width / reference.width,
-        h: op.crop.h * frame.height / reference.height,
-      } : op.crop;
+      const crop =
+        op.crop && reference
+          ? {
+              x: (op.crop.x * frame.width) / reference.width,
+              y: (op.crop.y * frame.height) / reference.height,
+              w: (op.crop.w * frame.width) / reference.width,
+              h: (op.crop.h * frame.height) / reference.height,
+            }
+          : op.crop;
       frame.draw(ctx, 0, 0, w, h, crop);
     }
   }
@@ -140,7 +143,10 @@ export class CanvasPainter {
       setMatrix(lctx, op.matrix);
       lctx.beginPath();
       traceMask(lctx, op.mask!, op.rect);
-      if (op.mask!.inverted) { lctx.rect(0, 0, op.rect.w, op.rect.h); lctx.fill("evenodd"); } else lctx.fill();
+      if (op.mask!.inverted) {
+        lctx.rect(0, 0, op.rect.w, op.rect.h);
+        lctx.fill("evenodd");
+      } else lctx.fill();
       lctx.restore();
     }
     for (const fx of op.post ?? []) {
@@ -157,7 +163,10 @@ export class CanvasPainter {
         lctx.fillRect(0, 0, w, h);
       } else {
         const pattern = lctx.createPattern(this.noise(fx.seed, fx.amount), "repeat");
-        if (pattern) { lctx.fillStyle = pattern; lctx.fillRect(0, 0, this.width, this.height); }
+        if (pattern) {
+          lctx.fillStyle = pattern;
+          lctx.fillRect(0, 0, this.width, this.height);
+        }
       }
       lctx.restore();
     }
@@ -248,13 +257,33 @@ function canvasOf(ctx: Ctx2D): AnyCanvas {
 /** Whether a draw op puts its picture over the whole canvas as it is: no transform, crop, clip, fade, filter or blend. */
 export function coversCanvas(op: DrawOp, width: number, height: number): boolean {
   const m = op.matrix;
-  return m.a === 1 && m.b === 0 && m.c === 0 && m.d === 1 && m.e === 0 && m.f === 0
-    && op.rect.w === width && op.rect.h === height && !op.crop
-    && op.opacity >= 1 && op.blend === "source-over" && !op.filter && op.borderRadius === 0 && !op.mask && !op.clip && !op.post;
+  return (
+    m.a === 1 &&
+    m.b === 0 &&
+    m.c === 0 &&
+    m.d === 1 &&
+    m.e === 0 &&
+    m.f === 0 &&
+    op.rect.w === width &&
+    op.rect.h === height &&
+    !op.crop &&
+    op.opacity >= 1 &&
+    op.blend === "source-over" &&
+    !op.filter &&
+    op.borderRadius === 0 &&
+    !op.mask &&
+    !op.clip &&
+    !op.post
+  );
 }
 
 /** The composition background (a colour or a gradient) over the whole frame. */
-export function paintBackground(ctx: Ctx2D, plan: Pick<FramePlan, "background" | "backgroundGradient">, w: number, h: number): void {
+export function paintBackground(
+  ctx: Ctx2D,
+  plan: Pick<FramePlan, "background" | "backgroundGradient">,
+  w: number,
+  h: number,
+): void {
   ctx.save();
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.globalAlpha = 1;
@@ -269,31 +298,44 @@ export function paintBackground(ctx: Ctx2D, plan: Pick<FramePlan, "background" |
 export function backgroundCss(plan: Pick<FramePlan, "background" | "backgroundGradient">): string {
   const g = plan.backgroundGradient;
   if (!g) return plan.background;
-  const stops = [...g.stops].sort((a, b) => a.offset - b.offset).map((s) => `${withOpacity(s.color, s.opacity)} ${Math.round(Math.max(0, Math.min(1, s.offset)) * 10000) / 100}%`).join(", ");
-  if (g.type === "radial") return `radial-gradient(farthest-corner at ${(g.center?.x ?? 0.5) * 100}% ${(g.center?.y ?? 0.5) * 100}%, ${stops})`;
-  if (g.type === "conic") return `conic-gradient(from ${g.angle ?? 0}deg at ${(g.center?.x ?? 0.5) * 100}% ${(g.center?.y ?? 0.5) * 100}%, ${stops})`;
+  const stops = [...g.stops]
+    .sort((a, b) => a.offset - b.offset)
+    .map((s) => `${withOpacity(s.color, s.opacity)} ${Math.round(Math.max(0, Math.min(1, s.offset)) * 10000) / 100}%`)
+    .join(", ");
+  if (g.type === "radial")
+    return `radial-gradient(farthest-corner at ${(g.center?.x ?? 0.5) * 100}% ${(g.center?.y ?? 0.5) * 100}%, ${stops})`;
+  if (g.type === "conic")
+    return `conic-gradient(from ${g.angle ?? 0}deg at ${(g.center?.x ?? 0.5) * 100}% ${(g.center?.y ?? 0.5) * 100}%, ${stops})`;
   return `linear-gradient(${g.angle ?? 180}deg, ${stops})`;
 }
 
 /** A canvas gradient for the frame, laid out the way CSS lays out the same gradient on a box of this size. */
 export function backgroundFill(ctx: Ctx2D, g: BackgroundGradient, w: number, h: number): CanvasGradient | string {
   const c = g.center ?? { x: 0.5, y: 0.5 };
-  const cx = c.x * w, cy = c.y * h;
+  const cx = c.x * w,
+    cy = c.y * h;
   let grad: CanvasGradient;
   if (g.type === "radial") {
     // CSS's default size: the farthest corner.
     const r = Math.max(Math.hypot(cx, cy), Math.hypot(w - cx, cy), Math.hypot(cx, h - cy), Math.hypot(w - cx, h - cy));
     grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
-  } else if (g.type === "conic" && typeof (ctx as { createConicGradient?: unknown }).createConicGradient === "function") {
-    grad = (ctx as unknown as { createConicGradient(a: number, x: number, y: number): CanvasGradient }).createConicGradient((((g.angle ?? 0) - 90) * Math.PI) / 180, cx, cy);
+  } else if (
+    g.type === "conic" &&
+    typeof (ctx as { createConicGradient?: unknown }).createConicGradient === "function"
+  ) {
+    grad = (
+      ctx as unknown as { createConicGradient(a: number, x: number, y: number): CanvasGradient }
+    ).createConicGradient((((g.angle ?? 0) - 90) * Math.PI) / 180, cx, cy);
   } else {
     const rad = ((g.angle ?? 180) * Math.PI) / 180;
-    const dx = Math.sin(rad), dy = -Math.cos(rad);
+    const dx = Math.sin(rad),
+      dy = -Math.cos(rad);
     // The CSS gradient line: through the centre, long enough that its ends touch the corners.
     const half = (Math.abs(w * dx) + Math.abs(h * dy)) / 2;
     grad = ctx.createLinearGradient(w / 2 - dx * half, h / 2 - dy * half, w / 2 + dx * half, h / 2 + dy * half);
   }
-  for (const s of [...g.stops].sort((a, b) => a.offset - b.offset)) grad.addColorStop(Math.max(0, Math.min(1, s.offset)), withOpacity(s.color, s.opacity));
+  for (const s of [...g.stops].sort((a, b) => a.offset - b.offset))
+    grad.addColorStop(Math.max(0, Math.min(1, s.offset)), withOpacity(s.color, s.opacity));
   return grad;
 }
 
@@ -301,6 +343,12 @@ function withOpacity(color: string, opacity: number | undefined): string {
   if (opacity === undefined || opacity >= 1) return color;
   const hex = color.trim().match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i);
   if (!hex) return color;
-  const h = (hex[1] as string).length === 3 ? (hex[1] as string).split("").map((x) => x + x).join("") : (hex[1] as string);
+  const h =
+    (hex[1] as string).length === 3
+      ? (hex[1] as string)
+          .split("")
+          .map((x) => x + x)
+          .join("")
+      : (hex[1] as string);
   return `rgba(${parseInt(h.slice(0, 2), 16)}, ${parseInt(h.slice(2, 4), 16)}, ${parseInt(h.slice(4, 6), 16)}, ${Math.max(0, opacity)})`;
 }

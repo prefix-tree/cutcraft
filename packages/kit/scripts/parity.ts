@@ -14,7 +14,17 @@ export function parityMarkdown(): string {
     "",
     "| OpenReel | Ours |",
     "|---|---|",
-    ...PARITY.map(([a, b]) => `| \`${a}\` | ${b.startsWith("out:") || b.startsWith("—") ? b : b.split(/,| \/ | \+ /).map((s) => `\`${s.trim()}\``).join(", ")} |`),
+    ...PARITY.map(
+      ([a, b]) =>
+        `| \`${a}\` | ${
+          b.startsWith("out:") || b.startsWith("—")
+            ? b
+            : b
+                .split(/,| \/ | \+ /)
+                .map((s) => `\`${s.trim()}\``)
+                .join(", ")
+        } |`,
+    ),
     "",
     "## Ours with no OpenReel equivalent",
     "",

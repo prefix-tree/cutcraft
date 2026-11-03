@@ -5,11 +5,30 @@
  */
 export { OVERLAY_KINDS, clipPathCss, overlayLayout, type ElementProps, type OverlayLayout } from "./overlays/layout";
 export { motionAt, type ClipRect, type GraphicAnimation, type Motion } from "./model/motion";
-export { captionsContent, layerContent, stickerPlaceholder, stickerSize, titleBox, titleContent } from "./overlays/content";
+export {
+  captionsContent,
+  layerContent,
+  stickerPlaceholder,
+  stickerSize,
+  titleBox,
+  titleContent,
+} from "./overlays/content";
 export { shapeDrawing, shapeMarkup, shapeSize, type ShapeDrawing, type ShapeMarkup } from "./overlays/shape";
 export { indexLayerInteriors } from "./overlays/layer-interiors";
 export { layerClock } from "./model/time";
-export { parseSvg, prepareSvg, rgb, serialize, svgAnimated, svgIntrinsicSize, type PrepareSvgOptions, type PreparedSvg, type SvgColor, type SvgNode, type SvgViewBox } from "./overlays/svg";
+export {
+  parseSvg,
+  prepareSvg,
+  rgb,
+  serialize,
+  svgAnimated,
+  svgIntrinsicSize,
+  type PrepareSvgOptions,
+  type PreparedSvg,
+  type SvgColor,
+  type SvgNode,
+  type SvgViewBox,
+} from "./overlays/svg";
 export { svgDrawing, themeTokens, type SvgDrawing } from "./overlays/svg-element";
 export { clock, freezeSmil, hasSmil, interpolate } from "./overlays/smil";
 export { graphicDrawing, graphicLabels, iconStickerDrawing, type GraphicDrawing } from "./overlays/graphic";

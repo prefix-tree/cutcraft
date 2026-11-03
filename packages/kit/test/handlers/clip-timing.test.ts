@@ -87,8 +87,11 @@ describe("clip timing", () => {
     expect(r.errors?.[0]?.code).toBe("TRACK_LOCKED");
     const bound = exec.execute({ type: "text/update", params: { id: "t1", props: { color: "#fff" } } });
     expect(bound.ok).toBe(true);
-    const index = buildSourceIndex(fixtureText.replace('size={64}', 'size={32 + 32}'));
-    const locked = new Executor({ tree: collectModule(sample, {}, { index }), manifest, now: () => 0 }).execute({ type: "text/update", params: { id: "t1", props: { size: 40 } } });
+    const index = buildSourceIndex(fixtureText.replace("size={64}", "size={32 + 32}"));
+    const locked = new Executor({ tree: collectModule(sample, {}, { index }), manifest, now: () => 0 }).execute({
+      type: "text/update",
+      params: { id: "t1", props: { size: 40 } },
+    });
     expect(locked.errors?.[0]?.code).toBe("LOCKED_PROP");
   });
 });

@@ -12,9 +12,18 @@ export type SceneFn = (props: Record<string, unknown>) => ReactElement | null;
  * resolved inside a composition of the outer size. The player renders the
  * result; `nested/extract` writes it into the file.
  */
-export function resolveScene(of: SceneFn, props: Readonly<Record<string, unknown>>, outer: { readonly fps: number; readonly width: number; readonly height: number }, manifest: AssetManifest): ResolvedState {
+export function resolveScene(
+  of: SceneFn,
+  props: Readonly<Record<string, unknown>>,
+  outer: { readonly fps: number; readonly width: number; readonly height: number },
+  manifest: AssetManifest,
+): ResolvedState {
   const { of: _of, id: _id, ...rest } = props;
   const inner = of(rest);
-  const element = createElement(Composition, { fps: outer.fps, width: outer.width, height: outer.height } as never, inner);
+  const element = createElement(
+    Composition,
+    { fps: outer.fps, width: outer.width, height: outer.height } as never,
+    inner,
+  );
   return resolve(collect(element as ReactElement), manifest);
 }

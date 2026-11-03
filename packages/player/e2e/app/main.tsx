@@ -18,7 +18,10 @@ declare global {
 window.__errors = [];
 window.__playerErrors = [];
 const origError = console.error.bind(console);
-console.error = (...args: unknown[]) => { window.__errors.push(args.map(String).join(" ")); origError(...args); };
+console.error = (...args: unknown[]) => {
+  window.__errors.push(args.map(String).join(" "));
+  origError(...args);
+};
 
 async function main(): Promise<void> {
   const params = new URLSearchParams(location.search);
@@ -32,11 +35,21 @@ async function main(): Promise<void> {
   window.__ctx = ctx;
   const ref = createRef<PlayerRef>();
   createRoot(document.getElementById("root")!).render(
-    <Player ref={ref} state={state} element={element} media={media} audioContext={ctx} controls onError={(e) => window.__playerErrors.push(e)} />,
+    <Player
+      ref={ref}
+      state={state}
+      element={element}
+      media={media}
+      audioContext={ctx}
+      controls
+      onError={(e) => window.__playerErrors.push(e)}
+    />,
   );
   const wait = (): void => {
-    if (ref.current) { window.__player = ref.current; document.body.dataset.ready = "1"; }
-    else requestAnimationFrame(wait);
+    if (ref.current) {
+      window.__player = ref.current;
+      document.body.dataset.ready = "1";
+    } else requestAnimationFrame(wait);
   };
   wait();
 }

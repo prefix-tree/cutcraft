@@ -1,7 +1,10 @@
 import { ALL_FORMATS, BlobSource, FilePathSource, Input, UrlSource } from "mediabunny";
 import type { MediaHandle } from "../types";
 
-interface Entry { input: Input; refs: number }
+interface Entry {
+  input: Input;
+  refs: number;
+}
 
 /** One mediabunny `Input` per asset, shared by the video and audio sources of that asset. */
 export class MediabunnyInputs {
@@ -10,7 +13,12 @@ export class MediabunnyInputs {
   acquire(assetId: string, handle: MediaHandle): Input {
     let e = this.entries.get(assetId);
     if (!e) {
-      const source = handle.kind === "blob" ? new BlobSource(handle.blob) : handle.kind === "path" ? new FilePathSource(handle.path) : new UrlSource(handle.url);
+      const source =
+        handle.kind === "blob"
+          ? new BlobSource(handle.blob)
+          : handle.kind === "path"
+            ? new FilePathSource(handle.path)
+            : new UrlSource(handle.url);
       e = { input: new Input({ source, formats: ALL_FORMATS }), refs: 0 };
       this.entries.set(assetId, e);
     }
@@ -28,7 +36,9 @@ export class MediabunnyInputs {
     }
   }
 
-  get openCount(): number { return this.entries.size; }
+  get openCount(): number {
+    return this.entries.size;
+  }
 
   dispose(): void {
     for (const e of this.entries.values()) e.input.dispose();

@@ -34,7 +34,18 @@ export default function Video({ title }: z.infer<typeof schema>) {
       </Track>
 
       <Track id="overlays" name="Overlays">
-        <Title id="lower" anchor="start" offset={0.5} duration={4} size={72} weight={700} align="left" valign="bottom" transform={{ position: { x: 120, y: -140 } }} animation={{ preset: "slide-left", in: 0.3, out: 0.3 }}>
+        <Title
+          id="lower"
+          anchor="start"
+          offset={0.5}
+          duration={4}
+          size={72}
+          weight={700}
+          align="left"
+          valign="bottom"
+          transform={{ position: { x: 120, y: -140 } }}
+          animation={{ preset: "slide-left", in: 0.3, out: 0.3 }}
+        >
           {title}
         </Title>
       </Track>

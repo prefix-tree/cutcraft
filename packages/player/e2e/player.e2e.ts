@@ -49,7 +49,10 @@ test.describe("player", () => {
   test("seeks accurately to random times", async ({ page }) => {
     await open(page);
     let seed = 7;
-    const rnd = (): number => { seed = (seed * 48271) % 2147483647; return seed / 2147483647; };
+    const rnd = (): number => {
+      seed = (seed * 48271) % 2147483647;
+      return seed / 2147483647;
+    };
     for (let i = 0; i < 20; i++) {
       const t = Math.round(rnd() * 5.4 * 30) / 30;
       if (t >= 3.5 && t < 4) continue;
@@ -63,7 +66,9 @@ test.describe("player", () => {
     await open(page);
     await page.evaluate(() => {
       window.__frameUpdates = 0;
-      window.__player!.addEventListener("frameupdate", () => { window.__frameUpdates = (window.__frameUpdates ?? 0) + 1; });
+      window.__player!.addEventListener("frameupdate", () => {
+        window.__frameUpdates = (window.__frameUpdates ?? 0) + 1;
+      });
     });
     const ctxBefore = await page.evaluate(() => window.__ctx.currentTime);
     await page.evaluate(() => window.__player!.play());
@@ -82,7 +87,9 @@ test.describe("player", () => {
 
   test("doubles playback at rate 2", async ({ page }) => {
     await open(page);
-    await page.evaluate(() => { window.__player!.playbackRate = 2; });
+    await page.evaluate(() => {
+      window.__player!.playbackRate = 2;
+    });
     await page.evaluate(() => window.__player!.play());
     await page.waitForTimeout(1000);
     await page.evaluate(() => window.__player!.pause());
@@ -93,11 +100,12 @@ test.describe("player", () => {
 
   test("crossfades between clips", async ({ page }) => {
     await open(page);
-    const pixel = async () => page.evaluate(() => {
-      const ctx = (document.querySelector("canvas[data-el='composition']") as HTMLCanvasElement).getContext("2d")!;
-      const d = ctx.getImageData(320, 200, 1, 1).data;
-      return [d[0]!, d[1]!, d[2]!];
-    });
+    const pixel = async () =>
+      page.evaluate(() => {
+        const ctx = (document.querySelector("canvas[data-el='composition']") as HTMLCanvasElement).getContext("2d")!;
+        const d = ctx.getImageData(320, 200, 1, 1).data;
+        return [d[0]!, d[1]!, d[2]!];
+      });
     await seek(page, 5.9);
     const red = await pixel();
     expect(red[0]).toBeGreaterThan(200);
@@ -108,7 +116,10 @@ test.describe("player", () => {
     const mid = await pixel();
     for (let i = 0; i < 3; i++) {
       const blend = (red[i]! + blue[i]!) / 2;
-      expect(Math.abs(mid[i]! - blend), `channel ${i}: red=${red[i]} blue=${blue[i]} mid=${mid[i]}`).toBeLessThanOrEqual(24);
+      expect(
+        Math.abs(mid[i]! - blend),
+        `channel ${i}: red=${red[i]} blue=${blue[i]} mid=${mid[i]}`,
+      ).toBeLessThanOrEqual(24);
     }
   });
 
@@ -140,14 +151,18 @@ test.describe("player", () => {
     expect(duration).toBeCloseTo(7);
     await page.evaluate(() => {
       window.__ended = 0;
-      window.__player!.addEventListener("ended", () => { window.__ended = (window.__ended ?? 0) + 1; });
+      window.__player!.addEventListener("ended", () => {
+        window.__ended = (window.__ended ?? 0) + 1;
+      });
     });
     await seek(page, duration - 0.2);
     await page.evaluate(() => window.__player!.play());
     await page.waitForTimeout(1000);
     expect(await page.evaluate(() => window.__ended)).toBe(1);
     expect(await page.evaluate(() => window.__player!.isPlaying())).toBe(false);
-    await page.evaluate(() => { window.__player!.loop = true; });
+    await page.evaluate(() => {
+      window.__player!.loop = true;
+    });
     await seek(page, duration - 0.2);
     await page.evaluate(() => window.__player!.play());
     await page.waitForTimeout(1000);
@@ -160,10 +175,11 @@ test.describe("player", () => {
     const pageErrors: string[] = [];
     page.on("pageerror", (e) => pageErrors.push(String(e)));
     await open(page);
-    const snap = () => page.evaluate(async () => {
-      await window.__player!.renderFrame(2.5);
-      return (document.querySelector("canvas[data-el='composition']") as HTMLCanvasElement).toDataURL();
-    });
+    const snap = () =>
+      page.evaluate(async () => {
+        await window.__player!.renderFrame(2.5);
+        return (document.querySelector("canvas[data-el='composition']") as HTMLCanvasElement).toDataURL();
+      });
     const first = await snap();
     await seek(page, 0.4);
     const second = await snap();
@@ -187,7 +203,12 @@ test.describe("player", () => {
         }
         return n;
       };
-      return { width: sheet.width, height: sheet.height, cells: [read(0, 0), read(640, 0), read(0, 360)], time: window.__player!.getCurrentTime() };
+      return {
+        width: sheet.width,
+        height: sheet.height,
+        cells: [read(0, 0), read(640, 0), read(0, 360)],
+        time: window.__player!.getCurrentTime(),
+      };
     });
     expect([result.width, result.height]).toEqual([1280, 720]);
     expect(Math.abs(result.cells[0]! - 30)).toBeLessThanOrEqual(1);
@@ -201,14 +222,21 @@ test.describe("player", () => {
     await page.goto("/?comp=overlays");
     await page.waitForSelector("body[data-ready='1']");
     await seek(page, 0.5);
-    const canvasBlue = await page.evaluate(() => (document.querySelector("canvas[data-el='composition']") as HTMLCanvasElement).getContext("2d")!.getImageData(320, 180, 1, 1).data[2]!);
+    const canvasBlue = await page.evaluate(
+      () =>
+        (document.querySelector("canvas[data-el='composition']") as HTMLCanvasElement)
+          .getContext("2d")!
+          .getImageData(320, 180, 1, 1).data[2]!,
+    );
     // What the viewer sees: the canvas and the DOM above it, composited.
     const png = (await page.locator("[data-player]").screenshot()).toString("base64");
     const screenBlue = await page.evaluate(async (b64) => {
       const img = new Image();
       img.src = `data:image/png;base64,${b64}`;
       await img.decode();
-      const ctx = Object.assign(document.createElement("canvas"), { width: img.width, height: img.height }).getContext("2d")!;
+      const ctx = Object.assign(document.createElement("canvas"), { width: img.width, height: img.height }).getContext(
+        "2d",
+      )!;
       ctx.drawImage(img, 0, 0);
       return ctx.getImageData(320, 180, 1, 1).data[2]!;
     }, png);
@@ -220,13 +248,23 @@ test.describe("player", () => {
   test("blurs the footage behind itself and wipes to the next clip", async ({ page }) => {
     await page.goto("/?comp=transitions");
     await page.waitForSelector("body[data-ready='1']");
-    const pixel = (x: number, y: number) => page.evaluate(([x, y]) => Array.from((document.querySelector("canvas[data-el='composition']") as HTMLCanvasElement).getContext("2d")!.getImageData(x!, y!, 1, 1).data), [x, y]);
+    const pixel = (x: number, y: number) =>
+      page.evaluate(
+        ([x, y]) =>
+          Array.from(
+            (document.querySelector("canvas[data-el='composition']") as HTMLCanvasElement)
+              .getContext("2d")!
+              .getImageData(x!, y!, 1, 1).data,
+          ),
+        [x, y],
+      );
     await seek(page, 0.5);
     // The corner is outside the half-size footage: the blurred footage, not the black background.
     expect((await pixel(10, 10))[2]).toBeGreaterThan(150);
     await seek(page, 1.5);
     // Halfway through a left wipe the red image shows on the right half only.
-    const right = await pixel(600, 180), left = await pixel(40, 180);
+    const right = await pixel(600, 180),
+      left = await pixel(40, 180);
     expect(right[0]).toBeGreaterThan(200);
     expect(right[2]).toBeLessThan(60);
     expect(left[0]).toBeLessThan(60);
@@ -236,7 +274,11 @@ test.describe("player", () => {
   test("decodes h264 when the browser can", async ({ page }) => {
     test.skip(!existsSync(join(mediaDir, "bars.mp4")), "no bars.mp4");
     await page.goto("/");
-    const supported = await page.evaluate(async () => (await VideoDecoder.isConfigSupported({ codec: "avc1.42E01E", codedWidth: 640, codedHeight: 360 })).supported === true);
+    const supported = await page.evaluate(
+      async () =>
+        (await VideoDecoder.isConfigSupported({ codec: "avc1.42E01E", codedWidth: 640, codedHeight: 360 }))
+          .supported === true,
+    );
     test.skip(!supported, "no h264 decoder in this Chromium");
     await open(page, "bars.mp4");
     await seek(page, 2.5);

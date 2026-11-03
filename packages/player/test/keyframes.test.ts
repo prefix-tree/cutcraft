@@ -3,15 +3,33 @@ import { captureWarnings } from "@cutcraft/player";
 import { makeState, childrenOf } from "./helpers/state";
 
 const state = makeState({
-  tracks: [{ id: "main", items: [
-    { id: "c1", kind: "clip", source: { in: 0, out: 5, asset: "a" }, children: [
-      { id: "k1", kind: "keyframe", props: { property: "transform.opacity", at: 0, value: 0, easing: "easeOutCubic" } },
-      { id: "k2", kind: "keyframe", props: { property: "transform.opacity", at: 1, value: 1 } },
-      { id: "k3", kind: "keyframe", props: { property: "transform.opacity", at: 2, value: 0.5, easing: "linear" } },
-      { id: "k4", kind: "keyframe", props: { property: "path", at: 0, value: "M0 0" } },
-      { id: "k5", kind: "keyframe", props: { property: "path", at: 1, value: "M1 1" } },
-    ] },
-  ] }],
+  tracks: [
+    {
+      id: "main",
+      items: [
+        {
+          id: "c1",
+          kind: "clip",
+          source: { in: 0, out: 5, asset: "a" },
+          children: [
+            {
+              id: "k1",
+              kind: "keyframe",
+              props: { property: "transform.opacity", at: 0, value: 0, easing: "easeOutCubic" },
+            },
+            { id: "k2", kind: "keyframe", props: { property: "transform.opacity", at: 1, value: 1 } },
+            {
+              id: "k3",
+              kind: "keyframe",
+              props: { property: "transform.opacity", at: 2, value: 0.5, easing: "linear" },
+            },
+            { id: "k4", kind: "keyframe", props: { property: "path", at: 0, value: "M0 0" } },
+            { id: "k5", kind: "keyframe", props: { property: "path", at: 1, value: "M1 1" } },
+          ],
+        },
+      ],
+    },
+  ],
 });
 const kids = childrenOf(state, "c1");
 
@@ -28,10 +46,28 @@ describe("keyframedValue", () => {
   });
 
   it("eases with a spring, overshooting before it lands", () => {
-    const s = makeState({ tracks: [{ id: "main", items: [{ id: "c", kind: "clip", source: { in: 0, out: 5, asset: "a" }, children: [
-      { id: "a", kind: "keyframe", props: { property: "transform.scale.x", at: 0, value: 0, easing: "spring" } },
-      { id: "b", kind: "keyframe", props: { property: "transform.scale.x", at: 1, value: 2 } },
-    ] }] }] });
+    const s = makeState({
+      tracks: [
+        {
+          id: "main",
+          items: [
+            {
+              id: "c",
+              kind: "clip",
+              source: { in: 0, out: 5, asset: "a" },
+              children: [
+                {
+                  id: "a",
+                  kind: "keyframe",
+                  props: { property: "transform.scale.x", at: 0, value: 0, easing: "spring" },
+                },
+                { id: "b", kind: "keyframe", props: { property: "transform.scale.x", at: 1, value: 2 } },
+              ],
+            },
+          ],
+        },
+      ],
+    });
     const k = childrenOf(s, "c");
     expect(keyframedValue(k, "transform.scale.x", 0.3, 0)).toBeGreaterThan(2);
     expect(keyframedValue(k, "transform.scale.x", 1, 0)).toBe(2);

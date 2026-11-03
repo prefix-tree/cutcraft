@@ -8,12 +8,16 @@ import type { Rule } from "./index";
 const OFF: readonly Json[] = [false, 0, "none", "all"];
 
 /** `prop` or `prop.field`: the written literal, or undefined when it is absent or not a literal. */
-function literalAt(site: ElementSite, path: string): { value: Json | undefined; range: ElementSite["range"]; prop: string } | null {
+function literalAt(
+  site: ElementSite,
+  path: string,
+): { value: Json | undefined; range: ElementSite["range"]; prop: string } | null {
   const [prop, ...fields] = path.split(".") as [string, ...string[]];
   const p = site.props.get(prop);
   if (!p) return null;
   let value: Json | undefined = p.literal;
-  for (const f of fields) value = value !== null && typeof value === "object" && !Array.isArray(value) ? value[f] : undefined;
+  for (const f of fields)
+    value = value !== null && typeof value === "object" && !Array.isArray(value) ? value[f] : undefined;
   return { value, range: p.range, prop };
 }
 
@@ -23,7 +27,14 @@ export const notRendered: Rule = {
   check: (index) => {
     const out: Diagnostic[] = [];
     const warn = (site: ElementSite, what: string, reason: string, range = site.range, prop?: string) =>
-      out.push({ rule: "not-rendered", severity: "warning", message: `"${site.id}" <${site.name}>${what ? ` ${what}` : ""} ${reason}`, range, id: site.id, ...(prop ? { prop } : {}) });
+      out.push({
+        rule: "not-rendered",
+        severity: "warning",
+        message: `"${site.id}" <${site.name}>${what ? ` ${what}` : ""} ${reason}`,
+        range,
+        id: site.id,
+        ...(prop ? { prop } : {}),
+      });
     const masks = new Map<string, number>();
     for (const site of index.elements.values()) {
       for (const v of RENDERED_VALUES) {
@@ -36,7 +47,10 @@ export const notRendered: Rule = {
       for (const n of NOT_RENDERED) {
         if (n.kind !== "*" && n.kind !== site.kind) continue;
         if (n.parent && index.elements.get(site.parent ?? "")?.kind !== n.parent) continue;
-        if (!n.prop) { warn(site, "", n.reason); continue; }
+        if (!n.prop) {
+          warn(site, "", n.reason);
+          continue;
+        }
         const at = literalAt(site, n.prop);
         if (!at || (n.prop.includes(".") && at.value === undefined)) continue;
         if (n.value !== undefined ? at.value !== n.value : OFF.includes(at.value as Json)) continue;
@@ -46,7 +60,8 @@ export const notRendered: Rule = {
         const parent = index.elements.get(site.parent);
         const count = (masks.get(site.parent) ?? 0) + 1;
         masks.set(site.parent, count);
-        if (parent && !(MASKED_KINDS as readonly string[]).includes(parent.kind)) warn(site, `on ${parent.kind} "${parent.id}"`, MASK_NOT_RENDERED.kind);
+        if (parent && !(MASKED_KINDS as readonly string[]).includes(parent.kind))
+          warn(site, `on ${parent.kind} "${parent.id}"`, MASK_NOT_RENDERED.kind);
         else if (count > 1) warn(site, "", MASK_NOT_RENDERED.second);
       }
     }

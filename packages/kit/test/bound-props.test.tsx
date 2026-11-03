@@ -39,7 +39,9 @@ const mod = {
         <Clip id="tail" src="asset:city" in={1} out={closeOut} />
       </Track>
       <Track id="overlays">
-        <Title id="t" anchor="close" offset={0.5} duration={1}>{label}</Title>
+        <Title id="t" anchor="close" offset={0.5} duration={1}>
+          {label}
+        </Title>
       </Track>
     </Composition>
   ),
@@ -83,8 +85,8 @@ describe("props bound to schema keys", () => {
     expect(result.skipped).toEqual([]);
     expect(result.edits).toHaveLength(1);
     expect(result.edits[0]).toMatchObject({ kind: "defaults", id: "close" });
-    expect(result.text).toContain("export const defaults = { closeOut: 7, label: \"Hi\" };");
-    expect(result.text).toContain('out={closeOut}');
+    expect(result.text).toContain('export const defaults = { closeOut: 7, label: "Hi" };');
+    expect(result.text).toContain("out={closeOut}");
     expect(result.text.split("\n").filter((line, i) => line !== text.split("\n")[i])).toHaveLength(1);
   });
 
@@ -101,7 +103,7 @@ describe("props bound to schema keys", () => {
   it("does not bind inside helpers or outside the default export", () => {
     const helperText = `${text.replace(
       '<Clip id="tail" src="asset:city" in={1} out={closeOut} />',
-      '<Tail />',
+      "<Tail />",
     )}\nfunction Tail() { const closeOut = 3; return <Clip id="tail" src="asset:city" in={0} duration={closeOut} />; }\n`;
     const i2 = buildSourceIndex(helperText);
     expect(i2.elements.get("tail")!.boundProps).toEqual({});
@@ -110,7 +112,10 @@ describe("props bound to schema keys", () => {
   });
 
   it("binds through a props object too", () => {
-    const propsText = text.replace("({ closeOut, label }: z.infer<typeof schema>)", "(props: z.infer<typeof schema>)").replaceAll("out={closeOut}", "out={props.closeOut}").replace("{label}", "{props.label}");
+    const propsText = text
+      .replace("({ closeOut, label }: z.infer<typeof schema>)", "(props: z.infer<typeof schema>)")
+      .replaceAll("out={closeOut}", "out={props.closeOut}")
+      .replace("{label}", "{props.label}");
     const i3 = buildSourceIndex(propsText);
     expect(i3.elements.get("close")!.boundProps).toEqual({ out: "closeOut" });
     expect(i3.elements.get("tail")!.boundProps).toEqual({ out: "closeOut" });

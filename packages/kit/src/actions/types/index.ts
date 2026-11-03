@@ -9,7 +9,13 @@ type Id = string;
 type Props = Readonly<Record<string, Json | undefined>>;
 
 export interface CompositionActions {
-  "composition/updateSettings": { fps?: number; width?: number; height?: number; sampleRate?: number; channels?: number };
+  "composition/updateSettings": {
+    fps?: number;
+    width?: number;
+    height?: number;
+    sampleRate?: number;
+    channels?: number;
+  };
   "composition/setBackground": { mode?: "color" | "blur"; color?: string };
   /** The tweaks panel: rewrites the file's `defaults` literal. */
   "composition/setProps": { defaults: Readonly<Record<string, Json>> };
@@ -35,13 +41,35 @@ export interface TrackActions {
 }
 
 export interface ClipActions {
-  "clip/add": { id: Id; trackId: Id; src: string; place: PlacementSpec; in?: TimeRef; out?: TimeRef; duration?: number };
+  "clip/add": {
+    id: Id;
+    trackId: Id;
+    src: string;
+    place: PlacementSpec;
+    in?: TimeRef;
+    out?: TimeRef;
+    duration?: number;
+  };
   /** An <Audio> (sound only: music, a voice-over), placed like a clip; `duration: "fill"` runs to the composition's end. */
-  "audio/add": { id: Id; trackId: Id; src: string; place: PlacementSpec; in?: TimeRef; out?: TimeRef; duration?: number | "fill" };
+  "audio/add": {
+    id: Id;
+    trackId: Id;
+    src: string;
+    place: PlacementSpec;
+    in?: TimeRef;
+    out?: TimeRef;
+    duration?: number | "fill";
+  };
   "clip/remove": { id: Id };
   "clip/restore": { id: Id; node: NodeSpec; trackId: Id; place: PlacementSpec };
   "clip/rippleDelete": { id: Id };
-  "clip/rippleRestore": { id: Id; node: NodeSpec; trackId: Id; place: PlacementSpec; affected: readonly { id: Id; start: number }[] };
+  "clip/rippleRestore": {
+    id: Id;
+    node: NodeSpec;
+    trackId: Id;
+    place: PlacementSpec;
+    affected: readonly { id: Id; start: number }[];
+  };
   "clip/move": { id: Id; trackId?: Id; place: PlacementSpec };
   "clip/trim": { id: Id; edge: "in" | "out"; value: TimeRef };
   "clip/split": { id: Id; at: number; newId: Id };
@@ -112,10 +140,21 @@ export interface KeyframeActions {
 }
 
 export interface TransitionActions {
-  "transition/add": { transitionId: Id; between: readonly [Id, Id] | { on: Id; edge: "in" | "out" }; type: TransitionType; duration: number; params?: Readonly<Record<string, Json>> };
+  "transition/add": {
+    transitionId: Id;
+    between: readonly [Id, Id] | { on: Id; edge: "in" | "out" };
+    type: TransitionType;
+    duration: number;
+    params?: Readonly<Record<string, Json>>;
+  };
   "transition/remove": { transitionId: Id };
   "transition/restore": { transitionId: Id; node: NodeSpec; trackId: Id; after: Id | null };
-  "transition/update": { transitionId: Id; type?: TransitionType; duration?: number; params?: Readonly<Record<string, Json>> };
+  "transition/update": {
+    transitionId: Id;
+    type?: TransitionType;
+    duration?: number;
+    params?: Readonly<Record<string, Json>>;
+  };
 }
 
 export interface AudioActions {
@@ -126,7 +165,16 @@ export interface AudioActions {
 }
 
 interface Overlay {
-  create: { id: Id; kind: string; trackId: Id; place: PlacementSpec; props: Props; text?: string; children?: readonly NodeSpec[]; after?: Id | null };
+  create: {
+    id: Id;
+    kind: string;
+    trackId: Id;
+    place: PlacementSpec;
+    props: Props;
+    text?: string;
+    children?: readonly NodeSpec[];
+    after?: Id | null;
+  };
   update: { id: Id; props: Props };
   remove: { id: Id };
 }
@@ -208,9 +256,22 @@ export interface SourceActions {
   "source/setProps": { id: Id; props: Readonly<Record<string, Json | undefined>> };
 }
 
-export type ActionMap = CompositionActions & TrackActions & ClipActions & SpeedActions & TransformActions & EffectActions
-  & KeyframeActions & TransitionActions & AudioActions & OverlayActions & CaptionActions & MarkerActions & MaskActions
-  & MulticamActions & LayerActions & SourceActions;
+export type ActionMap = CompositionActions &
+  TrackActions &
+  ClipActions &
+  SpeedActions &
+  TransformActions &
+  EffectActions &
+  KeyframeActions &
+  TransitionActions &
+  AudioActions &
+  OverlayActions &
+  CaptionActions &
+  MarkerActions &
+  MaskActions &
+  MulticamActions &
+  LayerActions &
+  SourceActions;
 
 export type ActionType = keyof ActionMap;
 
@@ -227,14 +288,51 @@ export type Namespace = ActionType extends `${infer N}/${string}` ? N : never;
 
 /** Rapid repeats of these on the same target collapse into one undo step (OpenReel's rule). */
 export const AUTO_GROUP_TYPES: ReadonlySet<ActionType> = new Set<ActionType>([
-  "transform/update", "effect/update", "audioEffect/update", "audio/setVolume", "audio/setFade", "audio/setDuck",
-  "transition/update", "clip/setBlend", "colorGrade/set", "clip/move", "clip/trim", "clip/slip", "clip/slide", "clip/roll",
-  "clip/setSpeed", "clip/setChromaKey", "clip/setStabilization", "keyframe/move", "keyframe/update",
-  "composition/updateSettings", "composition/setBackground", "theme/setToken", "text/update", "shape/update", "svg/update", "sticker/update", "graphic/update",
-  "mask/update", "layer/setTiming", "layer/setTransform", "layer/setProps",
+  "transform/update",
+  "effect/update",
+  "audioEffect/update",
+  "audio/setVolume",
+  "audio/setFade",
+  "audio/setDuck",
+  "transition/update",
+  "clip/setBlend",
+  "colorGrade/set",
+  "clip/move",
+  "clip/trim",
+  "clip/slip",
+  "clip/slide",
+  "clip/roll",
+  "clip/setSpeed",
+  "clip/setChromaKey",
+  "clip/setStabilization",
+  "keyframe/move",
+  "keyframe/update",
+  "composition/updateSettings",
+  "composition/setBackground",
+  "theme/setToken",
+  "text/update",
+  "shape/update",
+  "svg/update",
+  "sticker/update",
+  "graphic/update",
+  "mask/update",
+  "layer/setTiming",
+  "layer/setTransform",
+  "layer/setProps",
 ]);
 
-export const TARGET_PARAM_KEYS = ["id", "leftId", "trackId", "transitionId", "childId", "keyId", "captionId", "captionsId", "cutId", "markerId"] as const;
+export const TARGET_PARAM_KEYS = [
+  "id",
+  "leftId",
+  "trackId",
+  "transitionId",
+  "childId",
+  "keyId",
+  "captionId",
+  "captionsId",
+  "cutId",
+  "markerId",
+] as const;
 
 export function targetIdOf(action: ActionInput): string | null {
   const params = action.params as Record<string, unknown>;

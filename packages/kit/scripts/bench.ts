@@ -29,25 +29,54 @@ function report(name: string, tree: CollectedTree, trimId: string, transformId: 
   rows.push(["resolve, memo defeated", bench(100, () => resolve({ ...tree }, manifest))]);
   const trimmer = new Executor({ tree, manifest, now: () => 0 });
   const base = trimmer.state().items.get(trimId)!.source!;
-  rows.push(["clip/trim out (edge drag)", bench(240, (i) => {
-    const r = trimmer.execute({ type: "clip/trim", params: { id: trimId, edge: "out", value: base.in + 0.5 + (i % 50) / 100 } });
-    if (!r.ok) throw new Error(JSON.stringify(r.errors));
-  })]);
+  rows.push([
+    "clip/trim out (edge drag)",
+    bench(240, (i) => {
+      const r = trimmer.execute({
+        type: "clip/trim",
+        params: { id: trimId, edge: "out", value: base.in + 0.5 + (i % 50) / 100 },
+      });
+      if (!r.ok) throw new Error(JSON.stringify(r.errors));
+    }),
+  ]);
   const mover = new Executor({ tree, manifest, now: () => 0 });
-  rows.push(["transform/update (position drag)", bench(240, (i) => {
-    const r = mover.execute({ type: "transform/update", params: { id: transformId, transform: { position: { x: i % 50, y: 0 } } } });
-    if (!r.ok) throw new Error(JSON.stringify(r.errors));
-  })]);
+  rows.push([
+    "transform/update (position drag)",
+    bench(240, (i) => {
+      const r = mover.execute({
+        type: "transform/update",
+        params: { id: transformId, transform: { position: { x: i % 50, y: 0 } } },
+      });
+      if (!r.ok) throw new Error(JSON.stringify(r.errors));
+    }),
+  ]);
   console.log(`\n${name}: ${nodes} nodes`);
-  for (const [label, us] of rows) console.log(`  ${label.padEnd(36)} ${us.toFixed(0).padStart(7)} µs/step  ${(us / nodes).toFixed(2).padStart(6)} µs/node`);
-  for (const [step, us] of rows) results.push({ fixture: name, nodes, step, usPerStep: Math.round(us), usPerNode: Math.round((us / nodes) * 100) / 100 });
+  for (const [label, us] of rows)
+    console.log(
+      `  ${label.padEnd(36)} ${us.toFixed(0).padStart(7)} µs/step  ${(us / nodes).toFixed(2).padStart(6)} µs/node`,
+    );
+  for (const [step, us] of rows)
+    results.push({
+      fixture: name,
+      nodes,
+      step,
+      usPerStep: Math.round(us),
+      usPerNode: Math.round((us / nodes) * 100) / 100,
+    });
 }
 
-const sampleTree = collectModule(sample, {}, { index: buildSourceIndex(readFileSync(join(fixtures, "sample.tsx"), "utf8")) });
+const sampleTree = collectModule(
+  sample,
+  {},
+  { index: buildSourceIndex(readFileSync(join(fixtures, "sample.tsx"), "utf8")) },
+);
 report("sample fixture", sampleTree, "c2", "c2");
 report("large(500)", collectModule(buildLarge(500)), "c3", "c3");
 
 const json = process.argv.indexOf("--json");
 if (json >= 0 && process.argv[json + 1]) {
-  writeFileSync(process.argv[json + 1]!, `${JSON.stringify({ machine: `${cpus()[0]?.model ?? "?"}, ${cpus().length} cores`, node: process.version, results }, null, 2)}\n`);
+  writeFileSync(
+    process.argv[json + 1]!,
+    `${JSON.stringify({ machine: `${cpus()[0]?.model ?? "?"}, ${cpus().length} cores`, node: process.version, results }, null, 2)}\n`,
+  );
 }

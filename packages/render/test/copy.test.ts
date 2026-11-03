@@ -10,7 +10,7 @@ import { decodeFrames, decodesClean, probe, readStrip } from "./helpers/output";
 const scratch = join(import.meta.dirname, ".tmp", "copy");
 let dir = "";
 
-function source(body: string, comp = 'fps={30} width={640} height={360}'): string {
+function source(body: string, comp = "fps={30} width={640} height={360}"): string {
   return `import { Clip, Composition, Title, Track } from "@cutcraft/kit";
 export const manifest = ${JSON.stringify(manifest)};
 export default function Video() {
@@ -29,18 +29,39 @@ async function render(body: string, extra: Record<string, unknown> = {}, comp?: 
   writeFileSync(file, source(body, comp));
   const loaded = await loadVideo(file);
   const out = join(dir, `out${n}.webm`);
-  const result = await renderVideo({ state: loaded.state, media: directoryResolver(mediaDir, loaded.manifest), interiors: loaded.interiors, out, keyFrameInterval: 1, bitrate: 4_000_000, silent: true, ...extra });
+  const result = await renderVideo({
+    state: loaded.state,
+    media: directoryResolver(mediaDir, loaded.manifest),
+    interiors: loaded.interiors,
+    out,
+    keyFrameInterval: 1,
+    bitrate: 4_000_000,
+    silent: true,
+    ...extra,
+  });
   return { result, out };
 }
 
 function packets(file: string): { size: number; key: boolean }[] {
-  const text = execFileSync("ffprobe", ["-v", "error", "-select_streams", "v:0", "-show_entries", "packet=size,flags", "-of", "csv=p=0", file], { encoding: "utf8" });
-  return text.trim().split("\n").map((l) => { const [size, flags] = l.split(","); return { size: Number(size), key: (flags ?? "").includes("K") }; });
+  const text = execFileSync(
+    "ffprobe",
+    ["-v", "error", "-select_streams", "v:0", "-show_entries", "packet=size,flags", "-of", "csv=p=0", file],
+    { encoding: "utf8" },
+  );
+  return text
+    .trim()
+    .split("\n")
+    .map((l) => {
+      const [size, flags] = l.split(",");
+      return { size: Number(size), key: (flags ?? "").includes("K") };
+    });
 }
 
 async function strips(file: string): Promise<number[]> {
   const out: number[] = [];
-  await decodeFrames(file, (frame) => { out.push(readStrip(frame)); });
+  await decodeFrames(file, (frame) => {
+    out.push(readStrip(frame));
+  });
   return out;
 }
 
@@ -78,7 +99,10 @@ describe("smart copy", () => {
   });
 
   it("copies around a title: only the stretches nothing is drawn over", async () => {
-    const { result, out } = await render(`<Track id="main"><Clip id="c" src="asset:bars" in={2.2} out={6.1} /></Track><Track id="o"><Title id="t" anchor="c" offset={1} duration={1} size={30}>Hi</Title></Track>`, { smartCopy: true });
+    const { result, out } = await render(
+      `<Track id="main"><Clip id="c" src="asset:bars" in={2.2} out={6.1} /></Track><Track id="o"><Title id="t" anchor="c" offset={1} duration={1} size={30}>Hi</Title></Track>`,
+      { smartCopy: true },
+    );
     // The title covers output frames 30-59. Source keyframes at 150 and 180 bound a copy of output frames 84-113.
     expect(result.copiedFrames).toBe(30);
     expect(probe(out).frames).toBe(117);
@@ -87,10 +111,16 @@ describe("smart copy", () => {
   });
 
   it("joins several cuts, copying inside each", async () => {
-    const { result, out } = await render('<Track id="main"><Clip id="a" src="asset:bars" in={1} out={3} /><Clip id="b" src="asset:bars" in={5.5} out={8} /></Track>', { smartCopy: true });
+    const { result, out } = await render(
+      '<Track id="main"><Clip id="a" src="asset:bars" in={1} out={3} /><Clip id="b" src="asset:bars" in={5.5} out={8} /></Track>',
+      { smartCopy: true },
+    );
     // a: source 30-89 is two whole groups, copied. b: 165-239 has keyframes at 180 and 210: copy 180-209, 210-239 ends at the clip's end.
     expect(result.copiedFrames).toBe(60 + 60);
-    expect(await strips(out)).toEqual([...Array.from({ length: 60 }, (_, k) => 30 + k), ...Array.from({ length: 75 }, (_, k) => 165 + k)]);
+    expect(await strips(out)).toEqual([
+      ...Array.from({ length: 60 }, (_, k) => 30 + k),
+      ...Array.from({ length: 75 }, (_, k) => 165 + k),
+    ]);
     decodesClean(out);
   });
 
@@ -106,8 +136,12 @@ describe("smart copy", () => {
 
   it("does not copy a source of another frame rate or size", async () => {
     const body = '<Track id="main"><Clip id="c" src="asset:bars" in={1} out={4} /></Track>';
-    expect((await render(body, { smartCopy: true, to: 1 }, 'fps={60} width={640} height={360}')).result.copiedFrames).toBe(0);
-    expect((await render(body, { smartCopy: true, to: 1 }, 'fps={30} width={320} height={180}')).result.copiedFrames).toBe(0);
+    expect(
+      (await render(body, { smartCopy: true, to: 1 }, "fps={60} width={640} height={360}")).result.copiedFrames,
+    ).toBe(0);
+    expect(
+      (await render(body, { smartCopy: true, to: 1 }, "fps={30} width={320} height={180}")).result.copiedFrames,
+    ).toBe(0);
   });
 
   it("does not copy into a codec the source is not in", async () => {
@@ -116,13 +150,30 @@ describe("smart copy", () => {
 
   it("works together with workers", async () => {
     const file = join(dir, "par.tsx");
-    writeFileSync(file, source('<Track id="main"><Clip id="a" src="asset:bars" in={1} out={3} /><Clip id="b" src="asset:bars" in={5.5} out={8} /></Track><Track id="o"><Title id="t" anchor="b" offset={0.5} duration={1} size={30}>Hi</Title></Track>'));
+    writeFileSync(
+      file,
+      source(
+        '<Track id="main"><Clip id="a" src="asset:bars" in={1} out={3} /><Clip id="b" src="asset:bars" in={5.5} out={8} /></Track><Track id="o"><Title id="t" anchor="b" offset={0.5} duration={1} size={30}>Hi</Title></Track>',
+      ),
+    );
     const loaded = await loadVideo(file);
     const out = join(dir, "par-copy.webm");
-    const result = await renderVideo({ state: loaded.state, media: directoryResolver(mediaDir, loaded.manifest), interiors: loaded.interiors, out, keyFrameInterval: 1, bitrate: 4_000_000, silent: true, smartCopy: true, parallel: { file, mediaDir, workers: 2, segmentFrames: 30 } });
+    const result = await renderVideo({
+      state: loaded.state,
+      media: directoryResolver(mediaDir, loaded.manifest),
+      interiors: loaded.interiors,
+      out,
+      keyFrameInterval: 1,
+      bitrate: 4_000_000,
+      silent: true,
+      smartCopy: true,
+      parallel: { file, mediaDir, workers: 2, segmentFrames: 30 },
+    });
     expect(result.copiedFrames).toBeGreaterThan(0);
-    expect(await strips(out)).toEqual([...Array.from({ length: 60 }, (_, k) => 30 + k), ...Array.from({ length: 75 }, (_, k) => 165 + k)]);
+    expect(await strips(out)).toEqual([
+      ...Array.from({ length: 60 }, (_, k) => 30 + k),
+      ...Array.from({ length: 75 }, (_, k) => 165 + k),
+    ]);
     decodesClean(out);
   });
 });
-

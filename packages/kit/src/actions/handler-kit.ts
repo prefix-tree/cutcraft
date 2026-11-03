@@ -3,7 +3,17 @@ import type { Json, PatchLog } from "../patches/types";
 import type { Placement as ResolvedPlacement, ResolvedState } from "../resolve/resolve";
 import { INTERIOR_PREFIX, type CollectedNode } from "../resolve/tree";
 import { registerHandler, type ActionHandler, type ApplyContext } from "./registry";
-import { invalid, nodeOfSpec, ok, type Action, type ActionError, type ActionType, type NodeSpec, type PlacementSpec, type ValidationResult } from "./types";
+import {
+  invalid,
+  nodeOfSpec,
+  ok,
+  type Action,
+  type ActionError,
+  type ActionType,
+  type NodeSpec,
+  type PlacementSpec,
+  type ValidationResult,
+} from "./types";
 
 export class NotImplemented extends Error {
   constructor(type: string) {
@@ -31,17 +41,25 @@ export function requireNotOpaque(item: ResolvedPlacement): ActionError | null {
 }
 
 export function requireLiteralProp(item: ResolvedPlacement, prop: string): ActionError | null {
-  return item.lockedProps.includes(prop) ? { code: "LOCKED_PROP", message: `"${item.id}.${prop}" is an expression; bake it first`, path: prop } : null;
+  return item.lockedProps.includes(prop)
+    ? { code: "LOCKED_PROP", message: `"${item.id}.${prop}" is an expression; bake it first`, path: prop }
+    : null;
 }
 
-export function requireLayout(state: ResolvedState, item: ResolvedPlacement, layout: "sequence" | "free"): ActionError | null {
+export function requireLayout(
+  state: ResolvedState,
+  item: ResolvedPlacement,
+  layout: "sequence" | "free",
+): ActionError | null {
   const track = state.tracks.find((t) => t.id === item.track);
   if (!track || track.layout !== layout) return { code: "UNSUPPORTED_ON_LAYOUT", message: `needs a ${layout} track` };
   return null;
 }
 
 export function collectErrors(...errors: (ActionError | null | ResolvedPlacement | undefined)[]): ValidationResult {
-  const list = errors.filter((e): e is ActionError => Boolean(e) && "code" in (e as object) && "message" in (e as object));
+  const list = errors.filter(
+    (e): e is ActionError => Boolean(e) && "code" in (e as object) && "message" in (e as object),
+  );
   return invalid(...list);
 }
 
@@ -96,7 +114,9 @@ export function placementOf(state: ResolvedState, id: string): PlacementSpec {
   const node = rawNode(state, id);
   if (!node) return { after: null };
   if (typeof node.props.anchor === "string") {
-    return typeof node.props.offset === "number" ? { anchor: node.props.anchor, offset: node.props.offset } : { anchor: node.props.anchor };
+    return typeof node.props.offset === "number"
+      ? { anchor: node.props.anchor, offset: node.props.offset }
+      : { anchor: node.props.anchor };
   }
   if (typeof node.props.start === "number") return { start: node.props.start };
   return { after: siblingAfter(state, id) };
@@ -117,8 +137,16 @@ export function insertNode(log: PatchLog, parent: string, after: string | null, 
   log.append({ op: "insert", id: spec.id, parent, after, node: nodeOfSpec(spec, parent) });
 }
 
-export function placeNode(log: PatchLog, state: ResolvedState, parent: string, place: PlacementSpec, spec: NodeSpec, afterOverride?: string | null): void {
-  const after = afterOverride !== undefined ? afterOverride : "after" in place ? place.after : lastChildId(state, parent);
+export function placeNode(
+  log: PatchLog,
+  state: ResolvedState,
+  parent: string,
+  place: PlacementSpec,
+  spec: NodeSpec,
+  afterOverride?: string | null,
+): void {
+  const after =
+    afterOverride !== undefined ? afterOverride : "after" in place ? place.after : lastChildId(state, parent);
   const props = { ...spec.props, ...placementProps(place) };
   const cleaned = Object.fromEntries(Object.entries(props).filter(([, v]) => v !== undefined));
   insertNode(log, parent, after, { ...spec, props: cleaned });
@@ -191,11 +219,17 @@ export function define<T extends ActionType>(handler: ActionHandler<T>): ActionH
   return handler;
 }
 
-export function stub<T extends ActionType>(type: T, validate: ActionHandler<T>["validate"], invert: ActionHandler<T>["invert"]): ActionHandler<T> {
+export function stub<T extends ActionType>(
+  type: T,
+  validate: ActionHandler<T>["validate"],
+  invert: ActionHandler<T>["invert"],
+): ActionHandler<T> {
   return define<T>({
     type,
     validate,
-    apply: () => { throw new NotImplemented(type); },
+    apply: () => {
+      throw new NotImplemented(type);
+    },
     invert,
     fold: () => [],
   });

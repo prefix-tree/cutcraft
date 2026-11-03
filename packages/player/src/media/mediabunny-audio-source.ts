@@ -22,7 +22,12 @@ export class MediabunnyAudioSource implements AudioSource {
     const tracks = await this.input.getAudioTracks();
     const track = tracks[this.trackIndex] ?? (await this.input.getPrimaryAudioTrack());
     if (!track) return { sampleRate: 0, channels: 0, duration: 0, decodable: false };
-    const [decodable, sampleRate, channels, duration] = await Promise.all([track.canDecode(), track.getSampleRate(), track.getNumberOfChannels(), track.computeDuration()]);
+    const [decodable, sampleRate, channels, duration] = await Promise.all([
+      track.canDecode(),
+      track.getSampleRate(),
+      track.getNumberOfChannels(),
+      track.computeDuration(),
+    ]);
     this.sampleRate = sampleRate;
     this.channels = channels;
     this.sink = new AudioBufferSink(track);

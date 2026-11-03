@@ -46,7 +46,10 @@ export class Compositor {
   private readonly nested = new Map<string, { compositor: Compositor; canvas: AnyCanvas }>();
   private disposed = false;
 
-  constructor(state: ResolvedState, private readonly deps: CompositorDeps) {
+  constructor(
+    state: ResolvedState,
+    private readonly deps: CompositorDeps,
+  ) {
     this.state = state;
     this.pool = new DecoderPool(deps.sources);
     this.painter = new CanvasPainter(state.composition.width, state.composition.height, deps.createCanvas);
@@ -57,10 +60,18 @@ export class Compositor {
     this.lastFrame = -1;
   }
 
-  get renderedFrame(): number { return this.lastFrame; }
-  get attachedContext(): Ctx2D | null { return this.ctx; }
-  get lastPlanBuilt(): FramePlan | null { return this.lastPlan; }
-  get currentState(): ResolvedState { return this.state; }
+  get renderedFrame(): number {
+    return this.lastFrame;
+  }
+  get attachedContext(): Ctx2D | null {
+    return this.ctx;
+  }
+  get lastPlanBuilt(): FramePlan | null {
+    return this.lastPlan;
+  }
+  get currentState(): ResolvedState {
+    return this.state;
+  }
 
   setState(state: ResolvedState): void {
     this.state = state;
@@ -82,7 +93,9 @@ export class Compositor {
   /** Jump every decoder (nested ones too) to `t`. */
   seek(t: number): Promise<void> {
     const plan = this.plan(t);
-    const nested = plan.ops.filter((op) => op.nested).map((op) => this.nested.get(op.id)?.compositor.seek(op.nested!.time) ?? Promise.resolve());
+    const nested = plan.ops
+      .filter((op) => op.nested)
+      .map((op) => this.nested.get(op.id)?.compositor.seek(op.nested!.time) ?? Promise.resolve());
     return Promise.all([this.pool.seekAll(t), ...nested]).then(() => undefined);
   }
 
@@ -103,20 +116,28 @@ export class Compositor {
       if (this.pending) {
         this.pending.t = t;
         const intercept = opts.intercept ?? this.pending.opts.intercept;
-        this.pending.opts = { wait: opts.wait || this.pending.opts.wait, exact: Boolean(opts.exact || this.pending.opts.exact), ...(intercept ? { intercept } : {}) };
+        this.pending.opts = {
+          wait: opts.wait || this.pending.opts.wait,
+          exact: Boolean(opts.exact || this.pending.opts.exact),
+          ...(intercept ? { intercept } : {}),
+        };
         return this.pending.done;
       }
       let resolve = (): void => undefined;
-      const done = new Promise<void>((r) => { resolve = r; });
+      const done = new Promise<void>((r) => {
+        resolve = r;
+      });
       this.pending = { t, opts, done, resolve };
       return done;
     }
-    const run = this.run(t, opts).catch(() => undefined).then(() => {
-      this.inFlight = null;
-      const next = this.pending;
-      this.pending = null;
-      if (next) void this.tick(next.t, next.opts).then(next.resolve, next.resolve);
-    });
+    const run = this.run(t, opts)
+      .catch(() => undefined)
+      .then(() => {
+        this.inFlight = null;
+        const next = this.pending;
+        this.pending = null;
+        if (next) void this.tick(next.t, next.opts).then(next.resolve, next.resolve);
+      });
     this.inFlight = run;
     return run;
   }
@@ -138,18 +159,20 @@ export class Compositor {
     if (opts.wait) await this.pool.settle();
     const frames = new Map<string, Frame | null>();
     const nestedCanvases = new Map<string, AnyCanvas>();
-    await Promise.all(plan.ops.map(async (op) => {
-      if (op.nested) {
-        const n = this.nested.get(op.id);
-        if (!n) return;
-        await n.compositor.tick(op.nested.time, { wait: opts.wait, exact: Boolean(opts.exact) });
-        nestedCanvases.set(op.id, n.canvas);
-        return;
-      }
-      if (op.kind !== "video" && op.kind !== "image" && op.kind !== "error") return;
-      const d = this.pool.decoderFor(op.id);
-      frames.set(op.id, d ? await d.frameFor(t, opts.wait, opts.exact) : null);
-    }));
+    await Promise.all(
+      plan.ops.map(async (op) => {
+        if (op.nested) {
+          const n = this.nested.get(op.id);
+          if (!n) return;
+          await n.compositor.tick(op.nested.time, { wait: opts.wait, exact: Boolean(opts.exact) });
+          nestedCanvases.set(op.id, n.canvas);
+          return;
+        }
+        if (op.kind !== "video" && op.kind !== "image" && op.kind !== "error") return;
+        const d = this.pool.decoderFor(op.id);
+        frames.set(op.id, d ? await d.frameFor(t, opts.wait, opts.exact) : null);
+      }),
+    );
     if (this.disposed) return;
     if (!opts.intercept?.(plan, frames)) {
       await Promise.all([...frames.values()].map((f) => f?.prepare?.()));
@@ -182,4 +205,3 @@ export class Compositor {
     }
   }
 }
-

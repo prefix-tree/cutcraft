@@ -1,5 +1,11 @@
 import { useLayer } from "@cutcraft/kit";
-import { useAnimate, useMotionValue, type AnimationPlaybackControls, type AnimationSequence, type MotionValue } from "motion/react";
+import {
+  useAnimate,
+  useMotionValue,
+  type AnimationPlaybackControls,
+  type AnimationSequence,
+  type MotionValue,
+} from "motion/react";
 import { useLayoutEffect, useRef, type DependencyList, type ReactNode, type RefObject } from "react";
 
 /**
@@ -20,7 +26,10 @@ export function useLayerTime(): MotionValue<number> {
  * clock: built paused and set to the layer's time on every frame, so it scrubs both ways and exports as previewed.
  * Selectors are scoped to the returned ref. Rebuilt when `deps` change.
  */
-export function useTimeline<T extends Element = HTMLDivElement>(sequence: AnimationSequence, deps: DependencyList = []): RefObject<T | null> {
+export function useTimeline<T extends Element = HTMLDivElement>(
+  sequence: AnimationSequence,
+  deps: DependencyList = [],
+): RefObject<T | null> {
   const [scope, animate] = useAnimate<T>();
   const controls = useRef<AnimationPlaybackControls | null>(null);
   const { elapsed } = useLayer();
@@ -28,10 +37,15 @@ export function useTimeline<T extends Element = HTMLDivElement>(sequence: Animat
     const c = animate(sequence);
     c.pause();
     controls.current = c;
-    return () => { c.stop(); controls.current = null; };
+    return () => {
+      c.stop();
+      controls.current = null;
+    };
     // biome-ignore lint/correctness/useExhaustiveDependencies: the caller names what rebuilds the sequence, as with useEffect.
   }, deps);
-  useLayoutEffect(() => { if (controls.current) controls.current.time = elapsed; });
+  useLayoutEffect(() => {
+    if (controls.current) controls.current.time = elapsed;
+  });
   return scope as RefObject<T | null>;
 }
 
@@ -40,5 +54,9 @@ export function MotionLayer(props: { readonly sequence?: unknown; readonly child
   const sequence = (props.sequence ?? []) as AnimationSequence;
   // A literal sequence edited in the inspector arrives as a new array with new content: rebuild on content.
   const scope = useTimeline<HTMLDivElement>(sequence, [JSON.stringify(sequence)]);
-  return <div ref={scope} style={{ position: "absolute", inset: 0 }}>{props.children}</div>;
+  return (
+    <div ref={scope} style={{ position: "absolute", inset: 0 }}>
+      {props.children}
+    </div>
+  );
 }

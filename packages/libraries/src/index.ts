@@ -41,5 +41,14 @@ export function installFreeCodeLibraries(): Readonly<Record<string, unknown>> {
   return FREE_CODE_LIBRARIES;
 }
 
-export { ThreeLayer, ThreeScene, type ThreeCamera, type ThreeFrame, type ThreeSceneProps, type ThreeSetup, type ThreeSetupFn, type ThreeUpdate } from "./three";
+export {
+  ThreeLayer,
+  ThreeScene,
+  type ThreeCamera,
+  type ThreeFrame,
+  type ThreeSceneProps,
+  type ThreeSetup,
+  type ThreeSetupFn,
+  type ThreeUpdate,
+} from "./three";
 export { MotionLayer, useLayerTime, useTimeline } from "./motion";

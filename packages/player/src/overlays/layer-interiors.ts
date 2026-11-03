@@ -17,7 +17,10 @@ function walk(node: ReactNode, out: Map<string, ReactNode>): void {
     if (!isValidElement(child)) return;
     const element = child as ReactElement<Record<string, unknown>>;
     const type = element.type;
-    if (type === Fragment) { walk(element.props.children as ReactNode, out); return; }
+    if (type === Fragment) {
+      walk(element.props.children as ReactNode, out);
+      return;
+    }
     if (isVocabulary(type)) {
       if (type.kind === "layer") {
         if (typeof element.props.id === "string") out.set(element.props.id, element.props.children as ReactNode);

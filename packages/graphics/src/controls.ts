@@ -16,10 +16,21 @@ interface ControlBase {
  * bounds), a colour, a font, a line of text, a switch, a choice, or a list of items with their own controls.
  */
 export type GraphicControl =
-  | (ControlBase & { readonly type: "number"; readonly min?: number; readonly max?: number; readonly step: number; readonly unit?: string })
+  | (ControlBase & {
+      readonly type: "number";
+      readonly min?: number;
+      readonly max?: number;
+      readonly step: number;
+      readonly unit?: string;
+    })
   | (ControlBase & { readonly type: "color" | "font" | "text" | "boolean" })
   | (ControlBase & { readonly type: "choice"; readonly options: readonly string[] })
-  | (ControlBase & { readonly type: "list"; readonly fields: readonly GraphicControl[]; readonly min?: number; readonly max?: number });
+  | (ControlBase & {
+      readonly type: "list";
+      readonly fields: readonly GraphicControl[];
+      readonly min?: number;
+      readonly max?: number;
+    });
 
 /**
  * The controls for a kind's own props (`graphicControls("counter")`), in the order the kind declares them; props an
@@ -37,7 +48,9 @@ export function graphicControls(kindName: string): GraphicControl[] {
 type Meta = { control?: string; unit?: string };
 
 function controlOf(name: string, schema: z.ZodType): GraphicControl | null {
-  let s = schema, def: unknown, optional = false;
+  let s = schema,
+    def: unknown,
+    optional = false;
   const meta: Meta = { ...(z.globalRegistry.get(s) as Meta | undefined) };
   // Peel defaults and optionals, keeping the default and any marks on the way.
   for (;;) {
@@ -47,15 +60,30 @@ function controlOf(name: string, schema: z.ZodType): GraphicControl | null {
     s = s.def.innerType as z.ZodType;
     Object.assign(meta, z.globalRegistry.get(s) as Meta | undefined);
   }
-  const base = { name, label: labelOf(name), ...(def !== undefined ? { default: def } : {}), ...(optional && def === undefined ? { optional: true as const } : {}) };
+  const base = {
+    name,
+    label: labelOf(name),
+    ...(def !== undefined ? { default: def } : {}),
+    ...(optional && def === undefined ? { optional: true as const } : {}),
+  };
   if (s instanceof z.ZodNumber) {
     // An integer schema carries the safe-integer range as its bounds: that is no bound to show.
-    const bound = (v: number | null): number | undefined => (v !== null && Number.isFinite(v) && Math.abs(v) < Number.MAX_SAFE_INTEGER ? v : undefined);
-    const min = bound(s.minValue), max = bound(s.maxValue);
+    const bound = (v: number | null): number | undefined =>
+      v !== null && Number.isFinite(v) && Math.abs(v) < Number.MAX_SAFE_INTEGER ? v : undefined;
+    const min = bound(s.minValue),
+      max = bound(s.maxValue);
     const step = s.isInt ? 1 : min !== undefined && max !== undefined && max - min <= 1 ? 0.01 : 0.1;
-    return { ...base, type: "number", ...(min !== undefined ? { min } : {}), ...(max !== undefined ? { max } : {}), step, ...(meta.unit ? { unit: meta.unit } : {}) };
+    return {
+      ...base,
+      type: "number",
+      ...(min !== undefined ? { min } : {}),
+      ...(max !== undefined ? { max } : {}),
+      step,
+      ...(meta.unit ? { unit: meta.unit } : {}),
+    };
   }
-  if (s instanceof z.ZodString) return { ...base, type: meta.control === "color" ? "color" : meta.control === "font" ? "font" : "text" };
+  if (s instanceof z.ZodString)
+    return { ...base, type: meta.control === "color" ? "color" : meta.control === "font" ? "font" : "text" };
   if (s instanceof z.ZodBoolean) return { ...base, type: "boolean" };
   if (s instanceof z.ZodEnum) return { ...base, type: "choice", options: s.options.map(String) };
   if (s instanceof z.ZodArray && s.element instanceof z.ZodObject) {

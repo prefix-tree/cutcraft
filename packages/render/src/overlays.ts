@@ -1,10 +1,35 @@
 import { createRequire } from "node:module";
 import type { ResolvedState } from "@cutcraft/kit";
 import { BUNDLED_FONTS, BUNDLED_FONT_WEIGHTS, installLayerClock } from "@cutcraft/kit";
-import { backdropTracks, boundsOf, isVisibleAt, visiblePlacements, type DrawRect, type MediaResolver, type VisibleItem } from "@cutcraft/player/engine";
 import {
-  OVERLAY_KINDS, captionsContent, graphicDrawing, graphicLabels, iconStickerDrawing, parseSvg, serialize, shapeDrawing, svgDrawing, layerClock, layerContent, overlayLayout, stickerPlaceholder, stickerSize, titleBox, titleContent,
-  type ElementProps, type GraphicDrawing, type OverlayLayout,
+  backdropTracks,
+  boundsOf,
+  isVisibleAt,
+  visiblePlacements,
+  type DrawRect,
+  type MediaResolver,
+  type VisibleItem,
+} from "@cutcraft/player/engine";
+import {
+  OVERLAY_KINDS,
+  captionsContent,
+  graphicDrawing,
+  graphicLabels,
+  iconStickerDrawing,
+  parseSvg,
+  serialize,
+  shapeDrawing,
+  svgDrawing,
+  layerClock,
+  layerContent,
+  overlayLayout,
+  stickerPlaceholder,
+  stickerSize,
+  titleBox,
+  titleContent,
+  type ElementProps,
+  type GraphicDrawing,
+  type OverlayLayout,
 } from "@cutcraft/player/overlays";
 import { readFileSync } from "node:fs";
 import { readFile } from "node:fs/promises";
@@ -36,7 +61,10 @@ const IMAGE_CACHE = 64;
 const LAYOUT_CACHE = 32;
 
 /** How much layout work the plane did: Satori runs against pictures reused from earlier frames. */
-export interface OverlayStats { layouts: number; reused: number }
+export interface OverlayStats {
+  layouts: number;
+  reused: number;
+}
 
 /** Where an overlay's visible pixels fall at one moment, in composition pixels; it may reach past the frame. */
 export interface OverlayBounds {
@@ -58,7 +86,10 @@ const INK_ALPHA = 8;
 const INK_GRID = 16;
 
 /** A picture's ink as fractions of its size: the box around all of it, and the box around it in each grid cell that has any. */
-interface Ink { readonly box: Box; readonly parts: readonly Box[] }
+interface Ink {
+  readonly box: Box;
+  readonly parts: readonly Box[];
+}
 const inkCache = new WeakMap<Image | Canvas, Ink | null>();
 
 /** The part of a picture that is not transparent; null when it is all transparent. */
@@ -66,19 +97,28 @@ function inkOf(image: Image | Canvas): Ink | null {
   const hit = inkCache.get(image);
   if (hit !== undefined) return hit;
   const s = Math.min(1, INK_SIDE / Math.max(image.width, image.height, 1));
-  const w = Math.max(1, Math.round(image.width * s)), h = Math.max(1, Math.round(image.height * s));
+  const w = Math.max(1, Math.round(image.width * s)),
+    h = Math.max(1, Math.round(image.height * s));
   const ctx = new Canvas(w, h).getContext("2d");
   ctx.drawImage(image, 0, 0, w, h);
   const data = ctx.getImageData(0, 0, w, h).data;
   // Per grid cell: min x, min y, max x, max y of its ink pixels; rows run top down, so the first pixel sets min y.
-  const cell = Math.max(w, h) / INK_GRID, cols = Math.ceil(w / cell), rows = Math.ceil(h / cell);
+  const cell = Math.max(w, h) / INK_GRID,
+    cols = Math.ceil(w / cell),
+    rows = Math.ceil(h / cell);
   const cells = new Float64Array(cols * rows * 4).fill(Number.NaN);
   for (let y = 0; y < h; y++) {
     const row = Math.min(rows - 1, Math.floor(y / cell)) * cols;
     for (let x = 0; x < w; x++) {
       if ((data[(y * w + x) * 4 + 3] as number) <= INK_ALPHA) continue;
       const c = (row + Math.min(cols - 1, Math.floor(x / cell))) * 4;
-      if (Number.isNaN(cells[c]!)) { cells[c] = x; cells[c + 1] = y; cells[c + 2] = x; cells[c + 3] = y; continue; }
+      if (Number.isNaN(cells[c]!)) {
+        cells[c] = x;
+        cells[c + 1] = y;
+        cells[c + 2] = x;
+        cells[c + 3] = y;
+        continue;
+      }
       if (x < cells[c]!) cells[c] = x;
       if (x > cells[c + 2]!) cells[c + 2] = x;
       if (y > cells[c + 3]!) cells[c + 3] = y;
@@ -86,7 +126,13 @@ function inkOf(image: Image | Canvas): Ink | null {
   }
   const parts: Box[] = [];
   for (let c = 0; c < cells.length; c += 4) {
-    if (!Number.isNaN(cells[c]!)) parts.push({ x: cells[c]! / w, y: cells[c + 1]! / h, w: (cells[c + 2]! + 1 - cells[c]!) / w, h: (cells[c + 3]! + 1 - cells[c + 1]!) / h });
+    if (!Number.isNaN(cells[c]!))
+      parts.push({
+        x: cells[c]! / w,
+        y: cells[c + 1]! / h,
+        w: (cells[c + 2]! + 1 - cells[c]!) / w,
+        h: (cells[c + 3]! + 1 - cells[c + 1]!) / h,
+      });
   }
   const ink = parts.length === 0 ? null : { box: union(parts), parts };
   inkCache.set(image, ink);
@@ -94,7 +140,8 @@ function inkOf(image: Image | Canvas): Ink | null {
 }
 
 function union(boxes: readonly Box[]): Box {
-  const x = Math.min(...boxes.map((b) => b.x)), y = Math.min(...boxes.map((b) => b.y));
+  const x = Math.min(...boxes.map((b) => b.x)),
+    y = Math.min(...boxes.map((b) => b.y));
   return { x, y, w: Math.max(...boxes.map((b) => b.x + b.w)) - x, h: Math.max(...boxes.map((b) => b.y + b.h)) - y };
 }
 
@@ -117,11 +164,21 @@ export class OverlayPlane {
   private readonly steady = new Set<string>();
   private clockRead = false;
   /** Set while `bounds` runs: `place` records where the element's ink lands instead of drawing it. */
-  private measuring: { readonly id: string; readonly kind: string; readonly backdrop: boolean; readonly out: OverlayBounds[] } | null = null;
+  private measuring: {
+    readonly id: string;
+    readonly kind: string;
+    readonly backdrop: boolean;
+    readonly out: OverlayBounds[];
+  } | null = null;
   readonly stats: OverlayStats = { layouts: 0, reused: 0 };
 
   constructor(private readonly options: OverlayOptions) {
-    this.fonts = [...bundledFonts(), ...(options.fonts ?? [])].map((f) => ({ name: f.name, data: f.data, weight: f.weight ?? 400, style: f.style ?? "normal" }));
+    this.fonts = [...bundledFonts(), ...(options.fonts ?? [])].map((f) => ({
+      name: f.name,
+      data: f.data,
+      weight: f.weight ?? 400,
+      style: f.style ?? "normal",
+    }));
     this.families = new Set(this.fonts.map((f) => f.name));
     registerSvgFonts();
   }
@@ -150,7 +207,11 @@ export class OverlayPlane {
       if (captions.kind !== "captions") continue;
       await this.guard(captions.id, async () => {
         const comp = state.composition;
-        const image = await this.layoutImage(captionsContent({ placement: captions, state, time: t }), comp.width, comp.height);
+        const image = await this.layoutImage(
+          captionsContent({ placement: captions, state, time: t }),
+          comp.width,
+          comp.height,
+        );
         ctx.drawImage(image, 0, 0, comp.width, comp.height);
       });
     }
@@ -178,9 +239,23 @@ export class OverlayPlane {
     for (const captions of state.items.values()) {
       if (captions.kind !== "captions") continue;
       await this.guard(captions.id, async () => {
-        const ink = inkOf(await this.layoutImage(captionsContent({ placement: captions, state, time: t }), comp.width, comp.height));
-        const scale = (b: Box): Box => ({ x: b.x * comp.width, y: b.y * comp.height, w: b.w * comp.width, h: b.h * comp.height });
-        if (ink) out.push({ id: captions.id, kind: "captions", backdrop: false, rect: scale(ink.box), parts: ink.parts.map(scale) });
+        const ink = inkOf(
+          await this.layoutImage(captionsContent({ placement: captions, state, time: t }), comp.width, comp.height),
+        );
+        const scale = (b: Box): Box => ({
+          x: b.x * comp.width,
+          y: b.y * comp.height,
+          w: b.w * comp.width,
+          h: b.h * comp.height,
+        });
+        if (ink)
+          out.push({
+            id: captions.id,
+            kind: "captions",
+            backdrop: false,
+            rect: scale(ink.box),
+            parts: ink.parts.map(scale),
+          });
       });
     }
     return out;
@@ -198,7 +273,10 @@ export class OverlayPlane {
     try {
       await fn();
     } catch (error) {
-      this.warnOnce(`draw:${id}`, `overlay "${id}" could not be drawn and is left out: ${error instanceof Error ? error.message : String(error)}`);
+      this.warnOnce(
+        `draw:${id}`,
+        `overlay "${id}" could not be drawn and is left out: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 
@@ -226,31 +304,56 @@ export class OverlayPlane {
         const engine = placement.props.engine;
         if (typeof engine === "string") {
           // WebGL and Motion need a browser; the browser export engine draws them.
-          this.warnOnce(`engine:${placement.id}`, `layer "${placement.id}" is drawn by the ${engine} engine, which needs a browser; the Node export leaves it out`);
+          this.warnOnce(
+            `engine:${placement.id}`,
+            `layer "${placement.id}" is drawn by the ${engine} engine, which needs a browser; the Node export leaves it out`,
+          );
           return;
         }
         const layout = overlayLayout(props, full);
         const clock = layerClock(placement, t, comp.fps);
         const interior = this.options.interiors?.get(placement.id);
-        if (interior === undefined) { this.warnOnce(`interior:${placement.id}`, `layer "${placement.id}" has no interior (pass interiors from indexLayerInteriors); it is left out`); return; }
+        if (interior === undefined) {
+          this.warnOnce(
+            `interior:${placement.id}`,
+            `layer "${placement.id}" has no interior (pass interiors from indexLayerInteriors); it is left out`,
+          );
+          return;
+        }
         // An interior that never asked for the time looks the same on every frame: lay it out once.
         const key = `layer|${placement.id}|${JSON.stringify(placement.interior?.props ?? null)}|${layout.rect.w}x${layout.rect.h}`;
         let image = this.steady.has(key) ? this.laidOut.get(key) : undefined;
         if (image) this.stats.reused++;
         else {
           this.clockRead = false;
-          installLayerClock(() => { this.clockRead = true; return clock; });
-          image = await this.layoutImage(layerContent(interior, placement.interior?.props), layout.rect.w, layout.rect.h);
-          if (!this.clockRead) { this.steady.add(key); this.remember(key, image); }
+          installLayerClock(() => {
+            this.clockRead = true;
+            return clock;
+          });
+          image = await this.layoutImage(
+            layerContent(interior, placement.interior?.props),
+            layout.rect.w,
+            layout.rect.h,
+          );
+          if (!this.clockRead) {
+            this.steady.add(key);
+            this.remember(key, image);
+          }
         }
         this.place(ctx, layout, image);
         return;
       }
       case "shape": {
         const d = shapeDrawing(props);
-        for (const w of d.prepared.warnings) this.warnOnce(`shape:${placement.id}:${w}`, `shape "${placement.id}": ${w}`);
+        for (const w of d.prepared.warnings)
+          this.warnOnce(`shape:${placement.id}:${w}`, `shape "${placement.id}": ${w}`);
         const image = await this.vectorImage(d.prepared.markup);
-        this.place(ctx, d.layout, image, { x: -d.bleed, y: -d.bleed, w: d.layout.rect.w + 2 * d.bleed, h: d.layout.rect.h + 2 * d.bleed });
+        this.place(ctx, d.layout, image, {
+          x: -d.bleed,
+          y: -d.bleed,
+          w: d.layout.rect.w + 2 * d.bleed,
+          h: d.layout.rect.h + 2 * d.bleed,
+        });
         return;
       }
       case "svg": {
@@ -259,7 +362,8 @@ export class OverlayPlane {
         const markup = content ?? (src ? await this.assetText(src) : null);
         if (!markup) return;
         const drawing = svgDrawing(props, markup);
-        for (const w of drawing.prepared.warnings) this.warnOnce(`svg:${placement.id}:${w}`, `svg "${placement.id}": ${w}`);
+        for (const w of drawing.prepared.warnings)
+          this.warnOnce(`svg:${placement.id}:${w}`, `svg "${placement.id}": ${w}`);
         if (!drawing.prepared.markup) return;
         this.place(ctx, drawing.layout, await this.vectorImage(drawing.prepared.markup));
         return;
@@ -271,20 +375,38 @@ export class OverlayPlane {
       case "sticker": {
         const size = stickerSize(props);
         const icon = iconStickerDrawing(props, size);
-        if (icon) { await this.drawGraphic(ctx, placement.id, icon); return; }
+        if (icon) {
+          await this.drawGraphic(ctx, placement.id, icon);
+          return;
+        }
         const layout = overlayLayout(props, { width: size, height: size });
         const src = String(placement.props.src ?? "");
         const image = src.startsWith("asset:") ? await this.asset(src) : null;
         if (image) {
           this.place(ctx, layout, image, containRect(image, layout.rect.w, layout.rect.h, true));
         } else {
-          this.warnOnce(`sticker:${placement.id}`, `sticker "${src}" on "${placement.id}" has no media; drawing a placeholder`);
-          this.place(ctx, layout, await this.layoutImage(stickerPlaceholder(String(placement.props.name ?? src)), layout.rect.w, layout.rect.h));
+          this.warnOnce(
+            `sticker:${placement.id}`,
+            `sticker "${src}" on "${placement.id}" has no media; drawing a placeholder`,
+          );
+          this.place(
+            ctx,
+            layout,
+            await this.layoutImage(
+              stickerPlaceholder(String(placement.props.name ?? src)),
+              layout.rect.w,
+              layout.rect.h,
+            ),
+          );
         }
         return;
       }
       case "adjustment":
-        if (item.children.length > 0) this.warnOnce(`adjustment:${placement.id}`, `adjustment "${placement.id}" filters the footage beneath it; the filter does not reach overlays in an export`);
+        if (item.children.length > 0)
+          this.warnOnce(
+            `adjustment:${placement.id}`,
+            `adjustment "${placement.id}" filters the footage beneath it; the filter does not reach overlays in an export`,
+          );
         return;
       default:
         return;
@@ -295,9 +417,13 @@ export class OverlayPlane {
   private async drawGraphic(ctx: CanvasRenderingContext2D, id: string, d: GraphicDrawing): Promise<void> {
     for (const w of d.prepared.warnings) this.warnOnce(`graphic:${id}:${w}`, `graphic "${id}": ${w}`);
     const art = await this.vectorImage(d.prepared.markup);
-    if (d.labels.length === 0) { this.place(ctx, d.layout, art); return; }
+    if (d.labels.length === 0) {
+      this.place(ctx, d.layout, art);
+      return;
+    }
     for (const l of d.labels) this.checkFont(id, l.font);
-    const w = Math.max(1, Math.ceil(d.layout.rect.w)), h = Math.max(1, Math.ceil(d.layout.rect.h));
+    const w = Math.max(1, Math.ceil(d.layout.rect.w)),
+      h = Math.max(1, Math.ceil(d.layout.rect.h));
     const text = await this.layoutImage(graphicLabels(d.labels), w, h);
     const both = new Canvas(w, h);
     const c = both.getContext("2d");
@@ -307,8 +433,17 @@ export class OverlayPlane {
   }
 
   /** Draws `image` into `box` (default: the layout rect) under the element's matrix, opacity, filter, blend and corner radius. */
-  private place(ctx: CanvasRenderingContext2D, layout: OverlayLayout, image: Image | Canvas, box?: Box, extraFilter: string | null = null): void {
-    if (this.measuring) { this.record(this.measuring, layout, image, box); return; }
+  private place(
+    ctx: CanvasRenderingContext2D,
+    layout: OverlayLayout,
+    image: Image | Canvas,
+    box?: Box,
+    extraFilter: string | null = null,
+  ): void {
+    if (this.measuring) {
+      this.record(this.measuring, layout, image, box);
+      return;
+    }
     const { rect, matrix: m } = layout;
     ctx.save();
     ctx.setTransform(m.a, m.b, m.c, m.d, m.e, m.f);
@@ -333,7 +468,12 @@ export class OverlayPlane {
   }
 
   /** What `place` would draw, as boxes around its ink in composition pixels. */
-  private record(m: NonNullable<OverlayPlane["measuring"]>, layout: OverlayLayout, image: Image | Canvas, box?: Box): void {
+  private record(
+    m: NonNullable<OverlayPlane["measuring"]>,
+    layout: OverlayLayout,
+    image: Image | Canvas,
+    box?: Box,
+  ): void {
     if (layout.opacity < VISIBLE_OPACITY) return;
     const ink = inkOf(image);
     if (!ink) return;
@@ -343,8 +483,17 @@ export class OverlayPlane {
     const shown = layout.clip ? union(layout.clip) : null;
     const parts: DrawRect[] = [];
     for (const p of ink.parts) {
-      let x0 = b.x + p.x * b.w, y0 = b.y + p.y * b.h, x1 = x0 + p.w * b.w, y1 = y0 + p.h * b.h;
-      if (shown) [x0, y0, x1, y1] = [Math.max(x0, shown.x), Math.max(y0, shown.y), Math.min(x1, shown.x + shown.w), Math.min(y1, shown.y + shown.h)];
+      let x0 = b.x + p.x * b.w,
+        y0 = b.y + p.y * b.h,
+        x1 = x0 + p.w * b.w,
+        y1 = y0 + p.h * b.h;
+      if (shown)
+        [x0, y0, x1, y1] = [
+          Math.max(x0, shown.x),
+          Math.max(y0, shown.y),
+          Math.min(x1, shown.x + shown.w),
+          Math.min(y1, shown.y + shown.h),
+        ];
       // shortcut: a rotated part is measured by the upright box around it, a little generous; trace the ink in composition space if that reports false overlaps.
       if (x1 > x0 && y1 > y0) parts.push(boundsOf({ x: x0, y: y0, w: x1 - x0, h: y1 - y0 }, layout.matrix));
     }
@@ -384,7 +533,11 @@ export class OverlayPlane {
       return hit;
     }
     const { svg: safe, replaced } = safeSvgFonts(svg, svgFontKnown);
-    for (const family of replaced) this.warnOnce(`svg-font:${family}`, `SVG text in font "${family}" is drawn in sans-serif; the export has no such font`);
+    for (const family of replaced)
+      this.warnOnce(
+        `svg-font:${family}`,
+        `SVG text in font "${family}" is drawn in sans-serif; the export has no such font`,
+      );
     const image = await loadImage(Buffer.from(safe));
     this.images.set(svg, image);
     if (this.images.size > IMAGE_CACHE) this.images.delete(this.images.keys().next().value as string);
@@ -395,14 +548,20 @@ export class OverlayPlane {
     const id = ref.startsWith("asset:") ? ref.slice(6) : ref;
     let p = this.texts.get(id);
     if (!p) {
-      p = this.options.media.resolve(id).then(async (handle) => {
-        if (handle.kind === "path") return readFile(handle.path, "utf8");
-        if (handle.kind === "blob") return handle.blob.text();
-        return (await fetch(handle.url)).text();
-      }).catch((error: unknown) => {
-        this.warnOnce(`asset:${id}`, `SVG asset "${id}" could not be read: ${error instanceof Error ? error.message : String(error)}`);
-        return null;
-      });
+      p = this.options.media
+        .resolve(id)
+        .then(async (handle) => {
+          if (handle.kind === "path") return readFile(handle.path, "utf8");
+          if (handle.kind === "blob") return handle.blob.text();
+          return (await fetch(handle.url)).text();
+        })
+        .catch((error: unknown) => {
+          this.warnOnce(
+            `asset:${id}`,
+            `SVG asset "${id}" could not be read: ${error instanceof Error ? error.message : String(error)}`,
+          );
+          return null;
+        });
       this.texts.set(id, p);
     }
     return p;
@@ -412,14 +571,20 @@ export class OverlayPlane {
     const id = ref.startsWith("asset:") ? ref.slice(6) : ref;
     let p = this.assets.get(id);
     if (!p) {
-      p = this.options.media.resolve(id).then(async (handle) => {
-        if (handle.kind === "path") return loadImage(handle.path);
-        if (handle.kind === "blob") return loadImage(Buffer.from(await handle.blob.arrayBuffer()));
-        return loadImage(handle.url);
-      }).catch((error: unknown) => {
-        this.warnOnce(`asset:${id}`, `image asset "${id}" could not be loaded: ${error instanceof Error ? error.message : String(error)}`);
-        return null;
-      });
+      p = this.options.media
+        .resolve(id)
+        .then(async (handle) => {
+          if (handle.kind === "path") return loadImage(handle.path);
+          if (handle.kind === "blob") return loadImage(Buffer.from(await handle.blob.arrayBuffer()));
+          return loadImage(handle.url);
+        })
+        .catch((error: unknown) => {
+          this.warnOnce(
+            `asset:${id}`,
+            `image asset "${id}" could not be loaded: ${error instanceof Error ? error.message : String(error)}`,
+          );
+          return null;
+        });
       this.assets.set(id, p);
     }
     return p;
@@ -427,11 +592,19 @@ export class OverlayPlane {
 
   private checkFont(id: string, font: unknown): void {
     if (typeof font !== "string" || font === "Inter" || this.families.has(font)) return;
-    this.warnOnce(`font:${font}`, `font "${font}" (used by "${id}") is not available to the export; text is set in Inter`);
+    this.warnOnce(
+      `font:${font}`,
+      `font "${font}" (used by "${id}") is not available to the export; text is set in Inter`,
+    );
   }
 }
 
-interface Box { readonly x: number; readonly y: number; readonly w: number; readonly h: number }
+interface Box {
+  readonly x: number;
+  readonly y: number;
+  readonly w: number;
+  readonly h: number;
+}
 
 /**
  * Satori embeds an inline `<svg>` (in a Layer, say) as an `<image>` with an SVG data URL, which skia draws as nothing.
@@ -441,29 +614,40 @@ export function inlineSvgImages(svg: string): string {
   if (!svg.includes("data:image/svg+xml")) return svg;
   // Satori's masks size themselves to the masked element's bounding box, which skia gets wrong around a nested
   // <svg>; in user space they cover the same pixels, since their content is the element's own box.
-  return svg.replace(/<mask (?![^>]*maskUnits)/g, '<mask maskUnits="userSpaceOnUse" ').replace(/<image\b([^>]*?)\s(?:xlink:)?href="data:image\/svg\+xml;(utf8|base64),([^"]*)"([^>]*?)\/?>/g, (whole, before: string, encoding: string, data: string, after: string) => {
-    let inner: string;
-    try {
-      inner = encoding === "base64" ? Buffer.from(data, "base64").toString("utf8") : decodeURIComponent(data);
-    } catch {
-      return whole;
-    }
-    const root = parseSvg(inner).root;
-    if (!root) return whole;
-    const attrs = `${before}${after}`.replace(/\s*\/$/, "");
-    // Clip and mask stay on a group in the outer coordinates: skia would read them in the nested viewBox's.
-    const outer = [...attrs.matchAll(/\s(clip-path|mask)="[^"]*"/g)].map((m) => m[0]).join("");
-    const box = attrs.replace(/\s(clip-path|mask)="[^"]*"/g, "");
-    const viewBox = root.attrs.viewBox ?? (root.attrs.width && root.attrs.height ? `0 0 ${parseFloat(root.attrs.width)} ${parseFloat(root.attrs.height)}` : null);
-    return `<g${outer}><svg${box}${viewBox ? ` viewBox="${viewBox}"` : ""}>${root.children.map((c) => serialize(c)).join("")}</svg></g>`;
-  });
+  return svg
+    .replace(/<mask (?![^>]*maskUnits)/g, '<mask maskUnits="userSpaceOnUse" ')
+    .replace(
+      /<image\b([^>]*?)\s(?:xlink:)?href="data:image\/svg\+xml;(utf8|base64),([^"]*)"([^>]*?)\/?>/g,
+      (whole, before: string, encoding: string, data: string, after: string) => {
+        let inner: string;
+        try {
+          inner = encoding === "base64" ? Buffer.from(data, "base64").toString("utf8") : decodeURIComponent(data);
+        } catch {
+          return whole;
+        }
+        const root = parseSvg(inner).root;
+        if (!root) return whole;
+        const attrs = `${before}${after}`.replace(/\s*\/$/, "");
+        // Clip and mask stay on a group in the outer coordinates: skia would read them in the nested viewBox's.
+        const outer = [...attrs.matchAll(/\s(clip-path|mask)="[^"]*"/g)].map((m) => m[0]).join("");
+        const box = attrs.replace(/\s(clip-path|mask)="[^"]*"/g, "");
+        const viewBox =
+          root.attrs.viewBox ??
+          (root.attrs.width && root.attrs.height
+            ? `0 0 ${parseFloat(root.attrs.width)} ${parseFloat(root.attrs.height)}`
+            : null);
+        return `<g${outer}><svg${box}${viewBox ? ` viewBox="${viewBox}"` : ""}>${root.children.map((c) => serialize(c)).join("")}</svg></g>`;
+      },
+    );
 }
 
 /** `object-fit: contain` (or a centred natural size capped to the box, as `max-width: 100%` does) for an image in a box. */
 function containRect(image: Image, w: number, h: number, upscale = false): Box {
-  const iw = image.width || w, ih = image.height || h;
+  const iw = image.width || w,
+    ih = image.height || h;
   const k = Math.min(w / iw, h / ih, upscale ? Infinity : 1);
-  const dw = iw * k, dh = ih * k;
+  const dw = iw * k,
+    dh = ih * k;
   return { x: (w - dw) / 2, y: (h - dh) / 2, w: dw, h: dh };
 }
 
@@ -474,8 +658,14 @@ function containRect(image: Image, w: number, h: number, upscale = false): Box {
 export function treeKey(node: ReactNode): string | null {
   const out: string[] = [];
   const walk = (n: unknown): boolean => {
-    if (n === null || n === undefined || typeof n === "boolean") { out.push("_"); return true; }
-    if (typeof n === "string" || typeof n === "number") { out.push(JSON.stringify(n)); return true; }
+    if (n === null || n === undefined || typeof n === "boolean") {
+      out.push("_");
+      return true;
+    }
+    if (typeof n === "string" || typeof n === "number") {
+      out.push(JSON.stringify(n));
+      return true;
+    }
     if (Array.isArray(n)) {
       out.push("[");
       for (const child of n) if (!walk(child)) return false;
@@ -494,7 +684,14 @@ export function treeKey(node: ReactNode): string | null {
   return walk(node) ? out.join("") : null;
 }
 
-const GENERIC_FAMILIES: ReadonlySet<string> = new Set(["serif", "sans-serif", "monospace", "cursive", "fantasy", "system-ui"]);
+const GENERIC_FAMILIES: ReadonlySet<string> = new Set([
+  "serif",
+  "sans-serif",
+  "monospace",
+  "cursive",
+  "fantasy",
+  "system-ui",
+]);
 
 function svgFontKnown(family: string): boolean {
   return GENERIC_FAMILIES.has(family.toLowerCase()) || FontLibrary.has(family);
@@ -511,22 +708,34 @@ export function safeSvgFonts(svg: string, known: (family: string) => boolean): {
   if (!/font(-family)?\s*[:=]/.test(svg)) return { svg, replaced: [] };
   const replaced = new Set<string>();
   const pick = (list: string): string => {
-    const families = list.split(",").map((f) => f.trim().replace(/^(["'])(.*)\1$/, "$2").replace(/&quot;|&apos;/g, "")).filter(Boolean);
+    const families = list
+      .split(",")
+      .map((f) =>
+        f
+          .trim()
+          .replace(/^(["'])(.*)\1$/, "$2")
+          .replace(/&quot;|&apos;/g, ""),
+      )
+      .filter(Boolean);
     const found = families.find(known);
     // Unquoted: skia takes a quoted name for an unknown family, and aborts.
     if (found) return found;
     for (const f of families) replaced.add(f);
     return "sans-serif";
   };
-  const css = (text: string): string => text
-    .replace(/font-family\s*:\s*([^;}]+)/g, (_m, list: string) => `font-family: ${pick(list)}`)
-    .replace(/(^|[;{\s])font\s*:[^;}]*;?/g, "$1");
+  const css = (text: string): string =>
+    text
+      .replace(/font-family\s*:\s*([^;}]+)/g, (_m, list: string) => `font-family: ${pick(list)}`)
+      .replace(/(^|[;{\s])font\s*:[^;}]*;?/g, "$1");
   const out = svg
     .replace(/font-family=(["'])(.*?)\1/g, (_m, q: string, list: string) => `font-family=${q}${pick(list)}${q}`)
     .replace(/\sstyle=(["'])(.*?)\1/g, (_m, q: string, text: string) => {
       return ` style=${q}${css(text.replace(/&quot;/g, ""))}${q}`;
     })
-    .replace(/(<style[^>]*>)([\s\S]*?)(<\/style>)/g, (_m, open: string, text: string, close: string) => `${open}${css(text)}${close}`);
+    .replace(
+      /(<style[^>]*>)([\s\S]*?)(<\/style>)/g,
+      (_m, open: string, text: string, close: string) => `${open}${css(text)}${close}`,
+    );
   return { svg: out, replaced: [...replaced] };
 }
 
@@ -538,7 +747,9 @@ function registerSvgFonts(): void {
   const require = createRequire(import.meta.url);
   for (const font of BUNDLED_FONTS) {
     const dir = require.resolve(`@fontsource/${font.id}/package.json`).replace(/package\.json$/, "files/");
-    const files = BUNDLED_FONT_WEIGHTS.flatMap((w) => (font.italic ? ["normal", "italic"] : ["normal"]).map((st) => `${dir}${font.id}-latin-${w}-${st}.woff`));
+    const files = BUNDLED_FONT_WEIGHTS.flatMap((w) =>
+      (font.italic ? ["normal", "italic"] : ["normal"]).map((st) => `${dir}${font.id}-latin-${w}-${st}.woff`),
+    );
     FontLibrary.use(font.family, files);
   }
 }
@@ -552,8 +763,13 @@ function bundledFonts(): OverlayFont[] {
   for (const font of BUNDLED_FONTS) {
     const dir = require.resolve(`@fontsource/${font.id}/package.json`).replace(/package\.json$/, "files/");
     for (const weight of BUNDLED_FONT_WEIGHTS) {
-      for (const style of font.italic ? ["normal", "italic"] as const : ["normal"] as const) {
-        out.push({ name: font.family, data: readFileSync(`${dir}${font.id}-latin-${weight}-${style}.woff`), weight, style });
+      for (const style of font.italic ? (["normal", "italic"] as const) : (["normal"] as const)) {
+        out.push({
+          name: font.family,
+          data: readFileSync(`${dir}${font.id}-latin-${weight}-${style}.woff`),
+          weight,
+          style,
+        });
       }
     }
   }

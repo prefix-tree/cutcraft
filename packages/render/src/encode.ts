@@ -26,7 +26,11 @@ export async function encodeFrames(options: EncodeFramesOptions): Promise<number
   let waited = 0;
   const settle = async (): Promise<void> => {
     const at = performance.now();
-    try { await encoding; } finally { waited += performance.now() - at; }
+    try {
+      await encoding;
+    } finally {
+      waited += performance.now() - at;
+    }
   };
   for (let n = first; n < last; n++) {
     if (options.signal?.aborted) throw new Error("render aborted");
@@ -40,7 +44,14 @@ export async function encodeFrames(options: EncodeFramesOptions): Promise<number
       sample.setDuration(1 / fps);
     } else {
       // The readback is a fresh buffer each frame, so the sample may keep it rather than copy it (an internal flag).
-      sample = new VideoSample(raw, { format: "RGBA", codedWidth: width, codedHeight: height, timestamp, duration: 1 / fps, ...{ _doNotCopy: true } });
+      sample = new VideoSample(raw, {
+        format: "RGBA",
+        codedWidth: width,
+        codedHeight: height,
+        timestamp,
+        duration: 1 / fps,
+        ...{ _doNotCopy: true },
+      });
     }
     await settle();
     encoding = source.add(sample).finally(() => sample.close());

@@ -15,7 +15,10 @@ import { OverlayPlane, createCanvas, directoryResolver } from "../src/index";
  *   pnpm docs:graphics [--theme midnight] [--out docs/public/graphics]   (from the repository root)
  */
 const args = process.argv.slice(2);
-const flag = (name: string, fallback: string): string => { const i = args.indexOf(`--${name}`); return i >= 0 && args[i + 1] ? args[i + 1]! : fallback; };
+const flag = (name: string, fallback: string): string => {
+  const i = args.indexOf(`--${name}`);
+  return i >= 0 && args[i + 1] ? args[i + 1]! : fallback;
+};
 const theme = flag("theme", "midnight") as ThemeName;
 const out = join(import.meta.dirname, "..", "..", "..", flag("out", "docs/public/graphics"));
 mkdirSync(out, { recursive: true });
@@ -31,14 +34,25 @@ for (const name of GRAPHIC_KIND_NAMES) {
   const kind = GRAPHIC_KINDS[name];
   const props = { kind: name, ...kind.example };
   // Draw each kind at its own size in a frame just large enough, then scale that into the tile.
-  const size = graphicSize({ kind: name, ...(z.strictObject(kind.shape).parse(kind.example) as Record<string, unknown>) }, FRAME);
+  const size = graphicSize(
+    { kind: name, ...(z.strictObject(kind.shape).parse(kind.example) as Record<string, unknown>) },
+    FRAME,
+  );
   const pad = Math.round(Math.max(size.width, size.height) * 0.12);
-  const width = Math.min(FRAME.width, size.width + pad * 2), height = Math.min(FRAME.height, size.height + pad * 2);
-  const el = h(Composition, { fps: 30, width, height, theme: { extends: theme, motion: "none" } },
-    h(Track, { id: "a", layout: "free" }, h(Graphic, { id: `g-${name}`, ...props, start: 0, duration: 3 } as never)));
+  const width = Math.min(FRAME.width, size.width + pad * 2),
+    height = Math.min(FRAME.height, size.height + pad * 2);
+  const el = h(
+    Composition,
+    { fps: 30, width, height, theme: { extends: theme, motion: "none" } },
+    h(Track, { id: "a", layout: "free" }, h(Graphic, { id: `g-${name}`, ...props, start: 0, duration: 3 } as never)),
+  );
   const state = resolve(collect(el), { assets: {} });
   if (state.errors.length) throw new Error(`${name}: ${state.errors.map((e) => e.message).join("; ")}`);
-  const plane = new OverlayPlane({ state, media: directoryResolver("/nowhere", { assets: {} }), warn: (m) => console.warn(`${name}: ${m}`) });
+  const plane = new OverlayPlane({
+    state,
+    media: directoryResolver("/nowhere", { assets: {} }),
+    warn: (m) => console.warn(`${name}: ${m}`),
+  });
   const frame = canvas(width, height);
   const ctx = frame.getContext("2d");
   ctx.fillStyle = background;
@@ -56,13 +70,19 @@ for (const name of GRAPHIC_KIND_NAMES) {
   tiles.push({ name, canvas: tile });
 }
 
-const cols = 5, label = 34, gap = 8;
-const sheet = canvas(cols * (TILE.width + gap) + gap, Math.ceil(tiles.length / cols) * (TILE.height + label + gap) + gap);
+const cols = 5,
+  label = 34,
+  gap = 8;
+const sheet = canvas(
+  cols * (TILE.width + gap) + gap,
+  Math.ceil(tiles.length / cols) * (TILE.height + label + gap) + gap,
+);
 const s = sheet.getContext("2d");
 s.fillStyle = "#000000";
 s.fillRect(0, 0, sheet.width, sheet.height);
 tiles.forEach(({ name, canvas }, i) => {
-  const x = gap + (i % cols) * (TILE.width + gap), y = gap + Math.floor(i / cols) * (TILE.height + label + gap);
+  const x = gap + (i % cols) * (TILE.width + gap),
+    y = gap + Math.floor(i / cols) * (TILE.height + label + gap);
   s.drawImage(canvas, x, y);
   s.fillStyle = "#ffffff";
   s.font = "22px Inter, sans-serif";

@@ -6,7 +6,14 @@ import type { ResolveError } from "./errors";
 import type { CollectedNode, CollectedTree, Editable, LayerInterior } from "./tree";
 
 export interface SourceIndexLike {
-  readonly elements: ReadonlyMap<string, { readonly generated: boolean; readonly lockedProps?: readonly string[]; readonly boundProps?: Readonly<Record<string, string>> }>;
+  readonly elements: ReadonlyMap<
+    string,
+    {
+      readonly generated: boolean;
+      readonly lockedProps?: readonly string[];
+      readonly boundProps?: Readonly<Record<string, string>>;
+    }
+  >;
 }
 
 export interface CollectOptions {
@@ -34,7 +41,16 @@ export function collect(element: ReactElement, options: CollectOptions = {}): Co
   const roots = collectChildren(element, null, walker, null);
   const root = roots.find((n) => n.kind === "composition") ?? roots[0];
   if (!root) {
-    const empty: CollectedNode = { id: "composition", kind: "composition", props: {}, children: [], parent: null, editable: "literal", lockedProps: [], boundProps: {} };
+    const empty: CollectedNode = {
+      id: "composition",
+      kind: "composition",
+      props: {},
+      children: [],
+      parent: null,
+      editable: "literal",
+      lockedProps: [],
+      boundProps: {},
+    };
     walker.errors.push({ code: "SCHEMA", id: "composition", message: "the file must render a <Composition>" });
     return { root: empty, byId: walker.byId, errors: walker.errors };
   }
@@ -56,7 +72,11 @@ export interface VideoModule {
   readonly defaults?: Readonly<Record<string, unknown>> | undefined;
 }
 
-export function collectModule(mod: VideoModule, overrides: Readonly<Record<string, unknown>> = {}, options: CollectOptions = {}): CollectedTree {
+export function collectModule(
+  mod: VideoModule,
+  overrides: Readonly<Record<string, unknown>> = {},
+  options: CollectOptions = {},
+): CollectedTree {
   const element = mod.default({ ...((mod.defaults ?? {}) as Record<string, unknown>), ...overrides });
   if (!element) {
     return collect(Fragment({ children: null }) as unknown as ReactElement, options);
@@ -83,7 +103,15 @@ function collectChildren(
       if (type.kind === "layer") {
         const engine = engineOf(type);
         // An engine Layer's own props are its handles; its children are the engine's, not a component's.
-        const node = makeNode(engine ? withEngine(element, engine) : element, type.kind, parent, walker, origin, [], true);
+        const node = makeNode(
+          engine ? withEngine(element, engine) : element,
+          type.kind,
+          parent,
+          walker,
+          origin,
+          [],
+          true,
+        );
         const interior = engine ? null : interiorOf(element.props.children as ReactNode);
         if (interior) {
           const withInterior: CollectedNode = { ...node, interior };
@@ -108,7 +136,11 @@ function collectChildren(
       try {
         produced = helper(element.props);
       } catch (error) {
-        walker.errors.push({ code: "SCHEMA", id: parent ?? "composition", message: `helper ${name} threw while expanding: ${String(error)}` });
+        walker.errors.push({
+          code: "SCHEMA",
+          id: parent ?? "composition",
+          message: `helper ${name} threw while expanding: ${String(error)}`,
+        });
         return;
       }
       const childOrigin = origin ?? { helper: name, callerId: parent, callIndex: uses - 1 };
@@ -146,7 +178,14 @@ function makeNode(
   const lockedProps = indexed?.lockedProps ?? [];
   const boundProps = indexed?.boundProps ?? NO_BINDINGS;
   const node: CollectedNode = {
-    id, kind, props, children, parent, editable, lockedProps, boundProps,
+    id,
+    kind,
+    props,
+    children,
+    parent,
+    editable,
+    lockedProps,
+    boundProps,
     ...(text !== undefined ? { text } : {}),
     ...(origin ? { origin } : {}),
   };
@@ -172,13 +211,18 @@ function textOf(children: ReactNode): string | undefined {
 }
 
 /** The element with its engine named in its props, where the resolver, the Player and the export read it. */
-function withEngine(element: ReactElement<Record<string, unknown>>, engine: string): ReactElement<Record<string, unknown>> {
+function withEngine(
+  element: ReactElement<Record<string, unknown>>,
+  engine: string,
+): ReactElement<Record<string, unknown>> {
   return { ...element, props: { ...element.props, engine } };
 }
 
 /** A Layer's handles: exactly one child element whose type is a function component (not a vocabulary element). */
 function interiorOf(children: ReactNode): LayerInterior | null {
-  const only = Children.toArray(children).filter((c) => c !== null && c !== undefined && typeof c !== "boolean" && c !== "");
+  const only = Children.toArray(children).filter(
+    (c) => c !== null && c !== undefined && typeof c !== "boolean" && c !== "",
+  );
   const child = only.length === 1 ? only[0] : null;
   if (!isValidElement(child) || typeof child.type !== "function" || isVocabulary(child.type)) return null;
   const { children: _children, ...props } = child.props as Record<string, unknown>;

@@ -30,7 +30,11 @@ describe("resolveTimeRef", () => {
   });
 
   it("returns a typed error for unknown references", () => {
-    expect(resolveTimeRef("word:999", interview, new Map(), ctx)).toMatchObject({ code: "UNKNOWN_REF", id: "c1", prop: "in" });
+    expect(resolveTimeRef("word:999", interview, new Map(), ctx)).toMatchObject({
+      code: "UNKNOWN_REF",
+      id: "c1",
+      prop: "in",
+    });
     expect(resolveTimeRef("word:1", null, new Map(), ctx)).toMatchObject({ code: "UNKNOWN_REF" });
   });
 });

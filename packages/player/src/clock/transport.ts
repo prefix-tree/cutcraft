@@ -13,10 +13,17 @@ export class Transport {
   private _playing = false;
   loop = false;
 
-  constructor(private readonly clock: Clock, public duration: number) {}
+  constructor(
+    private readonly clock: Clock,
+    public duration: number,
+  ) {}
 
-  get playing(): boolean { return this._playing; }
-  get rate(): number { return this._rate; }
+  get playing(): boolean {
+    return this._playing;
+  }
+  get rate(): number {
+    return this._rate;
+  }
 
   time(): number {
     return this.timeAt(this.clock.now());
