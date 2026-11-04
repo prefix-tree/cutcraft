@@ -1177,6 +1177,9 @@ function placeCaptions(
         maxChars: Number(cp.props.maxChars ?? lineChars(root, cp.props.style)),
         maxDuration: Number(cp.props.maxDuration ?? 5),
         maxGap: Number(cp.props.maxGap ?? 0.8),
+        ...(Array.isArray(cp.props.breakAfter)
+          ? { breakAfter: new Set((cp.props.breakAfter as string[]).map((ref) => Number(ref.slice("word:".length)))) }
+          : {}),
       };
       nodes = cueNodes(node, planCues(timelineWords(asset, plays), options), (id) => pending.has(id));
       cuesByCaptions.set(node, { key, manifest, props: cp.props, nodes });

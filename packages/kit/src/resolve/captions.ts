@@ -30,6 +30,8 @@ export interface CueOptions {
   readonly maxChars: number;
   readonly maxDuration: number;
   readonly maxGap: number;
+  /** Transcript word indices (`i`) a cue always ends after, from the captions' `breakAfter`. */
+  readonly breakAfter?: ReadonlySet<number>;
 }
 
 export interface Cue {
@@ -75,6 +77,8 @@ export function timelineWords(asset: AssetEntry, plays: readonly AssetPlay[]): T
  * with a capital.
  */
 export function planCues(words: readonly TimelineWord[], options: CueOptions = DEFAULT_CUE_OPTIONS): Cue[] {
+  /** A cue ends after this word, whatever the limits and the merging below would do. */
+  const forced = (w: TimelineWord | undefined): boolean => w !== undefined && options.breakAfter?.has(w.i) === true;
   const lines: TimelineWord[][] = [];
   let current: TimelineWord[] = [];
   for (const w of words) {
@@ -95,6 +99,10 @@ export function planCues(words: readonly TimelineWord[], options: CueOptions = D
       }
     }
     current.push(w);
+    if (forced(w)) {
+      lines.push(current);
+      current = [];
+    }
   }
   if (current.length > 0) lines.push(current);
 
@@ -106,6 +114,7 @@ export function planCues(words: readonly TimelineWord[], options: CueOptions = D
     const joins =
       prev &&
       last &&
+      !forced(last) &&
       span(line) < MIN_CUE &&
       last.play === first.play &&
       !SENTENCE_END.test(last.text) &&
@@ -133,6 +142,7 @@ export function planCues(words: readonly TimelineWord[], options: CueOptions = D
       first = next[0] as TimelineWord;
     if (
       span(line) >= MIN_CUE ||
+      forced(last) ||
       SENTENCE_END.test(last.text) ||
       last.play !== first.play ||
       first.start - last.end > options.maxGap

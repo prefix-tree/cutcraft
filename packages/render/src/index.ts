@@ -1,3 +1,4 @@
+export { type AddOptions, type AddResult, addAsset } from "./add";
 export { createCanvas, initEnv } from "./env";
 export { DecodedFrame, frameSourceHooks, makeDecodedFrame, RgbaFrame } from "./frame-source";
 export {

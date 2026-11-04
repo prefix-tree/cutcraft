@@ -4,6 +4,38 @@
 (karaoke captions), [Vertical clip from a podcast](/recipes/vertical-podcast) (short lines in 9:16),
 [Talking-head cut](/recipes/talking-head) (a music bed that ducks under speech).
 
+## Getting a transcript
+
+Captions, word cuts and anchors read the words from the asset's transcript in the manifest. Put the transcript next to
+the media with the same name and add the media:
+
+```sh
+npx cutcraft add founder.mp4     # reads founder.json, founder.vtt or founder.srt beside it
+```
+
+| File | From | Word times |
+| --- | --- | --- |
+| `.json` with `words` | OpenAI (`verbose_json`, word timestamps), ElevenLabs | measured |
+| `.json` with `segments[].words` | openai-whisper `--word_timestamps`, faster-whisper, WhisperX | measured |
+| `.json` with `transcription[].tokens` | whisper.cpp `-ojf` | measured |
+| `.vtt` | any captioner; `<v Name>` sets the speaker | estimated, measured where it has inline timestamps |
+| `.srt` | any captioner | estimated |
+
+Subtitles time whole lines, so their words share the line's time by length and are marked `estimated`; a word cut on
+one lands near the word, not on it. When there are several, JSON wins, then VTT, then SRT; `--transcript` names another
+file. Adding the media again refreshes its entry and keeps what the command does not write (shots, silences).
+
+App code that already has the text uses the same parser:
+
+```ts
+import { parseTranscript } from "@cutcraft/kit";
+
+const { words } = parseTranscript(await (await fetch("/founder.vtt")).text());
+manifest.assets.founder = { ...manifest.assets.founder, transcript: { words } };
+```
+
+The words always go into the manifest, so the preview and the export agree on every `word:N`.
+
 ## Captions follow the clips
 
 `<Captions src="asset:founder" />`, left empty, makes captions from the transcript: every word the timeline plays,
@@ -17,6 +49,12 @@ change with it.
 
 `animation` colours the words as they are said: `word-highlight`, `word-by-word`, `karaoke`, `bounce` or
 `typewriter`. `style` sets the font, size, colours, background, stroke and position.
+
+`breakAfter` ends a line after the words you name, whatever the limits would do:
+
+```tsx
+<Captions id="captions" src="asset:founder" breakAfter={["word:5", "word:12"]} />
+```
 
 To write a line by hand, add `<Caption>` children. A caption timed with words means where those words play:
 
@@ -32,6 +70,18 @@ markers.
 
 Generated captions show as generated in an editor. The first edit to one of them writes all of them into the file as
 `<Caption>` children and then applies the edit; undoing it removes them again and generation resumes.
+
+## Subtitle files
+
+`--srt` and `--vtt` write the captions the cut plays, timed like the export (with `--from`, from that point):
+
+```sh
+npx cutcraft video.tsx --out video.mp4 --srt video.srt
+npx cutcraft video.tsx --vtt video.vtt            # only the subtitles, no video
+```
+
+In code, `subtitles(state, { format: "srt" })` from `@cutcraft/kit` returns the same text, for an editor's download
+button.
 
 ## Sound
 

@@ -1,12 +1,14 @@
 # CLI
 
-`cutcraft` exports a file to video, audio or a still, or checks its layout.
+`cutcraft` exports a file to video, audio, a still or subtitles, checks its layout, and adds media to the manifest.
 
 ```sh
 npm install cutcraft
 npx cutcraft <file.tsx> --out <video.webm|.mp4|.mov|.mp3|.wav> [options]
 npx cutcraft <file.tsx> --still <seconds> --out <image.png|.jpg> [options]
 npx cutcraft <file.tsx> --check-layout [--safe-zone <zone>] [--subject <x,y,w,h>] [--json] [options]
+npx cutcraft <file.tsx> --srt <captions.srt> | --vtt <captions.vtt> [--from <s> --to <s>]
+npx cutcraft add <media file>... [--manifest manifest.json] [--id <id>] [--transcript <file>]
 ```
 
 `npx cutcraft --help` prints the same list.
@@ -17,6 +19,7 @@ npx cutcraft <file.tsx> --check-layout [--safe-zone <zone>] [--subject <x,y,w,h>
 |---|---|
 | `--out <file>` | Where to write. `.webm` gives VP9 and Opus, `.mp4` H.264 and AAC, `.mov` ProRes and 16-bit PCM. `.mp3` and `.wav` hold the soundtrack alone. |
 | `--still <s>` | Write the frame at this time instead, to a `.png` or `.jpg` `--out`. |
+| `--srt <file>` `--vtt <file>` | Also write the captions the cut plays as SRT or WebVTT, timed like the export. Without `--out`, write only them ([Subtitle files](/guide/captions-and-sound#subtitle-files)). |
 | `--manifest <file>` | The asset manifest. Without it the file's own `manifest` export is used. |
 | `--media <dir>` | One file per asset id, with or without an extension (`podcast.webm`, `podcast`). Default: the file's folder. |
 | `--props <json>` | Props for the file's component, over its `defaults`. |
@@ -55,3 +58,16 @@ npx cutcraft <file.tsx> --check-layout [--safe-zone <zone>] [--subject <x,y,w,h>
 | 1 | An error, such as a missing asset or a file that doesn't load. |
 | 2 | Wrong arguments; the usage text is printed. |
 | 3 | The layout check found issues. |
+
+## Adding media
+
+`cutcraft add talk.mp4` writes the file's entry into the manifest: its kind, length, size, frame rate and sound, read
+from the file, and its words from the transcript beside it (`talk.json` from Whisper or ElevenLabs, then `talk.vtt`,
+then `talk.srt`). Running it again refreshes the entry and keeps the fields it does not write. See
+[Getting a transcript](/guide/captions-and-sound#getting-a-transcript).
+
+| Option | |
+|---|---|
+| `--manifest <file>` | The manifest to write. Default: `manifest.json` beside the media, created when missing. |
+| `--id <id>` | The asset id. Default: the file name without its extension. One file only. |
+| `--transcript <file>` | A transcript other than the one beside the media. One file only. |

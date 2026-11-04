@@ -3,7 +3,7 @@
 # cutcraft
 
 The [CutCraft](https://prefix-tree.github.io/cutcraft/) command line. It exports a TSX video file to video, audio or
-a still image, and checks its layout. Most files export in Node with no browser; a file with `<Three>` or `<Motion>`
+a still image, writes its captions as subtitles, checks its layout, and adds media to the manifest. Most files export in Node with no browser; a file with `<Three>` or `<Motion>`
 exports through headless Chromium (`npm install playwright-core`, and `CUTCRAFT_CHROMIUM` pointing at Chrome 153+).
 
 ```sh
@@ -11,7 +11,8 @@ npm install cutcraft @cutcraft/kit react zod   # the CLI, and types for the file
 ```
 
 ```sh
-npx cutcraft video.tsx --out video.mp4                     # or .webm, .mov (ProRes)
+npx cutcraft add talk.mp4                                  # the manifest entry, with talk.srt/.vtt/.json as its words
+npx cutcraft video.tsx --out video.mp4 --srt video.srt     # or .webm, .mov (ProRes); --srt/--vtt for subtitles
 npx cutcraft video.tsx --out soundtrack.mp3                # or .wav
 npx cutcraft video.tsx --still 2 --out poster.png          # the frame at 2 s, or .jpg
 npx cutcraft video.tsx --check-layout --safe-zone tiktok   # overlays off the frame, the safe zone or the captions
