@@ -46,7 +46,7 @@ Timed elements: `<Clip src in out|duration speed reverse fit transform volume fa
 (video or image), `<Audio>` (same, audio only), `<Transition type duration>`
 as a sibling *between* two clips of a sequence track, `<Title>` (text as
 children), `<Shape shape width height fill stroke cornerRadius>`, `<Svg>`,
-`<Sticker>`, `<Graphic kind>` (a built-in graphic: see below), `<Adjustment>`, `<Nested of>`, `<Layer>` (arbitrary React inside;
+`<Sticker>`, `<Motion>` and `<Three>` (Motion and three.js on the video's clock), `<Adjustment>`, `<Nested of>`, `<Layer>` (arbitrary React inside;
 call `useT()` for 0..1 progress or `useLayer()` for `elapsed`, `remaining`,
 `duration` and `time` in seconds; shape them with `interpolate()`,
 `spring()` and `random(seed)` from `@cutcraft/kit`). Give a Layer one component child whose
@@ -123,19 +123,13 @@ Give the video one look, the way a designer would, and say it once.
    graphics enter and exit the theme's way; write `enter`/`exit` only where
    one element should differ (`enter={{ type: "draw" }}` for a scribble,
    `{ type: "none" }` to keep one still).
-5. **Prefer a `<Graphic kind>` to drawing one.** Arrows (`arrow`,
-   `curved-arrow`, `hand-arrow`), callouts (`callout`, `speech-bubble`,
-   `badge`, `pill`, `burst`), lower thirds (`lower-third`, `-card`, `-split`),
-   frames (`corner-brackets`, `frame`, `device-frame`), highlights
-   (`underline`, `circle-scribble`, `marker`, `strike`), `progress-bar`,
-   `countdown`, `steps`, `divider`, data (`counter`, `unit-grid`,
-   `comparison`, `sample-size`: write the numbers as props, not a `<Layer>`, so
-   they stay editable), backgrounds (`gradient-background`,
-   `dots-background`, `grid-background`, `waves-background`,
-   `blobs-background`), `confetti`, `sparkles` and `icon` (any Lucide name;
-   `<Sticker src="icon:check">` too). Each takes a few props (`text`, `name`,
-   `color`, `tail`…), sizes itself, and draws in the theme. `width`/`height`
-   set its box; `transform.position` places it from the centre.
+5. **Draw graphics as free code.** A lower third, a callout, a chart or a
+   counter is a `<Motion>` (HTML or SVG children, animated by a `sequence`
+   on the video's clock), a `<Three>` scene, or a `<Layer>` of React that
+   reads `useLayer()`. Take colours and fonts from the theme (`THEMES[theme]`
+   or the composition's palette) and keep the numbers and text in props so
+   they stay editable. `<Graphic kind>` is deprecated: do not use it. The
+   showcase examples (launch, kinetic, data, logo) show each technique.
 6. **Backgrounds go on the lowest track.** A graphic or shape on a track below
    every footage track draws beneath the footage; anything on a later track
    draws above it.

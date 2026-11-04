@@ -1,5 +1,9 @@
 # Unit grid
 
+::: warning Deprecated
+`<Graphic>` and its kinds are deprecated and will be removed in a later release; the lint warns on each one. Draw the same thing with `<Motion>`, `<Three>` or a `<Layer>`: the [examples](/examples) show each, and [Free code](/guide/free-code) explains them.
+:::
+
 `total` units in a grid with `filled` of them coloured, one by one over `fillFor` seconds: "7 in 10". A fractional `filled` colours part of the last unit. Animated: it changes over its whole duration.
 
 <Example src="previews/graphics/unit-grid" alt="Unit grid">

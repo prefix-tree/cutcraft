@@ -1,5 +1,9 @@
 # Underline scribble
 
+::: warning Deprecated
+`<Graphic>` and its kinds are deprecated and will be removed in a later release; the lint warns on each one. Draw the same thing with `<Motion>`, `<Three>` or a `<Layer>`: the [examples](/examples) show each, and [Free code](/guide/free-code) explains them.
+:::
+
 A hand-drawn underline to put under a word. The `draw` entrance writes it on.
 
 <Example src="previews/graphics/underline" alt="Underline scribble">

@@ -1,5 +1,9 @@
 # Curved arrow
 
+::: warning Deprecated
+`<Graphic>` and its kinds are deprecated and will be removed in a later release; the lint warns on each one. Draw the same thing with `<Motion>`, `<Three>` or a `<Layer>`: the [examples](/examples) show each, and [Free code](/guide/free-code) explains them.
+:::
+
 An arrow that arcs from the bottom left to the bottom right of its box; `flip` arcs it downward.
 
 <Example src="previews/graphics/curved-arrow" alt="Curved arrow">

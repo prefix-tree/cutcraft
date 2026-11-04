@@ -184,7 +184,7 @@ function elementsIndex(): string {
 function elementPage(name: string, summary: string): string {
   const component = { ...ELEMENTS, ...ENGINE_LAYERS }[name as keyof typeof ELEMENTS];
   let schema = z.toJSONSchema(component.schema as z.ZodType, { unrepresentable: "any", io: "input" }) as JsonSchema;
-  const lines = [`# \`<${name}>\``, "", summary, ""];
+  const lines = [`# \`<${name}>\``, "", ...(name === "Graphic" ? GRAPHIC_DEPRECATED : []), summary, ""];
   const ex = exampleFor(name);
   if (ex)
     lines.push(
@@ -260,10 +260,19 @@ const example = (src: string, alt: string, code: string): string[] => [
   "</Example>",
 ];
 
+/** At the top of every page about `<Graphic>` and its kinds, until they are removed (decision 0020). */
+const GRAPHIC_DEPRECATED = [
+  "::: warning Deprecated",
+  "`<Graphic>` and its kinds are deprecated and will be removed in a later release; the lint warns on each one. Draw the same thing with `<Motion>`, `<Three>` or a `<Layer>`: the [examples](/examples) show each, and [Free code](/guide/free-code) explains them.",
+  ":::",
+  "",
+];
+
 function graphicsIndex(): string {
   const lines = [
     "# Graphics",
     "",
+    ...GRAPHIC_DEPRECATED,
     "Built-in kinds of `<Graphic>`: pure functions from props and the theme to SVG, drawn the same in the preview and the export. Each card plays its example as the export renders it; its page has the code. Generated from `packages/graphics`; run `pnpm docs:gen` and `pnpm docs:previews`.",
     "",
     ...example("previews/graphics/lower-third", "A lower third", graphicExample("lower-third").code),
@@ -288,6 +297,7 @@ function graphicPage(name: GraphicKindName): string {
   const lines = [
     `# ${kind.title}`,
     "",
+    ...GRAPHIC_DEPRECATED,
     `${kind.description}${kind.animated ? " Animated: it changes over its whole duration." : ""}`,
     "",
     ...example(`previews/graphics/${name}`, kind.title, graphicExample(name).code),

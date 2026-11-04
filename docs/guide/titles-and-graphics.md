@@ -1,7 +1,8 @@
 # Titles and graphics
 
 For the common cases there are ready-made elements: `<Title>` for text, `<Shape>` and `<Svg>` for vector art,
-`<Sticker>` for icons, and `<Graphic>` for animated pieces like lower thirds and counters. Their props show up in an
+`<Sticker>` for icons. Animated pieces like lower thirds, callouts and counters are free code: a `<Motion>` sequence,
+a `<Three>` scene or a `<Layer>` of React (`<Graphic>` drew them before and is deprecated). Their props show up in an
 editor's inspector, and they take colours and fonts from the [theme](./themes). When none of them fits, write
 [free code](./free-code).
 
@@ -10,7 +11,10 @@ editor's inspector, and they take colours and fonts from the [theme](./themes). 
   <Title id="title" anchor="start" offset={0.3} duration={2.2} style="h1" animation={{ preset: "word-by-word" }}>
     Cut by words
   </Title>
-  <Graphic id="who" kind="lower-third" name="Bohdan Snisar" role="Founder" anchor="close" offset={0.4} duration={2.6} />
+  <Motion id="who" anchor="close" offset={0.4} duration={2.6}
+    sequence={[[".name", { opacity: [0, 1], x: [-20, 0] }, { duration: 0.4 }]]}>
+    <div className="name" style={{ position: "absolute", left: 64, bottom: 80, font: "700 40px Inter" }}>Bohdan Snisar</div>
+  </Motion>
   <Shape id="card" anchor="close" duration={3} shape="rectangle" width={720} height={180} style="card" />
 </Track>
 ```
@@ -46,15 +50,14 @@ word or line. [`<Title>`](/reference/elements/title) lists every prop.
 
 ## Graphics
 
-`<Graphic kind="…">` draws one of 34 ready-made graphics: arrows, callouts, badges, lower thirds, frames, highlights,
-progress bars and countdowns, counters and other data graphics, backgrounds, confetti and icons. Each kind has its own
-props, and colours and fonts default to the theme.
+::: warning Deprecated
+`<Graphic kind="…">` (34 ready-made graphics: arrows, callouts, lower thirds, counters, backgrounds, confetti…) is
+deprecated and will be removed in a later release; the lint warns on each one.
+:::
 
-```tsx
-<Graphic id="growth" kind="counter" anchor="hook" at="word:9" duration={3} to={1250} suffix="+" label="customers" />
-```
-
-[The catalog](/reference/graphics/) shows every kind animating, with its props and an example.
+Write graphics as free code instead: a `<Motion>` lower third or callout, an SVG chart animated by Motion, a counter
+as a few lines of React in a `<Layer>`, confetti or a 3D product in a `<Three>` scene. The [examples](/examples) show
+each one next to its file, and [Free code](./free-code) explains the tags.
 
 ## Shapes
 

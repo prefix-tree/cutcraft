@@ -22,7 +22,10 @@ export { iconNames, isIcon } from "./kinds/icon";
 export type { Drawn, GraphicContext, GraphicKind, KindCategory, Label } from "./types";
 export { hash, random } from "./util";
 
-/** Every built-in kind, in catalog order. */
+/**
+ * Every built-in kind, in catalog order.
+ * @deprecated The `<Graphic>` kinds will be removed; write them as free code with `<Motion>`, `<Three>` or a `<Layer>`.
+ */
 export const GRAPHIC_KINDS = {
   arrow: arrow,
   "curved-arrow": curvedArrow,

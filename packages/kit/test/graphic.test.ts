@@ -75,3 +75,25 @@ export default function Video() {
     expect(d[0]?.message).toContain('did you mean "arrow"');
   });
 });
+
+describe("deprecated-graphic", () => {
+  it("warns on every <Graphic>, naming its kind, and on nothing else", () => {
+    const text = `import { Composition, Graphic, Title, Track } from "@cutcraft/kit";
+export default function Video() {
+  return (
+    <Composition fps={30} width={640} height={360}>
+      <Track id="t" layout="free">
+        <Graphic id="who" kind="lower-third" name="A" start={0} duration={2} />
+        <Title id="hi" start={0} duration={2}>Hi</Title>
+      </Track>
+    </Composition>
+  );
+}
+`;
+    const d = lint(text).filter((x) => x.rule === "deprecated-graphic");
+    expect(d).toHaveLength(1);
+    expect(d[0]).toMatchObject({ severity: "warning", id: "who" });
+    expect(d[0]?.message).toContain('<Graphic kind="lower-third"> is deprecated');
+    expect(text.slice(d[0]!.range[0], d[0]!.range[1])).toMatch(/^<Graphic id="who"/);
+  });
+});
