@@ -13,7 +13,7 @@ Shows only a shape of its clip, with a feathered edge or inverted.
 | prop | type | default | required |
 |---|---|---|---|
 | `id` | string |  | yes |
-| `type` | "shape" \| "drawn" \| "matte" | `"shape"` |  |
+| `type` | "shape" \| "drawn" | `"shape"` |  |
 | `shape` | { rect } \| { ellipse } \| { polygon } |  |  |
 | `path` | { points, closed } |  |  |
 | `feather` | number (0..100) | `0` |  |
@@ -21,6 +21,5 @@ Shows only a shape of its clip, with a feathered edge or inverted.
 | `expansion` | number (-100..100) | `0` |  |
 | `opacity` | number (0..1) | `1` |  |
 | `easing` | "linear" \| "ease-in" \| "ease-out" \| "ease-in-out" | `"linear"` |  |
-| `matte` | { source, channel } |  |  |
 
 Children: `keyframe`. [All elements](/reference/elements/)

@@ -22,7 +22,7 @@ Free code in the frame: any React, CSS, canvas or WebGL, placed on the timeline 
 | `duration` | number \| "fill" \| "source" \| { match } |  |  |
 | `enter` | { type, duration, easing } |  |  |
 | `exit` | { type, duration, easing } |  |  |
-| `transform` | { position, scale, rotation, anchor, opacity, borderRadius, crop, rotate3d, perspective, transformStyle } |  |  |
+| `transform` | { position, scale, rotation, anchor, opacity, borderRadius, crop } |  |  |
 | `blend` | "normal" \| "multiply" \| "screen" \| "overlay" \| "darken" \| … 13 more |  |  |
 
 Timed, visual, transformable. Children: `keyframe`. [All elements](/reference/elements/)

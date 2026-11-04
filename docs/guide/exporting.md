@@ -109,11 +109,9 @@ and with captions on top:
   speed, as in the preview), silence through freeze holds, and sample-rate
   conversion. Mute and solo apply.
 
-Not drawn, in the export as in the preview: transition types other than
-crossfade, dips to black or white, wipe, slide and push (drawn as a crossfade), effects with no CSS filter equivalent (besides vignette and grain), colour wheels
-and LUTs, matte masks, audio effects, pitch correction, 3D text and most text
-animation presets. The check reports each of these in your
-file as a `not-rendered` lint warning. An adjustment filters the footage
+Every transition, effect and animation preset the schemas accept is drawn, in the export as in the preview; a type
+the renderers do not draw is not offered. The few remaining limits are listed in
+[What renders](/reference/rendering), and the check reports each as a `not-rendered` warning. An adjustment filters the footage
 beneath it, not overlays, in both. In the preview only: an overlay's `blend`
 does not mix with the footage. Text in the export differs from the browser's
 by anti-aliasing and sub-pixel placement.

@@ -20,14 +20,6 @@ define(makePropHandler({
 }));
 define(makePropHandler({ type: "clip/setReverse", kinds: SOURCE_KINDS, write: (p) => ({ reverse: p.value }) }));
 define(makePropHandler({
-  type: "clip/setPitchCorrection",
-  kinds: SOURCE_KINDS,
-  write: (p) => ({ pitchCorrection: p.value }),
-}));
-define(makePropHandler({ type: "clip/setSmoothSlowMo", kinds: ["clip"], write: (p) => ({ smoothSlowMo: p.value }) }));
-define(makePropHandler({ type: "clip/setStabilization", kinds: ["clip"], write: (p) => ({ stabilize: p.value }) }));
-define(makePropHandler({ type: "clip/setChromaKey", kinds: ["clip"], write: (p) => ({ chromaKey: p.value }) }));
-define(makePropHandler({
   type: "clip/setBlend",
   kinds: VISUAL_KINDS,
   write: (p) => ({
@@ -35,7 +27,6 @@ define(makePropHandler({
     ...(p.opacity !== undefined ? { blendOpacity: p.opacity } : {}),
   }),
 }));
-define(makePropHandler({ type: "clip/setEmphasis", kinds: VISUAL_KINDS, write: (p) => ({ emphasis: p.value }) }));
 define(makePropHandler({ type: "clip/setFit", kinds: ["clip", "nested"], write: (p) => ({ fit: p.value }) }));
 define(makePropHandler({
   type: "clip/setSource",

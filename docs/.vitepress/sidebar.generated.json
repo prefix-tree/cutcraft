@@ -144,10 +144,6 @@
         {
           "text": "Audio",
           "link": "/reference/elements/audio"
-        },
-        {
-          "text": "AudioEffect",
-          "link": "/reference/elements/audioeffect"
         }
       ]
     }

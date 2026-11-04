@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { zBlendMode, zEasing, zEmphasisAnimation, zFitMode, zGraphicAnimation } from "../enums";
+import { zBlendMode, zEasing, zFitMode, zGraphicAnimation } from "../enums";
 
 export const ID_PATTERN = /^[A-Za-z_][A-Za-z0-9_-]*$/;
 export const TIME_REF_PATTERN = /^(word|shot|silence):\d+(\.end)?$|^marker:[A-Za-z_][A-Za-z0-9_-]*$/;
@@ -69,9 +69,6 @@ export const transformSchema = z.strictObject({
       height: z.number().min(0).max(1),
     })
     .optional(),
-  rotate3d: vec3Schema.optional(),
-  perspective: z.number().min(100).max(5000).optional(),
-  transformStyle: z.enum(["flat", "preserve-3d"]).optional(),
 });
 
 export const visualProps = {
@@ -79,22 +76,6 @@ export const visualProps = {
   fit: zFitMode.optional(),
   blend: zBlendMode.optional(),
   blendOpacity: z.number().min(0).max(1).optional(),
-  emphasis: z
-    .union([
-      zEmphasisAnimation,
-      z.strictObject({
-        type: zEmphasisAnimation,
-        speed: z.number().positive().optional(),
-        intensity: z.number().min(0).optional(),
-        loop: z.boolean().optional(),
-        focusPoint: vec2Schema.optional(),
-        zoomScale: z.number().positive().optional(),
-        holdDuration: z.number().nonnegative().optional(),
-        startTime: z.number().nonnegative().optional(),
-        animationDuration: z.number().positive().optional(),
-      }),
-    ])
-    .optional(),
 };
 
 export const automationPointsSchema = z.array(z.tuple([z.number().nonnegative(), z.number()]));

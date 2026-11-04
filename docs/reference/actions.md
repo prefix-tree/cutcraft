@@ -1,6 +1,6 @@
 # Actions
 
-Generated from the registered handlers (131). Do not edit by hand; run `pnpm docs:gen`.
+Generated from the registered handlers (119). Do not edit by hand; run `pnpm docs:gen`.
 
 Every action has `validate`, `apply`, `invert` and `fold`; the inverse is never null. Params are typed in `packages/kit/src/actions/types/index.ts`.
 
@@ -21,18 +21,6 @@ Every action has `validate`, `apply`, `invert` and `fold`; the inverse is never 
 | `audio/setDuck` |  |
 | `audio/setFade` |  |
 | `audio/setVolume` |  |
-
-## `audioEffect/`
-
-| action | note |
-|---|---|
-| `audioEffect/add` |  |
-| `audioEffect/remove` |  |
-| `audioEffect/restore` |  |
-| `audioEffect/setOrder` | parity with the video stack |
-| `audioEffect/setStack` | parity with the video stack |
-| `audioEffect/toggle` |  |
-| `audioEffect/update` |  |
 
 ## `batch/`
 
@@ -69,15 +57,10 @@ Every action has `validate`, `apply`, `invert` and `fold`; the inverse is never 
 | `clip/roll` |  |
 | `clip/setAnchor` |  |
 | `clip/setBlend` |  |
-| `clip/setChromaKey` |  |
-| `clip/setEmphasis` |  |
 | `clip/setFit` |  |
-| `clip/setPitchCorrection` |  |
 | `clip/setReverse` |  |
-| `clip/setSmoothSlowMo` |  |
 | `clip/setSource` | media-slot replacement |
 | `clip/setSpeed` |  |
-| `clip/setStabilization` |  |
 | `clip/slide` |  |
 | `clip/slip` |  |
 | `clip/split` |  |
@@ -126,7 +109,7 @@ Every action has `validate`, `apply`, `invert` and `fold`; the inverse is never 
 | `keyframe/add` |  |
 | `keyframe/move` |  |
 | `keyframe/remove` |  |
-| `keyframe/restore` | undo of keyframe/remove keeps easing and handles |
+| `keyframe/restore` | undo of keyframe/remove keeps its easing |
 | `keyframe/setAll` |  |
 | `keyframe/update` |  |
 

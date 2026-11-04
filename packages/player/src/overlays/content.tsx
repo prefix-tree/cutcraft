@@ -3,7 +3,7 @@
 
 import { Children, type CSSProperties, cloneElement, isValidElement, type ReactNode } from "react";
 
-import { type Placement, RENDERED_TITLE_ANIMATIONS } from "@cutcraft/kit";
+import { type Placement, TEXT_ANIMATION_PRESETS } from "@cutcraft/kit";
 
 import { isVisibleAt } from "../model/visible";
 import { devWarn } from "../warn";
@@ -15,7 +15,7 @@ import type { ElementProps } from "./layout";
  * hands the same trees to Satori and draws the result with the same layout.
  */
 
-const SUPPORTED: ReadonlySet<string> = new Set(RENDERED_TITLE_ANIMATIONS);
+const SUPPORTED: ReadonlySet<string> = new Set(TEXT_ANIMATION_PRESETS);
 
 /** A title's box: its width and height props, the whole frame when left out. */
 export function titleBox(

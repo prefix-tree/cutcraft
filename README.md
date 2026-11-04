@@ -176,7 +176,7 @@ videos, each tested) and [the worked example](examples/launch-recap).
 | | |
 |---|---|
 | Works | Resolving, every editor action with undo, writing edits back to the file, lint. Playback with seek, rate and loop; crossfade, dip, wipe, slide and push transitions; keyframes on transforms, effects, colour and sound; speed ramps and freeze frames with their audio; masks, overlays, captions and ducking. Export with frame-exact pictures, and the layout check. |
-| Partial | Other transition types draw as a crossfade. Effects with no CSS filter (vignette and grain do draw), colour wheels, curves and LUTs, matte masks, audio effects, pitch correction and 3D transforms are accepted but not drawn yet, and the lint says so ([what renders](https://prefix-tree.github.io/cutcraft/reference/rendering)). The Node export draws a `<Layer>` with a subset of CSS; `--engine browser` draws all of it. |
+| Partial | Six transitions, fourteen effects and nine title presets, all drawn: what the schemas accept is what renders, with a few limits listed in [what renders](https://prefix-tree.github.io/cutcraft/reference/rendering). The Node export draws a `<Layer>` with a subset of CSS; `--engine browser` draws all of it. |
 
 ## Roadmap
 
@@ -186,8 +186,8 @@ videos, each tested) and [the worked example](examples/launch-recap).
    and a `<Transition>` will take your own component along with its progress.
 3. An effects library: GPU effects for clips and layers, with options you can animate and an inspector for each.
    LUTs, curves, colour wheels and levels, chroma key, matte masks, glow, sharpen, light leaks, film grain, chromatic
-   aberration, zoom blur and glitch, plus zoom, glitch and 3D transitions. Most of what is accepted but not drawn
-   today moves here, and the preview and the export draw it the same way.
+   aberration, zoom blur and glitch, plus zoom, glitch and 3D transitions, written as shaders you can also write
+   yourself, drawn the same way in the preview and the export.
 4. An open editor package with the timeline, inspector and preview gestures over the action set.
 
 ## Contributing

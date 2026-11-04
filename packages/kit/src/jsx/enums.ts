@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-// Every list is adopted from OpenReel's core so the two editors agree on names.
+// Every value here is drawn by the player and the export: a type the renderers do not draw is not offered.
 
 export const TRACK_LAYOUTS = ["sequence", "free"] as const;
 export const TRACK_ROLES = ["general", "captions", "dialogue", "music", "effects", "ambience"] as const;
@@ -84,32 +84,7 @@ export const EASINGS = [
 
 export const MASK_EASINGS = ["linear", "ease-in", "ease-out", "ease-in-out"] as const;
 
-export const TRANSITION_TYPES = [
-  "crossfade",
-  "dipToBlack",
-  "dipToWhite",
-  "wipe",
-  "slide",
-  "zoom",
-  "push",
-  "circleReveal",
-  "blur",
-  "whipPan",
-  "radialWipe",
-  "pixelate",
-  "glitch",
-  "blinds",
-  "diamondReveal",
-  "spin",
-  "flip",
-  "splitReveal",
-  "flash",
-  "filmBurn",
-  "mosaic",
-  "ripple",
-  "pageTurn",
-  "colorSplit",
-] as const;
+export const TRANSITION_TYPES = ["crossfade", "dipToBlack", "dipToWhite", "wipe", "slide", "push"] as const;
 
 export const VIDEO_EFFECT_TYPES = [
   "brightness",
@@ -119,31 +94,13 @@ export const VIDEO_EFFECT_TYPES = [
   "temperature",
   "tint",
   "blur",
-  "sharpen",
   "vignette",
   "grain",
   "shadow",
-  "glow",
-  "motion-blur",
-  "radial-blur",
-  "chromatic-aberration",
   "grayscale",
   "sepia",
   "invert",
   "levels",
-  "hue-saturation",
-] as const;
-
-export const AUDIO_EFFECT_TYPES = [
-  "gain",
-  "pan",
-  "eq",
-  "compressor",
-  "reverb",
-  "delay",
-  "noiseReduction",
-  "fadeIn",
-  "fadeOut",
 ] as const;
 
 export const TEXT_ANIMATION_PRESETS = [
@@ -155,33 +112,10 @@ export const TEXT_ANIMATION_PRESETS = [
   "slide-left",
   "slide-right",
   "scale",
-  "blur",
-  "bounce",
-  "rotate",
-  "pop",
-  "flip",
-  "split",
   "word-by-word",
-  "rise",
-  "drop",
-  "elastic",
-  "swing",
-  "zoom-blur",
-  "cascade",
-  "wave",
-  "shake",
-  "rainbow",
-  "glitch",
 ] as const;
 
-export const CAPTION_ANIMATIONS = [
-  "none",
-  "word-highlight",
-  "word-by-word",
-  "karaoke",
-  "bounce",
-  "typewriter",
-] as const;
+export const CAPTION_ANIMATIONS = ["none", "word-highlight", "word-by-word", "karaoke", "typewriter"] as const;
 
 export const GRAPHIC_ANIMATIONS = [
   "none",
@@ -206,35 +140,6 @@ export const GRAPHIC_ANIMATIONS = [
   "flip-vertical",
 ] as const;
 
-export const EMPHASIS_ANIMATIONS = [
-  "none",
-  "pulse",
-  "shake",
-  "bounce",
-  "float",
-  "spin",
-  "flash",
-  "heartbeat",
-  "swing",
-  "wobble",
-  "jello",
-  "rubber-band",
-  "tada",
-  "vibrate",
-  "flicker",
-  "glow",
-  "breathe",
-  "wave",
-  "tilt",
-  "zoom-pulse",
-  "focus-zoom",
-  "pan-left",
-  "pan-right",
-  "pan-up",
-  "pan-down",
-  "ken-burns",
-] as const;
-
 export const SHAPE_TYPES = [
   "rectangle",
   "circle",
@@ -250,13 +155,9 @@ export const SHAPE_TYPES = [
 export const KEYFRAME_PROPERTIES = [
   "transform.position.x",
   "transform.position.y",
-  "transform.position.z",
   "transform.scale.x",
   "transform.scale.y",
   "transform.rotation",
-  "transform.rotation.x",
-  "transform.rotation.y",
-  "transform.perspective",
   "transform.opacity",
   "transform.anchor.x",
   "transform.anchor.y",
@@ -269,7 +170,6 @@ export const KEYFRAME_PROPERTIES = [
   "audio.pan",
   "colorGrade.temperature",
   "colorGrade.tint",
-  "path",
 ] as const;
 
 /** `effect.<effectId>.<param>` is also a valid keyframe property; see `isKeyframeProperty`. */
@@ -284,10 +184,7 @@ export const TEXT_ALIGNS = ["left", "center", "right", "justify"] as const;
 export const TEXT_VALIGNS = ["top", "middle", "bottom"] as const;
 export const TEXT_DECORATIONS = ["none", "underline", "line-through", "overline"] as const;
 export const ANIMATION_UNITS = ["character", "word", "line"] as const;
-export const MASK_TYPES = ["shape", "drawn", "matte"] as const;
-export const MATTE_CHANNELS = ["alpha", "luminance", "bounds"] as const;
-export const INTERPOLATION_QUALITIES = ["low", "medium", "high"] as const;
-export const STABILIZE_CROP_MODES = ["auto", "none"] as const;
+export const MASK_TYPES = ["shape", "drawn"] as const;
 export const SVG_COLOR_MODES = ["none", "tint", "replace"] as const;
 export const AUTOMATION_LANES = ["volume", "pan"] as const;
 export const TRACK_FLAGS = ["locked", "hidden", "muted", "solo"] as const;
@@ -300,11 +197,9 @@ export const zEasing = z.enum(EASINGS);
 export const zMaskEasing = z.enum(MASK_EASINGS);
 export const zTransitionType = z.enum(TRANSITION_TYPES);
 export const zVideoEffectType = z.enum(VIDEO_EFFECT_TYPES);
-export const zAudioEffectType = z.enum(AUDIO_EFFECT_TYPES);
 export const zTextAnimationPreset = z.enum(TEXT_ANIMATION_PRESETS);
 export const zCaptionAnimation = z.enum(CAPTION_ANIMATIONS);
 export const zGraphicAnimation = z.enum(GRAPHIC_ANIMATIONS);
-export const zEmphasisAnimation = z.enum(EMPHASIS_ANIMATIONS);
 export const zShapeType = z.enum(SHAPE_TYPES);
 export const zKeyframeProperty = z.string().refine(isKeyframeProperty, "unknown keyframe property");
 
@@ -315,5 +210,4 @@ export type BlendMode = (typeof BLEND_MODES)[number];
 export type Easing = (typeof EASINGS)[number];
 export type TransitionType = (typeof TRANSITION_TYPES)[number];
 export type VideoEffectType = (typeof VIDEO_EFFECT_TYPES)[number];
-export type AudioEffectType = (typeof AUDIO_EFFECT_TYPES)[number];
 export type TrackFlag = (typeof TRACK_FLAGS)[number];

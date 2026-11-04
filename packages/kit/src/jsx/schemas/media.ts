@@ -1,21 +1,6 @@
 import { z } from "zod";
 
-import { assetRefSchema, audioProps, colorSchema, timedProps, timeRefSchema, visualProps } from "./common";
-import { zInterpolation, zStabilizeCrop } from "./enums-local";
-
-export const chromaKeySchema = z.strictObject({
-  enabled: z.boolean().default(true),
-  color: colorSchema.default("#00ff00"),
-  tolerance: z.number().min(0).max(1).default(0.3),
-  edgeSoftness: z.number().min(0).max(1).default(0.1),
-  spillSuppression: z.number().min(0).max(1).default(0.5),
-});
-
-export const stabilizeSchema = z.strictObject({
-  enabled: z.boolean().default(true),
-  strength: z.number().min(0).max(1).default(0.5),
-  crop: zStabilizeCrop.default("auto"),
-});
+import { assetRefSchema, audioProps, timedProps, timeRefSchema, visualProps } from "./common";
 
 const sourceProps = {
   src: assetRefSchema,
@@ -23,8 +8,6 @@ const sourceProps = {
   out: timeRefSchema.optional(),
   speed: z.number().min(0.1).max(20).default(1),
   reverse: z.boolean().default(false),
-  pitchCorrection: z.boolean().default(false),
-  audioTrack: z.number().int().nonnegative().default(0),
 };
 
 export const clipSchema = z.strictObject({
@@ -43,11 +26,6 @@ export const clipSchema = z.strictObject({
         .default("center"),
     })
     .optional(),
-  smoothSlowMo: z.boolean().default(false),
-  interpolation: zInterpolation.optional(),
-  stabilize: stabilizeSchema.optional(),
-  chromaKey: chromaKeySchema.optional(),
-  behindSubject: z.boolean().default(false),
 });
 
 /** `<Audio>` is `<Clip>` for audio-only assets: the same schema, no visual props accepted. */

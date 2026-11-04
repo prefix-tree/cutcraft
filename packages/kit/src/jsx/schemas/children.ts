@@ -1,8 +1,8 @@
 import { z } from "zod";
 
-import { zAudioEffectType, zEasing, zKeyframeProperty, zMaskEasing, zVideoEffectType } from "../enums";
+import { zEasing, zKeyframeProperty, zMaskEasing, zVideoEffectType } from "../enums";
 import { idSchema, vec2Schema } from "./common";
-import { zMaskType, zMatteChannel } from "./enums-local";
+import { zMaskType } from "./enums-local";
 
 const paramValue = z.union([
   z.number(),
@@ -20,40 +20,8 @@ export const effectSchema = z.strictObject({
   enabled: z.boolean().default(true),
 });
 
-export const audioEffectSchema = z.strictObject({
-  id: idSchema,
-  type: zAudioEffectType,
-  params: paramsSchema.default({}),
-  enabled: z.boolean().default(true),
-});
-
-const rgb = z.strictObject({
-  r: z.number().min(-1).max(1),
-  g: z.number().min(-1).max(1),
-  b: z.number().min(-1).max(1),
-});
-const curve = z.array(vec2Schema).min(2);
-const eightBands = z.array(z.number()).length(8);
-
 export const colorGradeSchema = z.strictObject({
   id: idSchema,
-  wheels: z
-    .strictObject({
-      shadows: rgb.optional(),
-      midtones: rgb.optional(),
-      highlights: rgb.optional(),
-      shadowsLift: z.number().min(-1).max(1).optional(),
-      midtonesGamma: z.number().min(0.1).max(4).optional(),
-      highlightsGain: z.number().min(0).max(4).optional(),
-    })
-    .optional(),
-  curves: z
-    .strictObject({ rgb: curve.optional(), red: curve.optional(), green: curve.optional(), blue: curve.optional() })
-    .optional(),
-  lut: z.strictObject({ src: z.string(), intensity: z.number().min(0).max(1).default(1) }).optional(),
-  hsl: z
-    .strictObject({ hue: eightBands.optional(), saturation: eightBands.optional(), luminance: eightBands.optional() })
-    .optional(),
   temperature: z.number().min(-100).max(100).optional(),
   tint: z.number().min(-100).max(100).optional(),
 });
@@ -65,8 +33,6 @@ export const keyframeSchema = z.strictObject({
   at: z.number().nonnegative(),
   value: z.unknown(),
   easing: zEasing.default("linear"),
-  handles: z.strictObject({ in: vec2Schema, out: vec2Schema }).optional(),
-  roving: z.boolean().optional(),
 });
 
 export const speedKeySchema = z.strictObject({
@@ -130,5 +96,4 @@ export const maskSchema = z.strictObject({
   expansion: z.number().min(-100).max(100).default(0),
   opacity: z.number().min(0).max(1).default(1),
   easing: zMaskEasing.default("linear"),
-  matte: z.strictObject({ source: idSchema, channel: zMatteChannel.default("bounds") }).optional(),
 });

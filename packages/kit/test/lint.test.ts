@@ -5,7 +5,7 @@ import { buildSourceIndex, lint } from "@cutcraft/kit/source";
 import { fixtureText, manifest } from "./helpers";
 
 const wrap = (body: string, extra = "") => `
-import { Composition, Track, Clip, Layer, Title, Transition, Effect, AudioEffect, Adjustment, SpeedKey, Freeze, Mask, ColorGrade, Keyframe } from "@cutcraft/kit";
+import { Composition, Track, Clip, Layer, Title, Transition, Effect, Adjustment, SpeedKey, Freeze, Mask, ColorGrade, Keyframe } from "@cutcraft/kit";
 ${extra}
 export default function V() {
   return (<Composition fps={30} width={1920} height={1080}>${body}</Composition>);
@@ -13,12 +13,9 @@ export default function V() {
 `;
 
 describe("lint", () => {
-  it("accepts the sample file, warning only about the gap on its main track and what does not render", () => {
+  it("accepts the sample file, warning only about the gap on its main track", () => {
     const d = lint(fixtureText, { manifest });
-    expect(d.filter((x) => x.rule !== "not-rendered").map((x) => `${x.severity}:${x.rule}:${x.id}`)).toEqual([
-      "warning:sequence-gap:g1",
-    ]);
-    expect(d.filter((x) => x.rule === "not-rendered").map((x) => x.id)).toEqual(["st1", "adj1", "ae1"]);
+    expect(d.map((x) => `${x.severity}:${x.rule}:${x.id}`)).toEqual(["warning:sequence-gap:g1"]);
   });
 
   it("flags missing and non-literal ids", () => {
@@ -205,56 +202,15 @@ describe("lint", () => {
         .filter((d) => d.rule === "not-rendered")
         .map((d) => `${d.severity}:${d.id}.${d.prop ?? ""}: ${d.message}`);
 
-    it("warns on enum values that draw as something else", () => {
-      expect(
-        notRendered(
-          '<Track id="t"><Clip id="a" src="asset:city" /><Transition id="x" type="glitch" /><Clip id="b" src="asset:city" /></Track>',
-        ),
-      ).toEqual(['warning:x.type: "x" <Transition> type "glitch" draws as a crossfade']);
-      expect(
-        notRendered(
-          '<Track id="t"><Clip id="c" src="asset:city"><Effect id="v" type="glow" /><AudioEffect id="r" type="reverb" /></Clip></Track>',
-        ),
-      ).toEqual([
-        'warning:v.type: "v" <Effect> type "glow" is ignored: the picture renders without it',
-        'warning:r.type: "r" <AudioEffect> type "reverb" is ignored: the audio plays without it',
-      ]);
-      expect(notRendered('<Track id="t"><Title id="h" animation={{ preset: "bounce" }}>Hi</Title></Track>')).toEqual([
-        'warning:h.animation: "h" <Title> animation.preset "bounce" shows as a fade',
-      ]);
-    });
-
-    it("warns on accepted props that are ignored, but not on values that ask for nothing", () => {
-      expect(
-        notRendered(
-          '<Track id="t"><Clip id="c" src="asset:city" reverse emphasis="pulse" chromaKey={{ color: "#0f0" }} transform={{ rotate3d: { x: 0, y: 1, z: 0 } }} /></Track>',
-        ).map((d) => d.split(":")[1]),
-      ).toEqual(["c.emphasis", "c.chromaKey", "c.transform"]);
-      expect(
-        notRendered(
-          '<Track id="t"><Clip id="c" src="asset:city" reverse={false} emphasis="none" audioTrack={0} /><Adjustment id="a" affects="all" duration={1} /></Track>',
-        ),
-      ).toEqual([]);
-      expect(notRendered('<Track id="t"><Adjustment id="a" affects={["c"]} duration={1} /></Track>')).toHaveLength(1);
-    });
-
-    it("warns on SpeedKey and Freeze inside a Nested only, and on masks that do not render", () => {
+    it("warns on SpeedKey and Freeze inside a Nested only, and on a second mask or one on a title", () => {
       const d = notRendered(`<Track id="t">
-        <Clip id="c" src="asset:city"><SpeedKey id="s" at={1} speed={2} /><Freeze id="f" at={1} start={0} duration={1} /><Mask id="m1" /><Mask id="m2" /><Mask id="m3" type="matte" matte={{ source: "c" }} /></Clip>
+        <Clip id="c" src="asset:city"><SpeedKey id="s" at={1} speed={2} /><Freeze id="f" at={1} start={0} duration={1} /><Mask id="m1" /><Mask id="m2" /></Clip>
         <Title id="h">Hi<Mask id="m4" /></Title>
         <Nested id="n" duration={3}><SpeedKey id="ns" at={1} speed={2} /><Freeze id="nf" at={1} start={0} duration={1} /></Nested>
       </Track>`);
-      expect(d.map((x) => x.split(":")[1])).toEqual(["m2.", "m3.", "m3.type", "m3.matte", "m4.", "ns.", "nf."]);
-      expect(d[5]).toContain("is ignored inside <Nested>");
-      expect(d[4]).toContain("masks render on clips and nested sequences only");
-    });
-
-    it("warns on a diagonal or soft wipe, which draws as a hard wipe to the left", () => {
-      expect(
-        notRendered(
-          '<Track id="t"><Clip id="a" src="asset:city" /><Transition id="x" type="wipe" params={{ direction: "diagonal", softness: 0.3 }} /><Clip id="b" src="asset:city" /></Track>',
-        ).map((d) => d.split(":")[1]),
-      ).toEqual(["x.params", "x.params"]);
+      expect(d.map((x) => x.split(":")[1])).toEqual(["m2.", "m4.", "ns.", "nf."]);
+      expect(d[2]).toContain("is ignored inside <Nested>");
+      expect(d[1]).toContain("masks render on clips and nested sequences only");
     });
 
     it("warns on a levels gamma, which has no filter form", () => {
@@ -265,14 +221,6 @@ describe("lint", () => {
       ).toEqual([
         'warning:lv.params: "lv" <Effect> params.gamma is ignored: levels render their black and white points only',
       ]);
-    });
-
-    it("warns on path keyframes and on keyframe handles and roving, which do not render", () => {
-      expect(
-        notRendered(
-          '<Track id="t"><Clip id="c" src="asset:city"><Keyframe id="p" property="path" at={0} value="M0 0" /><Keyframe id="h" property="transform.opacity" at={0} value={1} handles={{ in: { x: 0, y: 0 }, out: { x: 1, y: 1 } }} roving /><Keyframe id="f" property="effect.e.radius" at={0} value={2} /></Clip></Track>',
-        ).map((d) => d.split(":")[1]),
-      ).toEqual(["p.property", "h.handles", "h.roving"]);
     });
 
     it("warns on an overlay's blend, which mixes with the footage in the export only", () => {

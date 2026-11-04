@@ -1,4 +1,4 @@
-import type { Placement, RENDERED_EFFECTS } from "@cutcraft/kit";
+import type { Placement, VIDEO_EFFECT_TYPES } from "@cutcraft/kit";
 
 import { devWarn } from "../warn";
 import { keyframedValue } from "./keyframes";
@@ -31,13 +31,12 @@ function levels(p: Params): string {
   return `brightness(${s / c}) contrast(${c})`;
 }
 
-// TODO(sharpen): no CSS filter form; needs a getImageData unsharp-mask pass in the painter (slow on 1080p, preview and export). Until then the not-rendered lint reports it.
 /** Effects the painter draws over the element after it (`postEffects`), not as filters. */
 const POST_TYPES = ["vignette", "grain"] as const;
 
-/** One filter per rendered effect type: kit's RENDERED_EFFECTS, which the `not-rendered` lint reads, less the post effects. */
+/** One filter per effect type (kit's VIDEO_EFFECT_TYPES), less the post effects. */
 const CANVAS_FILTERABLE: Readonly<
-  Record<Exclude<(typeof RENDERED_EFFECTS)[number], (typeof POST_TYPES)[number]>, (p: Params) => string>
+  Record<Exclude<(typeof VIDEO_EFFECT_TYPES)[number], (typeof POST_TYPES)[number]>, (p: Params) => string>
 > = {
   brightness: (p) => `brightness(${1 + num(p, ["amount", "value"], 0) / 100})`,
   contrast: (p) => `contrast(${1 + num(p, ["amount", "value"], 0) / 100})`,

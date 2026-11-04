@@ -4,7 +4,6 @@ import { join } from "node:path";
 import { z } from "zod";
 
 import { GRAPHIC_KIND_NAMES, GRAPHIC_KINDS, type GraphicKindName } from "../packages/graphics/src/index";
-import { OURS_ONLY } from "../packages/kit/scripts/parity-table";
 import {
   ELEMENTS,
   ENGINE_LAYERS,
@@ -115,10 +114,7 @@ const ELEMENT_DOCS: Record<string, readonly (readonly [element: string, summary:
     ["Angle", "One camera of a `<Multicam>`: its asset and sync offset."],
     ["Cut", "Switches a `<Multicam>` to an angle at a moment."],
   ],
-  Sound: [
-    ["Audio", "A stretch of a sound asset: volume, fades, ducking under another track, automation."],
-    ["AudioEffect", "An effect on an `<Audio>`'s sound."],
-  ],
+  Sound: [["Audio", "A stretch of a sound asset: volume, fades, ducking under another track, automation."]],
 };
 /** Elements with no rendered example (the Node export does not draw them yet): code, and a note. */
 const CODE_ONLY: Record<string, string> = {
@@ -356,11 +352,33 @@ function graphicPage(name: GraphicKindName): string {
   return lines.join("\n");
 }
 
+/** A line on the actions page for the actions whose name does not say it all. */
+const ACTION_NOTES: Readonly<Record<string, string>> = {
+  "batch/apply": "one history entry for multi-action gestures and compound inverses",
+  "composition/setProps": "the tweaks panel: rewrites the file's `defaults` literal",
+  "composition/setTheme": "the file's theme: swap it, extend it or remove it in one step",
+  "theme/setToken": "one palette colour, font role or radius in the file's theme",
+  "graphic/create": "a built-in graphic kind (`<Graphic>`)",
+  "graphic/update": "a built-in graphic kind (`<Graphic>`)",
+  "graphic/remove": "a built-in graphic kind (`<Graphic>`)",
+  "clip/setSource": "media-slot replacement",
+  "keyframe/restore": "undo of keyframe/remove keeps its easing",
+  "caption/setAnimation": "caption animation style as its own action",
+  "multicam/restoreCut": "undo of removeCut",
+  "multicam/remove": "a multicam group is an element and can be deleted",
+  "mask/restore": "undo of mask/remove",
+  "multicam/setActiveAngle": "angle selection",
+  "layer/setTiming": "the <Layer> escape hatch",
+  "layer/setTransform": "the <Layer> escape hatch",
+  "layer/setProps": "the handles of a Layer's component",
+  "source/bake": "expand generated elements into literals",
+  "source/setProp": "generic inspector write",
+  "source/setProps": "the inverse of every prop-writing action",
+  "track/setLayout": "sequence ↔ free",
+};
+
 function actionsPage(): string {
-  // Notes that compare with another editor are for contributors (the kit's parity table), not for this page.
-  const notes = new Map(
-    OURS_ONLY.filter(([, note]) => !/openreel/i.test(note)).map(([type, note]) => [type, note] as const),
-  );
+  const notes = new Map(Object.entries(ACTION_NOTES));
   const groups = new Map<string, string[]>();
   for (const type of listHandlers()) {
     const ns = type.split("/")[0]!;

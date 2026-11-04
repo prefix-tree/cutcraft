@@ -2,10 +2,10 @@ import {
   type BlendMode,
   type FitMode,
   lookupAsset,
+  MASK_TYPES,
   type Placement,
-  RENDERED_MASK_TYPES,
-  RENDERED_TRANSITIONS,
   type ResolvedState,
+  TRANSITION_TYPES,
   type Transform,
 } from "@cutcraft/kit";
 
@@ -190,7 +190,7 @@ function mediaOp(
   if (item.transition) {
     const x = item.transition.placement;
     const type = String(x.props.type ?? "crossfade");
-    if (!(RENDERED_TRANSITIONS as readonly string[]).includes(type)) {
+    if (!(TRANSITION_TYPES as readonly string[]).includes(type)) {
       const key = `transition:${x.id}:${type}`;
       devWarn(key, `transition "${type}" on "${x.id}" is drawn as a crossfade`);
       warnings.push(`transition ${x.id}: ${type} drawn as crossfade`);
@@ -276,8 +276,8 @@ function dipOp(x: Placement, amount: number, width: number, height: number): Dra
 function maskOf(children: readonly Placement[], warnings: string[]): MaskSpec | undefined {
   const m = children.find((c) => c.kind === "mask");
   if (!m) return undefined;
-  if (!(RENDERED_MASK_TYPES as readonly unknown[]).includes(m.props.type ?? "shape") || m.props.matte) {
-    warnings.push(`mask ${m.id}: matte masks are not rendered`);
+  if (!(MASK_TYPES as readonly unknown[]).includes(m.props.type ?? "shape")) {
+    warnings.push(`mask ${m.id}: type ${String(m.props.type)} is not rendered`);
     return undefined;
   }
   return {

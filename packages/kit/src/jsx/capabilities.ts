@@ -13,7 +13,7 @@ const none: ElementCapabilities = {
 
 const with_ = (over: Partial<ElementCapabilities>): ElementCapabilities => ({ ...none, ...over });
 
-const CLIP_CHILDREN = ["effect", "audioEffect", "colorGrade", "keyframe", "mask", "speedKey", "freeze"] as const;
+const CLIP_CHILDREN = ["effect", "colorGrade", "keyframe", "mask", "speedKey", "freeze"] as const;
 const OVERLAY_CHILDREN = ["effect", "keyframe", "mask"] as const;
 
 /**
@@ -61,7 +61,7 @@ export const KIND_CAPABILITIES: Readonly<Record<string, ElementCapabilities>> = 
     audio: true,
     trimSource: true,
     container: true,
-    childKinds: ["audioEffect", "keyframe"],
+    childKinds: ["keyframe"],
     placementScope: "track",
   }),
   gap: with_({ timed: true, placementScope: "track" }),
@@ -140,7 +140,6 @@ export const KIND_CAPABILITIES: Readonly<Record<string, ElementCapabilities>> = 
     placementScope: "track",
   }),
   effect: with_({ placementScope: "child" }),
-  audioEffect: with_({ placementScope: "child" }),
   colorGrade: with_({ placementScope: "child" }),
   keyframe: with_({ placementScope: "child" }),
   speedKey: with_({ placementScope: "child" }),

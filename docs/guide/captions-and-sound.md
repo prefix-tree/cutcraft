@@ -105,4 +105,4 @@ A clip plays its own sound. For music and voice-over, use `<Audio>`, usually on 
 `duration="fill"` runs the music to the end of the video, however long the edit becomes. Speed ramps and freezes on
 a clip apply to its sound as well.
 
-Audio effects (`<AudioEffect>`) and pitch correction are accepted but not played yet, and the lint says so.
+There are no audio effects: a clip's sound plays with its volume, fades, automation, ducking and speed.

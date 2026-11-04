@@ -1,4 +1,4 @@
-import { AUDIO_EFFECT_TYPES, isKeyframeProperty, VIDEO_EFFECT_TYPES } from "../../jsx/enums";
+import { isKeyframeProperty, VIDEO_EFFECT_TYPES } from "../../jsx/enums";
 import type { Json, PatchLog } from "../../patches/types";
 import type { ResolvedState } from "../../resolve/resolve";
 import { define, makePropHandler, rawNode, rawProp, setProps, siblingAfter, validateTarget } from "../handler-kit";
@@ -42,8 +42,8 @@ function replaceAll(
   }
 }
 
-/** effect/* and audioEffect/* share one shape: an ordered stack of children with type/params/enabled. */
-function stackHandlers(ns: "effect" | "audioEffect", kind: string, types: readonly string[]) {
+/** effect/*: an ordered stack of children with type/params/enabled. */
+function stackHandlers(ns: "effect", kind: string, types: readonly string[]) {
   const t = <N extends string>(n: N) => `${ns}/${n}` as ActionType;
   define({
     type: t("add") as "effect/add",
@@ -199,7 +199,6 @@ function lastNonStack(state: ResolvedState, parentId: string, kind: string): str
 }
 
 stackHandlers("effect", "effect", VIDEO_EFFECT_TYPES);
-stackHandlers("audioEffect", "audioEffect", AUDIO_EFFECT_TYPES);
 
 /** One `<ColorGrade>` child per clip, created or replaced as a whole. */
 define({
@@ -253,7 +252,6 @@ define({
       value: a.params.value,
     };
     if (a.params.easing) props.easing = a.params.easing;
-    if (a.params.handles) props.handles = a.params.handles;
     log.append({
       op: "insert",
       id: a.params.keyId,
@@ -309,8 +307,6 @@ define(makePropHandler({
   write: (p) => ({
     ...("value" in p ? { value: p.value } : {}),
     ...(p.easing !== undefined ? { easing: p.easing } : {}),
-    ...(p.handles !== undefined ? { handles: p.handles } : {}),
-    ...(p.roving !== undefined ? { roving: p.roving } : {}),
   }),
 }));
 

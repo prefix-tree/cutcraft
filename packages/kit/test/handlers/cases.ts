@@ -36,7 +36,6 @@ export const SETUP: Partial<Record<ActionType, readonly ActionInput[]>> = {
   "track/consolidate": [{ type: "clip/move", params: { id: "a1", place: { start: 2 } } }],
   "clip/merge": [{ type: "clip/split", params: { id: "c3", at: 11, newId: "c3_b" } }],
   "effect/setOrder": [{ type: "effect/add", params: { id: "c1", childId: "fx0", type: "sepia" } }],
-  "audioEffect/setOrder": [{ type: "audioEffect/add", params: { id: "a1", childId: "ae0", type: "gain" } }],
 };
 
 /** One sample action per registered type, against fixtures/sample.tsx. */
@@ -129,15 +128,7 @@ export const CASES: Partial<Record<ActionType, ActionInput>> = {
   "clip/closeGapBefore": { type: "clip/closeGapBefore", params: { id: "c3" } },
   "clip/setSpeed": { type: "clip/setSpeed", params: { id: "c3", speed: 2 } },
   "clip/setReverse": { type: "clip/setReverse", params: { id: "c3", value: true } },
-  "clip/setPitchCorrection": { type: "clip/setPitchCorrection", params: { id: "c3", value: true } },
-  "clip/setSmoothSlowMo": { type: "clip/setSmoothSlowMo", params: { id: "c3", value: true } },
-  "clip/setStabilization": {
-    type: "clip/setStabilization",
-    params: { id: "c3", value: { enabled: true, strength: 0.7, crop: "auto" } },
-  },
-  "clip/setChromaKey": { type: "clip/setChromaKey", params: { id: "c3", value: { enabled: true, color: "#00ff00" } } },
   "clip/setBlend": { type: "clip/setBlend", params: { id: "c2", mode: "screen", opacity: 0.8 } },
-  "clip/setEmphasis": { type: "clip/setEmphasis", params: { id: "c2", value: "ken-burns" } },
   "clip/setFit": { type: "clip/setFit", params: { id: "c2", value: "contain" } },
   "clip/setSource": { type: "clip/setSource", params: { id: "c2", src: "asset:interview" } },
   "clip/setAnchor": { type: "clip/setAnchor", params: { id: "s1", anchor: "c3", offset: 0.5 } },
@@ -169,20 +160,6 @@ export const CASES: Partial<Record<ActionType, ActionInput>> = {
   "effect/toggle": { type: "effect/toggle", params: { id: "c1", childId: "fx1", enabled: false } },
   "effect/setOrder": { type: "effect/setOrder", params: { id: "c1", childIds: ["fx0", "fx1"] } },
   "effect/setStack": { type: "effect/setStack", params: { id: "c1", nodes: [] } },
-  "audioEffect/add": { type: "audioEffect/add", params: { id: "a1", childId: "ae9", type: "reverb" } },
-  "audioEffect/remove": { type: "audioEffect/remove", params: { id: "a1", childId: "ae1" } },
-  "audioEffect/restore": {
-    type: "audioEffect/restore",
-    params: {
-      id: "a1",
-      node: { id: "ae8", kind: "audioEffect", props: { id: "ae8", type: "gain", params: { value: 2 }, enabled: true } },
-      after: "ae1",
-    },
-  },
-  "audioEffect/update": { type: "audioEffect/update", params: { id: "a1", childId: "ae1", params: { ratio: 8 } } },
-  "audioEffect/toggle": { type: "audioEffect/toggle", params: { id: "a1", childId: "ae1", enabled: false } },
-  "audioEffect/setOrder": { type: "audioEffect/setOrder", params: { id: "a1", childIds: ["ae0", "ae1"] } },
-  "audioEffect/setStack": { type: "audioEffect/setStack", params: { id: "a1", nodes: [] } },
   "colorGrade/set": { type: "colorGrade/set", params: { id: "c2", grading: { temperature: 20 } } },
 
   "keyframe/add": {
@@ -216,7 +193,7 @@ export const CASES: Partial<Record<ActionType, ActionInput>> = {
       after: "c2",
     },
   },
-  "transition/update": { type: "transition/update", params: { transitionId: "x1", type: "zoom", duration: 0.8 } },
+  "transition/update": { type: "transition/update", params: { transitionId: "x1", type: "push", duration: 0.8 } },
 
   "audio/add": {
     type: "audio/add",
@@ -285,7 +262,7 @@ export const CASES: Partial<Record<ActionType, ActionInput>> = {
       props: { duration: 1, src: "sticker:x" },
     },
   },
-  "sticker/update": { type: "sticker/update", params: { id: "st1", props: { emphasis: "shake" } } },
+  "sticker/update": { type: "sticker/update", params: { id: "st1", props: { name: "party" } } },
   "sticker/remove": { type: "sticker/remove", params: { id: "st1" } },
   "graphic/create": {
     type: "graphic/create",
