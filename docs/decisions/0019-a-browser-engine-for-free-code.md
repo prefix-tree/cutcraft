@@ -44,7 +44,9 @@ page at the composition's time, which is wrong for a layer that does not start a
 - **Speed.** On a 4-core Linux machine with no GPU (WebGL in software), the browser engine exported 1080p30 H.264
   with a three.js scene and a Motion layer at about 6 fps, after about 4 s to start the browser (3 s with the built
   page). The spike measured 185 to 202 fps on an M3 Pro with a GPU. The Node engine stays the fast path.
-- Playwright's pinned Chromium (141) is too old for `drawElementImage`; CI installs a current Chrome for these tests.
+- Playwright's pinned Chromium (141) is too old for `drawElementImage`; CI installs Chrome 157 for these tests,
+  pinned rather than "stable" while HTML-in-Canvas is experimental: its opt-in changed between 153 and 157, and a new
+  Chrome is taken on in a pull request of its own.
 - **What would retire the Node picture path**: the browser engine passing the overlay and mixer parity suites, the
   recipe and CLI tests, and coming within 10% of the Node engine's speed on Linux without a GPU. Until then both stay.
 

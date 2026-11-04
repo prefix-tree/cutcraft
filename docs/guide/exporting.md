@@ -37,7 +37,10 @@ CUTCRAFT_CHROMIUM=/path/to/chrome npx cutcraft launch.tsx --out launch.mp4
   exports in Node as before. `--engine browser` forces it, for a `<Layer>` that needs more CSS than the Node engine
   draws; `--engine node` never starts a browser (and leaves those layers out, with a warning).
 - It needs `playwright-core` and Chrome or Chromium 153 or later; `CUTCRAFT_CHROMIUM` names the binary, otherwise
-  Playwright's own browser is used.
+  Playwright's own browser is used. CI tests it with Chrome 157.
+- It captures frames with HTML-in-Canvas (`drawElementImage`), which Chrome still treats as experimental: it sits
+  behind a flag (the engine passes it) and its rules have changed between versions. If a newer Chrome fails, the error
+  names the Chrome version and the browser's own message; Chrome 153 and 157 are known to work.
 - It writes H.264 (`.mp4`) or VP9 (`.webm`), and PNG or JPEG stills; ProRes, HEVC and AV1 stay with the Node engine.
 - It is slower: about 6 frames a second at 1080p on a 4-core machine with no GPU, where WebGL runs in software, plus a
   few seconds to start the browser. With a GPU it is much faster.

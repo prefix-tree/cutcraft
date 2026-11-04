@@ -84,10 +84,12 @@ jobs:
       - run: pnpm --filter @cutcraft/player exec playwright install --with-deps chromium
       - run: pnpm --filter @cutcraft/player test:e2e
       # The browser export needs drawElementImage (Chrome 153+); Playwright's pinned Chromium (141) predates it.
+      # Pinned, not "stable": HTML-in-Canvas is still experimental and its opt-in has changed between versions, so a
+      # new Chrome is taken on in a pull request of its own, not by a CI run that starts failing.
       - uses: browser-actions/setup-chrome@v2
         id: chrome
         with:
-          chrome-version: stable
+          chrome-version: 157
       - run: '"${{ steps.chrome.outputs.chrome-path }}" --version'
       # The export is checked against the browser here: overlay layout, the audio mix, and the browser engine.
       - run: pnpm --filter @cutcraft/render test:browser
