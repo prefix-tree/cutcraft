@@ -48,12 +48,11 @@ Mounting a player makes the kit's `useT()` and `useLayer()` return the current t
 `seeked`, `ended`, `ratechange`, `volumechange` and `error`. Every browser dependency (clock, audio output, canvas,
 decoders) can be swapped out, which is how its tests run in jsdom.
 
-## Not drawn yet
+## What it draws
 
-Some props are accepted but not drawn yet: transition types other than crossfade, dips, wipe, slide and push (shown as
-a crossfade), effects with no CSS filter (vignette and grain do draw), colour wheels, curves and LUTs, matte masks,
-audio effects, pitch correction, 3D text and most text animation presets (shown as a fade). The kit's lint flags them
-in the file. [What renders](https://prefix-tree.github.io/cutcraft/reference/rendering) has the full table.
+Every transition, effect and animation preset the kit accepts: a type the player does not draw is not offered. The few
+remaining limits are in [What renders](https://prefix-tree.github.io/cutcraft/reference/rendering), and the kit's lint
+flags them in the file.
 
 ## Docs
 

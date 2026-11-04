@@ -33,19 +33,6 @@ export const textAnimationSchema = z.strictObject({
     .optional(),
 });
 
-export const text3dSchema = z.strictObject({
-  enabled: z.boolean().default(true),
-  depth: z.number().nonnegative().default(10),
-  bevelThickness: z.number().nonnegative().optional(),
-  bevelSize: z.number().nonnegative().optional(),
-  bevelSegments: z.number().int().nonnegative().optional(),
-  frontColor: colorSchema.optional(),
-  sideColor: colorSchema.optional(),
-  metalness: z.number().min(0).max(1).optional(),
-  roughness: z.number().min(0).max(1).optional(),
-  material: z.enum(["basic", "physical"]).optional(),
-});
-
 export const titleSchema = z.strictObject({
   ...timedProps,
   ...visualProps,
@@ -69,8 +56,6 @@ export const titleSchema = z.strictObject({
   letterSpacing: z.number().min(-100).max(100).default(0),
   decoration: zTextDecoration.optional(),
   animation: textAnimationSchema.optional(),
-  text3d: text3dSchema.optional(),
-  behindSubject: z.boolean().default(false),
 });
 
 const fillSchema = z.union([
@@ -175,7 +160,6 @@ export const stickerSchema = z.strictObject({
 
 export const adjustmentSchema = z.strictObject({
   ...timedProps,
-  affects: z.union([z.literal("all"), z.array(idSchema).min(1)]).default("all"),
   opacity: z.number().min(0).max(1).default(1),
   blend: zBlendMode.default("normal"),
   enabled: z.boolean().default(true),

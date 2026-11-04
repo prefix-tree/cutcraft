@@ -1,4 +1,4 @@
-import type { Placement, RENDERED_EFFECTS } from "@cutcraft/kit";
+import type { Placement, VIDEO_EFFECT_TYPES } from "@cutcraft/kit";
 
 import { devWarn } from "../warn";
 import { keyframedValue } from "./keyframes";
@@ -31,13 +31,12 @@ function levels(p: Params): string {
   return `brightness(${s / c}) contrast(${c})`;
 }
 
-// TODO(sharpen): no CSS filter form; needs a getImageData unsharp-mask pass in the painter (slow on 1080p, preview and export). Until then the not-rendered lint reports it.
 /** Effects the painter draws over the element after it (`postEffects`), not as filters. */
 const POST_TYPES = ["vignette", "grain"] as const;
 
-/** One filter per rendered effect type: kit's RENDERED_EFFECTS, which the `not-rendered` lint reads, less the post effects. */
+/** One filter per effect type (kit's VIDEO_EFFECT_TYPES), less the post effects. */
 const CANVAS_FILTERABLE: Readonly<
-  Record<Exclude<(typeof RENDERED_EFFECTS)[number], (typeof POST_TYPES)[number]>, (p: Params) => string>
+  Record<Exclude<(typeof VIDEO_EFFECT_TYPES)[number], (typeof POST_TYPES)[number]>, (p: Params) => string>
 > = {
   brightness: (p) => `brightness(${1 + num(p, ["amount", "value"], 0) / 100})`,
   contrast: (p) => `contrast(${1 + num(p, ["amount", "value"], 0) / 100})`,
@@ -55,7 +54,7 @@ const CANVAS_FILTERABLE: Readonly<
 };
 
 /** An effect's params with its keyframed ones (`effect.<id>.<param>` keyframes on the element) evaluated at element-relative `rel`. */
-function paramsAt(children: readonly Placement[], effect: Placement, rel: number): Params {
+export function paramsAt(children: readonly Placement[], effect: Placement, rel: number): Params {
   const base = (effect.props.params ?? {}) as Params;
   const prefix = `effect.${effect.id}.`;
   let out: Record<string, unknown> | null = null;
@@ -70,14 +69,20 @@ function paramsAt(children: readonly Placement[], effect: Placement, rel: number
 }
 
 /** A single canvas/CSS `filter` string for an element's effect and colour-grade children at element-relative `rel`; unsupported types are listed. */
-export function filterString(children: readonly Placement[], elementId: string, rel: number): FilterResult {
+export function filterString(
+  children: readonly Placement[],
+  elementId: string,
+  rel: number,
+  /** Effect types the file declares (`defineEffect()`), drawn as shaders rather than filters. */
+  declared: ReadonlySet<string> = new Set(),
+): FilterResult {
   const parts: string[] = [];
   const unsupported: string[] = [];
   for (const c of children) {
     if (c.kind === "effect") {
       if (c.props.enabled === false) continue;
       const type = String(c.props.type);
-      if ((POST_TYPES as readonly string[]).includes(type)) continue;
+      if ((POST_TYPES as readonly string[]).includes(type) || declared.has(type)) continue;
       const make = CANVAS_FILTERABLE[type as keyof typeof CANVAS_FILTERABLE] as ((p: Params) => string) | undefined;
       if (make) {
         const f = make(paramsAt(children, c, rel));

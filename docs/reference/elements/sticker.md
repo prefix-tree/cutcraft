@@ -18,11 +18,10 @@ A ready-made icon or sticker by name.
 | `at` | string |  |  |
 | `offset` | number |  |  |
 | `duration` | number \| "fill" \| "source" \| { match } |  |  |
-| `transform` | { position, scale, rotation, anchor, opacity, borderRadius, crop, rotate3d, perspective, transformStyle } |  |  |
+| `transform` | { position, scale, rotation, anchor, opacity, borderRadius, crop } |  |  |
 | `fit` | "contain" \| "cover" \| "stretch" \| "none" |  |  |
 | `blend` | "normal" \| "multiply" \| "screen" \| "overlay" \| "darken" \| … 13 more |  |  |
 | `blendOpacity` | number (0..1) |  |  |
-| `emphasis` | "none" \| "pulse" \| "shake" \| "bounce" \| "float" \| … 21 more \| { type, speed, intensity, loop, focusPoint, zoomScale, holdDuration, startTime, animationDuration } |  |  |
 | `enter` | { type, duration, easing } |  |  |
 | `exit` | { type, duration, easing } |  |  |
 | `style` | string |  |  |

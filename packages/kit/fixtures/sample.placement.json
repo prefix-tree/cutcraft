@@ -22,17 +22,6 @@
     "errors": []
   },
   {
-    "id": "ae1",
-    "kind": "audioEffect",
-    "track": "music",
-    "parent": "a1",
-    "order": 0,
-    "start": 0,
-    "end": 17.167,
-    "editable": "literal",
-    "errors": []
-  },
-  {
     "id": "an1",
     "kind": "angle",
     "track": "mc",

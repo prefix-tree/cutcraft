@@ -2,7 +2,6 @@ import { capabilitiesOf } from "./capabilities";
 import { defineElement } from "./define";
 import { captionSchema, captionsSchema } from "./schemas/captions";
 import {
-  audioEffectSchema,
   colorGradeSchema,
   effectSchema,
   freezeSchema,
@@ -87,7 +86,6 @@ export function engineOf(type: unknown): string | null {
 }
 
 export const Effect = el("effect", effectSchema);
-export const AudioEffect = el("audioEffect", audioEffectSchema);
 export const ColorGrade = el("colorGrade", colorGradeSchema);
 export const Keyframe = el("keyframe", keyframeSchema);
 export const SpeedKey = el("speedKey", speedKeySchema);
@@ -116,7 +114,6 @@ export const ELEMENTS = {
   Cut,
   Layer,
   Effect,
-  AudioEffect,
   ColorGrade,
   Keyframe,
   SpeedKey,

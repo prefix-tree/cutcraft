@@ -82,12 +82,7 @@ export interface ClipActions {
   "clip/closeGapBefore": { id: Id };
   "clip/setSpeed": { id: Id; speed: number };
   "clip/setReverse": { id: Id; value: boolean };
-  "clip/setPitchCorrection": { id: Id; value: boolean };
-  "clip/setSmoothSlowMo": { id: Id; value: boolean };
-  "clip/setStabilization": { id: Id; value?: Json };
-  "clip/setChromaKey": { id: Id; value?: Json };
   "clip/setBlend": { id: Id; mode?: string; opacity?: number };
-  "clip/setEmphasis": { id: Id; value?: Json };
   "clip/setFit": { id: Id; value?: string };
   "clip/setSource": { id: Id; src: string };
   "clip/setAnchor": { id: Id; anchor?: Id | "start"; offset?: number };
@@ -120,21 +115,14 @@ export interface EffectActions {
   "effect/toggle": ChildStack<string>["toggle"];
   "effect/setOrder": ChildStack<string>["setOrder"];
   "effect/setStack": ChildStack<string>["setStack"];
-  "audioEffect/add": ChildStack<string>["add"];
-  "audioEffect/remove": ChildStack<string>["remove"];
-  "audioEffect/restore": ChildStack<string>["restore"];
-  "audioEffect/update": ChildStack<string>["update"];
-  "audioEffect/toggle": ChildStack<string>["toggle"];
-  "audioEffect/setOrder": ChildStack<string>["setOrder"];
-  "audioEffect/setStack": ChildStack<string>["setStack"];
   "colorGrade/set": { id: Id; grading?: Readonly<Record<string, Json>> };
 }
 
 export interface KeyframeActions {
-  "keyframe/add": { id: Id; keyId: Id; property: string; at: number; value: Json; easing?: string; handles?: Json };
+  "keyframe/add": { id: Id; keyId: Id; property: string; at: number; value: Json; easing?: string };
   "keyframe/remove": { id: Id; keyId: Id };
   "keyframe/restore": { id: Id; node: NodeSpec; after: Id | null };
-  "keyframe/update": { id: Id; keyId: Id; value?: Json; easing?: string; handles?: Json; roving?: boolean };
+  "keyframe/update": { id: Id; keyId: Id; value?: Json; easing?: string };
   "keyframe/move": { id: Id; keyId: Id; at: number };
   "keyframe/setAll": { id: Id; nodes: readonly NodeSpec[]; after?: Id | null };
 }
@@ -143,7 +131,8 @@ export interface TransitionActions {
   "transition/add": {
     transitionId: Id;
     between: readonly [Id, Id] | { on: Id; edge: "in" | "out" };
-    type: TransitionType;
+    /** A built-in transition, or one the file declares with `defineTransition()`. */
+    type: TransitionType | (string & {});
     duration: number;
     params?: Readonly<Record<string, Json>>;
   };
@@ -151,7 +140,7 @@ export interface TransitionActions {
   "transition/restore": { transitionId: Id; node: NodeSpec; trackId: Id; after: Id | null };
   "transition/update": {
     transitionId: Id;
-    type?: TransitionType;
+    type?: TransitionType | (string & {});
     duration?: number;
     params?: Readonly<Record<string, Json>>;
   };
@@ -290,7 +279,6 @@ export type Namespace = ActionType extends `${infer N}/${string}` ? N : never;
 export const AUTO_GROUP_TYPES: ReadonlySet<ActionType> = new Set<ActionType>([
   "transform/update",
   "effect/update",
-  "audioEffect/update",
   "audio/setVolume",
   "audio/setFade",
   "audio/setDuck",
@@ -303,8 +291,6 @@ export const AUTO_GROUP_TYPES: ReadonlySet<ActionType> = new Set<ActionType>([
   "clip/slide",
   "clip/roll",
   "clip/setSpeed",
-  "clip/setChromaKey",
-  "clip/setStabilization",
   "keyframe/move",
   "keyframe/update",
   "composition/updateSettings",

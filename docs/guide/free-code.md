@@ -153,6 +153,62 @@ Inside a plain `<Layer>`, use the same libraries through adapters that follow th
 `@cutcraft/graphics/motion`. A bare `<Canvas>`, Motion's `animate()`, or a `motion` element with `animate` or
 `whileInView` runs on its library's own clock, and the lint points you to the adapter.
 
+## Effects and transitions of your own
+
+The built-in effects are CSS filters, and the built-in transitions fade, wipe, slide and push. Anything else is a few
+lines of GLSL: declare it at the top of the file with `defineEffect()` or `defineTransition()`, and use the name it
+returns as an `<Effect>` or `<Transition>` type.
+
+```tsx
+import { z } from "zod";
+import { Clip, defineEffect, defineTransition, Effect, Keyframe, Transition } from "@cutcraft/kit";
+
+const split = defineEffect({
+  name: "split",
+  params: z.object({ amount: z.number().min(0).max(0.1).default(0.02) }),
+  shader: `vec4 effect(vec2 uv) {
+    vec2 o = vec2(amount * sin(time * 6.0), 0.0);
+    return vec4(texture(image, uv + o).r, texture(image, uv).g, texture(image, uv - o).b, texture(image, uv).a);
+  }`,
+});
+
+const circle = defineTransition({
+  name: "circle",
+  shader: `vec4 transition(vec2 uv) {
+    float d = distance(uv * resolution, resolution / 2.0) / length(resolution / 2.0);
+    return d < progress ? texture(to, uv) : texture(from, uv);
+  }`,
+});
+
+<Clip id="city" src="asset:city">
+  <Effect id="s" type={split} params={{ amount: 0.03 }} />
+  <Keyframe id="k" property="effect.s.amount" at={2} value={0} />
+</Clip>
+<Transition id="x" type={circle} duration={0.8} />
+```
+
+An effect defines `vec4 effect(vec2 uv)` and reads its picture as `image`. A transition defines
+`vec4 transition(vec2 uv)` and reads the outgoing picture as `from`, the incoming one as `to`, and how far it has got
+as `progress`, from 0 to 1. Both also get `resolution` (the frame in pixels) and `time` (seconds into the element).
+`uv` (0, 0) is the top left. Return plain colour; the player premultiplies it.
+
+Each param reaches the shader as a uniform with the param's name. A number becomes a `float`, a boolean a `bool`, an
+array of two, three or four numbers a `vec2`, `vec3` or `vec4`, and a colour string such as `"#ff8800"` a `vec3`. The
+zod schema checks the values and fills in defaults, [`<Keyframe>`](/reference/elements/keyframe) animates them with
+`property="effect.<id>.<param>"`, and an editor can build its inspector from the schema.
+
+An effect works on a `<Clip>`, a `<Nested>` and an `<Adjustment>`, where it changes everything beneath it. It runs
+after the element's mask, vignette and grain, and before the element's other built-in effects. Several effects run in
+the order they appear in the file.
+
+Keep `defineEffect()` and `defineTransition()` at the top of the file with a literal `name` and `shader`, where the
+editor and lint can read them; the `declaration` lint ([Lint](/guide/editing#lint)) says when one is not. The editor's
+[actions](/reference/actions) take the names too, for example `effect/add` and `transition/update`.
+
+The player draws these shaders with WebGL in any browser. The export draws them through the
+[browser engine](/guide/exporting#three-js-and-motion-the-browser-engine), which a file that uses one picks on its own.
+`--engine node` has no WebGL, so it leaves them out and warns.
+
 ## Libraries
 
 What a file may import is up to the app that loads it. By default that is `react`, `zod` and `@cutcraft/kit`. To
@@ -173,7 +229,7 @@ way: add it to `imports` under the name the file imports. The export takes the s
 
 ## In the export
 
-The player draws all of this, and so does the export. A file with `<Three>` or `<Motion>` exports through the
+The player draws all of this, and so does the export. A file with `<Three>`, `<Motion>` or a declared shader exports through the
 [browser engine](/guide/exporting#three-js-and-motion-the-browser-engine): the real player in headless Chromium, frame
 by frame, with the same sound. Other files export in Node, which draws a Layer with
 [Satori](https://github.com/vercel/satori), a subset of CSS (flexbox, no hooks beyond `useT()` and `useLayer()`), and

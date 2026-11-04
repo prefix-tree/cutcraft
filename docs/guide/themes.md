@@ -111,9 +111,8 @@ and bold (and italic, except Space Grotesk). The export reads them from the
 `@fontsource` packages; the preview loads them once the app imports
 `@cutcraft/player/fonts.css`.
 
-Any other family is declared in the file, at the top, with `font()` for a file
-of your own or `googleFont()` for a Google Fonts family. Both return the family,
-so you pass the value on rather than retyping the name:
+For any other family, declare it at the top of the file: `font()` for a font file of your own, `googleFont()` for a
+Google Fonts family. Both return the family name, so the file passes the value on instead of retyping the name:
 
 ```tsx
 import { Composition, font, googleFont, Title, Track } from "@cutcraft/kit";
@@ -134,28 +133,25 @@ export default function Video() {
 }
 ```
 
-One call declares one face; `googleFont()` declares one per weight and style it
-is given (default 400, normal). Free code uses the same value as a CSS
-`fontFamily`.
+Each `font()` call declares one face. `googleFont()` declares one face for each weight and style you give it (400 and
+normal when you give none). Free code uses the same value as a CSS `fontFamily`.
 
-- **`font({ src: "asset:brand" })`** finds its file the way an asset does: the
-  export looks for `brand.ttf` (or `.otf`, `.woff`, `.woff2`) next to the file or
-  under `--media`, and the player asks its `media` for `brand`, which maps it
-  to a URL such as `/fonts/brand.woff2`. The Node export reads TTF, OTF and
-  WOFF but not WOFF2; a file with `<Three>` or `<Motion>` exports through the
-  browser, which reads all four.
-- **`googleFont()`**, like `next/font`: the first export downloads each face
-  into `~/.cache/cutcraft/fonts` (`CUTCRAFT_FONT_CACHE` moves it) and later
-  exports read it from there, with no network. The player loads it from Google.
+`font({ src: "asset:brand" })` finds its file the way a clip finds its media. The export looks for `brand.ttf`,
+`brand.otf`, `brand.woff` or `brand.woff2` next to the file (or in the `--media` folder), and the player asks its
+[`media`](./player) for `brand`, which you map to a URL such as `/fonts/brand.woff2`. The Node export reads TTF, OTF and
+WOFF but not WOFF2. A file with `<Three>` or `<Motion>` exports through the browser, which reads all four.
 
-The player and both exports load every declared face, and the browser export
-draws no frame until they have loaded; the browser export sets text in the same
-files the Node export reads. A family that is neither bundled nor declared is
-set in Inter, and the `font-available` lint names it. Keep the calls at the top
-of the file with literal arguments, where the editor and lint can read them
-(the `font-declaration` lint says when one is not). `--font` on the command line
-(and `fonts` in `renderVideo`) adds faces for one export without editing the
-file.
+`googleFont()` works like `next/font`. The first export downloads each face into `~/.cache/cutcraft/fonts` (set
+`CUTCRAFT_FONT_CACHE` to put it elsewhere), and later exports read the copy, so they need no network. The player loads
+the face from Google.
+
+The player and both exports load every declared face, and the browser export draws no frame until they have loaded. It
+reads the same files as the Node export, so both set text the same way. A family that is neither bundled nor declared
+is set in Inter, and the [`font-available` lint](#lint) names it.
+
+Keep the calls at the top of the file with literal arguments, where the editor and lint can read them; the
+[`declaration` lint](#lint) says when one is not. To add a face for a single export without editing the file, pass
+`--font` on the [command line](/reference/cli) or `fonts` to `renderVideo`.
 
 ## Seeing where a value came from
 
@@ -184,5 +180,5 @@ it restyles.
   The message names the token when the colour matches one.
 - `font-available` (warning): a font no renderer ships and the file does not
   declare.
-- `font-declaration` (warning): a `font()` or `googleFont()` call inside a
+- `declaration` (warning): a `font()`, `googleFont()`, `defineEffect()` or `defineTransition()` call inside a
   function, or with arguments that are not literal.

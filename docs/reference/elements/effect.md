@@ -13,7 +13,7 @@ A filter on its parent: brightness, blur, grayscale, vignette, grain and more.
 | prop | type | default | required |
 |---|---|---|---|
 | `id` | string |  | yes |
-| `type` | "brightness" \| "contrast" \| "saturation" \| "hue" \| "temperature" \| … 15 more |  | yes |
+| `type` | "brightness" \| "contrast" \| "saturation" \| "hue" \| "temperature" \| … 9 more \| string |  | yes |
 | `params` | object | `{}` |  |
 | `enabled` | boolean | `true` |  |
 

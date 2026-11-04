@@ -13,10 +13,6 @@ Temperature and tint on its parent.
 | prop | type | default | required |
 |---|---|---|---|
 | `id` | string |  | yes |
-| `wheels` | { shadows, midtones, highlights, shadowsLift, midtonesGamma, highlightsGain } |  |  |
-| `curves` | { rgb, red, green, blue } |  |  |
-| `lut` | { src, intensity } |  |  |
-| `hsl` | { hue, saturation, luminance } |  |  |
 | `temperature` | number (-100..100) |  |  |
 | `tint` | number (-100..100) |  |  |
 

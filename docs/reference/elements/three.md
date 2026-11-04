@@ -24,7 +24,7 @@ The player draws it once the host calls `installFreeCodeLibraries()` ([Free code
 | `duration` | number \| "fill" \| "source" \| { match } |  |  |
 | `enter` | { type, duration, easing } |  |  |
 | `exit` | { type, duration, easing } |  |  |
-| `transform` | { position, scale, rotation, anchor, opacity, borderRadius, crop, rotate3d, perspective, transformStyle } |  |  |
+| `transform` | { position, scale, rotation, anchor, opacity, borderRadius, crop } |  |  |
 | `blend` | "normal" \| "multiply" \| "screen" \| "overlay" \| "darken" \| … 13 more |  |  |
 | `camera` | { position, lookAt, fov, near, far, zoom, orthographic } |  |  |
 | `background` | string |  |  |

@@ -1,7 +1,16 @@
 import type { BackgroundGradient, DrawOp, FramePlan } from "../model/frame-plan";
 import { fitRect, type Matrix2D } from "../model/transform";
 import type { AnyCanvas, CreateCanvas, Ctx2D, Frame } from "../types";
+import { devWarn } from "../warn";
 import { roundedRect, traceMask } from "./masks";
+import { ShaderRunner } from "./shaders";
+
+/** The outgoing side of a declared transition, drawn and run through its effects, waiting for the incoming side. */
+interface Outgoing {
+  readonly id: string;
+  readonly canvas: AnyCanvas;
+  readonly op: DrawOp;
+}
 
 export interface PaintInputs {
   readonly frames: ReadonlyMap<string, Frame | null>;
@@ -18,6 +27,11 @@ export class CanvasPainter {
   /** An element drawn on its own before compositing: a feathered mask, vignette, grain. */
   private layer: AnyCanvas | null = null;
   private grain: AnyCanvas | null = null;
+  /** Runs the effects and transitions the file declares; made on first use. */
+  private shaders: ShaderRunner | null = null;
+  /** The outgoing side of a declared transition between two clips, waiting for the incoming side. */
+  private outgoing: Outgoing | null = null;
+  private outgoingPicture: AnyCanvas | null = null;
 
   constructor(
     readonly width: number,
@@ -33,10 +47,15 @@ export class CanvasPainter {
     if (plan.clear) ctx.clearRect(0, 0, this.width, this.height);
     else paintBackground(ctx, plan, this.width, this.height);
     if (plan.backgroundBlur) this.blurBackground(ctx, plan, plan.backgroundBlur.id, inputs);
+    this.outgoing = null;
     for (const op of plan.ops) {
       if (op.kind === "adjustment") this.adjust(ctx, op);
       else this.drawOp(ctx, op, inputs);
     }
+    // An outgoing side whose incoming clip drew nothing (its frame not decoded yet) still shows, as it is.
+    const left = this.outgoing as Outgoing | null;
+    if (left) this.composite(ctx, left.op, left.canvas);
+    this.outgoing = null;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
   }
 
@@ -45,6 +64,11 @@ export class CanvasPainter {
     const nested = op.kind === "nested" ? (inputs.nested.get(op.id) ?? null) : null;
     if (op.kind !== "nested" && !frame) return;
     if (op.kind === "nested" && !nested) return;
+    if ((op.shaders || op.transition) && this.runner().available) {
+      this.drawShaded(ctx, op, frame, nested);
+      return;
+    }
+    if (op.shaders || op.transition) warnNoShaders(op);
     ctx.save();
     ctx.globalAlpha = op.opacity;
     ctx.globalCompositeOperation = op.blend;
@@ -60,6 +84,54 @@ export class CanvasPainter {
     }
     this.blit(ctx, op, frame, nested);
     ctx.restore();
+  }
+
+  /**
+   * An element with effects or a transition the file declares: drawn alone, run through its shaders, then composited.
+   * The outgoing side of a transition between two clips is kept until the incoming side arrives, and the two are
+   * blended in one pass.
+   */
+  private drawShaded(ctx: Ctx2D, op: DrawOp, frame: Frame | null, nested: AnyCanvas | null): void {
+    const feathered = !!op.mask && op.mask.feather > 0;
+    const layer = this.alone(op, frame, nested, feathered);
+    if (!layer) return;
+    const runner = this.runner();
+    let picture: AnyCanvas | null = layer;
+    try {
+      if (op.shaders) picture = runner.effects(layer, op.shaders) ?? layer;
+      const x = op.transition;
+      if (x?.paired && x.role === "out") {
+        // Kept for the incoming side, which comes later in the same plan; drawn by it, not now.
+        this.outgoing = { id: x.id, canvas: copyInto(this.outgoingCanvas(), picture), op };
+        return;
+      }
+      if (x) {
+        const from = x.paired
+          ? this.outgoing?.id === x.id
+            ? this.outgoing.canvas
+            : null
+          : x.role === "out"
+            ? picture
+            : null;
+        const to = x.paired || x.role === "in" ? picture : null;
+        picture = runner.transition(from, to, x) ?? picture;
+        if (x.paired) this.outgoing = null;
+      }
+    } catch (error) {
+      warnShaderError(op, error);
+      picture = layer;
+    }
+    this.composite(ctx, op, picture);
+  }
+
+  private runner(): ShaderRunner {
+    this.shaders ??= new ShaderRunner(this.width, this.height, this.createCanvas);
+    return this.shaders;
+  }
+
+  private outgoingCanvas(): AnyCanvas {
+    this.outgoingPicture ??= this.createCanvas(this.width, this.height);
+    return this.outgoingPicture;
   }
 
   /** The footage's picture, blurred and scaled to cover the frame, under everything; skipped when the footage covers the frame itself. */
@@ -124,10 +196,16 @@ export class CanvasPainter {
    * blurred alpha there, and vignette and grain darken or speckle only its own pixels.
    */
   private drawLayered(ctx: Ctx2D, op: DrawOp, frame: Frame | null, nested: AnyCanvas | null, feathered: boolean): void {
+    const layer = this.alone(op, frame, nested, feathered);
+    if (layer) this.composite(ctx, op, layer);
+  }
+
+  /** The element drawn alone on the layer canvas, at its place in the frame, its mask and vignette or grain applied. */
+  private alone(op: DrawOp, frame: Frame | null, nested: AnyCanvas | null, feathered: boolean): AnyCanvas | null {
     this.layer ??= this.createCanvas(this.width, this.height);
     const layer = this.layer;
     const lctx = layer.getContext("2d") as Ctx2D | null;
-    if (!lctx) return;
+    if (!lctx) return null;
     lctx.setTransform(1, 0, 0, 1, 0, 0);
     lctx.clearRect(0, 0, this.width, this.height);
     lctx.save();
@@ -170,6 +248,11 @@ export class CanvasPainter {
       }
       lctx.restore();
     }
+    return layer;
+  }
+
+  /** A picture of the whole frame composited as the op: its opacity, blend, filter, wipe and rounded corners. */
+  private composite(ctx: Ctx2D, op: DrawOp, layer: AnyCanvas): void {
     ctx.save();
     ctx.globalAlpha = op.opacity;
     ctx.globalCompositeOperation = op.blend;
@@ -204,6 +287,13 @@ export class CanvasPainter {
   }
 
   private adjust(ctx: Ctx2D, op: DrawOp): void {
+    if (op.shaders) {
+      if (this.runner().available) {
+        this.adjustShaded(ctx, op);
+        return;
+      }
+      warnNoShaders(op);
+    }
     if (!op.filter && op.opacity >= 1) return;
     this.scratch ??= this.createCanvas(this.width, this.height);
     const sctx = this.scratch.getContext("2d") as Ctx2D | null;
@@ -221,9 +311,53 @@ export class CanvasPainter {
     ctx.drawImage(this.scratch, 0, 0);
     ctx.restore();
   }
+
+  /** An adjustment with declared effects: everything drawn so far, through the shaders, back over itself. */
+  private adjustShaded(ctx: Ctx2D, op: DrawOp): void {
+    this.scratch ??= this.createCanvas(this.width, this.height);
+    const scratch = copyInto(this.scratch, canvasOf(ctx));
+    let picture: AnyCanvas = scratch;
+    try {
+      picture = this.runner().effects(scratch, op.shaders ?? []) ?? scratch;
+    } catch (error) {
+      warnShaderError(op, error);
+      return;
+    }
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.globalCompositeOperation = "source-over";
+    ctx.globalAlpha = op.opacity;
+    ctx.filter = op.filter || "none";
+    ctx.drawImage(picture, 0, 0);
+    ctx.restore();
+  }
 }
 
 const GRAIN_TILE = 128;
+
+/** `target` holding a copy of `source`, both the frame's size. */
+function copyInto(target: AnyCanvas, source: AnyCanvas): AnyCanvas {
+  const c = target.getContext("2d") as Ctx2D | null;
+  if (!c) return source;
+  c.setTransform(1, 0, 0, 1, 0, 0);
+  c.globalCompositeOperation = "copy";
+  c.globalAlpha = 1;
+  c.filter = "none";
+  c.drawImage(source, 0, 0);
+  c.globalCompositeOperation = "source-over";
+  return target;
+}
+
+function warnNoShaders(op: DrawOp): void {
+  devWarn(
+    `shaders:${op.id}`,
+    `"${op.id}" uses an effect or transition the file declares; this renderer has no WebGL, so it draws without it (the browser export draws it)`,
+  );
+}
+
+function warnShaderError(op: DrawOp, error: unknown): void {
+  devWarn(`shader-error:${op.id}`, `"${op.id}": ${error instanceof Error ? error.message : String(error)}`);
+}
 
 /** A small seeded PRNG on 0..1. */
 function mulberry32(seed: number): () => number {

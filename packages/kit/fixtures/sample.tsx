@@ -4,7 +4,6 @@ import {
   Adjustment,
   Angle,
   Audio,
-  AudioEffect,
   Caption,
   Captions,
   Clip,
@@ -88,20 +87,18 @@ export default function Video({ title, accent }: z.infer<typeof schema>) {
           duration={2}
           content="<svg viewBox='0 0 10 10'><circle cx='5' cy='5' r='4'/></svg>"
         />
-        <Sticker id="st1" anchor="c3" duration={2} src="sticker:party" emphasis="pulse" />
+        <Sticker id="st1" anchor="c3" duration={2} src="sticker:party" />
         <Layer id="l1" anchor="c2" duration={4}>
           <Counter from={0} to={1200} />
         </Layer>
-        <Adjustment id="adj1" anchor="start" duration="fill" affects={["main"]}>
+        <Adjustment id="adj1" anchor="start" duration="fill">
           <Effect id="fx2" type="vignette" params={{ amount: 30 }} />
         </Adjustment>
         <Badge id="b1" anchor="c1" label="LIVE" />
         <Badge id="b2" anchor="c3" label="REPLAY" />
       </Track>
       <Track id="music" layout="free" role="music">
-        <Audio id="a1" src="asset:bed" start={0} duration="fill" volume={0.2} duck={{ under: "main", to: 0.05 }}>
-          <AudioEffect id="ae1" type="compressor" params={{ threshold: -18, ratio: 4 }} />
-        </Audio>
+        <Audio id="a1" src="asset:bed" start={0} duration="fill" volume={0.2} duck={{ under: "main", to: 0.05 }} />
       </Track>
       <Track id="mc" layout="free" hidden>
         <Multicam id="mc1" sync={0}>

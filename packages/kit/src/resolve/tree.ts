@@ -1,3 +1,4 @@
+import type { ShaderDefinition } from "../jsx/shaders";
 import type { DeclaredFont } from "../theme/fonts";
 import type { ResolveError } from "./errors";
 
@@ -41,6 +42,8 @@ export interface CollectedTree {
   readonly errors: readonly ResolveError[];
   /** The faces the file declares (`font()`, `googleFont()`); set by `collectModule`. */
   readonly fonts?: readonly DeclaredFont[];
+  /** The effects and transitions the file declares (`defineEffect()`, `defineTransition()`); set by `collectModule`. */
+  readonly shaders?: readonly ShaderDefinition[];
 }
 
 export function walk(node: CollectedNode, visit: (node: CollectedNode, depth: number) => void, depth = 0): void {

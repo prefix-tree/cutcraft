@@ -19,7 +19,5 @@ Animates one property of its parent between values, with easing.
 | `at` | number (0..∞) |  | yes |
 | `value` | any |  | yes |
 | `easing` | "linear" \| "ease" \| "ease-in" \| "ease-out" \| "ease-in-out" \| … 46 more | `"linear"` |  |
-| `handles` | { in, out } |  |  |
-| `roving` | boolean |  |  |
 
 No children. [All elements](/reference/elements/)

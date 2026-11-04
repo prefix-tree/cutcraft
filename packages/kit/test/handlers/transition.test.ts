@@ -46,7 +46,7 @@ describe("transitions", () => {
     });
     expect(good.ok).toBe(true);
     const x9 = exec.state().items.get("x9")!;
-    expect(x9.props.params).toEqual({ direction: "left", softness: 0 });
+    expect(x9.props.params).toEqual({ direction: "left" });
     expect(x9.between).toEqual(["c3", "n1"]);
     expect(x9.start).toBeCloseTo(10 + 5 / 1.2 - 0.5);
     expect(exec.state().items.get("n1")?.start).toBeCloseTo(x9.start);

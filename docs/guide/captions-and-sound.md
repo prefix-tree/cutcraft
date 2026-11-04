@@ -6,26 +6,30 @@
 
 ## Getting a transcript
 
-Captions, word cuts and anchors read the words from the asset's transcript in the manifest. Put the transcript next to
-the media with the same name and add the media:
+Captions, [word cuts and anchors](./time) read their words from the asset's transcript in the manifest. Put the
+transcript next to the media under the same name, then add the media with
+[`cutcraft add`](/reference/cli#adding-media):
 
 ```sh
-npx cutcraft add founder.mp4     # reads founder.json, founder.vtt or founder.srt beside it
+npx cutcraft add founder.mp4     # reads founder.json, founder.vtt or founder.srt from the same folder
 ```
 
-| File | From | Word times |
+| File | Written by | Word times |
 | --- | --- | --- |
-| `.json` with `words` | OpenAI (`verbose_json`, word timestamps), ElevenLabs | measured |
+| `.json` with `words` | OpenAI (`verbose_json` with word timestamps), ElevenLabs | measured |
 | `.json` with `segments[].words` | openai-whisper `--word_timestamps`, faster-whisper, WhisperX | measured |
 | `.json` with `transcription[].tokens` | whisper.cpp `-ojf` | measured |
-| `.vtt` | any captioner; `<v Name>` sets the speaker | estimated, measured where it has inline timestamps |
-| `.srt` | any captioner | estimated |
+| `.vtt` | any captioning tool; `<v Name>` sets the speaker | estimated, or measured where the file has inline timestamps |
+| `.srt` | any captioning tool | estimated |
 
-Subtitles time whole lines, so their words share the line's time by length and are marked `estimated`; a word cut on
-one lands near the word, not on it. When there are several, JSON wins, then VTT, then SRT; `--transcript` names another
-file. Adding the media again refreshes its entry and keeps what the command does not write (shots, silences).
+Subtitle files time whole lines, not words. Each word gets a share of its line's time by its length and is marked
+`estimated`, so a cut on that word lands near it rather than exactly on it.
 
-App code that already has the text uses the same parser:
+If more than one transcript sits next to the media, `cutcraft add` takes the JSON first, then the VTT, then the SRT.
+`--transcript other.vtt` names a different file. Running `cutcraft add` again refreshes the entry and keeps the fields
+it does not write, such as shots and silences.
+
+App code that already has the text can use the same parser, [`parseTranscript()`](/reference/api#cutcraft-kit):
 
 ```ts
 import { parseTranscript } from "@cutcraft/kit";
@@ -34,7 +38,7 @@ const { words } = parseTranscript(await (await fetch("/founder.vtt")).text());
 manifest.assets.founder = { ...manifest.assets.founder, transcript: { words } };
 ```
 
-The words always go into the manifest, so the preview and the export agree on every `word:N`.
+Either way the words end up in the manifest, so the preview and the export agree on every `word:N`.
 
 ## Captions follow the clips
 
@@ -50,7 +54,7 @@ change with it.
 `animation` colours the words as they are said: `word-highlight`, `word-by-word`, `karaoke`, `bounce` or
 `typewriter`. `style` sets the font, size, colours, background, stroke and position.
 
-`breakAfter` ends a line after the words you name, whatever the limits would do:
+`breakAfter` ends a line after each word you name, whatever the limits above would do:
 
 ```tsx
 <Captions id="captions" src="asset:founder" breakAfter={["word:5", "word:12"]} />
@@ -73,15 +77,17 @@ Generated captions show as generated in an editor. The first edit to one of them
 
 ## Subtitle files
 
-`--srt` and `--vtt` write the captions the cut plays, timed like the export (with `--from`, from that point):
+`--srt` and `--vtt` write the captions the cut plays as a subtitle file, timed like the export. With `--from`, the
+times count from that point, so they line up with a partial export
+([CLI](/reference/cli#export)):
 
 ```sh
 npx cutcraft video.tsx --out video.mp4 --srt video.srt
 npx cutcraft video.tsx --vtt video.vtt            # only the subtitles, no video
 ```
 
-In code, `subtitles(state, { format: "srt" })` from `@cutcraft/kit` returns the same text, for an editor's download
-button.
+In code, [`subtitles(state, { format: "srt" })`](/reference/api#cutcraft-kit) from `@cutcraft/kit` returns the same
+text, for example behind an editor's download button.
 
 ## Sound
 
@@ -105,4 +111,4 @@ A clip plays its own sound. For music and voice-over, use `<Audio>`, usually on 
 `duration="fill"` runs the music to the end of the video, however long the edit becomes. Speed ramps and freezes on
 a clip apply to its sound as well.
 
-Audio effects (`<AudioEffect>`) and pitch correction are accepted but not played yet, and the lint says so.
+There are no audio effects: a clip's sound plays with its volume, fades, automation, ducking and speed.

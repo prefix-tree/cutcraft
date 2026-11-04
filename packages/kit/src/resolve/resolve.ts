@@ -2,8 +2,15 @@ import type { z } from "zod";
 
 import { capabilitiesOf } from "../jsx/capabilities";
 import { ENGINE_SCHEMAS, SCHEMAS_BY_KIND } from "../jsx/elements";
-import type { TrackLayout, TrackRole, TransitionType } from "../jsx/enums";
-import { defaultTransitionParams } from "../jsx/schemas/transition";
+import {
+  TRANSITION_TYPES,
+  type TrackLayout,
+  type TrackRole,
+  type TransitionType,
+  VIDEO_EFFECT_TYPES,
+} from "../jsx/enums";
+import { defaultTransitionParams, isBuiltInTransition } from "../jsx/schemas/transition";
+import { type ShaderDefinition, shaderFor } from "../jsx/shaders";
 import { parseTimeRef, resolveTimeRef } from "../manifest/timeref";
 import { type AssetEntry, type AssetManifest, assetIdOf, lookupAsset } from "../manifest/types";
 import type { PatchLog } from "../patches/types";
@@ -80,6 +87,8 @@ export interface ResolvedState {
   readonly theme: ResolvedTheme;
   /** The faces the file declares (`font()`, `googleFont()`), which every renderer loads. */
   readonly fonts: readonly DeclaredFont[];
+  /** The effects and transitions the file declares (`defineEffect()`, `defineTransition()`). */
+  readonly shaders: readonly ShaderDefinition[];
 }
 
 const DEFAULT_OVERLAY_DURATION = 5;
@@ -138,6 +147,7 @@ function compute(
   previous?: ReadonlyMap<string, Placement>,
 ): ResolvedState {
   const tree = overlay(original, log);
+  fileShaders = original.shaders ?? [];
   const errors: ResolveError[] = [...tree.errors];
   const root = tree.root;
   const theme = resolveTheme(root.props.theme);
@@ -379,6 +389,7 @@ function compute(
     log,
     theme,
     fonts: original.fonts ?? [],
+    shaders: original.shaders ?? [],
   };
 }
 
@@ -399,6 +410,44 @@ interface ParsedProps {
 const parsedByProps = new WeakMap<object, ParsedProps>();
 /** Which parsed props the theme supplied, keyed by the parsed `data`. */
 const themedByData = new WeakMap<object, Readonly<Record<string, ThemeOrigin>>>();
+
+/** The shaders of the file being resolved (`defineEffect`, `defineTransition`); set for the length of one `compute`. */
+let fileShaders: readonly ShaderDefinition[] = [];
+
+/**
+ * An `<Effect>` or `<Transition>` of a type the file declares: its params checked and filled by the declared schema.
+ * An unknown type is an error naming the built-in ones; null for a built-in type or any other element.
+ */
+function declaredShader(
+  node: CollectedNode,
+  data: Record<string, unknown>,
+  own: ResolveError[],
+): Record<string, unknown> | null {
+  if (node.kind !== "effect" && node.kind !== "transition") return null;
+  const type = String(data.type);
+  const builtIn = (node.kind === "effect" ? VIDEO_EFFECT_TYPES : TRANSITION_TYPES) as readonly string[];
+  if (builtIn.includes(type)) return null;
+  const def = shaderFor(fileShaders, node.kind, type);
+  if (!def) {
+    own.push({
+      code: "SCHEMA",
+      id: node.id,
+      prop: "type",
+      message: `unknown ${node.kind} "${type}": use one of ${builtIn.join(", ")}, or declare it with ${node.kind === "effect" ? "defineEffect" : "defineTransition"}()`,
+    });
+    return null;
+  }
+  const result = def.params.safeParse(data.params ?? {});
+  if (result.success) return { ...data, params: result.data };
+  for (const issue of result.error.issues)
+    own.push({
+      code: "SCHEMA",
+      id: node.id,
+      prop: ["params", ...issue.path.map(String)].join("."),
+      message: issue.message,
+    });
+  return null;
+}
 
 function parseProps(node: CollectedNode, errors: ResolveError[], theme: ResolvedTheme): Record<string, unknown> {
   const cached = parsedByProps.get(node.props);
@@ -427,8 +476,10 @@ function parseProps(node: CollectedNode, errors: ResolveError[], theme: Resolved
     const result = schema.safeParse(themed.props);
     if (result.success) {
       data = result.data as Record<string, unknown>;
-      // A transition's params are validated per type but not filled by its schema; fill them here like any other default.
-      if (node.kind === "transition")
+      const declared = declaredShader(node, data, own);
+      if (declared) data = declared;
+      // A built-in transition's params are validated per type but not filled by its schema; fill them here.
+      else if (node.kind === "transition" && isBuiltInTransition(String(data.type)))
         data = {
           ...data,
           params: {

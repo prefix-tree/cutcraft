@@ -5,10 +5,12 @@ import { rangeOf } from "../../parse";
 import type { Diagnostic } from "../index";
 import type { Rule } from "./index";
 
-const DECLARERS = new Set(["font", "googleFont"]);
+const DECLARERS = new Set(["font", "googleFont", "defineEffect", "defineTransition"]);
+/** Declarations whose arguments hold code (a zod schema): only their name and shader need be literal. */
+const SHADERS = new Set(["defineEffect", "defineTransition"]);
 
-/** Calls to the kit's `font()` and `googleFont()`, under whatever local names the file imports them as. */
-function declarations(index: SourceIndex): { call: t.CallExpression; topLevel: boolean }[] {
+/** Calls to the kit's declarations (`font()`, `googleFont()`, `defineEffect()`, `defineTransition()`), under whatever local names the file imports them as. */
+function declarations(index: SourceIndex): { call: t.CallExpression; topLevel: boolean; declarer: string }[] {
   const local = new Map<string, string>();
   for (const node of index.ast.program.body) {
     if (!t.isImportDeclaration(node) || node.source.value !== "@cutcraft/kit") continue;
@@ -24,10 +26,10 @@ function declarations(index: SourceIndex): { call: t.CallExpression; topLevel: b
     const decl = t.isExportNamedDeclaration(node) ? node.declaration : node;
     if (t.isVariableDeclaration(decl)) for (const d of decl.declarations) if (d.init) top.add(d.init);
   }
-  const out: { call: t.CallExpression; topLevel: boolean }[] = [];
+  const out: { call: t.CallExpression; topLevel: boolean; declarer: string }[] = [];
   t.traverseFast(index.ast.program, (node) => {
     if (t.isCallExpression(node) && t.isIdentifier(node.callee) && local.has(node.callee.name))
-      out.push({ call: node, topLevel: top.has(node) });
+      out.push({ call: node, topLevel: top.has(node), declarer: local.get(node.callee.name) as string });
   });
   return out;
 }
@@ -48,7 +50,8 @@ function literal(node: t.Node): boolean {
 /** The families a file declares with literal arguments: `font({ family: "…" })` and `googleFont("…")`. */
 export function declaredFamilies(index: SourceIndex): Set<string> {
   const out = new Set<string>();
-  for (const { call } of declarations(index)) {
+  for (const { call, declarer } of declarations(index)) {
+    if (SHADERS.has(declarer)) continue;
     const [first] = call.arguments;
     if (t.isStringLiteral(first)) out.add(first.value);
     else if (t.isObjectExpression(first))
@@ -59,28 +62,45 @@ export function declaredFamilies(index: SourceIndex): Set<string> {
   return out;
 }
 
-/** `font()` and `googleFont()` at the top of the file with literal arguments, where the editor and lint can read them. */
-export const fontDeclaration: Rule = {
-  name: "font-declaration",
+/** A `name` and `shader` written out in a `defineEffect()` / `defineTransition()` call's options. */
+function literalShader(call: t.CallExpression): boolean {
+  const [options] = call.arguments;
+  if (!t.isObjectExpression(options)) return false;
+  const field = (key: string) =>
+    options.properties.find((p): p is t.ObjectProperty => t.isObjectProperty(p) && t.isIdentifier(p.key, { name: key }))
+      ?.value;
+  const name = field("name");
+  const shader = field("shader");
+  return !!name && !!shader && literal(name) && literal(shader);
+}
+
+/**
+ * The kit's declarations (`font()`, `googleFont()`, `defineEffect()`, `defineTransition()`) at the top of the file,
+ * with what names them written out, where the editor and lint can read them.
+ */
+export const declaration: Rule = {
+  name: "declaration",
   check: (index) =>
-    declarations(index).flatMap(({ call, topLevel }): Diagnostic[] => {
+    declarations(index).flatMap(({ call, topLevel, declarer }): Diagnostic[] => {
       const name = (call.callee as t.Identifier).name;
       if (!topLevel)
         return [
           {
-            rule: "font-declaration",
+            rule: "declaration",
             severity: "warning",
             range: rangeOf(call),
-            message: `${name}() inside a function or expression is hidden from the editor; declare the font at the top of the file: const brand = ${name}(…)`,
+            message: `${name}() inside a function or expression is hidden from the editor; declare it at the top of the file: const x = ${name}(…)`,
           },
         ];
-      if (!call.arguments.every(literal))
+      if (SHADERS.has(declarer) ? !literalShader(call) : !call.arguments.every(literal))
         return [
           {
-            rule: "font-declaration",
+            rule: "declaration",
             severity: "warning",
             range: rangeOf(call),
-            message: `${name}() takes literal arguments, so the editor and lint can read the font from the source`,
+            message: SHADERS.has(declarer)
+              ? `${name}() takes a literal name and shader, so the editor and lint can read them from the source`
+              : `${name}() takes literal arguments, so the editor and lint can read the font from the source`,
           },
         ];
       return [];

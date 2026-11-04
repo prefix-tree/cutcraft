@@ -50,7 +50,6 @@
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run",
     "test:watch": "vitest",
-    "parity": "tsx scripts/parity.ts",
     "bench": "tsx scripts/bench.ts"
   },
   "peerDependencies": {
