@@ -6,7 +6,7 @@ import type { ResolvedState } from "@cutcraft/kit";
 import { captureWarnings, FRAME_EPS, type MediaResolver, type PlayerErrorEvent } from "@cutcraft/player/engine";
 
 import { initEnv } from "./env";
-import { manifestFonts } from "./fonts";
+import { loadFonts } from "./fonts";
 import type { OverlayFont } from "./overlays";
 import { FramePipeline } from "./pipeline";
 import { type BrowserSource, type Engine, pickEngine } from "./renderer";
@@ -46,13 +46,17 @@ export async function renderStill(options: StillOptions): Promise<StillResult> {
   const picked = pickEngine(state, options.engine, options.source);
   const warnings: string[] = picked.note ? [picked.note] : [];
   const jpeg = /\.jpe?g$/i.test(options.out);
+  const fonts = [
+    ...(await loadFonts(state.fonts, options.media, { woff2: picked.engine === "browser" })),
+    ...(options.fonts ?? []),
+  ];
   if (picked.engine === "browser" && options.source) {
     const source = options.source;
     const browser = await BrowserEngine.open({
       source: source.text,
       manifest: source.manifest,
       media: options.media,
-      ...(options.fonts?.length ? { fonts: options.fonts } : {}),
+      ...(fonts.length ? { fonts } : {}),
       warn: (m) => {
         if (!warnings.includes(m)) warnings.push(m);
       },
@@ -74,7 +78,7 @@ export async function renderStill(options: StillOptions): Promise<StillResult> {
     state,
     media: options.media,
     interiors: options.interiors,
-    fonts: [...(await manifestFonts(state.manifest, options.media)), ...(options.fonts ?? [])],
+    fonts,
     onAssetError: options.onAssetError,
     warn: (m) => warnings.push(m),
   });

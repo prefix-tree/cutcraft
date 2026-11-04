@@ -41,12 +41,15 @@ npx cutcraft hello.tsx --out hello.mp4
 Three seconds of a card with a title that builds word by word. Every element has a literal `id`: that is how an editor
 finds it when you drag it on a timeline ([The file](./the-file) explains why).
 
+For a typeface beyond the five that ship, declare it at the top of the file and pass the value on:
+`const titan = googleFont("Titan One")`, then `<Title font={titan}>`. The first export downloads it and keeps a copy
+([Fonts](./themes#fonts)).
+
 ## 2. Your own footage, cut in seconds
 
 Put a video next to the file, `talk.mp4` say, and list it in a `manifest.json`. The manifest names each asset the file
 may use and holds what CutCraft can't read from a file name: its length, size and frame rate (`ffprobe talk.mp4` shows
-them). A font the file names, beyond the five that ship, goes in the manifest
-too ([Fonts](./themes#fonts)).
+them).
 
 ```json
 {

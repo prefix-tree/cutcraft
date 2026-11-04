@@ -280,6 +280,7 @@ export function makeState(spec: StateSpec): ResolvedState {
     manifest,
     log: undefined,
     theme: resolveTheme(undefined),
+    fonts: [],
   };
 }
 

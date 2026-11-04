@@ -24,7 +24,7 @@ import {
 import { feedCopy, planCopy, type Run } from "./copy";
 import { encodeFrames } from "./encode";
 import { initEnv } from "./env";
-import { manifestFonts } from "./fonts";
+import { loadFonts } from "./fonts";
 import { type MixedBlock, mixPlan } from "./mixer";
 import { type OverlayFont, OverlayPlane } from "./overlays";
 import {
@@ -220,8 +220,9 @@ export async function renderVideo(options: RenderOptions): Promise<RenderResult>
       `the browser engine encodes H.264 (.mp4) or VP9 (.webm), not ${encoding.codec}; use --engine node for it`,
     );
   const wanted = options.parallel ? Math.max(1, Math.floor(options.parallel.workers ?? defaultWorkers())) : 1;
-  // The manifest's fonts and the ones passed in. The browser engine's page loads the manifest's itself, as the player does.
-  const fonts = [...(inBrowser ? [] : await manifestFonts(state.manifest, options.media)), ...(options.fonts ?? [])];
+  // The file's fonts (`font()`, `googleFont()`) and the ones passed in, read here for either engine: the browser
+  // engine's page sets text in the same files, Google's included, from the same cache.
+  const fonts = [...(await loadFonts(state.fonts, options.media, { woff2: inBrowser })), ...(options.fonts ?? [])];
 
   const warnings: string[] = picked.note ? [picked.note] : [];
   captureWarnings((m) => warnings.push(m));
@@ -331,7 +332,7 @@ export async function renderVideo(options: RenderOptions): Promise<RenderResult>
         source: source.text,
         manifest: source.manifest,
         media: options.media,
-        ...(options.fonts?.length ? { fonts: options.fonts } : {}),
+        ...(fonts.length ? { fonts } : {}),
         warn: (m) => {
           if (!warnings.includes(m)) warnings.push(m);
         },

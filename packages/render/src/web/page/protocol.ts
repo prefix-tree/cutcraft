@@ -6,7 +6,7 @@ export interface PageJob {
   readonly source: string;
   readonly props: Readonly<Record<string, unknown>>;
   readonly manifest: unknown;
-  /** Faces passed to the export beyond the manifest's (`--font`), each served at its `url`. */
+  /** Every face the page sets text in, each served at its `url`: the file's own, read in Node, and `--font`. */
   readonly fonts: readonly PageFont[];
 }
 

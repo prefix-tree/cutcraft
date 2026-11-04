@@ -236,22 +236,33 @@ export default function Video() {
     expect(lint(text).find((x) => x.rule === "theme-literals" && x.prop === "color")?.message).toContain("$text");
   });
 
-  it("takes a font the manifest lists as available", () => {
-    const text = `import { Composition, Title, Track } from "@cutcraft/kit";
+  it("takes a font the file declares as available, and wants declarations at the top with literal arguments", () => {
+    const text = `import { Composition, font as face, googleFont, Title, Track } from "@cutcraft/kit";
+const brand = face({ family: "Brand", src: "asset:brand" });
+export const titan = googleFont("Titan One", { weights: [400, 700] });
+const name = "Computed";
+const computed = googleFont(name);
 export default function Video() {
+  const late = googleFont("Late");
   return (
     <Composition fps={30} width={1920} height={1080}>
       <Track id="over" layout="free">
         <Title id="a" start={0} font="Brand">A</Title>
-        <Title id="b" start={0} font="Other">B</Title>
+        <Title id="b" start={0} font="Titan One">B</Title>
+        <Title id="c" start={0} font="Other">C</Title>
       </Track>
     </Composition>
   );
 }
 `;
-    const manifest = { assets: {}, fonts: { brand: { family: "Brand" } } };
-    const d = lint(text, { manifest }).filter((x) => x.rule === "font-available");
-    expect(d.map((x) => x.id)).toEqual(["b"]);
-    expect(d[0]?.message).toContain("neither bundled nor in the manifest's fonts");
+    const d = lint(text);
+    const available = d.filter((x) => x.rule === "font-available");
+    expect(available.map((x) => x.id)).toEqual(["c"]);
+    expect(available[0]?.message).toContain("neither bundled nor declared with font() or googleFont()");
+    const declarations = d.filter((x) => x.rule === "font-declaration").map((x) => x.message);
+    expect(declarations).toEqual([
+      expect.stringContaining("googleFont() takes literal arguments"),
+      expect.stringContaining("googleFont() inside a function or expression"),
+    ]);
   });
 });

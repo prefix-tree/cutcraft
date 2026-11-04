@@ -28,7 +28,7 @@ export interface BrowserEngineOptions {
   readonly props?: Readonly<Record<string, unknown>>;
   readonly manifest: AssetManifest;
   readonly media: MediaResolver;
-  /** Faces beyond the manifest's (`--font`); the page loads the manifest's itself, as the player does. */
+  /** Every face to set text in: the file's, read in Node, and any passed beside it (`--font`). */
   readonly fonts?: readonly OverlayFont[];
   /** A Chromium or Chrome binary; default `CUTCRAFT_CHROMIUM`, then Playwright's own browser. */
   readonly executablePath?: string;

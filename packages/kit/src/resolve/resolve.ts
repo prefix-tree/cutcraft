@@ -7,6 +7,7 @@ import { defaultTransitionParams } from "../jsx/schemas/transition";
 import { parseTimeRef, resolveTimeRef } from "../manifest/timeref";
 import { type AssetEntry, type AssetManifest, assetIdOf, lookupAsset } from "../manifest/types";
 import type { PatchLog } from "../patches/types";
+import type { DeclaredFont } from "../theme/fonts";
 import { applyTheme, type ResolvedTheme, resolveTheme, type ThemeOrigin } from "../theme/theme";
 import {
   type AssetPlay,
@@ -77,6 +78,8 @@ export interface ResolvedState {
   readonly log: PatchLog | undefined;
   /** The composition's theme, its base merged in; the default theme when the file declares none. */
   readonly theme: ResolvedTheme;
+  /** The faces the file declares (`font()`, `googleFont()`), which every renderer loads. */
+  readonly fonts: readonly DeclaredFont[];
 }
 
 const DEFAULT_OVERLAY_DURATION = 5;
@@ -375,6 +378,7 @@ function compute(
     manifest,
     log,
     theme,
+    fonts: original.fonts ?? [],
   };
 }
 

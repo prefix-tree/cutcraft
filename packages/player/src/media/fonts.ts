@@ -1,4 +1,4 @@
-import type { AssetManifest } from "@cutcraft/kit";
+import type { DeclaredFont } from "@cutcraft/kit";
 
 import type { MediaResolver } from "../types";
 
@@ -45,31 +45,50 @@ export function addFontFaces(faces: readonly FontFaceSource[]): Promise<void> {
   ).then(() => undefined);
 }
 
+/** The stylesheet URL Google Fonts serves a family's face from, for a browser. */
+function googleCss(face: DeclaredFont): string {
+  const family = encodeURIComponent(face.family).replace(/%20/g, "+");
+  return `https://fonts.googleapis.com/css2?family=${family}:ital,wght@${face.style === "italic" ? 1 : 0},${face.weight}&display=block`;
+}
+
+async function addGoogleFace(face: DeclaredFont): Promise<void> {
+  const href = googleCss(face);
+  if (!document.querySelector(`link[href="${href}"]`)) {
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = href;
+    const loaded = new Promise<void>((ok, fail) => {
+      link.onload = () => ok();
+      link.onerror = () => fail(new Error(`Google Fonts did not serve ${face.family} ${face.weight} ${face.style}`));
+    });
+    document.head.append(link);
+    await loaded;
+  }
+  const faces = await document.fonts.load(`${face.style} ${face.weight} 16px "${face.family}"`);
+  if (faces.length === 0) throw new Error(`Google Fonts has no ${face.family} ${face.weight} ${face.style}`);
+}
+
 /**
- * Loads the faces the manifest lists (`fonts`): each key is asked of `media`, as an asset id is, and its file added to
- * `document.fonts`. Resolves once all have loaded; a face that fails is reported through `onError` and the rest load.
+ * Loads the faces a file declares (`state.fonts`) into the page: an `asset:` face is asked of `media` as an asset is,
+ * a Google face loads from Google's stylesheet. Resolves once all have loaded; a face that fails is reported through
+ * `onError` and the rest load. Does nothing where there is no `FontFace` (Node, tests).
  */
-export async function loadManifestFonts(
-  manifest: AssetManifest,
+export async function loadFileFonts(
+  faces: readonly DeclaredFont[],
   media: MediaResolver,
-  onError: (id: string, error: Error) => void,
+  onError: (family: string, error: Error) => void,
 ): Promise<void> {
+  if (typeof FontFace === "undefined" || typeof document === "undefined") return;
   await Promise.all(
-    Object.entries(manifest.fonts ?? {}).map(async ([id, entry]) => {
+    faces.map(async (face) => {
       try {
-        const handle = await media.resolve(id);
+        if (face.source.kind === "google") return await addGoogleFace(face);
+        const handle = await media.resolve(face.source.id);
         if (handle.kind === "path") throw new Error(`a browser cannot read the path ${handle.path}; give it a URL`);
         const source = handle.kind === "url" ? handle.url : await handle.blob.arrayBuffer();
-        await addFontFaces([
-          {
-            family: entry.family,
-            source,
-            ...(entry.weight !== undefined ? { weight: entry.weight } : {}),
-            ...(entry.style ? { style: entry.style } : {}),
-          },
-        ]);
+        await addFontFaces([{ family: face.family, weight: face.weight, style: face.style, source }]);
       } catch (error) {
-        onError(id, error instanceof Error ? error : new Error(String(error)));
+        onError(face.family, error instanceof Error ? error : new Error(String(error)));
       }
     }),
   );

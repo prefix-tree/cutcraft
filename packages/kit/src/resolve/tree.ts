@@ -1,3 +1,4 @@
+import type { DeclaredFont } from "../theme/fonts";
 import type { ResolveError } from "./errors";
 
 export type Editable = "literal" | "generated" | "opaque";
@@ -38,6 +39,8 @@ export interface CollectedTree {
   readonly root: CollectedNode;
   readonly byId: ReadonlyMap<string, CollectedNode>;
   readonly errors: readonly ResolveError[];
+  /** The faces the file declares (`font()`, `googleFont()`); set by `collectModule`. */
+  readonly fonts?: readonly DeclaredFont[];
 }
 
 export function walk(node: CollectedNode, visit: (node: CollectedNode, depth: number) => void, depth = 0): void {

@@ -24,7 +24,8 @@ const SETTLE_TIMEOUT_MS = 10_000;
 
 async function start(): Promise<void> {
   const job = (await (await fetch("/job.json")).json()) as PageJob;
-  // Faces passed beside the manifest (`--font`); the player loads the manifest's own.
+  // Every face, the file's and `--font`, read in Node and served here, so both engines set text in the same files and an
+  // export needs no network once Google's are cached. The player is told not to fetch them again.
   await addFontFaces(job.fonts.map((f) => ({ family: f.family, weight: f.weight, style: f.style, source: f.url })));
   const imports = installFreeCodeLibraries();
   const mod = loadModule(job.source, { imports });
@@ -51,13 +52,12 @@ async function start(): Promise<void> {
       media={media}
       fit="none"
       controls={false}
+      coreOptions={{ loadFonts: false }}
       onError={(e) => errors.push(`${e.asset ?? e.id ?? "?"}: ${e.error.message}`)}
     />,
   );
   while (!ref.current) await tick();
   const core = ref.current.core;
-  // No frame is drawn before the manifest's fonts are in: text set in a fallback face would be captured.
-  await core.fontsReady;
   const ctx = cap.getContext("2d") as CanvasRenderingContext2D & {
     drawElementImage(element: Element, x: number, y: number): void;
   };

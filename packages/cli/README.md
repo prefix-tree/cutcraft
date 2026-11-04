@@ -30,7 +30,7 @@ file's folder, one per asset id, or in the folder you pass to `--media`.
 | `--speed <s>` | `balanced` (default), `quality` for smaller files, or `fast`. |
 | `--copy` | Copy untouched stretches of the source without re-encoding (VP8 and VP9). |
 | `--import <spec>` | A module the file may import beyond `react`, `zod` and the kit, such as `three`. |
-| `--font <spec>` | A font beyond the manifest's `fonts`, for this export: `Name=file.ttf`. |
+| `--font <spec>` | A font beyond the ones the file declares, for this export: `Name=file.ttf`. |
 | `--json` | Print the layout check as JSON. It exits with code 3 when it finds issues. |
 
 `npx cutcraft --help` prints them all, and [Exporting](https://prefix-tree.github.io/cutcraft/guide/exporting)

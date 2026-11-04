@@ -13,7 +13,7 @@ import {
 } from "@cutcraft/player/engine";
 
 import { initEnv } from "./env";
-import { manifestFonts } from "./fonts";
+import { loadFonts } from "./fonts";
 import { type OverlayBounds, type OverlayFont, OverlayPlane } from "./overlays";
 
 /** Margins as fractions of the frame's height (top, bottom) and width (left, right). */
@@ -148,7 +148,7 @@ export async function checkLayout(options: LayoutCheckOptions): Promise<LayoutCh
     media: options.media,
     warn: (m) => warnings.push(m),
     ...(options.interiors ? { interiors: options.interiors } : {}),
-    fonts: [...(await manifestFonts(state.manifest, options.media)), ...(options.fonts ?? [])],
+    fonts: [...(await loadFonts(state.fonts, options.media)), ...(options.fonts ?? [])],
   });
   const issues: Run[] = [];
   const open = new Map<string, Run>();
