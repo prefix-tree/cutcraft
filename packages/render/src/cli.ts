@@ -7,7 +7,7 @@ import { loadVideo } from "./load";
 import { directoryResolver } from "./media";
 import type { FontWeight, OverlayFont } from "./overlays";
 import { defaultWorkers } from "./parallel";
-import { renderVideo, type VideoCodec } from "./renderer";
+import { type Engine, renderVideo, type VideoCodec } from "./renderer";
 import { QUALITIES, type QualityName, type Speed } from "./segment";
 import { renderStill } from "./still";
 
@@ -44,6 +44,8 @@ const USAGE = `Usage: cutcraft <file.tsx> --out <video.webm|.mp4|.mov|.mp3|.wav>
   --font <spec>         extra font for titles: Name=file.ttf, Name:700=file.ttf or Name:700:italic=file.ttf
   --import <spec>       a module the file may import beyond react, zod and the kit: three, or name=specifier
                         (a package, or a path relative to the file); the editor must offer the same modules
+  --engine <name>       what draws the pictures: auto (default: the browser for <Three> and <Motion>, else node),
+                        node (no browser), or browser (headless Chromium; CUTCRAFT_CHROMIUM picks the binary)
   --continue            draw the grey placeholder for an asset that cannot be read, instead of failing
   --quiet               no progress
 `;
@@ -75,6 +77,7 @@ async function main(): Promise<number> {
       import: { type: "string", multiple: true },
       continue: { type: "boolean" },
       copy: { type: "boolean" },
+      engine: { type: "string" },
       software: { type: "boolean" },
       quiet: { type: "boolean" },
       help: { type: "boolean", short: "h" },
@@ -111,6 +114,9 @@ async function main(): Promise<number> {
     return result.issues.length > 0 ? EXIT_LAYOUT_ISSUES : 0;
   }
   const out = values.out as string; // the usage check above: only --check-layout runs without --out
+  if (values.engine !== undefined && !["auto", "node", "browser"].includes(values.engine))
+    throw new Error(`--engine wants auto, node or browser, got "${values.engine}"`);
+  const engine = { engine: (values.engine ?? "auto") as Engine, source: loaded.source };
   if (values.still !== undefined) {
     const time = Number(values.still);
     if (!Number.isFinite(time)) throw new Error(`--still wants seconds, got "${values.still}"`);
@@ -121,6 +127,7 @@ async function main(): Promise<number> {
       interiors: loaded.interiors,
       time,
       fonts,
+      ...engine,
       ...(values.continue ? { onAssetError: "continue" as const } : {}),
     });
     for (const w of still.warnings) process.stderr.write(`warning: ${w}\n`);
@@ -162,6 +169,7 @@ async function main(): Promise<number> {
         }
       : {}),
     ...(values.continue ? { onAssetError: "continue" as const } : {}),
+    ...engine,
     fonts,
     onProgress: tty ? (p) => process.stderr.write(`\rframe ${p.frame}/${p.frames}`) : () => undefined,
   });

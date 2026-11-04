@@ -11,7 +11,7 @@ import {
 } from "mediabunny";
 import type { ReactNode } from "react";
 
-import type { ResolvedState } from "@cutcraft/kit";
+import type { AssetManifest, ResolvedState } from "@cutcraft/kit";
 import {
   buildAudioPlan,
   captureWarnings,
@@ -47,6 +47,7 @@ import {
   type VideoEncoding,
   videoSource,
 } from "./segment";
+import { BrowserEngine } from "./web/engine";
 
 export type Container = VideoContainer | "mp3" | "wav";
 const AUDIO_CODEC: Record<Container, AudioCodec> = {
@@ -106,6 +107,51 @@ export interface RenderOptions {
   readonly signal?: AbortSignal;
   /** What to do when an asset cannot be opened or decoded: stop (default) or draw the grey placeholder and go on. */
   readonly onAssetError?: "throw" | "continue";
+  /**
+   * What draws the pictures. `node` (skia and Satori, no browser) cannot draw `<Three>` or `<Motion>`; `browser`
+   * runs the real Player in headless Chromium and draws whatever a browser draws; `auto` (default) takes the
+   * browser for a file with such a layer when `source` is given, and Node otherwise.
+   */
+  readonly engine?: Engine;
+  /** The file the state came from: the browser engine loads it itself, as the editor does. */
+  readonly source?: BrowserSource;
+}
+
+export type Engine = "auto" | "node" | "browser";
+
+export interface BrowserSource {
+  /** The cut file's source text. */
+  readonly text: string;
+  readonly manifest: AssetManifest;
+  readonly props?: Readonly<Record<string, unknown>>;
+  /** A Chrome or Chromium 153+ binary; default `CUTCRAFT_CHROMIUM`, then Playwright's own. */
+  readonly executablePath?: string;
+}
+
+/** Layers only a browser draws: `<Three>`, `<Motion>` and any other engine layer. */
+export function needsBrowser(state: ResolvedState): boolean {
+  for (const p of state.items.values()) if (typeof p.props.engine === "string") return true;
+  return false;
+}
+
+/** The engine `renderVideo` and `renderStill` use for these options, and why, when it is not the one asked for. */
+export function pickEngine(
+  state: ResolvedState,
+  engine: Engine | undefined,
+  source: BrowserSource | undefined,
+): { readonly engine: "node" | "browser"; readonly note?: string } {
+  if (engine === "node") return { engine: "node" };
+  if (engine === "browser") {
+    if (!source) throw new Error("the browser engine needs `source`: the file's text, manifest and props");
+    return { engine: "browser" };
+  }
+  if (!needsBrowser(state)) return { engine: "node" };
+  return source
+    ? { engine: "browser" }
+    : {
+        engine: "node",
+        note: "the file has layers only a browser draws (<Three>, <Motion>); pass `source` to export them with the browser engine",
+      };
 }
 
 export interface RenderResult {
@@ -166,9 +212,15 @@ export async function renderVideo(options: RenderOptions): Promise<RenderResult>
   const total = Math.max(0, last - first);
   if (total === 0) throw new Error("nothing to render: the range holds no frames");
   const gopFrames = Math.max(1, Math.round(encoding.keyFrameInterval * fps));
+  const picked = audioOnly ? { engine: "node" as const } : pickEngine(state, options.engine, options.source);
+  const inBrowser = picked.engine === "browser";
+  if (inBrowser && !(encoding.codec === "avc" || encoding.codec === "vp9"))
+    throw new Error(
+      `the browser engine encodes H.264 (.mp4) or VP9 (.webm), not ${encoding.codec}; use --engine node for it`,
+    );
   const wanted = options.parallel ? Math.max(1, Math.floor(options.parallel.workers ?? defaultWorkers())) : 1;
 
-  const warnings: string[] = [];
+  const warnings: string[] = picked.note ? [picked.note] : [];
   captureWarnings((m) => warnings.push(m));
   const errors: PlayerErrorEvent[] = [];
   // Which frames are copied, which are rendered, and how the rendered ones are cut into runs for workers.
@@ -187,15 +239,16 @@ export async function renderVideo(options: RenderOptions): Promise<RenderResult>
     : null;
   const runs: readonly Run[] = copyPlan?.runs ?? [{ kind: "render", first, last }];
   const pieces: Run[] = runs.flatMap((run) =>
-    run.kind === "copy" || wanted === 1
+    run.kind === "copy" || (wanted === 1 && !inBrowser)
       ? [run]
-      : planSegments(run.first, run.last, gopFrames, wanted, options.parallel?.segmentFrames).map(
+      : planSegments(run.first, run.last, gopFrames, inBrowser ? 1 : wanted, options.parallel?.segmentFrames).map(
           (r): Run => ({ kind: "render", ...r }),
         ),
   );
   const renderPieces = pieces.filter((p) => p.kind === "render").length;
-  const threads = options.parallel && wanted > 1 && renderPieces > 1 ? Math.min(wanted, renderPieces) : 1;
-  const joined = (copyPlan?.copied ?? 0) > 0 || threads > 1;
+  const threads = !inBrowser && options.parallel && wanted > 1 && renderPieces > 1 ? Math.min(wanted, renderPieces) : 1;
+  // The browser engine hands back encoded pieces, as workers do; this thread joins them and mixes the sound.
+  const joined = inBrowser || (copyPlan?.copied ?? 0) > 0 || threads > 1;
   const output = new Output({
     format:
       container === "mp3"
@@ -267,7 +320,21 @@ export async function renderVideo(options: RenderOptions): Promise<RenderResult>
   const started = performance.now();
   let pool: SegmentPool | null = null;
   let pipeline: FramePipeline | null = null;
+  let browser: BrowserEngine | null = null;
   try {
+    if (inBrowser && options.source) {
+      const source = options.source;
+      browser = await BrowserEngine.open({
+        source: source.text,
+        manifest: source.manifest,
+        media: options.media,
+        warn: (m) => {
+          if (!warnings.includes(m)) warnings.push(m);
+        },
+        ...(source.props ? { props: source.props } : {}),
+        ...(source.executablePath ? { executablePath: source.executablePath } : {}),
+      });
+    }
     if (audioOnly) {
       if (!audioSource)
         throw new Error(
@@ -303,6 +370,27 @@ export async function renderVideo(options: RenderOptions): Promise<RenderResult>
           const started = pool.run(piece.first, piece.last);
           started.catch(() => undefined);
           return () => started;
+        }
+        if (browser) {
+          const engine = browser;
+          return async () => {
+            const at = performance.now();
+            const bytes = await engine.segment({
+              first: piece.first,
+              last: piece.last,
+              container: videoContainer === "mp4" ? "mp4" : "webm",
+              codec: encoding.codec as "avc" | "vp9",
+              bitrate: encoding.bitrate,
+              keyFrameInterval: encoding.keyFrameInterval,
+            });
+            const failed = await engine.errors();
+            return {
+              bytes,
+              stages: { composite: performance.now() - at, overlays: 0, readback: 0, encode: 0 },
+              warnings: [],
+              errors: [...failed],
+            };
+          };
         }
         return async () => {
           const r = await encodeSegment({
@@ -382,6 +470,7 @@ export async function renderVideo(options: RenderOptions): Promise<RenderResult>
     throw error;
   } finally {
     await pool?.terminate();
+    await browser?.close();
     pipeline?.dispose();
     sharedOverlays?.dispose();
     pcm?.dispose();

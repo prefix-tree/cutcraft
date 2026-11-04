@@ -1,7 +1,7 @@
 # Browser export spike (Phase 0)
 
 Throwaway code that answered whether a browser export can render free code fast, before building it
-(plan: free code plus a browser export engine). Phase 2 turns it into `src/web/`.
+(plan: free code plus a browser export engine). It became `src/web/`, the browser engine ([decision 0019](../../../docs/decisions/0019-a-browser-engine-for-free-code.md)).
 
 - `capture.mjs`, `webgl.mjs`, `canvas2d*.mjs`: what Chrome's HTML-in-Canvas (`drawElementImage`) captures, against
   screenshots of the same HTML.

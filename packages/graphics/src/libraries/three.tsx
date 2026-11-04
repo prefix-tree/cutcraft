@@ -1,8 +1,8 @@
 import { Canvas, type CanvasProps, useFrame, useThree } from "@react-three/fiber";
-import { type CSSProperties, type ReactNode, useLayoutEffect, useRef } from "react";
+import { type CSSProperties, type ReactNode, useCallback, useLayoutEffect, useRef } from "react";
 import * as THREE from "three";
 
-import { useLayer } from "@cutcraft/kit";
+import { holdLayerFrame, useLayer } from "@cutcraft/kit";
 
 export type ThreeSceneProps = Omit<CanvasProps, "frameloop">;
 
@@ -20,21 +20,27 @@ export function ThreeScene({ children, gl, style, ...rest }: ThreeSceneProps) {
   const options = (
     typeof gl === "function" || isRenderer(gl) ? gl : { preserveDrawingBuffer: true, ...(gl as object | undefined) }
   ) as NonNullable<CanvasProps["gl"]>;
+  // The renderer is created after mount; until the clock has drawn the first frame, an export must not capture.
+  const ready = useRef<(() => void) | null>(null);
+  ready.current ??= holdLayerFrame();
+  const drawn = useCallback(() => ready.current?.(), []);
+  useLayoutEffect(() => drawn, [drawn]);
   return (
     <Canvas {...rest} frameloop="never" gl={options} style={{ ...FILL, ...style }}>
       {children}
       {/* Last, so the children's useFrame subscriptions exist before the first advance. */}
-      <VideoClock />
+      <VideoClock onDrawn={drawn} />
     </Canvas>
   );
 }
 
-function VideoClock() {
+function VideoClock({ onDrawn }: { readonly onDrawn: () => void }) {
   const { elapsed } = useLayer();
   const advance = useThree((s) => s.advance);
   useLayoutEffect(() => {
     advance(elapsed, true);
-  }, [advance, elapsed]);
+    onDrawn();
+  }, [advance, elapsed, onDrawn]);
   return null;
 }
 

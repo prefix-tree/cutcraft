@@ -9,6 +9,8 @@ import { type AssetManifest, collectModule, type ResolvedState, resolve } from "
 import { loadModule } from "@cutcraft/kit/source";
 import { indexLayerInteriors } from "@cutcraft/player/overlays";
 
+import type { BrowserSource } from "./renderer";
+
 export interface LoadOptions {
   /** A manifest file, or the manifest itself; default: the file's own `manifest` export. */
   readonly manifest?: string | AssetManifest;
@@ -27,6 +29,8 @@ export interface LoadedVideo {
   readonly manifest: AssetManifest;
   /** The children of each `<Layer id>`, for `renderVideo`. */
   readonly interiors: ReadonlyMap<string, ReactNode>;
+  /** The file's text, manifest and props, for `renderVideo`'s browser engine, which loads the file itself. */
+  readonly source: BrowserSource;
 }
 
 /**
@@ -37,11 +41,17 @@ export async function loadVideo(file: string, options: LoadOptions = {}): Promis
   const path = resolvePath(file);
   if (!existsSync(path)) throw new Error(`${file} does not exist`);
   const imports = await importAll(options.imports ?? {}, dirname(path));
-  const mod = loadModule(readFileSync(path, "utf8"), { imports });
+  const text = readFileSync(path, "utf8");
+  const mod = loadModule(text, { imports });
   const manifest = readManifest(options.manifest, mod as unknown as Record<string, unknown>, file);
   const state = resolve(collectModule(mod as never, options.props ?? {}), manifest);
   const element = mod.default({ ...(mod.defaults ?? {}), ...(options.props ?? {}) });
-  return { state, manifest, interiors: indexLayerInteriors(element) };
+  return {
+    state,
+    manifest,
+    interiors: indexLayerInteriors(element),
+    source: { text, manifest, ...(options.props ? { props: options.props } : {}) },
+  };
 }
 
 /**

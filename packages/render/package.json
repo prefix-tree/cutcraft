@@ -44,7 +44,7 @@
     }
   },
   "scripts": {
-    "build": "tsdown src/index.ts src/cli.ts src/worker.ts --dts",
+    "build": "tsdown src/index.ts src/cli.ts src/worker.ts --dts && vite build -c src/web/vite.config.ts",
     "prepack": "pnpm run build",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run",
@@ -78,10 +78,19 @@
     "@types/react-dom": "catalog:",
     "@vitejs/plugin-react": "catalog:",
     "@vitest/coverage-v8": "catalog:",
+    "playwright-core": "catalog:",
     "react-dom": "catalog:",
     "tsx": "catalog:",
     "typescript": "catalog:",
     "vite": "catalog:",
     "vitest": "catalog:"
+  },
+  "peerDependencies": {
+    "playwright-core": "^1.56.0"
+  },
+  "peerDependenciesMeta": {
+    "playwright-core": {
+      "optional": true
+    }
   }
 }

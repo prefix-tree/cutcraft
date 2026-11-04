@@ -8,6 +8,8 @@ import { captureWarnings, FRAME_EPS, type MediaResolver, type PlayerErrorEvent }
 import { initEnv } from "./env";
 import type { OverlayFont } from "./overlays";
 import { FramePipeline } from "./pipeline";
+import { type BrowserSource, type Engine, pickEngine } from "./renderer";
+import { BrowserEngine } from "./web/engine";
 
 export interface StillOptions {
   readonly state: ResolvedState;
@@ -19,6 +21,9 @@ export interface StillOptions {
   readonly interiors?: ReadonlyMap<string, ReactNode>;
   readonly fonts?: readonly OverlayFont[];
   readonly onAssetError?: "throw" | "continue";
+  /** What draws the frame, as for `renderVideo`. */
+  readonly engine?: Engine;
+  readonly source?: BrowserSource;
 }
 
 export interface StillResult {
@@ -37,7 +42,31 @@ export async function renderStill(options: StillOptions): Promise<StillResult> {
   if (!(options.time >= 0 && options.time < duration))
     throw new Error(`time ${options.time} is outside the composition (0 to ${duration} s)`);
   const frame = Math.floor(options.time * fps + FRAME_EPS);
-  const warnings: string[] = [];
+  const picked = pickEngine(state, options.engine, options.source);
+  const warnings: string[] = picked.note ? [picked.note] : [];
+  const jpeg = /\.jpe?g$/i.test(options.out);
+  if (picked.engine === "browser" && options.source) {
+    const source = options.source;
+    const browser = await BrowserEngine.open({
+      source: source.text,
+      manifest: source.manifest,
+      media: options.media,
+      warn: (m) => {
+        if (!warnings.includes(m)) warnings.push(m);
+      },
+      ...(source.props ? { props: source.props } : {}),
+      ...(source.executablePath ? { executablePath: source.executablePath } : {}),
+    });
+    try {
+      await writeFile(options.out, await browser.still(frame / fps, jpeg ? "image/jpeg" : "image/png", 0.92));
+      const failed = await browser.errors();
+      if (failed.length > 0 && options.onAssetError !== "continue")
+        throw new Error(`cannot render: ${failed.join("; ")}`);
+      return { frame, width, height, warnings, errors: [] };
+    } finally {
+      await browser.close();
+    }
+  }
   captureWarnings((m) => warnings.push(m));
   const pipeline = new FramePipeline({
     state,
@@ -48,7 +77,7 @@ export async function renderStill(options: StillOptions): Promise<StillResult> {
     warn: (m) => warnings.push(m),
   });
   try {
-    await writeFile(options.out, await pipeline.image(frame, /\.jpe?g$/i.test(options.out) ? "jpg" : "png"));
+    await writeFile(options.out, await pipeline.image(frame, jpeg ? "jpg" : "png"));
     return { frame, width, height, warnings, errors: pipeline.errors };
   } finally {
     pipeline.dispose();

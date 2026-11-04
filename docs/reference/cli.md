@@ -33,6 +33,7 @@ npx cutcraft <file.tsx> --check-layout [--safe-zone <zone>] [--subject <x,y,w,h>
 | `--font Name[:weight[:style]]=file` | A font for titles, repeatable. TTF, OTF or WOFF (not WOFF2). |
 | `--continue` | Draw the grey placeholder for an asset that cannot be read, instead of stopping. |
 | `--import <spec>` | A module the file may import beyond `react`, `zod` and `@cutcraft/kit`, repeatable: `three`, or `name=specifier` for a package or a path relative to the file. |
+| `--engine <name>` | What draws the pictures: `auto` (default; the browser for a file with `<Three>` or `<Motion>`, Node otherwise), `node`, or `browser` (headless Chromium; `CUTCRAFT_CHROMIUM` names the binary). See [exporting](/guide/exporting#three-js-and-motion-the-browser-engine). |
 | `--quiet` | No progress output. |
 ## Layout check
 
