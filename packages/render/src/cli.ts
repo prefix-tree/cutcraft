@@ -57,8 +57,8 @@ const USAGE = `Usage: cutcraft <file.tsx> --out <video.webm|.mp4|.mov|.mp3|.wav>
   --font <spec>         extra font for titles: Name=file.ttf, Name:700=file.ttf or Name:700:italic=file.ttf
   --import <spec>       a module the file may import beyond react, zod and the kit: three, or name=specifier
                         (a package, or a path relative to the file); the editor must offer the same modules
-  --engine <name>       what draws the pictures: auto (default: the browser for <Three> and <Motion>, else node),
-                        node (no browser), or browser (headless Chromium; CUTCRAFT_CHROMIUM picks the binary)
+  --engine <name>       what draws the pictures: auto (default: the browser for <Three>, <Motion> and motion blur,
+                        else node), node (no browser), or browser (headless Chromium; CUTCRAFT_CHROMIUM picks it)
   --continue            draw the grey placeholder for an asset that cannot be read, instead of failing
   --quiet               no progress
 `;

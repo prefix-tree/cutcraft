@@ -20,6 +20,17 @@ export const compositionSchema = z.strictObject({
     .optional(),
   /** The video's look: palette, fonts, radius, motion style and element presets. Elements use it through `$tokens` and `style`. */
   theme: themeSchema.optional(),
+  /**
+   * A film camera's blur on everything that moves, in the export: each frame averages `samples` moments across the
+   * time its shutter is open, `shutterAngle` degrees of the frame (180 is half the frame, the film default). Drawn by
+   * the browser export, which a file with it uses on its own; the preview stays sharp.
+   */
+  motionBlur: z
+    .strictObject({
+      shutterAngle: z.number().min(1).max(360).default(180),
+      samples: z.number().int().min(2).max(64).default(8),
+    })
+    .optional(),
 });
 
 export const trackSchema = z.strictObject({

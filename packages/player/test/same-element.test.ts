@@ -29,6 +29,12 @@ describe("sameElement", () => {
     expect(sameElement(cell(before, "t1", 1.5), cell(before, "t1", 1.6))).toBe(false);
   });
 
+  it("follows every change of time with exactTime, for the moments inside a frame that motion blur averages", () => {
+    const exact = (time: number) => ({ ...cell(before, "t1", time), exact: true });
+    expect(sameElement(exact(1.5), exact(1.5))).toBe(true);
+    expect(sameElement(exact(1.5), exact(1.5 + 0.01))).toBe(false);
+  });
+
   it("keeps identity for untouched placements across resolves", () => {
     expect(cell(before, "t1", 1.5).item.placement).toBe(cell(after, "t1", 1.5).item.placement);
     expect(cell(before, "s1", 5.5).item.placement).not.toBe(cell(after, "s1", 5.5).item.placement);

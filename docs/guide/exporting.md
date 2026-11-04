@@ -33,14 +33,28 @@ npm install cutcraft playwright-core
 CUTCRAFT_CHROMIUM=/path/to/chrome npx cutcraft launch.tsx --out launch.mp4
 ```
 
-- `--engine auto` (the default) takes the browser only for a file with `<Three>` or `<Motion>`; every other file
-  exports in Node as before. `--engine browser` forces it, for a `<Layer>` that needs more CSS than the Node engine
+- `--engine auto` (the default) takes the browser only for a file with `<Three>`, `<Motion>` or motion blur; every
+  other file exports in Node as before. `--engine browser` forces it, for a `<Layer>` that needs more CSS than the Node engine
   draws; `--engine node` never starts a browser (and leaves those layers out, with a warning).
 - It needs `playwright-core` and Chrome or Chromium 153 or later; `CUTCRAFT_CHROMIUM` names the binary, otherwise
   Playwright's own browser is used.
 - It writes H.264 (`.mp4`) or VP9 (`.webm`), and PNG or JPEG stills; ProRes, HEVC and AV1 stay with the Node engine.
 - It is slower: about 6 frames a second at 1080p on a 4-core machine with no GPU, where WebGL runs in software, plus a
   few seconds to start the browser. With a GPU it is much faster.
+
+### Motion blur
+
+```tsx
+<Composition fps={30} width={1920} height={1080} motionBlur={{ shutterAngle: 180, samples: 8 }}>
+```
+
+A film camera blurs whatever moves while its shutter is open. With `motionBlur`, the browser export draws each frame
+`samples` times across the open shutter and averages them: footage, titles, `<Motion>`, three.js and any free code
+alike, since every frame is a function of time. `shutterAngle` is how much of the frame the shutter stays open: 180
+(half the frame, the film default) for natural movement, 90 for a crisper, staccato look, 360 for the most blur.
+`samples` (2 to 64, default 8) trades smoothness for time: the export draws that many pictures per frame, so 8 takes
+about eight times as long. Blur shows in the export and stills only; the preview stays sharp, and `--engine node`
+leaves it out with a warning.
 
 ## From code
 
