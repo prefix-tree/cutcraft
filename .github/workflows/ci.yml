@@ -88,6 +88,7 @@ jobs:
         id: chrome
         with:
           chrome-version: stable
+      - run: '"${{ steps.chrome.outputs.chrome-path }}" --version'
       # The export is checked against the browser here: overlay layout, the audio mix, and the browser engine.
       - run: pnpm --filter @cutcraft/render test:browser
         env:
