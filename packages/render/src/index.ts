@@ -38,8 +38,12 @@ export {
 export { defaultWorkers, type ParallelOptions, planSegments } from "./parallel";
 export { MediabunnyPcm } from "./pcm";
 export {
+  type BrowserSource,
   type Container,
   containerOf,
+  type Engine,
+  needsBrowser,
+  pickEngine,
   type RenderOptions,
   type RenderResult,
   renderVideo,
