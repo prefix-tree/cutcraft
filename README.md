@@ -100,8 +100,9 @@ trims and anchors them to words like everything else; only what they draw is up 
 
 [`@cutcraft/graphics`](packages/graphics) has the host setup, and
 [Free code](https://prefix-tree.github.io/cutcraft/guide/free-code) has the details.
-The player draws all of this today. The Node export draws a `<Layer>` with a subset of CSS and skips `<Three>` and
-`<Motion>`; an export through headless Chrome that draws everything is next.
+The player draws all of this, and so does the export: a file with `<Three>` or `<Motion>` exports through the real
+player in headless Chromium, frame by frame, with the same sound
+([exporting](https://prefix-tree.github.io/cutcraft/guide/exporting#three-js-and-motion-the-browser-engine)).
 
 ## What's in it
 
@@ -112,7 +113,7 @@ The player draws all of this today. The Node export draws a `<Layer>` with a sub
 | Editing | 131 actions, each with validation and undo. Every edit is written back into the file as the smallest text change. |
 | Lint | Checks the file before anything plays and reports props that are accepted but not drawn yet. |
 | Player | A React `<Player>` and a framework-free `PlayerCore`: WebCodecs decoding through [mediabunny](https://mediabunny.dev), one canvas for footage, DOM for overlays, Web Audio as the clock, and frame-exact seeking. |
-| Export | The same engine in Node, with no browser: MP4, WebM, MOV (ProRes), MP3 or WAV soundtracks, and PNG or JPEG stills. A layout check reports overlays that leave the frame or the safe zone, or cover the captions or the subject, at their line in the file. |
+| Export | The same engine in Node, with no browser: MP4, WebM, MOV (ProRes), MP3 or WAV soundtracks, and PNG or JPEG stills. Files with `<Three>` or `<Motion>` export through the player in headless Chromium. A layout check reports overlays that leave the frame or the safe zone, or cover the captions or the subject, at their line in the file. |
 
 ## Quick start
 
@@ -157,12 +158,12 @@ videos, each tested) and [the worked example](examples/launch-recap).
 | | |
 |---|---|
 | Works | Resolving, every editor action with undo, writing edits back to the file, lint. Playback with seek, rate and loop; crossfade, dip, wipe, slide and push transitions; keyframes on transforms, effects, colour and sound; speed ramps and freeze frames with their audio; masks, overlays, captions and ducking. Export with frame-exact pictures, and the layout check. |
-| Partial | Other transition types draw as a crossfade. Effects with no CSS filter (vignette and grain do draw), colour wheels, curves and LUTs, matte masks, audio effects, pitch correction and 3D transforms are accepted but not drawn yet, and the lint says so ([what renders](https://prefix-tree.github.io/cutcraft/reference/rendering)). The export draws a `<Layer>` with a subset of CSS and leaves out `<Three>` and `<Motion>`; the player draws all of them. |
+| Partial | Other transition types draw as a crossfade. Effects with no CSS filter (vignette and grain do draw), colour wheels, curves and LUTs, matte masks, audio effects, pitch correction and 3D transforms are accepted but not drawn yet, and the lint says so ([what renders](https://prefix-tree.github.io/cutcraft/reference/rendering)). The Node export draws a `<Layer>` with a subset of CSS; `--engine browser` draws all of it. |
 
 ## Roadmap
 
-1. Export through headless Chrome, so the exported file draws everything the player does: free code, three.js,
-   Motion, CSS 3D, filters and blend modes. Files without free code keep the faster Node export.
+1. One export engine. The browser engine draws everything the player does but is slower without a GPU; once it
+   matches the Node engine's speed and passes its parity tests, it draws every file.
 2. Footage in free code. `useClipFrame(clipId)` will hand a clip's current frame to your code for CSS 3D or a shader,
    and a `<Transition>` will take your own component along with its progress.
 3. An effects library: GPU effects for clips and layers, with options you can animate and an inspector for each.

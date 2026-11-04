@@ -83,8 +83,15 @@ jobs:
           key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
       - run: pnpm --filter @cutcraft/player exec playwright install --with-deps chromium
       - run: pnpm --filter @cutcraft/player test:e2e
-      # The export is checked against the browser here: overlay layout and the audio mix.
+      # The browser export needs drawElementImage (Chrome 153+); Playwright's pinned Chromium (141) predates it.
+      - uses: browser-actions/setup-chrome@v2
+        id: chrome
+        with:
+          chrome-version: stable
+      # The export is checked against the browser here: overlay layout, the audio mix, and the browser engine.
       - run: pnpm --filter @cutcraft/render test:browser
+        env:
+          CUTCRAFT_CHROMIUM: ${{ steps.chrome.outputs.chrome-path }}
       # Free code on the video's clock: three.js, Motion and CSS animations in the real Player.
       - run: pnpm --filter @cutcraft/graphics test:browser
       - uses: actions/upload-artifact@v4

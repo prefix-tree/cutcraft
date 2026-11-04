@@ -1,10 +1,10 @@
 # Exporting
 
 `@cutcraft/render` turns a file into a WebM, MP4 or MOV, a soundtrack (MP3 or WAV)
-or a still (PNG or JPEG) in Node, with no browser. It
-runs the same engine as the preview (the plan, the painter, the compositor and
-the audio plan) on different surfaces, so what the preview shows is what the
-file holds.
+or a still (PNG or JPEG). Most files export in Node, with no browser: the same engine as the preview (the plan, the
+painter, the compositor and the audio plan) on different surfaces, so what the preview shows is what the file holds.
+A file with `<Three>` or `<Motion>` exports through the real player in headless Chromium instead
+([below](#three-js-and-motion-the-browser-engine)).
 
 ## From the command line
 
@@ -21,6 +21,26 @@ asset id, or else the file's folder. The [CLI reference](/reference/cli) lists e
 The export loads a file the way the editor does: it may import `react`, `zod` and
 `@cutcraft/kit`, plus what `--import` offers. A file that imports anything else
 fails with the same message in both, so a file that exports also opens in the editor.
+
+## three.js and Motion: the browser engine
+
+`<Three>` and `<Motion>` need a browser. For a file that has them, the export runs the real player in headless
+Chromium: it steps the file frame by frame, waits for every three.js scene and Motion sequence to draw the frame, and
+captures and encodes it there. Node mixes the sound, so it is the same soundtrack the Node engine writes.
+
+```sh
+npm install cutcraft playwright-core
+CUTCRAFT_CHROMIUM=/path/to/chrome npx cutcraft launch.tsx --out launch.mp4
+```
+
+- `--engine auto` (the default) takes the browser only for a file with `<Three>` or `<Motion>`; every other file
+  exports in Node as before. `--engine browser` forces it, for a `<Layer>` that needs more CSS than the Node engine
+  draws; `--engine node` never starts a browser (and leaves those layers out, with a warning).
+- It needs `playwright-core` and Chrome or Chromium 153 or later; `CUTCRAFT_CHROMIUM` names the binary, otherwise
+  Playwright's own browser is used.
+- It writes H.264 (`.mp4`) or VP9 (`.webm`), and PNG or JPEG stills; ProRes, HEVC and AV1 stay with the Node engine.
+- It is slower: about 6 frames a second at 1080p on a 4-core machine with no GPU, where WebGL runs in software, plus a
+  few seconds to start the browser. With a GPU it is much faster.
 
 ## From code
 

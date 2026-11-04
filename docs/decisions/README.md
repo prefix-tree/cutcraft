@@ -24,3 +24,4 @@ new record that supersedes the old one.
 | [0016](./0016-a-theme-lives-in-the-file.md) | A theme lives in the file |
 | [0017](./0017-graphics-are-svg-generators.md) | Graphics are SVG generators |
 | [0018](./0018-free-code-in-a-timeline-skeleton.md) | Free code in a timeline skeleton |
+| [0019](./0019-a-browser-engine-for-free-code.md) | A browser engine exports what only a browser draws |
