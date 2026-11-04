@@ -139,6 +139,11 @@ and options such as `duration`, `at`, `ease` and `delay`:
 </Motion>
 ```
 
+Four complete files use these tags: a [product launch](/examples#a-product-launch) (a `<Three>` phone and word-timed
+callouts), [kinetic type](/examples#kinetic-type) (`<Motion>` phrases on their words), a
+[data story](/examples#a-data-story) (SVG bars animated by Motion, React counters in a `<Layer>`) and a
+[logo reveal](/examples#a-logo-reveal) (three.js particles settling into a name).
+
 Inside a plain `<Layer>`, use the same libraries through adapters that follow the layer's clock: `<ThreeScene>` from
 `@cutcraft/graphics/three` (a React Three Fiber canvas), and `useTimeline(sequence)` and `useLayerTime()` from
 `@cutcraft/graphics/motion`. A bare `<Canvas>`, Motion's `animate()`, or a `motion` element with `animate` or
@@ -164,7 +169,8 @@ way: add it to `imports` under the name the file imports. The export takes the s
 
 ## In the export
 
-The player draws all of this. The Node export draws a Layer with [Satori](https://github.com/vercel/satori), which
-reads a subset of CSS (flexbox, no hooks beyond `useT()` and `useLayer()`), and leaves out `<Three>` and `<Motion>`.
-Each time, it warns and names what it left out. An export through headless Chrome, which draws everything the player
-does, is next on the [roadmap](https://github.com/prefix-tree/cutcraft#roadmap).
+The player draws all of this, and so does the export. A file with `<Three>` or `<Motion>` exports through the
+[browser engine](/guide/exporting#three-js-and-motion-the-browser-engine): the real player in headless Chromium, frame
+by frame, with the same sound. Other files export in Node, which draws a Layer with
+[Satori](https://github.com/vercel/satori), a subset of CSS (flexbox, no hooks beyond `useT()` and `useLayer()`), and
+warns about what it leaves out; `--engine browser` draws such a Layer in full.

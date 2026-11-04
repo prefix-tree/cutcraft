@@ -54,14 +54,14 @@ stays on the word it was timed to, and the music still runs to the end. Whoever 
 model, reads the edit as ordinary code.
 
 <p align="center">
-  <img src="docs/public/readme/edit.gif" width="640" alt="An edit: three abstract shots cut together with a wipe and a slide, a slow push-in, a title that builds word by word, and a lower third">
+  <img src="docs/public/readme/launch.gif" width="640" alt="A product launch: a three.js phone turns in beside the founder, a lower third names her, and each feature appears as a pill on the word that names it">
 </p>
 <p align="center">
-  <img src="docs/public/readme/graphics.gif" width="300" alt="Data graphics animating in: a counter to 1,250+ customers, seven and a half of ten figures filled, two bars comparing 6.0 h and 1.5 h, and a field of dots with 38% highlighted">
-  <img src="docs/public/readme/motion.gif" width="300" alt="Five bars springing up one after another, a callout pointing at the tallest, and confetti">
-  <img src="docs/public/readme/captions.gif" width="95" alt="A vertical short with karaoke captions and a key point that appears on the word that names it">
+  <img src="docs/public/readme/data.gif" width="300" alt="A data story: bars for six hours and an hour and a half grow on the words that say them, then 4× and −40% count up">
+  <img src="docs/public/readme/logo.gif" width="300" alt="A logo reveal: three thousand particles drift in and settle into the name Shed, then a tagline slides in under it">
+  <img src="docs/public/readme/kinetic.gif" width="95" alt="Kinetic type in a vertical short: each phrase slams or stacks in on its word, over karaoke captions">
 </p>
-<p align="center"><sub>Each one is a short TSX file exported by CutCraft. <a href="https://prefix-tree.github.io/cutcraft/examples">See them next to their files</a>.</sub></p>
+<p align="center"><sub>Each one is a short TSX file exported by CutCraft: three.js and Motion, drawn by the browser engine. <a href="https://prefix-tree.github.io/cutcraft/examples">See them next to their files</a>.</sub></p>
 
 ## Why
 
