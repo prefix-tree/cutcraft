@@ -102,4 +102,5 @@ one track playing overlapping stretches of the same asset, usually a split that 
 
 Three more look at what will be drawn: `stray-html` (HTML straight in a track, where nothing draws it),
 `free-code-clock` (free code off the video's clock; see [Free code](./free-code#the-video-s-clock)) and
-`not-rendered` (a prop that is accepted but not drawn yet, from [What renders](/reference/rendering)).
+`not-rendered` (one of the few things the renderers draw differently from what the file says, listed in
+[What renders](/reference/rendering)).

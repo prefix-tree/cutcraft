@@ -96,8 +96,42 @@ need that much extra footage at the join.
 <Clip id="broll" src="asset:product" in="shot:1" out="shot:1.end" />
 ```
 
-Crossfade, dips to black or white, wipe, slide and push draw today. Other types are accepted and drawn as a
-crossfade, and the lint says so; [What renders](/reference/rendering) has the list.
+Crossfade, dips to black or white, wipe, slide and push are built in. Any other look is a few lines of GLSL that you
+declare with `defineTransition()` ([Effects and transitions of your own](./free-code#effects-and-transitions-of-your-own)).
+A type that is neither built in nor declared is an error.
+
+## At a cut: light leaks, flashes and whooshes
+
+Something that plays over a cut, without moving the cut, goes on a free track and anchors to the clip that comes in.
+A negative `offset` centres it on the cut:
+
+```tsx
+<Track id="main">
+  <Clip id="intro" src="asset:founder" in="word:0" out="word:11.end" />
+  <Clip id="demo" src="asset:screen" in={2} out={8} />
+</Track>
+<Track id="fx" layout="free">
+  {/* 0.8 s of light leak: half before the cut into "demo", half after */}
+  <Clip id="leak" src="asset:leak" anchor="demo" offset={-0.4} duration={0.8} blend="screen" />
+</Track>
+<Track id="sfx" layout="free" role="effects">
+  <Audio id="whoosh" src="asset:whoosh" anchor="demo" offset={-0.2} />
+</Track>
+```
+
+Trim `intro` and the cut moves, and the leak and the whoosh move with it. Nothing is added to the main track, so the
+video stays as long as its clips.
+
+A sound can also anchor to a transition, and then starts when the transition does:
+
+```tsx
+<Transition id="x1" type="crossfade" duration={0.4} />
+<Audio id="swish" src="asset:swish" anchor="x1" />
+```
+
+The thing over the cut can be footage (a light-leak or flash clip, usually with `blend="screen"` or `blend="add"`), a
+`<Layer>` of free code, or a clip with an effect you declared. Sound effects are `<Audio>` elements; a track with
+`role="effects"` keeps them apart from dialogue and music in the mix ([Sound](./captions-and-sound#sound)).
 
 ## Speed and freezes
 

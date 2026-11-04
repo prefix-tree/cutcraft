@@ -110,10 +110,10 @@ player in headless Chromium, frame by frame, with the same sound
 |---|---|
 | Elements | Tracks (a magnetic sequence or free placement), clips trimmed by seconds, words or shots, transitions, titles, shapes, SVG, stickers, built-in graphics, captions, markers, masks, adjustment layers, keyframes, speed ramps, freeze frames, nested compositions and multicam. `<Layer>` takes any React. |
 | Time by meaning | `in="word:12"`, `out="shot:3.end"`, and overlays pinned to a word of the clip that says it (`anchor="hook" at="word:14"`), so cuts and graphics follow every trim. |
-| Editing | 131 actions, each with validation and undo. Every edit is written back into the file as the smallest text change. |
-| Lint | Checks the file before anything plays and reports props that are accepted but not drawn yet. |
+| Editing | 119 actions, each with validation and undo. Every edit is written back into the file as the smallest text change. |
+| Lint | Checks the file before anything plays: literal ids, cuts inside words, fonts and declarations, and the few limits listed in [what renders](https://prefix-tree.github.io/cutcraft/reference/rendering). |
 | Player | A React `<Player>` and a framework-free `PlayerCore`: WebCodecs decoding through [mediabunny](https://mediabunny.dev), one canvas for footage, DOM for overlays, Web Audio as the clock, and frame-exact seeking. |
-| Export | The same engine, in Node with no browser for most files: MP4, WebM, MOV (ProRes), MP3 or WAV soundtracks, and PNG or JPEG stills. Files with `<Three>` or `<Motion>` export through the player in headless Chromium. A layout check reports overlays that leave the frame or the safe zone, or cover the captions or the subject, at their line in the file. |
+| Export | The same engine, in Node with no browser for most files: MP4, WebM, MOV (ProRes), MP3 or WAV soundtracks, and PNG or JPEG stills. Files with `<Three>`, `<Motion>`, motion blur or effects of their own (GLSL, `defineEffect()`) export through the player in headless Chromium. A layout check reports overlays that leave the frame or the safe zone, or cover the captions or the subject, at their line in the file. |
 
 ## Quick start
 
@@ -182,12 +182,10 @@ videos, each tested) and [the worked example](examples/launch-recap).
 
 1. One export engine. The browser engine draws everything the player does but is slower without a GPU; once it
    matches the Node engine's speed and passes its parity tests, it draws every file.
-2. Footage in free code. `useClipFrame(clipId)` will hand a clip's current frame to your code for CSS 3D or a shader,
-   and a `<Transition>` will take your own component along with its progress.
-3. An effects library: GPU effects for clips and layers, with options you can animate and an inspector for each.
-   LUTs, curves, colour wheels and levels, chroma key, matte masks, glow, sharpen, light leaks, film grain, chromatic
-   aberration, zoom blur and glitch, plus zoom, glitch and 3D transitions, written as shaders you can also write
-   yourself, drawn the same way in the preview and the export.
+2. Footage in free code. `useClipFrame(clipId)` will hand a clip's current frame to a `<Layer>`, for CSS 3D or a
+   shader of your own.
+3. Effects on overlays. Titles, `<Motion>` and other DOM layers will take the same `defineEffect()` shaders as clips,
+   drawn through HTML-in-Canvas.
 4. An open editor package with the timeline, inspector and preview gestures over the action set.
 
 ## Contributing

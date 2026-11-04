@@ -61,10 +61,10 @@ npx cutcraft add <media file>... [--manifest manifest.json] [--id <id>] [--trans
 
 ## Adding media
 
-`cutcraft add talk.mp4` writes the file's entry into the manifest: its kind, length, size, frame rate and sound, read
-from the file, and its words from the transcript beside it (`talk.json` from Whisper or ElevenLabs, then `talk.vtt`,
-then `talk.srt`). Running it again refreshes the entry and keeps the fields it does not write. See
-[Getting a transcript](/guide/captions-and-sound#getting-a-transcript).
+`cutcraft add talk.mp4` writes the media file's entry into the manifest. It reads the kind, length, size, frame rate
+and sound from the file itself, and the words from a transcript with the same name in the same folder: `talk.json`
+from Whisper or ElevenLabs first, then `talk.vtt`, then `talk.srt`. Running it again refreshes the entry and keeps the
+fields it does not write. See [Getting a transcript](/guide/captions-and-sound#getting-a-transcript).
 
 | Option | |
 |---|---|
