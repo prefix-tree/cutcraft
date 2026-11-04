@@ -177,7 +177,8 @@ const recipes: { name: string; file: string; mod: Module; check: (state: Resolve
           mode: "color",
           color: THEMES[theme].palette.background,
         });
-        expect(t.items.get("step-1")?.props.enter).not.toEqual(s.items.get("step-1")?.props.enter);
+        // The drawn parts take the theme's palette: the steps fill in with each theme's own colours.
+        expect(t.items.get("steps")?.props.sequence).not.toEqual(s.items.get("steps")?.props.sequence);
         expect(t.items.get("demo")).toMatchObject({ start: 4, end: 10 });
       }
     },

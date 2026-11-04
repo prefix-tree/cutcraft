@@ -1,13 +1,14 @@
 # Brand spot in any theme
 
-A twelve-second spot built from graphics around one screen recording: an
-opening title over a soft backdrop, the product in a browser window with
-callouts, and a closing card with confetti. The look is one prop.
+A twelve-second spot drawn around one screen recording: an opening title over
+a soft backdrop, the product in a browser window with callouts, and a closing
+card with confetti. The look is one prop.
 
 ## What the manifest gives it
 
-Only the `screen` recording. Everything else is drawn: `<Graphic>` kinds and
-titles in the theme's presets.
+Only the `screen` recording. Everything else is drawn: titles in the theme's
+presets, and free code (`<Motion>`, a `<Layer>` and a `<Three>` scene) in the
+theme's palette, fonts and radius.
 
 ## What the file shows
 
@@ -15,8 +16,8 @@ titles in the theme's presets.
   every colour, font, radius and entrance comes from it, so the same edit
   renders in `midnight`, `paper` or `neon` with no other change.
 - No literal colours or fonts: titles use presets (`kicker`, `h1`, `body`,
-  `h2`) and graphics default to tokens.
-- The backdrop (`blobs-background`) sits on the lowest track, so it draws
+  `h2`), and the drawn parts read `THEMES[theme]` (palette, fonts, radius).
+- The backdrop (three soft shapes drifting in a `<Motion>`) sits on the lowest track, so it draws
   beneath the screen recording; the callouts, steps and the live pill sit on
   later tracks, above it.
 - The window is sized to the scaled recording and anchored to it, so moving
