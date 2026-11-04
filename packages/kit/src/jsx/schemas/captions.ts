@@ -30,6 +30,8 @@ export const captionsSchema = z.strictObject({
   maxChars: z.number().int().positive().optional(),
   maxDuration: z.number().positive().default(5),
   maxGap: z.number().nonnegative().default(0.8),
+  /** Words a generated cue always ends after, as `word:N` refs on `src`: `breakAfter={["word:5", "word:12"]}`. */
+  breakAfter: z.array(z.string().regex(/^word:\d+$/, 'a word ref such as "word:12"')).optional(),
 });
 
 export const captionSchema = z.strictObject({

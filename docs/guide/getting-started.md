@@ -47,14 +47,20 @@ For a typeface beyond the five that ship, declare it at the top of the file and 
 
 ## 2. Your own footage, cut in seconds
 
-Put a video next to the file, `talk.mp4` say, and list it in a `manifest.json`. The manifest names each asset the file
-may use and holds what CutCraft can't read from a file name: its length, size and frame rate (`ffprobe talk.mp4` shows
-them).
+Put a video next to the file, `talk.mp4` say, and add it to the manifest:
+
+```sh
+npx cutcraft add talk.mp4
+# talk: video, 10.2 s, 1920x1080 at 30 fps, with sound → manifest.json
+```
+
+The manifest names each asset the file may use and holds what CutCraft reads from the media once, so that editing
+never has to open it again: length, size, frame rate and sound.
 
 ```json
 {
   "assets": {
-    "talk": { "id": "talk", "kind": "video", "duration": 10.2, "fps": 30, "width": 1920, "height": 1080 }
+    "talk": { "id": "talk", "kind": "video", "duration": 10.2, "fps": 30, "width": 1920, "height": 1080, "audio": { … } }
   }
 }
 ```
@@ -87,19 +93,28 @@ somewhere else. The `main` track lays its clips end to end; the `text` track pla
 
 ## 3. Cut on words
 
-Seconds are fine until the cut has to land between two words. Give the asset its transcript, with when each word is
-said. A speech-to-text tool that reports word timings (Whisper does) gives you this:
+Seconds are fine until the cut has to land between two words. Put the transcript next to the video with the same
+name, `talk.json` from Whisper or ElevenLabs, or the `talk.srt` or `talk.vtt` you already have, and add the video
+again:
+
+```sh
+npx cutcraft add talk.mp4
+# talk: video, 10.2 s, 1920x1080 at 30 fps, with sound, 6 words from talk.json → manifest.json
+```
+
+The asset now holds when each word is said:
 
 ```json
 "transcript": { "words": [
   { "i": 0, "text": "Small", "start": 0.42, "end": 0.71 },
   { "i": 1, "text": "software", "start": 0.71, "end": 1.20 },
-  { "i": 2, "text": "deserves", "start": 1.24, "end": 1.69 },
-  { "i": 3, "text": "a", "start": 1.69, "end": 1.77 },
-  { "i": 4, "text": "real", "start": 1.77, "end": 2.02 },
+  …
   { "i": 5, "text": "cloud.", "start": 2.02, "end": 2.55 }
 ] }
 ```
+
+Whisper's JSON times every word. Subtitles time whole lines, so words from an SRT or VTT share their line's time and
+are marked `estimated`: a cut lands near the word rather than on it.
 
 Then the clip, the title and captions all speak in words:
 
@@ -115,7 +130,8 @@ Then the clip, the title and captions all speak in words:
 
 The clip plays from the first word to the end of the sixth, the title appears on "real", and the captions come from
 the words the clip plays. Change `out="word:5.end"` to `out="word:3.end"` and export again: the clip ends two words
-earlier and the title still lands on its word, or the export tells you the word is no longer played.
+earlier and the title still lands on its word, or the export tells you the word is no longer played. Add
+`--srt video.srt` to the export for a subtitle file of the captions as cut.
 [Time by meaning](./time) covers words, shots and anchors.
 
 ## 4. three.js and Motion

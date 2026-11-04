@@ -21,5 +21,6 @@ Subtitles from an asset's transcript that follow the clips through every trim.
 | `maxChars` | integer |  |  |
 | `maxDuration` | number | `5` |  |
 | `maxGap` | number (0..∞) | `0.8` |  |
+| `breakAfter` | string[] |  |  |
 
 Visual. Children: `caption`. [All elements](/reference/elements/)

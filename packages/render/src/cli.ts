@@ -1,7 +1,10 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { parseArgs } from "node:util";
 
+import { subtitles } from "@cutcraft/kit";
+
+import { addAsset, describeAdded } from "./add";
 import { checkLayout, formatLayout, type Insets, SAFE_ZONES, type SafeZoneName } from "./layout-check";
 import { loadVideo } from "./load";
 import { directoryResolver } from "./media";
@@ -17,6 +20,16 @@ const EXIT_LAYOUT_ISSUES = 3;
 const USAGE = `Usage: cutcraft <file.tsx> --out <video.webm|.mp4|.mov|.mp3|.wav> [options]
        cutcraft <file.tsx> --still <seconds> --out <image.png|.jpg> [options]
        cutcraft <file.tsx> --check-layout [--safe-zone <zone>] [--subject <x,y,w,h>] [--json] [options]
+       cutcraft <file.tsx> --srt <captions.srt> | --vtt <captions.vtt> [--from <s> --to <s>]
+       cutcraft add <media file>... [--manifest manifest.json] [--id <id>] [--transcript <file>]
+
+  add                   write each media file's entry into the manifest (default: manifest.json beside it): its
+                        kind, length, size, frame rate and sound, read from the file, and its words from the
+                        transcript beside it (talk.json from Whisper or ElevenLabs, talk.vtt or talk.srt)
+  --id <id>             (add) the asset id; default the file name without its extension
+  --transcript <file>   (add) a transcript other than the one beside the media
+  --srt <file>          also write the captions the cut plays as SRT, timed like the export (alone: only that)
+  --vtt <file>          the same as WebVTT
 
   --out <file>          where to write; the extension picks the container: .webm, .mp4, .mov (ProRes),
                         or .mp3/.wav for the soundtrack alone
@@ -81,10 +94,16 @@ async function main(): Promise<number> {
       software: { type: "boolean" },
       quiet: { type: "boolean" },
       help: { type: "boolean", short: "h" },
+      id: { type: "string" },
+      transcript: { type: "string" },
+      srt: { type: "string" },
+      vtt: { type: "string" },
     },
   });
+  if (positionals[0] === "add") return add(positionals.slice(1), values);
   const [file] = positionals;
-  if (values.help || !file || (!values.out && !values["check-layout"])) {
+  const subtitlesOnly = !values.out && !values["check-layout"] && Boolean(values.srt || values.vtt);
+  if (values.help || !file || (!values.out && !values["check-layout"] && !subtitlesOnly)) {
     process.stderr.write(USAGE);
     return values.help ? 0 : 2;
   }
@@ -96,6 +115,22 @@ async function main(): Promise<number> {
   const loaded = await loadVideo(file, loadOptions);
   for (const e of loaded.state.errors) process.stderr.write(`warning: ${e.id ?? "?"}: ${e.message}\n`);
   const media = directoryResolver(resolve(values.media ?? dirname(file)), loaded.manifest);
+  // Subtitles first: they need no rendering, and a long export should not be the thing that delays them.
+  for (const [format, path] of [
+    ["srt", values.srt],
+    ["vtt", values.vtt],
+  ] as const) {
+    if (!path) continue;
+    const range = {
+      ...(values.from ? { from: Number(values.from) } : {}),
+      ...(values.to ? { to: Number(values.to) } : {}),
+    };
+    if (![...loaded.state.items.values()].some((p) => p.kind === "caption"))
+      process.stderr.write(`warning: ${file} has no captions; ${path} holds none\n`);
+    writeFileSync(resolve(path), subtitles(loaded.state, { format, ...range }));
+    process.stderr.write(`${path}: ${format === "srt" ? "SRT" : "WebVTT"} captions\n`);
+  }
+  if (subtitlesOnly) return 0;
   const fonts = (values.font ?? []).map(readFont);
   if (values["check-layout"]) {
     const result = await checkLayout({
@@ -200,6 +235,29 @@ function readZone(spec: string): SafeZoneName | Insets {
 function readSubject(spec: string): { x: number; y: number; w: number; h: number } {
   const [x = 0, y = 0, w = 0, h = 0] = numbers(spec, "--subject");
   return { x, y, w, h };
+}
+
+/** `cutcraft add <media>...`: one manifest entry per file. */
+async function add(
+  files: readonly string[],
+  values: { manifest?: string | undefined; id?: string | undefined; transcript?: string | undefined },
+): Promise<number> {
+  if (files.length === 0) {
+    process.stderr.write(USAGE);
+    return 2;
+  }
+  if (files.length > 1 && (values.id || values.transcript))
+    throw new Error("--id and --transcript name one asset; add the files one at a time with them");
+  for (const media of files) {
+    const result = await addAsset(media, {
+      ...(values.manifest ? { manifest: values.manifest } : {}),
+      ...(values.id ? { id: values.id } : {}),
+      ...(values.transcript ? { transcript: values.transcript } : {}),
+    });
+    for (const w of result.warnings) process.stderr.write(`warning: ${w}\n`);
+    process.stderr.write(`${describeAdded(result)} → ${result.manifest}\n`);
+  }
+  return 0;
 }
 
 function readFont(spec: string): OverlayFont {

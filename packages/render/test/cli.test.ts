@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 import generateMedia, { mediaDir } from "../../player/e2e/gen-media";
@@ -115,5 +115,45 @@ describe("cutcraft", () => {
     const r = run();
     expect(r.status).toBe(2);
     expect(r.stderr).toContain("Usage: cutcraft");
+  });
+
+  it("adds an asset to the manifest with its transcript", () => {
+    const media = join(dir, "talk.webm");
+    copyFileSync(join(mediaDir, "bars.webm"), media);
+    writeFileSync(join(dir, "talk.srt"), "1\n00:00:01,000 --> 00:00:02,000\nHello there\n");
+    const r = run("add", media);
+    expect(r.stderr).toContain("talk: video, 10 s, 640x360 at 30 fps, with sound, 2 words estimated from talk.srt");
+    expect(r.status).toBe(0);
+    expect(JSON.parse(readFileSync(join(dir, "manifest.json"), "utf8")).assets.talk.transcript.words).toHaveLength(2);
+    expect(run("add", media, join(dir, "x.webm"), "--id", "x").stderr).toContain(
+      "--id and --transcript name one asset",
+    );
+  });
+
+  it("writes the captions as SRT alone, or as WebVTT beside the export", () => {
+    const file = join(dir, "captions.tsx");
+    writeFileSync(
+      file,
+      `import { Caption, Captions, Composition, Track, Title } from "@cutcraft/kit";
+export const manifest = { assets: {} };
+export default function Video() {
+  return (
+    <Composition fps={30} width={320} height={180}>
+      <Track id="t" layout="free"><Title id="x" start={0} duration={2}>x</Title></Track>
+      <Captions id="cc"><Caption id="a" start={0.5} end={1.5} text="Hello there" /></Captions>
+    </Composition>
+  );
+}
+`,
+    );
+    const srt = join(dir, "c.srt");
+    const alone = run(file, "--srt", srt);
+    expect(alone.status).toBe(0);
+    expect(readFileSync(srt, "utf8")).toBe("1\n00:00:00,500 --> 00:00:01,500\nHello there\n");
+    const vtt = join(dir, "c.vtt");
+    const both = run(file, "--out", join(dir, "c.webm"), "--vtt", vtt, "--from", "1", "--quiet");
+    expect(both.status).toBe(0);
+    expect(readFileSync(vtt, "utf8")).toBe("WEBVTT\n\n00:00:00.000 --> 00:00:00.500\nHello there\n");
+    expect(probe(join(dir, "c.webm")).frames).toBe(30);
   });
 });

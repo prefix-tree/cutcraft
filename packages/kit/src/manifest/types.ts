@@ -39,6 +39,11 @@ export interface TranscriptWord {
   readonly start: number;
   readonly end: number;
   readonly speaker?: string;
+  /**
+   * The times are shared out from a longer span (an SRT or VTT cue, a segment without word times), not measured per
+   * word: a cut on this word lands near it, not exactly on it.
+   */
+  readonly estimated?: boolean;
 }
 
 export interface Shot {
