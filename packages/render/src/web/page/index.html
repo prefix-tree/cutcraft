@@ -5,8 +5,9 @@
     <title>CutCraft export</title>
   </head>
   <body style="margin: 0; background: #000; overflow: hidden">
-    <!-- HTML-in-Canvas opt-in: Chrome 153 reads layoutsubtree, newer Chrome content="drawable". -->
-    <canvas id="cap" layoutsubtree content="drawable"><div id="root"></div></canvas>
+    <!-- HTML-in-Canvas opt-in. Chrome 153 reads layoutsubtree on the canvas; Chrome 157 wants content="drawable" on the
+         canvas and drawable on the element drawElementImage captures. -->
+    <canvas id="cap" layoutsubtree content="drawable"><div id="root" drawable></div></canvas>
     <script type="module" src="./main.tsx"></script>
   </body>
 </html>
