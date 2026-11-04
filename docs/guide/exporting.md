@@ -49,12 +49,15 @@ CUTCRAFT_CHROMIUM=/path/to/chrome npx cutcraft launch.tsx --out launch.mp4
 ```
 
 A film camera blurs whatever moves while its shutter is open. With `motionBlur`, the browser export draws each frame
-`samples` times across the open shutter and averages them: footage, titles, `<Motion>`, three.js and any free code
-alike, since every frame is a function of time. `shutterAngle` is how much of the frame the shutter stays open: 180
-(half the frame, the film default) for natural movement, 90 for a crisper, staccato look, 360 for the most blur.
-`samples` (2 to 64, default 8) trades smoothness for time: the export draws that many pictures per frame, so 8 takes
-about eight times as long. Blur shows in the export and stills only; the preview stays sharp, and `--engine node`
-leaves it out with a warning.
+`samples` times while the shutter is open and averages the pictures. Every frame in CutCraft is a function of time,
+so footage, titles, `<Motion>`, three.js and free code all blur the same way.
+
+`shutterAngle` sets how long the shutter stays open, as a share of the frame: 180 (half the frame, the film default)
+looks natural, 90 is crisper and choppier, and 360 blurs the most. `samples` (2 to 64, default 8) trades smoothness for
+time, because the export draws that many pictures per frame: 8 samples take about eight times as long.
+
+The blur shows in exported videos and stills. The preview stays sharp, and `--engine node` leaves the blur out with a
+warning.
 
 ## From code
 
@@ -109,8 +112,8 @@ and with captions on top:
   speed, as in the preview), silence through freeze holds, and sample-rate
   conversion. Mute and solo apply.
 
-Every transition, effect and animation preset the schemas accept is drawn, in the export as in the preview; a type
-the renderers do not draw is not offered. The few remaining limits are listed in
+The export and the preview draw every transition, effect and animation preset the schemas accept. A type they would
+not draw is not offered at all. The few remaining limits are listed in
 [What renders](/reference/rendering), and the check reports each as a `not-rendered` warning. An adjustment filters the footage
 beneath it, not overlays, in both. In the preview only: an overlay's `blend`
 does not mix with the footage. Text in the export differs from the browser's

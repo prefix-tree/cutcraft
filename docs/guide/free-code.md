@@ -187,19 +187,27 @@ const circle = defineTransition({
 <Transition id="x" type={circle} duration={0.8} />
 ```
 
-- An effect defines `vec4 effect(vec2 uv)` and reads its picture as `image`; a transition defines
-  `vec4 transition(vec2 uv)` and reads `from`, `to` and `progress` (0 to 1). Both get `resolution` (pixels) and
-  `time` (seconds into the element), and `uv` (0, 0) is the top left. Return straight, not premultiplied, colour.
-- Each param arrives as a uniform of its own name: a number as a `float`, a boolean as a `bool`, two to four numbers
-  as a `vec2`–`vec4`, a colour such as `"#ff8800"` as a `vec3`. The zod schema checks the values and fills their
-  defaults, keyframes animate them (`effect.<id>.<param>`), and an editor can build its inspector from it.
-- An effect works on a `<Clip>`, a `<Nested>` and an `<Adjustment>` (everything beneath it), after the element's own
-  mask and before its built-in filters; several run in file order.
-- Keep the calls at the top of the file with a literal `name` and `shader`, where the editor and lint can read them
-  (the `declaration` lint says when one is not). The editor's actions (`effect/add`, `transition/update`) take the
-  names too.
-- The player draws them with WebGL in any browser, and the export draws them through the browser engine, which a file
-  that uses one picks on its own. `--engine node` has no WebGL: it leaves them out and says so.
+An effect defines `vec4 effect(vec2 uv)` and reads its picture as `image`. A transition defines
+`vec4 transition(vec2 uv)` and reads the outgoing picture as `from`, the incoming one as `to`, and how far it has got
+as `progress`, from 0 to 1. Both also get `resolution` (the frame in pixels) and `time` (seconds into the element).
+`uv` (0, 0) is the top left. Return plain colour; the player premultiplies it.
+
+Each param reaches the shader as a uniform with the param's name. A number becomes a `float`, a boolean a `bool`, an
+array of two, three or four numbers a `vec2`, `vec3` or `vec4`, and a colour string such as `"#ff8800"` a `vec3`. The
+zod schema checks the values and fills in defaults, [`<Keyframe>`](/reference/elements/keyframe) animates them with
+`property="effect.<id>.<param>"`, and an editor can build its inspector from the schema.
+
+An effect works on a `<Clip>`, a `<Nested>` and an `<Adjustment>`, where it changes everything beneath it. It runs
+after the element's mask, vignette and grain, and before the element's other built-in effects. Several effects run in
+the order they appear in the file.
+
+Keep `defineEffect()` and `defineTransition()` at the top of the file with a literal `name` and `shader`, where the
+editor and lint can read them; the `declaration` lint ([Lint](/guide/editing#lint)) says when one is not. The editor's
+[actions](/reference/actions) take the names too, for example `effect/add` and `transition/update`.
+
+The player draws these shaders with WebGL in any browser. The export draws them through the
+[browser engine](/guide/exporting#three-js-and-motion-the-browser-engine), which a file that uses one picks on its own.
+`--engine node` has no WebGL, so it leaves them out and warns.
 
 ## Libraries
 
