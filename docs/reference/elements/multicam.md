@@ -8,6 +8,8 @@ Several camera angles of one take; `<Cut>`s pick which one shows.
 
 </Example>
 
+**Used in:** [Multicam highlights](/recipes/highlights)
+
 ## Props
 
 | prop | type | default | required |

@@ -2,9 +2,11 @@
 
 # @cutcraft/render
 
-Exports a [CutCraft](https://prefix-tree.github.io/cutcraft/) video file in Node, with no browser: MP4, WebM or MOV,
-an MP3 or WAV soundtrack, or a PNG or JPEG still. It runs the player's own engine, so the exported file matches the
-preview frame for frame.
+Exports a [CutCraft](https://prefix-tree.github.io/cutcraft/) video file: MP4, WebM or MOV, an MP3 or WAV soundtrack,
+or a PNG or JPEG still. It runs the player's own engine, so the exported file matches the preview frame for frame:
+in Node with no browser for most files, and through the real player in headless Chromium for a file with `<Three>` or
+`<Motion>` (`engine: "auto"`, the default, picks; that path needs `playwright-core` and Chrome 153+ in
+`CUTCRAFT_CHROMIUM`).
 
 For the command line, install [`cutcraft`](https://www.npmjs.com/package/cutcraft). This package is the library behind
 it.

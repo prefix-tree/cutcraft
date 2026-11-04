@@ -2,18 +2,15 @@
 
 Children animated by a Motion `sequence` on the video's clock.
 
-```tsx
-<Motion id="headline" anchor="hook" duration={3}
-  sequence={[
-    ["h1", { opacity: [0, 1], y: [40, 0] }, { duration: 0.6 }],
-    [".rule", { scaleX: [0, 1] }, { at: 0.3, duration: 0.8 }],
-  ]}>
-  <h1>Launch</h1>
-  <div className="rule" />
-</Motion>
-```
+<Example src="previews/elements/motion" alt="<Motion>">
 
-The player draws it once the host calls `installFreeCodeLibraries()` ([Free code](/guide/free-code#three-js-and-motion)). The Node export leaves it out with a warning for now.
+<<< @/../examples/showcase/docs/motion.tsx
+
+</Example>
+
+The player draws it once the host calls `installFreeCodeLibraries()` ([Free code](/guide/free-code#three-js-and-motion)); the export draws it through headless Chromium ([the browser engine](/guide/exporting#three-js-and-motion-the-browser-engine)).
+
+**Used in:** [Product launch](/examples#a-product-launch) · [Kinetic type](/examples#kinetic-type) · [Data story](/examples#a-data-story) · [Logo reveal](/examples#a-logo-reveal) · [An edit](/examples#an-edit) · [Brand spot in any theme](/recipes/brand-spot)
 
 ## Props
 

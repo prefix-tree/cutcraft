@@ -8,6 +8,8 @@ One camera of a `<Multicam>`: its asset and sync offset.
 
 </Example>
 
+**Used in:** [Multicam highlights](/recipes/highlights)
+
 ## Props
 
 | prop | type | default | required |

@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 import { z } from "zod";
@@ -148,6 +148,48 @@ const exampleFor = (name: string): string | null => {
 };
 const slug = (name: string): string => name.toLowerCase();
 
+/** The complete files readers can learn from, and where each is shown: the showcase videos, the walkthrough, the recipes. */
+const SHOWCASE_SECTIONS: Record<string, [string, string]> = {
+  launch: ["Product launch", "/examples#a-product-launch"],
+  kinetic: ["Kinetic type", "/examples#kinetic-type"],
+  data: ["Data story", "/examples#a-data-story"],
+  logo: ["Logo reveal", "/examples#a-logo-reveal"],
+  edit: ["An edit", "/examples#an-edit"],
+  captions: ["Captions and key points", "/examples#captions-and-key-points"],
+};
+const LEARNING_FILES: readonly { readonly title: string; readonly link: string; readonly text: string }[] = [
+  ...Object.entries(SHOWCASE_SECTIONS).map(([file, [title, link]]) => ({
+    title,
+    link,
+    text: readFileSync(join(root, "examples", "showcase", `${file}.tsx`), "utf8"),
+  })),
+  {
+    title: "the walkthrough",
+    link: "/guide/writing-files",
+    text: readFileSync(join(root, "examples", "launch-recap", "video.tsx"), "utf8"),
+  },
+  ...readdirSync(join(root, "recipes"))
+    .filter((f) => f.endsWith(".tsx"))
+    .sort()
+    .map((f) => {
+      const text = readFileSync(join(root, "recipes", f), "utf8");
+      const title = /^# (.+)$/m.exec(
+        readFileSync(join(root, "docs", "recipes", f.replace(/\.tsx$/, ".md")), "utf8"),
+      )?.[1];
+      return { title: title ?? f, link: `/recipes/${f.replace(/\.tsx$/, "")}`, text };
+    }),
+];
+
+/** "Used in" links for an element: every learning file that writes its tag. */
+function usedIn(name: string): string | null {
+  const tag = new RegExp(`<${name}[\\s>/]`);
+  const hits = LEARNING_FILES.filter((f) => tag.test(f.text)).map((f) => `[${f.title}](${f.link})`);
+  return hits.length > 0 ? `**Used in:** ${hits.join(" · ")}` : null;
+}
+
+const ENGINE_NOTE =
+  "The player draws it once the host calls `installFreeCodeLibraries()` ([Free code](/guide/free-code#three-js-and-motion)); the export draws it through headless Chromium ([the browser engine](/guide/exporting#three-js-and-motion-the-browser-engine)).";
+
 function elementsIndex(): string {
   const lines = [
     "# Elements",
@@ -195,15 +237,10 @@ function elementPage(name: string, summary: string): string {
       "</Example>",
       "",
     );
-  else if (CODE_ONLY[name])
-    lines.push(
-      "```tsx",
-      CODE_ONLY[name],
-      "```",
-      "",
-      "The player draws it once the host calls `installFreeCodeLibraries()` ([Free code](/guide/free-code#three-js-and-motion)). The Node export leaves it out with a warning for now.",
-      "",
-    );
+  else if (CODE_ONLY[name]) lines.push("```tsx", CODE_ONLY[name], "```", "");
+  if (name in ENGINE_LAYERS) lines.push(ENGINE_NOTE, "");
+  const used = usedIn(name);
+  if (used) lines.push(used, "");
   if (name === "Graphic") {
     // One schema per kind: show the props every graphic takes; the kinds' own are on the graphics pages.
     const own = new Set(GRAPHIC_KIND_NAMES.flatMap((k) => Object.keys(GRAPHIC_KINDS[k].shape)));

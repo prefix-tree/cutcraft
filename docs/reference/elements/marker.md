@@ -2,6 +2,8 @@
 
 A named point on the timeline.
 
+**Used in:** [the walkthrough](/guide/writing-files) · [Product demo with zoom-ins](/recipes/product-demo)
+
 ## Props
 
 | prop | type | default | required |

@@ -1,6 +1,7 @@
 // Renders the reference pages' element examples (docs/*.tsx) for the documentation site: a looping WebM and a poster
 // each, in docs/public/previews/elements, through the same loader and renderer as `cutcraft-render`. The pages show the
-// same files as code. A file that does not resolve cleanly stops the run; warnings are printed.
+// same files as code. A file that does not resolve cleanly stops the run; warnings are printed. Files with <Three> or
+// <Motion> render with the browser engine (CUTCRAFT_CHROMIUM).
 //   pnpm --filter @cutcraft/example-showcase docs [name…]
 import { mkdirSync, readdirSync } from "node:fs";
 import { basename, join } from "node:path";
@@ -28,6 +29,7 @@ for (const file of readdirSync(join(here, "docs"))
     out: join(out, `${name}.webm`),
     silent: true,
     quality: "high",
+    source: video.source,
   });
   for (const w of result.warnings) process.stderr.write(`${name}: warning: ${w}\n`);
   await renderStill({
@@ -36,6 +38,7 @@ for (const file of readdirSync(join(here, "docs"))
     interiors: video.interiors,
     out: join(out, `${name}.jpg`),
     time: video.state.composition.duration * 0.6,
+    source: video.source,
   });
   process.stdout.write(`${name}: ${result.frames} frames, ${result.width}x${result.height}\n`);
 }

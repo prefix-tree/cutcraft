@@ -8,6 +8,8 @@ A blend between the two clips it sits between on a sequence track.
 
 </Example>
 
+**Used in:** [Product launch](/examples#a-product-launch) · [An edit](/examples#an-edit) · [the walkthrough](/guide/writing-files) · [Slideshow with motion](/recipes/slideshow)
+
 ## Props
 
 | prop | type | default | required |

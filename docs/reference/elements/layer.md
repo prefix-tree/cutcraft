@@ -8,6 +8,8 @@ Free code in the frame: any React, CSS, canvas or WebGL, placed on the timeline 
 
 </Example>
 
+**Used in:** [Kinetic type](/examples#kinetic-type) · [Data story](/examples#a-data-story) · [the walkthrough](/guide/writing-files) · [Brand spot in any theme](/recipes/brand-spot) · [Stats with handles](/recipes/stats)
+
 ## Props
 
 | prop | type | default | required |
