@@ -68,7 +68,13 @@ async function start(): Promise<void> {
     await settle();
     await painted(cap);
     ctx.clearRect(0, 0, width, height);
-    ctx.drawElementImage(root, 0, 0);
+    try {
+      ctx.drawElementImage(root, 0, 0);
+    } catch (error) {
+      throw new Error(
+        `drawElementImage failed in ${navigator.userAgent.match(/Chrome\/[\d.]+/)?.[0] ?? navigator.userAgent}: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
   };
 
   let out: Uint8Array = new Uint8Array();
@@ -127,16 +133,32 @@ async function settle(): Promise<void> {
   await tick();
   const until = performance.now() + SETTLE_TIMEOUT_MS;
   while (layerFramesPending() > 0) {
-    if (performance.now() > until) throw new Error("an engine layer did not finish drawing a frame within 10 s");
+    if (performance.now() > until)
+      throw new Error(
+        `${layerFramesPending()} engine layer(s) did not finish drawing a frame within 10 s; a three.js layer waits for its canvas to have a size, so check that the page's canvas lays out its children`,
+      );
     await new Promise((r) => setTimeout(r, 4));
   }
 }
 
-/** The canvas's subtree has been laid out and painted, so drawElementImage sees this frame. */
+/**
+ * The canvas's subtree has been laid out and painted, so drawElementImage sees this frame. A browser without the
+ * `paint` event (or one that never fires it) falls back to two animation frames after a second.
+ */
 function painted(cap: HTMLCanvasElement): Promise<void> {
+  const request = (cap as unknown as { requestPaint?: () => void }).requestPaint;
+  const frames = (): Promise<void> => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(() => r())));
+  if (typeof request !== "function") return frames();
   return new Promise((r) => {
-    cap.addEventListener("paint", () => r(), { once: true });
-    (cap as unknown as { requestPaint(): void }).requestPaint();
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      r();
+    };
+    cap.addEventListener("paint", finish, { once: true });
+    request.call(cap);
+    setTimeout(() => void frames().then(finish), 1000);
   });
 }
 

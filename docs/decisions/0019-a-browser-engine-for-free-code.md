@@ -31,7 +31,8 @@ page at the composition's time, which is wrong for a layer that does not start a
 - **H.264 and VP9.** WebCodecs encodes AVC for `.mp4` and VP9 for `.webm`; ProRes, HEVC and AV1 stay with Node.
 - **The browser is the user's.** `playwright-core` is an optional peer dependency; the binary is
   `CUTCRAFT_CHROMIUM` or Playwright's own. `drawElementImage` needs Chrome 153 or later with
-  `--enable-features=CanvasDrawElement` (on by default from 157), which the engine passes. Without a GPU, WebGL runs on
+  `--enable-features=CanvasDrawElement` (on by default from 157), which the engine passes. The page's canvas opts in with both names the
+  API has had: `layoutsubtree` (Chrome 153) and `content="drawable"` (later versions). Without a GPU, WebGL runs on
   SwiftShader (`--enable-unsafe-swiftshader`); the page runs only the file being exported.
 
 ## Consequences
