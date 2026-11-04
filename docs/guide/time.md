@@ -103,24 +103,22 @@ A type that is neither built in nor declared is an error.
 ## At a cut: light leaks, flashes and whooshes
 
 Something that plays over a cut, without moving the cut, goes on a free track and anchors to the clip that comes in.
-A negative `offset` centres it on the cut:
+A negative `offset` starts it before the cut. Here a warm flare peaks as the founder cuts to the product shot:
+
+<Example src="previews/guide/at-a-cut" alt="A warm flare over the cut from one shot to the next">
+
+<<< @/../examples/showcase/guide/at-a-cut.tsx
+
+</Example>
+
+Trim `talk` and the cut moves, and the flare moves with it. Nothing is added to the main track, so the video stays as
+long as its clips. A sound effect anchors the same way:
 
 ```tsx
-<Track id="main">
-  <Clip id="intro" src="asset:founder" in="word:0" out="word:11.end" />
-  <Clip id="demo" src="asset:screen" in={2} out={8} />
-</Track>
-<Track id="fx" layout="free">
-  {/* 0.8 s of light leak: half before the cut into "demo", half after */}
-  <Clip id="leak" src="asset:leak" anchor="demo" offset={-0.4} duration={0.8} blend="screen" />
-</Track>
 <Track id="sfx" layout="free" role="effects">
-  <Audio id="whoosh" src="asset:whoosh" anchor="demo" offset={-0.2} />
+  <Audio id="whoosh" src="asset:whoosh" anchor="product" offset={-0.2} />
 </Track>
 ```
-
-Trim `intro` and the cut moves, and the leak and the whoosh move with it. Nothing is added to the main track, so the
-video stays as long as its clips.
 
 A sound can also anchor to a transition, and then starts when the transition does:
 
@@ -129,8 +127,8 @@ A sound can also anchor to a transition, and then starts when the transition doe
 <Audio id="swish" src="asset:swish" anchor="x1" />
 ```
 
-The thing over the cut can be footage (a light-leak or flash clip, usually with `blend="screen"` or `blend="add"`), a
-`<Layer>` of free code, or a clip with an effect you declared. Sound effects are `<Audio>` elements; a track with
+The flare here is a `<Motion>` layer. It can as well be footage (a light-leak or flash clip, usually with
+`blend="screen"` or `blend="add"`), any `<Layer>` of free code, or a clip with an effect you declared. Sound effects are `<Audio>` elements; a track with
 `role="effects"` keeps them apart from dialogue and music in the mix ([Sound](./captions-and-sound#sound)).
 
 ## Speed and freezes

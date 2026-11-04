@@ -11,6 +11,8 @@ import { lint, loadModule } from "@cutcraft/kit/source";
 const root = join(import.meta.dirname, "..");
 const manifest = JSON.parse(readFileSync(join(root, "manifest.json"), "utf8")) as AssetManifest;
 const FILES = ["launch", "kinetic", "data", "logo", "edit", "captions"];
+/** The guide's examples (guide/*.tsx), rendered for the pages that explain each feature. */
+const GUIDE = ["fonts", "motion-blur", "shader-effect", "shader-transition", "title-effect", "at-a-cut"];
 
 describe.each(FILES)("%s.tsx", (name) => {
   const source = readFileSync(join(root, `${name}.tsx`), "utf8");
@@ -38,4 +40,13 @@ it("draws three.js or Motion in the four new examples, and no built-in <Graphic>
     expect(source).toMatch(/<(Three|Motion)\b/);
     expect(source).not.toMatch(/<Graphic\b/);
   }
+});
+
+describe.each(GUIDE)("guide/%s.tsx", (name) => {
+  it("resolves without errors and lints clean", () => {
+    const source = readFileSync(join(root, "guide", `${name}.tsx`), "utf8");
+    const state = resolve(collectModule(loadModule(source) as never, {}), manifest);
+    expect(state.errors).toEqual([]);
+    expect(lint(source, { manifest }).map((d) => `${d.rule}: ${d.message}`)).toEqual([]);
+  });
 });

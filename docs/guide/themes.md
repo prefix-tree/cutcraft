@@ -112,25 +112,22 @@ and bold (and italic, except Space Grotesk). The export reads them from the
 `@cutcraft/player/fonts.css`.
 
 For any other family, declare it at the top of the file: `font()` for a font file of your own, `googleFont()` for a
-Google Fonts family. Both return the family name, so the file passes the value on instead of retyping the name:
+Google Fonts family. Both return the family name, so the file passes the value on instead of retyping the name. Here
+two Google families become the theme's heading and body fonts, which the `h1` and `body` presets use:
+
+<Example src="previews/guide/fonts" alt="A title in Titan One and a line in Inter Tight over footage">
+
+<<< @/../examples/showcase/guide/fonts.tsx
+
+</Example>
+
+A font file of your own works the same way, and a title can take the value directly:
 
 ```tsx
-import { Composition, font, googleFont, Title, Track } from "@cutcraft/kit";
-
 const brand = font({ family: "Brand Sans", src: "asset:brand" });
 const brandBold = font({ family: "Brand Sans", src: "asset:brand-bold", weight: 700 });
-const titan = googleFont("Titan One");
-const tight = googleFont("Inter Tight", { weights: [400, 700], styles: ["normal", "italic"] });
 
-export default function Video() {
-  return (
-    <Composition fps={30} width={1920} height={1080} theme={{ extends: "paper", fonts: { heading: titan, body: tight } }}>
-      <Track id="text" layout="free">
-        <Title id="hello" font={brand}>Hello</Title>
-      </Track>
-    </Composition>
-  );
-}
+<Title id="hello" font={brand}>Hello</Title>
 ```
 
 Each `font()` call declares one face. `googleFont()` declares one face for each weight and style you give it (400 and
