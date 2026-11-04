@@ -113,12 +113,14 @@ function collectChildren(
           [],
           true,
         );
-        const interior = engine ? null : interiorOf(element.props.children as ReactNode);
-        if (interior) {
-          const withInterior: CollectedNode = { ...node, interior };
-          walker.byId.set(node.id, withInterior);
-          out.push(withInterior);
-        } else out.push(node);
+        // <Effect> and <Keyframe> written inside a Layer are its children on the timeline; the rest is its free code.
+        const all = Children.toArray(element.props.children as ReactNode);
+        const own = all.filter(isLayerChild);
+        const children = own.length > 0 ? collectChildren(own, node.id, walker, origin) : [];
+        const interior = engine ? null : interiorOf(all.filter((c) => !isLayerChild(c)));
+        const full: CollectedNode = { ...node, children, ...(interior ? { interior } : {}) };
+        if (full !== node) walker.byId.set(node.id, full);
+        out.push(full);
         return;
       }
       const placeholder = makeNode(element, type.kind, parent, walker, origin, [], false);
@@ -205,6 +207,8 @@ function textOf(children: ReactNode): string | undefined {
   let onlyText = true;
   Children.forEach(children, (child) => {
     if (typeof child === "string" || typeof child === "number") parts.push(String(child));
+    // A timeline child (<Effect>, <Keyframe>, <Mask>) is collected on its own; it is not part of the text.
+    else if (isValidElement(child) && isVocabulary(child.type)) return;
     else if (child !== null && child !== undefined && typeof child !== "boolean") onlyText = false;
   });
   if (!onlyText || parts.length === 0) return undefined;
@@ -217,6 +221,13 @@ function withEngine(
   engine: string,
 ): ReactElement<Record<string, unknown>> {
   return { ...element, props: { ...element.props, engine } };
+}
+
+/** The timeline children a Layer may hold in its JSX, beside its free code. */
+const LAYER_CHILD_KINDS: ReadonlySet<string> = new Set(["effect", "keyframe"]);
+
+function isLayerChild(child: ReactNode): boolean {
+  return isValidElement(child) && isVocabulary(child.type) && LAYER_CHILD_KINDS.has(child.type.kind);
 }
 
 /** A Layer's handles: exactly one child element whose type is a function component (not a vocabulary element). */

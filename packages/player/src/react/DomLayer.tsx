@@ -3,6 +3,7 @@ import { memo, type ReactNode } from "react";
 import type { ResolvedState } from "@cutcraft/kit";
 
 import { backdropTracks } from "../model/backdrop";
+import { effectPasses } from "../model/shaders";
 import { frameIndex } from "../model/time";
 import { type VisibleItem, visiblePlacements } from "../model/visible";
 import { type ElementProps, OVERLAY_KINDS } from "../overlays/layout";
@@ -15,6 +16,7 @@ import { Sticker } from "./elements/Sticker";
 import { Svg } from "./elements/Svg";
 import { Title } from "./elements/Title";
 import { useCompositionTime, usePlayer } from "./hooks";
+import { ShaderBox } from "./ShaderBox";
 
 export interface DomLayerProps {
   readonly state: ResolvedState;
@@ -92,27 +94,43 @@ const Element = memo(
       time,
       transition: item.transition,
     };
-    switch (item.placement.kind) {
-      case "title":
-        return <Title {...props} text={state.tree.byId.get(item.placement.id)?.text ?? ""} />;
-      case "shape":
-        return <Shape {...props} />;
-      case "svg":
-        return <Svg {...props} />;
-      case "sticker":
-        return <Sticker {...props} />;
-      case "graphic":
-        return <Graphic {...props} />;
-      case "layer":
-        return <Layer {...props} interior={interior} />;
-      case "adjustment":
-        return <Adjustment {...props} />;
-      default:
-        return null;
-    }
+    const content = elementContent(item, props, state, interior);
+    // Effects the file declares run over the overlay's picture, drawn through HTML-in-Canvas.
+    const passes =
+      item.placement.kind === "adjustment"
+        ? undefined
+        : effectPasses(state, item.children, time - item.placement.start);
+    if (!passes || !content) return content;
+    const { width, height } = state.composition;
+    return (
+      <ShaderBox id={item.placement.id} width={width} height={height} passes={passes}>
+        {content}
+      </ShaderBox>
+    );
   },
   (a, b) => sameElement(a, b),
 );
+
+function elementContent(item: VisibleItem, props: ElementProps, state: ResolvedState, interior: ReactNode): ReactNode {
+  switch (item.placement.kind) {
+    case "title":
+      return <Title {...props} text={state.tree.byId.get(item.placement.id)?.text ?? ""} />;
+    case "shape":
+      return <Shape {...props} />;
+    case "svg":
+      return <Svg {...props} />;
+    case "sticker":
+      return <Sticker {...props} />;
+    case "graphic":
+      return <Graphic {...props} />;
+    case "layer":
+      return <Layer {...props} interior={interior} />;
+    case "adjustment":
+      return <Adjustment {...props} />;
+    default:
+      return null;
+  }
+}
 
 /**
  * Whether two renders of an overlay would produce the same DOM. Placements

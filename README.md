@@ -184,9 +184,7 @@ videos, each tested) and [the worked example](examples/launch-recap).
    matches the Node engine's speed and passes its parity tests, it draws every file.
 2. Footage in free code. `useClipFrame(clipId)` will hand a clip's current frame to a `<Layer>`, for CSS 3D or a
    shader of your own.
-3. Effects on overlays. Titles, `<Motion>` and other DOM layers will take the same `defineEffect()` shaders as clips,
-   drawn through HTML-in-Canvas.
-4. An open editor package with the timeline, inspector and preview gestures over the action set.
+3. An open editor package with the timeline, inspector and preview gestures over the action set.
 
 ## Contributing
 

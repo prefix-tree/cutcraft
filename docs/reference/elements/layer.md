@@ -25,4 +25,4 @@ Free code in the frame: any React, CSS, canvas or WebGL, placed on the timeline 
 | `transform` | { position, scale, rotation, anchor, opacity, borderRadius, crop } |  |  |
 | `blend` | "normal" \| "multiply" \| "screen" \| "overlay" \| "darken" \| … 13 more |  |  |
 
-Timed, visual, transformable. Children: `keyframe`. [All elements](/reference/elements/)
+Timed, visual, transformable. Children: `effect`, `keyframe`. [All elements](/reference/elements/)

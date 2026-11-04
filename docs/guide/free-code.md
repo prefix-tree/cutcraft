@@ -197,9 +197,28 @@ array of two, three or four numbers a `vec2`, `vec3` or `vec4`, and a colour str
 zod schema checks the values and fills in defaults, [`<Keyframe>`](/reference/elements/keyframe) animates them with
 `property="effect.<id>.<param>"`, and an editor can build its inspector from the schema.
 
-An effect works on a `<Clip>`, a `<Nested>` and an `<Adjustment>`, where it changes everything beneath it. It runs
-after the element's mask, vignette and grain, and before the element's other built-in effects. Several effects run in
-the order they appear in the file.
+On a `<Clip>`, a `<Nested>` and an `<Adjustment>` (where it changes everything beneath it), an effect runs after the
+element's mask, vignette and grain, and before its other built-in effects. Several effects run in the order they
+appear in the file.
+
+Overlays take the same effects: titles, shapes, SVG, stickers and any `<Layer>`, including `<Three>` and `<Motion>`.
+Write the `<Effect>` inside the element, next to its text or its free code:
+
+```tsx
+<Title id="hello" start={0} duration={3} size={120}>
+  <Effect id="s" type={split} />
+  Hello
+</Title>
+<Motion id="badge" start={1} duration={2} sequence={[[".badge", { scale: [0.8, 1] }, { duration: 0.4 }]]}>
+  <Effect id="g" type={split} params={{ amount: 0.01 }} />
+  <div className="badge">New</div>
+</Motion>
+```
+
+An overlay is DOM, so the player draws it into a canvas with HTML-in-Canvas and runs the shaders over that picture.
+The overlay's built-in effects (CSS filters) apply first. HTML-in-Canvas is a Chrome feature that is still behind a
+flag: turn on `chrome://flags/#canvas-draw-element` to see overlay effects in the preview. Without it the preview shows
+the overlay as it is and warns once. The export always draws them, because its browser has the feature on.
 
 Keep `defineEffect()` and `defineTransition()` at the top of the file with a literal `name` and `shader`, where the
 editor and lint can read them; the `declaration` lint ([Lint](/guide/editing#lint)) says when one is not. The editor's

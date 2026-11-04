@@ -28,4 +28,4 @@ The player draws it once the host calls `installFreeCodeLibraries()` ([Free code
 | `blend` | "normal" \| "multiply" \| "screen" \| "overlay" \| "darken" \| … 13 more |  |  |
 | `sequence` | unknown[][] | `[]` |  |
 
-Timed, visual, transformable. Children: `keyframe`. [All elements](/reference/elements/)
+Timed, visual, transformable. Children: `effect`, `keyframe`. [All elements](/reference/elements/)
