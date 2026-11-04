@@ -1,5 +1,9 @@
 # Step dots
 
+::: warning Deprecated
+`<Graphic>` and its kinds are deprecated and will be removed in a later release; the lint warns on each one. Draw the same thing with `<Motion>`, `<Three>` or a `<Layer>`: the [examples](/examples) show each, and [Free code](/guide/free-code) explains them.
+:::
+
 A row of dots for steps in a sequence, the `active` one (1-based) filled and larger.
 
 <Example src="previews/graphics/steps" alt="Step dots">

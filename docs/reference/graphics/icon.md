@@ -1,5 +1,9 @@
 # Icon
 
+::: warning Deprecated
+`<Graphic>` and its kinds are deprecated and will be removed in a later release; the lint warns on each one. Draw the same thing with `<Motion>`, `<Three>` or a `<Layer>`: the [examples](/examples) show each, and [Free code](/guide/free-code) explains them.
+:::
+
 One of Lucide's line icons by name (`check`, `arrow-right`, `sparkles`, `play`, …), stroked in `color`, on an optional round or square plate.
 
 <Example src="previews/graphics/icon" alt="Icon">

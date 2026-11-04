@@ -1,5 +1,9 @@
 # Lower third, split
 
+::: warning Deprecated
+`<Graphic>` and its kinds are deprecated and will be removed in a later release; the lint warns on each one. Draw the same thing with `<Motion>`, `<Three>` or a `<Layer>`: the [examples](/examples) show each, and [Free code](/guide/free-code) explains them.
+:::
+
 The name on an accent block and the role on a panel below it, offset to the right.
 
 <Example src="previews/graphics/lower-third-split" alt="Lower third, split">

@@ -1,5 +1,9 @@
 # Callout
 
+::: warning Deprecated
+`<Graphic>` and its kinds are deprecated and will be removed in a later release; the lint warns on each one. Draw the same thing with `<Motion>`, `<Three>` or a `<Layer>`: the [examples](/examples) show each, and [Free code](/guide/free-code) explains them.
+:::
+
 Text in a rounded box with a pointer on one side; `tailAt` slides the pointer along that side (0 to 1).
 
 <Example src="previews/graphics/callout" alt="Callout">

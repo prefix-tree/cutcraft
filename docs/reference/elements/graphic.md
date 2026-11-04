@@ -1,5 +1,9 @@
 # `<Graphic>`
 
+::: warning Deprecated
+`<Graphic>` and its kinds are deprecated and will be removed in a later release; the lint warns on each one. Draw the same thing with `<Motion>`, `<Three>` or a `<Layer>`: the [examples](/examples) show each, and [Free code](/guide/free-code) explains them.
+:::
+
 A built-in graphic by `kind`: lower thirds, callouts, counters, progress and more.
 
 <Example src="previews/elements/graphic" alt="<Graphic>">

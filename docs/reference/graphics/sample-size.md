@@ -1,5 +1,9 @@
 # Sample size
 
+::: warning Deprecated
+`<Graphic>` and its kinds are deprecated and will be removed in a later release; the lint warns on each one. Draw the same thing with `<Motion>`, `<Three>` or a `<Layer>`: the [examples](/examples) show each, and [Free code](/guide/free-code) explains them.
+:::
+
 A field of dots for a sample of `n`, with `share` of them highlighted, appearing over `appearFor` seconds. Past 1,000 each dot stands for several (`perDot`), and the note says so. The label may use `{n}` and `{share}`. Animated: it changes over its whole duration.
 
 <Example src="previews/graphics/sample-size" alt="Sample size">
