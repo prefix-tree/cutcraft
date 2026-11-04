@@ -1,4 +1,5 @@
 import { isKeyframeProperty, VIDEO_EFFECT_TYPES } from "../../jsx/enums";
+import { shaderFor } from "../../jsx/shaders";
 import type { Json, PatchLog } from "../../patches/types";
 import type { ResolvedState } from "../../resolve/resolve";
 import { define, makePropHandler, rawNode, rawProp, setProps, siblingAfter, validateTarget } from "../handler-kit";
@@ -52,7 +53,7 @@ function stackHandlers(ns: "effect", kind: string, types: readonly string[]) {
       if (!base.valid) return base;
       if (state.tree.byId.has(a.params.childId))
         return invalid({ code: "DUPLICATE_ID", message: `"${a.params.childId}" exists` });
-      return types.includes(a.params.type)
+      return types.includes(a.params.type) || shaderFor(state.shaders, "effect", a.params.type)
         ? ok
         : invalid({ code: "INVALID_PARAMS", message: `unknown ${kind} type "${a.params.type}"`, path: "type" });
     },

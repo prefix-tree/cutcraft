@@ -40,8 +40,8 @@ describe("what a file can say is what renders", () => {
       ),
     ).toEqual([
       'a: Unrecognized key: "chromaKey"',
-      'x.type: Invalid option: expected one of "crossfade"|"dipToBlack"|"dipToWhite"|"wipe"|"slide"|"push"',
-      expect.stringMatching(/^g\.type: Invalid option/),
+      'x.type: unknown transition "glitch": use one of crossfade, dipToBlack, dipToWhite, wipe, slide, push, or declare it with defineTransition()',
+      expect.stringMatching(/^g\.type: unknown effect "glow": use one of .*, or declare it with defineEffect\(\)$/),
     ]);
     expect(errorsOf(`<Title id="h" emphasis="pulse" animation={{ preset: "bounce" }}>Hi</Title>`)).toEqual([
       expect.stringMatching(/^h\.animation\.preset: Invalid option/),

@@ -3,6 +3,7 @@ import { Children, Fragment, isValidElement } from "react";
 
 import { isVocabulary } from "../jsx/define";
 import { engineOf } from "../jsx/elements";
+import { shadersOf } from "../jsx/shaders";
 import { fontsOf } from "../theme/fonts";
 import type { ResolveError } from "./errors";
 import type { CollectedNode, CollectedTree, Editable, LayerInterior } from "./tree";
@@ -81,7 +82,7 @@ export function collectModule(
 ): CollectedTree {
   const element = mod.default({ ...((mod.defaults ?? {}) as Record<string, unknown>), ...overrides });
   const tree = collect(element ?? (Fragment({ children: null }) as unknown as ReactElement), options);
-  return { ...tree, fonts: fontsOf(mod) };
+  return { ...tree, fonts: fontsOf(mod), shaders: shadersOf(mod) };
 }
 
 function collectChildren(

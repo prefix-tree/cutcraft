@@ -54,7 +54,7 @@ const CANVAS_FILTERABLE: Readonly<
 };
 
 /** An effect's params with its keyframed ones (`effect.<id>.<param>` keyframes on the element) evaluated at element-relative `rel`. */
-function paramsAt(children: readonly Placement[], effect: Placement, rel: number): Params {
+export function paramsAt(children: readonly Placement[], effect: Placement, rel: number): Params {
   const base = (effect.props.params ?? {}) as Params;
   const prefix = `effect.${effect.id}.`;
   let out: Record<string, unknown> | null = null;
@@ -69,14 +69,20 @@ function paramsAt(children: readonly Placement[], effect: Placement, rel: number
 }
 
 /** A single canvas/CSS `filter` string for an element's effect and colour-grade children at element-relative `rel`; unsupported types are listed. */
-export function filterString(children: readonly Placement[], elementId: string, rel: number): FilterResult {
+export function filterString(
+  children: readonly Placement[],
+  elementId: string,
+  rel: number,
+  /** Effect types the file declares (`defineEffect()`), drawn as shaders rather than filters. */
+  declared: ReadonlySet<string> = new Set(),
+): FilterResult {
   const parts: string[] = [];
   const unsupported: string[] = [];
   for (const c of children) {
     if (c.kind === "effect") {
       if (c.props.enabled === false) continue;
       const type = String(c.props.type);
-      if ((POST_TYPES as readonly string[]).includes(type)) continue;
+      if ((POST_TYPES as readonly string[]).includes(type) || declared.has(type)) continue;
       const make = CANVAS_FILTERABLE[type as keyof typeof CANVAS_FILTERABLE] as ((p: Params) => string) | undefined;
       if (make) {
         const f = make(paramsAt(children, c, rel));

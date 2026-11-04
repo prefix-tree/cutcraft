@@ -16,6 +16,7 @@ export * from "./jsx/rendering";
 export type { Transform } from "./jsx/schemas/common";
 export type { ThreeFrameArgs, ThreeSetupArgs, ThreeSetupFunction } from "./jsx/schemas/overlays";
 export { defaultTransitionParams, TRANSITION_PARAMS } from "./jsx/schemas/transition";
+export * from "./jsx/shaders";
 export * from "./jsx/use-t";
 export * from "./manifest/timeref";
 export * from "./manifest/transcript";

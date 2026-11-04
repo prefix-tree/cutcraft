@@ -13,6 +13,7 @@ import { devWarn } from "../warn";
 import { backdropTracks } from "./backdrop";
 import { filterString, type PostEffect, postEffects } from "./effects";
 import type { ClipRect } from "./motion";
+import { effectPasses, type ShaderPass, type TransitionPass, transitionPass } from "./shaders";
 import { frameIndex, nestedSourceTime, placementSourceTime } from "./time";
 import { animatedTransform, type DrawRect, layoutRect, type Matrix2D, multiply, translate } from "./transform";
 import { transitionLook } from "./transition";
@@ -52,6 +53,10 @@ export interface DrawOp {
   readonly clip?: readonly ClipRect[];
   /** Vignette and grain, drawn over the element's own pixels. */
   readonly post?: readonly PostEffect[];
+  /** Effects the file declares (`defineEffect()`), run over the element's picture in order. */
+  readonly shaders?: readonly ShaderPass[];
+  /** A transition the file declares (`defineTransition()`) on this side of it; replaces the built-in look. */
+  readonly transition?: TransitionPass;
 }
 
 /** A composition background gradient, as the schema writes it. CSS angles: 0 points up, 180 (the default) runs down. */
@@ -123,11 +128,12 @@ export function buildFramePlan(state: ResolvedState, t: number, resolveNested?: 
     if (p.kind === "clip" || p.kind === "nested") {
       const op = mediaOp(state, item, t, resolveNested, warnings);
       if (op) ops.push(op);
-      const dip = item.transition && transitionLook(item.transition, comp.width, comp.height).dip;
+      const dip = item.transition && !op?.transition && transitionLook(item.transition, comp.width, comp.height).dip;
       if (op && dip) ops.push(dipOp(item.transition!.placement, dip, comp.width, comp.height));
     } else if (p.kind === "adjustment") {
       if (p.props.enabled === false) continue;
-      const { filter } = filterString(item.children, p.id, t - p.start);
+      const { filter } = filterString(item.children, p.id, t - p.start, declaredEffects(state));
+      const shaders = effectPasses(state, item.children, t - p.start);
       if (ops.length === 0) continue;
       ops.push({
         id: p.id,
@@ -139,6 +145,7 @@ export function buildFramePlan(state: ResolvedState, t: number, resolveNested?: 
         blend: blendOf(p.props.blend),
         filter,
         borderRadius: 0,
+        ...(shaders ? { shaders } : {}),
       });
     }
   }
@@ -187,7 +194,8 @@ function mediaOp(
   const fit = (p.props.fit as FitMode | undefined) ?? "contain";
   let opacity = (transform.opacity ?? 1) * (typeof p.props.blendOpacity === "number" ? p.props.blendOpacity : 1);
   let look: ReturnType<typeof transitionLook> | undefined;
-  if (item.transition) {
+  const shaded = item.transition ? transitionPass(state, item.transition) : undefined;
+  if (item.transition && !shaded) {
     const x = item.transition.placement;
     const type = String(x.props.type ?? "crossfade");
     if (!(TRANSITION_TYPES as readonly string[]).includes(type)) {
@@ -200,7 +208,8 @@ function mediaOp(
     look = transitionLook(item.transition, comp.width, comp.height);
     opacity *= look.opacity;
   }
-  const { filter } = filterString(item.children, p.id, rel);
+  const { filter } = filterString(item.children, p.id, rel, declaredEffects(state));
+  const shaders = effectPasses(state, item.children, rel);
   const mask = maskOf(item.children, warnings);
   const post = postEffects(item.children, frameIndex(t, comp.fps), rel);
   const common = {
@@ -213,6 +222,8 @@ function mediaOp(
     ...(mask ? { mask } : {}),
     ...(look?.clip ? { clip: look.clip } : {}),
     ...(post ? { post } : {}),
+    ...(shaders ? { shaders } : {}),
+    ...(shaded ? { transition: shaded } : {}),
   };
   const shift = (m: Matrix2D): Matrix2D => (look?.offset ? multiply(translate(look.offset.x, look.offset.y), m) : m);
 
@@ -287,4 +298,9 @@ function maskOf(children: readonly Placement[], warnings: string[]): MaskSpec | 
     inverted: m.props.inverted === true,
     opacity: Number(m.props.opacity ?? 1),
   };
+}
+
+/** The effect types the file declares, which the filter string leaves to the shader passes. */
+function declaredEffects(state: ResolvedState): ReadonlySet<string> {
+  return new Set(state.shaders.filter((s) => s.kind === "effect").map((s) => s.name));
 }

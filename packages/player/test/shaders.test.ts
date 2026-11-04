@@ -1,0 +1,106 @@
+import { collectModule, resolve } from "@cutcraft/kit";
+import { loadModule } from "@cutcraft/kit/source";
+import { buildFramePlan } from "@cutcraft/player";
+
+import { fragmentSource, uniformOf } from "../src/render/shaders";
+
+const manifest = {
+  assets: { city: { id: "city", kind: "video" as const, duration: 10, fps: 30, width: 640, height: 360 } },
+};
+const stateOf = (body: string, declarations: string) =>
+  resolve(
+    collectModule(
+      loadModule(`import { z } from "zod";
+import { Adjustment, Clip, Composition, defineEffect, defineTransition, Effect, Keyframe, Track, Transition } from "@cutcraft/kit";
+${declarations}
+export default function V() { return <Composition fps={30} width={640} height={360}>${body}</Composition>; }`) as never,
+    ),
+    manifest,
+  );
+
+const GLOW = `const glow = defineEffect({ name: "glow", params: z.object({ amount: z.number().default(0.5), tint: z.string().default("#ff8800") }), shader: "vec4 effect(vec2 uv) { return texture(image, uv) * amount; }" });`;
+const SWEEP = `const sweep = defineTransition({ name: "sweep", shader: "vec4 transition(vec2 uv) { return uv.x < progress ? texture(to, uv) : texture(from, uv); }" });`;
+
+describe("declared shaders in the frame plan", () => {
+  it("attach a clip's declared effects, with keyframed params and the element's clock, and leave its filter alone", () => {
+    const state = stateOf(
+      `<Track id="t"><Clip id="c" src="asset:city" in={0} out={4}>
+        <Effect id="b" type="blur" params={{ radius: 2 }} />
+        <Effect id="g" type={glow} />
+        <Keyframe id="k1" property="effect.g.amount" at={0} value={0} />
+        <Keyframe id="k2" property="effect.g.amount" at={2} value={1} />
+      </Clip></Track>`,
+      GLOW,
+    );
+    expect(state.errors).toEqual([]);
+    const op = buildFramePlan(state, 1).ops[0]!;
+    expect(op.filter).toBe("blur(2px)");
+    expect(op.shaders).toEqual([
+      {
+        name: "glow",
+        source: expect.stringContaining("vec4 effect"),
+        params: { amount: 0.5, tint: "#ff8800" },
+        time: 1,
+      },
+    ]);
+  });
+
+  it("attach an adjustment's declared effects", () => {
+    const state = stateOf(
+      `<Track id="t"><Clip id="c" src="asset:city" in={0} out={4} /></Track>
+       <Track id="fx" layout="free"><Adjustment id="a" start={0} duration={4}><Effect id="g" type={glow} /></Adjustment></Track>`,
+      GLOW,
+    );
+    expect(
+      buildFramePlan(state, 1)
+        .ops.find((o) => o.id === "a")
+        ?.shaders?.map((s) => s.name),
+    ).toEqual(["glow"]);
+  });
+
+  it("give both sides of a declared transition its pass, in place of the built-in look", () => {
+    const state = stateOf(
+      `<Track id="t"><Clip id="a" src="asset:city" in={0} out={2} /><Transition id="x" type={sweep} duration={1} /><Clip id="b" src="asset:city" in={0} out={2} /></Track>`,
+      SWEEP,
+    );
+    const x = state.items.get("x")!;
+    const ops = buildFramePlan(state, (x.start + x.end) / 2).ops;
+    expect(ops.map((o) => [o.id, o.transition?.role, o.transition?.paired, o.opacity])).toEqual([
+      ["a", "out", true, 1],
+      ["b", "in", true, 1],
+    ]);
+    expect(ops[1]?.transition?.progress).toBeGreaterThan(0.3);
+    expect(ops[1]?.transition?.progress).toBeLessThan(0.7);
+    expect(ops[1]?.clip).toBeUndefined();
+  });
+});
+
+describe("the shader runner's program", () => {
+  it("turns params into uniforms by their value", () => {
+    expect(uniformOf(0.5)).toEqual({ type: "float", value: [0.5] });
+    expect(uniformOf(true)).toEqual({ type: "bool", value: [1] });
+    expect(uniformOf([1, 2, 3])).toEqual({ type: "vec3", value: [1, 2, 3] });
+    expect(uniformOf("#ff8800")).toEqual({ type: "vec3", value: [1, 136 / 255, 0] });
+    expect(uniformOf("#f80")?.value).toEqual([1, 136 / 255, 0]);
+    expect(uniformOf("orange")).toBeNull();
+    expect(uniformOf([1])).toBeNull();
+  });
+
+  it("wraps the declared function with its inputs and params, and premultiplies what it returns", () => {
+    const effect = fragmentSource("effect", "vec4 effect(vec2 uv) { return texture(image, uv); }", {
+      amount: 1,
+      tint: "#fff",
+      time: 3,
+      "bad name": 1,
+    });
+    expect(effect).toContain("uniform sampler2D image;");
+    expect(effect).toContain("uniform float amount;");
+    expect(effect).toContain("uniform vec3 tint;");
+    expect(effect).not.toContain("uniform float time;\nuniform float time;");
+    expect(effect).not.toContain("bad name");
+    expect(effect).toContain("cutcraft_out = vec4(c.rgb * c.a, c.a);");
+    const transition = fragmentSource("transition", "vec4 transition(vec2 uv) { return texture(to, uv); }", {});
+    expect(transition).toContain("uniform sampler2D from;\nuniform sampler2D to;\nuniform float progress;");
+    expect(transition).toContain("vec4 c = transition(cutcraft_uv);");
+  });
+});

@@ -29,4 +29,19 @@ describe("pickEngine", () => {
     });
     expect(pickEngine(blurred, undefined, undefined).note).toContain("motion blur");
   });
+
+  it("draws the effects and transitions a file declares with the browser engine", () => {
+    const state = resolve(
+      collectModule(
+        loadModule(`import { Clip, Composition, defineEffect, Effect, Track } from "@cutcraft/kit";
+const inv = defineEffect({ name: "inv", shader: "vec4 effect(vec2 uv) { return texture(image, uv); }" });
+export default function Video() {
+  return <Composition fps={30} width={640} height={360}><Track id="t"><Clip id="c" src="asset:a"><Effect id="e" type={inv} /></Clip></Track></Composition>;
+}`) as never,
+      ),
+      { assets: { a: { id: "a", kind: "video", duration: 5 } } },
+    );
+    expect(needsBrowser(state)).toBe(true);
+    expect(pickEngine(state, "node", source).note).toContain("defineEffect, defineTransition");
+  });
 });

@@ -131,7 +131,8 @@ export interface TransitionActions {
   "transition/add": {
     transitionId: Id;
     between: readonly [Id, Id] | { on: Id; edge: "in" | "out" };
-    type: TransitionType;
+    /** A built-in transition, or one the file declares with `defineTransition()`. */
+    type: TransitionType | (string & {});
     duration: number;
     params?: Readonly<Record<string, Json>>;
   };
@@ -139,7 +140,7 @@ export interface TransitionActions {
   "transition/restore": { transitionId: Id; node: NodeSpec; trackId: Id; after: Id | null };
   "transition/update": {
     transitionId: Id;
-    type?: TransitionType;
+    type?: TransitionType | (string & {});
     duration?: number;
     params?: Readonly<Record<string, Json>>;
   };

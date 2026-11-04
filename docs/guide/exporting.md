@@ -33,8 +33,8 @@ npm install cutcraft playwright-core
 CUTCRAFT_CHROMIUM=/path/to/chrome npx cutcraft launch.tsx --out launch.mp4
 ```
 
-- `--engine auto` (the default) takes the browser only for a file with `<Three>`, `<Motion>` or motion blur; every
-  other file exports in Node as before. `--engine browser` forces it, for a `<Layer>` that needs more CSS than the Node engine
+- `--engine auto` (the default) takes the browser only for a file with `<Three>`, `<Motion>`, motion blur or an
+  effect or transition it declares; every other file exports in Node as before. `--engine browser` forces it, for a `<Layer>` that needs more CSS than the Node engine
   draws; `--engine node` never starts a browser (and leaves those layers out, with a warning).
 - It needs `playwright-core` and Chrome or Chromium 153 or later; `CUTCRAFT_CHROMIUM` names the binary, otherwise
   Playwright's own browser is used.

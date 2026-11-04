@@ -1,5 +1,6 @@
 import { TRANSITION_TYPES } from "../../jsx/enums";
-import { defaultTransitionParams, TRANSITION_PARAMS } from "../../jsx/schemas/transition";
+import { defaultTransitionParams, isBuiltInTransition, TRANSITION_PARAMS } from "../../jsx/schemas/transition";
+import { shaderFor } from "../../jsx/shaders";
 import type { Json } from "../../patches/types";
 import type { ResolvedState } from "../../resolve/resolve";
 import {
@@ -22,10 +23,17 @@ function requireTransition(state: ResolvedState, id: string): ActionError | null
     : { code: "ELEMENT_NOT_FOUND", message: `transition "${id}" does not exist`, path: "transitionId" };
 }
 
-function validateParams(type: string, params: Readonly<Record<string, Json>> | undefined): ActionError | null {
-  if (!(TRANSITION_TYPES as readonly string[]).includes(type))
+function validateParams(
+  state: ResolvedState,
+  type: string,
+  params: Readonly<Record<string, Json>> | undefined,
+): ActionError | null {
+  const declared = shaderFor(state.shaders, "transition", type);
+  if (!(TRANSITION_TYPES as readonly string[]).includes(type) && !declared)
     return { code: "INVALID_PARAMS", message: `unknown transition "${type}"`, path: "type" };
-  const result = TRANSITION_PARAMS[type as keyof typeof TRANSITION_PARAMS].safeParse(params ?? {});
+  const result = (declared?.params ?? TRANSITION_PARAMS[type as keyof typeof TRANSITION_PARAMS]).safeParse(
+    params ?? {},
+  );
   return result.success ? null : { code: "INVALID_PARAMS", message: result.error.message, path: "params" };
 }
 
@@ -35,7 +43,7 @@ define({
   validate: (a, state) => {
     if (state.tree.byId.has(a.params.transitionId))
       return invalid({ code: "DUPLICATE_ID", message: `"${a.params.transitionId}" exists` });
-    const bad = validateParams(a.params.type, a.params.params);
+    const bad = validateParams(state, a.params.type, a.params.params);
     if (bad) return invalid(bad);
     if (!(a.params.duration > 0))
       return invalid({ code: "INVALID_PARAMS", message: "duration must be positive", path: "duration" });
@@ -72,7 +80,10 @@ define({
       : invalid({ code: "INSUFFICIENT_HANDLES", message: "transition is longer than the clip" });
   },
   apply: (a, log, ctx) => {
-    const params = { ...defaultTransitionParams(a.params.type), ...(a.params.params ?? {}) } as Record<string, Json>;
+    const params = {
+      ...(isBuiltInTransition(a.params.type) ? defaultTransitionParams(a.params.type) : {}),
+      ...(a.params.params ?? {}),
+    } as Record<string, Json>;
     const props: Record<string, Json> = {
       id: a.params.transitionId,
       type: a.params.type,
@@ -140,7 +151,7 @@ define({
             ...((rawProp(state, a.params.transitionId, "params") ?? {}) as Record<string, Json>),
             ...(a.params.params ?? {}),
           };
-    const bad = validateParams(type, params);
+    const bad = validateParams(state, type, params);
     if (bad) return invalid(bad);
     if (a.params.duration !== undefined && !(a.params.duration > 0))
       return invalid({ code: "INVALID_PARAMS", message: "duration must be positive", path: "duration" });
@@ -150,7 +161,10 @@ define({
     const props: Record<string, Json | undefined> = {};
     if (a.params.type !== undefined) {
       props.type = a.params.type;
-      props.params = { ...defaultTransitionParams(a.params.type), ...(a.params.params ?? {}) } as Json;
+      props.params = {
+        ...(isBuiltInTransition(a.params.type) ? defaultTransitionParams(a.params.type) : {}),
+        ...(a.params.params ?? {}),
+      } as Json;
     } else if (a.params.params !== undefined) {
       props.params = {
         ...((rawProp(ctx.before, a.params.transitionId, "params") ?? {}) as Record<string, Json>),

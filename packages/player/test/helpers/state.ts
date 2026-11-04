@@ -281,6 +281,7 @@ export function makeState(spec: StateSpec): ResolvedState {
     log: undefined,
     theme: resolveTheme(undefined),
     fonts: [],
+    shaders: [],
   };
 }
 
