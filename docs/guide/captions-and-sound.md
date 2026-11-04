@@ -1,5 +1,9 @@
 # Captions and sound
 
+**See it in:** [Kinetic type](/examples#kinetic-type) and [Captions and key points](/examples#captions-and-key-points)
+(karaoke captions), [Vertical clip from a podcast](/recipes/vertical-podcast) (short lines in 9:16),
+[Talking-head cut](/recipes/talking-head) (a music bed that ducks under speech).
+
 ## Captions follow the clips
 
 `<Captions src="asset:founder" />`, left empty, makes captions from the transcript: every word the timeline plays,

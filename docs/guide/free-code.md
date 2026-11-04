@@ -4,6 +4,10 @@ The timeline part of a file uses CutCraft's elements, so an editor can trim and 
 you. A `<Layer>` holds any React component: hooks, CSS 3D transforms, filters and blend modes, a canvas, WebGL, a
 chart library. `<Three>` and `<Motion>` bring three.js and Motion onto the timeline.
 
+**See it in:** [Product launch](/examples#a-product-launch) (`<Three>` and `<Motion>`), [Data story](/examples#a-data-story)
+(SVG in `<Motion>`, React counters in a `<Layer>`), [Logo reveal](/examples#a-logo-reveal) (three.js particles),
+[Stats with handles](/recipes/stats) (a component in a `<Layer>` with editable props).
+
 ## A Layer holds any React
 
 A Layer sits on the timeline like any overlay. It has an id and a start or an anchor, and it can be trimmed, moved and

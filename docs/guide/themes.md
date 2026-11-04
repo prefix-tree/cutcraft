@@ -6,6 +6,9 @@ styles do in a design tool. It lives in the file, on the composition, so the
 model writes it, the editor changes it with one undoable action, and swapping
 it restyles every element that uses it without touching the edit.
 
+**See it in:** [Brand spot in any theme](/recipes/brand-spot): one `theme` prop restyles the titles, and the free-code
+parts read the same palette, fonts and radius from `THEMES[theme]`.
+
 ```tsx
 <Composition fps={30} width={1920} height={1080}
   theme={{

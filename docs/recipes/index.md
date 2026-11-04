@@ -2,7 +2,8 @@
 
 Complete files for the videos CutCraft is made for. Each one passes the lint
 with no warnings, resolves with no errors, and has a test that pins what it
-places. Copy them as starting points.
+places. Copy them as starting points. For finished videos, and a table of which
+file shows which feature, see [Examples](/examples#where-to-start).
 
 | Recipe | What it shows |
 |---|---|
@@ -12,7 +13,7 @@ places. Copy them as starting points.
 | [Slideshow with motion](./slideshow) | Four photos held four seconds each with a slow push, crossfades between them, a bed that fades out with the last one. |
 | [Stats with handles](./stats) | Two numbers count up over product footage. Each counter is one component inside a Layer, so its value and label are handles. |
 | [Variants from one file](./variants) | One cut rendered for many brands or markets: copy, colour and logo are schema props, and a variant is `defaults` with overrides. |
-| [Brand spot in any theme](./brand-spot) | A spot built from graphics around a screen recording, with a backdrop beneath it; one prop swaps the theme and with it every colour, font and entrance. |
+| [Brand spot in any theme](./brand-spot) | A spot drawn around a screen recording with `<Motion>`, a `<Layer>` and `<Three>` confetti, a backdrop beneath it; one prop swaps the theme and with it every colour and font. |
 | [Multicam highlights](./highlights) | Two cameras of one scene switched at camera B's shot boundaries, with the dense segment picked by the transcript's silences. |
 
 The fixture manifest they share is `recipes/manifest.json`: a two-speaker
