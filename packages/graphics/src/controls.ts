@@ -36,6 +36,7 @@ export type GraphicControl =
 /**
  * The controls for a kind's own props (`graphicControls("counter")`), in the order the kind declares them; props an
  * editor cannot show are left out, and an unknown kind has none.
+ * @deprecated Goes with the `<Graphic>` kinds.
  */
 export function graphicControls(kindName: string): GraphicControl[] {
   const kind = graphicKind(kindName);

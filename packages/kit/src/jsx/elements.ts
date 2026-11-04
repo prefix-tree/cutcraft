@@ -40,6 +40,10 @@ export const Title = el("title", titleSchema);
 export const Shape = el("shape", shapeSchema);
 export const Svg = el("svg", svgSchema);
 export const Sticker = el("sticker", stickerSchema);
+/**
+ * @deprecated `<Graphic kind>` will be removed. Draw it with `<Motion>`, `<Three>` or a `<Layer>`; the showcase examples
+ * show each (decision 0020).
+ */
 export const Graphic = el("graphic", graphicSchema);
 export const Captions = el("captions", captionsSchema);
 export const Caption = el("caption", captionSchema);

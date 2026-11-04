@@ -73,3 +73,23 @@ export const graphicProps: Rule = {
     return out;
   },
 };
+
+/** `<Graphic>` is deprecated: each one warns, pointing to the free code that replaces it. */
+export const deprecatedGraphic: Rule = {
+  name: "deprecated-graphic",
+  check: (index) => {
+    const out: Diagnostic[] = [];
+    for (const site of index.elements.values()) {
+      if (site.kind !== "graphic") continue;
+      const kind = site.props.get("kind")?.literal;
+      out.push({
+        rule: "deprecated-graphic",
+        severity: "warning",
+        message: `"${site.id}": <Graphic${typeof kind === "string" ? ` kind="${kind}"` : ""}> is deprecated and will be removed; draw it with <Motion>, <Three> or a <Layer> (see the examples)`,
+        range: site.openingTag,
+        id: site.id,
+      });
+    }
+    return out;
+  },
+};
