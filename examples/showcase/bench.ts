@@ -13,7 +13,8 @@ process.stdout.write(`${cpus()[0]?.model ?? "?"}, ${cpus().length} cores, Node $
 process.stdout.write("file        size       frames   1 thread    4 threads\n");
 const rows: { file: string; width: number; height: number; frames: number; fps1: number; fps4: number }[] = [];
 try {
-  for (const name of ["edit", "graphics", "captions", "motion"]) {
+  // The Node engine's speed: the files it draws (the others need the browser engine).
+  for (const name of ["edit", "captions"]) {
     const file = join(here, `${name}.tsx`);
     const load = { manifest: join(here, "manifest.json") };
     const video = await loadVideo(file, load);

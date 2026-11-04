@@ -48,25 +48,24 @@ Every video on this site is a short file rendered by CutCraft's own export engin
 it.
 
 <div class="home-videos">
-<figure class="wide"><video :src="withBase('/showcase/edit.webm')" :poster="withBase('/showcase/edit.jpg')" autoplay muted loop playsinline></video><figcaption>An edit: shots, a wipe and a slide, a push-in, a title and a lower third. <a :href="withBase('/examples')">Its file →</a></figcaption></figure>
+<figure class="wide"><video :src="withBase('/showcase/launch.webm')" :poster="withBase('/showcase/launch.jpg')" autoplay muted loop playsinline></video><figcaption>A product launch: a three.js phone beside the founder, each feature on the word that names it. <a :href="withBase('/examples')">Its file →</a></figcaption></figure>
 </div>
 
 <div class="cc-cards home-cards">
-<PreviewCard title="A vertical short" link="/examples" src="showcase/captions" text="Captions follow the words; the key point lands on its word." />
-<PreviewCard title="Data graphics" link="/examples" src="showcase/graphics" text="Counters and comparisons, numbers as props." />
-<PreviewCard title="Motion in a layer" link="/examples" src="showcase/motion" text="A chart that springs up, written as React." />
+<PreviewCard title="Kinetic type" link="/examples#kinetic-type" src="showcase/kinetic" text="Motion sequences that land on their words." />
+<PreviewCard title="A data story" link="/examples#a-data-story" src="showcase/data" text="SVG and React; each number on the word that says it." />
+<PreviewCard title="A logo reveal" link="/examples#a-logo-reveal" src="showcase/logo" text="three.js particles that settle into a name." />
+<PreviewCard title="A vertical short" link="/examples#captions-and-key-points" src="showcase/captions" text="Captions follow the words; the key point lands on its word." />
 <PreviewCard title="Free code" link="/reference/elements/layer" src="previews/elements/layer" text="Any React in a Layer, timed by useT()." />
 <PreviewCard title="Transitions" link="/reference/elements/transition" src="previews/elements/transition" text="A wipe between two clips." />
 <PreviewCard title="Keyframes" link="/reference/elements/keyframe" src="previews/elements/keyframe" text="A slow push-in, eased." />
 <PreviewCard title="Titles" link="/reference/elements/title" src="previews/elements/title" text="Entrances by letter, word or line." />
 <PreviewCard title="Masks" link="/reference/elements/mask" src="previews/elements/mask" text="A feathered oval over footage." />
 <PreviewCard title="Speed ramps" link="/reference/elements/speedkey" src="previews/elements/speedkey" text="Normal speed easing into 4×." />
-<PreviewCard title="Lower thirds" link="/reference/graphics/lower-third" src="previews/graphics/lower-third" text="One of 34 built-in graphics." />
-<PreviewCard title="Counters" link="/reference/graphics/counter" src="previews/graphics/counter" text="A number that counts up." />
 <PreviewCard title="Colour" link="/reference/elements/colorgrade" src="previews/elements/colorgrade" text="Cool and warm grades on one shot." />
 </div>
 
-<p class="home-links"><a :href="withBase('/examples')">Examples</a> · <a :href="withBase('/reference/elements/')">All elements</a> · <a :href="withBase('/reference/graphics/')">All graphics</a></p>
+<p class="home-links"><a :href="withBase('/examples')">Examples</a> · <a :href="withBase('/reference/elements/')">All elements</a> · <a :href="withBase('/guide/free-code')">Free code</a></p>
 
 ## What's inside
 

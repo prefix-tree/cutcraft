@@ -1,5 +1,9 @@
 # Marker highlight
 
+::: warning Deprecated
+`<Graphic>` and its kinds are deprecated and will be removed in a later release; the lint warns on each one. Draw the same thing with `<Motion>`, `<Three>` or a `<Layer>`: the [examples](/examples) show each, and [Free code](/guide/free-code) explains them.
+:::
+
 A translucent highlighter stroke with ragged ends that sweeps across in `sweep` seconds (0 to show it at once). Put it under a title on a lower track. Animated: it changes over its whole duration.
 
 <Example src="previews/graphics/marker" alt="Marker highlight">

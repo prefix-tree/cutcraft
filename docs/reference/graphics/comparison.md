@@ -1,5 +1,9 @@
 # Comparison
 
+::: warning Deprecated
+`<Graphic>` and its kinds are deprecated and will be removed in a later release; the lint warns on each one. Draw the same thing with `<Motion>`, `<Three>` or a `<Layer>`: the [examples](/examples) show each, and [Free code](/guide/free-code) explains them.
+:::
+
 Bars side by side for a few values, each with its label and value, growing over `growFor` seconds. `max` sets the scale (default: the largest value). Animated: it changes over its whole duration.
 
 <Example src="previews/graphics/comparison" alt="Comparison">
