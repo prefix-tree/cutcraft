@@ -20,7 +20,7 @@ const drag = bench.editor.find((r) => r.nodes > 500 && r.step.startsWith("transf
 
 A video is a TSX file. Clips are cut on transcript words and camera shots, titles land on the word they belong to,
 and anything you draw can be free code: React, CSS, three.js or Motion. The browser plays the file, an editor edits
-the same file, and Node exports it with the same engine.
+the same file, and the export renders it with the same engine.
 
 <p class="home-links"><a :href="withBase('/guide/getting-started')">Quick start</a> · <a :href="withBase('/examples')">Examples</a> · <a :href="withBase('/guide/introduction')">Introduction</a> · <a href="https://github.com/prefix-tree/cutcraft">GitHub</a></p>
 

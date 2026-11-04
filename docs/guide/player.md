@@ -22,8 +22,41 @@ const state = resolve(collectModule(file), manifest);
 - `element` is the rendered component. The player needs it to draw what is inside each `<Layer>`.
 - `media` maps asset ids to Blobs or URLs, or you pass your own `MediaResolver`.
 
-For a file loaded as text at run time (one a model just wrote, say), use `loadModule` from `@cutcraft/kit/source`
-in place of the `import`. See [Free code](./free-code#libraries) for offering extra libraries to it.
+### Files with `<Three>` or `<Motion>`
+
+The player draws them once the page has installed their engines. Call `installFreeCodeLibraries()` from
+`@cutcraft/graphics` once, before the player mounts; without it those layers stay empty and the console says which
+engine is missing.
+
+```sh
+npm install @cutcraft/graphics   # brings three.js, React Three Fiber and Motion with it
+```
+
+```tsx
+import { installFreeCodeLibraries } from "@cutcraft/graphics/libraries";
+
+installFreeCodeLibraries();
+```
+
+### A file loaded as text
+
+For a file that arrives at run time (one a model just wrote, say), use `loadModule` from `@cutcraft/kit/source` in
+place of the `import`. Pass it what `installFreeCodeLibraries()` returns, so the file may import three.js and Motion
+too; the export loads files the same way, so a file that plays here also exports.
+
+```tsx
+import { installFreeCodeLibraries } from "@cutcraft/graphics/libraries";
+import { collectModule, resolve } from "@cutcraft/kit";
+import { loadModule } from "@cutcraft/kit/source";
+
+const imports = installFreeCodeLibraries();
+const file = loadModule(sourceText, { imports });
+const state = resolve(collectModule(file), manifest);
+
+<Player state={state} element={file.default(file.defaults ?? {})} media={media} controls />;
+```
+
+[Free code](./free-code#libraries) covers offering other libraries.
 
 ## How it draws
 
