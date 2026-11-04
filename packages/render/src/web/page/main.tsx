@@ -8,7 +8,14 @@ import { createRef } from "react";
 import { createRoot } from "react-dom/client";
 
 import { installFreeCodeLibraries } from "@cutcraft/graphics/libraries";
-import { type AssetManifest, collectModule, layerFramesPending, resolve } from "@cutcraft/kit";
+import {
+  type AssetManifest,
+  collectModule,
+  layerFramesPending,
+  motionBlurOf,
+  resolve,
+  shutterTimes,
+} from "@cutcraft/kit";
 import { loadModule } from "@cutcraft/kit/source";
 import { addFontFaces, Player, type PlayerRef } from "@cutcraft/player";
 
@@ -52,7 +59,7 @@ async function start(): Promise<void> {
       media={media}
       fit="none"
       controls={false}
-      coreOptions={{ loadFonts: false }}
+      coreOptions={{ loadFonts: false, exactTime: true }}
       onError={(e) => errors.push(`${e.asset ?? e.id ?? "?"}: ${e.error.message}`)}
     />,
   );
@@ -66,8 +73,24 @@ async function start(): Promise<void> {
       "this browser has no drawElementImage: Chrome 153 or later with --enable-features=CanvasDrawElement",
     );
 
-  /** Draws composition time `t` into the capture canvas. */
+  const blur = motionBlurOf(state);
+  /** Draws composition time `t` into the capture canvas: one moment, or the average of the moments its shutter sees. */
   const frame = async (t: number): Promise<void> => {
+    if (!blur) return capture(t);
+    // Summed in 32 bits and divided once, so eight samples blend without the banding of repeated 8-bit blends.
+    const sum = new Uint32Array(width * height * 4);
+    const times = shutterTimes(t, fps, blur, state.composition.duration);
+    for (const at of times) {
+      await capture(at);
+      const { data } = ctx.getImageData(0, 0, width, height);
+      for (let i = 0; i < data.length; i++) sum[i] = (sum[i] as number) + (data[i] as number);
+    }
+    const average = new ImageData(width, height);
+    for (let i = 0; i < sum.length; i++) average.data[i] = Math.round((sum[i] as number) / times.length);
+    ctx.putImageData(average, 0, 0);
+  };
+  /** Draws the single moment `t` into the capture canvas. */
+  const capture = async (t: number): Promise<void> => {
     await core.compositor.step(t);
     await settle();
     await painted(cap);

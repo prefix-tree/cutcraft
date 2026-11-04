@@ -172,3 +172,28 @@ export const MASK_NOT_RENDERED = {
   kind: "is ignored: masks render on clips and nested sequences only, the element shows unmasked",
   second: "is ignored: only the first <Mask> on an element renders",
 } as const;
+
+export interface MotionBlur {
+  readonly shutterAngle: number;
+  readonly samples: number;
+}
+
+/** The composition's motion blur (`<Composition motionBlur>`), or null when it has none. */
+export function motionBlurOf(state: {
+  readonly composition: { readonly id: string };
+  readonly items: ReadonlyMap<string, { readonly props: Readonly<Record<string, unknown>> }>;
+}): MotionBlur | null {
+  const blur = state.items.get(state.composition.id)?.props.motionBlur as Partial<MotionBlur> | undefined;
+  if (!blur) return null;
+  return { shutterAngle: blur.shutterAngle ?? 180, samples: blur.samples ?? 8 };
+}
+
+/**
+ * The composition seconds a frame at `t` averages: `samples` moments spread evenly across the open shutter, which
+ * opens at `t` and stays open `shutterAngle / 360` of a frame. Never past the composition's end.
+ */
+export function shutterTimes(t: number, fps: number, blur: MotionBlur, duration: number): number[] {
+  const open = blur.shutterAngle / 360 / fps;
+  const last = Math.max(0, duration - 1e-6);
+  return Array.from({ length: blur.samples }, (_, k) => Math.min(last, t + (open * k) / blur.samples));
+}

@@ -11,7 +11,7 @@ import {
 } from "mediabunny";
 import type { ReactNode } from "react";
 
-import type { AssetManifest, ResolvedState } from "@cutcraft/kit";
+import { type AssetManifest, motionBlurOf, type ResolvedState } from "@cutcraft/kit";
 import {
   buildAudioPlan,
   captureWarnings,
@@ -129,11 +129,14 @@ export interface BrowserSource {
   readonly executablePath?: string;
 }
 
-/** Layers only a browser draws: `<Three>`, `<Motion>` and any other engine layer. */
+/** What only the browser engine draws: `<Three>`, `<Motion>` and any other engine layer, and motion blur. */
 export function needsBrowser(state: ResolvedState): boolean {
+  if (motionBlurOf(state)) return true;
   for (const p of state.items.values()) if (typeof p.props.engine === "string") return true;
   return false;
 }
+
+const BLUR_NODE_NOTE = "motion blur is drawn by the browser engine; this export leaves it out";
 
 /** The engine `renderVideo` and `renderStill` use for these options, and why, when it is not the one asked for. */
 export function pickEngine(
@@ -141,7 +144,7 @@ export function pickEngine(
   engine: Engine | undefined,
   source: BrowserSource | undefined,
 ): { readonly engine: "node" | "browser"; readonly note?: string } {
-  if (engine === "node") return { engine: "node" };
+  if (engine === "node") return motionBlurOf(state) ? { engine: "node", note: BLUR_NODE_NOTE } : { engine: "node" };
   if (engine === "browser") {
     if (!source) throw new Error("the browser engine needs `source`: the file's text, manifest and props");
     return { engine: "browser" };
@@ -151,7 +154,7 @@ export function pickEngine(
     ? { engine: "browser" }
     : {
         engine: "node",
-        note: "the file has layers only a browser draws (<Three>, <Motion>); pass `source` to export them with the browser engine",
+        note: "the file has what only a browser draws (<Three>, <Motion>, motion blur); pass `source` to export it with the browser engine",
       };
 }
 

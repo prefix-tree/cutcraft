@@ -14,7 +14,7 @@ import { Shape } from "./elements/Shape";
 import { Sticker } from "./elements/Sticker";
 import { Svg } from "./elements/Svg";
 import { Title } from "./elements/Title";
-import { useCompositionTime } from "./hooks";
+import { useCompositionTime, usePlayer } from "./hooks";
 
 export interface DomLayerProps {
   readonly state: ResolvedState;
@@ -26,6 +26,7 @@ export interface DomLayerProps {
 /** Overlay elements as DOM, one absolutely positioned group per track in compositing order, above the canvas (or, for the backdrop, below it). */
 export function DomLayer({ state, interiors, layer = "front" }: DomLayerProps) {
   const time = useCompositionTime();
+  const exact = usePlayer().exactTime;
   const items = visiblePlacements(state, time).filter((v) => OVERLAY_KINDS.has(v.placement.kind));
   const byTrack = new Map<string, VisibleItem[]>();
   for (const item of items) {
@@ -53,6 +54,7 @@ export function DomLayer({ state, interiors, layer = "front" }: DomLayerProps) {
                 item={item}
                 state={state}
                 time={time}
+                exact={exact}
                 interior={interiors.get(item.placement.id)}
               />
             ))}
@@ -76,6 +78,8 @@ export interface ElementCellProps {
   state: ResolvedState;
   time: number;
   interior: ReactNode;
+  /** Re-render for any change of time, not only a new frame (the player's `exactTime`). */
+  exact?: boolean;
 }
 
 /** Re-renders only when the element's own relative frame or placement changes. */
@@ -144,6 +148,11 @@ export function sameElement(a: ElementCellProps, b: ElementCellProps): boolean {
     cb = b.state.composition;
   if (ca.width !== cb.width || ca.height !== cb.height || ca.fps !== cb.fps) return false;
   if (p.kind === "title" && a.state.tree.byId.get(p.id)?.text !== b.state.tree.byId.get(p.id)?.text) return false;
-  if (frameIndex(a.time - p.start, ca.fps) !== frameIndex(b.time - q.start, cb.fps)) return false;
+  if (
+    a.exact || b.exact
+      ? a.time - p.start !== b.time - q.start
+      : frameIndex(a.time - p.start, ca.fps) !== frameIndex(b.time - q.start, cb.fps)
+  )
+    return false;
   return (a.item.transition?.progress ?? -1) === (b.item.transition?.progress ?? -1);
 }

@@ -36,7 +36,7 @@ npx cutcraft add <media file>... [--manifest manifest.json] [--id <id>] [--trans
 | `--font Name[:weight[:style]]=file` | A font for this export beyond the ones the file declares ([Fonts](/guide/themes#fonts)), repeatable. TTF, OTF or WOFF; the browser engine also reads WOFF2. |
 | `--continue` | Draw the grey placeholder for an asset that cannot be read, instead of stopping. |
 | `--import <spec>` | A module the file may import beyond `react`, `zod` and `@cutcraft/kit`, repeatable: `three`, or `name=specifier` for a package or a path relative to the file. |
-| `--engine <name>` | What draws the pictures: `auto` (default; the browser for a file with `<Three>` or `<Motion>`, Node otherwise), `node`, or `browser` (headless Chromium; `CUTCRAFT_CHROMIUM` names the binary). See [exporting](/guide/exporting#three-js-and-motion-the-browser-engine). |
+| `--engine <name>` | What draws the pictures: `auto` (default; the browser for a file with `<Three>`, `<Motion>` or motion blur, Node otherwise), `node`, or `browser` (headless Chromium; `CUTCRAFT_CHROMIUM` names the binary). See [exporting](/guide/exporting#three-js-and-motion-the-browser-engine). |
 | `--quiet` | No progress output. |
 ## Layout check
 

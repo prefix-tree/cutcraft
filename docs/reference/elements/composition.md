@@ -22,5 +22,6 @@ The video: frame rate, size, background and theme. It ends where its content end
 | `channels` | integer | `2` |  |
 | `background` | { mode, color, gradient } |  |  |
 | `theme` | { extends, palette, fonts, radius, motion, styles } |  |  |
+| `motionBlur` | { shutterAngle, samples } |  |  |
 
 Children: `track`, `marker`, `multicam`, `captions`. [All elements](/reference/elements/)

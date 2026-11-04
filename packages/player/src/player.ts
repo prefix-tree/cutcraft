@@ -50,6 +50,11 @@ export interface PlayerOptions {
   readonly playbackRate?: number | undefined;
   /** Load the file's fonts (`state.fonts`) into the page; default true. The export page loads them itself. */
   readonly loadFonts?: boolean | undefined;
+  /**
+   * Re-render overlays for every change of time, not once per frame; default false. The export sets it to draw the
+   * moments inside a frame that motion blur averages.
+   */
+  readonly exactTime?: boolean | undefined;
   readonly resolveNested?: ResolveNested | undefined;
   /** Test seams; the browser defaults are the audio-context clock, Web Audio and mediabunny. */
   readonly clock?: Clock | undefined;
@@ -164,10 +169,14 @@ export class PlayerCore {
     this._muted = options.initiallyMuted ?? false;
     this.engine.setMaster(this._volume, this._muted);
     this.fontsWanted = options.loadFonts ?? true;
+    this.exactTime = options.exactTime ?? false;
     this.loadFonts(options.state);
   }
 
   /** Resolves once the file's fonts (`state.fonts`) have loaded; a face that fails is reported as an error event. */
+  /** Overlays follow every change of time, not each frame (`exactTime`). */
+  readonly exactTime: boolean;
+
   get fontsReady(): Promise<void> {
     return this.fonts;
   }
