@@ -8,6 +8,8 @@ One cue inside `<Captions>`, written by hand: its text, start and end.
 
 </Example>
 
+**Used in:** [the walkthrough](/guide/writing-files)
+
 ## Props
 
 | prop | type | default | required |

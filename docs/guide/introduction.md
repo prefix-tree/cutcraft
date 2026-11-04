@@ -1,7 +1,8 @@
 # Introduction
 
 CutCraft edits video as code. A video is a TSX file: tracks of clips, transitions, captions and music, plus anything
-you want to draw on top. The browser plays the file, an editor changes it, and Node exports it to MP4, WebM or MOV.
+you want to draw on top. The browser plays the file, an editor changes it, and the export turns it into MP4, WebM or
+MOV.
 
 ```tsx
 export default function Video() {
@@ -44,8 +45,26 @@ The b-roll moves up behind it, and the title stays on its word. Whoever opens th
 reads the edit as ordinary code.
 
 What you draw on top is up to you. A `<Layer>` holds any React component, with hooks, CSS 3D, canvas or WebGL, and
-`<Three>` and `<Motion>` put three.js and Motion on the timeline. There is also a library of ready-made titles,
-shapes and graphics for the common cases. [Free code](./free-code) explains how it all stays on the video's clock.
+`<Three>` and `<Motion>` put three.js and Motion on the timeline. `<Title>`, `<Shape>` and `<Captions>` cover the
+common cases and take the theme's fonts and colours. [Free code](./free-code) explains how it all stays on the
+video's clock.
+
+## How it fits together
+
+```
+video.tsx      ┐                                       ┌─▶ <Player>   plays it in a page
+manifest.json  ├─▶ resolve ─▶ every element in seconds ├─▶ actions    edit it; each edit is written back to video.tsx
+media files    ┘                                       └─▶ export     MP4, WebM, MOV or a still
+```
+
+- **The file** (`video.tsx`) says what happens and when, in words, shots and seconds. [The file](./the-file)
+- **The manifest** (`manifest.json`) lists the assets the file may use, by id, with what CutCraft can't read from a
+  file name: length, size, and for speech the words and when each is said. The **media** are the files themselves.
+- **Resolving** turns the file and the manifest into seconds for every element. Everything after works from that.
+- **The player** draws it in the browser; **the export** writes a file. Both use the same engine, so what you preview
+  is what you get. [Player](./player), [Exporting](./exporting)
+- **Editing** changes the file through actions (trim, move, retime), each written back as a one-token edit.
+  [Editing](./editing)
 
 ## What you get
 
@@ -54,8 +73,9 @@ shapes and graphics for the common cases. [Free code](./free-code) explains how 
 | [`cutcraft`](https://www.npmjs.com/package/cutcraft) | The command line: export a file to video, audio or a still, or check its layout. |
 | [`@cutcraft/kit`](https://www.npmjs.com/package/@cutcraft/kit) | The elements, the resolver that places everything in time, 131 undoable editor actions, and the tools that write edits back into the file. |
 | [`@cutcraft/player`](https://www.npmjs.com/package/@cutcraft/player) | A React `<Player>` and a framework-free `PlayerCore` for the browser. |
-| [`@cutcraft/render`](https://www.npmjs.com/package/@cutcraft/render) | Export from your own code, in Node, with no browser. |
-| [`@cutcraft/graphics`](https://www.npmjs.com/package/@cutcraft/graphics) | Ready-made graphics, and three.js and Motion on the video's clock. |
+| [`@cutcraft/render`](https://www.npmjs.com/package/@cutcraft/render) | Export from your own code: in Node, or through headless Chromium for `<Three>` and `<Motion>`. |
+| [`@cutcraft/graphics`](https://www.npmjs.com/package/@cutcraft/graphics) | three.js and Motion on the video's clock (`installFreeCodeLibraries()`); its `<Graphic>` kinds are deprecated. |
 
-[Quick start](./getting-started) takes you from `npm install` to an exported file. [Examples](/examples) shows
-rendered videos next to the files that made them.
+[Quick start](./getting-started) takes you from `npm install` to an exported file in four steps.
+[Examples](/examples) shows finished videos next to the files that made them, and where to start for what you're
+making.

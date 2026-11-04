@@ -3,7 +3,8 @@
 # cutcraft
 
 The [CutCraft](https://prefix-tree.github.io/cutcraft/) command line. It exports a TSX video file to video, audio or
-a still image in Node, with no browser, and checks its layout.
+a still image, and checks its layout. Most files export in Node with no browser; a file with `<Three>` or `<Motion>`
+exports through headless Chromium (`npm install playwright-core`, and `CUTCRAFT_CHROMIUM` pointing at Chrome 153+).
 
 ```sh
 npm install cutcraft @cutcraft/kit react zod   # the CLI, and types for the file

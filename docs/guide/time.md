@@ -1,8 +1,12 @@
 # Time by meaning
 
 A CutCraft file rarely says "at 8.43 seconds". It says "on word 12", "where the second shot ends", "right after the
-hook". CutCraft works out the seconds from the [asset manifest](./getting-started#a-first-file) and works them out
-again after every edit.
+hook". CutCraft works out the seconds from the [asset manifest](./introduction#how-it-fits-together) and works them
+out again after every edit.
+
+**See it in:** [Product launch](/examples#a-product-launch) (cuts and callouts on words),
+[Kinetic type](/examples#kinetic-type) (type on words), [Talking-head cut](/recipes/talking-head) (an answer cut to its
+sentences), [Multicam highlights](/recipes/highlights) (shots and silences).
 
 ## Time references
 

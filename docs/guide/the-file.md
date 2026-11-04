@@ -3,6 +3,9 @@
 A CutCraft video is one TSX module. It has a default export, a component that returns a `<Composition>`, and two
 optional exports for the values you want to change later without touching the edit.
 
+**See it in:** every [showcase file](/examples) (each has `schema` and `defaults`), [Variants from one file](/recipes/variants)
+(one cut, many versions), and the [walkthrough](/guide/writing-files), which explains a whole file line by line.
+
 ```tsx
 import { z } from "zod";
 import { Clip, Composition, Title, Track, Transition } from "@cutcraft/kit";

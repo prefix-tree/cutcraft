@@ -2,6 +2,8 @@
 
 A stretch of a sound asset: volume, fades, ducking under another track, automation.
 
+**Used in:** [the walkthrough](/guide/writing-files) · [Product demo with zoom-ins](/recipes/product-demo) · [Slideshow with motion](/recipes/slideshow) · [Talking-head cut](/recipes/talking-head)
+
 ## Props
 
 | prop | type | default | required |

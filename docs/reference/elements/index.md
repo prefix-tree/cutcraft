@@ -17,8 +17,8 @@ The elements a file is written in: the timeline (clips, tracks, transitions, cap
 
 <div class="cc-cards">
 <PreviewCard code title="<Layer>" link="/reference/elements/layer" src="previews/elements/layer" text="Free code in the frame: any React, CSS, canvas or WebGL, placed on the timeline like any overlay; useT() is its time." />
-<PreviewCard code title="<Three>" link="/reference/elements/three" text="A three.js scene on the timeline: plain three.js in setup, or React Three Fiber children, on the video's clock." />
-<PreviewCard code title="<Motion>" link="/reference/elements/motion" text="Children animated by a Motion sequence on the video's clock." />
+<PreviewCard code title="<Three>" link="/reference/elements/three" src="previews/elements/three" text="A three.js scene on the timeline: plain three.js in setup, or React Three Fiber children, on the video's clock." />
+<PreviewCard code title="<Motion>" link="/reference/elements/motion" src="previews/elements/motion" text="Children animated by a Motion sequence on the video's clock." />
 </div>
 
 ## Text and graphics

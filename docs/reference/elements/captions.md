@@ -8,6 +8,8 @@ Subtitles from an asset's transcript that follow the clips through every trim.
 
 </Example>
 
+**Used in:** [Kinetic type](/examples#kinetic-type) · [Captions and key points](/examples#captions-and-key-points) · [the walkthrough](/guide/writing-files) · [Product demo with zoom-ins](/recipes/product-demo) · [Talking-head cut](/recipes/talking-head) · [Variants from one file](/recipes/variants) · [Vertical clip from a podcast](/recipes/vertical-podcast)
+
 ## Props
 
 | prop | type | default | required |

@@ -8,6 +8,8 @@ Switches a `<Multicam>` to an angle at a moment.
 
 </Example>
 
+**Used in:** [Multicam highlights](/recipes/highlights)
+
 ## Props
 
 | prop | type | default | required |

@@ -5,7 +5,7 @@
 <p align="center">
   <b>Video editing as code.</b><br>
   A video is a TSX file. Clips are cut on transcript words and camera shots, not on seconds someone worked out by hand.
-  The browser plays the file, an editor changes it, and Node exports it.
+  The browser plays the file, an editor changes it, and the export renders it with the same engine.
 </p>
 
 <p align="center">
@@ -113,30 +113,48 @@ player in headless Chromium, frame by frame, with the same sound
 | Editing | 131 actions, each with validation and undo. Every edit is written back into the file as the smallest text change. |
 | Lint | Checks the file before anything plays and reports props that are accepted but not drawn yet. |
 | Player | A React `<Player>` and a framework-free `PlayerCore`: WebCodecs decoding through [mediabunny](https://mediabunny.dev), one canvas for footage, DOM for overlays, Web Audio as the clock, and frame-exact seeking. |
-| Export | The same engine in Node, with no browser: MP4, WebM, MOV (ProRes), MP3 or WAV soundtracks, and PNG or JPEG stills. Files with `<Three>` or `<Motion>` export through the player in headless Chromium. A layout check reports overlays that leave the frame or the safe zone, or cover the captions or the subject, at their line in the file. |
+| Export | The same engine, in Node with no browser for most files: MP4, WebM, MOV (ProRes), MP3 or WAV soundtracks, and PNG or JPEG stills. Files with `<Three>` or `<Motion>` export through the player in headless Chromium. A layout check reports overlays that leave the frame or the safe zone, or cover the captions or the subject, at their line in the file. |
 
 ## Quick start
 
-Export a file from your project:
+A first video needs no footage. Save this as `hello.tsx`:
+
+```tsx
+import { Composition, Shape, Title, Track } from "@cutcraft/kit";
+
+export const manifest = { assets: {} }; // no footage yet
+
+export default function Video() {
+  return (
+    <Composition fps={30} width={1280} height={720}>
+      <Track id="text" layout="free">
+        <Shape id="card" start={0} duration={3} shape="rectangle" width={760} height={220} style="card" />
+        <Title id="hello" start={0.3} duration={2.5} style="h1" animation={{ preset: "word-by-word" }}>Hello, video</Title>
+      </Track>
+    </Composition>
+  );
+}
+```
 
 ```sh
 npm install cutcraft @cutcraft/kit react zod   # the CLI, and types for the file
-npx cutcraft video.tsx --out video.mp4         # or .webm, .mov, .mp3, .wav
-npx cutcraft video.tsx --still 2 --out poster.png
-npx cutcraft video.tsx --check-layout --safe-zone tiktok
+npx cutcraft hello.tsx --out hello.mp4         # or .webm, .mov, a .png still with --still 1
 ```
 
-The [CLI reference](https://prefix-tree.github.io/cutcraft/reference/cli) lists every option, and
-[A launch video, line by line](https://prefix-tree.github.io/cutcraft/guide/writing-files) walks through a 25-second
-video.
+The [quick start](https://prefix-tree.github.io/cutcraft/guide/getting-started) then adds your own footage, cuts on
+words, and three.js and Motion, one step at a time. [Examples](https://prefix-tree.github.io/cutcraft/examples) shows
+which file to start from for what you're making.
 
-To run the examples from this repository you need Node 22.19 or later, pnpm 10 (`corepack enable`), and `ffmpeg`
-with the `drawtext` filter for the placeholder footage:
+To render the examples from this repository you need Node 22.19 or later, pnpm 10 (`corepack enable`), and `ffmpeg`
+with the `drawtext` filter for the placeholder footage; the three.js and Motion examples also need Chrome 153+ in
+`CUTCRAFT_CHROMIUM`:
 
 ```sh
 pnpm install
-pnpm --filter @cutcraft/example-launch-recap gen   # placeholder footage
-pnpm --filter @cutcraft/example-launch-recap dev   # http://localhost:5180
+pnpm --filter @cutcraft/example-showcase gen       # placeholder footage
+pnpm --filter @cutcraft/example-showcase render    # the showcase videos, into docs/public/showcase
+pnpm --filter @cutcraft/example-launch-recap gen   # the walkthrough's footage
+pnpm --filter @cutcraft/example-launch-recap dev   # the walkthrough in a player, http://localhost:5180
 pnpm docs:dev                                      # the documentation site
 ```
 
