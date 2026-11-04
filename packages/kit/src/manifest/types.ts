@@ -5,6 +5,21 @@
  */
 export interface AssetManifest {
   readonly assets: Readonly<Record<string, AssetEntry>>;
+  /**
+   * Font files the file sets text in, beyond the bundled families (`BUNDLED_FONTS`). Each key names a file the way an
+   * asset id does: the export finds `<key>.ttf` (or `.otf`, `.woff`, `.woff2`) in the media folder, and the player
+   * asks its `media` for the key. One entry per face: a family in regular and bold is two entries.
+   */
+  readonly fonts?: Readonly<Record<string, FontEntry>>;
+}
+
+/** One font face: the family a title's `font` (or a theme font) names, with its weight and style. */
+export interface FontEntry {
+  readonly family: string;
+  /** 100 to 900; default 400. */
+  readonly weight?: number;
+  /** Default "normal". */
+  readonly style?: "normal" | "italic";
 }
 
 export interface AssetEntry {

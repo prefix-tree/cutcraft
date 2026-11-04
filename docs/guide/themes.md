@@ -109,9 +109,35 @@ Five families ship with both renderers, all under the SIL Open Font License:
 Inter, Space Grotesk, Playfair Display, DM Sans and JetBrains Mono, in regular
 and bold (and italic, except Space Grotesk). The export reads them from the
 `@fontsource` packages; the preview loads them once the app imports
-`@cutcraft/player/fonts.css`. Another family works in the preview if the page
-loads it, and in the export if you pass it (`--font`, `fonts`); otherwise the
-export sets it in Inter and warns. The `font-available` lint names such fonts.
+`@cutcraft/player/fonts.css`.
+
+Any other family goes in the manifest's `fonts`, one entry per face. Each key
+names a file the way an asset id does: the export finds `brand.ttf` (or `.otf`,
+`.woff`, `.woff2`) next to the file or under `--media`, and the player asks its
+`media` for the key.
+
+```json
+{
+  "assets": {},
+  "fonts": {
+    "brand": { "family": "Brand Sans" },
+    "brand-bold": { "family": "Brand Sans", "weight": 700 }
+  }
+}
+```
+
+```tsx
+<Title id="hello" font="Brand Sans">Hello</Title>
+<Player state={state} element={file.default({})} media={{ "brand": "/fonts/brand.woff2", "brand-bold": "/fonts/brand-bold.woff2" }} />
+```
+
+The player, the Node export and the browser export all load these, and the
+browser export draws no frame until they have loaded. The Node export reads TTF,
+OTF and WOFF but not WOFF2; a file with `<Three>` or `<Motion>` exports through
+the browser, which reads all four. A family that is neither bundled nor listed is
+set in Inter, and the `font-available` lint names it. `--font` on the command
+line (and `fonts` in `renderVideo`) adds faces for one export without editing the
+manifest.
 
 ## Seeing where a value came from
 

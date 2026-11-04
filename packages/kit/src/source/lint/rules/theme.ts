@@ -112,11 +112,12 @@ export const themeLiterals: Rule = {
   },
 };
 
-/** Fonts no renderer ships: the export sets them in Inter unless the fonts are passed to it. */
+/** Fonts no renderer ships and the manifest does not list: the export sets them in Inter. */
 export const fontAvailable: Rule = {
   name: "font-available",
-  check: (index) => {
+  check: (index, options) => {
     const theme = fileTheme(index) ?? resolveTheme(undefined);
+    const listed = new Set(Object.values(options.manifest?.fonts ?? {}).map((f) => f.family));
     const out: Diagnostic[] = [];
     const seen = new Set<string>();
     const check = (
@@ -126,12 +127,12 @@ export const fontAvailable: Rule = {
       name: string,
       path: string,
     ): void => {
-      if (isBundledFont(family) || seen.has(`${site.id}.${path}`)) return;
+      if (isBundledFont(family) || listed.has(family) || seen.has(`${site.id}.${path}`)) return;
       seen.add(`${site.id}.${path}`);
       out.push({
         rule: "font-available",
         severity: "warning",
-        message: `"${site.id}.${path}" uses font "${family}", which is not bundled; the export sets it in Inter unless the font is passed to it`,
+        message: `"${site.id}.${path}" uses font "${family}", which is neither bundled nor in the manifest's fonts; the export sets it in Inter`,
         range: [prop.range[0], prop.range[1]],
         id: site.id,
         prop: name,

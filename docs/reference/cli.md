@@ -30,7 +30,7 @@ npx cutcraft <file.tsx> --check-layout [--safe-zone <zone>] [--subject <x,y,w,h>
 | `--quality <preset>` | `very-low`, `low`, `medium`, `high` or `very-high`: the encoder picks the bitrate for the size and codec. In place of `--bitrate`. |
 | `--keyframe <s>` | Seconds between keyframes. Default 2. |
 | `--silent` | No soundtrack. |
-| `--font Name[:weight[:style]]=file` | A font for titles, repeatable. TTF, OTF or WOFF (not WOFF2). |
+| `--font Name[:weight[:style]]=file` | A font for this export beyond the manifest's `fonts` ([Fonts](/guide/themes#fonts)), repeatable. TTF, OTF or WOFF; the browser engine also reads WOFF2. |
 | `--continue` | Draw the grey placeholder for an asset that cannot be read, instead of stopping. |
 | `--import <spec>` | A module the file may import beyond `react`, `zod` and `@cutcraft/kit`, repeatable: `three`, or `name=specifier` for a package or a path relative to the file. |
 | `--engine <name>` | What draws the pictures: `auto` (default; the browser for a file with `<Three>` or `<Motion>`, Node otherwise), `node`, or `browser` (headless Chromium; `CUTCRAFT_CHROMIUM` names the binary). See [exporting](/guide/exporting#three-js-and-motion-the-browser-engine). |

@@ -45,7 +45,8 @@ finds it when you drag it on a timeline ([The file](./the-file) explains why).
 
 Put a video next to the file, `talk.mp4` say, and list it in a `manifest.json`. The manifest names each asset the file
 may use and holds what CutCraft can't read from a file name: its length, size and frame rate (`ffprobe talk.mp4` shows
-them).
+them). A font the file names, beyond the five that ship, goes in the manifest
+too ([Fonts](./themes#fonts)).
 
 ```json
 {

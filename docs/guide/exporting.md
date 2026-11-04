@@ -88,7 +88,8 @@ and with captions on top:
 - Fonts: Inter, Space Grotesk, Playfair Display, DM Sans and JetBrains
   Mono are bundled (regular and bold, italic where the family has one; see
   [Themes](/guide/themes#fonts)). A title that names another font is set in
-  Inter with a warning unless you pass the font with `--font` or `fonts`.
+  Inter with a warning unless the manifest lists it (`fonts`), or you pass it
+  with `--font`.
 - Sound is mixed by `mixPlan`, a pure function of the audio plan: volume,
   fades, automation, ducking, pan, speed and speed-key ramps (pitch follows
   speed, as in the preview), silence through freeze holds, and sample-rate

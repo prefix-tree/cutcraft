@@ -10,7 +10,7 @@ import { createRoot } from "react-dom/client";
 import { installFreeCodeLibraries } from "@cutcraft/graphics/libraries";
 import { type AssetManifest, collectModule, layerFramesPending, resolve } from "@cutcraft/kit";
 import { loadModule } from "@cutcraft/kit/source";
-import { Player, type PlayerRef } from "@cutcraft/player";
+import { addFontFaces, Player, type PlayerRef } from "@cutcraft/player";
 
 import type { PageApi, PageJob, SegmentRequest } from "./protocol";
 
@@ -24,6 +24,8 @@ const SETTLE_TIMEOUT_MS = 10_000;
 
 async function start(): Promise<void> {
   const job = (await (await fetch("/job.json")).json()) as PageJob;
+  // Faces passed beside the manifest (`--font`); the player loads the manifest's own.
+  await addFontFaces(job.fonts.map((f) => ({ family: f.family, weight: f.weight, style: f.style, source: f.url })));
   const imports = installFreeCodeLibraries();
   const mod = loadModule(job.source, { imports });
   const manifest = job.manifest as AssetManifest;
@@ -54,6 +56,8 @@ async function start(): Promise<void> {
   );
   while (!ref.current) await tick();
   const core = ref.current.core;
+  // No frame is drawn before the manifest's fonts are in: text set in a fallback face would be captured.
+  await core.fontsReady;
   const ctx = cap.getContext("2d") as CanvasRenderingContext2D & {
     drawElementImage(element: Element, x: number, y: number): void;
   };

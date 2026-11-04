@@ -235,4 +235,23 @@ export default function Video() {
     expect(d.filter((x) => x[1] === "s")).toEqual([]);
     expect(lint(text).find((x) => x.rule === "theme-literals" && x.prop === "color")?.message).toContain("$text");
   });
+
+  it("takes a font the manifest lists as available", () => {
+    const text = `import { Composition, Title, Track } from "@cutcraft/kit";
+export default function Video() {
+  return (
+    <Composition fps={30} width={1920} height={1080}>
+      <Track id="over" layout="free">
+        <Title id="a" start={0} font="Brand">A</Title>
+        <Title id="b" start={0} font="Other">B</Title>
+      </Track>
+    </Composition>
+  );
+}
+`;
+    const manifest = { assets: {}, fonts: { brand: { family: "Brand" } } };
+    const d = lint(text, { manifest }).filter((x) => x.rule === "font-available");
+    expect(d.map((x) => x.id)).toEqual(["b"]);
+    expect(d[0]?.message).toContain("neither bundled nor in the manifest's fonts");
+  });
 });

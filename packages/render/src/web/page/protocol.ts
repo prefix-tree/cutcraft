@@ -6,6 +6,15 @@ export interface PageJob {
   readonly source: string;
   readonly props: Readonly<Record<string, unknown>>;
   readonly manifest: unknown;
+  /** Faces passed to the export beyond the manifest's (`--font`), each served at its `url`. */
+  readonly fonts: readonly PageFont[];
+}
+
+interface PageFont {
+  readonly family: string;
+  readonly weight: number;
+  readonly style: "normal" | "italic";
+  readonly url: string;
 }
 
 export interface SegmentRequest {

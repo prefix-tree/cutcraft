@@ -4,6 +4,7 @@
 import type { AssetManifest } from "@cutcraft/kit";
 import type { MediaResolver } from "@cutcraft/player/engine";
 
+import type { OverlayFont } from "../overlays";
 import type { PageApi, SegmentRequest } from "./page/protocol";
 import { type PageServer, servePage } from "./server";
 
@@ -27,6 +28,8 @@ export interface BrowserEngineOptions {
   readonly props?: Readonly<Record<string, unknown>>;
   readonly manifest: AssetManifest;
   readonly media: MediaResolver;
+  /** Faces beyond the manifest's (`--font`); the page loads the manifest's itself, as the player does. */
+  readonly fonts?: readonly OverlayFont[];
   /** A Chromium or Chrome binary; default `CUTCRAFT_CHROMIUM`, then Playwright's own browser. */
   readonly executablePath?: string;
   /** Messages the page warns with (an asset it cannot read, an engine that is missing). */
@@ -59,6 +62,7 @@ export class BrowserEngine {
     const server = await servePage(
       { source: options.source, props: options.props ?? {}, manifest: options.manifest },
       options.media,
+      options.fonts ?? [],
     );
     let browser: Browser | null = null;
     try {

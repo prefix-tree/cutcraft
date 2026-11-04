@@ -6,6 +6,7 @@ import type { ResolvedState } from "@cutcraft/kit";
 import { captureWarnings, FRAME_EPS, type MediaResolver, type PlayerErrorEvent } from "@cutcraft/player/engine";
 
 import { initEnv } from "./env";
+import { manifestFonts } from "./fonts";
 import type { OverlayFont } from "./overlays";
 import { FramePipeline } from "./pipeline";
 import { type BrowserSource, type Engine, pickEngine } from "./renderer";
@@ -51,6 +52,7 @@ export async function renderStill(options: StillOptions): Promise<StillResult> {
       source: source.text,
       manifest: source.manifest,
       media: options.media,
+      ...(options.fonts?.length ? { fonts: options.fonts } : {}),
       warn: (m) => {
         if (!warnings.includes(m)) warnings.push(m);
       },
@@ -72,7 +74,7 @@ export async function renderStill(options: StillOptions): Promise<StillResult> {
     state,
     media: options.media,
     interiors: options.interiors,
-    fonts: options.fonts,
+    fonts: [...(await manifestFonts(state.manifest, options.media)), ...(options.fonts ?? [])],
     onAssetError: options.onAssetError,
     warn: (m) => warnings.push(m),
   });

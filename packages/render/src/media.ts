@@ -23,6 +23,11 @@ const EXTENSIONS = [
   ".webp",
   ".gif",
   ".svg",
+  // Fonts the manifest lists (`fonts`).
+  ".ttf",
+  ".otf",
+  ".woff",
+  ".woff2",
 ];
 
 /**
