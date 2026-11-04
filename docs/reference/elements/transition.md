@@ -15,7 +15,7 @@ A blend between the two clips it sits between on a sequence track.
 | prop | type | default | required |
 |---|---|---|---|
 | `id` | string |  | yes |
-| `type` | "crossfade" \| "dipToBlack" \| "dipToWhite" \| "wipe" \| "slide" \| "push" | `"crossfade"` |  |
+| `type` | "crossfade" \| "dipToBlack" \| "dipToWhite" \| "wipe" \| "slide" \| "push" \| string | `"crossfade"` |  |
 | `duration` | number (0.001..30) | `0.5` |  |
 | `params` | object | `{}` |  |
 | `on` | string |  |  |

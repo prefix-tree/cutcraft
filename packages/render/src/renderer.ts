@@ -11,7 +11,7 @@ import {
 } from "mediabunny";
 import type { ReactNode } from "react";
 
-import { type AssetManifest, motionBlurOf, type ResolvedState } from "@cutcraft/kit";
+import { type AssetManifest, motionBlurOf, type ResolvedState, usesShaders } from "@cutcraft/kit";
 import {
   buildAudioPlan,
   captureWarnings,
@@ -129,14 +129,16 @@ export interface BrowserSource {
   readonly executablePath?: string;
 }
 
-/** What only the browser engine draws: `<Three>`, `<Motion>` and any other engine layer, and motion blur. */
+/** What only the browser engine draws: `<Three>`, `<Motion>` and any other engine layer, motion blur, and shaders. */
 export function needsBrowser(state: ResolvedState): boolean {
-  if (motionBlurOf(state)) return true;
+  if (motionBlurOf(state) || usesShaders(state)) return true;
   for (const p of state.items.values()) if (typeof p.props.engine === "string") return true;
   return false;
 }
 
 const BLUR_NODE_NOTE = "motion blur is drawn by the browser engine; this export leaves it out";
+const SHADER_NODE_NOTE =
+  "effects and transitions the file declares (defineEffect, defineTransition) are drawn by the browser engine; this export leaves them out";
 
 /** The engine `renderVideo` and `renderStill` use for these options, and why, when it is not the one asked for. */
 export function pickEngine(
@@ -144,7 +146,12 @@ export function pickEngine(
   engine: Engine | undefined,
   source: BrowserSource | undefined,
 ): { readonly engine: "node" | "browser"; readonly note?: string } {
-  if (engine === "node") return motionBlurOf(state) ? { engine: "node", note: BLUR_NODE_NOTE } : { engine: "node" };
+  if (engine === "node") {
+    const notes = [motionBlurOf(state) ? BLUR_NODE_NOTE : "", usesShaders(state) ? SHADER_NODE_NOTE : ""].filter(
+      Boolean,
+    );
+    return notes.length > 0 ? { engine: "node", note: notes.join("; ") } : { engine: "node" };
+  }
   if (engine === "browser") {
     if (!source) throw new Error("the browser engine needs `source`: the file's text, manifest and props");
     return { engine: "browser" };
@@ -154,7 +161,7 @@ export function pickEngine(
     ? { engine: "browser" }
     : {
         engine: "node",
-        note: "the file has what only a browser draws (<Three>, <Motion>, motion blur); pass `source` to export it with the browser engine",
+        note: "the file has what only a browser draws (<Three>, <Motion>, motion blur, declared shaders); pass `source` to export it with the browser engine",
       };
 }
 

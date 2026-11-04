@@ -14,6 +14,7 @@ import type { ZodObject } from "zod";
 import * as zod from "zod";
 
 import * as kit from "../index";
+import { collectShaders, MODULE_SHADERS } from "../jsx/shaders";
 import { collectFonts, MODULE_FONTS } from "../theme/fonts";
 
 /** What a cut file exports: the schema of its tweakable values, their defaults, and the video itself. */
@@ -54,8 +55,12 @@ export function loadModule(source: string, options: LoadOptions = {}): CutModule
     return offered[name];
   };
   // The faces the file declares (`font()`, `googleFont()`) are kept on its exports, apart from any other file's.
-  const fonts = collectFonts(() => new Function("require", "exports", "module", code)(require, module.exports, module));
+  let shaders: ReturnType<typeof collectShaders> = [];
+  const fonts = collectFonts(() => {
+    shaders = collectShaders(() => new Function("require", "exports", "module", code)(require, module.exports, module));
+  });
   if (typeof module.exports.default !== "function") throw new Error("The file has no default export (the video).");
   Object.defineProperty(module.exports, MODULE_FONTS, { value: fonts });
+  Object.defineProperty(module.exports, MODULE_SHADERS, { value: shaders });
   return module.exports as unknown as CutModule;
 }

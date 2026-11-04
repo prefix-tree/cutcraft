@@ -259,7 +259,7 @@ export default function Video() {
     const available = d.filter((x) => x.rule === "font-available");
     expect(available.map((x) => x.id)).toEqual(["c"]);
     expect(available[0]?.message).toContain("neither bundled nor declared with font() or googleFont()");
-    const declarations = d.filter((x) => x.rule === "font-declaration").map((x) => x.message);
+    const declarations = d.filter((x) => x.rule === "declaration").map((x) => x.message);
     expect(declarations).toEqual([
       expect.stringContaining("googleFont() takes literal arguments"),
       expect.stringContaining("googleFont() inside a function or expression"),

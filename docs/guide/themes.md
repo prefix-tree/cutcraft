@@ -153,7 +153,7 @@ draws no frame until they have loaded; the browser export sets text in the same
 files the Node export reads. A family that is neither bundled nor declared is
 set in Inter, and the `font-available` lint names it. Keep the calls at the top
 of the file with literal arguments, where the editor and lint can read them
-(the `font-declaration` lint says when one is not). `--font` on the command line
+(the `declaration` lint says when one is not). `--font` on the command line
 (and `fonts` in `renderVideo`) adds faces for one export without editing the
 file.
 
@@ -184,5 +184,5 @@ it restyles.
   The message names the token when the colour matches one.
 - `font-available` (warning): a font no renderer ships and the file does not
   declare.
-- `font-declaration` (warning): a `font()` or `googleFont()` call inside a
+- `declaration` (warning): a `font()`, `googleFont()`, `defineEffect()` or `defineTransition()` call inside a
   function, or with arguments that are not literal.

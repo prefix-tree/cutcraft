@@ -1,7 +1,7 @@
 import { lookupAsset } from "../../../manifest/types";
 import type { ElementSite, SourceIndex } from "../../index";
 import type { Diagnostic, LintOptions } from "../index";
-import { fontDeclaration } from "./fonts";
+import { declaration } from "./fonts";
 import { freeCodeClock, strayHtml } from "./free-code";
 import { deprecatedGraphic, graphicProps } from "./graphic";
 import { notRendered } from "./not-rendered";
@@ -269,7 +269,7 @@ export const rules: readonly Rule[] = [
   themeRefs,
   themeLiterals,
   fontAvailable,
-  fontDeclaration,
+  declaration,
   graphicProps,
   deprecatedGraphic,
   notRendered,
