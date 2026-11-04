@@ -4,6 +4,7 @@ import { STYLED_KINDS, TOKEN_PATTERN } from "../../../theme/schema";
 import { type ResolvedTheme, resolveTheme, themeToken } from "../../../theme/theme";
 import type { SourceIndex } from "../../index";
 import type { Diagnostic } from "../index";
+import { declaredFamilies } from "./fonts";
 import type { Rule } from "./index";
 
 /** Keys whose string values are colours. */
@@ -112,11 +113,12 @@ export const themeLiterals: Rule = {
   },
 };
 
-/** Fonts no renderer ships: the export sets them in Inter unless the fonts are passed to it. */
+/** Fonts no renderer ships and the file does not declare (`font()`, `googleFont()`): the export sets them in Inter. */
 export const fontAvailable: Rule = {
   name: "font-available",
   check: (index) => {
     const theme = fileTheme(index) ?? resolveTheme(undefined);
+    const listed = declaredFamilies(index);
     const out: Diagnostic[] = [];
     const seen = new Set<string>();
     const check = (
@@ -126,12 +128,12 @@ export const fontAvailable: Rule = {
       name: string,
       path: string,
     ): void => {
-      if (isBundledFont(family) || seen.has(`${site.id}.${path}`)) return;
+      if (isBundledFont(family) || listed.has(family) || seen.has(`${site.id}.${path}`)) return;
       seen.add(`${site.id}.${path}`);
       out.push({
         rule: "font-available",
         severity: "warning",
-        message: `"${site.id}.${path}" uses font "${family}", which is not bundled; the export sets it in Inter unless the font is passed to it`,
+        message: `"${site.id}.${path}" uses font "${family}", which is neither bundled nor declared with font() or googleFont(); the export sets it in Inter`,
         range: [prop.range[0], prop.range[1]],
         id: site.id,
         prop: name,

@@ -7,6 +7,7 @@ import { PerformanceClock } from "./clock/clock";
 import { Transport } from "./clock/transport";
 import { MAX_RATE, MIN_RATE, SETTLE_MS } from "./constants";
 import { AssetSources } from "./media/asset-sources";
+import { loadFileFonts } from "./media/fonts";
 import { defaultCreateCanvas } from "./media/frame-source";
 import { mediabunnyAudioSourceFactory } from "./media/mediabunny-audio-source";
 import { mediabunnyFrameSourceFactory } from "./media/mediabunny-frame-source";
@@ -47,6 +48,8 @@ export interface PlayerOptions {
   readonly loop?: boolean | undefined;
   readonly initiallyMuted?: boolean | undefined;
   readonly playbackRate?: number | undefined;
+  /** Load the file's fonts (`state.fonts`) into the page; default true. The export page loads them itself. */
+  readonly loadFonts?: boolean | undefined;
   readonly resolveNested?: ResolveNested | undefined;
   /** Test seams; the browser defaults are the audio-context clock, Web Audio and mediabunny. */
   readonly clock?: Clock | undefined;
@@ -100,6 +103,9 @@ export class PlayerCore {
   private _muted: boolean;
   private _volume = 1;
   private disposed = false;
+  private fonts: Promise<void> = Promise.resolve();
+  private fontsOf: ResolvedState["fonts"] | null = null;
+  private readonly fontsWanted: boolean;
 
   constructor(options: PlayerOptions) {
     this._state = options.state;
@@ -157,6 +163,21 @@ export class PlayerCore {
     });
     this._muted = options.initiallyMuted ?? false;
     this.engine.setMaster(this._volume, this._muted);
+    this.fontsWanted = options.loadFonts ?? true;
+    this.loadFonts(options.state);
+  }
+
+  /** Resolves once the file's fonts (`state.fonts`) have loaded; a face that fails is reported as an error event. */
+  get fontsReady(): Promise<void> {
+    return this.fonts;
+  }
+
+  private loadFonts(state: ResolvedState): void {
+    if (!this.fontsWanted || state.fonts === this.fontsOf) return;
+    this.fontsOf = state.fonts;
+    this.fonts = loadFileFonts(state.fonts, this.media, (family, error) =>
+      this.emit("error", { error: new Error(`font "${family}": ${error.message}`), fatal: false }),
+    );
   }
 
   get state(): ResolvedState {
@@ -326,6 +347,7 @@ export class PlayerCore {
    */
   setState(state: ResolvedState): void {
     this._state = state;
+    this.loadFonts(state);
     this.transport.duration = state.composition.duration;
     this.compositor.setState(state);
     if (this.transport.playing) return;

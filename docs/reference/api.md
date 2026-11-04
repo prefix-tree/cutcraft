@@ -357,6 +357,8 @@ From `@cutcraft/kit`:
 | `interpolate` | `(input, inputRange, outputRange, options?: { easing?, extrapolateLeft?, extrapolateRight? }) => number` | Piecewise map from one range onto another. Extends past the ends unless `"clamp"`. |
 | `spring` | `({ time, from?, to?, mass?, damping?, stiffness?, overshootClamping? }) => number` | A physical spring at `time` seconds. Defaults: `from` 0, `to` 1, mass 1, damping 10, stiffness 100. |
 | `random` | `(seed: string \| number) => number` | A number in [0, 1) fixed by `seed`, the same every frame in the preview and the export. |
+| `font` | `({ family, src: "asset:<id>", weight?, style? }) => string` | Declares a face from a font file and returns its family ([Fonts](/guide/themes#fonts)). The file's faces are on `state.fonts`. |
+| `googleFont` | `(family, { weights?, styles? }?) => string` | Declares a Google Fonts family, one face per weight and style, and returns it. The export downloads it once into a local cache. |
 
 From `@cutcraft/kit/source`:
 

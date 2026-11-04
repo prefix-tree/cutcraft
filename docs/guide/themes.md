@@ -109,9 +109,53 @@ Five families ship with both renderers, all under the SIL Open Font License:
 Inter, Space Grotesk, Playfair Display, DM Sans and JetBrains Mono, in regular
 and bold (and italic, except Space Grotesk). The export reads them from the
 `@fontsource` packages; the preview loads them once the app imports
-`@cutcraft/player/fonts.css`. Another family works in the preview if the page
-loads it, and in the export if you pass it (`--font`, `fonts`); otherwise the
-export sets it in Inter and warns. The `font-available` lint names such fonts.
+`@cutcraft/player/fonts.css`.
+
+Any other family is declared in the file, at the top, with `font()` for a file
+of your own or `googleFont()` for a Google Fonts family. Both return the family,
+so you pass the value on rather than retyping the name:
+
+```tsx
+import { Composition, font, googleFont, Title, Track } from "@cutcraft/kit";
+
+const brand = font({ family: "Brand Sans", src: "asset:brand" });
+const brandBold = font({ family: "Brand Sans", src: "asset:brand-bold", weight: 700 });
+const titan = googleFont("Titan One");
+const tight = googleFont("Inter Tight", { weights: [400, 700], styles: ["normal", "italic"] });
+
+export default function Video() {
+  return (
+    <Composition fps={30} width={1920} height={1080} theme={{ extends: "paper", fonts: { heading: titan, body: tight } }}>
+      <Track id="text" layout="free">
+        <Title id="hello" font={brand}>Hello</Title>
+      </Track>
+    </Composition>
+  );
+}
+```
+
+One call declares one face; `googleFont()` declares one per weight and style it
+is given (default 400, normal). Free code uses the same value as a CSS
+`fontFamily`.
+
+- **`font({ src: "asset:brand" })`** finds its file the way an asset does: the
+  export looks for `brand.ttf` (or `.otf`, `.woff`, `.woff2`) next to the file or
+  under `--media`, and the player asks its `media` for `brand`, which maps it
+  to a URL such as `/fonts/brand.woff2`. The Node export reads TTF, OTF and
+  WOFF but not WOFF2; a file with `<Three>` or `<Motion>` exports through the
+  browser, which reads all four.
+- **`googleFont()`**, like `next/font`: the first export downloads each face
+  into `~/.cache/cutcraft/fonts` (`CUTCRAFT_FONT_CACHE` moves it) and later
+  exports read it from there, with no network. The player loads it from Google.
+
+The player and both exports load every declared face, and the browser export
+draws no frame until they have loaded; the browser export sets text in the same
+files the Node export reads. A family that is neither bundled nor declared is
+set in Inter, and the `font-available` lint names it. Keep the calls at the top
+of the file with literal arguments, where the editor and lint can read them
+(the `font-declaration` lint says when one is not). `--font` on the command line
+(and `fonts` in `renderVideo`) adds faces for one export without editing the
+file.
 
 ## Seeing where a value came from
 
@@ -138,4 +182,7 @@ it restyles.
 - `theme-literals` (warning): with a theme declared, a literal colour or font
   on a title, shape, SVG, sticker, captions or marker. Shadows are exempt.
   The message names the token when the colour matches one.
-- `font-available` (warning): a font no renderer ships.
+- `font-available` (warning): a font no renderer ships and the file does not
+  declare.
+- `font-declaration` (warning): a `font()` or `googleFont()` call inside a
+  function, or with arguments that are not literal.

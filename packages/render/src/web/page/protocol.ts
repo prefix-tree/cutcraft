@@ -6,6 +6,15 @@ export interface PageJob {
   readonly source: string;
   readonly props: Readonly<Record<string, unknown>>;
   readonly manifest: unknown;
+  /** Every face the page sets text in, each served at its `url`: the file's own, read in Node, and `--font`. */
+  readonly fonts: readonly PageFont[];
+}
+
+interface PageFont {
+  readonly family: string;
+  readonly weight: number;
+  readonly style: "normal" | "italic";
+  readonly url: string;
 }
 
 export interface SegmentRequest {

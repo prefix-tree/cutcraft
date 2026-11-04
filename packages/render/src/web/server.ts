@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 
 import type { MediaResolver } from "@cutcraft/player/engine";
 
+import type { OverlayFont } from "../overlays";
 import type { PageJob } from "./page/protocol";
 
 const TYPES: Readonly<Record<string, string>> = {
@@ -15,6 +16,8 @@ const TYPES: Readonly<Record<string, string>> = {
   ".mjs": "text/javascript",
   ".css": "text/css",
   ".json": "application/json",
+  ".ttf": "font/ttf",
+  ".otf": "font/otf",
   ".woff": "font/woff",
   ".woff2": "font/woff2",
   ".wasm": "application/wasm",
@@ -43,7 +46,20 @@ export interface PageServer {
 const builtPage = process.env.CUTCRAFT_EXPORT_PAGE;
 const fromSource = !builtPage && import.meta.url.endsWith(".ts");
 
-export async function servePage(job: PageJob, media: MediaResolver): Promise<PageServer> {
+export async function servePage(
+  job: Omit<PageJob, "fonts">,
+  media: MediaResolver,
+  fonts: readonly OverlayFont[] = [],
+): Promise<PageServer> {
+  const page: PageJob = {
+    ...job,
+    fonts: fonts.map((f, i) => ({
+      family: f.name,
+      weight: f.weight ?? 400,
+      style: f.style ?? "normal",
+      url: `/fonts/${i}`,
+    })),
+  };
   const vite = fromSource ? await sourcePage() : null;
   const built = fromSource
     ? null
@@ -58,7 +74,20 @@ export async function servePage(job: PageJob, media: MediaResolver): Promise<Pag
     const path = decodeURIComponent(new URL(req.url ?? "/", "http://localhost").pathname);
     if (path === "/job.json") {
       res.writeHead(200, { "content-type": "application/json", "cache-control": "no-store" });
-      res.end(JSON.stringify(job));
+      res.end(JSON.stringify(page));
+      return;
+    }
+    const font = /^\/fonts\/(\d+)$/.exec(path);
+    if (font) {
+      const data = fonts[Number(font[1])]?.data;
+      if (!data) {
+        res.writeHead(404);
+        res.end();
+        return;
+      }
+      const bytes = Buffer.from(data instanceof ArrayBuffer ? new Uint8Array(data) : data);
+      res.writeHead(200, { "content-type": "application/octet-stream", "content-length": bytes.length });
+      res.end(bytes);
       return;
     }
     if (path.startsWith("/media/")) {

@@ -21,6 +21,8 @@ const state = resolve(collectModule(file), manifest);
 - `state` is the resolved file: every element placed in time.
 - `element` is the rendered component. The player needs it to draw what is inside each `<Layer>`.
 - `media` maps asset ids to Blobs or URLs, or you pass your own `MediaResolver`.
+  A font the file declares with `font({ src: "asset:brand" })` is looked up the same way, as `brand`
+  ([Fonts](./themes#fonts)); `ref.current.core.fontsReady` resolves once the file's fonts have loaded.
 
 ### Files with `<Three>` or `<Motion>`
 

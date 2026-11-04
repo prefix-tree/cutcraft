@@ -10,7 +10,7 @@ import { createRoot } from "react-dom/client";
 import { installFreeCodeLibraries } from "@cutcraft/graphics/libraries";
 import { type AssetManifest, collectModule, layerFramesPending, resolve } from "@cutcraft/kit";
 import { loadModule } from "@cutcraft/kit/source";
-import { Player, type PlayerRef } from "@cutcraft/player";
+import { addFontFaces, Player, type PlayerRef } from "@cutcraft/player";
 
 import type { PageApi, PageJob, SegmentRequest } from "./protocol";
 
@@ -24,6 +24,9 @@ const SETTLE_TIMEOUT_MS = 10_000;
 
 async function start(): Promise<void> {
   const job = (await (await fetch("/job.json")).json()) as PageJob;
+  // Every face, the file's and `--font`, read in Node and served here, so both engines set text in the same files and an
+  // export needs no network once Google's are cached. The player is told not to fetch them again.
+  await addFontFaces(job.fonts.map((f) => ({ family: f.family, weight: f.weight, style: f.style, source: f.url })));
   const imports = installFreeCodeLibraries();
   const mod = loadModule(job.source, { imports });
   const manifest = job.manifest as AssetManifest;
@@ -49,6 +52,7 @@ async function start(): Promise<void> {
       media={media}
       fit="none"
       controls={false}
+      coreOptions={{ loadFonts: false }}
       onError={(e) => errors.push(`${e.asset ?? e.id ?? "?"}: ${e.error.message}`)}
     />,
   );
