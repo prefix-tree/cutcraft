@@ -1,5 +1,6 @@
 // Renders each showcase file for the documentation site: a looping WebM and a poster frame in docs/public/showcase,
-// through the same loader and renderer as `cutcraft`. A file that does not resolve cleanly stops the run.
+// through the same loader and renderer as `cutcraft`. A file that does not resolve cleanly stops the run. Files with
+// <Three> or <Motion> render with the browser engine, which needs Chrome or Chromium 153+ (CUTCRAFT_CHROMIUM).
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
 
@@ -10,7 +11,7 @@ const out = join(here, "..", "..", "docs", "public", "showcase");
 mkdirSync(out, { recursive: true });
 
 /** Each file, and the second its poster is taken at. */
-const FILES: Record<string, number> = { edit: 4, graphics: 4.5, captions: 9.2, motion: 3.5 };
+const FILES: Record<string, number> = { launch: 5.2, kinetic: 0.9, data: 6, logo: 4.5, edit: 4, captions: 9.2 };
 
 for (const [name, poster] of Object.entries(FILES)) {
   const video = await loadVideo(join(here, `${name}.tsx`), { manifest: join(here, "manifest.json") });
@@ -24,6 +25,7 @@ for (const [name, poster] of Object.entries(FILES)) {
     out: join(out, `${name}.webm`),
     silent: true,
     quality: "medium",
+    source: video.source,
   });
   for (const w of result.warnings) process.stderr.write(`${name}: warning: ${w}\n`);
   await renderStill({
@@ -32,6 +34,7 @@ for (const [name, poster] of Object.entries(FILES)) {
     interiors: video.interiors,
     out: join(out, `${name}.jpg`),
     time: poster,
+    source: video.source,
   });
   process.stdout.write(
     `${name}: ${result.frames} frames, ${result.width}x${result.height}, ${(result.wallMs / 1000).toFixed(1)} s\n`,

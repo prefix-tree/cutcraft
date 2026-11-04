@@ -5,5 +5,5 @@
     "types": ["node"],
     "jsx": "react-jsx"
   },
-  "include": ["*.tsx", "*.ts", "docs/*.tsx", "eslint.config.js"]
+  "include": ["*.tsx", "*.ts", "docs/*.tsx", "test/*.ts"]
 }

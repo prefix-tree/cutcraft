@@ -1,6 +1,6 @@
-import { Clip, Composition, Graphic, Keyframe, Title, Track, Transition } from "@cutcraft/kit";
+import { Clip, Composition, Keyframe, Motion, Title, Track, Transition } from "@cutcraft/kit";
 
-/** An edit: three shots cut back to back, a wipe and a slide between them, a slow push-in, a title and a lower third. */
+/** An edit: three shots cut back to back, a wipe and a slide between them, a slow push-in, a title and a Motion lower third. */
 export default function Video() {
   return (
     <Composition fps={30} width={960} height={540} theme={{ extends: "midnight", palette: { primary: "#c8402a" } }}>
@@ -29,15 +29,48 @@ export default function Video() {
         >
           Cut by words
         </Title>
-        <Graphic
+        <Motion
           id="who"
-          kind="lower-third"
-          name="Every cut is a line"
-          role="and every line is editable"
           anchor="zoom"
           offset={0.4}
           duration={2.6}
-        />
+          sequence={[
+            [".bar", { scaleX: [0, 1] }, { duration: 0.4, ease: "easeOut" }],
+            [".name", { opacity: [0, 1], x: [-20, 0] }, { at: 0.15, duration: 0.35 }],
+            [".role", { opacity: [0, 1], x: [-20, 0] }, { at: 0.3, duration: 0.35 }],
+          ]}
+        >
+          <div
+            className="bar"
+            style={{
+              position: "absolute",
+              left: 48,
+              top: 404,
+              width: 6,
+              height: 70,
+              background: "#c8402a",
+              transformOrigin: "left",
+            }}
+          />
+          <div
+            className="name"
+            style={{
+              position: "absolute",
+              left: 68,
+              top: 402,
+              color: "#f4efe6",
+              font: "700 32px 'Space Grotesk', sans-serif",
+            }}
+          >
+            Every cut is a line
+          </div>
+          <div
+            className="role"
+            style={{ position: "absolute", left: 68, top: 444, color: "#c9c2b8", font: "500 20px Inter, sans-serif" }}
+          >
+            and every line is editable
+          </div>
+        </Motion>
         <Title id="end" anchor="close" offset={0.2} duration={2.2} style="h2" animation={{ preset: "slide-up" }}>
           The file is the video.
         </Title>

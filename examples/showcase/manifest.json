@@ -185,6 +185,338 @@
           }
         ]
       }
+    },
+    "founder": {
+      "id": "founder",
+      "kind": "video",
+      "duration": 14,
+      "fps": 30,
+      "width": 960,
+      "height": 540,
+      "transcript": {
+        "words": [
+          {
+            "i": 0,
+            "text": "Meet",
+            "start": 0.4,
+            "end": 0.74
+          },
+          {
+            "i": 1,
+            "text": "Shed.",
+            "start": 0.82,
+            "end": 1.16
+          },
+          {
+            "i": 2,
+            "text": "A",
+            "start": 1.66,
+            "end": 1.87
+          },
+          {
+            "i": 3,
+            "text": "cloud",
+            "start": 1.95,
+            "end": 2.34
+          },
+          {
+            "i": 4,
+            "text": "for",
+            "start": 2.42,
+            "end": 2.72
+          },
+          {
+            "i": 5,
+            "text": "small",
+            "start": 2.8,
+            "end": 3.19
+          },
+          {
+            "i": 6,
+            "text": "software.",
+            "start": 3.27,
+            "end": 3.79
+          },
+          {
+            "i": 7,
+            "text": "It",
+            "start": 4.29,
+            "end": 4.54
+          },
+          {
+            "i": 8,
+            "text": "builds",
+            "start": 4.62,
+            "end": 5.05
+          },
+          {
+            "i": 9,
+            "text": "from",
+            "start": 5.13,
+            "end": 5.47
+          },
+          {
+            "i": 10,
+            "text": "your",
+            "start": 5.55,
+            "end": 5.89
+          },
+          {
+            "i": 11,
+            "text": "repo,",
+            "start": 5.97,
+            "end": 6.31
+          },
+          {
+            "i": 12,
+            "text": "runs",
+            "start": 6.81,
+            "end": 7.15
+          },
+          {
+            "i": 13,
+            "text": "every",
+            "start": 7.23,
+            "end": 7.62
+          },
+          {
+            "i": 14,
+            "text": "app",
+            "start": 7.7,
+            "end": 8.0
+          },
+          {
+            "i": 15,
+            "text": "in",
+            "start": 8.08,
+            "end": 8.33
+          },
+          {
+            "i": 16,
+            "text": "a",
+            "start": 8.41,
+            "end": 8.62
+          },
+          {
+            "i": 17,
+            "text": "sandbox,",
+            "start": 8.7,
+            "end": 9.17
+          },
+          {
+            "i": 18,
+            "text": "and",
+            "start": 9.67,
+            "end": 9.97
+          },
+          {
+            "i": 19,
+            "text": "scales",
+            "start": 10.05,
+            "end": 10.48
+          },
+          {
+            "i": 20,
+            "text": "to",
+            "start": 10.56,
+            "end": 10.81
+          },
+          {
+            "i": 21,
+            "text": "zero",
+            "start": 10.89,
+            "end": 11.23
+          },
+          {
+            "i": 22,
+            "text": "when",
+            "start": 11.31,
+            "end": 11.65
+          },
+          {
+            "i": 23,
+            "text": "nobody",
+            "start": 11.73,
+            "end": 12.16
+          },
+          {
+            "i": 24,
+            "text": "uses",
+            "start": 12.24,
+            "end": 12.58
+          },
+          {
+            "i": 25,
+            "text": "it.",
+            "start": 12.66,
+            "end": 12.91
+          }
+        ]
+      }
+    },
+    "analyst": {
+      "id": "analyst",
+      "kind": "video",
+      "duration": 14,
+      "fps": 30,
+      "width": 960,
+      "height": 540,
+      "transcript": {
+        "words": [
+          {
+            "i": 0,
+            "text": "Last",
+            "start": 0.4,
+            "end": 0.74
+          },
+          {
+            "i": 1,
+            "text": "year",
+            "start": 0.82,
+            "end": 1.16
+          },
+          {
+            "i": 2,
+            "text": "a",
+            "start": 1.24,
+            "end": 1.45
+          },
+          {
+            "i": 3,
+            "text": "release",
+            "start": 1.53,
+            "end": 2.0
+          },
+          {
+            "i": 4,
+            "text": "took",
+            "start": 2.08,
+            "end": 2.42
+          },
+          {
+            "i": 5,
+            "text": "six",
+            "start": 2.5,
+            "end": 2.8
+          },
+          {
+            "i": 6,
+            "text": "hours.",
+            "start": 2.88,
+            "end": 3.27
+          },
+          {
+            "i": 7,
+            "text": "Today",
+            "start": 3.77,
+            "end": 4.16
+          },
+          {
+            "i": 8,
+            "text": "it",
+            "start": 4.24,
+            "end": 4.49
+          },
+          {
+            "i": 9,
+            "text": "takes",
+            "start": 4.57,
+            "end": 4.96
+          },
+          {
+            "i": 10,
+            "text": "ninety",
+            "start": 5.04,
+            "end": 5.47
+          },
+          {
+            "i": 11,
+            "text": "minutes.",
+            "start": 5.55,
+            "end": 6.02
+          },
+          {
+            "i": 12,
+            "text": "Teams",
+            "start": 6.52,
+            "end": 6.91
+          },
+          {
+            "i": 13,
+            "text": "ship",
+            "start": 6.99,
+            "end": 7.33
+          },
+          {
+            "i": 14,
+            "text": "four",
+            "start": 7.41,
+            "end": 7.75
+          },
+          {
+            "i": 15,
+            "text": "times",
+            "start": 7.83,
+            "end": 8.22
+          },
+          {
+            "i": 16,
+            "text": "as",
+            "start": 8.3,
+            "end": 8.55
+          },
+          {
+            "i": 17,
+            "text": "often,",
+            "start": 8.63,
+            "end": 9.02
+          },
+          {
+            "i": 18,
+            "text": "and",
+            "start": 9.52,
+            "end": 9.82
+          },
+          {
+            "i": 19,
+            "text": "incidents",
+            "start": 9.9,
+            "end": 10.46
+          },
+          {
+            "i": 20,
+            "text": "fell",
+            "start": 10.54,
+            "end": 10.88
+          },
+          {
+            "i": 21,
+            "text": "by",
+            "start": 10.96,
+            "end": 11.21
+          },
+          {
+            "i": 22,
+            "text": "forty",
+            "start": 11.29,
+            "end": 11.68
+          },
+          {
+            "i": 23,
+            "text": "percent.",
+            "start": 11.76,
+            "end": 12.23
+          }
+        ]
+      }
+    },
+    "product": {
+      "id": "product",
+      "kind": "video",
+      "duration": 6,
+      "fps": 30,
+      "width": 960,
+      "height": 540
     }
   }
 }

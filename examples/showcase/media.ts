@@ -14,6 +14,12 @@ const clips: Record<string, string> = {
     "gradients=s=960x540:r=30:d=8:c0=0x1b2a4a:c1=0xc8402a:c2=0x101421:nb_colors=3:speed=0.015:type=spiral:seed=11",
   cells:
     "life=s=240x135:r=30:mold=10:ratio=0.12:seed=3:life_color=0x3d5a80:death_color=0x101421:mold_color=0x23395b,scale=960:540:flags=neighbor,trim=duration=8",
+  // Stand-ins for a founder and an analyst on camera (the manifest holds the words they would say), and product b-roll.
+  founder:
+    "gradients=s=960x540:r=30:d=14:c0=0x2a1c1a:c1=0x6b3a2a:c2=0x1b2a4a:nb_colors=3:speed=0.008:type=radial:seed=5",
+  analyst:
+    "gradients=s=960x540:r=30:d=14:c0=0x101421:c1=0x23395b:c2=0x1b4a4a:nb_colors=3:speed=0.008:type=radial:seed=9",
+  product: "mandelbrot=s=960x540:r=30:maxiter=200:end_scale=0.6:inner=period,trim=duration=6",
   speaker:
     "gradients=s=540x960:r=30:d=12:c0=0x23395b:c1=0x3d5a80:c2=0xc8402a:nb_colors=3:speed=0.01:type=spiral:seed=2",
 };

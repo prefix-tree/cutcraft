@@ -11,7 +11,8 @@
     "docs": "tsx docs.ts",
     "bench": "tsx bench.ts",
     "gif": "tsx gif.ts",
-    "typecheck": "tsc --noEmit -p tsconfig.json"
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run"
   },
   "dependencies": {
     "@cutcraft/kit": "workspace:*",
@@ -22,6 +23,7 @@
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "tsx": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   }
 }

@@ -9,15 +9,14 @@ const to = join(import.meta.dirname, "..", "..", "docs", "public", "readme");
 mkdirSync(to, { recursive: true });
 
 /**
- * Each video's GIF: width, frame rate and palette size. The edit leads the README and the others sit in a row under it;
- * footage that changes everywhere (the gradients) costs the most, so those get fewer frames and colours. All four come
- * to about 3.5 MB.
+ * Each video's GIF: width, frame rate and palette size. The launch leads the README and the others sit in a row under
+ * it; footage that changes everywhere (the gradients) costs the most, so those get fewer frames and colours.
  */
 const GIFS: Record<string, { width: number; fps: number; colors: number }> = {
-  edit: { width: 480, fps: 10, colors: 64 },
-  graphics: { width: 320, fps: 12, colors: 128 },
-  motion: { width: 320, fps: 12, colors: 128 },
-  captions: { width: 180, fps: 10, colors: 64 },
+  launch: { width: 480, fps: 10, colors: 64 },
+  data: { width: 300, fps: 10, colors: 64 },
+  logo: { width: 300, fps: 12, colors: 48 },
+  kinetic: { width: 170, fps: 10, colors: 64 },
 };
 
 for (const [name, { width, fps, colors }] of Object.entries(GIFS)) {
