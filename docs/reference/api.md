@@ -1,6 +1,6 @@
 # API
 
-The functions, components and options you call from code: the player in the browser, the renderer in Node, and the kit entry points both build on.
+The functions, components and options you call from code: the player in the browser, the export you drive from Node, and the kit entry points both build on.
 
 ## @cutcraft/player
 
@@ -161,7 +161,7 @@ interface MediaResolver {
 type MediaHandle =
   | { kind: "blob"; blob: Blob }
   | { kind: "url"; url: string }
-  | { kind: "path"; path: string }; // a file on disk, for the Node renderer
+  | { kind: "path"; path: string }; // a file on disk: the export's server reads it; the player needs a URL
 ```
 
 A map passed as `media` is turned into a resolver that answers a string with `url` and a Blob with `blob`, and rejects an id it does not hold.

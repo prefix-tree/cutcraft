@@ -49,6 +49,13 @@ What you draw on top is up to you. A `<Layer>` holds any React component, with h
 common cases and take the theme's fonts and colours. [Free code](./free-code) explains how it all stays on the
 video's clock.
 
+## Free to use
+
+The player, the editor actions, the export and the layout check are all MIT: no paid tier, no licence key, no
+watermark on the frames. That is why CutCraft is written from scratch instead of on Remotion, whose licence has a
+paid tier for companies, or Diffusion Studio, whose engine watermarks every frame without a key. The
+[comparisons](/comparisons/remotion) cover the other differences.
+
 ## How it fits together
 
 ```
@@ -73,7 +80,7 @@ media files    ┘                                       └─▶ export     MP
 | [`cutcraft`](https://www.npmjs.com/package/cutcraft) | The command line: export a file to video, audio or a still, or check its layout. |
 | [`@cutcraft/kit`](https://www.npmjs.com/package/@cutcraft/kit) | The elements, the resolver that places everything in time, 131 undoable editor actions, and the tools that write edits back into the file. |
 | [`@cutcraft/player`](https://www.npmjs.com/package/@cutcraft/player) | A React `<Player>` and a framework-free `PlayerCore` for the browser. |
-| [`@cutcraft/render`](https://www.npmjs.com/package/@cutcraft/render) | Export from your own code: in Node, or through headless Chromium for `<Three>` and `<Motion>`. |
+| [`@cutcraft/render`](https://www.npmjs.com/package/@cutcraft/render) | Export from your own code: from Node, through the player in headless Chrome. |
 | [`@cutcraft/graphics`](https://www.npmjs.com/package/@cutcraft/graphics) | three.js and Motion on the video's clock (`installFreeCodeLibraries()`); its `<Graphic>` kinds are deprecated. |
 
 [Quick start](./getting-started) takes you from `npm install` to an exported file in four steps.

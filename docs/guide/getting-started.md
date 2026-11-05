@@ -41,6 +41,9 @@ npx cutcraft hello.tsx --out hello.mp4
 Three seconds of a card with a title that builds word by word. Every element has a literal `id`: that is how an editor
 finds it when you drag it on a timeline ([The file](./the-file) explains why).
 
+The export runs the player in headless Chrome. The first one downloads Chrome for Testing once, which takes a moment;
+later exports start in a few seconds.
+
 For a typeface beyond the five that ship, declare it at the top of the file and pass the value on:
 `const titan = googleFont("Titan One")`, then `<Title font={titan}>`. The first export downloads it and keeps a copy
 ([Fonts](./themes#fonts)).
