@@ -11,9 +11,13 @@ name: Publish
 # npm trusted publishing: each package on npm trusts this workflow file (publish.yml in prefix-tree/cutcraft), so
 # GitHub's OIDC token stands in for an npm token. There is no secret to leak, and npm attaches provenance to each
 # version. Renaming this file breaks publishing until the packages' trusted publisher settings are updated too.
+#
+# It can also be run by hand from main (Actions → Publish → Run workflow), to retry a release whose tag is already
+# pushed: it then publishes the version main holds.
 on:
   push:
     tags: ["v*"]
+  workflow_dispatch:
 
 concurrency:
   group: publish
@@ -32,15 +36,26 @@ jobs:
           # The whole history, to check that the tag is on main.
           fetch-depth: 0
       - uses: pnpm/action-setup@v4
+      # No `registry-url`: it writes an .npmrc whose `_authToken=${NODE_AUTH_TOKEN}` is empty here, and npm then sends
+      # that instead of doing the OIDC exchange (the registry answers 404).
       - uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: pnpm
-          registry-url: https://registry.npmjs.org
+      # `pnpm publish` hands each packed tarball to npm, which does the trusted-publishing exchange from 11.5.1 on.
+      - run: npm install -g npm@^11.5.1 && npm --version
       - name: Check the tag against main and the packages' version
         run: |
-          tag="${GITHUB_REF_NAME}"
           version=$(node -p "require('./packages/kit/package.json').version")
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+            if [ "$GITHUB_REF_NAME" != "main" ]; then
+              echo "::error::run it from main, not $GITHUB_REF_NAME."
+              exit 1
+            fi
+            tag="v$version"
+          else
+            tag="${GITHUB_REF_NAME}"
+          fi
           if [ "$tag" != "v$version" ]; then
             echo "::error::tag $tag does not match the packages' version $version; tag v$version instead."
             exit 1
@@ -58,6 +73,7 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm build
       - run: pnpm check:packages
-      # `changeset publish` runs `pnpm publish` for each package whose version is not on npm (pnpm does the OIDC
-      # exchange and swaps workspace:* for versions). The pushed tag names the release, so it makes no tags of its own.
+      # `changeset publish` runs `pnpm publish` for each package whose version is not on npm: pnpm packs it (swapping
+      # workspace:* for versions) and npm publishes the tarball with the OIDC token. The pushed tag names the release,
+      # so it makes no tags of its own.
       - run: pnpm release --no-git-tag
