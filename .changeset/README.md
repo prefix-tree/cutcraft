@@ -11,7 +11,7 @@ All `@cutcraft/*` packages and the `cutcraft` CLI share one version. A release t
    version, writes each package's `CHANGELOG.md` from the pending changesets (with links to their pull requests and
    authors) and deletes the changesets.
 2. Read the changelogs, run `pnpm install` so the lockfile matches, and commit as `chore: version packages` in a pull
-   request.
+   request from the branch `chore/version-packages` (CI's changeset check skips that branch, which has none by design).
 3. After it merges, tag the merge commit on `main` with the new version and push the tag:
    `git tag v0.2.0 && git push origin v0.2.0`. The tag starts the **Publish** workflow
    (`.github/workflows/publish.yml`). It checks that the tag matches the packages' version, points at `main` and has

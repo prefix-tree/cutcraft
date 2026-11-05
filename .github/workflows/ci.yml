@@ -50,8 +50,9 @@ jobs:
       - run: pnpm check:packages
 
   changeset:
-    # A pull request that changes a published package says how in a changeset (.changeset/README.md).
-    if: github.event_name == 'pull_request'
+    # A pull request that changes a published package says how in a changeset (.changeset/README.md). The version pull
+    # request (`pnpm changeset version`, branch chore/version-packages) consumes them, so it has none by design.
+    if: github.event_name == 'pull_request' && github.head_ref != 'chore/version-packages'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7

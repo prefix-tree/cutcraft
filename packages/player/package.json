@@ -1,6 +1,6 @@
 {
   "name": "@cutcraft/player",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Browser player for the cut video DSL: WebCodecs decode through mediabunny, canvas compositing, DOM overlays, Web Audio clock.",
   "keywords": [
     "video",
