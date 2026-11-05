@@ -1,4 +1,4 @@
-name: Publish
+name: Release
 
 # Publishes a release when its tag is pushed. After the "chore: version packages" pull request (`pnpm changeset
 # version`) has merged into main:
@@ -8,11 +8,11 @@ name: Publish
 # All packages share one version, so one tag names the release; it must match that version and point at a commit on
 # main.
 #
-# npm trusted publishing: each package on npm trusts this workflow file (publish.yml in prefix-tree/cutcraft), so
+# npm trusted publishing: each package on npm trusts this workflow file (release.yml in prefix-tree/cutcraft), so
 # GitHub's OIDC token stands in for an npm token. There is no secret to leak, and npm attaches provenance to each
 # version. Renaming this file breaks publishing until the packages' trusted publisher settings are updated too.
 #
-# It can also be run by hand from main (Actions → Publish → Run workflow), to retry a release whose tag is already
+# It can also be run by hand from main (Actions → Release → Run workflow), to retry a release whose tag is already
 # pushed: it then publishes the version main holds.
 on:
   push:

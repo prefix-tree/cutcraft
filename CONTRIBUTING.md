@@ -71,7 +71,7 @@ A pull request that changes what a published package does for its users adds a c
 pick the packages, the size and a sentence for the changelog ([.changeset/README.md](.changeset/README.md)). CI asks
 for one when a package changed; for a change users do not see, `pnpm changeset --empty`. All published packages share
 one version. A release is a version pull request (`pnpm changeset version`) and then a `vX.Y.Z` tag on `main`, which
-starts the **Publish** workflow (`.github/workflows/publish.yml`) and publishes through npm trusted publishing;
+starts the **Release** workflow (`.github/workflows/release.yml`) and publishes through npm trusted publishing;
 [.changeset/README.md](.changeset/README.md) lists the steps.
 
 ## Publishing the docs
