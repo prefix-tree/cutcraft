@@ -38,7 +38,7 @@ async function colourAt(
   writeFileSync(
     file,
     `import { z } from "zod";
-import { Adjustment, Clip, Composition, defineEffect, defineTransition, Effect, Layer, Motion, Title, Track, Transition } from "@cutcraft/kit";
+import { Adjustment, Clip, Composition, defineEffect, defineTransition, Effect, Keyframe, Layer, Motion, Title, Track, Transition } from "@cutcraft/kit";
 export const manifest = ${JSON.stringify(manifest)};
 ${declarations}
 export default function Video() {
@@ -274,6 +274,154 @@ describe("colour effects", () => {
     const v = toSrgb(toLinear(26 / 255) * 2 ** (2 * (1 - t * t * (3 - 2 * t))));
     expect(about(dark, [v, v, v])).toBe(true);
     expect(about(bright, [0.9, 0.9, 0.9])).toBe(true);
+  });
+});
+
+describe("footage tools", () => {
+  // Two colours either side of x = split (a fraction of the width), then the effect under test. Background black.
+  const PAINT = `const paint = defineEffect({
+    name: "paint",
+    params: z.object({ left: z.array(z.number()), right: z.array(z.number()), split: z.number().default(0.5) }),
+    shader: "vec4 effect(vec2 uv) { return vec4(uv.x < split ? left : right, 1.0); }",
+  });`;
+  const at = (
+    name: string,
+    effect: string,
+    paint: { left: number[]; right: number[]; split?: number },
+    points: [number, number][],
+    time = 0.5,
+    keys = "",
+  ) =>
+    colourAt(
+      name,
+      `<Track id="t"><Clip id="c" src="asset:solid" fit="cover"><Effect id="p" type={paint} params={${JSON.stringify(paint)}} />${effect}${keys}</Clip></Track>`,
+      PAINT,
+      time,
+      points,
+    );
+  const near = (c: number[] | undefined, want: readonly number[], by = 6) =>
+    want.every((v, i) => Math.abs((c?.[i] ?? -999) - v) <= by);
+  const chroma = ([r, g, b]: readonly number[]) => [
+    -0.1146 * (r as number) - 0.3854 * (g as number) + 0.5 * (b as number),
+    0.5 * (r as number) - 0.4542 * (g as number) - 0.0458 * (b as number),
+  ];
+
+  it("colorKey takes out the key colour, keeps the rest, and fades what is close", async () => {
+    const [green, red] = await at("key", `<Effect id="k" type="colorKey" />`, { left: [0, 1, 0], right: [1, 0, 0] }, [
+      [40, 90],
+      [280, 90],
+    ]);
+    expect(near(green, [0, 0, 0])).toBe(true);
+    expect(near(red, [255, 0, 0])).toBe(true);
+    // A pale green, with no spill change: alpha from the chroma distance, over the black background.
+    const pale = [0.5, 1, 0.5];
+    const [a, b] = [chroma(pale), chroma([0, 1, 0])];
+    const d = 2 * Math.hypot((a[0] as number) - (b[0] as number), (a[1] as number) - (b[1] as number));
+    const t = Math.min(1, Math.max(0, (d - 0.4) / 0.4));
+    const keep = t * t * (3 - 2 * t);
+    const [faded] = await at(
+      "key-soft",
+      `<Effect id="k" type="colorKey" params={{ tolerance: 0.4, softness: 0.4, spill: 0 }} />`,
+      { left: pale, right: pale },
+      [[160, 90]],
+    );
+    expect(
+      near(
+        faded,
+        pale.map((v) => v * keep * 255),
+      ),
+    ).toBe(true);
+  });
+
+  it("regionBlur softens an edge inside the box and leaves it sharp outside", async () => {
+    const [inside, outside] = await at(
+      "region",
+      `<Effect id="b" type="regionBlur" params={{ box: [0.4, 0, 0.2, 0.5], radius: 20, feather: 0 }} />`,
+      { left: [0, 0, 0], right: [1, 1, 1] },
+      [
+        [156, 40],
+        [156, 140],
+      ],
+    );
+    expect(inside?.[0] ?? 0).toBeGreaterThan(40);
+    expect(inside?.[0] ?? 255).toBeLessThan(215);
+    expect(near(outside, [0, 0, 0])).toBe(true);
+  });
+
+  it("regionBlur's box follows its keyframes", async () => {
+    // The box moves from x 0..0.2 to 0.6..0.8; half way it is at 0.3..0.5, over the edge at 0.4.
+    const [edge] = await at(
+      "region-keys",
+      `<Effect id="b" type="regionBlur" params={{ box: [0, 0, 0.2, 1], radius: 20, feather: 0 }} />`,
+      { left: [0, 0, 0], right: [1, 1, 1], split: 0.4 },
+      [[124, 90]],
+      1,
+      `<Keyframe id="k1" property="effect.b.box" at={0} value={[0, 0, 0.2, 1]} /><Keyframe id="k2" property="effect.b.box" at={2} value={[0.6, 0, 0.2, 1]} />`,
+    );
+    expect(edge?.[0] ?? 0).toBeGreaterThan(40);
+  });
+
+  it("cornerPin draws the picture into its quad and nothing outside it", async () => {
+    const [left, right, outside] = await at(
+      "pin",
+      `<Effect id="p2" type="cornerPin" params={{ topRight: [0.5, 0], bottomRight: [0.5, 1] }} />`,
+      { left: [1, 0, 0], right: [0, 1, 0] },
+      [
+        [40, 90],
+        [120, 90],
+        [280, 90],
+      ],
+    );
+    expect(near(left, [255, 0, 0])).toBe(true);
+    expect(near(right, [0, 255, 0])).toBe(true);
+    expect(near(outside, [0, 0, 0])).toBe(true);
+  });
+
+  it("zoomBlur keeps its centre and smears an edge far from it", async () => {
+    const [centre, edge] = await at(
+      "zoom",
+      `<Effect id="z" type="zoomBlur" params={{ amount: 120, center: [0.25, 0.5] }} />`,
+      { left: [0, 0, 0], right: [1, 1, 1], split: 0.75 },
+      [
+        [80, 90],
+        [244, 90],
+      ],
+    );
+    expect(near(centre, [0, 0, 0])).toBe(true);
+    expect(edge?.[0] ?? 255).toBeLessThan(215);
+  });
+
+  it("chromaticAberration splits red and blue across an edge", async () => {
+    const [before, after, far] = await at(
+      "aberration",
+      `<Effect id="a" type="chromaticAberration" params={{ amount: 8 }} />`,
+      { left: [0, 0, 0], right: [1, 1, 1] },
+      [
+        [156, 90],
+        [164, 90],
+        [30, 90],
+      ],
+    );
+    // Left of the edge, blue is read from the white side; right of it, red from the black side.
+    expect(near(before, [0, 0, 255], 30)).toBe(true);
+    expect(near(after, [0, 255, 255], 30)).toBe(true);
+    expect(near(far, [0, 0, 0])).toBe(true);
+  });
+
+  it("radial aberration fringes the edges and leaves the centre", async () => {
+    const [centre, edge] = await at(
+      "aberration-radial",
+      `<Effect id="a" type="chromaticAberration" params={{ amount: 12, radial: true }} />`,
+      { left: [1, 1, 1], right: [0, 0, 0], split: 0.95 },
+      [
+        [160, 90],
+        [302, 90],
+      ],
+    );
+    expect(near(centre, [255, 255, 255])).toBe(true);
+    // Just left of the edge near the right side: blue is read further out, on the black.
+    expect(edge?.[2] ?? 255).toBeLessThan(100);
+    expect(edge?.[0] ?? 0).toBeGreaterThan(200);
   });
 });
 

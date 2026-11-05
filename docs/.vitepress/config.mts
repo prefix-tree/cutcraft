@@ -52,6 +52,7 @@ export default defineConfig({
             { text: "Titles and graphics", link: "/guide/titles-and-graphics" },
             { text: "Captions and sound", link: "/guide/captions-and-sound" },
             { text: "Colour and grading", link: "/guide/colour" },
+            { text: "Keying, blurs and pins", link: "/guide/footage-tools" },
             { text: "Themes", link: "/guide/themes" },
           ],
         },

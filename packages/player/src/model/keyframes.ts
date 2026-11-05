@@ -46,14 +46,23 @@ export function keyframedValue<T>(children: readonly Placement[], property: stri
     const a = keys[i]!,
       b = keys[i + 1]!;
     if (rel < a.at || rel >= b.at) continue;
-    if (typeof a.value !== "number" || typeof b.value !== "number") return a.value as T;
     const span = b.at - a.at;
     const u = span <= 0 ? 1 : ease(a.easing, (rel - a.at) / span);
-    return (a.value + (b.value - a.value) * u) as T;
+    if (typeof a.value === "number" && typeof b.value === "number") return (a.value + (b.value - a.value) * u) as T;
+    // Two lists of numbers of one length (a box, a corner) move element by element; anything else steps.
+    if (numberList(a.value) && numberList(b.value) && a.value.length === b.value.length) {
+      const to = b.value;
+      return a.value.map((v, i) => v + ((to[i] as number) - v) * u) as T;
+    }
+    return a.value as T;
   }
   return last.value as T;
 }
 
 export function hasKeyframes(children: readonly Placement[], property: string): boolean {
   return children.some((c) => c.kind === "keyframe" && c.props.property === property);
+}
+
+function numberList(v: unknown): v is readonly number[] {
+  return Array.isArray(v) && v.every((x) => typeof x === "number");
 }

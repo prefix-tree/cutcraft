@@ -28,7 +28,7 @@ describe("what a file can say is what renders", () => {
   it("offers only the types the renderers draw", () => {
     expect(TRANSITION_TYPES).toEqual(["crossfade", "dipToBlack", "dipToWhite", "wipe", "slide", "push"]);
     expect(Object.keys(TRANSITION_PARAMS).sort()).toEqual([...TRANSITION_TYPES].sort());
-    expect(VIDEO_EFFECT_TYPES).toHaveLength(21);
+    expect(VIDEO_EFFECT_TYPES).toHaveLength(26);
     expect(TEXT_ANIMATION_PRESETS).toHaveLength(9);
     expect(MASK_TYPES).toEqual(["shape", "drawn"]);
   });
