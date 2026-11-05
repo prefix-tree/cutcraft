@@ -101,6 +101,7 @@ export const VIDEO_EFFECT_TYPES = [
   "sepia",
   "invert",
   "levels",
+  "lut",
 ] as const;
 
 export const TEXT_ANIMATION_PRESETS = [

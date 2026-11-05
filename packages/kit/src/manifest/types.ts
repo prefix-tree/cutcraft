@@ -9,8 +9,9 @@ export interface AssetManifest {
 
 export interface AssetEntry {
   readonly id: string;
-  readonly kind: "video" | "audio" | "image";
-  /** Seconds. Images report 0 and may be held for any duration. */
+  /** `lut`: a 3D colour lookup table (`.cube`), read by `<Effect type="lut">`, not played. */
+  readonly kind: "video" | "audio" | "image" | "lut";
+  /** Seconds. Images and LUTs report 0; an image may be held for any duration. */
   readonly duration: number;
   readonly fps?: number;
   readonly width?: number;
