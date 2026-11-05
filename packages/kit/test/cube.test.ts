@@ -29,6 +29,13 @@ describe("parseCube", () => {
     expect(lut.domainMax).toEqual([2, 2, 2]);
   });
 
+  it("keeps a # inside a title, and reads a long run of # as a comment quickly", () => {
+    expect(parseCube(SWAP_CUBE.replace('TITLE "swap"', 'TITLE "Look #2"')).title).toBe("Look #2");
+    const started = performance.now();
+    expect(parseCube(`${"#".repeat(200_000)}\n${SWAP_CUBE}`).size).toBe(2);
+    expect(performance.now() - started).toBeLessThan(500);
+  });
+
   it("refuses what it cannot use, naming the line", () => {
     expect(() => parseCube("LUT_1D_SIZE 16\n0 0 0")).toThrow("a 1D table");
     expect(() => parseCube("0 0 0")).toThrow("line 1: values before LUT_3D_SIZE");

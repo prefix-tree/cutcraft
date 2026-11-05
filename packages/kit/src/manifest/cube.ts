@@ -1,6 +1,7 @@
 // Reads a 3D colour lookup table in the `.cube` format (Adobe's Cube LUT Specification 1.0, the format colour tools
 // export): `LUT_3D_SIZE N`, optional `TITLE`, `DOMAIN_MIN` and `DOMAIN_MAX`, then N³ lines of `r g b` output values,
-// red changing fastest, then green, then blue. A 1D table (`LUT_1D_SIZE`) is refused.
+// red changing fastest, then green, then blue. Lines starting with # are comments. A 1D table (`LUT_1D_SIZE`) is
+// refused.
 
 export interface CubeLut {
   readonly title?: string;
@@ -32,8 +33,9 @@ export function parseCube(text: string): CubeLut {
   let count = 0;
   const lines = text.split(/\r?\n/);
   for (let n = 0; n < lines.length; n++) {
-    const line = (lines[n] as string).replace(/#.*$/, "").trim();
-    if (!line) continue;
+    const line = (lines[n] as string).trim();
+    // A comment is a line that starts with #, so a title may hold one.
+    if (!line || line.startsWith("#")) continue;
     const [key, ...rest] = line.split(/\s+/);
     if (key === "TITLE") title = line.slice(5).trim().replace(/^"|"$/g, "");
     else if (key === "LUT_1D_SIZE") throw new Error(".cube: a 1D table; a LUT here is 3D (LUT_3D_SIZE)");
