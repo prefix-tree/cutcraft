@@ -28,7 +28,6 @@
   "exports": {
     ".": "./src/index.ts",
     "./engine": "./src/engine.ts",
-    "./overlays": "./src/overlays.ts",
     "./fonts.css": "./fonts.css"
   },
   "files": [
@@ -40,12 +39,11 @@
     "exports": {
       ".": "./dist/index.mjs",
       "./engine": "./dist/engine.mjs",
-      "./overlays": "./dist/overlays.mjs",
       "./fonts.css": "./fonts.css"
     }
   },
   "scripts": {
-    "build": "tsdown src/index.ts src/engine.ts src/overlays.ts --dts",
+    "build": "tsdown src/index.ts src/engine.ts --dts",
     "prepack": "pnpm run build",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run",

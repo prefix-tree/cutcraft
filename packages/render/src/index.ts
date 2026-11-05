@@ -1,6 +1,6 @@
 export { type AddOptions, type AddResult, addAsset } from "./add";
-export { createCanvas, initEnv } from "./env";
-export { DecodedFrame, frameSourceHooks, makeDecodedFrame, RgbaFrame } from "./frame-source";
+export { type Container, containerOf, QUALITIES, type QualityName, type VideoCodec } from "./encoding";
+export { type FontFile, type FontWeight, loadFonts } from "./fonts";
 export {
   checkLayout,
   formatLayout,
@@ -26,29 +26,6 @@ export {
   type PcmBuffer,
   type PcmProvider,
 } from "./mixer";
-export {
-  inlineSvgImages,
-  type OverlayBounds,
-  type OverlayFont,
-  type OverlayOptions,
-  OverlayPlane,
-  type OverlayStats,
-  safeSvgFonts,
-  treeKey,
-} from "./overlays";
-export { defaultWorkers, type ParallelOptions, planSegments } from "./parallel";
-export { MediabunnyPcm } from "./pcm";
-export {
-  type BrowserSource,
-  type Container,
-  containerOf,
-  type Engine,
-  needsBrowser,
-  pickEngine,
-  type RenderOptions,
-  type RenderResult,
-  renderVideo,
-  type VideoCodec,
-} from "./renderer";
-export { QUALITIES, type QualityName, type Speed } from "./segment";
+export { type ExportSource, type RenderOptions, type RenderResult, renderVideo } from "./renderer";
 export { renderStill, type StillOptions, type StillResult } from "./still";
+export { browserCacheDir, CHROME_MILESTONE, findChrome, installChrome } from "./web/chrome";

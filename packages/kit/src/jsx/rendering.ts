@@ -17,12 +17,12 @@ export interface RenderedValues {
 }
 
 export const RENDERED_VALUES: readonly RenderedValues[] = [
-  // shortcut: the preview's DOM overlay plane is its own stacking context (scaled, z-indexed), so CSS blends never reach the canvas; un-isolate it to drop these rows.
+  // shortcut: the player's DOM overlay plane is its own stacking context (scaled, z-indexed), so CSS blends never reach the canvas, in the preview or the export; un-isolate it to drop these rows.
   ...(["title", "shape", "svg", "sticker", "graphic", "layer"] as const).map((kind) => ({
     kind,
     prop: "blend",
     values: ["normal"],
-    reason: "blends with the footage in the export only: the preview draws it unblended over the footage",
+    reason: "is drawn unblended over the footage, in the preview and the export",
   })),
 ];
 

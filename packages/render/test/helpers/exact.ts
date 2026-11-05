@@ -1,7 +1,7 @@
 import { decodeFrames, pixel, readStrip } from "./output";
 
 /**
- * Checks a render of the e2e composition (minus its overlays) frame by frame. The source video paints its frame
+ * Checks a render of the e2e composition frame by frame. The source video paints its frame
  * number into a strip, so every output frame must show the source frame for its time, exactly.
  * Timeline: v1 bars[0,4) 0-4 s, crossfade, v2 bars[6,9) at 1.5x 3.5-5.5 s, logo 5.5-6.5 s, solid blue 6-7 s.
  */

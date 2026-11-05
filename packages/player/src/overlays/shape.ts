@@ -42,7 +42,7 @@ interface Radii {
   readonly bottomLeft: number;
 }
 
-export interface ShapeMarkup {
+interface ShapeMarkup {
   readonly markup: string;
   readonly size: { readonly width: number; readonly height: number };
   /** Pixels the stroke and shadows reach past the box on any side. */
@@ -51,14 +51,11 @@ export interface ShapeMarkup {
 }
 
 /** The size a shape draws at, before layout. */
-export function shapeSize(p: ElementProps): { width: number; height: number } {
+function shapeSize(p: ElementProps): { width: number; height: number } {
   return { width: Number(p.placement.props.width ?? 200), height: Number(p.placement.props.height ?? 200) };
 }
 
-export function shapeMarkup(
-  props: Readonly<Record<string, unknown>>,
-  size: { width: number; height: number },
-): ShapeMarkup {
+function shapeMarkup(props: Readonly<Record<string, unknown>>, size: { width: number; height: number }): ShapeMarkup {
   const { width: w, height: h } = size;
   const warnings: string[] = [];
   const defs: string[] = [];

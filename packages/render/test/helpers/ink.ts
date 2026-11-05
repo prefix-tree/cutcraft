@@ -1,12 +1,8 @@
-import { Canvas, loadImage } from "skia-canvas";
+import { readImage } from "./output";
 
 /** How wide the light pixels (text, here) spread across an image: rightmost minus leftmost column. */
-export async function inkWidth(png: string): Promise<number> {
-  const image = await loadImage(png);
-  const { width, height } = image;
-  const ctx = new Canvas(width, height).getContext("2d");
-  ctx.drawImage(image, 0, 0);
-  const { data } = ctx.getImageData(0, 0, width, height);
+export function inkWidth(png: string): number {
+  const { width, height, rgba: data } = readImage(png);
   let left = width;
   let right = -1;
   for (let y = 0; y < height; y++)

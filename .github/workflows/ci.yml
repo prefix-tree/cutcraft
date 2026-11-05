@@ -30,7 +30,7 @@ jobs:
           node-version: ${{ matrix.node }}
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      # The render tests generate their test media with ffmpeg.
+      # The render tests generate their test media with ffmpeg; the export tests run in the e2e job.
       - run: sudo apt-get update && sudo apt-get install -y ffmpeg
       - run: pnpm typecheck
       - run: pnpm lint
@@ -83,16 +83,15 @@ jobs:
           key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
       - run: pnpm --filter @cutcraft/player exec playwright install --with-deps chromium
       - run: pnpm --filter @cutcraft/player test:e2e
-      # The browser export needs drawElementImage (Chrome 153+); Playwright's pinned Chromium (141) predates it.
-      - uses: browser-actions/setup-chrome@v2
-        id: chrome
+      # The export needs drawElementImage (Chrome 153+); Playwright's pinned Chromium (141) predates it. The export
+      # downloads the Chrome for Testing it is tested against, as it does on a user's machine.
+      - uses: actions/cache@v6
         with:
-          chrome-version: stable
-      - run: '"${{ steps.chrome.outputs.chrome-path }}" --version'
-      # The export is checked against the browser here: overlay layout, the audio mix, and the browser engine.
+          path: ~/.cache/cutcraft/browsers
+          key: cutcraft-chrome-${{ runner.os }}-${{ hashFiles('packages/render/src/web/chrome.ts') }}
+      - run: pnpm --filter @cutcraft/render exec tsx src/cli.ts browser install
+      # The export: video, sound, stills, smart copy, the layout check, the CLI and the recipes.
       - run: pnpm --filter @cutcraft/render test:browser
-        env:
-          CUTCRAFT_CHROMIUM: ${{ steps.chrome.outputs.chrome-path }}
       # Free code on the video's clock: three.js, Motion and CSS animations in the real Player.
       - run: pnpm --filter @cutcraft/graphics test:browser
       - uses: actions/upload-artifact@v4
@@ -130,16 +129,11 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: sudo apt-get update && sudo apt-get install -y ffmpeg
       - run: pnpm --filter @cutcraft/render bench --json bench-results.json | tee bench.md
-      # The comparison's scenarios (cuts, crossfades, graphics) as H.264, with a worker sweep and a stage breakdown:
-      # the before and after of every export performance change, on this runner.
-      - run: pnpm --filter @cutcraft/render bench:scenarios --json scenarios-results.json | tee -a bench.md
-      # The same on one thread with x264's medium preset (--speed quality), against the default's veryfast.
-      - run: pnpm --filter @cutcraft/render bench:scenarios --workers 1 --speed quality --json scenarios-quality.json | tee -a bench.md
+      - run: pnpm --filter @cutcraft/render bench --tabs 4 --json bench-results-4.json | tee -a bench.md
       - uses: actions/upload-artifact@v4
         with:
           name: render-bench
           path: |
             packages/render/bench-results.json
-            packages/render/scenarios-results.json
-            packages/render/scenarios-quality.json
+            packages/render/bench-results-4.json
             bench.md

@@ -59,7 +59,7 @@ Both sit on the timeline like any overlay, so an editor can move, trim and ancho
 `<ThreeScene>` (`@cutcraft/graphics/three`) and `useTimeline` / `useLayerTime` (`@cutcraft/graphics/motion`) give
 you the same clock.
 
-The player draws both tags. The Node export (`cutcraft`) leaves them out with a warning for now.
+The player draws both tags, and so does the export (`cutcraft`), which runs the player in headless Chrome.
 [Free code](https://prefix-tree.github.io/cutcraft/guide/free-code) covers it
 in more depth.
 

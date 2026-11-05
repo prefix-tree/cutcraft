@@ -135,15 +135,13 @@ normal when you give none). Free code uses the same value as a CSS `fontFamily`.
 
 `font({ src: "asset:brand" })` finds its file the way a clip finds its media. The export looks for `brand.ttf`,
 `brand.otf`, `brand.woff` or `brand.woff2` next to the file (or in the `--media` folder), and the player asks its
-[`media`](./player) for `brand`, which you map to a URL such as `/fonts/brand.woff2`. The Node export reads TTF, OTF and
-WOFF but not WOFF2. A file with `<Three>` or `<Motion>` exports through the browser, which reads all four.
+[`media`](./player) for `brand`, which you map to a URL such as `/fonts/brand.woff2`. Both read all four formats.
 
 `googleFont()` works like `next/font`. The first export downloads each face into `~/.cache/cutcraft/fonts` (set
 `CUTCRAFT_FONT_CACHE` to put it elsewhere), and later exports read the copy, so they need no network. The player loads
 the face from Google.
 
-The player and both exports load every declared face, and the browser export draws no frame until they have loaded. It
-reads the same files as the Node export, so both set text the same way. A family that is neither bundled nor declared
+The player and the export load every declared face, and the export draws no frame until they have loaded. A family that is neither bundled nor declared
 is set in Inter, and the [`font-available` lint](#lint) names it.
 
 Keep the calls at the top of the file with literal arguments, where the editor and lint can read them; the

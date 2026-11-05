@@ -4,10 +4,10 @@ import { join } from "node:path";
 
 import type { AssetManifest } from "@cutcraft/kit";
 
-import { decodeFrames, decodesClean, pixel, probe } from "./helpers/output";
-import { makePlaceholders } from "./helpers/placeholders";
+import { decodeFrames, decodesClean, pixel, probe } from "../helpers/output";
+import { makePlaceholders } from "../helpers/placeholders";
 
-const root = join(import.meta.dirname, "..");
+const root = join(import.meta.dirname, "..", "..");
 const recipes = join(root, "..", "..", "recipes");
 const scratch = join(root, "test", ".tmp", "recipes");
 const manifest = JSON.parse(readFileSync(join(recipes, "manifest.json"), "utf8")) as AssetManifest;

@@ -1,7 +1,7 @@
 import type { ResolvedState } from "@cutcraft/kit";
 import { buildFramePlan, captureWarnings, visiblePlacements } from "@cutcraft/player";
-import { overlayLayout } from "@cutcraft/player/overlays";
 
+import { overlayLayout } from "../src/overlays/layout";
 import { fixtureState, makeState } from "./helpers/state";
 
 const state = makeState({

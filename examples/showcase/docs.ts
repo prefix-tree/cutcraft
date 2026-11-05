@@ -1,7 +1,7 @@
 // Renders the examples the documentation shows next to their code: the reference pages' element examples (docs/*.tsx)
 // into docs/public/previews/elements, and the guide's feature examples (guide/*.tsx) into docs/public/previews/guide.
-// A looping WebM and a poster each, through the same loader and renderer as `cutcraft-render`. A file that does not resolve cleanly stops the run; warnings are printed. Files with <Three> or
-// <Motion> render with the browser engine (CUTCRAFT_CHROMIUM).
+// A looping WebM and a poster each, through the same loader and renderer as `cutcraft`. A file that does not resolve cleanly stops the run; warnings are printed.
+// The export runs in headless Chrome, downloaded on the first run.
 //   pnpm --filter @cutcraft/example-showcase docs [name…]
 import { mkdirSync, readdirSync } from "node:fs";
 import { basename, join } from "node:path";
@@ -32,7 +32,6 @@ for (const { dir, file, out } of files.sort((a, b) => a.file.localeCompare(b.fil
   const result = await renderVideo({
     state: video.state,
     media,
-    interiors: video.interiors,
     out: join(out, `${name}.webm`),
     silent: true,
     quality: "high",
@@ -42,7 +41,6 @@ for (const { dir, file, out } of files.sort((a, b) => a.file.localeCompare(b.fil
   await renderStill({
     state: video.state,
     media,
-    interiors: video.interiors,
     out: join(out, `${name}.jpg`),
     time: posterTime(name, video.state),
     source: video.source,

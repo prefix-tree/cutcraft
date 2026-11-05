@@ -229,7 +229,7 @@ describe("lint", () => {
           '<Track id="t"><Clip id="c" src="asset:city" blend="screen" /><Title id="h" blend="screen">Hi</Title><Title id="n" blend="normal">Hi</Title></Track>',
         ),
       ).toEqual([
-        'warning:h.blend: "h" <Title> blend "screen" blends with the footage in the export only: the preview draws it unblended over the footage',
+        'warning:h.blend: "h" <Title> blend "screen" is drawn unblended over the footage, in the preview and the export',
       ]);
     });
 

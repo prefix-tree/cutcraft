@@ -8,7 +8,7 @@ Children animated by a Motion `sequence` on the video's clock.
 
 </Example>
 
-The player draws it once the host calls `installFreeCodeLibraries()` ([Free code](/guide/free-code#three-js-and-motion)); the export draws it through headless Chromium ([the browser engine](/guide/exporting#three-js-and-motion-the-browser-engine)).
+The player draws it once the host calls `installFreeCodeLibraries()` ([Free code](/guide/free-code#three-js-and-motion)); the export draws it the same way, in headless Chrome ([Exporting](/guide/exporting)).
 
 **Used in:** [Product launch](/examples#a-product-launch) · [Kinetic type](/examples#kinetic-type) · [Data story](/examples#a-data-story) · [Logo reveal](/examples#a-logo-reveal) · [An edit](/examples#an-edit) · [Brand spot in any theme](/recipes/brand-spot)
 

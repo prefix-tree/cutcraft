@@ -5,7 +5,7 @@ import type { Easing } from "./enums";
 
 /**
  * Pure animation helpers for `<Layer>` code, beside `useT()` and `useLayer()`. They take numbers and return
- * numbers, so they run the same in the preview and under the export's Satori.
+ * numbers, so they run the same in the preview and the export.
  */
 
 export type Extrapolate = "extend" | "clamp";

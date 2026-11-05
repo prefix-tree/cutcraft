@@ -55,8 +55,8 @@ Each video is one file in [`examples/showcase`](https://github.com/prefix-tree/c
 rendered with `pnpm --filter @cutcraft/example-showcase render`; the guide's feature examples, in
 [`examples/showcase/guide`](https://github.com/prefix-tree/cutcraft/tree/main/examples/showcase/guide), with
 `pnpm --filter @cutcraft/example-showcase docs`. The footage is made by `ffmpeg`'s own sources
-(`pnpm --filter @cutcraft/example-showcase gen`); the files with three.js or Motion render through the
-[browser engine](/guide/exporting#three-js-and-motion-the-browser-engine). The people on camera are stand-ins: their
+(`pnpm --filter @cutcraft/example-showcase gen`), and every file renders through the player in
+[headless Chrome](/guide/exporting#the-browser-it-runs-in). The people on camera are stand-ins: their
 footage is a gradient, and the manifest holds the words they would say.
 
 ## A product launch

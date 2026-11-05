@@ -1,8 +1,4 @@
-import { execFileSync } from "node:child_process";
-
-import { ALL_FORMATS, FilePathSource, Input, VideoSampleSink } from "mediabunny";
-
-import { initEnv } from "../../src";
+import { execFileSync, spawn } from "node:child_process";
 
 export interface Probe {
   readonly codec: string;
@@ -61,29 +57,61 @@ export interface DecodedFrame {
   readonly rgba: Uint8Array;
 }
 
-/** Every video frame of a file as RGBA, in order. */
+/** Every video frame of a file as RGBA, in order, decoded by ffmpeg. */
 export async function decodeFrames(file: string, visit: (frame: DecodedFrame, index: number) => void): Promise<number> {
-  initEnv();
-  const input = new Input({ source: new FilePathSource(file), formats: ALL_FORMATS });
-  const track = await input.getPrimaryVideoTrack();
-  if (!track) throw new Error("no video track");
-  const sink = new VideoSampleSink(track, { hardwareAcceleration: "prefer-software" });
+  const { width, height, fps } = probe(file);
+  const size = width * height * 4;
+  const ffmpeg = spawn(
+    "ffmpeg",
+    ["-v", "error", "-i", file, "-fps_mode", "passthrough", "-f", "rawvideo", "-pix_fmt", "rgba", "-"],
+    {
+      stdio: ["ignore", "pipe", "pipe"],
+    },
+  );
+  let errors = "";
+  ffmpeg.stderr.on("data", (d: Buffer) => {
+    errors += d.toString();
+  });
   let n = 0;
-  for await (const sample of sink.samples()) {
-    const rgba = new Uint8Array(sample.codedWidth * sample.codedHeight * 4);
-    await sample.copyTo(rgba, { format: "RGBA" });
-    visit({ timestamp: sample.timestamp, width: sample.codedWidth, height: sample.codedHeight, rgba }, n++);
-    sample.close();
+  let pending: Buffer = Buffer.alloc(0);
+  for await (const chunk of ffmpeg.stdout as AsyncIterable<Buffer>) {
+    pending = pending.length ? Buffer.concat([pending, chunk]) : chunk;
+    while (pending.length >= size) {
+      const rgba = new Uint8Array(pending.subarray(0, size));
+      pending = pending.subarray(size);
+      visit({ timestamp: n / fps, width, height, rgba }, n);
+      n++;
+    }
   }
-  input.dispose();
+  const code = await new Promise<number | null>((ok) => ffmpeg.on("close", ok));
+  if (code !== 0) throw new Error(`ffmpeg could not decode ${file}: ${errors}`);
   return n;
 }
 
-/** The frame number the test media paints as ten binary cells across its top strip. */
+/** An image file (PNG, JPEG) as RGBA, decoded by ffmpeg. */
+export function readImage(file: string): DecodedFrame {
+  const [width, height] = execFileSync(
+    "ffprobe",
+    ["-v", "error", "-select_streams", "v:0", "-show_entries", "stream=width,height", "-of", "csv=p=0", file],
+    { encoding: "utf8" },
+  )
+    .trim()
+    .split(",")
+    .map(Number) as [number, number];
+  const raw = execFileSync("ffmpeg", ["-v", "error", "-i", file, "-f", "rawvideo", "-pix_fmt", "rgba", "-"], {
+    maxBuffer: 1 << 30,
+  });
+  return { timestamp: 0, width, height, rgba: new Uint8Array(raw.buffer, raw.byteOffset, raw.length) };
+}
+
+/**
+ * The frame number the test media paints as ten binary cells across its top strip. Only the first nine are read: the
+ * test media is 300 frames long, so the tenth (512) is never lit, and the e2e composition's counter covers it.
+ */
 export function readStrip(frame: DecodedFrame): number {
   let n = 0;
   const cell = frame.width / 10;
-  for (let k = 0; k < 10; k++) {
+  for (let k = 0; k < 9; k++) {
     const x = Math.floor((k + 0.5) * cell),
       y = 20;
     if ((frame.rgba[(y * frame.width + x) * 4] as number) > 128) n |= 1 << k;

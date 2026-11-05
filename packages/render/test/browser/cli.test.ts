@@ -2,10 +2,10 @@ import { spawnSync } from "node:child_process";
 import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
-import generateMedia, { mediaDir } from "../../player/e2e/gen-media";
-import { probe } from "./helpers/output";
+import generateMedia, { mediaDir } from "../../../player/e2e/gen-media";
+import { probe } from "../helpers/output";
 
-const root = join(import.meta.dirname, "..");
+const root = join(import.meta.dirname, "..", "..");
 // Inside the package so the file can import @cutcraft/kit.
 const scratch = join(root, "test", ".tmp", "cli");
 const cli = join(root, "src", "cli.ts");

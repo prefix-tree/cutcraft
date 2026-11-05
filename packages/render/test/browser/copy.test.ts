@@ -2,13 +2,13 @@ import { execFileSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
-import { manifest } from "../../player/e2e/app/composition";
-import generateMedia, { mediaDir } from "../../player/e2e/gen-media";
-import { directoryResolver, loadVideo, renderVideo } from "../src";
-import { decodeFrames, decodesClean, probe, readStrip } from "./helpers/output";
+import { manifest } from "../../../player/e2e/app/composition";
+import generateMedia, { mediaDir } from "../../../player/e2e/gen-media";
+import { directoryResolver, loadVideo, renderVideo } from "../../src";
+import { decodeFrames, decodesClean, probe, readStrip } from "../helpers/output";
 
 // bars.webm: 640x360 at 30 fps, VP9, a keyframe every 30 frames, its frame number painted in a strip.
-const scratch = join(import.meta.dirname, ".tmp", "copy");
+const scratch = join(import.meta.dirname, "..", ".tmp", "copy");
 let dir = "";
 
 function source(body: string, comp = "fps={30} width={640} height={360}"): string {
@@ -33,7 +33,7 @@ async function render(body: string, extra: Record<string, unknown> = {}, comp?: 
   const result = await renderVideo({
     state: loaded.state,
     media: directoryResolver(mediaDir, loaded.manifest),
-    interiors: loaded.interiors,
+    source: loaded.source,
     out,
     keyFrameInterval: 1,
     bitrate: 4_000_000,
@@ -146,10 +146,10 @@ describe("smart copy", () => {
   });
 
   it("does not copy into a codec the source is not in", async () => {
-    expect((await render(CLIP, { smartCopy: true, videoCodec: "vp8", to: 2 })).result.copiedFrames).toBe(0);
+    expect((await render(CLIP, { smartCopy: true, videoCodec: "av1", to: 2 })).result.copiedFrames).toBe(0);
   });
 
-  it("works together with workers", async () => {
+  it("works together with several pages", async () => {
     const file = join(dir, "par.tsx");
     writeFileSync(
       file,
@@ -162,13 +162,13 @@ describe("smart copy", () => {
     const result = await renderVideo({
       state: loaded.state,
       media: directoryResolver(mediaDir, loaded.manifest),
-      interiors: loaded.interiors,
+      source: loaded.source,
       out,
       keyFrameInterval: 1,
       bitrate: 4_000_000,
       silent: true,
       smartCopy: true,
-      parallel: { file, mediaDir, workers: 2, segmentFrames: 30 },
+      tabs: 2,
     });
     expect(result.copiedFrames).toBeGreaterThan(0);
     expect(await strips(out)).toEqual([

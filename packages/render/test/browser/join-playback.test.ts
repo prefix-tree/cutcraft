@@ -6,7 +6,7 @@ import { chromium } from "@playwright/test";
 
 import { manifest } from "../../../player/e2e/app/composition";
 import generateMedia, { mediaDir } from "../../../player/e2e/gen-media";
-import { directoryResolver, loadVideo, renderVideo } from "../../src";
+import { directoryResolver, findChrome, loadVideo, renderVideo } from "../../src";
 
 const scratch = join(import.meta.dirname, "..", ".tmp", "join-playback");
 
@@ -33,13 +33,17 @@ export default function Video() {
     state: loaded.state,
     media: directoryResolver(mediaDir, loaded.manifest),
     out,
+    source: loaded.source,
     keyFrameInterval: 1,
     smartCopy: true,
     silent: true,
   });
   expect(result.copiedFrames).toBe(90);
 
-  const browser = await chromium.launch({ args: ["--autoplay-policy=no-user-gesture-required"] });
+  const browser = await chromium.launch({
+    executablePath: await findChrome(),
+    args: ["--autoplay-policy=no-user-gesture-required"],
+  });
   try {
     const page = await browser.newPage();
     await page.goto(`file://${out}`);

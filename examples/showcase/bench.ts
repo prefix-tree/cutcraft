@@ -1,4 +1,4 @@
-// Export speed on the showcase files: each rendered to WebM on one thread and on four, best of three, in frames per
+// Export speed on the showcase files: each rendered to WebM on one page and on four, best of three, in frames per
 // second of wall time. Needs only the generated footage (`pnpm gen`), so any machine can reproduce it. `--json <file>`
 // also writes the rows, with the machine, for the site's benchmarks.
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
@@ -10,26 +10,25 @@ import { directoryResolver, loadVideo, renderVideo } from "@cutcraft/render";
 const here = import.meta.dirname;
 const scratch = mkdtempSync(join(tmpdir(), "cutcraft-bench-"));
 process.stdout.write(`${cpus()[0]?.model ?? "?"}, ${cpus().length} cores, Node ${process.version}\n\n`);
-process.stdout.write("file        size       frames   1 thread    4 threads\n");
+process.stdout.write("file        size       frames   1 tab       4 tabs\n");
 const rows: { file: string; width: number; height: number; frames: number; fps1: number; fps4: number }[] = [];
 try {
-  // The Node engine's speed: the files it draws (the others need the browser engine).
   for (const name of ["edit", "captions"]) {
     const file = join(here, `${name}.tsx`);
     const load = { manifest: join(here, "manifest.json") };
     const video = await loadVideo(file, load);
     const media = directoryResolver(join(here, "media"), video.manifest);
-    const fps = async (workers: number): Promise<{ fps: number; frames: number }> => {
+    const fps = async (tabs: number): Promise<{ fps: number; frames: number }> => {
       let best = 0,
         frames = 0;
       for (let run = 0; run < 3; run++) {
         const r = await renderVideo({
           state: video.state,
           media,
-          interiors: video.interiors,
-          out: join(scratch, `${name}-${workers}.webm`),
+          source: video.source,
+          out: join(scratch, `${name}-${tabs}.webm`),
           silent: true,
-          ...(workers > 1 ? { parallel: { file, load, mediaDir: join(here, "media"), workers } } : {}),
+          tabs,
         });
         frames = r.frames;
         best = Math.max(best, r.frames / (r.wallMs / 1000));

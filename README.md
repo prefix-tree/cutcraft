@@ -61,7 +61,7 @@ model, reads the edit as ordinary code.
   <img src="docs/public/readme/logo.gif" width="300" alt="A logo reveal: three thousand particles drift in and settle into the name Shed, then a tagline slides in under it">
   <img src="docs/public/readme/kinetic.gif" width="95" alt="Kinetic type in a vertical short: each phrase slams or stacks in on its word, over karaoke captions">
 </p>
-<p align="center"><sub>Each one is a short TSX file exported by CutCraft: three.js and Motion, drawn by the browser engine. <a href="https://prefix-tree.github.io/cutcraft/examples">See them next to their files</a>.</sub></p>
+<p align="center"><sub>Each one is a short TSX file exported by CutCraft: three.js and Motion, drawn by the player in headless Chrome. <a href="https://prefix-tree.github.io/cutcraft/examples">See them next to their files</a>.</sub></p>
 
 ## Why
 
@@ -100,9 +100,9 @@ trims and anchors them to words like everything else; only what they draw is up 
 
 [`@cutcraft/graphics`](packages/graphics) has the host setup, and
 [Free code](https://prefix-tree.github.io/cutcraft/guide/free-code) has the details.
-The player draws all of this, and so does the export: a file with `<Three>` or `<Motion>` exports through the real
-player in headless Chromium, frame by frame, with the same sound
-([exporting](https://prefix-tree.github.io/cutcraft/guide/exporting#three-js-and-motion-the-browser-engine)).
+The player draws all of this, and so does the export, which runs the real player in headless Chrome, frame by frame,
+with the same sound
+([exporting](https://prefix-tree.github.io/cutcraft/guide/exporting#the-browser-it-runs-in)).
 
 ## What's in it
 
@@ -113,7 +113,7 @@ player in headless Chromium, frame by frame, with the same sound
 | Editing | 119 actions, each with validation and undo. Every edit is written back into the file as the smallest text change. |
 | Lint | Checks the file before anything plays: literal ids, cuts inside words, fonts and declarations, and the few limits listed in [what renders](https://prefix-tree.github.io/cutcraft/reference/rendering). |
 | Player | A React `<Player>` and a framework-free `PlayerCore`: WebCodecs decoding through [mediabunny](https://mediabunny.dev), one canvas for footage, DOM for overlays, Web Audio as the clock, and frame-exact seeking. |
-| Export | The same engine, in Node with no browser for most files: MP4, WebM, MOV (ProRes), MP3 or WAV soundtracks, and PNG or JPEG stills. Files with `<Three>`, `<Motion>`, motion blur or effects of their own (GLSL, `defineEffect()`) export through the player in headless Chromium. A layout check reports overlays that leave the frame or the safe zone, or cover the captions or the subject, at their line in the file. |
+| Export | The player itself, in headless Chrome that the first export downloads: MP4 (H.264 or AV1), WebM (VP9 or AV1), MP3 or WAV soundtracks, and PNG or JPEG stills. Everything the preview draws exports: three.js, Motion, motion blur and GLSL effects of the file's own included. A layout check reports overlays that leave the frame or the safe zone, or cover the captions or the subject, at their line in the file. |
 
 ## Quick start
 
@@ -138,7 +138,7 @@ export default function Video() {
 
 ```sh
 npm install cutcraft @cutcraft/kit react zod   # the CLI, and types for the file
-npx cutcraft hello.tsx --out hello.mp4         # or .webm, .mov, a .png still with --still 1
+npx cutcraft hello.tsx --out hello.mp4         # or .webm, a .png still with --still 1
 ```
 
 The [quick start](https://prefix-tree.github.io/cutcraft/guide/getting-started) then adds your own footage, cuts on
@@ -146,8 +146,7 @@ words, and three.js and Motion, one step at a time. [Examples](https://prefix-tr
 which file to start from for what you're making.
 
 To render the examples from this repository you need Node 22.19 or later, pnpm 10 (`corepack enable`), and `ffmpeg`
-with the `drawtext` filter for the placeholder footage; the three.js and Motion examples also need Chrome 153+ in
-`CUTCRAFT_CHROMIUM`:
+with the `drawtext` filter for the placeholder footage. The first render downloads Chrome for Testing:
 
 ```sh
 pnpm install
@@ -165,7 +164,7 @@ pnpm docs:dev                                      # the documentation site
 | [`cutcraft`](packages/cli) | The command line: export a file to video, audio or a still, or check its layout. |
 | [`@cutcraft/kit`](packages/kit) | The elements, time references, resolver, editor actions, source edits and lint. No DOM. |
 | [`@cutcraft/player`](packages/player) | The browser player and the React `<Player>`. |
-| [`@cutcraft/render`](packages/render) | Export in Node, as a library: `loadVideo` and `renderVideo`. |
+| [`@cutcraft/render`](packages/render) | The export as a library: `loadVideo` and `renderVideo`, driving the player in headless Chrome. |
 | [`@cutcraft/graphics`](packages/graphics) | three.js and Motion on the video's clock for `<Three>` and `<Motion>`, and the 34 `<Graphic>` kinds, which are deprecated and will be removed. |
 
 The repository also holds [eight recipes](https://prefix-tree.github.io/cutcraft/recipes/) (complete files for common
@@ -176,12 +175,12 @@ videos, each tested) and [the worked example](examples/launch-recap).
 | | |
 |---|---|
 | Works | Resolving, every editor action with undo, writing edits back to the file, lint. Playback with seek, rate and loop; crossfade, dip, wipe, slide and push transitions; keyframes on transforms, effects, colour and sound; speed ramps and freeze frames with their audio; masks, overlays, captions and ducking. Export with frame-exact pictures, and the layout check. |
-| Partial | Six transitions, fourteen effects and nine title presets, all drawn: what the schemas accept is what renders, with a few limits listed in [what renders](https://prefix-tree.github.io/cutcraft/reference/rendering). The Node export draws a `<Layer>` with a subset of CSS; `--engine browser` draws all of it. |
+| Partial | Six transitions, fourteen effects and nine title presets, all drawn: what the schemas accept is what renders, with a few limits listed in [what renders](https://prefix-tree.github.io/cutcraft/reference/rendering). |
 
 ## Roadmap
 
-1. One export engine. The browser engine draws everything the player does but is slower without a GPU; once it
-   matches the Node engine's speed and passes its parity tests, it draws every file.
+1. A faster export without a GPU. The export runs in Chrome, where WebGL and the capture run in software on a server
+   with no GPU; the next step is to measure it on the export-speed scenarios and close the gap.
 2. Footage in free code. `useClipFrame(clipId)` will hand a clip's current frame to a `<Layer>`, for CSS 3D or a
    shader of your own.
 3. An open editor package with the timeline, inspector and preview gestures over the action set.

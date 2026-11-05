@@ -15,9 +15,10 @@ import {
   Track,
 } from "@cutcraft/kit";
 
-import { manifest } from "../../player/e2e/app/composition";
-import { mediaDir } from "../../player/e2e/gen-media";
-import { checkLayout, directoryResolver, formatLayout, type LayoutIssue, subjectRects } from "../src";
+import { manifest } from "../../../player/e2e/app/composition";
+import { mediaDir } from "../../../player/e2e/gen-media";
+import { checkLayout, directoryResolver, formatLayout, type LayoutIssue, subjectRects } from "../../src";
+import { toSource } from "../helpers/jsx";
 
 const box = (
   id: string,
@@ -47,11 +48,20 @@ const box = (
 async function check(
   composition: ReturnType<typeof h>,
   m: AssetManifest = manifest,
-  extra: Partial<Parameters<typeof checkLayout>[0]> = {},
+  extra: Partial<Omit<Parameters<typeof checkLayout>[0], "source">> & {
+    source?: { readonly file: string; readonly text: string };
+  } = {},
 ) {
   const state = resolve(collect(composition), m);
   expect(state.errors).toEqual([]);
-  return checkLayout({ state, media: directoryResolver(mediaDir, m), ...extra });
+  // The page loads the file itself: the text given (for the source positions), or the composition written back.
+  const { source, ...rest } = extra;
+  return checkLayout({
+    state,
+    media: directoryResolver(mediaDir, m),
+    source: { ...(source ?? { text: toSource(composition) }), manifest: m },
+    ...rest,
+  });
 }
 
 const brief = (issues: readonly LayoutIssue[]) =>

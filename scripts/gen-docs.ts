@@ -184,7 +184,7 @@ function usedIn(name: string): string | null {
 }
 
 const ENGINE_NOTE =
-  "The player draws it once the host calls `installFreeCodeLibraries()` ([Free code](/guide/free-code#three-js-and-motion)); the export draws it through headless Chromium ([the browser engine](/guide/exporting#three-js-and-motion-the-browser-engine)).";
+  "The player draws it once the host calls `installFreeCodeLibraries()` ([Free code](/guide/free-code#three-js-and-motion)); the export draws it the same way, in headless Chrome ([Exporting](/guide/exporting)).";
 
 function elementsIndex(): string {
   const lines = [
@@ -306,7 +306,7 @@ function graphicsIndex(): string {
     "# Graphics",
     "",
     ...GRAPHIC_DEPRECATED,
-    "Built-in kinds of `<Graphic>`: pure functions from props and the theme to SVG, drawn the same in the preview and the export. Each card plays its example as the export renders it; its page has the code. Generated from `packages/graphics`; run `pnpm docs:gen` and `pnpm docs:previews`.",
+    "Built-in kinds of `<Graphic>`: pure functions from props and the theme to SVG, drawn the same in the preview and the export. Each card plays its example as the export renders it; its page has the code. Generated from `packages/graphics` by `pnpm docs:gen`; the previews were rendered by the Node export, which is gone, and `<Graphic>` is deprecated, so they are not rendered again.",
     "",
     ...example("previews/graphics/lower-third", "A lower third", graphicExample("lower-third").code),
     "",

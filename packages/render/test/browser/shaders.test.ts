@@ -3,11 +3,10 @@
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
-import { Canvas, loadImage } from "skia-canvas";
-
 import { manifest as mediaManifest } from "../../../player/e2e/app/composition";
 import generateMedia, { mediaDir } from "../../../player/e2e/gen-media";
 import { directoryResolver, loadVideo, renderStill } from "../../src";
+import { pixel, readImage } from "../helpers/output";
 
 const scratch = join(import.meta.dirname, "..", ".tmp", "shaders");
 let dir = "";
@@ -47,10 +46,8 @@ export default function Video() {
     time,
     source: loaded.source,
   });
-  const image = await loadImage(out);
-  const ctx = new Canvas(image.width, image.height).getContext("2d");
-  ctx.drawImage(image, 0, 0);
-  return points.map(([x, y]) => [...ctx.getImageData(x, y, 1, 1).data].slice(0, 3));
+  const image = readImage(out);
+  return points.map(([x, y]) => pixel(image, x, y));
 }
 
 const INVERT = `defineEffect({

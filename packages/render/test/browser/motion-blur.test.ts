@@ -3,9 +3,8 @@
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
-import { Canvas, loadImage } from "skia-canvas";
-
 import { directoryResolver, loadVideo, renderStill } from "../../src";
+import { readImage } from "../helpers/output";
 
 const scratch = join(import.meta.dirname, "..", ".tmp", "motion-blur");
 let dir = "";
@@ -45,10 +44,7 @@ export default function Video() {
     time: 0.5,
     source: loaded.source,
   });
-  const image = await loadImage(out);
-  const ctx = new Canvas(image.width, image.height).getContext("2d");
-  ctx.drawImage(image, 0, 0);
-  const { data } = ctx.getImageData(0, 0, image.width, image.height);
+  const { rgba: data } = readImage(out);
   let grey = 0;
   let white = 0;
   for (let i = 0; i < data.length; i += 4) {

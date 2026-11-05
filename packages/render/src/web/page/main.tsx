@@ -1,9 +1,20 @@
-// The browser export's page: the real Player, stepped frame by frame, captured with HTML-in-Canvas
-// (`drawElementImage`) and encoded with WebCodecs. Node serves this page with a job (the cut file's source, its props,
-// its manifest), asks for runs of frames, and reads the encoded bytes back; the sound is mixed in Node.
+// The export page: the real Player, stepped frame by frame, captured with HTML-in-Canvas (`drawElementImage`) and
+// encoded with WebCodecs. Node serves this page with a job (the cut file's source, its props, its manifest), asks for
+// runs of frames, the soundtrack, or the ink of the overlays at a moment, and reads the bytes back.
 import "@cutcraft/player/fonts.css";
 
-import { BufferTarget, CanvasSource, Mp4OutputFormat, Output, WebMOutputFormat } from "mediabunny";
+import {
+  BufferTarget,
+  CanvasSource,
+  Mp4OutputFormat,
+  Output,
+  QUALITY_HIGH,
+  QUALITY_LOW,
+  QUALITY_MEDIUM,
+  QUALITY_VERY_HIGH,
+  QUALITY_VERY_LOW,
+  WebMOutputFormat,
+} from "mediabunny";
 import { createRef } from "react";
 import { createRoot } from "react-dom/client";
 
@@ -17,9 +28,11 @@ import {
   shutterTimes,
 } from "@cutcraft/kit";
 import { loadModule } from "@cutcraft/kit/source";
-import { addFontFaces, Player, type PlayerRef } from "@cutcraft/player";
+import { addFontFaces, backdropTracks, Player, type PlayerRef } from "@cutcraft/player";
 
-import type { PageApi, PageJob, SegmentRequest } from "./protocol";
+import { renderSoundtrack } from "./audio";
+import { inkOf, offFrame, pastEdges } from "./ink";
+import type { AudioRequest, InkBounds, PageApi, PageJob, SegmentRequest } from "./protocol";
 
 declare global {
   interface Window {
@@ -28,6 +41,14 @@ declare global {
 }
 
 const SETTLE_TIMEOUT_MS = 10_000;
+
+const QUALITY = {
+  "very-low": QUALITY_VERY_LOW,
+  low: QUALITY_LOW,
+  medium: QUALITY_MEDIUM,
+  high: QUALITY_HIGH,
+  "very-high": QUALITY_VERY_HIGH,
+} as const;
 
 async function start(): Promise<void> {
   const job = (await (await fetch("/job.json")).json()) as PageJob;
@@ -104,6 +125,10 @@ async function start(): Promise<void> {
     }
   };
 
+  /** Kinds the layout check measures: overlays drawn as DOM, and the captions. */
+  const MEASURED = new Set(["title", "shape", "svg", "sticker", "graphic", "layer", "captions"]);
+  const backdrop = backdropTracks(state);
+
   let out: Uint8Array = new Uint8Array();
   const api: PageApi = {
     composition: { width, height, fps, duration: state.composition.duration },
@@ -116,7 +141,7 @@ async function start(): Promise<void> {
       });
       const source = new CanvasSource(cap, {
         codec: r.codec,
-        bitrate: r.bitrate,
+        bitrate: r.quality ? QUALITY[r.quality] : r.bitrate,
         keyFrameInterval: r.keyFrameInterval,
         latencyMode: "quality",
       });
@@ -129,6 +154,52 @@ async function start(): Promise<void> {
       await output.finalize();
       out = new Uint8Array(target.buffer as ArrayBuffer);
       return out.length;
+    },
+    async audio(r: AudioRequest) {
+      const track = await renderSoundtrack(state, media, r);
+      out = track.bytes ?? new Uint8Array();
+      return { length: out.length, codec: track.codec, warnings: track.warnings };
+    },
+    async bounds(t: number) {
+      await capture(t);
+      // Each overlay alone: everything else hidden, the frame drawn, its pixels scanned for ink.
+      const cells = [...root.querySelectorAll<HTMLElement>("[data-el][data-kind]")].filter(
+        (el) => MEASURED.has(el.dataset.kind ?? "") && !el.parentElement?.closest("[data-el]"),
+      );
+      const found: InkBounds[] = [];
+      root.style.visibility = "hidden";
+      try {
+        for (const el of cells) {
+          const before = el.style.visibility;
+          el.style.visibility = "visible";
+          try {
+            // drawElementImage draws only into the canvas that holds the element, so the capture canvas measures.
+            await painted(cap);
+            ctx.clearRect(0, 0, width, height);
+            ctx.drawElementImage(root, 0, 0);
+            const r = el.getBoundingClientRect();
+            const o = root.getBoundingClientRect();
+            const k = width / o.width;
+            const box = { x: (r.left - o.left) * k, y: (r.top - o.top) * k, w: r.width * k, h: r.height * k };
+            const seen = inkOf(ctx.getImageData(0, 0, width, height).data, width, height);
+            const ink = seen ? pastEdges(seen, box, width, height) : offFrame(box, width, height);
+            if (!ink) continue;
+            const track = el.closest<HTMLElement>("[data-track]")?.dataset.track;
+            found.push({
+              id: el.dataset.el as string,
+              kind: el.dataset.kind as string,
+              ...ink,
+              backdrop: track !== undefined && backdrop.has(track),
+            });
+          } finally {
+            el.style.visibility = before;
+          }
+        }
+      } finally {
+        root.style.visibility = "";
+        await painted(cap);
+      }
+      return found;
     },
     async still(t: number, type: "image/png" | "image/jpeg", quality?: number) {
       await frame(t);

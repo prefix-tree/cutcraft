@@ -3,7 +3,6 @@ import { AudioSampleSink, type InputAudioTrack } from "mediabunny";
 import type { MediaResolver } from "@cutcraft/player/engine";
 import { MediabunnyInputs } from "@cutcraft/player/engine";
 
-import { initEnv } from "./env";
 import type { PcmBuffer, PcmProvider } from "./mixer";
 
 interface Opened {
@@ -17,9 +16,7 @@ export class MediabunnyPcm implements PcmProvider {
   private readonly inputs = new MediabunnyInputs();
   private readonly opened = new Map<string, Promise<Opened | null>>();
 
-  constructor(private readonly media: MediaResolver) {
-    initEnv();
-  }
+  constructor(private readonly media: MediaResolver) {}
 
   async range(asset: string, from: number, to: number): Promise<PcmBuffer> {
     const open = await this.open(asset);

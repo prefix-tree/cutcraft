@@ -4,7 +4,7 @@ import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSy
 import { createRequire } from "node:module";
 import { join } from "node:path";
 
-import { directoryResolver, loadVideo, type OverlayFont, renderStill } from "../../src";
+import { directoryResolver, type FontFile, loadVideo, renderStill } from "../../src";
 import { inkWidth } from "../helpers/ink";
 
 const scratch = join(import.meta.dirname, "..", ".tmp", "browser-fonts");
@@ -27,7 +27,7 @@ beforeAll(() => {
 afterAll(() => rmSync(scratch, { recursive: true, force: true }));
 
 /** The width of a frame's text set in "Brand", which `brand` declares (or names), with these passed fonts. */
-async function width(name: string, brand: string, passed: readonly OverlayFont[] = []): Promise<number> {
+async function width(name: string, brand: string, passed: readonly FontFile[] = []): Promise<number> {
   const file = join(dir, `${name}.tsx`);
   writeFileSync(
     file,
@@ -53,7 +53,6 @@ export default function Video() {
     out,
     time: 0.5,
     source: loaded.source,
-    engine: "browser",
     fonts: passed,
   });
   return inkWidth(out);

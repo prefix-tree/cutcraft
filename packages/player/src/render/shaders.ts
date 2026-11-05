@@ -1,6 +1,6 @@
 // Runs the effects and transitions a file declares (`defineEffect()`, `defineTransition()`): each is a GLSL function the
 // runner wraps in a fragment shader with its params as uniforms, drawn over a full-frame triangle with WebGL 2. Where
-// there is no WebGL 2 (the Node export), `available` is false and the painter draws without them.
+// there is no WebGL 2, `available` is false and the painter draws without them.
 import type { ShaderPass, TransitionPass } from "../model/shaders";
 import type { AnyCanvas, CreateCanvas } from "../types";
 
@@ -78,7 +78,7 @@ export class ShaderRunner {
     private readonly createCanvas: CreateCanvas,
   ) {}
 
-  /** Whether WebGL 2 is there to run shaders; false in the Node export. */
+  /** Whether WebGL 2 is there to run shaders. */
   get available(): boolean {
     return this.context() !== null;
   }

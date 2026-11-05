@@ -5,6 +5,10 @@ The same three videos rendered by CutCraft, [Remotion](https://www.remotion.dev)
 1920×1080, 30 fps, 8 Mb/s, no audio. Each tool builds its version through its own
 public API and renders at its defaults.
 
+These numbers are for CutCraft's earlier Node export (CPU drawing, FFmpeg encoders), which has since been replaced
+by the export in headless Chrome ([Exporting](/guide/exporting)). The Chrome export has not been measured on these
+scenarios yet; this page will be redone when it is.
+
 | Scenario | What it is |
 |---|---|
 | cuts | Five four-second ranges of one 60-second 1080p H.264 file, back to back. Mostly decoding and encoding. |
@@ -63,9 +67,9 @@ Cuts are level with Diffusion Studio. A frame that is one source picture shown a
 to its encoder without being drawn, as WebCodecs frames do in Diffusion Studio's canvas pipeline. Remotion takes a
 screenshot of its page for every frame, which is why it is about ten times slower here.
 
-Diffusion Studio is ahead on crossfades and graphics. Every frame CutCraft has to draw is rasterised on the CPU and
-read back before encoding; Chrome draws Diffusion Studio's canvas on the GPU. A browser engine for CutCraft's
-export, the same plan and painter on a GPU canvas, is the planned answer.
+Diffusion Studio is ahead on crossfades and graphics. Every frame the Node export had to draw was rasterised on the
+CPU and read back before encoding; Chrome draws Diffusion Studio's canvas on the GPU. That is one reason the export
+now runs in Chrome.
 
 Hardware encoding helps CutCraft where the frame is drawn (crossfades and graphics); for cuts the software encoder
 at its balanced preset is faster still on this machine.

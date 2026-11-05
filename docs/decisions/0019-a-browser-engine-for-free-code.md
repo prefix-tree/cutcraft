@@ -2,6 +2,9 @@
 
 > Carries out the export half of [0018](./0018-free-code-in-a-timeline-skeleton.md). The Node engine of
 > [0015](./0015-a-headless-engine-renders-the-export.md) stays for every file it can draw.
+>
+> Done: [0021](./0021-one-export-engine.md) retired the Node engine, so this engine now draws every file, and mixes
+> the sound in the page.
 
 ## Context
 

@@ -5,34 +5,39 @@ import { parseArgs } from "node:util";
 import { subtitles } from "@cutcraft/kit";
 
 import { addAsset, describeAdded } from "./add";
+import { QUALITIES, type QualityName, type VideoCodec } from "./encoding";
+import type { FontFile, FontWeight } from "./fonts";
 import { checkLayout, formatLayout, type Insets, SAFE_ZONES, type SafeZoneName } from "./layout-check";
 import { loadVideo } from "./load";
 import { directoryResolver } from "./media";
-import type { FontWeight, OverlayFont } from "./overlays";
-import { defaultWorkers } from "./parallel";
-import { type Engine, renderVideo, type VideoCodec } from "./renderer";
-import { QUALITIES, type QualityName, type Speed } from "./segment";
+import { renderVideo } from "./renderer";
 import { renderStill } from "./still";
+import { browserCacheDir, CHROME_MILESTONE, installChrome } from "./web/chrome";
 
 /** --check-layout found issues: apart from 1 (an error) and 2 (usage), so a script can tell them apart. */
 const EXIT_LAYOUT_ISSUES = 3;
 
-const USAGE = `Usage: cutcraft <file.tsx> --out <video.webm|.mp4|.mov|.mp3|.wav> [options]
+const USAGE = `Usage: cutcraft <file.tsx> --out <video.mp4|.webm|.mp3|.wav> [options]
        cutcraft <file.tsx> --still <seconds> --out <image.png|.jpg> [options]
        cutcraft <file.tsx> --check-layout [--safe-zone <zone>] [--subject <x,y,w,h>] [--json] [options]
        cutcraft <file.tsx> --srt <captions.srt> | --vtt <captions.vtt> [--from <s> --to <s>]
        cutcraft add <media file>... [--manifest manifest.json] [--id <id>] [--transcript <file>]
+       cutcraft browser install
+
+  Every export draws its frames in Chrome. The first one downloads Chrome for Testing ${CHROME_MILESTONE} into
+  ~/.cache/cutcraft/browsers (or CUTCRAFT_BROWSER_CACHE); CUTCRAFT_CHROMIUM names a Chrome 153+ to use instead.
 
   add                   write each media file's entry into the manifest (default: manifest.json beside it): its
                         kind, length, size, frame rate and sound, read from the file, and its words from the
                         transcript beside it (talk.json from Whisper or ElevenLabs, talk.vtt or talk.srt)
   --id <id>             (add) the asset id; default the file name without its extension
   --transcript <file>   (add) a transcript other than the one beside the media
+  browser install       download Chrome for Testing now, rather than on the first export
   --srt <file>          also write the captions the cut plays as SRT, timed like the export (alone: only that)
   --vtt <file>          the same as WebVTT
 
-  --out <file>          where to write; the extension picks the container: .webm, .mp4, .mov (ProRes),
-                        or .mp3/.wav for the soundtrack alone
+  --out <file>          where to write; the extension picks the container: .mp4 (H.264 and AAC), .webm (VP9 and
+                        Opus), or .mp3/.wav for the soundtrack alone
   --still <s>           write the frame at this time as a PNG or JPEG instead of a video
   --check-layout        print every overlay that leaves the frame or the safe zone, or covers captions or the
                         subject: where it is in the file, when, and how to fix it, as a compiler does; writes no file
@@ -44,21 +49,17 @@ const USAGE = `Usage: cutcraft <file.tsx> --out <video.webm|.mp4|.mov|.mp3|.wav>
   --media <dir>         folder holding one file per asset id (default: the file's folder)
   --props <json>        props for the file's component
   --from <s> --to <s>   render only this part of the composition
-  --codec <name>        vp9 (default for webm), vp8, av1, avc (default for mp4), hevc, prores (default for mov)
+  --codec <name>        avc (default for .mp4), vp9 (default for .webm), or av1 in either
   --bitrate <bps>       video bits per second (default: about 0.1 per pixel per frame)
   --quality <preset>    very-low, low, medium, high or very-high, in place of --bitrate
-  --speed <s>           balanced (default), quality (x264's medium: smaller, about half as fast) or fast (real-time mode)
-  --software            encode H.264 and HEVC in software even where the machine has a hardware encoder
-  --workers <n>         render in n threads (default 1, this one; more rarely helps, as the encoder is threaded itself)
-  --copy                copy encoded pictures from the source where a cut shows nothing else (VP8/VP9 at the composition's
+  --tabs <n>            pages of the browser that render pieces at once (default 1)
+  --copy                copy encoded pictures from the source where a cut shows nothing else (VP9 at the composition's
                         size and rate), and render only the ends; fast for plain cuts
   --keyframe <seconds>  seconds between keyframes (default 2)
   --silent              no soundtrack
   --font <spec>         extra font for titles: Name=file.ttf, Name:700=file.ttf or Name:700:italic=file.ttf
   --import <spec>       a module the file may import beyond react, zod and the kit: three, or name=specifier
                         (a package, or a path relative to the file); the editor must offer the same modules
-  --engine <name>       what draws the pictures: auto (default: the browser for <Three>, <Motion> and motion blur,
-                        else node), node (no browser), or browser (headless Chromium; CUTCRAFT_CHROMIUM picks it)
   --continue            draw the grey placeholder for an asset that cannot be read, instead of failing
   --quiet               no progress
 `;
@@ -68,8 +69,7 @@ async function main(): Promise<number> {
     allowPositionals: true,
     options: {
       out: { type: "string" },
-      workers: { type: "string" },
-      speed: { type: "string" },
+      tabs: { type: "string" },
       keyframe: { type: "string" },
       manifest: { type: "string" },
       media: { type: "string" },
@@ -90,8 +90,6 @@ async function main(): Promise<number> {
       import: { type: "string", multiple: true },
       continue: { type: "boolean" },
       copy: { type: "boolean" },
-      engine: { type: "string" },
-      software: { type: "boolean" },
       quiet: { type: "boolean" },
       help: { type: "boolean", short: "h" },
       id: { type: "string" },
@@ -101,6 +99,15 @@ async function main(): Promise<number> {
     },
   });
   if (positionals[0] === "add") return add(positionals.slice(1), values);
+  if (positionals[0] === "browser") {
+    if (positionals[1] !== "install") {
+      process.stderr.write(USAGE);
+      return 2;
+    }
+    const path = await installChrome((m) => process.stderr.write(`${m}\n`));
+    process.stderr.write(`Chrome is at ${path} (cache: ${browserCacheDir()})\n`);
+    return 0;
+  }
   const [file] = positionals;
   const subtitlesOnly = !values.out && !values["check-layout"] && Boolean(values.srt || values.vtt);
   if (values.help || !file || (!values.out && !values["check-layout"] && !subtitlesOnly)) {
@@ -132,37 +139,34 @@ async function main(): Promise<number> {
   }
   if (subtitlesOnly) return 0;
   const fonts = (values.font ?? []).map(readFont);
+  const common = {
+    state: loaded.state,
+    source: loaded.source,
+    media,
+    fonts,
+    onLog: (m: string) => process.stderr.write(`${m}\n`),
+  };
   if (values["check-layout"]) {
     const result = await checkLayout({
-      state: loaded.state,
-      media,
-      interiors: loaded.interiors,
-      fonts,
+      ...common,
+      source: { ...loaded.source, file },
       ...(values["safe-zone"] ? { safeZone: readZone(values["safe-zone"]) } : {}),
       ...(values.subject ? { subject: readSubject(values.subject) } : {}),
       ...(values.step ? { step: Number(values.step) } : {}),
       ...(values.from ? { from: Number(values.from) } : {}),
       ...(values.to ? { to: Number(values.to) } : {}),
-      source: { file, text: readFileSync(file, "utf8") },
     });
     process.stdout.write(values.json ? `${JSON.stringify(result, null, 2)}\n` : formatLayout(result));
     return result.issues.length > 0 ? EXIT_LAYOUT_ISSUES : 0;
   }
   const out = values.out as string; // the usage check above: only --check-layout runs without --out
-  if (values.engine !== undefined && !["auto", "node", "browser"].includes(values.engine))
-    throw new Error(`--engine wants auto, node or browser, got "${values.engine}"`);
-  const engine = { engine: (values.engine ?? "auto") as Engine, source: loaded.source };
   if (values.still !== undefined) {
     const time = Number(values.still);
     if (!Number.isFinite(time)) throw new Error(`--still wants seconds, got "${values.still}"`);
     const still = await renderStill({
-      state: loaded.state,
-      media,
+      ...common,
       out: resolve(out),
-      interiors: loaded.interiors,
       time,
-      fonts,
-      ...engine,
       ...(values.continue ? { onAssetError: "continue" as const } : {}),
     });
     for (const w of still.warnings) process.stderr.write(`warning: ${w}\n`);
@@ -173,46 +177,31 @@ async function main(): Promise<number> {
     throw new Error(`--quality wants ${Object.keys(QUALITIES).join(", ")}, got "${values.quality}"`);
   if (values.quality !== undefined && values.bitrate !== undefined)
     throw new Error("--quality and --bitrate both set the size; pass one");
+  if (values.codec !== undefined && !["avc", "vp9", "av1"].includes(values.codec))
+    throw new Error(`--codec wants avc, vp9 or av1, got "${values.codec}"`);
+  const tabs = values.tabs === undefined ? 1 : Math.floor(Number(values.tabs));
+  if (!(tabs >= 1)) throw new Error(`--tabs wants a number of pages, got "${values.tabs}"`);
   const tty = process.stderr.isTTY && !values.quiet;
-  const workers = values.workers === undefined ? defaultWorkers() : Math.max(1, Math.floor(Number(values.workers)));
-  if (!Number.isFinite(workers)) throw new Error(`--workers wants a number, got "${values.workers}"`);
-  if (values.speed !== undefined && !["quality", "balanced", "fast"].includes(values.speed))
-    throw new Error(`--speed wants quality, balanced or fast, got "${values.speed}"`);
   const result = await renderVideo({
-    state: loaded.state,
-    media,
+    ...common,
     out: resolve(out),
-    interiors: loaded.interiors,
+    tabs,
     ...(values.from ? { from: Number(values.from) } : {}),
     ...(values.to ? { to: Number(values.to) } : {}),
     ...(values.codec ? { videoCodec: values.codec as VideoCodec } : {}),
     ...(values.bitrate ? { bitrate: Number(values.bitrate) } : {}),
     ...(values.quality ? { quality: values.quality as QualityName } : {}),
     ...(values.silent ? { silent: true } : {}),
-    ...(values.speed ? { speed: values.speed as Speed } : {}),
     ...(values.copy ? { smartCopy: true } : {}),
-    ...(values.software ? { hardware: false } : {}),
     ...(values.keyframe ? { keyFrameInterval: Number(values.keyframe) } : {}),
-    ...(workers > 1
-      ? {
-          parallel: {
-            file: resolve(file),
-            load: loadOptions,
-            mediaDir: resolve(values.media ?? dirname(file)),
-            workers,
-          },
-        }
-      : {}),
     ...(values.continue ? { onAssetError: "continue" as const } : {}),
-    ...engine,
-    fonts,
     onProgress: tty ? (p) => process.stderr.write(`\rframe ${p.frame}/${p.frames}`) : () => undefined,
   });
   if (tty) process.stderr.write("\n");
   for (const w of result.warnings) process.stderr.write(`warning: ${w}\n`);
   const seconds = (result.wallMs / 1000).toFixed(1);
   process.stderr.write(
-    `${values.out}: ${result.frames} frames, ${result.width}x${result.height} at ${result.fps} fps${result.audio ? ", with sound" : ""}, in ${seconds}s${result.workers > 1 ? ` on ${result.workers} threads` : ""}${result.copiedFrames > 0 ? `, ${result.copiedFrames} frames copied` : ""} (${(result.frames / (result.wallMs / 1000)).toFixed(1)} fps)\n`,
+    `${values.out}: ${result.frames} frames, ${result.width}x${result.height} at ${result.fps} fps${result.audio ? ", with sound" : ""}, in ${seconds}s${result.tabs > 1 ? ` on ${result.tabs} tabs` : ""}${result.copiedFrames > 0 ? `, ${result.copiedFrames} frames copied` : ""} (${(result.frames / (result.wallMs / 1000)).toFixed(1)} fps)\n`,
   );
   return 0;
 }
@@ -260,7 +249,7 @@ async function add(
   return 0;
 }
 
-function readFont(spec: string): OverlayFont {
+function readFont(spec: string): FontFile {
   const eq = spec.indexOf("=");
   if (eq < 1) throw new Error(`--font wants Name=file, got "${spec}"`);
   const [name = "", weight, style] = spec.slice(0, eq).split(":");

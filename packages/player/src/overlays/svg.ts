@@ -412,7 +412,7 @@ function colorFilter(color: SvgColor | undefined, id: string, region: SvgViewBox
 }
 
 /** A CSS colour as 0..1 channels; named colours other than black and white count as white. */
-export function rgb(color: string): [number, number, number] {
+function rgb(color: string): [number, number, number] {
   const c = color.trim().toLowerCase();
   const hex = c.match(/^#([0-9a-f]{3,8})$/);
   if (hex) {

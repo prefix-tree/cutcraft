@@ -42,7 +42,7 @@ export function envelopeAt(points: readonly GainPoint[], t: number, fallback: nu
  * binary search, exact for the piecewise linear envelope that Web Audio
  * automates), or `(t - compStart) * speed` without one.
  */
-export function playedAt(o: AudioOccurrence): (t: number) => number {
+function playedAt(o: AudioOccurrence): (t: number) => number {
   const r = o.rate;
   if (!r || r.length === 0) return (t) => (t - o.compStart) * o.speed;
   const n = r.length;

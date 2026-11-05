@@ -4,7 +4,7 @@ import { type Browser, chromium } from "@playwright/test";
 
 import type { AudioOccurrence } from "@cutcraft/player/engine";
 
-import { mixBlock, type PcmBuffer } from "../../src";
+import { findChrome, mixBlock, type PcmBuffer } from "../../src";
 
 const RATE = 48000;
 const SECONDS = 2;
@@ -215,8 +215,8 @@ function crossings(a: ArrayLike<number>, from: number, to: number): number {
 
 let browser: Browser;
 beforeAll(async () => {
-  browser = await chromium.launch();
-}, 60_000);
+  browser = await chromium.launch({ executablePath: await findChrome() });
+}, 600_000);
 afterAll(async () => {
   await browser.close();
 });

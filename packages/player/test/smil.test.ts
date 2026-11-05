@@ -1,4 +1,5 @@
-import { clock, freezeSmil, interpolate, parseSvg, prepareSvg, serialize } from "../src/overlays";
+import { clock, freezeSmil, interpolate } from "../src/overlays/smil";
+import { parseSvg, prepareSvg, serialize } from "../src/overlays/svg";
 
 const frozen = (markup: string, t: number, warnings: string[] = []) =>
   serialize(freezeSmil(parseSvg(markup).root!, t, warnings));

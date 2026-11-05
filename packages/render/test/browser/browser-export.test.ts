@@ -1,5 +1,5 @@
-// The browser engine: <Three> and <Motion> export as the player shows them, frame by frame, with the sound the Node
-// engine mixes. Needs a Chrome or Chromium 153+ in CUTCRAFT_CHROMIUM (Playwright's pinned Chromium is too old for
+// The export engine: <Three> and <Motion> export as the player shows them, frame by frame, and pieces rendered on
+// several pages join into the same file as one page writes. Needs a Chrome or Chromium 153+ in CUTCRAFT_CHROMIUM (Playwright's pinned Chromium is too old for
 // drawElementImage).
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -127,7 +127,7 @@ it("writes a still of a three.js frame", async () => {
   expect(readFileSync(out).subarray(1, 4).toString()).toBe("PNG");
 });
 
-it("has the Node engine's sound, and pictures close to the Node engine's for a file both can draw", async () => {
+it("writes the same sound and pictures on several pages as on one", async () => {
   const file = cut(
     "plain.tsx",
     `import { Clip, Composition, Title, Track } from "@cutcraft/kit";
@@ -136,7 +136,7 @@ export default function Video() {
   return (
     <Composition fps={30} width={640} height={360}>
       <Track id="m"><Clip id="c" src="asset:bars" in={1} out={3} /></Track>
-      <Track id="o" layout="free"><Title id="t" start={0.2} duration={1.5}>Both engines</Title></Track>
+      <Track id="o" layout="free"><Title id="t" start={0.2} duration={1.5}>Three pages</Title></Track>
     </Composition>
   );
 }
@@ -144,31 +144,29 @@ export default function Video() {
   );
   const loaded = await loadVideo(file);
   const media = directoryResolver(mediaDir, loaded.manifest);
-  const viaBrowser = join(dir, "browser.mp4");
-  const viaNode = join(dir, "node.mp4");
+  const one = join(dir, "one.mp4");
+  const three = join(dir, "three.mp4");
+  const a = await renderVideo({ state: loaded.state, media, out: one, source: loaded.source, keyFrameInterval: 0.5 });
   const b = await renderVideo({
     state: loaded.state,
     media,
-    out: viaBrowser,
+    out: three,
     source: loaded.source,
-    engine: "browser",
+    keyFrameInterval: 0.5,
+    tabs: 3,
   });
-  const n = await renderVideo({ state: loaded.state, media, out: viaNode, engine: "node" });
-  expect(b.audio).toBe(true);
-  expect(n.audio).toBe(true);
-  // One mixer, so one soundtrack.
-  const sb = decodeAudio(viaBrowser);
-  const sn = decodeAudio(viaNode);
-  expect(sb.length).toBe(sn.length);
+  expect([a.audio, b.audio, a.frames, b.frames, b.tabs]).toEqual([true, true, 60, 60, 3]);
+  // The soundtrack is mixed once, so it is the same file's sound either way.
+  const sa = decodeAudio(one);
+  const sb = decodeAudio(three);
+  expect(sb.length).toBe(sa.length);
   let worst = 0;
-  for (let i = 0; i < sn.length; i++) worst = Math.max(worst, Math.abs((sb[i] as number) - (sn[i] as number)));
+  for (let i = 0; i < sa.length; i++) worst = Math.max(worst, Math.abs((sb[i] as number) - (sa[i] as number)));
   expect(worst).toBeLessThan(1e-3);
-  // Footage and a title: the same picture within the two encoders' and text renderers' differences.
-  const fb = await framesAt(viaBrowser, [1.0], 30);
-  const fn = await framesAt(viaNode, [1.0], 30);
-  const pb = fb.get(1.0) as DecodedFrame;
-  const pn = fn.get(1.0) as DecodedFrame;
+  // A frame inside a later piece: the same picture within the encoder's differences.
+  const fa = (await framesAt(one, [1.0], 30)).get(1.0) as DecodedFrame;
+  const fb = (await framesAt(three, [1.0], 30)).get(1.0) as DecodedFrame;
   let sum = 0;
-  for (let i = 0; i < pn.rgba.length; i++) sum += Math.abs((pb.rgba[i] as number) - (pn.rgba[i] as number));
-  expect(sum / pn.rgba.length).toBeLessThan(12);
+  for (let i = 0; i < fa.rgba.length; i++) sum += Math.abs((fb.rgba[i] as number) - (fa.rgba[i] as number));
+  expect(sum / fa.rgba.length).toBeLessThan(4);
 });
