@@ -11,8 +11,7 @@ import type { ElementProps } from "./layout";
 
 /**
  * What each overlay element draws, as a React tree with no hooks and no DOM
- * calls. The browser mounts these inside positioned divs; the Node renderer
- * hands the same trees to Satori and draws the result with the same layout.
+ * calls. The player mounts these inside positioned divs.
  */
 
 const SUPPORTED: ReadonlySet<string> = new Set(TEXT_ANIMATION_PRESETS);

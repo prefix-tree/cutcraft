@@ -43,7 +43,7 @@ export function svgDrawing(
 const tokensByTheme = new WeakMap<ResolvedTheme, Readonly<Record<string, string>>>();
 
 /** A theme's tokens as SVG attribute values. */
-export function themeTokens(theme: ResolvedTheme | undefined): Readonly<Record<string, string>> {
+function themeTokens(theme: ResolvedTheme | undefined): Readonly<Record<string, string>> {
   if (!theme) return {};
   let tokens = tokensByTheme.get(theme);
   if (!tokens) {

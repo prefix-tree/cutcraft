@@ -3,13 +3,10 @@ import { createRequire } from "node:module";
 import { dirname, isAbsolute, join, resolve as resolvePath } from "node:path";
 import { pathToFileURL } from "node:url";
 
-import type { ReactNode } from "react";
-
 import { type AssetManifest, collectModule, type ResolvedState, resolve } from "@cutcraft/kit";
 import { loadModule } from "@cutcraft/kit/source";
-import { indexLayerInteriors } from "@cutcraft/player/overlays";
 
-import type { BrowserSource } from "./renderer";
+import type { ExportSource } from "./renderer";
 
 export interface LoadOptions {
   /** A manifest file, or the manifest itself; default: the file's own `manifest` export. */
@@ -18,8 +15,7 @@ export interface LoadOptions {
   readonly props?: Readonly<Record<string, unknown>>;
   /**
    * Modules the file may import beyond react, zod and the kit, by the name it imports them as. Each value is a module
-   * specifier this host imports for it: a package name, or a path relative to the file's folder. A string, not the
-   * module, so the same options can cross into a render worker.
+   * specifier this host imports for it: a package name, or a path relative to the file's folder.
    */
   readonly imports?: Readonly<Record<string, string>>;
 }
@@ -27,10 +23,8 @@ export interface LoadOptions {
 export interface LoadedVideo {
   readonly state: ResolvedState;
   readonly manifest: AssetManifest;
-  /** The children of each `<Layer id>`, for `renderVideo`. */
-  readonly interiors: ReadonlyMap<string, ReactNode>;
-  /** The file's text, manifest and props, for `renderVideo`'s browser engine, which loads the file itself. */
-  readonly source: BrowserSource;
+  /** The file's text, manifest and props, for `renderVideo`: the export page loads the file itself. */
+  readonly source: ExportSource;
 }
 
 /**
@@ -45,11 +39,9 @@ export async function loadVideo(file: string, options: LoadOptions = {}): Promis
   const mod = loadModule(text, { imports });
   const manifest = readManifest(options.manifest, mod as unknown as Record<string, unknown>, file);
   const state = resolve(collectModule(mod as never, options.props ?? {}), manifest);
-  const element = mod.default({ ...(mod.defaults ?? {}), ...(options.props ?? {}) });
   return {
     state,
     manifest,
-    interiors: indexLayerInteriors(element),
     source: { text, manifest, ...(options.props ? { props: options.props } : {}) },
   };
 }

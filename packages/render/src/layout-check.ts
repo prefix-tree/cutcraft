@@ -1,5 +1,3 @@
-import type { ReactNode } from "react";
-
 import { lookupAsset, type ResolvedState, type SubjectBox } from "@cutcraft/kit";
 import { buildSourceIndex, type SourceIndex } from "@cutcraft/kit/source";
 import {
@@ -12,9 +10,9 @@ import {
   type MediaResolver,
 } from "@cutcraft/player/engine";
 
-import { initEnv } from "./env";
-import { loadFonts } from "./fonts";
-import { type OverlayBounds, type OverlayFont, OverlayPlane } from "./overlays";
+import type { FontFile } from "./fonts";
+import { type ExportSource, openEngine } from "./renderer";
+import type { InkBounds as OverlayBounds } from "./web/page/protocol";
 
 /** Margins as fractions of the frame's height (top, bottom) and width (left, right). */
 export interface Insets {
@@ -86,8 +84,9 @@ export interface SourceSpot {
 export interface LayoutCheckOptions {
   readonly state: ResolvedState;
   readonly media: MediaResolver;
-  readonly interiors?: ReadonlyMap<string, ReactNode>;
-  readonly fonts?: readonly OverlayFont[];
+  /** The file the state came from (`loadVideo` returns it), with its path as issues should print it. */
+  readonly source: ExportSource & { readonly file?: string };
+  readonly fonts?: readonly FontFile[];
   /** A named zone or margins of your own; default `title-safe`. */
   readonly safeZone?: SafeZoneName | Insets;
   /** Where the subject is, as fractions of the frame, while footage shows whose manifest entry has no `subjects`. */
@@ -96,8 +95,8 @@ export interface LayoutCheckOptions {
   readonly step?: number;
   readonly from?: number;
   readonly to?: number;
-  /** The cut file's path (as it should be printed) and text, to point each issue at its place in the JSX. */
-  readonly source?: { readonly file: string; readonly text: string };
+  /** Progress while Chrome is being downloaded, on the first run. */
+  readonly onLog?: (message: string) => void;
 }
 
 export interface LayoutCheckResult {
@@ -122,7 +121,6 @@ type Run = { -readonly [K in keyof LayoutIssue]: LayoutIssue[K] } & { n: number;
  * are not checked; neither is a moment where an element is fainter than 10%.
  */
 export async function checkLayout(options: LayoutCheckOptions): Promise<LayoutCheckResult> {
-  initEnv();
   const { state } = options;
   const { fps, width: W, height: H, duration } = state.composition;
   for (const k of ["step", "from", "to"] as const) {
@@ -143,13 +141,8 @@ export async function checkLayout(options: LayoutCheckOptions): Promise<LayoutCh
   captureWarnings((m) => {
     if (!warnings.includes(m)) warnings.push(m);
   });
-  const plane = new OverlayPlane({
-    state,
-    media: options.media,
-    warn: (m) => warnings.push(m),
-    ...(options.interiors ? { interiors: options.interiors } : {}),
-    fonts: [...(await loadFonts(state.fonts, options.media)), ...(options.fonts ?? [])],
-  });
+  // The export page measures each overlay's ink in the frame the export would draw.
+  const engine = await openEngine({ ...options, warnings });
   const issues: Run[] = [];
   const open = new Map<string, Run>();
   /** Records a breach at frame `n` with its size (`worst` decides the moment the issue describes). */
@@ -193,7 +186,7 @@ export async function checkLayout(options: LayoutCheckOptions): Promise<LayoutCh
     for (let n = first; n < last; n += step) {
       samples++;
       const t = n / fps;
-      const shown = (await plane.bounds(t)).filter((b) => !b.backdrop && !covers(b.rect, frame));
+      const shown = (await engine.bounds(t)).filter((b) => !b.backdrop && !covers(b.rect, frame));
       const captions = shown.filter((b) => b.kind === "captions");
       const subjects = subjectRects(state, t, options.subject);
       for (const b of shown) {
@@ -217,7 +210,7 @@ export async function checkLayout(options: LayoutCheckOptions): Promise<LayoutCh
       }
     }
   } finally {
-    plane.dispose();
+    await engine.close();
     captureWarnings(null);
   }
   const ms = (t: number): number => Math.round(t * 1000) / 1000;
@@ -231,7 +224,7 @@ export async function checkLayout(options: LayoutCheckOptions): Promise<LayoutCh
       box: rounded(issue.box),
       area: rounded(issue.area),
     });
-    const spot = options.source && index ? locate(options.source.file, index, state, issue.id, issue.kind) : null;
+    const spot = options.source.file && index ? locate(options.source.file, index, state, issue.id, issue.kind) : null;
     return spot ? { ...described, source: spot } : described;
   });
   // As a compiler lists them: by place in the file, then by time; issues with no place come last, by time.

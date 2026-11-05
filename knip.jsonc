@@ -14,23 +14,16 @@
       "entry": ["src/index.ts", "src/source/index-public.ts", "scripts/*.ts", "fixtures/*.tsx"]
     },
     "packages/player": {
-      "entry": ["src/index.ts", "src/engine.ts", "src/overlays.ts", "e2e/**/*.{ts,tsx}"],
+      "entry": ["src/index.ts", "src/engine.ts", "e2e/**/*.{ts,tsx}"],
       // Loaded by fonts.css, which the package exports for the page to import.
       "ignoreDependencies": ["@fontsource/.+"]
     },
     "packages/render": {
-      "entry": [
-        "src/index.ts",
-        "src/cli.ts",
-        "src/worker.ts",
-        "src/worker-entry.mjs",
-        "bench/**/*.{ts,tsx}",
-        "scripts/*.ts"
-      ],
+      "entry": ["bench/**/*.{ts,tsx}"],
       // Throwaway measurement code (spike/README.md).
       "ignore": ["spike/**"],
-      // Font files are found by package name at run time (overlays.ts); the plugin builds the spike's page.
-      "ignoreDependencies": ["@fontsource/.+", "@vitejs/plugin-react"]
+      // Vite pre-bundles zod for the export page (src/web/server.ts), which loads cut files that import it.
+      "ignoreDependencies": ["zod"]
     },
     "packages/graphics": {
       "entry": ["test/**/*.{ts,tsx}"]

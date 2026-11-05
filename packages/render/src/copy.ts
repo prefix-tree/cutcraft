@@ -8,18 +8,20 @@ import {
   type InputVideoTrack,
 } from "mediabunny";
 
-import type { ResolvedState } from "@cutcraft/kit";
+import { motionBlurOf, type ResolvedState } from "@cutcraft/kit";
 import {
   buildFramePlan,
   coversCanvas,
+  isVisibleAt,
   type MediaResolver,
   makeNestedResolver,
+  OVERLAY_KINDS,
   PICK_EPS,
+  visiblePlacements,
 } from "@cutcraft/player/engine";
 
-import type { OverlayPlane } from "./overlays";
-import { compatibleConfig } from "./parallel";
-import type { VideoCodec } from "./segment";
+import type { VideoCodec } from "./encoding";
+import { compatibleConfig } from "./join";
 
 /**
  * Smart copy: where the picture is nothing but a stretch of one source file, shown as it is, the encoded packets
@@ -40,7 +42,7 @@ export interface CopyRun {
   readonly sourceFirst: number;
 }
 
-export interface RenderRun {
+interface RenderRun {
   readonly kind: "render";
   readonly first: number;
   readonly last: number;
@@ -55,7 +57,7 @@ export interface CopyPlan {
 }
 
 /** Codecs whose packets are one picture each and carry what they need in-stream, so pieces from different encoders join. */
-const COPYABLE: ReadonlySet<VideoCodec> = new Set<VideoCodec>(["vp8", "vp9"]);
+const COPYABLE: ReadonlySet<VideoCodec> = new Set<VideoCodec>(["vp9"]);
 
 interface Stretch {
   asset: string;
@@ -67,7 +69,6 @@ interface Stretch {
 export async function planCopy(options: {
   readonly state: ResolvedState;
   readonly media: MediaResolver;
-  readonly overlays: OverlayPlane;
   readonly codec: VideoCodec;
   /** Output frames [first, last) to plan. */
   readonly first: number;
@@ -77,7 +78,8 @@ export async function planCopy(options: {
 }): Promise<CopyPlan> {
   const { state, first, last } = options;
   const whole: CopyPlan = { runs: [{ kind: "render", first, last }], copied: 0 };
-  if (!COPYABLE.has(options.codec)) return whole;
+  // Motion blur changes every moving picture, footage included: nothing is copied as it is.
+  if (!COPYABLE.has(options.codec) || motionBlurOf(state)) return whole;
   const min = options.minFrames ?? 15;
   const { fps, width, height } = state.composition;
   const resolveNested = makeNestedResolver(() => state);
@@ -87,7 +89,7 @@ export async function planCopy(options: {
   let cur: Stretch | null = null;
   for (let n = first; n < last; n++) {
     const t = n / fps;
-    const shown = options.overlays.hasOverlays(t) ? null : plainFrame(state, t, width, height, fps, resolveNested);
+    const shown = hasOverlays(state, t) ? null : plainFrame(state, t, width, height, fps, resolveNested);
     if (shown && cur && shown.asset === cur.asset && shown.frame === cur.sourceFirst + (n - cur.first))
       cur.last = n + 1;
     else {
@@ -238,4 +240,10 @@ export async function feedCopy(
   } finally {
     input.dispose();
   }
+}
+
+/** Whether anything but footage shows at `t`: an overlay element, or a caption line. */
+function hasOverlays(state: ResolvedState, t: number): boolean {
+  if (visiblePlacements(state, t).some((v) => OVERLAY_KINDS.has(v.placement.kind))) return true;
+  return [...state.items.values()].some((p) => p.kind === "caption" && isVisibleAt(p, t, state.composition.duration));
 }

@@ -1,6 +1,6 @@
 import type { ResolvedState } from "@cutcraft/kit";
 
-/** Kinds the overlay plane draws (as DOM in the preview, through Satori and skia in the export) rather than the canvas. */
+/** Kinds the overlay plane draws (as DOM, in the preview and the export) rather than the canvas. */
 export const OVERLAY_KINDS: ReadonlySet<string> = new Set([
   "title",
   "shape",

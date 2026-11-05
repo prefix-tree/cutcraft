@@ -1,4 +1,4 @@
-import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { createRequire } from "node:module";
 import { join } from "node:path";
 
@@ -6,9 +6,8 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import type { DeclaredFont } from "@cutcraft/kit";
 
-import { directoryResolver, loadVideo, renderStill } from "../src";
+import { directoryResolver } from "../src";
 import { googleCssUrl, loadFonts } from "../src/fonts";
-import { inkWidth } from "./helpers/ink";
 
 const scratch = join(import.meta.dirname, ".tmp", "fonts");
 let dir = "";
@@ -43,9 +42,8 @@ describe("loadFonts", () => {
     expect(Buffer.compare(font?.data as Buffer, readFileSync(BRAND_WOFF))).toBe(0);
   });
 
-  it("refuses WOFF2 for the Node export only, and says why a face cannot be read", async () => {
-    await expect(loadFonts([asset("brand2")], media())).rejects.toThrow(/font "Brand" is WOFF2/);
-    await expect(loadFonts([asset("brand2")], media(), { woff2: true })).resolves.toHaveLength(1);
+  it("reads WOFF2, and says why a face cannot be read", async () => {
+    await expect(loadFonts([asset("brand2")], media())).resolves.toHaveLength(1);
     await expect(loadFonts([asset("nope")], media())).rejects.toThrow(/font "asset:nope": no media file/);
   });
 
@@ -87,35 +85,5 @@ describe("loadFonts", () => {
     expect(googleCssUrl({ family: "Inter Tight", weight: 700, style: "normal" })).toBe(
       "https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,700",
     );
-  });
-});
-
-describe("fonts declared in the file", () => {
-  /** The width of six i's in "Brand", with the file declaring the font or not. */
-  async function width(name: string, declare: boolean): Promise<number> {
-    const file = join(dir, `${name}.tsx`);
-    writeFileSync(
-      file,
-      `import { Composition, font, Title, Track } from "@cutcraft/kit";
-export const manifest = { assets: {} };
-const brand = ${declare ? `font({ family: "Brand", src: "asset:brand" })` : `"Brand"`};
-export default function Video() {
-  return (
-    <Composition fps={30} width={640} height={360}>
-      <Track id="o" layout="free"><Title id="t" start={0} duration={1} font={brand} size={72}>iiiiii</Title></Track>
-    </Composition>
-  );
-}
-`,
-    );
-    const loaded = await loadVideo(file);
-    const out = join(dir, `${name}.png`);
-    await renderStill({ state: loaded.state, media: directoryResolver(dir, loaded.manifest), out, time: 0.5 });
-    return inkWidth(out);
-  }
-
-  it("sets a title in a font the file declares, which the export otherwise replaces with Inter", async () => {
-    // Six i's: narrow in Inter, a full monospace advance each in Brand.
-    expect(await width("declared", true)).toBeGreaterThan((await width("fallback", false)) * 1.5);
   });
 });

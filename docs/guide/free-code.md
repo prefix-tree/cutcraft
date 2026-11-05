@@ -210,9 +210,8 @@ Keep `defineEffect()` and `defineTransition()` at the top of the file with a lit
 editor and lint can read them; the `declaration` lint ([Lint](/guide/editing#lint)) says when one is not. The editor's
 [actions](/reference/actions) take the names too, for example `effect/add` and `transition/update`.
 
-The player draws these shaders with WebGL in any browser. The export draws them through the
-[browser engine](/guide/exporting#three-js-and-motion-the-browser-engine), which a file that uses one picks on its own.
-`--engine node` has no WebGL, so it leaves them out and warns.
+The player draws these shaders with WebGL in any browser, and the export draws them the same way, in the
+[Chrome it runs in](/guide/exporting#the-browser-it-runs-in).
 
 ## Libraries
 
@@ -234,8 +233,6 @@ way: add it to `imports` under the name the file imports. The export takes the s
 
 ## In the export
 
-The player draws all of this, and so does the export. A file with `<Three>`, `<Motion>` or a declared shader exports through the
-[browser engine](/guide/exporting#three-js-and-motion-the-browser-engine): the real player in headless Chromium, frame
-by frame, with the same sound. Other files export in Node, which draws a Layer with
-[Satori](https://github.com/vercel/satori), a subset of CSS (flexbox, no hooks beyond `useT()` and `useLayer()`), and
-warns about what it leaves out; `--engine browser` draws such a Layer in full.
+The player draws all of this, and so does the export, because the export is the player: it runs in headless Chrome,
+frame by frame, with the same sound ([Exporting](/guide/exporting)). A Layer can use any CSS and any React the
+preview can.

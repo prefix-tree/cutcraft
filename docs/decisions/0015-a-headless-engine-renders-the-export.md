@@ -1,6 +1,8 @@
 # 0015. A headless engine renders the export
 
 > Supersedes the export half of [0007](./0007-the-browser-renders.md). The preview is still the browser's; the export no longer runs one.
+>
+> Superseded by [0021](./0021-one-export-engine.md): the export runs the player in Chrome again, and this engine is gone.
 
 ## Context
 

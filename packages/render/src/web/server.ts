@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 
 import type { MediaResolver } from "@cutcraft/player/engine";
 
-import type { OverlayFont } from "../overlays";
+import type { FontFile } from "../fonts";
 import type { PageJob } from "./page/protocol";
 
 const TYPES: Readonly<Record<string, string>> = {
@@ -36,6 +36,8 @@ const TYPES: Readonly<Record<string, string>> = {
 
 export interface PageServer {
   readonly url: string;
+  /** Why media the page asked for could not be served: the resolver's own messages, which the page sees only as a 500. */
+  readonly mediaErrors: readonly string[];
   close(): Promise<void>;
 }
 
@@ -49,7 +51,7 @@ const fromSource = !builtPage && import.meta.url.endsWith(".ts");
 export async function servePage(
   job: Omit<PageJob, "fonts">,
   media: MediaResolver,
-  fonts: readonly OverlayFont[] = [],
+  fonts: readonly FontFile[] = [],
 ): Promise<PageServer> {
   const page: PageJob = {
     ...job,
@@ -60,6 +62,7 @@ export async function servePage(
       url: `/fonts/${i}`,
     })),
   };
+  const mediaErrors: string[] = [];
   const vite = fromSource ? await sourcePage() : null;
   const built = fromSource
     ? null
@@ -91,7 +94,11 @@ export async function servePage(
       return;
     }
     if (path.startsWith("/media/")) {
-      await sendMedia(req, res, media, path.slice("/media/".length));
+      await sendMedia(req, res, media, path.slice("/media/".length)).catch((error: unknown) => {
+        const message = error instanceof Error ? error.message : String(error);
+        if (!mediaErrors.includes(message)) mediaErrors.push(message);
+        throw error;
+      });
       return;
     }
     if (vite) {
@@ -113,6 +120,7 @@ export async function servePage(
   const { port } = server.address() as AddressInfo;
   return {
     url: `http://127.0.0.1:${port}/`,
+    mediaErrors,
     close: async () => {
       await vite?.close();
       await closeServer(server);
@@ -139,7 +147,7 @@ async function sourcePage(): Promise<Middlewares> {
     plugins: [react()],
     resolve: { dedupe: ["react", "react-dom"] },
     define: { "process.env": "{}" },
-    server: { middlewareMode: true, hmr: false, fs: { allow: [repo] } },
+    server: { middlewareMode: true, hmr: false, ws: false, fs: { allow: [repo] } },
     optimizeDeps: { include: ["react", "react-dom/client", "mediabunny", "zod", "three", "motion"] },
   });
 }

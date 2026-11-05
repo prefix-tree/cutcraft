@@ -1,6 +1,6 @@
 // Renders each showcase file for the documentation site: a looping WebM and a poster frame in docs/public/showcase,
-// through the same loader and renderer as `cutcraft`. A file that does not resolve cleanly stops the run. Files with
-// <Three> or <Motion> render with the browser engine, which needs Chrome or Chromium 153+ (CUTCRAFT_CHROMIUM).
+// through the same loader and renderer as `cutcraft`. A file that does not resolve cleanly stops the run. The export runs in
+// headless Chrome, downloaded on the first run.
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
 
@@ -21,7 +21,6 @@ for (const [name, poster] of Object.entries(FILES)) {
   const result = await renderVideo({
     state: video.state,
     media,
-    interiors: video.interiors,
     out: join(out, `${name}.webm`),
     silent: true,
     quality: "medium",
@@ -31,7 +30,6 @@ for (const [name, poster] of Object.entries(FILES)) {
   await renderStill({
     state: video.state,
     media,
-    interiors: video.interiors,
     out: join(out, `${name}.jpg`),
     time: poster,
     source: video.source,

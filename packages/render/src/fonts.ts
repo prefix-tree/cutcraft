@@ -6,7 +6,15 @@ import { join } from "node:path";
 import type { DeclaredFont } from "@cutcraft/kit";
 import type { MediaResolver } from "@cutcraft/player/engine";
 
-import type { FontWeight, OverlayFont } from "./overlays";
+export type FontWeight = 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900;
+
+/** A font file to set text in: the export page adds it to the page's fonts under `name`. */
+export interface FontFile {
+  readonly name: string;
+  readonly data: Buffer | ArrayBuffer;
+  readonly weight?: FontWeight;
+  readonly style?: "normal" | "italic";
+}
 
 export interface FontOptions {
   /** Where Google Fonts files are kept once downloaded; default `CUTCRAFT_FONT_CACHE`, then `~/.cache/cutcraft/fonts`. */
@@ -16,24 +24,19 @@ export interface FontOptions {
 }
 
 /**
- * The faces a file declares (`state.fonts`), as bytes the overlay plane takes. An `asset:` face is read through the
- * media resolver; a Google face is downloaded once (Google serves TTF to a client that is not a browser) and read from
- * the cache after that. Satori, which sets the export's text, reads TTF, OTF and WOFF; a WOFF2 file is refused with a
- * message saying so, unless `woff2` is allowed (the browser engine reads it).
+ * The faces a file declares (`state.fonts`), as bytes the export page adds to its fonts. An `asset:` face is read
+ * through the media resolver; a Google face is downloaded once (Google serves TTF to a client that is not a browser)
+ * and read from the cache after that, so an export needs no network once the cache has it.
  */
 export async function loadFonts(
   faces: readonly DeclaredFont[],
   media: MediaResolver,
-  options: FontOptions & { readonly woff2?: boolean } = {},
-): Promise<OverlayFont[]> {
+  options: FontOptions = {},
+): Promise<FontFile[]> {
   return Promise.all(
-    faces.map(async (face): Promise<OverlayFont> => {
+    faces.map(async (face): Promise<FontFile> => {
       const data =
         face.source.kind === "asset" ? await assetBytes(face.source.id, media) : await googleBytes(face, options);
-      if (!options.woff2 && data.subarray(0, 4).toString("latin1") === "wOF2")
-        throw new Error(
-          `font "${face.family}" is WOFF2, which the Node export cannot read; use its TTF, OTF or WOFF file`,
-        );
       return { name: face.family, data, weight: face.weight as FontWeight, style: face.style };
     }),
   );

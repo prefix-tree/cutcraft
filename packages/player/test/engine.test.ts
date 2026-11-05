@@ -65,29 +65,3 @@ describe("@cutcraft/player/engine", () => {
     expect(engine).not.toHaveProperty("Player");
   });
 });
-
-describe("@cutcraft/player/overlays", () => {
-  it("reaches no hooks, react-dom, React layer or browser globals, so Node can render it", async () => {
-    const files = reachable(join(src, "overlays.ts"));
-    expect(files.length).toBeGreaterThan(5);
-    expect(files.filter((f) => f.includes(`${join(src, "react")}`))).toEqual([]);
-    for (const f of files) {
-      const text = readFileSync(f, "utf8");
-      expect(text, f).not.toMatch(/from\s+["']react-dom/);
-      expect(text, f).not.toMatch(/\buse(State|Effect|Context|Memo|Ref|Callback)\b/);
-      expect(text, f).not.toMatch(/\b(document|window)\./);
-    }
-    expect(typeof document).toBe("undefined");
-    const overlays = await import("../src/overlays");
-    for (const name of [
-      "overlayLayout",
-      "titleContent",
-      "shapeDrawing",
-      "prepareSvg",
-      "captionsContent",
-      "layerContent",
-      "indexLayerInteriors",
-    ])
-      expect(overlays, name).toHaveProperty(name);
-  });
-});

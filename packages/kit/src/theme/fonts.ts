@@ -1,6 +1,6 @@
 /**
- * The font families every renderer ships: the export hands them to Satori and
- * the preview loads them from `@cutcraft/player/fonts.css`. All are under the SIL
+ * The font families the player ships: the preview and the export load them
+ * from `@cutcraft/player/fonts.css`. All are under the SIL
  * Open Font License, from the `@fontsource` packages named here. Each comes in
  * regular and bold, and italic where the family has one.
  */
@@ -76,7 +76,7 @@ function declare(face: DeclaredFont): string {
  *   <Title id="hello" font={brand}>Hello</Title>
  *
  * `src: "asset:brand"` finds `brand.ttf` (or `.otf`, `.woff`, `.woff2`) where the export finds media, and asks the
- * player's `media` for `brand`. The Node export reads TTF, OTF and WOFF, not WOFF2.
+ * player's `media` for `brand`.
  */
 export function font(options: {
   readonly family: string;

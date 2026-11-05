@@ -1,6 +1,6 @@
 // Effects and transitions a file writes itself: a GLSL function and a zod schema for its params, declared at the top of
-// the file and used by name in <Effect type> or <Transition type>. The player and the browser export draw them with
-// WebGL; the Node export cannot and says so.
+// the file and used by name in <Effect type> or <Transition type>. The player draws them with WebGL, in the preview
+// and the export.
 import { type ZodObject, z } from "zod";
 
 import { TRANSITION_TYPES, VIDEO_EFFECT_TYPES } from "./enums";

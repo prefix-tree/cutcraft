@@ -146,16 +146,9 @@ three.js scene, and both run on the video's clock:
 </Motion>
 ```
 
-These need a browser to export: the export runs the real player in headless Chromium. Install `playwright-core` and
-point `CUTCRAFT_CHROMIUM` at Chrome or Chromium 153 or later:
-
-```sh
-npm install playwright-core
-CUTCRAFT_CHROMIUM=/path/to/chrome npx cutcraft video.tsx --manifest manifest.json --out video.mp4
-```
-
-A file without `<Three>` or `<Motion>` still exports without a browser. [Free code](./free-code) covers both tags, and
-the [examples](/examples) show four complete videos built with them.
+They export like everything else: the export runs the real player in headless Chrome, which the first export
+downloads. [Free code](./free-code) covers both tags, and the [examples](/examples) show four complete videos built
+with them.
 
 ## More commands
 

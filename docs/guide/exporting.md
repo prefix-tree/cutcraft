@@ -1,46 +1,36 @@
 # Exporting
 
-`@cutcraft/render` turns a file into a WebM, MP4 or MOV, a soundtrack (MP3 or WAV)
-or a still (PNG or JPEG). Most files export in Node, with no browser: the same engine as the preview (the plan, the
-painter, the compositor and the audio plan) on different surfaces, so what the preview shows is what the file holds.
-A file with `<Three>` or `<Motion>` exports through the real player in headless Chromium instead
-([below](#three-js-and-motion-the-browser-engine)).
+`@cutcraft/render` turns a file into an MP4 or WebM, a soundtrack (MP3 or WAV) or a still (PNG or JPEG). The export
+runs the real player in headless Chrome: it steps the file frame by frame, waits for every clip, title, three.js
+scene and Motion sequence to draw the frame, then captures and encodes it there with the browser's own encoders. The
+preview and the export are the same code, so what the preview shows is what the file holds.
 
 ## From the command line
 
 ```sh
 npm install cutcraft
-npx cutcraft video.tsx --manifest manifest.json --media ./media --out video.webm
+npx cutcraft video.tsx --manifest manifest.json --media ./media --out video.mp4
 ```
 
-`--out` picks the format by its extension: `.webm` (VP9 and Opus), `.mp4` (H.264 and AAC), `.mov` (ProRes and
-16-bit PCM), or `.mp3` and `.wav` for the soundtrack alone. `--still 2 --out poster.png` writes one frame. The
-manifest comes from `--manifest` or the file's own `manifest` export, and the media from `--media`, one file per
+`--out` picks the format by its extension: `.mp4` (H.264 and AAC), `.webm` (VP9 and Opus), or `.mp3` and `.wav` for
+the soundtrack alone. `--codec av1` writes AV1 in either container. `--still 2 --out poster.png` writes one frame.
+The manifest comes from `--manifest` or the file's own `manifest` export, and the media from `--media`, one file per
 asset id, or else the file's folder. The [CLI reference](/reference/cli) lists every option.
 
 The export loads a file the way the editor does: it may import `react`, `zod` and
 `@cutcraft/kit`, plus what `--import` offers. A file that imports anything else
 fails with the same message in both, so a file that exports also opens in the editor.
 
-## three.js and Motion: the browser engine
+## The browser it runs in
 
-`<Three>` and `<Motion>` need a browser. For a file that has them, the export runs the real player in headless
-Chromium: it steps the file frame by frame, waits for every three.js scene and Motion sequence to draw the frame, and
-captures and encodes it there. Node mixes the sound, so it is the same soundtrack the Node engine writes.
+The first export downloads Chrome for Testing into `~/.cache/cutcraft/browsers` once and reuses it
+after that. `npx cutcraft browser install` downloads it ahead of time, for a Docker image or a CI cache.
+`CUTCRAFT_BROWSER_CACHE` moves the cache, and `CUTCRAFT_CHROMIUM` names a Chrome or Chromium 153 or later to use
+instead of downloading one.
 
-```sh
-npm install cutcraft playwright-core
-CUTCRAFT_CHROMIUM=/path/to/chrome npx cutcraft launch.tsx --out launch.mp4
-```
-
-- `--engine auto` (the default) takes the browser only for a file with `<Three>`, `<Motion>`, motion blur or an
-  effect or transition it declares; every other file exports in Node as before. `--engine browser` forces it, for a `<Layer>` that needs more CSS than the Node engine
-  draws; `--engine node` never starts a browser (and leaves those layers out, with a warning).
-- It needs `playwright-core` and Chrome or Chromium 153 or later; `CUTCRAFT_CHROMIUM` names the binary, otherwise
-  Playwright's own browser is used.
-- It writes H.264 (`.mp4`) or VP9 (`.webm`), and PNG or JPEG stills; ProRes, HEVC and AV1 stay with the Node engine.
-- It is slower: about 6 frames a second at 1080p on a 4-core machine with no GPU, where WebGL runs in software, plus a
-  few seconds to start the browser. With a GPU it is much faster.
+The capture uses HTML-in-Canvas (`drawElementImage`), which Chrome ships behind a flag the export turns on. Without a
+GPU, WebGL runs in software: about 6 frames a second at 1080p on a 4-core machine for a file with three.js, plus a
+few seconds to start the browser. With a GPU it is much faster.
 
 ### Motion blur
 
@@ -58,8 +48,7 @@ so footage, titles, `<Motion>`, three.js and free code all blur the same way.
 looks natural, 90 is crisper and choppier, and 360 blurs the most. `samples` (2 to 64, default 8) trades smoothness for
 time, because the export draws that many pictures per frame: 8 samples take about eight times as long.
 
-The blur shows in exported videos and stills. The preview stays sharp, and `--engine node` leaves the blur out with a
-warning.
+The blur shows in exported videos and stills. The preview stays sharp.
 
 ## From code
 
@@ -67,20 +56,19 @@ warning.
 import { directoryResolver, loadVideo, renderStill, renderVideo } from "@cutcraft/render";
 
 const video = await loadVideo("video.tsx", { manifest: "manifest.json" });
+const media = directoryResolver("media", video.manifest);
 const result = await renderVideo({
   state: video.state,
-  media: directoryResolver("media", video.manifest),
-  interiors: video.interiors,           // the children of each <Layer>
-  out: "video.webm",
-  // Worker threads (rarely faster; see below) need the file, because each loads it for itself:
-  // parallel: { file: "video.tsx", load: { manifest: "manifest.json" }, mediaDir: "media", workers: 2 },
-  smartCopy: true,
+  source: video.source,                 // the file's text: the export page loads it, as the editor does
+  media,
+  out: "video.mp4",
+  tabs: 2,
   onProgress: ({ frame, frames }) => console.log(frame, frames),
 });
-// result: frames, fps, width, height, wallMs, workers, copiedFrames, stagesMs, warnings
+// result: frames, audio, fps, width, height, wallMs, tabs, copiedFrames, warnings
 
-// One frame, through the same pipeline:
-await renderStill({ state: video.state, media: directoryResolver("media", video.manifest), interiors: video.interiors, out: "poster.png", time: 2 });
+// One frame, the same way:
+await renderStill({ state: video.state, source: video.source, media, out: "poster.png", time: 2 });
 ```
 
 `renderVideo` stops with an error when an asset cannot be opened or decoded,
@@ -90,96 +78,46 @@ left out and why.
 
 ## What it draws
 
-Everything the preview draws. Footage, transitions, effects, crops, masks,
-blend modes and fades go through the same painter. Above them, in track order
-and with captions on top:
+Everything the preview draws, because it is the preview: footage, transitions, effects, crops, masks, blend modes,
+titles, shapes, SVG, stickers, layers with any CSS and React, captions, `<Three>`, `<Motion>`, and the effects and
+transitions a file declares in GLSL. A few limits remain, listed in [What renders](/reference/rendering), and the
+check reports each as a `not-rendered` warning.
 
-- Titles, layers and captions are laid out by [Satori](https://github.com/vercel/satori)
-  from the same React trees the browser mounts, then drawn with the element's
-  matrix, opacity, filter, blend and corner radius. Satori reads a subset of
-  CSS: flexbox, not grid, and no state or effects inside a layer (only
-  `useT()` and `useLayer()`). Put images in a layer as data URLs. An element
-  Satori cannot draw is left out with a warning that names it, and so are
-  `<Three>` and `<Motion>` for now ([Free code](/guide/free-code#in-the-export)).
-- Shapes and SVG are drawn as vectors (SVG through the same preparation as the
-  preview; see [Titles and graphics](/guide/titles-and-graphics#svg)), stickers and image assets as
-  images.
-- Fonts: Inter, Space Grotesk, Playfair Display, DM Sans and JetBrains
-  Mono are bundled (regular and bold, italic where the family has one; see
-  [Themes](/guide/themes#fonts)). A title that names another font is set in
-  Inter with a warning unless the file declares it (`font()`, `googleFont()`),
-  or you pass it with `--font`.
-- Sound is mixed by `mixPlan`, a pure function of the audio plan: volume,
-  fades, automation, ducking, pan, speed and speed-key ramps (pitch follows
-  speed, as in the preview), silence through freeze holds, and sample-rate
-  conversion. Mute and solo apply.
-
-The export and the preview draw every transition, effect and animation preset the schemas accept. A type they would
-not draw is not offered at all. The few remaining limits are listed in
-[What renders](/reference/rendering), and the check reports each as a `not-rendered` warning. An adjustment filters the footage
-beneath it, not overlays, in both. In the preview only: an overlay's `blend`
-does not mix with the footage. Text in the export differs from the browser's
-by anti-aliasing and sub-pixel placement.
+- Fonts: Inter, Space Grotesk, Playfair Display, DM Sans and JetBrains Mono are bundled (regular and bold, italic
+  where the family has one; see [Themes](/guide/themes#fonts)). A title that names another font falls back to Inter
+  unless the file declares it (`font()`, `googleFont()`) or you pass it with `--font`. TTF, OTF, WOFF and WOFF2 all
+  work.
+- Sound is mixed in the page by `mixPlan`, a pure function of the audio plan: volume, fades, automation, ducking,
+  pan, speed and speed-key ramps (pitch follows speed, as in the preview), silence through freeze holds, and
+  sample-rate conversion. Mute and solo apply. Chrome encodes Opus itself; AAC and MP3 go through Mediabunny's
+  WebAssembly encoders, since Chrome for Testing has none.
 
 ## Faster
 
-Most of an export's time is the encoder's. Two things are automatic:
+Two options, in the order to try them.
 
-- Pictures pass straight through. A frame that is one source picture shown
-  as it is (full frame, untransformed, with nothing over, under or applied to
-  it) goes from the decoder to the encoder as decoded: never converted to RGBA,
-  drawn or read back. Other frames convert only the pictures they draw.
-- Hardware encoding: H.264 and HEVC go through the machine's hardware
-  encoder when it has one that starts (Apple's VideoToolbox, NVIDIA, VA-API).
-  It is faster and spends its bits a little less well; `--software` turns it
-  off. Most Linux servers have none and encode in software.
+### `--tabs`
 
-Then, in the order to try them:
-
-### Workers
-
-The frames are cut into runs of whole keyframe intervals. Each
-worker renders and encodes runs into small containers; the main thread joins
-them in order and mixes the sound. The pictures are the same as one thread's,
-frame for frame; only where the keyframes fall differs. Each worker holds its
-own decoders and encoder, about 1 GB at 1080p. The encoder already uses every
-core, so workers rarely help: on 4-core Linux and a 12-core Mac, two or four
-were no faster than one, or slower.
-
-### `--speed`
-
-It trades compression for speed in the software encoder. The
-default, `balanced`, is x264's veryfast preset; on 4-core Linux it rendered the
-cuts at 111 fps against medium's 61, and the crossfades at 37 against 31, with
-the cuts scoring 53.3 dB against 56.4 at the same 8 Mb/s. `quality` is medium,
-for the smallest file at a bitrate. `fast` is the real-time mode: faster again,
-at larger files. VP9 knows only `fast` and the rest.
+The frames are cut into runs of whole keyframe intervals, and each page of the browser renders and encodes its runs
+into small containers. Node joins them in order with the soundtrack, copying the encoded packets. The pictures are
+the same as one page's, frame for frame; only where the keyframes fall differs. Each page holds its own decoders and
+encoder, so memory grows with the count; on a machine with spare cores, two to four pages help most.
 
 ### `--copy`
 
-Where the picture is nothing but a stretch of one source file,
-the encoded packets of whole groups of pictures are copied and only the ends
-are rendered. It applies when all of these hold for a stretch of frames:
+Where the picture is nothing but a stretch of one source file, the encoded packets of whole groups of pictures are
+copied and only the ends are rendered. It applies when all of these hold for a stretch of frames:
 
-- the source is VP8 or VP9 and so is the output codec;
+- the source is VP9 and so is the output;
 - the source has the composition's size and frame rate;
-- one clip is shown, untransformed, at full size, at speed 1, with no fade,
-  filter, crop, mask or blend, and no transition, title, caption or any other
-  overlay at those times.
+- one clip is shown, untransformed, at full size, at speed 1, with no fade, filter, crop, mask or blend, and no
+  transition, title, caption or any other overlay at those times, and the file has no motion blur.
 
-Copied pictures keep the source's quality and are not decoded or encoded at
-all: 20 seconds of cuts on keyframes took 1.2 seconds. A stretch that does not
-qualify is rendered as usual. `--copy` is opt-in because a source whose stream
-the encoder's does not match fails when the pieces are joined instead of
-falling back.
+Copied pictures keep the source's quality and are not decoded or encoded at all. A stretch that does not qualify is
+rendered as usual. `--copy` is opt-in because a source whose stream the encoder's does not match fails when the
+pieces are joined instead of falling back.
 
-| 1080p30 H.264 at 8 Mb/s, one thread | 4-core Linux, software | Apple M3 Pro, hardware |
-|---|---|---|
-| five cuts from one file | 111 | 203 |
-| the same with crossfades and a title on each | 37 | 98 |
-| moving shapes and titles, no footage | 61 | 117 |
-
-[Export speed](/comparisons/export-speed) compares these with Remotion and Diffusion Studio.
+[Export speed](/comparisons/export-speed) compares the export with Remotion and Diffusion Studio.
 
 ## Checking the layout
 
@@ -247,8 +185,9 @@ the check maps them through each clip's crop, fit and transform. Footage whose
 manifest entry has none uses `--subject x,y,w,h`, fractions of the frame,
 while it is on screen. Overlays beneath the footage and ones that fill the
 frame (backgrounds) are not checked, and neither is an element fainter than
-10%. From code: `checkLayout({ state, media, interiors, safeZone, subject, source: { file, text } })`,
-and `formatLayout(result)` for the text.
+10%. The check draws each overlay alone in the export page and measures its ink. From code:
+`checkLayout({ state, media, source: { ...video.source, file }, safeZone, subject })`, and `formatLayout(result)` for
+the text.
 
 ## Checking an export
 
@@ -262,6 +201,5 @@ ffmpeg -i video.webm -vf "select=eq(n\,90)" -frames:v 1 frame.png   # one frame,
 
 ## Requirements
 
-Node 22.19 or later. `skia-canvas` and `node-av` ship a binary per platform and are installed with the package,
-so there is no system FFmpeg to install. The FFmpeg inside `node-av` is built with GPLv3 options: check what that
-means for you before you ship it inside a product.
+Node 22.19 or later, and the Chrome the first export downloads (or `CUTCRAFT_CHROMIUM`). There is no FFmpeg and no
+native module to install.

@@ -1,5 +1,5 @@
-// Renders fixed compositions and reports frames per second, peak memory and where the time goes.
-//   pnpm --filter @cutcraft/render bench [--only <name>] [--workers <n>] [--speed fast] [--copy] [--json <file>]
+// Renders fixed compositions and reports frames per second and the memory Node holds.
+//   pnpm --filter @cutcraft/render bench [--only <name>] [--tabs <n>] [--copy] [--json <file>]
 import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -126,8 +126,7 @@ async function main(): Promise<void> {
     options: {
       only: { type: "string" },
       json: { type: "string" },
-      workers: { type: "string" },
-      speed: { type: "string" },
+      tabs: { type: "string" },
       copy: { type: "boolean" },
     },
   });
@@ -143,18 +142,14 @@ async function main(): Promise<void> {
     }
     const loaded = await loadVideo(c.file, { manifest: c.manifest });
     const cpu0 = process.cpuUsage();
-    const workers = Number(values.workers ?? 1);
     const result = await renderVideo({
       state: loaded.state,
+      source: loaded.source,
       media: directoryResolver(c.media, loaded.manifest),
-      interiors: loaded.interiors,
       out,
       to: c.seconds,
-      ...(values.speed === "fast" ? { speed: "fast" as const } : {}),
+      tabs: Number(values.tabs ?? 1),
       ...(values.copy ? { smartCopy: true } : {}),
-      ...(workers > 1
-        ? { parallel: { file: c.file, load: { manifest: c.manifest }, mediaDir: c.media, workers } }
-        : {}),
     });
     const cpu = process.cpuUsage(cpu0);
     rows.push({
@@ -165,16 +160,13 @@ async function main(): Promise<void> {
     });
   }
   rmSync(out, { force: true });
-  const ms = (v: number, frames: number): string => (v / frames).toFixed(1).padStart(6);
   console.log(
-    "\n| case | threads | fps | cpu | peak RSS | composite | overlays | readback | encode | audio |  (ms per frame; cpu = core-ms per frame)\n|---|---|---|---|---|---|---|---|---|---|",
+    "\n| case | tabs | fps | Node cpu | Node peak RSS |  (cpu = core-ms per frame; Chrome's own is not counted)\n|---|---|---|---|---|",
   );
-  for (const { name, result: r, rssMb, cpuMs } of rows) {
-    const s = r.stagesMs;
+  for (const { name, result: r, rssMb, cpuMs } of rows)
     console.log(
-      `| ${name} | ${r.workers}${r.copiedFrames ? ` (${r.copiedFrames} copied)` : ""} | ${(r.frames / (r.wallMs / 1000)).toFixed(1)} | ${(cpuMs / r.frames).toFixed(0)} | ${rssMb.toFixed(0)} MB | ${ms(s.composite, r.frames)} | ${ms(s.overlays, r.frames)} | ${ms(s.readback, r.frames)} | ${ms(s.encode, r.frames)} | ${ms(s.audio, r.frames)} |`,
+      `| ${name} | ${r.tabs}${r.copiedFrames ? ` (${r.copiedFrames} copied)` : ""} | ${(r.frames / (r.wallMs / 1000)).toFixed(1)} | ${(cpuMs / r.frames).toFixed(0)} | ${rssMb.toFixed(0)} MB |`,
     );
-  }
   if (values.json)
     writeFileSync(
       values.json,
@@ -184,7 +176,7 @@ async function main(): Promise<void> {
           fps: result.frames / (result.wallMs / 1000),
           frames: result.frames,
           wallMs: result.wallMs,
-          stagesMs: result.stagesMs,
+          tabs: result.tabs,
           rssMb,
           cpuMs,
         })),

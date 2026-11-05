@@ -91,7 +91,7 @@ function transitionMotion(t: TransitionRole | undefined, w: number, h: number): 
 }
 
 /** A clip as a CSS `path()`: rectangles in the element's own pixels, an empty one when nothing shows. */
-export function clipPathCss(clip: readonly ClipRect[]): string {
+function clipPathCss(clip: readonly ClipRect[]): string {
   const n = (v: number): string => String(Math.round(v * 100) / 100);
   const d = clip.map((r) => `M${n(r.x)} ${n(r.y)}h${n(r.w)}v${n(r.h)}h${n(-r.w)}Z`).join("");
   return `path("${d || "M0 0Z"}")`;

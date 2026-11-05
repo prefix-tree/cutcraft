@@ -2,11 +2,10 @@
 
 # @cutcraft/render
 
-Exports a [CutCraft](https://prefix-tree.github.io/cutcraft/) video file: MP4, WebM or MOV, an MP3 or WAV soundtrack,
-or a PNG or JPEG still. It runs the player's own engine, so the exported file matches the preview frame for frame:
-in Node with no browser for most files, and through the real player in headless Chromium for a file with `<Three>` or
-`<Motion>` (`engine: "auto"`, the default, picks; that path needs `playwright-core` and Chrome 153+ in
-`CUTCRAFT_CHROMIUM`).
+Exports a [CutCraft](https://prefix-tree.github.io/cutcraft/) video file: MP4 or WebM, an MP3 or WAV soundtrack, or a
+PNG or JPEG still. It runs the real player in headless Chrome, so the exported file matches the preview frame for
+frame. The first export downloads Chrome for Testing into `~/.cache/cutcraft/browsers`; `CUTCRAFT_CHROMIUM` names a
+Chrome 153+ to use instead.
 
 For the command line, install [`cutcraft`](https://www.npmjs.com/package/cutcraft). This package is the library behind
 it.
@@ -21,8 +20,8 @@ import { directoryResolver, loadVideo, renderVideo } from "@cutcraft/render";
 const video = await loadVideo("video.tsx", { manifest: "manifest.json" });
 await renderVideo({
   state: video.state,
+  source: video.source,
   media: directoryResolver("media", video.manifest),
-  interiors: video.interiors,
   out: "video.mp4",
   onProgress: ({ frame, frames }) => console.log(`${frame}/${frames}`),
 });
@@ -33,23 +32,18 @@ you list in `imports`. `directoryResolver` finds one file per asset id in a fold
 
 ## What it does
 
-- Encodes H.264, HEVC, VP8, VP9, AV1 or ProRes, with the machine's hardware encoder where it has one.
+- Draws every frame with the player: footage, titles, layers with any CSS, captions, three.js, Motion, and GLSL
+  effects and transitions.
+- Encodes H.264 or AV1 in MP4 and VP9 or AV1 in WebM with WebCodecs, and the soundtrack as AAC, Opus, MP3 or WAV.
 - Mixes the soundtrack itself: volume, fades, ducking, speed ramps and freeze frames.
-- Copies untouched stretches of the source without re-encoding them (`smartCopy: true`, for VP8 and VP9).
-- A frame that is one source picture shown as it is goes from the decoder to the encoder without being drawn.
+- Renders pieces on several browser pages at once (`tabs`), and copies untouched stretches of a VP9 source without
+  re-encoding them (`smartCopy: true`).
 - `renderStill` writes one frame. `checkLayout` reports overlays that leave the frame or the safe zone, or cover
   captions or the subject, with their line in the file.
 
-Titles, layers and captions are laid out with [Satori](https://github.com/vercel/satori), which reads a subset of CSS.
-What it can't draw is left out with a warning that names it. `<Three>` and `<Motion>` are left out the same way for now.
-
-On a 4-core Linux machine with no GPU it renders 1080p H.264 at 111 fps for plain cuts, and at 37 to 61 fps when
-frames are drawn. [Export speed](https://prefix-tree.github.io/cutcraft/comparisons/export-speed) compares it with
-Remotion and Diffusion Studio.
-
 ## Docs
 
-- [Exporting](https://prefix-tree.github.io/cutcraft/guide/exporting): every option, smart copy, speed, and what
-  each format holds
+- [Exporting](https://prefix-tree.github.io/cutcraft/guide/exporting): every option, the browser, smart copy, and
+  what each format holds
 
 MIT licensed.

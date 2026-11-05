@@ -6,7 +6,7 @@ The check's `not-rendered` warning reports everything outside these lists, so a 
 
 ## Values that render
 
-- `blend` on `<Title>`, `<Shape>`, `<Svg>`, `<Sticker>`, `<Graphic>`, `<Layer>`: only `normal` renders; any other value blends with the footage in the export only: the preview draws it unblended over the footage.
+- `blend` on `<Title>`, `<Shape>`, `<Svg>`, `<Sticker>`, `<Graphic>`, `<Layer>`: only `normal` renders; any other value is drawn unblended over the footage, in the preview and the export.
 - A `<Mask>` on an element other than `<Clip>`, `<Nested>` is ignored: masks render on clips and nested sequences only, the element shows unmasked; a second `<Mask>` is ignored: only the first `<Mask>` on an element renders.
 
 ## Accepted but not rendered

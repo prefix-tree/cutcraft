@@ -14,11 +14,11 @@ focused pull request with a test.
   would get it, checked with publint and attw, after `pnpm build`).
 - `pnpm fix` formats the code and applies lint fixes; `pnpm test:coverage` writes coverage reports. In VS Code, the
   recommended Biome extension formats on save.
-- The export (`packages/render`) loads native binaries (`skia-canvas`, `node-av` with
-  its FFmpeg) with the install; its tests make their media with the system `ffmpeg`
-  (`sudo apt-get install ffmpeg`), which needs the `drawtext` filter (FFmpeg built with libfreetype; Homebrew's
-  `ffmpeg` may lack it). `pnpm --filter @cutcraft/render test:browser` also
-  needs Playwright's Chromium, and `bench` measures frames per second.
+- The export (`packages/render`) runs the player in headless Chrome. Its tests make their media with the system
+  `ffmpeg` (`sudo apt-get install ffmpeg`), which needs the `drawtext` filter (FFmpeg built with libfreetype;
+  Homebrew's `ffmpeg` may lack it), and read the exports back with `ffmpeg` and `ffprobe`. `pnpm --filter
+  @cutcraft/render test` runs the parts that need no browser; `test:browser` runs the export itself, in the Chrome for
+  Testing it downloads (or `CUTCRAFT_CHROMIUM`). `bench` measures frames per second.
 - Browser tests: `pnpm --filter @cutcraft/player test:e2e` needs `ffmpeg` on the
   path and Playwright's Chromium (`pnpm exec playwright install --with-deps chromium`
   from `packages/player`). They generate their media on first run.
@@ -33,7 +33,7 @@ focused pull request with a test.
 | `packages/kit` | vocabulary (`src/jsx`), manifest and time references (`src/manifest`), resolver (`src/resolve`), patches and actions (`src/patches`, `src/actions`), source tools and lint (`src/source`) |
 | `packages/graphics` | the `<Graphic>` kinds (`src/kinds`), one `defineKind` each: a zod prop schema, a size and a pure `draw`; `graphicControls` reads a schema into editor controls |
 | `packages/player` | pure model (`src/model`), decoding (`src/media`), compositing (`src/render`), audio (`src/audio`), `PlayerCore` and the React surface (`src/react`) |
-| `packages/render` | the Node export: frame pipeline, overlay plane (Satori and skia), encoder, audio mixer, workers, stills and the layout check |
+| `packages/render` | the export: the page that runs the player in headless Chrome (`src/web`), the Chrome download, joining pieces, the audio mixer, smart copy, stills, the layout check and the CLI |
 | `recipes` | complete cut files for common videos, linted, resolved and tested |
 | `examples/launch-recap` | a file written by a model from a brief, played in the browser |
 | `docs/` | the VitePress site: guides, generated reference, decision records |

@@ -2,13 +2,14 @@
 // transcript beside it (`talk.json`, `talk.vtt` or `talk.srt`) found by convention. The manifest stays the one place
 // words live, so the preview and the export always agree on `word:N`.
 import { existsSync, readFileSync } from "node:fs";
-import { writeFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import { basename, dirname, extname, join } from "node:path";
 
 import { ALL_FORMATS, FilePathSource, Input } from "mediabunny";
-import { loadImage } from "skia-canvas";
 
 import { type AssetEntry, type AssetManifest, parseTranscript } from "@cutcraft/kit";
+
+import { imageSize } from "./image-size";
 
 const IMAGE = new Set([".png", ".jpg", ".jpeg", ".webp", ".gif", ".svg"]);
 /** Transcripts beside the media, best first: JSON from a speech-to-text tool has word times; subtitles do not. */
@@ -86,8 +87,8 @@ type Probed = Pick<AssetEntry, "kind" | "duration" | "fps" | "width" | "height" 
 /** What the manifest needs from a media file: its kind, length, picture size and rate, and sound. */
 async function probe(path: string): Promise<Probed> {
   if (IMAGE.has(extname(path).toLowerCase())) {
-    const image = await loadImage(path);
-    return { kind: "image", duration: 0, width: image.width, height: image.height };
+    const size = imageSize(await readFile(path), path);
+    return { kind: "image", duration: 0, ...size };
   }
   const input = new Input({ source: new FilePathSource(path), formats: ALL_FORMATS });
   try {
