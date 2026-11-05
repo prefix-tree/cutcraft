@@ -78,6 +78,67 @@ it("runs a declared effect over a clip, with its params", async () => {
   expect(near(none, [0, 0, 255])).toBe(true);
 });
 
+it("runs an effect's passes in order, each the right way up, with the element's picture as original", async () => {
+  // Pass 1 paints red over green, ignoring the clip; pass 2 copies it through a texture; pass 3 keeps it on the left
+  // and shows the blue clip (original) on the right.
+  const [top, bottom, right] = await colourAt(
+    "passes",
+    `<Track id="t"><Clip id="c" src="asset:solid" fit="cover"><Effect id="e" type={split} /></Clip></Track>`,
+    `const split = defineEffect({
+      name: "split",
+      passes: [
+        "vec4 effect(vec2 uv) { return uv.y < 0.5 ? vec4(1.0, 0.0, 0.0, 1.0) : vec4(0.0, 1.0, 0.0, 1.0); }",
+        "vec4 effect(vec2 uv) { return texture(image, uv); }",
+        "vec4 effect(vec2 uv) { return uv.x < 0.5 ? texture(image, uv) : texture(original, uv); }",
+      ],
+    });`,
+    0.5,
+    [
+      [40, 40],
+      [40, 140],
+      [280, 90],
+    ],
+  );
+  expect(near(top, [255, 0, 0])).toBe(true);
+  expect(near(bottom, [0, 255, 0])).toBe(true);
+  expect(near(right, [0, 0, 255])).toBe(true);
+});
+
+it("draws levels with its gamma, after an effect of the file's own", async () => {
+  // The file's effect paints mid grey (0.5); levels with gamma 2 lifts it to 0.5^(1/2), with gamma 0.5 lowers it to 0.25.
+  const grey = `const grey = defineEffect({ name: "grey", shader: "vec4 effect(vec2 uv) { return vec4(0.5, 0.5, 0.5, 1.0); }" });`;
+  const at = (gamma: number) =>
+    colourAt(
+      `levels-${gamma}`,
+      `<Track id="t"><Clip id="c" src="asset:solid" fit="cover"><Effect id="g" type={grey} /><Effect id="l" type="levels" params={{ gamma: ${gamma} }} /></Clip></Track>`,
+      grey,
+      0.5,
+      [[160, 90]],
+    );
+  const [lifted] = await at(2);
+  const [lowered] = await at(0.5);
+  const close = (c: number[] | undefined, v: number) => c?.slice(0, 3).every((x) => Math.abs(x - v) <= 6) === true;
+  expect(close(lifted, Math.round(255 * Math.SQRT1_2))).toBe(true);
+  expect(close(lowered, Math.round(255 * 0.25))).toBe(true);
+});
+
+it("draws levels with its gamma on an overlay, through HTML-in-Canvas", async () => {
+  const [c] = await colourAt(
+    "levels-layer",
+    `<Track id="fx" layout="free">
+      <Layer id="l" start={0} duration={2}>
+        <Effect id="e" type="levels" params={{ gamma: 2 }} />
+        <div style={{ position: "absolute", inset: 0, background: "#808080" }} />
+      </Layer>
+    </Track>`,
+    "",
+    0.5,
+    [[160, 90]],
+  );
+  const v = Math.round(255 * Math.sqrt(128 / 255));
+  expect(c?.slice(0, 3).every((x) => Math.abs(x - v) <= 6)).toBe(true);
+});
+
 it("runs a declared effect on an adjustment, over everything beneath it", async () => {
   const [c] = await colourAt(
     "adjust",

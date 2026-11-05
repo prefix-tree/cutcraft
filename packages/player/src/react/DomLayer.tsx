@@ -16,6 +16,7 @@ import { Sticker } from "./elements/Sticker";
 import { Svg } from "./elements/Svg";
 import { Title } from "./elements/Title";
 import { useCompositionTime, usePlayer } from "./hooks";
+import { htmlInCanvas } from "./html-in-canvas";
 import { ShaderBox } from "./ShaderBox";
 
 export interface DomLayerProps {
@@ -96,11 +97,13 @@ const Element = memo(
     };
     const content = elementContent(item, props, state, interior);
     // Effects the file declares run over the overlay's picture, drawn through HTML-in-Canvas.
-    const passes =
+    // Without HTML-in-Canvas the kit's own shader effects draw as their CSS filter (overlays/layout.ts).
+    const all =
       item.placement.kind === "adjustment"
         ? undefined
         : effectPasses(state, item.children, time - item.placement.start);
-    if (!passes || !content) return content;
+    const passes = all && !htmlInCanvas() ? all.filter((s) => !s.builtIn) : all;
+    if (!passes?.length || !content) return content;
     const { width, height } = state.composition;
     return (
       <ShaderBox id={item.placement.id} width={width} height={height} passes={passes}>

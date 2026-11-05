@@ -1,12 +1,15 @@
-import { type Placement, type ResolvedState, shaderFor } from "@cutcraft/kit";
+import { BUILT_IN_SHADERS, builtInShader, type Placement, type ResolvedState, shaderFor } from "@cutcraft/kit";
 
 import { paramsAt } from "./effects";
 import type { TransitionRole } from "./visible";
 
-/** One declared effect (`defineEffect()`) to run over an element's picture, with its params at this moment. */
+/** One shader effect to run over an element's picture, with its params at this moment. */
 export interface ShaderPass {
   readonly name: string;
-  readonly source: string;
+  /** The effect's GLSL, one source per pass, run in order. */
+  readonly sources: readonly string[];
+  /** A built-in effect (`levels`), which has a CSS filter to fall back on where there is no WebGL. */
+  readonly builtIn?: true;
   readonly params: Readonly<Record<string, unknown>>;
   /** Seconds into the element. */
   readonly time: number;
@@ -27,18 +30,25 @@ export interface TransitionPass {
   readonly paired: boolean;
 }
 
-/** The element's declared effects, in file order, with keyframed params evaluated at element-relative `rel`. */
+/** The element's shader effects (the file's own and the kit's), in file order, with keyframed params evaluated at element-relative `rel`. */
 export function effectPasses(
   state: ResolvedState,
   children: readonly Placement[],
   rel: number,
 ): ShaderPass[] | undefined {
-  if (state.shaders.length === 0) return undefined;
   const out: ShaderPass[] = [];
   for (const c of children) {
     if (c.kind !== "effect" || c.props.enabled === false) continue;
-    const def = shaderFor(state.shaders, "effect", c.props.type);
-    if (def) out.push({ name: def.name, source: def.shader, params: paramsAt(children, c, rel), time: rel });
+    const own = shaderFor(state.shaders, "effect", c.props.type);
+    const def = own ?? builtInShader(c.props.type);
+    if (def)
+      out.push({
+        name: def.name,
+        sources: def.passes,
+        ...(own ? {} : { builtIn: true as const }),
+        params: paramsAt(children, c, rel),
+        time: rel,
+      });
   }
   return out.length > 0 ? out : undefined;
 }
@@ -51,7 +61,7 @@ export function transitionPass(state: ResolvedState, role: TransitionRole): Tran
   return {
     id: x.id,
     name: def.name,
-    source: def.shader,
+    source: def.passes[0] as string,
     params: (x.props.params ?? {}) as Readonly<Record<string, unknown>>,
     progress: role.progress,
     time: role.progress * x.duration,
@@ -60,7 +70,12 @@ export function transitionPass(state: ResolvedState, role: TransitionRole): Tran
   };
 }
 
-/** The effect types the file declares, which the filter string leaves to the shader passes. */
-export function declaredEffects(state: ResolvedState): ReadonlySet<string> {
-  return new Set(state.shaders.filter((s) => s.kind === "effect").map((s) => s.name));
+/**
+ * The effect types the filter string leaves to the shader passes: the ones the file declares, and with `builtIns` the
+ * kit's own shader effects too. Without it those draw as their CSS filter, for a renderer that has no WebGL.
+ */
+export function shadedEffects(state: ResolvedState, builtIns: boolean): ReadonlySet<string> {
+  const out = new Set(state.shaders.filter((s) => s.kind === "effect").map((s) => s.name));
+  if (builtIns) for (const s of BUILT_IN_SHADERS) out.add(s.name);
+  return out;
 }

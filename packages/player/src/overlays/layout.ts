@@ -5,7 +5,7 @@ import type { FitMode, Placement, ResolvedState, Transform } from "@cutcraft/kit
 import { filterString } from "../model/effects";
 import { blendOf } from "../model/frame-plan";
 import { type ClipRect, combine, type GraphicAnimation, type Motion, motionAt, STILL } from "../model/motion";
-import { declaredEffects } from "../model/shaders";
+import { shadedEffects } from "../model/shaders";
 import {
   animatedTransform,
   type Box,
@@ -17,6 +17,7 @@ import {
 } from "../model/transform";
 import { transitionLook } from "../model/transition";
 import type { TransitionRole } from "../model/visible";
+import { htmlInCanvas } from "../react/html-in-canvas";
 
 /** Placement kinds drawn above the canvas plane, besides captions. */
 export { OVERLAY_KINDS } from "../model/backdrop";
@@ -55,7 +56,8 @@ export function overlayLayout(p: ElementProps, size: Box, fit: FitMode = "none",
   const rel = p.time - p.placement.start;
   const transform = animatedTransform(p.placement.props.transform as Transform | undefined, p.children, rel);
   const layout = layoutRect(p.state.composition, size, fit, transform);
-  const { filter } = filterString(p.children, p.placement.id, rel, declaredEffects(p.state));
+  // The kit's shader effects draw through HTML-in-Canvas where the browser has it, and as their CSS filter where not.
+  const { filter } = filterString(p.children, p.placement.id, rel, shadedEffects(p.state, htmlInCanvas()));
   const blend = p.placement.props.blend;
   const props = p.placement.props as { enter?: GraphicAnimation; exit?: GraphicAnimation };
   const motion = combine(

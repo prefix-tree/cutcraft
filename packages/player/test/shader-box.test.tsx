@@ -4,9 +4,10 @@ import { afterEach, describe, expect, it } from "vitest";
 
 import { captureWarnings } from "@cutcraft/player";
 
-import { htmlInCanvas, ShaderBox } from "../src/react/ShaderBox";
+import { htmlInCanvas } from "../src/react/html-in-canvas";
+import { ShaderBox } from "../src/react/ShaderBox";
 
-const pass = { name: "swap", source: "vec4 effect(vec2 uv) { return texture(image, uv); }", params: {}, time: 0 };
+const pass = { name: "swap", sources: ["vec4 effect(vec2 uv) { return texture(image, uv); }"], params: {}, time: 0 };
 
 describe("ShaderBox", () => {
   afterEach(() => captureWarnings(null));
