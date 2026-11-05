@@ -70,7 +70,7 @@ focused pull request with a test.
 A pull request that changes what a published package does for its users adds a changeset: `pnpm changeset`, then
 pick the packages, the size and a sentence for the changelog ([.changeset/README.md](.changeset/README.md)). CI asks
 for one when a package changed; for a change users do not see, `pnpm changeset --empty`. All published packages share
-one version. Releases are a merge: the "Version packages" pull request that the release workflow keeps open on `main`.
+one version. Releases are made by hand; [.changeset/README.md](.changeset/README.md) lists the steps.
 
 ## Publishing the docs
 

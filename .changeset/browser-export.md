@@ -5,6 +5,5 @@
 "cutcraft": minor
 ---
 
-`<Three>` and `<Motion>` export: the export runs the real player in headless Chrome, frame by frame, so three.js
-scenes and Motion sequences come out as the player shows them. `loadVideo` returns the file's `source`, which the
-export page loads, and the kit's `holdLayerFrame` lets an engine layer hold a frame until it has drawn it.
+The kit's `holdLayerFrame` lets an engine layer (three.js, Motion) hold a frame until it has drawn it, so an export
+never captures a frame half drawn. `loadVideo` returns the file's `source`, which the export page loads.

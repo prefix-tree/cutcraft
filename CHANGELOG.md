@@ -2,32 +2,15 @@
 
 All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow
-[Semantic Versioning](https://semver.org/). 0.1.0 is on npm.
+[Semantic Versioning](https://semver.org/).
 
 From the release after 0.1.0 on, each package keeps its own changelog (`packages/*/CHANGELOG.md`), written by
-[changesets](.changeset/README.md) from the changeset each pull request adds. This file holds the history before it.
+[changesets](.changeset/README.md) from the changeset each pull request adds. This file holds the history up to
+0.1.0.
 
-## [Unreleased]
+## [0.1.0] - 2026-11-02
 
 ### Added
-
-- `<Three>` and `<Motion>`: three.js and Motion on the timeline. Both are Layers to the
-  resolver, the timeline and the editor (placed, anchored, trimmed and folded like one), with
-  literal props the inspector edits. `<Three setup>` runs plain three.js once with `{ scene,
-  camera, renderer, THREE }` and its returned `update({ time, t, ... })` on every frame;
-  React Three Fiber children work too; `camera` and `background` are props. `<Motion
-  sequence>` animates its children with a Motion sequence. Both follow the video's clock and
-  scrub both ways. A host draws them by calling `installFreeCodeLibraries()` from
-  `@cutcraft/graphics/libraries`, which installs their engines (`installLayerEngine`) and returns the
-  imports to pass to `loadModule` (`three`, `@react-three/fiber`, `motion`, `motion/react`).
-  Inside a plain `<Layer>`, `<ThreeScene>` (`@cutcraft/graphics/three`), `useTimeline` and
-  `useLayerTime` (`@cutcraft/graphics/motion`) do the same. The
-  `free-code-clock` lint warns about a bare `<Canvas>`, Motion's `animate()` and `motion`
-  elements with `animate` or `whileInView`. The Node export leaves the tags out with a
-  warning; the browser export engine will draw them.
-
-- CSS animations inside a `<Layer>` are held at the layer's time in the player: they count from
-  the layer's start, pause with the video and scrub both ways.
 
 - `at` times an anchored element by a word of its anchor's footage: `<Title anchor="make-1"
   at="word:14655">` starts where clip `make-1` plays that word (clip start + (word time − clip in)
@@ -233,13 +216,6 @@ From the release after 0.1.0 on, each package keeps its own changelog (`packages
 - Benchmarks and performance tests for the drag loop.
 
 ### Changed
-
-- The export loads a cut file the way the editor does, with the kit's `loadModule`: the file may
-  import `react`, `zod` and `@cutcraft/kit`, plus what the host offers (`loadVideo(file, { imports })`,
-  `cutcraft --import three` or `--import name=specifier`). A file that imports anything else now
-  fails in the export with the editor's message, where it used to export and then fail in the
-  editor. `--tsconfig` and `LoadOptions.tsconfig` are gone, and `tsx` is no longer a runtime
-  dependency of `@cutcraft/render`.
 
 - `<Marker at>` and `<Cut at>` take seconds only, like `<Keyframe at>`: the schema rejects a
   reference (`"word:3"`), where before it passed the schema and the resolver reported it.
