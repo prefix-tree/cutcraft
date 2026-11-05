@@ -13,6 +13,7 @@ import { mediabunnyAudioSourceFactory } from "./media/mediabunny-audio-source";
 import { mediabunnyFrameSourceFactory } from "./media/mediabunny-frame-source";
 import { MediabunnyInputs } from "./media/mediabunny-input";
 import { toResolver } from "./media/resolver";
+import { ShaderTextures } from "./media/shader-textures";
 import type { ResolveNested } from "./model/frame-plan";
 import { frameIndex, frameTime, timecode } from "./model/time";
 import { makeNestedResolver } from "./nested";
@@ -149,6 +150,9 @@ export class PlayerCore {
     this.compositor = new Compositor(options.state, {
       sources: this.sources,
       createCanvas,
+      textures: new ShaderTextures(this.media, (asset, error) =>
+        this.emit("error", { asset, error: new Error(`texture ${asset}: ${error.message}`), fatal: false }),
+      ),
       resolveNested,
       onFrame: (time, frame) => this.publish(time, frame),
     });

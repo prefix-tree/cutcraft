@@ -1,13 +1,13 @@
 // `cutcraft add talk.mp4`: one manifest entry per media file, probed from the file itself, with the words of the
 // transcript beside it (`talk.json`, `talk.vtt` or `talk.srt`) found by convention. The manifest stays the one place
-// words live, so the preview and the export always agree on `word:N`.
+// words live, so the preview and the export always agree on `word:N`. A `.cube` file is a LUT, checked and listed.
 import { existsSync, readFileSync } from "node:fs";
 import { readFile, writeFile } from "node:fs/promises";
 import { basename, dirname, extname, join } from "node:path";
 
 import { ALL_FORMATS, FilePathSource, Input } from "mediabunny";
 
-import { type AssetEntry, type AssetManifest, parseTranscript } from "@cutcraft/kit";
+import { type AssetEntry, type AssetManifest, parseCube, parseTranscript } from "@cutcraft/kit";
 
 import { imageSize } from "./image-size";
 
@@ -44,11 +44,14 @@ export async function addAsset(media: string, options: AddOptions = {}): Promise
   const probed = await probe(media);
   const warnings: string[] = [];
 
+  if (probed.kind === "lut" && options.transcript) throw new Error(`${basename(media)} is a LUT; it has no transcript`);
   const transcriptFile =
-    options.transcript ??
-    TRANSCRIPTS.map((ext) => join(dirname(media), `${basename(media, extname(media))}${ext}`)).find(
-      (f) => f !== manifestPath && existsSync(f),
-    );
+    probed.kind === "lut"
+      ? undefined
+      : (options.transcript ??
+        TRANSCRIPTS.map((ext) => join(dirname(media), `${basename(media, extname(media))}${ext}`)).find(
+          (f) => f !== manifestPath && existsSync(f),
+        ));
   let transcript: AssetEntry["transcript"];
   let estimated = false;
   if (transcriptFile) {
@@ -86,6 +89,14 @@ type Probed = Pick<AssetEntry, "kind" | "duration" | "fps" | "width" | "height" 
 
 /** What the manifest needs from a media file: its kind, length, picture size and rate, and sound. */
 async function probe(path: string): Promise<Probed> {
+  if (extname(path).toLowerCase() === ".cube") {
+    try {
+      parseCube(await readFile(path, "utf8"));
+    } catch (error) {
+      throw new Error(`cannot read ${path}: ${error instanceof Error ? error.message : String(error)}`);
+    }
+    return { kind: "lut", duration: 0 };
+  }
   if (IMAGE.has(extname(path).toLowerCase())) {
     const size = imageSize(await readFile(path), path);
     return { kind: "image", duration: 0, ...size };
@@ -132,7 +143,7 @@ const round = (n: number, places: number): number => Math.round(n * 10 ** places
 export function describeAdded(result: AddResult): string {
   const e = result.entry;
   const parts: string[] = [e.kind];
-  if (e.kind !== "image") parts.push(`${e.duration} s`);
+  if (e.kind !== "image" && e.kind !== "lut") parts.push(`${e.duration} s`);
   if (e.width && e.height) parts.push(`${e.width}x${e.height}${e.fps ? ` at ${e.fps} fps` : ""}`);
   if (e.kind === "video") parts.push(e.audio ? "with sound" : "no sound");
   if (result.transcript && e.transcript)

@@ -360,7 +360,8 @@ From `@cutcraft/kit`:
 | `subtitles` | `(state: ResolvedState, { format: "srt" \| "vtt", from?, to? }) => string` | The captions the cut plays, as a subtitle file timed from `from` ([Subtitle files](/guide/captions-and-sound#subtitle-files)). |
 | `defineEffect` | `({ name, params?: ZodObject, shader } \| { name, params?, passes: string[] }) => string` | Declares an effect drawn by a GLSL `vec4 effect(vec2 uv)`, or by several run in order (`passes`, each reading the one before as `image` and the element as `original`), and returns its name for `<Effect type>` ([Effects and transitions of your own](/guide/free-code#effects-and-transitions-of-your-own)). |
 | `defineTransition` | `({ name, params?: ZodObject, shader }) => string` | Declares a transition drawn by a GLSL `vec4 transition(vec2 uv)` that reads `from`, `to` and `progress`, and returns its name for `<Transition type>`. |
-| `BUILT_IN_SHADERS`, `builtInShader` | `readonly ShaderDefinition[]`, `(type) => ShaderDefinition \| undefined` | The built-in effects drawn by a shader (`levels`), with the schema of their params. |
+| `BUILT_IN_SHADERS`, `builtInShader` | `readonly ShaderDefinition[]`, `(type) => ShaderDefinition \| undefined` | The built-in effects drawn by a shader (`levels`, `lut`), with the schema of their params. |
+| `parseCube` | `(text: string) => { size, domainMin, domainMax, data, title? }` | Reads a 3D `.cube` LUT; throws naming the line that is wrong ([Grading with a LUT](/guide/free-code#grading-with-a-lut)). |
 | `font` | `({ family, src: "asset:<id>", weight?, style? }) => string` | Declares a face from a font file and returns its family ([Fonts](/guide/themes#fonts)). The file's faces are on `state.fonts`. |
 | `googleFont` | `(family, { weights?, styles? }?) => string` | Declares a Google Fonts family, one face per weight and style, and returns it. The export downloads it once into a local cache. |
 

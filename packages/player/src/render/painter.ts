@@ -1,4 +1,6 @@
+import type { ShaderTextures } from "../media/shader-textures";
 import type { BackgroundGradient, DrawOp, FramePlan } from "../model/frame-plan";
+import { hasCssFallback } from "../model/shaders";
 import { fitRect, type Matrix2D } from "../model/transform";
 import type { AnyCanvas, CreateCanvas, Ctx2D, Frame } from "../types";
 import { devWarn } from "../warn";
@@ -15,6 +17,8 @@ interface Outgoing {
 export interface PaintInputs {
   readonly frames: ReadonlyMap<string, Frame | null>;
   readonly nested: ReadonlyMap<string, AnyCanvas>;
+  /** The textures effect params name (`"asset:ID"`), loaded. */
+  readonly textures?: ShaderTextures;
 }
 
 /**
@@ -32,6 +36,8 @@ export class CanvasPainter {
   /** The outgoing side of a declared transition between two clips, waiting for the incoming side. */
   private outgoing: Outgoing | null = null;
   private outgoingPicture: AnyCanvas | null = null;
+  /** The textures of the frame being painted. */
+  private textures: ShaderTextures | undefined;
 
   constructor(
     readonly width: number,
@@ -40,6 +46,7 @@ export class CanvasPainter {
   ) {}
 
   paint(ctx: Ctx2D, plan: FramePlan, inputs: PaintInputs): void {
+    this.textures = inputs.textures;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.globalAlpha = 1;
     ctx.globalCompositeOperation = "source-over";
@@ -99,7 +106,7 @@ export class CanvasPainter {
     const runner = this.runner();
     let picture: AnyCanvas | null = layer;
     try {
-      if (op.shaders) picture = runner.effects(layer, op.shaders) ?? layer;
+      if (op.shaders) picture = runner.effects(layer, op.shaders, this.textures) ?? layer;
       const x = op.transition;
       if (x?.paired && x.role === "out") {
         // Kept for the incoming side, which comes later in the same plan; drawn by it, not now.
@@ -126,12 +133,12 @@ export class CanvasPainter {
   }
 
   /**
-   * The op as a painter without WebGL draws it: its built-in shader effects as their CSS filter, and only the file's
-   * own shaders left, which it then warns it cannot draw. The op as it is where WebGL is there.
+   * The op as a painter without WebGL draws it: its built-in shader effects that have a CSS filter as that filter, and
+   * only the shaders without one left, which it then warns it cannot draw. The op as it is where WebGL is there.
    */
   private withoutWebGl(op: DrawOp): DrawOp {
-    if (!op.shaders?.some((s) => s.builtIn) || this.runner().available) return op;
-    const own = op.shaders.filter((s) => !s.builtIn);
+    if (!op.shaders?.some(hasCssFallback) || this.runner().available) return op;
+    const own = op.shaders.filter((s) => !hasCssFallback(s));
     const { shaders: _, ...rest } = op;
     return { ...rest, filter: op.fallbackFilter ?? op.filter, ...(own.length > 0 ? { shaders: own } : {}) };
   }
@@ -331,7 +338,7 @@ export class CanvasPainter {
     const scratch = copyInto(this.scratch, canvasOf(ctx));
     let picture: AnyCanvas = scratch;
     try {
-      picture = this.runner().effects(scratch, op.shaders ?? []) ?? scratch;
+      picture = this.runner().effects(scratch, op.shaders ?? [], this.textures) ?? scratch;
     } catch (error) {
       warnShaderError(op, error);
       return;
@@ -364,7 +371,7 @@ function copyInto(target: AnyCanvas, source: AnyCanvas): AnyCanvas {
 function warnNoShaders(op: DrawOp): void {
   devWarn(
     `shaders:${op.id}`,
-    `"${op.id}" uses an effect or transition the file declares; this renderer has no WebGL, so it draws without it (the browser export draws it)`,
+    `"${op.id}" uses a shader effect or transition; this renderer has no WebGL, so it draws without it (the browser export draws it)`,
   );
 }
 

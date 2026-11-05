@@ -3,7 +3,7 @@ import { memo, type ReactNode } from "react";
 import type { ResolvedState } from "@cutcraft/kit";
 
 import { backdropTracks } from "../model/backdrop";
-import { effectPasses } from "../model/shaders";
+import { effectPasses, hasCssFallback } from "../model/shaders";
 import { frameIndex } from "../model/time";
 import { type VisibleItem, visiblePlacements } from "../model/visible";
 import { type ElementProps, OVERLAY_KINDS } from "../overlays/layout";
@@ -102,7 +102,7 @@ const Element = memo(
       item.placement.kind === "adjustment"
         ? undefined
         : effectPasses(state, item.children, time - item.placement.start);
-    const passes = all && !htmlInCanvas() ? all.filter((s) => !s.builtIn) : all;
+    const passes = all && !htmlInCanvas() ? all.filter((s) => !hasCssFallback(s)) : all;
     if (!passes?.length || !content) return content;
     const { width, height } = state.composition;
     return (

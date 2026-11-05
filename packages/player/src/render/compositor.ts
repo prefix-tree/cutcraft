@@ -2,6 +2,7 @@ import type { ResolvedState } from "@cutcraft/kit";
 
 import type { AssetSources } from "../media/asset-sources";
 import { DecoderPool } from "../media/decoder-pool";
+import { type ShaderTextures, textureRefs } from "../media/shader-textures";
 import { buildFramePlan, type FramePlan, type ResolveNested } from "../model/frame-plan";
 import { frameIndex } from "../model/time";
 import type { AnyCanvas, CreateCanvas, Ctx2D, Frame } from "../types";
@@ -10,6 +11,8 @@ import { CanvasPainter } from "./painter";
 export interface CompositorDeps {
   readonly sources: AssetSources;
   readonly createCanvas: CreateCanvas;
+  /** The textures effect params name (a LUT, an image); without it such effects draw nothing. */
+  readonly textures?: ShaderTextures | undefined;
   readonly resolveNested?: ResolveNested | undefined;
   /** Called after a frame was painted with a new frame index. */
   readonly onFrame?: ((time: number, frame: number) => void) | undefined;
@@ -164,8 +167,16 @@ export class Compositor {
         frames.set(op.id, d ? await d.frameFor(t, opts.wait, opts.exact) : null);
       }),
     );
+    const refs = plan.ops.flatMap((op) => textureRefs(op.shaders));
+    const textures = this.deps.textures;
+    if (refs.length > 0 && textures) await textures.load(this.state.manifest, refs);
     if (this.disposed) return;
-    if (this.ctx) this.painter.paint(this.ctx, plan, { frames, nested: nestedCanvases });
+    if (this.ctx)
+      this.painter.paint(this.ctx, plan, {
+        frames,
+        nested: nestedCanvases,
+        ...(textures ? { textures } : {}),
+      });
     for (const op of plan.ops) this.pool.decoderFor(op.id)?.advance(t);
     this.lastFrame = frame;
     this.deps.onFrame?.(t, frame);

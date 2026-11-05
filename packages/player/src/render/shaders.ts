@@ -2,6 +2,7 @@
 // is a GLSL function the runner wraps in a fragment shader with its params as uniforms, drawn over a full-frame triangle
 // with WebGL 2. Passes between the first and the last draw into textures, not the canvas. Where there is no WebGL 2,
 // `available` is false and the painter draws without them.
+import type { ShaderTexture, ShaderTextures } from "../media/shader-textures";
 import type { ShaderPass, TransitionPass } from "../model/shaders";
 import type { AnyCanvas, CreateCanvas } from "../types";
 
@@ -47,11 +48,18 @@ export function fragmentSource(
   source: string,
   params: Readonly<Record<string, unknown>>,
   final = true,
+  /** The kind of texture each `"asset:ID"` param names: a 3D table (a LUT) or a 2D picture. */
+  textureKind: (ref: string) => "2d" | "3d" | undefined = () => undefined,
 ): string {
   const uniforms = Object.entries(params)
-    .map(([name, value]) => [name, uniformOf(value)] as const)
-    .filter(([name, u]) => u && /^[A-Za-z_]\w*$/.test(name) && !RESERVED.has(name))
-    .map(([name, u]) => `uniform ${u!.type} ${name};`);
+    .filter(([name]) => /^[A-Za-z_]\w*$/.test(name) && !RESERVED.has(name))
+    .map(([name, value]) => {
+      const texture = typeof value === "string" ? textureKind(value) : undefined;
+      if (texture) return `uniform highp ${texture === "3d" ? "sampler3D" : "sampler2D"} ${name};`;
+      const u = uniformOf(value);
+      return u ? `uniform ${u.type} ${name};` : null;
+    })
+    .filter((line): line is string => line !== null);
   const inputs =
     kind === "effect"
       ? "uniform sampler2D image;\nuniform sampler2D original;"
@@ -87,6 +95,8 @@ export class ShaderRunner {
   private readonly uploads = new Map<string, WebGLTexture>();
   /** Textures between passes; three, so a pass never draws into its `image` or its effect's `original`. */
   private readonly targets: Target[] = [];
+  /** The textures of assets (LUTs, images) uploaded, by their loaded data. */
+  private readonly assets = new WeakMap<ShaderTexture, WebGLTexture>();
   private blank: AnyCanvas | null = null;
 
   constructor(
@@ -104,7 +114,7 @@ export class ShaderRunner {
    * The effects run in order over `source`, each through its passes; the result is the runner's own canvas, valid
    * until its next run. A pass reads the one before as `image` and its effect's input as `original`.
    */
-  effects(source: AnyCanvas, effects: readonly ShaderPass[]): AnyCanvas | null {
+  effects(source: AnyCanvas, effects: readonly ShaderPass[], textures?: ShaderTextures): AnyCanvas | null {
     const gl = this.context();
     if (!gl) return null;
     const steps = effects.flatMap((effect) => effect.sources.map((code, i) => ({ effect, code, first: i === 0 })));
@@ -115,11 +125,59 @@ export class ShaderRunner {
       if (step.first) original = image;
       const last = i === steps.length - 1;
       const target = last ? null : this.targetBesides(gl, image, original);
-      const program = this.program(gl, fragmentSource("effect", step.code, step.effect.params, last));
-      this.draw(gl, program, target, step.effect.params, { image, original }, { time: step.effect.time });
+      const assets = this.assetTextures(gl, step.effect, textures);
+      const kindOf = (ref: string) => assets.get(ref)?.kind;
+      const program = this.program(gl, fragmentSource("effect", step.code, step.effect.params, last, kindOf));
+      const bound: Record<string, { texture: WebGLTexture; kind: "2d" | "3d" }> = {
+        image: { texture: image, kind: "2d" },
+        original: { texture: original, kind: "2d" },
+      };
+      for (const [name, value] of Object.entries(step.effect.params)) {
+        const asset = typeof value === "string" ? assets.get(value) : undefined;
+        if (asset) bound[name] = asset;
+      }
+      this.draw(gl, program, target, step.effect.params, bound, { time: step.effect.time });
       if (target) image = target.texture;
     });
     return this.canvas;
+  }
+
+  /** The textures an effect's `"asset:ID"` params name, uploaded once each; throws for one not loaded. */
+  private assetTextures(
+    gl: Gl,
+    effect: ShaderPass,
+    textures: ShaderTextures | undefined,
+  ): Map<string, { texture: WebGLTexture; kind: "2d" | "3d" }> {
+    const out = new Map<string, { texture: WebGLTexture; kind: "2d" | "3d" }>();
+    for (const value of Object.values(effect.params)) {
+      if (typeof value !== "string" || !value.startsWith("asset:") || out.has(value)) continue;
+      const data = textures?.get(value);
+      if (!data) throw new Error(`effect "${effect.name}": ${value} is not loaded`);
+      out.set(value, { texture: this.assetTexture(gl, data), kind: data.kind });
+    }
+    return out;
+  }
+
+  private assetTexture(gl: Gl, data: ShaderTexture): WebGLTexture {
+    const cached = this.assets.get(data);
+    if (cached) return cached;
+    const texture = gl.createTexture() as WebGLTexture;
+    const target = data.kind === "3d" ? gl.TEXTURE_3D : gl.TEXTURE_2D;
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(target, texture);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+    gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+    if (data.kind === "3d")
+      gl.texImage3D(target, 0, gl.RGBA8, data.size, data.size, data.size, 0, gl.RGBA, gl.UNSIGNED_BYTE, data.data);
+    else gl.texImage2D(target, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, data.image);
+    gl.texParameteri(target, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(target, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(target, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(target, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    if (data.kind === "3d") gl.texParameteri(target, gl.TEXTURE_WRAP_R, gl.CLAMP_TO_EDGE);
+    this.assets.set(data, texture);
+    return texture;
   }
 
   /** The transition between two pictures (either may be absent: an edge blends with nothing). */
@@ -127,7 +185,10 @@ export class ShaderRunner {
     const gl = this.context();
     if (!gl) return null;
     const empty = this.empty();
-    const textures = { from: this.upload(gl, "from", from ?? empty), to: this.upload(gl, "to", to ?? empty) };
+    const textures = {
+      from: { texture: this.upload(gl, "from", from ?? empty), kind: "2d" as const },
+      to: { texture: this.upload(gl, "to", to ?? empty), kind: "2d" as const },
+    };
     const program = this.program(gl, fragmentSource("transition", pass.source, pass.params));
     this.draw(gl, program, null, pass.params, textures, { time: pass.time, progress: pass.progress });
     return this.canvas;
@@ -228,16 +289,16 @@ export class ShaderRunner {
     program: WebGLProgram,
     target: Target | null,
     params: Readonly<Record<string, unknown>>,
-    textures: Readonly<Record<string, WebGLTexture>>,
+    textures: Readonly<Record<string, { readonly texture: WebGLTexture; readonly kind: "2d" | "3d" }>>,
     values: Readonly<Record<string, number>>,
   ): void {
     // biome-ignore lint/correctness/useHookAtTopLevel: WebGL's useProgram, not a React hook.
     gl.useProgram(program);
     gl.bindFramebuffer(gl.FRAMEBUFFER, target?.framebuffer ?? null);
     gl.viewport(0, 0, this.width, this.height);
-    Object.entries(textures).forEach(([name, texture], unit) => {
+    Object.entries(textures).forEach(([name, { texture, kind }], unit) => {
       gl.activeTexture(gl.TEXTURE0 + unit);
-      gl.bindTexture(gl.TEXTURE_2D, texture);
+      gl.bindTexture(kind === "3d" ? gl.TEXTURE_3D : gl.TEXTURE_2D, texture);
       gl.uniform1i(gl.getUniformLocation(program, name), unit);
     });
     gl.uniform1f(gl.getUniformLocation(program, "cutcraft_flip"), target ? -1 : 1);
