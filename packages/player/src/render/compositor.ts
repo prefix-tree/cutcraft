@@ -15,19 +15,11 @@ export interface CompositorDeps {
   readonly onFrame?: ((time: number, frame: number) => void) | undefined;
 }
 
-/**
- * Sees a frame's plan and its pictures before they are painted. Returning true means the host takes this frame as it
- * is (an export handing a decoded picture straight to its encoder): nothing is prepared or painted.
- */
-export type FrameIntercept = (plan: FramePlan, frames: ReadonlyMap<string, Frame | null>) => boolean;
-
 export interface TickOptions {
   /** Fetch missing frames before painting (seek, export). */
   readonly wait: boolean;
   /** With `wait`: no deadline. An export waits for every frame instead of drawing a stale one. */
   readonly exact?: boolean;
-  /** This composition's frames only; nested compositions paint as usual. */
-  readonly intercept?: FrameIntercept;
 }
 
 /**
@@ -106,8 +98,8 @@ export class Compositor {
    * for. Paint order and output are the same as `seek` then `tick`, at a
    * fraction of the decode work.
    */
-  step(t: number, intercept?: FrameIntercept): Promise<void> {
-    return this.tick(t, { wait: true, exact: true, ...(intercept ? { intercept } : {}) });
+  step(t: number): Promise<void> {
+    return this.tick(t, { wait: true, exact: true });
   }
 
   tick(t: number, opts: TickOptions): Promise<void> {
@@ -116,11 +108,9 @@ export class Compositor {
       // Coalesce: the newest request replaces the pending one; both callers resolve when it has run.
       if (this.pending) {
         this.pending.t = t;
-        const intercept = opts.intercept ?? this.pending.opts.intercept;
         this.pending.opts = {
           wait: opts.wait || this.pending.opts.wait,
           exact: Boolean(opts.exact || this.pending.opts.exact),
-          ...(intercept ? { intercept } : {}),
         };
         return this.pending.done;
       }
@@ -175,11 +165,7 @@ export class Compositor {
       }),
     );
     if (this.disposed) return;
-    if (!opts.intercept?.(plan, frames)) {
-      await Promise.all([...frames.values()].map((f) => f?.prepare?.()));
-      if (this.disposed) return;
-      if (this.ctx) this.painter.paint(this.ctx, plan, { frames, nested: nestedCanvases });
-    }
+    if (this.ctx) this.painter.paint(this.ctx, plan, { frames, nested: nestedCanvases });
     for (const op of plan.ops) this.pool.decoderFor(op.id)?.advance(t);
     this.lastFrame = frame;
     this.deps.onFrame?.(t, frame);

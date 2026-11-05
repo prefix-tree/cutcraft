@@ -9,7 +9,6 @@
     "gen": "tsx media.ts",
     "render": "tsx render.ts",
     "docs": "tsx docs.ts",
-    "bench": "tsx bench.ts",
     "gif": "tsx gif.ts",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run"

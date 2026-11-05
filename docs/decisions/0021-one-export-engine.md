@@ -40,8 +40,8 @@ in the browser, and runs it under Puppeteer on a server. Neither keeps a second 
   and overlay effects. The "left out in the Node export" warnings and their docs are gone.
 - Every export needs Chrome: about one download per machine, and a few seconds to start it per export.
 - Without a GPU, Chrome draws on the CPU (SwiftShader for WebGL). Files the Node engine drew fast (plain cuts at
-  111 fps on a 4-core Linux runner) are slower now; the export-speed page says its numbers are the Node engine's until
-  they are measured again. `--copy` and `--tabs` are the levers meanwhile.
+  111 fps on a 4-core Linux runner) are slower now. The export-speed page, which compared the Node engine with Remotion
+  and Diffusion Studio, was removed for "How the export works" (docs/guide/export-architecture.md). `--copy` and `--tabs` are the levers meanwhile.
 - The tests that render live in the browser suite (`test:browser`), which CI runs in the e2e job with the downloaded
   Chrome; `pnpm test` keeps the parts that need no browser. The tests read exports back with `ffmpeg` and `ffprobe`.
 

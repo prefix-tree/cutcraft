@@ -117,7 +117,7 @@ Copied pictures keep the source's quality and are not decoded or encoded at all.
 rendered as usual. `--copy` is opt-in because a source whose stream the encoder's does not match fails when the
 pieces are joined instead of falling back.
 
-[Export speed](/comparisons/export-speed) compares the export with Remotion and Diffusion Studio.
+[How the export works](./export-architecture) explains what runs where: the page, the pieces and the sound.
 
 ## Checking the layout
 

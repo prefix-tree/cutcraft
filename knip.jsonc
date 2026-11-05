@@ -20,8 +20,6 @@
     },
     "packages/render": {
       "entry": ["bench/**/*.{ts,tsx}"],
-      // Throwaway measurement code (spike/README.md).
-      "ignore": ["spike/**"],
       // Vite pre-bundles zod for the export page (src/web/server.ts), which loads cut files that import it.
       "ignoreDependencies": ["zod"]
     },

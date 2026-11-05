@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       bench:
-        description: Measure the landing page's benchmarks again (otherwise the committed docs/bench.json is used)
+        description: Measure the landing page's benchmark again (otherwise the committed docs/bench.json is used)
         type: boolean
         default: false
 
@@ -33,10 +33,7 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      # The landing page's benchmarks, measured on this runner when asked (Run workflow, "bench"): the kit's editor loop
-      # and the showcase export.
-      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
-        if: inputs.bench
+      # The landing page's benchmark, the kit's editor loop, measured on this runner when asked (Run workflow, "bench").
       - run: pnpm docs:bench
         if: inputs.bench
       - run: pnpm docs:build

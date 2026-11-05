@@ -46,39 +46,5 @@
       "usPerStep": 517,
       "usPerNode": 0.51
     }
-  ],
-  "export": [
-    {
-      "file": "edit",
-      "width": 960,
-      "height": 540,
-      "frames": 237,
-      "fps1": 55,
-      "fps4": 94
-    },
-    {
-      "file": "graphics",
-      "width": 960,
-      "height": 540,
-      "frames": 150,
-      "fps1": 131,
-      "fps4": 82
-    },
-    {
-      "file": "captions",
-      "width": 540,
-      "height": 960,
-      "frames": 333,
-      "fps1": 79,
-      "fps4": 100
-    },
-    {
-      "file": "motion",
-      "width": 960,
-      "height": 540,
-      "frames": 150,
-      "fps1": 106,
-      "fps4": 81
-    }
   ]
 }

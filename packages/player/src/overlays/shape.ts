@@ -255,7 +255,7 @@ function gradient(id: string, g: Gradient, warnings: string[]): string {
   return `<linearGradient id="${id}" x1="${num(0.5 - dx / 2)}" y1="${num(0.5 - dy / 2)}" x2="${num(0.5 + dx / 2)}" y2="${num(0.5 + dy / 2)}">${stops}</linearGradient>`;
 }
 
-/** Drop shadows under the shape, as SVG filter primitives skia and browsers both draw. */
+/** Drop shadows under the shape, as SVG filter primitives. */
 function shadowFilter(shadows: readonly Shadow[], region: { x: number; y: number; w: number; h: number }): string {
   const parts: string[] = [];
   const merged: string[] = [];

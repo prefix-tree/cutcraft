@@ -78,31 +78,12 @@ it.
 - **Every action undoes.** 131 editor actions, each able to validate, apply, invert and write itself back to the file.
 - **Plays in the browser.** WebCodecs decoding, a canvas for footage, DOM for overlays, Web Audio as the clock, and a
   frame-exact seek.
-- **Exports in Node.** The same engine, headless: WebM, MP4, MOV, soundtracks and stills, with its own audio mix.
+- **Exports with the player.** The same player in headless Chrome, frame by frame: MP4, WebM, soundtracks and stills,
+  with its own audio mix ([how it works](./guide/export-architecture)).
 - **Checks like a compiler.** A lint for the file, a list of what renders, and a layout check that points at the line
   where a graphic covers a face or leaves the safe zone.
 
-## Benchmarks
-
-The same three 1080p H.264 videos exported by CutCraft, Remotion and Diffusion Studio, each at its defaults, in frames
-per second ([method and every variant](./comparisons/export-speed)).
-
-<div class="home-chart cc-bench">
-<p class="cc-bench-group">Cuts: five shots of one file</p>
-<div class="row"><span class="name">CutCraft</span><span class="track"><span class="bar" style="width: 90%"></span></span><span class="value">199</span></div>
-<div class="row"><span class="name">Diffusion Studio</span><span class="track"><span class="bar other" style="width: 90%"></span></span><span class="value">198</span></div>
-<div class="row"><span class="name">Remotion</span><span class="track"><span class="bar other" style="width: 10%"></span></span><span class="value">21</span></div>
-<p class="cc-bench-group">Crossfades with a title on each</p>
-<div class="row"><span class="name">CutCraft</span><span class="track"><span class="bar" style="width: 36%"></span></span><span class="value">80</span></div>
-<div class="row"><span class="name">Diffusion Studio</span><span class="track"><span class="bar other" style="width: 86%"></span></span><span class="value">190</span></div>
-<div class="row"><span class="name">Remotion</span><span class="track"><span class="bar other" style="width: 10%"></span></span><span class="value">23</span></div>
-<p class="cc-bench-group">Motion graphics, no footage</p>
-<div class="row"><span class="name">CutCraft</span><span class="track"><span class="bar" style="width: 68%"></span></span><span class="value">149</span></div>
-<div class="row"><span class="name">Diffusion Studio</span><span class="track"><span class="bar other" style="width: 91%"></span></span><span class="value">201</span></div>
-<div class="row"><span class="name">Remotion</span><span class="track"><span class="bar other" style="width: 39%"></span></span><span class="value">85</span></div>
-</div>
-
-<p class="home-note">Apple M3 Pro, 2 November 2026. On a 4-core Linux server with no GPU, CutCraft renders the same videos at 111, 37 and 61 fps. An export through headless Chrome, in the works, rendered them at 191, 185 and 202 fps in a first test.</p>
+## Fast in the editor
 
 In the editor, one drag step on a composition of {{ drag.nodes.toLocaleString("en-US") }} elements (validate the action,
 patch the file, resolve everything again) takes {{ (drag.usPerStep / 1000).toFixed(2) }} ms

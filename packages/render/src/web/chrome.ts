@@ -39,16 +39,21 @@ export interface FindChromeOptions {
 export async function findChrome(options: FindChromeOptions = {}): Promise<string> {
   const named = options.executablePath ?? process.env.CUTCRAFT_CHROMIUM;
   if (named) return named;
-  const cacheDir = browserCacheDir();
-  const cached = (await getInstalledBrowsers({ cacheDir })).find(
-    (b) => b.browser === Browser.CHROME && b.buildId.startsWith(`${CHROME_MILESTONE}.`),
-  );
-  if (cached) return cached.executablePath;
+  const cached = await cachedChrome();
+  if (cached) return cached;
   if (options.download === false)
     throw new Error(
-      `no Chrome ${CHROME_MILESTONE} in ${cacheDir}; run \`cutcraft browser install\`, or set CUTCRAFT_CHROMIUM to a Chrome or Chromium 153+ binary`,
+      `no Chrome ${CHROME_MILESTONE} in ${browserCacheDir()}; run \`cutcraft browser install\`, or set CUTCRAFT_CHROMIUM to a Chrome or Chromium 153+ binary`,
     );
   return installChrome(options.log);
+}
+
+/** The binary of a Chrome for Testing of `CHROME_MILESTONE` already in the cache, without asking the network. */
+export async function cachedChrome(): Promise<string | null> {
+  const found = (await getInstalledBrowsers({ cacheDir: browserCacheDir() })).find(
+    (b) => b.browser === Browser.CHROME && b.buildId.startsWith(`${CHROME_MILESTONE}.`),
+  );
+  return found?.executablePath ?? null;
 }
 
 /** Downloads Chrome for Testing of `CHROME_MILESTONE` into the cache and returns its binary. */

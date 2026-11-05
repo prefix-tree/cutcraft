@@ -73,16 +73,12 @@ renders can be split across machines with Remotion Lambda.
 
 CutCraft's player runs in the browser: footage decodes through WebCodecs (via
 Mediabunny) onto a canvas, overlays are DOM, and Web Audio is the clock. The
-export runs in Node with no browser, on the same engine. It draws Layers with
-Satori, which supports a subset of CSS, and leaves out `<Three>` and
-`<Motion>` for now with a warning. An export through headless Chrome
-(HTML-in-Canvas and WebCodecs) that draws everything is on the roadmap. Until
-then, a video made mostly of free code exports completely from Remotion and
-only partly from CutCraft. See [Exporting](/guide/exporting).
-
-On speed, CutCraft is about ten times faster than Remotion on plain cuts and
-faster on drawn frames too, measured on one machine. The numbers and method
-are on [Export speed](/comparisons/export-speed).
+export runs that same player in headless Chrome, captures each frame with
+HTML-in-Canvas and encodes it with WebCodecs in the page, so only encoded
+packets leave the browser; Node joins them into the file. Like Remotion's, it
+draws everything the browser can, free code included. It splits a render across
+pages of one browser, not across machines.
+[How the export works](/guide/export-architecture) follows one export through.
 
 ## A model as the author
 
@@ -96,11 +92,9 @@ give the model something to verify against without exporting.
 ## When to pick which
 
 Pick Remotion if your video is mostly motion graphics or templated data
-video, if you need every CSS and browser feature in the export today, if you
-want its GPU effects, or if you render at volume and want Lambda.
+video, if you want its GPU effects, or if you render at volume and want Lambda.
 
 Pick CutCraft if your video is cut from footage (talking heads, podcasts,
 product demos) and the cuts should follow the transcript. It also fits if a
 model writes the file and a person refines it in a timeline editor, with
-every edit landing back in the file, or if you need to export on a server
-without a browser.
+every edit landing back in the file.

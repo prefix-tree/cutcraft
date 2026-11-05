@@ -215,45 +215,6 @@
   color: var(--cc-grey);
 }
 
-.home-chart {
-  margin: 20px 0 24px;
-  display: grid;
-  gap: 10px;
-}
-.home-chart .row {
-  display: grid;
-  grid-template-columns: 140px 1fr 44px;
-  align-items: center;
-  gap: 14px;
-  font-size: 14px;
-}
-.home-chart .name {
-  color: var(--cc-ink-2);
-}
-.home-chart .track {
-  position: relative;
-  height: 14px;
-  background: var(--cc-paper-2);
-  border-radius: 2px;
-}
-.home-chart .bar {
-  position: absolute;
-  inset: 0 auto 0 0;
-  background: var(--cc-accent);
-  border-radius: 2px;
-}
-.home-chart .realtime {
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  width: 0;
-  border-left: 1.5px dashed var(--cc-ink);
-}
-.home-chart .value {
-  font-family: var(--cc-mono);
-  font-size: 13px;
-  text-align: right;
-}
 .home-note,
 .home-foot {
   font-size: 13.5px !important;
@@ -277,9 +238,6 @@
   }
   .home-videos figure.side {
     grid-template-columns: 1fr;
-  }
-  .home-chart .row {
-    grid-template-columns: 110px 1fr 36px;
   }
 }
 
@@ -443,33 +401,10 @@
   font-size: 0.86em;
 }
 
-/* The comparison's chart: groups by scenario, CutCraft in the accent, the others in grey. */
-.vp-doc .cc-bench {
-  margin: 18px 0 28px;
-}
-.vp-doc .cc-bench .cc-bench-group {
-  margin: 14px 0 2px;
-  font-family: var(--cc-mono);
-  font-size: 11px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--cc-grey);
-}
-.vp-doc .cc-bench .row {
-  margin: 0;
-}
-.vp-doc .cc-bench .bar.other {
-  background: var(--cc-grey);
-  opacity: 0.55;
-}
-
 /* The landing page's example grid: three across, two on a phone. */
 .home .home-cards {
   grid-template-columns: repeat(3, 1fr);
   margin-top: 22px;
-}
-.home .home-chart.cc-bench .row {
-  grid-template-columns: 130px 1fr 44px;
 }
 @media (max-width: 640px) {
   .home .home-cards {

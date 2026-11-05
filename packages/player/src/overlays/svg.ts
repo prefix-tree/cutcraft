@@ -4,12 +4,9 @@ import { freezeSmil, hasSmil } from "./smil";
 import { shapeLength } from "./svg-length";
 
 /**
- * SVG markup as both surfaces draw it. The browser preview inlines the string,
- * the Node export rasterises it with skia, so whatever this module returns is
- * what both show: it parses the markup once, drops what must not run, sizes the
- * root to the element's box, renames ids so two elements never share one, puts
- * theme tokens in, and applies the colour mode as an SVG filter (skia and the
- * browser both implement the filters used here).
+ * SVG markup as the player draws it, in the preview and the export alike: it parses the markup once, drops what must
+ * not run, sizes the root to the element's box, renames ids so two elements never share one, puts theme tokens in, and
+ * applies the colour mode as an SVG filter.
  */
 
 export interface SvgNode {
@@ -288,8 +285,8 @@ function cleanStyleSheet(css: string, ctx: Walk): string {
 }
 
 /**
- * CSS animations are removed: the browser would play them on its own clock and skia not at all,
- * so the element is drawn as it is styled without them.
+ * CSS animations are removed: the browser would play them on its own clock, not the video's, so the element is drawn
+ * as it is styled without them.
  */
 function withoutCssAnimation(css: string, ctx: Walk): string {
   if (!/@keyframes|animation/i.test(css)) return css;
@@ -400,7 +397,7 @@ function colorFilter(color: SvgColor | undefined, id: string, region: SvgViewBox
       children: [],
     });
   }
-  // The region is the visible area in user units: skia mis-sizes a region relative to the bounding box.
+  // The region is the visible area in user units, so it does not depend on the element's bounding box.
   const bounds = {
     filterUnits: "userSpaceOnUse",
     x: num(region.minX),

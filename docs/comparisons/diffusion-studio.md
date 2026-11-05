@@ -105,12 +105,10 @@ hand its video playhead runs on `requestAnimationFrame` time and nothing
 corrects drift against the audio clock. CutCraft uses Web Audio as the master
 clock and shares one decoder input per media file across clips.
 
-Diffusion Studio exports in Chrome, drawing on a GPU canvas. CutCraft exports
-in Node with no browser. On one machine the two are level on plain cuts, and
-Diffusion Studio is faster on crossfades and graphics, where CutCraft draws on
-the CPU. See [Export speed](/comparisons/export-speed). CutCraft's Node export
-also draws Layers with a subset of CSS and leaves out `<Three>` and
-`<Motion>` for now ([Exporting](/guide/exporting)).
+Both export in Chrome. Diffusion Studio draws its canvas and encodes it with
+WebCodecs; CutCraft runs its player in headless Chrome, captures the canvas and
+the DOM overlays together with HTML-in-Canvas, and encodes in the page
+([How the export works](/guide/export-architecture)).
 
 ## The agent
 
@@ -125,11 +123,9 @@ verifies with the lint and the layout check (`--check-layout`).
 ## When to pick which
 
 Pick Diffusion Studio if you want a desktop editor today with an agent built
-in, if your videos are graphics-heavy and export speed matters, or if you
-prefer placing everything at absolute positions and times.
+in, or if you prefer placing everything at absolute positions and times.
 
 Pick CutCraft if your cuts should follow a transcript, so trims, transitions
 and captions keep working when the edit changes. It also fits if you want the
 timeline as plain data you can test without a browser, edits that land in the
-file as one-token changes with undo you can keep, or export on a server with
-no browser.
+file as one-token changes with undo you can keep.

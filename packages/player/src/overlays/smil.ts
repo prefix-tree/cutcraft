@@ -2,9 +2,8 @@ import type { SvgNode } from "./svg";
 
 /**
  * SVG animation (SMIL) evaluated at one moment of the element's own time and
- * written into plain attributes, so the frame is the same in the browser
- * (which would otherwise play SMIL on its own clock) and in skia (which does
- * not play it at all).
+ * written into plain attributes, so the frame follows the video's clock rather
+ * than the browser's, which would otherwise play SMIL on its own.
  *
  * Covered: `<animate>`, `<set>`, `<animateTransform>` and `<animateColor>`;
  * `values`, `from`/`to`/`by`, `keyTimes`, `keySplines`; linear, discrete,

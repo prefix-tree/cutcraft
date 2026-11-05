@@ -80,8 +80,9 @@ It needs Pages enabled for the repository with "GitHub Actions" as the source.
 ## Benchmarks
 
 Benchmarks run only on request. `gh workflow run ci.yml` runs the export
-benchmarks on a 4-core runner (results in the job log and the `render-bench`
-artifact); `gh workflow run docs.yml -f bench=true` measures the landing page's
-numbers again before deploying. Otherwise the site uses the committed
+benchmark (`pnpm --filter @cutcraft/render bench`, on one page and on four) on a
+4-core runner, with results in the job log and the `render-bench` artifact.
+`gh workflow run docs.yml -f bench=true` measures the landing page's editor
+number again before deploying. Otherwise the site uses the committed
 `docs/bench.json`.
 

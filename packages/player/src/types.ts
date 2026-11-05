@@ -22,7 +22,10 @@ export type Ctx2D = CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D
 export type AnyCanvas = HTMLCanvasElement | OffscreenCanvas;
 export type CreateCanvas = (width: number, height: number) => AnyCanvas;
 
-/** Where an asset's bytes come from. `path` is a file on disk, for a Node host such as the export's server; browsers use `blob` or `url`. */
+/**
+ * Where an asset's bytes come from. The player reads `blob` and `url`; `path` is a file on disk, which a Node host (the
+ * export's server) serves to the page as a URL.
+ */
 export type MediaHandle =
   | { readonly kind: "blob"; readonly blob: Blob }
   | { readonly kind: "url"; readonly url: string }
@@ -54,16 +57,6 @@ export interface Frame {
     dh: number,
     crop?: { x: number; y: number; w: number; h: number },
   ): void;
-  /**
-   * Optional fast path for a picture that covers the whole `width`×`height` canvas, untransformed, opaque and
-   * normally blended: replace the canvas content with it and return true, or return false to be drawn with `draw`.
-   */
-  paintFull?(ctx: Ctx2D, width: number, height: number): boolean;
-  /**
-   * Makes the picture drawable, for a frame that defers work until it is drawn (the Node renderer converts decoded
-   * pictures to RGBA only then). The compositor awaits it before painting the frame.
-   */
-  prepare?(): Promise<void>;
   /** A copy that outlives the source's pools and the original's `close()`. */
   retain(): Frame;
   close(): void;
