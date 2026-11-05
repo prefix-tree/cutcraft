@@ -19,6 +19,19 @@ export interface ShaderDefinition {
    * array of 2 to 4 numbers as a vec, a colour string as a vec3.
    */
   readonly passes: readonly string[];
+  /**
+   * Built-in effects only: pictures the effect computes from its params (a curve's table), each read by the passes as
+   * a `sampler2D` of that name. Bytes are RGBA, row 0 at the top.
+   */
+  readonly tables?: (params: Readonly<Record<string, unknown>>) => Readonly<Record<string, ShaderTable>>;
+}
+
+/** A small picture a built-in effect computes from its params. */
+export interface ShaderTable {
+  readonly width: number;
+  readonly height: number;
+  /** width × height × 4 bytes, RGBA. */
+  readonly data: Uint8Array;
 }
 
 interface ShaderStore {

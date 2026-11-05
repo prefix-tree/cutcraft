@@ -4,6 +4,7 @@ import {
   type Placement,
   type ResolvedState,
   SHADER_ONLY_EFFECTS,
+  type ShaderDefinition,
   shaderFor,
 } from "@cutcraft/kit";
 
@@ -15,8 +16,10 @@ export interface ShaderPass {
   readonly name: string;
   /** The effect's GLSL, one source per pass, run in order. */
   readonly sources: readonly string[];
-  /** A built-in effect (`levels`, `lut`), drawn by the kit's shader. */
+  /** A built-in effect (`levels`, `lut`…), drawn by the kit's shader. */
   readonly builtIn?: true;
+  /** Pictures a built-in computes from its params (a curve's table), read by the passes by name. */
+  readonly tables?: ShaderDefinition["tables"];
   readonly params: Readonly<Record<string, unknown>>;
   /** Seconds into the element. */
   readonly time: number;
@@ -53,6 +56,7 @@ export function effectPasses(
         name: def.name,
         sources: def.passes,
         ...(own ? {} : { builtIn: true as const }),
+        ...(!own && def.tables ? { tables: def.tables } : {}),
         params: paramsAt(children, c, rel),
         time: rel,
       });

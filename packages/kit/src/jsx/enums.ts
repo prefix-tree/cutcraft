@@ -102,6 +102,12 @@ export const VIDEO_EFFECT_TYPES = [
   "invert",
   "levels",
   "lut",
+  "exposure",
+  "vibrance",
+  "whiteBalance",
+  "shadowsHighlights",
+  "duotone",
+  "curves",
 ] as const;
 
 export const TEXT_ANIMATION_PRESETS = [

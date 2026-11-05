@@ -52,6 +52,9 @@ const CANVAS_FILTERABLE: Readonly<
   temperature: (p) => colorGradeFilters({ temperature: num(p, ["amount", "value"], 0) }).join(" "),
   tint: (p) => colorGradeFilters({ tint: num(p, ["amount", "value"], 0) }).join(" "),
   levels,
+  // Without WebGL: exposure as brightness of the encoded values, vibrance as plain saturation at half strength.
+  exposure: (p) => `brightness(${2 ** num(p, ["stops"], 0)})`,
+  vibrance: (p) => `saturate(${1 + num(p, ["amount"], 0) / 2})`,
   shadow: (p) =>
     `drop-shadow(${num(p, ["x"], 0)}px ${num(p, ["y"], 4)}px ${num(p, ["blur"], 8)}px ${typeof p.color === "string" ? p.color : "rgba(0,0,0,0.5)"})`,
 };

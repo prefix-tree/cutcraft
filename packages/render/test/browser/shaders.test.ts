@@ -191,6 +191,92 @@ it("lets a file's own effect read an image asset as a texture", async () => {
   expect(near(c, [255, 0, 0])).toBe(true);
 });
 
+describe("colour effects", () => {
+  // A picture of known colours, painted by an effect of the file's own, then the colour effect under test.
+  const PAINT = `const paint = defineEffect({
+    name: "paint",
+    params: z.object({ left: z.array(z.number()).default([0.5, 0.5, 0.5]), right: z.array(z.number()).default([0.5, 0.5, 0.5]) }),
+    shader: "vec4 effect(vec2 uv) { return vec4(uv.x < 0.5 ? left : right, 1.0); }",
+  });`;
+  const graded = (name: string, effect: string, left: number[], right = left) =>
+    colourAt(
+      name,
+      `<Track id="t"><Clip id="c" src="asset:solid" fit="cover"><Effect id="p" type={paint} params={{ left: ${JSON.stringify(left)}, right: ${JSON.stringify(right)} }} />${effect}</Clip></Track>`,
+      PAINT,
+      0.5,
+      [
+        [30, 90],
+        [290, 90],
+      ],
+    );
+  const toLinear = (c: number) => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
+  const toSrgb = (l: number) => (l <= 0.0031308 ? l * 12.92 : 1.055 * l ** (1 / 2.4) - 0.055);
+  /** Each channel within `by` of the expected 0..1 value. */
+  const about = (c: number[] | undefined, want: readonly number[], by = 4) =>
+    want.every((v, i) => Math.abs((c?.[i] ?? -999) - v * 255) <= by);
+
+  it("exposure doubles linear light at +1 stop", async () => {
+    const [c] = await graded("exposure", `<Effect id="e" type="exposure" params={{ stops: 1 }} />`, [0.2, 0.2, 0.2]);
+    const v = toSrgb(toLinear(51 / 255) * 2);
+    expect(about(c, [v, v, v])).toBe(true);
+  });
+
+  it("vibrance moves a muted colour and leaves a saturated one", async () => {
+    const [muted, blue] = await graded(
+      "vibrance",
+      `<Effect id="v" type="vibrance" params={{ amount: 0.8 }} />`,
+      [0.4, 0.45, 0.6],
+      [0, 0, 1],
+    );
+    expect(about(blue, [0, 0, 1])).toBe(true);
+    // The muted colour spreads from its luminance: blue up, red down.
+    expect((muted?.[2] ?? 0) - (muted?.[0] ?? 0)).toBeGreaterThan((0.6 - 0.4) * 255 + 20);
+  });
+
+  it("white balance warms grey at a positive temperature, and cools it at a negative one", async () => {
+    const [warm, cool] = await Promise.all([
+      graded("wb-warm", `<Effect id="w" type="whiteBalance" params={{ temperature: 50 }} />`, [0.5, 0.5, 0.5]),
+      graded("wb-cool", `<Effect id="w" type="whiteBalance" params={{ temperature: -50 }} />`, [0.5, 0.5, 0.5]),
+    ]);
+    expect((warm[0]?.[0] ?? 0) - (warm[0]?.[2] ?? 0)).toBeGreaterThan(10);
+    expect((cool[0]?.[2] ?? 0) - (cool[0]?.[0] ?? 0)).toBeGreaterThan(10);
+  });
+
+  it("duotone maps black and white to its two colours", async () => {
+    const [black, white] = await graded(
+      "duotone",
+      `<Effect id="d" type="duotone" params={{ dark: "#102040", light: "#ffcc00" }} />`,
+      [0, 0, 0],
+      [1, 1, 1],
+    );
+    expect(about(black, [0x10 / 255, 0x20 / 255, 0x40 / 255])).toBe(true);
+    expect(about(white, [1, 0xcc / 255, 0])).toBe(true);
+  });
+
+  it("curves lift the midtones through a point and keep black and white", async () => {
+    const effect = `<Effect id="k" type="curves" params={{ rgb: [[0, 0], [0.5, 0.75], [1, 1]] }} />`;
+    const [mid, white] = await graded("curves", effect, [0.5, 0.5, 0.5], [1, 1, 1]);
+    const [black] = await graded("curves-black", effect, [0, 0, 0]);
+    expect(about(mid, [0.75, 0.75, 0.75], 5)).toBe(true);
+    expect(about(white, [1, 1, 1])).toBe(true);
+    expect(about(black, [0, 0, 0])).toBe(true);
+  });
+
+  it("shadows lift a dark area and leave a bright one", async () => {
+    const [dark, bright] = await graded(
+      "shadows",
+      `<Effect id="s" type="shadowsHighlights" params={{ shadows: 1, radius: 20 }} />`,
+      [0.1, 0.1, 0.1],
+      [0.9, 0.9, 0.9],
+    );
+    // The dark side's surroundings are all 0.1, so its shadow weight is 1 − smoothstep(0, 0.5, 0.1): 2 stops times that.
+    const t = 0.1 / 0.5;
+    const v = toSrgb(toLinear(26 / 255) * 2 ** (2 * (1 - t * t * (3 - 2 * t))));
+    expect(about(dark, [v, v, v])).toBe(true);
+    expect(about(bright, [0.9, 0.9, 0.9])).toBe(true);
+  });
+});
+
 it("runs a declared effect on an adjustment, over everything beneath it", async () => {
   const [c] = await colourAt(
     "adjust",
