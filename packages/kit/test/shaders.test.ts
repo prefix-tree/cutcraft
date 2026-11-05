@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { z } from "zod";
 
 import { collectModule, defineEffect, defineTransition, Executor, resolve } from "@cutcraft/kit";
 import { lint, loadModule } from "@cutcraft/kit/source";
@@ -23,6 +24,9 @@ describe("defineEffect and defineTransition", () => {
     expect(() => defineEffect({ name: "blur", shader: INVERT })).toThrow("is built in");
     expect(() => defineEffect({ name: "Bad Name", shader: INVERT })).toThrow("lowercase letters");
     expect(() => defineEffect({ name: "x", shader: "void main() {}" })).toThrow("defines vec4 effect(vec2 uv)");
+    expect(() => defineEffect({ name: "tone", params: z.object({ mix: z.number() }), shader: INVERT })).toThrow(
+      'param "mix" is a name every shader already uses',
+    );
   });
 
   it("put a file's effects on its state, with params checked and filled by their schema", () => {
@@ -85,5 +89,35 @@ function make() { return defineTransition({ name: "inner", shader: "" }); }`,
       expect.stringContaining("defineEffect() takes a literal name and shader"),
       expect.stringContaining("defineTransition() inside a function or expression"),
     ]);
+  });
+});
+
+describe("timeline children inside overlays", () => {
+  it("keep a title's text, and collect a Layer's effects apart from its free code", () => {
+    const state = stateOf(`import { z } from "zod";
+import { Composition, defineEffect, Effect, Keyframe, Layer, Title, Track } from "@cutcraft/kit";
+const swap = defineEffect({ name: "swap", shader: "vec4 effect(vec2 uv) { return texture(image, uv); }" });
+function Box() { return null; }
+export default function V() {
+  return (
+    <Composition fps={30} width={640} height={360}>
+      <Track id="t" layout="free">
+        <Title id="h" start={0} duration={2}>
+          <Effect id="e1" type={swap} />
+          Hello
+        </Title>
+        <Layer id="l" start={0} duration={2}>
+          <Effect id="e2" type={swap} />
+          <Keyframe id="k" property="transform.opacity" at={0} value={1} />
+          <Box />
+        </Layer>
+      </Track>
+    </Composition>
+  );
+}`);
+    expect(state.errors).toEqual([]);
+    expect(state.tree.byId.get("h")?.text).toBe("Hello");
+    expect(state.items.get("l")?.children).toEqual(["e2", "k"]);
+    expect(state.tree.byId.get("l")?.interior?.component).toBe("Box");
   });
 });

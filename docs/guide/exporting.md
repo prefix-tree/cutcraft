@@ -44,9 +44,11 @@ CUTCRAFT_CHROMIUM=/path/to/chrome npx cutcraft launch.tsx --out launch.mp4
 
 ### Motion blur
 
-```tsx
-<Composition fps={30} width={1920} height={1080} motionBlur={{ shutterAngle: 180, samples: 8 }}>
-```
+<Example src="previews/guide/motion-blur" alt="A puck crossing the frame, blurred along its path">
+
+<<< @/../examples/showcase/guide/motion-blur.tsx
+
+</Example>
 
 A film camera blurs whatever moves while its shutter is open. With `motionBlur`, the browser export draws each frame
 `samples` times while the shutter is open and averages the pictures. Every frame in CutCraft is a function of time,

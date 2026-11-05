@@ -25,7 +25,7 @@ async function colourAt(name: string, body: string, declarations: string, time: 
   writeFileSync(
     file,
     `import { z } from "zod";
-import { Adjustment, Clip, Composition, defineEffect, defineTransition, Effect, Track, Transition } from "@cutcraft/kit";
+import { Adjustment, Clip, Composition, defineEffect, defineTransition, Effect, Layer, Motion, Title, Track, Transition } from "@cutcraft/kit";
 export const manifest = ${JSON.stringify(mediaManifest)};
 ${declarations}
 export default function Video() {
@@ -119,4 +119,42 @@ export default function Video() { return <Composition fps={30} width={320} heigh
   ]);
   expect(near(left, [255, 0, 0])).toBe(true);
   expect(near(right, [0, 0, 255])).toBe(true);
+});
+
+const SWAP = `defineEffect({
+  name: "swap",
+  shader: "vec4 effect(vec2 uv) { vec4 c = texture(image, uv); return vec4(c.b, c.g, c.r, c.a); }",
+})`;
+
+it("runs a declared effect over overlays: a Layer, a Motion layer and a title, through HTML-in-Canvas", async () => {
+  // Red boxes and red text over black: the swap turns each one blue, and leaves the black around them black.
+  const [layer, motion, title, around] = await colourAt(
+    "overlays",
+    `<Track id="fx" layout="free">
+      <Layer id="l" start={0} duration={2}>
+        <Effect id="e1" type={swap} />
+        <div style={{ position: "absolute", left: 10, top: 10, width: 80, height: 60, background: "#ff0000" }} />
+      </Layer>
+      <Motion id="m" start={0} duration={2} sequence={[[".box", { opacity: [1, 1] }, { duration: 1 }]]}>
+        <Effect id="e2" type={swap} />
+        <div className="box" style={{ position: "absolute", left: 120, top: 10, width: 80, height: 60, background: "#ff0000" }} />
+      </Motion>
+      <Title id="t" start={0} duration={2} color="#ff0000" size={90} transform={{ position: { x: 0, y: 40 } }}>
+        <Effect id="e3" type={swap} />
+        ███
+      </Title>
+    </Track>`,
+    `const swap = ${SWAP};`,
+    0.5,
+    [
+      [50, 40],
+      [160, 40],
+      [160, 130],
+      [300, 20],
+    ],
+  );
+  expect(near(layer, [0, 0, 255])).toBe(true);
+  expect(near(motion, [0, 0, 255])).toBe(true);
+  expect(near(title, [0, 0, 255])).toBe(true);
+  expect(near(around, [0, 0, 0])).toBe(true);
 });

@@ -30,4 +30,4 @@ The player draws it once the host calls `installFreeCodeLibraries()` ([Free code
 | `background` | string |  |  |
 | `setup` | any |  |  |
 
-Timed, visual, transformable. Children: `keyframe`. [All elements](/reference/elements/)
+Timed, visual, transformable. Children: `effect`, `keyframe`. [All elements](/reference/elements/)

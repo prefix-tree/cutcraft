@@ -89,7 +89,7 @@ The elements a file is written in: the timeline (clips, tracks, transitions, cap
 | [`<Multicam>`](/reference/elements/multicam) |  |  |  |  |  | `angle`, `cut` |
 | [`<Angle>`](/reference/elements/angle) |  |  |  |  |  |  |
 | [`<Cut>`](/reference/elements/cut) |  |  |  |  |  |  |
-| [`<Layer>`](/reference/elements/layer) | yes | yes |  |  | yes | `keyframe` |
+| [`<Layer>`](/reference/elements/layer) | yes | yes |  |  | yes | `effect`, `keyframe` |
 | [`<Effect>`](/reference/elements/effect) |  |  |  |  |  |  |
 | [`<ColorGrade>`](/reference/elements/colorgrade) |  |  |  |  |  |  |
 | [`<Keyframe>`](/reference/elements/keyframe) |  |  |  |  |  |  |

@@ -13,7 +13,7 @@ import { devWarn } from "../warn";
 import { backdropTracks } from "./backdrop";
 import { filterString, type PostEffect, postEffects } from "./effects";
 import type { ClipRect } from "./motion";
-import { effectPasses, type ShaderPass, type TransitionPass, transitionPass } from "./shaders";
+import { declaredEffects, effectPasses, type ShaderPass, type TransitionPass, transitionPass } from "./shaders";
 import { frameIndex, nestedSourceTime, placementSourceTime } from "./time";
 import { animatedTransform, type DrawRect, layoutRect, type Matrix2D, multiply, translate } from "./transform";
 import { transitionLook } from "./transition";
@@ -298,9 +298,4 @@ function maskOf(children: readonly Placement[], warnings: string[]): MaskSpec | 
     inverted: m.props.inverted === true,
     opacity: Number(m.props.opacity ?? 1),
   };
-}
-
-/** The effect types the file declares, which the filter string leaves to the shader passes. */
-function declaredEffects(state: ResolvedState): ReadonlySet<string> {
-  return new Set(state.shaders.filter((s) => s.kind === "effect").map((s) => s.name));
 }

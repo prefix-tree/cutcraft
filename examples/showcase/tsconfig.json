@@ -5,5 +5,5 @@
     "types": ["node"],
     "jsx": "react-jsx"
   },
-  "include": ["*.tsx", "*.ts", "docs/*.tsx", "test/*.ts"]
+  "include": ["*.tsx", "*.ts", "docs/*.tsx", "guide/*.tsx", "test/*.ts"]
 }

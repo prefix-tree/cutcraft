@@ -136,7 +136,7 @@ export const KIND_CAPABILITIES: Readonly<Record<string, ElementCapabilities>> = 
     visual: true,
     transformable: true,
     container: true,
-    childKinds: ["keyframe"],
+    childKinds: ["effect", "keyframe"],
     placementScope: "track",
   }),
   effect: with_({ placementScope: "child" }),

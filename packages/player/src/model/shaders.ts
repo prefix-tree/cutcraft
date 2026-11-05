@@ -59,3 +59,8 @@ export function transitionPass(state: ResolvedState, role: TransitionRole): Tran
     paired: x.between !== undefined,
   };
 }
+
+/** The effect types the file declares, which the filter string leaves to the shader passes. */
+export function declaredEffects(state: ResolvedState): ReadonlySet<string> {
+  return new Set(state.shaders.filter((s) => s.kind === "effect").map((s) => s.name));
+}

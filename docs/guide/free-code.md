@@ -159,33 +159,22 @@ The built-in effects are CSS filters, and the built-in transitions fade, wipe, s
 lines of GLSL: declare it at the top of the file with `defineEffect()` or `defineTransition()`, and use the name it
 returns as an `<Effect>` or `<Transition>` type.
 
-```tsx
-import { z } from "zod";
-import { Clip, defineEffect, defineTransition, Effect, Keyframe, Transition } from "@cutcraft/kit";
+An effect on a clip: a duotone, with two colour params and a third that the keyframes animate from the plain footage
+to the full effect.
 
-const split = defineEffect({
-  name: "split",
-  params: z.object({ amount: z.number().min(0).max(0.1).default(0.02) }),
-  shader: `vec4 effect(vec2 uv) {
-    vec2 o = vec2(amount * sin(time * 6.0), 0.0);
-    return vec4(texture(image, uv + o).r, texture(image, uv).g, texture(image, uv - o).b, texture(image, uv).a);
-  }`,
-});
+<Example src="previews/guide/shader-effect" alt="Fractal footage turned navy and gold by a duotone effect">
 
-const circle = defineTransition({
-  name: "circle",
-  shader: `vec4 transition(vec2 uv) {
-    float d = distance(uv * resolution, resolution / 2.0) / length(resolution / 2.0);
-    return d < progress ? texture(to, uv) : texture(from, uv);
-  }`,
-});
+<<< @/../examples/showcase/guide/shader-effect.tsx
 
-<Clip id="city" src="asset:city">
-  <Effect id="s" type={split} params={{ amount: 0.03 }} />
-  <Keyframe id="k" property="effect.s.amount" at={2} value={0} />
-</Clip>
-<Transition id="x" type={circle} duration={0.8} />
-```
+</Example>
+
+A transition: the incoming clip opens as a circle from the centre.
+
+<Example src="previews/guide/shader-transition" alt="A circle of the next clip opening over the first">
+
+<<< @/../examples/showcase/guide/shader-transition.tsx
+
+</Example>
 
 An effect defines `vec4 effect(vec2 uv)` and reads its picture as `image`. A transition defines
 `vec4 transition(vec2 uv)` and reads the outgoing picture as `from`, the incoming one as `to`, and how far it has got
@@ -193,13 +182,29 @@ as `progress`, from 0 to 1. Both also get `resolution` (the frame in pixels) and
 `uv` (0, 0) is the top left. Return plain colour; the player premultiplies it.
 
 Each param reaches the shader as a uniform with the param's name. A number becomes a `float`, a boolean a `bool`, an
-array of two, three or four numbers a `vec2`, `vec3` or `vec4`, and a colour string such as `"#ff8800"` a `vec3`. The
+array of two, three or four numbers a `vec2`, `vec3` or `vec4`, and a colour string such as `"#ff8800"` a `vec3`. A
+param can't use the name of a GLSL function (`mix`, `step`, `length`…) or of an input above; `defineEffect()` says so. The
 zod schema checks the values and fills in defaults, [`<Keyframe>`](/reference/elements/keyframe) animates them with
 `property="effect.<id>.<param>"`, and an editor can build its inspector from the schema.
 
-An effect works on a `<Clip>`, a `<Nested>` and an `<Adjustment>`, where it changes everything beneath it. It runs
-after the element's mask, vignette and grain, and before the element's other built-in effects. Several effects run in
-the order they appear in the file.
+On a `<Clip>`, a `<Nested>` and an `<Adjustment>` (where it changes everything beneath it), an effect runs after the
+element's mask, vignette and grain, and before its other built-in effects. Several effects run in the order they
+appear in the file.
+
+Overlays take the same effects: titles, shapes, SVG, stickers and any `<Layer>`, including `<Three>` and `<Motion>`.
+Write the `<Effect>` inside the element, next to its text or its free code. Here one colour-split effect runs on a
+title and, more gently, on a Motion badge, while the footage under them stays as it is:
+
+<Example src="previews/guide/title-effect" alt="A white title and an orange badge with red and blue fringes over fractal footage">
+
+<<< @/../examples/showcase/guide/title-effect.tsx
+
+</Example>
+
+An overlay is DOM, so the player draws it into a canvas with HTML-in-Canvas and runs the shaders over that picture.
+The overlay's built-in effects (CSS filters) apply first. HTML-in-Canvas is a Chrome feature that is still behind a
+flag: turn on `chrome://flags/#canvas-draw-element` to see overlay effects in the preview. Without it the preview shows
+the overlay as it is and warns once. The export always draws them, because its browser has the feature on.
 
 Keep `defineEffect()` and `defineTransition()` at the top of the file with a literal `name` and `shader`, where the
 editor and lint can read them; the `declaration` lint ([Lint](/guide/editing#lint)) says when one is not. The editor's
