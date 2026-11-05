@@ -32,6 +32,38 @@ The capture uses HTML-in-Canvas (`drawElementImage`), which Chrome ships behind 
 GPU, WebGL runs in software: about 6 frames a second at 1080p on a 4-core machine for a file with three.js, plus a
 few seconds to start the browser. With a GPU it is much faster.
 
+## On a server
+
+Chrome needs a few system libraries that a desktop has and a slim Linux image does not. On Debian or Ubuntu,
+`playwright-core` (installed with the export) lists and installs them, and `cutcraft browser install` puts Chrome in the
+image, so no export downloads it at run time:
+
+```dockerfile
+FROM node:22-bookworm-slim
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci
+RUN npx --yes playwright-core install-deps chromium && npx cutcraft browser install
+COPY . .
+CMD ["npx", "cutcraft", "video.tsx", "--out", "out/video.mp4"]
+```
+
+`npx playwright-core install-deps --dry-run chromium` prints the packages instead of installing them, for an image
+built another way. In GitHub Actions the runners already have them; cache the browser so it downloads once per
+CutCraft version:
+
+```yaml
+- uses: actions/cache@v4
+  with:
+    path: ~/.cache/cutcraft/browsers
+    key: cutcraft-chrome-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+- run: npx cutcraft browser install   # keeps a cached Chrome, downloads one otherwise
+- run: npx cutcraft video.tsx --out video.mp4
+```
+
+With no GPU, as on most servers, Chrome draws on the CPU; `--tabs` spreads the pieces over more cores
+([Faster](#faster)).
+
 ### Motion blur
 
 <Example src="previews/guide/motion-blur" alt="A puck crossing the frame, blurred along its path">

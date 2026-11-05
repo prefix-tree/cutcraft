@@ -7,3 +7,4 @@
 ---
 
 Every package has a README written for its users, with links to the documentation site that work on npm.
+The graphics README leads with three.js and Motion, its deprecated `<Graphic>` kinds below.

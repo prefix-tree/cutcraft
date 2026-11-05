@@ -73,6 +73,14 @@ The timeline part of the file (tracks, clips, transitions, captions) uses elemen
 gesture can find the element it touched and change one value. Anything you draw on top can be free code: a
 `<Layer>` holds any React, CSS, canvas or three.js you write.
 
+And all of it should be free to use. A player, an editor that writes back to the file, a frame-exact export and a
+layout check are what a product built on video needs, and they belong under a licence that costs it nothing.
+CutCraft is MIT: no paid tier, no licence key, no watermark. The projects closest to it ask for something:
+Remotion's licence has a paid tier for companies, and Diffusion Studio's engine stamps a watermark on every frame
+without a licence key. Building on either would have carried those terms into everything made with CutCraft, so it
+is written from scratch, on open libraries (React, zod, three.js, Motion, and Mediabunny, which is MPL-2.0 and stays
+so for its own files).
+
 ## Free code: three.js, Motion, any React
 
 You aren't limited to the built-in titles and graphics. A `<Layer>` takes any React component, with hooks, CSS 3D
