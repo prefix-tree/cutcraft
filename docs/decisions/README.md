@@ -27,3 +27,4 @@ new record that supersedes the old one.
 | [0019](./0019-a-browser-engine-for-free-code.md) | A browser engine exports what only a browser draws |
 | [0020](./0020-graphic-is-deprecated-for-free-code.md) | `<Graphic>` is deprecated for free code |
 | [0021](./0021-one-export-engine.md) | One export engine: the player in Chrome |
+| [0022](./0022-our-own-effects-library.md) | Our own effects library, written from the techniques |
