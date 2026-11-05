@@ -374,6 +374,7 @@ function compute(
       ...themedField(compParsed),
     }),
   );
+  errors.push(...textureErrors(items, manifest));
   return {
     composition: {
       id: root.id,
@@ -640,6 +641,14 @@ function intrinsicCompute(
         message: `asset ${props.src} is not in the manifest`,
       });
       p.duration = typeof dur === "number" ? dur : 0;
+    } else if (asset.kind === "lut") {
+      own.push({
+        code: "SCHEMA",
+        id: node.id,
+        prop: "src",
+        message: `asset ${props.src} is a LUT, which plays nothing; grade with it: <Effect type="lut" params={{ src: "${props.src}" }} />`,
+      });
+      p.duration = typeof dur === "number" ? dur : 0;
     } else {
       sourceRange(p, asset, markers);
     }
@@ -700,6 +709,32 @@ function framed(
     transform: { ...transform, crop: { x: fx * (1 - width), y: fy * (1 - height), width, height } },
   };
   framedByProps.set(props, { key, props: out });
+  return out;
+}
+
+/**
+ * Effect params that name an asset (`"asset:ID"`, a texture the shader reads): the asset must be in the manifest, a
+ * LUT for `<Effect type="lut">`, and an image or a LUT for an effect the file declares.
+ */
+function textureErrors(items: ReadonlyMap<string, Placement>, manifest: AssetManifest): ResolveError[] {
+  const out: ResolveError[] = [];
+  for (const p of items.values()) {
+    if (p.kind !== "effect") continue;
+    const params = (p.props.params ?? {}) as Readonly<Record<string, unknown>>;
+    for (const [name, value] of Object.entries(params)) {
+      if (typeof value !== "string" || !value.startsWith("asset:")) continue;
+      const asset = lookupAsset(manifest, value);
+      const prop = `params.${name}`;
+      if (!asset) out.push({ code: "MISSING_ASSET", id: p.id, prop, message: `asset ${value} is not in the manifest` });
+      else if (p.props.type === "lut" ? asset.kind !== "lut" : asset.kind !== "image" && asset.kind !== "lut")
+        out.push({
+          code: "SCHEMA",
+          id: p.id,
+          prop,
+          message: `asset ${value} is ${asset.kind === "image" ? "an image" : `a ${asset.kind}`}; ${p.props.type === "lut" ? "a lut effect reads a .cube file (kind lut)" : "a shader reads an image or a LUT"}`,
+        });
+    }
+  }
   return out;
 }
 

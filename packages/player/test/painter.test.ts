@@ -1,4 +1,11 @@
-import { buildFramePlan, CanvasPainter, type DrawOp, type Frame, type FramePlan } from "@cutcraft/player";
+import {
+  buildFramePlan,
+  CanvasPainter,
+  captureWarnings,
+  type DrawOp,
+  type Frame,
+  type FramePlan,
+} from "@cutcraft/player";
 
 import { FakeFrame, FakeFrameSource, recorderCanvas, recorderContext } from "./helpers/fakes";
 import { makeState } from "./helpers/state";
@@ -96,6 +103,16 @@ describe("CanvasPainter clips", () => {
       false,
     );
     expect(calls.some((c) => c.name === "set:filter" && c.args[0] === "blur(2px) brightness(1.2)")).toBe(true);
+  });
+
+  it("draws a shader-only built-in (lut) without it where there is no WebGL, and says so", () => {
+    const warnings: string[] = [];
+    captureWarnings((m) => warnings.push(m));
+    const lut = { name: "lut", sources: ["vec4 effect(vec2 uv) { return texture(image, uv); }"], params: {}, time: 0 };
+    const calls = paintOp({ filter: "blur(2px)", shaders: [{ ...lut, builtIn: true }] }, false);
+    expect(calls.some((c) => c.name === "set:filter" && c.args[0] === "blur(2px)")).toBe(true);
+    expect(warnings.join(" ")).toContain('"c" uses a shader effect or transition; this renderer has no WebGL');
+    captureWarnings(null);
   });
 
   it("clips a wipe in composition pixels before the element's matrix", () => {

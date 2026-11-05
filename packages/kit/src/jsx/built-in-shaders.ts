@@ -25,8 +25,30 @@ const levels = shaderDefinition("effect", {
 }`,
 });
 
+/**
+ * A 3D colour lookup table (a `.cube` file in the manifest, kind `lut`): each colour is looked up in the table's cube,
+ * between its entries by trilinear filtering, and mixed with the original by `amount`. The coordinates are moved half an
+ * entry in, so 0 and 1 land on the first and last entries' centres rather than their edges.
+ */
+const lut = shaderDefinition("effect", {
+  name: "lut",
+  params: z.object({
+    src: z.string().regex(/^asset:/, 'the LUT, as "asset:ID": a .cube file in the manifest'),
+    amount: z.number().min(0).max(1).default(1),
+  }),
+  shader: `vec4 effect(vec2 uv) {
+  vec4 c = texture(image, uv);
+  float n = float(textureSize(src, 0).x);
+  vec3 graded = texture(src, (clamp(c.rgb, 0.0, 1.0) * (n - 1.0) + 0.5) / n).rgb;
+  return vec4(mix(c.rgb, graded, amount), c.a);
+}`,
+});
+
 /** The built-in effect types the kit draws with a shader. */
-export const BUILT_IN_SHADERS: readonly ShaderDefinition[] = [levels];
+export const BUILT_IN_SHADERS: readonly ShaderDefinition[] = [levels, lut];
+
+/** Built-in shader effects with no CSS filter to fall back on: without WebGL they are not drawn. */
+export const SHADER_ONLY_EFFECTS = ["lut"] as const;
 
 /** The built-in shader of an effect type, if it has one. */
 export function builtInShader(type: unknown): ShaderDefinition | undefined {

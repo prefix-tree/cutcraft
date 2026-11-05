@@ -19,6 +19,7 @@ export type { ThreeFrameArgs, ThreeSetupArgs, ThreeSetupFunction } from "./jsx/s
 export { defaultTransitionParams, TRANSITION_PARAMS } from "./jsx/schemas/transition";
 export * from "./jsx/shaders";
 export * from "./jsx/use-t";
+export * from "./manifest/cube";
 export * from "./manifest/timeref";
 export * from "./manifest/transcript";
 export * from "./manifest/types";

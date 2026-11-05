@@ -155,8 +155,8 @@ Inside a plain `<Layer>`, use the same libraries through adapters that follow th
 
 ## Effects and transitions of your own
 
-Most built-in effects are CSS filters; `levels` runs as a shader, through the same pipeline as yours, and falls back on
-a filter without its gamma where there is no WebGL. The built-in transitions fade, wipe, slide and push. Anything else
+Most built-in effects are CSS filters. `levels` and `lut` run as shaders, through the same pipeline as yours: `levels`
+falls back on a filter without its gamma where there is no WebGL, and `lut` is not drawn there. The built-in transitions fade, wipe, slide and push. Anything else
 is a few lines of GLSL: declare it at the top of the file with `defineEffect()` or `defineTransition()`, and use the name it
 returns as an `<Effect>` or `<Transition>` type.
 
@@ -211,6 +211,30 @@ array of two, three or four numbers a `vec2`, `vec3` or `vec4`, and a colour str
 param can't use the name of a GLSL function (`mix`, `step`, `length`…) or of an input above; `defineEffect()` says so. The
 zod schema checks the values and fills in defaults, [`<Keyframe>`](/reference/elements/keyframe) animates them with
 `property="effect.<id>.<param>"`, and an editor can build its inspector from the schema.
+
+A param can also name an asset, `"asset:ID"`, and the shader reads that file as a texture: an image as a `sampler2D`, a
+LUT (`.cube`) as a `sampler3D`. The player loads it before the frame that needs it. The resolver checks that the asset
+is in the manifest and is an image or a LUT. Textures reach effects on clips, nested sequences and adjustments; on an
+overlay, an effect with an asset param is not drawn yet.
+
+### Grading with a LUT
+
+A colour look made in a grading tool usually leaves it as a 3D LUT in a `.cube` file. Add it to the manifest like
+media, then grade a clip, or everything beneath an adjustment, with the built-in `lut` effect:
+
+```bash
+npx cutcraft add teal-orange.cube
+```
+
+```tsx
+<Clip id="interview" src="asset:interview">
+  <Effect id="look" type="lut" params={{ src: "asset:teal-orange", amount: 0.8 }} />
+</Clip>
+```
+
+`amount` mixes the graded colour with the original, from 0 to 1, and a `<Keyframe>` can animate it. The LUT is read
+with trilinear filtering; a table whose `DOMAIN_MIN` and `DOMAIN_MAX` are not 0 and 1 is resampled onto 0 to 1 when
+it loads. 1D tables are not read.
 
 On a `<Clip>`, a `<Nested>` and an `<Adjustment>` (where it changes everything beneath it), an effect runs after the
 element's mask, vignette and grain, and before its other built-in effects. Several effects run in the order they
