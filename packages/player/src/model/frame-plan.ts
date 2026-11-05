@@ -13,7 +13,14 @@ import { devWarn } from "../warn";
 import { backdropTracks } from "./backdrop";
 import { filterString, type PostEffect, postEffects } from "./effects";
 import type { ClipRect } from "./motion";
-import { effectPasses, type ShaderPass, shadedEffects, type TransitionPass, transitionPass } from "./shaders";
+import {
+  effectPasses,
+  hasCssFallback,
+  type ShaderPass,
+  shadedEffects,
+  type TransitionPass,
+  transitionPass,
+} from "./shaders";
 import { frameIndex, nestedSourceTime, placementSourceTime } from "./time";
 import { animatedTransform, type DrawRect, layoutRect, type Matrix2D, multiply, translate } from "./transform";
 import { transitionLook } from "./transition";
@@ -314,6 +321,6 @@ function filtersOf(
   shaders: readonly ShaderPass[] | undefined,
 ): { filter: string; fallbackFilter?: string } {
   const { filter } = filterString(children, id, rel, shadedEffects(state, true));
-  if (!shaders?.some((s) => s.builtIn)) return { filter };
+  if (!shaders?.some(hasCssFallback)) return { filter };
   return { filter, fallbackFilter: filterString(children, id, rel, shadedEffects(state, false)).filter };
 }

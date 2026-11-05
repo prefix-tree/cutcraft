@@ -19,13 +19,27 @@ beforeAll(() => {
 afterAll(() => rmSync(scratch, { recursive: true, force: true }));
 
 /** The colour at (x, y) of a still of `body` at `time`, with the test media and these declarations. */
-async function colourAt(name: string, body: string, declarations: string, time: number, points: [number, number][]) {
+async function colourAt(
+  name: string,
+  body: string,
+  declarations: string,
+  time: number,
+  points: [number, number][],
+  /** More assets, each with the file it is read from. */
+  extra: Readonly<Record<string, { kind: "lut" | "image"; file: string }>> = {},
+) {
   const file = join(dir, `${name}.tsx`);
+  const manifest = {
+    assets: {
+      ...mediaManifest.assets,
+      ...Object.fromEntries(Object.entries(extra).map(([id, a]) => [id, { id, kind: a.kind, duration: 0 }])),
+    },
+  };
   writeFileSync(
     file,
     `import { z } from "zod";
 import { Adjustment, Clip, Composition, defineEffect, defineTransition, Effect, Layer, Motion, Title, Track, Transition } from "@cutcraft/kit";
-export const manifest = ${JSON.stringify(mediaManifest)};
+export const manifest = ${JSON.stringify(manifest)};
 ${declarations}
 export default function Video() {
   return (
@@ -41,7 +55,11 @@ export default function Video() {
   const out = join(dir, `${name}.png`);
   await renderStill({
     state: loaded.state,
-    media: directoryResolver(mediaDir, loaded.manifest),
+    media: directoryResolver(
+      mediaDir,
+      loaded.manifest,
+      Object.fromEntries(Object.entries(extra).map(([id, a]) => [id, a.file])),
+    ),
     out,
     time,
     source: loaded.source,
@@ -137,6 +155,40 @@ it("draws levels with its gamma on an overlay, through HTML-in-Canvas", async ()
   );
   const v = Math.round(255 * Math.sqrt(128 / 255));
   expect(c?.slice(0, 3).every((x) => Math.abs(x - v) <= 6)).toBe(true);
+});
+
+it("grades through a LUT asset, mixed by its amount", async () => {
+  // A size-2 table whose output is (b, g, r): the blue clip turns red; at amount 0.5, half of each.
+  const cube = join(dir, "swap.cube");
+  writeFileSync(
+    cube,
+    ["LUT_3D_SIZE 2", ...[0, 1].flatMap((b) => [0, 1].flatMap((g) => [0, 1].map((r) => `${b} ${g} ${r}`)))].join("\n"),
+  );
+  const at = (amount: number) =>
+    colourAt(
+      `lut-${amount}`,
+      `<Track id="t"><Clip id="c" src="asset:solid" fit="cover"><Effect id="l" type="lut" params={{ src: "asset:swap", amount: ${amount} }} /></Clip></Track>`,
+      "",
+      0.5,
+      [[160, 90]],
+      { swap: { kind: "lut", file: cube } },
+    );
+  const [full] = await at(1);
+  const [half] = await at(0.5);
+  expect(near(full, [255, 0, 0])).toBe(true);
+  expect(near(half, [128, 0, 128])).toBe(true);
+});
+
+it("lets a file's own effect read an image asset as a texture", async () => {
+  // The effect shows the logo (red) where the clip (blue) is: the image param is a sampler2D.
+  const [c] = await colourAt(
+    "texture",
+    `<Track id="t"><Clip id="c" src="asset:solid" fit="cover"><Effect id="o" type={over} params={{ picture: "asset:logo" }} /></Clip></Track>`,
+    `const over = defineEffect({ name: "over", params: z.object({ picture: z.string() }), shader: "vec4 effect(vec2 uv) { return texture(picture, uv); }" });`,
+    0.5,
+    [[160, 90]],
+  );
+  expect(near(c, [255, 0, 0])).toBe(true);
 });
 
 it("runs a declared effect on an adjustment, over everything beneath it", async () => {

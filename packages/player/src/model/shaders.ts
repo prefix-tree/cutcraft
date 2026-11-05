@@ -1,4 +1,11 @@
-import { BUILT_IN_SHADERS, builtInShader, type Placement, type ResolvedState, shaderFor } from "@cutcraft/kit";
+import {
+  BUILT_IN_SHADERS,
+  builtInShader,
+  type Placement,
+  type ResolvedState,
+  SHADER_ONLY_EFFECTS,
+  shaderFor,
+} from "@cutcraft/kit";
 
 import { paramsAt } from "./effects";
 import type { TransitionRole } from "./visible";
@@ -8,7 +15,7 @@ export interface ShaderPass {
   readonly name: string;
   /** The effect's GLSL, one source per pass, run in order. */
   readonly sources: readonly string[];
-  /** A built-in effect (`levels`), which has a CSS filter to fall back on where there is no WebGL. */
+  /** A built-in effect (`levels`, `lut`), drawn by the kit's shader. */
   readonly builtIn?: true;
   readonly params: Readonly<Record<string, unknown>>;
   /** Seconds into the element. */
@@ -78,4 +85,9 @@ export function shadedEffects(state: ResolvedState, builtIns: boolean): Readonly
   const out = new Set(state.shaders.filter((s) => s.kind === "effect").map((s) => s.name));
   if (builtIns) for (const s of BUILT_IN_SHADERS) out.add(s.name);
   return out;
+}
+
+/** Whether a pass draws as a CSS filter where there is no WebGL: a built-in effect that has one. */
+export function hasCssFallback(pass: ShaderPass): boolean {
+  return pass.builtIn === true && !(SHADER_ONLY_EFFECTS as readonly string[]).includes(pass.name);
 }
