@@ -1,6 +1,6 @@
 {
   "name": "@cutcraft/graphics",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Ready-made graphics for CutCraft files (arrows, callouts, lower thirds, data graphics, backgrounds, icons) as pure functions from props and theme to SVG, and three.js and Motion on the video's clock for free code.",
   "keywords": [
     "video",

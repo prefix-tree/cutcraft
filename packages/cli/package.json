@@ -1,6 +1,6 @@
 {
   "name": "cutcraft",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "The CutCraft command line: render a TSX video file to MP4, WebM, audio or a still, or check its layout.",
   "keywords": [
     "video",
