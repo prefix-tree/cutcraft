@@ -1,14 +1,19 @@
 name: Publish
 
-# Publishes the packages whose version is not on npm yet, after a "chore: version packages" pull request
-# (`pnpm changeset version`) has merged into main. Run it by hand: Actions → Publish → Run workflow, or
-# `gh workflow run publish.yml`.
+# Publishes a release when its tag is pushed. After the "chore: version packages" pull request (`pnpm changeset
+# version`) has merged into main:
+#
+#   git tag v0.2.0 && git push origin v0.2.0
+#
+# All packages share one version, so one tag names the release; it must match that version and point at a commit on
+# main.
 #
 # npm trusted publishing: each package on npm trusts this workflow file (publish.yml in prefix-tree/cutcraft), so
 # GitHub's OIDC token stands in for an npm token. There is no secret to leak, and npm attaches provenance to each
 # version. Renaming this file breaks publishing until the packages' trusted publisher settings are updated too.
 on:
-  workflow_dispatch:
+  push:
+    tags: ["v*"]
 
 concurrency:
   group: publish
@@ -16,34 +21,43 @@ concurrency:
 
 jobs:
   publish:
-    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
-      # Push the release tags.
-      contents: write
+      contents: read
       # The OIDC token npm exchanges for a short-lived publish token.
       id-token: write
     steps:
       - uses: actions/checkout@v7
+        with:
+          # The whole history, to check that the tag is on main.
+          fetch-depth: 0
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: pnpm
           registry-url: https://registry.npmjs.org
-      - run: pnpm install --frozen-lockfile
-      # Pending changesets mean `pnpm changeset version` has not run: the versions and changelogs are not bumped yet.
-      - name: Check that the versions are bumped
+      - name: Check the tag against main and the packages' version
         run: |
-          pending=$(find .changeset -name '*.md' ! -name README.md | wc -l)
-          if [ "$pending" -gt 0 ]; then
-            echo "::error::$pending changeset(s) are pending. Run \`pnpm changeset version\`, merge the version pull request, then publish."
+          tag="${GITHUB_REF_NAME}"
+          version=$(node -p "require('./packages/kit/package.json').version")
+          if [ "$tag" != "v$version" ]; then
+            echo "::error::tag $tag does not match the packages' version $version; tag v$version instead."
             exit 1
           fi
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            echo "::error::tag $tag points at a commit that is not on main."
+            exit 1
+          fi
+          pending=$(find .changeset -name '*.md' ! -name README.md | wc -l)
+          if [ "$pending" -gt 0 ]; then
+            echo "::error::$pending changeset(s) are pending: run \`pnpm changeset version\` and merge the version pull request before tagging."
+            exit 1
+          fi
+      - run: pnpm install --frozen-lockfile
       - run: pnpm typecheck
       - run: pnpm build
       - run: pnpm check:packages
       # `changeset publish` runs `pnpm publish` for each package whose version is not on npm (pnpm does the OIDC
-      # exchange and swaps workspace:* for versions), then tags each published version.
-      - run: pnpm release
-      - run: git push --follow-tags
+      # exchange and swaps workspace:* for versions). The pushed tag names the release, so it makes no tags of its own.
+      - run: pnpm release --no-git-tag

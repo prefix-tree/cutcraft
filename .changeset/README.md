@@ -12,6 +12,8 @@ All `@cutcraft/*` packages and the `cutcraft` CLI share one version. A release t
    authors) and deletes the changesets.
 2. Read the changelogs, run `pnpm install` so the lockfile matches, and commit as `chore: version packages` in a pull
    request.
-3. After it merges, run the **Publish** workflow (Actions → Publish → Run workflow, or `gh workflow run publish.yml`).
-   It refuses to run while changesets are pending, builds and checks the packages, publishes each version not yet on
-   npm through npm trusted publishing (no token; npm adds provenance), and pushes the release tags.
+3. After it merges, tag the merge commit on `main` with the new version and push the tag:
+   `git tag v0.2.0 && git push origin v0.2.0`. The tag starts the **Publish** workflow
+   (`.github/workflows/publish.yml`). It checks that the tag matches the packages' version, points at `main` and has
+   no pending changesets, builds and checks the packages, and publishes each version not yet on npm through npm
+   trusted publishing (no token; npm adds provenance).
