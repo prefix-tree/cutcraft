@@ -15,6 +15,8 @@ There are three kinds of example, each a complete file:
 - **[Recipes](/recipes/)**: files for the videos people most often make (an interview cut, a product demo, a vertical
   clip, variants). Each passes the lint and has a test; copy one as a starting point.
 - **[The walkthrough](/guide/writing-files)**: one launch video a model wrote from a brief, explained line by line.
+- **Feature examples** in the guide: short files that each show one feature, rendered next to their code on the page
+  that explains it (fonts, motion blur, your own effects and transitions, something over a cut).
 
 ## Where to start
 
@@ -41,11 +43,18 @@ There are three kinds of example, each a complete file:
 | One prop that restyles everything (themes) | [Brand spot](/recipes/brand-spot) | [Themes](/guide/themes) |
 | Tweakable values (`schema`, `defaults`) | Every showcase file, [Variants](/recipes/variants) | [The file](/guide/the-file#schema-and-defaults-are-the-knobs) |
 | Music that ducks under speech | [Talking-head cut](/recipes/talking-head), the [walkthrough](/guide/writing-files) | [Captions and sound](/guide/captions-and-sound#sound) |
+| Captions from an SRT, VTT or Whisper file | [Captions](#captions-and-key-points) | [Getting a transcript](/guide/captions-and-sound#getting-a-transcript) |
+| Google Fonts or your own font files | [Fonts example](/guide/themes#fonts) | [Themes](/guide/themes#fonts) |
+| Motion blur | [Motion blur example](/guide/exporting#motion-blur) | [Exporting](/guide/exporting#motion-blur) |
+| Your own effects and transitions in GLSL | [Duotone, circle reveal, colour split on a title](/guide/free-code#effects-and-transitions-of-your-own) | [Free code](/guide/free-code#effects-and-transitions-of-your-own) |
+| A flare or a sound over a cut | [At a cut](/guide/time#at-a-cut-light-leaks-flashes-and-whooshes) | [Time by meaning](/guide/time#at-a-cut-light-leaks-flashes-and-whooshes) |
 
 ## Rendering them yourself
 
 Each video is one file in [`examples/showcase`](https://github.com/prefix-tree/cutcraft/tree/main/examples/showcase),
-rendered with `pnpm --filter @cutcraft/example-showcase render`. The footage is made by `ffmpeg`'s own sources
+rendered with `pnpm --filter @cutcraft/example-showcase render`; the guide's feature examples, in
+[`examples/showcase/guide`](https://github.com/prefix-tree/cutcraft/tree/main/examples/showcase/guide), with
+`pnpm --filter @cutcraft/example-showcase docs`. The footage is made by `ffmpeg`'s own sources
 (`pnpm --filter @cutcraft/example-showcase gen`); the files with three.js or Motion render through the
 [browser engine](/guide/exporting#three-js-and-motion-the-browser-engine). The people on camera are stand-ins: their
 footage is a gradient, and the manifest holds the words they would say.

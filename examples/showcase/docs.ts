@@ -1,6 +1,6 @@
-// Renders the reference pages' element examples (docs/*.tsx) for the documentation site: a looping WebM and a poster
-// each, in docs/public/previews/elements, through the same loader and renderer as `cutcraft-render`. The pages show the
-// same files as code. A file that does not resolve cleanly stops the run; warnings are printed. Files with <Three> or
+// Renders the examples the documentation shows next to their code: the reference pages' element examples (docs/*.tsx)
+// into docs/public/previews/elements, and the guide's feature examples (guide/*.tsx) into docs/public/previews/guide.
+// A looping WebM and a poster each, through the same loader and renderer as `cutcraft-render`. A file that does not resolve cleanly stops the run; warnings are printed. Files with <Three> or
 // <Motion> render with the browser engine (CUTCRAFT_CHROMIUM).
 //   pnpm --filter @cutcraft/example-showcase docs [name…]
 import { mkdirSync, readdirSync } from "node:fs";
@@ -9,16 +9,23 @@ import { basename, join } from "node:path";
 import { directoryResolver, loadVideo, renderStill, renderVideo } from "@cutcraft/render";
 
 const here = import.meta.dirname;
-const out = join(here, "..", "..", "docs", "public", "previews", "elements");
-mkdirSync(out, { recursive: true });
+const previews = join(here, "..", "..", "docs", "public", "previews");
 const only = process.argv.slice(2);
+/** Examples whose poster is a moment of one element (what they show: id, fraction through it), instead of 60% of the way through. */
+const POSTER_AT: Readonly<Record<string, readonly [string, number]>> = {
+  "at-a-cut": ["flare", 0.65],
+  "shader-transition": ["open", 0.5],
+};
+const files = [
+  ...readdirSync(join(here, "docs")).map((f) => ({ dir: "docs", file: f, out: join(previews, "elements") })),
+  ...readdirSync(join(here, "guide")).map((f) => ({ dir: "guide", file: f, out: join(previews, "guide") })),
+].filter((f) => f.file.endsWith(".tsx"));
 
-for (const file of readdirSync(join(here, "docs"))
-  .filter((f) => f.endsWith(".tsx"))
-  .sort()) {
+for (const { dir, file, out } of files.sort((a, b) => a.file.localeCompare(b.file))) {
   const name = basename(file, ".tsx");
   if (only.length > 0 && !only.includes(name)) continue;
-  const video = await loadVideo(join(here, "docs", file), { manifest: join(here, "manifest.json") });
+  mkdirSync(out, { recursive: true });
+  const video = await loadVideo(join(here, dir, file), { manifest: join(here, "manifest.json") });
   if (video.state.errors.length > 0)
     throw new Error(`${name}: ${video.state.errors.map((e) => `${e.id}: ${e.message}`).join("; ")}`);
   const media = directoryResolver(join(here, "media"), video.manifest);
@@ -37,8 +44,14 @@ for (const file of readdirSync(join(here, "docs"))
     media,
     interiors: video.interiors,
     out: join(out, `${name}.jpg`),
-    time: video.state.composition.duration * 0.6,
+    time: posterTime(name, video.state),
     source: video.source,
   });
   process.stdout.write(`${name}: ${result.frames} frames, ${result.width}x${result.height}\n`);
+}
+
+function posterTime(name: string, state: Awaited<ReturnType<typeof loadVideo>>["state"]): number {
+  const [id, fraction] = POSTER_AT[name] ?? ["", 0];
+  const at = state.items.get(id);
+  return at ? at.start + at.duration * fraction : state.composition.duration * 0.6;
 }

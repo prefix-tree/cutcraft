@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { z } from "zod";
 
 import { collectModule, defineEffect, defineTransition, Executor, resolve } from "@cutcraft/kit";
 import { lint, loadModule } from "@cutcraft/kit/source";
@@ -23,6 +24,9 @@ describe("defineEffect and defineTransition", () => {
     expect(() => defineEffect({ name: "blur", shader: INVERT })).toThrow("is built in");
     expect(() => defineEffect({ name: "Bad Name", shader: INVERT })).toThrow("lowercase letters");
     expect(() => defineEffect({ name: "x", shader: "void main() {}" })).toThrow("defines vec4 effect(vec2 uv)");
+    expect(() => defineEffect({ name: "tone", params: z.object({ mix: z.number() }), shader: INVERT })).toThrow(
+      'param "mix" is a name every shader already uses',
+    );
   });
 
   it("put a file's effects on its state, with params checked and filled by their schema", () => {

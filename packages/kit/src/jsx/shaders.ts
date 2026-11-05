@@ -36,6 +36,18 @@ export const MODULE_SHADERS = Symbol.for("cutcraft.shaders");
 
 const NAME = /^[a-z][a-zA-Z0-9-]*$/;
 
+/** Names a param cannot take: the inputs every shader gets, and GLSL ES 3.00's built-in functions, which it would hide. */
+const RESERVED = new Set([
+  ...["image", "from", "to", "resolution", "time", "progress", "position", "uv", "main"],
+  ...["radians", "degrees", "sin", "cos", "tan", "asin", "acos", "atan", "sinh", "cosh", "tanh", "asinh", "acosh"],
+  ...["atanh", "pow", "exp", "log", "exp2", "log2", "sqrt", "inversesqrt", "abs", "sign", "floor", "trunc", "round"],
+  ...["roundEven", "ceil", "fract", "mod", "modf", "min", "max", "clamp", "mix", "step", "smoothstep", "isnan"],
+  ...["isinf", "length", "distance", "dot", "cross", "normalize", "faceforward", "reflect", "refract"],
+  ...["matrixCompMult", "outerProduct", "transpose", "determinant", "inverse", "lessThan", "lessThanEqual"],
+  ...["greaterThan", "greaterThanEqual", "equal", "notEqual", "any", "all", "not", "texture", "textureSize"],
+  ...["textureLod", "texelFetch", "dFdx", "dFdy", "fwidth"],
+]);
+
 function declare(kind: ShaderDefinition["kind"], options: DefineOptions): string {
   const { name, shader } = options;
   const builtIn = (kind === "effect" ? VIDEO_EFFECT_TYPES : TRANSITION_TYPES) as readonly string[];
@@ -44,6 +56,11 @@ function declare(kind: ShaderDefinition["kind"], options: DefineOptions): string
   const fn = kind === "effect" ? "effect" : "transition";
   if (!new RegExp(`vec4\\s+${fn}\\s*\\(\\s*vec2\\s+\\w+\\s*\\)`).test(shader))
     throw new Error(`${kind} "${name}": the shader defines vec4 ${fn}(vec2 uv)`);
+  for (const param of Object.keys(options.params?.shape ?? {}))
+    if (RESERVED.has(param))
+      throw new Error(
+        `${kind} "${name}": param "${param}" is a name every shader already uses (a GLSL function or input); call it something else`,
+      );
   (store.scope ?? store.global).set(`${kind}:${name}`, { kind, name, params: options.params ?? z.object({}), shader });
   return name;
 }
