@@ -1,0 +1,49 @@
+name: Publish
+
+# Publishes the packages whose version is not on npm yet, after a "chore: version packages" pull request
+# (`pnpm changeset version`) has merged into main. Run it by hand: Actions → Publish → Run workflow, or
+# `gh workflow run publish.yml`.
+#
+# npm trusted publishing: each package on npm trusts this workflow file (publish.yml in prefix-tree/cutcraft), so
+# GitHub's OIDC token stands in for an npm token. There is no secret to leak, and npm attaches provenance to each
+# version. Renaming this file breaks publishing until the packages' trusted publisher settings are updated too.
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      # Push the release tags.
+      contents: write
+      # The OIDC token npm exchanges for a short-lived publish token.
+      id-token: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+      - run: pnpm install --frozen-lockfile
+      # Pending changesets mean `pnpm changeset version` has not run: the versions and changelogs are not bumped yet.
+      - name: Check that the versions are bumped
+        run: |
+          pending=$(find .changeset -name '*.md' ! -name README.md | wc -l)
+          if [ "$pending" -gt 0 ]; then
+            echo "::error::$pending changeset(s) are pending. Run \`pnpm changeset version\`, merge the version pull request, then publish."
+            exit 1
+          fi
+      - run: pnpm typecheck
+      - run: pnpm build
+      - run: pnpm check:packages
+      # `changeset publish` runs `pnpm publish` for each package whose version is not on npm (pnpm does the OIDC
+      # exchange and swaps workspace:* for versions), then tags each published version.
+      - run: pnpm release
+      - run: git push --follow-tags
