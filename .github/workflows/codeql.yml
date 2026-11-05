@@ -22,10 +22,9 @@ jobs:
       - uses: github/codeql-action/init@v4
         with:
           languages: javascript-typescript
-          # Generated docs output, the throwaway spike and test media are not the library.
+          # Generated docs output and test media are not the library.
           config: |
             paths-ignore:
               - docs/.vitepress/dist
-              - packages/render/spike
               - "**/test/**"
       - uses: github/codeql-action/analyze@v4

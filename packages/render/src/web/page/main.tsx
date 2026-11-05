@@ -52,7 +52,7 @@ const QUALITY = {
 
 async function start(): Promise<void> {
   const job = (await (await fetch("/job.json")).json()) as PageJob;
-  // Every face, the file's and `--font`, read in Node and served here, so both engines set text in the same files and an
+  // Every face, the file's and `--font`, read in Node and served here, so the export sets text in the same files and an
   // export needs no network once Google's are cached. The player is told not to fetch them again.
   await addFontFaces(job.fonts.map((f) => ({ family: f.family, weight: f.weight, style: f.style, source: f.url })));
   const imports = installFreeCodeLibraries();

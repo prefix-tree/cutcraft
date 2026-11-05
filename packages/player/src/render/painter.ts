@@ -156,7 +156,7 @@ export class CanvasPainter {
   private blit(ctx: Ctx2D, op: DrawOp, frame: Frame | null, nested: AnyCanvas | null): void {
     const { w, h } = op.rect;
     if (nested) ctx.drawImage(nested, 0, 0, w, h);
-    else if (frame && !(coversCanvas(op, this.width, this.height) && frame.paintFull?.(ctx, this.width, this.height))) {
+    else if (frame) {
       // The manifest describes the original, while a normalized file or proxy may decode at a different size.
       const reference = op.cropReference;
       const crop =

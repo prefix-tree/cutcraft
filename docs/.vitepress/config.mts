@@ -60,6 +60,7 @@ export default defineConfig({
             { text: "Player", link: "/guide/player" },
             { text: "Editing", link: "/guide/editing" },
             { text: "Exporting", link: "/guide/exporting" },
+            { text: "How the export works", link: "/guide/export-architecture" },
           ],
         },
         { text: "Walkthrough", items: [{ text: "A launch video, line by line", link: "/guide/writing-files" }] },
@@ -128,7 +129,6 @@ export default defineConfig({
           items: [
             { text: "Remotion", link: "/comparisons/remotion" },
             { text: "Diffusion Studio", link: "/comparisons/diffusion-studio" },
-            { text: "Export speed", link: "/comparisons/export-speed" },
           ],
         },
       ],

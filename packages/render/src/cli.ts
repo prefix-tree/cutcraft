@@ -12,7 +12,7 @@ import { loadVideo } from "./load";
 import { directoryResolver } from "./media";
 import { renderVideo } from "./renderer";
 import { renderStill } from "./still";
-import { browserCacheDir, CHROME_MILESTONE, installChrome } from "./web/chrome";
+import { CHROME_MILESTONE, cachedChrome, installChrome } from "./web/chrome";
 
 /** --check-layout found issues: apart from 1 (an error) and 2 (usage), so a script can tell them apart. */
 const EXIT_LAYOUT_ISSUES = 3;
@@ -104,8 +104,10 @@ async function main(): Promise<number> {
       process.stderr.write(USAGE);
       return 2;
     }
-    const path = await installChrome((m) => process.stderr.write(`${m}\n`));
-    process.stderr.write(`Chrome is at ${path} (cache: ${browserCacheDir()})\n`);
+    // A Chrome already in the cache is kept: the command needs no network then, as on a CI runner with a warm cache.
+    const cached = await cachedChrome();
+    const path = cached ?? (await installChrome((m) => process.stderr.write(`${m}\n`)));
+    process.stderr.write(`Chrome is at ${path}${cached ? " (already in the cache)" : ""}\n`);
     return 0;
   }
   const [file] = positionals;

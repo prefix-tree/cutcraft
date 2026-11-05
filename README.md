@@ -180,7 +180,7 @@ videos, each tested) and [the worked example](examples/launch-recap).
 ## Roadmap
 
 1. A faster export without a GPU. The export runs in Chrome, where WebGL and the capture run in software on a server
-   with no GPU; the next step is to measure it on the export-speed scenarios and close the gap.
+   with no GPU.
 2. Footage in free code. `useClipFrame(clipId)` will hand a clip's current frame to a `<Layer>`, for CSS 3D or a
    shader of your own.
 3. An open editor package with the timeline, inspector and preview gestures over the action set.

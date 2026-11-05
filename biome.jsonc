@@ -6,8 +6,6 @@
     "includes": [
       "**",
       "!**/__snapshots__",
-      // Throwaway measurement code (spike/README.md), not part of the package.
-      "!packages/render/spike",
       // Generated: media, measurements and placement fixtures.
       "!examples/*/media",
       "!examples/*/public",

@@ -58,7 +58,7 @@ function drawingOf(
   };
 }
 
-/** A graphic's labels as positioned text, a tree both the DOM and Satori lay out. */
+/** A graphic's labels as positioned text, laid out by the DOM. */
 export function graphicLabels(labels: readonly Label[]): ReactNode {
   return labels.map((l, i) => (
     <div

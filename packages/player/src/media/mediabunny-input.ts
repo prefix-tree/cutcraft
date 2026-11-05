@@ -1,4 +1,4 @@
-import { ALL_FORMATS, BlobSource, FilePathSource, Input, UrlSource } from "mediabunny";
+import { ALL_FORMATS, BlobSource, Input, UrlSource } from "mediabunny";
 
 import type { MediaHandle } from "../types";
 
@@ -14,12 +14,8 @@ export class MediabunnyInputs {
   acquire(assetId: string, handle: MediaHandle): Input {
     let e = this.entries.get(assetId);
     if (!e) {
-      const source =
-        handle.kind === "blob"
-          ? new BlobSource(handle.blob)
-          : handle.kind === "path"
-            ? new FilePathSource(handle.path)
-            : new UrlSource(handle.url);
+      if (handle.kind === "path") throw new Error(`a browser cannot read the path ${handle.path}; give it a URL`);
+      const source = handle.kind === "blob" ? new BlobSource(handle.blob) : new UrlSource(handle.url);
       e = { input: new Input({ source, formats: ALL_FORMATS }), refs: 0 };
       this.entries.set(assetId, e);
     }
