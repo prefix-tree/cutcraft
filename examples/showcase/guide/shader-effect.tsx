@@ -2,10 +2,11 @@ import { z } from "zod";
 
 import { Clip, Composition, defineEffect, Effect, Keyframe, Track } from "@cutcraft/kit";
 
-// A duotone: each pixel's brightness picks a colour between `dark` and `light`. Colour params arrive in the shader as
-// vec3; `strength` blends from the footage to the duotone, and the keyframes animate it.
-const duotone = defineEffect({
-  name: "duotone",
+// A two-colour tone (the kit has one built in, `duotone`; this is how such an effect is written): each pixel's
+// brightness picks a colour between `dark` and `light`. Colour params arrive in the shader as vec3; `strength` blends
+// from the footage to the toned picture, and the keyframes animate it.
+const navyGold = defineEffect({
+  name: "navy-gold",
   params: z.object({
     dark: z.string().default("#101421"),
     light: z.string().default("#e8a33d"),
@@ -23,7 +24,7 @@ export default function Video() {
     <Composition fps={30} width={960} height={540}>
       <Track id="main">
         <Clip id="fractal" src="asset:product" in={0} out={3} fit="cover">
-          <Effect id="tone" type={duotone} params={{ dark: "#0b1d3a", light: "#ffcf70" }} />
+          <Effect id="tone" type={navyGold} params={{ dark: "#0b1d3a", light: "#ffcf70" }} />
           <Keyframe id="k1" property="effect.tone.strength" at={0} value={0} />
           <Keyframe id="k2" property="effect.tone.strength" at={1.5} value={1} />
         </Clip>

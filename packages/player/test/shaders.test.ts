@@ -62,6 +62,24 @@ describe("declared shaders in the frame plan", () => {
     expect(op.fallbackFilter).toMatch(/^blur\(2px\) brightness\([\d.]+\) contrast\([\d.]+\)$/);
   });
 
+  it("give exposure and vibrance a CSS fallback, and the shader-only colour effects none", () => {
+    const state = stateOf(
+      `<Track id="t"><Clip id="c" src="asset:city" in={0} out={4}>
+        <Effect id="e" type="exposure" params={{ stops: 1 }} />
+        <Effect id="v" type="vibrance" params={{ amount: 0.4 }} />
+        <Effect id="w" type="whiteBalance" params={{ temperature: 30 }} />
+        <Effect id="k" type="curves" />
+      </Clip></Track>`,
+      "",
+    );
+    expect(state.errors).toEqual([]);
+    const op = buildFramePlan(state, 1).ops[0]!;
+    expect(op.filter).toBe("");
+    expect(op.fallbackFilter).toBe("brightness(2) saturate(1.2)");
+    expect(op.shaders?.map((p) => p.name)).toEqual(["exposure", "vibrance", "whiteBalance", "curves"]);
+    expect(op.shaders?.[3]?.tables?.(op.shaders[3].params).curve?.width).toBe(256);
+  });
+
   it("carry every pass of an effect of several", () => {
     const state = stateOf(
       `<Track id="t"><Clip id="c" src="asset:city" in={0} out={4}><Effect id="s" type={soft} /></Clip></Track>`,
@@ -127,6 +145,17 @@ describe("the shader runner's program", () => {
     expect(effect).not.toContain("uniform float time;\nuniform float time;");
     expect(effect).not.toContain("bad name");
     expect(effect).toContain("cutcraft_out = vec4(c.rgb * c.a, c.a);");
+    const curve = fragmentSource(
+      "effect",
+      "vec4 effect(vec2 uv) { return texture(curve, uv); }",
+      { rgb: [[0, 0]] },
+      true,
+      undefined,
+      ["curve", "image"],
+    );
+    expect(curve).toContain("uniform highp sampler2D curve;");
+    expect(curve).not.toContain("uniform highp sampler2D image;");
+    expect(curve).not.toContain("rgb;");
     const between = fragmentSource("effect", "vec4 effect(vec2 uv) { return texture(image, uv); }", {}, false);
     expect(between).toContain("cutcraft_out = c;");
     const transition = fragmentSource("transition", "vec4 transition(vec2 uv) { return texture(to, uv); }", {});

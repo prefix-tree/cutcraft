@@ -50,7 +50,12 @@ export function fragmentSource(
   final = true,
   /** The kind of texture each `"asset:ID"` param names: a 3D table (a LUT) or a 2D picture. */
   textureKind: (ref: string) => "2d" | "3d" | undefined = () => undefined,
+  /** Pictures a built-in computes from its params (a curve's table), declared as `sampler2D`s of these names. */
+  tables: readonly string[] = [],
 ): string {
+  const named = tables
+    .filter((name) => /^[A-Za-z_]\w*$/.test(name) && !RESERVED.has(name) && !(name in params))
+    .map((name) => `uniform highp sampler2D ${name};`);
   const uniforms = Object.entries(params)
     .filter(([name]) => /^[A-Za-z_]\w*$/.test(name) && !RESERVED.has(name))
     .map(([name, value]) => {
@@ -69,7 +74,7 @@ precision highp float;
 ${inputs}
 uniform vec2 resolution;
 uniform float time;
-${uniforms.join("\n")}
+${[...named, ...uniforms].join("\n")}
 in vec2 cutcraft_uv;
 out vec4 cutcraft_out;
 #line 1
@@ -79,6 +84,9 @@ void main() {
   cutcraft_out = ${final ? "vec4(c.rgb * c.a, c.a)" : "c"};
 }`;
 }
+
+/** How many computed tables (a curve's, by its params) stay uploaded. */
+const MAX_TABLES = 32;
 
 /** A texture the size of the frame that a pass draws into. */
 interface Target {
@@ -97,6 +105,8 @@ export class ShaderRunner {
   private readonly targets: Target[] = [];
   /** The textures of assets (LUTs, images) uploaded, by their loaded data. */
   private readonly assets = new WeakMap<ShaderTexture, WebGLTexture>();
+  /** The tables built-ins computed, by effect and params, oldest first. */
+  private readonly tables = new Map<string, Map<string, WebGLTexture>>();
   private blank: AnyCanvas | null = null;
 
   constructor(
@@ -127,11 +137,16 @@ export class ShaderRunner {
       const target = last ? null : this.targetBesides(gl, image, original);
       const assets = this.assetTextures(gl, step.effect, textures);
       const kindOf = (ref: string) => assets.get(ref)?.kind;
-      const program = this.program(gl, fragmentSource("effect", step.code, step.effect.params, last, kindOf));
+      const tables = this.tableTextures(gl, step.effect);
+      const program = this.program(
+        gl,
+        fragmentSource("effect", step.code, step.effect.params, last, kindOf, [...tables.keys()]),
+      );
       const bound: Record<string, { texture: WebGLTexture; kind: "2d" | "3d" }> = {
         image: { texture: image, kind: "2d" },
         original: { texture: original, kind: "2d" },
       };
+      for (const [name, texture] of tables) bound[name] ??= { texture, kind: "2d" };
       for (const [name, value] of Object.entries(step.effect.params)) {
         const asset = typeof value === "string" ? assets.get(value) : undefined;
         if (asset) bound[name] = asset;
@@ -155,6 +170,39 @@ export class ShaderRunner {
       if (!data) throw new Error(`effect "${effect.name}": ${value} is not loaded`);
       out.set(value, { texture: this.assetTexture(gl, data), kind: data.kind });
     }
+    return out;
+  }
+
+  /**
+   * The tables a built-in computes from its params, uploaded; kept by the effect and its params, so a curve that does
+   * not change is computed and uploaded once. The oldest are let go past a few dozen.
+   */
+  private tableTextures(gl: Gl, effect: ShaderPass): ReadonlyMap<string, WebGLTexture> {
+    if (!effect.tables) return new Map();
+    const key = `${effect.name}:${JSON.stringify(effect.params)}`;
+    const cached = this.tables.get(key);
+    if (cached) return cached;
+    const out = new Map<string, WebGLTexture>();
+    for (const [name, table] of Object.entries(effect.tables(effect.params))) {
+      const texture = gl.createTexture() as WebGLTexture;
+      gl.activeTexture(gl.TEXTURE0);
+      gl.bindTexture(gl.TEXTURE_2D, texture);
+      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+      gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+      gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, table.width, table.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, table.data);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      out.set(name, texture);
+    }
+    if (this.tables.size >= MAX_TABLES) {
+      const [oldest, textures] = this.tables.entries().next().value as [string, Map<string, WebGLTexture>];
+      for (const t of textures.values()) gl.deleteTexture(t);
+      this.tables.delete(oldest);
+    }
+    this.tables.set(key, out);
     return out;
   }
 
