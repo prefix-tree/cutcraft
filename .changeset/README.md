@@ -11,6 +11,6 @@ All `@cutcraft/*` packages and the `cutcraft` CLI share one version. A release i
    version, writes each package's `CHANGELOG.md` from the pending changesets (with links to their pull requests and
    authors) and deletes the changesets.
 2. Read the changelogs, run `pnpm install` so the lockfile matches, and commit as `chore: version packages` in a pull
-   request.
+   request from the branch `chore/version-packages` (CI's changeset check skips that branch, which has none by design).
 3. After it merges: `pnpm build && pnpm release` (`changeset publish`) publishes each package not yet on npm and tags
    it; `git push --follow-tags` pushes the tags.
