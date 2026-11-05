@@ -38,11 +38,39 @@ describe("declared shaders in the frame plan", () => {
     expect(op.shaders).toEqual([
       {
         name: "glow",
-        source: expect.stringContaining("vec4 effect"),
+        sources: [expect.stringContaining("vec4 effect")],
         params: { amount: 0.5, tint: "#ff8800" },
         time: 1,
       },
     ]);
+  });
+
+  it("run a built-in shader effect as a pass, with its CSS filter kept for a painter without WebGL", () => {
+    const state = stateOf(
+      `<Track id="t"><Clip id="c" src="asset:city" in={0} out={4}>
+        <Effect id="b" type="blur" params={{ radius: 2 }} />
+        <Effect id="l" type="levels" params={{ black: 0.2, gamma: 2 }} />
+      </Clip></Track>`,
+      "",
+    );
+    expect(state.errors).toEqual([]);
+    const op = buildFramePlan(state, 1).ops[0]!;
+    expect(op.filter).toBe("blur(2px)");
+    expect(op.shaders?.map((p) => [p.name, p.builtIn, p.sources.length, p.params])).toEqual([
+      ["levels", true, 1, { black: 0.2, white: 1, gamma: 2 }],
+    ]);
+    expect(op.fallbackFilter).toMatch(/^blur\(2px\) brightness\([\d.]+\) contrast\([\d.]+\)$/);
+  });
+
+  it("carry every pass of an effect of several", () => {
+    const state = stateOf(
+      `<Track id="t"><Clip id="c" src="asset:city" in={0} out={4}><Effect id="s" type={soft} /></Clip></Track>`,
+      `const soft = defineEffect({ name: "soft", passes: ["vec4 effect(vec2 uv) { return texture(image, uv); }", "vec4 effect(vec2 uv) { return texture(original, uv); }"] });`,
+    );
+    const op = buildFramePlan(state, 1).ops[0]!;
+    expect(op.shaders?.[0]?.sources).toHaveLength(2);
+    expect(op.shaders?.[0]?.builtIn).toBeUndefined();
+    expect(op.fallbackFilter).toBeUndefined();
   });
 
   it("attach an adjustment's declared effects", () => {
@@ -93,12 +121,14 @@ describe("the shader runner's program", () => {
       time: 3,
       "bad name": 1,
     });
-    expect(effect).toContain("uniform sampler2D image;");
+    expect(effect).toContain("uniform sampler2D image;\nuniform sampler2D original;");
     expect(effect).toContain("uniform float amount;");
     expect(effect).toContain("uniform vec3 tint;");
     expect(effect).not.toContain("uniform float time;\nuniform float time;");
     expect(effect).not.toContain("bad name");
     expect(effect).toContain("cutcraft_out = vec4(c.rgb * c.a, c.a);");
+    const between = fragmentSource("effect", "vec4 effect(vec2 uv) { return texture(image, uv); }", {}, false);
+    expect(between).toContain("cutcraft_out = c;");
     const transition = fragmentSource("transition", "vec4 transition(vec2 uv) { return texture(to, uv); }", {});
     expect(transition).toContain("uniform sampler2D from;\nuniform sampler2D to;\nuniform float progress;");
     expect(transition).toContain("vec4 c = transition(cutcraft_uv);");

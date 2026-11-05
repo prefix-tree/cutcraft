@@ -48,7 +48,6 @@ export const NOT_RENDERED: readonly NotRendered[] = [
     reason: "is ignored inside <Nested>: the sequence plays at its constant speed",
   },
   { kind: "freeze", parent: "nested", reason: "is ignored inside <Nested>: the sequence plays at its constant speed" },
-  { kind: "effect", prop: "params.gamma", reason: "is ignored: levels render their black and white points only" },
   // shortcut: the lint cannot see which tracks sit beneath the footage, so it reports every blur; drop this when the blur also paints under backdrop overlays (frame-plan.ts).
   {
     kind: "composition",

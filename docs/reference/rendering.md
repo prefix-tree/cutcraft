@@ -16,6 +16,5 @@ No value means any value except one that asks for nothing (`false`, `0`, `"none"
 | element | prop | value | what happens |
 |---|---|---|---|
 | `<SpeedKey>`, `<Freeze>` | the element |  | is ignored inside `<Nested>`: the sequence plays at its constant speed |
-| `<Effect>` | `params.gamma` |  | is ignored: levels render their black and white points only |
 | `<Composition>` | `background.mode` | `blur` | draws as the plain colour when an overlay sits beneath the footage |
 | `<Captions>` | `animation` | `typewriter` | types out only cues without word timings; cues with words show as karaoke |

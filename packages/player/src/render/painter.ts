@@ -59,7 +59,8 @@ export class CanvasPainter {
     ctx.setTransform(1, 0, 0, 1, 0, 0);
   }
 
-  private drawOp(ctx: Ctx2D, op: DrawOp, inputs: PaintInputs): void {
+  private drawOp(ctx: Ctx2D, given: DrawOp, inputs: PaintInputs): void {
+    const op = this.withoutWebGl(given);
     const frame = op.kind === "nested" ? null : (inputs.frames.get(op.id) ?? null);
     const nested = op.kind === "nested" ? (inputs.nested.get(op.id) ?? null) : null;
     if (op.kind !== "nested" && !frame) return;
@@ -122,6 +123,17 @@ export class CanvasPainter {
       picture = layer;
     }
     this.composite(ctx, op, picture);
+  }
+
+  /**
+   * The op as a painter without WebGL draws it: its built-in shader effects as their CSS filter, and only the file's
+   * own shaders left, which it then warns it cannot draw. The op as it is where WebGL is there.
+   */
+  private withoutWebGl(op: DrawOp): DrawOp {
+    if (!op.shaders?.some((s) => s.builtIn) || this.runner().available) return op;
+    const own = op.shaders.filter((s) => !s.builtIn);
+    const { shaders: _, ...rest } = op;
+    return { ...rest, filter: op.fallbackFilter ?? op.filter, ...(own.length > 0 ? { shaders: own } : {}) };
   }
 
   private runner(): ShaderRunner {
@@ -286,7 +298,8 @@ export class CanvasPainter {
     return this.grain;
   }
 
-  private adjust(ctx: Ctx2D, op: DrawOp): void {
+  private adjust(ctx: Ctx2D, given: DrawOp): void {
+    const op = this.withoutWebGl(given);
     if (op.shaders) {
       if (this.runner().available) {
         this.adjustShaded(ctx, op);

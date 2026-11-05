@@ -29,6 +29,34 @@ describe("defineEffect and defineTransition", () => {
     );
   });
 
+  it("take an effect of several passes, each checked, and refuse passes on a transition or with a shader", () => {
+    expect(defineEffect({ name: "two-pass", passes: [INVERT, INVERT] })).toBe("two-pass");
+    expect(() => defineEffect({ name: "x", passes: [] })).toThrow("passes is empty");
+    expect(() => defineEffect({ name: "x", passes: [INVERT, "void main() {}"] })).toThrow(
+      "pass 2 defines vec4 effect(vec2 uv)",
+    );
+    expect(() => defineEffect({ name: "x", shader: INVERT, passes: [INVERT] })).toThrow("a shader or passes, not both");
+    expect(() => defineEffect({ name: "x" })).toThrow("a shader or passes, not both");
+    expect(() =>
+      defineTransition({ name: "x", passes: ["vec4 transition(vec2 uv) { return texture(to, uv); }", "x"] }),
+    ).toThrow("a transition is one shader");
+    expect(() => defineEffect({ name: "x", params: z.object({ original: z.number() }), shader: INVERT })).toThrow(
+      'param "original"',
+    );
+  });
+
+  it("check a built-in shader effect's params and fill its defaults", () => {
+    const ok = stateOf(
+      file(`<Clip id="c" src="asset:city"><Effect id="l" type="levels" params={{ gamma: 1.5 }} /></Clip>`),
+    );
+    expect(ok.errors).toEqual([]);
+    expect(ok.items.get("l")?.props.params).toEqual({ black: 0, white: 1, gamma: 1.5 });
+    const bad = stateOf(
+      file(`<Clip id="c" src="asset:city"><Effect id="l" type="levels" params={{ white: 2 }} /></Clip>`),
+    );
+    expect(bad.errors.map((e) => e.prop)).toEqual(["params.white"]);
+  });
+
   it("put a file's effects on its state, with params checked and filled by their schema", () => {
     const state = stateOf(
       file(

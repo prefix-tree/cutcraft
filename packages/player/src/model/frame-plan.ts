@@ -13,7 +13,7 @@ import { devWarn } from "../warn";
 import { backdropTracks } from "./backdrop";
 import { filterString, type PostEffect, postEffects } from "./effects";
 import type { ClipRect } from "./motion";
-import { declaredEffects, effectPasses, type ShaderPass, type TransitionPass, transitionPass } from "./shaders";
+import { effectPasses, type ShaderPass, shadedEffects, type TransitionPass, transitionPass } from "./shaders";
 import { frameIndex, nestedSourceTime, placementSourceTime } from "./time";
 import { animatedTransform, type DrawRect, layoutRect, type Matrix2D, multiply, translate } from "./transform";
 import { transitionLook } from "./transition";
@@ -47,13 +47,15 @@ export interface DrawOp {
   readonly opacity: number;
   readonly blend: GlobalCompositeOperation;
   readonly filter: string;
+  /** The filter with the built-in shader effects as CSS too, for a painter without WebGL; set when `shaders` has one. */
+  readonly fallbackFilter?: string;
   readonly borderRadius: number;
   readonly mask?: MaskSpec;
   /** The part shown, in composition pixels (a wipe). */
   readonly clip?: readonly ClipRect[];
   /** Vignette and grain, drawn over the element's own pixels. */
   readonly post?: readonly PostEffect[];
-  /** Effects the file declares (`defineEffect()`), run over the element's picture in order. */
+  /** Shader effects (the file's own from `defineEffect()`, and the kit's), run over the element's picture in order. */
   readonly shaders?: readonly ShaderPass[];
   /** A transition the file declares (`defineTransition()`) on this side of it; replaces the built-in look. */
   readonly transition?: TransitionPass;
@@ -132,8 +134,8 @@ export function buildFramePlan(state: ResolvedState, t: number, resolveNested?: 
       if (op && dip) ops.push(dipOp(item.transition!.placement, dip, comp.width, comp.height));
     } else if (p.kind === "adjustment") {
       if (p.props.enabled === false) continue;
-      const { filter } = filterString(item.children, p.id, t - p.start, declaredEffects(state));
       const shaders = effectPasses(state, item.children, t - p.start);
+      const filters = filtersOf(state, item.children, p.id, t - p.start, shaders);
       if (ops.length === 0) continue;
       ops.push({
         id: p.id,
@@ -143,7 +145,7 @@ export function buildFramePlan(state: ResolvedState, t: number, resolveNested?: 
         fit: "stretch",
         opacity: Number(p.props.opacity ?? 1),
         blend: blendOf(p.props.blend),
-        filter,
+        ...filters,
         borderRadius: 0,
         ...(shaders ? { shaders } : {}),
       });
@@ -208,8 +210,8 @@ function mediaOp(
     look = transitionLook(item.transition, comp.width, comp.height);
     opacity *= look.opacity;
   }
-  const { filter } = filterString(item.children, p.id, rel, declaredEffects(state));
   const shaders = effectPasses(state, item.children, rel);
+  const filters = filtersOf(state, item.children, p.id, rel, shaders);
   const mask = maskOf(item.children, warnings);
   const post = postEffects(item.children, frameIndex(t, comp.fps), rel);
   const common = {
@@ -217,7 +219,7 @@ function mediaOp(
     fit,
     opacity,
     blend: blendOf(p.props.blend),
-    filter,
+    ...filters,
     borderRadius: transform.borderRadius ?? 0,
     ...(mask ? { mask } : {}),
     ...(look?.clip ? { clip: look.clip } : {}),
@@ -298,4 +300,20 @@ function maskOf(children: readonly Placement[], warnings: string[]): MaskSpec | 
     inverted: m.props.inverted === true,
     opacity: Number(m.props.opacity ?? 1),
   };
+}
+
+/**
+ * An element's filter, less the effects its shader passes draw; with a built-in shader effect among them, also the
+ * filter that draws that effect as CSS, for a painter without WebGL.
+ */
+function filtersOf(
+  state: ResolvedState,
+  children: readonly Placement[],
+  id: string,
+  rel: number,
+  shaders: readonly ShaderPass[] | undefined,
+): { filter: string; fallbackFilter?: string } {
+  const { filter } = filterString(children, id, rel, shadedEffects(state, true));
+  if (!shaders?.some((s) => s.builtIn)) return { filter };
+  return { filter, fallbackFilter: filterString(children, id, rel, shadedEffects(state, false)).filter };
 }

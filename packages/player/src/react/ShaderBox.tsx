@@ -7,16 +7,9 @@ import type { ShaderPass } from "../model/shaders";
 import { ShaderRunner } from "../render/shaders";
 import type { AnyCanvas } from "../types";
 import { devWarn } from "../warn";
+import { htmlInCanvas } from "./html-in-canvas";
 
 type DrawingContext = CanvasRenderingContext2D & { drawElementImage(element: Element, x: number, y: number): void };
-
-/** Whether this browser draws live DOM into a canvas (HTML-in-Canvas: Chrome with the CanvasDrawElement feature). */
-export function htmlInCanvas(): boolean {
-  return (
-    typeof CanvasRenderingContext2D !== "undefined" &&
-    typeof (CanvasRenderingContext2D.prototype as Partial<DrawingContext>).drawElementImage === "function"
-  );
-}
 
 /** One WebGL runner per frame size for the whole page: a browser allows only a few WebGL contexts at once. */
 const runners = new Map<string, ShaderRunner>();

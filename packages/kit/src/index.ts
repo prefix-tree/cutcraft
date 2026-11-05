@@ -7,6 +7,7 @@ export * from "./actions/history";
 export * from "./actions/registry";
 export * from "./actions/types";
 export * from "./jsx/animate";
+export * from "./jsx/built-in-shaders";
 export * from "./jsx/capabilities";
 export * from "./jsx/define";
 export * from "./jsx/elements";

@@ -213,14 +213,12 @@ describe("lint", () => {
       expect(d[1]).toContain("masks render on clips and nested sequences only");
     });
 
-    it("warns on a levels gamma, which has no filter form", () => {
+    it("leaves a levels gamma alone, which the shader draws", () => {
       expect(
         notRendered(
           '<Track id="t"><Clip id="c" src="asset:city"><Effect id="lv" type="levels" params={{ black: 0.1, gamma: 1.2 }} /></Clip></Track>',
         ),
-      ).toEqual([
-        'warning:lv.params: "lv" <Effect> params.gamma is ignored: levels render their black and white points only',
-      ]);
+      ).toEqual([]);
     });
 
     it("warns on an overlay's blend, which mixes with the footage in the export only", () => {

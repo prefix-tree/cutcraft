@@ -1,5 +1,6 @@
 import type { z } from "zod";
 
+import { builtInShader } from "../jsx/built-in-shaders";
 import { capabilitiesOf } from "../jsx/capabilities";
 import { ENGINE_SCHEMAS, SCHEMAS_BY_KIND } from "../jsx/elements";
 import {
@@ -426,8 +427,9 @@ function declaredShader(
   if (node.kind !== "effect" && node.kind !== "transition") return null;
   const type = String(data.type);
   const builtIn = (node.kind === "effect" ? VIDEO_EFFECT_TYPES : TRANSITION_TYPES) as readonly string[];
-  if (builtIn.includes(type)) return null;
-  const def = shaderFor(fileShaders, node.kind, type);
+  const kitShader = node.kind === "effect" ? builtInShader(type) : undefined;
+  if (builtIn.includes(type) && !kitShader) return null;
+  const def = kitShader ?? shaderFor(fileShaders, node.kind, type);
   if (!def) {
     own.push({
       code: "SCHEMA",
