@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { TRANSITION_TYPES, VIDEO_EFFECT_TYPES } from "../effects/registry";
+
 // Every value here is drawn by the player and the export: a type the renderers do not draw is not offered.
 
 export const TRACK_LAYOUTS = ["sequence", "free"] as const;
@@ -84,54 +86,8 @@ export const EASINGS = [
 
 export const MASK_EASINGS = ["linear", "ease-in", "ease-out", "ease-in-out"] as const;
 
-export const TRANSITION_TYPES = [
-  "crossfade",
-  "dipToBlack",
-  "dipToWhite",
-  "wipe",
-  "slide",
-  "push",
-  // Drawn by the kit's shaders (jsx/built-in-shaders.ts).
-  "iris",
-  "clockWipe",
-  "blinds",
-  "filmBurn",
-  "pixelDissolve",
-  "zoom",
-] as const;
-
-export const VIDEO_EFFECT_TYPES = [
-  "brightness",
-  "contrast",
-  "saturation",
-  "hue",
-  "temperature",
-  "tint",
-  "blur",
-  "vignette",
-  "grain",
-  "shadow",
-  "grayscale",
-  "sepia",
-  "invert",
-  "levels",
-  "lut",
-  "exposure",
-  "vibrance",
-  "whiteBalance",
-  "shadowsHighlights",
-  "duotone",
-  "curves",
-  "colorKey",
-  "regionBlur",
-  "cornerPin",
-  "zoomBlur",
-  "chromaticAberration",
-  "glow",
-  "outline",
-  "longShadow",
-  "bevel",
-] as const;
+// The built-in effects and transitions are listed by their registry (effects/registry.ts).
+export { TRANSITION_TYPES, type TransitionType, VIDEO_EFFECT_TYPES, type VideoEffectType } from "../effects/registry";
 
 export const TEXT_ANIMATION_PRESETS = [
   "none",
@@ -245,6 +201,4 @@ export type TrackRole = (typeof TRACK_ROLES)[number];
 export type FitMode = (typeof FIT_MODES)[number];
 export type BlendMode = (typeof BLEND_MODES)[number];
 export type Easing = (typeof EASINGS)[number];
-export type TransitionType = (typeof TRANSITION_TYPES)[number];
-export type VideoEffectType = (typeof VIDEO_EFFECT_TYPES)[number];
 export type TrackFlag = (typeof TRACK_FLAGS)[number];

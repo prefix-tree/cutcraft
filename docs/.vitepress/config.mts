@@ -76,6 +76,7 @@ export default defineConfig({
           items: [
             { text: "Graphics", link: "/reference/graphics/" },
             { text: "What renders", link: "/reference/rendering" },
+            { text: "Effects and transitions", link: "/reference/effects" },
             { text: "CLI", link: "/reference/cli" },
             { text: "API", link: "/reference/api" },
             { text: "Actions", link: "/reference/actions" },
@@ -90,6 +91,7 @@ export default defineConfig({
           items: [
             { text: "Elements", link: "/reference/elements/" },
             { text: "What renders", link: "/reference/rendering" },
+            { text: "Effects and transitions", link: "/reference/effects" },
             { text: "CLI", link: "/reference/cli" },
             { text: "API", link: "/reference/api" },
             { text: "Actions", link: "/reference/actions" },
@@ -103,6 +105,7 @@ export default defineConfig({
             { text: "Elements", link: "/reference/elements/" },
             { text: "Graphics", link: "/reference/graphics/" },
             { text: "What renders", link: "/reference/rendering" },
+            { text: "Effects and transitions", link: "/reference/effects" },
             { text: "CLI", link: "/reference/cli" },
             { text: "API", link: "/reference/api" },
             { text: "Actions", link: "/reference/actions" },

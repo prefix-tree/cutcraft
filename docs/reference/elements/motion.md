@@ -26,6 +26,6 @@ The player draws it once the host calls `installFreeCodeLibraries()` ([Free code
 | `exit` | { type, duration, easing } |  |  |
 | `transform` | { position, scale, rotation, anchor, opacity, borderRadius, crop } |  |  |
 | `blend` | "normal" \| "multiply" \| "screen" \| "overlay" \| "darken" \| … 13 more |  |  |
-| `sequence` | unknown[][] | `[]` |  |
+| `sequence` | [string, object] \| [string, object, object][] | `[]` |  |
 
 Timed, visual, transformable. Children: `effect`, `keyframe`. [All elements](/reference/elements/)

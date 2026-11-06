@@ -1,4 +1,4 @@
-import { type Placement, SHADER_ONLY_EFFECTS, type VIDEO_EFFECT_TYPES } from "@cutcraft/kit";
+import { colorGradeFilters, cssOf, effectEntry, type Placement } from "@cutcraft/kit";
 
 import { devWarn } from "../warn";
 import { keyframedParam, keyframedValue } from "./keyframes";
@@ -9,63 +9,6 @@ export interface FilterResult {
 }
 
 type Params = Readonly<Record<string, unknown>>;
-
-function num(params: Params, keys: readonly string[], fallback: number): number {
-  for (const k of keys) {
-    const v = params[k];
-    if (typeof v === "number" && Number.isFinite(v)) return v;
-  }
-  return fallback;
-}
-
-/**
- * Levels as `brightness(k) contrast(c)`: out = (in − black) / (white − black), with c = 1 + 2·black·s
- * and k = s/c for s = 1/(white − black). Gamma has no filter form; the lint reports it.
- */
-function levels(p: Params): string {
-  const black = Math.max(0, Math.min(1, num(p, ["black"], 0))),
-    white = Math.max(0, Math.min(1, num(p, ["white"], 1)));
-  if (white <= black) return "";
-  const s = 1 / (white - black),
-    c = 1 + 2 * black * s;
-  return `brightness(${s / c}) contrast(${c})`;
-}
-
-/** Effects the painter draws over the element after it (`postEffects`), not as filters. */
-const POST_TYPES = ["vignette", "grain"] as const;
-
-/** One filter per effect type (kit's VIDEO_EFFECT_TYPES), less the post effects and the ones only a shader draws. */
-const CANVAS_FILTERABLE: Readonly<
-  Record<
-    Exclude<(typeof VIDEO_EFFECT_TYPES)[number], (typeof POST_TYPES)[number] | (typeof SHADER_ONLY_EFFECTS)[number]>,
-    (p: Params) => string
-  >
-> = {
-  brightness: (p) => `brightness(${1 + num(p, ["amount", "value"], 0) / 100})`,
-  contrast: (p) => `contrast(${1 + num(p, ["amount", "value"], 0) / 100})`,
-  saturation: (p) => `saturate(${1 + num(p, ["amount", "value"], 0) / 100})`,
-  hue: (p) => `hue-rotate(${num(p, ["angle", "amount", "value"], 0)}deg)`,
-  blur: (p) => `blur(${num(p, ["radius", "amount", "value"], 4)}px)`,
-  grayscale: (p) => `grayscale(${num(p, ["amount", "value"], 100) / 100})`,
-  sepia: (p) => `sepia(${num(p, ["amount", "value"], 100) / 100})`,
-  invert: (p) => `invert(${num(p, ["amount", "value"], 100) / 100})`,
-  temperature: (p) => colorGradeFilters({ temperature: num(p, ["amount", "value"], 0) }).join(" "),
-  tint: (p) => colorGradeFilters({ tint: num(p, ["amount", "value"], 0) }).join(" "),
-  levels,
-  // Without WebGL: exposure as brightness of the encoded values, vibrance as plain saturation at half strength.
-  exposure: (p) => `brightness(${2 ** num(p, ["stops"], 0)})`,
-  vibrance: (p) => `saturate(${1 + num(p, ["amount"], 0) / 2})`,
-  // Without WebGL or HTML-in-Canvas: a glow as a coloured shadow under the element, stacked for intensity.
-  glow: (p) => {
-    const colour = typeof p.color === "string" ? p.color : "#ffffff";
-    const layer = `drop-shadow(0 0 ${num(p, ["radius"], 20) / 2}px ${colour})`;
-    return Array.from({ length: Math.max(1, Math.min(4, Math.round(num(p, ["intensity"], 1)))) }, () => layer).join(
-      " ",
-    );
-  },
-  shadow: (p) =>
-    `drop-shadow(${num(p, ["x"], 0)}px ${num(p, ["y"], 4)}px ${num(p, ["blur"], 8)}px ${typeof p.color === "string" ? p.color : "rgba(0,0,0,0.5)"})`,
-};
 
 /** The placements of an element and its children, by id: where an effect's own keyframes are found. */
 export type Items = ReadonlyMap<string, Placement>;
@@ -103,11 +46,9 @@ export function childFilter(
     }).join(" ");
   if (c.kind !== "effect" || c.props.enabled === false) return "";
   const type = String(c.props.type);
-  if ((POST_TYPES as readonly string[]).includes(type) || skip.has(type)) return "";
-  // Drawn by its shader or not at all; the painter says so where there is no WebGL.
-  if ((SHADER_ONLY_EFFECTS as readonly string[]).includes(type)) return "";
-  const make = CANVAS_FILTERABLE[type as keyof typeof CANVAS_FILTERABLE] as ((p: Params) => string) | undefined;
-  if (make) return make(paramsAt(items, c, rel));
+  if (skip.has(type)) return "";
+  // A built-in: its CSS, or nothing for a post effect or one only a shader draws (the painter says so without WebGL).
+  if (effectEntry(type)) return cssOf(type)?.(paramsAt(items, c, rel)) ?? "";
   devWarn(`effect:${elementId}:${type}`, `effect "${type}" on "${elementId}" is not rendered by the browser player`);
   return "";
 }
@@ -130,9 +71,7 @@ export function filterString(
       c.kind === "effect" &&
       c.props.enabled !== false &&
       !declared.has(String(c.props.type)) &&
-      !(POST_TYPES as readonly string[]).includes(String(c.props.type)) &&
-      !(SHADER_ONLY_EFFECTS as readonly string[]).includes(String(c.props.type)) &&
-      !(String(c.props.type) in CANVAS_FILTERABLE)
+      !effectEntry(c.props.type)
     )
       unsupported.push(String(c.props.type));
   }
@@ -152,32 +91,14 @@ export function postEffects(
 ): PostEffect[] | undefined {
   const out: PostEffect[] = [];
   for (const c of children) {
-    if (c.kind !== "effect" || c.props.enabled === false) continue;
-    const amount = Math.max(
-      0,
-      Math.min(
-        1,
-        num(paramsAt(items, c, rel), ["amount", "intensity", "value"], c.props.type === "grain" ? 20 : 50) / 100,
-      ),
-    );
+    if (c.kind !== "effect" || c.props.enabled === false || effectEntry(c.props.type)?.draw.kind !== "post") continue;
+    // The resolver fills `amount`; a plan built without it (tests) falls back on the schema's default.
+    const given = paramsAt(items, c, rel).amount;
+    const fallback = c.props.type === "grain" ? 20 : 50;
+    const amount = Math.max(0, Math.min(1, (typeof given === "number" ? given : fallback) / 100));
     if (amount <= 0) continue;
     if (c.props.type === "vignette") out.push({ type: "vignette", amount });
     else if (c.props.type === "grain") out.push({ type: "grain", amount, seed: frame });
   }
   return out.length ? out : undefined;
-}
-
-/**
- * Temperature and tint approximated with CSS filters: warm pulls toward
- * sepia, cool toward a slight hue rotation; tint rotates hue. Wheels, curves,
- * LUTs and HSL bands are not rendered by the browser player.
- */
-function colorGradeFilters(props: Readonly<Record<string, unknown>>): string[] {
-  const out: string[] = [];
-  const temperature = typeof props.temperature === "number" ? props.temperature : 0;
-  const tint = typeof props.tint === "number" ? props.tint : 0;
-  if (temperature > 0) out.push(`sepia(${(temperature / 100) * 0.5})`);
-  else if (temperature < 0) out.push(`hue-rotate(${-temperature / 10}deg) saturate(${1 + -temperature / 200})`);
-  if (tint !== 0) out.push(`hue-rotate(${tint / 4}deg)`);
-  return out;
 }

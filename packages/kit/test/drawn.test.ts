@@ -2,11 +2,13 @@ import { describe, expect, it } from "vitest";
 
 import {
   collectModule,
+  EFFECTS,
   MASK_TYPES,
   resolve,
   TEXT_ANIMATION_PRESETS,
   TRANSITION_PARAMS,
   TRANSITION_TYPES,
+  TRANSITIONS,
   VIDEO_EFFECT_TYPES,
 } from "@cutcraft/kit";
 import { loadModule } from "@cutcraft/kit/source";
@@ -41,7 +43,10 @@ describe("what a file can say is what renders", () => {
       "zoom",
     ]);
     expect(Object.keys(TRANSITION_PARAMS).sort()).toEqual([...TRANSITION_TYPES].sort());
-    expect(VIDEO_EFFECT_TYPES).toHaveLength(30);
+    // The effect types are the registry's, each drawn one way (a CSS filter, a shader or the painter).
+    expect(VIDEO_EFFECT_TYPES).toEqual(Object.keys(EFFECTS));
+    for (const type of VIDEO_EFFECT_TYPES) expect(["css", "shader", "post"]).toContain(EFFECTS[type].draw.kind);
+    for (const type of TRANSITION_TYPES) expect(["look", "shader"]).toContain(TRANSITIONS[type].draw.kind);
     expect(TEXT_ANIMATION_PRESETS).toHaveLength(9);
     expect(MASK_TYPES).toEqual(["shape", "drawn"]);
   });

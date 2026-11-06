@@ -1,6 +1,6 @@
 import type { z } from "zod";
 
-import { builtInShader } from "../jsx/built-in-shaders";
+import { effectEntry } from "../effects/registry";
 import { capabilitiesOf } from "../jsx/capabilities";
 import { effectParamProblem } from "../jsx/effect-params";
 import { ENGINE_SCHEMAS, SCHEMAS_BY_KIND } from "../jsx/elements";
@@ -419,8 +419,8 @@ const themedByData = new WeakMap<object, Readonly<Record<string, ThemeOrigin>>>(
 let fileShaders: readonly ShaderDefinition[] = [];
 
 /**
- * An `<Effect>` or `<Transition>` of a type the file declares: its params checked and filled by the declared schema.
- * An unknown type is an error naming the built-in ones; null for a built-in type or any other element.
+ * An `<Effect>` (built-in or the file's own) or a `<Transition>` the file declares: its params checked and filled by
+ * its schema. An unknown type is an error naming the built-in ones; null for a built-in transition or another element.
  */
 function declaredShader(
   node: CollectedNode,
@@ -430,10 +430,11 @@ function declaredShader(
   if (node.kind !== "effect" && node.kind !== "transition") return null;
   const type = String(data.type);
   const builtIn = (node.kind === "effect" ? VIDEO_EFFECT_TYPES : TRANSITION_TYPES) as readonly string[];
-  const kitShader = node.kind === "effect" ? builtInShader(type) : undefined;
-  if (builtIn.includes(type) && !kitShader) return null;
-  const def = kitShader ?? shaderFor(fileShaders, node.kind, type);
-  if (!def) {
+  // Every built-in effect is checked by its registry schema; built-in transitions by TRANSITION_PARAMS, elsewhere.
+  const kit = node.kind === "effect" ? effectEntry(type)?.params : undefined;
+  if (builtIn.includes(type) && !kit) return null;
+  const params = kit ?? shaderFor(fileShaders, node.kind, type)?.params;
+  if (!params) {
     own.push({
       code: "SCHEMA",
       id: node.id,
@@ -442,7 +443,7 @@ function declaredShader(
     });
     return null;
   }
-  const result = def.params.safeParse(data.params ?? {});
+  const result = params.safeParse(data.params ?? {});
   if (result.success) return { ...data, params: result.data };
   for (const issue of result.error.issues)
     own.push({
