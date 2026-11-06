@@ -63,7 +63,7 @@ export async function servePage(
     })),
   };
   const mediaErrors: string[] = [];
-  const vite = fromSource ? await sourcePage() : null;
+  const vite = fromSource ? await sourcePage.acquire() : null;
   const built = fromSource
     ? null
     : normalize(`${builtPage ?? fileURLToPath(new URL("./web/page/", import.meta.url))}/`);
@@ -122,7 +122,7 @@ export async function servePage(
     url: `http://127.0.0.1:${port}/`,
     mediaErrors,
     close: async () => {
-      await vite?.close();
+      if (vite) sourcePage.release();
       await closeServer(server);
     },
   };
@@ -133,24 +133,61 @@ interface Middlewares {
   close(): Promise<void>;
 }
 
-async function sourcePage(): Promise<Middlewares> {
-  // Vite is a dev dependency: only the workspace serves the page from source.
-  const { createServer: createVite } = await import("vite");
-  const { default: react } = await import("@vitejs/plugin-react");
-  const root = fileURLToPath(new URL("./page/", import.meta.url));
-  const repo = fileURLToPath(new URL("../../../../", import.meta.url));
-  return createVite({
-    root,
-    configFile: false,
-    logLevel: "error",
-    appType: "spa",
-    plugins: [react()],
-    resolve: { dedupe: ["react", "react-dom"] },
-    define: { "process.env": "{}" },
-    server: { middlewareMode: true, hmr: false, ws: false, fs: { allow: [repo] } },
-    optimizeDeps: { include: ["react", "react-dom/client", "mediabunny", "zod", "three", "motion"] },
-  });
+function createSourcePage(): Promise<Middlewares> {
+  return (async () => {
+    // Vite is a dev dependency: only the workspace serves the page from source.
+    const { createServer: createVite } = await import("vite");
+    const { default: react } = await import("@vitejs/plugin-react");
+    const root = fileURLToPath(new URL("./page/", import.meta.url));
+    const repo = fileURLToPath(new URL("../../../../", import.meta.url));
+    return createVite({
+      root,
+      configFile: false,
+      logLevel: "error",
+      appType: "spa",
+      plugins: [react()],
+      resolve: { dedupe: ["react", "react-dom"] },
+      define: { "process.env": "{}" },
+      // No file watching: nothing edits the page's source while an export runs.
+      server: { middlewareMode: true, hmr: false, ws: false, watch: null, fs: { allow: [repo] } },
+      optimizeDeps: { include: ["react", "react-dom/client", "mediabunny", "zod", "three", "motion"] },
+    });
+  })();
 }
+
+/** How long the source page stays up after its last export, for the next one to reuse. */
+const SOURCE_PAGE_IDLE_MS = 3000;
+
+/**
+ * The page served from source, one Vite server per process, shared by the exports that run in it. A Vite server
+ * closed after each export does not give all its memory back (about 40 MB each, measured), so a process that exports
+ * many times (the browser tests) ran out of heap. It closes once no export has used it for a few seconds.
+ */
+const sourcePage = (() => {
+  let shared: Promise<Middlewares> | null = null;
+  let users = 0;
+  let idle: ReturnType<typeof setTimeout> | null = null;
+  return {
+    acquire(): Promise<Middlewares> {
+      users++;
+      if (idle) clearTimeout(idle);
+      idle = null;
+      shared ??= createSourcePage();
+      return shared;
+    },
+    release(): void {
+      users = Math.max(0, users - 1);
+      if (users > 0 || !shared) return;
+      const closing = shared;
+      idle = setTimeout(() => {
+        if (users > 0 || shared !== closing) return;
+        shared = null;
+        idle = null;
+        void closing.then((vite) => vite.close()).catch(() => undefined);
+      }, SOURCE_PAGE_IDLE_MS);
+    },
+  };
+})();
 
 async function sendMedia(req: IncomingMessage, res: ServerResponse, media: MediaResolver, id: string): Promise<void> {
   const handle = await media.resolve(id);
