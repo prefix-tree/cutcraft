@@ -18,11 +18,17 @@ const drag = bench.editor.find((r) => r.nodes > 500 && r.step.startsWith("transf
 
 # Video editor as code
 
-A video is a TSX file. Clips are cut on transcript words and camera shots, titles land on the word they belong to,
-and anything you draw can be free code: React, CSS, three.js or Motion. The browser plays the file, an editor edits
-the same file, and the export renders it with the same engine.
+LLMs write code well and math badly. So a model writes a TSX file of words and shots, and CutCraft does the
+arithmetic, plays it in the browser, edits it and exports it.
 
-<p class="home-links"><a :href="withBase('/guide/getting-started')">Quick start</a> · <a :href="withBase('/examples')">Examples</a> · <a :href="withBase('/guide/introduction')">Introduction</a> · <a href="https://github.com/prefix-tree/cutcraft">GitHub</a></p>
+What a desktop editor like Premiere Pro gives you, as a file: tracks, cuts, transitions, titles, captions, sound,
+colour, keying and export. Anything the timeline doesn't cover is free code: React, CSS, three.js or Motion.
+
+```sh
+npm install cutcraft @cutcraft/kit react zod
+```
+
+<p class="home-links"><a :href="withBase('/guide/getting-started')">Quick start</a> · <a :href="withBase('/examples')">Examples</a> · <a :href="withBase('/guide/introduction')">Introduction</a> · <a href="https://github.com/prefix-tree/cutcraft">GitHub</a> · MIT</p>
 
 ```tsx
 <Composition fps={30} width={1080} height={1920}>
@@ -39,8 +45,8 @@ the same file, and the export renders it with the same engine.
 </Composition>
 ```
 
-No second counts the model had to compute: the cut starts on word 12, the title on word 16 of the clip that says it,
-and both move when the clip is trimmed or dragged.
+The model never counts seconds: the cut starts on word 12, the title on word 16 of the clip that says it, and
+CutCraft works out the frames. Trim or drag the clip and both stay on their words.
 
 ## Examples
 
@@ -69,17 +75,16 @@ it.
 
 ## What's inside
 
-- **One file, three authors.** The model writes it, the editor's gestures become actions that fold back into it as
-  small edits, and the model reads what you did as the code it wrote.
-- **No math for the model.** Cuts name transcript words and camera shots, titles name the word they belong to, and
-  the resolver turns them into seconds through every trim and speed change.
-- **Free code where you want it.** A `<Layer>` takes any React, CSS or WebGL, and `<Three>` and `<Motion>` put
-  three.js and Motion on the timeline. All of it follows the video's clock, so it scrubs and seeks frame-exact.
-- **Every action undoes.** 131 editor actions, each able to validate, apply, invert and write itself back to the file.
-- **Plays in the browser.** WebCodecs decoding, a canvas for footage, DOM for overlays, Web Audio as the clock, and a
-  frame-exact seek.
-- **Exports with the player.** The same player in headless Chrome, frame by frame: MP4, WebM, soundtracks and stills,
-  with its own audio mix ([how it works](./guide/export-architecture)).
+- **The model writes words, CutCraft does the math.** Cuts name transcript words and camera shots, titles name the
+  word they belong to, and CutCraft turns them into frames through every trim and speed change.
+- **A full editor's timeline.** Tracks, clips, transitions, keyframes, speed ramps, masks, titles, captions, a
+  soundtrack, colour grading and keying, each an element in the file.
+- **Free code where the timeline stops.** A `<Layer>` takes any React, CSS or WebGL, and `<Three>` and `<Motion>`
+  put three.js and Motion on the timeline. All of it follows the video's clock, so it scrubs frame-exact.
+- **Edit by hand, keep the code.** Every drag and trim in the editor is an undoable action written back to the file as
+  a one-value change, so the model reads your edit as the code it wrote.
+- **What you preview is what you export.** The browser plays the file, and the export runs the same player in
+  headless Chrome: MP4, WebM and stills ([how it works](./guide/export-architecture)).
 - **Checks like a compiler.** A lint for the file, a list of what renders, and a layout check that points at the line
   where a graphic covers a face or leaves the safe zone.
 

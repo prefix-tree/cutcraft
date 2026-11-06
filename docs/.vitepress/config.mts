@@ -5,7 +5,7 @@ import generated from "./sidebar.generated.json";
 export default defineConfig({
   title: "CutCraft",
   description:
-    "Video editor as code: a model writes a TSX file with words and shots instead of seconds, the browser plays it, an editor edits the same file, and Node exports it.",
+    "Video editor as code: LLMs write code well and math badly, so a model writes a TSX file of words and shots, and CutCraft does the arithmetic, plays it in the browser, edits it and exports it.",
   base: "/cutcraft/",
   cleanUrls: true,
   // Decision records are for contributors and live in the repository, not on the site.
@@ -26,118 +26,89 @@ export default defineConfig({
   ],
   themeConfig: {
     logo: "/logo.svg",
+    // The top bar stays out of the way (logo, one link, search, GitHub); the sidebar is the map of the docs.
     nav: [
-      { text: "Guide", link: "/guide/introduction" },
-      { text: "Examples", link: "/examples" },
-      { text: "Recipes", link: "/recipes/" },
-      { text: "Reference", link: "/reference/elements/" },
-      { text: "Compare", link: "/comparisons/remotion" },
-      { text: "GitHub", link: "https://github.com/prefix-tree/cutcraft" },
+      { text: "Docs", link: "/guide/introduction", activeMatch: "^/(guide|recipes|reference|comparisons|examples)" },
     ],
-    sidebar: {
-      "/guide/": [
-        {
-          text: "Start",
-          items: [
-            { text: "Introduction", link: "/guide/introduction" },
-            { text: "Quick start", link: "/guide/getting-started" },
-          ],
-        },
-        {
-          text: "Writing videos",
-          items: [
-            { text: "The file", link: "/guide/the-file" },
-            { text: "Time by meaning", link: "/guide/time" },
-            { text: "Free code", link: "/guide/free-code" },
-            { text: "Titles and graphics", link: "/guide/titles-and-graphics" },
-            { text: "Captions and sound", link: "/guide/captions-and-sound" },
-            { text: "Colour and grading", link: "/guide/colour" },
-            { text: "Keying, blurs and pins", link: "/guide/footage-tools" },
-            { text: "Themes", link: "/guide/themes" },
-          ],
-        },
-        {
-          text: "In your app",
-          items: [
-            { text: "Player", link: "/guide/player" },
-            { text: "Editing", link: "/guide/editing" },
-            { text: "Exporting", link: "/guide/exporting" },
-            { text: "How the export works", link: "/guide/export-architecture" },
-          ],
-        },
-        { text: "Walkthrough", items: [{ text: "A launch video, line by line", link: "/guide/writing-files" }] },
-      ],
-      // Before "/reference/": the most specific prefix wins only when it comes first.
-      "/reference/elements/": [
-        { text: "Elements", items: [{ text: "All elements", link: "/reference/elements/" }] },
-        ...generated.elements.map((group) => ({ ...group, collapsed: false })),
-        {
-          text: "Reference",
-          items: [
-            { text: "Graphics", link: "/reference/graphics/" },
-            { text: "What renders", link: "/reference/rendering" },
-            { text: "Effects and transitions", link: "/reference/effects" },
-            { text: "CLI", link: "/reference/cli" },
-            { text: "API", link: "/reference/api" },
-            { text: "Actions", link: "/reference/actions" },
-          ],
-        },
-      ],
-      "/reference/graphics/": [
-        { text: "Graphics", items: [{ text: "All graphics", link: "/reference/graphics/" }] },
-        ...generated.graphics.map((group) => ({ ...group, collapsed: false })),
-        {
-          text: "Reference",
-          items: [
-            { text: "Elements", link: "/reference/elements/" },
-            { text: "What renders", link: "/reference/rendering" },
-            { text: "Effects and transitions", link: "/reference/effects" },
-            { text: "CLI", link: "/reference/cli" },
-            { text: "API", link: "/reference/api" },
-            { text: "Actions", link: "/reference/actions" },
-          ],
-        },
-      ],
-      "/reference/": [
-        {
-          text: "Reference",
-          items: [
-            { text: "Elements", link: "/reference/elements/" },
-            { text: "Graphics", link: "/reference/graphics/" },
-            { text: "What renders", link: "/reference/rendering" },
-            { text: "Effects and transitions", link: "/reference/effects" },
-            { text: "CLI", link: "/reference/cli" },
-            { text: "API", link: "/reference/api" },
-            { text: "Actions", link: "/reference/actions" },
-          ],
-        },
-      ],
-      "/recipes/": [
-        {
-          text: "Recipes",
-          items: [
-            { text: "Overview", link: "/recipes/" },
-            { text: "Talking-head cut", link: "/recipes/talking-head" },
-            { text: "Product demo with zoom-ins", link: "/recipes/product-demo" },
-            { text: "Vertical clip from a podcast", link: "/recipes/vertical-podcast" },
-            { text: "Slideshow with motion", link: "/recipes/slideshow" },
-            { text: "Stats with handles", link: "/recipes/stats" },
-            { text: "Variants from one file", link: "/recipes/variants" },
-            { text: "Multicam highlights", link: "/recipes/highlights" },
-            { text: "Brand spot in any theme", link: "/recipes/brand-spot" },
-          ],
-        },
-      ],
-      "/comparisons/": [
-        {
-          text: "Compare",
-          items: [
-            { text: "Remotion", link: "/comparisons/remotion" },
-            { text: "Diffusion Studio", link: "/comparisons/diffusion-studio" },
-          ],
-        },
-      ],
-    },
+    sidebar: [
+      {
+        text: "Get started",
+        items: [
+          { text: "Introduction", link: "/guide/introduction" },
+          { text: "Quick start", link: "/guide/getting-started" },
+          { text: "A launch video, line by line", link: "/guide/writing-files" },
+          { text: "Examples", link: "/examples" },
+        ],
+      },
+      {
+        text: "Writing videos",
+        items: [
+          { text: "The file", link: "/guide/the-file" },
+          { text: "Time by meaning", link: "/guide/time" },
+          { text: "Free code", link: "/guide/free-code" },
+          { text: "Titles and graphics", link: "/guide/titles-and-graphics" },
+          { text: "Captions and sound", link: "/guide/captions-and-sound" },
+          { text: "Colour and grading", link: "/guide/colour" },
+          { text: "Keying, blurs and pins", link: "/guide/footage-tools" },
+          { text: "Themes", link: "/guide/themes" },
+        ],
+      },
+      {
+        text: "In your app",
+        items: [
+          { text: "Player", link: "/guide/player" },
+          { text: "Editing", link: "/guide/editing" },
+          { text: "Exporting", link: "/guide/exporting" },
+          { text: "How the export works", link: "/guide/export-architecture" },
+        ],
+      },
+      {
+        text: "Recipes",
+        collapsed: true,
+        items: [
+          { text: "Overview", link: "/recipes/" },
+          { text: "Talking-head cut", link: "/recipes/talking-head" },
+          { text: "Product demo with zoom-ins", link: "/recipes/product-demo" },
+          { text: "Vertical clip from a podcast", link: "/recipes/vertical-podcast" },
+          { text: "Slideshow with motion", link: "/recipes/slideshow" },
+          { text: "Stats with handles", link: "/recipes/stats" },
+          { text: "Variants from one file", link: "/recipes/variants" },
+          { text: "Multicam highlights", link: "/recipes/highlights" },
+          { text: "Brand spot in any theme", link: "/recipes/brand-spot" },
+        ],
+      },
+      {
+        text: "Reference",
+        collapsed: true,
+        items: [
+          {
+            text: "Elements",
+            link: "/reference/elements/",
+            collapsed: true,
+            items: generated.elements.map((group) => ({ ...group, collapsed: true })),
+          },
+          {
+            text: "Graphics",
+            link: "/reference/graphics/",
+            collapsed: true,
+            items: generated.graphics.map((group) => ({ ...group, collapsed: true })),
+          },
+          { text: "What renders", link: "/reference/rendering" },
+          { text: "Effects and transitions", link: "/reference/effects" },
+          { text: "CLI", link: "/reference/cli" },
+          { text: "API", link: "/reference/api" },
+          { text: "Actions", link: "/reference/actions" },
+        ],
+      },
+      {
+        text: "Compare",
+        collapsed: true,
+        items: [
+          { text: "Remotion", link: "/comparisons/remotion" },
+          { text: "Diffusion Studio", link: "/comparisons/diffusion-studio" },
+        ],
+      },
+    ],
     socialLinks: [{ icon: "github", link: "https://github.com/prefix-tree/cutcraft" }],
     search: { provider: "local" },
     editLink: { pattern: "https://github.com/prefix-tree/cutcraft/edit/main/docs/:path" },
