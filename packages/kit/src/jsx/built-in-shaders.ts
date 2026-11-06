@@ -119,25 +119,46 @@ vec4 effect(vec2 uv) {
 });
 
 /**
- * One pass of a separable Gaussian blur of `radius` pixels: 33 taps along x or y spanning three standard deviations
- * each way. `luma` blurs the luminance (the result's red), `rgba` the picture, weighted by alpha so transparent pixels
- * add no colour.
+ * One pass of a separable Gaussian blur of the `radius` param's pixels (or another param's): 33 taps along x or y
+ * spanning three standard deviations each way. `luma` blurs the luminance and `alpha` the alpha (each into the
+ * result's red), `rgba` the picture, weighted by alpha so transparent pixels add no colour.
  */
-const GAUSS_PASS = (axis: "x" | "y", what: "luma" | "rgba") => `${COLOUR}vec4 effect(vec2 uv) {
-  float sigma = max(radius, 1.0) / 3.0;
-  vec2 dir = vec2(${axis === "x" ? "1.0, 0.0" : "0.0, 1.0"}) * max(radius, 1.0) / 16.0 / resolution;
+const GAUSS_PASS = (
+  axis: "x" | "y",
+  what: "luma" | "alpha" | "rgba",
+  radius = "radius",
+) => `${COLOUR}vec4 effect(vec2 uv) {
+  float span = max(${radius}, 1.0);
+  float sigma = span / 3.0;
+  vec2 dir = vec2(${axis === "x" ? "1.0, 0.0" : "0.0, 1.0"}) * span / 16.0 / resolution;
   vec4 sum = vec4(0.0);
   float weights = 0.0;
   for (int i = -16; i <= 16; i++) {
-    float d = float(i) * max(radius, 1.0) / 16.0;
+    float d = float(i) * span / 16.0;
     float w = exp(-d * d / (2.0 * sigma * sigma));
     vec4 s = texture(image, uv + float(i) * dir);
-    sum += w * ${what === "rgba" ? "vec4(s.rgb * s.a, s.a)" : axis === "x" ? "vec4(cc_luma(s.rgb))" : "vec4(s.r)"};
+    sum += w * ${
+      what === "rgba"
+        ? "vec4(s.rgb * s.a, s.a)"
+        : axis === "y"
+          ? "vec4(s.r)"
+          : what === "luma"
+            ? "vec4(cc_luma(s.rgb))"
+            : "vec4(s.a)"
+    };
     weights += w;
   }
   sum /= weights;
   return ${what === "rgba" ? "sum.a > 0.0 ? vec4(sum.rgb / sum.a, sum.a) : vec4(0.0)" : "vec4(vec3(sum.r), 1.0)"};
 }`;
+
+/** `top` over `under`, both plain (not premultiplied) colour: the source-over operator of Porter and Duff (1984). */
+const OVER = `vec4 cc_over(vec4 top, vec4 under) {
+  float a = top.a + under.a * (1.0 - top.a);
+  if (a <= 0.0) return vec4(0.0);
+  return vec4((top.rgb * top.a + under.rgb * under.a * (1.0 - top.a)) / a, a);
+}
+`;
 
 /**
  * Shadows and highlights, a local tone adjustment: the luminance around each pixel (a Gaussian blur of the radius, in
@@ -377,6 +398,130 @@ const chromaticAberration = shaderDefinition("effect", {
 }`,
 });
 
+/**
+ * Glow: the element's bright parts (luminance above `threshold`, all of it at 0), coloured toward `color` by `tint`
+ * (at 0 they keep their own colours, a bloom), blurred in two Gaussian passes and added to the picture by `intensity`.
+ * The glow reaches past the element's edge, so it shows on titles and shapes as well as on footage.
+ */
+const glow = shaderDefinition("effect", {
+  name: "glow",
+  params: z.object({
+    radius: z.number().min(0).max(200).default(20),
+    intensity: z.number().min(0).max(4).default(1),
+    threshold: z.number().min(0).max(1).default(0),
+    color: HEX.default("#ffffff"),
+    tint: z.number().min(0).max(1).default(1),
+  }),
+  passes: [
+    `${COLOUR}vec4 effect(vec2 uv) {
+  vec4 c = texture(image, uv);
+  float bright = threshold <= 0.0 ? 1.0 : smoothstep(threshold, min(threshold + 0.1, 1.0), cc_luma(c.rgb));
+  return vec4(mix(c.rgb, color, tint), c.a * bright);
+}`,
+    GAUSS_PASS("x", "rgba"),
+    GAUSS_PASS("y", "rgba"),
+    `vec4 effect(vec2 uv) {
+  vec4 o = texture(original, uv);
+  vec4 g = texture(image, uv);
+  vec3 light = o.rgb * o.a + g.rgb * g.a * intensity;
+  float a = clamp(max(o.a, g.a * intensity), 0.0, 1.0);
+  return a > 0.0 ? vec4(min(light / a, 1.0), a) : vec4(0.0);
+}`,
+  ],
+});
+
+/**
+ * Outline: a band of `width` pixels around the element's silhouette, by morphological dilation of its alpha (the
+ * largest alpha within the width, sampled on 12 rings of 24 directions, so corners round), drawn under the element in
+ * `color`. `outlineOnly` draws the dilated silhouette alone, filled.
+ */
+const outline = shaderDefinition("effect", {
+  name: "outline",
+  params: z.object({
+    width: z.number().min(0).max(64).default(8),
+    color: HEX.default("#ffffff"),
+    opacity: z.number().min(0).max(1).default(1),
+    outlineOnly: z.boolean().default(false),
+  }),
+  shader: `${OVER}vec4 effect(vec2 uv) {
+  vec4 o = texture(image, uv);
+  float grown = o.a;
+  for (int ring = 1; ring <= 12; ring++) {
+    float r = width * float(ring) / 12.0;
+    for (int k = 0; k < 24; k++) {
+      float a = 6.2831853 * float(k) / 24.0;
+      grown = max(grown, texture(image, uv + vec2(cos(a), sin(a)) * r / resolution).a);
+    }
+  }
+  vec4 band = vec4(color, grown * opacity);
+  return outlineOnly ? band : cc_over(o, band);
+}`,
+});
+
+/**
+ * Long shadow: the element's silhouette swept back along `angle` (clockwise from the right, so 45 falls down and
+ * right) for `reach` pixels, keeping the largest alpha met so overlapping parts never stack, in `color` under the
+ * element. `fade` thins it toward its far end.
+ */
+const longShadow = shaderDefinition("effect", {
+  name: "longShadow",
+  params: z.object({
+    reach: z.number().min(0).max(2000).default(240),
+    angle: z.number().default(45),
+    color: HEX.default("#777777"),
+    opacity: z.number().min(0).max(1).default(1),
+    fade: z.boolean().default(false),
+  }),
+  shader: `${OVER}vec4 effect(vec2 uv) {
+  vec4 o = texture(image, uv);
+  float a = radians(angle);
+  vec2 dir = vec2(cos(a), sin(a)) / resolution;
+  int n = int(clamp(reach, 1.0, 128.0));
+  float swept = 0.0;
+  for (int i = 1; i <= 128; i++) {
+    if (i > n) break;
+    float t = float(i) / float(n);
+    float s = texture(image, uv - dir * reach * t).a;
+    swept = max(swept, fade ? s * (1.0 - t) : s);
+  }
+  return cc_over(o, vec4(color, swept * opacity));
+}`,
+});
+
+/**
+ * Bevel: the element lit as if raised. Its alpha, blurred over `size` pixels in two Gaussian passes, is a height
+ * map; the gradient by central differences gives each pixel's surface normal, and a light from `angle` (clockwise
+ * from above) shades it by Lambert's cosine law against a flat surface: edges facing the light take `highlight`, the
+ * far ones `shade`, by `intensity`. Only the element's own pixels change.
+ */
+const bevel = shaderDefinition("effect", {
+  name: "bevel",
+  params: z.object({
+    size: z.number().min(0).max(200).default(4),
+    angle: z.number().default(-60),
+    intensity: z.number().min(0).max(1).default(0.4),
+    highlight: HEX.default("#ffffff"),
+    shade: HEX.default("#000000"),
+  }),
+  passes: [
+    GAUSS_PASS("x", "alpha", "size"),
+    GAUSS_PASS("y", "alpha", "size"),
+    `vec4 effect(vec2 uv) {
+  vec4 o = texture(original, uv);
+  vec2 px = 1.0 / resolution;
+  float dx = texture(image, uv + vec2(px.x, 0.0)).r - texture(image, uv - vec2(px.x, 0.0)).r;
+  float dy = texture(image, uv + vec2(0.0, px.y)).r - texture(image, uv - vec2(0.0, px.y)).r;
+  float slope = max(size, 1.0) / 2.0;
+  vec3 n = normalize(vec3(-dx * slope, -dy * slope, 1.0));
+  float a = radians(angle);
+  vec3 l = normalize(vec3(sin(a), -cos(a), 1.0));
+  float k = clamp((dot(n, l) - l.z) * 2.0, -1.0, 1.0) * intensity;
+  vec3 rgb = k > 0.0 ? mix(o.rgb, highlight, k) : mix(o.rgb, shade, -k);
+  return vec4(rgb, o.a);
+}`,
+  ],
+});
+
 /** The built-in effect types the kit draws with a shader. */
 export const BUILT_IN_SHADERS: readonly ShaderDefinition[] = [
   levels,
@@ -392,6 +537,10 @@ export const BUILT_IN_SHADERS: readonly ShaderDefinition[] = [
   cornerPin,
   zoomBlur,
   chromaticAberration,
+  glow,
+  outline,
+  longShadow,
+  bevel,
 ];
 
 /** Built-in shader effects with no CSS filter to fall back on: without WebGL they are not drawn. */
@@ -406,6 +555,9 @@ export const SHADER_ONLY_EFFECTS = [
   "cornerPin",
   "zoomBlur",
   "chromaticAberration",
+  "outline",
+  "longShadow",
+  "bevel",
 ] as const;
 
 /** The built-in shader of an effect type, if it has one. */
