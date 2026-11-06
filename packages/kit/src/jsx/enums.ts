@@ -202,11 +202,9 @@ export const KEYFRAME_PROPERTIES = [
   "colorGrade.tint",
 ] as const;
 
-/** `effect.<effectId>.<param>` is also a valid keyframe property; see `isKeyframeProperty`. */
-export const KEYFRAME_PROPERTY_PATTERN = /^(effect\.[A-Za-z0-9_-]+\.[A-Za-z0-9_]+)$/;
-
+/** A property of the keyframe's parent element. An effect's param is keyframed inside the effect, with `param`. */
 export function isKeyframeProperty(value: string): boolean {
-  return (KEYFRAME_PROPERTIES as readonly string[]).includes(value) || KEYFRAME_PROPERTY_PATTERN.test(value);
+  return (KEYFRAME_PROPERTIES as readonly string[]).includes(value);
 }
 
 export const CAPTION_POSITIONS = ["top", "center", "bottom"] as const;
@@ -231,7 +229,16 @@ export const zTextAnimationPreset = z.enum(TEXT_ANIMATION_PRESETS);
 export const zCaptionAnimation = z.enum(CAPTION_ANIMATIONS);
 export const zGraphicAnimation = z.enum(GRAPHIC_ANIMATIONS);
 export const zShapeType = z.enum(SHAPE_TYPES);
-export const zKeyframeProperty = z.string().refine(isKeyframeProperty, "unknown keyframe property");
+export const zKeyframeProperty = z.string().superRefine((value, ctx) => {
+  if (isKeyframeProperty(value)) return;
+  const effect = /^effect\.([^.]+)\.([^.]+)$/.exec(value);
+  ctx.addIssue({
+    code: "custom",
+    message: effect
+      ? `an effect's param is keyframed inside the effect: <Effect id="${effect[1]}" …><Keyframe param="${effect[2]}" at={…} value={…} /></Effect>`
+      : `unknown keyframe property "${value}": use one of ${KEYFRAME_PROPERTIES.join(", ")}, or put the keyframe inside an <Effect> with param`,
+  });
+});
 
 export type TrackLayout = (typeof TRACK_LAYOUTS)[number];
 export type TrackRole = (typeof TRACK_ROLES)[number];

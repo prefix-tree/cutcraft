@@ -2,8 +2,9 @@
 
 Footage rarely comes out of the camera looking the way the video should: too dark, a little blue, flat. The colour
 effects fix that in the file, as `<Effect>` children of a clip, or of an `<Adjustment>` to grade everything beneath it
-for a stretch of time. They run as shaders in the preview and the export alike, and every param can be animated with
-a [`<Keyframe>`](/reference/elements/keyframe) (`property="effect.<id>.<param>"`).
+for a stretch of time. They run as shaders in the preview and the export alike, and every param can be animated by a
+[`<Keyframe>`](/reference/elements/keyframe) inside the effect, naming the param:
+`<Keyframe id="k1" param="stops" at={0} value={0} />`.
 
 ```tsx
 <Clip id="interview" src="asset:interview">

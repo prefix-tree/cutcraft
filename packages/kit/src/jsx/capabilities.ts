@@ -139,7 +139,7 @@ export const KIND_CAPABILITIES: Readonly<Record<string, ElementCapabilities>> = 
     childKinds: ["effect", "keyframe"],
     placementScope: "track",
   }),
-  effect: with_({ placementScope: "child" }),
+  effect: with_({ container: true, childKinds: ["keyframe"], placementScope: "child" }),
   colorGrade: with_({ placementScope: "child" }),
   keyframe: with_({ placementScope: "child" }),
   speedKey: with_({ placementScope: "child" }),

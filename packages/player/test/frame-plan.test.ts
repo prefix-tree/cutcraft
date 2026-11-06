@@ -252,12 +252,22 @@ describe("buildFramePlan", () => {
               kind: "clip",
               source: { in: 0, out: 4, asset: "a" },
               children: [
-                { id: "b", kind: "effect", props: { type: "blur", params: { radius: 2 } } },
-                { id: "v", kind: "effect", props: { type: "vignette" } },
+                {
+                  id: "b",
+                  kind: "effect",
+                  props: { type: "blur", params: { radius: 2 } },
+                  children: [
+                    { id: "k1", kind: "keyframe", props: { param: "radius", at: 0, value: 0 } },
+                    { id: "k2", kind: "keyframe", props: { param: "radius", at: 2, value: 8 } },
+                  ],
+                },
+                {
+                  id: "v",
+                  kind: "effect",
+                  props: { type: "vignette" },
+                  children: [{ id: "k3", kind: "keyframe", props: { param: "amount", at: 2, value: 80 } }],
+                },
                 { id: "g", kind: "colorGrade", props: { temperature: 0 } },
-                { id: "k1", kind: "keyframe", props: { property: "effect.b.radius", at: 0, value: 0 } },
-                { id: "k2", kind: "keyframe", props: { property: "effect.b.radius", at: 2, value: 8 } },
-                { id: "k3", kind: "keyframe", props: { property: "effect.v.amount", at: 2, value: 80 } },
                 { id: "k4", kind: "keyframe", props: { property: "colorGrade.temperature", at: 0, value: 0 } },
                 { id: "k5", kind: "keyframe", props: { property: "colorGrade.temperature", at: 2, value: 40 } },
               ],

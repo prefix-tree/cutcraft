@@ -76,9 +76,9 @@ describe("element schemas", () => {
     expect(defaultTransitionParams("crossfade")).toEqual({ curve: "ease" });
   });
 
-  it("knows keyframe properties, including per-effect params", () => {
+  it("knows keyframe properties of the parent element; an effect's params are keyframed inside the effect", () => {
     expect(isKeyframeProperty("transform.opacity")).toBe(true);
-    expect(isKeyframeProperty("effect.fx1.radius")).toBe(true);
+    expect(isKeyframeProperty("effect.fx1.radius")).toBe(false);
     expect(isKeyframeProperty("opacity")).toBe(false);
   });
 

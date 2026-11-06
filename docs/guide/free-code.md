@@ -209,8 +209,9 @@ const soften = defineEffect({
 Each param reaches the shader as a uniform with the param's name. A number becomes a `float`, a boolean a `bool`, an
 array of two, three or four numbers a `vec2`, `vec3` or `vec4`, and a colour string such as `"#ff8800"` a `vec3`. A
 param can't use the name of a GLSL function (`mix`, `step`, `length`…) or of an input above; `defineEffect()` says so. The
-zod schema checks the values and fills in defaults, [`<Keyframe>`](/reference/elements/keyframe) animates them with
-`property="effect.<id>.<param>"`, and an editor can build its inspector from the schema.
+zod schema checks the values and fills in defaults, a [`<Keyframe>`](/reference/elements/keyframe) inside the
+`<Effect>` animates one with `param="<name>"` (the resolver checks the name and the values against the schema), and
+an editor can build its inspector from the schema.
 
 A param can also name an asset, `"asset:ID"`, and the shader reads that file as a texture: an image as a `sampler2D`, a
 LUT (`.cube`) as a `sampler3D`. The player loads it before the frame that needs it. The resolver checks that the asset

@@ -11,6 +11,7 @@ export * from "./jsx/built-in-shaders";
 export * from "./jsx/capabilities";
 export * from "./jsx/curves";
 export * from "./jsx/define";
+export * from "./jsx/effect-params";
 export * from "./jsx/elements";
 export * from "./jsx/engines";
 export * from "./jsx/enums";

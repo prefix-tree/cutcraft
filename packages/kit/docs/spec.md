@@ -72,7 +72,7 @@ function Helper(...) {...}                       // helpers that make elements a
 
 ### A.3 Enums (single source `jsx/enums.ts`, adopted from OpenReel)
 
-- Transitions (24) with per-type param schemas and engine defaults. Easing (50). Blend modes (18). Fit modes (4). Video effects (one unified list of 20, percent-based ranges from OpenReel's `EFFECT_DEFINITIONS`; brightness standardised to −100..100). Audio effects (9). Text animation presets (25), caption animations (6), graphic enter/exit (20), emphasis (26). Keyframe properties use the descriptor naming (`transform.opacity`, `audio.volume`, `effect.<id>.<param>`). Shape types: the 9 2D shapes.
+- Transitions (24) with per-type param schemas and engine defaults. Easing (50). Blend modes (18). Fit modes (4). Video effects (one unified list of 20, percent-based ranges from OpenReel's `EFFECT_DEFINITIONS`; brightness standardised to −100..100). Audio effects (9). Text animation presets (25), caption animations (6), graphic enter/exit (20), emphasis (26). Keyframe properties use the descriptor naming (`transform.opacity`, `audio.volume`); an effect's params are keyframed inside the effect, with `param`. Shape types: the 9 2D shapes.
 
 ### A.4 Resolver output
 

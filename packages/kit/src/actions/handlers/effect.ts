@@ -1,3 +1,4 @@
+import { effectParamProblem } from "../../jsx/effect-params";
 import { isKeyframeProperty, VIDEO_EFFECT_TYPES } from "../../jsx/enums";
 import { shaderFor } from "../../jsx/shaders";
 import type { Json, PatchLog } from "../../patches/types";
@@ -238,9 +239,17 @@ define({
     if (!base.valid) return base;
     if (state.tree.byId.has(a.params.keyId))
       return invalid({ code: "DUPLICATE_ID", message: `"${a.params.keyId}" exists` });
-    if (!isKeyframeProperty(a.params.property))
-      return invalid({ code: "INVALID_PARAMS", message: `unknown property "${a.params.property}"`, path: "property" });
+    const { property, param } = a.params;
+    if ((property === undefined) === (param === undefined))
+      return invalid({ code: "INVALID_PARAMS", message: "give property or param, not both", path: "property" });
     const item = state.items.get(a.params.id)!;
+    if (param !== undefined) {
+      if (item.kind !== "effect")
+        return invalid({ code: "INVALID_PARAMS", message: "a param keyframe goes on an effect", path: "id" });
+      const problem = effectParamProblem(item.props.type, state.shaders, param, a.params.value);
+      if (problem) return invalid({ code: "INVALID_PARAMS", message: problem.message, path: problem.prop });
+    } else if (item.kind === "effect" || !isKeyframeProperty(property as string))
+      return invalid({ code: "INVALID_PARAMS", message: `unknown property "${property}"`, path: "property" });
     if (a.params.at < 0 || a.params.at > item.duration + 1e-6)
       return invalid({ code: "OUT_OF_BOUNDS", message: "keyframe time must be inside the element" });
     return ok;
@@ -248,7 +257,7 @@ define({
   apply: (a, log, ctx) => {
     const props: Record<string, Json> = {
       id: a.params.keyId,
-      property: a.params.property,
+      ...(a.params.param !== undefined ? { param: a.params.param } : { property: a.params.property as string }),
       at: a.params.at,
       value: a.params.value,
     };
