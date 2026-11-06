@@ -73,14 +73,14 @@ const vibrance = shaderDefinition("effect", {
 /**
  * White balance as a chromatic adaptation (von Kries scaling in the Bradford cone space): the picture is taken as lit
  * by a daylight white of another colour temperature and tint, and adapted to D65. The scene white's chromaticity is
- * the CIE daylight locus at T = 6500 K · 2^(temperature / 100), moved off it along y by the tint. A positive
+ * the CIE daylight locus at T = 6500 K · 2^temperature (each -1..1), moved off it along y by the tint. A positive
  * temperature warms the picture, a positive tint makes it more magenta.
  */
 const whiteBalance = shaderDefinition("effect", {
   name: "whiteBalance",
   params: z.object({
-    temperature: z.number().min(-100).max(100).default(0),
-    tint: z.number().min(-100).max(100).default(0),
+    temperature: z.number().min(-1).max(1).default(0),
+    tint: z.number().min(-1).max(1).default(0),
   }),
   shader: `${COLOUR}
 // Rows of linear sRGB (D65) to XYZ, and of the Bradford matrix, written as rows: v * M is then M times v.
@@ -91,11 +91,11 @@ const mat3 BRADFORD_INV = mat3(0.9869929, -0.1470543, 0.1599627, 0.4323053, 0.51
 vec3 cc_xyz(vec2 xy) { return vec3(xy.x / xy.y, 1.0, (1.0 - xy.x - xy.y) / xy.y); }
 vec4 effect(vec2 uv) {
   vec4 c = texture(image, uv);
-  float t = 6500.0 * exp2(params.temperature / 100.0);
+  float t = 6500.0 * exp2(params.temperature);
   float x = t <= 7000.0
     ? -4.6070e9 / (t * t * t) + 2.9678e6 / (t * t) + 0.09911e3 / t + 0.244063
     : -2.0064e9 / (t * t * t) + 1.9018e6 / (t * t) + 0.24748e3 / t + 0.237040;
-  float y = -3.0 * x * x + 2.87 * x - 0.275 + params.tint * 0.0005;
+  float y = -3.0 * x * x + 2.87 * x - 0.275 + params.tint * 0.05;
   vec3 gain = (cc_xyz(vec2(0.3127, 0.3290)) * BRADFORD) / (cc_xyz(vec2(x, y)) * BRADFORD);
   vec3 lms = (cc_linear(c.rgb) * RGB_XYZ) * BRADFORD;
   vec3 rgb = ((lms * gain) * BRADFORD_INV) * XYZ_RGB;

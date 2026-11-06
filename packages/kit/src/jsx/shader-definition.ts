@@ -21,6 +21,11 @@ export interface ShaderDefinition<P extends ZodObject = ZodObject> {
    * a `sampler2D` of that name. Bytes are RGBA, row 0 at the top.
    */
   readonly tables?: (params: Readonly<Record<string, unknown>>) => Readonly<Record<string, ShaderTable>>;
+  /**
+   * Built-in effects and transitions only: the values the passes read, from the params, where a param is written in a
+   * form no uniform takes (a choice, as a string, read as a number).
+   */
+  readonly uniforms?: (params: Readonly<Record<string, unknown>>) => Readonly<Record<string, unknown>>;
 }
 
 /** A small picture a built-in effect computes from its params. */

@@ -43,7 +43,7 @@ export default function Video({ title, accent }: z.infer<typeof schema>) {
       <Track id="main" name="Main">
         <Clip id="c1" src="asset:interview" in="word:3" out="word:18">
           <Effect id="fx1" type="blur" params={{ radius: 4 }} />
-          <ColorGrade id="cg1" temperature={10} tint={-5} />
+          <ColorGrade id="cg1" temperature={0.1} tint={-0.05} />
           <Keyframe id="k1" property="transform.opacity" at={0} value={0} easing="easeOutCubic" />
           <Keyframe id="k2" property="transform.opacity" at={0.5} value={1} />
           <Mask id="mk1" shape={{ rect: { x: 0.1, y: 0.1, width: 0.8, height: 0.8 } }} feather={12} />
@@ -92,7 +92,7 @@ export default function Video({ title, accent }: z.infer<typeof schema>) {
           <Counter from={0} to={1200} />
         </Layer>
         <Adjustment id="adj1" anchor="start" duration="fill">
-          <Effect id="fx2" type="vignette" params={{ amount: 30 }} />
+          <Effect id="fx2" type="vignette" params={{ amount: 0.3 }} />
         </Adjustment>
         <Badge id="b1" anchor="c1" label="LIVE" />
         <Badge id="b2" anchor="c3" label="REPLAY" />

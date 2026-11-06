@@ -59,7 +59,7 @@ const EFFECT_CASES: readonly { readonly key: string; readonly label: string; rea
     label: "colour grade, 5 s 1080p30 (exposure, white balance, curves, vibrance, LUT)",
     effects: `
           <Effect id="e1" type="exposure" params={{ stops: 0.4 }} />
-          <Effect id="e2" type="whiteBalance" params={{ temperature: 20 }} />
+          <Effect id="e2" type="whiteBalance" params={{ temperature: 0.2 }} />
           <Effect id="e3" type="curves" params={{ rgb: [[0, 0], [0.5, 0.6], [1, 1]] }} />
           <Effect id="e4" type="vibrance" params={{ amount: 0.4 }} />
           <Effect id="e5" type="lut" params={{ src: "asset:warm", amount: 0.5 }} />`,
@@ -68,9 +68,9 @@ const EFFECT_CASES: readonly { readonly key: string; readonly label: string; rea
     key: "interleaved",
     label: "interleaved, 5 s 1080p30 (brightness, levels, saturation, LUT: CSS and shader effects alternating)",
     effects: `
-          <Effect id="e1" type="brightness" params={{ amount: 10 }} />
+          <Effect id="e1" type="brightness" params={{ amount: 0.1 }} />
           <Effect id="e2" type="levels" params={{ gamma: 1.2 }} />
-          <Effect id="e3" type="saturation" params={{ amount: 20 }} />
+          <Effect id="e3" type="saturation" params={{ amount: 0.2 }} />
           <Effect id="e4" type="lut" params={{ src: "asset:warm", amount: 0.5 }} />`,
   },
   {

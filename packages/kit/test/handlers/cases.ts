@@ -145,7 +145,7 @@ export const CASES: Partial<Record<ActionType, ActionInput>> = {
 
   "effect/add": {
     type: "effect/add",
-    params: { id: "c3", childId: "fx9", type: "grain", params: { amount: 20 }, index: 0 },
+    params: { id: "c3", childId: "fx9", type: "grain", params: { amount: 0.2 }, index: 0 },
   },
   "effect/remove": { type: "effect/remove", params: { id: "c1", childId: "fx1" } },
   "effect/restore": {
@@ -160,7 +160,7 @@ export const CASES: Partial<Record<ActionType, ActionInput>> = {
   "effect/toggle": { type: "effect/toggle", params: { id: "c1", childId: "fx1", enabled: false } },
   "effect/setOrder": { type: "effect/setOrder", params: { id: "c1", childIds: ["fx0", "fx1"] } },
   "effect/setStack": { type: "effect/setStack", params: { id: "c1", nodes: [] } },
-  "colorGrade/set": { type: "colorGrade/set", params: { id: "c2", grading: { temperature: 20 } } },
+  "colorGrade/set": { type: "colorGrade/set", params: { id: "c2", grading: { temperature: 0.2 } } },
 
   "keyframe/add": {
     type: "keyframe/add",

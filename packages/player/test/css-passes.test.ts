@@ -72,7 +72,7 @@ describe("CSS filters as passes", () => {
 describe("the effect pipeline", () => {
   it("keeps one CSS filter when nothing on the element needs a shader", () => {
     const p = pipelineOf(
-      `<Effect id="a" type="brightness" params={{ amount: 10 }} /><Effect id="b" type="blur" params={{ radius: 2 }} />`,
+      `<Effect id="a" type="brightness" params={{ amount: 0.1 }} /><Effect id="b" type="blur" params={{ radius: 2 }} />`,
       {
         shaders: true,
       },
@@ -82,7 +82,7 @@ describe("the effect pipeline", () => {
 
   it("runs every effect as a pass in file order once one needs a shader, and keeps the CSS look as the fallback", () => {
     const p = pipelineOf(
-      `<Effect id="a" type="brightness" params={{ amount: 10 }} /><Effect id="b" type="levels" params={{ gamma: 1.2 }} /><ColorGrade id="g" tint={20} /><Effect id="v" type="vibrance" params={{ amount: 0.5 }} />`,
+      `<Effect id="a" type="brightness" params={{ amount: 0.1 }} /><Effect id="b" type="levels" params={{ gamma: 1.2 }} /><ColorGrade id="g" tint={0.2} /><Effect id="v" type="vibrance" params={{ amount: 0.5 }} />`,
       { shaders: true },
     );
     expect(p.filter).toBe("");
@@ -100,7 +100,7 @@ describe("the effect pipeline", () => {
 
   it("draws as CSS where shaders cannot run, leaving only the passes that have no CSS form", () => {
     const p = pipelineOf(
-      `<Effect id="a" type="brightness" params={{ amount: 10 }} /><Effect id="b" type="levels" /><Effect id="o" type={own} /><Effect id="k" type="curves" />`,
+      `<Effect id="a" type="brightness" params={{ amount: 0.1 }} /><Effect id="b" type="levels" /><Effect id="o" type={own} /><Effect id="k" type="curves" />`,
       { shaders: false },
       `const own = effect({ name: "own", shader: "vec4 effect(vec2 uv) { return texture(image, uv); }" });`,
     );

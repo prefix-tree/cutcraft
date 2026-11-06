@@ -22,8 +22,8 @@ describe("the title effects", () => {
     const params = (id: string) => state.items.get(id)?.props.params;
     expect(params("g")).toEqual({ radius: 20, intensity: 1, threshold: 0, color: "#ffffff", tint: 1 });
     expect(params("o")).toEqual({ width: 4, color: "#ffffff", opacity: 1, outlineOnly: false });
-    expect(params("l")).toEqual({ length: 240, angle: 45, color: "#777777", opacity: 1, fade: true });
-    expect(params("b")).toEqual({ size: 4, angle: -60, intensity: 0.4, highlight: "#ffffff", shade: "#000000" });
+    expect(params("l")).toEqual({ length: 240, angle: 135, color: "#777777", opacity: 1, fade: true });
+    expect(params("b")).toEqual({ size: 4, angle: -60, amount: 0.4, highlight: "#ffffff", shade: "#000000" });
   });
 
   it("say what is out of range", () => {

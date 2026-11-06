@@ -43,6 +43,10 @@ export interface TransitionPass {
   readonly paired: boolean;
 }
 
+/** The values a definition's passes read from its params: the params, or what a built-in maps them to. */
+const uniformsOf = (def: ShaderDefinition, params: Readonly<Record<string, unknown>>) =>
+  def.uniforms ? def.uniforms(params) : params;
+
 /** An effect drawn by a shader (the file's own, or the kit's) as a pass at element-relative `rel`; undefined otherwise. */
 function shaderPass(state: ResolvedState, c: Placement, rel: number): ShaderPass | undefined {
   if (c.kind !== "effect" || c.props.enabled === false) return undefined;
@@ -54,7 +58,7 @@ function shaderPass(state: ResolvedState, c: Placement, rel: number): ShaderPass
     sources: def.passes,
     ...(own ? {} : { builtIn: true as const }),
     ...(!own && def.tables ? { tables: def.tables } : {}),
-    params: paramsAt(state.items, c, rel),
+    params: uniformsOf(def, paramsAt(state.items, c, rel)),
     time: rel,
   };
 }
@@ -128,7 +132,7 @@ export function transitionPass(state: ResolvedState, role: TransitionRole): Tran
     name: def.name,
     ...(own ? {} : { builtIn: true as const }),
     source: def.passes[0] as string,
-    params: (x.props.params ?? {}) as Readonly<Record<string, unknown>>,
+    params: uniformsOf(def, (x.props.params ?? {}) as Readonly<Record<string, unknown>>),
     progress: role.progress,
     time: role.progress * x.duration,
     role: role.role,

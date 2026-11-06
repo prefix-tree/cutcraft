@@ -25,8 +25,8 @@ export const effectSchema = z.strictObject({
 
 export const colorGradeSchema = z.strictObject({
   id: idSchema,
-  temperature: z.number().min(-100).max(100).optional(),
-  tint: z.number().min(-100).max(100).optional(),
+  temperature: z.number().min(-1).max(1).optional(),
+  tint: z.number().min(-1).max(1).optional(),
 });
 
 export const keyframeSchema = z

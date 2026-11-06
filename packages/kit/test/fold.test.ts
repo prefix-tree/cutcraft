@@ -60,7 +60,7 @@ describe("fold", () => {
     const exec = fixtureExecutor();
     exec.execute({ type: "clip/trim", params: { id: "c2", edge: "out", value: 4.4 } });
     exec.execute({ type: "text/setContent", params: { id: "t1", text: "Hello there" } });
-    exec.execute({ type: "effect/add", params: { id: "c3", childId: "fx9", type: "grain", params: { amount: 20 } } });
+    exec.execute({ type: "effect/add", params: { id: "c3", childId: "fx9", type: "grain", params: { amount: 0.2 } } });
     exec.execute({ type: "clip/remove", params: { id: "g1" } });
     exec.execute({ type: "marker/add", params: { markerId: "m2", at: 6, label: "beat" } });
     const result = foldToSource(fixtureText, exec.log(), exec.state());
@@ -71,7 +71,7 @@ describe("fold", () => {
     expect(reresolved.errors).toEqual([]);
     expect(lint(result.text, { manifest }).filter((d) => d.severity === "error")).toEqual([]);
     expect(serialize(reresolved, false)).toEqual(serialize(exec.state(), false));
-    expect(result.text).toContain('<Effect id="fx9" type="grain" params={{ amount: 20 }} enabled />');
+    expect(result.text).toContain('<Effect id="fx9" type="grain" params={{ amount: 0.2 }} enabled />');
     expect(result.text).not.toContain('<Gap id="g1"');
   });
 

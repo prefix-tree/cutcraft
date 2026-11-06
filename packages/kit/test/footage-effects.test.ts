@@ -25,8 +25,8 @@ describe("the footage effects", () => {
     expect(params("k")).toEqual({ color: "#00ff00", tolerance: 0.3, softness: 0.1, spill: 0.5 });
     expect(params("b")).toEqual({ box: [0.1, 0.1, 0.3, 0.3], radius: 20, feather: 10, roundness: 0, inverted: false });
     expect(params("p")).toEqual({ topLeft: [0.1, 0.1], topRight: [1, 0], bottomRight: [1, 1], bottomLeft: [0, 1] });
-    expect(params("z")).toEqual({ amount: 40, center: [0.5, 0.5], samples: 24 });
-    expect(params("a")).toEqual({ amount: 4, angle: 0, radial: true, center: [0.5, 0.5] });
+    expect(params("z")).toEqual({ length: 40, center: [0.5, 0.5], samples: 24 });
+    expect(params("a")).toEqual({ distance: 4, angle: 90, radial: true, center: [0.5, 0.5] });
   });
 
   it("say what is out of range", () => {

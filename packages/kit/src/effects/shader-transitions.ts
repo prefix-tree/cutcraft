@@ -40,55 +40,69 @@ const iris = shaderDefinition("transition", {
 }`,
 });
 
+/** clockWipe's directions, as the numbers its shader reads. */
+const SWEEP = { clockwise: 1, counterclockwise: -1, both: 0 } as const;
+
 /**
- * Clock wipe: the next clip sweeps in around `center`, from `startAngle` (degrees clockwise from up), clockwise
- * (`direction` 1), counterclockwise (-1) or both ways at once (0). `feather` softens the moving edge, in degrees.
+ * Clock wipe: the next clip sweeps in around `center`, from `startAngle` (degrees clockwise from up), `clockwise`,
+ * `counterclockwise` or `both` ways at once. `softness` softens the moving edge, as a share of the turn.
  */
-const clockWipe = shaderDefinition("transition", {
-  name: "clockWipe",
-  params: z.object({
-    startAngle: z.number().default(0),
-    direction: z.union([z.literal(1), z.literal(-1), z.literal(0)]).default(1),
-    center: UV.default([0.5, 0.5]),
-    feather: z.number().min(0).max(360).default(1),
-  }),
-  shader: `vec4 transition(vec2 uv) {
+const clockWipe = {
+  ...shaderDefinition("transition", {
+    name: "clockWipe",
+    params: z.object({
+      startAngle: z.number().default(0),
+      direction: z.enum(["clockwise", "counterclockwise", "both"]).default("clockwise"),
+      center: UV.default([0.5, 0.5]),
+      softness: z
+        .number()
+        .min(0)
+        .max(1)
+        .default(1 / 360),
+    }),
+    shader: `vec4 transition(vec2 uv) {
   float tau = 6.28318531;
   vec2 p = (uv - params.center) * resolution;
   float rel = mod(atan(p.x, -p.y) - radians(params.startAngle), tau);
   float along = params.direction > 0.5 ? rel : params.direction < -0.5 ? tau - rel : 2.0 * min(rel, tau - rel);
-  float soft = max(radians(params.feather), 1e-4);
+  float soft = max(params.softness * tau, 1e-4);
   float m = clamp((progress * (tau + soft) - along) / soft, 0.0, 1.0);
   return mix(texture(from, uv), texture(to, uv), m);
 }`,
-});
+  }),
+  uniforms: (params: Readonly<Record<string, unknown>>) => ({
+    ...params,
+    direction: SWEEP[params.direction as keyof typeof SWEEP] ?? 1,
+  }),
+};
 
 /**
- * Blinds: `slats` bands across the frame at `angle` (0 is vertical slats), each opening across its width as the
- * transition runs: a pixel's place within its slat (the fractional part of its position times the slat count) against
- * progress. `feather` softens each opening edge, as a share of the slat.
+ * Blinds: `slats` bands across the frame, each opening across its width as the transition runs: a pixel's place within
+ * its slat (the fractional part of its position times the slat count) against progress. The slats open along `angle`
+ * (degrees clockwise from up, so 90 opens them sideways: vertical slats). `softness` softens each opening edge, as a
+ * share of the slat.
  */
 const blinds = shaderDefinition("transition", {
   name: "blinds",
   params: z.object({
     slats: z.number().int().min(1).max(100).default(12),
-    angle: z.number().default(0),
-    feather: z.number().min(0).max(1).default(0.1),
+    angle: z.number().default(90),
+    softness: z.number().min(0).max(1).default(0.1),
   }),
   shader: `vec4 transition(vec2 uv) {
   float a = radians(params.angle);
-  vec2 dir = vec2(cos(a), sin(a));
+  vec2 dir = vec2(sin(a), -cos(a));
   float across = abs(dir.x) + abs(dir.y);
   float t = dot(uv - 0.5, dir) / across + 0.5;
   float f = fract(t * params.slats);
-  float soft = max(params.feather, 1e-4);
+  float soft = max(params.softness, 1e-4);
   float m = clamp((progress * (1.0 + soft) - f) / soft, 0.0, 1.0);
   return mix(texture(from, uv), texture(to, uv), m);
 }`,
 });
 
 /**
- * Film burn: each pixel's burn time mixes its distance from `center` with fractal value noise of `scale` pixels, so
+ * Film burn: each pixel's burn time mixes its distance from `center` with fractal value noise of `size` pixels, so
  * the hole opens from the centre with ragged edges. Past its time a pixel shows the next clip; a band of `edge`
  * pixels before that glows in `color`, then chars and darkens into the picture it is burning.
  */
@@ -97,14 +111,14 @@ const filmBurn = shaderDefinition("transition", {
   params: z.object({
     seed: z.number().int().min(0).max(4294967295).default(0),
     center: UV.default([0.5, 0.5]),
-    scale: z.number().min(4).max(2000).default(120),
+    size: z.number().min(4).max(2000).default(120),
     edge: z.number().min(0).max(500).default(24),
     color: HEX.default("#ff7a1a"),
   }),
   shader: `${NOISE}${FARTHEST}vec4 transition(vec2 uv) {
   vec2 p = (uv - params.center) * resolution;
   float near = length(p) / cc_farthest(params.center);
-  float rough = cc_fbm(uv * resolution / params.scale, uint(params.seed));
+  float rough = cc_fbm(uv * resolution / params.size, uint(params.seed));
   float burn = clamp(0.55 * near + 0.45 * rough, 0.0, 1.0);
   float band = params.edge / length(resolution);
   float front = progress * (1.0 + band) - band;
@@ -117,19 +131,22 @@ const filmBurn = shaderDefinition("transition", {
 }`,
 });
 
-/** Pixel dissolve: the frame cut into `columns` by `rows` blocks, each switching at its own hashed time from `seed`. */
+/**
+ * Pixel dissolve: the frame cut into `columns` by `rows` blocks, each switching at its own hashed time from `seed`.
+ * `softness` is how long each block takes to switch, as a share of the transition.
+ */
 const pixelDissolve = shaderDefinition("transition", {
   name: "pixelDissolve",
   params: z.object({
     columns: z.number().int().min(1).max(200).default(16),
     rows: z.number().int().min(1).max(200).default(9),
     seed: z.number().int().min(0).max(4294967295).default(0),
-    feather: z.number().min(0).max(1).default(0.15),
+    softness: z.number().min(0).max(1).default(0.15),
   }),
   shader: `${NOISE}vec4 transition(vec2 uv) {
   uvec2 block = uvec2(min(floor(uv * vec2(params.columns, params.rows)), vec2(params.columns, params.rows) - 1.0));
-  float at = cc_hash(uvec3(block, uint(params.seed))) * (1.0 - params.feather);
-  float m = params.feather > 0.0 ? smoothstep(at, at + params.feather, progress) : step(at, progress);
+  float at = cc_hash(uvec3(block, uint(params.seed))) * (1.0 - params.softness);
+  float m = params.softness > 0.0 ? smoothstep(at, at + params.softness, progress) : step(at, progress);
   return mix(texture(from, uv), texture(to, uv), m);
 }`,
 });

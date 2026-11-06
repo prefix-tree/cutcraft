@@ -5,10 +5,10 @@ export default function Video() {
     <Composition fps={30} width={960} height={540}>
       <Track id="main">
         <Clip id="cool" src="asset:cells" in={0} out={1.5} fit="cover">
-          <ColorGrade id="cold" temperature={-60} />
+          <ColorGrade id="cold" temperature={-0.6} />
         </Clip>
         <Clip id="warm" src="asset:cells" in={1.5} out={3} fit="cover">
-          <ColorGrade id="hot" temperature={60} tint={10} />
+          <ColorGrade id="hot" temperature={0.6} tint={0.1} />
         </Clip>
       </Track>
     </Composition>

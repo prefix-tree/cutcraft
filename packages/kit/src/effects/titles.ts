@@ -65,7 +65,7 @@ const outline = shaderDefinition("effect", {
 });
 
 /**
- * Long shadow: the element's silhouette swept back along `angle` (clockwise from the right, so 45 falls down and
+ * Long shadow: the element's silhouette swept back along `angle` (degrees clockwise from up, so 135 falls down and
  * right) for `length` pixels, keeping the largest alpha met so overlapping parts never stack, in `color` under the
  * element. `fade` thins it toward its far end.
  */
@@ -73,7 +73,7 @@ const longShadow = shaderDefinition("effect", {
   name: "longShadow",
   params: z.object({
     length: z.number().min(0).max(2000).default(240),
-    angle: z.number().default(45),
+    angle: z.number().default(135),
     color: HEX.default("#777777"),
     opacity: z.number().min(0).max(1).default(1),
     fade: z.boolean().default(false),
@@ -81,7 +81,7 @@ const longShadow = shaderDefinition("effect", {
   shader: `${OVER}vec4 effect(vec2 uv) {
   vec4 o = texture(image, uv);
   float a = radians(params.angle);
-  vec2 dir = vec2(cos(a), sin(a)) / resolution;
+  vec2 dir = vec2(sin(a), -cos(a)) / resolution;
   int n = int(clamp(params.length, 1.0, 128.0));
   float swept = 0.0;
   for (int i = 1; i <= 128; i++) {
@@ -98,14 +98,14 @@ const longShadow = shaderDefinition("effect", {
  * Bevel: the element lit as if raised. Its alpha, blurred over `size` pixels in two Gaussian passes, is a height
  * map; the gradient by central differences gives each pixel's surface normal, and a light from `angle` (clockwise
  * from above) shades it by Lambert's cosine law against a flat surface: edges facing the light take `highlight`, the
- * far ones `shade`, by `intensity`. Only the element's own pixels change.
+ * far ones `shade`, by `amount`. Only the element's own pixels change.
  */
 const bevel = shaderDefinition("effect", {
   name: "bevel",
   params: z.object({
     size: z.number().min(0).max(200).default(4),
     angle: z.number().default(-60),
-    intensity: z.number().min(0).max(1).default(0.4),
+    amount: z.number().min(0).max(1).default(0.4),
     highlight: HEX.default("#ffffff"),
     shade: HEX.default("#000000"),
   }),
@@ -121,7 +121,7 @@ const bevel = shaderDefinition("effect", {
   vec3 n = normalize(vec3(-dx * slope, -dy * slope, 1.0));
   float a = radians(params.angle);
   vec3 l = normalize(vec3(sin(a), -cos(a), 1.0));
-  float k = clamp((dot(n, l) - l.z) * 2.0, -1.0, 1.0) * params.intensity;
+  float k = clamp((dot(n, l) - l.z) * 2.0, -1.0, 1.0) * params.amount;
   vec3 rgb = k > 0.0 ? mix(o.rgb, params.highlight, k) : mix(o.rgb, params.shade, -k);
   return vec4(rgb, o.a);
 }`,

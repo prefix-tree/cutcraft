@@ -100,12 +100,14 @@ Crossfade, dips to black or white, wipe, slide and push are built in, and six mo
 
 - `iris` opens the next clip from `center` as a circle, or a polygon with `sides` (3 to 64), or a star when `star`
   sets the inner points' radius (0 to 0.95 of the outer). `rotation` turns it, `feather` softens its edge in pixels.
-- `clockWipe` sweeps around `center` from `startAngle` (degrees clockwise from up), clockwise (`direction` 1),
-  counterclockwise (-1) or both ways at once (0). `feather` is in degrees.
-- `blinds` opens `slats` bands at `angle` (0 for vertical slats), each across its width; `feather` softens them.
-- `filmBurn` burns a ragged hole from `center` with a glowing edge in `color`; `scale` sets the size of its ragged
+- `clockWipe` sweeps around `center` from `startAngle` (degrees clockwise from up), with `direction` `"clockwise"`,
+  `"counterclockwise"` or `"both"` ways at once. `softness` softens the edge, as a share of the turn.
+- `blinds` opens `slats` bands along `angle` (degrees clockwise from up, so the default 90 gives vertical slats), each
+  across its width; `softness` softens them, as a share of a slat.
+- `filmBurn` burns a ragged hole from `center` with a glowing edge in `color`; `size` sets the size of its ragged
   pattern and `edge` the width of the glow, both in pixels, and `seed` picks another pattern.
-- `pixelDissolve` switches `columns` by `rows` blocks one at a time, in an order set by `seed`.
+- `pixelDissolve` switches `columns` by `rows` blocks one at a time, in an order set by `seed`; `softness` is how long
+  each block takes, as a share of the transition.
 - `zoom` pushes into the outgoing clip toward `center` and settles the next one from `scale`, with a `blur` along the
   motion.
 

@@ -29,15 +29,15 @@ describe("the shader transitions", () => {
     });
     expect(params(`<Transition id="x" type="clockWipe" />`)).toEqual({
       startAngle: 0,
-      direction: 1,
+      direction: "clockwise",
       center: [0.5, 0.5],
-      feather: 1,
+      softness: 1 / 360,
     });
-    expect(params(`<Transition id="x" type="blinds" />`)).toEqual({ slats: 12, angle: 0, feather: 0.1 });
+    expect(params(`<Transition id="x" type="blinds" />`)).toEqual({ slats: 12, angle: 90, softness: 0.1 });
     expect(params(`<Transition id="x" type="filmBurn" />`)).toEqual({
       seed: 0,
       center: [0.5, 0.5],
-      scale: 120,
+      size: 120,
       edge: 24,
       color: "#ff7a1a",
     });
@@ -45,7 +45,7 @@ describe("the shader transitions", () => {
       columns: 16,
       rows: 9,
       seed: 0,
-      feather: 0.15,
+      softness: 0.15,
     });
     expect(params(`<Transition id="x" type="zoom" />`)).toEqual({ center: [0.5, 0.5], scale: 1.6, blur: 0.5 });
   });

@@ -102,16 +102,16 @@ const cornerPin = shaderDefinition("effect", {
 }`,
 });
 
-/** Zoom blur: each pixel averaged along the line toward `center`, the smear growing with distance to `amount` pixels at a corner. */
+/** Zoom blur: each pixel averaged along the line toward `center`, the smear growing with distance to `length` pixels at a corner. */
 const zoomBlur = shaderDefinition("effect", {
   name: "zoomBlur",
   params: z.object({
-    amount: z.number().min(0).max(500).default(40),
+    length: z.number().min(0).max(500).default(40),
     center: UV.default([0.5, 0.5]),
     samples: z.number().int().min(1).max(64).default(24),
   }),
   shader: `vec4 effect(vec2 uv) {
-  float reach = params.amount / length(resolution / 2.0);
+  float reach = params.length / length(resolution / 2.0);
   int n = int(params.samples);
   vec4 sum = vec4(0.0);
   for (int i = 0; i < 64; i++) {
@@ -126,23 +126,23 @@ const zoomBlur = shaderDefinition("effect", {
 });
 
 /**
- * Chromatic aberration: red and blue read from either side of each pixel, green in place. Along `angle` it is a
- * uniform split of `amount` pixels; with `radial` the split points out from `center` and grows with distance to
- * `amount` pixels at a corner, as a lens fringes toward its edges.
+ * Chromatic aberration: red and blue read from either side of each pixel, green in place. Along `angle` (degrees
+ * clockwise from up, so 90 splits them sideways) it is a uniform split of `distance` pixels; with `radial` the split
+ * points out from `center` and grows with distance to `distance` pixels at a corner, as a lens fringes toward its edges.
  */
 const chromaticAberration = shaderDefinition("effect", {
   name: "chromaticAberration",
   params: z.object({
-    amount: z.number().min(0).max(100).default(4),
-    angle: z.number().default(0),
+    distance: z.number().min(0).max(100).default(4),
+    angle: z.number().default(90),
     radial: z.boolean().default(false),
     center: UV.default([0.5, 0.5]),
   }),
   shader: `vec4 effect(vec2 uv) {
   float a = radians(params.angle);
   vec2 shift = params.radial
-    ? (uv - params.center) * params.amount / length(resolution / 2.0)
-    : vec2(cos(a), sin(a)) * params.amount / resolution;
+    ? (uv - params.center) * params.distance / length(resolution / 2.0)
+    : vec2(sin(a), -cos(a)) * params.distance / resolution;
   vec4 c = texture(image, uv);
   vec4 r = texture(image, uv - shift);
   vec4 b = texture(image, uv + shift);
