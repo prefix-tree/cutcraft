@@ -1,5 +1,4 @@
 import {
-  BUILT_IN_SHADERS,
   builtInShader,
   builtInTransition,
   type Placement,
@@ -9,7 +8,8 @@ import {
   shaderFor,
 } from "@cutcraft/kit";
 
-import { paramsAt } from "./effects";
+import { cssPasses } from "./css-passes";
+import { childFilter, paramsAt } from "./effects";
 import type { TransitionRole } from "./visible";
 
 /** One shader effect to run over an element's picture, with its params at this moment. */
@@ -43,28 +43,83 @@ export interface TransitionPass {
   readonly paired: boolean;
 }
 
-/** The element's shader effects (the file's own and the kit's), in file order, with keyframed params evaluated at element-relative `rel`. */
-export function effectPasses(
+/** An effect drawn by a shader (the file's own, or the kit's) as a pass at element-relative `rel`; undefined otherwise. */
+function shaderPass(
   state: ResolvedState,
   children: readonly Placement[],
+  c: Placement,
   rel: number,
-): ShaderPass[] | undefined {
-  const out: ShaderPass[] = [];
+): ShaderPass | undefined {
+  if (c.kind !== "effect" || c.props.enabled === false) return undefined;
+  const own = shaderFor(state.shaders, "effect", c.props.type);
+  const def = own ?? builtInShader(c.props.type);
+  if (!def) return undefined;
+  return {
+    name: def.name,
+    sources: def.passes,
+    ...(own ? {} : { builtIn: true as const }),
+    ...(!own && def.tables ? { tables: def.tables } : {}),
+    params: paramsAt(children, c, rel),
+    time: rel,
+  };
+}
+
+/** How an element's effects draw: a CSS filter, shader passes, or both, decided by `effectPipeline`. */
+export interface EffectPipeline {
+  /** The CSS filter the element draws with. Empty when its effects run as passes. */
+  readonly filter: string;
+  /** The passes, in file order: the CSS-type effects among them as CSS passes. */
+  readonly shaders?: readonly ShaderPass[];
+  /** With passes: the element's look as CSS alone, for a painter without WebGL. */
+  readonly fallbackFilter?: string;
+}
+
+/**
+ * An element's effects (its `<Effect>` and `<ColorGrade>` children) in the order the file writes them, at
+ * element-relative `rel`:
+ *
+ * - no shader effect (and no shader transition, `transition`): one CSS filter, which needs no WebGL;
+ * - otherwise, with `shaders` (the renderer can run them): every effect as passes in file order, CSS-type ones
+ *   included (model/css-passes.ts), no filter, and the CSS-only look as `fallbackFilter`;
+ * - without `shaders` (an overlay without HTML-in-Canvas): the CSS-only look as the filter, and only the passes that
+ *   have no CSS form, which the renderer then reports it cannot draw.
+ */
+export function effectPipeline(
+  state: ResolvedState,
+  children: readonly Placement[],
+  elementId: string,
+  rel: number,
+  options: { readonly shaders: boolean; readonly transition?: boolean },
+): EffectPipeline {
+  const steps: (ShaderPass | string)[] = [];
   for (const c of children) {
-    if (c.kind !== "effect" || c.props.enabled === false) continue;
-    const own = shaderFor(state.shaders, "effect", c.props.type);
-    const def = own ?? builtInShader(c.props.type);
-    if (def)
-      out.push({
-        name: def.name,
-        sources: def.passes,
-        ...(own ? {} : { builtIn: true as const }),
-        ...(!own && def.tables ? { tables: def.tables } : {}),
-        params: paramsAt(children, c, rel),
-        time: rel,
-      });
+    const pass = shaderPass(state, children, c, rel);
+    if (pass) steps.push(pass);
+    else {
+      const css = childFilter(children, c, elementId, rel);
+      if (css) steps.push(css);
+    }
   }
-  return out.length > 0 ? out : undefined;
+  const passes = steps.filter((s): s is ShaderPass => typeof s !== "string");
+  const css = steps.filter((s): s is string => typeof s === "string").join(" ");
+  if (passes.length === 0 && !options.transition) return { filter: css };
+  // The look as CSS alone: the CSS-type effects, and the CSS form of each built-in shader effect that has one.
+  const fallbackFilter = cssOnly(state, children, elementId, rel);
+  if (!options.shaders) {
+    const shaderOnly = passes.filter((p) => !hasCssFallback(p));
+    return { filter: fallbackFilter, ...(shaderOnly.length > 0 ? { shaders: shaderOnly } : {}) };
+  }
+  const shaders = steps.flatMap((s) => (typeof s === "string" ? cssPasses(s, rel) : [s]));
+  return { filter: "", ...(shaders.length > 0 ? { shaders } : {}), fallbackFilter };
+}
+
+/** The element's look as CSS alone, in file order: its CSS-type effects and the CSS form of its built-in shader effects. */
+function cssOnly(state: ResolvedState, children: readonly Placement[], elementId: string, rel: number): string {
+  const own = new Set(state.shaders.filter((s) => s.kind === "effect").map((s) => s.name));
+  return children
+    .map((c) => childFilter(children, c, elementId, rel, own))
+    .filter(Boolean)
+    .join(" ");
 }
 
 /** The side of a shader transition this clip plays (the file's own, or the kit's), or undefined for one drawn without a shader. */
@@ -84,16 +139,6 @@ export function transitionPass(state: ResolvedState, role: TransitionRole): Tran
     role: role.role,
     paired: x.between !== undefined,
   };
-}
-
-/**
- * The effect types the filter string leaves to the shader passes: the ones the file declares, and with `builtIns` the
- * kit's own shader effects too. Without it those draw as their CSS filter, for a renderer that has no WebGL.
- */
-export function shadedEffects(state: ResolvedState, builtIns: boolean): ReadonlySet<string> {
-  const out = new Set(state.shaders.filter((s) => s.kind === "effect").map((s) => s.name));
-  if (builtIns) for (const s of BUILT_IN_SHADERS) out.add(s.name);
-  return out;
 }
 
 /** Whether a pass draws as a CSS filter where there is no WebGL: a built-in effect that has one. */

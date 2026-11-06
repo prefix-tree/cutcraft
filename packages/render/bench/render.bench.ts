@@ -65,6 +65,15 @@ const EFFECT_CASES: readonly { readonly key: string; readonly label: string; rea
           <Effect id="e5" type="lut" params={{ src: "asset:warm", amount: 0.5 }} />`,
   },
   {
+    key: "interleaved",
+    label: "interleaved, 5 s 1080p30 (brightness, levels, saturation, LUT: CSS and shader effects alternating)",
+    effects: `
+          <Effect id="e1" type="brightness" params={{ amount: 10 }} />
+          <Effect id="e2" type="levels" params={{ gamma: 1.2 }} />
+          <Effect id="e3" type="saturation" params={{ amount: 20 }} />
+          <Effect id="e4" type="lut" params={{ src: "asset:warm", amount: 0.5 }} />`,
+  },
+  {
     key: "blurs",
     label: "blurs, 5 s 1080p30 (region blur of a small box, shadows and highlights)",
     effects: `

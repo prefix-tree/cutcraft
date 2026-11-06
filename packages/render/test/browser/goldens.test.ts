@@ -68,6 +68,8 @@ interface Case {
   readonly name: string;
   readonly effects: string;
   readonly shape?: boolean;
+  /** On a `<Layer>` over a CSS gradient (an overlay, drawn through HTML-in-Canvas) instead of the chart on a clip. */
+  readonly layer?: boolean;
 }
 
 /** One case per built-in shader effect, and stacks that later steps fuse or reorder. */
@@ -124,6 +126,13 @@ const CASES: readonly Case[] = [
       <Effect id="s5" type="lut" params={{ src: "asset:warm", amount: 0.5 }} />`,
   },
   {
+    name: "stack-css-and-shader-title",
+    layer: true,
+    effects: `<Effect id="s1" type="brightness" params={{ amount: 10 }} />
+      <Effect id="s2" type="levels" params={{ gamma: 1.2 }} />
+      <Effect id="s3" type="blur" params={{ radius: 1 }} />`,
+  },
+  {
     name: "stack-css-and-shader",
     effects: `<Effect id="s1" type="brightness" params={{ amount: 10 }} />
       <Effect id="s2" type="levels" params={{ gamma: 1.2 }} />
@@ -139,18 +148,27 @@ async function still(c: Case): Promise<string> {
   writeFileSync(
     file,
     `import { z } from "zod";
-import { Clip, Composition, defineEffect, Effect, Track } from "@cutcraft/kit";
+import { Clip, Composition, defineEffect, Effect, Layer, Track } from "@cutcraft/kit";
 export const manifest = ${JSON.stringify(manifest)};
 ${CHART}
 export default function Video() {
   return (
     <Composition fps={30} width={320} height={180} background={{ mode: "color", color: "#000000" }}>
-      <Track id="t">
+      ${
+        c.layer
+          ? `<Track id="fx" layout="free">
+        <Layer id="l" start={0} duration={2}>
+          ${c.effects}
+          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(90deg, #ff2200, #22ff88 50%, #2244ff)" }} />
+        </Layer>
+      </Track>`
+          : `<Track id="t">
         <Clip id="c" src="asset:solid" fit="cover">
           <Effect id="chart" type={chart} params={{ shape: ${c.shape === true} }} />
           ${c.effects}
         </Clip>
-      </Track>
+      </Track>`
+      }
     </Composition>
   );
 }

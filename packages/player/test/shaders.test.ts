@@ -22,7 +22,7 @@ const GLOW = `const glow = defineEffect({ name: "soft-glow", params: z.object({ 
 const SWEEP = `const sweep = defineTransition({ name: "sweep", shader: "vec4 transition(vec2 uv) { return uv.x < progress ? texture(to, uv) : texture(from, uv); }" });`;
 
 describe("declared shaders in the frame plan", () => {
-  it("attach a clip's declared effects, with keyframed params and the element's clock, and leave its filter alone", () => {
+  it("attach a clip's declared effects, with keyframed params and the element's clock, after its CSS ones in file order", () => {
     const state = stateOf(
       `<Track id="t"><Clip id="c" src="asset:city" in={0} out={4}>
         <Effect id="b" type="blur" params={{ radius: 2 }} />
@@ -34,8 +34,10 @@ describe("declared shaders in the frame plan", () => {
     );
     expect(state.errors).toEqual([]);
     const op = buildFramePlan(state, 1).ops[0]!;
-    expect(op.filter).toBe("blur(2px)");
-    expect(op.shaders).toEqual([
+    expect(op.filter).toBe("");
+    expect(op.fallbackFilter).toBe("blur(2px)");
+    expect(op.shaders?.[0]).toMatchObject({ name: "css:blur", builtIn: true, params: { sigma: 2 } });
+    expect(op.shaders?.slice(1)).toEqual([
       {
         name: "soft-glow",
         sources: [expect.stringContaining("vec4 effect")],
@@ -45,7 +47,7 @@ describe("declared shaders in the frame plan", () => {
     ]);
   });
 
-  it("run a built-in shader effect as a pass, with its CSS filter kept for a painter without WebGL", () => {
+  it("run a built-in shader effect as a pass after the CSS one before it, with the CSS look kept for a painter without WebGL", () => {
     const state = stateOf(
       `<Track id="t"><Clip id="c" src="asset:city" in={0} out={4}>
         <Effect id="b" type="blur" params={{ radius: 2 }} />
@@ -55,10 +57,12 @@ describe("declared shaders in the frame plan", () => {
     );
     expect(state.errors).toEqual([]);
     const op = buildFramePlan(state, 1).ops[0]!;
-    expect(op.filter).toBe("blur(2px)");
-    expect(op.shaders?.map((p) => [p.name, p.builtIn, p.sources.length, p.params])).toEqual([
-      ["levels", true, 1, { black: 0.2, white: 1, gamma: 2 }],
+    expect(op.filter).toBe("");
+    expect(op.shaders?.map((p) => [p.name, p.builtIn, p.sources.length])).toEqual([
+      ["css:blur", true, 2],
+      ["levels", true, 1],
     ]);
+    expect(op.shaders?.[1]?.params).toEqual({ black: 0.2, white: 1, gamma: 2 });
     expect(op.fallbackFilter).toMatch(/^blur\(2px\) brightness\([\d.]+\) contrast\([\d.]+\)$/);
   });
 
@@ -122,7 +126,7 @@ describe("declared shaders in the frame plan", () => {
     const op = buildFramePlan(state, 1).ops[0]!;
     expect(op.shaders?.[0]?.sources).toHaveLength(2);
     expect(op.shaders?.[0]?.builtIn).toBeUndefined();
-    expect(op.fallbackFilter).toBeUndefined();
+    expect(op.fallbackFilter).toBe("");
   });
 
   it("attach an adjustment's declared effects", () => {

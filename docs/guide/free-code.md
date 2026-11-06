@@ -219,9 +219,11 @@ overlay, an effect with an asset param is not drawn yet.
 
 The built-in `lut` effect reads a LUT this way: see [Colour and grading](./colour#a-look-from-a-lut).
 
-On a `<Clip>`, a `<Nested>` and an `<Adjustment>` (where it changes everything beneath it), an effect runs after the
-element's mask, vignette and grain, and before its other built-in effects. Several effects run in the order they
-appear in the file.
+An element's effects run in the order they appear in the file, yours and the built-in ones alike, after its mask,
+vignette and grain. That holds on a `<Clip>`, a `<Nested>`, an `<Adjustment>` (where they change everything beneath
+it) and an overlay. When none of an element's effects needs a shader, its built-in ones draw as one CSS filter;
+once one does, they all run as shader passes, so the order stays the one you wrote. Under a shader transition, each
+clip's effects run before the two are blended.
 
 Overlays take the same effects: titles, shapes, SVG, stickers and any `<Layer>`, including `<Three>` and `<Motion>`.
 Write the `<Effect>` inside the element, next to its text or its free code. Here one colour-split effect runs on a
@@ -233,10 +235,11 @@ title and, more gently, on a Motion badge, while the footage under them stays as
 
 </Example>
 
-An overlay is DOM, so the player draws it into a canvas with HTML-in-Canvas and runs the shaders over that picture.
-The overlay's built-in effects (CSS filters) apply first. HTML-in-Canvas is a Chrome feature that is still behind a
-flag: turn on `chrome://flags/#canvas-draw-element` to see overlay effects in the preview. Without it the preview shows
-the overlay as it is and warns once. The export always draws them, because its browser has the feature on.
+An overlay is DOM, so the player draws it into a canvas with HTML-in-Canvas and runs its effects over that picture,
+in file order. HTML-in-Canvas is a Chrome feature that is still behind a flag: turn on
+`chrome://flags/#canvas-draw-element` to see overlay effects in the preview. Without it the preview draws the
+overlay's built-in effects as CSS, leaves out the ones only a shader draws, and warns once. The export always draws
+them all, because its browser has the feature on.
 
 Keep `defineEffect()` and `defineTransition()` at the top of the file with a literal `name` and `shader`, where the
 editor and lint can read them; the `declaration` lint ([Lint](/guide/editing#lint)) says when one is not. The editor's

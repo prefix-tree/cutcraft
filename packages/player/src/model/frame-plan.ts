@@ -11,16 +11,9 @@ import {
 
 import { devWarn } from "../warn";
 import { backdropTracks } from "./backdrop";
-import { filterString, type PostEffect, postEffects } from "./effects";
+import { type PostEffect, postEffects } from "./effects";
 import type { ClipRect } from "./motion";
-import {
-  effectPasses,
-  hasCssFallback,
-  type ShaderPass,
-  shadedEffects,
-  type TransitionPass,
-  transitionPass,
-} from "./shaders";
+import { effectPipeline, type ShaderPass, type TransitionPass, transitionPass } from "./shaders";
 import { frameIndex, nestedSourceTime, placementSourceTime } from "./time";
 import { animatedTransform, type DrawRect, layoutRect, type Matrix2D, multiply, translate } from "./transform";
 import { transitionLook } from "./transition";
@@ -143,8 +136,7 @@ export function buildFramePlan(state: ResolvedState, t: number, resolveNested?: 
       if (op && dip) ops.push(dipOp(item.transition!.placement, dip, comp.width, comp.height));
     } else if (p.kind === "adjustment") {
       if (p.props.enabled === false) continue;
-      const shaders = effectPasses(state, item.children, t - p.start);
-      const filters = filtersOf(state, item.children, p.id, t - p.start, shaders);
+      const { shaders, ...filters } = effectPipeline(state, item.children, p.id, t - p.start, { shaders: true });
       if (ops.length === 0) continue;
       ops.push({
         id: p.id,
@@ -219,8 +211,10 @@ function mediaOp(
     look = transitionLook(item.transition, comp.width, comp.height);
     opacity *= look.opacity;
   }
-  const shaders = effectPasses(state, item.children, rel);
-  const filters = filtersOf(state, item.children, p.id, rel, shaders);
+  const { shaders, ...filters } = effectPipeline(state, item.children, p.id, rel, {
+    shaders: true,
+    transition: shaded !== undefined,
+  });
   const mask = maskOf(item.children, warnings);
   const post = postEffects(item.children, frameIndex(t, comp.fps), rel);
   const common = {
@@ -313,20 +307,4 @@ function maskOf(children: readonly Placement[], warnings: string[]): MaskSpec | 
     inverted: m.props.inverted === true,
     opacity: Number(m.props.opacity ?? 1),
   };
-}
-
-/**
- * An element's filter, less the effects its shader passes draw; with a built-in shader effect among them, also the
- * filter that draws that effect as CSS, for a painter without WebGL.
- */
-function filtersOf(
-  state: ResolvedState,
-  children: readonly Placement[],
-  id: string,
-  rel: number,
-  shaders: readonly ShaderPass[] | undefined,
-): { filter: string; fallbackFilter?: string } {
-  const { filter } = filterString(children, id, rel, shadedEffects(state, true));
-  if (!shaders?.some(hasCssFallback)) return { filter };
-  return { filter, fallbackFilter: filterString(children, id, rel, shadedEffects(state, false)).filter };
 }
