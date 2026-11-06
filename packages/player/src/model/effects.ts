@@ -82,42 +82,56 @@ export function paramsAt(children: readonly Placement[], effect: Placement, rel:
   return out ?? base;
 }
 
+/**
+ * One child's CSS filter (an `<Effect>` drawn as CSS, or a `<ColorGrade>`) at element-relative `rel`, or "" for a
+ * child drawn otherwise: a post effect, a type in `skip` (drawn by its shader), a shader-only type, or a disabled one.
+ * An unknown type is reported once and draws nothing.
+ */
+export function childFilter(
+  children: readonly Placement[],
+  c: Placement,
+  elementId: string,
+  rel: number,
+  skip: ReadonlySet<string> = new Set(),
+): string {
+  if (c.kind === "colorGrade")
+    return colorGradeFilters({
+      temperature: keyframedValue(children, "colorGrade.temperature", rel, c.props.temperature),
+      tint: keyframedValue(children, "colorGrade.tint", rel, c.props.tint),
+    }).join(" ");
+  if (c.kind !== "effect" || c.props.enabled === false) return "";
+  const type = String(c.props.type);
+  if ((POST_TYPES as readonly string[]).includes(type) || skip.has(type)) return "";
+  // Drawn by its shader or not at all; the painter says so where there is no WebGL.
+  if ((SHADER_ONLY_EFFECTS as readonly string[]).includes(type)) return "";
+  const make = CANVAS_FILTERABLE[type as keyof typeof CANVAS_FILTERABLE] as ((p: Params) => string) | undefined;
+  if (make) return make(paramsAt(children, c, rel));
+  devWarn(`effect:${elementId}:${type}`, `effect "${type}" on "${elementId}" is not rendered by the browser player`);
+  return "";
+}
+
 /** A single canvas/CSS `filter` string for an element's effect and colour-grade children at element-relative `rel`; unsupported types are listed. */
 export function filterString(
   children: readonly Placement[],
   elementId: string,
   rel: number,
-  /** Effect types the file declares (`defineEffect()`), drawn as shaders rather than filters. */
+  /** Effect types drawn as shaders rather than filters. */
   declared: ReadonlySet<string> = new Set(),
 ): FilterResult {
   const parts: string[] = [];
   const unsupported: string[] = [];
   for (const c of children) {
-    if (c.kind === "effect") {
-      if (c.props.enabled === false) continue;
-      const type = String(c.props.type);
-      if ((POST_TYPES as readonly string[]).includes(type) || declared.has(type)) continue;
-      // Drawn by its shader or not at all; the painter says so where there is no WebGL.
-      if ((SHADER_ONLY_EFFECTS as readonly string[]).includes(type)) continue;
-      const make = CANVAS_FILTERABLE[type as keyof typeof CANVAS_FILTERABLE] as ((p: Params) => string) | undefined;
-      if (make) {
-        const f = make(paramsAt(children, c, rel));
-        if (f) parts.push(f);
-      } else {
-        unsupported.push(type);
-        devWarn(
-          `effect:${elementId}:${type}`,
-          `effect "${type}" on "${elementId}" is not rendered by the browser player`,
-        );
-      }
-    } else if (c.kind === "colorGrade") {
-      parts.push(
-        ...colorGradeFilters({
-          temperature: keyframedValue(children, "colorGrade.temperature", rel, c.props.temperature),
-          tint: keyframedValue(children, "colorGrade.tint", rel, c.props.tint),
-        }),
-      );
-    }
+    const f = childFilter(children, c, elementId, rel, declared);
+    if (f) parts.push(f);
+    else if (
+      c.kind === "effect" &&
+      c.props.enabled !== false &&
+      !declared.has(String(c.props.type)) &&
+      !(POST_TYPES as readonly string[]).includes(String(c.props.type)) &&
+      !(SHADER_ONLY_EFFECTS as readonly string[]).includes(String(c.props.type)) &&
+      !(String(c.props.type) in CANVAS_FILTERABLE)
+    )
+      unsupported.push(String(c.props.type));
   }
   return { filter: parts.join(" "), unsupported };
 }

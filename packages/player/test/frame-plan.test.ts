@@ -204,7 +204,7 @@ describe("buildFramePlan", () => {
     expect(plan.ops[0]!.filter).toBe("blur(2px)");
   });
 
-  it("draws temperature and tint as filters, and levels with its shader, falling back on a filter mapping black to 0 and white to 1", () => {
+  it("runs temperature, tint and levels as passes in file order, falling back on a filter mapping black to 0 and white to 1", () => {
     const s = makeState({
       width: 640,
       height: 360,
@@ -227,10 +227,9 @@ describe("buildFramePlan", () => {
       ],
     });
     const op = buildFramePlan(s, 1).ops[0]!;
-    expect(op.filter).toBe("sepia(0.2) hue-rotate(5deg)");
-    expect(op.shaders?.map((p) => [p.name, p.builtIn, p.params])).toEqual([
-      ["levels", true, { black: 0.1, white: 0.6, gamma: 1.2 }],
-    ]);
+    expect(op.filter).toBe("");
+    expect(op.shaders?.map((p) => p.name)).toEqual(["css:sepia", "css:hue-rotate", "levels"]);
+    expect(op.shaders?.[2]?.params).toEqual({ black: 0.1, white: 0.6, gamma: 1.2 });
     const filter = op.fallbackFilter!;
     expect(filter).toMatch(/^sepia\(0\.2\) hue-rotate\(5deg\) brightness\([\d.]+\) contrast\([\d.]+\)$/);
     const [k, c] = [/brightness\(([\d.]+)\)/, /contrast\(([\d.]+)\)/].map((r) => Number(r.exec(filter)![1]));

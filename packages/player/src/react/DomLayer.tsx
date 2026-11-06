@@ -3,7 +3,7 @@ import { memo, type ReactNode } from "react";
 import type { ResolvedState } from "@cutcraft/kit";
 
 import { backdropTracks } from "../model/backdrop";
-import { effectPasses, hasCssFallback } from "../model/shaders";
+import { effectPipeline } from "../model/shaders";
 import { frameIndex } from "../model/time";
 import { type VisibleItem, visiblePlacements } from "../model/visible";
 import { type ElementProps, OVERLAY_KINDS } from "../overlays/layout";
@@ -96,13 +96,14 @@ const Element = memo(
       transition: item.transition,
     };
     const content = elementContent(item, props, state, interior);
-    // Effects the file declares run over the overlay's picture, drawn through HTML-in-Canvas.
-    // Without HTML-in-Canvas the kit's own shader effects draw as their CSS filter (overlays/layout.ts).
-    const all =
+    // An overlay's effects run in file order over its picture, drawn through HTML-in-Canvas. Without HTML-in-Canvas
+    // they draw as CSS (overlays/layout.ts), and only the ones with no CSS form are left here, to be reported.
+    const passes =
       item.placement.kind === "adjustment"
         ? undefined
-        : effectPasses(state, item.children, time - item.placement.start);
-    const passes = all && !htmlInCanvas() ? all.filter((s) => !hasCssFallback(s)) : all;
+        : effectPipeline(state, item.children, item.placement.id, time - item.placement.start, {
+            shaders: htmlInCanvas(),
+          }).shaders;
     if (!passes?.length || !content) return content;
     const { width, height } = state.composition;
     return (

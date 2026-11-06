@@ -631,6 +631,75 @@ export default function Video() { return <Composition fps={30} width={320} heigh
   });
 });
 
+describe("effects run in the order the file writes them", () => {
+  // Mid grey, then brightness 1.5 and a squaring shader in either order: 0.75² = 0.5625, or 0.25 · 1.5 = 0.375.
+  const SQUARE = `const grey = defineEffect({ name: "grey", shader: "vec4 effect(vec2 uv) { return vec4(vec3(0.5), 1.0); }" });
+const square = defineEffect({ name: "square", shader: "vec4 effect(vec2 uv) { vec4 c = texture(image, uv); return vec4(c.rgb * c.rgb, c.a); }" });`;
+  const BRIGHT = `<Effect id="b" type="brightness" params={{ amount: 50 }} />`;
+  const SQ = `<Effect id="s" type={square} />`;
+  const close = (c: number[] | undefined, v: number) =>
+    c?.slice(0, 3).every((x) => Math.abs(x - v * 255) <= 4) === true;
+
+  it("on a clip, a CSS effect before a shader effect runs first, and after it runs after", async () => {
+    const at = (name: string, effects: string) =>
+      colourAt(
+        name,
+        `<Track id="t"><Clip id="c" src="asset:solid" fit="cover"><Effect id="g" type={grey} />${effects}</Clip></Track>`,
+        SQUARE,
+        0.5,
+        [[160, 90]],
+      );
+    const [cssFirst] = await at("order-css-first", BRIGHT + SQ);
+    const [shaderFirst] = await at("order-shader-first", SQ + BRIGHT);
+    // The grey is 128/255, not exactly 0.5.
+    const g = 128 / 255;
+    expect(close(cssFirst, (g * 1.5) ** 2)).toBe(true);
+    expect(close(shaderFirst, g * g * 1.5)).toBe(true);
+  });
+
+  it("on a Layer, the same order as on a clip", async () => {
+    const at = (name: string, effects: string) =>
+      colourAt(
+        name,
+        `<Track id="fx" layout="free"><Layer id="l" start={0} duration={2}>${effects}<div style={{ position: "absolute", inset: 0, background: "#808080" }} /></Layer></Track>`,
+        SQUARE,
+        0.5,
+        [[160, 90]],
+      );
+    const [cssFirst] = await at("layer-css-first", BRIGHT + SQ);
+    const [shaderFirst] = await at("layer-shader-first", SQ + BRIGHT);
+    const g = 128 / 255;
+    expect(close(cssFirst, (g * 1.5) ** 2)).toBe(true);
+    expect(close(shaderFirst, g * g * 1.5)).toBe(true);
+  });
+
+  it("a CSS effect on the incoming clip of a shader transition leaves the outgoing clip alone", async () => {
+    // Blue to red through a clock wipe, with a full sepia on the red clip: half way, the left (still blue) half stays blue.
+    const body = `<Track id="t">
+      <Clip id="a" src="asset:solid" in={0} out={2} fit="cover" />
+      <Transition id="x" type="clockWipe" duration={1} />
+      <Clip id="b" src="asset:logo" duration={2} fit="cover"><Effect id="s" type="sepia" /></Clip>
+    </Track>`;
+    const probe = join(dir, "order-probe.tsx");
+    writeFileSync(
+      probe,
+      `import { Clip, Composition, Effect, Track, Transition } from "@cutcraft/kit";
+export const manifest = ${JSON.stringify(mediaManifest)};
+export default function Video() { return <Composition fps={30} width={320} height={180}>${body}</Composition>; }`,
+    );
+    const x = (await loadVideo(probe)).state.items.get("x")!;
+    const [left, right] = await colourAt("order-transition", body, "", (x.start + x.end) / 2, [
+      [40, 90],
+      [280, 90],
+    ]);
+    expect(left?.[0] ?? 255).toBeLessThan(20);
+    expect(left?.[2] ?? 0).toBeGreaterThan(235);
+    // Sepia on red: 0.393·1, 0.349·1, 0.272·1.
+    expect(Math.abs((right?.[0] ?? 0) - 100)).toBeLessThanOrEqual(8);
+    expect(Math.abs((right?.[1] ?? 0) - 89)).toBeLessThanOrEqual(8);
+  });
+});
+
 it("runs a declared effect on an adjustment, over everything beneath it", async () => {
   const [c] = await colourAt(
     "adjust",
