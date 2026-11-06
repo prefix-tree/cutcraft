@@ -102,6 +102,13 @@ jobs:
           name: playwright-report
           path: packages/player/playwright-report
           if-no-files-found: ignore
+      # Stills that drifted from their golden (packages/render/test/goldens), to compare or adopt.
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: goldens-actual
+          path: packages/render/test/.tmp/goldens-actual
+          if-no-files-found: ignore
 
   docs:
     runs-on: ubuntu-latest

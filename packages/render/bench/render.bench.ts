@@ -40,6 +40,59 @@ export default function Video() {
 }
 `;
 
+/** One source clip for 5 s with these effects on it, for the shader cases. */
+const effectsFile = (effects: string) => `import { Clip, Composition, Effect, Track } from "@cutcraft/kit";
+export default function Video() {
+  return (
+    <Composition fps={30} width={1920} height={1080}>
+      <Track id="main">
+        <Clip id="c1" src="asset:src" in={2} out={7}>${effects}</Clip>
+      </Track>
+    </Composition>
+  );
+}
+`;
+
+const EFFECT_CASES: readonly { readonly key: string; readonly label: string; readonly effects: string }[] = [
+  {
+    key: "grade",
+    label: "colour grade, 5 s 1080p30 (exposure, white balance, curves, vibrance, LUT)",
+    effects: `
+          <Effect id="e1" type="exposure" params={{ stops: 0.4 }} />
+          <Effect id="e2" type="whiteBalance" params={{ temperature: 20 }} />
+          <Effect id="e3" type="curves" params={{ rgb: [[0, 0], [0.5, 0.6], [1, 1]] }} />
+          <Effect id="e4" type="vibrance" params={{ amount: 0.4 }} />
+          <Effect id="e5" type="lut" params={{ src: "asset:warm", amount: 0.5 }} />`,
+  },
+  {
+    key: "blurs",
+    label: "blurs, 5 s 1080p30 (region blur of a small box, shadows and highlights)",
+    effects: `
+          <Effect id="e1" type="regionBlur" params={{ box: [0.4, 0.3, 0.15, 0.2], radius: 30 }} />
+          <Effect id="e2" type="shadowsHighlights" params={{ shadows: 0.5, radius: 30 }} />`,
+  },
+  {
+    key: "silhouette",
+    label: "silhouette, 5 s 1080p30 (outline and glow on the footage)",
+    effects: `
+          <Effect id="e1" type="outline" params={{ width: 12 }} />
+          <Effect id="e2" type="glow" params={{ radius: 24 }} />`,
+  },
+];
+
+/** A size-17 LUT that warms, for the grade case. */
+function warmCube(): string {
+  const n = 17;
+  const lines = [`LUT_3D_SIZE ${n}`];
+  for (let b = 0; b < n; b++)
+    for (let g = 0; g < n; g++)
+      for (let r = 0; r < n; r++)
+        lines.push(
+          `${((r / (n - 1)) ** 0.85).toFixed(5)} ${(g / (n - 1)).toFixed(5)} ${((b / (n - 1)) ** 1.15).toFixed(5)}`,
+        );
+  return lines.join("\n");
+}
+
 const cases: Case[] = [
   {
     name: "cuts only, 20 s 1080p30 (five hard cuts, one source, its own sound)",
@@ -98,6 +151,30 @@ const cases: Case[] = [
       );
     },
   },
+  ...EFFECT_CASES.map(
+    (e): Case => ({
+      name: `effects: ${e.label}`,
+      file: join(cache, `effects-${e.key}.tsx`),
+      manifest: join(cache, "effects.manifest.json"),
+      media: join(cache, "media"),
+      seconds: 5,
+      prepare: () => {
+        // The cuts case makes the source; the LUT is written beside it.
+        cases[0]?.prepare?.();
+        writeFileSync(join(cache, "media", "warm.cube"), warmCube());
+        writeFileSync(join(cache, `effects-${e.key}.tsx`), effectsFile(e.effects));
+        writeFileSync(
+          join(cache, "effects.manifest.json"),
+          JSON.stringify({
+            assets: {
+              src: { id: "src", kind: "video", duration: 20, fps: 30, width: 1920, height: 1080 },
+              warm: { id: "warm", kind: "lut", duration: 0 },
+            },
+          }),
+        );
+      },
+    }),
+  ),
   {
     name: "talking head, first 20 s of 1080p30 (generated captions on screen throughout; small stand-in footage)",
     file: join(root, "recipes", "talking-head.tsx"),
