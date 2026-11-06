@@ -1,7 +1,7 @@
 import { type Placement, SHADER_ONLY_EFFECTS, type VIDEO_EFFECT_TYPES } from "@cutcraft/kit";
 
 import { devWarn } from "../warn";
-import { keyframedValue } from "./keyframes";
+import { keyframedParam, keyframedValue } from "./keyframes";
 
 export interface FilterResult {
   readonly filter: string;
@@ -67,19 +67,20 @@ const CANVAS_FILTERABLE: Readonly<
     `drop-shadow(${num(p, ["x"], 0)}px ${num(p, ["y"], 4)}px ${num(p, ["blur"], 8)}px ${typeof p.color === "string" ? p.color : "rgba(0,0,0,0.5)"})`,
 };
 
-/** An effect's params with its keyframed ones (`effect.<id>.<param>` keyframes on the element) evaluated at element-relative `rel`. */
-export function paramsAt(children: readonly Placement[], effect: Placement, rel: number): Params {
+/** The placements of an element and its children, by id: where an effect's own keyframes are found. */
+export type Items = ReadonlyMap<string, Placement>;
+
+/** An effect's params, with the ones its own `<Keyframe param>` children animate evaluated at element-relative `rel`. */
+export function paramsAt(items: Items, effect: Placement, rel: number): Params {
   const base = (effect.props.params ?? {}) as Params;
-  const prefix = `effect.${effect.id}.`;
-  let out: Record<string, unknown> | null = null;
-  for (const k of children) {
-    const property = k.kind === "keyframe" ? String(k.props.property) : "";
-    if (!property.startsWith(prefix)) continue;
-    const name = property.slice(prefix.length);
-    out ??= { ...base };
-    out[name] = keyframedValue(children, property, rel, base[name]);
-  }
-  return out ?? base;
+  const keys = effect.children
+    .map((id) => items.get(id))
+    .filter((k): k is Placement => k?.kind === "keyframe" && typeof k.props.param === "string");
+  if (keys.length === 0) return base;
+  const out: Record<string, unknown> = { ...base };
+  for (const name of new Set(keys.map((k) => k.props.param as string)))
+    out[name] = keyframedParam(keys, name, rel, base[name]);
+  return out;
 }
 
 /**
@@ -88,6 +89,7 @@ export function paramsAt(children: readonly Placement[], effect: Placement, rel:
  * An unknown type is reported once and draws nothing.
  */
 export function childFilter(
+  items: Items,
   children: readonly Placement[],
   c: Placement,
   elementId: string,
@@ -105,13 +107,14 @@ export function childFilter(
   // Drawn by its shader or not at all; the painter says so where there is no WebGL.
   if ((SHADER_ONLY_EFFECTS as readonly string[]).includes(type)) return "";
   const make = CANVAS_FILTERABLE[type as keyof typeof CANVAS_FILTERABLE] as ((p: Params) => string) | undefined;
-  if (make) return make(paramsAt(children, c, rel));
+  if (make) return make(paramsAt(items, c, rel));
   devWarn(`effect:${elementId}:${type}`, `effect "${type}" on "${elementId}" is not rendered by the browser player`);
   return "";
 }
 
 /** A single canvas/CSS `filter` string for an element's effect and colour-grade children at element-relative `rel`; unsupported types are listed. */
 export function filterString(
+  items: Items,
   children: readonly Placement[],
   elementId: string,
   rel: number,
@@ -121,7 +124,7 @@ export function filterString(
   const parts: string[] = [];
   const unsupported: string[] = [];
   for (const c of children) {
-    const f = childFilter(children, c, elementId, rel, declared);
+    const f = childFilter(items, children, c, elementId, rel, declared);
     if (f) parts.push(f);
     else if (
       c.kind === "effect" &&
@@ -141,7 +144,12 @@ export type PostEffect =
   | { readonly type: "grain"; readonly amount: number; readonly seed: number };
 
 /** Vignette and grain, in order, with `amount` on 0..1; grain is seeded by the frame, so a frame always looks the same. */
-export function postEffects(children: readonly Placement[], frame: number, rel: number): PostEffect[] | undefined {
+export function postEffects(
+  items: Items,
+  children: readonly Placement[],
+  frame: number,
+  rel: number,
+): PostEffect[] | undefined {
   const out: PostEffect[] = [];
   for (const c of children) {
     if (c.kind !== "effect" || c.props.enabled === false) continue;
@@ -149,7 +157,7 @@ export function postEffects(children: readonly Placement[], frame: number, rel: 
       0,
       Math.min(
         1,
-        num(paramsAt(children, c, rel), ["amount", "intensity", "value"], c.props.type === "grain" ? 20 : 50) / 100,
+        num(paramsAt(items, c, rel), ["amount", "intensity", "value"], c.props.type === "grain" ? 20 : 50) / 100,
       ),
     );
     if (amount <= 0) continue;

@@ -21,10 +21,10 @@ interface Key {
   easing: string | undefined;
 }
 
-function keysFor(children: readonly Placement[], property: string): Key[] {
+function keysWhere(children: readonly Placement[], match: (k: Placement) => boolean): Key[] {
   const keys: Key[] = [];
   for (const c of children) {
-    if (c.kind !== "keyframe" || c.props.property !== property) continue;
+    if (c.kind !== "keyframe" || !match(c)) continue;
     keys.push({ at: Number(c.props.at ?? 0), value: c.props.value, easing: c.props.easing as string | undefined });
   }
   return keys.sort((a, b) => a.at - b.at);
@@ -36,7 +36,23 @@ function keysFor(children: readonly Placement[], property: string): Key[] {
  * the easing of the key it leaves. Non-numeric values step.
  */
 export function keyframedValue<T>(children: readonly Placement[], property: string, rel: number, fallback: T): T {
-  const keys = keysFor(children, property);
+  return valueAt(
+    keysWhere(children, (k) => k.props.property === property),
+    rel,
+    fallback,
+  );
+}
+
+/** The keyframed value of an effect's `param` at element-relative `rel`, from the keyframes inside the effect. */
+export function keyframedParam<T>(keys: readonly Placement[], param: string, rel: number, fallback: T): T {
+  return valueAt(
+    keysWhere(keys, (k) => k.props.param === param),
+    rel,
+    fallback,
+  );
+}
+
+function valueAt<T>(keys: readonly Key[], rel: number, fallback: T): T {
   const first = keys[0];
   if (!first) return fallback;
   const last = keys[keys.length - 1]!;

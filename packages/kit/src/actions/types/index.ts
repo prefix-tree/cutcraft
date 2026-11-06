@@ -119,7 +119,16 @@ export interface EffectActions {
 }
 
 export interface KeyframeActions {
-  "keyframe/add": { id: Id; keyId: Id; property: string; at: number; value: Json; easing?: string };
+  /** `property` animates the element `id`; `param` animates a param of the effect `id`. One of the two. */
+  "keyframe/add": {
+    id: Id;
+    keyId: Id;
+    property?: string;
+    param?: string;
+    at: number;
+    value: Json;
+    easing?: string;
+  };
   "keyframe/remove": { id: Id; keyId: Id };
   "keyframe/restore": { id: Id; node: NodeSpec; after: Id | null };
   "keyframe/update": { id: Id; keyId: Id; value?: Json; easing?: string };

@@ -24,9 +24,10 @@ export default function Video() {
     <Composition fps={30} width={960} height={540}>
       <Track id="main">
         <Clip id="fractal" src="asset:product" in={0} out={3} fit="cover">
-          <Effect id="tone" type={navyGold} params={{ dark: "#0b1d3a", light: "#ffcf70" }} />
-          <Keyframe id="k1" property="effect.tone.strength" at={0} value={0} />
-          <Keyframe id="k2" property="effect.tone.strength" at={1.5} value={1} />
+          <Effect id="tone" type={navyGold} params={{ dark: "#0b1d3a", light: "#ffcf70" }}>
+            <Keyframe id="k1" param="strength" at={0} value={0} />
+            <Keyframe id="k2" param="strength" at={1.5} value={1} />
+          </Effect>
         </Clip>
       </Track>
     </Composition>

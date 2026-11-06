@@ -216,7 +216,7 @@ function mediaOp(
     transition: shaded !== undefined,
   });
   const mask = maskOf(item.children, warnings);
-  const post = postEffects(item.children, frameIndex(t, comp.fps), rel);
+  const post = postEffects(state.items, item.children, frameIndex(t, comp.fps), rel);
   const common = {
     id: p.id,
     fit,

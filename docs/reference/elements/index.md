@@ -90,7 +90,7 @@ The elements a file is written in: the timeline (clips, tracks, transitions, cap
 | [`<Angle>`](/reference/elements/angle) |  |  |  |  |  |  |
 | [`<Cut>`](/reference/elements/cut) |  |  |  |  |  |  |
 | [`<Layer>`](/reference/elements/layer) | yes | yes |  |  | yes | `effect`, `keyframe` |
-| [`<Effect>`](/reference/elements/effect) |  |  |  |  |  |  |
+| [`<Effect>`](/reference/elements/effect) |  |  |  |  |  | `keyframe` |
 | [`<ColorGrade>`](/reference/elements/colorgrade) |  |  |  |  |  |  |
 | [`<Keyframe>`](/reference/elements/keyframe) |  |  |  |  |  |  |
 | [`<SpeedKey>`](/reference/elements/speedkey) |  |  |  |  |  |  |

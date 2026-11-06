@@ -17,4 +17,4 @@ A filter on its parent: brightness, blur, grayscale, vignette, grain and more.
 | `params` | object | `{}` |  |
 | `enabled` | boolean | `true` |  |
 
-No children. [All elements](/reference/elements/)
+Children: `keyframe`. [All elements](/reference/elements/)

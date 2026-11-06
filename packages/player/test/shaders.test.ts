@@ -26,9 +26,10 @@ describe("declared shaders in the frame plan", () => {
     const state = stateOf(
       `<Track id="t"><Clip id="c" src="asset:city" in={0} out={4}>
         <Effect id="b" type="blur" params={{ radius: 2 }} />
-        <Effect id="g" type={glow} />
-        <Keyframe id="k1" property="effect.g.amount" at={0} value={0} />
-        <Keyframe id="k2" property="effect.g.amount" at={2} value={1} />
+        <Effect id="g" type={glow}>
+          <Keyframe id="k1" param="amount" at={0} value={0} />
+          <Keyframe id="k2" param="amount" at={2} value={1} />
+        </Effect>
       </Clip></Track>`,
       GLOW,
     );
@@ -87,12 +88,14 @@ describe("declared shaders in the frame plan", () => {
   it("move a keyframed box element by element, and step a value that is not a number list", () => {
     const state = stateOf(
       `<Track id="t"><Clip id="c" src="asset:city" in={0} out={4}>
-        <Effect id="b" type="regionBlur" />
-        <Keyframe id="k1" property="effect.b.box" at={0} value={[0, 0, 0.2, 0.4]} />
-        <Keyframe id="k2" property="effect.b.box" at={2} value={[0.6, 0.2, 0.2, 0.4]} />
-        <Effect id="k" type="colorKey" />
-        <Keyframe id="k3" property="effect.k.color" at={0} value="#00ff00" />
-        <Keyframe id="k4" property="effect.k.color" at={2} value="#0000ff" />
+        <Effect id="b" type="regionBlur">
+          <Keyframe id="k1" param="box" at={0} value={[0, 0, 0.2, 0.4]} />
+          <Keyframe id="k2" param="box" at={2} value={[0.6, 0.2, 0.2, 0.4]} />
+        </Effect>
+        <Effect id="k" type="colorKey">
+          <Keyframe id="k3" param="color" at={0} value="#00ff00" />
+          <Keyframe id="k4" param="color" at={2} value="#0000ff" />
+        </Effect>
       </Clip></Track>`,
       "",
     );

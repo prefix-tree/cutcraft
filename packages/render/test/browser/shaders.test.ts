@@ -352,11 +352,13 @@ describe("footage tools", () => {
     // The box moves from x 0..0.2 to 0.6..0.8; half way it is at 0.3..0.5, over the edge at 0.4.
     const [edge] = await at(
       "region-keys",
-      `<Effect id="b" type="regionBlur" params={{ box: [0, 0, 0.2, 1], radius: 20, feather: 0 }} />`,
+      `<Effect id="b" type="regionBlur" params={{ box: [0, 0, 0.2, 1], radius: 20, feather: 0 }}>
+        <Keyframe id="k1" param="box" at={0} value={[0, 0, 0.2, 1]} />
+        <Keyframe id="k2" param="box" at={2} value={[0.6, 0, 0.2, 1]} />
+      </Effect>`,
       { left: [0, 0, 0], right: [1, 1, 1], split: 0.4 },
       [[124, 90]],
       1,
-      `<Keyframe id="k1" property="effect.b.box" at={0} value={[0, 0, 0.2, 1]} /><Keyframe id="k2" property="effect.b.box" at={2} value={[0.6, 0, 0.2, 1]} />`,
     );
     expect(edge?.[0] ?? 0).toBeGreaterThan(40);
   });

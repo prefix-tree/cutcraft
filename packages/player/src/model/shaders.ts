@@ -44,12 +44,7 @@ export interface TransitionPass {
 }
 
 /** An effect drawn by a shader (the file's own, or the kit's) as a pass at element-relative `rel`; undefined otherwise. */
-function shaderPass(
-  state: ResolvedState,
-  children: readonly Placement[],
-  c: Placement,
-  rel: number,
-): ShaderPass | undefined {
+function shaderPass(state: ResolvedState, c: Placement, rel: number): ShaderPass | undefined {
   if (c.kind !== "effect" || c.props.enabled === false) return undefined;
   const own = shaderFor(state.shaders, "effect", c.props.type);
   const def = own ?? builtInShader(c.props.type);
@@ -59,7 +54,7 @@ function shaderPass(
     sources: def.passes,
     ...(own ? {} : { builtIn: true as const }),
     ...(!own && def.tables ? { tables: def.tables } : {}),
-    params: paramsAt(children, c, rel),
+    params: paramsAt(state.items, c, rel),
     time: rel,
   };
 }
@@ -93,10 +88,10 @@ export function effectPipeline(
 ): EffectPipeline {
   const steps: (ShaderPass | string)[] = [];
   for (const c of children) {
-    const pass = shaderPass(state, children, c, rel);
+    const pass = shaderPass(state, c, rel);
     if (pass) steps.push(pass);
     else {
-      const css = childFilter(children, c, elementId, rel);
+      const css = childFilter(state.items, children, c, elementId, rel);
       if (css) steps.push(css);
     }
   }
@@ -117,7 +112,7 @@ export function effectPipeline(
 function cssOnly(state: ResolvedState, children: readonly Placement[], elementId: string, rel: number): string {
   const own = new Set(state.shaders.filter((s) => s.kind === "effect").map((s) => s.name));
   return children
-    .map((c) => childFilter(children, c, elementId, rel, own))
+    .map((c) => childFilter(state.items, children, c, elementId, rel, own))
     .filter(Boolean)
     .join(" ");
 }

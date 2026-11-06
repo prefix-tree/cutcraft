@@ -2,6 +2,7 @@ import type { z } from "zod";
 
 import { builtInShader } from "../jsx/built-in-shaders";
 import { capabilitiesOf } from "../jsx/capabilities";
+import { effectParamProblem } from "../jsx/effect-params";
 import { ENGINE_SCHEMAS, SCHEMAS_BY_KIND } from "../jsx/elements";
 import {
   TRANSITION_TYPES,
@@ -375,6 +376,7 @@ function compute(
     }),
   );
   errors.push(...textureErrors(items, manifest));
+  errors.push(...keyframeErrors(items));
   return {
     composition: {
       id: root.id,
@@ -709,6 +711,41 @@ function framed(
     transform: { ...transform, crop: { x: fx * (1 - width), y: fy * (1 - height), width, height } },
   };
   framedByProps.set(props, { key, props: out });
+  return out;
+}
+
+/**
+ * Keyframes against what they animate: a `param` keyframe sits inside an `<Effect>` and names one of its params, with a
+ * value that param's schema takes; a `property` keyframe animates its parent element, so it does not sit in an effect.
+ */
+function keyframeErrors(items: ReadonlyMap<string, Placement>): ResolveError[] {
+  const out: ResolveError[] = [];
+  for (const k of items.values()) {
+    if (k.kind !== "keyframe") continue;
+    const parent = k.parent ? items.get(k.parent) : undefined;
+    const param = k.props.param;
+    if (typeof param !== "string") {
+      if (parent?.kind === "effect")
+        out.push({
+          code: "INVALID_CHILD",
+          id: k.id,
+          prop: "property",
+          message: `a keyframe inside an <Effect> animates one of its params: param="…", not property`,
+        });
+      continue;
+    }
+    if (parent?.kind !== "effect") {
+      out.push({
+        code: "INVALID_CHILD",
+        id: k.id,
+        prop: "param",
+        message: `a keyframe with param goes inside the <Effect> it animates; on <${parent?.kind ?? "?"}> it takes property`,
+      });
+      continue;
+    }
+    const problem = effectParamProblem(parent.props.type, fileShaders, param, k.props.value);
+    if (problem) out.push({ code: "SCHEMA", id: k.id, prop: problem.prop, message: problem.message });
+  }
   return out;
 }
 

@@ -29,14 +29,25 @@ export const colorGradeSchema = z.strictObject({
   tint: z.number().min(-100).max(100).optional(),
 });
 
-export const keyframeSchema = z.strictObject({
-  id: idSchema,
-  property: zKeyframeProperty,
-  /** Element-relative seconds. */
-  at: z.number().nonnegative(),
-  value: z.unknown(),
-  easing: zEasing.default("linear"),
-});
+export const keyframeSchema = z
+  .strictObject({
+    id: idSchema,
+    /** A property of the parent element (`transform.opacity`…). */
+    property: zKeyframeProperty.optional(),
+    /** Inside an `<Effect>`: the effect param it animates. */
+    param: z
+      .string()
+      .regex(/^[A-Za-z_]\w*$/, "a param is a name: letters, digits and _")
+      .optional(),
+    /** Element-relative seconds. */
+    at: z.number().nonnegative(),
+    value: z.unknown(),
+    easing: zEasing.default("linear"),
+  })
+  .refine((k) => (k.property === undefined) !== (k.param === undefined), {
+    message:
+      "a keyframe animates a property of its parent (property) or, inside an <Effect>, a param (param): give one",
+  });
 
 export const speedKeySchema = z.strictObject({
   id: idSchema,

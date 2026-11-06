@@ -2,7 +2,7 @@
 
 The everyday work on footage, as `<Effect>` children of a clip: take out a green screen, hide a face or a screen, put
 a recording into a screen filmed at an angle, and two camera looks. They run as shaders in the preview and the export
-alike. Every param can be animated with a [`<Keyframe>`](/reference/elements/keyframe), lists included: a box or a
+alike. Every param can be animated by a [`<Keyframe>`](/reference/elements/keyframe) inside the effect, lists included: a box or a
 corner moves smoothly between two keys, which is how a blur follows a face or a pin follows a screen.
 
 ## Green screen
@@ -33,9 +33,10 @@ corners up to a circle or a pill. `inverted` blurs everything except the box.
 
 ```tsx
 <Clip id="street" src="asset:street">
-  <Effect id="plate" type="regionBlur" params={{ box: [0.42, 0.66, 0.12, 0.06], radius: 30, roundness: 0.3 }} />
-  <Keyframe id="p1" property="effect.plate.box" at={0} value={[0.42, 0.66, 0.12, 0.06]} />
-  <Keyframe id="p2" property="effect.plate.box" at={2.5} value={[0.3, 0.7, 0.14, 0.07]} />
+  <Effect id="plate" type="regionBlur" params={{ box: [0.42, 0.66, 0.12, 0.06], radius: 30, roundness: 0.3 }}>
+    <Keyframe id="p1" param="box" at={0} value={[0.42, 0.66, 0.12, 0.06]} />
+    <Keyframe id="p2" param="box" at={2.5} value={[0.3, 0.7, 0.14, 0.07]} />
+  </Effect>
 </Clip>
 ```
 

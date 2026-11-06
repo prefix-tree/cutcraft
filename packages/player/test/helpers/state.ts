@@ -141,12 +141,33 @@ export function makeState(spec: StateSpec): ResolvedState {
         cs = start + Number(c.props?.start ?? 0);
         cd = Number(c.props?.duration ?? 0);
       }
+      // Keyframes inside a child (an effect's own), placed at the element's start plus their `at`.
+      const grand: Placement[] = (c.children ?? []).map((g) => {
+        const at = start + Number(g.props?.at ?? 0);
+        const gp: Placement = {
+          id: g.id,
+          kind: g.kind,
+          track,
+          parent: c.id,
+          children: [],
+          start: at,
+          end: at,
+          duration: 0,
+          props: { id: g.id, ...(g.props ?? {}) },
+          editable: "literal",
+          lockedProps: [],
+          boundProps: {},
+          errors: [],
+        };
+        items.set(g.id, gp);
+        return gp;
+      });
       const cp: Placement = {
         id: c.id,
         kind: c.kind,
         track,
         parent: it.id,
-        children: [],
+        children: grand.map((g) => g.id),
         start: cs,
         end: cs + cd,
         duration: cd,
@@ -158,7 +179,15 @@ export function makeState(spec: StateSpec): ResolvedState {
       };
       items.set(c.id, cp);
       childPlacements.push(cp);
-      childNodes.push(node(c.id, c.kind, it.id, cp.props as Record<string, unknown>, []));
+      childNodes.push(
+        node(
+          c.id,
+          c.kind,
+          it.id,
+          cp.props as Record<string, unknown>,
+          grand.map((g) => node(g.id, g.kind, c.id, g.props as Record<string, unknown>, [])),
+        ),
+      );
     }
     node(it.id, it.kind, parent, props, childNodes, it.text);
     const p: Placement = {
