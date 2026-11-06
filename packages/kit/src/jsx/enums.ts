@@ -108,6 +108,11 @@ export const VIDEO_EFFECT_TYPES = [
   "shadowsHighlights",
   "duotone",
   "curves",
+  "colorKey",
+  "regionBlur",
+  "cornerPin",
+  "zoomBlur",
+  "chromaticAberration",
 ] as const;
 
 export const TEXT_ANIMATION_PRESETS = [

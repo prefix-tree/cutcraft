@@ -80,6 +80,26 @@ describe("declared shaders in the frame plan", () => {
     expect(op.shaders?.[3]?.tables?.(op.shaders[3].params).curve?.width).toBe(256);
   });
 
+  it("move a keyframed box element by element, and step a value that is not a number list", () => {
+    const state = stateOf(
+      `<Track id="t"><Clip id="c" src="asset:city" in={0} out={4}>
+        <Effect id="b" type="regionBlur" />
+        <Keyframe id="k1" property="effect.b.box" at={0} value={[0, 0, 0.2, 0.4]} />
+        <Keyframe id="k2" property="effect.b.box" at={2} value={[0.6, 0.2, 0.2, 0.4]} />
+        <Effect id="k" type="colorKey" />
+        <Keyframe id="k3" property="effect.k.color" at={0} value="#00ff00" />
+        <Keyframe id="k4" property="effect.k.color" at={2} value="#0000ff" />
+      </Clip></Track>`,
+      "",
+    );
+    expect(state.errors).toEqual([]);
+    const passes = buildFramePlan(state, 1).ops[0]!.shaders!;
+    const box = passes[0]?.params.box as number[];
+    [0.3, 0.1, 0.2, 0.4].forEach((v, i) => expect(box[i]).toBeCloseTo(v, 6));
+    expect(passes[0]?.sources).toHaveLength(3);
+    expect(passes[1]?.params.color).toBe("#00ff00");
+  });
+
   it("carry every pass of an effect of several", () => {
     const state = stateOf(
       `<Track id="t"><Clip id="c" src="asset:city" in={0} out={4}><Effect id="s" type={soft} /></Clip></Track>`,
