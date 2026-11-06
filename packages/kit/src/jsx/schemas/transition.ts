@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { builtInTransition } from "../built-in-shaders";
 import { TRANSITION_TYPES, type TransitionType, zTransitionType } from "../enums";
 import { idSchema } from "./common";
 
@@ -17,7 +18,20 @@ export const TRANSITION_PARAMS: Readonly<Record<TransitionType, z.ZodType>> = {
   }),
   slide: z.strictObject({ direction: dir4.default("left"), pushOut: z.boolean().default(false) }),
   push: z.strictObject({ direction: dir4.default("left") }),
+  iris: shaderParams("iris"),
+  clockWipe: shaderParams("clockWipe"),
+  blinds: shaderParams("blinds"),
+  filmBurn: shaderParams("filmBurn"),
+  pixelDissolve: shaderParams("pixelDissolve"),
+  zoom: shaderParams("zoom"),
 };
+
+/** A shader transition's params, from its definition, strict like the others. */
+function shaderParams(type: string): z.ZodType {
+  const def = builtInTransition(type);
+  if (!def) throw new Error(`no built-in shader transition "${type}"`);
+  return def.params.strict();
+}
 
 export const transitionSchema = z
   .strictObject({

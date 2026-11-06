@@ -1,4 +1,11 @@
-import { buildFramePlan, CanvasPainter, type DrawOp, type Frame, type FramePlan } from "@cutcraft/player";
+import {
+  buildFramePlan,
+  CanvasPainter,
+  captureWarnings,
+  type DrawOp,
+  type Frame,
+  type FramePlan,
+} from "@cutcraft/player";
 
 import { FakeFrame, FakeFrameSource, recorderCanvas, recorderContext } from "./helpers/fakes";
 import { makeState } from "./helpers/state";
@@ -50,7 +57,7 @@ describe("CanvasPainter blur background", () => {
 });
 
 describe("CanvasPainter clips", () => {
-  function paintOp(op: Partial<DrawOp>) {
+  function paintOp(op: Partial<DrawOp>, webgl = true) {
     const rec = recorderContext();
     const base: DrawOp = {
       id: "c",
@@ -64,12 +71,75 @@ describe("CanvasPainter clips", () => {
       borderRadius: 0,
     };
     const plan: FramePlan = { time: 0, frame: 0, background: "#000", ops: [{ ...base, ...op }], warnings: [] };
-    new CanvasPainter(640, 360, recorderCanvas).paint(rec.ctx, plan, {
+    // The recorder answers every getContext, WebGL included; without WebGL, a canvas that has none.
+    const create = webgl
+      ? recorderCanvas
+      : (w: number, h: number) => {
+          const c = recorderCanvas(w, h) as unknown as { getContext: (type: string) => unknown };
+          const two = c.getContext.bind(c);
+          c.getContext = (type) => (type === "webgl2" ? null : two(type));
+          return c as unknown as OffscreenCanvas;
+        };
+    new CanvasPainter(640, 360, create).paint(rec.ctx, plan, {
       frames: new Map<string, Frame | null>([["c", new FakeFrame(new FakeFrameSource("a"), 0, 1 / 30)]]),
       nested: new Map(),
     });
     return rec.calls;
   }
+
+  it("draws a built-in shader effect as its CSS filter where there is no WebGL, without a warning", () => {
+    const levels = {
+      name: "levels",
+      sources: ["vec4 effect(vec2 uv) { return texture(image, uv); }"],
+      params: {},
+      time: 0,
+    };
+    const calls = paintOp(
+      {
+        filter: "blur(2px)",
+        fallbackFilter: "blur(2px) brightness(1.2)",
+        shaders: [{ ...levels, builtIn: true }],
+      },
+      false,
+    );
+    expect(calls.some((c) => c.name === "set:filter" && c.args[0] === "blur(2px) brightness(1.2)")).toBe(true);
+  });
+
+  it("draws a shader-only built-in (lut) without it where there is no WebGL, and says so", () => {
+    const warnings: string[] = [];
+    captureWarnings((m) => warnings.push(m));
+    const lut = { name: "lut", sources: ["vec4 effect(vec2 uv) { return texture(image, uv); }"], params: {}, time: 0 };
+    const calls = paintOp({ filter: "blur(2px)", shaders: [{ ...lut, builtIn: true }] }, false);
+    expect(calls.some((c) => c.name === "set:filter" && c.args[0] === "blur(2px)")).toBe(true);
+    expect(warnings.join(" ")).toContain('"c" uses a shader effect or transition; this renderer has no WebGL');
+    captureWarnings(null);
+  });
+
+  it("crossfades a built-in shader transition where there is no WebGL, without a warning", () => {
+    const warnings: string[] = [];
+    captureWarnings((m) => warnings.push(m));
+    const calls = paintOp(
+      {
+        opacity: 1,
+        fallbackOpacity: 0.25,
+        transition: {
+          id: "x",
+          name: "iris",
+          builtIn: true,
+          source: "vec4 transition(vec2 uv) { return texture(to, uv); }",
+          params: {},
+          progress: 0.25,
+          time: 0.25,
+          role: "in",
+          paired: false,
+        },
+      },
+      false,
+    );
+    expect(calls.some((c) => c.name === "set:globalAlpha" && c.args[0] === 0.25)).toBe(true);
+    expect(warnings).toEqual([]);
+    captureWarnings(null);
+  });
 
   it("clips a wipe in composition pixels before the element's matrix", () => {
     const calls = paintOp({ clip: [{ x: 320, y: 0, w: 320, h: 360 }] });

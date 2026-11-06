@@ -7,7 +7,9 @@ export * from "./actions/history";
 export * from "./actions/registry";
 export * from "./actions/types";
 export * from "./jsx/animate";
+export * from "./jsx/built-in-shaders";
 export * from "./jsx/capabilities";
+export * from "./jsx/curves";
 export * from "./jsx/define";
 export * from "./jsx/elements";
 export * from "./jsx/engines";
@@ -18,6 +20,7 @@ export type { ThreeFrameArgs, ThreeSetupArgs, ThreeSetupFunction } from "./jsx/s
 export { defaultTransitionParams, TRANSITION_PARAMS } from "./jsx/schemas/transition";
 export * from "./jsx/shaders";
 export * from "./jsx/use-t";
+export * from "./manifest/cube";
 export * from "./manifest/timeref";
 export * from "./manifest/transcript";
 export * from "./manifest/types";

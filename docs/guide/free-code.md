@@ -155,12 +155,13 @@ Inside a plain `<Layer>`, use the same libraries through adapters that follow th
 
 ## Effects and transitions of your own
 
-The built-in effects are CSS filters, and the built-in transitions fade, wipe, slide and push. Anything else is a few
-lines of GLSL: declare it at the top of the file with `defineEffect()` or `defineTransition()`, and use the name it
-returns as an `<Effect>` or `<Transition>` type.
+Most built-in effects are CSS filters. The colour tools in [Colour and grading](./colour) run as shaders, through the
+same pipeline as yours, and so do the built-in shader transitions ([Transitions](./time#transitions-sit-between-clips)).
+Anything else is a few lines of GLSL: declare it at the top of the file with `defineEffect()` or `defineTransition()`,
+and use the name it returns as an `<Effect>` or `<Transition>` type.
 
-An effect on a clip: a duotone, with two colour params and a third that the keyframes animate from the plain footage
-to the full effect.
+An effect on a clip: a two-colour tone (the built-in `duotone` does the same; this shows how it is written), with two
+colour params and a third that the keyframes animate from the plain footage to the full effect.
 
 <Example src="previews/guide/shader-effect" alt="Fractal footage turned navy and gold by a duotone effect">
 
@@ -181,11 +182,42 @@ An effect defines `vec4 effect(vec2 uv)` and reads its picture as `image`. A tra
 as `progress`, from 0 to 1. Both also get `resolution` (the frame in pixels) and `time` (seconds into the element).
 `uv` (0, 0) is the top left. Return plain colour; the player premultiplies it.
 
+An effect that needs more than one pass (a blur in two directions, a glow drawn from a blurred copy) gives `passes`, a
+list of shaders, in place of `shader`. Each defines `vec4 effect(vec2 uv)` and runs in order: `image` is the pass
+before's result (the element's picture for the first), and `original` is the element's picture in every pass. Every
+pass gets the same params. A separable blur, as an example:
+
+```tsx
+const soften = defineEffect({
+  name: "soften",
+  params: z.object({ radius: z.number().min(0).max(40).default(8) }),
+  passes: [
+    `vec4 effect(vec2 uv) {
+      vec4 sum = vec4(0.0);
+      for (int i = -8; i <= 8; i++) sum += texture(image, uv + vec2(float(i) * radius / 8.0 / resolution.x, 0.0));
+      return sum / 17.0;
+    }`,
+    `vec4 effect(vec2 uv) {
+      vec4 sum = vec4(0.0);
+      for (int i = -8; i <= 8; i++) sum += texture(image, uv + vec2(0.0, float(i) * radius / 8.0 / resolution.y));
+      return sum / 17.0;
+    }`,
+  ],
+});
+```
+
 Each param reaches the shader as a uniform with the param's name. A number becomes a `float`, a boolean a `bool`, an
 array of two, three or four numbers a `vec2`, `vec3` or `vec4`, and a colour string such as `"#ff8800"` a `vec3`. A
 param can't use the name of a GLSL function (`mix`, `step`, `length`…) or of an input above; `defineEffect()` says so. The
 zod schema checks the values and fills in defaults, [`<Keyframe>`](/reference/elements/keyframe) animates them with
 `property="effect.<id>.<param>"`, and an editor can build its inspector from the schema.
+
+A param can also name an asset, `"asset:ID"`, and the shader reads that file as a texture: an image as a `sampler2D`, a
+LUT (`.cube`) as a `sampler3D`. The player loads it before the frame that needs it. The resolver checks that the asset
+is in the manifest and is an image or a LUT. Textures reach effects on clips, nested sequences and adjustments; on an
+overlay, an effect with an asset param is not drawn yet.
+
+The built-in `lut` effect reads a LUT this way: see [Colour and grading](./colour#a-look-from-a-lut).
 
 On a `<Clip>`, a `<Nested>` and an `<Adjustment>` (where it changes everything beneath it), an effect runs after the
 element's mask, vignette and grain, and before its other built-in effects. Several effects run in the order they

@@ -62,6 +62,18 @@ describe("addAsset", () => {
     expect(assets["logo-red"]).toEqual({ id: "logo-red", kind: "image", duration: 0, width: 128, height: 128 });
   });
 
+  it("lists a .cube LUT, checked, without looking for a transcript, and refuses a broken one", async () => {
+    const manifest = join(dir, "luts.json");
+    const cube = ["LUT_3D_SIZE 2", ...Array.from({ length: 8 }, () => "0.5 0.5 0.5")].join("\n");
+    writeFileSync(join(dir, "teal.cube"), cube);
+    writeFileSync(join(dir, "teal.srt"), "1\n00:00:00,000 --> 00:00:01,000\nhi\n");
+    const result = await addAsset(join(dir, "teal.cube"), { manifest });
+    expect(manifestAt(manifest).assets.teal).toEqual({ id: "teal", kind: "lut", duration: 0 });
+    expect(result.transcript).toBeUndefined();
+    writeFileSync(join(dir, "broken.cube"), "LUT_3D_SIZE 2\n0 0 0");
+    await expect(addAsset(join(dir, "broken.cube"), { manifest })).rejects.toThrow("1 values, expected 2³ = 8");
+  });
+
   it("reads the transcript beside the media, JSON before subtitles, and keeps fields it does not own", async () => {
     const manifest = join(dir, "words.json");
     writeFileSync(

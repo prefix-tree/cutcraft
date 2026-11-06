@@ -1,4 +1,4 @@
-import type { Placement, VIDEO_EFFECT_TYPES } from "@cutcraft/kit";
+import { type Placement, SHADER_ONLY_EFFECTS, type VIDEO_EFFECT_TYPES } from "@cutcraft/kit";
 
 import { devWarn } from "../warn";
 import { keyframedValue } from "./keyframes";
@@ -34,9 +34,12 @@ function levels(p: Params): string {
 /** Effects the painter draws over the element after it (`postEffects`), not as filters. */
 const POST_TYPES = ["vignette", "grain"] as const;
 
-/** One filter per effect type (kit's VIDEO_EFFECT_TYPES), less the post effects. */
+/** One filter per effect type (kit's VIDEO_EFFECT_TYPES), less the post effects and the ones only a shader draws. */
 const CANVAS_FILTERABLE: Readonly<
-  Record<Exclude<(typeof VIDEO_EFFECT_TYPES)[number], (typeof POST_TYPES)[number]>, (p: Params) => string>
+  Record<
+    Exclude<(typeof VIDEO_EFFECT_TYPES)[number], (typeof POST_TYPES)[number] | (typeof SHADER_ONLY_EFFECTS)[number]>,
+    (p: Params) => string
+  >
 > = {
   brightness: (p) => `brightness(${1 + num(p, ["amount", "value"], 0) / 100})`,
   contrast: (p) => `contrast(${1 + num(p, ["amount", "value"], 0) / 100})`,
@@ -49,6 +52,17 @@ const CANVAS_FILTERABLE: Readonly<
   temperature: (p) => colorGradeFilters({ temperature: num(p, ["amount", "value"], 0) }).join(" "),
   tint: (p) => colorGradeFilters({ tint: num(p, ["amount", "value"], 0) }).join(" "),
   levels,
+  // Without WebGL: exposure as brightness of the encoded values, vibrance as plain saturation at half strength.
+  exposure: (p) => `brightness(${2 ** num(p, ["stops"], 0)})`,
+  vibrance: (p) => `saturate(${1 + num(p, ["amount"], 0) / 2})`,
+  // Without WebGL or HTML-in-Canvas: a glow as a coloured shadow under the element, stacked for intensity.
+  glow: (p) => {
+    const colour = typeof p.color === "string" ? p.color : "#ffffff";
+    const layer = `drop-shadow(0 0 ${num(p, ["radius"], 20) / 2}px ${colour})`;
+    return Array.from({ length: Math.max(1, Math.min(4, Math.round(num(p, ["intensity"], 1)))) }, () => layer).join(
+      " ",
+    );
+  },
   shadow: (p) =>
     `drop-shadow(${num(p, ["x"], 0)}px ${num(p, ["y"], 4)}px ${num(p, ["blur"], 8)}px ${typeof p.color === "string" ? p.color : "rgba(0,0,0,0.5)"})`,
 };
@@ -83,6 +97,8 @@ export function filterString(
       if (c.props.enabled === false) continue;
       const type = String(c.props.type);
       if ((POST_TYPES as readonly string[]).includes(type) || declared.has(type)) continue;
+      // Drawn by its shader or not at all; the painter says so where there is no WebGL.
+      if ((SHADER_ONLY_EFFECTS as readonly string[]).includes(type)) continue;
       const make = CANVAS_FILTERABLE[type as keyof typeof CANVAS_FILTERABLE] as ((p: Params) => string) | undefined;
       if (make) {
         const f = make(paramsAt(children, c, rel));

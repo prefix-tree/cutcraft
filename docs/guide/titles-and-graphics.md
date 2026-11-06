@@ -48,6 +48,32 @@ A `<Title>` draws text in the theme's type. `style` picks a preset from the them
 any you define), and `size`, `weight`, `color` and the rest override it. `animation` builds the text in by letter,
 word or line. [`<Title>`](/reference/elements/title) lists every prop.
 
+## Glow, outline, long shadow and bevel
+
+Four effects shape a title, a shape, a sticker or a `<Layer>` by its silhouette. Write them inside the element, like
+any `<Effect>`; they work on clips too.
+
+```tsx
+<Title id="headline" start={0} duration={4} size={120} color="#ffd166">
+  Launch day
+  <Effect id="glow" type="glow" params={{ radius: 24, color: "#ff9f1c", intensity: 1.5 }} />
+</Title>
+```
+
+- `glow` lights the area around the element: `radius` in pixels, `intensity` (up to 4), `color`, and `tint` (1 is all
+  `color`, 0 keeps the element's own colours, a bloom). `threshold` (0 to 1) makes only the bright parts glow, which
+  suits footage.
+- `outline` draws a band of `width` pixels (up to 64) around the shape in `color`, under it. `outlineOnly` draws the
+  grown silhouette alone, filled.
+- `longShadow` sweeps the shape back along `angle` (degrees clockwise from the right, 45 falls down and right) for
+  `reach` pixels, in `color`. Overlapping parts never stack, and `fade` thins it toward the far end.
+- `bevel` lights the shape as if raised: `size` is the width of the slope in pixels, `angle` where the light comes from
+  (degrees clockwise from above), and `intensity` how strongly edges take `highlight` or `shade`.
+
+They draw through the overlay's picture, which the preview needs Chrome's `chrome://flags/#canvas-draw-element` flag
+for. Without it the preview shows `glow` as a coloured shadow and leaves the other three out; the export always draws
+them. For a plain offset shadow, the CSS `shadow` effect needs no flag.
+
 ## Graphics
 
 ::: warning Deprecated

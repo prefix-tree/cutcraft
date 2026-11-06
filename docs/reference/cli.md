@@ -68,7 +68,8 @@ time. `CUTCRAFT_CHROMIUM` names a Chrome or Chromium 153 or later to use instead
 `cutcraft add talk.mp4` writes the media file's entry into the manifest. It reads the kind, length, size, frame rate
 and sound from the file itself, and the words from a transcript with the same name in the same folder: `talk.json`
 from Whisper or ElevenLabs first, then `talk.vtt`, then `talk.srt`. Running it again refreshes the entry and keeps the
-fields it does not write. See [Getting a transcript](/guide/captions-and-sound#getting-a-transcript).
+fields it does not write. See [Getting a transcript](/guide/captions-and-sound#getting-a-transcript). A `.cube` file
+is added as a LUT (kind `lut`) after it is checked, for [`<Effect type="lut">`](/guide/colour#a-look-from-a-lut).
 
 | Option | |
 |---|---|

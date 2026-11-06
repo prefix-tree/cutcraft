@@ -9,6 +9,8 @@ const paramValue = z.union([
   z.string(),
   z.boolean(),
   z.array(z.number()),
+  // A list of points, as `curves` takes.
+  z.array(z.array(z.number())),
   z.record(z.string(), z.number()),
 ]);
 export const paramsSchema = z.record(z.string(), paramValue);
