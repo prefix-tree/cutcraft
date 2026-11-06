@@ -5,6 +5,8 @@ import { z } from "zod";
 
 import { GRAPHIC_KIND_NAMES, GRAPHIC_KINDS, type GraphicKindName } from "../packages/graphics/src/index";
 import {
+  EFFECT_FAMILIES,
+  EFFECTS,
   ELEMENTS,
   ENGINE_LAYERS,
   KIND_CAPABILITIES,
@@ -13,6 +15,8 @@ import {
   MASKED_KINDS,
   NOT_RENDERED,
   RENDERED_VALUES,
+  TRANSITION_FAMILIES,
+  TRANSITIONS,
 } from "../packages/kit/src/index";
 import { syncGeneratedFiles } from "./generated-files";
 import { graphicExample } from "./graphic-example";
@@ -37,6 +41,8 @@ type JsonSchema = {
   anyOf?: JsonSchema[];
   oneOf?: JsonSchema[];
   items?: JsonSchema;
+  /** A tuple's members, in order. */
+  prefixItems?: JsonSchema[];
   properties?: Record<string, JsonSchema>;
   required?: string[];
   default?: unknown;
@@ -57,6 +63,7 @@ function typeOf(s: JsonSchema, limit = Infinity): string {
   if (s.const !== undefined) return JSON.stringify(s.const);
   const alts = s.anyOf ?? s.oneOf;
   if (alts) return [...new Set(alts.map((a) => typeOf(a, limit)))].join(" \\| ");
+  if (s.type === "array" && s.prefixItems) return `[${s.prefixItems.map((m) => typeOf(m)).join(", ")}]`;
   if (s.type === "array") return `${s.items ? typeOf(s.items) : "unknown"}[]`;
   if (s.type === "object") return s.properties ? `{ ${Object.keys(s.properties).join(", ")} }` : "object";
   if (Array.isArray(s.type)) return s.type.join(" \\| ");
@@ -264,11 +271,73 @@ function elementPage(name: string, summary: string): string {
     const def = s.default === undefined ? "" : `\`${JSON.stringify(s.default)}\``;
     lines.push(`| \`${prop}\` | ${typeOf(s, 6)} | ${def} | ${required.has(prop) ? "yes" : ""} |`);
   }
+  if (name === "Effect" || name === "Transition")
+    lines.push("", "Every built-in type and its params: [Effects and transitions](/reference/effects).");
   lines.push(
     "",
     `${traits.length ? `${capital(traits.join(", "))}. ` : ""}${c.childKinds.length ? `Children: ${c.childKinds.map((k) => `\`${k}\``).join(", ")}.` : "No children."} [All elements](/reference/elements/)`,
     "",
   );
+  return lines.join("\n");
+}
+
+/** How a built-in effect or transition draws, for its line in the reference. */
+const DRAWN: Record<string, string> = {
+  css: "a CSS filter; no WebGL needed",
+  shader: "a shader",
+  post: "painted over the element after it",
+  look: "drawn without a shader",
+};
+
+/** One effect's or transition's params as a table, from its schema. */
+function paramsTable(schema: z.ZodType): string[] {
+  const json = z.toJSONSchema(schema, { unrepresentable: "any", io: "input" }) as JsonSchema;
+  const props = Object.entries(json.properties ?? {});
+  if (props.length === 0) return ["No params.", ""];
+  return [
+    "| param | type | default |",
+    "|---|---|---|",
+    ...props.map(
+      ([name, p]) =>
+        `| \`${name}\` | ${typeOf(p, 6)} | ${p.default === undefined ? "" : `\`${JSON.stringify(p.default)}\``} |`,
+    ),
+    "",
+  ];
+}
+
+/** Every built-in effect and transition with its params, grouped by family: generated from the registry. */
+function effectsPage(): string {
+  const lines = [
+    "# Effects and transitions",
+    "",
+    "Every built-in `<Effect type>` and `<Transition type>`, with the params it takes. Params outside these ranges, or not listed, are an error when the file resolves; a keyframe inside an effect animates one by `param`. Generated from the effect registry (`packages/kit/src/effects/registry.ts`) by `pnpm docs:gen`.",
+    "",
+    "## Effects",
+    "",
+  ];
+  for (const [family, names] of Object.entries(EFFECT_FAMILIES)) {
+    lines.push(`### ${family}`, "");
+    for (const name of names) {
+      const e = EFFECTS[name];
+      const fallback = e.draw.kind === "shader" && e.draw.css ? ", with a CSS filter where WebGL is missing" : "";
+      lines.push(`#### \`${name}\``, "", `Drawn as ${DRAWN[e.draw.kind]}${fallback}.`, "", ...paramsTable(e.params));
+    }
+  }
+  lines.push("## Transitions", "");
+  for (const [family, names] of Object.entries(TRANSITION_FAMILIES)) {
+    lines.push(`### ${family}`, "");
+    for (const name of names) {
+      const t = TRANSITIONS[name];
+      const fallback = t.draw.kind === "shader" ? ", as a crossfade where WebGL is missing" : "";
+      lines.push(
+        `#### \`${name}\``,
+        "",
+        `Drawn ${t.draw.kind === "shader" ? "by a shader" : "without a shader"}${fallback}.`,
+        "",
+        ...paramsTable(t.params),
+      );
+    }
+  }
   return lines.join("\n");
 }
 
@@ -502,6 +571,7 @@ const sidebar = {
 };
 write(join(root, "docs", ".vitepress", "sidebar.generated.json"), `${JSON.stringify(sidebar, null, 2)}\n`);
 write(join(out, "rendering.md"), escapeTags(renderingPage()));
+write(join(out, "effects.md"), escapeTags(effectsPage()));
 const problems = syncGeneratedFiles(root, generated, {
   check,
   directories: ["docs/reference/elements", "docs/reference/graphics"],

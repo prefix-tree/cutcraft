@@ -17,4 +17,6 @@ A filter on its parent: brightness, blur, grayscale, vignette, grain and more.
 | `params` | object | `{}` |  |
 | `enabled` | boolean | `true` |  |
 
+Every built-in type and its params: [Effects and transitions](/reference/effects).
+
 Children: `keyframe`. [All elements](/reference/elements/)

@@ -94,6 +94,7 @@ export default defineConfig({
             items: generated.graphics.map((group) => ({ ...group, collapsed: true })),
           },
           { text: "What renders", link: "/reference/rendering" },
+          { text: "Effects and transitions", link: "/reference/effects" },
           { text: "CLI", link: "/reference/cli" },
           { text: "API", link: "/reference/api" },
           { text: "Actions", link: "/reference/actions" },

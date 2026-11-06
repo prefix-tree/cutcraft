@@ -1,37 +1,11 @@
 import { z } from "zod";
 
-import { builtInTransition } from "../built-in-shaders";
+import { TRANSITION_PARAMS } from "../../effects/registry";
 import { TRANSITION_TYPES, type TransitionType, zTransitionType } from "../enums";
 import { idSchema } from "./common";
 
-const dir4 = z.enum(["left", "right", "up", "down"]);
-
-/** Per-type parameter schemas, with defaults that validate. */
-export const TRANSITION_PARAMS: Readonly<Record<TransitionType, z.ZodType>> = {
-  crossfade: z.strictObject({
-    curve: z.enum(["linear", "ease", "ease-in", "ease-out", "ease-in-out"]).default("ease"),
-  }),
-  dipToBlack: z.strictObject({ holdDuration: z.number().min(0).max(30).default(0.1) }),
-  dipToWhite: z.strictObject({ holdDuration: z.number().min(0).max(30).default(0.1) }),
-  wipe: z.strictObject({
-    direction: dir4.default("left"),
-  }),
-  slide: z.strictObject({ direction: dir4.default("left"), pushOut: z.boolean().default(false) }),
-  push: z.strictObject({ direction: dir4.default("left") }),
-  iris: shaderParams("iris"),
-  clockWipe: shaderParams("clockWipe"),
-  blinds: shaderParams("blinds"),
-  filmBurn: shaderParams("filmBurn"),
-  pixelDissolve: shaderParams("pixelDissolve"),
-  zoom: shaderParams("zoom"),
-};
-
-/** A shader transition's params, from its definition, strict like the others. */
-function shaderParams(type: string): z.ZodType {
-  const def = builtInTransition(type);
-  if (!def) throw new Error(`no built-in shader transition "${type}"`);
-  return def.params.strict();
-}
+/** Per-type parameter schemas, with defaults that validate: the registry's. */
+export { TRANSITION_PARAMS };
 
 export const transitionSchema = z
   .strictObject({

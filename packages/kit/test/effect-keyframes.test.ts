@@ -42,7 +42,7 @@ describe("keyframes inside an effect", () => {
     ).toEqual([
       'k1.param: effect "regionBlur" has no param "boxx": it has box, radius, feather, roundness, inverted',
       'k2.value: param "amount" of "own": Too big: expected number to be <=1',
-      'k3.param: effect "brightness" has no param "radius": it has amount, value',
+      'k3.param: effect "brightness" has no param "radius": it has amount',
     ]);
   });
 

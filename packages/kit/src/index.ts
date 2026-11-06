@@ -6,8 +6,25 @@ export * from "./actions/handler-kit";
 export * from "./actions/history";
 export * from "./actions/registry";
 export * from "./actions/types";
+export { colorGradeFilters } from "./effects/css";
+export {
+  BUILT_IN_SHADERS,
+  BUILT_IN_TRANSITIONS,
+  builtInShader,
+  builtInTransition,
+  cssOf,
+  EFFECT_FAMILIES,
+  EFFECTS,
+  type EffectDraw,
+  type EffectEntry,
+  effectEntry,
+  POST_EFFECTS,
+  SHADER_ONLY_EFFECTS,
+  TRANSITION_FAMILIES,
+  TRANSITIONS,
+  type TransitionEntry,
+} from "./effects/registry";
 export * from "./jsx/animate";
-export * from "./jsx/built-in-shaders";
 export * from "./jsx/capabilities";
 export * from "./jsx/curves";
 export * from "./jsx/define";
