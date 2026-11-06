@@ -24,12 +24,12 @@ const colorKey = shaderDefinition("effect", {
 }
 vec4 effect(vec2 uv) {
   vec4 c = texture(image, uv);
-  float d = 2.0 * distance(ck_chroma(c.rgb), ck_chroma(color));
-  float keep = smoothstep(tolerance, tolerance + softness + 1e-4, d);
+  float d = 2.0 * distance(ck_chroma(c.rgb), ck_chroma(params.color));
+  float keep = smoothstep(params.tolerance, params.tolerance + params.softness + 1e-4, d);
   vec3 rgb = c.rgb;
-  if (color.g >= color.r && color.g >= color.b) rgb.g = mix(rgb.g, min(rgb.g, (rgb.r + rgb.b) / 2.0), spill);
-  else if (color.b >= color.r) rgb.b = mix(rgb.b, min(rgb.b, (rgb.r + rgb.g) / 2.0), spill);
-  else rgb.r = mix(rgb.r, min(rgb.r, (rgb.g + rgb.b) / 2.0), spill);
+  if (params.color.g >= params.color.r && params.color.g >= params.color.b) rgb.g = mix(rgb.g, min(rgb.g, (rgb.r + rgb.b) / 2.0), params.spill);
+  else if (params.color.b >= params.color.r) rgb.b = mix(rgb.b, min(rgb.b, (rgb.r + rgb.g) / 2.0), params.spill);
+  else rgb.r = mix(rgb.r, min(rgb.r, (rgb.g + rgb.b) / 2.0), params.spill);
   return vec4(rgb, c.a * keep);
 }`,
 });
@@ -55,13 +55,13 @@ const regionBlur = shaderDefinition("effect", {
     GAUSS_PASS("y", "rgba"),
     `vec4 effect(vec2 uv) {
   vec2 p = uv * resolution;
-  vec2 half_size = box.zw * resolution / 2.0;
-  vec2 centre = box.xy * resolution + half_size;
-  float r = roundness * min(half_size.x, half_size.y);
+  vec2 half_size = params.box.zw * resolution / 2.0;
+  vec2 centre = params.box.xy * resolution + half_size;
+  float r = params.roundness * min(half_size.x, half_size.y);
   vec2 q = abs(p - centre) - (half_size - r);
   float d = length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - r;
-  float m = feather > 0.0 ? clamp(-d / feather, 0.0, 1.0) : (d <= 0.0 ? 1.0 : 0.0);
-  if (inverted) m = 1.0 - m;
+  float m = params.feather > 0.0 ? clamp(-d / params.feather, 0.0, 1.0) : (d <= 0.0 ? 1.0 : 0.0);
+  if (params.inverted) m = 1.0 - m;
   return mix(texture(original, uv), texture(image, uv), m);
 }`,
   ],
@@ -82,7 +82,7 @@ const cornerPin = shaderDefinition("effect", {
     bottomLeft: UV.default([0, 1]),
   }),
   shader: `vec4 effect(vec2 uv) {
-  vec2 p0 = topLeft, p1 = topRight, p2 = bottomRight, p3 = bottomLeft;
+  vec2 p0 = params.topLeft, p1 = params.topRight, p2 = params.bottomRight, p3 = params.bottomLeft;
   vec2 d1 = p1 - p2, d2 = p3 - p2, d3 = p0 - p1 + p2 - p3;
   float den = d1.x * d2.y - d2.x * d1.y;
   float g = 0.0, h = 0.0;
@@ -111,13 +111,13 @@ const zoomBlur = shaderDefinition("effect", {
     samples: z.number().int().min(1).max(64).default(24),
   }),
   shader: `vec4 effect(vec2 uv) {
-  float reach = amount / length(resolution / 2.0);
-  int n = int(samples);
+  float reach = params.amount / length(resolution / 2.0);
+  int n = int(params.samples);
   vec4 sum = vec4(0.0);
   for (int i = 0; i < 64; i++) {
     if (i >= n) break;
     float t = n > 1 ? float(i) / float(n - 1) : 0.0;
-    vec4 s = texture(image, uv + (center - uv) * reach * t);
+    vec4 s = texture(image, uv + (params.center - uv) * reach * t);
     sum += vec4(s.rgb * s.a, s.a);
   }
   sum /= float(n);
@@ -139,10 +139,10 @@ const chromaticAberration = shaderDefinition("effect", {
     center: UV.default([0.5, 0.5]),
   }),
   shader: `vec4 effect(vec2 uv) {
-  float a = radians(angle);
-  vec2 shift = radial
-    ? (uv - center) * amount / length(resolution / 2.0)
-    : vec2(cos(a), sin(a)) * amount / resolution;
+  float a = radians(params.angle);
+  vec2 shift = params.radial
+    ? (uv - params.center) * params.amount / length(resolution / 2.0)
+    : vec2(cos(a), sin(a)) * params.amount / resolution;
   vec4 c = texture(image, uv);
   vec4 r = texture(image, uv - shift);
   vec4 b = texture(image, uv + shift);

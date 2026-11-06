@@ -29,12 +29,15 @@ const percent = (fallback: number) => z.number().min(-100).max(100).default(fall
 const share = (fallback: number) => z.number().min(0).max(100).default(fallback);
 
 /** An effect drawn as a CSS filter: its params and the filter it writes. */
-export interface CssEffect {
-  readonly params: z.ZodObject;
+export interface CssEffect<P extends z.ZodObject = z.ZodObject> {
+  readonly params: P;
   readonly css: (p: Params) => string;
 }
 
-const css = <S extends z.ZodRawShape>(shape: S, write: (p: Params) => string): CssEffect => ({
+const css = <S extends z.ZodRawShape>(
+  shape: S,
+  write: (p: Params) => string,
+): CssEffect<z.ZodObject<S, z.core.$strict>> => ({
   params: z.strictObject(shape),
   css: write,
 });

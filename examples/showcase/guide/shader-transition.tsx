@@ -1,7 +1,7 @@
-import { Clip, Composition, defineTransition, Track, Transition } from "@cutcraft/kit";
+import { Clip, Composition, Track, Transition, transition } from "@cutcraft/kit";
 
 // The incoming clip opens as a circle from the centre of the frame.
-const circle = defineTransition({
+const circle = transition({
   name: "circle",
   shader: `vec4 transition(vec2 uv) {
     float d = distance(uv * resolution, resolution / 2.0) / length(resolution / 2.0);

@@ -17,7 +17,7 @@ float cc_luma(vec3 c) { return dot(c, vec3(0.2126, 0.7152, 0.0722)); }
 export const HEX = z.string().regex(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i, 'a colour is "#rgb" or "#rrggbb"');
 
 /**
- * One pass of a separable Gaussian blur of the `radius` param's pixels (or another param's): 33 taps along x or y
+ * One pass of a separable Gaussian blur of the `radius` param's pixels (or another param's, by name): 33 taps along x or y
  * spanning three standard deviations each way. `luma` blurs the luminance and `alpha` the alpha (each into the
  * result's red), `rgba` the picture, weighted by alpha so transparent pixels add no colour.
  */
@@ -26,7 +26,7 @@ export const GAUSS_PASS = (
   what: "luma" | "alpha" | "rgba",
   radius = "radius",
 ) => `${COLOUR}vec4 effect(vec2 uv) {
-  float span = max(${radius}, 1.0);
+  float span = max(params.${radius}, 1.0);
   float sigma = span / 3.0;
   vec2 dir = vec2(${axis === "x" ? "1.0, 0.0" : "0.0, 1.0"}) * span / 16.0 / resolution;
   vec4 sum = vec4(0.0);

@@ -11,7 +11,7 @@ const stateOf = (children: string, declarations = "") =>
   resolve(
     collectModule(
       loadModule(`import { z } from "zod";
-import { Clip, ColorGrade, Composition, defineEffect, Effect, Track } from "@cutcraft/kit";
+import { Clip, ColorGrade, Composition, effect, Effect, Track } from "@cutcraft/kit";
 ${declarations}
 export default function V() { return <Composition fps={30} width={640} height={360}><Track id="t"><Clip id="c" src="asset:city" in={0} out={4}>${children}</Clip></Track></Composition>; }`) as never,
     ),
@@ -102,7 +102,7 @@ describe("the effect pipeline", () => {
     const p = pipelineOf(
       `<Effect id="a" type="brightness" params={{ amount: 10 }} /><Effect id="b" type="levels" /><Effect id="o" type={own} /><Effect id="k" type="curves" />`,
       { shaders: false },
-      `const own = defineEffect({ name: "own", shader: "vec4 effect(vec2 uv) { return texture(image, uv); }" });`,
+      `const own = effect({ name: "own", shader: "vec4 effect(vec2 uv) { return texture(image, uv); }" });`,
     );
     expect(p.filter).toMatch(/^brightness\(1\.1\) brightness\(1\) contrast\(1\)$/);
     expect(p.shaders?.map((s) => s.name)).toEqual(["own", "curves"]);

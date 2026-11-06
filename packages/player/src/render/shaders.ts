@@ -1,5 +1,5 @@
-// Runs shader effects (the kit's own and the file's, `defineEffect()`) and transitions (`defineTransition()`): each pass
-// is a GLSL function the runner wraps in a fragment shader with its params as uniforms, drawn over a full-frame triangle
+// Runs shader effects (the kit's own and the file's, `effect()`) and transitions (`transition()`): each pass is a GLSL
+// function the runner wraps in a fragment shader with its params as uniforms, drawn over a full-frame triangle
 // with WebGL 2. Passes between the first and the last draw into textures, not the canvas. Where there is no WebGL 2,
 // `available` is false and the painter draws without them.
 import type { ShaderTexture, ShaderTextures } from "../media/shader-textures";
@@ -20,8 +20,18 @@ void main() {
   gl_Position = vec4(position.x, position.y * cutcraft_flip, 0.0, 1.0);
 }`;
 
-/** Names the runner gives every shader; a param may not take one. */
-const RESERVED = new Set(["image", "original", "from", "to", "resolution", "time", "progress", "position"]);
+/** Names the runner gives every shader; a computed table may not take one. */
+const INPUTS = new Set(["image", "original", "from", "to", "resolution", "time", "progress", "position"]);
+
+/** The uniform a param is declared as: shaders read it as `params.NAME`, which the runner rewrites to this. */
+export const paramUniform = (name: string): string => `cc_param_${name}`;
+
+/** A shader's `params.NAME` reads, as the uniforms the runner declares. */
+const PARAM_READ = /(?<![.\w])params\.([A-Za-z_]\w*)/g;
+
+/** A compile or link log with the param uniforms back as the shader wrote them. */
+const asWritten = (log: string | null | undefined): string | undefined =>
+  log?.trim().replace(/cc_param_(\w+)/g, "params.$1");
 
 /** A param as a uniform: a number as a float, a boolean as a bool, 2 to 4 numbers as a vec, `#rgb`/`#rrggbb` as a vec3. */
 export function uniformOf(value: unknown): Uniform | null {
@@ -39,9 +49,9 @@ export function uniformOf(value: unknown): Uniform | null {
 }
 
 /**
- * The fragment shader around a pass's GLSL function: its inputs, its params as uniforms, and a `main` that calls it. A
- * final pass writes premultiplied colour for the canvas; a pass into a texture writes plain colour, as the next pass
- * reads its `image`.
+ * The fragment shader around a pass's GLSL function: its inputs, its params as uniforms (read as `params.NAME`), and a
+ * `main` that calls it. A final pass writes premultiplied colour for the canvas; a pass into a texture writes plain
+ * colour, as the next pass reads its `image`.
  */
 export function fragmentSource(
   kind: "effect" | "transition",
@@ -54,15 +64,15 @@ export function fragmentSource(
   tables: readonly string[] = [],
 ): string {
   const named = tables
-    .filter((name) => /^[A-Za-z_]\w*$/.test(name) && !RESERVED.has(name) && !(name in params))
+    .filter((name) => /^[A-Za-z_]\w*$/.test(name) && !INPUTS.has(name))
     .map((name) => `uniform highp sampler2D ${name};`);
   const uniforms = Object.entries(params)
-    .filter(([name]) => /^[A-Za-z_]\w*$/.test(name) && !RESERVED.has(name))
+    .filter(([name]) => /^[A-Za-z_]\w*$/.test(name))
     .map(([name, value]) => {
       const texture = typeof value === "string" ? textureKind(value) : undefined;
-      if (texture) return `uniform highp ${texture === "3d" ? "sampler3D" : "sampler2D"} ${name};`;
+      if (texture) return `uniform highp ${texture === "3d" ? "sampler3D" : "sampler2D"} ${paramUniform(name)};`;
       const u = uniformOf(value);
-      return u ? `uniform ${u.type} ${name};` : null;
+      return u ? `uniform ${u.type} ${paramUniform(name)};` : null;
     })
     .filter((line): line is string => line !== null);
   const inputs =
@@ -78,7 +88,7 @@ ${[...named, ...uniforms].join("\n")}
 in vec2 cutcraft_uv;
 out vec4 cutcraft_out;
 #line 1
-${source}
+${source.replace(PARAM_READ, (_, name: string) => paramUniform(name))}
 void main() {
   vec4 c = ${kind}(cutcraft_uv);
   cutcraft_out = ${final ? "vec4(c.rgb * c.a, c.a)" : "c"};
@@ -149,7 +159,7 @@ export class ShaderRunner {
       for (const [name, texture] of tables) bound[name] ??= { texture, kind: "2d" };
       for (const [name, value] of Object.entries(step.effect.params)) {
         const asset = typeof value === "string" ? assets.get(value) : undefined;
-        if (asset) bound[name] = asset;
+        if (asset) bound[paramUniform(name)] = asset;
       }
       this.draw(gl, program, target, step.effect.params, bound, { time: step.effect.time });
       if (target) image = target.texture;
@@ -317,7 +327,7 @@ export class ShaderRunner {
       gl.shaderSource(shader, text);
       gl.compileShader(shader);
       if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS))
-        throw new Error(`the shader does not compile: ${gl.getShaderInfoLog(shader)?.trim()}`);
+        throw new Error(`the shader does not compile: ${asWritten(gl.getShaderInfoLog(shader))}`);
       return shader;
     };
     const program = gl.createProgram() as WebGLProgram;
@@ -326,7 +336,7 @@ export class ShaderRunner {
     gl.bindAttribLocation(program, 0, "position");
     gl.linkProgram(program);
     if (!gl.getProgramParameter(program, gl.LINK_STATUS))
-      throw new Error(`the shader does not link: ${gl.getProgramInfoLog(program)?.trim()}`);
+      throw new Error(`the shader does not link: ${asWritten(gl.getProgramInfoLog(program))}`);
     this.programs.set(fragment, program);
     return program;
   }
@@ -354,7 +364,7 @@ export class ShaderRunner {
     for (const [name, value] of Object.entries(values)) gl.uniform1f(gl.getUniformLocation(program, name), value);
     for (const [name, value] of Object.entries(params)) {
       const u = uniformOf(value);
-      const at = u && gl.getUniformLocation(program, name);
+      const at = u && gl.getUniformLocation(program, paramUniform(name));
       if (!u || !at) continue;
       if (u.type === "float" || u.type === "bool") gl.uniform1f(at, u.value[0] as number);
       else if (u.type === "vec2") gl.uniform2fv(at, u.value);

@@ -280,7 +280,7 @@ Drawn as a shader.
 
 | param | type | default |
 |---|---|---|
-| `reach` | number (0..2000) | `240` |
+| `length` | number (0..2000) | `240` |
 | `angle` | number | `45` |
 | `color` | string | `"#777777"` |
 | `opacity` | number (0..1) | `1` |

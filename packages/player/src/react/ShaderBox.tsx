@@ -24,7 +24,7 @@ function runnerFor(width: number, height: number): ShaderRunner {
 }
 
 /**
- * An overlay drawn through the effects the file declares (`defineEffect()`): its DOM lives inside a canvas
+ * An overlay drawn through the effects the file declares (`effect()`): its DOM lives inside a canvas
  * (HTML-in-Canvas), which draws it, runs the shaders over the picture and shows the result. The box is the frame's
  * size, so the overlay keeps its place in it. A browser without HTML-in-Canvas shows the overlay without the effects.
  */

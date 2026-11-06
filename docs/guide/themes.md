@@ -175,5 +175,5 @@ it restyles.
   The message names the token when the colour matches one.
 - `font-available` (warning): a font no renderer ships and the file does not
   declare.
-- `declaration` (warning): a `font()`, `googleFont()`, `defineEffect()` or `defineTransition()` call inside a
+- `declaration` (warning): a `font()`, `googleFont()`, `effect()` or `transition()` call inside a
   function, or with arguments that are not literal.

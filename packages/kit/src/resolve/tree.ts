@@ -42,7 +42,7 @@ export interface CollectedTree {
   readonly errors: readonly ResolveError[];
   /** The faces the file declares (`font()`, `googleFont()`); set by `collectModule`. */
   readonly fonts?: readonly DeclaredFont[];
-  /** The effects and transitions the file declares (`defineEffect()`, `defineTransition()`); set by `collectModule`. */
+  /** The effects and transitions the file declares (`effect()`, `transition()`); set by `collectModule`. */
   readonly shaders?: readonly ShaderDefinition[];
 }
 

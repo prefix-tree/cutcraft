@@ -1,19 +1,19 @@
 // What a shader effect or transition is: its GLSL passes and the zod schema of its params, checked when it is made.
-// Built-in effects (effects/registry.ts) and a file's own (jsx/shaders.ts, defineEffect) are both made here.
+// Built-in effects (effects/registry.ts) and a file's own (jsx/shaders.ts, effect()) are both made here.
 import { type ZodObject, z } from "zod";
 
-export interface ShaderDefinition {
+export interface ShaderDefinition<P extends ZodObject = ZodObject> {
   readonly kind: "effect" | "transition";
   readonly name: string;
   /** The params `<Effect params>` or `<Transition params>` takes, validated and given defaults by this schema. */
-  readonly params: ZodObject;
+  readonly params: P;
   /**
    * GLSL ES 3.00, one source per pass, run in order. An effect's pass defines `vec4 effect(vec2 uv)` and a transition's
    * single pass `vec4 transition(vec2 uv)`. A pass may read `image` (an effect's picture: the element's for the first
    * pass, the pass before's for the others), `original` (the element's picture, in every pass) or `from` and `to` (a
    * transition's two pictures) as `sampler2D`, `resolution` (vec2, pixels), `time` (seconds into the element),
-   * `progress` (0..1 through a transition), and each param by its name: a number as a float, a boolean as a bool, an
-   * array of 2 to 4 numbers as a vec, a colour string as a vec3.
+   * `progress` (0..1 through a transition), and each param as `params.NAME`: a number as a float, a boolean as a bool,
+   * an array of 2 to 4 numbers as a vec, a colour string as a vec3, an `"asset:ID"` as a sampler.
    */
   readonly passes: readonly string[];
   /**
@@ -31,22 +31,22 @@ export interface ShaderTable {
   readonly data: Uint8Array;
 }
 
+/** The params of a shader that declares none. */
+export type NoParams = ZodObject<Record<never, never>>;
+
 const NAME = /^[a-z][a-zA-Z0-9-]*$/;
 
-/** Names a param cannot take: the inputs every shader gets, and GLSL ES 3.00's built-in functions, which it would hide. */
-const RESERVED = new Set([
-  ...["image", "original", "from", "to", "resolution", "time", "progress", "position", "uv", "main"],
-  ...["radians", "degrees", "sin", "cos", "tan", "asin", "acos", "atan", "sinh", "cosh", "tanh", "asinh", "acosh"],
-  ...["atanh", "pow", "exp", "log", "exp2", "log2", "sqrt", "inversesqrt", "abs", "sign", "floor", "trunc", "round"],
-  ...["roundEven", "ceil", "fract", "mod", "modf", "min", "max", "clamp", "mix", "step", "smoothstep", "isnan"],
-  ...["isinf", "length", "distance", "dot", "cross", "normalize", "faceforward", "reflect", "refract"],
-  ...["matrixCompMult", "outerProduct", "transpose", "determinant", "inverse", "lessThan", "lessThanEqual"],
-  ...["greaterThan", "greaterThanEqual", "equal", "notEqual", "any", "all", "not", "texture", "textureSize"],
-  ...["textureLod", "texelFetch", "dFdx", "dFdy", "fwidth"],
-]);
+/** A param's name: letters and digits, words joined by single underscores, as GLSL allows after a prefix. */
+const PARAM = /^[A-Za-z](?:_?[A-Za-z0-9])*$/;
+
+/** A pass's `params.NAME` reads. */
+const PARAM_READ = /(?<![.\w])params\.([A-Za-z_]\w*)/g;
 
 /** Checks a declaration and makes its definition; throws what is wrong with it. */
-export function shaderDefinition(kind: ShaderDefinition["kind"], options: DefineOptions): ShaderDefinition {
+export function shaderDefinition<P extends ZodObject = NoParams>(
+  kind: ShaderDefinition["kind"],
+  options: DefineOptions<P>,
+): ShaderDefinition<P> {
   const { name } = options;
   if (!NAME.test(name)) throw new Error(`${kind} "${name}": a name is lowercase letters, digits and dashes`);
   if ((options.shader === undefined) === (options.passes === undefined))
@@ -63,17 +63,20 @@ export function shaderDefinition(kind: ShaderDefinition["kind"], options: Define
         `${kind} "${name}": ${passes.length > 1 ? `pass ${i + 1}` : "the shader"} defines vec4 ${fn}(vec2 uv)`,
       );
   });
-  for (const param of Object.keys(options.params?.shape ?? {}))
-    if (RESERVED.has(param))
-      throw new Error(
-        `${kind} "${name}": param "${param}" is a name every shader already uses (a GLSL function or input); call it something else`,
-      );
-  return { kind, name, params: options.params ?? z.object({}), passes };
+  const declared = Object.keys(options.params?.shape ?? {});
+  for (const param of declared)
+    if (!PARAM.test(param))
+      throw new Error(`${kind} "${name}": param "${param}" is not a name; use letters and digits, joined by single _`);
+  for (const pass of passes)
+    for (const [, read] of pass.matchAll(PARAM_READ))
+      if (!declared.includes(read as string))
+        throw new Error(`${kind} "${name}": the shader reads params.${read}, which its params do not declare`);
+  return { kind, name, params: options.params ?? (z.object({}) as ZodObject as P), passes };
 }
 
-export interface DefineOptions {
+export interface DefineOptions<P extends ZodObject = ZodObject> {
   readonly name: string;
-  readonly params?: ZodObject;
+  readonly params?: P;
   /** The GLSL of a one-pass effect or of a transition. */
   readonly shader?: string;
   /** An effect of several passes, run in order: each reads the one before as `image` and the element as `original`. */

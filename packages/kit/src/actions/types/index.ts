@@ -140,7 +140,7 @@ export interface TransitionActions {
   "transition/add": {
     transitionId: Id;
     between: readonly [Id, Id] | { on: Id; edge: "in" | "out" };
-    /** A built-in transition, or one the file declares with `defineTransition()`. */
+    /** A built-in transition, or one the file declares with `transition()`. */
     type: TransitionType | (string & {});
     duration: number;
     params?: Readonly<Record<string, Json>>;

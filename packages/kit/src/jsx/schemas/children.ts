@@ -17,7 +17,7 @@ export const paramsSchema = z.record(z.string(), paramValue);
 
 export const effectSchema = z.strictObject({
   id: idSchema,
-  /** A built-in effect, or one the file declares with `defineEffect()`. */
+  /** A built-in effect, or one the file declares with `effect()`. */
   type: z.union([zVideoEffectType, z.string().min(1)]),
   params: paramsSchema.default({}),
   enabled: z.boolean().default(true),

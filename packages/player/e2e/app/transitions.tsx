@@ -10,7 +10,7 @@ export default function Video() {
     <Composition fps={30} width={640} height={360} background={{ mode: "blur", color: "#000000" }}>
       <Track id="main">
         <Clip id="solid" src="asset:solid" in={0} out={2} transform={{ scale: 0.5 }} />
-        <Transition id="w" type="wipe" duration={1} params={{ direction: "left", curve: "linear" }} />
+        <Transition id="w" type="wipe" duration={1} params={{ direction: "left" }} />
         <Clip id="img" src="asset:logo" duration={2} fit="cover" />
       </Track>
     </Composition>

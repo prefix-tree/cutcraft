@@ -11,15 +11,15 @@ const stateOf = (body: string, declarations: string) =>
   resolve(
     collectModule(
       loadModule(`import { z } from "zod";
-import { Adjustment, Clip, Composition, defineEffect, defineTransition, Effect, Keyframe, Track, Transition } from "@cutcraft/kit";
+import { Adjustment, Clip, Composition, effect, transition, Effect, Keyframe, Track, Transition } from "@cutcraft/kit";
 ${declarations}
 export default function V() { return <Composition fps={30} width={640} height={360}>${body}</Composition>; }`) as never,
     ),
     manifest,
   );
 
-const GLOW = `const glow = defineEffect({ name: "soft-glow", params: z.object({ amount: z.number().default(0.5), tint: z.string().default("#ff8800") }), shader: "vec4 effect(vec2 uv) { return texture(image, uv) * amount; }" });`;
-const SWEEP = `const sweep = defineTransition({ name: "sweep", shader: "vec4 transition(vec2 uv) { return uv.x < progress ? texture(to, uv) : texture(from, uv); }" });`;
+const GLOW = `const glow = effect({ name: "soft-glow", params: z.object({ amount: z.number().default(0.5), tint: z.string().default("#ff8800") }), shader: "vec4 effect(vec2 uv) { return texture(image, uv) * params.amount; }" });`;
+const SWEEP = `const sweep = transition({ name: "sweep", shader: "vec4 transition(vec2 uv) { return uv.x < progress ? texture(to, uv) : texture(from, uv); }" });`;
 
 describe("declared shaders in the frame plan", () => {
   it("attach a clip's declared effects, with keyframed params and the element's clock, after its CSS ones in file order", () => {
@@ -124,7 +124,7 @@ describe("declared shaders in the frame plan", () => {
   it("carry every pass of an effect of several", () => {
     const state = stateOf(
       `<Track id="t"><Clip id="c" src="asset:city" in={0} out={4}><Effect id="s" type={soft} /></Clip></Track>`,
-      `const soft = defineEffect({ name: "soft", passes: ["vec4 effect(vec2 uv) { return texture(image, uv); }", "vec4 effect(vec2 uv) { return texture(original, uv); }"] });`,
+      `const soft = effect({ name: "soft", passes: ["vec4 effect(vec2 uv) { return texture(image, uv); }", "vec4 effect(vec2 uv) { return texture(original, uv); }"] });`,
     );
     const op = buildFramePlan(state, 1).ops[0]!;
     expect(op.shaders?.[0]?.sources).toHaveLength(2);
@@ -196,16 +196,20 @@ describe("the shader runner's program", () => {
   });
 
   it("wraps the declared function with its inputs and params, and premultiplies what it returns", () => {
-    const effect = fragmentSource("effect", "vec4 effect(vec2 uv) { return texture(image, uv); }", {
+    const effect = fragmentSource("effect", "vec4 effect(vec2 uv) { return texture(image, uv) * params.amount; }", {
       amount: 1,
       tint: "#fff",
       time: 3,
+      image: 0.5,
       "bad name": 1,
     });
     expect(effect).toContain("uniform sampler2D image;\nuniform sampler2D original;");
-    expect(effect).toContain("uniform float amount;");
-    expect(effect).toContain("uniform vec3 tint;");
-    expect(effect).not.toContain("uniform float time;\nuniform float time;");
+    expect(effect).toContain("uniform float cc_param_amount;");
+    expect(effect).toContain("uniform vec3 cc_param_tint;");
+    // A param may take an input's name: it is read as params.NAME, never as the bare name.
+    expect(effect).toContain("uniform float cc_param_time;");
+    expect(effect).toContain("uniform float cc_param_image;");
+    expect(effect).toContain("return texture(image, uv) * cc_param_amount;");
     expect(effect).not.toContain("bad name");
     expect(effect).toContain("cutcraft_out = vec4(c.rgb * c.a, c.a);");
     const curve = fragmentSource(

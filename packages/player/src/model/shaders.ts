@@ -26,7 +26,7 @@ export interface ShaderPass {
   readonly time: number;
 }
 
-/** A shader transition (the file's own from `defineTransition()`, or the kit's) on one side of it at this moment. */
+/** A shader transition (the file's own from `transition()`, or the kit's) on one side of it at this moment. */
 export interface TransitionPass {
   /** A built-in transition (`iris`…), which crossfades where there is no WebGL. */
   readonly builtIn?: true;

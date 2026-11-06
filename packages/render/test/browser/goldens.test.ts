@@ -45,12 +45,12 @@ afterAll(() => rmSync(scratch, { recursive: true, force: true }));
  * sweep across and a brightness ramp down with a grey band and hard edges; `shape` is a rounded box and a disc on
  * transparency, for the effects that work on alpha.
  */
-const CHART = `const chart = defineEffect({
+const CHART = `const chart = effect({
   name: "chart",
   params: z.object({ shape: z.boolean().default(false) }),
   shader: \`vec3 hue(float h) { return clamp(abs(mod(h * 6.0 + vec3(0.0, 4.0, 2.0), 6.0) - 3.0) - 1.0, 0.0, 1.0); }
 vec4 effect(vec2 uv) {
-  if (shape) {
+  if (params.shape) {
     vec2 p = uv * resolution;
     vec2 q = abs(p - vec2(110.0, 90.0)) - vec2(50.0, 35.0) + 12.0;
     float box = length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - 12.0;
@@ -114,7 +114,7 @@ const CASES: readonly Case[] = [
   {
     name: "longShadow",
     shape: true,
-    effects: `<Effect id="e" type="longShadow" params={{ reach: 60, color: "#333333", fade: true }} />`,
+    effects: `<Effect id="e" type="longShadow" params={{ length: 60, color: "#333333", fade: true }} />`,
   },
   { name: "bevel", shape: true, effects: `<Effect id="e" type="bevel" params={{ size: 6, intensity: 0.8 }} />` },
   {
@@ -148,7 +148,7 @@ async function still(c: Case): Promise<string> {
   writeFileSync(
     file,
     `import { z } from "zod";
-import { Clip, Composition, defineEffect, Effect, Layer, Track } from "@cutcraft/kit";
+import { Clip, Composition, effect, Effect, Layer, Track } from "@cutcraft/kit";
 export const manifest = ${JSON.stringify(manifest)};
 ${CHART}
 export default function Video() {

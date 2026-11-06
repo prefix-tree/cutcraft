@@ -1,13 +1,13 @@
 import { z } from "zod";
 
-import { Clip, Composition, defineEffect, Effect, Motion, Title, Track } from "@cutcraft/kit";
+import { Clip, Composition, Effect, effect, Motion, Title, Track } from "@cutcraft/kit";
 
 // The same kind of effect a clip takes, on a title and on a Motion layer: the overlay's pixels only.
-const split = defineEffect({
+const split = effect({
   name: "split",
   params: z.object({ amount: z.number().min(0).max(0.05).default(0.008) }),
   shader: `vec4 effect(vec2 uv) {
-    vec2 o = vec2(amount * (1.0 + sin(time * 8.0)), 0.0);
+    vec2 o = vec2(params.amount * (1.0 + sin(time * 8.0)), 0.0);
     vec4 c = texture(image, uv);
     float r = texture(image, uv + o).a;
     float b = texture(image, uv - o).a;

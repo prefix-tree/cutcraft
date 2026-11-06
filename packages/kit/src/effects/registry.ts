@@ -23,28 +23,28 @@ export type EffectDraw =
   /** By the painter, over the element's own pixels after it (vignette, grain). */
   | { readonly kind: "post" };
 
-export interface EffectEntry {
+export interface EffectEntry<P extends z.ZodObject = z.ZodObject> {
   readonly name: string;
-  readonly params: z.ZodObject;
+  readonly params: P;
   readonly draw: EffectDraw;
 }
 
-export interface TransitionEntry {
+export interface TransitionEntry<P extends z.ZodObject = z.ZodObject> {
   readonly name: string;
-  readonly params: z.ZodObject;
+  readonly params: P;
   /** `look`: drawn by the player's own transition looks (fades, wipes, slides); `shader`: by a shader. */
   readonly draw: { readonly kind: "look" } | { readonly kind: "shader"; readonly shader: ShaderDefinition };
 }
 
-const cssEntry = (name: string, e: cssEffects.CssEffect): EffectEntry => ({
+const cssEntry = <P extends z.ZodObject>(name: string, e: cssEffects.CssEffect<P>): EffectEntry<P> => ({
   name,
   params: e.params,
   draw: { kind: "css", css: e.css },
 });
 
 /** A shader effect with strict params (an unknown param is an error, not dropped), and its CSS fallback if it has one. */
-function shaderEntry(def: ShaderDefinition, css?: (p: Params) => string): EffectEntry {
-  const strict = { ...def, params: def.params.strict() };
+function shaderEntry<P extends z.ZodObject>(def: ShaderDefinition<P>, css?: (p: Params) => string): EffectEntry<P> {
+  const strict = { ...def, params: def.params.strict() as z.ZodObject as P };
   return { name: def.name, params: strict.params, draw: { kind: "shader", shader: strict, ...(css ? { css } : {}) } };
 }
 
@@ -82,9 +82,13 @@ export const EFFECTS = {
 } as const satisfies Record<string, EffectEntry>;
 
 const dir4 = z.enum(["left", "right", "up", "down"]);
-const look = (name: string, params: z.ZodObject): TransitionEntry => ({ name, params, draw: { kind: "look" } });
-const shaderTransition = (def: ShaderDefinition): TransitionEntry => {
-  const strict = { ...def, params: def.params.strict() };
+const look = <P extends z.ZodObject>(name: string, params: P): TransitionEntry<P> => ({
+  name,
+  params,
+  draw: { kind: "look" },
+});
+const shaderTransition = <P extends z.ZodObject>(def: ShaderDefinition<P>): TransitionEntry<P> => {
+  const strict = { ...def, params: def.params.strict() as z.ZodObject as P };
   return { name: def.name, params: strict.params, draw: { kind: "shader", shader: strict } };
 };
 
@@ -107,6 +111,8 @@ export const TRANSITIONS = {
 } as const satisfies Record<string, TransitionEntry>;
 
 export type VideoEffectType = keyof typeof EFFECTS;
+/** The params a built-in effect takes, as written in `<Effect params>`. */
+export type EffectParams<K extends VideoEffectType> = z.input<(typeof EFFECTS)[K]["params"]>;
 
 /** The effects by family, for the reference and the editor's menus. Every effect is in exactly one. */
 export const EFFECT_FAMILIES: Readonly<Record<string, readonly VideoEffectType[]>> = {
@@ -129,6 +135,8 @@ export const EFFECT_FAMILIES: Readonly<Record<string, readonly VideoEffectType[]
   "Titles and shapes": ["glow", "outline", "longShadow", "bevel"],
 };
 export type TransitionType = keyof typeof TRANSITIONS;
+/** The params a built-in transition takes, as written in `<Transition params>`. */
+export type TransitionParams<K extends TransitionType> = z.input<(typeof TRANSITIONS)[K]["params"]>;
 
 /** The transitions by family. Every transition is in exactly one. */
 export const TRANSITION_FAMILIES: Readonly<Record<string, readonly TransitionType[]>> = {
@@ -186,4 +194,4 @@ export function cssOf(type: unknown): ((p: Params) => string) | undefined {
 /** Per-type params schemas of the built-in transitions. */
 export const TRANSITION_PARAMS: Readonly<Record<TransitionType, z.ZodObject>> = Object.fromEntries(
   Object.entries(TRANSITIONS).map(([k, t]) => [k, t.params]),
-) as Record<TransitionType, z.ZodObject>;
+) as unknown as Record<TransitionType, z.ZodObject>;

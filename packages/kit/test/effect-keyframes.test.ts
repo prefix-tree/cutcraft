@@ -5,8 +5,8 @@ import { buildSourceIndex, foldToSource, loadModule } from "@cutcraft/kit/source
 
 const manifest = { assets: { city: { id: "city", kind: "video" as const, duration: 10 } } };
 const file = (children: string) => `import { z } from "zod";
-import { Clip, Composition, defineEffect, Effect, Keyframe, Track } from "@cutcraft/kit";
-const own = defineEffect({ name: "own", params: z.object({ amount: z.number().min(0).max(1).default(0.5) }), shader: "vec4 effect(vec2 uv) { return texture(image, uv); }" });
+import { Clip, Composition, effect, Effect, Keyframe, Track } from "@cutcraft/kit";
+const own = effect({ name: "own", params: z.object({ amount: z.number().min(0).max(1).default(0.5) }), shader: "vec4 effect(vec2 uv) { return texture(image, uv); }" });
 export default function V() {
   return (
     <Composition fps={30} width={640} height={360}>

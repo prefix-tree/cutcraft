@@ -5,11 +5,11 @@ import { rangeOf } from "../../parse";
 import type { Diagnostic } from "../index";
 import type { Rule } from "./index";
 
-const DECLARERS = new Set(["font", "googleFont", "defineEffect", "defineTransition"]);
+const DECLARERS = new Set(["font", "googleFont", "effect", "transition"]);
 /** Declarations whose arguments hold code (a zod schema): only their name and shader need be literal. */
-const SHADERS = new Set(["defineEffect", "defineTransition"]);
+const SHADERS = new Set(["effect", "transition"]);
 
-/** Calls to the kit's declarations (`font()`, `googleFont()`, `defineEffect()`, `defineTransition()`), under whatever local names the file imports them as. */
+/** Calls to the kit's declarations (`font()`, `googleFont()`, `effect()`, `transition()`), under whatever local names the file imports them as. */
 function declarations(index: SourceIndex): { call: t.CallExpression; topLevel: boolean; declarer: string }[] {
   const local = new Map<string, string>();
   for (const node of index.ast.program.body) {
@@ -62,7 +62,7 @@ export function declaredFamilies(index: SourceIndex): Set<string> {
   return out;
 }
 
-/** A `name` and `shader` written out in a `defineEffect()` / `defineTransition()` call's options. */
+/** A `name` and a `shader` or `passes` written out in an `effect()` / `transition()` call's options. */
 function literalShader(call: t.CallExpression): boolean {
   const [options] = call.arguments;
   if (!t.isObjectExpression(options)) return false;
@@ -70,12 +70,12 @@ function literalShader(call: t.CallExpression): boolean {
     options.properties.find((p): p is t.ObjectProperty => t.isObjectProperty(p) && t.isIdentifier(p.key, { name: key }))
       ?.value;
   const name = field("name");
-  const shader = field("shader");
+  const shader = field("shader") ?? field("passes");
   return !!name && !!shader && literal(name) && literal(shader);
 }
 
 /**
- * The kit's declarations (`font()`, `googleFont()`, `defineEffect()`, `defineTransition()`) at the top of the file,
+ * The kit's declarations (`font()`, `googleFont()`, `effect()`, `transition()`) at the top of the file,
  * with what names them written out, where the editor and lint can read them.
  */
 export const declaration: Rule = {
@@ -99,7 +99,7 @@ export const declaration: Rule = {
             severity: "warning",
             range: rangeOf(call),
             message: SHADERS.has(declarer)
-              ? `${name}() takes a literal name and shader, so the editor and lint can read them from the source`
+              ? `${name}() takes a literal name and shader (or passes), so the editor and lint can read them from the source`
               : `${name}() takes literal arguments, so the editor and lint can read the font from the source`,
           },
         ];

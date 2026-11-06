@@ -1,4 +1,4 @@
-// Effects and transitions a file declares (defineEffect, defineTransition), drawn by the browser export with WebGL.
+// Effects and transitions a file declares (effect, transition), drawn by the browser export with WebGL.
 // Needs a Chrome or Chromium 153+ in CUTCRAFT_CHROMIUM.
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -38,7 +38,7 @@ async function colourAt(
   writeFileSync(
     file,
     `import { z } from "zod";
-import { Adjustment, Clip, Composition, defineEffect, defineTransition, Effect, Keyframe, Layer, Motion, Title, Track, Transition } from "@cutcraft/kit";
+import { Adjustment, Clip, Composition, effect, transition, Effect, Keyframe, Layer, Motion, Title, Track, Transition } from "@cutcraft/kit";
 export const manifest = ${JSON.stringify(manifest)};
 ${declarations}
 export default function Video() {
@@ -68,10 +68,10 @@ export default function Video() {
   return points.map(([x, y]) => pixel(image, x, y));
 }
 
-const INVERT = `defineEffect({
+const INVERT = `effect({
   name: "invert-it",
   params: z.object({ amount: z.number().min(0).max(1).default(1) }),
-  shader: "vec4 effect(vec2 uv) { vec4 c = texture(image, uv); return vec4(mix(c.rgb, 1.0 - c.rgb, amount), c.a); }",
+  shader: "vec4 effect(vec2 uv) { vec4 c = texture(image, uv); return vec4(mix(c.rgb, 1.0 - c.rgb, params.amount), c.a); }",
 })`;
 
 const near = (a: number[] | undefined, b: number[]) => a?.every((v, i) => Math.abs(v - (b[i] as number)) < 40) === true;
@@ -102,7 +102,7 @@ it("runs an effect's passes in order, each the right way up, with the element's 
   const [top, bottom, right] = await colourAt(
     "passes",
     `<Track id="t"><Clip id="c" src="asset:solid" fit="cover"><Effect id="e" type={split} /></Clip></Track>`,
-    `const split = defineEffect({
+    `const split = effect({
       name: "split",
       passes: [
         "vec4 effect(vec2 uv) { return uv.y < 0.5 ? vec4(1.0, 0.0, 0.0, 1.0) : vec4(0.0, 1.0, 0.0, 1.0); }",
@@ -124,7 +124,7 @@ it("runs an effect's passes in order, each the right way up, with the element's 
 
 it("draws levels with its gamma, after an effect of the file's own", async () => {
   // The file's effect paints mid grey (0.5); levels with gamma 2 lifts it to 0.5^(1/2), with gamma 0.5 lowers it to 0.25.
-  const grey = `const grey = defineEffect({ name: "grey", shader: "vec4 effect(vec2 uv) { return vec4(0.5, 0.5, 0.5, 1.0); }" });`;
+  const grey = `const grey = effect({ name: "grey", shader: "vec4 effect(vec2 uv) { return vec4(0.5, 0.5, 0.5, 1.0); }" });`;
   const at = (gamma: number) =>
     colourAt(
       `levels-${gamma}`,
@@ -184,7 +184,7 @@ it("lets a file's own effect read an image asset as a texture", async () => {
   const [c] = await colourAt(
     "texture",
     `<Track id="t"><Clip id="c" src="asset:solid" fit="cover"><Effect id="o" type={over} params={{ picture: "asset:logo" }} /></Clip></Track>`,
-    `const over = defineEffect({ name: "over", params: z.object({ picture: z.string() }), shader: "vec4 effect(vec2 uv) { return texture(picture, uv); }" });`,
+    `const over = effect({ name: "over", params: z.object({ picture: z.string() }), shader: "vec4 effect(vec2 uv) { return texture(params.picture, uv); }" });`,
     0.5,
     [[160, 90]],
   );
@@ -193,10 +193,10 @@ it("lets a file's own effect read an image asset as a texture", async () => {
 
 describe("colour effects", () => {
   // A picture of known colours, painted by an effect of the file's own, then the colour effect under test.
-  const PAINT = `const paint = defineEffect({
+  const PAINT = `const paint = effect({
     name: "paint",
     params: z.object({ left: z.array(z.number()).default([0.5, 0.5, 0.5]), right: z.array(z.number()).default([0.5, 0.5, 0.5]) }),
-    shader: "vec4 effect(vec2 uv) { return vec4(uv.x < 0.5 ? left : right, 1.0); }",
+    shader: "vec4 effect(vec2 uv) { return vec4(uv.x < 0.5 ? params.left : params.right, 1.0); }",
   });`;
   const graded = (name: string, effect: string, left: number[], right = left) =>
     colourAt(
@@ -279,10 +279,10 @@ describe("colour effects", () => {
 
 describe("footage tools", () => {
   // Two colours either side of x = split (a fraction of the width), then the effect under test. Background black.
-  const PAINT = `const paint = defineEffect({
+  const PAINT = `const paint = effect({
     name: "paint",
     params: z.object({ left: z.array(z.number()), right: z.array(z.number()), split: z.number().default(0.5) }),
-    shader: "vec4 effect(vec2 uv) { return vec4(uv.x < split ? left : right, 1.0); }",
+    shader: "vec4 effect(vec2 uv) { return vec4(uv.x < params.split ? params.left : params.right, 1.0); }",
   });`;
   const at = (
     name: string,
@@ -481,7 +481,7 @@ describe("title effects", () => {
   it("longShadow falls down and right of the box, not up and left", async () => {
     const [cast, behind, inside] = await boxed(
       "long-shadow",
-      `<Effect id="s" type="longShadow" params={{ reach: 40, color: "#00ff00" }} />`,
+      `<Effect id="s" type="longShadow" params={{ length: 40, color: "#00ff00" }} />`,
       [
         [205, 125],
         [115, 55],
@@ -512,7 +512,7 @@ describe("title effects", () => {
     const [edge] = await colourAt(
       "glow-clip",
       `<Track id="t"><Clip id="c" src="asset:solid" fit="cover"><Effect id="p" type={paint} /><Effect id="g" type="glow" params={{ radius: 20, color: "#ff0000" }} /></Clip></Track>`,
-      `const paint = defineEffect({ name: "paint", shader: "vec4 effect(vec2 uv) { return uv.x < 0.5 ? vec4(0.0, 0.0, 0.0, 0.0) : vec4(1.0); }" });`,
+      `const paint = effect({ name: "paint", shader: "vec4 effect(vec2 uv) { return uv.x < 0.5 ? vec4(0.0, 0.0, 0.0, 0.0) : vec4(1.0); }" });`,
       0.5,
       [[155, 90]],
     );
@@ -635,8 +635,8 @@ export default function Video() { return <Composition fps={30} width={320} heigh
 
 describe("effects run in the order the file writes them", () => {
   // Mid grey, then brightness 1.5 and a squaring shader in either order: 0.75² = 0.5625, or 0.25 · 1.5 = 0.375.
-  const SQUARE = `const grey = defineEffect({ name: "grey", shader: "vec4 effect(vec2 uv) { return vec4(vec3(0.5), 1.0); }" });
-const square = defineEffect({ name: "square", shader: "vec4 effect(vec2 uv) { vec4 c = texture(image, uv); return vec4(c.rgb * c.rgb, c.a); }" });`;
+  const SQUARE = `const grey = effect({ name: "grey", shader: "vec4 effect(vec2 uv) { return vec4(vec3(0.5), 1.0); }" });
+const square = effect({ name: "square", shader: "vec4 effect(vec2 uv) { vec4 c = texture(image, uv); return vec4(c.rgb * c.rgb, c.a); }" });`;
   const BRIGHT = `<Effect id="b" type="brightness" params={{ amount: 50 }} />`;
   const SQ = `<Effect id="s" type={square} />`;
   const close = (c: number[] | undefined, v: number) =>
@@ -721,14 +721,14 @@ it("blends two clips with a declared transition", async () => {
       <Transition id="x" type={sweep} duration={1} />
       <Clip id="b" src="asset:logo" duration={2} fit="cover" />
     </Track>`;
-  const declarations = `const sweep = defineTransition({
+  const declarations = `const sweep = transition({
     name: "sweep",
     shader: "vec4 transition(vec2 uv) { return uv.x < progress ? texture(to, uv) : texture(from, uv); }",
   });`;
   const file = join(dir, "probe.tsx");
   writeFileSync(
     file,
-    `import { Clip, Composition, defineTransition, Track, Transition } from "@cutcraft/kit";
+    `import { Clip, Composition, transition, Track, Transition } from "@cutcraft/kit";
 export const manifest = ${JSON.stringify(mediaManifest)};
 ${declarations}
 export default function Video() { return <Composition fps={30} width={320} height={180}>${body}</Composition>; }`,
@@ -742,7 +742,7 @@ export default function Video() { return <Composition fps={30} width={320} heigh
   expect(near(right, [0, 0, 255])).toBe(true);
 });
 
-const SWAP = `defineEffect({
+const SWAP = `effect({
   name: "swap",
   shader: "vec4 effect(vec2 uv) { vec4 c = texture(image, uv); return vec4(c.b, c.g, c.r, c.a); }",
 })`;

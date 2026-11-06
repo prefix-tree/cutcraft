@@ -58,7 +58,7 @@ describe("the lut effect", () => {
     resolve(
       collectModule(
         loadModule(`import { z } from "zod";
-import { Clip, Composition, defineEffect, Effect, Track } from "@cutcraft/kit";
+import { Clip, Composition, effect, Effect, Track } from "@cutcraft/kit";
 ${declarations}
 export default function V() { return <Composition fps={30} width={640} height={360}><Track id="t">${body}</Track></Composition>; }`) as never,
       ),
@@ -84,7 +84,7 @@ export default function V() { return <Composition fps={30} width={640} height={3
     expect(
       errorsOf(
         `<Clip id="c" src="asset:city"><Effect id="m" type={mix} params={{ over: "asset:logo" }} /><Effect id="v" type={mix} params={{ over: "asset:city" }} /></Clip><Clip id="x" src="asset:teal" />`,
-        `const mix = defineEffect({ name: "mix", params: z.object({ over: z.string() }), shader: "vec4 effect(vec2 uv) { return texture(over, uv); }" });`,
+        `const mix = effect({ name: "mix", params: z.object({ over: z.string() }), shader: "vec4 effect(vec2 uv) { return texture(params.over, uv); }" });`,
       ),
     ).toEqual([
       expect.stringMatching(/^x\.src: asset asset:teal is a LUT, which plays nothing/),
