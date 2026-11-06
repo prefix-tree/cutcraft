@@ -115,6 +115,32 @@ describe("CanvasPainter clips", () => {
     captureWarnings(null);
   });
 
+  it("crossfades a built-in shader transition where there is no WebGL, without a warning", () => {
+    const warnings: string[] = [];
+    captureWarnings((m) => warnings.push(m));
+    const calls = paintOp(
+      {
+        opacity: 1,
+        fallbackOpacity: 0.25,
+        transition: {
+          id: "x",
+          name: "iris",
+          builtIn: true,
+          source: "vec4 transition(vec2 uv) { return texture(to, uv); }",
+          params: {},
+          progress: 0.25,
+          time: 0.25,
+          role: "in",
+          paired: false,
+        },
+      },
+      false,
+    );
+    expect(calls.some((c) => c.name === "set:globalAlpha" && c.args[0] === 0.25)).toBe(true);
+    expect(warnings).toEqual([]);
+    captureWarnings(null);
+  });
+
   it("clips a wipe in composition pixels before the element's matrix", () => {
     const calls = paintOp({ clip: [{ x: 320, y: 0, w: 320, h: 360 }] });
     const rect = calls.findIndex((c) => c.name === "rect" && c.args[0] === 320);

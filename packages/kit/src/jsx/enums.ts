@@ -84,7 +84,21 @@ export const EASINGS = [
 
 export const MASK_EASINGS = ["linear", "ease-in", "ease-out", "ease-in-out"] as const;
 
-export const TRANSITION_TYPES = ["crossfade", "dipToBlack", "dipToWhite", "wipe", "slide", "push"] as const;
+export const TRANSITION_TYPES = [
+  "crossfade",
+  "dipToBlack",
+  "dipToWhite",
+  "wipe",
+  "slide",
+  "push",
+  // Drawn by the kit's shaders (jsx/built-in-shaders.ts).
+  "iris",
+  "clockWipe",
+  "blinds",
+  "filmBurn",
+  "pixelDissolve",
+  "zoom",
+] as const;
 
 export const VIDEO_EFFECT_TYPES = [
   "brightness",

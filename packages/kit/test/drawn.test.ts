@@ -26,7 +26,20 @@ export default function V() {
 
 describe("what a file can say is what renders", () => {
   it("offers only the types the renderers draw", () => {
-    expect(TRANSITION_TYPES).toEqual(["crossfade", "dipToBlack", "dipToWhite", "wipe", "slide", "push"]);
+    expect(TRANSITION_TYPES).toEqual([
+      "crossfade",
+      "dipToBlack",
+      "dipToWhite",
+      "wipe",
+      "slide",
+      "push",
+      "iris",
+      "clockWipe",
+      "blinds",
+      "filmBurn",
+      "pixelDissolve",
+      "zoom",
+    ]);
     expect(Object.keys(TRANSITION_PARAMS).sort()).toEqual([...TRANSITION_TYPES].sort());
     expect(VIDEO_EFFECT_TYPES).toHaveLength(30);
     expect(TEXT_ANIMATION_PRESETS).toHaveLength(9);
@@ -40,7 +53,7 @@ describe("what a file can say is what renders", () => {
       ),
     ).toEqual([
       'a: Unrecognized key: "chromaKey"',
-      'x.type: unknown transition "glitch": use one of crossfade, dipToBlack, dipToWhite, wipe, slide, push, or declare it with defineTransition()',
+      'x.type: unknown transition "glitch": use one of crossfade, dipToBlack, dipToWhite, wipe, slide, push, iris, clockWipe, blinds, filmBurn, pixelDissolve, zoom, or declare it with defineTransition()',
       expect.stringMatching(
         /^g\.type: unknown effect "sparkle-dust": use one of .*, or declare it with defineEffect\(\)$/,
       ),

@@ -518,6 +518,119 @@ describe("title effects", () => {
   });
 });
 
+describe("shader transitions", () => {
+  // Blue (solid.webm) to red (logo.png) through the transition, sampled at a share of the way through it.
+  const BLUE = [0, 0, 255],
+    RED = [255, 0, 0];
+  const near = (c: number[] | undefined, want: readonly number[], by = 40) =>
+    want.every((v, i) => Math.abs((c?.[i] ?? -999) - v) <= by);
+  const through = async (name: string, transition: string, share: number, points: [number, number][]) => {
+    const body = `<Track id="t">
+      <Clip id="a" src="asset:solid" in={0} out={2} fit="cover" />
+      ${transition}
+      <Clip id="b" src="asset:logo" duration={2} fit="cover" />
+    </Track>`;
+    const probe = join(dir, `${name}-probe.tsx`);
+    writeFileSync(
+      probe,
+      `import { Clip, Composition, Track, Transition } from "@cutcraft/kit";
+export const manifest = ${JSON.stringify(mediaManifest)};
+export default function Video() { return <Composition fps={30} width={320} height={180}>${body}</Composition>; }`,
+    );
+    const x = (await loadVideo(probe)).state.items.get("x")!;
+    return colourAt(name, body, "", x.start + share * (x.end - x.start), points);
+  };
+  const grid = (cols: number, rows: number): [number, number][] =>
+    Array.from({ length: cols * rows }, (_, i) => [
+      Math.round(((i % cols) + 0.5) * (320 / cols)),
+      Math.round((Math.floor(i / cols) + 0.5) * (180 / rows)),
+    ]);
+
+  it("iris opens the next clip from the centre", async () => {
+    const [centre, corner] = await through("iris", `<Transition id="x" type="iris" duration={1} />`, 0.5, [
+      [160, 90],
+      [4, 4],
+    ]);
+    expect(near(centre, RED)).toBe(true);
+    expect(near(corner, BLUE)).toBe(true);
+  });
+
+  it("clockWipe sweeps clockwise from up: half way, the right half is through", async () => {
+    const [right, left] = await through("clock", `<Transition id="x" type="clockWipe" duration={1} />`, 0.5, [
+      [280, 90],
+      [40, 90],
+    ]);
+    expect(near(right, RED)).toBe(true);
+    expect(near(left, BLUE)).toBe(true);
+  });
+
+  it("blinds open each slat across its width", async () => {
+    const [opened, shut] = await through(
+      "blinds",
+      `<Transition id="x" type="blinds" duration={1} params={{ feather: 0 }} />`,
+      0.5,
+      [
+        [5, 90],
+        [20, 90],
+      ],
+    );
+    expect(near(opened, RED)).toBe(true);
+    expect(near(shut, BLUE)).toBe(true);
+  });
+
+  it("pixelDissolve switches whole blocks, some each way half way through", async () => {
+    const colours = await through(
+      "dissolve",
+      `<Transition id="x" type="pixelDissolve" duration={1} params={{ feather: 0, seed: 7 }} />`,
+      0.5,
+      grid(16, 9),
+    );
+    const red = colours.filter((c) => near(c, RED)).length;
+    const blue = colours.filter((c) => near(c, BLUE)).length;
+    expect(red + blue).toBe(colours.length);
+    expect(red).toBeGreaterThan(20);
+    expect(blue).toBeGreaterThan(20);
+  });
+
+  it("filmBurn burns from blue to red, with a coloured edge on the way", async () => {
+    const points = grid(16, 9);
+    const share = async (at: number) => {
+      const colours = await through(`burn-${at}`, `<Transition id="x" type="filmBurn" duration={1} />`, at, points);
+      return {
+        red: colours.filter((c) => near(c, RED)).length / colours.length,
+        blue: colours.filter((c) => near(c, BLUE)).length / colours.length,
+        burning: colours.filter((c) => (c[0] ?? 0) > 150 && (c[1] ?? 0) > 50 && (c[2] ?? 255) < 120).length,
+      };
+    };
+    const [start, middle, end] = await Promise.all([share(0.05), share(0.5), share(0.95)]);
+    expect(start.blue).toBeGreaterThan(0.9);
+    expect(end.red).toBeGreaterThan(0.9);
+    expect(middle.burning).toBeGreaterThan(0);
+  });
+
+  it("zoom crossfades through the middle and lands on the next clip", async () => {
+    const [middle] = await through("zoom-mid", `<Transition id="x" type="zoom" duration={1} />`, 0.5, [[160, 90]]);
+    const [end] = await through("zoom-end", `<Transition id="x" type="zoom" duration={1} />`, 0.98, [[160, 90]]);
+    expect(near(middle, [128, 0, 128])).toBe(true);
+    expect(near(end, RED)).toBe(true);
+  });
+
+  it("iris at a clip's edge opens it from the background", async () => {
+    const [centre, corner] = await colourAt(
+      "iris-edge",
+      `<Track id="t"><Clip id="c" src="asset:solid" fit="cover" /><Transition id="x" type="iris" duration={1} on="c" edge="in" /></Track>`,
+      "",
+      0.5,
+      [
+        [160, 90],
+        [4, 4],
+      ],
+    );
+    expect(near(centre, BLUE)).toBe(true);
+    expect(near(corner, [0, 0, 0])).toBe(true);
+  });
+});
+
 it("runs a declared effect on an adjustment, over everything beneath it", async () => {
   const [c] = await colourAt(
     "adjust",

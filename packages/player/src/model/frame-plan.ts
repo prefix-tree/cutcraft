@@ -64,8 +64,10 @@ export interface DrawOp {
   readonly post?: readonly PostEffect[];
   /** Shader effects (the file's own from `defineEffect()`, and the kit's), run over the element's picture in order. */
   readonly shaders?: readonly ShaderPass[];
-  /** A transition the file declares (`defineTransition()`) on this side of it; replaces the built-in look. */
+  /** A shader transition (the file's own, or the kit's) on this side of it; replaces the look drawn without shaders. */
   readonly transition?: TransitionPass;
+  /** With a built-in shader transition: the opacity a crossfade gives, for a painter without WebGL. */
+  readonly fallbackOpacity?: number;
 }
 
 /** A composition background gradient, as the schema writes it. CSS angles: 0 points up, 180 (the default) runs down. */
@@ -233,6 +235,10 @@ function mediaOp(
     ...(post ? { post } : {}),
     ...(shaders ? { shaders } : {}),
     ...(shaded ? { transition: shaded } : {}),
+    // A built-in shader transition crossfades where there is no WebGL: the opacity a crossfade has here (its default look).
+    ...(shaded?.builtIn && item.transition
+      ? { fallbackOpacity: opacity * transitionLook(item.transition, comp.width, comp.height).opacity }
+      : {}),
   };
   const shift = (m: Matrix2D): Matrix2D => (look?.offset ? multiply(translate(look.offset.x, look.offset.y), m) : m);
 
