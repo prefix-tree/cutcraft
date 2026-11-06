@@ -38,7 +38,7 @@ Every handler has four faces:
 | `invert` | action, state before | the inverse action, never null |
 | `fold` | action, source index | source edits, when the generic fold is not enough |
 
-The [action reference](../reference/actions.md) lists all 131. History auto-groups rapid same-type, same-target
+The [action reference](../reference/actions.md) lists all 119. History auto-groups rapid same-type, same-target
 updates (a slider drag) within 100 ms and keeps explicit groups for gestures.
 
 ## Patches

@@ -3,15 +3,16 @@
 <h1 align="center">CutCraft</h1>
 
 <p align="center">
-  <b>Video editing as code.</b><br>
-  A video is a TSX file. Clips are cut on transcript words and camera shots, not on seconds someone worked out by hand.
-  The browser plays the file, an editor changes it, and the export renders it with the same engine.
+  <b>Video editor as code.</b><br>
+  LLMs write code well and math badly, so a model writes a TSX file of words and shots, and CutCraft does the
+  arithmetic, plays it in the browser, edits it and exports it.
 </p>
 
 <p align="center">
   <a href="https://github.com/prefix-tree/cutcraft/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/prefix-tree/cutcraft/actions/workflows/ci.yml/badge.svg"></a>
   <a href="https://www.npmjs.com/package/cutcraft"><img alt="npm" src="https://img.shields.io/npm/v/cutcraft?color=black"></a>
   <a href="https://prefix-tree.github.io/cutcraft/"><img alt="Docs" src="https://github.com/prefix-tree/cutcraft/actions/workflows/docs.yml/badge.svg"></a>
+  <a href="https://github.com/prefix-tree/cutcraft/actions/workflows/codeql.yml"><img alt="CodeQL" src="https://github.com/prefix-tree/cutcraft/actions/workflows/codeql.yml/badge.svg"></a>
   <a href="LICENSE"><img alt="MIT License" src="https://img.shields.io/badge/license-MIT-black"></a>
   <img alt="Node 22.19 or later" src="https://img.shields.io/badge/node-%E2%89%A522.19-black">
 </p>
@@ -69,6 +70,9 @@ Language models write code well and do arithmetic badly. A cut written as `8.43`
 word; a cut written as `word:12` lands on it. CutCraft lets the file say what it means (this word, that shot) and does
 the math itself.
 
+The goal is a desktop editor's power, in the shape of Premiere Pro's timeline, as a file: tracks, cuts, transitions,
+titles, captions, sound, colour, keying and export, each an element a model can write and a person can drag.
+
 The timeline part of the file (tracks, clips, transitions, captions) uses elements with literal ids, so an editor
 gesture can find the element it touched and change one value. Anything you draw on top can be free code: a
 `<Layer>` holds any React, CSS, canvas or three.js you write.
@@ -112,16 +116,85 @@ The player draws all of this, and so does the export, which runs the real player
 with the same sound
 ([exporting](https://prefix-tree.github.io/cutcraft/guide/exporting#the-browser-it-runs-in)).
 
-## What's in it
+## By topic
 
-| | |
-|---|---|
-| Elements | Tracks (a magnetic sequence or free placement), clips trimmed by seconds, words or shots, transitions, titles, shapes, SVG, stickers, ready-made components (lower thirds, callouts, counters…), captions, markers, masks, adjustment layers, keyframes, speed ramps, freeze frames, nested compositions and multicam. `<Layer>` takes any React. |
-| Time by meaning | `in="word:12"`, `out="shot:3.end"`, and overlays pinned to a word of the clip that says it (`anchor="hook" at="word:14"`), so cuts and graphics follow every trim. |
-| Editing | 119 actions, each with validation and undo. Every edit is written back into the file as the smallest text change. |
-| Lint | Checks the file before anything plays: literal ids, cuts inside words, fonts and declarations, and the few limits listed in [what renders](https://prefix-tree.github.io/cutcraft/reference/rendering). |
-| Player | A React `<Player>` and a framework-free `PlayerCore`: WebCodecs decoding through [mediabunny](https://mediabunny.dev), one canvas for footage, DOM for overlays, Web Audio as the clock, and frame-exact seeking. |
-| Export | The player itself, in headless Chrome that the first export downloads: MP4 (H.264 or AV1), WebM (VP9 or AV1), MP3 or WAV soundtracks, and PNG or JPEG stills. Everything the preview draws exports: three.js, Motion, motion blur and GLSL effects of the file's own included. A layout check reports overlays that leave the frame or the safe zone, or cover the captions or the subject, at their line in the file. |
+### Cut on words and shots
+
+A clip's `in` and `out` name a word of the transcript or a shot of the camera, and CutCraft turns them into frames
+through every trim and speed change. [Time by meaning](https://prefix-tree.github.io/cutcraft/guide/time)
+
+```tsx
+<Clip id="hook" src="asset:founder" in="word:12" out="word:23.end" />
+<Clip id="broll" src="asset:product" in="shot:1" out="shot:1.end" fit="cover" />
+```
+
+### Titles on the word that says them
+
+An overlay anchors to a clip and starts on one of its words, so it moves when the clip is trimmed or dragged.
+[Titles and graphics](https://prefix-tree.github.io/cutcraft/guide/titles-and-graphics)
+
+```tsx
+<Title id="title" anchor="hook" at="word:14" duration={2.8} style="h1" animation={{ preset: "word-by-word" }}>Shed</Title>
+```
+
+### Captions and sound
+
+Captions come from the transcript and follow the clips. Music fills the video and ducks under speech.
+[Captions and sound](https://prefix-tree.github.io/cutcraft/guide/captions-and-sound)
+
+```tsx
+<Captions id="captions" src="asset:founder" style={{ position: "bottom", size: 44 }} animation="karaoke" />
+<Audio id="bed" src="asset:music" start={0} duration="fill" volume={0.35} duck={{ under: "main", to: 0.15 }} />
+```
+
+### Transitions
+
+Twelve between two clips: crossfade, dips to black and white, wipe, slide, push, iris, clock wipe, blinds, film burn,
+pixel dissolve and zoom. [Transition](https://prefix-tree.github.io/cutcraft/reference/elements/transition)
+
+```tsx
+<Transition id="x1" type="crossfade" duration={0.4} />
+<Transition id="x2" type="iris" duration={0.8} params={{ sides: 5, star: 0.45, feather: 4 }} />
+```
+
+### Colour, keying and effects
+
+Twenty-eight effects, from exposure and curves to a chroma key, a region blur and glow, run in the order the file lists them.
+[Colour and grading](https://prefix-tree.github.io/cutcraft/guide/colour), [Keying, blurs and pins](https://prefix-tree.github.io/cutcraft/guide/footage-tools)
+
+```tsx
+<Clip id="interview" src="asset:interview">
+  <Effect id="expose" type="exposure" params={{ stops: 0.5 }} />
+  <Effect id="tone" type="curves" params={{ rgb: [[0, 0.03], [0.25, 0.22], [0.75, 0.8], [1, 1]] }} />
+  <Effect id="key" type="colorKey" params={{ color: "#18c43a", tolerance: 0.3, softness: 0.1, spill: 0.6 }} />
+</Clip>
+```
+
+### Keyframes and speed ramps
+
+Keyframes animate transforms, effects, colour and sound. A speed key ramps a clip's speed from a moment on, with its
+audio. [Keyframe](https://prefix-tree.github.io/cutcraft/reference/elements/keyframe), [SpeedKey](https://prefix-tree.github.io/cutcraft/reference/elements/speedkey)
+
+```tsx
+<Clip id="broll" src="asset:product">
+  <Keyframe id="s0" property="transform.scale.x" at={0} value={1} easing="easeInOutSine" />
+  <Keyframe id="s1" property="transform.scale.x" at={6} value={1.08} />
+  <SpeedKey id="fast" at={2} speed={4} easing="ease-in-out" />
+</Clip>
+```
+
+### Edit by hand, keep the code
+
+119 editor actions (trim, move, retime, restyle…), each with validation and undo. Every edit is written back into
+the file as the smallest text change, so a model reads your edit as code. [Editing](https://prefix-tree.github.io/cutcraft/guide/editing)
+
+### Play, check and export
+
+A React `<Player>` (or the framework-free `PlayerCore`) decodes with WebCodecs and seeks frame-exact. The export runs
+that same player in headless Chrome: MP4 (H.264 or AV1), WebM (VP9 or AV1), MP3 or WAV, and PNG or JPEG stills. A lint
+checks the file before it plays, and a layout check reports overlays that leave the safe zone or cover the captions or
+the subject, at their line in the file. [Player](https://prefix-tree.github.io/cutcraft/guide/player), [Exporting](https://prefix-tree.github.io/cutcraft/guide/exporting),
+[What renders](https://prefix-tree.github.io/cutcraft/reference/rendering)
 
 ## Quick start
 
@@ -173,7 +246,7 @@ pnpm docs:dev                                      # the documentation site
 | [`@cutcraft/kit`](packages/kit) | The elements, time references, resolver, editor actions, source edits and lint. No DOM. |
 | [`@cutcraft/player`](packages/player) | The browser player and the React `<Player>`. |
 | [`@cutcraft/render`](packages/render) | The export as a library: `loadVideo` and `renderVideo`, driving the player in headless Chrome. |
-| [`@cutcraft/graphics`](packages/graphics) | three.js and Motion on the video's clock for `<Three>` and `<Motion>`. |
+| [`@cutcraft/graphics`](packages/graphics) | three.js and Motion on the video's clock for `<Three>` and `<Motion>`, and the 34 `<Graphic>` kinds, which are deprecated and will be removed. |
 
 The repository also holds [eight recipes](https://prefix-tree.github.io/cutcraft/recipes/) (complete files for common
 videos, each tested) and [the worked example](examples/launch-recap).
@@ -182,7 +255,7 @@ videos, each tested) and [the worked example](examples/launch-recap).
 
 | | |
 |---|---|
-| Works | Resolving, every editor action with undo, writing edits back to the file, lint. Playback with seek, rate and loop; crossfade, dip, wipe, slide and push transitions; keyframes on transforms, effects, colour and sound; speed ramps and freeze frames with their audio; masks, overlays, captions and ducking. Export with frame-exact pictures, and the layout check. |
+| Works | Resolving, every editor action with undo, writing edits back to the file, lint. Playback with seek, rate and loop; twelve transitions; keyframes on transforms, effects, colour and sound; speed ramps and freeze frames with their audio; masks, overlays, captions and ducking. Export with frame-exact pictures, and the layout check. |
 | Partial | Twelve transitions, twenty-eight effects and nine title presets, all drawn: what the schemas accept is what renders, with a few limits listed in [what renders](https://prefix-tree.github.io/cutcraft/reference/rendering). |
 
 ## Roadmap

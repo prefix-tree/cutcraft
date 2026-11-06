@@ -1,8 +1,8 @@
 # Introduction
 
 CutCraft edits video as code. A video is a TSX file: tracks of clips, transitions, captions and music, plus anything
-you want to draw on top. The browser plays the file, an editor changes it, and the export turns it into MP4, WebM or
-MOV.
+you want to draw on top. The browser plays the file, an editor changes it, and the export turns it into MP4, WebM or a
+still.
 
 ```tsx
 export default function Video() {
@@ -60,7 +60,7 @@ paid tier for companies, or Diffusion Studio, whose engine watermarks every fram
 ```
 video.tsx      ┐                                       ┌─▶ <Player>   plays it in a page
 manifest.json  ├─▶ resolve ─▶ every element in seconds ├─▶ actions    edit it; each edit is written back to video.tsx
-media files    ┘                                       └─▶ export     MP4, WebM, MOV or a still
+media files    ┘                                       └─▶ export     MP4, WebM or a still
 ```
 
 - **The file** (`video.tsx`) says what happens and when, in words, shots and seconds. [The file](./the-file)
@@ -77,7 +77,7 @@ media files    ┘                                       └─▶ export     MP
 | Package | What it does |
 |---|---|
 | [`cutcraft`](https://www.npmjs.com/package/cutcraft) | The command line: export a file to video, audio or a still, or check its layout. |
-| [`@cutcraft/kit`](https://www.npmjs.com/package/@cutcraft/kit) | The elements, the resolver that places everything in time, 131 undoable editor actions, and the tools that write edits back into the file. |
+| [`@cutcraft/kit`](https://www.npmjs.com/package/@cutcraft/kit) | The elements, the resolver that places everything in time, 119 undoable editor actions, and the tools that write edits back into the file. |
 | [`@cutcraft/player`](https://www.npmjs.com/package/@cutcraft/player) | A React `<Player>` and a framework-free `PlayerCore` for the browser. |
 | [`@cutcraft/render`](https://www.npmjs.com/package/@cutcraft/render) | Export from your own code: from Node, through the player in headless Chrome. |
 | [`@cutcraft/graphics`](https://www.npmjs.com/package/@cutcraft/graphics) | three.js and Motion on the video's clock (`installFreeCodeLibraries()`), for `<Three>` and `<Motion>`. |
