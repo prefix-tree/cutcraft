@@ -138,6 +138,28 @@ describe("declared shaders in the frame plan", () => {
     ).toEqual(["soft-glow"]);
   });
 
+  it("give both sides of a built-in shader transition its pass, and the crossfade's opacity to fall back on", () => {
+    const shaded = stateOf(
+      `<Track id="t"><Clip id="a" src="asset:city" in={0} out={2} /><Transition id="x" type="iris" duration={1} /><Clip id="b" src="asset:city" in={0} out={2} /></Track>`,
+      "",
+    );
+    const faded = stateOf(
+      `<Track id="t"><Clip id="a" src="asset:city" in={0} out={2} /><Transition id="x" type="crossfade" duration={1} params={{ curve: "linear" }} /><Clip id="b" src="asset:city" in={0} out={2} /></Track>`,
+      "",
+    );
+    expect(shaded.errors).toEqual([]);
+    const x = shaded.items.get("x")!;
+    const t = x.start + 0.3 * x.duration;
+    const ops = buildFramePlan(shaded, t).ops;
+    expect(ops.map((o) => [o.id, o.transition?.name, o.transition?.builtIn, o.transition?.role, o.opacity])).toEqual([
+      ["a", "iris", true, "out", 1],
+      ["b", "iris", true, "in", 1],
+    ]);
+    const crossfade = buildFramePlan(faded, t).ops;
+    expect(ops.map((o) => o.fallbackOpacity)).toEqual(crossfade.map((o) => o.opacity));
+    expect(ops[1]?.fallbackOpacity).toBeCloseTo(0.3, 6);
+  });
+
   it("give both sides of a declared transition its pass, in place of the built-in look", () => {
     const state = stateOf(
       `<Track id="t"><Clip id="a" src="asset:city" in={0} out={2} /><Transition id="x" type={sweep} duration={1} /><Clip id="b" src="asset:city" in={0} out={2} /></Track>`,

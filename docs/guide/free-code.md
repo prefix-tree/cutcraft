@@ -156,9 +156,9 @@ Inside a plain `<Layer>`, use the same libraries through adapters that follow th
 ## Effects and transitions of your own
 
 Most built-in effects are CSS filters. The colour tools in [Colour and grading](./colour) run as shaders, through the
-same pipeline as yours. The built-in transitions fade, wipe, slide and push. Anything else is a few lines of GLSL:
-declare it at the top of the file with `defineEffect()` or `defineTransition()`, and use the name it returns as an
-`<Effect>` or `<Transition>` type.
+same pipeline as yours, and so do the built-in shader transitions ([Transitions](./time#transitions-sit-between-clips)).
+Anything else is a few lines of GLSL: declare it at the top of the file with `defineEffect()` or `defineTransition()`,
+and use the name it returns as an `<Effect>` or `<Transition>` type.
 
 An effect on a clip: a two-colour tone (the built-in `duotone` does the same; this shows how it is written), with two
 colour params and a third that the keyframes animate from the plain footage to the full effect.

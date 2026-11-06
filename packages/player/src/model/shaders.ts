@@ -1,6 +1,7 @@
 import {
   BUILT_IN_SHADERS,
   builtInShader,
+  builtInTransition,
   type Placement,
   type ResolvedState,
   SHADER_ONLY_EFFECTS,
@@ -25,8 +26,10 @@ export interface ShaderPass {
   readonly time: number;
 }
 
-/** A declared transition (`defineTransition()`) on one side of it at this moment. */
+/** A shader transition (the file's own from `defineTransition()`, or the kit's) on one side of it at this moment. */
 export interface TransitionPass {
+  /** A built-in transition (`iris`…), which crossfades where there is no WebGL. */
+  readonly builtIn?: true;
   /** The transition's id, which pairs the outgoing side with the incoming one. */
   readonly id: string;
   readonly name: string;
@@ -64,14 +67,16 @@ export function effectPasses(
   return out.length > 0 ? out : undefined;
 }
 
-/** The side of a declared transition this clip plays, or undefined for a built-in transition. */
+/** The side of a shader transition this clip plays (the file's own, or the kit's), or undefined for one drawn without a shader. */
 export function transitionPass(state: ResolvedState, role: TransitionRole): TransitionPass | undefined {
   const x = role.placement;
-  const def = shaderFor(state.shaders, "transition", x.props.type);
+  const own = shaderFor(state.shaders, "transition", x.props.type);
+  const def = own ?? builtInTransition(x.props.type);
   if (!def) return undefined;
   return {
     id: x.id,
     name: def.name,
+    ...(own ? {} : { builtIn: true as const }),
     source: def.passes[0] as string,
     params: (x.props.params ?? {}) as Readonly<Record<string, unknown>>,
     progress: role.progress,

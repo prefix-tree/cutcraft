@@ -96,8 +96,27 @@ need that much extra footage at the join.
 <Clip id="broll" src="asset:product" in="shot:1" out="shot:1.end" />
 ```
 
-Crossfade, dips to black or white, wipe, slide and push are built in. Any other look is a few lines of GLSL that you
-declare with `defineTransition()` ([Effects and transitions of your own](./free-code#effects-and-transitions-of-your-own)).
+Crossfade, dips to black or white, wipe, slide and push are built in, and six more drawn as shaders:
+
+- `iris` opens the next clip from `center` as a circle, or a polygon with `sides` (3 to 64), or a star when `star`
+  sets the inner points' radius (0 to 0.95 of the outer). `rotation` turns it, `feather` softens its edge in pixels.
+- `clockWipe` sweeps around `center` from `startAngle` (degrees clockwise from up), clockwise (`direction` 1),
+  counterclockwise (-1) or both ways at once (0). `feather` is in degrees.
+- `blinds` opens `slats` bands at `angle` (0 for vertical slats), each across its width; `feather` softens them.
+- `filmBurn` burns a ragged hole from `center` with a glowing edge in `color`; `scale` sets the size of its ragged
+  pattern and `edge` the width of the glow, both in pixels, and `seed` picks another pattern.
+- `pixelDissolve` switches `columns` by `rows` blocks one at a time, in an order set by `seed`.
+- `zoom` pushes into the outgoing clip toward `center` and settles the next one from `scale`, with a `blur` along the
+  motion.
+
+```tsx
+<Transition id="x2" type="iris" duration={0.8} params={{ sides: 5, star: 0.45, feather: 4 }} />
+```
+
+The shader transitions need WebGL, which the player and the export have; where it is missing they play as a
+crossfade. At the edge of a title or another overlay they play as a fade. Any other look is a few lines of GLSL that
+you declare with `defineTransition()`
+([Effects and transitions of your own](./free-code#effects-and-transitions-of-your-own)).
 A type that is neither built in nor declared is an error.
 
 ## At a cut: light leaks, flashes and whooshes

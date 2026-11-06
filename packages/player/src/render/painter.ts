@@ -137,10 +137,21 @@ export class CanvasPainter {
    * only the shaders without one left, which it then warns it cannot draw. The op as it is where WebGL is there.
    */
   private withoutWebGl(op: DrawOp): DrawOp {
-    if (!op.shaders?.some(hasCssFallback) || this.runner().available) return op;
-    const own = op.shaders.filter((s) => !hasCssFallback(s));
-    const { shaders: _, ...rest } = op;
-    return { ...rest, filter: op.fallbackFilter ?? op.filter, ...(own.length > 0 ? { shaders: own } : {}) };
+    const builtInTransition = op.transition?.builtIn === true;
+    if ((!op.shaders?.some(hasCssFallback) && !builtInTransition) || this.runner().available) return op;
+    const own = (op.shaders ?? []).filter((s) => !hasCssFallback(s));
+    const { shaders: _, transition: __, ...rest } = op;
+    return {
+      ...rest,
+      filter: op.fallbackFilter ?? op.filter,
+      ...(own.length > 0 ? { shaders: own } : {}),
+      // A built-in shader transition crossfades instead; a file's own stays, to be warned about.
+      ...(builtInTransition
+        ? { opacity: op.fallbackOpacity ?? op.opacity }
+        : op.transition
+          ? { transition: op.transition }
+          : {}),
+    };
   }
 
   private runner(): ShaderRunner {
