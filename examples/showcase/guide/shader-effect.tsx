@@ -1,11 +1,11 @@
 import { z } from "zod";
 
-import { Clip, Composition, defineEffect, Effect, Keyframe, Track } from "@cutcraft/kit";
+import { Clip, Composition, Effect, effect, Keyframe, Track } from "@cutcraft/kit";
 
 // A two-colour tone (the kit has one built in, `duotone`; this is how such an effect is written): each pixel's
 // brightness picks a colour between `dark` and `light`. Colour params arrive in the shader as vec3; `strength` blends
 // from the footage to the toned picture, and the keyframes animate it.
-const navyGold = defineEffect({
+const navyGold = effect({
   name: "navy-gold",
   params: z.object({
     dark: z.string().default("#101421"),
@@ -15,7 +15,7 @@ const navyGold = defineEffect({
   shader: `vec4 effect(vec2 uv) {
     vec4 c = texture(image, uv);
     float l = dot(c.rgb, vec3(0.299, 0.587, 0.114));
-    return vec4(mix(c.rgb, mix(dark, light, l), strength), c.a);
+    return vec4(mix(c.rgb, mix(params.dark, params.light, l), params.strength), c.a);
   }`,
 });
 

@@ -20,22 +20,22 @@ const iris = shaderDefinition("transition", {
     feather: z.number().min(0).max(200).default(2),
   }),
   shader: `${FARTHEST}vec4 transition(vec2 uv) {
-  vec2 p = (uv - center) * resolution;
-  float n = sides >= 3.0 ? sides : 0.0;
+  vec2 p = (uv - params.center) * resolution;
+  float n = params.sides >= 3.0 ? params.sides : 0.0;
   float half_sector = n > 0.0 ? 3.14159265 / n : 0.0;
-  float inner = n > 0.0 ? (star > 0.0 ? star : cos(half_sector)) : 1.0;
-  float full = cc_farthest(center) / inner + feather;
+  float inner = n > 0.0 ? (params.star > 0.0 ? params.star : cos(half_sector)) : 1.0;
+  float full = cc_farthest(params.center) / inner + params.feather;
   float big = progress * full;
   float edge = big;
   if (n > 0.0) {
-    float theta = atan(p.x, -p.y) - radians(rotation);
+    float theta = atan(p.x, -p.y) - radians(params.rotation);
     float local = abs(mod(theta + half_sector, 2.0 * half_sector) - half_sector);
     vec2 a = vec2(big, 0.0);
     vec2 b = inner * big * vec2(cos(half_sector), sin(half_sector));
     float den = (b.y - a.y) * cos(local) - (b.x - a.x) * sin(local);
     edge = abs(den) > 1e-6 ? (a.x * b.y - b.x * a.y) / den : big;
   }
-  float m = clamp(0.5 - (length(p) - edge) / max(feather, 0.5), 0.0, 1.0);
+  float m = clamp(0.5 - (length(p) - edge) / max(params.feather, 0.5), 0.0, 1.0);
   return mix(texture(from, uv), texture(to, uv), m);
 }`,
 });
@@ -54,10 +54,10 @@ const clockWipe = shaderDefinition("transition", {
   }),
   shader: `vec4 transition(vec2 uv) {
   float tau = 6.28318531;
-  vec2 p = (uv - center) * resolution;
-  float rel = mod(atan(p.x, -p.y) - radians(startAngle), tau);
-  float along = direction > 0.5 ? rel : direction < -0.5 ? tau - rel : 2.0 * min(rel, tau - rel);
-  float soft = max(radians(feather), 1e-4);
+  vec2 p = (uv - params.center) * resolution;
+  float rel = mod(atan(p.x, -p.y) - radians(params.startAngle), tau);
+  float along = params.direction > 0.5 ? rel : params.direction < -0.5 ? tau - rel : 2.0 * min(rel, tau - rel);
+  float soft = max(radians(params.feather), 1e-4);
   float m = clamp((progress * (tau + soft) - along) / soft, 0.0, 1.0);
   return mix(texture(from, uv), texture(to, uv), m);
 }`,
@@ -76,12 +76,12 @@ const blinds = shaderDefinition("transition", {
     feather: z.number().min(0).max(1).default(0.1),
   }),
   shader: `vec4 transition(vec2 uv) {
-  float a = radians(angle);
+  float a = radians(params.angle);
   vec2 dir = vec2(cos(a), sin(a));
   float across = abs(dir.x) + abs(dir.y);
   float t = dot(uv - 0.5, dir) / across + 0.5;
-  float f = fract(t * slats);
-  float soft = max(feather, 1e-4);
+  float f = fract(t * params.slats);
+  float soft = max(params.feather, 1e-4);
   float m = clamp((progress * (1.0 + soft) - f) / soft, 0.0, 1.0);
   return mix(texture(from, uv), texture(to, uv), m);
 }`,
@@ -102,17 +102,17 @@ const filmBurn = shaderDefinition("transition", {
     color: HEX.default("#ff7a1a"),
   }),
   shader: `${NOISE}${FARTHEST}vec4 transition(vec2 uv) {
-  vec2 p = (uv - center) * resolution;
-  float near = length(p) / cc_farthest(center);
-  float rough = cc_fbm(uv * resolution / scale, uint(seed));
+  vec2 p = (uv - params.center) * resolution;
+  float near = length(p) / cc_farthest(params.center);
+  float rough = cc_fbm(uv * resolution / params.scale, uint(params.seed));
   float burn = clamp(0.55 * near + 0.45 * rough, 0.0, 1.0);
-  float band = edge / length(resolution);
+  float band = params.edge / length(resolution);
   float front = progress * (1.0 + band) - band;
   vec4 a = texture(from, uv), b = texture(to, uv);
   if (burn < front) return b;
   float k = (burn - front) / max(band, 1e-4);
   if (k >= 1.0) return a;
-  vec3 hot = mix(min(color * 1.25, 1.0), a.rgb * 0.25, smoothstep(0.15, 0.6, k));
+  vec3 hot = mix(min(params.color * 1.25, 1.0), a.rgb * 0.25, smoothstep(0.15, 0.6, k));
   return vec4(mix(hot, a.rgb, smoothstep(0.6, 1.0, k)), a.a);
 }`,
 });
@@ -127,9 +127,9 @@ const pixelDissolve = shaderDefinition("transition", {
     feather: z.number().min(0).max(1).default(0.15),
   }),
   shader: `${NOISE}vec4 transition(vec2 uv) {
-  uvec2 block = uvec2(min(floor(uv * vec2(columns, rows)), vec2(columns, rows) - 1.0));
-  float at = cc_hash(uvec3(block, uint(seed))) * (1.0 - feather);
-  float m = feather > 0.0 ? smoothstep(at, at + feather, progress) : step(at, progress);
+  uvec2 block = uvec2(min(floor(uv * vec2(params.columns, params.rows)), vec2(params.columns, params.rows) - 1.0));
+  float at = cc_hash(uvec3(block, uint(params.seed))) * (1.0 - params.feather);
+  float m = params.feather > 0.0 ? smoothstep(at, at + params.feather, progress) : step(at, progress);
   return mix(texture(from, uv), texture(to, uv), m);
 }`,
 });
@@ -149,16 +149,16 @@ const zoom = shaderDefinition("transition", {
   vec4 sum = vec4(0.0);
   for (int i = 0; i < 12; i++) {
     float k = s * (1.0 + smear * float(i) / 11.0);
-    vec4 c = texture(picture, center + (uv - center) / k);
+    vec4 c = texture(picture, params.center + (uv - params.center) / k);
     sum += vec4(c.rgb * c.a, c.a);
   }
   sum /= 12.0;
   return sum.a > 0.0 ? vec4(sum.rgb / sum.a, sum.a) : vec4(0.0);
 }
 vec4 transition(vec2 uv) {
-  float smear = blur * 0.25 * sin(3.14159265 * progress);
-  vec4 a = cc_zoomed(from, uv, mix(1.0, scale, progress), smear);
-  vec4 b = cc_zoomed(to, uv, mix(scale, 1.0, progress), smear);
+  float smear = params.blur * 0.25 * sin(3.14159265 * progress);
+  vec4 a = cc_zoomed(from, uv, mix(1.0, params.scale, progress), smear);
+  vec4 b = cc_zoomed(to, uv, mix(params.scale, 1.0, progress), smear);
   float w = smoothstep(0.3, 0.7, progress);
   vec4 pa = vec4(a.rgb * a.a, a.a) * (1.0 - w) + vec4(b.rgb * b.a, b.a) * w;
   return pa.a > 0.0 ? vec4(pa.rgb / pa.a, pa.a) : vec4(0.0);

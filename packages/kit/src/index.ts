@@ -17,12 +17,14 @@ export {
   EFFECTS,
   type EffectDraw,
   type EffectEntry,
+  type EffectParams,
   effectEntry,
   POST_EFFECTS,
   SHADER_ONLY_EFFECTS,
   TRANSITION_FAMILIES,
   TRANSITIONS,
   type TransitionEntry,
+  type TransitionParams,
 } from "./effects/registry";
 export * from "./jsx/animate";
 export * from "./jsx/capabilities";

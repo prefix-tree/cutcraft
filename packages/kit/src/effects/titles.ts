@@ -21,16 +21,16 @@ const glow = shaderDefinition("effect", {
   passes: [
     `${COLOUR}vec4 effect(vec2 uv) {
   vec4 c = texture(image, uv);
-  float bright = threshold <= 0.0 ? 1.0 : smoothstep(threshold, min(threshold + 0.1, 1.0), cc_luma(c.rgb));
-  return vec4(mix(c.rgb, color, tint), c.a * bright);
+  float bright = params.threshold <= 0.0 ? 1.0 : smoothstep(params.threshold, min(params.threshold + 0.1, 1.0), cc_luma(c.rgb));
+  return vec4(mix(c.rgb, params.color, params.tint), c.a * bright);
 }`,
     GAUSS_PASS("x", "rgba"),
     GAUSS_PASS("y", "rgba"),
     `vec4 effect(vec2 uv) {
   vec4 o = texture(original, uv);
   vec4 g = texture(image, uv);
-  vec3 light = o.rgb * o.a + g.rgb * g.a * intensity;
-  float a = clamp(max(o.a, g.a * intensity), 0.0, 1.0);
+  vec3 light = o.rgb * o.a + g.rgb * g.a * params.intensity;
+  float a = clamp(max(o.a, g.a * params.intensity), 0.0, 1.0);
   return a > 0.0 ? vec4(min(light / a, 1.0), a) : vec4(0.0);
 }`,
   ],
@@ -53,26 +53,26 @@ const outline = shaderDefinition("effect", {
   vec4 o = texture(image, uv);
   float grown = o.a;
   for (int ring = 1; ring <= 12; ring++) {
-    float r = width * float(ring) / 12.0;
+    float r = params.width * float(ring) / 12.0;
     for (int k = 0; k < 24; k++) {
       float a = 6.2831853 * float(k) / 24.0;
       grown = max(grown, texture(image, uv + vec2(cos(a), sin(a)) * r / resolution).a);
     }
   }
-  vec4 band = vec4(color, grown * opacity);
-  return outlineOnly ? band : cc_over(o, band);
+  vec4 band = vec4(params.color, grown * params.opacity);
+  return params.outlineOnly ? band : cc_over(o, band);
 }`,
 });
 
 /**
  * Long shadow: the element's silhouette swept back along `angle` (clockwise from the right, so 45 falls down and
- * right) for `reach` pixels, keeping the largest alpha met so overlapping parts never stack, in `color` under the
+ * right) for `length` pixels, keeping the largest alpha met so overlapping parts never stack, in `color` under the
  * element. `fade` thins it toward its far end.
  */
 const longShadow = shaderDefinition("effect", {
   name: "longShadow",
   params: z.object({
-    reach: z.number().min(0).max(2000).default(240),
+    length: z.number().min(0).max(2000).default(240),
     angle: z.number().default(45),
     color: HEX.default("#777777"),
     opacity: z.number().min(0).max(1).default(1),
@@ -80,17 +80,17 @@ const longShadow = shaderDefinition("effect", {
   }),
   shader: `${OVER}vec4 effect(vec2 uv) {
   vec4 o = texture(image, uv);
-  float a = radians(angle);
+  float a = radians(params.angle);
   vec2 dir = vec2(cos(a), sin(a)) / resolution;
-  int n = int(clamp(reach, 1.0, 128.0));
+  int n = int(clamp(params.length, 1.0, 128.0));
   float swept = 0.0;
   for (int i = 1; i <= 128; i++) {
     if (i > n) break;
     float t = float(i) / float(n);
-    float s = texture(image, uv - dir * reach * t).a;
-    swept = max(swept, fade ? s * (1.0 - t) : s);
+    float s = texture(image, uv - dir * params.length * t).a;
+    swept = max(swept, params.fade ? s * (1.0 - t) : s);
   }
-  return cc_over(o, vec4(color, swept * opacity));
+  return cc_over(o, vec4(params.color, swept * params.opacity));
 }`,
 });
 
@@ -117,12 +117,12 @@ const bevel = shaderDefinition("effect", {
   vec2 px = 1.0 / resolution;
   float dx = texture(image, uv + vec2(px.x, 0.0)).r - texture(image, uv - vec2(px.x, 0.0)).r;
   float dy = texture(image, uv + vec2(0.0, px.y)).r - texture(image, uv - vec2(0.0, px.y)).r;
-  float slope = max(size, 1.0) / 2.0;
+  float slope = max(params.size, 1.0) / 2.0;
   vec3 n = normalize(vec3(-dx * slope, -dy * slope, 1.0));
-  float a = radians(angle);
+  float a = radians(params.angle);
   vec3 l = normalize(vec3(sin(a), -cos(a), 1.0));
-  float k = clamp((dot(n, l) - l.z) * 2.0, -1.0, 1.0) * intensity;
-  vec3 rgb = k > 0.0 ? mix(o.rgb, highlight, k) : mix(o.rgb, shade, -k);
+  float k = clamp((dot(n, l) - l.z) * 2.0, -1.0, 1.0) * params.intensity;
+  vec3 rgb = k > 0.0 ? mix(o.rgb, params.highlight, k) : mix(o.rgb, params.shade, -k);
   return vec4(rgb, o.a);
 }`,
   ],

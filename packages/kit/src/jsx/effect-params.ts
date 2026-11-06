@@ -1,5 +1,5 @@
 // Whether a param belongs to an effect, and a value fits it: a built-in effect's params schema (effects/registry.ts),
-// or the one a file declares with defineEffect().
+// or the one a file declares with effect().
 import type { ZodType } from "zod";
 
 import { effectEntry } from "../effects/registry";

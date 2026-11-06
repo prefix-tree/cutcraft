@@ -66,7 +66,7 @@ any `<Effect>`; they work on clips too.
 - `outline` draws a band of `width` pixels (up to 64) around the shape in `color`, under it. `outlineOnly` draws the
   grown silhouette alone, filled.
 - `longShadow` sweeps the shape back along `angle` (degrees clockwise from the right, 45 falls down and right) for
-  `reach` pixels, in `color`. Overlapping parts never stack, and `fade` thins it toward the far end.
+  `length` pixels, in `color`. Overlapping parts never stack, and `fade` thins it toward the far end.
 - `bevel` lights the shape as if raised: `size` is the width of the slope in pixels, `angle` where the light comes from
   (degrees clockwise from above), and `intensity` how strongly edges take `highlight` or `shade`.
 

@@ -58,10 +58,8 @@ describe("what a file can say is what renders", () => {
       ),
     ).toEqual([
       'a: Unrecognized key: "chromaKey"',
-      'x.type: unknown transition "glitch": use one of crossfade, dipToBlack, dipToWhite, wipe, slide, push, iris, clockWipe, blinds, filmBurn, pixelDissolve, zoom, or declare it with defineTransition()',
-      expect.stringMatching(
-        /^g\.type: unknown effect "sparkle-dust": use one of .*, or declare it with defineEffect\(\)$/,
-      ),
+      'x.type: unknown transition "glitch": use one of crossfade, dipToBlack, dipToWhite, wipe, slide, push, iris, clockWipe, blinds, filmBurn, pixelDissolve, zoom, or declare it with transition()',
+      expect.stringMatching(/^g\.type: unknown effect "sparkle-dust": use one of .*, or declare it with effect\(\)$/),
     ]);
     expect(errorsOf(`<Title id="h" emphasis="pulse" animation={{ preset: "bounce" }}>Hi</Title>`)).toEqual([
       expect.stringMatching(/^h\.animation\.preset: Invalid option/),

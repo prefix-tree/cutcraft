@@ -24,15 +24,19 @@ export interface ElementCapabilities {
 
 export type VocabularyProps<S extends z.ZodType> = z.input<S> & { readonly children?: ReactNode };
 
-export type VocabularyComponent<K extends string, S extends z.ZodType> = ((
-  props: VocabularyProps<S>,
-) => ReactElement | null) & {
+/** What a vocabulary component carries besides being one: its kind, schema and capabilities. */
+export interface VocabularyMeta<K extends string, S extends z.ZodType> {
   readonly kind: K;
   readonly schema: S;
   readonly isVocabulary: true;
   readonly capabilities: ElementCapabilities;
   readonly displayName: string;
-};
+}
+
+export type VocabularyComponent<K extends string, S extends z.ZodType> = ((
+  props: VocabularyProps<S>,
+) => ReactElement | null) &
+  VocabularyMeta<K, S>;
 
 export interface ElementDefinition<K extends string, S extends z.ZodType> {
   readonly kind: K;

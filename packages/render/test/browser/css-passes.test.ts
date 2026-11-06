@@ -15,12 +15,12 @@ const scratch = join(import.meta.dirname, "..", ".tmp", "css-passes");
 let dir = "";
 
 /** The two pictures: an opaque hue and brightness chart, and two shapes on transparency. */
-const CHART = `const chart = defineEffect({
+const CHART = `const chart = effect({
   name: "chart",
   params: z.object({ shape: z.boolean().default(false) }),
   shader: \`vec3 hue(float h) { return clamp(abs(mod(h * 6.0 + vec3(0.0, 4.0, 2.0), 6.0) - 3.0) - 1.0, 0.0, 1.0); }
 vec4 effect(vec2 uv) {
-  if (shape) {
+  if (params.shape) {
     vec2 p = uv * resolution;
     vec2 q = abs(p - vec2(110.0, 90.0)) - vec2(50.0, 35.0) + 12.0;
     float box = length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - 12.0;
@@ -34,7 +34,7 @@ vec4 effect(vec2 uv) {
 }\`,
 });`;
 
-const PASS_THROUGH = `const same = defineEffect({ name: "same", shader: "vec4 effect(vec2 uv) { return texture(image, uv); }" });`;
+const PASS_THROUGH = `const same = effect({ name: "same", shader: "vec4 effect(vec2 uv) { return texture(image, uv); }" });`;
 
 const manifest = {
   assets: {
@@ -49,7 +49,7 @@ async function still(name: string, body: string, declarations: string, backgroun
   writeFileSync(
     file,
     `import { z } from "zod";
-import { Clip, ColorGrade, Composition, defineEffect, Effect, Track } from "@cutcraft/kit";
+import { Clip, ColorGrade, Composition, effect, Effect, Track } from "@cutcraft/kit";
 export const manifest = ${JSON.stringify(manifest)};
 ${declarations}
 export default function Video() {

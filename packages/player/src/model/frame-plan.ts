@@ -55,7 +55,7 @@ export interface DrawOp {
   readonly clip?: readonly ClipRect[];
   /** Vignette and grain, drawn over the element's own pixels. */
   readonly post?: readonly PostEffect[];
-  /** Shader effects (the file's own from `defineEffect()`, and the kit's), run over the element's picture in order. */
+  /** Shader effects (the file's own from `effect()`, and the kit's), run over the element's picture in order. */
   readonly shaders?: readonly ShaderPass[];
   /** A shader transition (the file's own, or the kit's) on this side of it; replaces the look drawn without shaders. */
   readonly transition?: TransitionPass;

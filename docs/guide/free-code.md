@@ -157,8 +157,9 @@ Inside a plain `<Layer>`, use the same libraries through adapters that follow th
 
 Most built-in effects are CSS filters. The colour tools in [Colour and grading](./colour) run as shaders, through the
 same pipeline as yours, and so do the built-in shader transitions ([Transitions](./time#transitions-sit-between-clips)).
-Anything else is a few lines of GLSL: declare it at the top of the file with `defineEffect()` or `defineTransition()`,
-and use the name it returns as an `<Effect>` or `<Transition>` type.
+Anything else is a few lines of GLSL: declare it at the top of the file with `effect()` or `transition()`, and pass
+what it returns as an `<Effect>` or `<Transition>` type. TypeScript then checks the params you write against the
+schema you declared, as it does for the built-in types.
 
 An effect on a clip: a two-colour tone (the built-in `duotone` does the same; this shows how it is written), with two
 colour params and a third that the keyframes animate from the plain footage to the full effect.
@@ -188,28 +189,28 @@ before's result (the element's picture for the first), and `original` is the ele
 pass gets the same params. A separable blur, as an example:
 
 ```tsx
-const soften = defineEffect({
+const soften = effect({
   name: "soften",
   params: z.object({ radius: z.number().min(0).max(40).default(8) }),
   passes: [
     `vec4 effect(vec2 uv) {
       vec4 sum = vec4(0.0);
-      for (int i = -8; i <= 8; i++) sum += texture(image, uv + vec2(float(i) * radius / 8.0 / resolution.x, 0.0));
+      for (int i = -8; i <= 8; i++) sum += texture(image, uv + vec2(float(i) * params.radius / 8.0 / resolution.x, 0.0));
       return sum / 17.0;
     }`,
     `vec4 effect(vec2 uv) {
       vec4 sum = vec4(0.0);
-      for (int i = -8; i <= 8; i++) sum += texture(image, uv + vec2(0.0, float(i) * radius / 8.0 / resolution.y));
+      for (int i = -8; i <= 8; i++) sum += texture(image, uv + vec2(0.0, float(i) * params.radius / 8.0 / resolution.y));
       return sum / 17.0;
     }`,
   ],
 });
 ```
 
-Each param reaches the shader as a uniform with the param's name. A number becomes a `float`, a boolean a `bool`, an
-array of two, three or four numbers a `vec2`, `vec3` or `vec4`, and a colour string such as `"#ff8800"` a `vec3`. A
-param can't use the name of a GLSL function (`mix`, `step`, `length`…) or of an input above; `defineEffect()` says so. The
-zod schema checks the values and fills in defaults, a [`<Keyframe>`](/reference/elements/keyframe) inside the
+The shader reads each param as `params.<name>`, so a param can take any name, `length` and `image` included. A
+number becomes a `float`, a boolean a `bool`, an array of two, three or four numbers a `vec2`, `vec3` or `vec4`, and a
+colour string such as `"#ff8800"` a `vec3`. `effect()` refuses a shader that reads a param its schema does not
+declare. The zod schema checks the values and fills in defaults, a [`<Keyframe>`](/reference/elements/keyframe) inside the
 `<Effect>` animates one with `param="<name>"` (the resolver checks the name and the values against the schema), and
 an editor can build its inspector from the schema.
 
@@ -242,8 +243,8 @@ in file order. HTML-in-Canvas is a Chrome feature that is still behind a flag: t
 overlay's built-in effects as CSS, leaves out the ones only a shader draws, and warns once. The export always draws
 them all, because its browser has the feature on.
 
-Keep `defineEffect()` and `defineTransition()` at the top of the file with a literal `name` and `shader`, where the
-editor and lint can read them; the `declaration` lint ([Lint](/guide/editing#lint)) says when one is not. The editor's
+Keep `effect()` and `transition()` at the top of the file with a literal `name` and `shader` (or `passes`), where
+the editor and lint can read them; the `declaration` lint ([Lint](/guide/editing#lint)) says when one is not. The editor's
 [actions](/reference/actions) take the names too, for example `effect/add` and `transition/update`.
 
 The player draws these shaders with WebGL in any browser, and the export draws them the same way, in the

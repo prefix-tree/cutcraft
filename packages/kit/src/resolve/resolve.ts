@@ -89,7 +89,7 @@ export interface ResolvedState {
   readonly theme: ResolvedTheme;
   /** The faces the file declares (`font()`, `googleFont()`), which every renderer loads. */
   readonly fonts: readonly DeclaredFont[];
-  /** The effects and transitions the file declares (`defineEffect()`, `defineTransition()`). */
+  /** The effects and transitions the file declares (`effect()`, `transition()`). */
   readonly shaders: readonly ShaderDefinition[];
 }
 
@@ -415,7 +415,7 @@ const parsedByProps = new WeakMap<object, ParsedProps>();
 /** Which parsed props the theme supplied, keyed by the parsed `data`. */
 const themedByData = new WeakMap<object, Readonly<Record<string, ThemeOrigin>>>();
 
-/** The shaders of the file being resolved (`defineEffect`, `defineTransition`); set for the length of one `compute`. */
+/** The shaders of the file being resolved (`effect`, `transition`); set for the length of one `compute`. */
 let fileShaders: readonly ShaderDefinition[] = [];
 
 /**
@@ -439,7 +439,7 @@ function declaredShader(
       code: "SCHEMA",
       id: node.id,
       prop: "type",
-      message: `unknown ${node.kind} "${type}": use one of ${builtIn.join(", ")}, or declare it with ${node.kind === "effect" ? "defineEffect" : "defineTransition"}()`,
+      message: `unknown ${node.kind} "${type}": use one of ${builtIn.join(", ")}, or declare it with ${node.kind === "effect" ? "effect" : "transition"}()`,
     });
     return null;
   }

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { collectModule, defineTransition, resolve } from "@cutcraft/kit";
+import { collectModule, resolve, transition } from "@cutcraft/kit";
 import { loadModule } from "@cutcraft/kit/source";
 
 const manifest = { assets: { city: { id: "city", kind: "video" as const, duration: 10 } } };
@@ -57,8 +57,8 @@ describe("the shader transitions", () => {
   });
 
   it("are built in, so a file cannot declare its own under their names", () => {
-    expect(() =>
-      defineTransition({ name: "iris", shader: "vec4 transition(vec2 uv) { return texture(to, uv); }" }),
-    ).toThrow("is built in");
+    expect(() => transition({ name: "iris", shader: "vec4 transition(vec2 uv) { return texture(to, uv); }" })).toThrow(
+      "is built in",
+    );
   });
 });

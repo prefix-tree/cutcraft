@@ -10,7 +10,7 @@ export { TRANSITION_PARAMS };
 export const transitionSchema = z
   .strictObject({
     id: idSchema,
-    /** A built-in transition, or one the file declares with `defineTransition()`. */
+    /** A built-in transition, or one the file declares with `transition()`. */
     type: z.union([zTransitionType, z.string().min(1)]).default("crossfade"),
     duration: z.number().min(0.001).max(30).default(0.5),
     params: z.record(z.string(), z.unknown()).default({}),

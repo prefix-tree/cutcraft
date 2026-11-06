@@ -115,7 +115,7 @@ Crossfade, dips to black or white, wipe, slide and push are built in, and six mo
 
 The shader transitions need WebGL, which the player and the export have; where it is missing they play as a
 crossfade. At the edge of a title or another overlay they play as a fade. Any other look is a few lines of GLSL that
-you declare with `defineTransition()`
+you declare with `transition()`
 ([Effects and transitions of your own](./free-code#effects-and-transitions-of-your-own)).
 A type that is neither built in nor declared is an error.
 

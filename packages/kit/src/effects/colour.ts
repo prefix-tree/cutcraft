@@ -19,9 +19,9 @@ const levels = shaderDefinition("effect", {
   }),
   shader: `vec4 effect(vec2 uv) {
   vec4 c = texture(image, uv);
-  float range = max(white - black, 1e-5);
-  vec3 v = clamp((c.rgb - black) / range, 0.0, 1.0);
-  return vec4(pow(v, vec3(1.0 / max(gamma, 0.01))), c.a);
+  float range = max(params.white - params.black, 1e-5);
+  vec3 v = clamp((c.rgb - params.black) / range, 0.0, 1.0);
+  return vec4(pow(v, vec3(1.0 / max(params.gamma, 0.01))), c.a);
 }`,
 });
 
@@ -38,9 +38,9 @@ const lut = shaderDefinition("effect", {
   }),
   shader: `vec4 effect(vec2 uv) {
   vec4 c = texture(image, uv);
-  float n = float(textureSize(src, 0).x);
-  vec3 graded = texture(src, (clamp(c.rgb, 0.0, 1.0) * (n - 1.0) + 0.5) / n).rgb;
-  return vec4(mix(c.rgb, graded, amount), c.a);
+  float n = float(textureSize(params.src, 0).x);
+  vec3 graded = texture(params.src, (clamp(c.rgb, 0.0, 1.0) * (n - 1.0) + 0.5) / n).rgb;
+  return vec4(mix(c.rgb, graded, params.amount), c.a);
 }`,
 });
 
@@ -50,7 +50,7 @@ const exposure = shaderDefinition("effect", {
   params: z.object({ stops: z.number().min(-5).max(5).default(0) }),
   shader: `${COLOUR}vec4 effect(vec2 uv) {
   vec4 c = texture(image, uv);
-  return vec4(clamp(cc_srgb(cc_linear(c.rgb) * exp2(stops)), 0.0, 1.0), c.a);
+  return vec4(clamp(cc_srgb(cc_linear(c.rgb) * exp2(params.stops)), 0.0, 1.0), c.a);
 }`,
 });
 
@@ -65,7 +65,7 @@ const vibrance = shaderDefinition("effect", {
   shader: `${COLOUR}vec4 effect(vec2 uv) {
   vec4 c = texture(image, uv);
   float spread = max(c.r, max(c.g, c.b)) - min(c.r, min(c.g, c.b));
-  float k = amount > 0.0 ? amount * (1.0 - spread) : amount;
+  float k = params.amount > 0.0 ? params.amount * (1.0 - spread) : params.amount;
   return vec4(clamp(mix(vec3(cc_luma(c.rgb)), c.rgb, 1.0 + k), 0.0, 1.0), c.a);
 }`,
 });
@@ -91,11 +91,11 @@ const mat3 BRADFORD_INV = mat3(0.9869929, -0.1470543, 0.1599627, 0.4323053, 0.51
 vec3 cc_xyz(vec2 xy) { return vec3(xy.x / xy.y, 1.0, (1.0 - xy.x - xy.y) / xy.y); }
 vec4 effect(vec2 uv) {
   vec4 c = texture(image, uv);
-  float t = 6500.0 * exp2(temperature / 100.0);
+  float t = 6500.0 * exp2(params.temperature / 100.0);
   float x = t <= 7000.0
     ? -4.6070e9 / (t * t * t) + 2.9678e6 / (t * t) + 0.09911e3 / t + 0.244063
     : -2.0064e9 / (t * t * t) + 1.9018e6 / (t * t) + 0.24748e3 / t + 0.237040;
-  float y = -3.0 * x * x + 2.87 * x - 0.275 + tint * 0.0005;
+  float y = -3.0 * x * x + 2.87 * x - 0.275 + params.tint * 0.0005;
   vec3 gain = (cc_xyz(vec2(0.3127, 0.3290)) * BRADFORD) / (cc_xyz(vec2(x, y)) * BRADFORD);
   vec3 lms = (cc_linear(c.rgb) * RGB_XYZ) * BRADFORD;
   vec3 rgb = ((lms * gain) * BRADFORD_INV) * XYZ_RGB;
@@ -124,7 +124,7 @@ const shadowsHighlights = shaderDefinition("effect", {
   float around = texture(image, uv).r;
   float dark = 1.0 - smoothstep(0.0, 0.5, around);
   float bright = smoothstep(0.5, 1.0, around);
-  float stops = 2.0 * (shadows * dark + highlights * bright);
+  float stops = 2.0 * (params.shadows * dark + params.highlights * bright);
   return vec4(clamp(cc_srgb(cc_linear(c.rgb) * exp2(stops)), 0.0, 1.0), c.a);
 }`,
   ],
@@ -140,8 +140,8 @@ const duotone = shaderDefinition("effect", {
   }),
   shader: `${COLOUR}vec4 effect(vec2 uv) {
   vec4 c = texture(image, uv);
-  vec3 toned = mix(dark, light, cc_luma(c.rgb));
-  return vec4(mix(c.rgb, toned, amount), c.a);
+  vec3 toned = mix(params.dark, params.light, cc_luma(c.rgb));
+  return vec4(mix(c.rgb, toned, params.amount), c.a);
 }`,
 });
 

@@ -10,13 +10,13 @@ type Params = Readonly<Record<string, unknown>>;
 /** `rgb = clamp(rgb * slope + offset)`: the spec's linear transfer functions (brightness, contrast, invert). */
 const LINEAR = `vec4 effect(vec2 uv) {
   vec4 c = texture(image, uv);
-  return vec4(clamp(c.rgb * slope + offset, 0.0, 1.0), c.a);
+  return vec4(clamp(c.rgb * params.slope + params.offset, 0.0, 1.0), c.a);
 }`;
 
 /** A 3 × 3 colour matrix, rows r0..r2: the spec's saturate, hue-rotate, sepia and grayscale. */
 const MATRIX = `vec4 effect(vec2 uv) {
   vec4 c = texture(image, uv);
-  return vec4(clamp(vec3(dot(r0, c.rgb), dot(r1, c.rgb), dot(r2, c.rgb)), 0.0, 1.0), c.a);
+  return vec4(clamp(vec3(dot(params.r0, c.rgb), dot(params.r1, c.rgb), dot(params.r2, c.rgb)), 0.0, 1.0), c.a);
 }`;
 
 /**
@@ -28,8 +28,8 @@ const gauss = (axis: "x" | "y", alphaOnly: boolean) => `vec4 cc_at(vec2 uv) {
   return any(lessThan(uv, vec2(0.0))) || any(greaterThan(uv, vec2(1.0))) ? vec4(0.0) : texture(image, uv);
 }
 vec4 effect(vec2 uv) {
-  if (sigma <= 0.0) return texture(image, uv);
-  float reach = 3.0 * sigma;
+  if (params.sigma <= 0.0) return texture(image, uv);
+  float reach = 3.0 * params.sigma;
   float n = min(ceil(reach), 96.0);
   vec2 dir = vec2(${axis === "x" ? "1.0, 0.0" : "0.0, 1.0"}) * (reach / n) / resolution;
   vec4 sum = vec4(0.0);
@@ -37,7 +37,7 @@ vec4 effect(vec2 uv) {
   for (int i = -96; i <= 96; i++) {
     if (abs(float(i)) > n) continue;
     float d = float(i) * reach / n;
-    float w = exp(-d * d / (2.0 * sigma * sigma));
+    float w = exp(-d * d / (2.0 * params.sigma * params.sigma));
     vec4 s = cc_at(uv + float(i) * dir);
     sum += w * ${alphaOnly ? (axis === "x" ? "vec4(s.a)" : "vec4(s.r)") : "vec4(s.rgb * s.a, s.a)"};
     weights += w;
@@ -49,12 +49,12 @@ vec4 effect(vec2 uv) {
 /** The shadow: the blurred alpha (in red) read back by `offset` pixels, coloured, drawn under the original. */
 const SHADOW = `vec4 effect(vec2 uv) {
   vec4 o = texture(original, uv);
-  vec2 at = uv - offset / resolution;
+  vec2 at = uv - params.offset / resolution;
   float a = any(lessThan(at, vec2(0.0))) || any(greaterThan(at, vec2(1.0))) ? 0.0 : texture(image, at).r;
-  float s = a * color.a;
+  float s = a * params.color.a;
   float out_a = o.a + s * (1.0 - o.a);
   if (out_a <= 0.0) return vec4(0.0);
-  return vec4((o.rgb * o.a + color.rgb * s * (1.0 - o.a)) / out_a, out_a);
+  return vec4((o.rgb * o.a + params.color.rgb * s * (1.0 - o.a)) / out_a, out_a);
 }`;
 
 const pass = (name: string, sources: readonly string[], params: Params, time: number): ShaderPass => ({

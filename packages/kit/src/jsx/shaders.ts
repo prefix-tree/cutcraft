@@ -1,10 +1,18 @@
 // Effects and transitions a file writes itself: a GLSL function and a zod schema for its params, declared at the top of
-// the file and used by name in <Effect type> or <Transition type>. The player draws them with WebGL, in the preview
-// and the export.
-import { TRANSITION_TYPES, VIDEO_EFFECT_TYPES } from "../effects/registry";
-import { type DefineOptions, type ShaderDefinition, shaderDefinition } from "./shader-definition";
+// the file with effect() or transition() and passed to <Effect type> or <Transition type>. The player draws them with
+// WebGL, in the preview and the export.
+import type { ZodObject } from "zod";
 
-export { type DefineOptions, type ShaderDefinition, type ShaderTable, shaderDefinition } from "./shader-definition";
+import { TRANSITION_TYPES, VIDEO_EFFECT_TYPES } from "../effects/registry";
+import { type DefineOptions, type NoParams, type ShaderDefinition, shaderDefinition } from "./shader-definition";
+
+export {
+  type DefineOptions,
+  type NoParams,
+  type ShaderDefinition,
+  type ShaderTable,
+  shaderDefinition,
+} from "./shader-definition";
 
 interface ShaderStore {
   scope: Map<string, ShaderDefinition> | null;
@@ -21,7 +29,20 @@ const store: ShaderStore = ((globalThis as Record<symbol, ShaderStore | undefine
 /** The shaders a module loaded by `loadModule` declared, stored on its exports under this key. */
 export const MODULE_SHADERS = Symbol.for("cutcraft.shaders");
 
-function declare(kind: ShaderDefinition["kind"], options: DefineOptions): string {
+declare const PARAMS: unique symbol;
+
+/**
+ * An effect a file declares, as `effect()` returns it: its name, which is all it is at runtime, typed with its params
+ * so `<Effect type={ref} params>` checks them.
+ */
+export type EffectRef<P extends ZodObject = ZodObject> = string & { readonly [PARAMS]: P; readonly kind?: "effect" };
+/** A transition a file declares, as `transition()` returns it: its name, typed with its params. */
+export type TransitionRef<P extends ZodObject = ZodObject> = string & {
+  readonly [PARAMS]: P;
+  readonly kind?: "transition";
+};
+
+function declare(kind: ShaderDefinition["kind"], options: DefineOptions<ZodObject>): string {
   const builtIn = (kind === "effect" ? VIDEO_EFFECT_TYPES : TRANSITION_TYPES) as readonly string[];
   if (builtIn.includes(options.name)) throw new Error(`${kind} "${options.name}" is built in; give yours another name`);
   const def = shaderDefinition(kind, options);
@@ -30,33 +51,34 @@ function declare(kind: ShaderDefinition["kind"], options: DefineOptions): string
 }
 
 /**
- * Declares an effect drawn by a GLSL function, and returns its name for `<Effect type>`. Call it at the top of the file.
+ * Declares an effect drawn by a GLSL function, and returns it for `<Effect type>`. Call it at the top of the file. The
+ * shader reads each param as `params.NAME`.
  *
- *   const glitch = defineEffect({
+ *   const glitch = effect({
  *     name: "glitch",
  *     params: z.object({ amount: z.number().min(0).max(1).default(0.3) }),
  *     shader: `vec4 effect(vec2 uv) {
- *       float shift = amount * 0.02 * sin(time * 40.0 + uv.y * 80.0);
+ *       float shift = params.amount * 0.02 * sin(time * 40.0 + uv.y * 80.0);
  *       return vec4(texture(image, uv + vec2(shift, 0)).r, texture(image, uv).g, texture(image, uv - vec2(shift, 0)).b,
  *                   texture(image, uv).a);
  *     }`,
  *   });
  *   <Clip id="city" src="asset:city"><Effect id="g" type={glitch} params={{ amount: 0.5 }} /></Clip>
  */
-export function defineEffect(options: DefineOptions): string {
-  return declare("effect", options);
+export function effect<P extends ZodObject = NoParams>(options: DefineOptions<P>): EffectRef<P> {
+  return declare("effect", options) as EffectRef<P>;
 }
 
 /**
- * Declares a transition drawn by a GLSL function of the two pictures, and returns its name for `<Transition type>`.
+ * Declares a transition drawn by a GLSL function of the two pictures, and returns it for `<Transition type>`.
  *
- *   const sweep = defineTransition({
+ *   const sweep = transition({
  *     name: "sweep",
  *     shader: `vec4 transition(vec2 uv) { return uv.x < progress ? texture(to, uv) : texture(from, uv); }`,
  *   });
  */
-export function defineTransition(options: DefineOptions): string {
-  return declare("transition", options);
+export function transition<P extends ZodObject = NoParams>(options: DefineOptions<P>): TransitionRef<P> {
+  return declare("transition", options) as TransitionRef<P>;
 }
 
 /** Runs `load` and returns the shaders declared while it ran: how `loadModule` keeps each file's apart. */
