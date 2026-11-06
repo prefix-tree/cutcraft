@@ -5,7 +5,7 @@ import generated from "./sidebar.generated.json";
 export default defineConfig({
   title: "CutCraft",
   description:
-    "Video editor as code: a model writes a TSX file with words and shots instead of seconds, the browser plays it, an editor edits the same file, and Node exports it.",
+    "Video editor as code: LLMs write code well and math badly, so a model writes a TSX file of words and shots, and CutCraft does the arithmetic, plays it in the browser, edits it and exports it.",
   base: "/cutcraft/",
   cleanUrls: true,
   // Decision records are for contributors and live in the repository, not on the site.
