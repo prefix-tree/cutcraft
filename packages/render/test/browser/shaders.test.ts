@@ -425,6 +425,99 @@ describe("footage tools", () => {
   });
 });
 
+describe("title effects", () => {
+  // A red box at x 120..200, y 60..120 in a Layer, over black, through HTML-in-Canvas.
+  const boxed = (name: string, effect: string, points: [number, number][]) =>
+    colourAt(
+      name,
+      `<Track id="fx" layout="free">
+        <Layer id="l" start={0} duration={2}>
+          ${effect}
+          <div style={{ position: "absolute", left: 120, top: 60, width: 80, height: 60, background: "#ff0000" }} />
+        </Layer>
+      </Track>`,
+      "",
+      0.5,
+      points,
+    );
+  const near = (c: number[] | undefined, want: readonly number[], by = 12) =>
+    want.every((v, i) => Math.abs((c?.[i] ?? -999) - v) <= by);
+
+  it("glow lights the area around the box in its colour", async () => {
+    const [around, far] = await boxed(
+      "glow",
+      `<Effect id="g" type="glow" params={{ radius: 20, color: "#00ffff" }} />`,
+      [
+        [205, 90],
+        [20, 20],
+      ],
+    );
+    // 5 px out from a hard edge, a Gaussian of sigma 20 / 3 holds about a fifth of the alpha.
+    expect(around?.[1] ?? 0).toBeGreaterThan(35);
+    expect(around?.[2] ?? 0).toBeGreaterThan(35);
+    expect(around?.[0] ?? 255).toBeLessThan(15);
+    expect(near(far, [0, 0, 0])).toBe(true);
+  });
+
+  it("outline draws a band around the box, and outlineOnly fills its silhouette", async () => {
+    const [band, beyond, inside] = await boxed("outline", `<Effect id="o" type="outline" params={{ width: 8 }} />`, [
+      [204, 90],
+      [216, 90],
+      [160, 90],
+    ]);
+    expect(near(band, [255, 255, 255])).toBe(true);
+    expect(near(beyond, [0, 0, 0])).toBe(true);
+    expect(near(inside, [255, 0, 0])).toBe(true);
+    const [filled] = await boxed(
+      "outline-only",
+      `<Effect id="o" type="outline" params={{ width: 8, outlineOnly: true, color: "#0000ff" }} />`,
+      [[160, 90]],
+    );
+    expect(near(filled, [0, 0, 255])).toBe(true);
+  });
+
+  it("longShadow falls down and right of the box, not up and left", async () => {
+    const [cast, behind, inside] = await boxed(
+      "long-shadow",
+      `<Effect id="s" type="longShadow" params={{ reach: 40, color: "#00ff00" }} />`,
+      [
+        [205, 125],
+        [115, 55],
+        [160, 90],
+      ],
+    );
+    expect(near(cast, [0, 255, 0])).toBe(true);
+    expect(near(behind, [0, 0, 0])).toBe(true);
+    expect(near(inside, [255, 0, 0])).toBe(true);
+  });
+
+  it("bevel lights the edge facing the light and shades the other, and leaves the middle", async () => {
+    const [top, bottom, middle] = await boxed(
+      "bevel",
+      `<Effect id="b" type="bevel" params={{ size: 6, angle: 0, intensity: 1 }} />`,
+      [
+        [160, 61],
+        [160, 118],
+        [160, 90],
+      ],
+    );
+    expect(top?.[1] ?? 0).toBeGreaterThan(50);
+    expect(bottom?.[0] ?? 255).toBeLessThan(200);
+    expect(near(middle, [255, 0, 0])).toBe(true);
+  });
+
+  it("glow works on footage too", async () => {
+    const [edge] = await colourAt(
+      "glow-clip",
+      `<Track id="t"><Clip id="c" src="asset:solid" fit="cover"><Effect id="p" type={paint} /><Effect id="g" type="glow" params={{ radius: 20, color: "#ff0000" }} /></Clip></Track>`,
+      `const paint = defineEffect({ name: "paint", shader: "vec4 effect(vec2 uv) { return uv.x < 0.5 ? vec4(0.0, 0.0, 0.0, 0.0) : vec4(1.0); }" });`,
+      0.5,
+      [[155, 90]],
+    );
+    expect(edge?.[0] ?? 0).toBeGreaterThan(35);
+  });
+});
+
 it("runs a declared effect on an adjustment, over everything beneath it", async () => {
   const [c] = await colourAt(
     "adjust",

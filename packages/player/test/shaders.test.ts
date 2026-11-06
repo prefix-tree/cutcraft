@@ -18,7 +18,7 @@ export default function V() { return <Composition fps={30} width={640} height={3
     manifest,
   );
 
-const GLOW = `const glow = defineEffect({ name: "glow", params: z.object({ amount: z.number().default(0.5), tint: z.string().default("#ff8800") }), shader: "vec4 effect(vec2 uv) { return texture(image, uv) * amount; }" });`;
+const GLOW = `const glow = defineEffect({ name: "soft-glow", params: z.object({ amount: z.number().default(0.5), tint: z.string().default("#ff8800") }), shader: "vec4 effect(vec2 uv) { return texture(image, uv) * amount; }" });`;
 const SWEEP = `const sweep = defineTransition({ name: "sweep", shader: "vec4 transition(vec2 uv) { return uv.x < progress ? texture(to, uv) : texture(from, uv); }" });`;
 
 describe("declared shaders in the frame plan", () => {
@@ -37,7 +37,7 @@ describe("declared shaders in the frame plan", () => {
     expect(op.filter).toBe("blur(2px)");
     expect(op.shaders).toEqual([
       {
-        name: "glow",
+        name: "soft-glow",
         sources: [expect.stringContaining("vec4 effect")],
         params: { amount: 0.5, tint: "#ff8800" },
         time: 1,
@@ -100,6 +100,20 @@ describe("declared shaders in the frame plan", () => {
     expect(passes[1]?.params.color).toBe("#00ff00");
   });
 
+  it("give glow a CSS fallback, stacked for intensity, and outline none", () => {
+    const state = stateOf(
+      `<Track id="t"><Clip id="c" src="asset:city" in={0} out={4}>
+        <Effect id="g" type="glow" params={{ radius: 10, intensity: 2, color: "#ff0000" }} />
+        <Effect id="o" type="outline" />
+      </Clip></Track>`,
+      "",
+    );
+    expect(state.errors).toEqual([]);
+    const op = buildFramePlan(state, 1).ops[0]!;
+    expect(op.filter).toBe("");
+    expect(op.fallbackFilter).toBe("drop-shadow(0 0 5px #ff0000) drop-shadow(0 0 5px #ff0000)");
+  });
+
   it("carry every pass of an effect of several", () => {
     const state = stateOf(
       `<Track id="t"><Clip id="c" src="asset:city" in={0} out={4}><Effect id="s" type={soft} /></Clip></Track>`,
@@ -121,7 +135,7 @@ describe("declared shaders in the frame plan", () => {
       buildFramePlan(state, 1)
         .ops.find((o) => o.id === "a")
         ?.shaders?.map((s) => s.name),
-    ).toEqual(["glow"]);
+    ).toEqual(["soft-glow"]);
   });
 
   it("give both sides of a declared transition its pass, in place of the built-in look", () => {

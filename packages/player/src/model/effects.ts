@@ -55,6 +55,14 @@ const CANVAS_FILTERABLE: Readonly<
   // Without WebGL: exposure as brightness of the encoded values, vibrance as plain saturation at half strength.
   exposure: (p) => `brightness(${2 ** num(p, ["stops"], 0)})`,
   vibrance: (p) => `saturate(${1 + num(p, ["amount"], 0) / 2})`,
+  // Without WebGL or HTML-in-Canvas: a glow as a coloured shadow under the element, stacked for intensity.
+  glow: (p) => {
+    const colour = typeof p.color === "string" ? p.color : "#ffffff";
+    const layer = `drop-shadow(0 0 ${num(p, ["radius"], 20) / 2}px ${colour})`;
+    return Array.from({ length: Math.max(1, Math.min(4, Math.round(num(p, ["intensity"], 1)))) }, () => layer).join(
+      " ",
+    );
+  },
   shadow: (p) =>
     `drop-shadow(${num(p, ["x"], 0)}px ${num(p, ["y"], 4)}px ${num(p, ["blur"], 8)}px ${typeof p.color === "string" ? p.color : "rgba(0,0,0,0.5)"})`,
 };

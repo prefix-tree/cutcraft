@@ -28,7 +28,7 @@ describe("what a file can say is what renders", () => {
   it("offers only the types the renderers draw", () => {
     expect(TRANSITION_TYPES).toEqual(["crossfade", "dipToBlack", "dipToWhite", "wipe", "slide", "push"]);
     expect(Object.keys(TRANSITION_PARAMS).sort()).toEqual([...TRANSITION_TYPES].sort());
-    expect(VIDEO_EFFECT_TYPES).toHaveLength(26);
+    expect(VIDEO_EFFECT_TYPES).toHaveLength(30);
     expect(TEXT_ANIMATION_PRESETS).toHaveLength(9);
     expect(MASK_TYPES).toEqual(["shape", "drawn"]);
   });
@@ -36,12 +36,14 @@ describe("what a file can say is what renders", () => {
   it("refuses a type or prop no renderer draws, naming it", () => {
     expect(
       errorsOf(
-        `<Clip id="a" src="asset:city" chromaKey={{ color: "#0f0" }} /><Transition id="x" type="glitch" /><Clip id="b" src="asset:city"><Effect id="g" type="glow" /></Clip>`,
+        `<Clip id="a" src="asset:city" chromaKey={{ color: "#0f0" }} /><Transition id="x" type="glitch" /><Clip id="b" src="asset:city"><Effect id="g" type="sparkle-dust" /></Clip>`,
       ),
     ).toEqual([
       'a: Unrecognized key: "chromaKey"',
       'x.type: unknown transition "glitch": use one of crossfade, dipToBlack, dipToWhite, wipe, slide, push, or declare it with defineTransition()',
-      expect.stringMatching(/^g\.type: unknown effect "glow": use one of .*, or declare it with defineEffect\(\)$/),
+      expect.stringMatching(
+        /^g\.type: unknown effect "sparkle-dust": use one of .*, or declare it with defineEffect\(\)$/,
+      ),
     ]);
     expect(errorsOf(`<Title id="h" emphasis="pulse" animation={{ preset: "bounce" }}>Hi</Title>`)).toEqual([
       expect.stringMatching(/^h\.animation\.preset: Invalid option/),
