@@ -113,8 +113,8 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm docs:gen
-      - run: git diff --exit-code -- docs
+      - run: pnpm docs:test
+      - run: pnpm docs:check
       - run: pnpm docs:build
 
   # Not a gate: records how fast the export is on a CI machine, for comparison over time.

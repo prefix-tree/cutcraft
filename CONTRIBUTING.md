@@ -22,8 +22,10 @@ focused pull request with a test.
 - Browser tests: `pnpm --filter @cutcraft/player test:e2e` needs `ffmpeg` on the
   path and Playwright's Chromium (`pnpm exec playwright install --with-deps chromium`
   from `packages/player`). They generate their media on first run.
-- Docs: `pnpm docs:dev` serves the site; `pnpm docs:gen` regenerates the
-  reference pages from the code and must leave `git diff` empty (CI checks).
+- Docs: `pnpm docs:dev` serves the site; `pnpm docs:gen` regenerates the reference pages from the code.
+  `pnpm docs:check` recomputes the pages and sidebar in memory and fails on changed, missing, unexpected or
+  obsolete generated files, without rewriting them. Run `pnpm docs:test` for its read-only/drift regression tests.
+  CI runs both checks; commit regenerated pages alongside the source changes that require them.
 - The example: `pnpm --filter @cutcraft/example-launch-recap gen` then `dev`.
 
 ## Where things live

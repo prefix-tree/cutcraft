@@ -25,6 +25,8 @@
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs",
     "docs:gen": "tsx scripts/gen-docs.ts",
+    "docs:check": "node --import tsx scripts/gen-docs.ts --check",
+    "docs:test": "node --import tsx --test scripts/generated-files.test.ts",
     "docs:bench": "tsx scripts/site-bench.ts",
     "docs:examples": "pnpm --filter @cutcraft/example-showcase docs",
     "build": "pnpm -r build",

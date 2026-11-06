@@ -1,5 +1,5 @@
-import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { join, relative, sep } from "node:path";
 
 import { z } from "zod";
 
@@ -14,6 +14,7 @@ import {
   NOT_RENDERED,
   RENDERED_VALUES,
 } from "../packages/kit/src/index";
+import { syncGeneratedFiles } from "./generated-files";
 import { graphicExample } from "./graphic-example";
 
 /**
@@ -24,7 +25,10 @@ import { graphicExample } from "./graphic-example";
  */
 const root = join(import.meta.dirname, "..");
 const out = join(root, "docs", "reference");
-mkdirSync(out, { recursive: true });
+const check = process.argv.includes("--check");
+if (process.argv.slice(2).some((arg) => arg !== "--check")) throw new Error("Usage: gen-docs.ts [--check]");
+const generated = new Map<string, string>();
+const write = (path: string, content: string) => generated.set(relative(root, path).split(sep).join("/"), content);
 
 type JsonSchema = {
   type?: string | string[];
@@ -476,21 +480,15 @@ function escapeTags(markdown: string): string {
     .join("\n");
 }
 
-rmSync(join(out, "elements.md"), { force: true });
-rmSync(join(out, "elements"), { recursive: true, force: true });
-mkdirSync(join(out, "elements"));
-writeFileSync(join(out, "elements", "index.md"), escapeTags(elementsIndex()));
+write(join(out, "elements", "index.md"), escapeTags(elementsIndex()));
 const documented = Object.values(ELEMENT_DOCS).flat();
 const missing = Object.keys(ELEMENTS).filter((name) => !documented.some(([e]) => e === name));
 if (missing.length) throw new Error(`no summary in ELEMENT_DOCS for ${missing.join(", ")}`);
 for (const [name, summary] of documented)
-  writeFileSync(join(out, "elements", `${slug(name)}.md`), escapeTags(elementPage(name, summary)));
-writeFileSync(join(out, "actions.md"), escapeTags(actionsPage()));
-rmSync(join(out, "graphics"), { recursive: true, force: true });
-mkdirSync(join(out, "graphics"));
-writeFileSync(join(out, "graphics", "index.md"), escapeTags(graphicsIndex()));
-for (const name of GRAPHIC_KIND_NAMES)
-  writeFileSync(join(out, "graphics", `${name}.md`), escapeTags(graphicPage(name)));
+  write(join(out, "elements", `${slug(name)}.md`), escapeTags(elementPage(name, summary)));
+write(join(out, "actions.md"), escapeTags(actionsPage()));
+write(join(out, "graphics", "index.md"), escapeTags(graphicsIndex()));
+for (const name of GRAPHIC_KIND_NAMES) write(join(out, "graphics", `${name}.md`), escapeTags(graphicPage(name)));
 // The sidebars of the generated sections, read by the site's config.
 const sidebar = {
   elements: Object.entries(ELEMENT_DOCS).map(([group, items]) => ({
@@ -502,8 +500,17 @@ const sidebar = {
     items: names.map((name) => ({ text: GRAPHIC_KINDS[name].title, link: `/reference/graphics/${name}` })),
   })),
 };
-writeFileSync(join(root, "docs", ".vitepress", "sidebar.generated.json"), `${JSON.stringify(sidebar, null, 2)}\n`);
-writeFileSync(join(out, "rendering.md"), escapeTags(renderingPage()));
-console.log(
-  `docs/reference: actions.md rendering.md, elements/ (${documented.length + 1} pages), graphics/ (${GRAPHIC_KIND_NAMES.length + 1} pages)`,
-);
+write(join(root, "docs", ".vitepress", "sidebar.generated.json"), `${JSON.stringify(sidebar, null, 2)}\n`);
+write(join(out, "rendering.md"), escapeTags(renderingPage()));
+const problems = syncGeneratedFiles(root, generated, {
+  check,
+  directories: ["docs/reference/elements", "docs/reference/graphics"],
+  obsolete: ["docs/reference/elements.md"],
+});
+if (problems.length) {
+  console.error(`Generated reference is stale (${problems.length} files). Run pnpm docs:gen.`);
+  for (const problem of problems) console.error(problem);
+  process.exitCode = 1;
+} else {
+  console.log(`${check ? "Checked" : "Generated"} ${generated.size} reference/sidebar files.`);
+}
