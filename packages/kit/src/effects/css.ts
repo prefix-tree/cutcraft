@@ -56,6 +56,7 @@ const css = <S extends z.ZodRawShape>(
 export const brightness = css({ amount: change(0) }, (p) => `brightness(${1 + num(p, "amount", 0)})`);
 export const contrast = css({ amount: change(0) }, (p) => `contrast(${1 + num(p, "amount", 0)})`);
 export const saturation = css({ amount: change(0) }, (p) => `saturate(${1 + num(p, "amount", 0)})`);
+export const blur = css({ radius: z.number().min(0).max(200).default(4) }, (p) => `blur(${num(p, "radius", 4)}px)`);
 export const hue = css({ angle: z.number().default(0) }, (p) => `hue-rotate(${num(p, "angle", 0)}deg)`);
 export const grayscale = css({ amount: share(1) }, (p) => `grayscale(${num(p, "amount", 1)})`);
 export const sepia = css({ amount: share(1) }, (p) => `sepia(${num(p, "amount", 1)})`);
@@ -89,8 +90,6 @@ export const FALLBACKS = {
       c = 1 + 2 * black * s;
     return `brightness(${s / c}) contrast(${c})`;
   },
-  /** Blur as the CSS filter, whose length is the same standard deviation. */
-  blur: (p: Params): string => `blur(${num(p, "radius", 4)}px)`,
   /** White balance as sepia toward warm and a hue rotation toward cool and for the tint. */
   whiteBalance: (p: Params): string =>
     whiteBalanceFilters({ temperature: num(p, "temperature", 0), tint: num(p, "tint", 0) }).join(" "),

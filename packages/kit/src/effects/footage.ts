@@ -150,14 +150,4 @@ const chromaticAberration = shaderDefinition("effect", {
 }`,
 });
 
-/**
- * Blur: a Gaussian of standard deviation `radius` pixels, as CSS `blur()` reads its length, with the frame's outside
- * transparent, as a canvas blur sees it. The same Gaussian every other built-in uses.
- */
-const blur = shaderDefinition("effect", {
-  name: "blur",
-  params: z.object({ radius: z.number().min(0).max(200).default(4) }),
-  passes: [GAUSS_PASS("x", "rgba", "radius", "transparent"), GAUSS_PASS("y", "rgba", "radius", "transparent")],
-});
-
-export { blur, chromaticAberration, colorKey, cornerPin, regionBlur, zoomBlur };
+export { chromaticAberration, colorKey, cornerPin, regionBlur, zoomBlur };

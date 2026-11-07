@@ -138,9 +138,9 @@ function difference(a: string, b: string): { off: number; max: number } {
 }
 
 /**
- * `tolerance` is the golden one (at most 0.2% of values off by more than 2, none by more than 32). `blur` is no longer a
- * CSS-type effect: it is the kit's Gaussian, the one `shadow-shape` checks here against Chrome's `drop-shadow()`, and
- * its golden guards it.
+ * `tolerance` is the golden one (at most 0.2% of values off by more than 2, none by more than 32) unless a case says
+ * otherwise. Blur is looser: Chrome approximates the Gaussian (Skia's box blurs) where the pass computes the true
+ * Gaussian every built-in shares; they differ by a few levels along soft edges.
  */
 const CASES: readonly {
   name: string;
@@ -155,6 +155,18 @@ const CASES: readonly {
   { name: "sepia", picture: "photo", effect: `<Effect id="e" type="sepia" params={{ amount: 0.7 }} />` },
   { name: "grayscale", picture: "photo", effect: `<Effect id="e" type="grayscale" params={{ amount: 0.8 }} />` },
   { name: "invert", picture: "photo", effect: `<Effect id="e" type="invert" params={{ amount: 0.6 }} />` },
+  {
+    name: "blur",
+    picture: "photo",
+    effect: `<Effect id="e" type="blur" params={{ radius: 4 }} />`,
+    tolerance: { off: 0.15, max: 10 },
+  },
+  {
+    name: "blur-shape",
+    picture: "shape",
+    effect: `<Effect id="e" type="blur" params={{ radius: 6 }} />`,
+    tolerance: { off: 0.15, max: 10 },
+  },
   {
     name: "shadow-shape",
     picture: "shape",

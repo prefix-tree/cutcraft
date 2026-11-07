@@ -93,9 +93,8 @@ export default function V() { return <Composition fps={30} width={640} height={3
     expect(effectEntry("nope")).toBeUndefined();
   });
 
-  it("blurs with the shared Gaussian, radius its standard deviation, and CSS blur() of the same length as the fallback", () => {
-    const draw = effectEntry("blur")?.draw;
-    expect(draw?.kind).toBe("shader");
+  it("blurs as CSS blur(), radius the Gaussian's standard deviation, as every other blur reads it", () => {
+    expect(effectEntry("blur")?.draw.kind).toBe("css");
     expect(cssOf("blur")?.({ radius: 6 })).toBe("blur(6px)");
     expect(effectParamProblem("blur", [], "radius", 500)).toMatchObject({ prop: "value" });
   });

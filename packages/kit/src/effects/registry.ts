@@ -7,7 +7,7 @@ import type { ShaderDefinition } from "../jsx/shader-definition";
 import { curves, duotone, exposure, levels, lut, shadowsHighlights, vibrance, whiteBalance } from "./colour";
 import * as cssEffects from "./css";
 import { FALLBACKS } from "./css";
-import { blur, chromaticAberration, colorKey, cornerPin, regionBlur, zoomBlur } from "./footage";
+import { chromaticAberration, colorKey, cornerPin, regionBlur, zoomBlur } from "./footage";
 import { grain, vignette } from "./post";
 import { blinds, clockWipe, filmBurn, iris, pixelDissolve, zoom } from "./shader-transitions";
 import { bevel, glow, longShadow, outline } from "./titles";
@@ -53,7 +53,7 @@ export const EFFECTS = {
   contrast: cssEntry("contrast", cssEffects.contrast),
   saturation: cssEntry("saturation", cssEffects.saturation),
   hue: cssEntry("hue", cssEffects.hue),
-  blur: shaderEntry(blur, FALLBACKS.blur),
+  blur: cssEntry("blur", cssEffects.blur),
   vignette: { name: "vignette", params: vignette.params, draw: { kind: "post" } },
   grain: { name: "grain", params: grain.params, draw: { kind: "post" } },
   shadow: cssEntry("shadow", cssEffects.shadow),

@@ -79,7 +79,7 @@ Drawn as a CSS filter; no WebGL needed.
 
 #### `blur`
 
-Drawn as a shader, with a CSS filter where WebGL is missing.
+Drawn as a CSS filter; no WebGL needed.
 
 | param | type | default |
 |---|---|---|
