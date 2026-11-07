@@ -77,8 +77,8 @@ const EFFECT_CASES: readonly { readonly key: string; readonly label: string; rea
     key: "blurs",
     label: "blurs, 5 s 1080p30 (region blur of a small box, shadows and highlights)",
     effects: `
-          <Effect id="e1" type="regionBlur" params={{ box: [0.4, 0.3, 0.15, 0.2], radius: 30 }} />
-          <Effect id="e2" type="shadowsHighlights" params={{ shadows: 0.5, radius: 30 }} />`,
+          <Effect id="e1" type="regionBlur" params={{ box: [0.4, 0.3, 0.15, 0.2], radius: 10 }} />
+          <Effect id="e2" type="shadowsHighlights" params={{ shadows: 0.5, radius: 10 }} />`,
   },
   {
     key: "blur",
@@ -91,7 +91,7 @@ const EFFECT_CASES: readonly { readonly key: string; readonly label: string; rea
     label: "silhouette, 5 s 1080p30 (outline and glow on the footage)",
     effects: `
           <Effect id="e1" type="outline" params={{ width: 12 }} />
-          <Effect id="e2" type="glow" params={{ radius: 24 }} />`,
+          <Effect id="e2" type="glow" params={{ radius: 8 }} />`,
   },
 ];
 
