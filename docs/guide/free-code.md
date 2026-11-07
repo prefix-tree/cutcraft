@@ -247,8 +247,12 @@ overlay's built-in effects as CSS, leaves out the ones only a shader draws, and 
 them all, because its browser has the feature on.
 
 Keep `effect()` and `transition()` at the top of the file with a literal `name` and `shader` (or `passes`), where
-the editor and lint can read them; the `declaration` lint ([Lint](/guide/editing#lint)) says when one is not. The editor's
-[actions](/reference/actions) take the names too, for example `effect/add` and `transition/update`.
+the editor and lint can read them; the `declaration` lint ([Lint](/guide/editing#lint)) says when one is not. A
+declaration is a value, not a registration: each file's effects belong to it alone, so many players on one page never
+see each other's. The player finds an effect on the element that uses it, and among the file's exports, so
+`export const` the ones the editor should offer before anything uses them. The editor's
+[actions](/reference/actions) take the names too, for example `effect/add` and `transition/update`, and write
+`type={glitch}` back into the file.
 
 The player draws these shaders with WebGL in any browser, and the export draws them the same way, in the
 [Chrome it runs in](/guide/exporting#the-browser-it-runs-in).

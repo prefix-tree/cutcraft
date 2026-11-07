@@ -238,10 +238,10 @@ export default function Video() {
 
   it("takes a font the file declares as available, and wants declarations at the top with literal arguments", () => {
     const text = `import { Composition, font as face, googleFont, Title, Track } from "@cutcraft/kit";
-const brand = face({ family: "Brand", src: "asset:brand" });
+export const brand = face({ family: "Brand", src: "asset:brand" });
 export const titan = googleFont("Titan One", { weights: [400, 700] });
 const name = "Computed";
-const computed = googleFont(name);
+export const computed = googleFont(name);
 export default function Video() {
   const late = googleFont("Late");
   return (

@@ -1,7 +1,7 @@
 import traverseModule from "@babel/traverse";
 import * as t from "@babel/types";
 
-import { nodeSpecOf } from "../actions/types";
+import { type NodeSpec, nodeSpecOf } from "../actions/types";
 import { ELEMENTS } from "../jsx/elements";
 import type { Json, NetPatch, PatchLog } from "../patches/types";
 import type { ResolvedState } from "../resolve/resolve";
@@ -9,9 +9,10 @@ import { INTERIOR_PREFIX } from "../resolve/tree";
 import { bake } from "./bake";
 import { applyEdits, lineRange, type SourceEdit } from "./edits";
 import { buildSourceIndex, type ElementSite, type SourceIndex } from "./index";
+import { declaredIdentifiers } from "./lint/rules/fonts";
 import type { Range } from "./parse";
 import { parseSource } from "./parse";
-import { printElement, printLiteral, printProp } from "./print";
+import { Identifier, printElement, printLiteral, printProp } from "./print";
 
 const traverse = ((traverseModule as unknown as { default?: typeof traverseModule }).default ??
   traverseModule) as typeof traverseModule;
@@ -65,6 +66,24 @@ export function fold(
   const skipped: { id: string; reason: string }[] = [];
   const text = index.text;
   const groups = new Map<string, PlacedGroup>();
+  // An effect, transition or font the file declares is written as its identifier (`type={glitch}`), not as its name.
+  const idents = declaredIdentifiers(index);
+  const declared = (kind: string, prop: string, value: Json | undefined): Json | undefined => {
+    if (typeof value !== "string") return value;
+    const key =
+      prop === "type" && (kind === "effect" || kind === "transition")
+        ? `${kind}:${value}`
+        : prop === "font"
+          ? `font:${value}`
+          : null;
+    const ident = key ? idents.get(key) : undefined;
+    return ident ? (new Identifier(ident) as unknown as Json) : value;
+  };
+  const withIdentifiers = (spec: NodeSpec): NodeSpec => ({
+    ...spec,
+    props: Object.fromEntries(Object.entries(spec.props).map(([k, v]) => [k, declared(spec.kind, k, v)])),
+    ...(spec.children ? { children: spec.children.map(withIdentifiers) } : {}),
+  });
 
   /**
    * Queue a placed node (inserted or moved) at its insertion point. Siblings
@@ -141,7 +160,7 @@ export function fold(
         if (insertedAncestor(id)) break;
         // The node as it stands now, with the props and children later patches gave it.
         const node = state.tree.byId.get(id) ?? net.node;
-        if (!place(id, net.place, (indent) => printElement(nodeSpecOf(node), indent), null))
+        if (!place(id, net.place, (indent) => printElement(withIdentifiers(nodeSpecOf(node)), indent), null))
           needsBake.push(net.place.parent);
         break;
       }
@@ -173,7 +192,12 @@ export function fold(
           const e =
             key !== undefined
               ? bindingEdit(index, id, prop, key, value, skipped)
-              : propEdit(target, handle ? prop.slice(INTERIOR_PREFIX.length) : prop, value, text);
+              : propEdit(
+                  target,
+                  handle ? prop.slice(INTERIOR_PREFIX.length) : prop,
+                  handle ? value : declared(site.kind, prop, value),
+                  text,
+                );
           if (!e) continue;
           if (e.kind === "prop" && e.range[0] === e.range[1]) {
             // New attributes share one insertion point; one edit keeps them in write order.

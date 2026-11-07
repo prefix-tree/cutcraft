@@ -1,6 +1,7 @@
 // Effects and transitions a file writes itself: a GLSL function and a zod schema for its params, declared at the top of
-// the file with effect() or transition() and passed to <Effect type> or <Transition type>. The player draws them with
-// WebGL, in the preview and the export.
+// the file with effect() or transition() and passed to <Effect type> or <Transition type>. A declaration is a value:
+// nothing is registered anywhere. A tree's definitions are collected from the elements that use them and from the
+// module's exports (resolve/collect.ts), so each player owns its own. The player draws them with WebGL.
 import type { ZodObject } from "zod";
 
 import { TRANSITION_TYPES, VIDEO_EFFECT_TYPES } from "../effects/registry";
@@ -17,40 +18,35 @@ export {
   uniformsOf,
 } from "./shader-definition";
 
-interface ShaderStore {
-  scope: Map<string, ShaderDefinition> | null;
-  readonly global: Map<string, ShaderDefinition>;
-}
-
-// On globalThis, so a second copy of the kit in one page or process still shares it.
-const STORE_KEY = Symbol.for("cutcraft.shaders.store");
-const store: ShaderStore = ((globalThis as Record<symbol, ShaderStore | undefined>)[STORE_KEY] ??= {
-  scope: null,
-  global: new Map(),
-});
-
-/** The shaders a module loaded by `loadModule` declared, stored on its exports under this key. */
-export const MODULE_SHADERS = Symbol.for("cutcraft.shaders");
-
-declare const PARAMS: unique symbol;
+/** What every value a file declares (an effect, a transition, a font) carries, so collection can recognise it. */
+export const DECLARED = Symbol.for("cutcraft.declared");
 
 /**
- * An effect a file declares, as `effect()` returns it: its name, which is all it is at runtime, typed with its params
- * so `<Effect type={ref} params>` checks them.
+ * An effect a file declares, as `effect()` returns it: the definition itself, a value with no side effect. Passed as
+ * `<Effect type={ref}>`, it is collected from the element; exported, from the module, so the editor can offer it.
  */
-export type EffectRef<P extends ZodObject = ZodObject> = string & { readonly [PARAMS]: P; readonly kind?: "effect" };
-/** A transition a file declares, as `transition()` returns it: its name, typed with its params. */
-export type TransitionRef<P extends ZodObject = ZodObject> = string & {
-  readonly [PARAMS]: P;
-  readonly kind?: "transition";
-};
+export interface EffectRef<P extends ZodObject = ZodObject> {
+  readonly [DECLARED]: "effect";
+  readonly name: string;
+  readonly definition: ShaderDefinition<P>;
+}
+/** A transition a file declares, as `transition()` returns it: the definition itself. */
+export interface TransitionRef<P extends ZodObject = ZodObject> {
+  readonly [DECLARED]: "transition";
+  readonly name: string;
+  readonly definition: ShaderDefinition<P>;
+}
 
-function declare(kind: ShaderDefinition["kind"], options: DefineOptions<ZodObject>): string {
+/** Whether a value is an effect or transition a file declared. */
+export function isShaderRef(value: unknown): value is EffectRef | TransitionRef {
+  const kind = (value as { [DECLARED]?: unknown } | null)?.[DECLARED];
+  return kind === "effect" || kind === "transition";
+}
+
+function declare<P extends ZodObject>(kind: ShaderDefinition["kind"], options: DefineOptions<P>): ShaderDefinition<P> {
   const builtIn = (kind === "effect" ? VIDEO_EFFECT_TYPES : TRANSITION_TYPES) as readonly string[];
   if (builtIn.includes(options.name)) throw new Error(`${kind} "${options.name}" is built in; give yours another name`);
-  const def = shaderDefinition(kind, options);
-  (store.scope ?? store.global).set(`${kind}:${def.name}`, def);
-  return def.name;
+  return shaderDefinition(kind, options);
 }
 
 /**
@@ -69,7 +65,8 @@ function declare(kind: ShaderDefinition["kind"], options: DefineOptions<ZodObjec
  *   <Clip id="city" src="asset:city"><Effect id="g" type={glitch} params={{ amount: 0.5 }} /></Clip>
  */
 export function effect<P extends ZodObject = NoParams>(options: DefineOptions<P>): EffectRef<P> {
-  return declare("effect", options) as EffectRef<P>;
+  const definition = declare("effect", options);
+  return Object.freeze({ [DECLARED]: "effect" as const, name: definition.name, definition });
 }
 
 /**
@@ -81,25 +78,8 @@ export function effect<P extends ZodObject = NoParams>(options: DefineOptions<P>
  *   });
  */
 export function transition<P extends ZodObject = NoParams>(options: DefineOptions<P>): TransitionRef<P> {
-  return declare("transition", options) as TransitionRef<P>;
-}
-
-/** Runs `load` and returns the shaders declared while it ran: how `loadModule` keeps each file's apart. */
-export function collectShaders(load: () => void): ShaderDefinition[] {
-  const outer = store.scope;
-  const scope = new Map<string, ShaderDefinition>();
-  store.scope = scope;
-  try {
-    load();
-  } finally {
-    store.scope = outer;
-  }
-  return [...scope.values()];
-}
-
-/** The shaders a module declared: those `loadModule` recorded for it, or else every one declared outside a load. */
-export function shadersOf(mod: object): readonly ShaderDefinition[] {
-  return (mod as Record<symbol, readonly ShaderDefinition[] | undefined>)[MODULE_SHADERS] ?? [...store.global.values()];
+  const definition = declare("transition", options);
+  return Object.freeze({ [DECLARED]: "transition" as const, name: definition.name, definition });
 }
 
 /** The shader a file declares under this name for an `<Effect>` or `<Transition>`, if any. */
