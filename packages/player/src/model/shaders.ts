@@ -1,6 +1,7 @@
 import {
   builtInShader,
   builtInTransition,
+  isNeutral,
   type Placement,
   type ResolvedState,
   SHADER_ONLY_EFFECTS,
@@ -58,6 +59,8 @@ function shaderPass(state: ResolvedState, c: Placement, rel: number): ShaderPass
   const def = own ?? builtInShader(c.props.type);
   if (!def) return undefined;
   const params = paramsAt(state.items, c, rel);
+  // A built-in whose params change nothing at this moment is not drawn: no pass, and so no WebGL for it.
+  if (!own && isNeutral(c.props.type, params)) return undefined;
   return {
     name: def.name,
     sources: def.passes,

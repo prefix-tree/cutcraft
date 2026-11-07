@@ -19,6 +19,7 @@ export {
   type EffectEntry,
   type EffectParams,
   effectEntry,
+  isNeutral,
   POST_EFFECTS,
   SHADER_ONLY_EFFECTS,
   TRANSITION_FAMILIES,

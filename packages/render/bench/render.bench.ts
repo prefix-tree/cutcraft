@@ -94,6 +94,13 @@ const EFFECT_CASES: readonly { readonly key: string; readonly label: string; rea
           <Effect id="e1" type="blur" params={{ radius: 8 }} />`,
   },
   {
+    key: "neutral",
+    label: "neutral, 5 s 1080p30 (exposure at 0 stops and a brightness: the shader effect changes nothing)",
+    effects: `
+          <Effect id="e1" type="exposure" params={{ stops: 0 }} />
+          <Effect id="e2" type="brightness" params={{ amount: 0.1 }} />`,
+  },
+  {
     key: "zoom",
     label: "zoom, 5 s 1080p30 (a zoom blur of the footage)",
     effects: `

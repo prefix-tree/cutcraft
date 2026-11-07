@@ -77,7 +77,7 @@ describe("declared shaders in the frame plan", () => {
         <Effect id="e" type="exposure" params={{ stops: 1 }} />
         <Effect id="v" type="vibrance" params={{ amount: 0.4 }} />
         <Effect id="w" type="whiteBalance" params={{ temperature: 0.3 }} />
-        <Effect id="k" type="curves" />
+        <Effect id="k" type="curves" params={{ rgb: [[0, 0.1], [1, 1]] }} />
       </Clip></Track>`,
       "",
     );
@@ -191,6 +191,39 @@ describe("declared shaders in the frame plan", () => {
     expect(ops[1]?.transition?.progress).toBeGreaterThan(0.3);
     expect(ops[1]?.transition?.progress).toBeLessThan(0.7);
     expect(ops[1]?.clip).toBeUndefined();
+  });
+});
+
+describe("effects whose params change nothing", () => {
+  it("are not drawn: no pass, so an element whose shader effects are all neutral needs no WebGL", () => {
+    const state = stateOf(
+      `<Track id="t"><Clip id="c" src="asset:city" in={0} out={4}>
+        <Effect id="e" type="exposure" params={{ stops: 0 }} />
+        <Effect id="l" type="levels" />
+        <Effect id="k" type="curves" />
+        <Effect id="b" type="brightness" params={{ amount: 0.1 }} />
+        <Effect id="g" type="grayscale" params={{ amount: 0 }} />
+      </Clip></Track>`,
+      "",
+    );
+    expect(state.errors).toEqual([]);
+    const op = buildFramePlan(state, 1).ops[0]!;
+    expect(op.shaders).toBeUndefined();
+    expect(op.filter).toBe("brightness(1.1)");
+  });
+
+  it("bail out only on the frames where a keyframed param is neutral", () => {
+    const state = stateOf(
+      `<Track id="t"><Clip id="c" src="asset:city" in={0} out={4}>
+        <Effect id="e" type="exposure">
+          <Keyframe id="k1" param="stops" at={0} value={0} />
+          <Keyframe id="k2" param="stops" at={2} value={1} />
+        </Effect>
+      </Clip></Track>`,
+      "",
+    );
+    expect(buildFramePlan(state, 0).ops[0]?.shaders).toBeUndefined();
+    expect(buildFramePlan(state, 1).ops[0]?.shaders?.map((p) => p.name)).toEqual(["exposure"]);
   });
 });
 
