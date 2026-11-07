@@ -68,7 +68,7 @@ it.
 <PreviewCard title="Titles" link="/reference/elements/title" src="previews/elements/title" text="Entrances by letter, word or line." />
 <PreviewCard title="Masks" link="/reference/elements/mask" src="previews/elements/mask" text="A feathered oval over footage." />
 <PreviewCard title="Speed ramps" link="/reference/elements/speedkey" src="previews/elements/speedkey" text="Normal speed easing into 4×." />
-<PreviewCard title="Colour" link="/reference/elements/colorgrade" src="previews/elements/colorgrade" text="Cool and warm grades on one shot." />
+<PreviewCard title="Colour" link="/guide/colour" src="previews/guide/white-balance" text="Cool and warm white balance on one shot." />
 </div>
 
 <p class="home-links"><a :href="withBase('/examples')">Examples</a> · <a :href="withBase('/reference/elements/')">All elements</a> · <a :href="withBase('/guide/free-code')">Free code</a></p>

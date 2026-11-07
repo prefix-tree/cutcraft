@@ -25,7 +25,7 @@ describe("declared shaders in the frame plan", () => {
   it("attach a clip's declared effects, with keyframed params and the element's clock, after its CSS ones in file order", () => {
     const state = stateOf(
       `<Track id="t"><Clip id="c" src="asset:city" in={0} out={4}>
-        <Effect id="b" type="blur" params={{ radius: 2 }} />
+        <Effect id="b" type="sepia" params={{ amount: 0.5 }} />
         <Effect id="g" type={glow}>
           <Keyframe id="k1" param="amount" at={0} value={0} />
           <Keyframe id="k2" param="amount" at={2} value={1} />
@@ -36,8 +36,8 @@ describe("declared shaders in the frame plan", () => {
     expect(state.errors).toEqual([]);
     const op = buildFramePlan(state, 1).ops[0]!;
     expect(op.filter).toBe("");
-    expect(op.fallbackFilter).toBe("blur(2px)");
-    expect(op.shaders?.[0]).toMatchObject({ name: "css:blur", builtIn: true, params: { sigma: 2 } });
+    expect(op.fallbackFilter).toBe("sepia(0.5)");
+    expect(op.shaders?.[0]).toMatchObject({ name: "css:sepia", builtIn: true });
     expect(op.shaders?.slice(1)).toEqual([
       {
         name: "soft-glow",
@@ -51,7 +51,7 @@ describe("declared shaders in the frame plan", () => {
   it("run a built-in shader effect as a pass after the CSS one before it, with the CSS look kept for a painter without WebGL", () => {
     const state = stateOf(
       `<Track id="t"><Clip id="c" src="asset:city" in={0} out={4}>
-        <Effect id="b" type="blur" params={{ radius: 2 }} />
+        <Effect id="b" type="grayscale" params={{ amount: 0.5 }} />
         <Effect id="l" type="levels" params={{ black: 0.2, gamma: 2 }} />
       </Clip></Track>`,
       "",
@@ -60,14 +60,14 @@ describe("declared shaders in the frame plan", () => {
     const op = buildFramePlan(state, 1).ops[0]!;
     expect(op.filter).toBe("");
     expect(op.shaders?.map((p) => [p.name, p.builtIn, p.sources.length])).toEqual([
-      ["css:blur", true, 2],
+      ["css:grayscale", true, 1],
       ["levels", true, 1],
     ]);
     expect(op.shaders?.[1]?.params).toEqual({ black: 0.2, white: 1, gamma: 2 });
-    expect(op.fallbackFilter).toMatch(/^blur\(2px\) brightness\([\d.]+\) contrast\([\d.]+\)$/);
+    expect(op.fallbackFilter).toMatch(/^grayscale\(0\.5\) brightness\([\d.]+\) contrast\([\d.]+\)$/);
   });
 
-  it("give exposure and vibrance a CSS fallback, and the shader-only colour effects none", () => {
+  it("give exposure, vibrance and white balance a CSS fallback, and curves none", () => {
     const state = stateOf(
       `<Track id="t"><Clip id="c" src="asset:city" in={0} out={4}>
         <Effect id="e" type="exposure" params={{ stops: 1 }} />
@@ -80,7 +80,7 @@ describe("declared shaders in the frame plan", () => {
     expect(state.errors).toEqual([]);
     const op = buildFramePlan(state, 1).ops[0]!;
     expect(op.filter).toBe("");
-    expect(op.fallbackFilter).toBe("brightness(2) saturate(1.2)");
+    expect(op.fallbackFilter).toBe("brightness(2) saturate(1.2) sepia(0.15)");
     expect(op.shaders?.map((p) => p.name)).toEqual(["exposure", "vibrance", "whiteBalance", "curves"]);
     expect(op.shaders?.[3]?.tables?.(op.shaders[3].params).curve?.width).toBe(256);
   });
@@ -118,7 +118,7 @@ describe("declared shaders in the frame plan", () => {
     expect(state.errors).toEqual([]);
     const op = buildFramePlan(state, 1).ops[0]!;
     expect(op.filter).toBe("");
-    expect(op.fallbackFilter).toBe("drop-shadow(0 0 5px #ff0000) drop-shadow(0 0 5px #ff0000)");
+    expect(op.fallbackFilter).toBe("drop-shadow(0 0 10px #ff0000) drop-shadow(0 0 10px #ff0000)");
   });
 
   it("carry every pass of an effect of several", () => {

@@ -158,9 +158,8 @@ export const CASES: Partial<Record<ActionType, ActionInput>> = {
   },
   "effect/update": { type: "effect/update", params: { id: "c1", childId: "fx1", params: { radius: 9 } } },
   "effect/toggle": { type: "effect/toggle", params: { id: "c1", childId: "fx1", enabled: false } },
-  "effect/setOrder": { type: "effect/setOrder", params: { id: "c1", childIds: ["fx0", "fx1"] } },
+  "effect/setOrder": { type: "effect/setOrder", params: { id: "c1", childIds: ["wb1", "fx0", "fx1"] } },
   "effect/setStack": { type: "effect/setStack", params: { id: "c1", nodes: [] } },
-  "colorGrade/set": { type: "colorGrade/set", params: { id: "c2", grading: { temperature: 0.2 } } },
 
   "keyframe/add": {
     type: "keyframe/add",

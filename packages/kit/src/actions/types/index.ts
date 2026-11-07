@@ -115,7 +115,6 @@ export interface EffectActions {
   "effect/toggle": ChildStack<string>["toggle"];
   "effect/setOrder": ChildStack<string>["setOrder"];
   "effect/setStack": ChildStack<string>["setStack"];
-  "colorGrade/set": { id: Id; grading?: Readonly<Record<string, Json>> };
 }
 
 export interface KeyframeActions {
@@ -293,7 +292,6 @@ export const AUTO_GROUP_TYPES: ReadonlySet<ActionType> = new Set<ActionType>([
   "audio/setDuck",
   "transition/update",
   "clip/setBlend",
-  "colorGrade/set",
   "clip/move",
   "clip/trim",
   "clip/slip",

@@ -38,7 +38,6 @@ The elements a file is written in: the timeline (clips, tracks, transitions, cap
 <div class="cc-cards">
 <PreviewCard code title="<Effect>" link="/reference/elements/effect" src="previews/elements/effect" text="A filter on its parent: brightness, blur, grayscale, vignette, grain and more." />
 <PreviewCard code title="<Adjustment>" link="/reference/elements/adjustment" src="previews/elements/adjustment" text="Filters everything beneath it for its own stretch of time." />
-<PreviewCard code title="<ColorGrade>" link="/reference/elements/colorgrade" src="previews/elements/colorgrade" text="Temperature and tint on its parent." />
 <PreviewCard code title="<Mask>" link="/reference/elements/mask" src="previews/elements/mask" text="Shows only a shape of its clip, with a feathered edge or inverted." />
 </div>
 
@@ -71,7 +70,7 @@ The elements a file is written in: the timeline (clips, tracks, transitions, cap
 |---|---|---|---|---|---|---|
 | [`<Composition>`](/reference/elements/composition) |  |  |  |  |  | `track`, `marker`, `multicam`, `captions` |
 | [`<Track>`](/reference/elements/track) |  |  |  |  |  | `clip`, `audio`, `gap`, `transition`, `title`, `shape`, `svg`, `sticker`, `graphic`, `adjustment`, `nested`, `layer`, `multicam` |
-| [`<Clip>`](/reference/elements/clip) | yes | yes | yes | yes | yes | `effect`, `colorGrade`, `keyframe`, `mask`, `speedKey`, `freeze` |
+| [`<Clip>`](/reference/elements/clip) | yes | yes | yes | yes | yes | `effect`, `keyframe`, `mask`, `speedKey`, `freeze` |
 | [`<Audio>`](/reference/elements/audio) | yes |  | yes | yes |  | `keyframe` |
 | [`<Gap>`](/reference/elements/gap) | yes |  |  |  |  |  |
 | [`<Transition>`](/reference/elements/transition) | yes | yes |  |  |  |  |
@@ -85,13 +84,12 @@ The elements a file is written in: the timeline (clips, tracks, transitions, cap
 | [`<Marker>`](/reference/elements/marker) |  |  |  |  |  |  |
 | [`<Adjustment>`](/reference/elements/adjustment) | yes | yes |  | yes |  | `effect`, `keyframe` |
 | [`<Mask>`](/reference/elements/mask) |  |  |  |  |  | `keyframe` |
-| [`<Nested>`](/reference/elements/nested) | yes | yes | yes | yes | yes | `effect`, `colorGrade`, `keyframe`, `mask`, `speedKey`, `freeze` |
+| [`<Nested>`](/reference/elements/nested) | yes | yes | yes | yes | yes | `effect`, `keyframe`, `mask`, `speedKey`, `freeze` |
 | [`<Multicam>`](/reference/elements/multicam) |  |  |  |  |  | `angle`, `cut` |
 | [`<Angle>`](/reference/elements/angle) |  |  |  |  |  |  |
 | [`<Cut>`](/reference/elements/cut) |  |  |  |  |  |  |
 | [`<Layer>`](/reference/elements/layer) | yes | yes |  |  | yes | `effect`, `keyframe` |
 | [`<Effect>`](/reference/elements/effect) |  |  |  |  |  | `keyframe` |
-| [`<ColorGrade>`](/reference/elements/colorgrade) |  |  |  |  |  |  |
 | [`<Keyframe>`](/reference/elements/keyframe) |  |  |  |  |  |  |
 | [`<SpeedKey>`](/reference/elements/speedkey) |  |  |  |  |  |  |
 | [`<Freeze>`](/reference/elements/freeze) |  |  |  |  |  |  |

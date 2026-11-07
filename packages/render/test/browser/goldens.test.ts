@@ -81,7 +81,7 @@ const CASES: readonly Case[] = [
   { name: "whiteBalance", effects: `<Effect id="e" type="whiteBalance" params={{ temperature: 0.35, tint: -0.2 }} />` },
   {
     name: "shadowsHighlights",
-    effects: `<Effect id="e" type="shadowsHighlights" params={{ shadows: 0.7, highlights: -0.5, radius: 24 }} />`,
+    effects: `<Effect id="e" type="shadowsHighlights" params={{ shadows: 0.7, highlights: -0.5, radius: 8 }} />`,
   },
   { name: "duotone", effects: `<Effect id="e" type="duotone" params={{ dark: "#102040", light: "#ffcc66" }} />` },
   {
@@ -94,7 +94,7 @@ const CASES: readonly Case[] = [
   },
   {
     name: "regionBlur",
-    effects: `<Effect id="e" type="regionBlur" params={{ box: [0.3, 0.2, 0.4, 0.5], radius: 16, feather: 8, roundness: 0.5 }} />`,
+    effects: `<Effect id="e" type="regionBlur" params={{ box: [0.3, 0.2, 0.4, 0.5], radius: 5, feather: 8, roundness: 0.5 }} />`,
   },
   {
     name: "cornerPin",
@@ -108,7 +108,7 @@ const CASES: readonly Case[] = [
   {
     name: "glow",
     shape: true,
-    effects: `<Effect id="e" type="glow" params={{ radius: 18, intensity: 1.5, color: "#ffee88" }} />`,
+    effects: `<Effect id="e" type="glow" params={{ radius: 6, intensity: 1.5, color: "#ffee88" }} />`,
   },
   { name: "outline", shape: true, effects: `<Effect id="e" type="outline" params={{ width: 6 }} />` },
   {
@@ -116,7 +116,9 @@ const CASES: readonly Case[] = [
     shape: true,
     effects: `<Effect id="e" type="longShadow" params={{ length: 60, color: "#333333", fade: true }} />`,
   },
-  { name: "bevel", shape: true, effects: `<Effect id="e" type="bevel" params={{ size: 6, amount: 0.8 }} />` },
+  { name: "bevel", shape: true, effects: `<Effect id="e" type="bevel" params={{ size: 2, amount: 0.8 }} />` },
+  { name: "blur", effects: `<Effect id="e" type="blur" params={{ radius: 4 }} />` },
+  { name: "blur-shape", shape: true, effects: `<Effect id="e" type="blur" params={{ radius: 6 }} />` },
   {
     name: "stack-grade",
     effects: `<Effect id="s1" type="exposure" params={{ stops: 0.4 }} />

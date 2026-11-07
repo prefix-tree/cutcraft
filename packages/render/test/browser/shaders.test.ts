@@ -265,7 +265,7 @@ describe("colour effects", () => {
   it("shadows lift a dark area and leave a bright one", async () => {
     const [dark, bright] = await graded(
       "shadows",
-      `<Effect id="s" type="shadowsHighlights" params={{ shadows: 1, radius: 20 }} />`,
+      `<Effect id="s" type="shadowsHighlights" params={{ shadows: 1, radius: 7 }} />`,
       [0.1, 0.1, 0.1],
       [0.9, 0.9, 0.9],
     );
@@ -336,7 +336,7 @@ describe("footage tools", () => {
   it("regionBlur softens an edge inside the box and leaves it sharp outside", async () => {
     const [inside, outside] = await at(
       "region",
-      `<Effect id="b" type="regionBlur" params={{ box: [0.4, 0, 0.2, 0.5], radius: 20, feather: 0 }} />`,
+      `<Effect id="b" type="regionBlur" params={{ box: [0.4, 0, 0.2, 0.5], radius: 7, feather: 0 }} />`,
       { left: [0, 0, 0], right: [1, 1, 1] },
       [
         [156, 40],
@@ -352,7 +352,7 @@ describe("footage tools", () => {
     // The box moves from x 0..0.2 to 0.6..0.8; half way it is at 0.3..0.5, over the edge at 0.4.
     const [edge] = await at(
       "region-keys",
-      `<Effect id="b" type="regionBlur" params={{ box: [0, 0, 0.2, 1], radius: 20, feather: 0 }}>
+      `<Effect id="b" type="regionBlur" params={{ box: [0, 0, 0.2, 1], radius: 7, feather: 0 }}>
         <Keyframe id="k1" param="box" at={0} value={[0, 0, 0.2, 1]} />
         <Keyframe id="k2" param="box" at={2} value={[0.6, 0, 0.2, 1]} />
       </Effect>`,
@@ -448,7 +448,7 @@ describe("title effects", () => {
   it("glow lights the area around the box in its colour", async () => {
     const [around, far] = await boxed(
       "glow",
-      `<Effect id="g" type="glow" params={{ radius: 20, color: "#00ffff" }} />`,
+      `<Effect id="g" type="glow" params={{ radius: 7, color: "#00ffff" }} />`,
       [
         [205, 90],
         [20, 20],
@@ -496,7 +496,7 @@ describe("title effects", () => {
   it("bevel lights the edge facing the light and shades the other, and leaves the middle", async () => {
     const [top, bottom, middle] = await boxed(
       "bevel",
-      `<Effect id="b" type="bevel" params={{ size: 6, angle: 0, amount: 1 }} />`,
+      `<Effect id="b" type="bevel" params={{ size: 2, angle: 0, amount: 1 }} />`,
       [
         [160, 61],
         [160, 118],
@@ -511,7 +511,7 @@ describe("title effects", () => {
   it("glow works on footage too", async () => {
     const [edge] = await colourAt(
       "glow-clip",
-      `<Track id="t"><Clip id="c" src="asset:solid" fit="cover"><Effect id="p" type={paint} /><Effect id="g" type="glow" params={{ radius: 20, color: "#ff0000" }} /></Clip></Track>`,
+      `<Track id="t"><Clip id="c" src="asset:solid" fit="cover"><Effect id="p" type={paint} /><Effect id="g" type="glow" params={{ radius: 7, color: "#ff0000" }} /></Clip></Track>`,
       `const paint = effect({ name: "paint", shader: "vec4 effect(vec2 uv) { return uv.x < 0.5 ? vec4(0.0, 0.0, 0.0, 0.0) : vec4(1.0); }" });`,
       0.5,
       [[155, 90]],

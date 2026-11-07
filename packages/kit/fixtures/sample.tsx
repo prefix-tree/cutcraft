@@ -7,7 +7,6 @@ import {
   Caption,
   Captions,
   Clip,
-  ColorGrade,
   Composition,
   Cut,
   Effect,
@@ -43,7 +42,7 @@ export default function Video({ title, accent }: z.infer<typeof schema>) {
       <Track id="main" name="Main">
         <Clip id="c1" src="asset:interview" in="word:3" out="word:18">
           <Effect id="fx1" type="blur" params={{ radius: 4 }} />
-          <ColorGrade id="cg1" temperature={0.1} tint={-0.05} />
+          <Effect id="wb1" type="whiteBalance" params={{ temperature: 0.1, tint: -0.05 }} />
           <Keyframe id="k1" property="transform.opacity" at={0} value={0} easing="easeOutCubic" />
           <Keyframe id="k2" property="transform.opacity" at={0.5} value={1} />
           <Mask id="mk1" shape={{ rect: { x: 0.1, y: 0.1, width: 0.8, height: 0.8 } }} feather={12} />

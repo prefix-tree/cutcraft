@@ -150,6 +150,19 @@ function collectChildren(
       out.push(...collectChildren(produced, parent, walker, childOrigin));
       return;
     }
+    if (type === undefined || type === null) {
+      // An import that is not there: a misspelt name, or an element the kit no longer has.
+      const id = typeof element.props.id === "string" ? element.props.id : (parent ?? "composition");
+      const grade = "temperature" in element.props || "tint" in element.props;
+      walker.errors.push({
+        code: "SCHEMA",
+        id,
+        message: grade
+          ? '<ColorGrade> is now a whiteBalance effect: <Effect type="whiteBalance" params={{ temperature, tint }} />'
+          : "an element whose component is undefined: check its import from @cutcraft/kit",
+      });
+      return;
+    }
     // Host elements (div, span…) outside a Layer are ignored by the resolver but their vocabulary descendants are not.
     out.push(...collectChildren(element.props.children as ReactNode, parent, walker, origin));
   });

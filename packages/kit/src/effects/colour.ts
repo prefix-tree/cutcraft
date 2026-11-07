@@ -104,8 +104,8 @@ vec4 effect(vec2 uv) {
 });
 
 /**
- * Shadows and highlights, a local tone adjustment: the luminance around each pixel (a Gaussian blur of the radius, in
- * two separable passes) says how much it is shadow or highlight, and the third pass brightens or darkens it there, by
+ * Shadows and highlights, a local tone adjustment: the luminance around each pixel (a Gaussian blur, `radius` its standard
+ * deviation in pixels, in two separable passes) says how much it is shadow or highlight, and the third pass brightens or darkens it there, by
  * up to 2 stops where the light is linear. A pixel decides by its surroundings, not by itself, so detail in a dark
  * area keeps its contrast while the area lifts.
  */
@@ -114,7 +114,7 @@ const shadowsHighlights = shaderDefinition("effect", {
   params: z.object({
     shadows: z.number().min(-1).max(1).default(0),
     highlights: z.number().min(-1).max(1).default(0),
-    radius: z.number().min(1).max(200).default(30),
+    radius: z.number().min(0.5).max(200).default(10),
   }),
   passes: [
     GAUSS_PASS("x", "luma"),

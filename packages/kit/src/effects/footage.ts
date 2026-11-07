@@ -36,7 +36,7 @@ vec4 effect(vec2 uv) {
 
 /**
  * A blur inside a box (faces, plates, screens), or outside it with `inverted`: the picture blurred in two Gaussian
- * passes, then mixed with the original by a mask from the signed distance to a rounded box (`roundness` 1 rounds the
+ * passes (`radius` the standard deviation, in pixels), then mixed with the original by a mask from the signed distance to a rounded box (`roundness` 1 rounds the
  * short side fully). `feather` fades the blur in over that many pixels inside the box's edge.
  */
 const regionBlur = shaderDefinition("effect", {
@@ -45,7 +45,7 @@ const regionBlur = shaderDefinition("effect", {
     box: z
       .tuple([z.number(), z.number(), z.number().positive(), z.number().positive()])
       .default([0.25, 0.25, 0.5, 0.5]),
-    radius: z.number().min(0).max(200).default(20),
+    radius: z.number().min(0).max(200).default(7),
     feather: z.number().min(0).max(500).default(10),
     roundness: z.number().min(0).max(1).default(0),
     inverted: z.boolean().default(false),

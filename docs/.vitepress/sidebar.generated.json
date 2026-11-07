@@ -91,10 +91,6 @@
           "link": "/reference/elements/adjustment"
         },
         {
-          "text": "ColorGrade",
-          "link": "/reference/elements/colorgrade"
-        },
-        {
           "text": "Mask",
           "link": "/reference/elements/mask"
         }

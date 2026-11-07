@@ -25,14 +25,21 @@ It works where light is linear, so highlights keep their colour instead of washi
 brightness filter.
 
 `whiteBalance` removes a colour cast. `temperature` (-1 to 1, a stop of colour temperature each way) warms the picture
-toward amber or cools it toward blue; `tint` (-1 to 1) moves it toward magenta or green. It adapts the picture as if it had been lit by a
-different daylight, so greys stay grey while the cast goes.
+toward amber or cools it toward blue; `tint` (-1 to 1) moves it toward magenta or green. It adapts the picture as if
+it had been lit by a different daylight, so greys stay grey while the cast goes. Where WebGL is missing it falls back
+on a CSS approximation.
+
+<Example src="previews/guide/white-balance" alt="The same shot cooled toward blue, then warmed toward amber">
+
+<<< @/../examples/showcase/guide/white-balance.tsx
+
+</Example>
 
 `levels` sets the black point and the white point (`black`, `white`, 0 to 1) and bends the midtones with `gamma`
 (above 1 lifts them).
 
 `shadowsHighlights` lifts the shadows or holds back the highlights (`shadows`, `highlights`, -1 to 1, up to two stops
-each way). It judges each pixel by the light around it (`radius`, in pixels, 30 by default), so a dark area lifts as
+each way). It judges each pixel by the light around it (`radius`, the blur's standard deviation in pixels, 10 by default), so a dark area lifts as
 a whole and keeps its detail and contrast.
 
 ## Shape the tones

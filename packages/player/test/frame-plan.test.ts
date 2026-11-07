@@ -17,7 +17,7 @@ const state = makeState({
           source: { in: 0, out: 4, asset: "a" },
           children: [
             { id: "e2", kind: "effect", props: { type: "vignette", params: { amount: 0.3 } } },
-            { id: "e3", kind: "effect", props: { type: "blur", params: { radius: 2 } } },
+            { id: "e3", kind: "effect", props: { type: "grayscale", params: { amount: 0.5 } } },
           ],
         },
         { id: "x1", kind: "transition", duration: 1, props: { type: "crossfade", params: { curve: "linear" } } },
@@ -41,7 +41,7 @@ const state = makeState({
           kind: "adjustment",
           start: 0,
           duration: 10,
-          children: [{ id: "e1", kind: "effect", props: { type: "blur", params: { radius: 4 } } }],
+          children: [{ id: "e1", kind: "effect", props: { type: "sepia", params: { amount: 0.4 } } }],
         },
       ],
     },
@@ -62,7 +62,7 @@ describe("buildFramePlan", () => {
       ["c1", "video"],
       ["adj", "adjustment"],
     ]);
-    expect(plan.ops[1]!.filter).toBe("blur(4px)");
+    expect(plan.ops[1]!.filter).toBe("sepia(0.4)");
     expect(plan.frame).toBe(30);
     expect(plan.background).toBe("#000000");
   });
@@ -201,10 +201,10 @@ describe("buildFramePlan", () => {
 
   it("builds filters and lists unsupported effects", () => {
     const plan = buildFramePlan(state, 0.5);
-    expect(plan.ops[0]!.filter).toBe("blur(2px)");
+    expect(plan.ops[0]!.filter).toBe("grayscale(0.5)");
   });
 
-  it("runs temperature, tint and levels as passes in file order, falling back on a filter mapping black to 0 and white to 1", () => {
+  it("runs white balance and levels as passes in file order, falling back on a filter mapping black to 0 and white to 1", () => {
     const s = makeState({
       width: 640,
       height: 360,
@@ -217,8 +217,7 @@ describe("buildFramePlan", () => {
               kind: "clip",
               source: { in: 0, out: 4, asset: "a" },
               children: [
-                { id: "t", kind: "effect", props: { type: "temperature", params: { amount: 0.4 } } },
-                { id: "n", kind: "effect", props: { type: "tint", params: { amount: 0.2 } } },
+                { id: "w", kind: "effect", props: { type: "whiteBalance", params: { temperature: 0.4, tint: 0.2 } } },
                 { id: "l", kind: "effect", props: { type: "levels", params: { black: 0.1, white: 0.6, gamma: 1.2 } } },
               ],
             },
@@ -228,8 +227,8 @@ describe("buildFramePlan", () => {
     });
     const op = buildFramePlan(s, 1).ops[0]!;
     expect(op.filter).toBe("");
-    expect(op.shaders?.map((p) => p.name)).toEqual(["css:sepia", "css:hue-rotate", "levels"]);
-    expect(op.shaders?.[2]?.params).toEqual({ black: 0.1, white: 0.6, gamma: 1.2 });
+    expect(op.shaders?.map((p) => p.name)).toEqual(["whiteBalance", "levels"]);
+    expect(op.shaders?.[1]?.params).toEqual({ black: 0.1, white: 0.6, gamma: 1.2 });
     const filter = op.fallbackFilter!;
     expect(filter).toMatch(/^sepia\(0\.2\) hue-rotate\(5deg\) brightness\([\d.]+\) contrast\([\d.]+\)$/);
     const [k, c] = [/brightness\(([\d.]+)\)/, /contrast\(([\d.]+)\)/].map((r) => Number(r.exec(filter)![1]));
@@ -239,7 +238,7 @@ describe("buildFramePlan", () => {
     expect(level(0.6)).toBeCloseTo(1);
   });
 
-  it("animates effect params and colour grade by their keyframes", () => {
+  it("animates effect params by their keyframes", () => {
     const s = makeState({
       width: 640,
       height: 360,
@@ -255,10 +254,10 @@ describe("buildFramePlan", () => {
                 {
                   id: "b",
                   kind: "effect",
-                  props: { type: "blur", params: { radius: 2 } },
+                  props: { type: "grayscale", params: { amount: 0.5 } },
                   children: [
-                    { id: "k1", kind: "keyframe", props: { param: "radius", at: 0, value: 0 } },
-                    { id: "k2", kind: "keyframe", props: { param: "radius", at: 2, value: 8 } },
+                    { id: "k1", kind: "keyframe", props: { param: "amount", at: 0, value: 0 } },
+                    { id: "k2", kind: "keyframe", props: { param: "amount", at: 2, value: 0.8 } },
                   ],
                 },
                 {
@@ -267,21 +266,27 @@ describe("buildFramePlan", () => {
                   props: { type: "vignette" },
                   children: [{ id: "k3", kind: "keyframe", props: { param: "amount", at: 2, value: 0.8 } }],
                 },
-                { id: "g", kind: "colorGrade", props: { temperature: 0 } },
-                { id: "k4", kind: "keyframe", props: { property: "colorGrade.temperature", at: 0, value: 0 } },
-                { id: "k5", kind: "keyframe", props: { property: "colorGrade.temperature", at: 2, value: 0.4 } },
+                {
+                  id: "s",
+                  kind: "effect",
+                  props: { type: "sepia", params: { amount: 0 } },
+                  children: [
+                    { id: "k4", kind: "keyframe", props: { param: "amount", at: 0, value: 0 } },
+                    { id: "k5", kind: "keyframe", props: { param: "amount", at: 2, value: 0.2 } },
+                  ],
+                },
               ],
             },
           ],
         },
       ],
     });
-    expect(buildFramePlan(s, 0).ops[0]!.filter).toBe("blur(0px)");
+    expect(buildFramePlan(s, 0).ops[0]!.filter).toBe("grayscale(0) sepia(0)");
     expect(buildFramePlan(s, 1).ops[0]).toMatchObject({
-      filter: "blur(4px) sepia(0.1)",
+      filter: "grayscale(0.4) sepia(0.1)",
       post: [{ type: "vignette", amount: 0.8 }],
     });
-    expect(buildFramePlan(s, 3).ops[0]!.filter).toBe("blur(8px) sepia(0.2)");
+    expect(buildFramePlan(s, 3).ops[0]!.filter).toBe("grayscale(0.8) sepia(0.2)");
   });
 
   it("blurs the first footage behind everything, unless an overlay sits beneath the footage", () => {

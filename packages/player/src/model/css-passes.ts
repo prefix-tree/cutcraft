@@ -3,6 +3,8 @@
 // Functions" and their SVG equivalents), on plain (not premultiplied) colour, clamped to 0..1 after each, as the
 // browser's filter does. The input is a CSS filter string of the forms the player writes (model/effects.ts), so the
 // shader and the no-WebGL fallback share one mapping from params to CSS.
+import { GAUSS_PASS } from "@cutcraft/kit";
+
 import type { ShaderPass } from "./shaders";
 
 type Params = Readonly<Record<string, unknown>>;
@@ -19,32 +21,9 @@ const MATRIX = `vec4 effect(vec2 uv) {
   return vec4(clamp(vec3(dot(params.r0, c.rgb), dot(params.r1, c.rgb), dot(params.r2, c.rgb)), 0.0, 1.0), c.a);
 }`;
 
-/**
- * One direction of a Gaussian of standard deviation `sigma` pixels, sampled at every pixel out to three deviations
- * (at most 96 each side, spread wider past that), on premultiplied colour. Outside the frame is transparent, as the
- * canvas's own blur sees it.
- */
-const gauss = (axis: "x" | "y", alphaOnly: boolean) => `vec4 cc_at(vec2 uv) {
-  return any(lessThan(uv, vec2(0.0))) || any(greaterThan(uv, vec2(1.0))) ? vec4(0.0) : texture(image, uv);
-}
-vec4 effect(vec2 uv) {
-  if (params.sigma <= 0.0) return texture(image, uv);
-  float reach = 3.0 * params.sigma;
-  float n = min(ceil(reach), 96.0);
-  vec2 dir = vec2(${axis === "x" ? "1.0, 0.0" : "0.0, 1.0"}) * (reach / n) / resolution;
-  vec4 sum = vec4(0.0);
-  float weights = 0.0;
-  for (int i = -96; i <= 96; i++) {
-    if (abs(float(i)) > n) continue;
-    float d = float(i) * reach / n;
-    float w = exp(-d * d / (2.0 * params.sigma * params.sigma));
-    vec4 s = cc_at(uv + float(i) * dir);
-    sum += w * ${alphaOnly ? (axis === "x" ? "vec4(s.a)" : "vec4(s.r)") : "vec4(s.rgb * s.a, s.a)"};
-    weights += w;
-  }
-  sum /= weights;
-  return ${alphaOnly ? "vec4(vec3(sum.r), 1.0)" : "sum.a > 0.0 ? vec4(sum.rgb / sum.a, sum.a) : vec4(0.0)"};
-}`;
+/** The kit's Gaussian, one direction, with the frame's outside transparent as the canvas's own blur sees it. */
+const gauss = (axis: "x" | "y", alphaOnly: boolean) =>
+  GAUSS_PASS(axis, alphaOnly ? "alpha" : "rgba", "sigma", "transparent");
 
 /** The shadow: the blurred alpha (in red) read back by `offset` pixels, coloured, drawn under the original. */
 const SHADOW = `vec4 effect(vec2 uv) {

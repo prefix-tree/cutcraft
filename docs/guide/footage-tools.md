@@ -28,12 +28,12 @@ the subject.
 ## Hiding a face, a plate or a screen
 
 `regionBlur` blurs inside a box: `[x, y, width, height]` as fractions of the frame from its top left. `radius` is the
-blur in pixels, `feather` fades it in over that many pixels inside the edge, and `roundness` (0 to 1) rounds the
+blur, the Gaussian's standard deviation in pixels as CSS `blur()` reads it, `feather` fades it in over that many pixels inside the edge, and `roundness` (0 to 1) rounds the
 corners up to a circle or a pill. `inverted` blurs everything except the box.
 
 ```tsx
 <Clip id="street" src="asset:street">
-  <Effect id="plate" type="regionBlur" params={{ box: [0.42, 0.66, 0.12, 0.06], radius: 30, roundness: 0.3 }}>
+  <Effect id="plate" type="regionBlur" params={{ box: [0.42, 0.66, 0.12, 0.06], radius: 10, roundness: 0.3 }}>
     <Keyframe id="p1" param="box" at={0} value={[0.42, 0.66, 0.12, 0.06]} />
     <Keyframe id="p2" param="box" at={2.5} value={[0.3, 0.7, 0.14, 0.07]} />
   </Effect>

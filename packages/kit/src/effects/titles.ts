@@ -6,13 +6,14 @@ import { COLOUR, GAUSS_PASS, HEX, OVER } from "./glsl";
 
 /**
  * Glow: the element's bright parts (luminance above `threshold`, all of it at 0), coloured toward `color` by `tint`
- * (at 0 they keep their own colours, a bloom), blurred in two Gaussian passes and added to the picture by `intensity`.
+ * (at 0 they keep their own colours, a bloom), blurred in two Gaussian passes (`radius` the standard deviation, in pixels) and added to
+ * the picture by `intensity`.
  * The glow reaches past the element's edge, so it shows on titles and shapes as well as on footage.
  */
 const glow = shaderDefinition("effect", {
   name: "glow",
   params: z.object({
-    radius: z.number().min(0).max(200).default(20),
+    radius: z.number().min(0).max(200).default(7),
     intensity: z.number().min(0).max(4).default(1),
     threshold: z.number().min(0).max(1).default(0),
     color: HEX.default("#ffffff"),
@@ -95,7 +96,7 @@ const longShadow = shaderDefinition("effect", {
 });
 
 /**
- * Bevel: the element lit as if raised. Its alpha, blurred over `size` pixels in two Gaussian passes, is a height
+ * Bevel: the element lit as if raised. Its alpha, blurred in two Gaussian passes of standard deviation `size` pixels, is a height
  * map; the gradient by central differences gives each pixel's surface normal, and a light from `angle` (clockwise
  * from above) shades it by Lambert's cosine law against a flat surface: edges facing the light take `highlight`, the
  * far ones `shade`, by `amount`. Only the element's own pixels change.
@@ -103,7 +104,7 @@ const longShadow = shaderDefinition("effect", {
 const bevel = shaderDefinition("effect", {
   name: "bevel",
   params: z.object({
-    size: z.number().min(0).max(200).default(4),
+    size: z.number().min(0).max(200).default(1.5),
     angle: z.number().default(-60),
     amount: z.number().min(0).max(1).default(0.4),
     highlight: HEX.default("#ffffff"),
@@ -117,7 +118,7 @@ const bevel = shaderDefinition("effect", {
   vec2 px = 1.0 / resolution;
   float dx = texture(image, uv + vec2(px.x, 0.0)).r - texture(image, uv - vec2(px.x, 0.0)).r;
   float dy = texture(image, uv + vec2(0.0, px.y)).r - texture(image, uv - vec2(0.0, px.y)).r;
-  float slope = max(params.size, 1.0) / 2.0;
+  float slope = max(params.size * 3.0, 1.0) / 2.0;
   vec3 n = normalize(vec3(-dx * slope, -dy * slope, 1.0));
   float a = radians(params.angle);
   vec3 l = normalize(vec3(sin(a), -cos(a), 1.0));

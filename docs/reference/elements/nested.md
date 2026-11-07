@@ -27,4 +27,4 @@ A sequence written once as a component and placed like a clip.
 | `out` | number (0..∞) \| string |  |  |
 | `volume` | number (0..4) | `1` |  |
 
-Timed, visual, audible, trims its source, transformable. Children: `effect`, `colorGrade`, `keyframe`, `mask`, `speedKey`, `freeze`. [All elements](/reference/elements/)
+Timed, visual, audible, trims its source, transformable. Children: `effect`, `keyframe`, `mask`, `speedKey`, `freeze`. [All elements](/reference/elements/)

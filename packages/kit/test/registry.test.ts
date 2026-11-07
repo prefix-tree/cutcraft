@@ -87,9 +87,36 @@ export default function V() { return <Composition fps={30} width={640} height={3
   });
 
   it("checks a CSS effect's keyframed param by its schema", () => {
-    expect(effectParamProblem("blur", [], "radius", 500)).toMatchObject({ prop: "value" });
-    expect(effectParamProblem("blur", [], "radius", 12)).toBeNull();
-    expect(effectEntry("blur")?.draw.kind).toBe("css");
+    expect(effectParamProblem("brightness", [], "amount", 5)).toMatchObject({ prop: "value" });
+    expect(effectParamProblem("brightness", [], "amount", 0.5)).toBeNull();
+    expect(effectEntry("brightness")?.draw.kind).toBe("css");
     expect(effectEntry("nope")).toBeUndefined();
+  });
+
+  it("blurs as CSS blur(), radius the Gaussian's standard deviation, as every other blur reads it", () => {
+    expect(effectEntry("blur")?.draw.kind).toBe("css");
+    expect(cssOf("blur")?.({ radius: 6 })).toBe("blur(6px)");
+    expect(effectParamProblem("blur", [], "radius", 500)).toMatchObject({ prop: "value" });
+  });
+
+  it("warms only with whiteBalance: no <ColorGrade>, no temperature or tint types, and a CSS fallback", () => {
+    expect(effectEntry("temperature")).toBeUndefined();
+    expect(effectEntry("tint")).toBeUndefined();
+    expect(cssOf("whiteBalance")?.({ temperature: 0.4, tint: 0 })).toBe("sepia(0.2)");
+    const errors = (body: string) =>
+      resolve(
+        collectModule(
+          loadModule(`import { Clip, ColorGrade, Composition, Effect, Keyframe, Track } from "@cutcraft/kit";
+export default function V() { return <Composition fps={30} width={640} height={360}><Track id="t"><Clip id="c" src="asset:city">${body}</Clip></Track></Composition>; }`) as never,
+        ),
+        manifest,
+      ).errors.map((e) => e.message);
+    expect(errors(`<ColorGrade id="g" temperature={0.2} />`)).toEqual([expect.stringContaining('type="whiteBalance"')]);
+    expect(errors(`<Effect id="tp" type="temperature" params={{ amount: 0.2 }} />`)).toEqual([
+      expect.stringContaining('type="whiteBalance" params={{ temperature: … }}'),
+    ]);
+    expect(errors(`<Keyframe id="k" property="colorGrade.temperature" at={0} value={0} />`)).toEqual([
+      expect.stringContaining('<Effect type="whiteBalance" …><Keyframe param="temperature"'),
+    ]);
   });
 });

@@ -74,7 +74,7 @@ export interface EffectPipeline {
 }
 
 /**
- * An element's effects (its `<Effect>` and `<ColorGrade>` children) in the order the file writes them, at
+ * An element's effects (its `<Effect>` children) in the order the file writes them, at
  * element-relative `rel`:
  *
  * - no shader effect (and no shader transition, `transition`): one CSS filter, which needs no WebGL;
@@ -95,7 +95,7 @@ export function effectPipeline(
     const pass = shaderPass(state, c, rel);
     if (pass) steps.push(pass);
     else {
-      const css = childFilter(state.items, children, c, elementId, rel);
+      const css = childFilter(state.items, c, elementId, rel);
       if (css) steps.push(css);
     }
   }
@@ -116,7 +116,7 @@ export function effectPipeline(
 function cssOnly(state: ResolvedState, children: readonly Placement[], elementId: string, rel: number): string {
   const own = new Set(state.shaders.filter((s) => s.kind === "effect").map((s) => s.name));
   return children
-    .map((c) => childFilter(state.items, children, c, elementId, rel, own))
+    .map((c) => childFilter(state.items, c, elementId, rel, own))
     .filter(Boolean)
     .join(" ");
 }

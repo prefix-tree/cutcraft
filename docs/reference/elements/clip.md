@@ -35,4 +35,4 @@ A stretch of a video or image asset, trimmed by seconds, transcript words or cam
 | `duck` | { under, to, attack, release } |  |  |
 | `frame` | { focus } |  |  |
 
-Timed, visual, audible, trims its source, transformable. Children: `effect`, `colorGrade`, `keyframe`, `mask`, `speedKey`, `freeze`. [All elements](/reference/elements/)
+Timed, visual, audible, trims its source, transformable. Children: `effect`, `keyframe`, `mask`, `speedKey`, `freeze`. [All elements](/reference/elements/)

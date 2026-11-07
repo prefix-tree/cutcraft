@@ -202,34 +202,6 @@ function lastNonStack(state: ResolvedState, parentId: string, kind: string): str
 
 stackHandlers("effect", "effect", VIDEO_EFFECT_TYPES);
 
-/** One `<ColorGrade>` child per clip, created or replaced as a whole. */
-define({
-  type: "colorGrade/set",
-  validate: (a, state) => validateTarget(state, a.params.id, []),
-  apply: (a, log, ctx) => {
-    const existing = childrenOfKind(ctx.before, a.params.id, "colorGrade");
-    for (const c of existing) log.append({ op: "remove", id: c.id });
-    if (a.params.grading) {
-      const id = `${a.params.id}_grade`;
-      log.append({
-        op: "insert",
-        id,
-        parent: a.params.id,
-        after: lastNonStack(ctx.before, a.params.id, "colorGrade"),
-        node: nodeOfSpec({ id, kind: "colorGrade", props: { id, ...a.params.grading } }, a.params.id),
-      });
-    }
-  },
-  invert: (a, before) => {
-    const prior = childrenOfKind(before, a.params.id, "colorGrade")[0];
-    const grading = prior
-      ? (Object.fromEntries(Object.entries(prior.props).filter(([k]) => k !== "id")) as Record<string, Json>)
-      : undefined;
-    return { type: "colorGrade/set", params: grading ? { id: a.params.id, grading } : { id: a.params.id } };
-  },
-  fold: () => [],
-});
-
 // ── keyframes ───────────────────────────────────────────────────────────────
 
 define({

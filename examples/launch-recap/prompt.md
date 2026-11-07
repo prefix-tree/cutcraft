@@ -54,7 +54,7 @@ props are literals or schema props: those props are the editor's handles,
 the component's body is not.
 
 Children that the inspector edits one by one: `<Keyframe property at value easing>`,
-`<Effect type params>`, `<ColorGrade>`, `<Mask>`, `<SpeedKey>`, `<Freeze>`,
+`<Effect type params>`, `<Mask>`, `<SpeedKey>`, `<Freeze>`,
 `<Caption start end text>`.
 
 ## Conventions the editor relies on

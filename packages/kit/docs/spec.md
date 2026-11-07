@@ -42,7 +42,7 @@ function Helper(...) {...}                       // helpers that make elements a
 - **Placement by track layout.** `layout="sequence"` (default): children play back to back in source order; `<Gap>` inserts a hole; `start` is a lint error. `layout="free"`: every child has literal `start`. On any track an overlay may use `anchor="<id>" offset={s}`; anchors cannot form cycles.
 - **`duration`**: `number | "fill" | "source" | { match: id }`. Media clips give `in`/`out` instead; `duration = (out − in) / speed`. Giving both `in/out` and `duration` is a lint error.
 - **Expressions** are legal in any prop; the editor shows that prop locked (`lockedProps`) with a bake action. Literals and references to `schema` props are editable.
-- **Child elements** for collections the editor addresses individually: `<Keyframe>`, `<Effect>`, `<AudioEffect>`, `<ColorGrade>`, `<SpeedKey>`, `<Freeze>`, `<Mask>`, `<Caption>`, `<Angle>`, `<Cut>`. Authoring shorthands (`animate={{ opacity: [[0,0],[1,1]] }}`, `<Captions src=...>`) are allowed; the first user edit of an item inside a shorthand bakes it into children.
+- **Child elements** for collections the editor addresses individually: `<Keyframe>`, `<Effect>`, `<AudioEffect>`, `<SpeedKey>`, `<Freeze>`, `<Mask>`, `<Caption>`, `<Angle>`, `<Cut>`. Authoring shorthands (`animate={{ opacity: [[0,0],[1,1]] }}`, `<Captions src=...>`) are allowed; the first user edit of an item inside a shorthand bakes it into children.
 - **Editable state per resolved element:** `literal` (id in the source index), `generated` (from a loop or a helper used more than once; gestures bake first), `opaque` (a `<Layer>` interior; model-only).
 
 ### A.2 Element table (ours ↔ OpenReel)
@@ -51,7 +51,7 @@ function Helper(...) {...}                       // helpers that make elements a
 |---|---|---|
 | `<Composition>` | Project settings + Timeline | `fps`, `width`, `height`, `sampleRate=48000`, `channels=2`, `background={{ mode: "color"\|"blur"\|"gradient", color, gradient }}`, `theme={{ extends, palette, fonts, radius, motion, styles }}` (see the Themes guide); children `<Track>`, `<Marker>` (a `<Multicam>` goes inside a `<Track>`) |
 | `<Track>` | Track (universal) | `layout`, `name`, `role: general\|captions\|dialogue\|music\|effects\|ambience`, `locked`, `hidden`, `muted`, `solo`, `group`. Child order = compositing order, first on top. Any item kind on any track. |
-| `<Clip>` (alias `<Audio>`) | Clip (video/image/audio media) | `src="asset:ID"`, `in`, `out`, `duration`, `speed` 0.1–20, `reverse`, `pitchCorrection`, `smoothSlowMo`, `interpolation`, `transform`, `fit`, `blend`, `blendOpacity`, `volume` 0–4, `fade={{in,out}}`, `automation={{volume:[[t,v]], pan:[[t,v]]}}`, `duck={{ under: trackId, to, attack?, release? }}`, `audioTrack`, `stabilize`, `chromaKey`, `emphasis`, `behindSubject`; children `<Effect>`, `<AudioEffect>`, `<ColorGrade>`, `<Keyframe>`, `<Mask>`, `<SpeedKey>`, `<Freeze>` |
+| `<Clip>` (alias `<Audio>`) | Clip (video/image/audio media) | `src="asset:ID"`, `in`, `out`, `duration`, `speed` 0.1–20, `reverse`, `pitchCorrection`, `smoothSlowMo`, `interpolation`, `transform`, `fit`, `blend`, `blendOpacity`, `volume` 0–4, `fade={{in,out}}`, `automation={{volume:[[t,v]], pan:[[t,v]]}}`, `duck={{ under: trackId, to, attack?, release? }}`, `audioTrack`, `stabilize`, `chromaKey`, `emphasis`, `behindSubject`; children `<Effect>`, `<AudioEffect>`, `<Keyframe>`, `<Mask>`, `<SpeedKey>`, `<Freeze>` |
 | `<Gap>` | (gaps) | `duration` |
 | `<Transition>` | Transition | Sibling between two clips in a sequence track: `type`, `duration`, `params`. Edge form: `on="<clipId>" edge="in"\|"out"`. In sequence layout the two clips overlap by `duration` (each extends its source by `duration/2`; needs handles) and the sequence shortens by `duration`. The resolver emits a placement for the transition itself at `boundary − duration/2`. |
 | `<Title>` | TextClip | text as children; `style` (theme preset); flat style props (`font`, `size`, `weight`, `italic`, `color`, `background`, `stroke`, `shadow`, `align`, `valign`, `lineHeight`, `letterSpacing`, `decoration`); `animation={{ preset, in, out, stagger, unit, params }}`; `text3d`; `enter`, `exit`; `transform`, `blend`, `emphasis`; children `<Effect>`, `<Keyframe>` |
@@ -66,7 +66,6 @@ function Helper(...) {...}                       // helpers that make elements a
 | `<Multicam>` + `<Angle>` + `<Cut>` | MultiCamGroup + angles + switches | `<Multicam id name sync>` with `<Angle id src offset color/>` and `<Cut id at angle/>`; the resolver expands cuts into generated clips on the containing track; angle sources render hidden |
 | `<Layer>` | — (ours) | `duration`, `anchor`/`offset`, `transform`, `enter`, `exit`; free code inside (any React, hooks, CSS, canvas, WebGL, host-offered libraries; decision 0018), timed by `useT()` (0..1) or `useLayer()` (seconds elapsed, remaining, duration); one component child gives the Layer handles (`layer/setProps`) |
 | `<Effect>` / `<AudioEffect>` | Effect | `type`, `params`, `enabled`; order = stack order |
-| `<ColorGrade>` | ClipColorGrading | `wheels`, `curves`, `lut`, `hsl`, `temperature`, `tint` |
 | `<Keyframe>` | Keyframe | `property`, `at` (element-relative), `value`, `easing`, `handles`, `roving` |
 | `<SpeedKey>` / `<Freeze>` | SpeedKeyframe / FreezeFrame | `at, speed, easing` / `at` (source), `start` (element-relative), `duration` |
 
@@ -117,7 +116,7 @@ Fold: `prop` = rewrite a literal prop; `ins`/`rm`/`mv` = element insert/remove/r
 | rippleDelete | `id` | rippleRestore | free: rm + prop `start` on later siblings; sequence: = remove |
 | move | `id, trackId?, after?` (sequence) or `start` (free) | self | mv / prop |
 | trim | `id, edge: in\|out, value: TimeRef` | restoreTiming | prop `in`/`out`; free layout + edge `in` also rewrites `start` |
-| split | `id, at, newId` | merge | replace element by two: children with `at`/`start` before the split stay left, others move right with times shifted; Mask/Effect/ColorGrade duplicated; free layout right half gets `start = at` |
+| split | `id, at, newId` | merge | replace element by two: children with `at`/`start` before the split stay left, others move right with times shifted; Mask/Effect duplicated; free layout right half gets `start = at` |
 | merge | `id, originalNode` | split | replace two by original |
 | slip | `id, delta` | restoreTiming | prop `in`,`out` |
 | slide | `id, delta` (this clip keeps content; prev tail +Δ; next head +Δ) | batch restoreTiming ×3 | prop ×3 |
@@ -132,7 +131,7 @@ Fold: `prop` = rewrite a literal prop; `ins`/`rm`/`mv` = element insert/remove/r
 
 **transform/** (1): `update {id, transform: DeepPartial}` deep-merge per axis; inverse full prior; prop.
 
-**effect/** and **audioEffect/** (6 each, same shape): `add {id, effectId, type, params?, index?}` ↔ `remove`; `remove` ↔ `restore {node, index}`; `update {params}` (inverse exact prior, replace not merge); `toggle`; `setOrder {effectIds[]}`; `setStack {effects[]}`. **colorGrade/set {id, grading?}**.
+**effect/** and **audioEffect/** (6 each, same shape): `add {id, effectId, type, params?, index?}` ↔ `remove`; `remove` ↔ `restore {node, index}`; `update {params}` (inverse exact prior, replace not merge); `toggle`; `setOrder {effectIds[]}`; `setStack {effects[]}`. Colour grading is effects too: temperature and tint are a `whiteBalance` effect.
 
 **keyframe/** (5): `add {id, keyId, property, at, value, easing?, handles?}` ↔ `remove` (inverse keeps easing/handles); `update {value?, easing?, handles?, roving?}`; `move {at}`; `setAll`.
 
@@ -169,7 +168,7 @@ Count: 92 action types, every one with a non-null inverse.
 
 ### B.4 Auto-group set
 
-transform/update, effect/update, audioEffect/update, audio/setVolume, audio/setFade, audio/setDuck, transition/update, clip/setBlend, colorGrade/set, clip/move, clip/trim, clip/slip, clip/slide, clip/roll, clip/setSpeed, clip/setChromaKey, clip/setStabilization, keyframe/move, keyframe/update, composition/updateSettings, composition/setBackground, text/update, shape/update, svg/update, sticker/update, mask/update, layer/setTiming, layer/setTransform.
+transform/update, effect/update, audioEffect/update, audio/setVolume, audio/setFade, audio/setDuck, transition/update, clip/setBlend, clip/move, clip/trim, clip/slip, clip/slide, clip/roll, clip/setSpeed, clip/setChromaKey, clip/setStabilization, keyframe/move, keyframe/update, composition/updateSettings, composition/setBackground, text/update, shape/update, svg/update, sticker/update, mask/update, layer/setTiming, layer/setTransform.
 
 ---
 
@@ -197,7 +196,7 @@ Snapping rules copied as is: snap on by default, threshold 40 px, priority clip 
 | Quick edit bar (single media clip, playhead inside) | Split here, Trim start/end (`clip/trimToPlayhead`), Add captions, Clean audio (`audioEffect/add noiseReduction`), Export |
 | Inspector: Transform (position, scale, rotation, anchor, opacity, radius, fit, crop, align, blend, 3D) | `transform/update`, `clip/setFit`, `clip/setBlend` (3D fields through `transform/update`, with undo) |
 | Inspector: Style (text / shape / svg) | `text/update`, `text/setContent`, `shape/update`, `svg/update` |
-| Inspector: Color grading | `colorGrade/set` |
+| Inspector: Color grading | `effect/add`, `effect/update` (`whiteBalance`, `exposure`, `curves`…) |
 | Inspector: Effects (stack, chroma key, masking, nested, adjustment, PiP presets, behind-subject) | `effect/*`, `clip/setChromaKey`, `mask/*`, `nested/*`, `adjustment/*`, `transform/update`, `text/update` |
 | Inspector: Audio (volume, fades, noise removal, effects, ducking) | `audio/setVolume`, `audio/setFade`, `audioEffect/*`, `audio/setDuck` |
 | Inspector: Speed (presets, reverse, stabilization, speed curves) | `clip/setSpeed`, `clip/setReverse`, `clip/setStabilization`, `speed/setKeys`, `speed/setFreezes` |

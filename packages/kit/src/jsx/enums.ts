@@ -154,8 +154,6 @@ export const KEYFRAME_PROPERTIES = [
   "transform.crop.height",
   "audio.volume",
   "audio.pan",
-  "colorGrade.temperature",
-  "colorGrade.tint",
 ] as const;
 
 /** A property of the keyframe's parent element. An effect's param is keyframed inside the effect, with `param`. */
@@ -188,11 +186,14 @@ export const zShapeType = z.enum(SHAPE_TYPES);
 export const zKeyframeProperty = z.string().superRefine((value, ctx) => {
   if (isKeyframeProperty(value)) return;
   const effect = /^effect\.([^.]+)\.([^.]+)$/.exec(value);
+  const grade = /^colorGrade\.(temperature|tint)$/.exec(value);
   ctx.addIssue({
     code: "custom",
     message: effect
       ? `an effect's param is keyframed inside the effect: <Effect id="${effect[1]}" …><Keyframe param="${effect[2]}" at={…} value={…} /></Effect>`
-      : `unknown keyframe property "${value}": use one of ${KEYFRAME_PROPERTIES.join(", ")}, or put the keyframe inside an <Effect> with param`,
+      : grade
+        ? `<ColorGrade> is now a whiteBalance effect: <Effect type="whiteBalance" …><Keyframe param="${grade[1]}" at={…} value={…} /></Effect>`
+        : `unknown keyframe property "${value}": use one of ${KEYFRAME_PROPERTIES.join(", ")}, or put the keyframe inside an <Effect> with param`,
   });
 });
 

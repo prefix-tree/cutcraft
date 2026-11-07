@@ -49,7 +49,7 @@ async function still(name: string, body: string, declarations: string, backgroun
   writeFileSync(
     file,
     `import { z } from "zod";
-import { Clip, ColorGrade, Composition, effect, Effect, Track } from "@cutcraft/kit";
+import { Clip, Composition, effect, Effect, Track } from "@cutcraft/kit";
 export const manifest = ${JSON.stringify(manifest)};
 ${declarations}
 export default function Video() {
@@ -139,8 +139,8 @@ function difference(a: string, b: string): { off: number; max: number } {
 
 /**
  * `tolerance` is the golden one (at most 0.2% of values off by more than 2, none by more than 32) unless a case says
- * otherwise. Blur is looser: Chrome approximates the Gaussian (Skia's box blurs) where the pass computes the spec's
- * true Gaussian, which RFC 0001 makes `blur` everywhere; they differ by a few levels along soft edges.
+ * otherwise. Blur is looser: Chrome approximates the Gaussian (Skia's box blurs) where the pass computes the true
+ * Gaussian every built-in shares; they differ by a few levels along soft edges.
  */
 const CASES: readonly {
   name: string;
@@ -155,9 +155,6 @@ const CASES: readonly {
   { name: "sepia", picture: "photo", effect: `<Effect id="e" type="sepia" params={{ amount: 0.7 }} />` },
   { name: "grayscale", picture: "photo", effect: `<Effect id="e" type="grayscale" params={{ amount: 0.8 }} />` },
   { name: "invert", picture: "photo", effect: `<Effect id="e" type="invert" params={{ amount: 0.6 }} />` },
-  { name: "temperature", picture: "photo", effect: `<Effect id="e" type="temperature" params={{ amount: 0.4 }} />` },
-  { name: "tint", picture: "photo", effect: `<Effect id="e" type="tint" params={{ amount: 0.3 }} />` },
-  { name: "colorGrade", picture: "photo", effect: `<ColorGrade id="e" temperature={-0.4} tint={0.2} />` },
   {
     name: "blur",
     picture: "photo",
