@@ -39,11 +39,11 @@ vec4 effect(vec2 uv) {
   float sigma = max(params.${radius}, 1e-3);
   float reach = 3.0 * sigma;
   float n = min(ceil(reach), 96.0);
+  int taps = int(n);
   vec2 dir = vec2(${axis === "x" ? "1.0, 0.0" : "0.0, 1.0"}) * (reach / n) / resolution;
   vec4 sum = vec4(0.0);
   float weights = 0.0;
-  for (int i = -96; i <= 96; i++) {
-    if (abs(float(i)) > n) continue;
+  for (int i = -taps; i <= taps; i++) {
     float d = float(i) * reach / n;
     float w = exp(-d * d / (2.0 * sigma * sigma));
     vec4 s = cc_at(uv + float(i) * dir);
