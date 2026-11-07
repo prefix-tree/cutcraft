@@ -10,6 +10,7 @@ export {
   type DefineOptions,
   type NoParams,
   type ShaderDefinition,
+  type ShaderStep,
   type ShaderTable,
   shaderDefinition,
 } from "./shader-definition";

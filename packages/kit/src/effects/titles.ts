@@ -2,7 +2,8 @@
 import { z } from "zod";
 
 import { shaderDefinition } from "../jsx/shader-definition";
-import { COLOUR, GAUSS_PASS, HEX, OVER } from "./glsl";
+import { aroundGauss } from "./gauss";
+import { COLOUR, HEX, OVER } from "./glsl";
 
 /**
  * Glow: the element's bright parts (luminance above `threshold`, all of it at 0), coloured toward `color` by `tint`
@@ -10,23 +11,16 @@ import { COLOUR, GAUSS_PASS, HEX, OVER } from "./glsl";
  * the picture by `intensity`.
  * The glow reaches past the element's edge, so it shows on titles and shapes as well as on footage.
  */
-const glow = shaderDefinition("effect", {
-  name: "glow",
-  params: z.object({
-    radius: z.number().min(0).max(200).default(7),
-    intensity: z.number().min(0).max(4).default(1),
-    threshold: z.number().min(0).max(1).default(0),
-    color: HEX.default("#ffffff"),
-    tint: z.number().min(0).max(1).default(1),
-  }),
-  passes: [
+const GLOW = aroundGauss({
+  what: "rgba",
+  before: [
     `${COLOUR}vec4 effect(vec2 uv) {
   vec4 c = texture(image, uv);
   float bright = params.threshold <= 0.0 ? 1.0 : smoothstep(params.threshold, min(params.threshold + 0.1, 1.0), cc_luma(c.rgb));
   return vec4(mix(c.rgb, params.color, params.tint), c.a * bright);
 }`,
-    GAUSS_PASS("x", "rgba"),
-    GAUSS_PASS("y", "rgba"),
+  ],
+  after: [
     `vec4 effect(vec2 uv) {
   vec4 o = texture(original, uv);
   vec4 g = texture(image, uv);
@@ -36,6 +30,20 @@ const glow = shaderDefinition("effect", {
 }`,
   ],
 });
+const glow = {
+  ...shaderDefinition("effect", {
+    name: "glow",
+    params: z.object({
+      radius: z.number().min(0).max(200).default(7),
+      intensity: z.number().min(0).max(4).default(1),
+      threshold: z.number().min(0).max(1).default(0),
+      color: HEX.default("#ffffff"),
+      tint: z.number().min(0).max(1).default(1),
+    }),
+    passes: GLOW.passes,
+  }),
+  steps: GLOW.steps,
+};
 
 /**
  * Outline: a band of `width` pixels around the element's silhouette, by morphological dilation of its alpha (the
@@ -101,18 +109,10 @@ const longShadow = shaderDefinition("effect", {
  * from above) shades it by Lambert's cosine law against a flat surface: edges facing the light take `highlight`, the
  * far ones `shade`, by `amount`. Only the element's own pixels change.
  */
-const bevel = shaderDefinition("effect", {
-  name: "bevel",
-  params: z.object({
-    size: z.number().min(0).max(200).default(1.5),
-    angle: z.number().default(-60),
-    amount: z.number().min(0).max(1).default(0.4),
-    highlight: HEX.default("#ffffff"),
-    shade: HEX.default("#000000"),
-  }),
-  passes: [
-    GAUSS_PASS("x", "alpha", "size"),
-    GAUSS_PASS("y", "alpha", "size"),
+const BEVEL = aroundGauss({
+  what: "alpha",
+  param: "size",
+  after: [
     `vec4 effect(vec2 uv) {
   vec4 o = texture(original, uv);
   vec2 px = 1.0 / resolution;
@@ -128,5 +128,20 @@ const bevel = shaderDefinition("effect", {
 }`,
   ],
 });
+
+const bevel = {
+  ...shaderDefinition("effect", {
+    name: "bevel",
+    params: z.object({
+      size: z.number().min(0).max(200).default(1.5),
+      angle: z.number().default(-60),
+      amount: z.number().min(0).max(1).default(0.4),
+      highlight: HEX.default("#ffffff"),
+      shade: HEX.default("#000000"),
+    }),
+    passes: BEVEL.passes,
+  }),
+  steps: BEVEL.steps,
+};
 
 export { bevel, glow, longShadow, outline };

@@ -6,7 +6,7 @@ export * from "./actions/handler-kit";
 export * from "./actions/history";
 export * from "./actions/registry";
 export * from "./actions/types";
-export { GAUSS_PASS } from "./effects/glsl";
+export { type GaussOutside, type GaussWhat, gaussScale, gaussSources, gaussSteps } from "./effects/gauss";
 export {
   BUILT_IN_SHADERS,
   BUILT_IN_TRANSITIONS,

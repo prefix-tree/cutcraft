@@ -2,7 +2,8 @@
 import { z } from "zod";
 
 import { shaderDefinition } from "../jsx/shader-definition";
-import { GAUSS_PASS, HEX, UV } from "./glsl";
+import { aroundGauss } from "./gauss";
+import { HEX, UV } from "./glsl";
 
 /**
  * Colour key (green or blue screen): how far each pixel's chroma lies from the key colour's, in the Cb, Cr plane of
@@ -39,20 +40,12 @@ vec4 effect(vec2 uv) {
  * passes (`radius` the standard deviation, in pixels), then mixed with the original by a mask from the signed distance to a rounded box (`roundness` 1 rounds the
  * short side fully). `feather` fades the blur in over that many pixels inside the box's edge.
  */
-const regionBlur = shaderDefinition("effect", {
-  name: "regionBlur",
-  params: z.object({
-    box: z
-      .tuple([z.number(), z.number(), z.number().positive(), z.number().positive()])
-      .default([0.25, 0.25, 0.5, 0.5]),
-    radius: z.number().min(0).max(200).default(7),
-    feather: z.number().min(0).max(500).default(10),
-    roundness: z.number().min(0).max(1).default(0),
-    inverted: z.boolean().default(false),
-  }),
-  passes: [
-    GAUSS_PASS("x", "rgba"),
-    GAUSS_PASS("y", "rgba"),
+const REGION_BLUR = aroundGauss({
+  what: "rgba",
+  // Not inverted, only the box needs the blur.
+  box: (params) =>
+    params.inverted === true ? undefined : (params.box as readonly [number, number, number, number] | undefined),
+  after: [
     `vec4 effect(vec2 uv) {
   vec2 p = uv * resolution;
   vec2 half_size = params.box.zw * resolution / 2.0;
@@ -66,6 +59,23 @@ const regionBlur = shaderDefinition("effect", {
 }`,
   ],
 });
+
+const regionBlur = {
+  ...shaderDefinition("effect", {
+    name: "regionBlur",
+    params: z.object({
+      box: z
+        .tuple([z.number(), z.number(), z.number().positive(), z.number().positive()])
+        .default([0.25, 0.25, 0.5, 0.5]),
+      radius: z.number().min(0).max(200).default(7),
+      feather: z.number().min(0).max(500).default(10),
+      roundness: z.number().min(0).max(1).default(0),
+      inverted: z.boolean().default(false),
+    }),
+    passes: REGION_BLUR.passes,
+  }),
+  steps: REGION_BLUR.steps,
+};
 
 /**
  * Corner pin: the picture mapped onto the quadrilateral of its four corners by a projective transform, so a screen

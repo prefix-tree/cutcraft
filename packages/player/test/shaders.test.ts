@@ -103,7 +103,13 @@ describe("declared shaders in the frame plan", () => {
     const passes = buildFramePlan(state, 1).ops[0]!.shaders!;
     const box = passes[0]?.params.box as number[];
     [0.3, 0.1, 0.2, 0.4].forEach((v, i) => expect(box[i]).toBeCloseTo(v, 6));
-    expect(passes[0]?.sources).toHaveLength(3);
+    // Its 7 px blur at half size, over the box's part of the frame only, then the mask at full size over all of it.
+    expect(passes[0]?.steps?.map((s) => [s.scale ?? 1, s.region !== undefined])).toEqual([
+      [0.5, true],
+      [0.5, true],
+      [0.5, true],
+      [1, false],
+    ]);
     expect(passes[1]?.params.color).toBe("#00ff00");
   });
 
