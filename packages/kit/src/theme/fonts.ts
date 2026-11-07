@@ -42,35 +42,52 @@ export interface DeclaredFont {
   readonly source: FontSource;
 }
 
-interface FontStore {
-  /** Faces declared while a file loads through `loadModule`, or null outside one. */
-  scope: Map<string, DeclaredFont> | null;
-  /** Faces declared by modules imported some other way (a bundled app), for `collectModule` to fall back on. */
-  readonly global: Map<string, DeclaredFont>;
+const DECLARED = Symbol.for("cutcraft.declared");
+
+/**
+ * A family a file declares, as `font()` and `googleFont()` return it: a value with no side effect, which carries its
+ * faces. It stands for its family wherever a string is expected (a `font` prop, a theme font, a CSS `fontFamily`, a
+ * template string, JSON), so it is typed as one. Collection (resolve/collect.ts) finds it on the elements that use it
+ * and among the module's exports, and reads its faces from it.
+ */
+export type FontRef = string & { readonly [DECLARED]?: "font" };
+
+interface FontValue {
+  readonly [DECLARED]: "font";
+  readonly family: string;
+  readonly faces: readonly DeclaredFont[];
 }
 
-// On globalThis, so a second copy of the kit in one page or process still shares it.
-const STORE_KEY = Symbol.for("cutcraft.fonts.store");
-const store: FontStore = ((globalThis as Record<symbol, FontStore | undefined>)[STORE_KEY] ??= {
-  scope: null,
-  global: new Map(),
-});
+/** Whether a value is a family a file declared, and if so its faces. */
+export function fontFaces(value: unknown): readonly DeclaredFont[] | undefined {
+  const v = value as Partial<FontValue> | null;
+  return v?.[DECLARED] === "font" ? v.faces : undefined;
+}
 
-/** The faces a module loaded by `loadModule` declared, stored on its exports under this key. */
-export const MODULE_FONTS = Symbol.for("cutcraft.fonts");
-
-function declare(face: DeclaredFont): string {
+function checked(face: DeclaredFont): DeclaredFont {
   if (!(Number.isInteger(face.weight) && face.weight >= 100 && face.weight <= 900 && face.weight % 100 === 0))
     throw new Error(`font "${face.family}": weight must be 100, 200 … 900, got ${face.weight}`);
   if (face.style !== "normal" && face.style !== "italic")
     throw new Error(`font "${face.family}": style must be "normal" or "italic", got "${face.style}"`);
-  (store.scope ?? store.global).set(`${face.family}|${face.weight}|${face.style}`, face);
-  return face.family;
+  return face;
+}
+
+function fontRef(family: string, faces: readonly DeclaredFont[]): FontRef {
+  const value: FontValue & { toString(): string; toJSON(): string; [Symbol.toPrimitive](): string } = {
+    [DECLARED]: "font",
+    family,
+    faces: Object.freeze(faces.map(checked)),
+    toString: () => family,
+    toJSON: () => family,
+    [Symbol.toPrimitive]: () => family,
+  };
+  return Object.freeze(value) as unknown as FontRef;
 }
 
 /**
- * Declares a face from a font file and returns its family, to pass as a `font` prop, a theme font or a CSS
- * `fontFamily`. Call it at the top of the file with literal arguments, as the editor and lint read them from the source.
+ * Declares a face from a font file and returns it (a `FontRef`, standing for its family), to pass as a `font` prop, a
+ * theme font or a CSS `fontFamily`. Call it at the top of the file with literal arguments, as the editor and lint read
+ * them from the source; export it when only free code uses it, so the player loads it.
  *
  *   const brand = font({ family: "Brand Sans", src: "asset:brand", weight: 700 });
  *   <Title id="hello" font={brand}>Hello</Title>
@@ -83,19 +100,21 @@ export function font(options: {
   readonly src: string;
   readonly weight?: number;
   readonly style?: FontStyle;
-}): string {
+}): FontRef {
   if (!options.src.startsWith("asset:") || options.src.length === "asset:".length)
     throw new Error(`font "${options.family}": src must be "asset:<id>", got "${options.src}"`);
-  return declare({
-    family: options.family,
-    weight: options.weight ?? 400,
-    style: options.style ?? "normal",
-    source: { kind: "asset", id: options.src.slice("asset:".length) },
-  });
+  return fontRef(options.family, [
+    {
+      family: options.family,
+      weight: options.weight ?? 400,
+      style: options.style ?? "normal",
+      source: { kind: "asset", id: options.src.slice("asset:".length) },
+    },
+  ]);
 }
 
 /**
- * Declares a Google Fonts family, in each weight and style given (default 400, normal), and returns the family. The
+ * Declares a Google Fonts family, in each weight and style given (default 400, normal), and returns it (a `FontRef`). The
  * export downloads the files once into `~/.cache/cutcraft/fonts` (`CUTCRAFT_FONT_CACHE` moves it) and reads them from
  * there; the player loads them from Google.
  *
@@ -105,26 +124,9 @@ export function font(options: {
 export function googleFont(
   family: string,
   options: { readonly weights?: readonly number[]; readonly styles?: readonly FontStyle[] } = {},
-): string {
+): FontRef {
+  const faces: DeclaredFont[] = [];
   for (const weight of options.weights ?? [400])
-    for (const style of options.styles ?? ["normal"]) declare({ family, weight, style, source: { kind: "google" } });
-  return family;
-}
-
-/** Runs `load` and returns the faces declared while it ran: how `loadModule` keeps each file's faces apart. */
-export function collectFonts(load: () => void): DeclaredFont[] {
-  const outer = store.scope;
-  const scope = new Map<string, DeclaredFont>();
-  store.scope = scope;
-  try {
-    load();
-  } finally {
-    store.scope = outer;
-  }
-  return [...scope.values()];
-}
-
-/** The faces a module declared: those `loadModule` recorded for it, or else every face declared outside a load. */
-export function fontsOf(mod: object): readonly DeclaredFont[] {
-  return (mod as Record<symbol, readonly DeclaredFont[] | undefined>)[MODULE_FONTS] ?? [...store.global.values()];
+    for (const style of options.styles ?? ["normal"]) faces.push({ family, weight, style, source: { kind: "google" } });
+  return fontRef(family, faces);
 }

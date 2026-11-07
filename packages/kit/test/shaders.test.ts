@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { z } from "zod";
 
 import { collectModule, Executor, effect, resolve, transition } from "@cutcraft/kit";
-import { lint, loadModule } from "@cutcraft/kit/source";
+import { foldToSource, lint, loadModule } from "@cutcraft/kit/source";
 
 const INVERT = "vec4 effect(vec2 uv) { vec4 c = texture(image, uv); return vec4(1.0 - c.rgb, c.a); }";
 
@@ -16,9 +16,10 @@ const manifest = { assets: { city: { id: "city", kind: "video" as const, duratio
 const stateOf = (source: string) => resolve(collectModule(loadModule(source) as never), manifest);
 
 describe("effect() and transition()", () => {
-  it("return the name, and refuse a name or shader no renderer could use", () => {
-    expect(effect({ name: "my-invert", shader: INVERT })).toBe("my-invert");
-    expect(transition({ name: "my-cut", shader: "vec4 transition(vec2 uv) { return texture(to, uv); }" })).toBe(
+  it("return the definition as a value, and refuse a name or shader no renderer could use", () => {
+    expect(effect({ name: "my-invert", shader: INVERT }).name).toBe("my-invert");
+    expect(effect({ name: "my-invert", shader: INVERT }).definition.passes).toEqual([INVERT]);
+    expect(transition({ name: "my-cut", shader: "vec4 transition(vec2 uv) { return texture(to, uv); }" }).name).toBe(
       "my-cut",
     );
     expect(() => effect({ name: "blur", shader: INVERT })).toThrow("is built in");
@@ -37,7 +38,7 @@ describe("effect() and transition()", () => {
   });
 
   it("take an effect of several passes, each checked, and refuse passes on a transition or with a shader", () => {
-    expect(effect({ name: "two-pass", passes: [INVERT, INVERT] })).toBe("two-pass");
+    expect(effect({ name: "two-pass", passes: [INVERT, INVERT] }).name).toBe("two-pass");
     expect(() => effect({ name: "x", passes: [] })).toThrow("passes is empty");
     expect(() => effect({ name: "x", passes: [INVERT, "void main() {}"] })).toThrow(
       "pass 2 defines vec4 effect(vec2 uv)",
@@ -50,7 +51,7 @@ describe("effect() and transition()", () => {
     // Params are read as params.NAME, so any name is free: a GLSL function's or an input's.
     const free = z.object({ length: z.number(), image: z.number(), mix: z.number() });
     const reads = "vec4 effect(vec2 uv) { return texture(image, uv) * params.length * params.image * params.mix; }";
-    expect(effect({ name: "free-names", params: free, shader: reads })).toBe("free-names");
+    expect(effect({ name: "free-names", params: free, shader: reads }).name).toBe("free-names");
   });
 
   it("check a built-in shader effect's params and fill its defaults", () => {
@@ -80,7 +81,7 @@ describe("effect() and transition()", () => {
     const bad = stateOf(
       file(
         `<Clip id="c" src="asset:city"><Effect id="g" type="glitch" params={{ amount: 4 }} /></Clip>`,
-        `const glitch = effect({ name: "glitch", params: z.object({ amount: z.number().max(1) }), shader: \`${INVERT}\` });`,
+        `export const glitch = effect({ name: "glitch", params: z.object({ amount: z.number().max(1) }), shader: \`${INVERT}\` });`,
       ),
     );
     expect(bad.errors.map((e) => `${e.id}.${e.prop}`)).toEqual(["g.params.amount"]);
@@ -101,8 +102,8 @@ describe("effect() and transition()", () => {
   it("are accepted by the editor's actions", () => {
     const source = file(
       `<Clip id="a" src="asset:city" in={0} out={2} /><Transition id="x" type="crossfade" duration={0.5} /><Clip id="b" src="asset:city" in={0} out={2} />`,
-      `const inv = effect({ name: "inv", shader: \`${INVERT}\` });
-const sweep = transition({ name: "sweep", shader: "vec4 transition(vec2 uv) { return texture(to, uv); }" });`,
+      `export const inv = effect({ name: "inv", shader: \`${INVERT}\` });
+export const sweep = transition({ name: "sweep", shader: "vec4 transition(vec2 uv) { return texture(to, uv); }" });`,
     );
     const exec = new Executor({ tree: collectModule(loadModule(source) as never), manifest });
     expect(exec.execute({ type: "effect/add", params: { id: "a", childId: "e1", type: "inv" } }).ok).toBe(true);
@@ -115,10 +116,10 @@ const sweep = transition({ name: "sweep", shader: "vec4 transition(vec2 uv) { re
     const d = lint(
       file(
         `<Clip id="a" src="asset:city" />`,
-        `const ok = effect({ name: "ok", params: z.object({}), shader: \`${INVERT}\` });
-const multi = effect({ name: "multi", passes: [\`${INVERT}\`, \`${INVERT}\`] });
+        `export const ok = effect({ name: "ok", params: z.object({}), shader: \`${INVERT}\` });
+export const multi = effect({ name: "multi", passes: [\`${INVERT}\`, \`${INVERT}\`] });
 const name = "late";
-const computed = effect({ name, shader: \`${INVERT}\` });
+export const computed = effect({ name, shader: \`${INVERT}\` });
 function make() { return transition({ name: "inner", shader: "" }); }`,
       ),
     ).filter((x) => x.rule === "declaration");
@@ -126,6 +127,89 @@ function make() { return transition({ name: "inner", shader: "" }); }`,
       expect.stringContaining("effect() takes a literal name and shader (or passes)"),
       expect.stringContaining("transition() inside a function or expression"),
     ]);
+  });
+});
+
+describe("declarations as values", () => {
+  it("are a file's own: nothing one file declares reaches another, however it is loaded", () => {
+    const first = stateOf(
+      file(`<Clip id="a" src="asset:city" />`, `export const one = effect({ name: "one", shader: \`${INVERT}\` });`),
+    );
+    const second = stateOf(
+      file(`<Clip id="a" src="asset:city" />`, `export const two = effect({ name: "two", shader: \`${INVERT}\` });`),
+    );
+    expect(first.shaders.map((s) => s.name)).toEqual(["one"]);
+    expect(second.shaders.map((s) => s.name)).toEqual(["two"]);
+    expect(stateOf(file(`<Clip id="a" src="asset:city" />`)).shaders).toEqual([]);
+    // A module imported another way (a bundled preview) is read the same way.
+    const imported = {
+      ...loadModule(
+        file(
+          `<Clip id="a" src="asset:city" />`,
+          `export const three = effect({ name: "three", shader: \`${INVERT}\` });`,
+        ),
+      ),
+    };
+    expect(resolve(collectModule(imported as never), manifest).shaders.map((s) => s.name)).toEqual(["three"]);
+  });
+
+  it("are found on the element that uses them, or among the exports; one neither used nor exported is not", () => {
+    const state = stateOf(
+      file(
+        `<Clip id="a" src="asset:city"><Effect id="u" type={used} /></Clip>`,
+        `const used = effect({ name: "used", shader: \`${INVERT}\` });
+export const offered = effect({ name: "offered", shader: \`${INVERT}\` });
+const hidden = effect({ name: "hidden", shader: \`${INVERT}\` });`,
+      ),
+    );
+    expect(state.errors).toEqual([]);
+    expect(state.shaders.map((s) => s.name).sort()).toEqual(["offered", "used"]);
+    expect(state.items.get("u")?.props.type).toBe("used");
+  });
+
+  it("refuse two different definitions under one name", () => {
+    const state = stateOf(
+      file(
+        `<Clip id="a" src="asset:city"><Effect id="u" type={a} /><Effect id="v" type={b} /></Clip>`,
+        `const a = effect({ name: "same", shader: \`${INVERT}\` });
+const b = effect({ name: "same", shader: "vec4 effect(vec2 uv) { return vec4(1.0); }" });`,
+      ),
+    );
+    expect(state.errors.map((e) => e.message)).toEqual([
+      expect.stringContaining('two different effects are named "same"'),
+    ]);
+  });
+
+  it("want one neither exported nor used to be exported, so the editor can offer it", () => {
+    const d = lint(
+      file(
+        `<Clip id="a" src="asset:city"><Effect id="u" type={used} /></Clip>`,
+        `const used = effect({ name: "used", shader: \`${INVERT}\` });
+export const offered = effect({ name: "offered", shader: \`${INVERT}\` });
+const hidden = effect({ name: "hidden", shader: \`${INVERT}\` });`,
+      ),
+    ).filter((x) => x.rule === "declaration");
+    expect(d.map((x) => x.message)).toEqual([
+      "hidden is neither exported nor used: export it so the editor can offer it",
+    ]);
+  });
+
+  it("are written back by the editor as the identifier that declares them", () => {
+    const source = file(
+      `<Clip id="a" src="asset:city" in={0} out={2} /><Transition id="x" type="crossfade" duration={0.5} /><Clip id="b" src="asset:city" in={0} out={2} />`,
+      `export const inv = effect({ name: "inv", shader: \`${INVERT}\` });
+export const sweep = transition({ name: "sweep", shader: "vec4 transition(vec2 uv) { return texture(to, uv); }" });`,
+    );
+    const exec = new Executor({ tree: collectModule(loadModule(source) as never), manifest });
+    expect(exec.execute({ type: "effect/add", params: { id: "a", childId: "e1", type: "inv" } }).ok).toBe(true);
+    expect(exec.execute({ type: "transition/update", params: { transitionId: "x", type: "sweep" } }).ok).toBe(true);
+    const folded = foldToSource(source, exec.log(), exec.state());
+    expect(folded.text).toContain('<Effect id="e1" type={inv}');
+    expect(folded.text).toContain('<Transition id="x" type={sweep}');
+    const again = stateOf(folded.text);
+    expect(again.errors).toEqual([]);
+    expect(again.items.get("e1")?.props.type).toBe("inv");
+    expect(again.items.get("x")?.props.type).toBe("sweep");
   });
 });
 

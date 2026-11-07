@@ -124,14 +124,14 @@ two Google families become the theme's heading and body fonts, which the `h1` an
 A font file of your own works the same way, and a title can take the value directly:
 
 ```tsx
-const brand = font({ family: "Brand Sans", src: "asset:brand" });
-const brandBold = font({ family: "Brand Sans", src: "asset:brand-bold", weight: 700 });
+export const brand = font({ family: "Brand Sans", src: "asset:brand" });
+export const brandBold = font({ family: "Brand Sans", src: "asset:brand-bold", weight: 700 });
 
 <Title id="hello" font={brand}>Hello</Title>
 ```
 
 Each `font()` call declares one face. `googleFont()` declares one face for each weight and style you give it (400 and
-normal when you give none). Free code uses the same value as a CSS `fontFamily`.
+normal when you give none). The value stands for its family, so free code uses it as a CSS `fontFamily` too.
 
 `font({ src: "asset:brand" })` finds its file the way a clip finds its media. The export looks for `brand.ttf`,
 `brand.otf`, `brand.woff` or `brand.woff2` next to the file (or in the `--media` folder), and the player asks its
@@ -141,7 +141,9 @@ normal when you give none). Free code uses the same value as a CSS `fontFamily`.
 `CUTCRAFT_FONT_CACHE` to put it elsewhere), and later exports read the copy, so they need no network. The player loads
 the face from Google.
 
-The player and the export load every declared face, and the export draws no frame until they have loaded. A family that is neither bundled nor declared
+The player and the export load every face the file uses (in a `font` prop, a theme, a style in free code) or exports,
+and the export draws no frame until they have loaded. Export a face nothing names directly, such as a bold weight
+of a family set by its regular one, or one only a free-code component uses, so it is loaded. A family that is neither bundled nor declared
 is set in Inter, and the [`font-available` lint](#lint) names it.
 
 Keep the calls at the top of the file with literal arguments, where the editor and lint can read them; the
@@ -176,4 +178,4 @@ it restyles.
 - `font-available` (warning): a font no renderer ships and the file does not
   declare.
 - `declaration` (warning): a `font()`, `googleFont()`, `effect()` or `transition()` call inside a
-  function, or with arguments that are not literal.
+  function, or with arguments that are not literal, or one neither exported nor used.

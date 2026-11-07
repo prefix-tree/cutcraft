@@ -34,6 +34,57 @@ function declarations(index: SourceIndex): { call: t.CallExpression; topLevel: b
   return out;
 }
 
+/** The top-level variable a declaration call initialises (`const glitch = effect(…)`), and whether it is exported. */
+function declarator(index: SourceIndex, call: t.CallExpression): { name: string; exported: boolean } | null {
+  for (const node of index.ast.program.body) {
+    const exported = t.isExportNamedDeclaration(node);
+    const decl = exported ? node.declaration : node;
+    if (!t.isVariableDeclaration(decl)) continue;
+    for (const d of decl.declarations)
+      if (d.init === call && t.isIdentifier(d.id)) return { name: d.id.name, exported };
+  }
+  return null;
+}
+
+/** The literal name a declaration gives: an effect's or transition's `name`, a font's family. */
+function declaredName(call: t.CallExpression, declarer: string): string | null {
+  const [first] = call.arguments;
+  if (declarer === "googleFont") return t.isStringLiteral(first) ? first.value : null;
+  if (!t.isObjectExpression(first)) return null;
+  const key = declarer === "font" ? "family" : "name";
+  const prop = first.properties.find(
+    (p): p is t.ObjectProperty => t.isObjectProperty(p) && t.isIdentifier(p.key, { name: key }),
+  );
+  return prop && t.isStringLiteral(prop.value) ? prop.value.value : null;
+}
+
+/**
+ * The identifier that declares each effect, transition and font family the file declares at the top level with a
+ * literal name, as `effect:glitch`, `transition:sweep` or `font:Brand Sans`: how the fold writes `type={glitch}` for
+ * an effect the editor added by name.
+ */
+export function declaredIdentifiers(index: SourceIndex): ReadonlyMap<string, string> {
+  const out = new Map<string, string>();
+  for (const { call, topLevel, declarer } of declarations(index)) {
+    if (!topLevel) continue;
+    const name = declaredName(call, declarer);
+    const variable = declarator(index, call);
+    if (name === null || !variable) continue;
+    const kind = declarer === "effect" ? "effect" : declarer === "transition" ? "transition" : "font";
+    if (!out.has(`${kind}:${name}`)) out.set(`${kind}:${name}`, variable.name);
+  }
+  return out;
+}
+
+/** Whether an identifier is read anywhere in the file besides where it is declared. */
+function isUsed(index: SourceIndex, name: string): boolean {
+  let uses = 0;
+  t.traverseFast(index.ast.program, (node) => {
+    if (t.isIdentifier(node, { name }) || t.isJSXIdentifier(node, { name })) uses++;
+  });
+  return uses > 1;
+}
+
 /** A value written out in the source: a string, number or boolean, or an array or object of them. */
 function literal(node: t.Node): boolean {
   if (t.isStringLiteral(node) || t.isNumericLiteral(node) || t.isBooleanLiteral(node)) return true;
@@ -90,6 +141,16 @@ export const declaration: Rule = {
             severity: "warning",
             range: rangeOf(call),
             message: `${name}() inside a function or expression is hidden from the editor; declare it at the top of the file: const x = ${name}(…)`,
+          },
+        ];
+      const variable = declarator(index, call);
+      if (variable && !variable.exported && !isUsed(index, variable.name))
+        return [
+          {
+            rule: "declaration",
+            severity: "warning",
+            range: rangeOf(call),
+            message: `${variable.name} is neither exported nor used: export it so the editor can offer it`,
           },
         ];
       if (SHADERS.has(declarer) ? !literalShader(call) : !call.arguments.every(literal))

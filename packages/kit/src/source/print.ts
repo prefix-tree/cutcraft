@@ -6,9 +6,15 @@ const NAME_BY_KIND: ReadonlyMap<string, string> = new Map(Object.entries(ELEMENT
 
 const IDENT = /^[A-Za-z_$][A-Za-z0-9_$]*$/;
 
+/** A value printed as an identifier the file declares (`type={glitch}`), not as a literal. */
+export class Identifier {
+  constructor(readonly name: string) {}
+}
+
 /** JavaScript source for a JSON value, compact, double-quoted. */
 export function printLiteral(value: Json | undefined): string {
   if (value === undefined) return "undefined";
+  if ((value as unknown) instanceof Identifier) return (value as unknown as Identifier).name;
   if (typeof value === "function") return (value as { name?: string }).name || "undefined";
   if (value === null) return "null";
   if (typeof value === "string") return JSON.stringify(value);
@@ -23,7 +29,8 @@ export function printLiteral(value: Json | undefined): string {
 export function printProp(name: string, value: Json | undefined): string {
   if (value === undefined) return "";
   if (value === true) return name;
-  if (typeof value === "function") return `${name}={${printLiteral(value)}}`;
+  if (typeof value === "function" || (value as unknown) instanceof Identifier)
+    return `${name}={${printLiteral(value)}}`;
   if (typeof value === "string" && !value.includes('"') && !value.includes("\n")) return `${name}="${value}"`;
   return `${name}={${printLiteral(value)}}`;
 }
