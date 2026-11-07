@@ -7,8 +7,9 @@ import { COLOUR, HEX, OVER } from "./glsl";
 
 /**
  * Glow: the element's bright parts (luminance above `threshold`, all of it at 0), coloured toward `color` by `tint`
- * (at 0 they keep their own colours, a bloom), blurred in two Gaussian passes (`radius` the standard deviation, in pixels) and added to
- * the picture by `intensity`.
+ * (at 0 they keep their own colours), blurred in two Gaussian passes (`radius` the standard deviation, in pixels), and
+ * drawn by `intensity` as a halo under the element, so the element keeps its own colours. With a `threshold` the glow
+ * also adds its light over the bright parts: a bloom, for footage.
  * The glow reaches past the element's edge, so it shows on titles and shapes as well as on footage.
  */
 const GLOW = aroundGauss({
@@ -21,12 +22,14 @@ const GLOW = aroundGauss({
 }`,
   ],
   after: [
-    `vec4 effect(vec2 uv) {
+    // A halo under the element; with a threshold, a bloom over its bright parts too. The bloom's share ramps up over
+    // the first 0.05 of threshold, so a keyframed threshold does not jump at 0.
+    `${OVER}vec4 effect(vec2 uv) {
   vec4 o = texture(original, uv);
   vec4 g = texture(image, uv);
-  vec3 light = o.rgb * o.a + g.rgb * g.a * params.intensity;
-  float a = clamp(max(o.a, g.a * params.intensity), 0.0, 1.0);
-  return a > 0.0 ? vec4(min(light / a, 1.0), a) : vec4(0.0);
+  vec4 c = cc_over(o, vec4(g.rgb, min(g.a * params.intensity, 1.0)));
+  float bloom = clamp(params.threshold / 0.05, 0.0, 1.0);
+  return vec4(min(c.rgb + bloom * o.a * g.rgb * g.a * params.intensity, 1.0), c.a);
 }`,
   ],
 });
@@ -46,9 +49,11 @@ const glow = {
 };
 
 /**
- * Outline: a band of `width` pixels around the element's silhouette, by morphological dilation of its alpha (the
- * largest alpha within the width, sampled on 12 rings of 24 directions, so corners round), drawn under the element in
- * `color`. `outlineOnly` draws the dilated silhouette alone, filled.
+ * Outline: a band of `width` pixels around the element's silhouette (its pixels of alpha 0.5 or more), drawn under the
+ * element in `color`; `outlineOnly` draws the grown silhouette alone, filled. The distance to the silhouette is the
+ * exact Euclidean one, separable into a pass down each column and one along each row (Felzenszwalb and Huttenlocher,
+ * "Distance Transforms of Sampled Functions", 2012), so the band's corners round as a circle's, and it costs a few
+ * reads per pixel of width rather than a fixed ring of them. Its outer edge fades over one pixel.
  */
 const outline = shaderDefinition("effect", {
   name: "outline",
@@ -58,19 +63,41 @@ const outline = shaderDefinition("effect", {
     opacity: z.number().min(0).max(1).default(1),
     outlineOnly: z.boolean().default(false),
   }),
-  shader: `${OVER}vec4 effect(vec2 uv) {
-  vec4 o = texture(image, uv);
-  float grown = o.a;
-  for (int ring = 1; ring <= 12; ring++) {
-    float r = params.width * float(ring) / 12.0;
-    for (int k = 0; k < 24; k++) {
-      float a = 6.2831853 * float(k) / 24.0;
-      grown = max(grown, texture(image, uv + vec2(cos(a), sin(a)) * r / resolution).a);
-    }
+  passes: [
+    // Down each column: how many rows away the nearest silhouette pixel is, within the width, as red × 255 (255: none).
+    `vec4 effect(vec2 uv) {
+  ivec2 size = textureSize(image, 0);
+  ivec2 p = ivec2(uv * vec2(size));
+  if (texelFetch(image, p, 0).a >= 0.5) return vec4(0.0, 0.0, 0.0, 1.0);
+  int w = min(int(ceil(params.width)), 64);
+  for (int k = 1; k <= w; k++) {
+    ivec2 up = p - ivec2(0, k), down = p + ivec2(0, k);
+    if ((up.y >= 0 && texelFetch(image, up, 0).a >= 0.5) || (down.y < size.y && texelFetch(image, down, 0).a >= 0.5))
+      return vec4(float(k) / 255.0, 0.0, 0.0, 1.0);
   }
+  return vec4(1.0, 0.0, 0.0, 1.0);
+}`,
+    // Along each row: the nearest of those, by Pythagoras; the band where it is within the width.
+    `${OVER}vec4 effect(vec2 uv) {
+  vec4 o = texture(original, uv);
+  ivec2 size = textureSize(image, 0);
+  ivec2 p = ivec2(uv * vec2(size));
+  int w = min(int(ceil(params.width)), 64);
+  float best = 1e9;
+  for (int k = -w; k <= w; k++) {
+    int x = p.x + k;
+    if (x < 0 || x >= size.x) continue;
+    float dy = texelFetch(image, ivec2(x, p.y), 0).r * 255.0;
+    if (dy > 254.5) continue;
+    best = min(best, float(k * k) + dy * dy);
+  }
+  // Distances run to silhouette pixels' centres; the shape's edge lies half a pixel past them, and the band's own edge
+  // fades over the pixel after it.
+  float grown = max(o.a, clamp(params.width - sqrt(best) + 1.0, 0.0, 1.0));
   vec4 band = vec4(params.color, grown * params.opacity);
   return params.outlineOnly ? band : cc_over(o, band);
 }`,
+  ],
 });
 
 /**

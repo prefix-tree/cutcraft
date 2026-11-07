@@ -94,6 +94,12 @@ const EFFECT_CASES: readonly { readonly key: string; readonly label: string; rea
           <Effect id="e1" type="blur" params={{ radius: 8 }} />`,
   },
   {
+    key: "zoom",
+    label: "zoom, 5 s 1080p30 (a zoom blur of the footage)",
+    effects: `
+          <Effect id="e1" type="zoomBlur" params={{ length: 60 }} />`,
+  },
+  {
     key: "silhouette",
     label: "silhouette, 5 s 1080p30 (outline and glow on the footage)",
     effects: `

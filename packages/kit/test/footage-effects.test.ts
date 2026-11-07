@@ -51,4 +51,9 @@ describe("the footage effects", () => {
     ]);
     expect(steps({ radius: 2, box: [0.1, 0.1, 0.2, 0.2], inverted: true }).every((s) => !s.region)).toBe(true);
   });
+
+  it("zoomBlur takes one sample per pixel of streak, at least 2 and at most samples", () => {
+    const source = builtInShader("zoomBlur")?.passes[0];
+    expect(source).toContain("min(int(params.samples), max(2, int(ceil(streak))))");
+  });
 });

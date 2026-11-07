@@ -461,6 +461,19 @@ describe("title effects", () => {
     expect(near(far, [0, 0, 0])).toBe(true);
   });
 
+  it("glow is a halo: the box keeps its own colour inside", async () => {
+    const [inside, around] = await boxed(
+      "glow-halo",
+      `<Effect id="g" type="glow" params={{ radius: 7, color: "#00ffff", intensity: 2 }} />`,
+      [
+        [160, 90],
+        [205, 90],
+      ],
+    );
+    expect(near(inside, [255, 0, 0])).toBe(true);
+    expect(around?.[1] ?? 0).toBeGreaterThan(35);
+  });
+
   it("outline draws a band around the box, and outlineOnly fills its silhouette", async () => {
     const [band, beyond, inside] = await boxed("outline", `<Effect id="o" type="outline" params={{ width: 8 }} />`, [
       [204, 90],
@@ -517,6 +530,23 @@ describe("title effects", () => {
       [[155, 90]],
     );
     expect(edge?.[0] ?? 0).toBeGreaterThan(35);
+  });
+
+  it("glow with a threshold blooms over the bright parts of footage; without one it leaves them", async () => {
+    const PAINT = `const paint = effect({ name: "paint", shader: "vec4 effect(vec2 uv) { return uv.x < 0.5 ? vec4(0.0, 0.0, 0.0, 1.0) : vec4(vec3(0.6), 1.0); }" });`;
+    const grey = (threshold: number) =>
+      colourAt(
+        `glow-bloom-${threshold}`,
+        `<Track id="t"><Clip id="c" src="asset:solid" fit="cover"><Effect id="p" type={paint} /><Effect id="g" type="glow" params={{ radius: 7, threshold: ${threshold} }} /></Clip></Track>`,
+        PAINT,
+        0.5,
+        [[240, 90]],
+      );
+    const [bloomed] = await grey(0.5);
+    const [kept] = await grey(0);
+    // 0.6 grey is 153; the bloom adds its own light on top, the halo none.
+    expect(bloomed?.[0] ?? 0).toBeGreaterThan(200);
+    expect(Math.abs((kept?.[0] ?? 0) - 153)).toBeLessThan(6);
   });
 });
 
