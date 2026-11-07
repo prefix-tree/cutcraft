@@ -4,7 +4,7 @@ import { gaussScale, gaussSources, gaussSteps } from "@cutcraft/kit";
 
 describe("the shared Gaussian", () => {
   it("draws a blur of 4 px or more at half size, and of 8 px or more at a quarter", () => {
-    expect([0, 3.9, 4, 7.9, 8, 200].map(gaussScale)).toEqual([1, 1, 0.5, 0.5, 0.25, 0.25]);
+    expect([0, 3.9, 4, 7.9, 8, 200].map((s) => gaussScale(s))).toEqual([1, 1, 0.5, 0.5, 0.25, 0.25]);
     expect(gaussSteps(2, "rgba").map((s) => s.scale)).toEqual([1, 1]);
     expect(gaussSteps(5, "rgba").map((s) => s.scale)).toEqual([0.5, 0.5, 0.5]);
     expect(gaussSteps(20, "rgba").map((s) => s.scale)).toEqual([0.5, 0.25, 0.25, 0.25]);
