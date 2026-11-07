@@ -20,8 +20,8 @@ const isModule = (part: unknown): part is GlslModule =>
   typeof part === "object" && part !== null && "code" in part && "dependencies" in part;
 
 /**
- * A GLSL source: the modules interpolated into it (and theirs) placed once each, in order, at the top; anything else
- * interpolated is written where it stands.
+ * A GLSL source: the modules interpolated into it, alone or in a list, (and theirs) placed once each, in order, at the
+ * top; anything else interpolated is written where it stands.
  */
 export function glsl(strings: TemplateStringsArray, ...parts: readonly unknown[]): string {
   const placed = new Set<GlslModule>();
@@ -35,6 +35,7 @@ export function glsl(strings: TemplateStringsArray, ...parts: readonly unknown[]
   let body = strings[0] ?? "";
   parts.forEach((part, i) => {
     if (isModule(part)) place(part);
+    else if (Array.isArray(part) && part.every(isModule)) for (const m of part) place(m);
     else body += String(part);
     body += strings[i + 1] ?? "";
   });

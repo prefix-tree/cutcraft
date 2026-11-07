@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { shaderDefinition } from "../jsx/shader-definition";
 import { FARTHEST, glsl, HEX, NOISE, UV } from "./glsl";
+import { maskTransition } from "./shapes";
 
 /**
  * Iris: the next clip opens from `center` in a circle (`sides` 0), a regular polygon, or a star (`star` sets the inner
@@ -10,7 +11,7 @@ import { FARTHEST, glsl, HEX, NOISE, UV } from "./glsl";
  * outer vertex and the next inner one at its angle (the line through two points in polar form); the shape grows until
  * its narrowest point covers the farthest corner. `feather` softens the edge, in pixels.
  */
-const iris = shaderDefinition("transition", {
+const iris = maskTransition({
   name: "iris",
   params: z.object({
     sides: z.number().int().min(0).max(64).default(0),
@@ -19,8 +20,8 @@ const iris = shaderDefinition("transition", {
     center: UV.default([0.5, 0.5]),
     feather: z.number().min(0).max(200).default(2),
   }),
-  shader: glsl`${FARTHEST}vec4 transition(vec2 uv) {
-  vec2 p = (uv - params.center) * resolution;
+  uses: [FARTHEST],
+  mask: `  vec2 p = (uv - params.center) * resolution;
   float n = params.sides >= 3.0 ? params.sides : 0.0;
   float half_sector = n > 0.0 ? 3.14159265 / n : 0.0;
   float inner = n > 0.0 ? (params.star > 0.0 ? params.star : cos(half_sector)) : 1.0;
@@ -36,15 +37,14 @@ const iris = shaderDefinition("transition", {
     edge = abs(den) > 1e-6 ? (a.x * b.y - b.x * a.y) / den : big;
   }
   float m = clamp(0.5 - (length(p) - edge) / max(params.feather, 0.5), 0.0, 1.0);
-  return mix(texture(from, uv), texture(to, uv), m);
-}`,
+  return m;`,
 });
 
 /**
  * Clock wipe: the next clip sweeps in around `center`, from `startAngle` (degrees clockwise from up), `clockwise`,
  * `counterclockwise` or `both` ways at once. `softness` softens the moving edge, as a share of the turn.
  */
-const clockWipe = shaderDefinition("transition", {
+const clockWipe = maskTransition({
   name: "clockWipe",
   params: z.object({
     startAngle: z.number().default(0),
@@ -56,8 +56,7 @@ const clockWipe = shaderDefinition("transition", {
       .max(1)
       .default(1 / 360),
   }),
-  shader: `vec4 transition(vec2 uv) {
-  float tau = 6.28318531;
+  mask: `  float tau = 6.28318531;
   vec2 p = (uv - params.center) * resolution;
   float rel = mod(atan(p.x, -p.y) - radians(params.startAngle), tau);
   float along = params.direction == params.direction.clockwise
@@ -65,8 +64,7 @@ const clockWipe = shaderDefinition("transition", {
     : params.direction == params.direction.counterclockwise ? tau - rel : 2.0 * min(rel, tau - rel);
   float soft = max(params.softness * tau, 1e-4);
   float m = clamp((progress * (tau + soft) - along) / soft, 0.0, 1.0);
-  return mix(texture(from, uv), texture(to, uv), m);
-}`,
+  return m;`,
 });
 
 /**
@@ -75,23 +73,21 @@ const clockWipe = shaderDefinition("transition", {
  * (degrees clockwise from up, so 90 opens them sideways: vertical slats). `softness` softens each opening edge, as a
  * share of the slat.
  */
-const blinds = shaderDefinition("transition", {
+const blinds = maskTransition({
   name: "blinds",
   params: z.object({
     slats: z.number().int().min(1).max(100).default(12),
     angle: z.number().default(90),
     softness: z.number().min(0).max(1).default(0.1),
   }),
-  shader: `vec4 transition(vec2 uv) {
-  float a = radians(params.angle);
+  mask: `  float a = radians(params.angle);
   vec2 dir = vec2(sin(a), -cos(a));
   float across = abs(dir.x) + abs(dir.y);
   float t = dot(uv - 0.5, dir) / across + 0.5;
   float f = fract(t * params.slats);
   float soft = max(params.softness, 1e-4);
   float m = clamp((progress * (1.0 + soft) - f) / soft, 0.0, 1.0);
-  return mix(texture(from, uv), texture(to, uv), m);
-}`,
+  return m;`,
 });
 
 /**
@@ -128,7 +124,7 @@ const filmBurn = shaderDefinition("transition", {
  * Pixel dissolve: the frame cut into `columns` by `rows` blocks, each switching at its own hashed time from `seed`.
  * `softness` is how long each block takes to switch, as a share of the transition.
  */
-const pixelDissolve = shaderDefinition("transition", {
+const pixelDissolve = maskTransition({
   name: "pixelDissolve",
   params: z.object({
     columns: z.number().int().min(1).max(200).default(16),
@@ -136,12 +132,11 @@ const pixelDissolve = shaderDefinition("transition", {
     seed: z.number().int().min(0).max(4294967295).default(0),
     softness: z.number().min(0).max(1).default(0.15),
   }),
-  shader: glsl`${NOISE}vec4 transition(vec2 uv) {
-  uvec2 block = uvec2(min(floor(uv * vec2(params.columns, params.rows)), vec2(params.columns, params.rows) - 1.0));
+  uses: [NOISE],
+  mask: `  uvec2 block = uvec2(min(floor(uv * vec2(params.columns, params.rows)), vec2(params.columns, params.rows) - 1.0));
   float at = cc_hash(uvec3(block, uint(params.seed))) * (1.0 - params.softness);
   float m = params.softness > 0.0 ? smoothstep(at, at + params.softness, progress) : step(at, progress);
-  return mix(texture(from, uv), texture(to, uv), m);
-}`,
+  return m;`,
 });
 
 /**

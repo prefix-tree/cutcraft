@@ -10,6 +10,7 @@ import { FALLBACKS } from "./css";
 import { chromaticAberration, colorKey, cornerPin, regionBlur, zoomBlur } from "./footage";
 import { grain, vignette } from "./post";
 import { blinds, clockWipe, filmBurn, iris, pixelDissolve, zoom } from "./shader-transitions";
+import type { Neutral } from "./shapes";
 import { bevel, glow, longShadow, outline } from "./titles";
 
 type Params = Readonly<Record<string, unknown>>;
@@ -27,6 +28,8 @@ export interface EffectEntry<P extends z.ZodObject = z.ZodObject> {
   readonly name: string;
   readonly params: P;
   readonly draw: EffectDraw;
+  /** The params at which the effect changes nothing: the player draws nothing for it there. */
+  readonly neutral?: Neutral;
 }
 
 export interface TransitionEntry<P extends z.ZodObject = z.ZodObject> {
@@ -36,30 +39,44 @@ export interface TransitionEntry<P extends z.ZodObject = z.ZodObject> {
   readonly draw: { readonly kind: "look" } | { readonly kind: "shader"; readonly shader: ShaderDefinition };
 }
 
-const cssEntry = <P extends z.ZodObject>(name: string, e: cssEffects.CssEffect<P>): EffectEntry<P> => ({
+const cssEntry = <P extends z.ZodObject>(
+  name: string,
+  e: cssEffects.CssEffect<P>,
+  neutral?: Neutral,
+): EffectEntry<P> => ({
   name,
   params: e.params,
   draw: { kind: "css", css: e.css },
+  ...(neutral ? { neutral } : {}),
 });
 
 /** A shader effect with strict params (an unknown param is an error, not dropped), and its CSS fallback if it has one. */
-function shaderEntry<P extends z.ZodObject>(def: ShaderDefinition<P>, css?: (p: Params) => string): EffectEntry<P> {
+function shaderEntry<P extends z.ZodObject>(
+  def: ShaderDefinition<P>,
+  css?: (p: Params) => string,
+  neutral: Neutral | undefined = def.neutral,
+): EffectEntry<P> {
   const strict = { ...def, params: def.params.strict() as z.ZodObject as P };
-  return { name: def.name, params: strict.params, draw: { kind: "shader", shader: strict, ...(css ? { css } : {}) } };
+  return {
+    name: def.name,
+    params: strict.params,
+    draw: { kind: "shader", shader: strict, ...(css ? { css } : {}) },
+    ...(neutral ? { neutral } : {}),
+  };
 }
 
 export const EFFECTS = {
-  brightness: cssEntry("brightness", cssEffects.brightness),
-  contrast: cssEntry("contrast", cssEffects.contrast),
-  saturation: cssEntry("saturation", cssEffects.saturation),
-  hue: cssEntry("hue", cssEffects.hue),
-  blur: cssEntry("blur", cssEffects.blur),
+  brightness: cssEntry("brightness", cssEffects.brightness, { amount: 0 }),
+  contrast: cssEntry("contrast", cssEffects.contrast, { amount: 0 }),
+  saturation: cssEntry("saturation", cssEffects.saturation, { amount: 0 }),
+  hue: cssEntry("hue", cssEffects.hue, { angle: 0 }),
+  blur: cssEntry("blur", cssEffects.blur, { radius: 0 }),
   vignette: { name: "vignette", params: vignette.params, draw: { kind: "post" } },
   grain: { name: "grain", params: grain.params, draw: { kind: "post" } },
   shadow: cssEntry("shadow", cssEffects.shadow),
-  grayscale: cssEntry("grayscale", cssEffects.grayscale),
-  sepia: cssEntry("sepia", cssEffects.sepia),
-  invert: cssEntry("invert", cssEffects.invert),
+  grayscale: cssEntry("grayscale", cssEffects.grayscale, { amount: 0 }),
+  sepia: cssEntry("sepia", cssEffects.sepia, { amount: 0 }),
+  invert: cssEntry("invert", cssEffects.invert, { amount: 0 }),
   levels: shaderEntry(levels, FALLBACKS.levels),
   lut: shaderEntry(lut),
   exposure: shaderEntry(exposure, FALLBACKS.exposure),
@@ -69,14 +86,14 @@ export const EFFECTS = {
   duotone: shaderEntry(duotone),
   curves: shaderEntry(curves),
   colorKey: shaderEntry(colorKey),
-  regionBlur: shaderEntry(regionBlur),
+  regionBlur: shaderEntry(regionBlur, undefined, { radius: 0 }),
   cornerPin: shaderEntry(cornerPin),
-  zoomBlur: shaderEntry(zoomBlur),
-  chromaticAberration: shaderEntry(chromaticAberration),
-  glow: shaderEntry(glow, FALLBACKS.glow),
+  zoomBlur: shaderEntry(zoomBlur, undefined, { length: 0 }),
+  chromaticAberration: shaderEntry(chromaticAberration, undefined, { distance: 0 }),
+  glow: shaderEntry(glow, FALLBACKS.glow, { intensity: 0 }),
   outline: shaderEntry(outline),
-  longShadow: shaderEntry(longShadow),
-  bevel: shaderEntry(bevel),
+  longShadow: shaderEntry(longShadow, undefined, { opacity: 0 }),
+  bevel: shaderEntry(bevel, undefined, { amount: 0 }),
 } as const satisfies Record<string, EffectEntry>;
 
 const dir4 = z.enum(["left", "right", "up", "down"]);
@@ -179,6 +196,21 @@ export function builtInTransition(type: unknown): ShaderDefinition | undefined {
   const entry =
     typeof type === "string" && Object.hasOwn(TRANSITIONS, type) ? TRANSITIONS[type as TransitionType] : undefined;
   return entry?.draw.kind === "shader" ? entry.draw.shader : undefined;
+}
+
+/** Whether two param values are the same: numbers and strings by value, lists item by item. */
+function same(a: unknown, b: unknown): boolean {
+  if (Array.isArray(a) && Array.isArray(b)) return a.length === b.length && a.every((x, i) => same(x, b[i]));
+  return Object.is(a, b);
+}
+
+/**
+ * Whether a built-in effect changes nothing with these params: every param its `neutral` names is at that value. A type
+ * that declares none, or is not built in, is never neutral.
+ */
+export function isNeutral(type: unknown, params: Params): boolean {
+  const neutral = effectEntry(type)?.neutral;
+  return !!neutral && Object.entries(neutral).every(([k, v]) => same(params[k], v));
 }
 
 /** The CSS filter a built-in effect draws as: its own, or its shader's fallback; undefined for one that has none. */

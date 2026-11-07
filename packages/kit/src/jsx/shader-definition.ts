@@ -28,6 +28,8 @@ export interface ShaderDefinition<P extends ZodObject = ZodObject> {
    * and the part of the frame it needs. Without it, every pass draws the whole frame at full size.
    */
   readonly steps?: (params: Readonly<Record<string, unknown>>) => readonly ShaderStep[];
+  /** Built-in effects only: the params at which the effect changes nothing, so the player skips it there. */
+  readonly neutral?: Readonly<Record<string, unknown>>;
 }
 
 /**

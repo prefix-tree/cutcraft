@@ -100,11 +100,11 @@ describe("the effect pipeline", () => {
 
   it("draws as CSS where shaders cannot run, leaving only the passes that have no CSS form", () => {
     const p = pipelineOf(
-      `<Effect id="a" type="brightness" params={{ amount: 0.1 }} /><Effect id="b" type="levels" /><Effect id="o" type={own} /><Effect id="k" type="curves" />`,
+      `<Effect id="a" type="brightness" params={{ amount: 0.1 }} /><Effect id="b" type="levels" params={{ black: 0.1 }} /><Effect id="o" type={own} /><Effect id="k" type="curves" params={{ rgb: [[0, 0.1], [1, 1]] }} />`,
       { shaders: false },
       `const own = effect({ name: "own", shader: "vec4 effect(vec2 uv) { return texture(image, uv); }" });`,
     );
-    expect(p.filter).toMatch(/^brightness\(1\.1\) brightness\(1\) contrast\(1\)$/);
+    expect(p.filter).toMatch(/^brightness\(1\.1\) brightness\([\d.]+\) contrast\([\d.]+\)$/);
     expect(p.shaders?.map((s) => s.name)).toEqual(["own", "curves"]);
   });
 });

@@ -5,25 +5,24 @@ import { type CurvePoint, monotoneCurve } from "../jsx/curves";
 import { type ShaderDefinition, shaderDefinition } from "../jsx/shader-definition";
 import { aroundGauss } from "./gauss";
 import { COLOUR, glsl, HEX } from "./glsl";
+import { colorTransform } from "./shapes";
 
 /**
  * Levels: the input range [black, white] stretched to [0, 1], then a gamma curve on the midtones, per channel:
  * out = ((in − black) / (white − black)) ^ (1 / gamma). Gamma above 1 lifts the midtones, below 1 deepens them; black
  * and white stay where they are. The standard input-levels adjustment of image editors.
  */
-const levels = shaderDefinition("effect", {
+const levels = colorTransform({
   name: "levels",
   params: z.object({
     black: z.number().min(0).max(1).default(0),
     white: z.number().min(0).max(1).default(1),
     gamma: z.number().min(0.01).max(10).default(1),
   }),
-  shader: `vec4 effect(vec2 uv) {
-  vec4 c = texture(image, uv);
-  float range = max(params.white - params.black, 1e-5);
-  vec3 v = clamp((c.rgb - params.black) / range, 0.0, 1.0);
-  return vec4(pow(v, vec3(1.0 / max(params.gamma, 0.01))), c.a);
-}`,
+  rgb: `  float range = max(params.white - params.black, 1e-5);
+  vec3 v = clamp((c - params.black) / range, 0.0, 1.0);
+  return pow(v, vec3(1.0 / max(params.gamma, 0.01)));`,
+  neutral: { black: 0, white: 1, gamma: 1 },
 });
 
 /**
@@ -31,28 +30,25 @@ const levels = shaderDefinition("effect", {
  * between its entries by trilinear filtering, and mixed with the original by `amount`. The coordinates are moved half an
  * entry in, so 0 and 1 land on the first and last entries' centres rather than their edges.
  */
-const lut = shaderDefinition("effect", {
+const lut = colorTransform({
   name: "lut",
   params: z.object({
     src: z.string().regex(/^asset:/, 'the LUT, as "asset:ID": a .cube file in the manifest'),
     amount: z.number().min(0).max(1).default(1),
   }),
-  shader: `vec4 effect(vec2 uv) {
-  vec4 c = texture(image, uv);
-  float n = float(textureSize(params.src, 0).x);
-  vec3 graded = texture(params.src, (clamp(c.rgb, 0.0, 1.0) * (n - 1.0) + 0.5) / n).rgb;
-  return vec4(mix(c.rgb, graded, params.amount), c.a);
-}`,
+  rgb: `  float n = float(textureSize(params.src, 0).x);
+  vec3 graded = texture(params.src, (clamp(c, 0.0, 1.0) * (n - 1.0) + 0.5) / n).rgb;
+  return mix(c, graded, params.amount);`,
+  neutral: { amount: 0 },
 });
 
 /** Exposure in stops, as a camera's: light scaled by 2^stops where it is linear, so +1 doubles it. */
-const exposure = shaderDefinition("effect", {
+const exposure = colorTransform({
   name: "exposure",
   params: z.object({ stops: z.number().min(-5).max(5).default(0) }),
-  shader: glsl`${COLOUR}vec4 effect(vec2 uv) {
-  vec4 c = texture(image, uv);
-  return vec4(clamp(cc_srgb(cc_linear(c.rgb) * exp2(params.stops)), 0.0, 1.0), c.a);
-}`,
+  uses: [COLOUR],
+  rgb: "  return clamp(cc_srgb(cc_linear(c) * exp2(params.stops)), 0.0, 1.0);",
+  neutral: { stops: 0 },
 });
 
 /**
@@ -60,15 +56,14 @@ const exposure = shaderDefinition("effect", {
  * its spread (max − min of its channels); raising vibrance pushes it from its luminance by amount × (1 − spread).
  * Lowering it desaturates evenly.
  */
-const vibrance = shaderDefinition("effect", {
+const vibrance = colorTransform({
   name: "vibrance",
   params: z.object({ amount: z.number().min(-1).max(1).default(0) }),
-  shader: glsl`${COLOUR}vec4 effect(vec2 uv) {
-  vec4 c = texture(image, uv);
-  float spread = max(c.r, max(c.g, c.b)) - min(c.r, min(c.g, c.b));
+  uses: [COLOUR],
+  rgb: `  float spread = max(c.r, max(c.g, c.b)) - min(c.r, min(c.g, c.b));
   float k = params.amount > 0.0 ? params.amount * (1.0 - spread) : params.amount;
-  return vec4(clamp(mix(vec3(cc_luma(c.rgb)), c.rgb, 1.0 + k), 0.0, 1.0), c.a);
-}`,
+  return clamp(mix(vec3(cc_luma(c)), c, 1.0 + k), 0.0, 1.0);`,
+  neutral: { amount: 0 },
 });
 
 /**
@@ -77,31 +72,30 @@ const vibrance = shaderDefinition("effect", {
  * the CIE daylight locus at T = 6500 K · 2^temperature (each -1..1), moved off it along y by the tint. A positive
  * temperature warms the picture, a positive tint makes it more magenta.
  */
-const whiteBalance = shaderDefinition("effect", {
+const whiteBalance = colorTransform({
   name: "whiteBalance",
   params: z.object({
     temperature: z.number().min(-1).max(1).default(0),
     tint: z.number().min(-1).max(1).default(0),
   }),
-  shader: glsl`${COLOUR}
-// Rows of linear sRGB (D65) to XYZ, and of the Bradford matrix, written as rows: v * M is then M times v.
+  uses: [COLOUR],
+  prelude: `// Rows of linear sRGB (D65) to XYZ, and of the Bradford matrix, written as rows: v * M is then M times v.
 const mat3 RGB_XYZ = mat3(0.4124564, 0.3575761, 0.1804375, 0.2126729, 0.7151522, 0.0721750, 0.0193339, 0.1191920, 0.9503041);
 const mat3 XYZ_RGB = mat3(3.2404542, -1.5371385, -0.4985314, -0.9692660, 1.8760108, 0.0415560, 0.0556434, -0.2040259, 1.0572252);
 const mat3 BRADFORD = mat3(0.8951, 0.2664, -0.1614, -0.7502, 1.7135, 0.0367, 0.0389, -0.0685, 1.0296);
 const mat3 BRADFORD_INV = mat3(0.9869929, -0.1470543, 0.1599627, 0.4323053, 0.5183603, 0.0492912, -0.0085287, 0.0400428, 0.9684867);
 vec3 cc_xyz(vec2 xy) { return vec3(xy.x / xy.y, 1.0, (1.0 - xy.x - xy.y) / xy.y); }
-vec4 effect(vec2 uv) {
-  vec4 c = texture(image, uv);
-  float t = 6500.0 * exp2(params.temperature);
+`,
+  rgb: `  float t = 6500.0 * exp2(params.temperature);
   float x = t <= 7000.0
     ? -4.6070e9 / (t * t * t) + 2.9678e6 / (t * t) + 0.09911e3 / t + 0.244063
     : -2.0064e9 / (t * t * t) + 1.9018e6 / (t * t) + 0.24748e3 / t + 0.237040;
   float y = -3.0 * x * x + 2.87 * x - 0.275 + params.tint * 0.05;
   vec3 gain = (cc_xyz(vec2(0.3127, 0.3290)) * BRADFORD) / (cc_xyz(vec2(x, y)) * BRADFORD);
-  vec3 lms = (cc_linear(c.rgb) * RGB_XYZ) * BRADFORD;
+  vec3 lms = (cc_linear(c) * RGB_XYZ) * BRADFORD;
   vec3 rgb = ((lms * gain) * BRADFORD_INV) * XYZ_RGB;
-  return vec4(clamp(cc_srgb(rgb), 0.0, 1.0), c.a);
-}`,
+  return clamp(cc_srgb(rgb), 0.0, 1.0);`,
+  neutral: { temperature: 0, tint: 0 },
 });
 
 /**
@@ -135,21 +129,21 @@ const shadowsHighlights = {
     passes: SHADOWS_HIGHLIGHTS.passes,
   }),
   steps: SHADOWS_HIGHLIGHTS.steps,
+  neutral: { shadows: 0, highlights: 0 },
 };
 
 /** Duotone: the picture's luminance mapped from one colour (its blacks) to another (its whites), mixed by amount. */
-const duotone = shaderDefinition("effect", {
+const duotone = colorTransform({
   name: "duotone",
   params: z.object({
     dark: HEX.default("#1d2b53"),
     light: HEX.default("#ffd27f"),
     amount: z.number().min(0).max(1).default(1),
   }),
-  shader: glsl`${COLOUR}vec4 effect(vec2 uv) {
-  vec4 c = texture(image, uv);
-  vec3 toned = mix(params.dark, params.light, cc_luma(c.rgb));
-  return vec4(mix(c.rgb, toned, params.amount), c.a);
-}`,
+  uses: [COLOUR],
+  rgb: `  vec3 toned = mix(params.dark, params.light, cc_luma(c));
+  return mix(c, toned, params.amount);`,
+  neutral: { amount: 0 },
 });
 
 const curvePoints = z
@@ -168,15 +162,18 @@ const curvePoints = z
  * order, each a monotone cubic through its points (./curves.ts). The four are baked into one 256 × 1 table, read
  * at the centre of each entry.
  */
+const IDENTITY_CURVE = [
+  [0, 0],
+  [1, 1],
+];
+
 const curves = {
-  ...shaderDefinition("effect", {
+  ...colorTransform({
     name: "curves",
     params: z.object({ rgb: curvePoints, red: curvePoints, green: curvePoints, blue: curvePoints }),
-    shader: `vec4 effect(vec2 uv) {
-  vec4 c = texture(image, uv);
-  vec3 at = (clamp(c.rgb, 0.0, 1.0) * 255.0 + 0.5) / 256.0;
-  return vec4(texture(curve, vec2(at.r, 0.5)).r, texture(curve, vec2(at.g, 0.5)).g, texture(curve, vec2(at.b, 0.5)).b, c.a);
-}`,
+    rgb: `  vec3 at = (clamp(c, 0.0, 1.0) * 255.0 + 0.5) / 256.0;
+  return vec3(texture(curve, vec2(at.r, 0.5)).r, texture(curve, vec2(at.g, 0.5)).g, texture(curve, vec2(at.b, 0.5)).b);`,
+    neutral: { rgb: IDENTITY_CURVE, red: IDENTITY_CURVE, green: IDENTITY_CURVE, blue: IDENTITY_CURVE },
   }),
   tables: (params: Readonly<Record<string, unknown>>) => {
     const line = (key: string) =>

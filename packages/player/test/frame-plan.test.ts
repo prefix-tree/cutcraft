@@ -281,7 +281,8 @@ describe("buildFramePlan", () => {
         },
       ],
     });
-    expect(buildFramePlan(s, 0).ops[0]!.filter).toBe("grayscale(0) sepia(0)");
+    // At 0 both amounts are neutral: nothing is drawn for them.
+    expect(buildFramePlan(s, 0).ops[0]!.filter).toBe("");
     expect(buildFramePlan(s, 1).ops[0]).toMatchObject({
       filter: "grayscale(0.4) sepia(0.1)",
       post: [{ type: "vignette", amount: 0.8 }],

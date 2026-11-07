@@ -1,4 +1,4 @@
-import { cssOf, effectEntry, type Placement } from "@cutcraft/kit";
+import { cssOf, effectEntry, isNeutral, type Placement } from "@cutcraft/kit";
 
 import { devWarn } from "../warn";
 import { keyframedParam } from "./keyframes";
@@ -28,7 +28,8 @@ export function paramsAt(items: Items, effect: Placement, rel: number): Params {
 
 /**
  * One child's CSS filter (an `<Effect>` drawn as CSS) at element-relative `rel`, or "" for a
- * child drawn otherwise: a post effect, a type in `skip` (drawn by its shader), a shader-only type, or a disabled one.
+ * child drawn otherwise: a post effect, a type in `skip` (drawn by its shader), a shader-only type, a disabled one, or a
+ * built-in whose params change nothing at this moment.
  * An unknown type is reported once and draws nothing.
  */
 export function childFilter(
@@ -41,8 +42,12 @@ export function childFilter(
   if (c.kind !== "effect" || c.props.enabled === false) return "";
   const type = String(c.props.type);
   if (skip.has(type)) return "";
-  // A built-in: its CSS, or nothing for a post effect or one only a shader draws (the painter says so without WebGL).
-  if (effectEntry(type)) return cssOf(type)?.(paramsAt(items, c, rel)) ?? "";
+  // A built-in: its CSS, or nothing for a post effect or one only a shader draws (the painter says so without WebGL),
+  // or for one whose params change nothing at this moment.
+  if (effectEntry(type)) {
+    const params = paramsAt(items, c, rel);
+    return isNeutral(type, params) ? "" : (cssOf(type)?.(params) ?? "");
+  }
   devWarn(`effect:${elementId}:${type}`, `effect "${type}" on "${elementId}" is not rendered by the browser player`);
   return "";
 }
