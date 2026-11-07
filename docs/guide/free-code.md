@@ -155,8 +155,10 @@ Inside a plain `<Layer>`, use the same libraries through adapters that follow th
 
 ## Effects and transitions of your own
 
-Most built-in effects are CSS filters. The colour tools in [Colour and grading](./colour) run as shaders, through the
-same pipeline as yours, and so do the built-in shader transitions ([Transitions](./time#transitions-sit-between-clips)).
+Most built-in effects run as shaders, through the same pipeline as yours: the colour tools in
+[Colour and grading](./colour), the footage tools, and the title looks, and so do the built-in shader transitions
+([Transitions](./time#transitions-sit-between-clips)). The simple adjustments (brightness, blur and the like) are CSS
+filters, and vignette and grain are painted.
 Anything else is a few lines of GLSL: declare it at the top of the file with `effect()` or `transition()`, and pass
 what it returns as an `<Effect>` or `<Transition>` type. TypeScript then checks the params you write against the
 schema you declared, as it does for the built-in types.
@@ -186,22 +188,37 @@ as `progress`, from 0 to 1. Both also get `resolution` (the frame in pixels) and
 An effect that needs more than one pass (a blur in two directions, a glow drawn from a blurred copy) gives `passes`, a
 list of shaders, in place of `shader`. Each defines `vec4 effect(vec2 uv)` and runs in order: `image` is the pass
 before's result (the element's picture for the first), and `original` is the element's picture in every pass. Every
-pass gets the same params. A separable blur, as an example:
+pass gets the same params. A separable Gaussian blur, as an example, with `radius` its standard deviation in pixels
+as CSS `blur()` reads it (25 taps out to three deviations):
 
 ```tsx
 const soften = effect({
   name: "soften",
-  params: z.object({ radius: z.number().min(0).max(40).default(8) }),
+  params: z.object({ radius: z.number().min(0).max(40).default(4) }),
   passes: [
     `vec4 effect(vec2 uv) {
+      float s = max(params.radius, 0.001);
       vec4 sum = vec4(0.0);
-      for (int i = -8; i <= 8; i++) sum += texture(image, uv + vec2(float(i) * params.radius / 8.0 / resolution.x, 0.0));
-      return sum / 17.0;
+      float total = 0.0;
+      for (int i = -12; i <= 12; i++) {
+        float d = float(i) * s / 4.0;
+        float w = exp(-d * d / (2.0 * s * s));
+        sum += w * texture(image, uv + vec2(d / resolution.x, 0.0));
+        total += w;
+      }
+      return sum / total;
     }`,
     `vec4 effect(vec2 uv) {
+      float s = max(params.radius, 0.001);
       vec4 sum = vec4(0.0);
-      for (int i = -8; i <= 8; i++) sum += texture(image, uv + vec2(0.0, float(i) * params.radius / 8.0 / resolution.y));
-      return sum / 17.0;
+      float total = 0.0;
+      for (int i = -12; i <= 12; i++) {
+        float d = float(i) * s / 4.0;
+        float w = exp(-d * d / (2.0 * s * s));
+        sum += w * texture(image, uv + vec2(0.0, d / resolution.y));
+        total += w;
+      }
+      return sum / total;
     }`,
   ],
 });

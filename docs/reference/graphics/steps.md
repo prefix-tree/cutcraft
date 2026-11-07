@@ -29,8 +29,8 @@ A row of dots for steps in a sequence, the `active` one (1-based) filled and lar
 
 | prop | type | default |
 |---|---|---|
-| `count` | integer | `5` |
-| `active` | integer | `1` |
+| `count` | integer (2..20) | `5` |
+| `active` | integer (0..20) | `1` |
 | `color` | string | `"$primary"` |
 | `inactive` | string | `"$muted"` |
 | `line` | boolean | `true` |

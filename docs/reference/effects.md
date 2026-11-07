@@ -8,14 +8,21 @@ A param's name says what kind of value it is, and each kind has one scale:
 
 | Kind | Scale | Params |
 |---|---|---|
-| strength, mix or share | a fraction, 0 to 1, or -1 to 1 when it goes both ways | `amount`, `opacity`, `softness`, `tolerance`, `tint` |
+| strength, mix or share | a fraction, 0 to 1, or -1 to 1 when it goes both ways | `amount`, `opacity`, `softness`, `tolerance`, `tint`, `temperature`, `shadows`, `highlights`, `threshold`, `spill`, `black`, `white`, `blur`, `roundness`, `star` |
 | gain | a multiplier | `intensity`, `scale` |
+| exponent | a power, 1 changes nothing | `gamma` |
 | distance | pixels of the composition; a blur's `radius` (and `bevel`'s `size`) is its Gaussian's standard deviation, as CSS `blur()` reads it | `radius`, `width`, `feather`, `length`, `distance`, `size`, `edge`, `x`, `y` |
 | angle | degrees, clockwise from up | `angle`, `rotation`, `startAngle` |
 | position | fractions of the frame, `[x, y]` from the top left | `center`, `box`, the corners |
 | colour | `"#rgb"` or `"#rrggbb"` | `color`, `dark`, `light` |
 | exposure | stops | `stops` |
-| choice | a string | `direction` |
+| duration | seconds | `holdDuration` |
+| count | a whole number | `sides`, `slats`, `columns`, `rows`, `samples` |
+| seed | a whole number; the same seed draws the same pattern | `seed` |
+| switch | `true` or `false` | `fade`, `inverted`, `outlineOnly`, `pushOut`, `radial` |
+| curve | `[input, output]` points, 0 to 1 | `rgb`, `red`, `green`, `blue` |
+| asset | `"asset:<id>"` from the manifest | `src` |
+| choice | a string | `direction`, `curve` |
 
 ## Effects
 
@@ -101,7 +108,7 @@ Drawn as a CSS filter; no WebGL needed.
 
 #### `vignette`
 
-Drawn as painted over the element after it.
+Drawn as painting on the element's pixels; no WebGL needed.
 
 | param | type | default |
 |---|---|---|
@@ -109,7 +116,7 @@ Drawn as painted over the element after it.
 
 #### `grain`
 
-Drawn as painted over the element after it.
+Drawn as painting on the element's pixels; no WebGL needed.
 
 | param | type | default |
 |---|---|---|
@@ -236,7 +243,7 @@ Drawn as a shader.
 |---|---|---|
 | `length` | number (0..500) | `40` |
 | `center` | [number, number] | `[0.5,0.5]` |
-| `samples` | integer | `24` |
+| `samples` | integer (1..64) | `24` |
 
 #### `chromaticAberration`
 
@@ -359,7 +366,7 @@ Drawn by a shader, as a crossfade where WebGL is missing.
 
 | param | type | default |
 |---|---|---|
-| `sides` | integer | `0` |
+| `sides` | integer (0..64) | `0` |
 | `star` | number (0..0.95) | `0` |
 | `rotation` | number | `0` |
 | `center` | [number, number] | `[0.5,0.5]` |
@@ -374,7 +381,7 @@ Drawn by a shader, as a crossfade where WebGL is missing.
 | `startAngle` | number | `0` |
 | `direction` | "clockwise" \| "counterclockwise" \| "both" | `"clockwise"` |
 | `center` | [number, number] | `[0.5,0.5]` |
-| `softness` | number (0..1) | `0.002777777777777778` |
+| `softness` | number (0..1) | `0.002778` |
 
 #### `blinds`
 
@@ -382,7 +389,7 @@ Drawn by a shader, as a crossfade where WebGL is missing.
 
 | param | type | default |
 |---|---|---|
-| `slats` | integer | `12` |
+| `slats` | integer (1..100) | `12` |
 | `angle` | number | `90` |
 | `softness` | number (0..1) | `0.1` |
 
@@ -392,7 +399,7 @@ Drawn by a shader, as a crossfade where WebGL is missing.
 
 | param | type | default |
 |---|---|---|
-| `seed` | integer | `0` |
+| `seed` | integer (0..4294967295) | `0` |
 | `center` | [number, number] | `[0.5,0.5]` |
 | `size` | number (4..2000) | `120` |
 | `edge` | number (0..500) | `24` |
@@ -404,9 +411,9 @@ Drawn by a shader, as a crossfade where WebGL is missing.
 
 | param | type | default |
 |---|---|---|
-| `columns` | integer | `16` |
-| `rows` | integer | `9` |
-| `seed` | integer | `0` |
+| `columns` | integer (1..200) | `16` |
+| `rows` | integer (1..200) | `9` |
+| `seed` | integer (0..4294967295) | `0` |
 | `softness` | number (0..1) | `0.15` |
 
 #### `zoom`

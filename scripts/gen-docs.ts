@@ -67,9 +67,22 @@ function typeOf(s: JsonSchema, limit = Infinity): string {
   if (s.type === "array") return `${s.items ? typeOf(s.items) : "unknown"}[]`;
   if (s.type === "object") return s.properties ? `{ ${Object.keys(s.properties).join(", ")} }` : "object";
   if (Array.isArray(s.type)) return s.type.join(" \\| ");
-  if (s.type === "number" && (s.minimum !== undefined || s.maximum !== undefined))
-    return `number (${s.minimum ?? "−∞"}..${s.maximum ?? "∞"})`;
+  if (s.type === "number" || s.type === "integer") {
+    // `z.int()` bounds every integer by the safe range: that says nothing, so it reads as no bound.
+    const min = s.minimum === undefined || s.minimum <= Number.MIN_SAFE_INTEGER ? undefined : s.minimum;
+    const max = s.maximum === undefined || s.maximum >= Number.MAX_SAFE_INTEGER ? undefined : s.maximum;
+    if (min !== undefined || max !== undefined) return `${s.type} (${min ?? "−∞"}..${max ?? "∞"})`;
+  }
   return s.type ?? "any";
+}
+
+/** A default for a table: numbers kept to four significant digits, so 1/360 reads 0.002778. */
+function defaultOf(value: unknown): string {
+  if (value === undefined) return "";
+  const rounded = JSON.stringify(value, (_, v: unknown) =>
+    typeof v === "number" && !Number.isInteger(v) ? Number(v.toPrecision(4)) : v,
+  );
+  return `\`${rounded}\``;
 }
 
 /** What each element is for, by group: the index's cards and the first line of each page. */
@@ -109,7 +122,10 @@ const ELEMENT_DOCS: Record<string, readonly (readonly [element: string, summary:
     ["Sticker", "A ready-made icon or sticker by name."],
   ],
   "Effects and colour": [
-    ["Effect", "A filter on its parent: brightness, blur, grayscale, vignette, grain and more."],
+    [
+      "Effect",
+      "A look on its parent: colour grading, blur, glow, outline, keying, corner pin, vignette, grain and more, or your own shader.",
+    ],
     ["Adjustment", "Filters everything beneath it for its own stretch of time."],
     ["Mask", "Shows only a shape of its clip, with a feathered edge or inverted."],
   ],
@@ -267,7 +283,7 @@ function elementPage(name: string, summary: string): string {
   lines.push("| prop | type | default | required |", "|---|---|---|---|");
   const required = new Set(schema.required ?? []);
   for (const [prop, s] of Object.entries(schema.properties ?? {})) {
-    const def = s.default === undefined ? "" : `\`${JSON.stringify(s.default)}\``;
+    const def = defaultOf(s.default);
     lines.push(`| \`${prop}\` | ${typeOf(s, 6)} | ${def} | ${required.has(prop) ? "yes" : ""} |`);
   }
   if (name === "Effect" || name === "Transition")
@@ -284,7 +300,7 @@ function elementPage(name: string, summary: string): string {
 const DRAWN: Record<string, string> = {
   css: "a CSS filter; no WebGL needed",
   shader: "a shader",
-  post: "painted over the element after it",
+  post: "painting on the element's pixels; no WebGL needed",
   look: "drawn without a shader",
 };
 
@@ -296,10 +312,7 @@ function paramsTable(schema: z.ZodType): string[] {
   return [
     "| param | type | default |",
     "|---|---|---|",
-    ...props.map(
-      ([name, p]) =>
-        `| \`${name}\` | ${typeOf(p, 6)} | ${p.default === undefined ? "" : `\`${JSON.stringify(p.default)}\``} |`,
-    ),
+    ...props.map(([name, p]) => `| \`${name}\` | ${typeOf(p, 6)} | ${defaultOf(p.default)} |`),
     "",
   ];
 }
@@ -317,14 +330,21 @@ function effectsPage(): string {
     "",
     "| Kind | Scale | Params |",
     "|---|---|---|",
-    "| strength, mix or share | a fraction, 0 to 1, or -1 to 1 when it goes both ways | `amount`, `opacity`, `softness`, `tolerance`, `tint` |",
+    "| strength, mix or share | a fraction, 0 to 1, or -1 to 1 when it goes both ways | `amount`, `opacity`, `softness`, `tolerance`, `tint`, `temperature`, `shadows`, `highlights`, `threshold`, `spill`, `black`, `white`, `blur`, `roundness`, `star` |",
     "| gain | a multiplier | `intensity`, `scale` |",
+    "| exponent | a power, 1 changes nothing | `gamma` |",
     "| distance | pixels of the composition; a blur's `radius` (and `bevel`'s `size`) is its Gaussian's standard deviation, as CSS `blur()` reads it | `radius`, `width`, `feather`, `length`, `distance`, `size`, `edge`, `x`, `y` |",
     "| angle | degrees, clockwise from up | `angle`, `rotation`, `startAngle` |",
     "| position | fractions of the frame, `[x, y]` from the top left | `center`, `box`, the corners |",
     '| colour | `"#rgb"` or `"#rrggbb"` | `color`, `dark`, `light` |',
     "| exposure | stops | `stops` |",
-    "| choice | a string | `direction` |",
+    "| duration | seconds | `holdDuration` |",
+    "| count | a whole number | `sides`, `slats`, `columns`, `rows`, `samples` |",
+    "| seed | a whole number; the same seed draws the same pattern | `seed` |",
+    "| switch | `true` or `false` | `fade`, `inverted`, `outlineOnly`, `pushOut`, `radial` |",
+    "| curve | `[input, output]` points, 0 to 1 | `rgb`, `red`, `green`, `blue` |",
+    '| asset | `"asset:<id>"` from the manifest | `src` |',
+    "| choice | a string | `direction`, `curve` |",
     "",
     "## Effects",
     "",
@@ -428,9 +448,7 @@ function graphicPage(name: GraphicKindName): string {
     "|---|---|---|",
   ];
   for (const [prop, ps] of Object.entries(schema.properties ?? {}))
-    lines.push(
-      `| \`${prop}\` | ${typeOf(ps)} | ${ps.default === undefined ? "" : `\`${JSON.stringify(ps.default)}\``} |`,
-    );
+    lines.push(`| \`${prop}\` | ${typeOf(ps)} | ${defaultOf(ps.default)} |`);
   lines.push(
     "",
     `Plus the [\`<Graphic>\` props](/reference/elements/graphic) every kind takes. More in [${capital(kind.category)}](/reference/graphics/#${kind.category.replace(/ /g, "-")}).`,

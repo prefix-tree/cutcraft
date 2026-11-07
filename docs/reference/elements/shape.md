@@ -37,7 +37,7 @@ A vector shape (rectangle, circle, star, polygon, path) with fill, stroke and sh
 | `shadows` | { color, blur, x, y, spread, inset }[] |  |  |
 | `cornerRadius` | number (0..∞) \| string |  |  |
 | `cornerRadii` | { topLeft, topRight, bottomRight, bottomLeft } |  |  |
-| `starPoints` | integer |  |  |
+| `starPoints` | integer (3..∞) |  |  |
 | `innerRadius` | number (0..1) |  |  |
 
 Timed, visual, transformable. Children: `effect`, `keyframe`, `mask`. [All elements](/reference/elements/)

@@ -23,7 +23,7 @@ Confetti thrown up from the bottom centre that tumbles down across the frame ove
 | prop | type | default |
 |---|---|---|
 | `colors` | string[] | `["$primary","$secondary","$accent"]` |
-| `count` | integer | `90` |
+| `count` | integer (1..400) | `90` |
 | `spread` | number (0..1) | `0.7` |
 | `seed` | integer |  |
 

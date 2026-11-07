@@ -1,6 +1,6 @@
 # `<Effect>`
 
-A filter on its parent: brightness, blur, grayscale, vignette, grain and more.
+A look on its parent: colour grading, blur, glow, outline, keying, corner pin, vignette, grain and more, or your own shader.
 
 <Example src="previews/elements/effect" alt="<Effect>">
 

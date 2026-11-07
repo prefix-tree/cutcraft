@@ -36,7 +36,7 @@ The elements a file is written in: the timeline (clips, tracks, transitions, cap
 ## Effects and colour
 
 <div class="cc-cards">
-<PreviewCard code title="<Effect>" link="/reference/elements/effect" src="previews/elements/effect" text="A filter on its parent: brightness, blur, grayscale, vignette, grain and more." />
+<PreviewCard code title="<Effect>" link="/reference/elements/effect" src="previews/elements/effect" text="A look on its parent: colour grading, blur, glow, outline, keying, corner pin, vignette, grain and more, or your own shader." />
 <PreviewCard code title="<Adjustment>" link="/reference/elements/adjustment" src="previews/elements/adjustment" text="Filters everything beneath it for its own stretch of time." />
 <PreviewCard code title="<Mask>" link="/reference/elements/mask" src="previews/elements/mask" text="Shows only a shape of its clip, with a feathered edge or inverted." />
 </div>

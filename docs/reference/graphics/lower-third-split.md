@@ -36,7 +36,7 @@ The name on an accent block and the role on a panel below it, offset to the righ
 | `font` | string | `"$heading"` |
 | `roleFont` | string | `"$body"` |
 | `size` | number (0..400) | `44` |
-| `weight` | integer | `700` |
+| `weight` | integer (100..900) | `700` |
 | `onAccent` | string | `"$onPrimary"` |
 
 Plus the [`<Graphic>` props](/reference/elements/graphic) every kind takes. More in [Lower thirds](/reference/graphics/#lower-thirds).

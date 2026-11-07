@@ -81,5 +81,5 @@ whose `DOMAIN_MIN` and `DOMAIN_MAX` are not 0 and 1 is resampled onto 0 to 1 whe
 ## Where there is no WebGL
 
 The colour effects need WebGL, which every browser the player runs in has, and the export always has. Where it is
-missing, `exposure`, `vibrance` and `levels` fall back on a CSS filter that comes close, and the others are left out
+missing, `exposure`, `vibrance`, `levels` and `whiteBalance` fall back on a CSS filter that comes close, and the others are left out
 with a warning. Effects that read a file (`lut`) work on clips, nested sequences and adjustments, not yet on overlays.

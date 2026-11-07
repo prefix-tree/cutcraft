@@ -1,6 +1,7 @@
 import { Clip, Composition, Track, Transition, transition } from "@cutcraft/kit";
 
-// The incoming clip opens as a circle from the centre of the frame.
+// The incoming clip opens as a circle from the centre of the frame. (The built-in `iris` does this and more; this shows
+// how a transition of your own is written.)
 const circle = transition({
   name: "circle",
   shader: `vec4 transition(vec2 uv) {

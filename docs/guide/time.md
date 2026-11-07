@@ -98,7 +98,7 @@ need that much extra footage at the join.
 
 Crossfade, dips to black or white, wipe, slide and push are built in, and six more drawn as shaders:
 
-- `iris` opens the next clip from `center` as a circle, or a polygon with `sides` (3 to 64), or a star when `star`
+- `iris` opens the next clip from `center` as a circle, or a polygon with `sides` (3 to 64; 0 is the circle), or a star when `star`
   sets the inner points' radius (0 to 0.95 of the outer). `rotation` turns it, `feather` softens its edge in pixels.
 - `clockWipe` sweeps around `center` from `startAngle` (degrees clockwise from up), with `direction` `"clockwise"`,
   `"counterclockwise"` or `"both"` ways at once. `softness` softens the edge, as a share of the turn.

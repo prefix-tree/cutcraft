@@ -36,7 +36,7 @@ A name and a role on a rounded card, with an accent dot before the name.
 | `font` | string | `"$heading"` |
 | `roleFont` | string | `"$body"` |
 | `size` | number (0..400) | `44` |
-| `weight` | integer | `700` |
+| `weight` | integer (100..900) | `700` |
 | `radius` | number (0..∞) \| string | `"$radius"` |
 
 Plus the [`<Graphic>` props](/reference/elements/graphic) every kind takes. More in [Lower thirds](/reference/graphics/#lower-thirds).

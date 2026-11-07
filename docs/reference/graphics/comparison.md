@@ -34,7 +34,7 @@ Bars side by side for a few values, each with its label and value, growing over 
 | `orientation` | "horizontal" \| "vertical" | `"horizontal"` |
 | `max` | number |  |
 | `showValues` | boolean | `true` |
-| `decimals` | integer | `0` |
+| `decimals` | integer (0..4) | `0` |
 | `prefix` | string | `""` |
 | `suffix` | string | `""` |
 | `growFor` | number (0..60) | `1` |

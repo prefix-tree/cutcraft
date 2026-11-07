@@ -30,9 +30,9 @@
 
 | prop | type | default |
 |---|---|---|
-| `total` | integer | `10` |
+| `total` | integer (1..400) | `10` |
 | `filled` | number (0..400) | `3` |
-| `columns` | integer |  |
+| `columns` | integer (1..50) |  |
 | `unit` | "person" \| "circle" \| "square" | `"person"` |
 | `gap` | number (0..0.8) | `0.25` |
 | `fillFor` | number (0..60) | `1` |
