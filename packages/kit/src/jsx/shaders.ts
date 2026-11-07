@@ -12,7 +12,9 @@ export {
   type ShaderDefinition,
   type ShaderStep,
   type ShaderTable,
+  type ShaderUniform,
   shaderDefinition,
+  uniformsOf,
 } from "./shader-definition";
 
 interface ShaderStore {

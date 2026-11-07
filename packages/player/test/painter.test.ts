@@ -92,6 +92,7 @@ describe("CanvasPainter clips", () => {
       name: "levels",
       sources: ["vec4 effect(vec2 uv) { return texture(image, uv); }"],
       params: {},
+      uniforms: [],
       time: 0,
     };
     const calls = paintOp(
@@ -108,7 +109,13 @@ describe("CanvasPainter clips", () => {
   it("draws a shader-only built-in (lut) without it where there is no WebGL, and says so", () => {
     const warnings: string[] = [];
     captureWarnings((m) => warnings.push(m));
-    const lut = { name: "lut", sources: ["vec4 effect(vec2 uv) { return texture(image, uv); }"], params: {}, time: 0 };
+    const lut = {
+      name: "lut",
+      sources: ["vec4 effect(vec2 uv) { return texture(image, uv); }"],
+      params: {},
+      uniforms: [],
+      time: 0,
+    };
     const calls = paintOp({ filter: "blur(2px)", shaders: [{ ...lut, builtIn: true }] }, false);
     expect(calls.some((c) => c.name === "set:filter" && c.args[0] === "blur(2px)")).toBe(true);
     expect(warnings.join(" ")).toContain('"c" uses a shader effect or transition; this renderer has no WebGL');
@@ -128,6 +135,7 @@ describe("CanvasPainter clips", () => {
           builtIn: true,
           source: "vec4 transition(vec2 uv) { return texture(to, uv); }",
           params: {},
+          uniforms: [],
           progress: 0.25,
           time: 0.25,
           role: "in",

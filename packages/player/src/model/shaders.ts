@@ -6,6 +6,7 @@ import {
   SHADER_ONLY_EFFECTS,
   type ShaderDefinition,
   type ShaderStep,
+  type ShaderUniform,
   shaderFor,
 } from "@cutcraft/kit";
 
@@ -25,6 +26,8 @@ export interface ShaderPass {
   /** Pictures a built-in computes from its params (a curve's table), read by the passes by name. */
   readonly tables?: ShaderDefinition["tables"];
   readonly params: Readonly<Record<string, unknown>>;
+  /** How each param reaches the shader, from the definition's schema. */
+  readonly uniforms: readonly ShaderUniform[];
   /** Seconds into the element. */
   readonly time: number;
 }
@@ -38,6 +41,8 @@ export interface TransitionPass {
   readonly name: string;
   readonly source: string;
   readonly params: Readonly<Record<string, unknown>>;
+  /** How each param reaches the shader, from the definition's schema. */
+  readonly uniforms: readonly ShaderUniform[];
   /** 0..1 through the transition, eased by its curve. */
   readonly progress: number;
   readonly time: number;
@@ -45,10 +50,6 @@ export interface TransitionPass {
   /** Between two clips, whose pictures the shader blends; false for one clip's edge, blended with nothing. */
   readonly paired: boolean;
 }
-
-/** The values a definition's passes read from its params: the params, or what a built-in maps them to. */
-const uniformsOf = (def: ShaderDefinition, params: Readonly<Record<string, unknown>>) =>
-  def.uniforms ? def.uniforms(params) : params;
 
 /** An effect drawn by a shader (the file's own, or the kit's) as a pass at element-relative `rel`; undefined otherwise. */
 function shaderPass(state: ResolvedState, c: Placement, rel: number): ShaderPass | undefined {
@@ -63,7 +64,8 @@ function shaderPass(state: ResolvedState, c: Placement, rel: number): ShaderPass
     ...(own ? {} : { builtIn: true as const }),
     ...(!own && def.tables ? { tables: def.tables } : {}),
     ...(!own && def.steps ? { steps: def.steps(params) } : {}),
-    params: uniformsOf(def, params),
+    params,
+    uniforms: def.uniforms,
     time: rel,
   };
 }
@@ -137,7 +139,8 @@ export function transitionPass(state: ResolvedState, role: TransitionRole): Tran
     name: def.name,
     ...(own ? {} : { builtIn: true as const }),
     source: def.passes[0] as string,
-    params: uniformsOf(def, (x.props.params ?? {}) as Readonly<Record<string, unknown>>),
+    params: (x.props.params ?? {}) as Readonly<Record<string, unknown>>,
+    uniforms: def.uniforms,
     progress: role.progress,
     time: role.progress * x.duration,
     role: role.role,

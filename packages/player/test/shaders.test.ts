@@ -2,7 +2,7 @@ import { collectModule, resolve } from "@cutcraft/kit";
 import { loadModule } from "@cutcraft/kit/source";
 import { buildFramePlan } from "@cutcraft/player";
 
-import { fragmentSource, uniformOf } from "../src/render/shaders";
+import { declare, fragmentSource, uniformValue } from "../src/render/shaders";
 
 const manifest = {
   assets: { city: { id: "city", kind: "video" as const, duration: 10, fps: 30, width: 640, height: 360 } },
@@ -43,6 +43,10 @@ describe("declared shaders in the frame plan", () => {
         name: "soft-glow",
         sources: [expect.stringContaining("vec4 effect")],
         params: { amount: 0.5, tint: "#ff8800" },
+        uniforms: [
+          { name: "amount", kind: "float" },
+          { name: "tint", kind: "string" },
+        ],
         time: 1,
       },
     ]);
@@ -191,47 +195,85 @@ describe("declared shaders in the frame plan", () => {
 });
 
 describe("the shader runner's program", () => {
-  it("turns params into uniforms by their value", () => {
-    expect(uniformOf(0.5)).toEqual({ type: "float", value: [0.5] });
-    expect(uniformOf(true)).toEqual({ type: "bool", value: [1] });
-    expect(uniformOf([1, 2, 3])).toEqual({ type: "vec3", value: [1, 2, 3] });
-    expect(uniformOf("#ff8800")).toEqual({ type: "vec3", value: [1, 136 / 255, 0] });
-    expect(uniformOf("#f80")?.value).toEqual([1, 136 / 255, 0]);
-    expect(uniformOf("orange")).toBeNull();
-    expect(uniformOf([1])).toBeNull();
+  it("declares each param by its schema's kind, settling a string or a list by its value", () => {
+    const uniforms = [
+      { name: "amount", kind: "float" },
+      { name: "on", kind: "bool" },
+      { name: "at", kind: "vec2" },
+      { name: "tint", kind: "colour" },
+      { name: "dir", kind: "enum", options: ["left", "right"] },
+      { name: "lut", kind: "asset" },
+      { name: "any", kind: "string" },
+      { name: "list", kind: "numbers" },
+    ] as const;
+    const kinds = (params: Record<string, unknown>) =>
+      declare(uniforms, params, (ref) => (ref === "asset:cube" ? "3d" : ref === "asset:pic" ? "2d" : undefined)).map(
+        (d) => `${d.name}:${d.glsl}`,
+      );
+    expect(kinds({ lut: "asset:cube", any: "#fff", list: [1, 2, 3] })).toEqual([
+      "amount:float",
+      "on:bool",
+      "at:vec2",
+      "tint:vec3",
+      "dir:int",
+      "lut:sampler3D",
+      "any:vec3",
+      "list:vec3",
+    ]);
+    // An asset not loaded, a string that is neither, and a list of the wrong length reach no uniform.
+    expect(kinds({ lut: "asset:missing", any: "orange", list: [1] })).not.toContain("lut:sampler3D");
+    expect(kinds({ any: "asset:pic" })).toContain("any:sampler2D");
   });
 
-  it("wraps the declared function with its inputs and params, and premultiplies what it returns", () => {
-    const effect = fragmentSource("effect", "vec4 effect(vec2 uv) { return texture(image, uv) * params.amount; }", {
-      amount: 1,
-      tint: "#fff",
-      time: 3,
-      image: 0.5,
-      "bad name": 1,
-    });
+  it("sets each value as its declared uniform takes it", () => {
+    expect(uniformValue({ name: "a", glsl: "float" }, 0.5)).toEqual([0.5]);
+    expect(uniformValue({ name: "a", glsl: "bool" }, true)).toEqual([1]);
+    expect(uniformValue({ name: "a", glsl: "int", options: ["l", "r"] }, "r")).toEqual([1]);
+    expect(uniformValue({ name: "a", glsl: "int", options: ["l", "r"] }, "up")).toBeNull();
+    expect(uniformValue({ name: "a", glsl: "vec3" }, "#ff8800")).toEqual([1, 136 / 255, 0]);
+    expect(uniformValue({ name: "a", glsl: "vec3" }, "#f80")).toEqual([1, 136 / 255, 0]);
+    expect(uniformValue({ name: "a", glsl: "vec3" }, [1, 2, 3])).toEqual([1, 2, 3]);
+    expect(uniformValue({ name: "a", glsl: "vec2" }, [1, 2, 3])).toBeNull();
+  });
+
+  it("wraps the declared function with its inputs and declared uniforms, and premultiplies what it returns", () => {
+    const declared = [
+      { name: "amount", glsl: "float" },
+      { name: "tint", glsl: "vec3" },
+      { name: "time", glsl: "float" },
+      { name: "image", glsl: "float" },
+      { name: "dir", glsl: "int", options: ["left", "right"] },
+      { name: "bad name", glsl: "float" },
+    ] as const;
+    const effect = fragmentSource(
+      "effect",
+      "vec4 effect(vec2 uv) { return params.dir == params.dir.right ? texture(image, uv) * params.amount : vec4(params.tint.r); }",
+      declared,
+    );
     expect(effect).toContain("uniform sampler2D image;\nuniform sampler2D original;");
     expect(effect).toContain("uniform float cc_param_amount;");
     expect(effect).toContain("uniform vec3 cc_param_tint;");
+    expect(effect).toContain("uniform int cc_param_dir;");
     // A param may take an input's name: it is read as params.NAME, never as the bare name.
     expect(effect).toContain("uniform float cc_param_time;");
     expect(effect).toContain("uniform float cc_param_image;");
-    expect(effect).toContain("return texture(image, uv) * cc_param_amount;");
+    // An enum's option is its index; a vec's swizzle is left alone.
+    expect(effect).toContain("cc_param_dir == 1 ? texture(image, uv) * cc_param_amount : vec4(cc_param_tint.r)");
     expect(effect).not.toContain("bad name");
     expect(effect).toContain("cutcraft_out = vec4(c.rgb * c.a, c.a);");
-    const curve = fragmentSource(
-      "effect",
-      "vec4 effect(vec2 uv) { return texture(curve, uv); }",
-      { rgb: [[0, 0]] },
-      true,
-      undefined,
-      ["curve", "image"],
+    // The text depends on how the uniforms are declared, never on their values.
+    expect(fragmentSource("effect", "vec4 effect(vec2 uv) { return vec4(params.amount); }", declared)).toBe(
+      fragmentSource("effect", "vec4 effect(vec2 uv) { return vec4(params.amount); }", [...declared]),
     );
+    const curve = fragmentSource("effect", "vec4 effect(vec2 uv) { return texture(curve, uv); }", [], true, [
+      "curve",
+      "image",
+    ]);
     expect(curve).toContain("uniform highp sampler2D curve;");
     expect(curve).not.toContain("uniform highp sampler2D image;");
-    expect(curve).not.toContain("rgb;");
-    const between = fragmentSource("effect", "vec4 effect(vec2 uv) { return texture(image, uv); }", {}, false);
+    const between = fragmentSource("effect", "vec4 effect(vec2 uv) { return texture(image, uv); }", [], false);
     expect(between).toContain("cutcraft_out = c;");
-    const transition = fragmentSource("transition", "vec4 transition(vec2 uv) { return texture(to, uv); }", {});
+    const transition = fragmentSource("transition", "vec4 transition(vec2 uv) { return texture(to, uv); }", []);
     expect(transition).toContain("uniform sampler2D from;\nuniform sampler2D to;\nuniform float progress;");
     expect(transition).toContain("vec4 c = transition(cutcraft_uv);");
   });

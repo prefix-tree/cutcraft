@@ -4,7 +4,7 @@ import { z } from "zod";
 import { type CurvePoint, monotoneCurve } from "../jsx/curves";
 import { type ShaderDefinition, shaderDefinition } from "../jsx/shader-definition";
 import { aroundGauss } from "./gauss";
-import { COLOUR, HEX } from "./glsl";
+import { COLOUR, glsl, HEX } from "./glsl";
 
 /**
  * Levels: the input range [black, white] stretched to [0, 1], then a gamma curve on the midtones, per channel:
@@ -49,7 +49,7 @@ const lut = shaderDefinition("effect", {
 const exposure = shaderDefinition("effect", {
   name: "exposure",
   params: z.object({ stops: z.number().min(-5).max(5).default(0) }),
-  shader: `${COLOUR}vec4 effect(vec2 uv) {
+  shader: glsl`${COLOUR}vec4 effect(vec2 uv) {
   vec4 c = texture(image, uv);
   return vec4(clamp(cc_srgb(cc_linear(c.rgb) * exp2(params.stops)), 0.0, 1.0), c.a);
 }`,
@@ -63,7 +63,7 @@ const exposure = shaderDefinition("effect", {
 const vibrance = shaderDefinition("effect", {
   name: "vibrance",
   params: z.object({ amount: z.number().min(-1).max(1).default(0) }),
-  shader: `${COLOUR}vec4 effect(vec2 uv) {
+  shader: glsl`${COLOUR}vec4 effect(vec2 uv) {
   vec4 c = texture(image, uv);
   float spread = max(c.r, max(c.g, c.b)) - min(c.r, min(c.g, c.b));
   float k = params.amount > 0.0 ? params.amount * (1.0 - spread) : params.amount;
@@ -83,7 +83,7 @@ const whiteBalance = shaderDefinition("effect", {
     temperature: z.number().min(-1).max(1).default(0),
     tint: z.number().min(-1).max(1).default(0),
   }),
-  shader: `${COLOUR}
+  shader: glsl`${COLOUR}
 // Rows of linear sRGB (D65) to XYZ, and of the Bradford matrix, written as rows: v * M is then M times v.
 const mat3 RGB_XYZ = mat3(0.4124564, 0.3575761, 0.1804375, 0.2126729, 0.7151522, 0.0721750, 0.0193339, 0.1191920, 0.9503041);
 const mat3 XYZ_RGB = mat3(3.2404542, -1.5371385, -0.4985314, -0.9692660, 1.8760108, 0.0415560, 0.0556434, -0.2040259, 1.0572252);
@@ -113,7 +113,7 @@ vec4 effect(vec2 uv) {
 const SHADOWS_HIGHLIGHTS = aroundGauss({
   what: "luma",
   after: [
-    `${COLOUR}vec4 effect(vec2 uv) {
+    glsl`${COLOUR}vec4 effect(vec2 uv) {
   vec4 c = texture(original, uv);
   float around = texture(image, uv).r;
   float dark = 1.0 - smoothstep(0.0, 0.5, around);
@@ -145,7 +145,7 @@ const duotone = shaderDefinition("effect", {
     light: HEX.default("#ffd27f"),
     amount: z.number().min(0).max(1).default(1),
   }),
-  shader: `${COLOUR}vec4 effect(vec2 uv) {
+  shader: glsl`${COLOUR}vec4 effect(vec2 uv) {
   vec4 c = texture(image, uv);
   vec3 toned = mix(params.dark, params.light, cc_luma(c.rgb));
   return vec4(mix(c.rgb, toned, params.amount), c.a);

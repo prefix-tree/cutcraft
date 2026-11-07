@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { shaderDefinition } from "../jsx/shader-definition";
 import { aroundGauss } from "./gauss";
-import { COLOUR, HEX, OVER } from "./glsl";
+import { COLOUR, glsl, HEX, OVER } from "./glsl";
 
 /**
  * Glow: the element's bright parts (luminance above `threshold`, all of it at 0), coloured toward `color` by `tint`
@@ -15,7 +15,7 @@ import { COLOUR, HEX, OVER } from "./glsl";
 const GLOW = aroundGauss({
   what: "rgba",
   before: [
-    `${COLOUR}vec4 effect(vec2 uv) {
+    glsl`${COLOUR}vec4 effect(vec2 uv) {
   vec4 c = texture(image, uv);
   float bright = params.threshold <= 0.0 ? 1.0 : smoothstep(params.threshold, min(params.threshold + 0.1, 1.0), cc_luma(c.rgb));
   return vec4(mix(c.rgb, params.color, params.tint), c.a * bright);
@@ -24,7 +24,7 @@ const GLOW = aroundGauss({
   after: [
     // A halo under the element; with a threshold, a bloom over its bright parts too. The bloom's share ramps up over
     // the first 0.05 of threshold, so a keyframed threshold does not jump at 0.
-    `${OVER}vec4 effect(vec2 uv) {
+    glsl`${OVER}vec4 effect(vec2 uv) {
   vec4 o = texture(original, uv);
   vec4 g = texture(image, uv);
   vec4 c = cc_over(o, vec4(g.rgb, min(g.a * params.intensity, 1.0)));
@@ -78,7 +78,7 @@ const outline = shaderDefinition("effect", {
   return vec4(1.0, 0.0, 0.0, 1.0);
 }`,
     // Along each row: the nearest of those, by Pythagoras; the band where it is within the width.
-    `${OVER}vec4 effect(vec2 uv) {
+    glsl`${OVER}vec4 effect(vec2 uv) {
   vec4 o = texture(original, uv);
   ivec2 size = textureSize(image, 0);
   ivec2 p = ivec2(uv * vec2(size));
@@ -114,7 +114,7 @@ const longShadow = shaderDefinition("effect", {
     opacity: z.number().min(0).max(1).default(1),
     fade: z.boolean().default(false),
   }),
-  shader: `${OVER}vec4 effect(vec2 uv) {
+  shader: glsl`${OVER}vec4 effect(vec2 uv) {
   vec4 o = texture(image, uv);
   float a = radians(params.angle);
   vec2 dir = vec2(sin(a), -cos(a)) / resolution;
