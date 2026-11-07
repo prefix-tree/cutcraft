@@ -64,10 +64,9 @@ describe("declared shaders in the frame plan", () => {
     const op = buildFramePlan(state, 1).ops[0]!;
     expect(op.filter).toBe("");
     expect(op.shaders?.map((p) => [p.name, p.builtIn, p.sources.length])).toEqual([
-      ["css:grayscale", true, 1],
-      ["levels", true, 1],
+      ["fused:css:grayscale+levels", true, 1],
     ]);
-    expect(op.shaders?.[1]?.params).toEqual({ black: 0.2, white: 1, gamma: 2 });
+    expect(op.shaders?.[0]?.params).toMatchObject({ e1_black: 0.2, e1_white: 1, e1_gamma: 2 });
     expect(op.fallbackFilter).toMatch(/^grayscale\(0\.5\) brightness\([\d.]+\) contrast\([\d.]+\)$/);
   });
 
@@ -85,8 +84,8 @@ describe("declared shaders in the frame plan", () => {
     const op = buildFramePlan(state, 1).ops[0]!;
     expect(op.filter).toBe("");
     expect(op.fallbackFilter).toBe("brightness(2) saturate(1.2) sepia(0.15)");
-    expect(op.shaders?.map((p) => p.name)).toEqual(["exposure", "vibrance", "whiteBalance", "curves"]);
-    expect(op.shaders?.[3]?.tables?.(op.shaders[3].params).curve?.width).toBe(256);
+    expect(op.shaders?.map((p) => p.name)).toEqual(["fused:exposure+vibrance+whiteBalance+curves"]);
+    expect(op.shaders?.[0]?.tables?.(op.shaders[0].params).curve?.width).toBe(256);
   });
 
   it("move a keyframed box element by element, and step a value that is not a number list", () => {
@@ -191,6 +190,54 @@ describe("declared shaders in the frame plan", () => {
     expect(ops[1]?.transition?.progress).toBeGreaterThan(0.3);
     expect(ops[1]?.transition?.progress).toBeLessThan(0.7);
     expect(ops[1]?.clip).toBeUndefined();
+  });
+});
+
+describe("a run of colour effects", () => {
+  const passesOf = (effects: string, declarations = "") =>
+    buildFramePlan(
+      stateOf(`<Track id="t"><Clip id="c" src="asset:city" in={0} out={4}>${effects}</Clip></Track>`, declarations),
+      1,
+    ).ops[0]?.shaders ?? [];
+
+  it("is drawn as one pass calling each function in order, with each member's params and uniforms under its prefix", () => {
+    const [pass, ...rest] = passesOf(`<Effect id="e" type="exposure" params={{ stops: 0.4 }} />
+      <Effect id="w" type="whiteBalance" params={{ temperature: 0.2 }} />
+      <Effect id="v" type="vibrance" params={{ amount: 0.4 }} />`);
+    expect(rest).toEqual([]);
+    expect(pass?.name).toBe("fused:exposure+whiteBalance+vibrance");
+    expect(pass?.params).toEqual({ e0_stops: 0.4, e1_temperature: 0.2, e1_tint: 0, e2_amount: 0.4 });
+    expect(pass?.uniforms.map((u) => u.name)).toEqual(["e0_stops", "e1_temperature", "e1_tint", "e2_amount"]);
+    const source = pass?.sources[0] ?? "";
+    expect(source.indexOf("v = cc_exposure_0(v);")).toBeLessThan(source.indexOf("v = cc_whiteBalance_1(v);"));
+    expect(source).toContain("params.e0_stops");
+    // The colour module both use is placed once.
+    expect(source.match(/vec3 cc_srgb\(/g)).toHaveLength(1);
+  });
+
+  it("breaks at an effect that is not a colour change, and at a second white balance or curves", () => {
+    expect(
+      passesOf(`<Effect id="a" type="exposure" params={{ stops: 0.4 }} />
+        <Effect id="b" type="regionBlur" />
+        <Effect id="d" type="vibrance" params={{ amount: 0.4 }} />`).map((p) => p.name),
+    ).toEqual(["exposure", "regionBlur", "vibrance"]);
+    expect(
+      passesOf(`<Effect id="a" type="whiteBalance" params={{ temperature: 0.2 }} />
+        <Effect id="b" type="exposure" params={{ stops: 0.4 }} />
+        <Effect id="d" type="whiteBalance" params={{ tint: 0.2 }} />`).map((p) => p.name),
+    ).toEqual(["fused:whiteBalance+exposure", "whiteBalance"]);
+    expect(
+      passesOf(`<Effect id="a" type="curves" params={{ rgb: [[0, 0.1], [1, 1]] }} />
+        <Effect id="b" type="curves" params={{ blue: [[0, 0.1], [1, 1]] }} />`).map((p) => p.name),
+    ).toEqual(["curves", "curves"]);
+  });
+
+  it("never takes in a file's own effect", () => {
+    const names = passesOf(
+      `<Effect id="a" type="exposure" params={{ stops: 0.4 }} /><Effect id="o" type={own} /><Effect id="b" type="vibrance" params={{ amount: 0.4 }} />`,
+      `const own = effect({ name: "own", shader: "vec4 effect(vec2 uv) { return texture(image, uv); }" });`,
+    ).map((p) => p.name);
+    expect(names).toEqual(["exposure", "own", "vibrance"]);
   });
 });
 

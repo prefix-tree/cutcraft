@@ -1,6 +1,8 @@
 import {
   builtInShader,
   builtInTransition,
+  type ColourFunction,
+  fusedColourSource,
   isNeutral,
   type Placement,
   type ResolvedState,
@@ -20,6 +22,8 @@ export interface ShaderPass {
   readonly name: string;
   /** The effect's GLSL, one source per pass, run in order. */
   readonly sources: readonly string[];
+  /** A built-in colour transform's function: a run of them is drawn as one pass. */
+  readonly colour?: ColourFunction;
   /** How a built-in draws its passes for these params (sizes, regions); without it, each source over the frame. */
   readonly steps?: readonly ShaderStep[];
   /** A built-in effect (`levels`, `lut`…), drawn by the kit's shader. */
@@ -66,6 +70,7 @@ function shaderPass(state: ResolvedState, c: Placement, rel: number): ShaderPass
     sources: def.passes,
     ...(own ? {} : { builtIn: true as const }),
     ...(!own && def.tables ? { tables: def.tables } : {}),
+    ...(!own && def.colour ? { colour: def.colour } : {}),
     ...(!own && def.steps ? { steps: def.steps(params) } : {}),
     params,
     uniforms: def.uniforms,
@@ -118,8 +123,61 @@ export function effectPipeline(
     const shaderOnly = passes.filter((p) => !hasCssFallback(p));
     return { filter: fallbackFilter, ...(shaderOnly.length > 0 ? { shaders: shaderOnly } : {}) };
   }
-  const shaders = steps.flatMap((s) => (typeof s === "string" ? cssPasses(s, rel) : [s]));
+  const shaders = fuseColour(steps.flatMap((s) => (typeof s === "string" ? cssPasses(s, rel) : [s])));
   return { filter: "", ...(shaders.length > 0 ? { shaders } : {}), fallbackFilter };
+}
+
+/** Fused sources by the run they draw (its members' names in order), so a run's source is the same string each frame. */
+const FUSED = new Map<string, string>();
+
+/** A run of colour transforms as one pass: each member's params and uniforms under its prefix, `e0_`, `e1_`… */
+function fuse(run: readonly ShaderPass[]): ShaderPass {
+  const prefix = (i: number) => `e${i}_`;
+  const key = run.map((p) => p.name).join("+");
+  let source = FUSED.get(key);
+  if (source === undefined) {
+    source = fusedColourSource(run.map((p, i) => ({ colour: p.colour as ColourFunction, prefix: prefix(i) })));
+    FUSED.set(key, source);
+  }
+  const withTables = run.find((p) => p.tables);
+  return {
+    name: `fused:${key}`,
+    sources: [source],
+    builtIn: true,
+    params: Object.fromEntries(run.flatMap((p, i) => Object.entries(p.params).map(([k, v]) => [prefix(i) + k, v]))),
+    uniforms: run.flatMap((p, i) => p.uniforms.map((u) => ({ ...u, name: prefix(i) + u.name }))),
+    ...(withTables?.tables
+      ? { tables: () => (withTables.tables as NonNullable<ShaderPass["tables"]>)(withTables.params) }
+      : {}),
+    time: run[0]?.time ?? 0,
+  };
+}
+
+/**
+ * Each run of consecutive colour transforms drawn as one pass, in file order: one read of the picture, each function in
+ * turn, one write. A run breaks at a pass that is not one, and at a member whose prelude or table is already in it (two
+ * white balances would declare the same matrices, two curves the same table). A run of one is left as it is.
+ */
+export function fuseColour(passes: readonly ShaderPass[]): ShaderPass[] {
+  const out: ShaderPass[] = [];
+  let run: ShaderPass[] = [];
+  const flush = () => {
+    if (run.length >= 2) out.push(fuse(run));
+    else out.push(...run);
+    run = [];
+  };
+  for (const p of passes) {
+    if (!p.colour || p.steps) {
+      flush();
+      out.push(p);
+      continue;
+    }
+    const prelude = p.colour.prelude;
+    if (run.some((r) => (prelude && r.colour?.prelude === prelude) || (p.tables && r.tables))) flush();
+    run.push(p);
+  }
+  flush();
+  return out;
 }
 
 /** The element's look as CSS alone, in file order: its CSS-type effects and the CSS form of its built-in shader effects. */

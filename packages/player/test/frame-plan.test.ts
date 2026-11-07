@@ -227,8 +227,8 @@ describe("buildFramePlan", () => {
     });
     const op = buildFramePlan(s, 1).ops[0]!;
     expect(op.filter).toBe("");
-    expect(op.shaders?.map((p) => p.name)).toEqual(["whiteBalance", "levels"]);
-    expect(op.shaders?.[1]?.params).toEqual({ black: 0.1, white: 0.6, gamma: 1.2 });
+    expect(op.shaders?.map((p) => p.name)).toEqual(["fused:whiteBalance+levels"]);
+    expect(op.shaders?.[0]?.params).toMatchObject({ e1_black: 0.1, e1_white: 0.6, e1_gamma: 1.2 });
     const filter = op.fallbackFilter!;
     expect(filter).toMatch(/^sepia\(0\.2\) hue-rotate\(5deg\) brightness\([\d.]+\) contrast\([\d.]+\)$/);
     const [k, c] = [/brightness\(([\d.]+)\)/, /contrast\(([\d.]+)\)/].map((r) => Number(r.exec(filter)![1]));

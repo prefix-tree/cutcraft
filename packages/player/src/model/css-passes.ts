@@ -4,7 +4,7 @@
 // browser's filter does. The input is a CSS filter string of the forms the player writes (model/effects.ts), so the
 // shader and the no-WebGL fallback share one mapping from params to CSS.
 
-import type { ShaderStep, ShaderUniform } from "@cutcraft/kit";
+import type { ColourFunction, ShaderStep, ShaderUniform } from "@cutcraft/kit";
 import { gaussSteps } from "@cutcraft/kit";
 
 import type { ShaderPass } from "./shaders";
@@ -49,6 +49,20 @@ const SHADOW_UNIFORMS: ShaderUniform[] = [
   { name: "color", kind: "vec4" },
 ];
 
+/** The linear and matrix passes as colour functions, so a run of colour changes can be drawn as one pass. */
+const LINEAR_COLOUR: ColourFunction = {
+  fn: "cc_css_linear",
+  uses: [],
+  prelude: "",
+  code: "vec3 cc_css_linear(vec3 c) { return clamp(c * params.slope + params.offset, 0.0, 1.0); }\n",
+};
+const MATRIX_COLOUR: ColourFunction = {
+  fn: "cc_css_matrix",
+  uses: [],
+  prelude: "",
+  code: "vec3 cc_css_matrix(vec3 c) { return clamp(vec3(dot(params.r0, c), dot(params.r1, c), dot(params.r2, c)), 0.0, 1.0); }\n",
+};
+
 const pass = (
   name: string,
   sources: readonly string[],
@@ -56,10 +70,12 @@ const pass = (
   time: number,
   uniforms: readonly ShaderUniform[],
   steps?: readonly ShaderStep[],
+  colour?: ColourFunction,
 ): ShaderPass => ({
   name: `css:${name}`,
   sources: steps ? steps.map((s) => s.source) : sources,
   ...(steps ? { steps } : {}),
+  ...(colour ? { colour } : {}),
   builtIn: true,
   params,
   uniforms,
@@ -108,7 +124,7 @@ function grayscale(amount: number): number[][] {
 }
 
 const matrix = (name: string, rows: number[][], time: number): ShaderPass =>
-  pass(name, [MATRIX], { r0: rows[0], r1: rows[1], r2: rows[2] }, time, MATRIX_UNIFORMS);
+  pass(name, [MATRIX], { r0: rows[0], r1: rows[1], r2: rows[2] }, time, MATRIX_UNIFORMS, undefined, MATRIX_COLOUR);
 
 /** A number or a percentage, as a CSS filter argument. */
 function amount(arg: string): number {
@@ -186,17 +202,23 @@ export function cssPasses(filter: string, time: number): ShaderPass[] {
   for (const { name, args } of cssFunctions(filter)) {
     switch (name) {
       case "brightness": {
-        out.push(pass(name, [LINEAR], { slope: amount(args), offset: 0 }, time, LINEAR_UNIFORMS));
+        out.push(
+          pass(name, [LINEAR], { slope: amount(args), offset: 0 }, time, LINEAR_UNIFORMS, undefined, LINEAR_COLOUR),
+        );
         break;
       }
       case "contrast": {
         const a = amount(args);
-        out.push(pass(name, [LINEAR], { slope: a, offset: 0.5 - 0.5 * a }, time, LINEAR_UNIFORMS));
+        out.push(
+          pass(name, [LINEAR], { slope: a, offset: 0.5 - 0.5 * a }, time, LINEAR_UNIFORMS, undefined, LINEAR_COLOUR),
+        );
         break;
       }
       case "invert": {
         const a = Math.min(1, Math.max(0, amount(args)));
-        out.push(pass(name, [LINEAR], { slope: 1 - 2 * a, offset: a }, time, LINEAR_UNIFORMS));
+        out.push(
+          pass(name, [LINEAR], { slope: 1 - 2 * a, offset: a }, time, LINEAR_UNIFORMS, undefined, LINEAR_COLOUR),
+        );
         break;
       }
       case "saturate":

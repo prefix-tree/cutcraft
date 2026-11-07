@@ -2,6 +2,8 @@
 // Built-in effects (effects/registry.ts) and a file's own (jsx/shaders.ts, effect()) are both made here.
 import { type ZodObject, z } from "zod";
 
+import type { GlslModule } from "../effects/glsl";
+
 export interface ShaderDefinition<P extends ZodObject = ZodObject> {
   readonly kind: "effect" | "transition";
   readonly name: string;
@@ -28,6 +30,8 @@ export interface ShaderDefinition<P extends ZodObject = ZodObject> {
    * and the part of the frame it needs. Without it, every pass draws the whole frame at full size.
    */
   readonly steps?: (params: Readonly<Record<string, unknown>>) => readonly ShaderStep[];
+  /** Built-in colour transforms only: the function, so a run of them can be drawn as one pass. */
+  readonly colour?: ColourFunction;
   /** Built-in effects only: the params at which the effect changes nothing, so the player skips it there. */
   readonly neutral?: Readonly<Record<string, unknown>>;
 }
@@ -57,6 +61,17 @@ export interface ShaderUniform {
   readonly name: string;
   readonly kind: "float" | "bool" | "vec2" | "vec3" | "vec4" | "colour" | "enum" | "asset" | "string" | "numbers";
   readonly options?: readonly string[];
+}
+
+/**
+ * A built-in colour transform's function, in parts a fused source can combine: `code` is `vec3 <fn>(vec3 c)`, which
+ * reads `params.*`; `prelude` is what it declares besides; `uses` are the GLSL modules both need.
+ */
+export interface ColourFunction {
+  readonly fn: string;
+  readonly uses: readonly GlslModule[];
+  readonly prelude: string;
+  readonly code: string;
 }
 
 /** A small picture a built-in effect computes from its params. */
