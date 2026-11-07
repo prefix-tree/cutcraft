@@ -91,7 +91,9 @@ const outline = shaderDefinition("effect", {
     if (dy > 254.5) continue;
     best = min(best, float(k * k) + dy * dy);
   }
-  float grown = max(o.a, clamp(params.width - sqrt(best) + 0.5, 0.0, 1.0));
+  // Distances run to silhouette pixels' centres; the shape's edge lies half a pixel past them, and the band's own edge
+  // fades over the pixel after it.
+  float grown = max(o.a, clamp(params.width - sqrt(best) + 1.0, 0.0, 1.0));
   vec4 band = vec4(params.color, grown * params.opacity);
   return params.outlineOnly ? band : cc_over(o, band);
 }`,
