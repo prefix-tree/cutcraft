@@ -2,7 +2,7 @@
 import { z } from "zod";
 
 import { shaderDefinition } from "../jsx/shader-definition";
-import { FARTHEST, HEX, NOISE, UV } from "./glsl";
+import { FARTHEST, glsl, HEX, NOISE, UV } from "./glsl";
 
 /**
  * Iris: the next clip opens from `center` in a circle (`sides` 0), a regular polygon, or a star (`star` sets the inner
@@ -19,7 +19,7 @@ const iris = shaderDefinition("transition", {
     center: UV.default([0.5, 0.5]),
     feather: z.number().min(0).max(200).default(2),
   }),
-  shader: `${FARTHEST}vec4 transition(vec2 uv) {
+  shader: glsl`${FARTHEST}vec4 transition(vec2 uv) {
   vec2 p = (uv - params.center) * resolution;
   float n = params.sides >= 3.0 ? params.sides : 0.0;
   float half_sector = n > 0.0 ? 3.14159265 / n : 0.0;
@@ -40,41 +40,34 @@ const iris = shaderDefinition("transition", {
 }`,
 });
 
-/** clockWipe's directions, as the numbers its shader reads. */
-const SWEEP = { clockwise: 1, counterclockwise: -1, both: 0 } as const;
-
 /**
  * Clock wipe: the next clip sweeps in around `center`, from `startAngle` (degrees clockwise from up), `clockwise`,
  * `counterclockwise` or `both` ways at once. `softness` softens the moving edge, as a share of the turn.
  */
-const clockWipe = {
-  ...shaderDefinition("transition", {
-    name: "clockWipe",
-    params: z.object({
-      startAngle: z.number().default(0),
-      direction: z.enum(["clockwise", "counterclockwise", "both"]).default("clockwise"),
-      center: UV.default([0.5, 0.5]),
-      softness: z
-        .number()
-        .min(0)
-        .max(1)
-        .default(1 / 360),
-    }),
-    shader: `vec4 transition(vec2 uv) {
+const clockWipe = shaderDefinition("transition", {
+  name: "clockWipe",
+  params: z.object({
+    startAngle: z.number().default(0),
+    direction: z.enum(["clockwise", "counterclockwise", "both"]).default("clockwise"),
+    center: UV.default([0.5, 0.5]),
+    softness: z
+      .number()
+      .min(0)
+      .max(1)
+      .default(1 / 360),
+  }),
+  shader: `vec4 transition(vec2 uv) {
   float tau = 6.28318531;
   vec2 p = (uv - params.center) * resolution;
   float rel = mod(atan(p.x, -p.y) - radians(params.startAngle), tau);
-  float along = params.direction > 0.5 ? rel : params.direction < -0.5 ? tau - rel : 2.0 * min(rel, tau - rel);
+  float along = params.direction == params.direction.clockwise
+    ? rel
+    : params.direction == params.direction.counterclockwise ? tau - rel : 2.0 * min(rel, tau - rel);
   float soft = max(params.softness * tau, 1e-4);
   float m = clamp((progress * (tau + soft) - along) / soft, 0.0, 1.0);
   return mix(texture(from, uv), texture(to, uv), m);
 }`,
-  }),
-  uniforms: (params: Readonly<Record<string, unknown>>) => ({
-    ...params,
-    direction: SWEEP[params.direction as keyof typeof SWEEP] ?? 1,
-  }),
-};
+});
 
 /**
  * Blinds: `slats` bands across the frame, each opening across its width as the transition runs: a pixel's place within
@@ -115,7 +108,7 @@ const filmBurn = shaderDefinition("transition", {
     edge: z.number().min(0).max(500).default(24),
     color: HEX.default("#ff7a1a"),
   }),
-  shader: `${NOISE}${FARTHEST}vec4 transition(vec2 uv) {
+  shader: glsl`${NOISE}${FARTHEST}vec4 transition(vec2 uv) {
   vec2 p = (uv - params.center) * resolution;
   float near = length(p) / cc_farthest(params.center);
   float rough = cc_fbm(uv * resolution / params.size, uint(params.seed));
@@ -143,7 +136,7 @@ const pixelDissolve = shaderDefinition("transition", {
     seed: z.number().int().min(0).max(4294967295).default(0),
     softness: z.number().min(0).max(1).default(0.15),
   }),
-  shader: `${NOISE}vec4 transition(vec2 uv) {
+  shader: glsl`${NOISE}vec4 transition(vec2 uv) {
   uvec2 block = uvec2(min(floor(uv * vec2(params.columns, params.rows)), vec2(params.columns, params.rows) - 1.0));
   float at = cc_hash(uvec3(block, uint(params.seed))) * (1.0 - params.softness);
   float m = params.softness > 0.0 ? smoothstep(at, at + params.softness, progress) : step(at, progress);

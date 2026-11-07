@@ -3,14 +3,13 @@
 // with WebGL 2. Passes between the first and the last draw into textures, not the canvas. Where there is no WebGL 2,
 // `available` is false and the painter draws without them.
 
-import type { ShaderStep } from "@cutcraft/kit";
+import type { ShaderStep, ShaderUniform } from "@cutcraft/kit";
 
 import type { ShaderTexture, ShaderTextures } from "../media/shader-textures";
 import type { ShaderPass, TransitionPass } from "../model/shaders";
 import type { AnyCanvas, CreateCanvas } from "../types";
 
 type Gl = WebGL2RenderingContext;
-type Uniform = { readonly type: "float" | "bool" | "vec2" | "vec3" | "vec4"; readonly value: readonly number[] };
 
 const VERTEX = `#version 300 es
 in vec2 position;
@@ -36,52 +35,127 @@ const PARAM_READ = /(?<![.\w])params\.([A-Za-z_]\w*)/g;
 const asWritten = (log: string | null | undefined): string | undefined =>
   log?.trim().replace(/cc_param_(\w+)/g, "params.$1");
 
-/** A param as a uniform: a number as a float, a boolean as a bool, 2 to 4 numbers as a vec, `#rgb`/`#rrggbb` as a vec3. */
-export function uniformOf(value: unknown): Uniform | null {
-  if (typeof value === "number" && Number.isFinite(value)) return { type: "float", value: [value] };
-  if (typeof value === "boolean") return { type: "bool", value: [value ? 1 : 0] };
-  if (Array.isArray(value) && value.length >= 2 && value.length <= 4 && value.every((v) => typeof v === "number"))
-    return { type: `vec${value.length}` as Uniform["type"], value: value as number[] };
-  if (typeof value === "string") {
-    const hex = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(value)?.[1];
-    if (!hex) return null;
-    const full = hex.length === 3 ? [...hex].map((c) => c + c).join("") : hex;
-    return { type: "vec3", value: [0, 2, 4].map((i) => Number.parseInt(full.slice(i, i + 2), 16) / 255) };
-  }
-  return null;
+/** A param's uniform as a pass declares it: its GLSL type, and an enum's options. */
+export interface Declared {
+  readonly name: string;
+  readonly glsl: "float" | "bool" | "int" | "vec2" | "vec3" | "vec4" | "sampler2D" | "sampler3D";
+  readonly options?: readonly string[];
 }
 
+/** `#rgb` or `#rrggbb` as 0..1 channels, or null. */
+function rgbOf(value: unknown): number[] | null {
+  if (typeof value !== "string") return null;
+  const hex = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(value)?.[1];
+  if (!hex) return null;
+  const full = hex.length === 3 ? [...hex].map((c) => c + c).join("") : hex;
+  return [0, 2, 4].map((i) => Number.parseInt(full.slice(i, i + 2), 16) / 255);
+}
+
+const isNumbers = (v: unknown): v is number[] => Array.isArray(v) && v.every((x) => typeof x === "number");
+
 /**
- * The fragment shader around a pass's GLSL function: its inputs, its params as uniforms (read as `params.NAME`), and a
- * `main` that calls it. A final pass writes premultiplied colour for the canvas; a pass into a texture writes plain
- * colour, as the next pass reads its `image`.
+ * How each param reaches a pass's shader: the kind its schema gave it, and, where the schema left it open (a string or
+ * a list of numbers of no fixed length), the kind its value has. A param with nothing a uniform can take is left out.
+ */
+export function declare(
+  uniforms: readonly ShaderUniform[],
+  params: Readonly<Record<string, unknown>>,
+  /** The kind of texture an `"asset:ID"` names: a 3D table (a LUT) or a 2D picture; undefined when not loaded. */
+  textureKind: (ref: string) => "2d" | "3d" | undefined = () => undefined,
+): Declared[] {
+  const out: Declared[] = [];
+  for (const u of uniforms) {
+    const value = params[u.name];
+    const sampler = () => {
+      const kind = typeof value === "string" ? textureKind(value) : undefined;
+      return kind ? ({ name: u.name, glsl: kind === "3d" ? "sampler3D" : "sampler2D" } as const) : null;
+    };
+    let d: Declared | null = null;
+    switch (u.kind) {
+      case "float":
+      case "bool":
+      case "vec2":
+      case "vec3":
+      case "vec4":
+        d = { name: u.name, glsl: u.kind };
+        break;
+      case "colour":
+        d = { name: u.name, glsl: "vec3" };
+        break;
+      case "enum":
+        d = { name: u.name, glsl: "int", options: u.options ?? [] };
+        break;
+      case "asset":
+        d = sampler();
+        break;
+      case "string":
+        d = sampler() ?? (rgbOf(value) ? { name: u.name, glsl: "vec3" } : null);
+        break;
+      case "numbers":
+        d =
+          isNumbers(value) && value.length >= 2 && value.length <= 4
+            ? { name: u.name, glsl: `vec${value.length}` as "vec2" | "vec3" | "vec4" }
+            : null;
+        break;
+    }
+    if (d) out.push(d);
+  }
+  return out;
+}
+
+/** A param's value as its declared uniform takes it, or null to leave it unset (a sampler is bound, not set). */
+export function uniformValue(d: Declared, value: unknown): number[] | null {
+  switch (d.glsl) {
+    case "float":
+      return typeof value === "number" && Number.isFinite(value) ? [value] : null;
+    case "bool":
+      return typeof value === "boolean" ? [value ? 1 : 0] : null;
+    case "int": {
+      const i = typeof value === "string" ? (d.options ?? []).indexOf(value) : -1;
+      return i >= 0 ? [i] : null;
+    }
+    case "vec3":
+      return rgbOf(value) ?? (isNumbers(value) && value.length === 3 ? value : null);
+    case "vec2":
+    case "vec4":
+      return isNumbers(value) && value.length === Number(d.glsl.slice(3)) ? value : null;
+    default:
+      return null;
+  }
+}
+
+/** `params.NAME.OPTION` naming an enum's option. */
+const OPTION_READ = /(?<![.\w])params\.([A-Za-z_]\w*)\.([A-Za-z_]\w*)/g;
+
+/**
+ * The fragment shader around a pass's GLSL function: its inputs, its params as the uniforms they are declared as (read
+ * as `params.NAME`, an enum's options as `params.NAME.OPTION`), and a `main` that calls it. A final pass writes
+ * premultiplied colour for the canvas; a pass into a texture writes plain colour, as the next pass reads its `image`.
  */
 export function fragmentSource(
   kind: "effect" | "transition",
   source: string,
-  params: Readonly<Record<string, unknown>>,
+  declared: readonly Declared[],
   final = true,
-  /** The kind of texture each `"asset:ID"` param names: a 3D table (a LUT) or a 2D picture. */
-  textureKind: (ref: string) => "2d" | "3d" | undefined = () => undefined,
   /** Pictures a built-in computes from its params (a curve's table), declared as `sampler2D`s of these names. */
   tables: readonly string[] = [],
 ): string {
   const named = tables
     .filter((name) => /^[A-Za-z_]\w*$/.test(name) && !INPUTS.has(name))
     .map((name) => `uniform highp sampler2D ${name};`);
-  const uniforms = Object.entries(params)
-    .filter(([name]) => /^[A-Za-z_]\w*$/.test(name))
-    .map(([name, value]) => {
-      const texture = typeof value === "string" ? textureKind(value) : undefined;
-      if (texture) return `uniform highp ${texture === "3d" ? "sampler3D" : "sampler2D"} ${paramUniform(name)};`;
-      const u = uniformOf(value);
-      return u ? `uniform ${u.type} ${paramUniform(name)};` : null;
-    })
-    .filter((line): line is string => line !== null);
+  const uniforms = declared
+    .filter((d) => /^[A-Za-z_]\w*$/.test(d.name))
+    .map((d) => `uniform ${d.glsl.startsWith("sampler") ? "highp " : ""}${d.glsl} ${paramUniform(d.name)};`);
   const inputs =
     kind === "effect"
       ? "uniform sampler2D image;\nuniform sampler2D original;"
       : "uniform sampler2D from;\nuniform sampler2D to;\nuniform float progress;";
+  const code = source
+    .replace(OPTION_READ, (read, name: string, option: string) => {
+      const i = declared.find((d) => d.name === name && d.glsl === "int")?.options?.indexOf(option) ?? -1;
+      return i >= 0 ? String(i) : read;
+    })
+    .replace(PARAM_READ, (_, name: string) => paramUniform(name));
   return `#version 300 es
 precision highp float;
 ${inputs}
@@ -91,7 +165,7 @@ ${[...named, ...uniforms].join("\n")}
 in vec2 cutcraft_uv;
 out vec4 cutcraft_out;
 #line 1
-${source.replace(PARAM_READ, (_, name: string) => paramUniform(name))}
+${code}
 void main() {
   vec4 c = ${kind}(cutcraft_uv);
   cutcraft_out = ${final ? "vec4(c.rgb * c.a, c.a)" : "c"};
@@ -137,7 +211,7 @@ export function planSteps(effects: readonly ShaderPass[]): PlannedStep[] {
   const last = out[out.length - 1];
   if (last && (last.scale !== 1 || last.region))
     out.push({
-      effect: { name: "copy", sources: [COPY], builtIn: true, params: {}, time: last.effect.time },
+      effect: { name: "copy", sources: [COPY], builtIn: true, params: {}, uniforms: [], time: last.effect.time },
       source: COPY,
       scale: 1,
       first: true,
@@ -149,7 +223,10 @@ export class ShaderRunner {
   private canvas: AnyCanvas | null = null;
   private gl: Gl | null = null;
   private tried = false;
-  private readonly programs = new Map<string, WebGLProgram>();
+  /** Programs by source, then by how the source's uniforms are declared. */
+  private readonly programs = new Map<string, Map<string, WebGLProgram>>();
+  /** Uniform locations by program and name. */
+  private readonly locations = new WeakMap<WebGLProgram, Map<string, WebGLUniformLocation | null>>();
   /** Textures the pictures are uploaded into, one per input name. */
   private readonly uploads = new Map<string, WebGLTexture>();
   /** Textures between passes, by size; enough that a pass never draws into its `image` or its effect's `original`. */
@@ -190,10 +267,8 @@ export class ShaderRunner {
       const assets = this.assetTextures(gl, step.effect, textures);
       const kindOf = (ref: string) => assets.get(ref)?.kind;
       const tables = this.tableTextures(gl, step.effect);
-      const program = this.program(
-        gl,
-        fragmentSource("effect", step.source, step.effect.params, last, kindOf, [...tables.keys()]),
-      );
+      const declared = declare(step.effect.uniforms, step.effect.params, kindOf);
+      const program = this.programFor(gl, "effect", step.source, declared, last, [...tables.keys()]);
       const bound: Record<string, { texture: WebGLTexture; kind: "2d" | "3d" }> = {
         image: { texture: image, kind: "2d" },
         original: { texture: original, kind: "2d" },
@@ -203,7 +278,7 @@ export class ShaderRunner {
         const asset = typeof value === "string" ? assets.get(value) : undefined;
         if (asset) bound[paramUniform(name)] = asset;
       }
-      this.draw(gl, program, target, step.effect.params, bound, { time: step.effect.time }, step.region);
+      this.draw(gl, program, target, declared, step.effect.params, bound, { time: step.effect.time }, step.region);
       if (target) image = target.texture;
     });
     return this.canvas;
@@ -289,8 +364,9 @@ export class ShaderRunner {
       from: { texture: this.upload(gl, "from", from ?? empty), kind: "2d" as const },
       to: { texture: this.upload(gl, "to", to ?? empty), kind: "2d" as const },
     };
-    const program = this.program(gl, fragmentSource("transition", pass.source, pass.params));
-    this.draw(gl, program, null, pass.params, textures, { time: pass.time, progress: pass.progress });
+    const declared = declare(pass.uniforms, pass.params);
+    const program = this.programFor(gl, "transition", pass.source, declared, true, []);
+    this.draw(gl, program, null, declared, pass.params, textures, { time: pass.time, progress: pass.progress });
     return this.canvas;
   }
 
@@ -363,9 +439,43 @@ export class ShaderRunner {
     return target;
   }
 
-  private program(gl: Gl, fragment: string): WebGLProgram {
-    const cached = this.programs.get(fragment);
+  /**
+   * The program of a pass's source with these uniforms, built once: kept by its source (the same string each frame, so
+   * its hash is computed once) and a short key of how it is declared, so no shader text is built for a frame.
+   */
+  private programFor(
+    gl: Gl,
+    kind: "effect" | "transition",
+    source: string,
+    declared: readonly Declared[],
+    final: boolean,
+    tables: readonly string[],
+  ): WebGLProgram {
+    const key = `${kind}|${final ? 1 : 0}|${declared.map((d) => `${d.name}:${d.glsl}`).join(",")}|${tables.join(",")}`;
+    let bySource = this.programs.get(source);
+    if (!bySource) {
+      bySource = new Map();
+      this.programs.set(source, bySource);
+    }
+    const cached = bySource.get(key);
     if (cached) return cached;
+    const program = this.program(gl, fragmentSource(kind, source, declared, final, tables));
+    bySource.set(key, program);
+    return program;
+  }
+
+  /** A uniform's location in a program, looked up once. */
+  private location(gl: Gl, program: WebGLProgram, name: string): WebGLUniformLocation | null {
+    let names = this.locations.get(program);
+    if (!names) {
+      names = new Map();
+      this.locations.set(program, names);
+    }
+    if (!names.has(name)) names.set(name, gl.getUniformLocation(program, name));
+    return names.get(name) ?? null;
+  }
+
+  private program(gl: Gl, fragment: string): WebGLProgram {
     const compile = (type: number, text: string): WebGLShader => {
       const shader = gl.createShader(type) as WebGLShader;
       gl.shaderSource(shader, text);
@@ -381,7 +491,6 @@ export class ShaderRunner {
     gl.linkProgram(program);
     if (!gl.getProgramParameter(program, gl.LINK_STATUS))
       throw new Error(`the shader does not link: ${asWritten(gl.getProgramInfoLog(program))}`);
-    this.programs.set(fragment, program);
     return program;
   }
 
@@ -390,6 +499,7 @@ export class ShaderRunner {
     gl: Gl,
     program: WebGLProgram,
     target: Target | null,
+    declared: readonly Declared[],
     params: Readonly<Record<string, unknown>>,
     textures: Readonly<Record<string, { readonly texture: WebGLTexture; readonly kind: "2d" | "3d" }>>,
     values: Readonly<Record<string, number>>,
@@ -415,19 +525,20 @@ export class ShaderRunner {
     Object.entries(textures).forEach(([name, { texture, kind }], unit) => {
       gl.activeTexture(gl.TEXTURE0 + unit);
       gl.bindTexture(kind === "3d" ? gl.TEXTURE_3D : gl.TEXTURE_2D, texture);
-      gl.uniform1i(gl.getUniformLocation(program, name), unit);
+      gl.uniform1i(this.location(gl, program, name), unit);
     });
-    gl.uniform1f(gl.getUniformLocation(program, "cutcraft_flip"), target ? -1 : 1);
-    gl.uniform2f(gl.getUniformLocation(program, "resolution"), this.width, this.height);
-    for (const [name, value] of Object.entries(values)) gl.uniform1f(gl.getUniformLocation(program, name), value);
-    for (const [name, value] of Object.entries(params)) {
-      const u = uniformOf(value);
-      const at = u && gl.getUniformLocation(program, paramUniform(name));
-      if (!u || !at) continue;
-      if (u.type === "float" || u.type === "bool") gl.uniform1f(at, u.value[0] as number);
-      else if (u.type === "vec2") gl.uniform2fv(at, u.value);
-      else if (u.type === "vec3") gl.uniform3fv(at, u.value);
-      else gl.uniform4fv(at, u.value);
+    gl.uniform1f(this.location(gl, program, "cutcraft_flip"), target ? -1 : 1);
+    gl.uniform2f(this.location(gl, program, "resolution"), this.width, this.height);
+    for (const [name, value] of Object.entries(values)) gl.uniform1f(this.location(gl, program, name), value);
+    for (const d of declared) {
+      const value = uniformValue(d, params[d.name]);
+      const at = value && this.location(gl, program, paramUniform(d.name));
+      if (!value || !at) continue;
+      if (d.glsl === "float") gl.uniform1f(at, value[0] as number);
+      else if (d.glsl === "bool" || d.glsl === "int") gl.uniform1i(at, value[0] as number);
+      else if (d.glsl === "vec2") gl.uniform2fv(at, value);
+      else if (d.glsl === "vec3") gl.uniform3fv(at, value);
+      else gl.uniform4fv(at, value);
     }
     gl.enableVertexAttribArray(0);
     gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);

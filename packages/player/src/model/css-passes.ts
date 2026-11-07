@@ -4,7 +4,7 @@
 // browser's filter does. The input is a CSS filter string of the forms the player writes (model/effects.ts), so the
 // shader and the no-WebGL fallback share one mapping from params to CSS.
 
-import type { ShaderStep } from "@cutcraft/kit";
+import type { ShaderStep, ShaderUniform } from "@cutcraft/kit";
 import { gaussSteps } from "@cutcraft/kit";
 
 import type { ShaderPass } from "./shaders";
@@ -38,11 +38,23 @@ const SHADOW = `vec4 effect(vec2 uv) {
   return vec4((o.rgb * o.a + params.color.rgb * s * (1.0 - o.a)) / out_a, out_a);
 }`;
 
+/** The uniforms of the passes here, declared as the kit's definitions declare theirs from a schema. */
+const FLOATS = (...names: string[]): ShaderUniform[] => names.map((name) => ({ name, kind: "float" }));
+const LINEAR_UNIFORMS = FLOATS("slope", "offset");
+const MATRIX_UNIFORMS: ShaderUniform[] = ["r0", "r1", "r2"].map((name) => ({ name, kind: "vec3" }));
+const BLUR_UNIFORMS = FLOATS("sigma");
+const SHADOW_UNIFORMS: ShaderUniform[] = [
+  ...BLUR_UNIFORMS,
+  { name: "offset", kind: "vec2" },
+  { name: "color", kind: "vec4" },
+];
+
 const pass = (
   name: string,
   sources: readonly string[],
   params: Params,
   time: number,
+  uniforms: readonly ShaderUniform[],
   steps?: readonly ShaderStep[],
 ): ShaderPass => ({
   name: `css:${name}`,
@@ -50,6 +62,7 @@ const pass = (
   ...(steps ? { steps } : {}),
   builtIn: true,
   params,
+  uniforms,
   time,
 });
 
@@ -95,7 +108,7 @@ function grayscale(amount: number): number[][] {
 }
 
 const matrix = (name: string, rows: number[][], time: number): ShaderPass =>
-  pass(name, [MATRIX], { r0: rows[0], r1: rows[1], r2: rows[2] }, time);
+  pass(name, [MATRIX], { r0: rows[0], r1: rows[1], r2: rows[2] }, time, MATRIX_UNIFORMS);
 
 /** A number or a percentage, as a CSS filter argument. */
 function amount(arg: string): number {
@@ -173,17 +186,17 @@ export function cssPasses(filter: string, time: number): ShaderPass[] {
   for (const { name, args } of cssFunctions(filter)) {
     switch (name) {
       case "brightness": {
-        out.push(pass(name, [LINEAR], { slope: amount(args), offset: 0 }, time));
+        out.push(pass(name, [LINEAR], { slope: amount(args), offset: 0 }, time, LINEAR_UNIFORMS));
         break;
       }
       case "contrast": {
         const a = amount(args);
-        out.push(pass(name, [LINEAR], { slope: a, offset: 0.5 - 0.5 * a }, time));
+        out.push(pass(name, [LINEAR], { slope: a, offset: 0.5 - 0.5 * a }, time, LINEAR_UNIFORMS));
         break;
       }
       case "invert": {
         const a = Math.min(1, Math.max(0, amount(args)));
-        out.push(pass(name, [LINEAR], { slope: 1 - 2 * a, offset: a }, time));
+        out.push(pass(name, [LINEAR], { slope: 1 - 2 * a, offset: a }, time, LINEAR_UNIFORMS));
         break;
       }
       case "saturate":
@@ -199,7 +212,7 @@ export function cssPasses(filter: string, time: number): ShaderPass[] {
         out.push(matrix(name, grayscale(amount(args)), time));
         break;
       case "blur":
-        out.push(pass(name, [], { sigma: px(args) }, time, gauss(px(args), false)));
+        out.push(pass(name, [], { sigma: px(args) }, time, BLUR_UNIFORMS, gauss(px(args), false)));
         break;
       case "drop-shadow": {
         // `x y [blur] colour`: the lengths first, the colour after them (it may hold spaces, as rgba() does).
@@ -218,6 +231,7 @@ export function cssPasses(filter: string, time: number): ShaderPass[] {
               color: cssColour(colour || "black"),
             },
             time,
+            SHADOW_UNIFORMS,
             [...gauss(px(b ?? "0"), true), { source: SHADOW }],
           ),
         );

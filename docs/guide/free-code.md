@@ -209,8 +209,9 @@ const soften = effect({
 
 The shader reads each param as `params.<name>`, so a param can take any name, `length` and `image` included. A
 number becomes a `float`, a boolean a `bool`, an array of two, three or four numbers a `vec2`, `vec3` or `vec4`, and a
-colour string such as `"#ff8800"` a `vec3`. `effect()` refuses a shader that reads a param its schema does not
-declare. The zod schema checks the values and fills in defaults, a [`<Keyframe>`](/reference/elements/keyframe) inside the
+colour string such as `"#ff8800"` a `vec3`. A `z.enum` becomes an `int`, and the shader names its options:
+`params.direction == params.direction.left`. The types come from the schema, once. `effect()` refuses a shader that
+reads a param its schema does not declare, or one no uniform can carry. The zod schema checks the values and fills in defaults, a [`<Keyframe>`](/reference/elements/keyframe) inside the
 `<Effect>` animates one with `param="<name>"` (the resolver checks the name and the values against the schema), and
 an editor can build its inspector from the schema.
 

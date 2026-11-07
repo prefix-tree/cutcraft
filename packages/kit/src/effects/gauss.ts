@@ -12,6 +12,7 @@
 //
 // Shaders work in frame pixels and uv as always: a step works out its own texel size from its `image`'s size.
 import type { ShaderStep } from "../jsx/shader-definition";
+import { COLOUR, glsl } from "./glsl";
 
 /** What a blur blurs: the luminance or the alpha (into red), or the picture. */
 export type GaussWhat = "luma" | "alpha" | "rgba";
@@ -74,8 +75,7 @@ function direction(
         ? "sum.a > 0.0 ? vec4(sum.rgb / sum.a, sum.a) : vec4(0.0)"
         : "vec4(vec3(sum.r), 1.0)";
   const linear = input !== "plain";
-  return `float cc_luma(vec3 c) { return dot(c, vec3(0.2126, 0.7152, 0.0722)); }
-${at(outside)}vec4 cc_take(vec4 s) { return ${take(what, input)}; }
+  return glsl`${COLOUR}${at(outside)}vec4 cc_take(vec4 s) { return ${take(what, input)}; }
 vec4 effect(vec2 uv) {
   vec2 size = vec2(textureSize(image, 0));
   float sigma = max(params.${param}, 1e-3) * size.${a} / resolution.${a};

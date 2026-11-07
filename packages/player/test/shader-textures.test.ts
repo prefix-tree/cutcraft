@@ -12,7 +12,7 @@ const identity = (size: number, domain = "") => {
 
 describe("shader textures", () => {
   it("find the asset refs among effects' params", () => {
-    const pass = (params: Record<string, unknown>) => ({ name: "x", sources: [], params, time: 0 });
+    const pass = (params: Record<string, unknown>) => ({ name: "x", sources: [], params, uniforms: [], time: 0 });
     expect(textureRefs([pass({ src: "asset:teal", amount: 1 }), pass({ tint: "#fff", over: "asset:logo" })])).toEqual([
       "asset:teal",
       "asset:logo",
