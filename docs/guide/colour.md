@@ -9,7 +9,7 @@ for a stretch of time. They run as shaders in the preview and the export alike, 
 ```tsx
 <Clip id="interview" src="asset:interview">
   <Effect id="expose" type="exposure" params={{ stops: 0.5 }} />
-  <Effect id="balance" type="whiteBalance" params={{ temperature: 15 }} />
+  <Effect id="balance" type="whiteBalance" params={{ temperature: 0.15 }} />
   <Effect id="tone" type="curves" params={{ rgb: [[0, 0.03], [0.25, 0.22], [0.75, 0.8], [1, 1]] }} />
   <Effect id="pop" type="vibrance" params={{ amount: 0.3 }} />
 </Clip>
@@ -24,8 +24,8 @@ the white first, then shape the tones, then give the picture its look.
 It works where light is linear, so highlights keep their colour instead of washing out as they would under a plain
 brightness filter.
 
-`whiteBalance` removes a colour cast. `temperature` (-100 to 100) warms the picture toward amber or cools it toward
-blue; `tint` (-100 to 100) moves it toward magenta or green. It adapts the picture as if it had been lit by a
+`whiteBalance` removes a colour cast. `temperature` (-1 to 1, a stop of colour temperature each way) warms the picture
+toward amber or cools it toward blue; `tint` (-1 to 1) moves it toward magenta or green. It adapts the picture as if it had been lit by a
 different daylight, so greys stay grey while the cast goes.
 
 `levels` sets the black point and the white point (`black`, `white`, 0 to 1) and bends the midtones with `gamma`

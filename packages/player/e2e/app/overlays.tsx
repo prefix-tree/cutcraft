@@ -13,7 +13,7 @@ export default function Video() {
       </Track>
       <Track id="adj" layout="free">
         <Adjustment id="adj1" start={0} duration={1}>
-          <Effect id="e1" type="brightness" params={{ amount: -50 }} />
+          <Effect id="e1" type="brightness" params={{ amount: -0.5 }} />
         </Adjustment>
       </Track>
     </Composition>

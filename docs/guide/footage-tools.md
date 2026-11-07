@@ -67,10 +67,11 @@ When the camera moves, keyframe each corner.
 
 ## Camera looks
 
-`zoomBlur` smears the picture toward `center` (`[x, y]`), more the further from it, up to `amount` pixels at the
-corners; `samples` (up to 64) trades smoothness for speed. Keyframe `amount` down from a high value for a punch-in.
+`zoomBlur` smears the picture toward `center` (`[x, y]`), more the further from it, up to `length` pixels at the
+corners; `samples` (up to 64) trades smoothness for speed. Keyframe `length` down from a high value for a punch-in.
 
-`chromaticAberration` splits red and blue apart by `amount` pixels, along `angle` (degrees, 0 is across), or with
+`chromaticAberration` splits red and blue apart by `distance` pixels, along `angle` (degrees clockwise from up, so the
+default 90 is across), or with
 `radial` outward from `center`, growing toward the edges as a lens fringes.
 
 ## Where there is no WebGL

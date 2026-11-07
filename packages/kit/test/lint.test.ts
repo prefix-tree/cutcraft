@@ -234,7 +234,7 @@ describe("lint", () => {
     it("says nothing about a file that only uses what renders", () => {
       expect(
         notRendered(`<Track id="t">
-        <Clip id="a" src="asset:city" speed={2}><Effect id="e" type="blur" /><Effect id="tp" type="temperature" params={{ amount: 20 }} /><Effect id="tn" type="tint" params={{ amount: -10 }} /><Effect id="lv" type="levels" params={{ black: 0.05, white: 0.95 }} /><Effect id="vg" type="vignette" params={{ amount: 40 }} /><Effect id="gr" type="grain" /><ColorGrade id="g" temperature={20} /><Mask id="m" shape={{ rect: { x: 0, y: 0, width: 1, height: 1 } }} /><Keyframe id="k" property="transform.position.x" at={0} value={0} /></Clip>
+        <Clip id="a" src="asset:city" speed={2}><Effect id="e" type="blur" /><Effect id="tp" type="temperature" params={{ amount: 0.2 }} /><Effect id="tn" type="tint" params={{ amount: -0.1 }} /><Effect id="lv" type="levels" params={{ black: 0.05, white: 0.95 }} /><Effect id="vg" type="vignette" params={{ amount: 0.4 }} /><Effect id="gr" type="grain" /><ColorGrade id="g" temperature={20} /><Mask id="m" shape={{ rect: { x: 0, y: 0, width: 1, height: 1 } }} /><Keyframe id="k" property="transform.position.x" at={0} value={0} /></Clip>
         <Transition id="x" type="crossfade" />
         <Clip id="b" src="asset:city" />
         <Transition id="w" type="wipe" params={{ direction: "up" }} />

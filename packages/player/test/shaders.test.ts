@@ -72,7 +72,7 @@ describe("declared shaders in the frame plan", () => {
       `<Track id="t"><Clip id="c" src="asset:city" in={0} out={4}>
         <Effect id="e" type="exposure" params={{ stops: 1 }} />
         <Effect id="v" type="vibrance" params={{ amount: 0.4 }} />
-        <Effect id="w" type="whiteBalance" params={{ temperature: 30 }} />
+        <Effect id="w" type="whiteBalance" params={{ temperature: 0.3 }} />
         <Effect id="k" type="curves" />
       </Clip></Track>`,
       "",

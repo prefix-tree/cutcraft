@@ -235,8 +235,8 @@ describe("colour effects", () => {
 
   it("white balance warms grey at a positive temperature, and cools it at a negative one", async () => {
     const [warm, cool] = await Promise.all([
-      graded("wb-warm", `<Effect id="w" type="whiteBalance" params={{ temperature: 50 }} />`, [0.5, 0.5, 0.5]),
-      graded("wb-cool", `<Effect id="w" type="whiteBalance" params={{ temperature: -50 }} />`, [0.5, 0.5, 0.5]),
+      graded("wb-warm", `<Effect id="w" type="whiteBalance" params={{ temperature: 0.5 }} />`, [0.5, 0.5, 0.5]),
+      graded("wb-cool", `<Effect id="w" type="whiteBalance" params={{ temperature: -0.5 }} />`, [0.5, 0.5, 0.5]),
     ]);
     expect((warm[0]?.[0] ?? 0) - (warm[0]?.[2] ?? 0)).toBeGreaterThan(10);
     expect((cool[0]?.[2] ?? 0) - (cool[0]?.[0] ?? 0)).toBeGreaterThan(10);
@@ -382,7 +382,7 @@ describe("footage tools", () => {
   it("zoomBlur keeps its centre and smears an edge far from it", async () => {
     const [centre, edge] = await at(
       "zoom",
-      `<Effect id="z" type="zoomBlur" params={{ amount: 120, center: [0.25, 0.5] }} />`,
+      `<Effect id="z" type="zoomBlur" params={{ length: 120, center: [0.25, 0.5] }} />`,
       { left: [0, 0, 0], right: [1, 1, 1], split: 0.75 },
       [
         [80, 90],
@@ -396,7 +396,7 @@ describe("footage tools", () => {
   it("chromaticAberration splits red and blue across an edge", async () => {
     const [before, after, far] = await at(
       "aberration",
-      `<Effect id="a" type="chromaticAberration" params={{ amount: 8 }} />`,
+      `<Effect id="a" type="chromaticAberration" params={{ distance: 8 }} />`,
       { left: [0, 0, 0], right: [1, 1, 1] },
       [
         [156, 90],
@@ -413,7 +413,7 @@ describe("footage tools", () => {
   it("radial aberration fringes the edges and leaves the centre", async () => {
     const [centre, edge] = await at(
       "aberration-radial",
-      `<Effect id="a" type="chromaticAberration" params={{ amount: 12, radial: true }} />`,
+      `<Effect id="a" type="chromaticAberration" params={{ distance: 12, radial: true }} />`,
       { left: [1, 1, 1], right: [0, 0, 0], split: 0.95 },
       [
         [160, 90],
@@ -496,7 +496,7 @@ describe("title effects", () => {
   it("bevel lights the edge facing the light and shades the other, and leaves the middle", async () => {
     const [top, bottom, middle] = await boxed(
       "bevel",
-      `<Effect id="b" type="bevel" params={{ size: 6, angle: 0, intensity: 1 }} />`,
+      `<Effect id="b" type="bevel" params={{ size: 6, angle: 0, amount: 1 }} />`,
       [
         [160, 61],
         [160, 118],
@@ -569,7 +569,7 @@ export default function Video() { return <Composition fps={30} width={320} heigh
   it("blinds open each slat across its width", async () => {
     const [opened, shut] = await through(
       "blinds",
-      `<Transition id="x" type="blinds" duration={1} params={{ feather: 0 }} />`,
+      `<Transition id="x" type="blinds" duration={1} params={{ softness: 0 }} />`,
       0.5,
       [
         [5, 90],
@@ -583,7 +583,7 @@ export default function Video() { return <Composition fps={30} width={320} heigh
   it("pixelDissolve switches whole blocks, some each way half way through", async () => {
     const colours = await through(
       "dissolve",
-      `<Transition id="x" type="pixelDissolve" duration={1} params={{ feather: 0, seed: 7 }} />`,
+      `<Transition id="x" type="pixelDissolve" duration={1} params={{ softness: 0, seed: 7 }} />`,
       0.5,
       grid(16, 9),
     );
@@ -637,7 +637,7 @@ describe("effects run in the order the file writes them", () => {
   // Mid grey, then brightness 1.5 and a squaring shader in either order: 0.75² = 0.5625, or 0.25 · 1.5 = 0.375.
   const SQUARE = `const grey = effect({ name: "grey", shader: "vec4 effect(vec2 uv) { return vec4(vec3(0.5), 1.0); }" });
 const square = effect({ name: "square", shader: "vec4 effect(vec2 uv) { vec4 c = texture(image, uv); return vec4(c.rgb * c.rgb, c.a); }" });`;
-  const BRIGHT = `<Effect id="b" type="brightness" params={{ amount: 50 }} />`;
+  const BRIGHT = `<Effect id="b" type="brightness" params={{ amount: 0.5 }} />`;
   const SQ = `<Effect id="s" type={square} />`;
   const close = (c: number[] | undefined, v: number) =>
     c?.slice(0, 3).every((x) => Math.abs(x - v * 255) <= 4) === true;

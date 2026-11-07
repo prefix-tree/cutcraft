@@ -13,7 +13,7 @@ Temperature and tint on its parent.
 | prop | type | default | required |
 |---|---|---|---|
 | `id` | string |  | yes |
-| `temperature` | number (-100..100) |  |  |
-| `tint` | number (-100..100) |  |  |
+| `temperature` | number (-1..1) |  |  |
+| `tint` | number (-1..1) |  |  |
 
 No children. [All elements](/reference/elements/)

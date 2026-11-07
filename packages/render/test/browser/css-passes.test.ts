@@ -148,16 +148,16 @@ const CASES: readonly {
   picture: "photo" | "shape";
   tolerance?: { off: number; max: number };
 }[] = [
-  { name: "brightness", picture: "photo", effect: `<Effect id="e" type="brightness" params={{ amount: 25 }} />` },
-  { name: "contrast", picture: "photo", effect: `<Effect id="e" type="contrast" params={{ amount: 40 }} />` },
-  { name: "saturation", picture: "photo", effect: `<Effect id="e" type="saturation" params={{ amount: 60 }} />` },
+  { name: "brightness", picture: "photo", effect: `<Effect id="e" type="brightness" params={{ amount: 0.25 }} />` },
+  { name: "contrast", picture: "photo", effect: `<Effect id="e" type="contrast" params={{ amount: 0.4 }} />` },
+  { name: "saturation", picture: "photo", effect: `<Effect id="e" type="saturation" params={{ amount: 0.6 }} />` },
   { name: "hue", picture: "photo", effect: `<Effect id="e" type="hue" params={{ angle: 90 }} />` },
-  { name: "sepia", picture: "photo", effect: `<Effect id="e" type="sepia" params={{ amount: 70 }} />` },
-  { name: "grayscale", picture: "photo", effect: `<Effect id="e" type="grayscale" params={{ amount: 80 }} />` },
-  { name: "invert", picture: "photo", effect: `<Effect id="e" type="invert" params={{ amount: 60 }} />` },
-  { name: "temperature", picture: "photo", effect: `<Effect id="e" type="temperature" params={{ amount: 40 }} />` },
-  { name: "tint", picture: "photo", effect: `<Effect id="e" type="tint" params={{ amount: 30 }} />` },
-  { name: "colorGrade", picture: "photo", effect: `<ColorGrade id="e" temperature={-40} tint={20} />` },
+  { name: "sepia", picture: "photo", effect: `<Effect id="e" type="sepia" params={{ amount: 0.7 }} />` },
+  { name: "grayscale", picture: "photo", effect: `<Effect id="e" type="grayscale" params={{ amount: 0.8 }} />` },
+  { name: "invert", picture: "photo", effect: `<Effect id="e" type="invert" params={{ amount: 0.6 }} />` },
+  { name: "temperature", picture: "photo", effect: `<Effect id="e" type="temperature" params={{ amount: 0.4 }} />` },
+  { name: "tint", picture: "photo", effect: `<Effect id="e" type="tint" params={{ amount: 0.3 }} />` },
+  { name: "colorGrade", picture: "photo", effect: `<ColorGrade id="e" temperature={-0.4} tint={0.2} />` },
   {
     name: "blur",
     picture: "photo",
@@ -173,12 +173,12 @@ const CASES: readonly {
   {
     name: "shadow-shape",
     picture: "shape",
-    effect: `<Effect id="e" type="shadow" params={{ x: 6, y: 8, blur: 10, color: "rgba(0,0,0,0.6)" }} />`,
+    effect: `<Effect id="e" type="shadow" params={{ x: 6, y: 8, radius: 10, color: "#000000", opacity: 0.6 }} />`,
   },
   {
     name: "brightness-shape",
     picture: "shape",
-    effect: `<Effect id="e" type="brightness" params={{ amount: -30 }} />`,
+    effect: `<Effect id="e" type="brightness" params={{ amount: -0.3 }} />`,
   },
 ];
 

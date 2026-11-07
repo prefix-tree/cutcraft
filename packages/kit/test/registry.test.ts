@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import type { z } from "zod";
 
 import {
   collectModule,
@@ -38,8 +39,8 @@ describe("the effect registry", () => {
   });
 
   it("checks and fills a CSS effect's params, which it did not before", () => {
-    expect(errorsOf(`<Effect id="b" type="brightness" params={{ amount: 300 }} />`)).toEqual([
-      "b.params.amount: Too big: expected number to be <=100",
+    expect(errorsOf(`<Effect id="b" type="brightness" params={{ amount: 3 }} />`)).toEqual([
+      "b.params.amount: Too big: expected number to be <=1",
     ]);
     expect(errorsOf(`<Effect id="b" type="brightness" params={{ value: 10 }} />`)).toEqual([
       'b.params: Unrecognized key: "value"',
@@ -51,7 +52,32 @@ export default function V() { return <Composition fps={30} width={640} height={3
       ),
       manifest,
     );
-    expect(state.items.get("s")?.props.params).toEqual({ x: 0, y: 4, blur: 8, color: "rgba(0,0,0,0.5)" });
+    expect(state.items.get("s")?.props.params).toEqual({ x: 0, y: 4, radius: 8, color: "#000000", opacity: 0.5 });
+  });
+
+  it("takes each kind of value on one scale, and refuses the old ones", () => {
+    expect(
+      errorsOf(`<Effect id="b" type="brightness" params={{ amount: 10 }} />
+          <Effect id="s" type="sepia" params={{ amount: 70 }} />
+          <Effect id="v" type="vignette" params={{ amount: 50 }} />
+          <Effect id="w" type="whiteBalance" params={{ temperature: 35 }} />
+          <Effect id="z" type="zoomBlur" params={{ amount: 60 }} />
+          <Effect id="d" type="shadow" params={{ blur: 4, color: "rgba(0,0,0,0.5)" }} />`),
+    ).toEqual([
+      "b.params.amount: Too big: expected number to be <=1",
+      "s.params.amount: Too big: expected number to be <=1",
+      "v.params.amount: Too big: expected number to be <=1",
+      "w.params.temperature: Too big: expected number to be <=1",
+      'z.params: Unrecognized key: "amount"',
+      expect.stringContaining("d.params"),
+      expect.stringContaining("d.params"),
+    ]);
+    // `amount` is a strength or share everywhere: never past -1..1.
+    for (const [type, entry] of Object.entries(EFFECTS)) {
+      const amount = (entry.params.shape as Record<string, z.ZodType | undefined>).amount;
+      if (!amount) continue;
+      expect([type, amount.safeParse(1).success, amount.safeParse(1.01).success]).toEqual([type, true, false]);
+    }
   });
 
   it("refuses an unknown param on a shader effect too, where it was dropped before", () => {

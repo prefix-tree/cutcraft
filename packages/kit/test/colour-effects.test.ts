@@ -65,7 +65,7 @@ describe("the colour effects", () => {
   it("fill their defaults", () => {
     const state = stateOf(`<Effect id="e" type="exposure" />
       <Effect id="v" type="vibrance" params={{ amount: 0.5 }} />
-      <Effect id="w" type="whiteBalance" params={{ temperature: 20 }} />
+      <Effect id="w" type="whiteBalance" params={{ temperature: 0.2 }} />
       <Effect id="s" type="shadowsHighlights" params={{ shadows: 0.4 }} />
       <Effect id="d" type="duotone" />
       <Effect id="k" type="curves" params={{ rgb: [[0, 0], [0.5, 0.6], [1, 1]] }} />`);
@@ -73,7 +73,7 @@ describe("the colour effects", () => {
     const params = (id: string) => state.items.get(id)?.props.params;
     expect(params("e")).toEqual({ stops: 0 });
     expect(params("v")).toEqual({ amount: 0.5 });
-    expect(params("w")).toEqual({ temperature: 20, tint: 0 });
+    expect(params("w")).toEqual({ temperature: 0.2, tint: 0 });
     expect(params("s")).toEqual({ shadows: 0.4, highlights: 0, radius: 30 });
     expect(params("d")).toEqual({ dark: "#1d2b53", light: "#ffd27f", amount: 1 });
     expect(params("k")).toMatchObject({

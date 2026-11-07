@@ -78,7 +78,7 @@ const CASES: readonly Case[] = [
   { name: "lut", effects: `<Effect id="e" type="lut" params={{ src: "asset:warm", amount: 0.8 }} />` },
   { name: "exposure", effects: `<Effect id="e" type="exposure" params={{ stops: 0.75 }} />` },
   { name: "vibrance", effects: `<Effect id="e" type="vibrance" params={{ amount: 0.6 }} />` },
-  { name: "whiteBalance", effects: `<Effect id="e" type="whiteBalance" params={{ temperature: 35, tint: -20 }} />` },
+  { name: "whiteBalance", effects: `<Effect id="e" type="whiteBalance" params={{ temperature: 0.35, tint: -0.2 }} />` },
   {
     name: "shadowsHighlights",
     effects: `<Effect id="e" type="shadowsHighlights" params={{ shadows: 0.7, highlights: -0.5, radius: 24 }} />`,
@@ -100,10 +100,10 @@ const CASES: readonly Case[] = [
     name: "cornerPin",
     effects: `<Effect id="e" type="cornerPin" params={{ topLeft: [0.1, 0.15], topRight: [0.85, 0.05], bottomRight: [0.9, 0.9], bottomLeft: [0.05, 0.8] }} />`,
   },
-  { name: "zoomBlur", effects: `<Effect id="e" type="zoomBlur" params={{ amount: 60, center: [0.4, 0.5] }} />` },
+  { name: "zoomBlur", effects: `<Effect id="e" type="zoomBlur" params={{ length: 60, center: [0.4, 0.5] }} />` },
   {
     name: "chromaticAberration",
-    effects: `<Effect id="e" type="chromaticAberration" params={{ amount: 10, radial: true }} />`,
+    effects: `<Effect id="e" type="chromaticAberration" params={{ distance: 10, radial: true }} />`,
   },
   {
     name: "glow",
@@ -116,11 +116,11 @@ const CASES: readonly Case[] = [
     shape: true,
     effects: `<Effect id="e" type="longShadow" params={{ length: 60, color: "#333333", fade: true }} />`,
   },
-  { name: "bevel", shape: true, effects: `<Effect id="e" type="bevel" params={{ size: 6, intensity: 0.8 }} />` },
+  { name: "bevel", shape: true, effects: `<Effect id="e" type="bevel" params={{ size: 6, amount: 0.8 }} />` },
   {
     name: "stack-grade",
     effects: `<Effect id="s1" type="exposure" params={{ stops: 0.4 }} />
-      <Effect id="s2" type="whiteBalance" params={{ temperature: 20 }} />
+      <Effect id="s2" type="whiteBalance" params={{ temperature: 0.2 }} />
       <Effect id="s3" type="curves" params={{ rgb: [[0, 0], [0.5, 0.6], [1, 1]] }} />
       <Effect id="s4" type="vibrance" params={{ amount: 0.4 }} />
       <Effect id="s5" type="lut" params={{ src: "asset:warm", amount: 0.5 }} />`,
@@ -128,13 +128,13 @@ const CASES: readonly Case[] = [
   {
     name: "stack-css-and-shader-title",
     layer: true,
-    effects: `<Effect id="s1" type="brightness" params={{ amount: 10 }} />
+    effects: `<Effect id="s1" type="brightness" params={{ amount: 0.1 }} />
       <Effect id="s2" type="levels" params={{ gamma: 1.2 }} />
       <Effect id="s3" type="blur" params={{ radius: 1 }} />`,
   },
   {
     name: "stack-css-and-shader",
-    effects: `<Effect id="s1" type="brightness" params={{ amount: 10 }} />
+    effects: `<Effect id="s1" type="brightness" params={{ amount: 0.1 }} />
       <Effect id="s2" type="levels" params={{ gamma: 1.2 }} />
       <Effect id="s3" type="blur" params={{ radius: 1 }} />`,
   },

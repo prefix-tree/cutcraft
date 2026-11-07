@@ -65,10 +65,10 @@ any `<Effect>`; they work on clips too.
   suits footage.
 - `outline` draws a band of `width` pixels (up to 64) around the shape in `color`, under it. `outlineOnly` draws the
   grown silhouette alone, filled.
-- `longShadow` sweeps the shape back along `angle` (degrees clockwise from the right, 45 falls down and right) for
+- `longShadow` sweeps the shape back along `angle` (degrees clockwise from up, 135 falls down and right) for
   `length` pixels, in `color`. Overlapping parts never stack, and `fade` thins it toward the far end.
 - `bevel` lights the shape as if raised: `size` is the width of the slope in pixels, `angle` where the light comes from
-  (degrees clockwise from above), and `intensity` how strongly edges take `highlight` or `shade`.
+  (degrees clockwise from up), and `amount` (0 to 1) how strongly edges take `highlight` or `shade`.
 
 They draw through the overlay's picture, which the preview needs Chrome's `chrome://flags/#canvas-draw-element` flag
 for. Without it the preview shows `glow` as a coloured shadow and leaves the other three out; the export always draws

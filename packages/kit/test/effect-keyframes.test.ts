@@ -38,7 +38,7 @@ describe("keyframes inside an effect", () => {
       errorsOf(`<Effect id="b" type="regionBlur"><Keyframe id="k1" param="boxx" at={0} value={1} /></Effect>
           <Effect id="o" type={own}><Keyframe id="k2" param="amount" at={0} value={2} /></Effect>
           <Effect id="r" type="brightness"><Keyframe id="k3" param="radius" at={0} value={10} /></Effect>
-          <Effect id="s" type="brightness"><Keyframe id="k4" param="amount" at={0} value={10} /></Effect>`),
+          <Effect id="s" type="brightness"><Keyframe id="k4" param="amount" at={0} value={0.1} /></Effect>`),
     ).toEqual([
       'k1.param: effect "regionBlur" has no param "boxx": it has box, radius, feather, roundness, inverted',
       'k2.value: param "amount" of "own": Too big: expected number to be <=1',

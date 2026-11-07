@@ -2,6 +2,21 @@
 
 Every built-in `<Effect type>` and `<Transition type>`, with the params it takes. Params outside these ranges, or not listed, are an error when the file resolves; a keyframe inside an effect animates one by `param`. Generated from the effect registry (`packages/kit/src/effects/registry.ts`) by `pnpm docs:gen`.
 
+## Units
+
+A param's name says what kind of value it is, and each kind has one scale:
+
+| Kind | Scale | Params |
+|---|---|---|
+| strength, mix or share | a fraction, 0 to 1, or -1 to 1 when it goes both ways | `amount`, `opacity`, `softness`, `tolerance`, `tint` |
+| gain | a multiplier | `intensity`, `scale` |
+| distance | pixels of the composition | `radius`, `width`, `feather`, `length`, `distance`, `size`, `edge`, `x`, `y` |
+| angle | degrees, clockwise from up | `angle`, `rotation`, `startAngle` |
+| position | fractions of the frame, `[x, y]` from the top left | `center`, `box`, the corners |
+| colour | `"#rgb"` or `"#rrggbb"` | `color`, `dark`, `light` |
+| exposure | stops | `stops` |
+| choice | a string | `direction` |
+
 ## Effects
 
 ### Basic adjustments
@@ -12,7 +27,7 @@ Drawn as a CSS filter; no WebGL needed.
 
 | param | type | default |
 |---|---|---|
-| `amount` | number (-100..100) | `0` |
+| `amount` | number (-1..1) | `0` |
 
 #### `contrast`
 
@@ -20,7 +35,7 @@ Drawn as a CSS filter; no WebGL needed.
 
 | param | type | default |
 |---|---|---|
-| `amount` | number (-100..100) | `0` |
+| `amount` | number (-1..1) | `0` |
 
 #### `saturation`
 
@@ -28,7 +43,7 @@ Drawn as a CSS filter; no WebGL needed.
 
 | param | type | default |
 |---|---|---|
-| `amount` | number (-100..100) | `0` |
+| `amount` | number (-1..1) | `0` |
 
 #### `hue`
 
@@ -44,7 +59,7 @@ Drawn as a CSS filter; no WebGL needed.
 
 | param | type | default |
 |---|---|---|
-| `amount` | number (-100..100) | `0` |
+| `amount` | number (-1..1) | `0` |
 
 #### `tint`
 
@@ -52,7 +67,7 @@ Drawn as a CSS filter; no WebGL needed.
 
 | param | type | default |
 |---|---|---|
-| `amount` | number (-100..100) | `0` |
+| `amount` | number (-1..1) | `0` |
 
 #### `grayscale`
 
@@ -60,7 +75,7 @@ Drawn as a CSS filter; no WebGL needed.
 
 | param | type | default |
 |---|---|---|
-| `amount` | number (0..100) | `100` |
+| `amount` | number (0..1) | `1` |
 
 #### `sepia`
 
@@ -68,7 +83,7 @@ Drawn as a CSS filter; no WebGL needed.
 
 | param | type | default |
 |---|---|---|
-| `amount` | number (0..100) | `100` |
+| `amount` | number (0..1) | `1` |
 
 #### `invert`
 
@@ -76,7 +91,7 @@ Drawn as a CSS filter; no WebGL needed.
 
 | param | type | default |
 |---|---|---|
-| `amount` | number (0..100) | `100` |
+| `amount` | number (0..1) | `1` |
 
 #### `blur`
 
@@ -94,8 +109,9 @@ Drawn as a CSS filter; no WebGL needed.
 |---|---|---|
 | `x` | number | `0` |
 | `y` | number | `4` |
-| `blur` | number (0..200) | `8` |
-| `color` | string | `"rgba(0,0,0,0.5)"` |
+| `radius` | number (0..200) | `8` |
+| `color` | string | `"#000000"` |
+| `opacity` | number (0..1) | `0.5` |
 
 ### Vignette and grain
 
@@ -105,7 +121,7 @@ Drawn as painted over the element after it.
 
 | param | type | default |
 |---|---|---|
-| `amount` | number (0..100) | `50` |
+| `amount` | number (0..1) | `0.5` |
 
 #### `grain`
 
@@ -113,7 +129,7 @@ Drawn as painted over the element after it.
 
 | param | type | default |
 |---|---|---|
-| `amount` | number (0..100) | `20` |
+| `amount` | number (0..1) | `0.2` |
 
 ### Colour
 
@@ -158,8 +174,8 @@ Drawn as a shader.
 
 | param | type | default |
 |---|---|---|
-| `temperature` | number (-100..100) | `0` |
-| `tint` | number (-100..100) | `0` |
+| `temperature` | number (-1..1) | `0` |
+| `tint` | number (-1..1) | `0` |
 
 #### `shadowsHighlights`
 
@@ -234,7 +250,7 @@ Drawn as a shader.
 
 | param | type | default |
 |---|---|---|
-| `amount` | number (0..500) | `40` |
+| `length` | number (0..500) | `40` |
 | `center` | [number, number] | `[0.5,0.5]` |
 | `samples` | integer | `24` |
 
@@ -244,8 +260,8 @@ Drawn as a shader.
 
 | param | type | default |
 |---|---|---|
-| `amount` | number (0..100) | `4` |
-| `angle` | number | `0` |
+| `distance` | number (0..100) | `4` |
+| `angle` | number | `90` |
 | `radial` | boolean | `false` |
 | `center` | [number, number] | `[0.5,0.5]` |
 
@@ -281,7 +297,7 @@ Drawn as a shader.
 | param | type | default |
 |---|---|---|
 | `length` | number (0..2000) | `240` |
-| `angle` | number | `45` |
+| `angle` | number | `135` |
 | `color` | string | `"#777777"` |
 | `opacity` | number (0..1) | `1` |
 | `fade` | boolean | `false` |
@@ -294,7 +310,7 @@ Drawn as a shader.
 |---|---|---|
 | `size` | number (0..200) | `4` |
 | `angle` | number | `-60` |
-| `intensity` | number (0..1) | `0.4` |
+| `amount` | number (0..1) | `0.4` |
 | `highlight` | string | `"#ffffff"` |
 | `shade` | string | `"#000000"` |
 
@@ -372,9 +388,9 @@ Drawn by a shader, as a crossfade where WebGL is missing.
 | param | type | default |
 |---|---|---|
 | `startAngle` | number | `0` |
-| `direction` | 1 \| -1 \| 0 | `1` |
+| `direction` | "clockwise" \| "counterclockwise" \| "both" | `"clockwise"` |
 | `center` | [number, number] | `[0.5,0.5]` |
-| `feather` | number (0..360) | `1` |
+| `softness` | number (0..1) | `0.002777777777777778` |
 
 #### `blinds`
 
@@ -383,8 +399,8 @@ Drawn by a shader, as a crossfade where WebGL is missing.
 | param | type | default |
 |---|---|---|
 | `slats` | integer | `12` |
-| `angle` | number | `0` |
-| `feather` | number (0..1) | `0.1` |
+| `angle` | number | `90` |
+| `softness` | number (0..1) | `0.1` |
 
 #### `filmBurn`
 
@@ -394,7 +410,7 @@ Drawn by a shader, as a crossfade where WebGL is missing.
 |---|---|---|
 | `seed` | integer | `0` |
 | `center` | [number, number] | `[0.5,0.5]` |
-| `scale` | number (4..2000) | `120` |
+| `size` | number (4..2000) | `120` |
 | `edge` | number (0..500) | `24` |
 | `color` | string | `"#ff7a1a"` |
 
@@ -407,7 +423,7 @@ Drawn by a shader, as a crossfade where WebGL is missing.
 | `columns` | integer | `16` |
 | `rows` | integer | `9` |
 | `seed` | integer | `0` |
-| `feather` | number (0..1) | `0.15` |
+| `softness` | number (0..1) | `0.15` |
 
 #### `zoom`
 

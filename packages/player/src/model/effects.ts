@@ -94,8 +94,8 @@ export function postEffects(
     if (c.kind !== "effect" || c.props.enabled === false || effectEntry(c.props.type)?.draw.kind !== "post") continue;
     // The resolver fills `amount`; a plan built without it (tests) falls back on the schema's default.
     const given = paramsAt(items, c, rel).amount;
-    const fallback = c.props.type === "grain" ? 20 : 50;
-    const amount = Math.max(0, Math.min(1, (typeof given === "number" ? given : fallback) / 100));
+    const fallback = c.props.type === "grain" ? 0.2 : 0.5;
+    const amount = Math.max(0, Math.min(1, typeof given === "number" ? given : fallback));
     if (amount <= 0) continue;
     if (c.props.type === "vignette") out.push({ type: "vignette", amount });
     else if (c.props.type === "grain") out.push({ type: "grain", amount, seed: frame });
