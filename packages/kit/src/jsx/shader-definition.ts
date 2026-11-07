@@ -26,6 +26,23 @@ export interface ShaderDefinition<P extends ZodObject = ZodObject> {
    * form no uniform takes (a choice, as a string, read as a number).
    */
   readonly uniforms?: (params: Readonly<Record<string, unknown>>) => Readonly<Record<string, unknown>>;
+  /**
+   * Built-in effects only: the passes as drawn for these params, each a source from `passes` with the size it draws at
+   * and the part of the frame it needs. Without it, every pass draws the whole frame at full size.
+   */
+  readonly steps?: (params: Readonly<Record<string, unknown>>) => readonly ShaderStep[];
+}
+
+/**
+ * One pass of a built-in as it is drawn: its GLSL, the size it draws at (a share of the frame's), and the part of the
+ * frame it needs to draw, if not all of it.
+ */
+export interface ShaderStep {
+  readonly source: string;
+  /** Of the frame's size: a blur drawn smaller, read back full size through linear filtering. */
+  readonly scale?: 1 | 0.5 | 0.25;
+  /** The only part drawn: `box` in uv (`[x, y, width, height]`), grown by `margin` frame pixels on every side. */
+  readonly region?: { readonly box: readonly [number, number, number, number]; readonly margin: number };
 }
 
 /** A small picture a built-in effect computes from its params. */

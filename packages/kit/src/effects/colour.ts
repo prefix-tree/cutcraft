@@ -3,7 +3,8 @@ import { z } from "zod";
 
 import { type CurvePoint, monotoneCurve } from "../jsx/curves";
 import { type ShaderDefinition, shaderDefinition } from "../jsx/shader-definition";
-import { COLOUR, GAUSS_PASS, HEX } from "./glsl";
+import { aroundGauss } from "./gauss";
+import { COLOUR, HEX } from "./glsl";
 
 /**
  * Levels: the input range [black, white] stretched to [0, 1], then a gamma curve on the midtones, per channel:
@@ -109,16 +110,9 @@ vec4 effect(vec2 uv) {
  * up to 2 stops where the light is linear. A pixel decides by its surroundings, not by itself, so detail in a dark
  * area keeps its contrast while the area lifts.
  */
-const shadowsHighlights = shaderDefinition("effect", {
-  name: "shadowsHighlights",
-  params: z.object({
-    shadows: z.number().min(-1).max(1).default(0),
-    highlights: z.number().min(-1).max(1).default(0),
-    radius: z.number().min(0.5).max(200).default(10),
-  }),
-  passes: [
-    GAUSS_PASS("x", "luma"),
-    GAUSS_PASS("y", "luma"),
+const SHADOWS_HIGHLIGHTS = aroundGauss({
+  what: "luma",
+  after: [
     `${COLOUR}vec4 effect(vec2 uv) {
   vec4 c = texture(original, uv);
   float around = texture(image, uv).r;
@@ -129,6 +123,19 @@ const shadowsHighlights = shaderDefinition("effect", {
 }`,
   ],
 });
+
+const shadowsHighlights = {
+  ...shaderDefinition("effect", {
+    name: "shadowsHighlights",
+    params: z.object({
+      shadows: z.number().min(-1).max(1).default(0),
+      highlights: z.number().min(-1).max(1).default(0),
+      radius: z.number().min(0.5).max(200).default(10),
+    }),
+    passes: SHADOWS_HIGHLIGHTS.passes,
+  }),
+  steps: SHADOWS_HIGHLIGHTS.steps,
+};
 
 /** Duotone: the picture's luminance mapped from one colour (its blacks) to another (its whites), mixed by amount. */
 const duotone = shaderDefinition("effect", {

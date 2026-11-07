@@ -5,6 +5,7 @@ import {
   type ResolvedState,
   SHADER_ONLY_EFFECTS,
   type ShaderDefinition,
+  type ShaderStep,
   shaderFor,
 } from "@cutcraft/kit";
 
@@ -17,6 +18,8 @@ export interface ShaderPass {
   readonly name: string;
   /** The effect's GLSL, one source per pass, run in order. */
   readonly sources: readonly string[];
+  /** How a built-in draws its passes for these params (sizes, regions); without it, each source over the frame. */
+  readonly steps?: readonly ShaderStep[];
   /** A built-in effect (`levels`, `lut`…), drawn by the kit's shader. */
   readonly builtIn?: true;
   /** Pictures a built-in computes from its params (a curve's table), read by the passes by name. */
@@ -53,12 +56,14 @@ function shaderPass(state: ResolvedState, c: Placement, rel: number): ShaderPass
   const own = shaderFor(state.shaders, "effect", c.props.type);
   const def = own ?? builtInShader(c.props.type);
   if (!def) return undefined;
+  const params = paramsAt(state.items, c, rel);
   return {
     name: def.name,
     sources: def.passes,
     ...(own ? {} : { builtIn: true as const }),
     ...(!own && def.tables ? { tables: def.tables } : {}),
-    params: uniformsOf(def, paramsAt(state.items, c, rel)),
+    ...(!own && def.steps ? { steps: def.steps(params) } : {}),
+    params: uniformsOf(def, params),
     time: rel,
   };
 }

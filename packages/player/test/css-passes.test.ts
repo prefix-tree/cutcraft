@@ -48,7 +48,8 @@ describe("CSS filters as passes", () => {
       ["css:sepia", 1],
       ["css:grayscale", 1],
       ["css:blur", 2],
-      ["css:drop-shadow", 3],
+      // A 6 px blur is drawn at half size: halve, x, y, then the shadow.
+      ["css:drop-shadow", 4],
     ]);
     expect(passes[0]?.params).toEqual({ slope: 0.9, offset: 0 });
     expect(passes[1]?.params).toEqual({ slope: 1.5, offset: -0.25 });

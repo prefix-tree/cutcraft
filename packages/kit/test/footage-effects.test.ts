@@ -42,7 +42,13 @@ describe("the footage effects", () => {
     ]);
   });
 
-  it("blur a region in three passes", () => {
-    expect(builtInShader("regionBlur")?.passes).toHaveLength(3);
+  it("blur a region in three passes, over the box's part of the frame unless it is inverted", () => {
+    const steps = (p: Record<string, unknown>) => builtInShader("regionBlur")?.steps?.(p) ?? [];
+    expect(steps({ radius: 2, box: [0.1, 0.1, 0.2, 0.2] }).map((s) => s.region?.box)).toEqual([
+      [0.1, 0.1, 0.2, 0.2],
+      [0.1, 0.1, 0.2, 0.2],
+      undefined,
+    ]);
+    expect(steps({ radius: 2, box: [0.1, 0.1, 0.2, 0.2], inverted: true }).every((s) => !s.region)).toBe(true);
   });
 });
