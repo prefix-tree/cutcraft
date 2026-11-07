@@ -39,7 +39,7 @@ OpenReel executable action types: 115. Ours: 125.
 | `clip/setBlendMode` | `clip/setBlend` |
 | `clip/setBlendOpacity` | `clip/setBlend` |
 | `clip/setEmphasisAnimation` | `clip/setEmphasis` |
-| `clip/setColorGrading` | `colorGrade/set` |
+| `clip/setColorGrading` | `effect/add`, `effect/update` (`whiteBalance` and the other colour effects) |
 | `clip/slip` | `clip/slip` |
 | `clip/slide` | `clip/slide` |
 | `clip/roll` | `clip/roll` |

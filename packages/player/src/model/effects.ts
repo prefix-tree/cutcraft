@@ -1,7 +1,7 @@
-import { colorGradeFilters, cssOf, effectEntry, type Placement } from "@cutcraft/kit";
+import { cssOf, effectEntry, type Placement } from "@cutcraft/kit";
 
 import { devWarn } from "../warn";
-import { keyframedParam, keyframedValue } from "./keyframes";
+import { keyframedParam } from "./keyframes";
 
 export interface FilterResult {
   readonly filter: string;
@@ -27,23 +27,17 @@ export function paramsAt(items: Items, effect: Placement, rel: number): Params {
 }
 
 /**
- * One child's CSS filter (an `<Effect>` drawn as CSS, or a `<ColorGrade>`) at element-relative `rel`, or "" for a
+ * One child's CSS filter (an `<Effect>` drawn as CSS) at element-relative `rel`, or "" for a
  * child drawn otherwise: a post effect, a type in `skip` (drawn by its shader), a shader-only type, or a disabled one.
  * An unknown type is reported once and draws nothing.
  */
 export function childFilter(
   items: Items,
-  children: readonly Placement[],
   c: Placement,
   elementId: string,
   rel: number,
   skip: ReadonlySet<string> = new Set(),
 ): string {
-  if (c.kind === "colorGrade")
-    return colorGradeFilters({
-      temperature: keyframedValue(children, "colorGrade.temperature", rel, c.props.temperature),
-      tint: keyframedValue(children, "colorGrade.tint", rel, c.props.tint),
-    }).join(" ");
   if (c.kind !== "effect" || c.props.enabled === false) return "";
   const type = String(c.props.type);
   if (skip.has(type)) return "";
@@ -65,7 +59,7 @@ export function filterString(
   const parts: string[] = [];
   const unsupported: string[] = [];
   for (const c of children) {
-    const f = childFilter(items, children, c, elementId, rel, declared);
+    const f = childFilter(items, c, elementId, rel, declared);
     if (f) parts.push(f);
     else if (
       c.kind === "effect" &&

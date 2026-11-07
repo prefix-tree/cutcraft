@@ -6,14 +6,7 @@ import { capabilitiesOf } from "./capabilities";
 import { defineElement, type VocabularyMeta, type VocabularyProps } from "./define";
 import type { TransitionType, VideoEffectType } from "./enums";
 import { captionSchema, captionsSchema } from "./schemas/captions";
-import {
-  colorGradeSchema,
-  effectSchema,
-  freezeSchema,
-  keyframeSchema,
-  maskSchema,
-  speedKeySchema,
-} from "./schemas/children";
+import { effectSchema, freezeSchema, keyframeSchema, maskSchema, speedKeySchema } from "./schemas/children";
 import { compositionSchema, gapSchema, markerSchema, trackSchema } from "./schemas/composition";
 import { audioSchema, clipSchema } from "./schemas/media";
 import { angleSchema, cutSchema, multicamSchema } from "./schemas/multicam";
@@ -132,7 +125,6 @@ export interface EffectComponent extends VocabularyMeta<"effect", typeof effectS
 }
 
 export const Effect = el("effect", effectSchema) as unknown as EffectComponent;
-export const ColorGrade = el("colorGrade", colorGradeSchema);
 export const Keyframe = el("keyframe", keyframeSchema);
 export const SpeedKey = el("speedKey", speedKeySchema);
 export const Freeze = el("freeze", freezeSchema);
@@ -160,7 +152,6 @@ export const ELEMENTS = {
   Cut,
   Layer,
   Effect,
-  ColorGrade,
   Keyframe,
   SpeedKey,
   Freeze,

@@ -7,7 +7,7 @@ import type { ShaderDefinition } from "../jsx/shader-definition";
 import { curves, duotone, exposure, levels, lut, shadowsHighlights, vibrance, whiteBalance } from "./colour";
 import * as cssEffects from "./css";
 import { FALLBACKS } from "./css";
-import { chromaticAberration, colorKey, cornerPin, regionBlur, zoomBlur } from "./footage";
+import { blur, chromaticAberration, colorKey, cornerPin, regionBlur, zoomBlur } from "./footage";
 import { grain, vignette } from "./post";
 import { blinds, clockWipe, filmBurn, iris, pixelDissolve, zoom } from "./shader-transitions";
 import { bevel, glow, longShadow, outline } from "./titles";
@@ -53,9 +53,7 @@ export const EFFECTS = {
   contrast: cssEntry("contrast", cssEffects.contrast),
   saturation: cssEntry("saturation", cssEffects.saturation),
   hue: cssEntry("hue", cssEffects.hue),
-  temperature: cssEntry("temperature", cssEffects.temperature),
-  tint: cssEntry("tint", cssEffects.tint),
-  blur: cssEntry("blur", cssEffects.blur),
+  blur: shaderEntry(blur, FALLBACKS.blur),
   vignette: { name: "vignette", params: vignette.params, draw: { kind: "post" } },
   grain: { name: "grain", params: grain.params, draw: { kind: "post" } },
   shadow: cssEntry("shadow", cssEffects.shadow),
@@ -66,7 +64,7 @@ export const EFFECTS = {
   lut: shaderEntry(lut),
   exposure: shaderEntry(exposure, FALLBACKS.exposure),
   vibrance: shaderEntry(vibrance, FALLBACKS.vibrance),
-  whiteBalance: shaderEntry(whiteBalance),
+  whiteBalance: shaderEntry(whiteBalance, FALLBACKS.whiteBalance),
   shadowsHighlights: shaderEntry(shadowsHighlights),
   duotone: shaderEntry(duotone),
   curves: shaderEntry(curves),
@@ -121,8 +119,6 @@ export const EFFECT_FAMILIES: Readonly<Record<string, readonly VideoEffectType[]
     "contrast",
     "saturation",
     "hue",
-    "temperature",
-    "tint",
     "grayscale",
     "sepia",
     "invert",

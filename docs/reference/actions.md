@@ -1,6 +1,6 @@
 # Actions
 
-Generated from the registered handlers (119). Do not edit by hand; run `pnpm docs:gen`.
+Generated from the registered handlers (118). Do not edit by hand; run `pnpm docs:gen`.
 
 Every action has `validate`, `apply`, `invert` and `fold`; the inverse is never null. Params are typed in `packages/kit/src/actions/types/index.ts`.
 
@@ -66,12 +66,6 @@ Every action has `validate`, `apply`, `invert` and `fold`; the inverse is never 
 | `clip/split` |  |
 | `clip/trim` |  |
 | `clip/trimToPlayhead` |  |
-
-## `colorGrade/`
-
-| action | note |
-|---|---|
-| `colorGrade/set` |  |
 
 ## `composition/`
 

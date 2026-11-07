@@ -112,17 +112,6 @@
     "errors": []
   },
   {
-    "id": "cg1",
-    "kind": "colorGrade",
-    "track": "main",
-    "parent": "c1",
-    "order": 1,
-    "start": 0,
-    "end": 5.5,
-    "editable": "literal",
-    "errors": []
-  },
-  {
     "id": "composition",
     "kind": "composition",
     "track": null,
@@ -428,6 +417,17 @@
     "order": 2,
     "start": 0.5,
     "end": 2.5,
+    "editable": "literal",
+    "errors": []
+  },
+  {
+    "id": "wb1",
+    "kind": "effect",
+    "track": "main",
+    "parent": "c1",
+    "order": 1,
+    "start": 0,
+    "end": 5.5,
     "editable": "literal",
     "errors": []
   },

@@ -111,7 +111,6 @@ const ELEMENT_DOCS: Record<string, readonly (readonly [element: string, summary:
   "Effects and colour": [
     ["Effect", "A filter on its parent: brightness, blur, grayscale, vignette, grain and more."],
     ["Adjustment", "Filters everything beneath it for its own stretch of time."],
-    ["ColorGrade", "Temperature and tint on its parent."],
     ["Mask", "Shows only a shape of its clip, with a feathered edge or inverted."],
   ],
   "Motion and time": [
@@ -320,7 +319,7 @@ function effectsPage(): string {
     "|---|---|---|",
     "| strength, mix or share | a fraction, 0 to 1, or -1 to 1 when it goes both ways | `amount`, `opacity`, `softness`, `tolerance`, `tint` |",
     "| gain | a multiplier | `intensity`, `scale` |",
-    "| distance | pixels of the composition | `radius`, `width`, `feather`, `length`, `distance`, `size`, `edge`, `x`, `y` |",
+    "| distance | pixels of the composition; a blur's `radius` (and `bevel`'s `size`) is its Gaussian's standard deviation, as CSS `blur()` reads it | `radius`, `width`, `feather`, `length`, `distance`, `size`, `edge`, `x`, `y` |",
     "| angle | degrees, clockwise from up | `angle`, `rotation`, `startAngle` |",
     "| position | fractions of the frame, `[x, y]` from the top left | `center`, `box`, the corners |",
     '| colour | `"#rgb"` or `"#rrggbb"` | `color`, `dark`, `light` |',

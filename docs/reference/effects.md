@@ -10,7 +10,7 @@ A param's name says what kind of value it is, and each kind has one scale:
 |---|---|---|
 | strength, mix or share | a fraction, 0 to 1, or -1 to 1 when it goes both ways | `amount`, `opacity`, `softness`, `tolerance`, `tint` |
 | gain | a multiplier | `intensity`, `scale` |
-| distance | pixels of the composition | `radius`, `width`, `feather`, `length`, `distance`, `size`, `edge`, `x`, `y` |
+| distance | pixels of the composition; a blur's `radius` (and `bevel`'s `size`) is its Gaussian's standard deviation, as CSS `blur()` reads it | `radius`, `width`, `feather`, `length`, `distance`, `size`, `edge`, `x`, `y` |
 | angle | degrees, clockwise from up | `angle`, `rotation`, `startAngle` |
 | position | fractions of the frame, `[x, y]` from the top left | `center`, `box`, the corners |
 | colour | `"#rgb"` or `"#rrggbb"` | `color`, `dark`, `light` |
@@ -53,22 +53,6 @@ Drawn as a CSS filter; no WebGL needed.
 |---|---|---|
 | `angle` | number | `0` |
 
-#### `temperature`
-
-Drawn as a CSS filter; no WebGL needed.
-
-| param | type | default |
-|---|---|---|
-| `amount` | number (-1..1) | `0` |
-
-#### `tint`
-
-Drawn as a CSS filter; no WebGL needed.
-
-| param | type | default |
-|---|---|---|
-| `amount` | number (-1..1) | `0` |
-
 #### `grayscale`
 
 Drawn as a CSS filter; no WebGL needed.
@@ -95,7 +79,7 @@ Drawn as a CSS filter; no WebGL needed.
 
 #### `blur`
 
-Drawn as a CSS filter; no WebGL needed.
+Drawn as a shader, with a CSS filter where WebGL is missing.
 
 | param | type | default |
 |---|---|---|
@@ -170,7 +154,7 @@ Drawn as a shader, with a CSS filter where WebGL is missing.
 
 #### `whiteBalance`
 
-Drawn as a shader.
+Drawn as a shader, with a CSS filter where WebGL is missing.
 
 | param | type | default |
 |---|---|---|
@@ -185,7 +169,7 @@ Drawn as a shader.
 |---|---|---|
 | `shadows` | number (-1..1) | `0` |
 | `highlights` | number (-1..1) | `0` |
-| `radius` | number (1..200) | `30` |
+| `radius` | number (0.5..200) | `10` |
 
 #### `duotone`
 
@@ -228,7 +212,7 @@ Drawn as a shader.
 | param | type | default |
 |---|---|---|
 | `box` | [number, number, number, number] | `[0.25,0.25,0.5,0.5]` |
-| `radius` | number (0..200) | `20` |
+| `radius` | number (0..200) | `7` |
 | `feather` | number (0..500) | `10` |
 | `roundness` | number (0..1) | `0` |
 | `inverted` | boolean | `false` |
@@ -273,7 +257,7 @@ Drawn as a shader, with a CSS filter where WebGL is missing.
 
 | param | type | default |
 |---|---|---|
-| `radius` | number (0..200) | `20` |
+| `radius` | number (0..200) | `7` |
 | `intensity` | number (0..4) | `1` |
 | `threshold` | number (0..1) | `0` |
 | `color` | string | `"#ffffff"` |
@@ -308,7 +292,7 @@ Drawn as a shader.
 
 | param | type | default |
 |---|---|---|
-| `size` | number (0..200) | `4` |
+| `size` | number (0..200) | `1.5` |
 | `angle` | number | `-60` |
 | `amount` | number (0..1) | `0.4` |
 | `highlight` | string | `"#ffffff"` |

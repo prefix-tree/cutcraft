@@ -11,7 +11,7 @@ const stateOf = (children: string, declarations = "") =>
   resolve(
     collectModule(
       loadModule(`import { z } from "zod";
-import { Clip, ColorGrade, Composition, effect, Effect, Track } from "@cutcraft/kit";
+import { Clip, Composition, effect, Effect, Track } from "@cutcraft/kit";
 ${declarations}
 export default function V() { return <Composition fps={30} width={640} height={360}><Track id="t"><Clip id="c" src="asset:city" in={0} out={4}>${children}</Clip></Track></Composition>; }`) as never,
     ),
@@ -72,17 +72,17 @@ describe("CSS filters as passes", () => {
 describe("the effect pipeline", () => {
   it("keeps one CSS filter when nothing on the element needs a shader", () => {
     const p = pipelineOf(
-      `<Effect id="a" type="brightness" params={{ amount: 0.1 }} /><Effect id="b" type="blur" params={{ radius: 2 }} />`,
+      `<Effect id="a" type="brightness" params={{ amount: 0.1 }} /><Effect id="b" type="grayscale" params={{ amount: 0.5 }} />`,
       {
         shaders: true,
       },
     );
-    expect(p).toEqual({ filter: "brightness(1.1) blur(2px)" });
+    expect(p).toEqual({ filter: "brightness(1.1) grayscale(0.5)" });
   });
 
   it("runs every effect as a pass in file order once one needs a shader, and keeps the CSS look as the fallback", () => {
     const p = pipelineOf(
-      `<Effect id="a" type="brightness" params={{ amount: 0.1 }} /><Effect id="b" type="levels" params={{ gamma: 1.2 }} /><ColorGrade id="g" tint={0.2} /><Effect id="v" type="vibrance" params={{ amount: 0.5 }} />`,
+      `<Effect id="a" type="brightness" params={{ amount: 0.1 }} /><Effect id="b" type="levels" params={{ gamma: 1.2 }} /><Effect id="g" type="hue" params={{ angle: 5 }} /><Effect id="v" type="vibrance" params={{ amount: 0.5 }} />`,
       { shaders: true },
     );
     expect(p.filter).toBe("");

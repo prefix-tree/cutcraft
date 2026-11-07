@@ -14,9 +14,9 @@ function num(p: Params, key: string, fallback: number): number {
 
 /**
  * Temperature and tint (each -1..1) approximated with CSS filters: warm pulls toward sepia, cool toward a slight hue
- * rotation; tint rotates hue. Shared by the `temperature` and `tint` effects and `<ColorGrade>`.
+ * rotation; tint rotates hue. `whiteBalance`'s fallback.
  */
-export function colorGradeFilters(props: Params): string[] {
+function whiteBalanceFilters(props: Params): string[] {
   const out: string[] = [];
   const temperature = typeof props.temperature === "number" ? props.temperature : 0;
   const tint = typeof props.tint === "number" ? props.tint : 0;
@@ -57,14 +57,9 @@ export const brightness = css({ amount: change(0) }, (p) => `brightness(${1 + nu
 export const contrast = css({ amount: change(0) }, (p) => `contrast(${1 + num(p, "amount", 0)})`);
 export const saturation = css({ amount: change(0) }, (p) => `saturate(${1 + num(p, "amount", 0)})`);
 export const hue = css({ angle: z.number().default(0) }, (p) => `hue-rotate(${num(p, "angle", 0)}deg)`);
-export const blur = css({ radius: z.number().min(0).max(200).default(4) }, (p) => `blur(${num(p, "radius", 4)}px)`);
 export const grayscale = css({ amount: share(1) }, (p) => `grayscale(${num(p, "amount", 1)})`);
 export const sepia = css({ amount: share(1) }, (p) => `sepia(${num(p, "amount", 1)})`);
 export const invert = css({ amount: share(1) }, (p) => `invert(${num(p, "amount", 1)})`);
-export const temperature = css({ amount: change(0) }, (p) =>
-  colorGradeFilters({ temperature: num(p, "amount", 0) }).join(" "),
-);
-export const tint = css({ amount: change(0) }, (p) => colorGradeFilters({ tint: num(p, "amount", 0) }).join(" "));
 export const shadow = css(
   {
     x: z.number().default(0),
@@ -94,6 +89,11 @@ export const FALLBACKS = {
       c = 1 + 2 * black * s;
     return `brightness(${s / c}) contrast(${c})`;
   },
+  /** Blur as the CSS filter, whose length is the same standard deviation. */
+  blur: (p: Params): string => `blur(${num(p, "radius", 4)}px)`,
+  /** White balance as sepia toward warm and a hue rotation toward cool and for the tint. */
+  whiteBalance: (p: Params): string =>
+    whiteBalanceFilters({ temperature: num(p, "temperature", 0), tint: num(p, "tint", 0) }).join(" "),
   /** Exposure as brightness of the encoded values. */
   exposure: (p: Params): string => `brightness(${2 ** num(p, "stops", 0)})`,
   /** Vibrance as plain saturation at half strength. */
@@ -101,7 +101,7 @@ export const FALLBACKS = {
   /** A glow as a coloured shadow under the element, stacked for intensity. */
   glow: (p: Params): string => {
     const colour = typeof p.color === "string" ? p.color : "#ffffff";
-    const layer = `drop-shadow(0 0 ${num(p, "radius", 20) / 2}px ${colour})`;
+    const layer = `drop-shadow(0 0 ${num(p, "radius", 7)}px ${colour})`;
     return Array.from({ length: Math.max(1, Math.min(4, Math.round(num(p, "intensity", 1)))) }, () => layer).join(" ");
   },
 };

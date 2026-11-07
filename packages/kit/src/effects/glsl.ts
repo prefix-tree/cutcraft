@@ -17,24 +17,36 @@ float cc_luma(vec3 c) { return dot(c, vec3(0.2126, 0.7152, 0.0722)); }
 export const HEX = z.string().regex(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i, 'a colour is "#rgb" or "#rrggbb"');
 
 /**
- * One pass of a separable Gaussian blur of the `radius` param's pixels (or another param's, by name): 33 taps along x or y
- * spanning three standard deviations each way. `luma` blurs the luminance and `alpha` the alpha (each into the
- * result's red), `rgba` the picture, weighted by alpha so transparent pixels add no colour.
+ * One pass of the separable Gaussian blur every built-in shares: a standard deviation of the `radius` param's pixels
+ * (or another param's, by name), as CSS `blur()` reads its length, sampled at every pixel out to three deviations (at
+ * most 96 each side, spread wider past that). `luma` blurs the luminance and `alpha` the alpha (each into the result's
+ * red), `rgba` the picture, weighted by alpha so transparent pixels add no colour. Past the frame's edge is
+ * `transparent`, as a canvas blur sees it, or the edge pixels repeated (`clamp`), for footage.
  */
 export const GAUSS_PASS = (
   axis: "x" | "y",
   what: "luma" | "alpha" | "rgba",
   radius = "radius",
-) => `${COLOUR}vec4 effect(vec2 uv) {
-  float span = max(params.${radius}, 1.0);
-  float sigma = span / 3.0;
-  vec2 dir = vec2(${axis === "x" ? "1.0, 0.0" : "0.0, 1.0"}) * span / 16.0 / resolution;
+  outside: "transparent" | "clamp" = "clamp",
+) => `${COLOUR}vec4 cc_at(vec2 uv) {
+  return ${
+    outside === "transparent"
+      ? "any(lessThan(uv, vec2(0.0))) || any(greaterThan(uv, vec2(1.0))) ? vec4(0.0) : texture(image, uv)"
+      : "texture(image, uv)"
+  };
+}
+vec4 effect(vec2 uv) {
+  float sigma = max(params.${radius}, 1e-3);
+  float reach = 3.0 * sigma;
+  float n = min(ceil(reach), 96.0);
+  vec2 dir = vec2(${axis === "x" ? "1.0, 0.0" : "0.0, 1.0"}) * (reach / n) / resolution;
   vec4 sum = vec4(0.0);
   float weights = 0.0;
-  for (int i = -16; i <= 16; i++) {
-    float d = float(i) * span / 16.0;
+  for (int i = -96; i <= 96; i++) {
+    if (abs(float(i)) > n) continue;
+    float d = float(i) * reach / n;
     float w = exp(-d * d / (2.0 * sigma * sigma));
-    vec4 s = texture(image, uv + float(i) * dir);
+    vec4 s = cc_at(uv + float(i) * dir);
     sum += w * ${
       what === "rgba"
         ? "vec4(s.rgb * s.a, s.a)"

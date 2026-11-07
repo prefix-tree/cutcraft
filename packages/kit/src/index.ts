@@ -6,7 +6,7 @@ export * from "./actions/handler-kit";
 export * from "./actions/history";
 export * from "./actions/registry";
 export * from "./actions/types";
-export { colorGradeFilters } from "./effects/css";
+export { GAUSS_PASS } from "./effects/glsl";
 export {
   BUILT_IN_SHADERS,
   BUILT_IN_TRANSITIONS,

@@ -74,7 +74,7 @@ describe("the colour effects", () => {
     expect(params("e")).toEqual({ stops: 0 });
     expect(params("v")).toEqual({ amount: 0.5 });
     expect(params("w")).toEqual({ temperature: 0.2, tint: 0 });
-    expect(params("s")).toEqual({ shadows: 0.4, highlights: 0, radius: 30 });
+    expect(params("s")).toEqual({ shadows: 0.4, highlights: 0, radius: 10 });
     expect(params("d")).toEqual({ dark: "#1d2b53", light: "#ffd27f", amount: 1 });
     expect(params("k")).toMatchObject({
       rgb: [

@@ -435,11 +435,14 @@ function declaredShader(
   if (builtIn.includes(type) && !kit) return null;
   const params = kit ?? shaderFor(fileShaders, node.kind, type)?.params;
   if (!params) {
+    const moved = node.kind === "effect" && (type === "temperature" || type === "tint");
     own.push({
       code: "SCHEMA",
       id: node.id,
       prop: "type",
-      message: `unknown ${node.kind} "${type}": use one of ${builtIn.join(", ")}, or declare it with ${node.kind === "effect" ? "effect" : "transition"}()`,
+      message: moved
+        ? `effect "${type}" is now whiteBalance: <Effect type="whiteBalance" params={{ ${type}: … }} />`
+        : `unknown ${node.kind} "${type}": use one of ${builtIn.join(", ")}, or declare it with ${node.kind === "effect" ? "effect" : "transition"}()`,
     });
     return null;
   }
