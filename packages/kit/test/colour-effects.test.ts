@@ -98,7 +98,7 @@ describe("the colour effects", () => {
   });
 
   it("run shadows and highlights in three passes, and bake curves into a table", () => {
-    expect(builtInShader("shadowsHighlights")?.passes).toHaveLength(3);
+    expect(builtInShader("shadowsHighlights")?.steps?.({ radius: 2 })).toHaveLength(3);
     const table = builtInShader("curves")?.tables?.({
       rgb: [
         [0, 0],

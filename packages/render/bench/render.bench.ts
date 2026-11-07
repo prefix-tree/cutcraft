@@ -41,7 +41,8 @@ export default function Video() {
 `;
 
 /** One source clip for 5 s with these effects on it, for the shader cases. */
-const effectsFile = (effects: string) => `import { Clip, Composition, Effect, Track } from "@cutcraft/kit";
+const effectsFile = (effects: string) => `import { Clip, Composition, Effect, effect, Track } from "@cutcraft/kit";
+const same = effect({ name: "same", shader: "vec4 effect(vec2 uv) { return texture(image, uv); }" });
 export default function Video() {
   return (
     <Composition fps={30} width={1920} height={1080}>
@@ -54,6 +55,12 @@ export default function Video() {
 `;
 
 const EFFECT_CASES: readonly { readonly key: string; readonly label: string; readonly effects: string }[] = [
+  {
+    key: "passthrough",
+    label: "passthrough, 5 s 1080p30 (one shader that changes nothing: the shader path's ceiling)",
+    effects: `
+          <Effect id="e1" type={same} />`,
+  },
   {
     key: "grade",
     label: "colour grade, 5 s 1080p30 (exposure, white balance, curves, vibrance, LUT)",

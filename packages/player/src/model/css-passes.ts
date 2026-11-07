@@ -3,7 +3,9 @@
 // Functions" and their SVG equivalents), on plain (not premultiplied) colour, clamped to 0..1 after each, as the
 // browser's filter does. The input is a CSS filter string of the forms the player writes (model/effects.ts), so the
 // shader and the no-WebGL fallback share one mapping from params to CSS.
-import { GAUSS_PASS } from "@cutcraft/kit";
+
+import type { ShaderStep } from "@cutcraft/kit";
+import { gaussSteps } from "@cutcraft/kit";
 
 import type { ShaderPass } from "./shaders";
 
@@ -21,9 +23,9 @@ const MATRIX = `vec4 effect(vec2 uv) {
   return vec4(clamp(vec3(dot(params.r0, c.rgb), dot(params.r1, c.rgb), dot(params.r2, c.rgb)), 0.0, 1.0), c.a);
 }`;
 
-/** The kit's Gaussian, one direction, with the frame's outside transparent as the canvas's own blur sees it. */
-const gauss = (axis: "x" | "y", alphaOnly: boolean) =>
-  GAUSS_PASS(axis, alphaOnly ? "alpha" : "rgba", "sigma", "transparent");
+/** The kit's Gaussian of σ `sigma` pixels, with the frame's outside transparent as the canvas's own blur sees it. */
+const gauss = (sigma: number, alphaOnly: boolean) =>
+  gaussSteps(sigma, alphaOnly ? "alpha" : "rgba", "sigma", "transparent");
 
 /** The shadow: the blurred alpha (in red) read back by `offset` pixels, coloured, drawn under the original. */
 const SHADOW = `vec4 effect(vec2 uv) {
@@ -36,9 +38,16 @@ const SHADOW = `vec4 effect(vec2 uv) {
   return vec4((o.rgb * o.a + params.color.rgb * s * (1.0 - o.a)) / out_a, out_a);
 }`;
 
-const pass = (name: string, sources: readonly string[], params: Params, time: number): ShaderPass => ({
+const pass = (
+  name: string,
+  sources: readonly string[],
+  params: Params,
+  time: number,
+  steps?: readonly ShaderStep[],
+): ShaderPass => ({
   name: `css:${name}`,
-  sources,
+  sources: steps ? steps.map((s) => s.source) : sources,
+  ...(steps ? { steps } : {}),
   builtIn: true,
   params,
   time,
@@ -190,7 +199,7 @@ export function cssPasses(filter: string, time: number): ShaderPass[] {
         out.push(matrix(name, grayscale(amount(args)), time));
         break;
       case "blur":
-        out.push(pass(name, [gauss("x", false), gauss("y", false)], { sigma: px(args) }, time));
+        out.push(pass(name, [], { sigma: px(args) }, time, gauss(px(args), false)));
         break;
       case "drop-shadow": {
         // `x y [blur] colour`: the lengths first, the colour after them (it may hold spaces, as rgba() does).
@@ -200,7 +209,7 @@ export function cssPasses(filter: string, time: number): ShaderPass[] {
         out.push(
           pass(
             name,
-            [gauss("x", true), gauss("y", true), SHADOW],
+            [],
             {
               // The blur length is the Gaussian's standard deviation, as for blur() (measured against Chrome's
               // canvas filter: half of it, as box-shadow reads its blur, comes out visibly tighter).
@@ -209,6 +218,7 @@ export function cssPasses(filter: string, time: number): ShaderPass[] {
               color: cssColour(colour || "black"),
             },
             time,
+            [...gauss(px(b ?? "0"), true), { source: SHADOW }],
           ),
         );
         break;

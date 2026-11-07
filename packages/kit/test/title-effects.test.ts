@@ -33,8 +33,8 @@ describe("the title effects", () => {
   });
 
   it("glow and bevel blur in passes; outline and longShadow are one", () => {
-    expect(builtInShader("glow")?.passes).toHaveLength(4);
-    expect(builtInShader("bevel")?.passes).toHaveLength(3);
+    expect(builtInShader("glow")?.steps?.({ radius: 2 })).toHaveLength(4);
+    expect(builtInShader("bevel")?.steps?.({ size: 2 })).toHaveLength(3);
     expect(builtInShader("outline")?.passes).toHaveLength(1);
     expect(builtInShader("longShadow")?.passes).toHaveLength(1);
   });

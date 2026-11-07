@@ -2,6 +2,9 @@
 // function the runner wraps in a fragment shader with its params as uniforms, drawn over a full-frame triangle
 // with WebGL 2. Passes between the first and the last draw into textures, not the canvas. Where there is no WebGL 2,
 // `available` is false and the painter draws without them.
+
+import type { ShaderStep } from "@cutcraft/kit";
+
 import type { ShaderTexture, ShaderTextures } from "../media/shader-textures";
 import type { ShaderPass, TransitionPass } from "../model/shaders";
 import type { AnyCanvas, CreateCanvas } from "../types";
@@ -102,6 +105,44 @@ const MAX_TABLES = 32;
 interface Target {
   readonly texture: WebGLTexture;
   readonly framebuffer: WebGLFramebuffer;
+  readonly width: number;
+  readonly height: number;
+}
+
+/** A pass as the runner draws it: the effect it belongs to, its GLSL, its size and region, and whether it is the first. */
+export interface PlannedStep {
+  readonly effect: ShaderPass;
+  readonly source: string;
+  readonly scale: 1 | 0.5 | 0.25;
+  readonly region?: ShaderStep["region"];
+  readonly first: boolean;
+}
+
+const COPY = "vec4 effect(vec2 uv) { return texture(image, uv); }";
+
+/**
+ * The passes the runner draws for these effects, in order: each effect's steps, or its sources over the whole frame.
+ * The last draws the canvas, full size and whole, so one that is smaller or partial is followed by a copy.
+ */
+export function planSteps(effects: readonly ShaderPass[]): PlannedStep[] {
+  const out: PlannedStep[] = effects.flatMap((effect) =>
+    (effect.steps ?? effect.sources.map((source): ShaderStep => ({ source }))).map((step, i) => ({
+      effect,
+      source: step.source,
+      scale: step.scale ?? 1,
+      ...(step.region ? { region: step.region } : {}),
+      first: i === 0,
+    })),
+  );
+  const last = out[out.length - 1];
+  if (last && (last.scale !== 1 || last.region))
+    out.push({
+      effect: { name: "copy", sources: [COPY], builtIn: true, params: {}, time: last.effect.time },
+      source: COPY,
+      scale: 1,
+      first: true,
+    });
+  return out;
 }
 
 export class ShaderRunner {
@@ -111,7 +152,7 @@ export class ShaderRunner {
   private readonly programs = new Map<string, WebGLProgram>();
   /** Textures the pictures are uploaded into, one per input name. */
   private readonly uploads = new Map<string, WebGLTexture>();
-  /** Textures between passes; three, so a pass never draws into its `image` or its effect's `original`. */
+  /** Textures between passes, by size; enough that a pass never draws into its `image` or its effect's `original`. */
   private readonly targets: Target[] = [];
   /** The textures of assets (LUTs, images) uploaded, by their loaded data. */
   private readonly assets = new WeakMap<ShaderTexture, WebGLTexture>();
@@ -137,20 +178,21 @@ export class ShaderRunner {
   effects(source: AnyCanvas, effects: readonly ShaderPass[], textures?: ShaderTextures): AnyCanvas | null {
     const gl = this.context();
     if (!gl) return null;
-    const steps = effects.flatMap((effect) => effect.sources.map((code, i) => ({ effect, code, first: i === 0 })));
+    const steps = planSteps(effects);
     if (steps.length === 0) return null;
     let image = this.upload(gl, "image", source);
     let original = image;
     steps.forEach((step, i) => {
       if (step.first) original = image;
       const last = i === steps.length - 1;
-      const target = last ? null : this.targetBesides(gl, image, original);
+      const size = (n: number) => Math.max(1, Math.ceil(n * step.scale));
+      const target = last ? null : this.targetBesides(gl, image, original, size(this.width), size(this.height));
       const assets = this.assetTextures(gl, step.effect, textures);
       const kindOf = (ref: string) => assets.get(ref)?.kind;
       const tables = this.tableTextures(gl, step.effect);
       const program = this.program(
         gl,
-        fragmentSource("effect", step.code, step.effect.params, last, kindOf, [...tables.keys()]),
+        fragmentSource("effect", step.source, step.effect.params, last, kindOf, [...tables.keys()]),
       );
       const bound: Record<string, { texture: WebGLTexture; kind: "2d" | "3d" }> = {
         image: { texture: image, kind: "2d" },
@@ -161,7 +203,7 @@ export class ShaderRunner {
         const asset = typeof value === "string" ? assets.get(value) : undefined;
         if (asset) bound[paramUniform(name)] = asset;
       }
-      this.draw(gl, program, target, step.effect.params, bound, { time: step.effect.time });
+      this.draw(gl, program, target, step.effect.params, bound, { time: step.effect.time }, step.region);
       if (target) image = target.texture;
     });
     return this.canvas;
@@ -305,16 +347,18 @@ export class ShaderRunner {
   }
 
   /** A pass target whose texture is neither of these, made on first use. */
-  private targetBesides(gl: Gl, a: WebGLTexture, b: WebGLTexture): Target {
-    const free = this.targets.find((t) => t.texture !== a && t.texture !== b);
+  private targetBesides(gl: Gl, a: WebGLTexture, b: WebGLTexture, width: number, height: number): Target {
+    const free = this.targets.find(
+      (t) => t.texture !== a && t.texture !== b && t.width === width && t.height === height,
+    );
     if (free) return free;
     const texture = this.texture(gl);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, this.width, this.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
     const framebuffer = gl.createFramebuffer() as WebGLFramebuffer;
     gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-    const target = { texture, framebuffer };
+    const target = { texture, framebuffer, width, height };
     this.targets.push(target);
     return target;
   }
@@ -349,11 +393,25 @@ export class ShaderRunner {
     params: Readonly<Record<string, unknown>>,
     textures: Readonly<Record<string, { readonly texture: WebGLTexture; readonly kind: "2d" | "3d" }>>,
     values: Readonly<Record<string, number>>,
+    region?: ShaderStep["region"],
   ): void {
     // biome-ignore lint/correctness/useHookAtTopLevel: WebGL's useProgram, not a React hook.
     gl.useProgram(program);
     gl.bindFramebuffer(gl.FRAMEBUFFER, target?.framebuffer ?? null);
-    gl.viewport(0, 0, this.width, this.height);
+    const [w, h] = target ? [target.width, target.height] : [this.width, this.height];
+    gl.viewport(0, 0, w, h);
+    if (region) {
+      // The box grown by the margin, in this target's pixels; a target's row 0 is the picture's top.
+      const [bx, by, bw, bh] = region.box;
+      const mx = region.margin / this.width,
+        my = region.margin / this.height;
+      const x0 = Math.max(0, Math.floor((bx - mx) * w)),
+        x1 = Math.min(w, Math.ceil((bx + bw + mx) * w));
+      const top = Math.max(0, Math.floor((by - my) * h)),
+        bottom = Math.min(h, Math.ceil((by + bh + my) * h));
+      gl.enable(gl.SCISSOR_TEST);
+      gl.scissor(x0, target ? top : h - bottom, Math.max(0, x1 - x0), Math.max(0, bottom - top));
+    }
     Object.entries(textures).forEach(([name, { texture, kind }], unit) => {
       gl.activeTexture(gl.TEXTURE0 + unit);
       gl.bindTexture(kind === "3d" ? gl.TEXTURE_3D : gl.TEXTURE_2D, texture);
@@ -376,6 +434,7 @@ export class ShaderRunner {
     gl.clearColor(0, 0, 0, 0);
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
+    if (region) gl.disable(gl.SCISSOR_TEST);
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
   }
 }
