@@ -60,10 +60,11 @@ any `<Effect>`; they work on clips too.
 </Title>
 ```
 
-- `glow` lights the area around the element: `radius` (the blur's standard deviation, in pixels), `intensity` (up to 4), `color`, and `tint` (1 is all
-  `color`, 0 keeps the element's own colours, a bloom). `threshold` (0 to 1) makes only the bright parts glow, which
-  suits footage.
-- `outline` draws a band of `width` pixels (up to 64) around the shape in `color`, under it. `outlineOnly` draws the
+- `glow` lights the area around the element, as a halo under it, so the element keeps its own colours: `radius` (the
+  blur's standard deviation, in pixels), `intensity` (up to 4), `color`, and `tint` (1 is all `color`, 0 keeps the
+  element's own colours). `threshold` (0 to 1) makes only the bright parts glow, and then the glow also adds its light
+  over them: a bloom, which suits footage.
+- `outline` draws a band of `width` pixels (up to 64) around the shape in `color`, under it, with round corners. `outlineOnly` draws the
   grown silhouette alone, filled.
 - `longShadow` sweeps the shape back along `angle` (degrees clockwise from up, 135 falls down and right) for
   `length` pixels, in `color`. Overlapping parts never stack, and `fade` thins it toward the far end.

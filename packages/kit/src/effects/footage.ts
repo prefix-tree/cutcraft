@@ -112,7 +112,11 @@ const cornerPin = shaderDefinition("effect", {
 }`,
 });
 
-/** Zoom blur: each pixel averaged along the line toward `center`, the smear growing with distance to `length` pixels at a corner. */
+/**
+ * Zoom blur: each pixel averaged along the line toward `center`, the smear growing with distance to `length` pixels at a
+ * corner. A pixel takes one sample per pixel of its streak, at least 2 and at most `samples`, so near the centre it
+ * reads a few.
+ */
 const zoomBlur = shaderDefinition("effect", {
   name: "zoomBlur",
   params: z.object({
@@ -122,7 +126,8 @@ const zoomBlur = shaderDefinition("effect", {
   }),
   shader: `vec4 effect(vec2 uv) {
   float reach = params.length / length(resolution / 2.0);
-  int n = int(params.samples);
+  float streak = length((params.center - uv) * reach * resolution);
+  int n = min(int(params.samples), max(2, int(ceil(streak))));
   vec4 sum = vec4(0.0);
   for (int i = 0; i < 64; i++) {
     if (i >= n) break;

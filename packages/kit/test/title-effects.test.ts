@@ -32,10 +32,23 @@ describe("the title effects", () => {
     expect(state.errors.map((e) => `${e.id}.${e.prop}`)).toEqual(["g.params.intensity", "o.params.width"]);
   });
 
-  it("glow and bevel blur in passes; outline and longShadow are one", () => {
+  it("glow and bevel blur in passes; outline takes two, longShadow one", () => {
     expect(builtInShader("glow")?.steps?.({ radius: 2 })).toHaveLength(4);
     expect(builtInShader("bevel")?.steps?.({ size: 2 })).toHaveLength(3);
-    expect(builtInShader("outline")?.passes).toHaveLength(1);
     expect(builtInShader("longShadow")?.passes).toHaveLength(1);
+  });
+
+  it("outline measures the distance down each column, then along each row, within its width", () => {
+    const [down, along] = builtInShader("outline")?.passes ?? [];
+    expect(builtInShader("outline")?.passes).toHaveLength(2);
+    expect(down).toContain("texelFetch(image, up, 0)");
+    expect(along).toContain("float(k * k) + dy * dy");
+    expect([down, along].every((s) => s?.includes("ceil(params.width)"))).toBe(true);
+  });
+
+  it("glow is a halo under the element, and a bloom over it only once it has a threshold", () => {
+    const last = builtInShader("glow")?.passes.at(-1);
+    expect(last).toContain("cc_over(o,");
+    expect(last).toContain("clamp(params.threshold / 0.05, 0.0, 1.0)");
   });
 });
