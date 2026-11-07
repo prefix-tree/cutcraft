@@ -86,7 +86,8 @@ describe("the effect pipeline", () => {
       { shaders: true },
     );
     expect(p.filter).toBe("");
-    expect(p.shaders?.map((s) => s.name)).toEqual(["css:brightness", "levels", "css:hue-rotate", "vibrance"]);
+    // All four are colour changes, so they are drawn as one pass, still in file order.
+    expect(p.shaders?.map((s) => s.name)).toEqual(["fused:css:brightness+levels+css:hue-rotate+vibrance"]);
     expect(p.fallbackFilter).toMatch(
       /^brightness\(1\.1\) brightness\([\d.]+\) contrast\([\d.]+\) hue-rotate\(5deg\) saturate\(1\.25\)$/,
     );

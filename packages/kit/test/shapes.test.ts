@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
 
-import { builtInShader, builtInTransition, EFFECTS, isNeutral } from "@cutcraft/kit";
+import { builtInShader, builtInTransition, EFFECTS, fusedColourSource, isNeutral } from "@cutcraft/kit";
 
 import { colorTransform, maskTransition } from "../src/effects/shapes";
 
@@ -71,5 +71,38 @@ describe("neutral params", () => {
       const shape = entry.params.shape as Record<string, unknown>;
       expect([type, Object.keys(neutral).every((k) => k in shape)]).toEqual([type, true]);
     }
+  });
+});
+
+describe("fusedColourSource", () => {
+  const colour = (type: string) =>
+    builtInShader(type)?.colour as NonNullable<ReturnType<typeof builtInShader>>["colour"] & {};
+
+  it("places shared modules and preludes once, renames each function and its params, and calls them in order", () => {
+    const source = fusedColourSource([
+      { colour: colour("exposure"), prefix: "e0_" },
+      { colour: colour("whiteBalance"), prefix: "e1_" },
+      { colour: colour("vibrance"), prefix: "e2_" },
+    ]);
+    expect(source.match(/vec3 cc_linear\(/g)).toHaveLength(1);
+    expect(source.match(/const mat3 BRADFORD =/g)).toHaveLength(1);
+    expect(source).toContain("vec3 cc_exposure_0(vec3 c)");
+    expect(source).toContain("exp2(params.e0_stops)");
+    expect(source).toContain("params.e1_temperature");
+    expect(source).not.toMatch(/params\.stops|params\.amount/);
+    const order = ["cc_exposure_0(v)", "cc_whiteBalance_1(v)", "cc_vibrance_2(v)"].map((c) => source.indexOf(c));
+    expect(order).toEqual([...order].sort((a, b) => a - b));
+    expect(source).toContain("return vec4(v, c.a);");
+  });
+
+  it("renames an enum's params with their options", () => {
+    const enumColour = {
+      fn: "cc_pick",
+      uses: [],
+      prelude: "",
+      code: "vec3 cc_pick(vec3 c) { return params.mode == params.mode.dark ? c * 0.5 : c; }\n",
+    };
+    const source = fusedColourSource([{ colour: enumColour, prefix: "e3_" }]);
+    expect(source).toContain("params.e3_mode == params.e3_mode.dark");
   });
 });
