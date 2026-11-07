@@ -2,7 +2,7 @@
 // `shadowsHighlights`, `bevel`): a standard deviation in pixels, as CSS `blur()` reads its length, drawn as steps that
 // work at the smallest size the blur allows.
 //
-// - A blur of σ ≥ 4 pixels is drawn at half size, of σ ≥ 8 at a quarter: each halving averages the four pixels under
+// - A blur of σ ≥ 4 pixels is drawn at half size, of σ ≥ 8 at a quarter, unless its outside is transparent (CSS's): each halving averages the four pixels under
 //   each new one, premultiplied, so transparent pixels add no colour. The blur hides the lost detail, and the next pass,
 //   full size, reads the small result through linear filtering.
 // - Each direction takes its taps in pairs where it can: one linear read between two neighbouring pixels, at the offset
@@ -23,7 +23,8 @@ export const GAUSS_HALF = 4;
 export const GAUSS_QUARTER = 8;
 
 const at = (outside: GaussOutside) =>
-  `vec4 cc_at(vec2 uv) {
+  `bool cc_inside(vec2 uv) { return all(greaterThanEqual(uv, vec2(0.0))) && all(lessThanEqual(uv, vec2(1.0))); }
+vec4 cc_at(vec2 uv) {
   return ${
     outside === "transparent"
       ? "any(lessThan(uv, vec2(0.0))) || any(greaterThan(uv, vec2(1.0))) ? vec4(0.0) : texture(image, uv)"
@@ -92,7 +93,15 @@ vec4 effect(vec2 uv) {
     float w1 = exp(-d1 * d1 / k2), w2 = i + 1 <= taps ? exp(-d2 * d2 / k2) : 0.0;
     float w = w1 + w2;
     float o = (float(i) * w1 + float(i + 1) * w2) / w;
-    sum += w * (${tap("uv + o * dir")} + ${tap("uv - o * dir")});
+    ${
+      outside === "transparent"
+        ? `// A pair whose far pixel is past the frame's edge reads its near pixel alone: one linear read between them would
+    // land outside and count both as transparent.
+    vec2 far = float(i + 1) * dir;
+    sum += cc_inside(uv + far) ? w * ${tap("uv + o * dir")} : w1 * ${tap("uv + float(i) * dir")};
+    sum += cc_inside(uv - far) ? w * ${tap("uv - o * dir")} : w1 * ${tap("uv - float(i) * dir")};`
+        : `sum += w * (${tap("uv + o * dir")} + ${tap("uv - o * dir")});`
+    }
     weights += 2.0 * w;
   }`
       : `for (int i = 1; i <= taps; i++) {
@@ -121,8 +130,12 @@ export function gaussSources(what: GaussWhat, param = "radius", outside: GaussOu
   ];
 }
 
-/** The scale a blur of σ frame pixels is drawn at. */
-export function gaussScale(sigma: number): 1 | 0.5 | 0.25 {
+/**
+ * The scale a blur of σ frame pixels is drawn at. A blur with a transparent outside stays full size: a smaller picture
+ * cannot show how the frame's last pixel fades into the outside, so it would miss CSS's own blur there.
+ */
+export function gaussScale(sigma: number, outside: GaussOutside = "clamp"): 1 | 0.5 | 0.25 {
+  if (outside === "transparent") return 1;
   return sigma >= GAUSS_QUARTER ? 0.25 : sigma >= GAUSS_HALF ? 0.5 : 1;
 }
 
@@ -144,7 +157,7 @@ export function gaussSteps(
     string,
     string,
   ];
-  const scale = gaussScale(sigma);
+  const scale = gaussScale(sigma, outside);
   const reach = 3 * Math.max(sigma, 0);
   const texel = 1 / scale;
   // Each step must cover what the next reads: the y pass its box, the x pass the box and as far up and down as the y

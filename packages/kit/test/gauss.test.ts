@@ -8,6 +8,8 @@ describe("the shared Gaussian", () => {
     expect(gaussSteps(2, "rgba").map((s) => s.scale)).toEqual([1, 1]);
     expect(gaussSteps(5, "rgba").map((s) => s.scale)).toEqual([0.5, 0.5, 0.5]);
     expect(gaussSteps(20, "rgba").map((s) => s.scale)).toEqual([0.5, 0.25, 0.25, 0.25]);
+    // A transparent outside, CSS's, stays full size, so the frame's edge fades as CSS's own blur does.
+    expect(gaussSteps(20, "rgba", "sigma", "transparent").map((s) => s.scale)).toEqual([1, 1]);
   });
 
   it("reads the plain picture one tap per pixel at full size, and in linear pairs once it is premultiplied", () => {
