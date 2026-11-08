@@ -538,6 +538,14 @@
       "id": "warm",
       "kind": "lut",
       "duration": 0
+    },
+    "coffeeWide": {
+      "id": "coffeeWide",
+      "kind": "video",
+      "duration": 36,
+      "fps": 30,
+      "width": 960,
+      "height": 540
     }
   }
 }

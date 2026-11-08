@@ -42,7 +42,7 @@ Every built-in `<Effect type>` and `<Transition type>`. Hover a card to play it;
 
 <div class="cc-cards">
 <PreviewCard code hover title="colorKey" link="/reference/effects/colorKey" src="previews/effects/colorKey" text="Makes one colour transparent: a green screen." />
-<PreviewCard code hover title="regionBlur" link="/reference/effects/regionBlur" src="previews/effects/regionBlur" text="Blurs a box of the frame, to hide a face, a plate or a screen." />
+<PreviewCard code hover title="regionBlur" link="/reference/effects/regionBlur" src="previews/effects/regionBlur" text="Blurs a box of the frame, to hide a face, a person, a plate or a screen." />
 <PreviewCard code hover title="cornerPin" link="/reference/effects/cornerPin" src="previews/effects/cornerPin" text="Moves the picture's four corners, to place it in a screen or a frame." />
 <PreviewCard code hover title="zoomBlur" link="/reference/effects/zoomBlur" src="previews/effects/zoomBlur" text="Streaks the picture out from a centre." />
 <PreviewCard code hover title="chromaticAberration" link="/reference/effects/chromaticAberration" src="previews/effects/chromaticAberration" text="Splits red and blue apart, as a cheap lens does." />

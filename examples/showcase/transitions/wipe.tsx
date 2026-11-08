@@ -7,7 +7,7 @@ export default function Video() {
       <Track id="main">
         <Clip id="first" src="asset:coffee" in={1} out={3} fit="cover" />
         <Transition id="change" type="wipe" duration={1} />
-        <Clip id="next" src="asset:product" in={0} out={2} fit="cover" />
+        <Clip id="next" src="asset:coffeeWide" in={4} out={6} fit="cover" />
       </Track>
     </Composition>
   );

@@ -58,9 +58,9 @@ Each video is one file in [`examples/showcase`](https://github.com/prefix-tree/c
 rendered with `pnpm --filter @cutcraft/example-showcase render`; the guide's feature examples, in
 [`examples/showcase/guide`](https://github.com/prefix-tree/cutcraft/tree/main/examples/showcase/guide), with
 `pnpm --filter @cutcraft/example-showcase docs`. The footage is made by `ffmpeg`'s own sources
-(`pnpm --filter @cutcraft/example-showcase gen`), except the coffee shot in the effect and transition demos:
-[Pixabay video 209419](https://pixabay.com/videos/id-209419/), under the Pixabay Content License. It is not committed;
-`gen` reads it from `examples/showcase/media/stock/` and checks its hash. Every file renders through the player in
+(`pnpm --filter @cutcraft/example-showcase gen`), except the two coffee shots in the effect and transition demos, close and wide: Pixabay videos
+[209419](https://pixabay.com/videos/id-209419/) and [209424](https://pixabay.com/videos/id-209424/), under the Pixabay
+Content License. They are not committed; `gen` reads them from `examples/showcase/media/stock/` and checks their hashes. Every file renders through the player in
 [headless Chrome](/guide/exporting#the-browser-it-runs-in). The people on camera are stand-ins: their
 footage is a gradient, and the manifest holds the words they would say.
 

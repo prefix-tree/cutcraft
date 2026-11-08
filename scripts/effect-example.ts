@@ -6,7 +6,7 @@
 // - colour, footage, basic adjustments, vignette and grain: the coffee shot, the effect keyed from where it changes
 //   nothing up to its example value, then held, so the video shows the change;
 // - title looks: one word over moving gradients, the look keyed up the same way;
-// - transitions: the coffee shot into the fractal, the transition in the middle, at its defaults.
+// - transitions: the coffee close-up into the same scene wide, the transition in the middle, at its defaults.
 import type { EFFECTS, TRANSITIONS } from "../packages/kit/src/effects/registry";
 
 export const EXAMPLE_WIDTH = 640;
@@ -29,10 +29,19 @@ interface EffectDemo {
   readonly on: "shot" | "title" | "key" | "pin";
   readonly params?: Readonly<Record<string, Value>>;
   readonly animate?: readonly Animate[];
+  /** The shot it is drawn on, when not the close-up. */
+  readonly shot?: Shot;
 }
 
-/** The shot most demos use: the pour, where the picture moves. */
-const SHOT = { src: "coffee", in: 12 } as const;
+interface Shot {
+  readonly src: string;
+  readonly in: number;
+}
+
+/** The shot most demos use: the pour, close up, where the picture moves. */
+const SHOT: Shot = { src: "coffee", in: 12 };
+/** The same scene wide: the kettle pouring, a person at the right edge. */
+const WIDE: Shot = { src: "coffeeWide", in: 4 };
 
 const line = [
   [0, 0],
@@ -135,10 +144,11 @@ export const EFFECT_DEMOS: Readonly<Record<keyof typeof EFFECTS, EffectDemo>> = 
     animate: [{ param: "tolerance", from: 0, to: 0.3 }],
   },
   regionBlur: {
-    text: "Blurs a box of the frame, to hide a face, a plate or a screen.",
+    text: "Blurs a box of the frame, to hide a face, a person, a plate or a screen.",
     on: "shot",
-    params: { radius: 12, roundness: 0.5 },
-    animate: [{ param: "box", from: [0.1, 0.25, 0.3, 0.45], to: [0.55, 0.25, 0.3, 0.45] }],
+    shot: WIDE,
+    params: { box: [0.66, 0, 0.34, 1], roundness: 0.3, feather: 16 },
+    animate: [{ param: "radius", from: 0, to: 18 }],
   },
   cornerPin: {
     text: "Moves the picture's four corners, to place it in a screen or a frame.",
@@ -239,12 +249,13 @@ export function effectExample(name: keyof typeof EFFECTS): string {
   const demo = EFFECT_DEMOS[name];
   const look = effectElement(name, demo, "          ");
   const tracks: string[] = [];
+  const own = demo.shot ?? SHOT;
   if (demo.on === "shot")
-    tracks.push('      <Track id="main">', ...shot("shot", SHOT.src, SHOT.in, look), "      </Track>");
+    tracks.push('      <Track id="main">', ...shot("shot", own.src, own.in, look), "      </Track>");
   if (demo.on === "key")
     tracks.push(
       '      <Track id="main">',
-      ...shot("shot", SHOT.src, SHOT.in, []),
+      ...shot("shot", WIDE.src, WIDE.in, []),
       "      </Track>",
       '      <Track id="keyed">',
       ...shot("greenscreen", "greenscreen", 0, look),
@@ -253,7 +264,7 @@ export function effectExample(name: keyof typeof EFFECTS): string {
   if (demo.on === "pin")
     tracks.push(
       '      <Track id="main">',
-      ...shot("backdrop", "cells", 0, []),
+      ...shot("backdrop", WIDE.src, WIDE.in, []),
       "      </Track>",
       '      <Track id="pinned">',
       ...shot("shot", SHOT.src, SHOT.in, look),
@@ -294,7 +305,7 @@ export function effectExample(name: keyof typeof EFFECTS): string {
   ].join("\n");
 }
 
-/** The whole file a built-in transition's demo renders: the coffee shot into the fractal, at the transition's defaults. */
+/** The whole file a built-in transition's demo renders: the close-up into the wide shot, at the transition's defaults. */
 export function transitionExample(name: keyof typeof TRANSITIONS): string {
   return [
     'import { Clip, Composition, Track, Transition } from "@cutcraft/kit";',
@@ -306,7 +317,7 @@ export function transitionExample(name: keyof typeof TRANSITIONS): string {
     '      <Track id="main">',
     '        <Clip id="first" src="asset:coffee" in={1} out={3} fit="cover" />',
     `        <Transition id="change" type="${name}" duration={1} />`,
-    '        <Clip id="next" src="asset:product" in={0} out={2} fit="cover" />',
+    `        <Clip id="next" src="asset:${WIDE.src}" in={${WIDE.in}} out={${WIDE.in + 2}} fit="cover" />`,
     "      </Track>",
     "    </Composition>",
     "  );",
