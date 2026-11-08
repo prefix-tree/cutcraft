@@ -719,7 +719,10 @@ write(
   ),
 );
 write(join(skillRefs, "rendering.md"), `${forAgent(renderingPage(), false)}\n`);
-write(join(skillRefs, "cli.md"), `${forAgent(readFileSync(join(root, "docs", "reference", "cli.md"), "utf8"), false)}\n`);
+write(
+  join(skillRefs, "cli.md"),
+  `${forAgent(readFileSync(join(root, "docs", "reference", "cli.md"), "utf8"), false)}\n`,
+);
 
 const problems = syncGeneratedFiles(root, generated, {
   check,

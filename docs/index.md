@@ -50,15 +50,15 @@ them in bulk and build them into your apps.</p>
 
 ### Make videos agentically
 
-Turn your idea into a video using your agent. It writes a TSX file of words and shots, and the checks answer it like
-a compiler, at the line to fix.
+Turn your idea into a video using your agent. The CutCraft skill teaches it to write the file, check it and look at
+it before it renders.
 
 ```sh
-npx cutcraft video.tsx \
-  --check-layout --safe-zone reels
+/plugin marketplace add prefix-tree/cutcraft
+/plugin install cutcraft@prefix-tree
 ```
 
-<p class="home-way-links"><a :href="withBase('/guide/writing-files')">A model's file, line by line</a><a :href="withBase('/guide/exporting#checking-the-layout')">Layout check</a><a :href="withBase('/reference/rendering')">What renders</a></p>
+<p class="home-way-links"><a :href="withBase('/guide/agents')">Agent Skill</a><a :href="withBase('/guide/writing-files')">A model's file, line by line</a><a :href="withBase('/guide/exporting#checking-the-layout')">Layout check</a></p>
 </div>
 
 <div class="home-way">
