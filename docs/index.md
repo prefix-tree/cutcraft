@@ -23,8 +23,8 @@ const drag = bench.editor.find((r) => r.nodes > 500 && r.step.startsWith("transf
 
 # Video editor as code
 
-<p class="home-lead">LLMs write code well and math badly. So a model writes a TSX file of words and shots, and CutCraft
-does the arithmetic, plays it in the browser, edits it and exports it.</p>
+<p class="home-lead">Make videos and motion graphics with React. Write them with your agent, edit them by hand, render
+them in bulk and build them into your apps.</p>
 
 <CopyCommand command="npm install cutcraft @cutcraft/kit react zod" />
 
@@ -39,8 +39,121 @@ does the arithmetic, plays it in the browser, edits it and exports it.</p>
 
 </div>
 <div class="home-hero-media">
-<HeroVideo src="showcase/hero" alt="A woodblock print: waves roll in under a red sun, a katana cuts it in two, and the print draws in to the CutCraft logo" />
+<HeroVideo src="showcase/hero" alt="A woodblock print: waves roll in, a red sun rises through mist, a katana cuts it in two, and the print draws in to the CutCraft logo beside the words made by your agent, edited by hand, owned as code" />
 </div>
+</section>
+
+<section class="home-ways" aria-label="Three ways to make a video">
+
+<div class="home-way">
+<p class="home-way-kicker">01</p>
+
+### Make videos agentically
+
+Turn your idea into a video using your agent. It writes a TSX file of words and shots, and the checks answer it like
+a compiler, at the line to fix.
+
+```sh
+npx cutcraft video.tsx \
+  --check-layout --safe-zone reels
+```
+
+<p class="home-way-links"><a :href="withBase('/guide/writing-files')">A model's file, line by line</a><a :href="withBase('/guide/exporting#checking-the-layout')">Layout check</a><a :href="withBase('/reference/rendering')">What renders</a></p>
+</div>
+
+<div class="home-way">
+<p class="home-way-kicker">02</p>
+
+### Make videos interactively
+
+Edit and animate like in a regular video editor. Every drag, trim and retime is an undoable action written back to
+the file as one changed value.
+
+```ts
+exec.execute({
+  type: "clip/trim",
+  params: {
+    id: "hook",
+    edge: "out",
+    value: "word:22.end",
+  },
+});
+```
+
+<p class="home-way-links"><a :href="withBase('/playground')">Playground</a><a :href="withBase('/guide/player')">Player</a><a :href="withBase('/guide/editing')">Editing</a><a :href="withBase('/reference/actions')">Actions</a></p>
+</div>
+
+<div class="home-way">
+<p class="home-way-kicker">03</p>
+
+### Make videos programmatically
+
+Use web technology and own your video as code: React, CSS, three.js and Motion on a timeline. Render one, or a
+thousand with different props.
+
+```sh
+npx cutcraft video.tsx \
+  --props '{"product":"Shed"}' \
+  --out shed.mp4
+```
+
+<p class="home-way-links"><a :href="withBase('/guide/getting-started')">Quick start</a><a :href="withBase('/reference/elements/')">Elements</a><a :href="withBase('/reference/api')">API</a><a :href="withBase('/reference/cli')">CLI</a></p>
+</div>
+
+</section>
+
+<section class="home-idea">
+
+## The idea
+
+<p class="home-strip-lead">A video should be a file that a model, a person and a program can all work on, each reading what the
+others did.</p>
+
+<div class="home-idea-grid">
+
+<div>
+
+**A video is a file.** Not a project locked in an app, but a TSX file you read, diff, review and keep in git like
+the rest of your code. Its tracks, clips and titles are elements with literal ids, so a tool can find each one.
+
+</div>
+<div>
+
+**Words and shots, not seconds.** Models write code well and arithmetic badly. So the file says where things happen:
+on word 12, at the second shot. CutCraft turns that into frames, through every trim and speed change.
+
+</div>
+<div>
+
+**Every hand writes the same file.** Your agent writes it, you drag a clip, and the drag lands in the file as a
+one-value diff that the agent reads on its next turn. Nothing lives in a second format.
+
+</div>
+<div>
+
+**One engine, end to end.** The browser plays the file, and the export runs that same player in headless Chrome. What
+you preview is what you get, frame for frame.
+
+</div>
+<div>
+
+**Code where the timeline stops.** A `<Layer>` takes any React, CSS or WebGL, and it scrubs frame-exact because
+everything runs on the video's clock, not the wall clock.
+
+</div>
+<div>
+
+**Free, with nothing held back.** The player, the editor actions, the export and the checks are MIT: no paid tier, no
+licence key, no watermark.
+
+</div>
+
+</div>
+
+<div class="home-loop" aria-hidden="true">
+<span>brief</span><i>→</i><span>agent</span><i>→</i><span class="on">video.tsx</span><i>⇄</i><span>editor</span><i>→</i><span>MP4 · WebM · still</span>
+</div>
+
 </section>
 
 <section class="home-words">

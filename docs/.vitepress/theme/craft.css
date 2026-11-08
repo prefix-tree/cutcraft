@@ -747,3 +747,101 @@
     padding: 24px 16px 64px;
   }
 }
+
+/* Three ways to make a video: agent, editor, code. */
+.home-ways {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+.home-way {
+  display: flex;
+  flex-direction: column;
+  padding: 22px 22px 18px;
+  border: 1px solid var(--cc-rule);
+  border-radius: 12px;
+  background: var(--cc-paper-2);
+}
+.home-way h3 {
+  margin: 4px 0 10px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  font-size: 20px;
+}
+.home-way p {
+  font-size: 15px;
+  line-height: 1.6;
+}
+.vp-doc .home-way div[class*="language-"] {
+  margin: auto 0 14px;
+}
+.home-way-kicker {
+  margin: 0 !important;
+  font-family: var(--vp-font-family-mono);
+  font-size: 12px !important;
+  color: var(--cc-accent);
+}
+.home-way-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin: 0 !important;
+  font-size: 14px !important;
+}
+
+/* The idea: six short claims and the loop they make. */
+.home-idea-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px 36px;
+}
+.home-idea-grid > div {
+  padding-top: 14px;
+  border-top: 1px solid var(--cc-rule);
+}
+.home-idea-grid p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+}
+.home-loop {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px 12px;
+  margin-top: 36px;
+  font-family: var(--vp-font-family-mono);
+  font-size: 14px;
+  color: var(--cc-grey);
+}
+.home-loop span {
+  padding: 6px 12px;
+  border: 1px solid var(--cc-rule);
+  border-radius: 999px;
+}
+.home-loop span.on {
+  border-color: var(--cc-accent);
+  color: var(--cc-accent);
+}
+.home-loop i {
+  font-style: normal;
+}
+
+@media (max-width: 960px) {
+  .home-ways,
+  .home-idea-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.vp-doc .home-way div[class*="language-"] > span.lang {
+  display: none;
+}
+.vp-doc .home-way div[class*="language-"] pre {
+  padding: 14px 0;
+}
+.vp-doc .home-way div[class*="language-"] code {
+  font-size: 12.5px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}

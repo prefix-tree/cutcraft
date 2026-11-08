@@ -66,10 +66,10 @@ footage is a gradient, and the manifest holds the words they would say.
 
 ## The logo film
 
-The landing page's hero, made with CutCraft: a woodblock print in the logo's colours. Waves roll in under a red sun, a
-katana cuts it in two, and the print draws in to the logo's tile, where the colours turn over. It is one `<Layer>` of
-React SVG timed by `useLayer().elapsed`, and two `<Title>`s in Google Fonts, and it ends on the paper it began on, so it
-loops.
+The landing page's hero, made with CutCraft: a woodblock print in the logo's colours. Waves roll in, a red sun rises
+through bands of mist while birds cross, a katana cuts it in two, and the print draws in to the logo's tile, where the
+colours turn over. The name follows, then the three ways to make a video, and a seal. It is one `<Layer>` of React SVG
+timed by `useLayer().elapsed`, and `<Title>`s in Google Fonts, and it ends on the paper it began on, so it loops.
 
 <div class="cc-pair"><video :src="withBase('/showcase/hero.webm')" :poster="withBase('/showcase/hero.jpg')" controls muted loop playsinline></video></div>
 
