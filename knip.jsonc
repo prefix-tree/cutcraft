@@ -6,7 +6,13 @@
   "rules": { "exports": "warn", "types": "warn", "enumMembers": "warn" },
   "workspaces": {
     ".": {
-      "entry": ["scripts/*.{ts,mjs}", "docs/.vitepress/config.mts", "docs/.vitepress/theme/index.ts"],
+      // The playground's modules are imported from Playground.vue, which knip does not read.
+      "entry": [
+        "scripts/*.{ts,mjs}",
+        "docs/.vitepress/config.mts",
+        "docs/.vitepress/theme/index.ts",
+        "docs/.vitepress/theme/playground/mount.tsx"
+      ],
       // Run through its binary by scripts/check-packages.mjs.
       "ignoreDependencies": ["@arethetypeswrong/cli"]
     },
