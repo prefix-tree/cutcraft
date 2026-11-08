@@ -73,7 +73,7 @@ const bounceOut =
   (x) =>
     x + (bounceFull(x) - x) * h;
 
-/** A spring's physics: mass, damping and stiffness, as Remotion's `spring()` takes them. */
+/** A spring's physics: mass, damping and stiffness. */
 export interface SpringConfig {
   readonly mass?: number;
   readonly damping?: number;

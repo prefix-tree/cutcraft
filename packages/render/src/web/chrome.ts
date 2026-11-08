@@ -1,5 +1,5 @@
-// The Chrome the export runs in. Every export draws its frames in a real browser, so CutCraft finds one the way
-// Remotion does: a binary you name, or else a Chrome for Testing it downloads once into a cache and reuses.
+// The Chrome the export runs in. Every export draws its frames in a real browser: a binary you name, or else a Chrome
+// for Testing that CutCraft downloads once into a cache and reuses.
 import { homedir } from "node:os";
 import { join } from "node:path";
 
