@@ -23,8 +23,8 @@ const drag = bench.editor.find((r) => r.nodes > 500 && r.step.startsWith("transf
 
 # Video editor as code
 
-<p class="home-lead">Make videos and motion graphics with React. Write them with your agent, edit them by hand, render
-them in bulk and build them into your apps.</p>
+<p class="home-lead">Create videos &amp; motion graphics with React. Use agents, render in bulk and build apps. Free and
+open source under the MIT licence.</p>
 
 <CopyCommand command="npm install cutcraft @cutcraft/kit react zod" />
 
@@ -35,12 +35,22 @@ them in bulk and build them into your apps.</p>
 <a class="home-button" href="https://github.com/prefix-tree/cutcraft">GitHub</a>
 </div>
 
-<p class="home-meta">MIT · plays in the browser · exports MP4, WebM and stills</p>
+<p class="home-meta">MIT licence · no paid tier · no watermark · exports MP4, WebM and stills</p>
 
 </div>
 <div class="home-hero-media">
 <HeroVideo src="showcase/hero" alt="A woodblock print: waves roll in, a red sun rises through mist, a katana cuts it in two, and the print draws in to the CutCraft logo beside the words made by your agent, edited by hand, owned as code" />
 </div>
+</section>
+
+<section class="home-goal">
+
+## The idea
+
+<p class="home-goal-lead">Create videos and motion graphics with React, in the way that suits the job: let your agent
+write them, edit them like in a regular video editor, or generate them from code. All three work on the same file,
+and all of it is free under the MIT licence.</p>
+
 </section>
 
 <section class="home-ways" aria-label="Three ways to make a video">
@@ -102,59 +112,12 @@ npx cutcraft video.tsx \
 
 </section>
 
-<section class="home-idea">
+<section class="home-free">
 
-## The idea
+**Free for everyone, under the MIT licence.** The player, the editor actions, the export and the checks: no paid tier,
+no licence key, no watermark on the frames, for a person, a startup or a company.
 
-<p class="home-strip-lead">A video should be a file that a model, a person and a program can all work on, each reading what the
-others did.</p>
-
-<div class="home-idea-grid">
-
-<div>
-
-**A video is a file.** Not a project locked in an app, but a TSX file you read, diff, review and keep in git like
-the rest of your code. Its tracks, clips and titles are elements with literal ids, so a tool can find each one.
-
-</div>
-<div>
-
-**Words and shots, not seconds.** Models write code well and arithmetic badly. So the file says where things happen:
-on word 12, at the second shot. CutCraft turns that into frames, through every trim and speed change.
-
-</div>
-<div>
-
-**Every hand writes the same file.** Your agent writes it, you drag a clip, and the drag lands in the file as a
-one-value diff that the agent reads on its next turn. Nothing lives in a second format.
-
-</div>
-<div>
-
-**One engine, end to end.** The browser plays the file, and the export runs that same player in headless Chrome. What
-you preview is what you get, frame for frame.
-
-</div>
-<div>
-
-**Code where the timeline stops.** A `<Layer>` takes any React, CSS or WebGL, and it scrubs frame-exact because
-everything runs on the video's clock, not the wall clock.
-
-</div>
-<div>
-
-**Free, with nothing held back.** The player, the editor actions, the export and the checks are MIT: no paid tier, no
-licence key, no watermark.
-
-</div>
-
-</div>
-
-<div class="home-loop" aria-hidden="true">
-<span>brief</span><i>→</i><span>agent</span><i>→</i><span class="on">video.tsx</span><i>⇄</i><span>editor</span><i>→</i><span>MP4 · WebM · still</span>
-</div>
-
-<p class="home-links"><a :href="withBase('/guide/principles')">Core principles and the decisions behind them →</a></p>
+<p class="home-links"><a :href="withBase('/guide/core-idea')">The core idea, in three small files →</a> <a :href="withBase('/guide/principles')">Core principles and the decisions behind them →</a></p>
 
 </section>
 
@@ -310,7 +273,7 @@ npx cutcraft video.tsx --out video.mp4
 
 ## Examples
 
-Every video on this site is a short file rendered by CutCraft's own export engine; each card opens the file that made
+Every video on this site is a short file rendered by CutCraft's own export engine; each row opens the file that made
 it.
 
 <div class="cc-cards home-cards">

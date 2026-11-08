@@ -55,6 +55,7 @@ export default defineConfig({
         text: "Get started",
         items: [
           { text: "Introduction", link: "/guide/introduction" },
+          { text: "The core idea", link: "/guide/core-idea" },
           { text: "Quick start", link: "/guide/getting-started" },
           { text: "A launch video, line by line", link: "/guide/writing-files" },
           { text: "Examples", link: "/examples" },
