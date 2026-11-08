@@ -27,18 +27,25 @@ beforeAll(() => {
 afterAll(() => rmSync(scratch, { recursive: true, force: true }));
 
 /** The width of a frame's text set in "Brand", which `brand` declares (or names), with these passed fonts. */
-async function width(name: string, brand: string, passed: readonly FontFile[] = []): Promise<number> {
+async function width(
+  name: string,
+  brand: string,
+  passed: readonly FontFile[] = [],
+  extra = "",
+  start = 0,
+): Promise<number> {
   const file = join(dir, `${name}.tsx`);
   writeFileSync(
     file,
     `import { Composition, font, Title, Track } from "@cutcraft/kit";
 export const manifest = { assets: {} };
 const brand = ${brand};
+const START = ${start};
 export default function Video() {
   return (
     <Composition fps={30} width={640} height={360}>
       <Track id="o" layout="free">
-        <Title id="t" start={0} duration={1} font={brand} size={72}>iiiiii</Title>
+        <Title id="t" start={START} duration={1} font={brand} size={72}${extra}>iiiiii</Title>
       </Track>
     </Composition>
   );
@@ -69,4 +76,16 @@ it("sets text in a font passed beside the file's own (--font)", async () => {
   const fallback = await width("fallback-2", NAMED);
   const passed = [{ name: "Brand", data: readFileSync(BRAND) }];
   expect(await width("passed", NAMED, passed)).toBeGreaterThan(fallback * 1.5);
+});
+
+it("sets a bundled face, which the page loads only once text uses it, in a still of that text's first moment", async () => {
+  const fallback = await width("bundled-fallback", NAMED);
+  // JetBrains Mono comes with the player (fonts.css), fetched lazily: the still must wait for it, not draw the fallback.
+  expect(await width("bundled", `"JetBrains Mono"`)).toBeGreaterThan(fallback * 1.5);
+});
+
+it("sets a bundled face in a still of text that appears after the first frame", async () => {
+  const fallback = await width("late-fallback", NAMED, [], "", 0.3);
+  // JetBrains Mono comes with the player (fonts.css) and loads only once text uses it, here at 0.3 s.
+  expect(await width("late", `"JetBrains Mono"`, [], "", 0.3)).toBeGreaterThan(fallback * 1.5);
 });

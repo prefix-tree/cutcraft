@@ -224,11 +224,14 @@ function tick(): Promise<void> {
 }
 
 /**
- * After a step: React has committed the new time (its update is flushed before the next task), and every engine
- * layer has drawn it. A three.js renderer created by a layer that just appeared takes a few frames.
+ * After a step: React has committed the new time (its update is flushed before the next task), every engine layer
+ * has drawn it, and every face its text uses has loaded. A three.js renderer created by a layer that just appeared
+ * takes a few frames; a bundled face (fonts.css) is fetched only once text first uses it, so text that appears after
+ * the first frame would otherwise be captured in the fallback face.
  */
 async function settle(): Promise<void> {
   await tick();
+  if (document.fonts.status === "loading") await document.fonts.ready;
   const until = performance.now() + SETTLE_TIMEOUT_MS;
   while (layerFramesPending() > 0) {
     if (performance.now() > until)

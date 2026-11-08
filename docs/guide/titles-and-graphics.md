@@ -75,16 +75,31 @@ They draw through the overlay's picture, which the preview needs Chrome's `chrom
 for. Without it the preview shows `glow` as a coloured shadow and leaves the other three out; the export always draws
 them. For a plain offset shadow, the CSS [`shadow`](/reference/effects/shadow) effect needs no flag.
 
-## Graphics
+## Ready-made components
+
+Lower thirds, callouts, badges, counters, progress bars, arrows, highlights and backgrounds come as components:
+ordinary functions, imported from `@cutcraft/kit`, that return the kit's own titles, shapes and SVG. So a lower third
+is timed by a word like any title, the theme styles it, and the layout check sees its text:
+
+<Example src="previews/components/lower-third" alt="A lower third on a card, sliding up over the coffee shot">
+
+<<< @/../examples/showcase/components/lower-third.tsx
+
+</Example>
+
+Each one's parts get ids from its own (`lt-card`, `lt-name`, `lt-role`). Editing a part in the editor writes that use
+out into the file as plain elements, which you then own. [Components](/reference/components/) shows all eight, each
+with its props.
+
+For anything they don't cover, write it as free code: a `<Motion>` sequence, an SVG chart animated by Motion, a few
+lines of React in a `<Layer>`, or a 3D scene in a `<Three>`. The [examples](/examples) show each one next to its file,
+and [Free code](./free-code) explains the tags.
 
 ::: warning Deprecated
-`<Graphic kind="…">` (34 ready-made graphics: arrows, callouts, lower thirds, counters, backgrounds, confetti…) is
-deprecated and will be removed in a later release; the lint warns on each one.
+`<Graphic kind="…">` (the 34 graphics drawn by the engine) is deprecated and will be removed in the next major
+release; the lint warns on each one. `LowerThird`, `Callout`, `Badge`, `Counter`, `ProgressBar`, `Arrow`, `Highlight`
+and `Background` replace the kinds most used.
 :::
-
-Write graphics as free code instead: a `<Motion>` lower third or callout, an SVG chart animated by Motion, a counter
-as a few lines of React in a `<Layer>`, confetti or a 3D product in a `<Three>` scene. The [examples](/examples) show
-each one next to its file, and [Free code](./free-code) explains the tags.
 
 ## Shapes
 

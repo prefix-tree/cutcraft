@@ -116,7 +116,7 @@ with the same sound
 
 | | |
 |---|---|
-| Elements | Tracks (a magnetic sequence or free placement), clips trimmed by seconds, words or shots, transitions, titles, shapes, SVG, stickers, built-in graphics, captions, markers, masks, adjustment layers, keyframes, speed ramps, freeze frames, nested compositions and multicam. `<Layer>` takes any React. |
+| Elements | Tracks (a magnetic sequence or free placement), clips trimmed by seconds, words or shots, transitions, titles, shapes, SVG, stickers, ready-made components (lower thirds, callouts, counters…), captions, markers, masks, adjustment layers, keyframes, speed ramps, freeze frames, nested compositions and multicam. `<Layer>` takes any React. |
 | Time by meaning | `in="word:12"`, `out="shot:3.end"`, and overlays pinned to a word of the clip that says it (`anchor="hook" at="word:14"`), so cuts and graphics follow every trim. |
 | Editing | 119 actions, each with validation and undo. Every edit is written back into the file as the smallest text change. |
 | Lint | Checks the file before anything plays: literal ids, cuts inside words, fonts and declarations, and the few limits listed in [what renders](https://prefix-tree.github.io/cutcraft/reference/rendering). |

@@ -22,6 +22,11 @@ const files = [
   ...readdirSync(join(here, "docs")).map((f) => ({ dir: "docs", file: f, out: join(previews, "elements") })),
   ...readdirSync(join(here, "guide")).map((f) => ({ dir: "guide", file: f, out: join(previews, "guide") })),
   ...readdirSync(join(here, "effects")).map((f) => ({ dir: "effects", file: f, out: join(previews, "effects") })),
+  ...readdirSync(join(here, "components")).map((f) => ({
+    dir: "components",
+    file: f,
+    out: join(previews, "components"),
+  })),
   ...readdirSync(join(here, "transitions")).map((f) => ({
     dir: "transitions",
     file: f,
