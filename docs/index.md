@@ -214,7 +214,7 @@ Each sits between two clips and takes its params from the file.
 
 <Feature title="Colour and effects" src="previews/guide/colour-grade" link="/guide/colour">
 
-Exposure, white balance, curves, levels, LUTs, keying, region blur, corner pin, glow and more: twenty-eight built in,
+Exposure, white balance, curves, levels, LUTs, keying, region blur, corner pin, glow, halftone, light leaks and more: thirty-three built in,
 run as shaders in the preview and the export alike, and your own in GLSL. Effects run in the order the file lists them.
 
 ```tsx
@@ -296,13 +296,17 @@ npx cutcraft video.tsx --out video.mp4
 <PreviewCard code hover title="glow" link="/reference/effects/glow" src="previews/effects/glow" />
 <PreviewCard code hover title="outline" link="/reference/effects/outline" src="previews/effects/outline" />
 <PreviewCard code hover title="longShadow" link="/reference/effects/longShadow" src="previews/effects/longShadow" />
+<PreviewCard code hover title="halftone" link="/reference/effects/halftone" src="previews/effects/halftone" />
+<PreviewCard code hover title="lightLeak" link="/reference/effects/lightLeak" src="previews/effects/lightLeak" />
+<PreviewCard code hover title="pixelate" link="/reference/effects/pixelate" src="previews/effects/pixelate" />
+<PreviewCard code hover title="fractalNoise" link="/reference/effects/fractalNoise" src="previews/effects/fractalNoise" />
 <PreviewCard code hover title="iris" link="/reference/transitions/iris" src="previews/transitions/iris" />
 <PreviewCard code hover title="filmBurn" link="/reference/transitions/filmBurn" src="previews/transitions/filmBurn" />
 <PreviewCard code hover title="pixelDissolve" link="/reference/transitions/pixelDissolve" src="previews/transitions/pixelDissolve" />
 <PreviewCard code hover title="blinds" link="/reference/transitions/blinds" src="previews/transitions/blinds" />
 </div>
 
-<p class="home-links"><a :href="withBase('/reference/effects/')">All 40 effects and transitions →</a></p>
+<p class="home-links"><a :href="withBase('/reference/effects/')">All 45 effects and transitions →</a></p>
 
 </section>
 

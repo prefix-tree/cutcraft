@@ -199,6 +199,37 @@ export const EFFECT_DEMOS: Readonly<Record<keyof typeof EFFECTS, EffectDemo>> = 
     on: "title",
     animate: [{ param: "amount", from: 0, to: 0.8 }],
   },
+  halftone: {
+    text: "Prints the picture as a screen of dots, in one ink or four.",
+    on: "shot",
+    params: { size: 7 },
+    animate: [{ param: "amount", from: 0, to: 1 }],
+  },
+  pixelate: {
+    text: "Turns the picture, or a box of it, into a coarse mosaic.",
+    on: "shot",
+    shot: WIDE,
+    params: { box: [0.66, 0, 0.34, 1] },
+    animate: [{ param: "size", from: 1, to: 18 }],
+  },
+  scanlines: {
+    text: "Lays the dark lines of an old screen over the picture.",
+    on: "shot",
+    params: { spacing: 4, speed: 8 },
+    animate: [{ param: "intensity", from: 0, to: 0.5 }],
+  },
+  lightLeak: {
+    text: "Washes warm light in from the edges, as light leaking into a film camera.",
+    on: "shot",
+    params: { evolution: 0.4 },
+    animate: [{ param: "intensity", from: 0, to: 0.7 }],
+  },
+  fractalNoise: {
+    text: "Blends a moving cloud of noise over the picture: mist, smoke or texture.",
+    on: "shot",
+    params: { blend: "screen", size: 140, contrast: 1.6, evolution: 0.5 },
+    animate: [{ param: "opacity", from: 0, to: 0.6 }],
+  },
 };
 
 export const TRANSITION_TEXT: Readonly<Record<keyof typeof TRANSITIONS, string>> = {
