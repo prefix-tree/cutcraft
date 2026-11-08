@@ -156,10 +156,7 @@
   margin: 0 auto;
   padding: 56px 24px 96px;
 }
-.home section + section,
-.home section + .cc-feature,
-.home .cc-feature + .cc-feature,
-.home .cc-feature + section {
+.home section + section {
   margin-top: 88px;
 }
 .home h2 {
@@ -167,35 +164,66 @@
   border-top: 0;
   padding-top: 0;
 }
-.home-icon {
-  width: 64px;
-  height: 64px;
-  border-radius: 14px;
-  margin-bottom: 20px;
-}
-
-/* Hero: the pitch and the install on the left, the launch video on the right. */
+/* Hero: the pitch centred above the film. */
 .home-hero {
-  display: grid;
-  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
-  gap: 48px;
+  display: flex;
+  flex-direction: column;
   align-items: center;
+  text-align: center;
+}
+.vp-doc a.home-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 28px;
+  padding: 5px 14px 5px 5px;
+  border: 1px solid var(--cc-rule);
+  border-radius: 999px;
+  font-size: 13.5px;
+  text-decoration: none;
+  color: var(--cc-ink-2);
+  transition: border-color 0.15s;
+}
+.vp-doc a.home-pill:hover {
+  border-color: var(--cc-accent);
+}
+.home-pill span {
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: var(--cc-accent);
+  color: #ffffff;
+  font-family: var(--cc-mono);
+  font-size: 12px;
 }
 .home-hero h1 {
-  font-size: clamp(38px, 5.2vw, 60px);
-  margin: 0 0 18px;
+  font-size: clamp(42px, 7vw, 80px);
+  line-height: 1.02;
+  margin: 0 0 20px;
 }
 .home-lead {
-  font-size: 18px !important;
-  line-height: 1.6 !important;
+  max-width: 600px;
+  font-size: 19px !important;
+  line-height: 1.55 !important;
   color: var(--cc-ink-2);
-  margin: 0 0 26px !important;
+  margin: 0 0 8px !important;
+}
+.home-hero .cc-command {
+  width: 100%;
+  max-width: 540px;
+  margin-bottom: 14px;
+  text-align: left;
+}
+.home-hero .cc-hero-video {
+  width: 100%;
+  max-width: 1040px;
+  margin-top: 48px;
 }
 .home-actions {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 10px;
-  margin: 18px 0 16px;
+  margin: 22px 0 18px;
 }
 .vp-doc a.home-button {
   display: inline-block;
@@ -310,54 +338,6 @@
   clip: rect(0 0 0 0);
 }
 
-/* "Cut on words": the explanation beside the file. */
-.home-words {
-  display: grid;
-  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
-  gap: 48px;
-  align-items: center;
-  padding-top: 40px;
-  border-top: 1px solid var(--cc-rule);
-}
-.home-words p {
-  font-size: 16px;
-  line-height: 1.7;
-}
-
-/* A feature: the video on one side, its words and an excerpt on the other; `reverse` swaps them. */
-.cc-feature {
-  display: grid;
-  grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
-  gap: 48px;
-  align-items: center;
-}
-.cc-feature.reverse .cc-feature-media {
-  order: 2;
-}
-.vp-doc .cc-feature .cc-preview {
-  margin: 0;
-  border-radius: 8px;
-}
-.cc-feature-text h2 {
-  font-size: 28px;
-  margin-bottom: 14px;
-}
-.cc-feature-text p {
-  font-size: 16px;
-  line-height: 1.7;
-}
-.vp-doc a.cc-feature-more {
-  display: inline-block;
-  margin-top: 6px;
-  font-family: var(--cc-mono);
-  font-size: 12.5px;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  text-decoration: none;
-  color: var(--cc-accent);
-}
-
 /* The effects strip: one row of cards that scrolls inside its own box. */
 .home-strip-lead {
   color: var(--cc-grey);
@@ -396,25 +376,6 @@
 }
 
 /* What's inside: two columns of short claims. */
-.home-inside-grid ul {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 18px 40px;
-  padding: 0;
-  list-style: none;
-}
-.home-inside-grid li {
-  margin: 0;
-  padding-top: 14px;
-  border-top: 1px solid var(--cc-rule);
-  font-size: 15px;
-  line-height: 1.6;
-}
-
-.home-note {
-  font-size: 13.5px !important;
-  color: var(--cc-grey);
-}
 .home-foot {
   padding-top: 24px;
   border-top: 1px solid var(--cc-rule);
@@ -426,23 +387,8 @@
   .home {
     padding: 28px 16px 72px;
   }
-  .home section + section,
-  .home section + .cc-feature,
-  .home .cc-feature + .cc-feature,
-  .home .cc-feature + section {
+  .home section + section {
     margin-top: 64px;
-  }
-  .home-hero,
-  .home-words,
-  .cc-feature {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 24px;
-  }
-  .cc-feature.reverse .cc-feature-media {
-    order: 0;
-  }
-  .home-inside-grid ul {
-    grid-template-columns: 1fr;
   }
   /* VitePress pulls code blocks out to the edge on a phone (-24px); here they keep the page's 16px gutter. */
   .home.vp-doc div[class*="language-"] {
@@ -611,52 +557,38 @@
   font-size: 0.86em;
 }
 
-/* The landing page's examples: a list, each row the video beside its name and what it shows. */
-.home .home-cards {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  margin-top: 22px;
+/* Features: set apart from the idea above by a rule. */
+.home .home-features {
+  margin-top: 72px;
+  padding-top: 56px;
   border-top: 1px solid var(--cc-rule);
 }
-.home .home-cards a.cc-card {
-  display: grid;
-  grid-template-columns: 280px minmax(0, 1fr);
-  grid-template-rows: auto 1fr;
-  column-gap: 28px;
-  row-gap: 6px;
-  align-items: start;
-  padding: 18px 0;
-  border-bottom: 1px solid var(--cc-rule);
-}
-.home .home-cards a.cc-card .cc-preview {
-  grid-row: 1 / 3;
-  margin: 0;
+
+/* The landing page's card grids (features, examples): three across. */
+.home .home-cards {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 32px 24px;
+  margin-top: 24px;
 }
 .home .home-cards .cc-card-title {
-  font-size: 18px;
-  padding-top: 6px;
+  font-size: 17px;
 }
 .home .home-cards .cc-card-title::after {
   content: " →";
   color: var(--cc-accent);
 }
 .home .home-cards .cc-card-text {
-  font-size: 15px;
-  line-height: 1.55;
+  font-size: 14.5px;
+  line-height: 1.5;
 }
-@media (max-width: 640px) {
-  .home .home-cards a.cc-card {
-    grid-template-columns: 128px minmax(0, 1fr);
-    column-gap: 16px;
-    padding: 14px 0;
+@media (max-width: 900px) {
+  .home .home-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .home .home-cards .cc-card-title {
-    font-size: 15.5px;
-    padding-top: 0;
-  }
-  .home .home-cards .cc-card-text {
-    font-size: 13.5px;
+}
+@media (max-width: 560px) {
+  .home .home-cards {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
@@ -786,65 +718,7 @@
   }
 }
 
-/* Three ways to make a video: agent, editor, code. */
-.home-ways {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 20px;
-}
-.home-way {
-  display: flex;
-  flex-direction: column;
-  padding: 22px 22px 18px;
-  border: 1px solid var(--cc-rule);
-  border-radius: 12px;
-  background: var(--cc-paper-2);
-}
-.home-way h3 {
-  margin: 4px 0 10px !important;
-  padding: 0 !important;
-  border: 0 !important;
-  font-size: 20px;
-}
-.home-way p {
-  font-size: 15px;
-  line-height: 1.6;
-}
-.vp-doc .home-way div[class*="language-"] {
-  margin: auto 0 14px;
-}
-.home-way-kicker {
-  margin: 0 !important;
-  font-family: var(--vp-font-family-mono);
-  font-size: 12px !important;
-  color: var(--cc-accent);
-}
-.home-way-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px 16px;
-  margin: 0 !important;
-  font-size: 14px !important;
-}
-
-@media (max-width: 960px) {
-  .home-ways {
-    grid-template-columns: minmax(0, 1fr);
-  }
-}
-.vp-doc .home-way div[class*="language-"] > span.lang {
-  display: none;
-}
-.vp-doc .home-way div[class*="language-"] pre {
-  padding: 14px 0;
-}
-.vp-doc .home-way div[class*="language-"] code {
-  font-size: 12.5px;
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-}
-
-/* The idea: the goal in one paragraph, above the three ways; the licence below them. */
+/* The idea: the goal in one paragraph; the licence below it. */
 .home-goal h2 {
   margin-top: 0 !important;
   padding-top: 0 !important;
@@ -856,24 +730,12 @@
   line-height: 1.5 !important;
   color: var(--cc-ink);
 }
-.home .home-goal + .home-ways {
-  margin-top: 28px;
-}
-.home-free {
-  padding: 22px 24px;
-  border: 1px solid var(--cc-accent);
-  border-radius: 12px;
-}
 .home-free p {
+  max-width: 780px;
   margin: 0 0 10px;
   font-size: 16px;
   line-height: 1.6;
 }
-.home .home-ways + .home-free {
+.home .home-goal + .home-free {
   margin-top: 28px;
-}
-.home-free .home-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px 28px;
 }

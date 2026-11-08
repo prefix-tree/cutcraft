@@ -44,10 +44,10 @@ export default defineConfig({
     logo: "/logo.svg",
     // The top bar names the four ways in (on every page, the landing one included); the sidebar is the map of the docs.
     nav: [
-      { text: "Guide", link: "/guide/introduction", activeMatch: "^/(guide|recipes|decisions)/" },
+      { text: "Guide", link: "/guide/introduction", activeMatch: "^/(guide|decisions)/" },
       { text: "Reference", link: "/reference/elements/", activeMatch: "^/reference/(?!effects|transitions)" },
       { text: "Effects", link: "/reference/effects/", activeMatch: "^/reference/(effects|transitions)/" },
-      { text: "Examples", link: "/examples", activeMatch: "^/examples" },
+      { text: "Examples", link: "/examples", activeMatch: "^/(examples|recipes)" },
       { text: "Playground", link: "/playground", activeMatch: "^/playground" },
     ],
     sidebar: [
@@ -55,18 +55,9 @@ export default defineConfig({
         text: "Get started",
         items: [
           { text: "Introduction", link: "/guide/introduction" },
-          { text: "The core idea", link: "/guide/core-idea" },
           { text: "Quick start", link: "/guide/getting-started" },
           { text: "With your agent", link: "/guide/agents" },
-          { text: "A launch video, line by line", link: "/guide/writing-files" },
-          { text: "Examples", link: "/examples" },
-        ],
-      },
-      {
-        text: "Principles",
-        items: [
-          { text: "Core principles", link: "/guide/principles" },
-          { text: "Decision records", link: "/decisions/", collapsed: true, items: decisions },
+          { text: "The core idea", link: "/guide/core-idea" },
         ],
       },
       {
@@ -74,16 +65,16 @@ export default defineConfig({
         items: [
           { text: "The file", link: "/guide/the-file" },
           { text: "Time by meaning", link: "/guide/time" },
-          { text: "Free code", link: "/guide/free-code" },
           { text: "Titles and graphics", link: "/guide/titles-and-graphics" },
           { text: "Captions and sound", link: "/guide/captions-and-sound" },
           { text: "Colour and grading", link: "/guide/colour" },
           { text: "Keying, blurs and pins", link: "/guide/footage-tools" },
           { text: "Themes", link: "/guide/themes" },
+          { text: "Free code", link: "/guide/free-code" },
         ],
       },
       {
-        text: "In your app",
+        text: "Play, edit, export",
         items: [
           { text: "Player", link: "/guide/player" },
           { text: "Editing", link: "/guide/editing" },
@@ -92,18 +83,25 @@ export default defineConfig({
         ],
       },
       {
-        text: "Recipes",
-        collapsed: true,
+        text: "Examples",
         items: [
-          { text: "Overview", link: "/recipes/" },
-          { text: "Talking-head cut", link: "/recipes/talking-head" },
-          { text: "Product demo with zoom-ins", link: "/recipes/product-demo" },
-          { text: "Vertical clip from a podcast", link: "/recipes/vertical-podcast" },
-          { text: "Slideshow with motion", link: "/recipes/slideshow" },
-          { text: "Stats with handles", link: "/recipes/stats" },
-          { text: "Variants from one file", link: "/recipes/variants" },
-          { text: "Multicam highlights", link: "/recipes/highlights" },
-          { text: "Brand spot in any theme", link: "/recipes/brand-spot" },
+          { text: "Showcase", link: "/examples" },
+          { text: "A launch video, line by line", link: "/guide/writing-files" },
+          {
+            text: "Recipes",
+            link: "/recipes/",
+            collapsed: true,
+            items: [
+              { text: "Talking-head cut", link: "/recipes/talking-head" },
+              { text: "Product demo with zoom-ins", link: "/recipes/product-demo" },
+              { text: "Vertical clip from a podcast", link: "/recipes/vertical-podcast" },
+              { text: "Slideshow with motion", link: "/recipes/slideshow" },
+              { text: "Stats with handles", link: "/recipes/stats" },
+              { text: "Variants from one file", link: "/recipes/variants" },
+              { text: "Multicam highlights", link: "/recipes/highlights" },
+              { text: "Brand spot in any theme", link: "/recipes/brand-spot" },
+            ],
+          },
         ],
       },
       {
@@ -139,6 +137,14 @@ export default defineConfig({
           { text: "CLI", link: "/reference/cli" },
           { text: "API", link: "/reference/api" },
           { text: "Actions", link: "/reference/actions" },
+        ],
+      },
+      {
+        text: "Project",
+        items: [
+          { text: "Core principles", link: "/guide/principles" },
+          { text: "Decision records", link: "/decisions/", collapsed: true, items: decisions },
+          { text: "Changelog", link: "https://github.com/prefix-tree/cutcraft/blob/main/packages/kit/CHANGELOG.md" },
         ],
       },
     ],
