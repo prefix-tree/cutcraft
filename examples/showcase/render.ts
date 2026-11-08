@@ -18,7 +18,7 @@ const FILES: Record<string, number> = {
   logo: 4.5,
   edit: 4,
   captions: 9.2,
-  hero: 4.8,
+  hero: 6.5,
 };
 
 /** Files encoded at a set bitrate instead of the medium preset: the hero loops on the landing page, so it stays small. */
