@@ -374,12 +374,19 @@ function effectsIndex(): string {
     "| choice | a string | `direction`, `curve` |",
     "",
   );
-  // Links to the single page this replaced (`/reference/effects#iris`) go on to the item's own page.
+  return lines.join("\n");
+}
+
+/**
+ * The effects index's script: links to the single page it replaced (`/reference/effects#iris`) go on to the item's
+ * own page. Appended after escaping, so `escapeTags` never has to let a script through.
+ */
+function redirectScript(): string {
   const pages = Object.fromEntries([
     ...Object.keys(EFFECTS).map((n) => [n.toLowerCase(), `effects/${n}`]),
     ...Object.keys(TRANSITIONS).map((n) => [n.toLowerCase(), `transitions/${n}`]),
   ]);
-  lines.push(
+  return [
     "<script setup>",
     'import { onMounted } from "vue";',
     'import { withBase } from "vitepress";',
@@ -390,8 +397,7 @@ function effectsIndex(): string {
     "});",
     "</script>",
     "",
-  );
-  return lines.join("\n");
+  ].join("\n");
 }
 
 /** One built-in effect's page: its demo above the file that made it, then how it draws and its params. */
@@ -650,7 +656,7 @@ function escapeTags(markdown: string): string {
       }
       if (fenced) return line;
       // Our own components and their grid are written on lines of their own, as they are.
-      if (/^<\/?(Example|Preview|PreviewCard|div|script)[\s>]/.test(line) || line.startsWith("<<< ")) return line;
+      if (/^<\/?(Example|Preview|PreviewCard|div)[\s>]/.test(line) || line.startsWith("<<< ")) return line;
       // Outside code: `<Tag` would be a Vue component and `{{ x }}` a Vue interpolation.
       return line
         .split("`")
@@ -692,7 +698,7 @@ const sidebar = {
 };
 write(join(root, "docs", ".vitepress", "sidebar.generated.json"), `${JSON.stringify(sidebar, null, 2)}\n`);
 write(join(out, "rendering.md"), escapeTags(renderingPage()));
-write(join(out, "effects", "index.md"), escapeTags(effectsIndex()));
+write(join(out, "effects", "index.md"), `${escapeTags(effectsIndex())}\n${redirectScript()}`);
 for (const name of Object.keys(EFFECTS) as (keyof typeof EFFECTS)[]) {
   write(join(out, "effects", `${name}.md`), escapeTags(effectPage(name)));
   const file = join(root, "examples", "showcase", "effects", `${name}.tsx`);
