@@ -678,6 +678,52 @@ for (const name of Object.keys(TRANSITIONS) as (keyof typeof TRANSITIONS)[]) {
   const file = join(root, "examples", "showcase", "transitions", `${name}.tsx`);
   write(file, formatted(file, transitionExample(name)));
 }
+// The agent skill's references: the same pages, for a model reading files. What only the site can show (the
+// rendered examples, where an element is used) is left out, and the site's links become absolute.
+const SITE = "https://prefix-tree.github.io/cutcraft";
+const skillRefs = join(root, "plugins", "cutcraft", "skills", "cutcraft", "references");
+function forAgent(page: string, demote = true): string {
+  const text = page
+    .replace(/\n<Example[^\n]*>\n[\s\S]*?\n<\/Example>\n/g, "\n")
+    .split("\n")
+    .filter((line) => !line.startsWith("**Used in:**") && !line.startsWith("The coffee footage is"))
+    .join("\n")
+    .replace(/\]\(\/(?!\/)/g, `](${SITE}/`);
+  return (demote ? text.replace(/^(#+) /gm, "#$1 ") : text).replace(/\n{3,}/g, "\n\n").trim();
+}
+const reference = (title: string, lead: string, parts: readonly string[]): string =>
+  `# ${title}\n\n${lead} Generated from the code by \`scripts/gen-docs.ts\`; do not edit.\n\n${parts.join("\n\n")}\n`;
+write(
+  join(skillRefs, "elements.md"),
+  reference(
+    "Elements",
+    "Every element a file can use, with its props.",
+    documented.map(([name, summary]) => forAgent(elementPage(name, summary))),
+  ),
+);
+const units = effectsIndex();
+write(
+  join(skillRefs, "effects.md"),
+  reference("Effects and transitions", "Every built-in effect and transition, with its params and defaults.", [
+    forAgent(units.slice(units.indexOf("## Units"))),
+    ...(Object.keys(EFFECTS) as (keyof typeof EFFECTS)[]).map((name) => forAgent(effectPage(name))),
+    ...(Object.keys(TRANSITIONS) as (keyof typeof TRANSITIONS)[]).map((name) => forAgent(transitionPage(name))),
+  ]),
+);
+write(
+  join(skillRefs, "components.md"),
+  reference(
+    "Components",
+    "The ready-made components, imported from `@cutcraft/kit`. Positions are pixels from the frame's centre; colours default to theme tokens; each takes the timing props any element takes.",
+    (Object.keys(COMPONENTS) as (keyof typeof COMPONENTS)[]).map((name) => forAgent(componentPage(name))),
+  ),
+);
+write(join(skillRefs, "rendering.md"), `${forAgent(renderingPage(), false)}\n`);
+write(
+  join(skillRefs, "cli.md"),
+  `${forAgent(readFileSync(join(root, "docs", "reference", "cli.md"), "utf8"), false)}\n`,
+);
+
 const problems = syncGeneratedFiles(root, generated, {
   check,
   directories: [
@@ -687,6 +733,7 @@ const problems = syncGeneratedFiles(root, generated, {
     "docs/reference/transitions",
     "examples/showcase/effects",
     "examples/showcase/transitions",
+    "plugins/cutcraft/skills/cutcraft/references",
   ],
   obsolete: ["docs/reference/elements.md", "docs/reference/effects.md", "docs/reference/graphics"],
 });

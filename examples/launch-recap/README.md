@@ -8,6 +8,9 @@ instructions in [`prompt.md`](prompt.md), against the assets in
 the file is the video. The guide that explains every choice in it is
 `docs/guide/writing-files.md`.
 
+`prompt.md` is kept as the model was given it. The current instructions for an agent are the
+[CutCraft skill](../../plugins/cutcraft/skills/cutcraft/SKILL.md).
+
 ```
 pnpm install
 pnpm --filter @cutcraft/example-launch-recap gen    # placeholder footage via ffmpeg → public/

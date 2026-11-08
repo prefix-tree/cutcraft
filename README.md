@@ -238,6 +238,19 @@ pnpm --filter @cutcraft/example-launch-recap dev   # the walkthrough in a player
 pnpm docs:dev                                      # the documentation site
 ```
 
+## With your agent
+
+The CutCraft [Agent Skill](plugins/cutcraft) teaches a coding agent to write the file, check it, look at stills and
+render. In Claude Code:
+
+```
+/plugin marketplace add prefix-tree/cutcraft
+/plugin install cutcraft@prefix-tree
+```
+
+Other agents take the [`skills/cutcraft`](plugins/cutcraft/skills/cutcraft) folder as it is.
+[With your agent](https://prefix-tree.github.io/cutcraft/guide/agents) has the details.
+
 ## Packages
 
 | Package | What it is |

@@ -1,0 +1,7 @@
+{
+  "name": "cutcraft",
+  "description": "Make and edit videos as code with CutCraft: cut on words, add titles, captions, effects and motion graphics, check and render from the command line.",
+  "homepage": "https://prefix-tree.github.io/cutcraft/guide/agents",
+  "repository": "https://github.com/prefix-tree/cutcraft",
+  "license": "MIT"
+}
