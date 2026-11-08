@@ -7,6 +7,9 @@
 /** Masks render on these kinds, one per element. */
 export const MASKED_KINDS = ["clip", "nested"] as const;
 
+/** The kinds drawn on the player's DOM overlay plane, over the canvas (a Motion or Three element is a layer). */
+const OVERLAY_KINDS = ["title", "shape", "svg", "sticker", "graphic", "layer"] as const;
+
 /** An enum prop where only some values render: a written value outside `values` gets `reason`. */
 export interface RenderedValues {
   readonly kind: string;
@@ -18,7 +21,7 @@ export interface RenderedValues {
 
 export const RENDERED_VALUES: readonly RenderedValues[] = [
   // shortcut: the player's DOM overlay plane is its own stacking context (scaled, z-indexed), so CSS blends never reach the canvas, in the preview or the export; un-isolate it to drop these rows.
-  ...(["title", "shape", "svg", "sticker", "graphic", "layer"] as const).map((kind) => ({
+  ...OVERLAY_KINDS.map((kind) => ({
     kind,
     prop: "blend",
     values: ["normal"],
@@ -61,6 +64,17 @@ export const NOT_RENDERED: readonly NotRendered[] = [
     value: "typewriter",
     reason: "types out only cues without word timings; cues with words show as karaoke",
   },
+  // shortcut: vignette and grain are painted on the canvas (painter.ts paintPost); an overlay's effects run in the DOM
+  // plane or HTML-in-Canvas, which has no pass for them yet. Drop these when an overlay draws them.
+  ...OVERLAY_KINDS.flatMap((parent) =>
+    (["vignette", "grain"] as const).map((value) => ({
+      kind: "effect",
+      prop: "type",
+      value,
+      parent,
+      reason: "is not drawn on an overlay yet: put it on the clip, or on an <Adjustment> to cover everything beneath",
+    })),
+  ),
 ];
 
 export const MASK_NOT_RENDERED = {

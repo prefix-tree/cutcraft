@@ -1,6 +1,6 @@
 import { Clip, Composition, Effect, Keyframe, Track } from "@cutcraft/kit";
 
-// grain: Adds moving film grain.
+// grain: Adds moving film grain to a clip, a nested sequence, or everything beneath an adjustment.
 export default function Video() {
   return (
     <Composition fps={30} width={640} height={360}>

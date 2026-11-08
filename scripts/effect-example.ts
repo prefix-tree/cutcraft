@@ -83,8 +83,16 @@ export const EFFECT_DEMOS: Readonly<Record<keyof typeof EFFECTS, EffectDemo>> = 
     params: { x: 8, y: 8, radius: 3 },
     animate: [{ param: "opacity", from: 0, to: 0.9 }],
   },
-  vignette: { text: "Darkens the edges of the frame.", on: "shot", animate: [{ param: "amount", from: 0, to: 0.9 }] },
-  grain: { text: "Adds moving film grain.", on: "shot", animate: [{ param: "amount", from: 0, to: 0.6 }] },
+  vignette: {
+    text: "Darkens the edges of a clip, a nested sequence, or everything beneath an adjustment.",
+    on: "shot",
+    animate: [{ param: "amount", from: 0, to: 0.9 }],
+  },
+  grain: {
+    text: "Adds moving film grain to a clip, a nested sequence, or everything beneath an adjustment.",
+    on: "shot",
+    animate: [{ param: "amount", from: 0, to: 0.6 }],
+  },
   levels: {
     text: "Sets the black point, the white point and the gamma between them.",
     on: "shot",

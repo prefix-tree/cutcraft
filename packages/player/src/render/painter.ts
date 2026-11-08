@@ -257,12 +257,26 @@ export class CanvasPainter {
       } else lctx.fill();
       lctx.restore();
     }
-    for (const fx of op.post ?? []) {
+    this.paintPost(lctx, op.post, op.matrix, op.rect);
+    return layer;
+  }
+
+  /**
+   * Vignette and grain, in order, on the pixels already on `lctx` (`source-atop`): a vignette over the rect `matrix`
+   * places, grain over the whole canvas.
+   */
+  private paintPost(
+    lctx: Ctx2D,
+    post: DrawOp["post"],
+    matrix: DrawOp["matrix"],
+    rect: { readonly w: number; readonly h: number },
+  ): void {
+    for (const fx of post ?? []) {
       lctx.save();
       lctx.globalCompositeOperation = "source-atop";
       if (fx.type === "vignette") {
-        setMatrix(lctx, op.matrix);
-        const { w, h } = op.rect;
+        setMatrix(lctx, matrix);
+        const { w, h } = rect;
         const r = Math.hypot(w, h) / 2;
         const g = lctx.createRadialGradient(w / 2, h / 2, r * 0.4, w / 2, h / 2, r);
         g.addColorStop(0, "rgba(0,0,0,0)");
@@ -278,7 +292,6 @@ export class CanvasPainter {
       }
       lctx.restore();
     }
-    return layer;
   }
 
   /** A picture of the whole frame composited as the op: its opacity, blend, filter, wipe and rounded corners. */
@@ -325,7 +338,7 @@ export class CanvasPainter {
       }
       warnNoShaders(op);
     }
-    if (!op.filter && op.opacity >= 1) return;
+    if (!op.filter && op.opacity >= 1 && !op.post?.length) return;
     this.scratch ??= this.createCanvas(this.width, this.height);
     const sctx = this.scratch.getContext("2d") as Ctx2D | null;
     if (!sctx) return;
@@ -334,6 +347,7 @@ export class CanvasPainter {
     sctx.filter = "none";
     sctx.globalAlpha = 1;
     sctx.drawImage(canvasOf(ctx), 0, 0);
+    this.paintPost(sctx, op.post, op.matrix, op.rect);
     ctx.save();
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.globalCompositeOperation = "source-over";
@@ -347,6 +361,8 @@ export class CanvasPainter {
   private adjustShaded(ctx: Ctx2D, op: DrawOp): void {
     this.scratch ??= this.createCanvas(this.width, this.height);
     const scratch = copyInto(this.scratch, canvasOf(ctx));
+    const sctx = scratch.getContext("2d") as Ctx2D | null;
+    if (sctx && op.post?.length) this.paintPost(sctx, op.post, op.matrix, op.rect);
     let picture: AnyCanvas = scratch;
     try {
       picture = this.runner().effects(scratch, op.shaders ?? [], this.textures) ?? scratch;
