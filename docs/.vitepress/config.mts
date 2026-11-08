@@ -26,8 +26,13 @@ export default defineConfig({
   ],
   themeConfig: {
     logo: "/logo.svg",
-    // The top bar stays out of the way (logo, one link, search, GitHub); the sidebar is the map of the docs.
-    nav: [{ text: "Docs", link: "/guide/introduction", activeMatch: "^/(guide|recipes|reference|examples)" }],
+    // The top bar names the four ways in (on every page, the landing one included); the sidebar is the map of the docs.
+    nav: [
+      { text: "Guide", link: "/guide/introduction", activeMatch: "^/(guide|recipes)/" },
+      { text: "Reference", link: "/reference/elements/", activeMatch: "^/reference/(?!effects|transitions)" },
+      { text: "Effects", link: "/reference/effects/", activeMatch: "^/reference/(effects|transitions)/" },
+      { text: "Examples", link: "/examples", activeMatch: "^/examples" },
+    ],
     sidebar: [
       {
         text: "Get started",
