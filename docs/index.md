@@ -154,7 +154,7 @@ licence key, no watermark.
 <span>brief</span><i>→</i><span>agent</span><i>→</i><span class="on">video.tsx</span><i>⇄</i><span>editor</span><i>→</i><span>MP4 · WebM · still</span>
 </div>
 
-<p class="home-links"><a :href="withBase('/guide/principles')">Core principles and the decisions behind them →</a></p>
+<p class="home-links"><a :href="withBase('/guide/core-idea')">The core idea, in three small files →</a> <a :href="withBase('/guide/principles')">Core principles and the decisions behind them →</a></p>
 
 </section>
 
@@ -310,7 +310,7 @@ npx cutcraft video.tsx --out video.mp4
 
 ## Examples
 
-Every video on this site is a short file rendered by CutCraft's own export engine; each card opens the file that made
+Every video on this site is a short file rendered by CutCraft's own export engine; each row opens the file that made
 it.
 
 <div class="cc-cards home-cards">

@@ -82,7 +82,7 @@ media files    ┘                                       └─▶ export     MP
 | [`@cutcraft/render`](https://www.npmjs.com/package/@cutcraft/render) | Export from your own code: from Node, through the player in headless Chrome. |
 | [`@cutcraft/graphics`](https://www.npmjs.com/package/@cutcraft/graphics) | three.js and Motion on the video's clock (`installFreeCodeLibraries()`), for `<Three>` and `<Motion>`. |
 
-[Core principles](./principles) explains why it is built this way, with the decision behind each choice.
+[The core idea](./core-idea) shows it in three small files. [Core principles](./principles) explains why it is built this way, with the decision behind each choice.
 [Quick start](./getting-started) takes you from `npm install` to an exported file in four steps.
 [Examples](/examples) shows finished videos next to the files that made them, and where to start for what you're
 making.
