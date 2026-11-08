@@ -1,6 +1,6 @@
 import { Clip, Composition, Effect, Keyframe, Track } from "@cutcraft/kit";
 
-// vignette: Darkens the edges of the frame.
+// vignette: Darkens the edges of a clip, a nested sequence, or everything beneath an adjustment.
 export default function Video() {
   return (
     <Composition fps={30} width={640} height={360}>

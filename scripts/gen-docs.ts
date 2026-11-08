@@ -636,11 +636,19 @@ function renderingPage(): string {
     "| element | prop | value | what happens |",
     "|---|---|---|---|",
   );
-  for (const [r, kinds] of merge(NOT_RENDERED, (r) => `${r.prop}|${r.value}|${r.reason}`)) {
+  // A row that holds only inside some parents names them: `<Effect>` inside `<Title>`, `<Shape>`.
+  const free = NOT_RENDERED.filter((r) => !r.parent);
+  const inside = NOT_RENDERED.filter((r) => r.parent).map((r) => ({ ...r, kind: r.parent!, child: r.kind }));
+  const rows = [
+    ...merge(free, (r) => `${r.prop}|${r.value}|${r.reason}`).map(([r, kinds]) => [r, on(kinds)] as const),
+    ...merge(inside, (r) => `${r.child}|${r.prop}|${r.value}|${r.reason}`).map(
+      ([r, parents]) => [r, `${on([r.child])} inside ${on(parents)}`] as const,
+    ),
+  ];
+  for (const [r, element] of rows)
     lines.push(
-      `| ${on(kinds)} | ${r.prop ? code(r.prop) : "the element"} | ${r.value ? code(r.value) : ""} | ${why(r.reason)} |`,
+      `| ${element} | ${r.prop ? code(r.prop) : "the element"} | ${r.value ? code(r.value) : ""} | ${why(r.reason)} |`,
     );
-  }
   return `${lines.join("\n")}\n`;
 }
 

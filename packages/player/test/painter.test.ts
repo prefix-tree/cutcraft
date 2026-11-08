@@ -8,7 +8,7 @@ import {
 } from "@cutcraft/player";
 
 import { FakeFrame, FakeFrameSource, recorderCanvas, recorderContext } from "./helpers/fakes";
-import { makeState } from "./helpers/state";
+import { type ItemSpec, makeState } from "./helpers/state";
 
 describe("CanvasPainter blur background", () => {
   function paintBlur(transform?: object) {
@@ -229,6 +229,52 @@ describe("CanvasPainter vignette and grain", () => {
     expect(a).toEqual(b);
     expect(a!.some((v, i) => i % 4 === 3 && v > 0)).toBe(true);
     expect(tiles(paintPost(1 + 1 / 30))[0]).not.toEqual(a);
+  });
+});
+
+describe("CanvasPainter vignette and grain on an adjustment", () => {
+  function paintAdjustment(children: ItemSpec[]) {
+    const canvases: ReturnType<typeof recorderContext>[] = [];
+    const create = (width: number, height: number) => {
+      const rec = recorderContext();
+      Object.assign(rec.canvas, { width, height });
+      canvases.push(rec);
+      return rec.canvas as unknown as OffscreenCanvas;
+    };
+    const state = makeState({
+      width: 640,
+      height: 360,
+      tracks: [
+        { id: "main", items: [{ id: "c", kind: "clip", source: { in: 0, out: 4, asset: "a" } }] },
+        { id: "fx", layout: "free", items: [{ id: "adj", kind: "adjustment", start: 0, duration: 4, children }] },
+      ],
+    });
+    const main = recorderContext();
+    const frames = new Map<string, Frame | null>([["c", new FakeFrame(new FakeFrameSource("a"), 0, 1 / 30)]]);
+    new CanvasPainter(640, 360, create).paint(main.ctx, buildFramePlan(state, 1), { frames, nested: new Map() });
+    return { main: main.calls, canvases };
+  }
+
+  it("darkens and speckles a copy of what is beneath, then draws it back through the adjustment's filter", () => {
+    const r = paintAdjustment([
+      { id: "v", kind: "effect", props: { type: "vignette", params: { amount: 0.6 } } },
+      { id: "g", kind: "effect", props: { type: "grain" } },
+      { id: "s", kind: "effect", props: { type: "sepia", params: { amount: 0.4 } } },
+    ]);
+    const scratch = r.canvases.find((c) => c.calls.some((x) => x.name === "createRadialGradient"))!;
+    expect(scratch).toBeDefined();
+    const names = scratch.calls.map((c) => c.name);
+    // The copy of the frame first, then the vignette and the grain over it.
+    expect(names.indexOf("drawImage")).toBeLessThan(names.indexOf("createRadialGradient"));
+    expect(names.indexOf("createRadialGradient")).toBeLessThan(names.indexOf("createPattern"));
+    const last = r.main.filter((c) => c.name === "drawImage").at(-1)!;
+    expect(last.args[0]).toBe(scratch.canvas);
+    expect(r.main.some((c) => c.name === "set:filter" && c.args[0] === "sepia(0.4)")).toBe(true);
+  });
+
+  it("draws an adjustment that holds only a vignette", () => {
+    const r = paintAdjustment([{ id: "v", kind: "effect", props: { type: "vignette" } }]);
+    expect(r.canvases.some((c) => c.calls.some((x) => x.name === "createRadialGradient"))).toBe(true);
   });
 });
 

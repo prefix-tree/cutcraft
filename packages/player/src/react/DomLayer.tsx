@@ -1,12 +1,13 @@
 import { memo, type ReactNode } from "react";
 
-import type { ResolvedState } from "@cutcraft/kit";
+import { effectEntry, type Placement, type ResolvedState } from "@cutcraft/kit";
 
 import { backdropTracks } from "../model/backdrop";
 import { effectPipeline } from "../model/shaders";
 import { frameIndex } from "../model/time";
 import { type VisibleItem, visiblePlacements } from "../model/visible";
 import { type ElementProps, OVERLAY_KINDS } from "../overlays/layout";
+import { devWarn } from "../warn";
 import { Adjustment } from "./elements/Adjustment";
 import { Captions } from "./elements/Captions";
 import { Graphic } from "./elements/Graphic";
@@ -96,6 +97,7 @@ const Element = memo(
       transition: item.transition,
     };
     const content = elementContent(item, props, state, interior);
+    if (item.placement.kind !== "adjustment") warnPostOnOverlay(item.placement.id, item.children);
     // An overlay's effects run in file order over its picture, drawn through HTML-in-Canvas. Without HTML-in-Canvas
     // they draw as CSS (overlays/layout.ts), and only the ones with no CSS form are left here, to be reported.
     const passes =
@@ -114,6 +116,18 @@ const Element = memo(
   },
   (a, b) => sameElement(a, b),
 );
+
+/** Vignette and grain are painted on the canvas; an overlay has no pass for them yet, so the preview says so once. */
+function warnPostOnOverlay(id: string, children: readonly Placement[]): void {
+  for (const c of children) {
+    if (c.kind !== "effect" || c.props.enabled === false || effectEntry(c.props.type)?.draw.kind !== "post") continue;
+    const type = String(c.props.type);
+    devWarn(
+      `effect:${id}:${type}`,
+      `effect "${type}" on overlay "${id}" is not drawn: put it on a clip or an <Adjustment>`,
+    );
+  }
+}
 
 function elementContent(item: VisibleItem, props: ElementProps, state: ResolvedState, interior: ReactNode): ReactNode {
   switch (item.placement.kind) {

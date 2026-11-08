@@ -138,6 +138,8 @@ export function buildFramePlan(state: ResolvedState, t: number, resolveNested?: 
       if (p.props.enabled === false) continue;
       const { shaders, ...filters } = effectPipeline(state, item.children, p.id, t - p.start, { shaders: true });
       if (ops.length === 0) continue;
+      // Vignette and grain darken and speckle everything beneath, before the adjustment's other effects.
+      const post = postEffects(state.items, item.children, frameIndex(t, comp.fps), t - p.start);
       ops.push({
         id: p.id,
         kind: "adjustment",
@@ -148,6 +150,7 @@ export function buildFramePlan(state: ResolvedState, t: number, resolveNested?: 
         blend: blendOf(p.props.blend),
         ...filters,
         borderRadius: 0,
+        ...(post ? { post } : {}),
         ...(shaders ? { shaders } : {}),
       });
     }

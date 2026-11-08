@@ -21,8 +21,8 @@ Every built-in `<Effect type>` and `<Transition type>`. Hover a card to play it;
 ### Vignette and grain
 
 <div class="cc-cards">
-<PreviewCard code hover title="vignette" link="/reference/effects/vignette" src="previews/effects/vignette" text="Darkens the edges of the frame." />
-<PreviewCard code hover title="grain" link="/reference/effects/grain" src="previews/effects/grain" text="Adds moving film grain." />
+<PreviewCard code hover title="vignette" link="/reference/effects/vignette" src="previews/effects/vignette" text="Darkens the edges of a clip, a nested sequence, or everything beneath an adjustment." />
+<PreviewCard code hover title="grain" link="/reference/effects/grain" src="previews/effects/grain" text="Adds moving film grain to a clip, a nested sequence, or everything beneath an adjustment." />
 </div>
 
 ### Colour

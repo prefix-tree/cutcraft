@@ -231,6 +231,19 @@ describe("lint", () => {
       ]);
     });
 
+    it("warns on vignette and grain on an overlay, and not on a clip or an adjustment", () => {
+      expect(
+        notRendered(`<Track id="t">
+        <Clip id="c" src="asset:city"><Effect id="cv" type="vignette" /></Clip>
+        <Adjustment id="a" start={0} duration={1}><Effect id="av" type="vignette" /><Effect id="ag" type="grain" /></Adjustment>
+        <Title id="h">Hi<Effect id="hv" type="vignette" /><Effect id="hg" type="grain" /><Effect id="hb" type="blur" /></Title>
+      </Track>`),
+      ).toEqual([
+        'warning:hv.type: "hv" <Effect> type "vignette" is not drawn on an overlay yet: put it on the clip, or on an <Adjustment> to cover everything beneath',
+        'warning:hg.type: "hg" <Effect> type "grain" is not drawn on an overlay yet: put it on the clip, or on an <Adjustment> to cover everything beneath',
+      ]);
+    });
+
     it("says nothing about a file that only uses what renders", () => {
       expect(
         notRendered(`<Track id="t">

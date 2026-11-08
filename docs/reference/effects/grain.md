@@ -1,6 +1,6 @@
 # `grain`
 
-Adds moving film grain.
+Adds moving film grain to a clip, a nested sequence, or everything beneath an adjustment.
 
 <Example src="previews/effects/grain" alt="grain">
 

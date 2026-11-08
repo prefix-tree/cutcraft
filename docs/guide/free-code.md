@@ -241,7 +241,7 @@ The built-in `lut` effect reads a LUT this way: see [Colour and grading](./colou
 
 An element's effects run in the order they appear in the file, yours and the built-in ones alike, after its mask,
 vignette and grain. That holds on a `<Clip>`, a `<Nested>`, an `<Adjustment>` (where they change everything beneath
-it) and an overlay. When none of an element's effects needs a shader, its built-in ones draw as one CSS filter;
+it, its vignette and grain included) and an overlay, which does not draw vignette or grain yet: the lint says so. When none of an element's effects needs a shader, its built-in ones draw as one CSS filter;
 once one does, they all run as shader passes, so the order stays the one you wrote. Consecutive built-in colour
 effects (exposure, white balance, curves, a LUT, brightness and the like) are drawn together as one pass, still in that
 order, and a built-in whose params change nothing (an amount at 0) is not drawn at all. Under a shader transition,

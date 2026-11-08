@@ -199,6 +199,40 @@ describe("buildFramePlan", () => {
     expect(buildFramePlan(s, 1.5).ops[0]!.post![1]).toMatchObject({ seed: 45 });
   });
 
+  it("gives an adjustment its vignette and grain, before its other effects", () => {
+    const s = makeState({
+      width: 640,
+      height: 360,
+      tracks: [
+        { id: "main", items: [{ id: "c", kind: "clip", source: { in: 0, out: 4, asset: "a" } }] },
+        {
+          id: "fx",
+          layout: "free",
+          items: [
+            {
+              id: "adj",
+              kind: "adjustment",
+              start: 0,
+              duration: 4,
+              children: [
+                { id: "v", kind: "effect", props: { type: "vignette", params: { amount: 0.6 } } },
+                { id: "s", kind: "effect", props: { type: "sepia", params: { amount: 0.4 } } },
+                { id: "g", kind: "effect", props: { type: "grain" } },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+    const adj = buildFramePlan(s, 1).ops.find((o) => o.id === "adj")!;
+    expect(adj.post).toEqual([
+      { type: "vignette", amount: 0.6 },
+      { type: "grain", amount: 0.2, seed: 30 },
+    ]);
+    expect(adj.filter).toBe("sepia(0.4)");
+    expect(buildFramePlan(s, 1).warnings).toEqual([]);
+  });
+
   it("builds filters and lists unsupported effects", () => {
     const plan = buildFramePlan(state, 0.5);
     expect(plan.ops[0]!.filter).toBe("grayscale(0.5)");

@@ -1,6 +1,6 @@
 # `vignette`
 
-Darkens the edges of the frame.
+Darkens the edges of a clip, a nested sequence, or everything beneath an adjustment.
 
 <Example src="previews/effects/vignette" alt="vignette">
 
