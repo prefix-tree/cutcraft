@@ -113,6 +113,13 @@ const EFFECT_CASES: readonly { readonly key: string; readonly label: string; rea
           <Effect id="e1" type="outline" params={{ width: 12 }} />
           <Effect id="e2" type="glow" params={{ radius: 8 }} />`,
   },
+  {
+    key: "print",
+    label: "print, 5 s 1080p30 (a CMYK halftone and eight octaves of fractal noise on the footage, the heaviest looks)",
+    effects: `
+          <Effect id="e1" type="halftone" params={{ mode: "cmyk", size: 10 }} />
+          <Effect id="e2" type="fractalNoise" params={{ octaves: 8, opacity: 0.4 }} />`,
+  },
 ];
 
 /** A size-17 LUT that warms, for the grade case. */

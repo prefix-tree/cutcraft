@@ -57,6 +57,21 @@ Every built-in `<Effect type>` and `<Transition type>`. Hover a card to play it;
 <PreviewCard code hover title="bevel" link="/reference/effects/bevel" src="previews/effects/bevel" text="Gives the element's shape a raised, lit edge." />
 </div>
 
+### Stylize
+
+<div class="cc-cards">
+<PreviewCard code hover title="halftone" link="/reference/effects/halftone" src="previews/effects/halftone" text="Prints the picture as a screen of dots, in one ink or four." />
+<PreviewCard code hover title="pixelate" link="/reference/effects/pixelate" src="previews/effects/pixelate" text="Turns the picture, or a box of it, into a coarse mosaic." />
+<PreviewCard code hover title="scanlines" link="/reference/effects/scanlines" src="previews/effects/scanlines" text="Lays the dark lines of an old screen over the picture." />
+</div>
+
+### Light and texture
+
+<div class="cc-cards">
+<PreviewCard code hover title="lightLeak" link="/reference/effects/lightLeak" src="previews/effects/lightLeak" text="Washes warm light in from the edges, as light leaking into a film camera." />
+<PreviewCard code hover title="fractalNoise" link="/reference/effects/fractalNoise" src="previews/effects/fractalNoise" text="Blends a moving cloud of noise over the picture: mist, smoke or texture." />
+</div>
+
 ## Transitions
 
 ### Fades, wipes and slides
@@ -87,26 +102,27 @@ A param's name says what kind of value it is, and each kind has one scale:
 
 | Kind | Scale | Params |
 |---|---|---|
-| strength, mix or share | a fraction, 0 to 1, or -1 to 1 when it goes both ways | `amount`, `opacity`, `softness`, `tolerance`, `tint`, `temperature`, `shadows`, `highlights`, `threshold`, `spill`, `black`, `white`, `blur`, `roundness`, `star` |
-| gain | a multiplier | `intensity`, `scale` |
+| strength, mix or share | a fraction, 0 to 1, or -1 to 1 when it goes both ways | `amount`, `opacity`, `softness`, `tolerance`, `tint`, `temperature`, `shadows`, `highlights`, `threshold`, `spill`, `black`, `white`, `blur`, `roundness`, `star`, `thickness`, `spread` (of the frame's diagonal) |
+| gain | a multiplier | `intensity`, `scale`, `contrast` |
 | exponent | a power, 1 changes nothing | `gamma` |
-| distance | pixels of the composition; a blur's `radius` (and `bevel`'s `size`) is its Gaussian's standard deviation, as CSS `blur()` reads it | `radius`, `width`, `feather`, `length`, `distance`, `size`, `edge`, `x`, `y` |
+| distance | pixels of the composition; a blur's `radius` (and `bevel`'s `size`) is its Gaussian's standard deviation, as CSS `blur()` reads it | `radius`, `width`, `feather`, `length`, `distance`, `size`, `spacing`, `edge`, `x`, `y` |
 | angle | degrees, clockwise from up | `angle`, `rotation`, `startAngle` |
 | position | fractions of the frame, `[x, y]` from the top left | `center`, `box`, the corners |
-| colour | `"#rgb"` or `"#rrggbb"` | `color`, `dark`, `light` |
+| colour | `"#rgb"` or `"#rrggbb"` | `color`, `dark`, `light`, `ink`, `paper` |
 | exposure | stops | `stops` |
 | duration | seconds | `holdDuration` |
-| count | a whole number | `sides`, `slats`, `columns`, `rows`, `samples` |
+| rate | per second: pixels for `speed`, changes of the pattern for `evolution` | `speed`, `evolution` |
+| count | a whole number | `sides`, `slats`, `columns`, `rows`, `samples`, `octaves` |
 | seed | a whole number; the same seed draws the same pattern | `seed` |
 | switch | `true` or `false` | `fade`, `inverted`, `outlineOnly`, `pushOut`, `radial` |
 | curve | `[input, output]` points, 0 to 1 | `rgb`, `red`, `green`, `blue` |
 | asset | `"asset:<id>"` from the manifest | `src` |
-| choice | a string | `direction`, `curve` |
+| choice | a string | `direction`, `curve`, `mode`, `blend` |
 
 <script setup>
 import { onMounted } from "vue";
 import { withBase } from "vitepress";
-const PAGES = {"brightness":"effects/brightness","contrast":"effects/contrast","saturation":"effects/saturation","hue":"effects/hue","blur":"effects/blur","vignette":"effects/vignette","grain":"effects/grain","shadow":"effects/shadow","grayscale":"effects/grayscale","sepia":"effects/sepia","invert":"effects/invert","levels":"effects/levels","lut":"effects/lut","exposure":"effects/exposure","vibrance":"effects/vibrance","whitebalance":"effects/whiteBalance","shadowshighlights":"effects/shadowsHighlights","duotone":"effects/duotone","curves":"effects/curves","colorkey":"effects/colorKey","regionblur":"effects/regionBlur","cornerpin":"effects/cornerPin","zoomblur":"effects/zoomBlur","chromaticaberration":"effects/chromaticAberration","glow":"effects/glow","outline":"effects/outline","longshadow":"effects/longShadow","bevel":"effects/bevel","crossfade":"transitions/crossfade","diptoblack":"transitions/dipToBlack","diptowhite":"transitions/dipToWhite","wipe":"transitions/wipe","slide":"transitions/slide","push":"transitions/push","iris":"transitions/iris","clockwipe":"transitions/clockWipe","blinds":"transitions/blinds","filmburn":"transitions/filmBurn","pixeldissolve":"transitions/pixelDissolve","zoom":"transitions/zoom"};
+const PAGES = {"brightness":"effects/brightness","contrast":"effects/contrast","saturation":"effects/saturation","hue":"effects/hue","blur":"effects/blur","vignette":"effects/vignette","grain":"effects/grain","shadow":"effects/shadow","grayscale":"effects/grayscale","sepia":"effects/sepia","invert":"effects/invert","levels":"effects/levels","lut":"effects/lut","exposure":"effects/exposure","vibrance":"effects/vibrance","whitebalance":"effects/whiteBalance","shadowshighlights":"effects/shadowsHighlights","duotone":"effects/duotone","curves":"effects/curves","colorkey":"effects/colorKey","regionblur":"effects/regionBlur","cornerpin":"effects/cornerPin","zoomblur":"effects/zoomBlur","chromaticaberration":"effects/chromaticAberration","glow":"effects/glow","outline":"effects/outline","longshadow":"effects/longShadow","bevel":"effects/bevel","halftone":"effects/halftone","pixelate":"effects/pixelate","scanlines":"effects/scanlines","lightleak":"effects/lightLeak","fractalnoise":"effects/fractalNoise","crossfade":"transitions/crossfade","diptoblack":"transitions/dipToBlack","diptowhite":"transitions/dipToWhite","wipe":"transitions/wipe","slide":"transitions/slide","push":"transitions/push","iris":"transitions/iris","clockwipe":"transitions/clockWipe","blinds":"transitions/blinds","filmburn":"transitions/filmBurn","pixeldissolve":"transitions/pixelDissolve","zoom":"transitions/zoom"};
 onMounted(() => {
   const page = PAGES[location.hash.slice(1).toLowerCase()];
   if (page) location.replace(withBase("/reference/" + page));

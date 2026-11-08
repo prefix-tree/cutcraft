@@ -311,6 +311,36 @@
           "link": "/reference/effects/bevel"
         }
       ]
+    },
+    {
+      "text": "Stylize",
+      "items": [
+        {
+          "text": "halftone",
+          "link": "/reference/effects/halftone"
+        },
+        {
+          "text": "pixelate",
+          "link": "/reference/effects/pixelate"
+        },
+        {
+          "text": "scanlines",
+          "link": "/reference/effects/scanlines"
+        }
+      ]
+    },
+    {
+      "text": "Light and texture",
+      "items": [
+        {
+          "text": "lightLeak",
+          "link": "/reference/effects/lightLeak"
+        },
+        {
+          "text": "fractalNoise",
+          "link": "/reference/effects/fractalNoise"
+        }
+      ]
     }
   ],
   "transitions": [

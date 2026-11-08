@@ -550,6 +550,121 @@ describe("title effects", () => {
   });
 });
 
+describe("stylizers and generators", () => {
+  // A known picture painted by an effect of the file's own: grey, white, or a gradient (red across, green down).
+  const PAINT = `const paint = effect({
+    name: "paint",
+    params: z.object({ grey: z.number().default(0.5), gradient: z.boolean().default(false), split: z.number().default(2) }),
+    shader: "vec4 effect(vec2 uv) { if (params.gradient) return vec4(uv.x, uv.y, 0.5, 1.0); return vec4(vec3(uv.x < params.split ? params.grey : 1.0), 1.0); }",
+  });`;
+  const at = (
+    name: string,
+    effect: string,
+    paint: { grey?: number; gradient?: boolean; split?: number },
+    points: [number, number][],
+    time = 0.5,
+  ) =>
+    colourAt(
+      name,
+      `<Track id="t"><Clip id="c" src="asset:solid" fit="cover"><Effect id="p" type={paint} params={${JSON.stringify(paint)}} />${effect}</Clip></Track>`,
+      PAINT,
+      time,
+      points,
+    );
+  /** Points of a `w` by `h` rectangle at (x, y), `step` apart. */
+  const grid = (x: number, y: number, w: number, h = w, step = 1): [number, number][] => {
+    const cols = Math.ceil(w / step);
+    return Array.from({ length: cols * Math.ceil(h / step) }, (_, i) => [
+      x + (i % cols) * step,
+      y + Math.floor(i / cols) * step,
+    ]);
+  };
+  const mean = (cs: (number[] | undefined)[]) => cs.reduce((sum, c) => sum + (c?.[0] ?? 0), 0) / cs.length;
+
+  it("halftone covers about half of a mid-grey cell with ink, and prints no dots on white", async () => {
+    // sRGB 0.5 has luminance 0.5, so its dots cover half the screen's area.
+    const effect = `<Effect id="h" type="halftone" params={{ size: 8, angle: 0, ink: "#000000" }} />`;
+    const grey = await at("halftone-grey", effect, { grey: 0.5 }, grid(40, 40, 32));
+    expect(mean(grey)).toBeGreaterThan(100);
+    expect(mean(grey)).toBeLessThan(155);
+    expect(grey.some((c) => (c?.[0] ?? 255) < 40)).toBe(true);
+    expect(grey.some((c) => (c?.[0] ?? 0) > 215)).toBe(true);
+    const white = await at("halftone-white", effect, { split: -1 }, grid(40, 40, 32, 32, 4));
+    expect(white.every((c) => (c?.[0] ?? 0) > 250)).toBe(true);
+  });
+
+  it("halftone in cmyk prints a grey with all four inks, so it stays neutral on average", async () => {
+    const cs = await at(
+      "halftone-cmyk",
+      `<Effect id="h" type="halftone" params={{ size: 10, mode: "cmyk" }} />`,
+      { grey: 0.4 },
+      grid(40, 40, 40),
+    );
+    const avg = [0, 1, 2].map((i) => cs.reduce((sum, c) => sum + (c?.[i] ?? 0), 0) / cs.length);
+    expect(Math.max(...avg) - Math.min(...avg)).toBeLessThan(25);
+  });
+
+  it("pixelate gives a cell one colour inside its box, and leaves the picture outside it", async () => {
+    const [a, b, c, d] = await at(
+      "pixelate",
+      `<Effect id="x" type="pixelate" params={{ size: 20, box: [0.5, 0, 0.5, 1] }} />`,
+      { gradient: true },
+      [
+        [201, 41],
+        [218, 58],
+        [41, 41],
+        [58, 58],
+      ],
+    );
+    expect(a).toEqual(b);
+    expect(Math.abs((c?.[0] ?? 0) - (d?.[0] ?? 0))).toBeGreaterThan(8);
+    expect(Math.abs((c?.[0] ?? 0) - (41.5 / 320) * 255)).toBeLessThan(6);
+  });
+
+  it("scanlines darken a band every spacing pixels, and roll by speed times time", async () => {
+    const effect = (speed: number) =>
+      `<Effect id="s" type="scanlines" params={{ spacing: 10, thickness: 0.5, intensity: 1, speed: ${speed} }} />`;
+    const [onLine, between] = await at("scan", effect(0), { split: -1 }, [
+      [160, 90],
+      [160, 95],
+    ]);
+    expect(onLine?.[0] ?? 255).toBeLessThan(30);
+    expect(between?.[0] ?? 0).toBeGreaterThan(225);
+    // At 10 px/s, half a second in, the lines have moved 5 px: the band and the gap swap.
+    const [moved, gap] = await at("scan-roll", effect(10), { split: -1 }, [
+      [160, 90],
+      [160, 95],
+    ]);
+    expect(moved?.[0] ?? 0).toBeGreaterThan(225);
+    expect(gap?.[0] ?? 255).toBeLessThan(30);
+  });
+
+  it("lightLeak only lightens, and wanders over time", async () => {
+    const points = grid(0, 0, 320, 180, 16);
+    const effect = `<Effect id="l" type="lightLeak" params={{ intensity: 1, evolution: 1 }} />`;
+    const early = await at("leak-early", effect, { grey: 0.3 }, points, 0.2);
+    const late = await at("leak-late", effect, { grey: 0.3 }, points, 1.6);
+    const base = 0.3 * 255;
+    expect(early.every((c) => (c?.[0] ?? 0) >= base - 2 && (c?.[1] ?? 0) >= base - 2)).toBe(true);
+    expect(early.some((c) => (c?.[0] ?? 0) > base + 40)).toBe(true);
+    expect(early.filter((c, i) => Math.abs((c?.[0] ?? 0) - (late[i]?.[0] ?? 0)) > 10).length).toBeGreaterThan(10);
+  });
+
+  it("fractalNoise draws a mid-grey pattern, the same for a seed and different for another", async () => {
+    const points = grid(0, 0, 320, 180, 16);
+    const effect = (seed: number) =>
+      `<Effect id="n" type="fractalNoise" params={{ size: 60, blend: "normal", opacity: 1, seed: ${seed} }} />`;
+    const a = await at("noise-a", effect(0), { grey: 0.5 }, points);
+    const again = await at("noise-a2", effect(0), { grey: 0.5 }, points);
+    const b = await at("noise-b", effect(1), { grey: 0.5 }, points);
+    expect(mean(a)).toBeGreaterThan(90);
+    expect(mean(a)).toBeLessThan(165);
+    expect(Math.max(...a.map((c) => c?.[0] ?? 0)) - Math.min(...a.map((c) => c?.[0] ?? 0))).toBeGreaterThan(60);
+    expect(again).toEqual(a);
+    expect(b.filter((c, i) => Math.abs((c?.[0] ?? 0) - (a[i]?.[0] ?? 0)) > 10).length).toBeGreaterThan(20);
+  });
+});
+
 describe("shader transitions", () => {
   // Blue (solid.webm) to red (logo.png) through the transition, sampled at a share of the way through it.
   const BLUE = [0, 0, 255],

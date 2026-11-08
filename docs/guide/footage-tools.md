@@ -74,6 +74,48 @@ corners; `samples` (up to 64) trades smoothness for speed. Keyframe `length` dow
 default 90 is across), or with
 `radial` outward from `center`, growing toward the edges as a lens fringes.
 
+## Stylize
+
+[`halftone`](/reference/effects/halftone) prints the picture as dots on a screen of `size`-pixel cells turned by
+`angle`. `mode: "mono"` prints `ink` on `paper` by brightness; `mode: "cmyk"` separates it into four inks, each on its
+own screen at the classic angles, as a magazine page is printed. `amount` mixes the print over the picture.
+
+[`pixelate`](/reference/effects/pixelate) turns the picture into a mosaic of `size`-pixel cells. Give it a `box` and only
+that part is pixelated, so it hides a face or a plate the way [`regionBlur`](/reference/effects/regionBlur) does, but
+as a coarse mosaic:
+
+```tsx
+<Clip id="street" src="asset:street">
+  <Effect id="hide" type="pixelate" params={{ size: 18, box: [0.62, 0.1, 0.2, 0.35], feather: 6 }} />
+</Clip>
+```
+
+[`scanlines`](/reference/effects/scanlines) lays a dark band every `spacing` pixels over the picture, `thickness` of the
+gap wide and `intensity` deep, for an old screen. `speed` rolls them by that many pixels a second, and `angle` turns
+them.
+
+## Light and texture
+
+[`lightLeak`](/reference/effects/lightLeak) washes soft blooms of `color` over the picture, wandering as the video plays
+(`evolution` sets how fast) and only ever lightening it. On an `<Adjustment>` it covers everything beneath, cuts and
+titles included; change `seed` for another pattern.
+
+```tsx
+<Track id="look" layout="free">
+  <Adjustment id="leak" start={0} duration={12}>
+    <Effect id="l" type="lightLeak" params={{ intensity: 0.5, color: "#ff9a4d" }} />
+  </Adjustment>
+</Track>
+```
+
+[`fractalNoise`](/reference/effects/fractalNoise) draws clouds of noise, about `size` pixels across with `octaves`
+layers of finer detail, that change in place over time. `blend` and `opacity` set how they meet the picture: `screen`
+gives mist or smoke over footage, `overlay` or `softLight` a texture. On a full-frame `<Shape>` with `blend: "normal"`
+it is a moving background.
+
+These looks change the picture's pixels, so they cost more to export without a GPU than a colour effect does: a CMYK
+`halftone` and `fractalNoise` with many octaves are the heaviest.
+
 ## Where there is no WebGL
 
 These effects need WebGL, which every browser the player runs in has, and the export always has. Where it is missing

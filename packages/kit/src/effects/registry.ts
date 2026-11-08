@@ -8,6 +8,7 @@ import { curves, duotone, exposure, levels, lut, shadowsHighlights, vibrance, wh
 import * as cssEffects from "./css";
 import { FALLBACKS } from "./css";
 import { chromaticAberration, colorKey, cornerPin, regionBlur, zoomBlur } from "./footage";
+import { fractalNoise, halftone, lightLeak, pixelate, scanlines } from "./looks";
 import { grain, vignette } from "./post";
 import { blinds, clockWipe, filmBurn, iris, pixelDissolve, zoom } from "./shader-transitions";
 import type { Neutral } from "./shapes";
@@ -94,6 +95,11 @@ export const EFFECTS = {
   outline: shaderEntry(outline),
   longShadow: shaderEntry(longShadow, undefined, { opacity: 0 }),
   bevel: shaderEntry(bevel, undefined, { amount: 0 }),
+  halftone: shaderEntry(halftone, undefined, { amount: 0 }),
+  pixelate: shaderEntry(pixelate, undefined, { size: 1 }),
+  scanlines: shaderEntry(scanlines, undefined, { intensity: 0 }),
+  lightLeak: shaderEntry(lightLeak, undefined, { intensity: 0 }),
+  fractalNoise: shaderEntry(fractalNoise, undefined, { opacity: 0 }),
 } as const satisfies Record<string, EffectEntry>;
 
 const dir4 = z.enum(["left", "right", "up", "down"]);
@@ -146,6 +152,8 @@ export const EFFECT_FAMILIES: Readonly<Record<string, readonly VideoEffectType[]
   Colour: ["levels", "lut", "exposure", "vibrance", "whiteBalance", "shadowsHighlights", "duotone", "curves"],
   Footage: ["colorKey", "regionBlur", "cornerPin", "zoomBlur", "chromaticAberration"],
   "Titles and shapes": ["glow", "outline", "longShadow", "bevel"],
+  Stylize: ["halftone", "pixelate", "scanlines"],
+  "Light and texture": ["lightLeak", "fractalNoise"],
 };
 export type TransitionType = keyof typeof TRANSITIONS;
 /** The params a built-in transition takes, as written in `<Transition params>`. */

@@ -106,6 +106,11 @@ const CASES: readonly { type: string; neutral: string; shape?: boolean }[] = [
   { type: "zoomBlur", neutral: "{ length: 0 }" },
   { type: "chromaticAberration", neutral: "{ distance: 0 }" },
   { type: "longShadow", neutral: "{ opacity: 0 }", shape: true },
+  { type: "halftone", neutral: "{ amount: 0 }" },
+  { type: "pixelate", neutral: "{ size: 1 }" },
+  { type: "scanlines", neutral: "{ intensity: 0 }" },
+  { type: "lightLeak", neutral: "{ intensity: 0 }" },
+  { type: "fractalNoise", neutral: "{ opacity: 0 }" },
 ];
 
 const measured: Record<string, { off: number; max: number }> = {};

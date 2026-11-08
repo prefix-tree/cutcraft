@@ -269,7 +269,7 @@ videos, each tested) and [the worked example](examples/launch-recap).
 | | |
 |---|---|
 | Works | Resolving, every editor action with undo, writing edits back to the file, lint. Playback with seek, rate and loop; twelve transitions; keyframes on transforms, effects, colour and sound; speed ramps and freeze frames with their audio; masks, overlays, captions and ducking. Export with frame-exact pictures, and the layout check. |
-| Partial | Twelve transitions, twenty-eight effects and nine title presets, all drawn: what the schemas accept is what renders, with a few limits listed in [what renders](https://prefix-tree.github.io/cutcraft/reference/rendering). |
+| Partial | Twelve transitions, thirty-three effects and nine title presets, all drawn: what the schemas accept is what renders, with a few limits listed in [what renders](https://prefix-tree.github.io/cutcraft/reference/rendering). |
 
 ## Roadmap
 
