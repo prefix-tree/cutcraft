@@ -70,8 +70,7 @@
   "dependencies": {
     "@react-three/fiber": "9.4.0",
     "motion": "12.23.24",
-    "three": "0.180.0",
-    "zod": "catalog:"
+    "three": "0.180.0"
   },
   "devDependencies": {
     "@cutcraft/kit": "workspace:*",
