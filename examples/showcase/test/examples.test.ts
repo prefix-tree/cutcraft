@@ -77,5 +77,5 @@ describe.each(DEMOS)("%s", (file) => {
 });
 
 it("has a demo for every built-in effect, transition and component", () => {
-  expect(DEMOS.length).toBe(48);
+  expect(DEMOS.length).toBe(53);
 });
