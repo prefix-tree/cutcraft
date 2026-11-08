@@ -827,48 +827,8 @@
   font-size: 14px !important;
 }
 
-/* The idea: six short claims and the loop they make. */
-.home-idea-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 18px 36px;
-}
-.home-idea-grid > div {
-  padding-top: 14px;
-  border-top: 1px solid var(--cc-rule);
-}
-.home-idea-grid p {
-  margin: 0;
-  font-size: 15px;
-  line-height: 1.6;
-}
-.home-loop {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 8px 12px;
-  margin-top: 36px;
-  font-family: var(--vp-font-family-mono);
-  font-size: 14px;
-  color: var(--cc-grey);
-}
-.home-loop span {
-  padding: 6px 12px;
-  border: 1px solid var(--cc-rule);
-  border-radius: 999px;
-}
-.home-loop span.on {
-  border-color: var(--cc-accent);
-  color: var(--cc-accent);
-}
-.home-loop i {
-  font-style: normal;
-}
-
 @media (max-width: 960px) {
-  .home-ways,
-  .home-idea-grid {
+  .home-ways {
     grid-template-columns: minmax(0, 1fr);
   }
 }
@@ -882,4 +842,38 @@
   font-size: 12.5px;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
+}
+
+/* The idea: the goal in one paragraph, above the three ways; the licence below them. */
+.home-goal h2 {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  border-top: 0 !important;
+}
+.home-goal-lead {
+  max-width: 780px;
+  font-size: 22px !important;
+  line-height: 1.5 !important;
+  color: var(--cc-ink);
+}
+.home .home-goal + .home-ways {
+  margin-top: 28px;
+}
+.home-free {
+  padding: 22px 24px;
+  border: 1px solid var(--cc-accent);
+  border-radius: 12px;
+}
+.home-free p {
+  margin: 0 0 10px;
+  font-size: 16px;
+  line-height: 1.6;
+}
+.home .home-ways + .home-free {
+  margin-top: 28px;
+}
+.home-free .home-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 28px;
 }
