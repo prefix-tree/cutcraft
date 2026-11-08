@@ -63,15 +63,16 @@ it.
 <PreviewCard title="A logo reveal" link="/examples#a-logo-reveal" src="showcase/logo" text="three.js particles that settle into a name." />
 <PreviewCard title="A vertical short" link="/examples#captions-and-key-points" src="showcase/captions" text="Captions follow the words; the key point lands on its word." />
 <PreviewCard title="Free code" link="/reference/elements/layer" src="previews/elements/layer" text="Any React in a Layer, timed by useT()." />
-<PreviewCard title="Transitions" link="/reference/elements/transition" src="previews/elements/transition" text="A wipe between two clips." />
+<PreviewCard title="Transitions" link="/reference/effects/#transitions" src="previews/transitions/iris" text="Twelve built in: fades, wipes, slides, iris, film burn and more." />
+<PreviewCard title="Effects" link="/reference/effects/" src="previews/effects/duotone" text="Twenty-eight built in: colour grading, keying, blurs, glow and more." />
 <PreviewCard title="Keyframes" link="/reference/elements/keyframe" src="previews/elements/keyframe" text="A slow push-in, eased." />
 <PreviewCard title="Titles" link="/reference/elements/title" src="previews/elements/title" text="Entrances by letter, word or line." />
 <PreviewCard title="Masks" link="/reference/elements/mask" src="previews/elements/mask" text="A feathered oval over footage." />
 <PreviewCard title="Speed ramps" link="/reference/elements/speedkey" src="previews/elements/speedkey" text="Normal speed easing into 4×." />
-<PreviewCard title="Colour" link="/guide/colour" src="previews/guide/white-balance" text="Cool and warm white balance on one shot." />
+<PreviewCard title="Colour" link="/guide/colour" src="previews/guide/colour-grade" text="A grade in four steps: exposure, white balance, curves, vibrance." />
 </div>
 
-<p class="home-links"><a :href="withBase('/examples')">Examples</a> · <a :href="withBase('/reference/elements/')">All elements</a> · <a :href="withBase('/guide/free-code')">Free code</a></p>
+<p class="home-links"><a :href="withBase('/examples')">Examples</a> · <a :href="withBase('/reference/elements/')">All elements</a> · <a :href="withBase('/reference/effects/')">All effects and transitions</a> · <a :href="withBase('/guide/free-code')">Free code</a></p>
 
 ## What's inside
 

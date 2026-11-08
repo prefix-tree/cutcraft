@@ -21,6 +21,6 @@ A blend between the two clips it sits between on a sequence track.
 | `on` | string |  |  |
 | `edge` | "in" \| "out" |  |  |
 
-Every built-in type and its params: [Effects and transitions](/reference/effects).
+Every built-in type and its params: [Effects and transitions](/reference/effects/).
 
 Timed, visual. No children. [All elements](/reference/elements/)

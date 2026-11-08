@@ -247,6 +247,12 @@ effects (exposure, white balance, curves, a LUT, brightness and the like) are dr
 order, and a built-in whose params change nothing (an amount at 0) is not drawn at all. Under a shader transition,
 each clip's effects run before the two are blended.
 
+<Example src="previews/guide/effect-order" alt="The same shot twice: toned navy and amber on the left, grey on the right">
+
+<<< @/../examples/showcase/guide/effect-order.tsx
+
+</Example>
+
 Overlays take the same effects: titles, shapes, SVG, stickers and any `<Layer>`, including `<Three>` and `<Motion>`.
 Write the `<Effect>` inside the element, next to its text or its free code. Here one colour-split effect runs on a
 title and, more gently, on a Motion badge, while the footage under them stays as it is:

@@ -1,3 +1,4 @@
+import { execFileSync } from "node:child_process";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join, relative, sep } from "node:path";
 
@@ -18,6 +19,7 @@ import {
   TRANSITION_FAMILIES,
   TRANSITIONS,
 } from "../packages/kit/src/index";
+import { EFFECT_DEMOS, effectExample, TRANSITION_TEXT, transitionExample } from "./effect-example";
 import { syncGeneratedFiles } from "./generated-files";
 import { graphicExample } from "./graphic-example";
 
@@ -287,7 +289,7 @@ function elementPage(name: string, summary: string): string {
     lines.push(`| \`${prop}\` | ${typeOf(s, 6)} | ${def} | ${required.has(prop) ? "yes" : ""} |`);
   }
   if (name === "Effect" || name === "Transition")
-    lines.push("", "Every built-in type and its params: [Effects and transitions](/reference/effects).");
+    lines.push("", "Every built-in type and its params: [Effects and transitions](/reference/effects/).");
   lines.push(
     "",
     `${traits.length ? `${capital(traits.join(", "))}. ` : ""}${c.childKinds.length ? `Children: ${c.childKinds.map((k) => `\`${k}\``).join(", ")}.` : "No children."} [All elements](/reference/elements/)`,
@@ -317,13 +319,38 @@ function paramsTable(schema: z.ZodType): string[] {
   ];
 }
 
-/** Every built-in effect and transition with its params, grouped by family: generated from the registry. */
-function effectsPage(): string {
+/** The footage a demo shows that is not ours, credited under it. */
+const STOCK_CREDIT =
+  "The coffee footage is [Pixabay video 209419](https://pixabay.com/videos/id-209419/), under the Pixabay Content License.";
+
+/** Every built-in effect and transition as a gallery, grouped by family: generated from the registry. */
+function effectsIndex(): string {
   const lines = [
     "# Effects and transitions",
     "",
-    "Every built-in `<Effect type>` and `<Transition type>`, with the params it takes. Params outside these ranges, or not listed, are an error when the file resolves; a keyframe inside an effect animates one by `param`. Generated from the effect registry (`packages/kit/src/effects/registry.ts`) by `pnpm docs:gen`.",
+    "Every built-in `<Effect type>` and `<Transition type>`. Hover a card to play it; each page shows the file that made the video and the params it takes. Params outside their ranges, or not listed, are an error when the file resolves; a keyframe inside an effect animates one by `param`. Generated from the effect registry (`packages/kit/src/effects/registry.ts`) by `pnpm docs:gen`.",
     "",
+    "## Effects",
+    "",
+  ];
+  for (const [family, names] of Object.entries(EFFECT_FAMILIES)) {
+    lines.push(`### ${family}`, "", '<div class="cc-cards">');
+    for (const name of names)
+      lines.push(
+        `<PreviewCard code hover title="${name}" link="/reference/effects/${name}" src="previews/effects/${name}" text="${attr(EFFECT_DEMOS[name].text)}" />`,
+      );
+    lines.push("</div>", "");
+  }
+  lines.push("## Transitions", "");
+  for (const [family, names] of Object.entries(TRANSITION_FAMILIES)) {
+    lines.push(`### ${family}`, "", '<div class="cc-cards">');
+    for (const name of names)
+      lines.push(
+        `<PreviewCard code hover title="${name}" link="/reference/transitions/${name}" src="previews/transitions/${name}" text="${attr(TRANSITION_TEXT[name])}" />`,
+      );
+    lines.push("</div>", "");
+  }
+  lines.push(
     "## Units",
     "",
     "A param's name says what kind of value it is, and each kind has one scale:",
@@ -346,33 +373,87 @@ function effectsPage(): string {
     '| asset | `"asset:<id>"` from the manifest | `src` |',
     "| choice | a string | `direction`, `curve` |",
     "",
-    "## Effects",
+  );
+  // Links to the single page this replaced (`/reference/effects#iris`) go on to the item's own page.
+  const pages = Object.fromEntries([
+    ...Object.keys(EFFECTS).map((n) => [n.toLowerCase(), `effects/${n}`]),
+    ...Object.keys(TRANSITIONS).map((n) => [n.toLowerCase(), `transitions/${n}`]),
+  ]);
+  lines.push(
+    "<script setup>",
+    'import { onMounted } from "vue";',
+    'import { withBase } from "vitepress";',
+    `const PAGES = ${JSON.stringify(pages)};`,
+    "onMounted(() => {",
+    "  const page = PAGES[location.hash.slice(1).toLowerCase()];",
+    "  if (page) location.replace(withBase(`/reference/${page}`));",
+    "});",
+    "</script>",
     "",
-  ];
-  for (const [family, names] of Object.entries(EFFECT_FAMILIES)) {
-    lines.push(`### ${family}`, "");
-    for (const name of names) {
-      const e = EFFECTS[name];
-      const fallback = e.draw.kind === "shader" && e.draw.css ? ", with a CSS filter where WebGL is missing" : "";
-      lines.push(`#### \`${name}\``, "", `Drawn as ${DRAWN[e.draw.kind]}${fallback}.`, "", ...paramsTable(e.params));
-    }
-  }
-  lines.push("## Transitions", "");
-  for (const [family, names] of Object.entries(TRANSITION_FAMILIES)) {
-    lines.push(`### ${family}`, "");
-    for (const name of names) {
-      const t = TRANSITIONS[name];
-      const fallback = t.draw.kind === "shader" ? ", as a crossfade where WebGL is missing" : "";
-      lines.push(
-        `#### \`${name}\``,
-        "",
-        `Drawn ${t.draw.kind === "shader" ? "by a shader" : "without a shader"}${fallback}.`,
-        "",
-        ...paramsTable(t.params),
-      );
-    }
-  }
+  );
   return lines.join("\n");
+}
+
+/** One built-in effect's page: its demo above the file that made it, then how it draws and its params. */
+function effectPage(name: keyof typeof EFFECTS): string {
+  const e = EFFECTS[name];
+  const demo = EFFECT_DEMOS[name];
+  const fallback = e.draw.kind === "shader" && e.draw.css ? ", with a CSS filter where WebGL is missing" : "";
+  return [
+    `# \`${name}\``,
+    "",
+    demo.text,
+    "",
+    `<Example src="previews/effects/${name}" alt="${name}">`,
+    "",
+    `<<< @/../examples/showcase/effects/${name}.tsx`,
+    "",
+    "</Example>",
+    "",
+    ...(effectExample(name).includes("asset:coffee") ? [STOCK_CREDIT, ""] : []),
+    "## Params",
+    "",
+    `Drawn as ${DRAWN[e.draw.kind]}${fallback}.`,
+    "",
+    ...paramsTable(e.params),
+    "[All effects and transitions](/reference/effects/) · [Units](/reference/effects/#units)",
+    "",
+  ].join("\n");
+}
+
+/** One built-in transition's page, as an effect's. */
+function transitionPage(name: keyof typeof TRANSITIONS): string {
+  const t = TRANSITIONS[name];
+  const fallback = t.draw.kind === "shader" ? ", as a crossfade where WebGL is missing" : "";
+  return [
+    `# \`${name}\``,
+    "",
+    TRANSITION_TEXT[name],
+    "",
+    `<Example src="previews/transitions/${name}" alt="${name}">`,
+    "",
+    `<<< @/../examples/showcase/transitions/${name}.tsx`,
+    "",
+    "</Example>",
+    "",
+    STOCK_CREDIT,
+    "",
+    "## Params",
+    "",
+    `Drawn ${t.draw.kind === "shader" ? "by a shader" : "without a shader"}${fallback}.`,
+    "",
+    ...paramsTable(t.params),
+    "[All effects and transitions](/reference/effects/) · [Units](/reference/effects/#units)",
+    "",
+  ].join("\n");
+}
+
+/** A generated example file, formatted as the repository formats its code, so the formatter leaves it alone. */
+function formatted(path: string, code: string): string {
+  return execFileSync(join(root, "node_modules", ".bin", "biome"), ["format", `--stdin-file-path=${path}`], {
+    input: code,
+    encoding: "utf8",
+  });
 }
 
 /** A Vue attribute value: quotes and braces escaped, Markdown code ticks dropped. */
@@ -569,7 +650,7 @@ function escapeTags(markdown: string): string {
       }
       if (fenced) return line;
       // Our own components and their grid are written on lines of their own, as they are.
-      if (/^<\/?(Example|Preview|PreviewCard|div)[\s>]/.test(line) || line.startsWith("<<< ")) return line;
+      if (/^<\/?(Example|Preview|PreviewCard|div|script)[\s>]/.test(line) || line.startsWith("<<< ")) return line;
       // Outside code: `<Tag` would be a Vue component and `{{ x }}` a Vue interpolation.
       return line
         .split("`")
@@ -596,6 +677,14 @@ const sidebar = {
     text: group,
     items: items.map(([name]) => ({ text: name, link: `/reference/elements/${slug(name)}` })),
   })),
+  effects: Object.entries(EFFECT_FAMILIES).map(([family, names]) => ({
+    text: family,
+    items: names.map((name) => ({ text: name, link: `/reference/effects/${name}` })),
+  })),
+  transitions: Object.entries(TRANSITION_FAMILIES).map(([family, names]) => ({
+    text: family,
+    items: names.map((name) => ({ text: name, link: `/reference/transitions/${name}` })),
+  })),
   graphics: [...graphicCategories()].map(([category, names]) => ({
     text: capital(category),
     items: names.map((name) => ({ text: GRAPHIC_KINDS[name].title, link: `/reference/graphics/${name}` })),
@@ -603,11 +692,28 @@ const sidebar = {
 };
 write(join(root, "docs", ".vitepress", "sidebar.generated.json"), `${JSON.stringify(sidebar, null, 2)}\n`);
 write(join(out, "rendering.md"), escapeTags(renderingPage()));
-write(join(out, "effects.md"), escapeTags(effectsPage()));
+write(join(out, "effects", "index.md"), escapeTags(effectsIndex()));
+for (const name of Object.keys(EFFECTS) as (keyof typeof EFFECTS)[]) {
+  write(join(out, "effects", `${name}.md`), escapeTags(effectPage(name)));
+  const file = join(root, "examples", "showcase", "effects", `${name}.tsx`);
+  write(file, formatted(file, effectExample(name)));
+}
+for (const name of Object.keys(TRANSITIONS) as (keyof typeof TRANSITIONS)[]) {
+  write(join(out, "transitions", `${name}.md`), escapeTags(transitionPage(name)));
+  const file = join(root, "examples", "showcase", "transitions", `${name}.tsx`);
+  write(file, formatted(file, transitionExample(name)));
+}
 const problems = syncGeneratedFiles(root, generated, {
   check,
-  directories: ["docs/reference/elements", "docs/reference/graphics"],
-  obsolete: ["docs/reference/elements.md"],
+  directories: [
+    "docs/reference/elements",
+    "docs/reference/graphics",
+    "docs/reference/effects",
+    "docs/reference/transitions",
+    "examples/showcase/effects",
+    "examples/showcase/transitions",
+  ],
+  obsolete: ["docs/reference/elements.md", "docs/reference/effects.md"],
 });
 if (problems.length) {
   console.error(`Generated reference is stale (${problems.length} files). Run pnpm docs:gen.`);

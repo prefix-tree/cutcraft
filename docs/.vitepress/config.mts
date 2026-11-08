@@ -86,13 +86,25 @@ export default defineConfig({
             items: generated.elements.map((group) => ({ ...group, collapsed: true })),
           },
           {
+            text: "Effects and transitions",
+            link: "/reference/effects/",
+            collapsed: true,
+            items: [
+              ...generated.effects.map((group) => ({ ...group, collapsed: true })),
+              ...generated.transitions.map((group) => ({
+                ...group,
+                text: `Transitions: ${group.text}`,
+                collapsed: true,
+              })),
+            ],
+          },
+          {
             text: "Graphics",
             link: "/reference/graphics/",
             collapsed: true,
             items: generated.graphics.map((group) => ({ ...group, collapsed: true })),
           },
           { text: "What renders", link: "/reference/rendering" },
-          { text: "Effects and transitions", link: "/reference/effects" },
           { text: "CLI", link: "/reference/cli" },
           { text: "API", link: "/reference/api" },
           { text: "Actions", link: "/reference/actions" },

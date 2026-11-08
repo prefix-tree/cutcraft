@@ -17,6 +17,6 @@ A look on its parent: colour grading, blur, glow, outline, keying, corner pin, v
 | `params` | object | `{}` |  |
 | `enabled` | boolean | `true` |  |
 
-Every built-in type and its params: [Effects and transitions](/reference/effects).
+Every built-in type and its params: [Effects and transitions](/reference/effects/).
 
 Children: `keyframe`. [All elements](/reference/elements/)

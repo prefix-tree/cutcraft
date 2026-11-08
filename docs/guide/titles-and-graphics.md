@@ -60,20 +60,20 @@ any `<Effect>`; they work on clips too.
 </Title>
 ```
 
-- `glow` lights the area around the element, as a halo under it, so the element keeps its own colours: `radius` (the
+- [`glow`](/reference/effects/glow) lights the area around the element, as a halo under it, so the element keeps its own colours: `radius` (the
   blur's standard deviation, in pixels), `intensity` (up to 4), `color`, and `tint` (1 is all `color`, 0 keeps the
   element's own colours). `threshold` (0 to 1) makes only the bright parts glow, and then the glow also adds its light
   over them: a bloom, which suits footage.
-- `outline` draws a band of `width` pixels (up to 64) around the shape in `color`, under it, with round corners. `outlineOnly` draws the
+- [`outline`](/reference/effects/outline) draws a band of `width` pixels (up to 64) around the shape in `color`, under it, with round corners. `outlineOnly` draws the
   grown silhouette alone, filled.
-- `longShadow` sweeps the shape back along `angle` (degrees clockwise from up, 135 falls down and right) for
+- [`longShadow`](/reference/effects/longShadow) sweeps the shape back along `angle` (degrees clockwise from up, 135 falls down and right) for
   `length` pixels, in `color`. Overlapping parts never stack, and `fade` thins it toward the far end.
-- `bevel` lights the shape as if raised: `size` softens the slope (the blur's standard deviation, in pixels), `angle` where the light comes from
+- [`bevel`](/reference/effects/bevel) lights the shape as if raised: `size` softens the slope (the blur's standard deviation, in pixels), `angle` where the light comes from
   (degrees clockwise from up), and `amount` (0 to 1) how strongly edges take `highlight` or `shade`.
 
 They draw through the overlay's picture, which the preview needs Chrome's `chrome://flags/#canvas-draw-element` flag
 for. Without it the preview shows `glow` as a coloured shadow and leaves the other three out; the export always draws
-them. For a plain offset shadow, the CSS `shadow` effect needs no flag.
+them. For a plain offset shadow, the CSS [`shadow`](/reference/effects/shadow) effect needs no flag.
 
 ## Graphics
 

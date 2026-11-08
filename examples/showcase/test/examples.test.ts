@@ -1,6 +1,6 @@
 // Every showcase file loads the way the editor loads it, resolves without errors, lints clean, and ends with its
 // footage; and every engine layer is timed to a word, a clip or a literal start, so the editor can move it.
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 import { describe, expect, it } from "vitest";
@@ -12,7 +12,23 @@ const root = join(import.meta.dirname, "..");
 const manifest = JSON.parse(readFileSync(join(root, "manifest.json"), "utf8")) as AssetManifest;
 const FILES = ["launch", "kinetic", "data", "logo", "edit", "captions"];
 /** The guide's examples (guide/*.tsx), rendered for the pages that explain each feature. */
-const GUIDE = ["fonts", "motion-blur", "shader-effect", "shader-transition", "title-effect", "at-a-cut"];
+const GUIDE = [
+  "fonts",
+  "motion-blur",
+  "shader-effect",
+  "shader-transition",
+  "title-effect",
+  "at-a-cut",
+  "white-balance",
+  "colour-grade",
+  "effect-order",
+];
+/** The reference's demos, one per built-in effect and transition, written by `pnpm docs:gen`. */
+const DEMOS = ["effects", "transitions"].flatMap((dir) =>
+  readdirSync(join(root, dir))
+    .filter((f) => f.endsWith(".tsx"))
+    .map((f) => `${dir}/${f}`),
+);
 
 describe.each(FILES)("%s.tsx", (name) => {
   const source = readFileSync(join(root, `${name}.tsx`), "utf8");
@@ -49,4 +65,18 @@ describe.each(GUIDE)("guide/%s.tsx", (name) => {
     expect(state.errors).toEqual([]);
     expect(lint(source, { manifest }).map((d) => `${d.rule}: ${d.message}`)).toEqual([]);
   });
+});
+
+describe.each(DEMOS)("%s", (file) => {
+  it("resolves without errors, lints clean, and lasts its three seconds", () => {
+    const source = readFileSync(join(root, file), "utf8");
+    const state = resolve(collectModule(loadModule(source) as never, {}), manifest);
+    expect(state.errors).toEqual([]);
+    expect(lint(source, { manifest }).map((d) => `${d.rule}: ${d.message}`)).toEqual([]);
+    expect(state.composition.duration).toBeCloseTo(3, 2);
+  });
+});
+
+it("has a demo for every built-in effect and transition", () => {
+  expect(DEMOS.length).toBe(40);
 });

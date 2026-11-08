@@ -40,6 +40,9 @@ There are three kinds of example, each a complete file:
 | Motion (`<Motion>`) | [Kinetic type](#kinetic-type), [Data story](#a-data-story), [An edit](#an-edit) | [Free code](/guide/free-code#three-js-and-motion) |
 | Any React in a `<Layer>` | [Data story](#a-data-story) (counters), [Stats with handles](/recipes/stats) | [Free code](/guide/free-code) |
 | Transitions and keyframes | [An edit](#an-edit), [Slideshow](/recipes/slideshow) | [Elements](/reference/elements/) |
+| Every built-in effect and transition, one demo each | [Effects and transitions](/reference/effects/) | [Colour](/guide/colour), [Keying, blurs and pins](/guide/footage-tools), [Time by meaning](/guide/time) |
+| A grade built from several effects, in order | [Colour grade](/guide/colour) | [Colour and grading](/guide/colour) |
+| Effect order changing the picture | [Grayscale then duotone, and the reverse](/guide/free-code#effects-and-transitions-of-your-own) | [Free code](/guide/free-code) |
 | One prop that restyles everything (themes) | [Brand spot](/recipes/brand-spot) | [Themes](/guide/themes) |
 | Tweakable values (`schema`, `defaults`) | Every showcase file, [Variants](/recipes/variants) | [The file](/guide/the-file#schema-and-defaults-are-the-knobs) |
 | Music that ducks under speech | [Talking-head cut](/recipes/talking-head), the [walkthrough](/guide/writing-files) | [Captions and sound](/guide/captions-and-sound#sound) |
@@ -55,7 +58,9 @@ Each video is one file in [`examples/showcase`](https://github.com/prefix-tree/c
 rendered with `pnpm --filter @cutcraft/example-showcase render`; the guide's feature examples, in
 [`examples/showcase/guide`](https://github.com/prefix-tree/cutcraft/tree/main/examples/showcase/guide), with
 `pnpm --filter @cutcraft/example-showcase docs`. The footage is made by `ffmpeg`'s own sources
-(`pnpm --filter @cutcraft/example-showcase gen`), and every file renders through the player in
+(`pnpm --filter @cutcraft/example-showcase gen`), except the coffee shot in the effect and transition demos:
+[Pixabay video 209419](https://pixabay.com/videos/id-209419/), under the Pixabay Content License. It is not committed;
+`gen` reads it from `examples/showcase/media/stock/` and checks its hash. Every file renders through the player in
 [headless Chrome](/guide/exporting#the-browser-it-runs-in). The people on camera are stand-ins: their
 footage is a gradient, and the manifest holds the words they would say.
 

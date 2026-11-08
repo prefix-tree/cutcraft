@@ -98,17 +98,17 @@ need that much extra footage at the join.
 
 Crossfade, dips to black or white, wipe, slide and push are built in, and six more drawn as shaders:
 
-- `iris` opens the next clip from `center` as a circle, or a polygon with `sides` (3 to 64; 0 is the circle), or a star when `star`
+- [`iris`](/reference/transitions/iris) opens the next clip from `center` as a circle, or a polygon with `sides` (3 to 64; 0 is the circle), or a star when `star`
   sets the inner points' radius (0 to 0.95 of the outer). `rotation` turns it, `feather` softens its edge in pixels.
-- `clockWipe` sweeps around `center` from `startAngle` (degrees clockwise from up), with `direction` `"clockwise"`,
+- [`clockWipe`](/reference/transitions/clockWipe) sweeps around `center` from `startAngle` (degrees clockwise from up), with `direction` `"clockwise"`,
   `"counterclockwise"` or `"both"` ways at once. `softness` softens the edge, as a share of the turn.
-- `blinds` opens `slats` bands along `angle` (degrees clockwise from up, so the default 90 gives vertical slats), each
+- [`blinds`](/reference/transitions/blinds) opens `slats` bands along `angle` (degrees clockwise from up, so the default 90 gives vertical slats), each
   across its width; `softness` softens them, as a share of a slat.
-- `filmBurn` burns a ragged hole from `center` with a glowing edge in `color`; `size` sets the size of its ragged
+- [`filmBurn`](/reference/transitions/filmBurn) burns a ragged hole from `center` with a glowing edge in `color`; `size` sets the size of its ragged
   pattern and `edge` the width of the glow, both in pixels, and `seed` picks another pattern.
-- `pixelDissolve` switches `columns` by `rows` blocks one at a time, in an order set by `seed`; `softness` is how long
+- [`pixelDissolve`](/reference/transitions/pixelDissolve) switches `columns` by `rows` blocks one at a time, in an order set by `seed`; `softness` is how long
   each block takes, as a share of the transition.
-- `zoom` pushes into the outgoing clip toward `center` and settles the next one from `scale`, with a `blur` along the
+- [`zoom`](/reference/transitions/zoom) pushes into the outgoing clip toward `center` and settles the next one from `scale`, with a `blur` along the
   motion.
 
 ```tsx
