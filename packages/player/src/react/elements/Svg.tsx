@@ -11,7 +11,15 @@ export function Svg(p: ElementProps) {
   const content = typeof props.content === "string" ? props.content : null;
   const text = useMediaText(content === null && typeof props.src === "string" ? props.src : null);
   const markup = content ?? text;
-  if (markup === null) return <div {...dataAttrs(p.placement)} style={overlayStyle(p, { width: 0, height: 0 })} />;
+  // Marked pending while its file loads, so an export waits for the drawing instead of capturing nothing.
+  if (markup === null)
+    return (
+      <div
+        {...dataAttrs(p.placement)}
+        {...(content === null && typeof props.src === "string" ? { "data-pending": "" } : {})}
+        style={overlayStyle(p, { width: 0, height: 0 })}
+      />
+    );
   const drawing = svgDrawing(p, markup);
   for (const w of drawing.prepared.warnings) devWarn(`svg:${p.placement.id}:${w}`, `svg "${p.placement.id}": ${w}`);
   return (

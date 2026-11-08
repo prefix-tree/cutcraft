@@ -126,7 +126,7 @@ async function start(): Promise<void> {
   };
 
   /** Kinds the layout check measures: overlays drawn as DOM, and the captions. */
-  const MEASURED = new Set(["title", "shape", "svg", "sticker", "graphic", "layer", "captions"]);
+  const MEASURED = new Set(["title", "shape", "svg", "sticker", "layer", "captions"]);
   const backdrop = backdropTracks(state);
 
   let out: Uint8Array = new Uint8Array();
@@ -225,7 +225,7 @@ function tick(): Promise<void> {
 
 /**
  * After a step: React has committed the new time (its update is flushed before the next task), every engine layer
- * has drawn it, and every face its text uses has loaded. A three.js renderer created by a layer that just appeared
+ * has drawn it, every face its text uses has loaded, and every image or SVG file an overlay shows has loaded. A three.js renderer created by a layer that just appeared
  * takes a few frames; a bundled face (fonts.css) is fetched only once text first uses it, so text that appears after
  * the first frame would otherwise be captured in the fallback face.
  */
@@ -233,6 +233,14 @@ async function settle(): Promise<void> {
   await tick();
   if (document.fonts.status === "loading") await document.fonts.ready;
   const until = performance.now() + SETTLE_TIMEOUT_MS;
+  // An overlay still loading its file (a sticker's image, an SVG's markup) says so with `data-pending`.
+  while (document.querySelector("[data-pending]")) {
+    if (performance.now() > until) throw new Error("an overlay's media did not load within 10 s");
+    await new Promise((r) => setTimeout(r, 4));
+  }
+  await Promise.all(
+    [...document.images].filter((img) => !img.complete).map((img) => img.decode().catch(() => undefined)),
+  );
   while (layerFramesPending() > 0) {
     if (performance.now() > until)
       throw new Error(

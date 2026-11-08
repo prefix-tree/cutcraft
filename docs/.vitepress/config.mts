@@ -114,12 +114,6 @@ export default defineConfig({
               })),
             ],
           },
-          {
-            text: "Graphics",
-            link: "/reference/graphics/",
-            collapsed: true,
-            items: generated.graphics.map((group) => ({ ...group, collapsed: true })),
-          },
           { text: "What renders", link: "/reference/rendering" },
           { text: "CLI", link: "/reference/cli" },
           { text: "API", link: "/reference/api" },

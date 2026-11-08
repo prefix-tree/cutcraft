@@ -36,7 +36,6 @@ const KIND_OF_NS: Record<string, string> = {
   shape: "shape",
   svg: "svg",
   sticker: "sticker",
-  graphic: "graphic",
   adjustment: "adjustment",
   nested: "nested",
 };

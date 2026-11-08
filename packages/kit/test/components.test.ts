@@ -11,7 +11,7 @@ const manifest: AssetManifest = {
 
 const file = (
   body: string,
-) => `import { Arrow, Background, Badge, Callout, Clip, Composition, Counter, Highlight, LowerThird, ProgressBar, Track } from "@cutcraft/kit";
+) => `import { Arrow, Background, Badge, Callout, Clip, Composition, Counter, Highlight, LowerThird, ProgressBar, Sticker, Track } from "@cutcraft/kit";
 
 export default function Video() {
   return (
@@ -118,5 +118,30 @@ describe("components", () => {
     );
     expect(again.errors).toEqual([]);
     expect(again.items.get("b-text")!.editable).not.toBe("generated");
+  });
+});
+
+describe("what they replace", () => {
+  it("say what replaced a <Graphic> a file still uses", () => {
+    const text = `import { Composition, Graphic, Track } from "@cutcraft/kit";
+export default function Video() {
+  return (
+    <Composition fps={30} width={1920} height={1080}>
+      <Track id="over" layout="free">
+        <Graphic id="g" kind="lower-third" start={0} duration={2} />
+      </Track>
+    </Composition>
+  );
+}
+`;
+    const state = resolve(collectModule(loadModule(text) as never, {}), manifest);
+    expect(state.errors.map((e) => e.message).join(" ")).toMatch(
+      /<Graphic kind="lower-third"> was removed: use LowerThird, Callout/,
+    );
+  });
+
+  it("take a sticker as an image asset, and say icon stickers are gone", () => {
+    const icon = resolved('<Sticker id="s" start={0} duration={2} src="icon:check" />');
+    expect(icon.state.errors.map((e) => e.message).join(" ")).toMatch(/icon stickers were removed/);
   });
 });

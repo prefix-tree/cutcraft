@@ -115,7 +115,7 @@ const SUBJECT_REACH = 1;
 type Run = { -readonly [K in keyof LayoutIssue]: LayoutIssue[K] } & { n: number; worst: number };
 
 /**
- * Samples the composition and reports every overlay (titles, shapes, graphics, stickers, layers, and captions) that
+ * Samples the composition and reports every overlay (titles, shapes, SVG, stickers, layers, and captions) that
  * leaves the frame, leaves the safe zone, covers captions (not captions themselves), or covers the subject, as runs
  * of consecutive offending samples. Overlays beneath the footage, and ones whose ink fills the frame (backgrounds),
  * are not checked; neither is a moment where an element is fainter than 10%.

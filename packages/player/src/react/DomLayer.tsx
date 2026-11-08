@@ -10,7 +10,6 @@ import { type ElementProps, OVERLAY_KINDS } from "../overlays/layout";
 import { devWarn } from "../warn";
 import { Adjustment } from "./elements/Adjustment";
 import { Captions } from "./elements/Captions";
-import { Graphic } from "./elements/Graphic";
 import { Layer } from "./elements/Layer";
 import { Shape } from "./elements/Shape";
 import { Sticker } from "./elements/Sticker";
@@ -139,8 +138,6 @@ function elementContent(item: VisibleItem, props: ElementProps, state: ResolvedS
       return <Svg {...props} />;
     case "sticker":
       return <Sticker {...props} />;
-    case "graphic":
-      return <Graphic {...props} />;
     case "layer":
       return <Layer {...props} interior={interior} />;
     case "adjustment":

@@ -24,4 +24,4 @@ A row of elements. A sequence track plays its children back to back; a free trac
 | `solo` | boolean | `false` |  |
 | `group` | string |  |  |
 
-Children: `clip`, `audio`, `gap`, `transition`, `title`, `shape`, `svg`, `sticker`, `graphic`, `adjustment`, `nested`, `layer`, `multicam`. [All elements](/reference/elements/)
+Children: `clip`, `audio`, `gap`, `transition`, `title`, `shape`, `svg`, `sticker`, `adjustment`, `nested`, `layer`, `multicam`. [All elements](/reference/elements/)

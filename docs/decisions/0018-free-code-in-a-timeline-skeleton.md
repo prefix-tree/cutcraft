@@ -24,7 +24,7 @@ and literal timing. Pictures drawn on top need none of that.
   transform) and holds any React: any hooks, CSS (3D, filters, blend modes, masks), canvas, WebGL, and the libraries
   the host offers (`loadModule(source, { imports })`). Its interior stays opaque to the kit; the model edits it as text,
   and one component child still gets handles (0013).
-- **The library stays.** `<Title>`, `<Graphic>`, `<Shape>`, `<Svg>`, `<Sticker>`, `<Effect>`, `<ColorGrade>`,
+- **The library stays.** (`<Graphic>` and `<ColorGrade>` were later removed: see 0024 and the changelog.) `<Title>`, `<Graphic>`, `<Shape>`, `<Svg>`, `<Sticker>`, `<Effect>`, `<ColorGrade>`,
   `<Mask>` and `<Adjustment>` remain as ready-made, inspector-editable pieces; the model uses them when they fit and
   writes code when they do not.
 - **The lint follows.** Only a helper that makes timeline elements must be pure, since the resolver calls it as a

@@ -1,6 +1,6 @@
 # Elements
 
-The elements a file is written in: the timeline (clips, tracks, transitions, captions), free code, and ready-made titles, graphics and effects. Each page shows an example as the export renders it, with the file that made it, then the element's props. Generated from the Zod schemas in `packages/kit/src/jsx/schemas`; run `pnpm docs:gen`, and `pnpm docs:examples` for the videos.
+The elements a file is written in: the timeline (clips, tracks, transitions, captions), free code, titles, shapes and effects. Each page shows an example as the export renders it, with the file that made it, then the element's props. Generated from the Zod schemas in `packages/kit/src/jsx/schemas`; run `pnpm docs:gen`, and `pnpm docs:examples` for the videos.
 
 ## Timeline
 
@@ -27,7 +27,6 @@ The elements a file is written in: the timeline (clips, tracks, transitions, cap
 <PreviewCard code title="<Title>" link="/reference/elements/title" src="previews/elements/title" text="Text over the picture in the theme's type, with entrances by letter, word or line." />
 <PreviewCard code title="<Captions>" link="/reference/elements/captions" src="previews/elements/captions" text="Subtitles from an asset's transcript that follow the clips through every trim." />
 <PreviewCard code title="<Caption>" link="/reference/elements/caption" src="previews/elements/captions" text="One cue inside <Captions>, written by hand: its text, start and end." />
-<PreviewCard code title="<Graphic>" link="/reference/elements/graphic" src="previews/elements/graphic" text="A built-in graphic by kind: lower thirds, callouts, counters, progress and more." />
 <PreviewCard code title="<Shape>" link="/reference/elements/shape" src="previews/elements/shape" text="A vector shape (rectangle, circle, star, polygon, path) with fill, stroke and shadow." />
 <PreviewCard code title="<Svg>" link="/reference/elements/svg" src="previews/elements/svg" text="One-off vector art from inline SVG markup or a file." />
 <PreviewCard code title="<Sticker>" link="/reference/elements/sticker" src="previews/elements/sticker" text="A ready-made icon or sticker by name." />
@@ -69,7 +68,7 @@ The elements a file is written in: the timeline (clips, tracks, transitions, cap
 | element | timed | visual | audio | trims source | transformable | children allowed |
 |---|---|---|---|---|---|---|
 | [`<Composition>`](/reference/elements/composition) |  |  |  |  |  | `track`, `marker`, `multicam`, `captions` |
-| [`<Track>`](/reference/elements/track) |  |  |  |  |  | `clip`, `audio`, `gap`, `transition`, `title`, `shape`, `svg`, `sticker`, `graphic`, `adjustment`, `nested`, `layer`, `multicam` |
+| [`<Track>`](/reference/elements/track) |  |  |  |  |  | `clip`, `audio`, `gap`, `transition`, `title`, `shape`, `svg`, `sticker`, `adjustment`, `nested`, `layer`, `multicam` |
 | [`<Clip>`](/reference/elements/clip) | yes | yes | yes | yes | yes | `effect`, `keyframe`, `mask`, `speedKey`, `freeze` |
 | [`<Audio>`](/reference/elements/audio) | yes |  | yes | yes |  | `keyframe` |
 | [`<Gap>`](/reference/elements/gap) | yes |  |  |  |  |  |
@@ -78,7 +77,6 @@ The elements a file is written in: the timeline (clips, tracks, transitions, cap
 | [`<Shape>`](/reference/elements/shape) | yes | yes |  |  | yes | `effect`, `keyframe`, `mask` |
 | [`<Svg>`](/reference/elements/svg) | yes | yes |  |  | yes | `effect`, `keyframe`, `mask` |
 | [`<Sticker>`](/reference/elements/sticker) | yes | yes |  |  | yes | `effect`, `keyframe`, `mask` |
-| [`<Graphic>`](/reference/elements/graphic) | yes | yes |  |  | yes | `effect`, `keyframe`, `mask` |
 | [`<Captions>`](/reference/elements/captions) |  | yes |  |  |  | `caption` |
 | [`<Caption>`](/reference/elements/caption) | yes | yes |  |  |  |  |
 | [`<Marker>`](/reference/elements/marker) |  |  |  |  |  |  |

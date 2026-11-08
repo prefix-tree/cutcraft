@@ -50,11 +50,10 @@ describe.each(FILES)("%s.tsx", (name) => {
   });
 });
 
-it("draws three.js or Motion in the four new examples, and no built-in <Graphic>", () => {
+it("draws three.js or Motion in the four new examples", () => {
   for (const name of ["launch", "kinetic", "data", "logo"]) {
     const source = readFileSync(join(root, `${name}.tsx`), "utf8");
     expect(source).toMatch(/<(Three|Motion)\b/);
-    expect(source).not.toMatch(/<Graphic\b/);
   }
 });
 

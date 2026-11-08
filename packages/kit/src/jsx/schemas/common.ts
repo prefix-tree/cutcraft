@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { zBlendMode, zEasing, zFitMode, zGraphicAnimation } from "../enums";
+import { zBlendMode, zEasing, zEntranceAnimation, zFitMode } from "../enums";
 
 export const ID_PATTERN = /^[A-Za-z_][A-Za-z0-9_-]*$/;
 export const TIME_REF_PATTERN = /^(word|shot|silence):\d+(\.end)?$|^marker:[A-Za-z_][A-Za-z0-9_-]*$/;
@@ -126,7 +126,7 @@ export type Transform = z.output<typeof transformSchema>;
 
 /** An entrance or an exit: what plays over `duration` seconds at the start or the end of an element. */
 export const graphicAnimationSchema = z.strictObject({
-  type: zGraphicAnimation,
+  type: zEntranceAnimation,
   duration: z.number().positive().default(0.5),
   easing: zEasing.default("ease-out"),
 });

@@ -37,7 +37,7 @@ parts read the same palette, fonts and radius from `THEMES[theme]`.
 | `fonts` | Families by role: `heading`, `body`, `mono` | `$heading`, `$body`, `$mono` |
 | `radius` | Corner radius in pixels | `$radius` |
 | `motion` | `none`, `calm`, `snappy`, `bouncy`, `editorial`, or `{ enter, exit, transition }` | fills entrances, exits and transitions |
-| `styles` | Named presets per kind (`title`, `shape`, `svg`, `sticker`, `graphic`, `captions`), merged over the base's | `style="h1"` |
+| `styles` | Named presets per kind (`title`, `shape`, `svg`, `sticker`, `captions`), merged over the base's | `style="h1"` |
 
 Tokens and preset names share one namespace per theme; the schema rejects a
 font role with the name of a palette colour.
@@ -74,7 +74,7 @@ The built-in themes share one set of presets, written in tokens:
 ## Motion
 
 The motion style fills what the file leaves out: `enter` and `exit` on titles,
-shapes, SVG, stickers and graphics (a title with a text `animation` keeps it instead),
+shapes, SVG and stickers (a title with a text `animation` keeps it instead),
 and the `type` and `duration` of a `<Transition>`. To keep one element still, give it an
 `enter` of type `none`.
 
@@ -94,7 +94,7 @@ export alike, and the composition background goes under them.
 
 ```tsx
 <Track id="backdrop" layout="free">
-  <Graphic id="blobs" kind="blobs-background" start={0} duration={12} />
+  <Background id="dots" variant="dots" start={0} duration={12} />
 </Track>
 <Track id="main">…clips…</Track>
 <Track id="notes" layout="free">…callouts above the footage…</Track>

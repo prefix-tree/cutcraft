@@ -46,8 +46,8 @@ from its timeline. That only works for elements it knows, so a `<div>` placed st
 the lint warns about it.
 
 Everything drawn over the footage can be free code. Put it in a `<Layer>` and any React, CSS, canvas or WebGL
-renders: see [Free code](./free-code). The ready-made `<Title>`, `<Graphic>`, `<Shape>` and the rest are there for the
-common cases, with props an inspector can edit.
+renders: see [Free code](./free-code). The ready-made `<Title>`, `<Shape>`, `<Svg>` and the rest, and components like
+`LowerThird` built from them, are there for the common cases, with props an inspector can edit.
 
 ## Every element has a literal id
 

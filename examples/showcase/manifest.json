@@ -546,6 +546,13 @@
       "fps": 30,
       "width": 960,
       "height": 540
+    },
+    "star": {
+      "id": "star",
+      "kind": "image",
+      "duration": 0,
+      "width": 256,
+      "height": 256
     }
   }
 }

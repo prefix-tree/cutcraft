@@ -5,7 +5,7 @@ import { invalid, type NodeSpec, nodeSpecOf, ok } from "../types";
 import { replaceAll, stackPosition } from "./effect";
 
 const SOURCE_KINDS = ["clip", "audio", "nested"];
-const VISUAL_KINDS = ["clip", "title", "shape", "svg", "sticker", "graphic", "nested", "layer", "adjustment"];
+const VISUAL_KINDS = ["clip", "title", "shape", "svg", "sticker", "nested", "layer", "adjustment"];
 const AUDIO_KINDS = ["clip", "audio", "nested"];
 
 /** Speed always recomputes the timeline length; `out` stays, so nothing else changes in the file. */

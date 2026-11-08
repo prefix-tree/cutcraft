@@ -80,7 +80,7 @@ media files    ┘                                       └─▶ export     MP
 | [`@cutcraft/kit`](https://www.npmjs.com/package/@cutcraft/kit) | The elements, the resolver that places everything in time, 131 undoable editor actions, and the tools that write edits back into the file. |
 | [`@cutcraft/player`](https://www.npmjs.com/package/@cutcraft/player) | A React `<Player>` and a framework-free `PlayerCore` for the browser. |
 | [`@cutcraft/render`](https://www.npmjs.com/package/@cutcraft/render) | Export from your own code: from Node, through the player in headless Chrome. |
-| [`@cutcraft/graphics`](https://www.npmjs.com/package/@cutcraft/graphics) | three.js and Motion on the video's clock (`installFreeCodeLibraries()`); its `<Graphic>` kinds are deprecated. |
+| [`@cutcraft/graphics`](https://www.npmjs.com/package/@cutcraft/graphics) | three.js and Motion on the video's clock (`installFreeCodeLibraries()`), for `<Three>` and `<Motion>`. |
 
 [Quick start](./getting-started) takes you from `npm install` to an exported file in four steps.
 [Examples](/examples) shows finished videos next to the files that made them, and where to start for what you're
