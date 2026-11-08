@@ -154,6 +154,8 @@ licence key, no watermark.
 <span>brief</span><i>→</i><span>agent</span><i>→</i><span class="on">video.tsx</span><i>⇄</i><span>editor</span><i>→</i><span>MP4 · WebM · still</span>
 </div>
 
+<p class="home-links"><a :href="withBase('/guide/principles')">Core principles and the decisions behind them →</a></p>
+
 </section>
 
 <section class="home-words">
@@ -348,7 +350,7 @@ it.
 
 **Free and open source under the MIT licence.**
 
-[Quick start](./guide/getting-started) · [Elements](./reference/elements/) · [CLI](./reference/cli) ·
+[Quick start](./guide/getting-started) · [Principles](./guide/principles) · [Elements](./reference/elements/) · [CLI](./reference/cli) ·
 [API](./reference/api) · [GitHub](https://github.com/prefix-tree/cutcraft) ·
 [npm](https://www.npmjs.com/package/cutcraft)
 

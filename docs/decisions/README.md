@@ -1,8 +1,12 @@
 # Decision records
 
-Why cutcut is built the way it is, one decision per file, in the order they were
+Why CutCraft is built the way it is, one decision per file, in the order they were
 made. A record is never edited to say something else; a change of mind adds a
-new record that supersedes the old one.
+new record that supersedes the old one. [Core principles](../guide/principles.md)
+sums them up.
+
+CutCraft was called cutcut when the early records were written, and a few still
+use that name.
 
 | | Decision |
 |---|---|

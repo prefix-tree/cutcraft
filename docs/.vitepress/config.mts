@@ -1,6 +1,18 @@
+import { readdirSync, readFileSync } from "node:fs";
+
 import { defineConfig } from "vitepress";
 
 import generated from "./sidebar.generated.json";
+
+/** The decision records, read from the folder, so the sidebar lists each one as it is added: "0001 The file is the video". */
+const decisionsDir = new URL("../decisions/", import.meta.url);
+const decisions = readdirSync(decisionsDir)
+  .filter((f) => /^\d{4}-.*\.md$/.test(f))
+  .sort()
+  .map((f) => {
+    const heading = /^# (\d{4})\. (.+)$/m.exec(readFileSync(new URL(f, decisionsDir), "utf8"));
+    return { text: heading ? `${heading[1]} ${heading[2]}` : f, link: `/decisions/${f.replace(/\.md$/, "")}` };
+  });
 
 export default defineConfig({
   title: "CutCraft",
@@ -8,8 +20,8 @@ export default defineConfig({
     "Video editor as code: LLMs write code well and math badly, so a model writes a TSX file of words and shots, and CutCraft does the arithmetic, plays it in the browser, edits it and exports it.",
   base: "/cutcraft/",
   cleanUrls: true,
-  // Decision records are for contributors and live in the repository, not on the site.
-  srcExclude: ["decisions/**"],
+  // The decision records' index is the folder's README, so it reads on GitHub too.
+  rewrites: { "decisions/README.md": "decisions/index.md" },
   lastUpdated: true,
   // Code in one dark style in both colour schemes, so it reads as the screen it describes and joins the videos above it.
   markdown: { theme: { light: "vitesse-dark", dark: "vitesse-dark" } },
@@ -32,7 +44,7 @@ export default defineConfig({
     logo: "/logo.svg",
     // The top bar names the four ways in (on every page, the landing one included); the sidebar is the map of the docs.
     nav: [
-      { text: "Guide", link: "/guide/introduction", activeMatch: "^/(guide|recipes)/" },
+      { text: "Guide", link: "/guide/introduction", activeMatch: "^/(guide|recipes|decisions)/" },
       { text: "Reference", link: "/reference/elements/", activeMatch: "^/reference/(?!effects|transitions)" },
       { text: "Effects", link: "/reference/effects/", activeMatch: "^/reference/(effects|transitions)/" },
       { text: "Examples", link: "/examples", activeMatch: "^/examples" },
@@ -46,6 +58,13 @@ export default defineConfig({
           { text: "Quick start", link: "/guide/getting-started" },
           { text: "A launch video, line by line", link: "/guide/writing-files" },
           { text: "Examples", link: "/examples" },
+        ],
+      },
+      {
+        text: "Principles",
+        items: [
+          { text: "Core principles", link: "/guide/principles" },
+          { text: "Decision records", link: "/decisions/", collapsed: true, items: decisions },
         ],
       },
       {
