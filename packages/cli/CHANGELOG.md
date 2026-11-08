@@ -1,5 +1,19 @@
 # cutcraft
 
+## 0.3.0
+
+### Minor Changes
+
+- bedea28: Grade with a LUT: `<Effect type="lut" params={{ src: "asset:look", amount }} />` reads a 3D `.cube` file, a new manifest asset kind `lut` that `cutcraft add look.cube` checks and lists. An effect param that names an asset is read by the shader as a texture (a LUT as a `sampler3D`, an image as a `sampler2D`), loaded before the frame that needs it. `parseCube` reads the format.
+
+### Patch Changes
+
+- Updated dependencies [bedea28]
+- Updated dependencies [c37a87f]
+- Updated dependencies [fa7c303]
+- Updated dependencies [e1e5bdb]
+  - @cutcraft/render@0.3.0
+
 ## 0.2.0
 
 ### Minor Changes

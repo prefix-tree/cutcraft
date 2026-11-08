@@ -1,5 +1,58 @@
 # @cutcraft/graphics
 
+## 0.3.0
+
+### Minor Changes
+
+- fa7c303: `<Graphic>` and its 34 kinds are removed (decision 0024), with the `graphic/*` actions, the `graphic-props` and
+  `deprecated-graphic` lint rules and `graphicControls`. A file that still uses `<Graphic>` gets an error naming what
+  replaces it. Use the components in `@cutcraft/kit`:
+  
+  | Was | Now |
+  |---|---|
+  | `kind="lower-third"`, `-card`, `-split` | `<LowerThird>` |
+  | `callout`, `speech-bubble` | `<Callout>` |
+  | `badge`, `pill` | `<Badge>` |
+  | `counter` | `<Counter>` |
+  | `progress-bar` | `<ProgressBar>` |
+  | `arrow`, `curved-arrow`, `hand-arrow` | `<Arrow>` |
+  | `underline`, `marker`, `circle-scribble`, `strike` | `<Highlight>` |
+  | `gradient-`, `dots-`, `grid-background` | `<Background>` |
+  
+  The other kinds have no component: draw them as free code (`<Svg>`, `<Motion>`, a `<Layer>`).
+  
+  `<Sticker src>` takes an image asset; `icon:` stickers are removed, and Lucide with them (about 0.7 MB out of every
+  bundle). Draw an icon as an `<Svg>`. `@cutcraft/graphics` now holds only the free-code libraries
+  (`installFreeCodeLibraries`, `/three`, `/motion`), and the kit and the player no longer depend on it.
+  `GRAPHIC_ANIMATIONS` is renamed `ENTRANCE_ANIMATIONS`: they are every overlay's entrances and exits.
+  
+  The export also waits for an overlay's image or SVG file before it captures a frame, so a still of a sticker shows
+  the image rather than nothing.
+
+### Patch Changes
+
+- Updated dependencies [e1e5bdb]
+- Updated dependencies [ee3a1e9]
+- Updated dependencies [6ac1d41]
+- Updated dependencies [ab5cec4]
+- Updated dependencies [4756002]
+- Updated dependencies [1fdf930]
+- Updated dependencies [bedea28]
+- Updated dependencies [5b492f0]
+- Updated dependencies [7e411a0]
+- Updated dependencies [7db2452]
+- Updated dependencies [e7301f9]
+- Updated dependencies [4e5e3cb]
+- Updated dependencies [ac13aea]
+- Updated dependencies [5d99f1b]
+- Updated dependencies [40b5a9f]
+- Updated dependencies [3847609]
+- Updated dependencies [fa7c303]
+- Updated dependencies [e9107f6]
+- Updated dependencies [41e9b6b]
+- Updated dependencies [8a0f302]
+  - @cutcraft/kit@0.3.0
+
 ## 0.2.0
 
 ### Minor Changes

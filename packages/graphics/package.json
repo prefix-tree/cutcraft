@@ -1,6 +1,6 @@
 {
   "name": "@cutcraft/graphics",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Free-code libraries for CutCraft: three.js, React Three Fiber and Motion on the video's clock, for <Three> and <Motion>.",
   "keywords": [
     "video",
