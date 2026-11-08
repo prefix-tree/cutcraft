@@ -64,7 +64,9 @@ focused pull request with a test.
   `// biome-ignore lint/<group>/<rule>: <why>` comment with a real reason.
 - Commits follow conventional-commit summaries (`feat(kit): …`, `fix(player): …`, `perf: …`, `docs: …`); keep each commit focused.
 - A pull request says what changed and why, lists the validation you ran, and includes before/after numbers for anything performance-related and screenshots for anything visual.
-- Design choices are recorded as decision records in `docs/decisions/`. A change that reverses one adds a new record; it does not edit the old one.
+- Design choices are recorded as decision records in `docs/decisions/`, published on the site at
+  [/decisions/](https://prefix-tree.github.io/cutcraft/decisions/) and summed up in
+  [Core principles](https://prefix-tree.github.io/cutcraft/guide/principles). A change that reverses one adds a new record; it does not edit the old one.
 - Claims in docs must be true of the code. If a feature is partial, say so.
 
 ## Changesets and releases
