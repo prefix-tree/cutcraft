@@ -27,9 +27,7 @@ export default defineConfig({
   themeConfig: {
     logo: "/logo.svg",
     // The top bar stays out of the way (logo, one link, search, GitHub); the sidebar is the map of the docs.
-    nav: [
-      { text: "Docs", link: "/guide/introduction", activeMatch: "^/(guide|recipes|reference|comparisons|examples)" },
-    ],
+    nav: [{ text: "Docs", link: "/guide/introduction", activeMatch: "^/(guide|recipes|reference|examples)" }],
     sidebar: [
       {
         text: "Get started",
@@ -98,14 +96,6 @@ export default defineConfig({
           { text: "CLI", link: "/reference/cli" },
           { text: "API", link: "/reference/api" },
           { text: "Actions", link: "/reference/actions" },
-        ],
-      },
-      {
-        text: "Compare",
-        collapsed: true,
-        items: [
-          { text: "Remotion", link: "/comparisons/remotion" },
-          { text: "Diffusion Studio", link: "/comparisons/diffusion-studio" },
         ],
       },
     ],

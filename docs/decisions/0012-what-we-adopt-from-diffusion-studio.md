@@ -4,7 +4,7 @@
 
 Diffusion Studio's editor shares our thesis and ships. Before building
 cutcut's editor UI we studied its write-back path, runtime and agent surface
-(see [the comparison](../comparisons/diffusion-studio.md)). The question was
+(in a comparison page since removed). The question was
 whether to change course.
 
 ## Decision

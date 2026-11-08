@@ -100,7 +100,6 @@ patch the file, resolve everything again) takes {{ (drag.usPerStep / 1000).toFix
 - [Free code](./guide/free-code): any React, three.js or Motion, on the video's clock.
 - [A launch video, line by line](./guide/writing-files): one file from a brief to a finished video.
 - [Elements](./reference/elements/), [CLI](./reference/cli) and [API](./reference/api): every element, option and function.
-- [Compare](./comparisons/remotion): how CutCraft differs from Remotion and Diffusion Studio.
 
 <p class="home-foot">CutCraft is free and open source under the MIT licence.</p>
 

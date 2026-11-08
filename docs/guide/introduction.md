@@ -53,8 +53,7 @@ video's clock.
 
 The player, the editor actions, the export and the layout check are all MIT: no paid tier, no licence key, no
 watermark on the frames. That is why CutCraft is written from scratch instead of on Remotion, whose licence has a
-paid tier for companies, or Diffusion Studio, whose engine watermarks every frame without a key. The
-[comparisons](/comparisons/remotion) cover the other differences.
+paid tier for companies, or Diffusion Studio, whose engine watermarks every frame without a key.
 
 ## How it fits together
 
