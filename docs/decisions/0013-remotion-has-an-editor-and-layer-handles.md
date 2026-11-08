@@ -32,7 +32,7 @@ when they were written. Verified against Remotion's documentation on
 ## Decision
 
 Records 0001 and 0007 stand except for the sentence about Remotion; this
-record corrects it. The comparison is in `docs/comparisons/remotion.md`.
+record corrects it. The comparison page it pointed to has since been removed.
 
 From Remotion we adopt the component-level control model, as *handles*: a
 Layer whose interior is exactly one element whose type is a file-level

@@ -23,7 +23,7 @@ Four-pointed stars that twinkle in and out across the box. Size the box to the a
 | prop | type | default |
 |---|---|---|
 | `colors` | string[] | `["#ffffff","$accent"]` |
-| `count` | integer | `14` |
+| `count` | integer (1..200) | `14` |
 | `size` | number (2..400) | `28` |
 | `speed` | number (0..10) | `1.2` |
 | `seed` | integer |  |

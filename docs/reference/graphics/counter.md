@@ -32,7 +32,7 @@ A number that counts from `from` to `to` over `countFor` seconds, with an option
 |---|---|---|
 | `from` | number | `0` |
 | `to` | number | `100` |
-| `decimals` | integer | `0` |
+| `decimals` | integer (0..4) | `0` |
 | `prefix` | string | `""` |
 | `suffix` | string | `""` |
 | `label` | string | `""` |

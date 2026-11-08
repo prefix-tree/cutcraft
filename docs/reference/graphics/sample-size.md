@@ -30,9 +30,9 @@ A field of dots for a sample of `n`, with `share` of them highlighted, appearing
 
 | prop | type | default |
 |---|---|---|
-| `n` | integer | `1200` |
+| `n` | integer (1..10000000) | `1200` |
 | `share` | number (0..1) |  |
-| `perDot` | integer |  |
+| `perDot` | integer (1..∞) |  |
 | `layout` | "grid" \| "scatter" | `"grid"` |
 | `appearFor` | number (0..60) | `1.5` |
 | `label` | string | `"n = {n}"` |

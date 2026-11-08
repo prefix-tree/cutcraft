@@ -32,9 +32,9 @@ A starburst sticker with a word on it, for prices, offers and shouts.
 | `color` | string | `"$onPrimary"` |
 | `font` | string | `"$heading"` |
 | `size` | number (0..400) | `44` |
-| `weight` | integer | `700` |
+| `weight` | integer (100..900) | `700` |
 | `fill` | string | `"$accent"` |
-| `points` | integer | `18` |
+| `points` | integer (5..48) | `18` |
 | `depth` | number (0..1) | `0.16` |
 
 Plus the [`<Graphic>` props](/reference/elements/graphic) every kind takes. More in [Callouts](/reference/graphics/#callouts).

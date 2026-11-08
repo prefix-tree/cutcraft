@@ -31,6 +31,6 @@ A name and a role on a panel with an accent bar at its left edge. Place it low o
 | `font` | string | `"$heading"` |
 | `roleFont` | string | `"$body"` |
 | `size` | number (0..400) | `44` |
-| `weight` | integer | `700` |
+| `weight` | integer (100..900) | `700` |
 
 Plus the [`<Graphic>` props](/reference/elements/graphic) every kind takes. More in [Lower thirds](/reference/graphics/#lower-thirds).

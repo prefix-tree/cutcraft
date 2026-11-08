@@ -29,7 +29,7 @@ Text over the picture in the theme's type, with entrances by letter, word or lin
 | `style` | string |  |  |
 | `font` | string | `"Inter"` |  |
 | `size` | number (1..1000) | `48` |  |
-| `weight` | integer \| "normal" \| "bold" | `"bold"` |  |
+| `weight` | integer (100..900) \| "normal" \| "bold" | `"bold"` |  |
 | `italic` | boolean | `false` |  |
 | `color` | string | `"#ffffff"` |  |
 | `background` | string |  |  |

@@ -16,10 +16,10 @@ The video: frame rate, size, background and theme. It ends where its content end
 |---|---|---|---|
 | `id` | string | `"composition"` |  |
 | `fps` | number (−∞..240) |  | yes |
-| `width` | integer |  | yes |
-| `height` | integer |  | yes |
-| `sampleRate` | integer | `48000` |  |
-| `channels` | integer | `2` |  |
+| `width` | integer (16..8192) |  | yes |
+| `height` | integer (16..8192) |  | yes |
+| `sampleRate` | integer (8000..192000) | `48000` |  |
+| `channels` | integer (1..8) | `2` |  |
 | `background` | { mode, color, gradient } |  |  |
 | `theme` | { extends, palette, fonts, radius, motion, styles } |  |  |
 | `motionBlur` | { shutterAngle, samples } |  |  |

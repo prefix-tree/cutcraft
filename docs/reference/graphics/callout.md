@@ -33,7 +33,7 @@ Text in a rounded box with a pointer on one side; `tailAt` slides the pointer al
 | `color` | string | `"$text"` |
 | `font` | string | `"$body"` |
 | `size` | number (0..400) | `36` |
-| `weight` | integer | `700` |
+| `weight` | integer (100..900) | `700` |
 | `fill` | string | `"$surface"` |
 | `border` | string | `"none"` |
 | `borderWidth` | number (0..50) | `0` |

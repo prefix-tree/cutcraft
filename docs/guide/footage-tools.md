@@ -7,7 +7,7 @@ corner moves smoothly between two keys, which is how a blur follows a face or a 
 
 ## Green screen
 
-`colorKey` makes the key colour transparent, so the tracks beneath show through. It compares colour, not brightness,
+[`colorKey`](/reference/effects/colorKey) makes the key colour transparent, so the tracks beneath show through. It compares colour, not brightness,
 so the shadowed and lit parts of the screen go together.
 
 ```tsx
@@ -27,7 +27,7 @@ the subject.
 
 ## Hiding a face, a plate or a screen
 
-`regionBlur` blurs inside a box: `[x, y, width, height]` as fractions of the frame from its top left. `radius` is the
+[`regionBlur`](/reference/effects/regionBlur) blurs inside a box: `[x, y, width, height]` as fractions of the frame from its top left. `radius` is the
 blur, the Gaussian's standard deviation in pixels as CSS `blur()` reads it, `feather` fades it in over that many pixels inside the edge, and `roundness` (0 to 1) rounds the
 corners up to a circle or a pill. `inverted` blurs everything except the box.
 
@@ -44,7 +44,7 @@ To hide something, make the box larger than it, so nothing recognisable sits in 
 
 ## A recording in a screen
 
-`cornerPin` maps the picture onto four corners, `topLeft`, `topRight`, `bottomRight` and `bottomLeft`, each `[x, y]`
+[`cornerPin`](/reference/effects/cornerPin) maps the picture onto four corners, `topLeft`, `topRight`, `bottomRight` and `bottomLeft`, each `[x, y]`
 as fractions of the frame. The picture is warped in perspective, as a flat screen seen at an angle is, and outside its
 four corners it is transparent. Put the recording on a track above the shot of the device:
 
@@ -67,10 +67,10 @@ When the camera moves, keyframe each corner.
 
 ## Camera looks
 
-`zoomBlur` smears the picture toward `center` (`[x, y]`), more the further from it, up to `length` pixels at the
+[`zoomBlur`](/reference/effects/zoomBlur) smears the picture toward `center` (`[x, y]`), more the further from it, up to `length` pixels at the
 corners; `samples` (up to 64) trades smoothness for speed. Keyframe `length` down from a high value for a punch-in.
 
-`chromaticAberration` splits red and blue apart by `distance` pixels, along `angle` (degrees clockwise from up, so the
+[`chromaticAberration`](/reference/effects/chromaticAberration) splits red and blue apart by `distance` pixels, along `angle` (degrees clockwise from up, so the
 default 90 is across), or with
 `radial` outward from `center`, growing toward the edges as a lens fringes.
 

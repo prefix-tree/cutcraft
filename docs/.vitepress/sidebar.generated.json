@@ -144,6 +144,205 @@
       ]
     }
   ],
+  "effects": [
+    {
+      "text": "Basic adjustments",
+      "items": [
+        {
+          "text": "brightness",
+          "link": "/reference/effects/brightness"
+        },
+        {
+          "text": "contrast",
+          "link": "/reference/effects/contrast"
+        },
+        {
+          "text": "saturation",
+          "link": "/reference/effects/saturation"
+        },
+        {
+          "text": "hue",
+          "link": "/reference/effects/hue"
+        },
+        {
+          "text": "grayscale",
+          "link": "/reference/effects/grayscale"
+        },
+        {
+          "text": "sepia",
+          "link": "/reference/effects/sepia"
+        },
+        {
+          "text": "invert",
+          "link": "/reference/effects/invert"
+        },
+        {
+          "text": "blur",
+          "link": "/reference/effects/blur"
+        },
+        {
+          "text": "shadow",
+          "link": "/reference/effects/shadow"
+        }
+      ]
+    },
+    {
+      "text": "Vignette and grain",
+      "items": [
+        {
+          "text": "vignette",
+          "link": "/reference/effects/vignette"
+        },
+        {
+          "text": "grain",
+          "link": "/reference/effects/grain"
+        }
+      ]
+    },
+    {
+      "text": "Colour",
+      "items": [
+        {
+          "text": "levels",
+          "link": "/reference/effects/levels"
+        },
+        {
+          "text": "lut",
+          "link": "/reference/effects/lut"
+        },
+        {
+          "text": "exposure",
+          "link": "/reference/effects/exposure"
+        },
+        {
+          "text": "vibrance",
+          "link": "/reference/effects/vibrance"
+        },
+        {
+          "text": "whiteBalance",
+          "link": "/reference/effects/whiteBalance"
+        },
+        {
+          "text": "shadowsHighlights",
+          "link": "/reference/effects/shadowsHighlights"
+        },
+        {
+          "text": "duotone",
+          "link": "/reference/effects/duotone"
+        },
+        {
+          "text": "curves",
+          "link": "/reference/effects/curves"
+        }
+      ]
+    },
+    {
+      "text": "Footage",
+      "items": [
+        {
+          "text": "colorKey",
+          "link": "/reference/effects/colorKey"
+        },
+        {
+          "text": "regionBlur",
+          "link": "/reference/effects/regionBlur"
+        },
+        {
+          "text": "cornerPin",
+          "link": "/reference/effects/cornerPin"
+        },
+        {
+          "text": "zoomBlur",
+          "link": "/reference/effects/zoomBlur"
+        },
+        {
+          "text": "chromaticAberration",
+          "link": "/reference/effects/chromaticAberration"
+        }
+      ]
+    },
+    {
+      "text": "Titles and shapes",
+      "items": [
+        {
+          "text": "glow",
+          "link": "/reference/effects/glow"
+        },
+        {
+          "text": "outline",
+          "link": "/reference/effects/outline"
+        },
+        {
+          "text": "longShadow",
+          "link": "/reference/effects/longShadow"
+        },
+        {
+          "text": "bevel",
+          "link": "/reference/effects/bevel"
+        }
+      ]
+    }
+  ],
+  "transitions": [
+    {
+      "text": "Fades, wipes and slides",
+      "items": [
+        {
+          "text": "crossfade",
+          "link": "/reference/transitions/crossfade"
+        },
+        {
+          "text": "dipToBlack",
+          "link": "/reference/transitions/dipToBlack"
+        },
+        {
+          "text": "dipToWhite",
+          "link": "/reference/transitions/dipToWhite"
+        },
+        {
+          "text": "wipe",
+          "link": "/reference/transitions/wipe"
+        },
+        {
+          "text": "slide",
+          "link": "/reference/transitions/slide"
+        },
+        {
+          "text": "push",
+          "link": "/reference/transitions/push"
+        }
+      ]
+    },
+    {
+      "text": "Shaders",
+      "items": [
+        {
+          "text": "iris",
+          "link": "/reference/transitions/iris"
+        },
+        {
+          "text": "clockWipe",
+          "link": "/reference/transitions/clockWipe"
+        },
+        {
+          "text": "blinds",
+          "link": "/reference/transitions/blinds"
+        },
+        {
+          "text": "filmBurn",
+          "link": "/reference/transitions/filmBurn"
+        },
+        {
+          "text": "pixelDissolve",
+          "link": "/reference/transitions/pixelDissolve"
+        },
+        {
+          "text": "zoom",
+          "link": "/reference/transitions/zoom"
+        }
+      ]
+    }
+  ],
   "graphics": [
     {
       "text": "Arrows",

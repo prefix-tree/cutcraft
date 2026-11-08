@@ -27,9 +27,7 @@ export default defineConfig({
   themeConfig: {
     logo: "/logo.svg",
     // The top bar stays out of the way (logo, one link, search, GitHub); the sidebar is the map of the docs.
-    nav: [
-      { text: "Docs", link: "/guide/introduction", activeMatch: "^/(guide|recipes|reference|comparisons|examples)" },
-    ],
+    nav: [{ text: "Docs", link: "/guide/introduction", activeMatch: "^/(guide|recipes|reference|examples)" }],
     sidebar: [
       {
         text: "Get started",
@@ -88,24 +86,28 @@ export default defineConfig({
             items: generated.elements.map((group) => ({ ...group, collapsed: true })),
           },
           {
+            text: "Effects and transitions",
+            link: "/reference/effects/",
+            collapsed: true,
+            items: [
+              ...generated.effects.map((group) => ({ ...group, collapsed: true })),
+              ...generated.transitions.map((group) => ({
+                ...group,
+                text: `Transitions: ${group.text}`,
+                collapsed: true,
+              })),
+            ],
+          },
+          {
             text: "Graphics",
             link: "/reference/graphics/",
             collapsed: true,
             items: generated.graphics.map((group) => ({ ...group, collapsed: true })),
           },
           { text: "What renders", link: "/reference/rendering" },
-          { text: "Effects and transitions", link: "/reference/effects" },
           { text: "CLI", link: "/reference/cli" },
           { text: "API", link: "/reference/api" },
           { text: "Actions", link: "/reference/actions" },
-        ],
-      },
-      {
-        text: "Compare",
-        collapsed: true,
-        items: [
-          { text: "Remotion", link: "/comparisons/remotion" },
-          { text: "Diffusion Studio", link: "/comparisons/diffusion-studio" },
         ],
       },
     ],

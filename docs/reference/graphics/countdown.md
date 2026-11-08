@@ -28,7 +28,7 @@ A ring that empties over the element's duration around the seconds left, countin
 
 | prop | type | default |
 |---|---|---|
-| `from` | integer |  |
+| `from` | integer (0..3600) |  |
 | `color` | string | `"$primary"` |
 | `track` | string | `"$surface"` |
 | `textColor` | string | `"$text"` |

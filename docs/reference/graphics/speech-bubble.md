@@ -32,7 +32,7 @@ A round comic-style bubble with a tail to one side below it.
 | `color` | string | `"#111111"` |
 | `font` | string | `"$body"` |
 | `size` | number (0..400) | `36` |
-| `weight` | integer | `700` |
+| `weight` | integer (100..900) | `700` |
 | `fill` | string | `"#ffffff"` |
 | `border` | string | `"#111111"` |
 | `borderWidth` | number (0..50) | `4` |

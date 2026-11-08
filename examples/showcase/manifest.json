@@ -517,6 +517,27 @@
       "fps": 30,
       "width": 960,
       "height": 540
+    },
+    "coffee": {
+      "id": "coffee",
+      "kind": "video",
+      "duration": 20,
+      "fps": 30,
+      "width": 960,
+      "height": 540
+    },
+    "greenscreen": {
+      "id": "greenscreen",
+      "kind": "video",
+      "duration": 4,
+      "fps": 30,
+      "width": 960,
+      "height": 540
+    },
+    "warm": {
+      "id": "warm",
+      "kind": "lut",
+      "duration": 0
     }
   }
 }

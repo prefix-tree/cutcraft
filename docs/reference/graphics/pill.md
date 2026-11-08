@@ -33,7 +33,7 @@ A fully rounded label, with an optional dot before the text (a live indicator, a
 | `color` | string | `"$onPrimary"` |
 | `font` | string | `"$body"` |
 | `size` | number (0..400) | `28` |
-| `weight` | integer | `700` |
+| `weight` | integer (100..900) | `700` |
 | `fill` | string | `"$primary"` |
 | `dot` | string | `"none"` |
 

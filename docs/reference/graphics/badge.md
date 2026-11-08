@@ -32,7 +32,7 @@ A round badge with a short word or two, and a ring inside its edge.
 | `color` | string | `"$onPrimary"` |
 | `font` | string | `"$heading"` |
 | `size` | number (0..400) | `40` |
-| `weight` | integer | `700` |
+| `weight` | integer (100..900) | `700` |
 | `fill` | string | `"$accent"` |
 | `ring` | boolean | `true` |
 

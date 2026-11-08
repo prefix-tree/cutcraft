@@ -16,15 +16,24 @@ for a stretch of time. They run as shaders in the preview and the export alike, 
 ```
 
 Effects run in the order they appear in the file, so write them in the order a colourist works: correct the light and
-the white first, then shape the tones, then give the picture its look.
+the white first, then shape the tones, then give the picture its look. Here is that grade on a real shot, over it from
+halfway through by an `<Adjustment>`:
+
+<Example src="previews/guide/colour-grade" alt="A coffee shot, then the same shot brightened, warmed, given contrast and richer colour">
+
+<<< @/../examples/showcase/guide/colour-grade.tsx
+
+</Example>
+
+Each effect also has its own page with a demo: see [Effects and transitions](/reference/effects/#colour).
 
 ## Correct
 
-`exposure` brightens or darkens by `stops`, from -5 to 5, the way a camera's exposure does: +1 doubles the light.
+[`exposure`](/reference/effects/exposure) brightens or darkens by `stops`, from -5 to 5, the way a camera's exposure does: +1 doubles the light.
 It works where light is linear, so highlights keep their colour instead of washing out as they would under a plain
 brightness filter.
 
-`whiteBalance` removes a colour cast. `temperature` (-1 to 1, a stop of colour temperature each way) warms the picture
+[`whiteBalance`](/reference/effects/whiteBalance) removes a colour cast. `temperature` (-1 to 1, a stop of colour temperature each way) warms the picture
 toward amber or cools it toward blue; `tint` (-1 to 1) moves it toward magenta or green. It adapts the picture as if
 it had been lit by a different daylight, so greys stay grey while the cast goes. Where WebGL is missing it falls back
 on a CSS approximation.
@@ -35,16 +44,16 @@ on a CSS approximation.
 
 </Example>
 
-`levels` sets the black point and the white point (`black`, `white`, 0 to 1) and bends the midtones with `gamma`
+[`levels`](/reference/effects/levels) sets the black point and the white point (`black`, `white`, 0 to 1) and bends the midtones with `gamma`
 (above 1 lifts them).
 
-`shadowsHighlights` lifts the shadows or holds back the highlights (`shadows`, `highlights`, -1 to 1, up to two stops
+[`shadowsHighlights`](/reference/effects/shadowsHighlights) lifts the shadows or holds back the highlights (`shadows`, `highlights`, -1 to 1, up to two stops
 each way). It judges each pixel by the light around it (`radius`, the blur's standard deviation in pixels, 10 by default), so a dark area lifts as
 a whole and keeps its detail and contrast.
 
 ## Shape the tones
 
-`curves` maps input brightness to output brightness through points you give, for all channels (`rgb`) and for each
+[`curves`](/reference/effects/curves) maps input brightness to output brightness through points you give, for all channels (`rgb`) and for each
 (`red`, `green`, `blue`). A point is `[input, output]`, both 0 to 1, left to right. The curve is a smooth monotone
 spline through the points, so it never overshoots between them. Two points `[[0, 0], [1, 1]]` change nothing, which
 is each curve's default.
@@ -54,18 +63,18 @@ is each curve's default.
 <Effect id="s" type="curves" params={{ rgb: [[0, 0], [0.25, 0.2], [0.75, 0.82], [1, 1]], blue: [[0, 0], [1, 0.95]] }} />
 ```
 
-`vibrance` adds saturation to muted colours and leaves strong ones nearly alone (`amount`, -1 to 1), which is kinder
-to skin than `saturation`.
+[`vibrance`](/reference/effects/vibrance) adds saturation to muted colours and leaves strong ones nearly alone (`amount`, -1 to 1), which is kinder
+to skin than [`saturation`](/reference/effects/saturation).
 
 ## Give it a look
 
-`duotone` maps the picture's brightness from one colour (`dark`) to another (`light`), mixed with the original by
+[`duotone`](/reference/effects/duotone) maps the picture's brightness from one colour (`dark`) to another (`light`), mixed with the original by
 `amount`.
 
 ### A look from a LUT
 
 A look made in a grading tool usually leaves it as a 3D LUT in a `.cube` file. Add it to the manifest like media, then
-grade with the built-in `lut` effect:
+grade with the built-in [`lut`](/reference/effects/lut) effect:
 
 ```bash
 npx cutcraft add teal-orange.cube
@@ -81,5 +90,5 @@ whose `DOMAIN_MIN` and `DOMAIN_MAX` are not 0 and 1 is resampled onto 0 to 1 whe
 ## Where there is no WebGL
 
 The colour effects need WebGL, which every browser the player runs in has, and the export always has. Where it is
-missing, `exposure`, `vibrance` and `levels` fall back on a CSS filter that comes close, and the others are left out
+missing, `exposure`, `vibrance`, `levels` and `whiteBalance` fall back on a CSS filter that comes close, and the others are left out
 with a warning. Effects that read a file (`lut`) work on clips, nested sequences and adjustments, not yet on overlays.
