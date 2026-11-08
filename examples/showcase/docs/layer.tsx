@@ -1,4 +1,4 @@
-import { Clip, Composition, Layer, Track, useT } from "@cutcraft/kit";
+import { Clip, Composition, Layer, Track, useLayer } from "@cutcraft/kit";
 
 export default function Video() {
   return (
@@ -15,9 +15,9 @@ export default function Video() {
   );
 }
 
-/** Any React inside a layer, drawn each frame; `useT()` is the layer's time in seconds. */
+/** Any React inside a layer, drawn each frame; `useLayer().elapsed` is the seconds since it started (`useT()` is 0..1). */
 function Elapsed() {
-  const t = useT();
+  const t = useLayer().elapsed;
   return (
     <div
       style={{

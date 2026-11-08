@@ -10,7 +10,7 @@ import { lint, loadModule } from "@cutcraft/kit/source";
 
 const root = join(import.meta.dirname, "..");
 const manifest = JSON.parse(readFileSync(join(root, "manifest.json"), "utf8")) as AssetManifest;
-const FILES = ["launch", "kinetic", "data", "logo", "edit", "captions"];
+const FILES = ["launch", "kinetic", "data", "logo", "edit", "captions", "hero"];
 /** The guide's examples (guide/*.tsx), rendered for the pages that explain each feature. */
 const GUIDE = [
   "fonts",

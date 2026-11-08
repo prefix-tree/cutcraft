@@ -64,6 +64,17 @@ Content License. They are not committed; `gen` reads them from `examples/showcas
 [headless Chrome](/guide/exporting#the-browser-it-runs-in). The people on camera are stand-ins: their
 footage is a gradient, and the manifest holds the words they would say.
 
+## The logo film
+
+The landing page's hero, made with CutCraft: a woodblock print in the logo's colours. Waves roll in under a red sun, a
+katana cuts it in two, and the print draws in to the logo's tile, where the colours turn over. It is one `<Layer>` of
+React SVG timed by `useLayer().elapsed`, and two `<Title>`s in Google Fonts, and it ends on the paper it began on, so it
+loops.
+
+<div class="cc-pair"><video :src="withBase('/showcase/hero.webm')" :poster="withBase('/showcase/hero.jpg')" controls muted loop playsinline></video></div>
+
+<<< @/../examples/showcase/hero.tsx
+
 ## A product launch
 
 The founder on camera, cut on her words, with b-roll in the middle. A `<Three>` layer turns a phone in on the word

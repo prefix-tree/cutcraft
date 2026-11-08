@@ -241,6 +241,7 @@
   width: 100%;
   aspect-ratio: 16 / 9;
   border-radius: 8px;
+  border: 1px solid var(--cc-rule);
   background: #101014;
 }
 .cc-hero-play {
