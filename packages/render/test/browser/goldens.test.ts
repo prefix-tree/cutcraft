@@ -117,6 +117,17 @@ const CASES: readonly Case[] = [
     effects: `<Effect id="e" type="longShadow" params={{ length: 60, color: "#333333", fade: true }} />`,
   },
   { name: "bevel", shape: true, effects: `<Effect id="e" type="bevel" params={{ size: 2, amount: 0.8 }} />` },
+  { name: "halftone", effects: `<Effect id="e" type="halftone" params={{ size: 10, mode: "cmyk" }} />` },
+  { name: "pixelate", effects: `<Effect id="e" type="pixelate" params={{ size: 16, box: [0.25, 0.2, 0.5, 0.6], feather: 6 }} />` },
+  {
+    name: "scanlines",
+    effects: `<Effect id="e" type="scanlines" params={{ spacing: 6, intensity: 0.6, speed: 20, angle: 10 }} />`,
+  },
+  { name: "lightLeak", effects: `<Effect id="e" type="lightLeak" params={{ intensity: 0.8, seed: 3 }} />` },
+  {
+    name: "fractalNoise",
+    effects: `<Effect id="e" type="fractalNoise" params={{ size: 50, octaves: 6, blend: "softLight", opacity: 0.8, seed: 2 }} />`,
+  },
   { name: "blur", effects: `<Effect id="e" type="blur" params={{ radius: 4 }} />` },
   { name: "blur-shape", shape: true, effects: `<Effect id="e" type="blur" params={{ radius: 6 }} />` },
   {

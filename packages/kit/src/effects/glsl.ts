@@ -106,6 +106,62 @@ float cc_fbm(vec2 p, uint seed) {
 `,
 );
 
+/**
+ * Value noise in three dimensions and its fractal sum, for patterns that change over time rather than slide: `p.z` is
+ * time. `cc_fbm3` sums up to eight octaves of `cc_value3`, each twice the frequency and half the amplitude of the one
+ * before, normalised to 0..1 (fractal Brownian motion, as in Ebert, Musgrave et al., "Texturing and Modeling", 2003).
+ */
+export const NOISE3 = glslModule(
+  "noise3",
+  `float cc_value3(vec3 p, uint seed) {
+  vec3 i = floor(p), f = fract(p);
+  vec3 u = f * f * (3.0 - 2.0 * f);
+  uvec3 c = uvec3(ivec3(i) + 65536);
+  uint s = cc_pcg(seed);
+  float v000 = cc_hash(uvec3(c.x ^ s, c.y, c.z)), v100 = cc_hash(uvec3((c.x + 1u) ^ s, c.y, c.z));
+  float v010 = cc_hash(uvec3(c.x ^ s, c.y + 1u, c.z)), v110 = cc_hash(uvec3((c.x + 1u) ^ s, c.y + 1u, c.z));
+  float v001 = cc_hash(uvec3(c.x ^ s, c.y, c.z + 1u)), v101 = cc_hash(uvec3((c.x + 1u) ^ s, c.y, c.z + 1u));
+  float v011 = cc_hash(uvec3(c.x ^ s, c.y + 1u, c.z + 1u)), v111 = cc_hash(uvec3((c.x + 1u) ^ s, c.y + 1u, c.z + 1u));
+  return mix(mix(mix(v000, v100, u.x), mix(v010, v110, u.x), u.y), mix(mix(v001, v101, u.x), mix(v011, v111, u.x), u.y), u.z);
+}
+float cc_fbm3(vec3 p, uint seed, int octaves) {
+  float sum = 0.0, amp = 0.5, total = 0.0;
+  for (int o = 0; o < 8; o++) {
+    if (o >= octaves) break;
+    sum += amp * cc_value3(p, seed + uint(o));
+    total += amp;
+    p = vec3(p.xy * 2.0, p.z * 1.5);
+    amp *= 0.5;
+  }
+  return sum / total;
+}
+`,
+  NOISE,
+);
+
+/** The blend modes `cc_blend` knows, in the order of its `mode` index. */
+export const BLEND_MODES = ["normal", "multiply", "screen", "overlay", "softLight"] as const;
+
+/**
+ * `top` blended onto `base`, both sRGB colour: the separable blend modes of the W3C "Compositing and Blending Level 1"
+ * recommendation, `mode` an index into `BLEND_MODES`.
+ */
+export const BLEND = glslModule(
+  "blend",
+  `float cc_soft_d(float b) { return b <= 0.25 ? ((16.0 * b - 12.0) * b + 4.0) * b : sqrt(b); }
+vec3 cc_blend(vec3 b, vec3 s, int mode) {
+  if (mode == 1) return b * s;
+  if (mode == 2) return b + s - b * s;
+  if (mode == 3) return mix(2.0 * b * s, 1.0 - 2.0 * (1.0 - b) * (1.0 - s), step(0.5, b));
+  if (mode == 4) {
+    vec3 d = vec3(cc_soft_d(b.r), cc_soft_d(b.g), cc_soft_d(b.b));
+    return mix(b - (1.0 - 2.0 * s) * b * (1.0 - b), b + (2.0 * s - 1.0) * (d - b), step(0.5, s));
+  }
+  return s;
+}
+`,
+);
+
 /** Half the frame's diagonal from `center` to its farthest corner, in pixels. */
 export const FARTHEST = glslModule(
   "farthest",
