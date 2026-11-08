@@ -109,6 +109,6 @@ import { withBase } from "vitepress";
 const PAGES = {"brightness":"effects/brightness","contrast":"effects/contrast","saturation":"effects/saturation","hue":"effects/hue","blur":"effects/blur","vignette":"effects/vignette","grain":"effects/grain","shadow":"effects/shadow","grayscale":"effects/grayscale","sepia":"effects/sepia","invert":"effects/invert","levels":"effects/levels","lut":"effects/lut","exposure":"effects/exposure","vibrance":"effects/vibrance","whitebalance":"effects/whiteBalance","shadowshighlights":"effects/shadowsHighlights","duotone":"effects/duotone","curves":"effects/curves","colorkey":"effects/colorKey","regionblur":"effects/regionBlur","cornerpin":"effects/cornerPin","zoomblur":"effects/zoomBlur","chromaticaberration":"effects/chromaticAberration","glow":"effects/glow","outline":"effects/outline","longshadow":"effects/longShadow","bevel":"effects/bevel","crossfade":"transitions/crossfade","diptoblack":"transitions/dipToBlack","diptowhite":"transitions/dipToWhite","wipe":"transitions/wipe","slide":"transitions/slide","push":"transitions/push","iris":"transitions/iris","clockwipe":"transitions/clockWipe","blinds":"transitions/blinds","filmburn":"transitions/filmBurn","pixeldissolve":"transitions/pixelDissolve","zoom":"transitions/zoom"};
 onMounted(() => {
   const page = PAGES[location.hash.slice(1).toLowerCase()];
-  if (page) location.replace(withBase(`/reference/${page}`));
+  if (page) location.replace(withBase("/reference/" + page));
 });
 </script>

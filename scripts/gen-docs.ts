@@ -386,7 +386,7 @@ function effectsIndex(): string {
     `const PAGES = ${JSON.stringify(pages)};`,
     "onMounted(() => {",
     "  const page = PAGES[location.hash.slice(1).toLowerCase()];",
-    "  if (page) location.replace(withBase(`/reference/${page}`));",
+    '  if (page) location.replace(withBase("/reference/" + page));',
     "});",
     "</script>",
     "",
