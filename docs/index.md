@@ -39,7 +39,7 @@ does the arithmetic, plays it in the browser, edits it and exports it.</p>
 
 </div>
 <div class="home-hero-media">
-<HeroVideo src="showcase/launch" alt="A product launch: a three.js phone beside the founder, each feature on the word that names it" />
+<HeroVideo src="showcase/hero" alt="A woodblock print: waves roll in under a red sun, a katana cuts it in two, and the print draws in to the CutCraft logo" />
 </div>
 </section>
 

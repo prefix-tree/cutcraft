@@ -11,9 +11,24 @@ const out = join(here, "..", "..", "docs", "public", "showcase");
 mkdirSync(out, { recursive: true });
 
 /** Each file, and the second its poster is taken at. */
-const FILES: Record<string, number> = { launch: 5.2, kinetic: 0.9, data: 6, logo: 4.5, edit: 4, captions: 9.2 };
+const FILES: Record<string, number> = {
+  launch: 5.2,
+  kinetic: 0.9,
+  data: 6,
+  logo: 4.5,
+  edit: 4,
+  captions: 9.2,
+  hero: 4.8,
+};
+
+/** Files encoded at a set bitrate instead of the medium preset: the hero loops on the landing page, so it stays small. */
+const BITRATE: Record<string, number> = { hero: 1_500_000 };
+
+/** Names given on the command line render alone: `pnpm --filter @cutcraft/example-showcase render hero`. */
+const only = process.argv.slice(2);
 
 for (const [name, poster] of Object.entries(FILES)) {
+  if (only.length > 0 && !only.includes(name)) continue;
   const video = await loadVideo(join(here, `${name}.tsx`), { manifest: join(here, "manifest.json") });
   if (video.state.errors.length > 0)
     throw new Error(`${name}: ${video.state.errors.map((e) => `${e.id}: ${e.message}`).join("; ")}`);
@@ -23,7 +38,7 @@ for (const [name, poster] of Object.entries(FILES)) {
     media,
     out: join(out, `${name}.webm`),
     silent: true,
-    quality: "medium",
+    ...(BITRATE[name] ? { bitrate: BITRATE[name] } : { quality: "medium" as const }),
     source: video.source,
   });
   for (const w of result.warnings) process.stderr.write(`${name}: warning: ${w}\n`);
