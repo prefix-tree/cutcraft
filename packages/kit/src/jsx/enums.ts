@@ -103,7 +103,7 @@ export const TEXT_ANIMATION_PRESETS = [
 
 export const CAPTION_ANIMATIONS = ["none", "word-highlight", "word-by-word", "karaoke", "typewriter"] as const;
 
-export const GRAPHIC_ANIMATIONS = [
+export const ENTRANCE_ANIMATIONS = [
   "none",
   "fade",
   "slide-left",
@@ -181,7 +181,7 @@ export const zTransitionType = z.enum(TRANSITION_TYPES);
 export const zVideoEffectType = z.enum(VIDEO_EFFECT_TYPES);
 export const zTextAnimationPreset = z.enum(TEXT_ANIMATION_PRESETS);
 export const zCaptionAnimation = z.enum(CAPTION_ANIMATIONS);
-export const zGraphicAnimation = z.enum(GRAPHIC_ANIMATIONS);
+export const zEntranceAnimation = z.enum(ENTRANCE_ANIMATIONS);
 export const zShapeType = z.enum(SHAPE_TYPES);
 export const zKeyframeProperty = z.string().superRefine((value, ctx) => {
   if (isKeyframeProperty(value)) return;

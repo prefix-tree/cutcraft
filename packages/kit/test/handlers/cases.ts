@@ -14,20 +14,7 @@ export interface Case {
 }
 
 /** Actions that need the fixture prepared first, e.g. a gap removed so two clips meet. */
-const graphic: ActionInput = {
-  type: "graphic/create",
-  params: {
-    id: "gr9",
-    kind: "graphic",
-    trackId: "overlays",
-    place: { anchor: "start" },
-    props: { kind: "badge", duration: 1, text: "NEW" },
-  },
-};
-
 export const SETUP: Partial<Record<ActionType, readonly ActionInput[]>> = {
-  "graphic/update": [graphic],
-  "graphic/remove": [graphic],
   "clip/slide": [
     { type: "clip/remove", params: { id: "g1" } },
     { type: "transition/remove", params: { transitionId: "x1" } },
@@ -258,23 +245,11 @@ export const CASES: Partial<Record<ActionType, ActionInput>> = {
       kind: "sticker",
       trackId: "overlays",
       place: { anchor: "c1" },
-      props: { duration: 1, src: "sticker:x" },
+      props: { duration: 1, src: "asset:logo" },
     },
   },
-  "sticker/update": { type: "sticker/update", params: { id: "st1", props: { name: "party" } } },
+  "sticker/update": { type: "sticker/update", params: { id: "st1", props: { blendOpacity: 0.5 } } },
   "sticker/remove": { type: "sticker/remove", params: { id: "st1" } },
-  "graphic/create": {
-    type: "graphic/create",
-    params: {
-      id: "gr9",
-      kind: "graphic",
-      trackId: "overlays",
-      place: { anchor: "start" },
-      props: { kind: "badge", duration: 1, text: "NEW" },
-    },
-  },
-  "graphic/update": { type: "graphic/update", params: { id: "gr9", props: { text: "HOT" } } },
-  "graphic/remove": { type: "graphic/remove", params: { id: "gr9" } },
   "adjustment/create": {
     type: "adjustment/create",
     params: { id: "adj9", kind: "adjustment", trackId: "overlays", place: { anchor: "start" }, props: { duration: 2 } },

@@ -86,7 +86,7 @@ export default function Video({ title, accent }: z.infer<typeof schema>) {
           duration={2}
           content="<svg viewBox='0 0 10 10'><circle cx='5' cy='5' r='4'/></svg>"
         />
-        <Sticker id="st1" anchor="c3" duration={2} src="sticker:party" />
+        <Sticker id="st1" anchor="c3" duration={2} src="asset:logo" />
         <Layer id="l1" anchor="c2" duration={4}>
           <Counter from={0} to={1200} />
         </Layer>

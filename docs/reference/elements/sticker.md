@@ -26,7 +26,5 @@ A ready-made icon or sticker by name.
 | `exit` | { type, duration, easing } |  |  |
 | `style` | string |  |  |
 | `src` | string |  | yes |
-| `category` | string |  |  |
-| `name` | string |  |  |
 
 Timed, visual, transformable. Children: `effect`, `keyframe`, `mask`. [All elements](/reference/elements/)

@@ -254,12 +254,16 @@ function collectChildren(
       // An import that is not there: a misspelt name, or an element the kit no longer has.
       const id = typeof element.props.id === "string" ? element.props.id : (parent ?? "composition");
       const grade = "temperature" in element.props || "tint" in element.props;
+      // `<Graphic kind="…">` is the only element that took a `kind`.
+      const graphic = typeof element.props.kind === "string";
       walker.errors.push({
         code: "SCHEMA",
         id,
         message: grade
           ? '<ColorGrade> is now a whiteBalance effect: <Effect type="whiteBalance" params={{ temperature, tint }} />'
-          : "an element whose component is undefined: check its import from @cutcraft/kit",
+          : graphic
+            ? `<Graphic kind="${String(element.props.kind)}"> was removed: use LowerThird, Callout, Badge, Counter, ProgressBar, Arrow, Highlight or Background from @cutcraft/kit, or free code (<Layer>, <Motion>, <Svg>)`
+            : "an element whose component is undefined: check its import from @cutcraft/kit",
       });
       return;
     }

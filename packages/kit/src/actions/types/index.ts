@@ -190,9 +190,6 @@ export interface OverlayActions {
   "sticker/create": Overlay["create"];
   "sticker/update": Overlay["update"];
   "sticker/remove": Overlay["remove"];
-  "graphic/create": Overlay["create"];
-  "graphic/update": Overlay["update"];
-  "graphic/remove": Overlay["remove"];
   "adjustment/create": Overlay["create"];
   "adjustment/update": Overlay["update"];
   "adjustment/remove": Overlay["remove"];
@@ -307,7 +304,6 @@ export const AUTO_GROUP_TYPES: ReadonlySet<ActionType> = new Set<ActionType>([
   "shape/update",
   "svg/update",
   "sticker/update",
-  "graphic/update",
   "mask/update",
   "layer/setTiming",
   "layer/setTransform",

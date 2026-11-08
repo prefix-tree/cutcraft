@@ -3,7 +3,8 @@
 # @cutcraft/graphics
 
 What a [CutCraft](https://prefix-tree.github.io/cutcraft/) file draws beyond footage: three.js and Motion on the
-video's clock, for the graphics you write yourself. It also holds the 34 `<Graphic>` kinds, which are deprecated.
+video's clock, for the graphics you write yourself. Ready-made lower thirds, callouts, counters and the like are
+components in `@cutcraft/kit` (`LowerThird`, `Callout`, `Counter`…).
 
 ```sh
 npm install @cutcraft/graphics
@@ -64,27 +65,3 @@ The player draws both tags, and so does the export (`cutcraft`), which runs the 
 in more depth.
 
 MIT licensed.
-
-## Ready-made graphics (deprecated)
-
-`<Graphic>` and its kinds are deprecated and will be removed in a later release; the lint warns on each one. Draw the
-same things with `<Motion>`, `<Three>` or a `<Layer>`: the [examples](https://prefix-tree.github.io/cutcraft/examples)
-show each.
-
-`<Graphic kind="…">` draws arrows, callouts, badges, lower thirds, frames, highlights, progress bars and countdowns,
-counters and other data graphics, backgrounds, confetti and icons. Each kind is a pure function from props, theme and
-time to SVG, so the player and the export draw it the same way.
-
-```tsx
-<Graphic id="growth" kind="counter" anchor="hook" at="word:9" duration={3} to={1250} suffix="+" label="customers" />
-```
-
-```ts
-import { drawGraphic, graphicControls } from "@cutcraft/graphics";
-
-const { svg, labels } = drawGraphic(props, { width: 640, height: 360, t: 1.2, duration: 3, id: "growth", tokens });
-const controls = graphicControls("counter");   // the fields an inspector shows for this kind
-```
-
-[The catalog](https://prefix-tree.github.io/cutcraft/reference/graphics/) shows every kind animating, with its props
-and an example.

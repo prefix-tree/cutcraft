@@ -8,7 +8,7 @@
 export const MASKED_KINDS = ["clip", "nested"] as const;
 
 /** The kinds drawn on the player's DOM overlay plane, over the canvas (a Motion or Three element is a layer). */
-const OVERLAY_KINDS = ["title", "shape", "svg", "sticker", "graphic", "layer"] as const;
+const OVERLAY_KINDS = ["title", "shape", "svg", "sticker", "layer"] as const;
 
 /** An enum prop where only some values render: a written value outside `values` gets `reason`. */
 export interface RenderedValues {

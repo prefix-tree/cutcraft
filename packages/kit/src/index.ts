@@ -1,6 +1,3 @@
-// What an editor shows for a <Graphic>'s own props, read from its kind's schema.
-export { type GraphicControl, graphicControls } from "@cutcraft/graphics";
-
 export * from "./actions/executor";
 export * from "./actions/handler-kit";
 export * from "./actions/history";

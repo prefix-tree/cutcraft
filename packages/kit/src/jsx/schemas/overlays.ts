@@ -1,7 +1,5 @@
 import { z } from "zod";
 
-import { GRAPHIC_KIND_NAMES, GRAPHIC_KINDS } from "@cutcraft/graphics";
-
 import { zBlendMode, zShapeType, zTextAnimationPreset } from "../enums";
 import {
   assetRefSchema,
@@ -120,42 +118,16 @@ export const svgSchema = z
   })
   .refine((v) => Boolean(v.src) !== Boolean(v.content), { message: "Svg takes either src or content" });
 
-const graphicBase = {
-  ...timedProps,
-  ...visualProps,
-  ...entranceProps,
-  /** A theme preset for graphics. */
-  style: idSchema.optional(),
-  /** The box, in composition pixels; each kind has a size of its own when these are left out. */
-  width: z.number().positive().optional(),
-  height: z.number().positive().optional(),
-};
-
-type Kinds = typeof GRAPHIC_KINDS;
-type KindShape<K extends keyof Kinds> = Kinds[K]["shape"] extends infer S extends z.ZodRawShape ? S : never;
-type GraphicVariant<K extends keyof Kinds> = z.ZodObject<
-  typeof graphicBase & { kind: z.ZodLiteral<K> } & KindShape<K>,
-  z.core.$strict
->;
-type GraphicVariants = { [K in keyof Kinds]: GraphicVariant<K> }[keyof Kinds];
-
-/** `<Graphic kind>`: the props every graphic takes, and the kind's own (see `@cutcraft/graphics`). */
-export const graphicSchema = z.discriminatedUnion(
-  "kind",
-  GRAPHIC_KIND_NAMES.map((k) =>
-    z.strictObject({ ...graphicBase, kind: z.literal(k), ...GRAPHIC_KINDS[k].shape }),
-  ) as unknown as [GraphicVariants, ...GraphicVariants[]],
-);
-
 export const stickerSchema = z.strictObject({
   ...timedProps,
   ...visualProps,
   ...entranceProps,
   /** A theme preset for stickers. */
   style: idSchema.optional(),
-  src: z.string().min(1),
-  category: z.string().optional(),
-  name: z.string().optional(),
+  /** An image the manifest lists (`asset:party`): PNG, SVG, WebP or GIF. */
+  src: z.string().refine((v) => v.startsWith("asset:"), {
+    message: "a sticker is an image asset (asset:…); icon stickers were removed, so draw an icon as an <Svg>",
+  }),
 });
 
 export const adjustmentSchema = z.strictObject({

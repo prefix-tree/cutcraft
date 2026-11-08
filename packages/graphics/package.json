@@ -1,7 +1,7 @@
 {
   "name": "@cutcraft/graphics",
   "version": "0.2.0",
-  "description": "Ready-made graphics for CutCraft files (arrows, callouts, lower thirds, data graphics, backgrounds, icons) as pure functions from props and theme to SVG, and three.js and Motion on the video's clock for free code.",
+  "description": "Free-code libraries for CutCraft: three.js, React Three Fiber and Motion on the video's clock, for <Three> and <Motion>.",
   "keywords": [
     "video",
     "video-editing",
@@ -10,8 +10,6 @@
     "llm",
     "ai-video",
     "svg",
-    "motion-graphics",
-    "lower-third",
     "three",
     "motion",
     "animation"
@@ -71,7 +69,6 @@
   },
   "dependencies": {
     "@react-three/fiber": "9.4.0",
-    "lucide": "^1.61.0",
     "motion": "12.23.24",
     "three": "0.180.0",
     "zod": "catalog:"

@@ -144,6 +144,20 @@ for (const clip of stock) {
   );
 }
 
+/** A sticker image: a five-pointed star in the site's amber, for the <Sticker> example. */
+const star = join(dir, "star.svg");
+if (!existsSync(star)) {
+  const points = Array.from({ length: 10 }, (_, i) => {
+    const r = i % 2 === 0 ? 120 : 52;
+    const a = (Math.PI / 5) * i - Math.PI / 2;
+    return `${(128 + r * Math.cos(a)).toFixed(1)},${(132 + r * Math.sin(a)).toFixed(1)}`;
+  });
+  writeFileSync(
+    star,
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><polygon points="${points.join(" ")}" fill="#e8a33d" stroke="#101421" stroke-width="8" stroke-linejoin="round"/></svg>\n`,
+  );
+}
+
 /** A size-5 LUT that warms, as the goldens' one: for the LUT demo. */
 const cube = join(dir, "warm.cube");
 if (!existsSync(cube)) {

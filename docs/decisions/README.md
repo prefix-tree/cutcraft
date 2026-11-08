@@ -25,5 +25,6 @@ new record that supersedes the old one.
 | [0017](./0017-graphics-are-svg-generators.md) | Graphics are SVG generators |
 | [0018](./0018-free-code-in-a-timeline-skeleton.md) | Free code in a timeline skeleton |
 | [0019](./0019-a-browser-engine-for-free-code.md) | A browser engine exports what only a browser draws |
-| [0020](./0020-graphic-is-deprecated-for-free-code.md) | `<Graphic>` is deprecated for free code |
+| [0020](./0020-graphic-is-deprecated-for-free-code.md) | `<Graphic>` is deprecated for free code (superseded by 0024) |
 | [0021](./0021-one-export-engine.md) | One export engine: the player in Chrome |
+| [0024](./0024-graphic-kinds-become-components.md) | Graphic kinds become components; icon stickers are removed |

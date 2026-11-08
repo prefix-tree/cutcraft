@@ -1,5 +1,8 @@
 # 0020. `<Graphic>` is deprecated for free code
 
+> Superseded by [0024](./0024-graphic-kinds-become-components.md): the kinds became components and `<Graphic>` was
+> removed.
+
 > Supersedes [0017](./0017-graphics-are-svg-generators.md). Follows from
 > [0018](./0018-free-code-in-a-timeline-skeleton.md) and [0019](./0019-a-browser-engine-for-free-code.md).
 

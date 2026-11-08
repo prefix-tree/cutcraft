@@ -173,7 +173,7 @@ pnpm docs:dev                                      # the documentation site
 | [`@cutcraft/kit`](packages/kit) | The elements, time references, resolver, editor actions, source edits and lint. No DOM. |
 | [`@cutcraft/player`](packages/player) | The browser player and the React `<Player>`. |
 | [`@cutcraft/render`](packages/render) | The export as a library: `loadVideo` and `renderVideo`, driving the player in headless Chrome. |
-| [`@cutcraft/graphics`](packages/graphics) | three.js and Motion on the video's clock for `<Three>` and `<Motion>`, and the 34 `<Graphic>` kinds, which are deprecated and will be removed. |
+| [`@cutcraft/graphics`](packages/graphics) | three.js and Motion on the video's clock for `<Three>` and `<Motion>`. |
 
 The repository also holds [eight recipes](https://prefix-tree.github.io/cutcraft/recipes/) (complete files for common
 videos, each tested) and [the worked example](examples/launch-recap).

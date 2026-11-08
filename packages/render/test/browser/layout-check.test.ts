@@ -7,10 +7,10 @@ import {
   Clip,
   Composition,
   collect,
-  Graphic,
   Keyframe,
   resolve,
   Shape,
+  Svg,
   Title,
   Track,
 } from "@cutcraft/kit";
@@ -357,7 +357,14 @@ describe("checkLayout", () => {
       h(
         Track,
         { id: "t", layout: "free" },
-        h(Graphic, { id: "brackets", kind: "corner-brackets", width: 300, height: 260, start: 0, duration: 1 }),
+        // Corner brackets: four marks at the corners of a 300x260 box, hollow in the middle.
+        h(Svg, {
+          id: "brackets",
+          start: 0,
+          duration: 1,
+          content:
+            "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 260'><path d='M3 43V3H43M257 3H297V43M297 217V257H257M43 257H3V217' stroke='#ffffff' stroke-width='6' fill='none'/></svg>",
+        }),
         box("solid", 0, 0, 40, 40),
       ),
     );

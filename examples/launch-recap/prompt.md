@@ -128,7 +128,8 @@ Give the video one look, the way a designer would, and say it once.
    on the video's clock), a `<Three>` scene, or a `<Layer>` of React that
    reads `useLayer()`. Take colours and fonts from the theme (`THEMES[theme]`
    or the composition's palette) and keep the numbers and text in props so
-   they stay editable. `<Graphic kind>` is deprecated: do not use it. The
+   they stay editable. For a lower third, callout, badge or counter, the kit's
+   components (`LowerThird`, `Callout`, `Badge`, `Counter`…) do it. The
    showcase examples (launch, kinetic, data, logo) show each technique.
 6. **Backgrounds go on the lowest track.** A graphic or shape on a track below
    every footage track draws beneath the footage; anything on a later track

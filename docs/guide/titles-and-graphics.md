@@ -1,10 +1,10 @@
 # Titles and graphics
 
 For the common cases there are ready-made elements: `<Title>` for text, `<Shape>` and `<Svg>` for vector art,
-`<Sticker>` for icons. Animated pieces like lower thirds, callouts and counters are free code: a `<Motion>` sequence,
-a `<Three>` scene or a `<Layer>` of React (`<Graphic>` drew them before and is deprecated). Their props show up in an
-editor's inspector, and they take colours and fonts from the [theme](./themes). When none of them fits, write
-[free code](./free-code).
+`<Sticker>` for an image. Lower thirds, callouts, counters and the like are [components](#ready-made-components)
+made of those elements. Their props show up in an editor's inspector, and they take colours and fonts from the
+[theme](./themes). When none of them fits, write [free code](./free-code): a `<Motion>` sequence, a `<Three>` scene or
+a `<Layer>` of React.
 
 ```tsx
 <Track id="overlays">
@@ -95,11 +95,8 @@ For anything they don't cover, write it as free code: a `<Motion>` sequence, an 
 lines of React in a `<Layer>`, or a 3D scene in a `<Three>`. The [examples](/examples) show each one next to its file,
 and [Free code](./free-code) explains the tags.
 
-::: warning Deprecated
-`<Graphic kind="…">` (the 34 graphics drawn by the engine) is deprecated and will be removed in the next major
-release; the lint warns on each one. `LowerThird`, `Callout`, `Badge`, `Counter`, `ProgressBar`, `Arrow`, `Highlight`
-and `Background` replace the kinds most used.
-:::
+`<Graphic kind="…">`, which drew 34 graphics in the engine, was removed in favour of these components and free code;
+a file that still uses it gets an error naming the replacements.
 
 ## Shapes
 

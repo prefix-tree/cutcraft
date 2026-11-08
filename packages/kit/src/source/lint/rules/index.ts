@@ -3,7 +3,6 @@ import type { ElementSite, SourceIndex } from "../../index";
 import type { Diagnostic, LintOptions } from "../index";
 import { declaration } from "./fonts";
 import { freeCodeClock, strayHtml } from "./free-code";
-import { deprecatedGraphic, graphicProps } from "./graphic";
 import { notRendered } from "./not-rendered";
 import { cutNearShot, repeatedSource, shotChangeInsideCrop } from "./shots";
 import { fontAvailable, themeLiterals, themeRefs } from "./theme";
@@ -270,8 +269,6 @@ export const rules: readonly Rule[] = [
   themeLiterals,
   fontAvailable,
   declaration,
-  graphicProps,
-  deprecatedGraphic,
   notRendered,
 ];
 

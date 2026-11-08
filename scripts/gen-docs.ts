@@ -4,7 +4,6 @@ import { join, relative, sep } from "node:path";
 
 import { z } from "zod";
 
-import { GRAPHIC_KIND_NAMES, GRAPHIC_KINDS, type GraphicKindName } from "../packages/graphics/src/index";
 import {
   COMPONENTS,
   EFFECT_FAMILIES,
@@ -22,7 +21,6 @@ import {
 } from "../packages/kit/src/index";
 import { EFFECT_DEMOS, effectExample, TRANSITION_TEXT, transitionExample } from "./effect-example";
 import { syncGeneratedFiles } from "./generated-files";
-import { graphicExample } from "./graphic-example";
 
 /**
  * Generated reference pages: the element table from the Zod schemas and the
@@ -119,7 +117,6 @@ const ELEMENT_DOCS: Record<string, readonly (readonly [element: string, summary:
     ["Title", "Text over the picture in the theme's type, with entrances by letter, word or line."],
     ["Captions", "Subtitles from an asset's transcript that follow the clips through every trim."],
     ["Caption", "One cue inside `<Captions>`, written by hand: its text, start and end."],
-    ["Graphic", "A built-in graphic by `kind`: lower thirds, callouts, counters, progress and more."],
     ["Shape", "A vector shape (rectangle, circle, star, polygon, path) with fill, stroke and shadow."],
     ["Svg", "One-off vector art from inline SVG markup or a file."],
     ["Sticker", "A ready-made icon or sticker by name."],
@@ -219,7 +216,7 @@ function elementsIndex(): string {
   const lines = [
     "# Elements",
     "",
-    "The elements a file is written in: the timeline (clips, tracks, transitions, captions), free code, and ready-made titles, graphics and effects. Each page shows an example as the export renders it, with the file that made it, then the element's props. Generated from the Zod schemas in `packages/kit/src/jsx/schemas`; run `pnpm docs:gen`, and `pnpm docs:examples` for the videos.",
+    "The elements a file is written in: the timeline (clips, tracks, transitions, captions), free code, titles, shapes and effects. Each page shows an example as the export renders it, with the file that made it, then the element's props. Generated from the Zod schemas in `packages/kit/src/jsx/schemas`; run `pnpm docs:gen`, and `pnpm docs:examples` for the videos.",
     "",
   ];
   for (const [group, items] of Object.entries(ELEMENT_DOCS)) {
@@ -250,8 +247,8 @@ function elementsIndex(): string {
 
 function elementPage(name: string, summary: string): string {
   const component = { ...ELEMENTS, ...ENGINE_LAYERS }[name as keyof typeof ELEMENTS];
-  let schema = z.toJSONSchema(component.schema as z.ZodType, { unrepresentable: "any", io: "input" }) as JsonSchema;
-  const lines = [`# \`<${name}>\``, "", ...(name === "Graphic" ? GRAPHIC_DEPRECATED : []), summary, ""];
+  const schema = z.toJSONSchema(component.schema as z.ZodType, { unrepresentable: "any", io: "input" }) as JsonSchema;
+  const lines = [`# \`<${name}>\``, "", summary, ""];
   const ex = exampleFor(name);
   if (ex)
     lines.push(
@@ -266,13 +263,6 @@ function elementPage(name: string, summary: string): string {
   if (name in ENGINE_LAYERS) lines.push(ENGINE_NOTE, "");
   const used = usedIn(name);
   if (used) lines.push(used, "");
-  if (name === "Graphic") {
-    // One schema per kind: show the props every graphic takes; the kinds' own are on the graphics pages.
-    const own = new Set(GRAPHIC_KIND_NAMES.flatMap((k) => Object.keys(GRAPHIC_KINDS[k].shape)));
-    const first = (schema.oneOf ?? schema.anyOf ?? [])[0] ?? {};
-    const properties = Object.fromEntries(Object.entries(first.properties ?? {}).filter(([k]) => !own.has(k)));
-    schema = { ...first, properties: { ...properties, kind: { enum: [...GRAPHIC_KIND_NAMES] } } };
-  }
   const c = KIND_CAPABILITIES[component.kind]!;
   const traits = [
     c.timed && "timed",
@@ -282,7 +272,6 @@ function elementPage(name: string, summary: string): string {
     c.transformable && "transformable",
   ].filter(Boolean);
   lines.push("## Props", "");
-  if (name === "Graphic") lines.push("Plus the props of its `kind`: see [Graphics](/reference/graphics/).", "");
   lines.push("| prop | type | default | required |", "|---|---|---|---|");
   const required = new Set(schema.required ?? []);
   for (const [prop, s] of Object.entries(schema.properties ?? {})) {
@@ -519,84 +508,7 @@ function formatted(path: string, code: string): string {
 /** A Vue attribute value: quotes and braces escaped, Markdown code ticks dropped. */
 const attr = (text: string): string =>
   text.replace(/`/g, "").replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/\{\{/g, "&#123;&#123;");
-/** The first sentence, for a card. */
-const firstSentence = (text: string): string => /^.*?[.;](?=\s|$)/.exec(text)?.[0].replace(/;$/, ".") ?? text;
 const capital = (s: string): string => `${s[0]!.toUpperCase()}${s.slice(1)}`;
-
-function graphicCategories(): Map<string, string[]> {
-  const categories = new Map<string, string[]>();
-  for (const name of GRAPHIC_KIND_NAMES)
-    categories.set(GRAPHIC_KINDS[name].category, [...(categories.get(GRAPHIC_KINDS[name].category) ?? []), name]);
-  return categories;
-}
-
-/** A rendered example: the video, then the code that made it (both from `graphicExample`). */
-const example = (src: string, alt: string, code: string): string[] => [
-  `<Example src="${src}" alt="${attr(alt)}">`,
-  "",
-  "```tsx",
-  code,
-  "```",
-  "",
-  "</Example>",
-];
-
-/** At the top of every page about `<Graphic>` and its kinds, until they are removed (decision 0020). */
-const GRAPHIC_DEPRECATED = [
-  "::: warning Deprecated",
-  "`<Graphic>` and its kinds are deprecated and will be removed in a later release; the lint warns on each one. Draw the same thing with `<Motion>`, `<Three>` or a `<Layer>`: the [examples](/examples) show each, and [Free code](/guide/free-code) explains them.",
-  ":::",
-  "",
-];
-
-function graphicsIndex(): string {
-  const lines = [
-    "# Graphics",
-    "",
-    ...GRAPHIC_DEPRECATED,
-    "Built-in kinds of `<Graphic>`: pure functions from props and the theme to SVG, drawn the same in the preview and the export. Each card plays its example as the export renders it; its page has the code. Generated from `packages/graphics` by `pnpm docs:gen`; the previews were rendered by the Node export, which is gone, and `<Graphic>` is deprecated, so they are not rendered again.",
-    "",
-    ...example("previews/graphics/lower-third", "A lower third", graphicExample("lower-third").code),
-    "",
-    "Every kind also takes the [`<Graphic>` props](/reference/elements/graphic): timing, `transform`, `enter`/`exit`, `style`, and `width`/`height` for its box. Colours and fonts default to theme tokens.",
-    "",
-  ];
-  for (const [category, names] of graphicCategories()) {
-    lines.push(`## ${capital(category)}`, "", '<div class="cc-cards">');
-    for (const name of names)
-      lines.push(
-        `<PreviewCard code title="${name}" link="/reference/graphics/${name}" src="previews/graphics/${name}" text="${attr(firstSentence(GRAPHIC_KINDS[name].description))}" />`,
-      );
-    lines.push("</div>", "");
-  }
-  return lines.join("\n");
-}
-
-function graphicPage(name: GraphicKindName): string {
-  const kind = GRAPHIC_KINDS[name];
-  const schema = z.toJSONSchema(z.strictObject(kind.shape), { unrepresentable: "any", io: "input" }) as JsonSchema;
-  const lines = [
-    `# ${kind.title}`,
-    "",
-    ...GRAPHIC_DEPRECATED,
-    `${kind.description}${kind.animated ? " Animated: it changes over its whole duration." : ""}`,
-    "",
-    ...example(`previews/graphics/${name}`, kind.title, graphicExample(name).code),
-    "",
-    "## Props",
-    "",
-    "| prop | type | default |",
-    "|---|---|---|",
-  ];
-  for (const [prop, ps] of Object.entries(schema.properties ?? {}))
-    lines.push(`| \`${prop}\` | ${typeOf(ps)} | ${defaultOf(ps.default)} |`);
-  lines.push(
-    "",
-    `Plus the [\`<Graphic>\` props](/reference/elements/graphic) every kind takes. More in [${capital(kind.category)}](/reference/graphics/#${kind.category.replace(/ /g, "-")}).`,
-    "",
-  );
-  return lines.join("\n");
-}
 
 /** A line on the actions page for the actions whose name does not say it all. */
 const ACTION_NOTES: Readonly<Record<string, string>> = {
@@ -604,9 +516,6 @@ const ACTION_NOTES: Readonly<Record<string, string>> = {
   "composition/setProps": "the tweaks panel: rewrites the file's `defaults` literal",
   "composition/setTheme": "the file's theme: swap it, extend it or remove it in one step",
   "theme/setToken": "one palette colour, font role or radius in the file's theme",
-  "graphic/create": "a built-in graphic kind (`<Graphic>`)",
-  "graphic/update": "a built-in graphic kind (`<Graphic>`)",
-  "graphic/remove": "a built-in graphic kind (`<Graphic>`)",
   "clip/setSource": "media-slot replacement",
   "keyframe/restore": "undo of keyframe/remove keeps its easing",
   "caption/setAnimation": "caption animation style as its own action",
@@ -737,8 +646,6 @@ if (missing.length) throw new Error(`no summary in ELEMENT_DOCS for ${missing.jo
 for (const [name, summary] of documented)
   write(join(out, "elements", `${slug(name)}.md`), escapeTags(elementPage(name, summary)));
 write(join(out, "actions.md"), escapeTags(actionsPage()));
-write(join(out, "graphics", "index.md"), escapeTags(graphicsIndex()));
-for (const name of GRAPHIC_KIND_NAMES) write(join(out, "graphics", `${name}.md`), escapeTags(graphicPage(name)));
 // The sidebars of the generated sections, read by the site's config.
 const sidebar = {
   elements: Object.entries(ELEMENT_DOCS).map(([group, items]) => ({
@@ -753,10 +660,6 @@ const sidebar = {
   transitions: Object.entries(TRANSITION_FAMILIES).map(([family, names]) => ({
     text: family,
     items: names.map((name) => ({ text: name, link: `/reference/transitions/${name}` })),
-  })),
-  graphics: [...graphicCategories()].map(([category, names]) => ({
-    text: capital(category),
-    items: names.map((name) => ({ text: GRAPHIC_KINDS[name].title, link: `/reference/graphics/${name}` })),
   })),
 };
 write(join(root, "docs", ".vitepress", "sidebar.generated.json"), `${JSON.stringify(sidebar, null, 2)}\n`);
@@ -779,14 +682,13 @@ const problems = syncGeneratedFiles(root, generated, {
   check,
   directories: [
     "docs/reference/elements",
-    "docs/reference/graphics",
     "docs/reference/effects",
     "docs/reference/components",
     "docs/reference/transitions",
     "examples/showcase/effects",
     "examples/showcase/transitions",
   ],
-  obsolete: ["docs/reference/elements.md", "docs/reference/effects.md"],
+  obsolete: ["docs/reference/elements.md", "docs/reference/effects.md", "docs/reference/graphics"],
 });
 if (problems.length) {
   console.error(`Generated reference is stale (${problems.length} files). Run pnpm docs:gen.`);

@@ -55,7 +55,6 @@
     "react-dom": "^19.0.0"
   },
   "dependencies": {
-    "@cutcraft/graphics": "workspace:*",
     "@cutcraft/kit": "workspace:*",
     "@fontsource/dm-sans": "catalog:",
     "@fontsource/inter": "catalog:",

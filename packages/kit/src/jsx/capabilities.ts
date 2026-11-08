@@ -39,7 +39,6 @@ export const KIND_CAPABILITIES: Readonly<Record<string, ElementCapabilities>> = 
       "shape",
       "svg",
       "sticker",
-      "graphic",
       "adjustment",
       "nested",
       "layer",
@@ -91,14 +90,6 @@ export const KIND_CAPABILITIES: Readonly<Record<string, ElementCapabilities>> = 
     placementScope: "track",
   }),
   sticker: with_({
-    timed: true,
-    visual: true,
-    transformable: true,
-    container: true,
-    childKinds: OVERLAY_CHILDREN,
-    placementScope: "track",
-  }),
-  graphic: with_({
     timed: true,
     visual: true,
     transformable: true,

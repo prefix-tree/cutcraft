@@ -9,10 +9,10 @@ const under = {
   items: [
     {
       id: "bg",
-      kind: "graphic",
+      kind: "shape",
       start: 0,
       duration: 4,
-      props: { kind: "gradient-background", from: "#000000", to: "#ffffff", type: "linear", angle: 135 },
+      props: { shape: "rectangle", width: 640, height: 360, fill: "#000000" },
     },
   ],
 };

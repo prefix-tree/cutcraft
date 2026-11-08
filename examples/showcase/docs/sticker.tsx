@@ -12,7 +12,7 @@ export default function Video() {
           anchor="shot"
           offset={0.3}
           duration={2.5}
-          src="icon:check"
+          src="asset:star"
           transform={{ scale: 2 }}
           enter={{ type: "scale", duration: 0.4 }}
         />

@@ -1,7 +1,6 @@
-import { random as generator, hash } from "@cutcraft/graphics";
-
 import { EASING_FN, type SpringConfig, springAt } from "../resolve/speed";
 import type { Easing } from "./enums";
+import { random as generator, hash } from "./random";
 
 /**
  * Pure animation helpers for `<Layer>` code, beside `useT()` and `useLayer()`. They take numbers and return
