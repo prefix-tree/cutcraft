@@ -620,3 +620,129 @@
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+/* ── The live playground: the file beside the player, the starters above ─────────────────────────────── */
+
+.cc-playground {
+  border: 1px solid #23232c;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #14141a;
+}
+.cc-playground-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px 12px;
+  border-bottom: 1px solid #23232c;
+}
+.cc-playground-bar button {
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-family: var(--cc-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #b8b5bf;
+}
+.cc-playground-bar button:hover:not(:disabled),
+.cc-playground-bar button.active {
+  background: #26262f;
+  color: #f2f1ee;
+}
+.cc-playground-bar button:focus-visible {
+  outline: 2px solid var(--cc-accent);
+  outline-offset: 1px;
+}
+.cc-playground-bar .cc-playground-share {
+  margin-left: auto;
+  color: #e0563d;
+}
+.cc-playground-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  min-height: 460px;
+}
+.cc-playground.compact .cc-playground-body {
+  min-height: 380px;
+}
+.cc-playground-editor {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border-right: 1px solid #23232c;
+}
+.cc-playground-code {
+  flex: 1;
+  min-height: 0;
+  max-height: 560px;
+  overflow: auto;
+}
+.cc-playground.compact .cc-playground-code {
+  max-height: 420px;
+}
+.vp-doc .cc-playground-error {
+  margin: 0;
+  padding: 10px 14px;
+  border-top: 1px solid #5a2219;
+  background: #2a1512;
+  color: #ffb4a6;
+  font-family: var(--cc-mono);
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+.cc-playground-player {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 16px;
+  min-width: 0;
+}
+.cc-playground-loading {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  margin: 0 !important;
+  font-family: var(--cc-mono);
+  font-size: 12px;
+  color: #8b8794;
+}
+.cc-playground-fallback {
+  padding: 16px;
+}
+.vp-doc .cc-playground-fallback p {
+  margin: 0;
+  font-size: 14px;
+  color: #b8b5bf;
+}
+@media (max-width: 768px) {
+  .cc-playground-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .cc-playground-editor {
+    border-right: 0;
+    border-bottom: 1px solid #23232c;
+  }
+  .cc-playground-code {
+    max-height: 320px;
+  }
+}
+
+/* The playground page: wide, like the landing page. */
+.cc-playground-page {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 40px 24px 80px;
+}
+.cc-playground-page h1 {
+  font-size: clamp(30px, 4vw, 44px) !important;
+  margin-bottom: 12px !important;
+}
+@media (max-width: 768px) {
+  .cc-playground-page {
+    padding: 24px 16px 64px;
+  }
+}

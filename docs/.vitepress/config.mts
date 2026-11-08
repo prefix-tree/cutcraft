@@ -24,6 +24,10 @@ export default defineConfig({
       },
     ],
   ],
+  // The playground (theme/playground) is React: JSX compiles to the automatic runtime, as in the packages.
+  // Its player, editor and the in-browser compiler are one lazy chunk (about 700 KB gzipped), fetched only where a
+  // playground is on screen, so Vite's size warning is raised past it.
+  vite: { esbuild: { jsx: "automatic" }, build: { chunkSizeWarningLimit: 3000 } },
   themeConfig: {
     logo: "/logo.svg",
     // The top bar names the four ways in (on every page, the landing one included); the sidebar is the map of the docs.
@@ -32,6 +36,7 @@ export default defineConfig({
       { text: "Reference", link: "/reference/elements/", activeMatch: "^/reference/(?!effects|transitions)" },
       { text: "Effects", link: "/reference/effects/", activeMatch: "^/reference/(effects|transitions)/" },
       { text: "Examples", link: "/examples", activeMatch: "^/examples" },
+      { text: "Playground", link: "/playground", activeMatch: "^/playground" },
     ],
     sidebar: [
       {

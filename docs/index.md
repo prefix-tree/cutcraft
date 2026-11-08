@@ -31,6 +31,7 @@ does the arithmetic, plays it in the browser, edits it and exports it.</p>
 <div class="home-actions">
 <a class="home-button primary" :href="withBase('/guide/getting-started')">Get started</a>
 <a class="home-button" :href="withBase('/guide/introduction')">Read the docs</a>
+<a class="home-button" :href="withBase('/playground')">Playground</a>
 <a class="home-button" href="https://github.com/prefix-tree/cutcraft">GitHub</a>
 </div>
 
@@ -140,6 +141,18 @@ npx cutcraft video.tsx --out video.mp4
 ```
 
 </Feature>
+
+<section class="home-try">
+
+## Try it
+
+<p class="home-strip-lead">Edit the file; the video follows. It plays right here, in the same player your app embeds.</p>
+
+<Playground compact />
+
+<p class="home-links"><a :href="withBase('/playground')">Open the playground →</a></p>
+
+</section>
 
 <section class="home-strip">
 
