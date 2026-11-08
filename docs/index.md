@@ -109,7 +109,19 @@ run as shaders in the preview and the export alike, and your own in GLSL. Effect
 
 </Feature>
 
-<Feature title="Free code where the timeline stops" src="showcase/logo" link="/guide/free-code" reverse>
+<Feature title="Ready-made components" src="previews/components/lower-third" link="/reference/components/" more="All eight" reverse>
+
+Lower thirds, callouts, badges, counters, progress bars, arrows, highlights and backgrounds. Each is a plain function
+that returns the kit's own titles and shapes, so it follows words, takes the theme's colours, and turns into plain
+elements you own the moment you edit it.
+
+```tsx
+<LowerThird id="lt" anchor="talk" at="word:3" name="Maya Chen" role="Head roaster" />
+```
+
+</Feature>
+
+<Feature title="Free code where the timeline stops" src="showcase/logo" link="/guide/free-code">
 
 A `<Layer>` takes any React, CSS or WebGL, and `<Three>` and `<Motion>` put three.js and Motion on the timeline. All
 of it follows the video's clock, so it scrubs frame-exact.
@@ -122,7 +134,7 @@ of it follows the video's clock, so it scrubs frame-exact.
 
 </Feature>
 
-<Feature title="Edit by hand, keep the code" src="showcase/edit" link="/guide/editing">
+<Feature title="Edit by hand, keep the code" src="showcase/edit" link="/guide/editing" reverse>
 
 Every drag and trim in the editor is an undoable action written back to the file as a one-value change, so the model
 reads your edit as the code it wrote. One drag step on a composition of {{ drag.nodes.toLocaleString("en-US") }}
@@ -131,7 +143,7 @@ elements takes {{ (drag.usPerStep / 1000).toFixed(2) }} ms
 
 </Feature>
 
-<Feature title="What you preview is what you export" src="showcase/kinetic" link="/guide/exporting" reverse>
+<Feature title="What you preview is what you export" src="showcase/kinetic" link="/guide/exporting">
 
 The browser plays the file, and the export runs the same player in headless Chrome: MP4, WebM and stills. A lint, a
 list of what renders and a layout check catch mistakes before the render.

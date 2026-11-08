@@ -6,6 +6,7 @@ import { z } from "zod";
 
 import { GRAPHIC_KIND_NAMES, GRAPHIC_KINDS, type GraphicKindName } from "../packages/graphics/src/index";
 import {
+  COMPONENTS,
   EFFECT_FAMILIES,
   EFFECTS,
   ELEMENTS,
@@ -322,6 +323,59 @@ function paramsTable(schema: z.ZodType): string[] {
 /** The footage a demo shows that is not ours (the coffee close-up and wide shot), credited under it. */
 const STOCK_CREDIT =
   "The coffee footage is Pixabay videos [209419](https://pixabay.com/videos/id-209419/) and [209424](https://pixabay.com/videos/id-209424/), under the Pixabay Content License.";
+
+/** A component's page and file name: `LowerThird` is `lower-third`. */
+const kebab = (name: string): string => name.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase();
+
+/** The ready-made components as a gallery: generated from the kit's `COMPONENTS`. */
+function componentsIndex(): string {
+  const lines = [
+    "# Components",
+    "",
+    "Ready-made pieces: lower thirds, callouts, counters and the like. Each is an ordinary function that returns the kit's own elements (titles, shapes, SVG, a layer where something moves every frame), so it is timed by words, styled by the theme and checked like any element. Editing one of its parts in the editor writes that use out into the file as plain elements. Import them from `@cutcraft/kit`. Generated from `packages/kit/src/components` by `pnpm docs:gen`.",
+    "",
+    '<div class="cc-cards">',
+  ];
+  for (const [name, c] of Object.entries(COMPONENTS))
+    lines.push(
+      `<PreviewCard code hover title="${name}" link="/reference/components/${kebab(name)}" src="previews/components/${kebab(name)}" text="${attr(c.text)}" />`,
+    );
+  lines.push(
+    "</div>",
+    "",
+    "Positions are pixels from the frame's centre, as every element's `transform.position`, and the defaults suit a 1920x1080 frame. Colours default to theme tokens (`$primary`, `$surface`, `$text`), so a theme restyles them. Every component takes the timing props any element takes: `start`, or `anchor` with `at` and `offset`, and `duration`.",
+    "",
+  );
+  return lines.join("\n");
+}
+
+/** One component's page: its demo above the file that made it, then its props. */
+function componentPage(name: keyof typeof COMPONENTS): string {
+  const c = COMPONENTS[name];
+  const file = kebab(name);
+  return [
+    `# \`${name}\``,
+    "",
+    c.text,
+    "",
+    `<Example src="previews/components/${file}" alt="${name}">`,
+    "",
+    `<<< @/../examples/showcase/components/${file}.tsx`,
+    "",
+    "</Example>",
+    "",
+    ...(readFileSync(join(root, "examples", "showcase", "components", `${file}.tsx`), "utf8").includes("asset:coffee")
+      ? [STOCK_CREDIT, ""]
+      : []),
+    "## Props",
+    "",
+    "Besides the timing props (`start`, `anchor`, `at`, `offset`, `duration`):",
+    "",
+    ...paramsTable(c.props.omit({ start: true, anchor: true, at: true, offset: true, duration: true })),
+    "[All components](/reference/components/)",
+    "",
+  ].join("\n");
+}
 
 /** Every built-in effect and transition as a gallery, grouped by family: generated from the registry. */
 function effectsIndex(): string {
@@ -691,6 +745,7 @@ const sidebar = {
     text: group,
     items: items.map(([name]) => ({ text: name, link: `/reference/elements/${slug(name)}` })),
   })),
+  components: Object.keys(COMPONENTS).map((name) => ({ text: name, link: `/reference/components/${kebab(name)}` })),
   effects: Object.entries(EFFECT_FAMILIES).map(([family, names]) => ({
     text: family,
     items: names.map((name) => ({ text: name, link: `/reference/effects/${name}` })),
@@ -707,6 +762,9 @@ const sidebar = {
 write(join(root, "docs", ".vitepress", "sidebar.generated.json"), `${JSON.stringify(sidebar, null, 2)}\n`);
 write(join(out, "rendering.md"), escapeTags(renderingPage()));
 write(join(out, "effects", "index.md"), `${escapeTags(effectsIndex())}\n${redirectScript()}`);
+write(join(out, "components", "index.md"), escapeTags(componentsIndex()));
+for (const name of Object.keys(COMPONENTS) as (keyof typeof COMPONENTS)[])
+  write(join(out, "components", `${kebab(name)}.md`), escapeTags(componentPage(name)));
 for (const name of Object.keys(EFFECTS) as (keyof typeof EFFECTS)[]) {
   write(join(out, "effects", `${name}.md`), escapeTags(effectPage(name)));
   const file = join(root, "examples", "showcase", "effects", `${name}.tsx`);
@@ -723,6 +781,7 @@ const problems = syncGeneratedFiles(root, generated, {
     "docs/reference/elements",
     "docs/reference/graphics",
     "docs/reference/effects",
+    "docs/reference/components",
     "docs/reference/transitions",
     "examples/showcase/effects",
     "examples/showcase/transitions",

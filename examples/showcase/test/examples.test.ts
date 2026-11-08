@@ -24,7 +24,7 @@ const GUIDE = [
   "effect-order",
 ];
 /** The reference's demos, one per built-in effect and transition, written by `pnpm docs:gen`. */
-const DEMOS = ["effects", "transitions"].flatMap((dir) =>
+const DEMOS = ["effects", "transitions", "components"].flatMap((dir) =>
   readdirSync(join(root, dir))
     .filter((f) => f.endsWith(".tsx"))
     .map((f) => `${dir}/${f}`),
@@ -77,6 +77,6 @@ describe.each(DEMOS)("%s", (file) => {
   });
 });
 
-it("has a demo for every built-in effect and transition", () => {
-  expect(DEMOS.length).toBe(40);
+it("has a demo for every built-in effect, transition and component", () => {
+  expect(DEMOS.length).toBe(48);
 });

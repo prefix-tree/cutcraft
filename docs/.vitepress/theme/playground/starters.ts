@@ -33,6 +33,27 @@ export default function Video() {
 `,
   },
   {
+    name: "Lower third",
+    preview: "previews/components/lower-third",
+    code: `import { Badge, Clip, Composition, LowerThird, Track } from "@cutcraft/kit";
+
+// Ready-made components, made of the kit's own titles and shapes. Change the name, or try variant="bar".
+export default function Video() {
+  return (
+    <Composition fps={30} width={1280} height={720}>
+      <Track id="main">
+        <Clip id="shot" src="asset:aurora" in={0} out={4} fit="cover" />
+      </Track>
+      <Track id="over" layout="free">
+        <LowerThird id="lt" start={0.3} duration={3.7} name="Maya Chen" role="Founder, Shed" x={-330} y={220} width={540} />
+        <Badge id="new" start={1} duration={3} text="Live" x={480} y={-260} />
+      </Track>
+    </Composition>
+  );
+}
+`,
+  },
+  {
     name: "Transition",
     preview: "previews/transitions/iris",
     code: `import { Clip, Composition, Track, Transition } from "@cutcraft/kit";

@@ -96,6 +96,12 @@ export default defineConfig({
             items: generated.elements.map((group) => ({ ...group, collapsed: true })),
           },
           {
+            text: "Components",
+            link: "/reference/components/",
+            collapsed: true,
+            items: generated.components,
+          },
+          {
             text: "Effects and transitions",
             link: "/reference/effects/",
             collapsed: true,

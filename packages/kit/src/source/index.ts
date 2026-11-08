@@ -1,6 +1,7 @@
 import traverseModule from "@babel/traverse";
 import * as t from "@babel/types";
 
+import { COMPONENT_NAMES } from "../components/index";
 import { ELEMENTS, ENGINE_LAYERS } from "../jsx/elements";
 import type { Json } from "../patches/types";
 import { INTERIOR_PREFIX } from "../resolve/tree";
@@ -233,7 +234,8 @@ export function buildSourceIndex(text: string): SourceIndex {
       const parent = enclosingElementId(path);
       const siblingIndex = siblingIndexOf(path);
       const indent = indentOf(text, path.node.start ?? 0);
-      if (helperNames.has(name) && !KIND_BY_NAME.has(name)) {
+      // A helper of the file's own, or one of the kit's ready-made components (a helper the file imports).
+      if ((helperNames.has(name) || COMPONENT_NAMES.has(name)) && !KIND_BY_NAME.has(name)) {
         const callIndex = calls.filter((c) => c.helper === name).length;
         calls.push({ helper: name, callIndex, range: rangeOf(path.node), parent, siblingIndex, indent });
         return;

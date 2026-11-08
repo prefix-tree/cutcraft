@@ -144,6 +144,40 @@
       ]
     }
   ],
+  "components": [
+    {
+      "text": "LowerThird",
+      "link": "/reference/components/lower-third"
+    },
+    {
+      "text": "Callout",
+      "link": "/reference/components/callout"
+    },
+    {
+      "text": "Badge",
+      "link": "/reference/components/badge"
+    },
+    {
+      "text": "Counter",
+      "link": "/reference/components/counter"
+    },
+    {
+      "text": "ProgressBar",
+      "link": "/reference/components/progress-bar"
+    },
+    {
+      "text": "Arrow",
+      "link": "/reference/components/arrow"
+    },
+    {
+      "text": "Highlight",
+      "link": "/reference/components/highlight"
+    },
+    {
+      "text": "Background",
+      "link": "/reference/components/background"
+    }
+  ],
   "effects": [
     {
       "text": "Basic adjustments",
