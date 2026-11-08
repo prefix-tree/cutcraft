@@ -319,9 +319,9 @@ function paramsTable(schema: z.ZodType): string[] {
   ];
 }
 
-/** The footage a demo shows that is not ours, credited under it. */
+/** The footage a demo shows that is not ours (the coffee close-up and wide shot), credited under it. */
 const STOCK_CREDIT =
-  "The coffee footage is [Pixabay video 209419](https://pixabay.com/videos/id-209419/), under the Pixabay Content License.";
+  "The coffee footage is Pixabay videos [209419](https://pixabay.com/videos/id-209419/) and [209424](https://pixabay.com/videos/id-209424/), under the Pixabay Content License.";
 
 /** Every built-in effect and transition as a gallery, grouped by family: generated from the registry. */
 function effectsIndex(): string {
@@ -416,7 +416,7 @@ function effectPage(name: keyof typeof EFFECTS): string {
     "",
     "</Example>",
     "",
-    ...(effectExample(name).includes("asset:coffee") ? [STOCK_CREDIT, ""] : []),
+    ...(/asset:coffee/.test(effectExample(name)) ? [STOCK_CREDIT, ""] : []),
     "## Params",
     "",
     `Drawn as ${DRAWN[e.draw.kind]}${fallback}.`,

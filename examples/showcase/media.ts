@@ -51,6 +51,15 @@ const stock: readonly {
     start: 0,
     duration: 20,
   },
+  {
+    id: "coffeeWide",
+    file: "coffee-wide.mp4",
+    sha256: "8430ed80518688d8bcad2890744ad3e7c22b7172bec9ab19e1a27b8f1643205f",
+    page: "https://pixabay.com/videos/id-209424/",
+    credit: "Pour-over coffee, wide, Pixabay video 209424, Pixabay Content License",
+    start: 0,
+    duration: 36,
+  },
 ];
 
 for (const [name, source] of Object.entries(clips)) {

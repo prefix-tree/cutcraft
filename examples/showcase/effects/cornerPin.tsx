@@ -5,7 +5,7 @@ export default function Video() {
   return (
     <Composition fps={30} width={640} height={360}>
       <Track id="main">
-        <Clip id="backdrop" src="asset:cells" in={0} out={3} fit="cover" />
+        <Clip id="backdrop" src="asset:coffeeWide" in={4} out={7} fit="cover" />
       </Track>
       <Track id="pinned">
         <Clip id="shot" src="asset:coffee" in={12} out={15} fit="cover">

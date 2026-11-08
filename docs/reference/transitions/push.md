@@ -8,7 +8,7 @@ Pushes the first clip out as the next comes in.
 
 </Example>
 
-The coffee footage is [Pixabay video 209419](https://pixabay.com/videos/id-209419/), under the Pixabay Content License.
+The coffee footage is Pixabay videos [209419](https://pixabay.com/videos/id-209419/) and [209424](https://pixabay.com/videos/id-209424/), under the Pixabay Content License.
 
 ## Params
 
