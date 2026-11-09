@@ -2,7 +2,7 @@
 head:
   - - meta
     - http-equiv: refresh
-      content: "0; url=/cutcraft/guide/player"
+      content: "0; url=/guide/player"
 ---
 
 # Moved

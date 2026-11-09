@@ -21,7 +21,7 @@ Besides the timing props (`start`, `anchor`, `at`, `offset`, `duration`):
 | `width` | number | `640` |
 | `accent` | string | `"$primary"` |
 
-[All components](https://prefix-tree.github.io/cutcraft/reference/components/)
+[All components](https://cutcraft.prefixtree.xyz/reference/components/)
 
 ## `Callout`
 
@@ -41,7 +41,7 @@ Besides the timing props (`start`, `anchor`, `at`, `offset`, `duration`):
 | `to` | { x, y } |  |
 | `color` | string | `"$accent"` |
 
-[All components](https://prefix-tree.github.io/cutcraft/reference/components/)
+[All components](https://cutcraft.prefixtree.xyz/reference/components/)
 
 ## `Badge`
 
@@ -61,7 +61,7 @@ Besides the timing props (`start`, `anchor`, `at`, `offset`, `duration`):
 | `color` | string | `"$accent"` |
 | `textColor` | string | `"$background"` |
 
-[All components](https://prefix-tree.github.io/cutcraft/reference/components/)
+[All components](https://cutcraft.prefixtree.xyz/reference/components/)
 
 ## `Counter`
 
@@ -85,7 +85,7 @@ Besides the timing props (`start`, `anchor`, `at`, `offset`, `duration`):
 | `size` | number | `140` |
 | `countFor` | number | `1.5` |
 
-[All components](https://prefix-tree.github.io/cutcraft/reference/components/)
+[All components](https://cutcraft.prefixtree.xyz/reference/components/)
 
 ## `ProgressBar`
 
@@ -106,7 +106,7 @@ Besides the timing props (`start`, `anchor`, `at`, `offset`, `duration`):
 | `color` | string | `"$primary"` |
 | `fillFor` | number | `1.2` |
 
-[All components](https://prefix-tree.github.io/cutcraft/reference/components/)
+[All components](https://cutcraft.prefixtree.xyz/reference/components/)
 
 ## `Arrow`
 
@@ -125,7 +125,7 @@ Besides the timing props (`start`, `anchor`, `at`, `offset`, `duration`):
 | `color` | string | `"$accent"` |
 | `width` | number | `6` |
 
-[All components](https://prefix-tree.github.io/cutcraft/reference/components/)
+[All components](https://cutcraft.prefixtree.xyz/reference/components/)
 
 ## `Highlight`
 
@@ -145,7 +145,7 @@ Besides the timing props (`start`, `anchor`, `at`, `offset`, `duration`):
 | `height` | number |  |
 | `color` | string | `"$accent"` |
 
-[All components](https://prefix-tree.github.io/cutcraft/reference/components/)
+[All components](https://cutcraft.prefixtree.xyz/reference/components/)
 
 ## `Background`
 
@@ -164,4 +164,4 @@ Besides the timing props (`start`, `anchor`, `at`, `offset`, `duration`):
 | `colors` | [string, string] | `["$background","$primary"]` |
 | `spacing` | number | `48` |
 
-[All components](https://prefix-tree.github.io/cutcraft/reference/components/)
+[All components](https://cutcraft.prefixtree.xyz/reference/components/)

@@ -11,17 +11,17 @@
 <p align="center">
   <a href="https://github.com/prefix-tree/cutcraft/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/prefix-tree/cutcraft/actions/workflows/ci.yml/badge.svg"></a>
   <a href="https://www.npmjs.com/package/cutcraft"><img alt="npm" src="https://img.shields.io/npm/v/cutcraft?color=black"></a>
-  <a href="https://prefix-tree.github.io/cutcraft/"><img alt="Docs" src="https://github.com/prefix-tree/cutcraft/actions/workflows/docs.yml/badge.svg"></a>
+  <a href="https://cutcraft.prefixtree.xyz/"><img alt="Docs" src="https://github.com/prefix-tree/cutcraft/actions/workflows/docs.yml/badge.svg"></a>
   <a href="https://github.com/prefix-tree/cutcraft/actions/workflows/codeql.yml"><img alt="CodeQL" src="https://github.com/prefix-tree/cutcraft/actions/workflows/codeql.yml/badge.svg"></a>
   <a href="LICENSE"><img alt="MIT License" src="https://img.shields.io/badge/license-MIT-black"></a>
   <img alt="Node 22.19 or later" src="https://img.shields.io/badge/node-%E2%89%A522.19-black">
 </p>
 
 <p align="center">
-  <a href="https://prefix-tree.github.io/cutcraft/">Documentation</a> ·
-  <a href="https://prefix-tree.github.io/cutcraft/examples">Examples</a> ·
-  <a href="https://prefix-tree.github.io/cutcraft/guide/introduction">Guide</a> ·
-  <a href="https://prefix-tree.github.io/cutcraft/reference/elements/">Reference</a> ·
+  <a href="https://cutcraft.prefixtree.xyz/">Documentation</a> ·
+  <a href="https://cutcraft.prefixtree.xyz/examples">Examples</a> ·
+  <a href="https://cutcraft.prefixtree.xyz/guide/introduction">Guide</a> ·
+  <a href="https://cutcraft.prefixtree.xyz/reference/elements/">Reference</a> ·
   <a href="CHANGELOG.md">Changelog</a>
 </p>
 
@@ -62,7 +62,7 @@ model, reads the edit as ordinary code.
   <img src="docs/public/readme/logo.gif" width="300" alt="A logo reveal: three thousand particles drift in and settle into the name Shed, then a tagline slides in under it">
   <img src="docs/public/readme/kinetic.gif" width="95" alt="Kinetic type in a vertical short: each phrase slams or stacks in on its word, over karaoke captions">
 </p>
-<p align="center"><sub>Each one is a short TSX file exported by CutCraft: three.js and Motion, drawn by the player in headless Chrome. <a href="https://prefix-tree.github.io/cutcraft/examples">See them next to their files</a>.</sub></p>
+<p align="center"><sub>Each one is a short TSX file exported by CutCraft: three.js and Motion, drawn by the player in headless Chrome. <a href="https://cutcraft.prefixtree.xyz/examples">See them next to their files</a>.</sub></p>
 
 ## Why
 
@@ -111,17 +111,17 @@ CSS animation shows exactly the frame for that time. These layers are still time
 trims and anchors them to words like everything else; only what they draw is up to you.
 
 [`@cutcraft/graphics`](packages/graphics) has the host setup, and
-[Free code](https://prefix-tree.github.io/cutcraft/guide/free-code) has the details.
+[Free code](https://cutcraft.prefixtree.xyz/guide/free-code) has the details.
 The player draws all of this, and so does the export, which runs the real player in headless Chrome, frame by frame,
 with the same sound
-([exporting](https://prefix-tree.github.io/cutcraft/guide/exporting#the-browser-it-runs-in)).
+([exporting](https://cutcraft.prefixtree.xyz/guide/exporting#the-browser-it-runs-in)).
 
 ## By topic
 
 ### Cut on words and shots
 
 A clip's `in` and `out` name a word of the transcript or a shot of the camera, and CutCraft turns them into frames
-through every trim and speed change. [Time by meaning](https://prefix-tree.github.io/cutcraft/guide/time)
+through every trim and speed change. [Time by meaning](https://cutcraft.prefixtree.xyz/guide/time)
 
 ```tsx
 <Clip id="hook" src="asset:founder" in="word:12" out="word:23.end" />
@@ -131,7 +131,7 @@ through every trim and speed change. [Time by meaning](https://prefix-tree.githu
 ### Titles on the word that says them
 
 An overlay anchors to a clip and starts on one of its words, so it moves when the clip is trimmed or dragged.
-[Titles and graphics](https://prefix-tree.github.io/cutcraft/guide/titles-and-graphics)
+[Titles and graphics](https://cutcraft.prefixtree.xyz/guide/titles-and-graphics)
 
 ```tsx
 <Title id="title" anchor="hook" at="word:14" duration={2.8} style="h1" animation={{ preset: "word-by-word" }}>Shed</Title>
@@ -140,7 +140,7 @@ An overlay anchors to a clip and starts on one of its words, so it moves when th
 ### Captions and sound
 
 Captions come from the transcript and follow the clips. Music fills the video and ducks under speech.
-[Captions and sound](https://prefix-tree.github.io/cutcraft/guide/captions-and-sound)
+[Captions and sound](https://cutcraft.prefixtree.xyz/guide/captions-and-sound)
 
 ```tsx
 <Captions id="captions" src="asset:founder" style={{ position: "bottom", size: 44 }} animation="karaoke" />
@@ -150,7 +150,7 @@ Captions come from the transcript and follow the clips. Music fills the video an
 ### Transitions
 
 Twelve between two clips: crossfade, dips to black and white, wipe, slide, push, iris, clock wipe, blinds, film burn,
-pixel dissolve and zoom. [Transition](https://prefix-tree.github.io/cutcraft/reference/elements/transition)
+pixel dissolve and zoom. [Transition](https://cutcraft.prefixtree.xyz/reference/elements/transition)
 
 ```tsx
 <Transition id="x1" type="crossfade" duration={0.4} />
@@ -160,7 +160,7 @@ pixel dissolve and zoom. [Transition](https://prefix-tree.github.io/cutcraft/ref
 ### Colour, keying and effects
 
 Twenty-eight effects, from exposure and curves to a chroma key, a region blur and glow, run in the order the file lists them.
-[Colour and grading](https://prefix-tree.github.io/cutcraft/guide/colour), [Keying, blurs and pins](https://prefix-tree.github.io/cutcraft/guide/footage-tools)
+[Colour and grading](https://cutcraft.prefixtree.xyz/guide/colour), [Keying, blurs and pins](https://cutcraft.prefixtree.xyz/guide/footage-tools)
 
 ```tsx
 <Clip id="interview" src="asset:interview">
@@ -173,7 +173,7 @@ Twenty-eight effects, from exposure and curves to a chroma key, a region blur an
 ### Keyframes and speed ramps
 
 Keyframes animate transforms, effects, colour and sound. A speed key ramps a clip's speed from a moment on, with its
-audio. [Keyframe](https://prefix-tree.github.io/cutcraft/reference/elements/keyframe), [SpeedKey](https://prefix-tree.github.io/cutcraft/reference/elements/speedkey)
+audio. [Keyframe](https://cutcraft.prefixtree.xyz/reference/elements/keyframe), [SpeedKey](https://cutcraft.prefixtree.xyz/reference/elements/speedkey)
 
 ```tsx
 <Clip id="broll" src="asset:product">
@@ -186,15 +186,15 @@ audio. [Keyframe](https://prefix-tree.github.io/cutcraft/reference/elements/keyf
 ### Edit by hand, keep the code
 
 119 editor actions (trim, move, retime, restyle…), each with validation and undo. Every edit is written back into
-the file as the smallest text change, so a model reads your edit as code. [Editing](https://prefix-tree.github.io/cutcraft/guide/editing)
+the file as the smallest text change, so a model reads your edit as code. [Editing](https://cutcraft.prefixtree.xyz/guide/editing)
 
 ### Play, check and export
 
 A React `<Player>` (or the framework-free `PlayerCore`) decodes with WebCodecs and seeks frame-exact. The export runs
 that same player in headless Chrome: MP4 (H.264 or AV1), WebM (VP9 or AV1), MP3 or WAV, and PNG or JPEG stills. A lint
 checks the file before it plays, and a layout check reports overlays that leave the safe zone or cover the captions or
-the subject, at their line in the file. [Player](https://prefix-tree.github.io/cutcraft/guide/player), [Exporting](https://prefix-tree.github.io/cutcraft/guide/exporting),
-[What renders](https://prefix-tree.github.io/cutcraft/reference/rendering)
+the subject, at their line in the file. [Player](https://cutcraft.prefixtree.xyz/guide/player), [Exporting](https://cutcraft.prefixtree.xyz/guide/exporting),
+[What renders](https://cutcraft.prefixtree.xyz/reference/rendering)
 
 ## Quick start
 
@@ -222,8 +222,8 @@ npm install cutcraft @cutcraft/kit react zod   # the CLI, and types for the file
 npx cutcraft hello.tsx --out hello.mp4         # or .webm, a .png still with --still 1
 ```
 
-The [quick start](https://prefix-tree.github.io/cutcraft/guide/getting-started) then adds your own footage, cuts on
-words, and three.js and Motion, one step at a time. [Examples](https://prefix-tree.github.io/cutcraft/examples) shows
+The [quick start](https://cutcraft.prefixtree.xyz/guide/getting-started) then adds your own footage, cuts on
+words, and three.js and Motion, one step at a time. [Examples](https://cutcraft.prefixtree.xyz/examples) shows
 which file to start from for what you're making.
 
 To render the examples from this repository you need Node 22.19 or later, pnpm 10 (`corepack enable`), and `ffmpeg`
@@ -249,7 +249,7 @@ render. In Claude Code:
 ```
 
 Other agents take the [`skills/cutcraft`](plugins/cutcraft/skills/cutcraft) folder as it is.
-[With your agent](https://prefix-tree.github.io/cutcraft/guide/agents) has the details.
+[With your agent](https://cutcraft.prefixtree.xyz/guide/agents) has the details.
 
 ## Packages
 
@@ -261,7 +261,7 @@ Other agents take the [`skills/cutcraft`](plugins/cutcraft/skills/cutcraft) fold
 | [`@cutcraft/render`](packages/render) | The export as a library: `loadVideo` and `renderVideo`, driving the player in headless Chrome. |
 | [`@cutcraft/graphics`](packages/graphics) | three.js and Motion on the video's clock for `<Three>` and `<Motion>`, and the 34 `<Graphic>` kinds, which are deprecated and will be removed. |
 
-The repository also holds [eight recipes](https://prefix-tree.github.io/cutcraft/recipes/) (complete files for common
+The repository also holds [eight recipes](https://cutcraft.prefixtree.xyz/recipes/) (complete files for common
 videos, each tested) and [the worked example](examples/launch-recap).
 
 ## Status
@@ -269,7 +269,7 @@ videos, each tested) and [the worked example](examples/launch-recap).
 | | |
 |---|---|
 | Works | Resolving, every editor action with undo, writing edits back to the file, lint. Playback with seek, rate and loop; twelve transitions; keyframes on transforms, effects, colour and sound; speed ramps and freeze frames with their audio; masks, overlays, captions and ducking. Export with frame-exact pictures, and the layout check. |
-| Partial | Twelve transitions, thirty-three effects and nine title presets, all drawn: what the schemas accept is what renders, with a few limits listed in [what renders](https://prefix-tree.github.io/cutcraft/reference/rendering). |
+| Partial | Twelve transitions, thirty-three effects and nine title presets, all drawn: what the schemas accept is what renders, with a few limits listed in [what renders](https://cutcraft.prefixtree.xyz/reference/rendering). |
 
 ## Roadmap
 

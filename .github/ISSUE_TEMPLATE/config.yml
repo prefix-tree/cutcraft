@@ -1,7 +1,7 @@
 blank_issues_enabled: true
 contact_links:
   - name: Documentation
-    url: https://prefix-tree.github.io/cutcraft/
+    url: https://cutcraft.prefixtree.xyz/
     about: Guides, the element and action reference, and what renders.
   - name: Design and decisions
     url: https://github.com/prefix-tree/cutcraft/tree/main/docs/decisions

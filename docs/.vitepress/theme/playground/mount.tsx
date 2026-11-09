@@ -19,7 +19,7 @@ export interface PlaygroundOptions {
   readonly editor: HTMLElement;
   readonly player: HTMLElement;
   readonly code: string;
-  /** The site's base URL, for the clips (`/cutcraft/`). */
+  /** The site's base URL, for the clips (`/`). */
   readonly base: string;
   /** What is wrong with the file, or null once it plays. */
   readonly onError: (message: string | null) => void;

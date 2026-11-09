@@ -2,7 +2,7 @@
 
 # @cutcraft/graphics
 
-What a [CutCraft](https://prefix-tree.github.io/cutcraft/) file draws beyond footage: three.js and Motion on the
+What a [CutCraft](https://cutcraft.prefixtree.xyz/) file draws beyond footage: three.js and Motion on the
 video's clock, for the graphics you write yourself. Ready-made lower thirds, callouts, counters and the like are
 components in `@cutcraft/kit` (`LowerThird`, `Callout`, `Counter`…).
 
@@ -61,7 +61,7 @@ Both sit on the timeline like any overlay, so an editor can move, trim and ancho
 you the same clock.
 
 The player draws both tags, and so does the export (`cutcraft`), which runs the player in headless Chrome.
-[Free code](https://prefix-tree.github.io/cutcraft/guide/free-code) covers it
+[Free code](https://cutcraft.prefixtree.xyz/guide/free-code) covers it
 in more depth.
 
 MIT licensed.

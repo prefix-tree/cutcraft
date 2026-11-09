@@ -36,7 +36,7 @@ Drawn as a CSS filter; no WebGL needed.
 |---|---|---|
 | `amount` | number (-1..1) | `0` |
 
-[All effects and transitions](https://prefix-tree.github.io/cutcraft/reference/effects/) · [Units](https://prefix-tree.github.io/cutcraft/reference/effects/#units)
+[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
 
 ## `contrast`
 
@@ -50,7 +50,7 @@ Drawn as a CSS filter; no WebGL needed.
 |---|---|---|
 | `amount` | number (-1..1) | `0` |
 
-[All effects and transitions](https://prefix-tree.github.io/cutcraft/reference/effects/) · [Units](https://prefix-tree.github.io/cutcraft/reference/effects/#units)
+[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
 
 ## `saturation`
 
@@ -64,7 +64,7 @@ Drawn as a CSS filter; no WebGL needed.
 |---|---|---|
 | `amount` | number (-1..1) | `0` |
 
-[All effects and transitions](https://prefix-tree.github.io/cutcraft/reference/effects/) · [Units](https://prefix-tree.github.io/cutcraft/reference/effects/#units)
+[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
 
 ## `hue`
 
@@ -78,7 +78,7 @@ Drawn as a CSS filter; no WebGL needed.
 |---|---|---|
 | `angle` | number | `0` |
 
-[All effects and transitions](https://prefix-tree.github.io/cutcraft/reference/effects/) · [Units](https://prefix-tree.github.io/cutcraft/reference/effects/#units)
+[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
 
 ## `blur`
 
@@ -92,7 +92,7 @@ Drawn as a CSS filter; no WebGL needed.
 |---|---|---|
 | `radius` | number (0..200) | `4` |
 
-[All effects and transitions](https://prefix-tree.github.io/cutcraft/reference/effects/) · [Units](https://prefix-tree.github.io/cutcraft/reference/effects/#units)
+[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
 
 ## `vignette`
 
@@ -106,7 +106,7 @@ Drawn as painting on the element's pixels; no WebGL needed.
 |---|---|---|
 | `amount` | number (0..1) | `0.5` |
 
-[All effects and transitions](https://prefix-tree.github.io/cutcraft/reference/effects/) · [Units](https://prefix-tree.github.io/cutcraft/reference/effects/#units)
+[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
 
 ## `grain`
 
@@ -120,7 +120,7 @@ Drawn as painting on the element's pixels; no WebGL needed.
 |---|---|---|
 | `amount` | number (0..1) | `0.2` |
 
-[All effects and transitions](https://prefix-tree.github.io/cutcraft/reference/effects/) · [Units](https://prefix-tree.github.io/cutcraft/reference/effects/#units)
+[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
 
 ## `shadow`
 
@@ -138,7 +138,7 @@ Drawn as a CSS filter; no WebGL needed.
 | `color` | string | `"#000000"` |
 | `opacity` | number (0..1) | `0.5` |
 
-[All effects and transitions](https://prefix-tree.github.io/cutcraft/reference/effects/) · [Units](https://prefix-tree.github.io/cutcraft/reference/effects/#units)
+[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
 
 ## `grayscale`
 
@@ -152,7 +152,7 @@ Drawn as a CSS filter; no WebGL needed.
 |---|---|---|
 | `amount` | number (0..1) | `1` |
 
-[All effects and transitions](https://prefix-tree.github.io/cutcraft/reference/effects/) · [Units](https://prefix-tree.github.io/cutcraft/reference/effects/#units)
+[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
 
 ## `sepia`
 
@@ -166,7 +166,7 @@ Drawn as a CSS filter; no WebGL needed.
 |---|---|---|
 | `amount` | number (0..1) | `1` |
 
-[All effects and transitions](https://prefix-tree.github.io/cutcraft/reference/effects/) · [Units](https://prefix-tree.github.io/cutcraft/reference/effects/#units)
+[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
 
 ## `invert`
 
@@ -180,7 +180,7 @@ Drawn as a CSS filter; no WebGL needed.
 |---|---|---|
 | `amount` | number (0..1) | `1` |
 
-[All effects and transitions](https://prefix-tree.github.io/cutcraft/reference/effects/) · [Units](https://prefix-tree.github.io/cutcraft/reference/effects/#units)
+[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
 
 ## `levels`
 
@@ -196,7 +196,7 @@ Drawn as a shader, with a CSS filter where WebGL is missing.
 | `white` | number (0..1) | `1` |
 | `gamma` | number (0.01..10) | `1` |
 
-[All effects and transitions](https://prefix-tree.github.io/cutcraft/reference/effects/) · [Units](https://prefix-tree.github.io/cutcraft/reference/effects/#units)
+[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
 
 ## `lut`
 
@@ -211,7 +211,7 @@ Drawn as a shader.
 | `src` | string |  |
 | `amount` | number (0..1) | `1` |
 
-[All effects and transitions](https://prefix-tree.github.io/cutcraft/reference/effects/) · [Units](https://prefix-tree.github.io/cutcraft/reference/effects/#units)
+[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
 
 ## `exposure`
 
@@ -225,7 +225,7 @@ Drawn as a shader, with a CSS filter where WebGL is missing.
 |---|---|---|
 | `stops` | number (-5..5) | `0` |
 
-[All effects and transitions](https://prefix-tree.github.io/cutcraft/reference/effects/) · [Units](https://prefix-tree.github.io/cutcraft/reference/effects/#units)
+[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
 
 ## `vibrance`
 
@@ -239,7 +239,7 @@ Drawn as a shader, with a CSS filter where WebGL is missing.
 |---|---|---|
 | `amount` | number (-1..1) | `0` |
 
-[All effects and transitions](https://prefix-tree.github.io/cutcraft/reference/effects/) · [Units](https://prefix-tree.github.io/cutcraft/reference/effects/#units)
+[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
 
 ## `whiteBalance`
 
@@ -254,7 +254,7 @@ Drawn as a shader, with a CSS filter where WebGL is missing.
 | `temperature` | number (-1..1) | `0` |
 | `tint` | number (-1..1) | `0` |
 
-[All effects and transitions](https://prefix-tree.github.io/cutcraft/reference/effects/) · [Units](https://prefix-tree.github.io/cutcraft/reference/effects/#units)
+[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
 
 ## `shadowsHighlights`
 
@@ -270,7 +270,7 @@ Drawn as a shader.
 | `highlights` | number (-1..1) | `0` |
 | `radius` | number (0.5..200) | `10` |
 
-[All effects and transitions](https://prefix-tree.github.io/cutcraft/reference/effects/) · [Units](https://prefix-tree.github.io/cutcraft/reference/effects/#units)
+[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
 
 ## `duotone`
 
@@ -286,7 +286,7 @@ Drawn as a shader.
 | `light` | string | `"#ffd27f"` |
 | `amount` | number (0..1) | `1` |
 
-[All effects and transitions](https://prefix-tree.github.io/cutcraft/reference/effects/) · [Units](https://prefix-tree.github.io/cutcraft/reference/effects/#units)
+[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
 
 ## `curves`
 
@@ -303,7 +303,7 @@ Drawn as a shader.
 | `green` | [number (0..1), number (0..1)][] | `[[0,0],[1,1]]` |
 | `blue` | [number (0..1), number (0..1)][] | `[[0,0],[1,1]]` |
 
-[All effects and transitions](https://prefix-tree.github.io/cutcraft/reference/effects/) · [Units](https://prefix-tree.github.io/cutcraft/reference/effects/#units)
+[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
 
 ## `colorKey`
 
@@ -320,7 +320,7 @@ Drawn as a shader.
 | `softness` | number (0..1) | `0.1` |
 | `spill` | number (0..1) | `0.5` |
 
-[All effects and transitions](https://prefix-tree.github.io/cutcraft/reference/effects/) · [Units](https://prefix-tree.github.io/cutcraft/reference/effects/#units)
+[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
 
 ## `regionBlur`
 
@@ -338,7 +338,7 @@ Drawn as a shader.
 | `roundness` | number (0..1) | `0` |
 | `inverted` | boolean | `false` |
 
-[All effects and transitions](https://prefix-tree.github.io/cutcraft/reference/effects/) · [Units](https://prefix-tree.github.io/cutcraft/reference/effects/#units)
+[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
 
 ## `cornerPin`
 
@@ -355,7 +355,7 @@ Drawn as a shader.
 | `bottomRight` | [number, number] | `[1,1]` |
 | `bottomLeft` | [number, number] | `[0,1]` |
 
-[All effects and transitions](https://prefix-tree.github.io/cutcraft/reference/effects/) · [Units](https://prefix-tree.github.io/cutcraft/reference/effects/#units)
+[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
 
 ## `zoomBlur`
 
@@ -371,7 +371,7 @@ Drawn as a shader.
 | `center` | [number, number] | `[0.5,0.5]` |
 | `samples` | integer (1..64) | `24` |
 
-[All effects and transitions](https://prefix-tree.github.io/cutcraft/reference/effects/) · [Units](https://prefix-tree.github.io/cutcraft/reference/effects/#units)
+[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
 
 ## `chromaticAberration`
 
@@ -388,7 +388,7 @@ Drawn as a shader.
 | `radial` | boolean | `false` |
 | `center` | [number, number] | `[0.5,0.5]` |
 
-[All effects and transitions](https://prefix-tree.github.io/cutcraft/reference/effects/) · [Units](https://prefix-tree.github.io/cutcraft/reference/effects/#units)
+[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
 
 ## `glow`
 
@@ -406,7 +406,7 @@ Drawn as a shader, with a CSS filter where WebGL is missing.
 | `color` | string | `"#ffffff"` |
 | `tint` | number (0..1) | `1` |
 
-[All effects and transitions](https://prefix-tree.github.io/cutcraft/reference/effects/) · [Units](https://prefix-tree.github.io/cutcraft/reference/effects/#units)
+[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
 
 ## `outline`
 
@@ -423,7 +423,7 @@ Drawn as a shader.
 | `opacity` | number (0..1) | `1` |
 | `outlineOnly` | boolean | `false` |
 
-[All effects and transitions](https://prefix-tree.github.io/cutcraft/reference/effects/) · [Units](https://prefix-tree.github.io/cutcraft/reference/effects/#units)
+[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
 
 ## `longShadow`
 
@@ -441,7 +441,7 @@ Drawn as a shader.
 | `opacity` | number (0..1) | `1` |
 | `fade` | boolean | `false` |
 
-[All effects and transitions](https://prefix-tree.github.io/cutcraft/reference/effects/) · [Units](https://prefix-tree.github.io/cutcraft/reference/effects/#units)
+[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
 
 ## `bevel`
 
@@ -459,7 +459,7 @@ Drawn as a shader.
 | `highlight` | string | `"#ffffff"` |
 | `shade` | string | `"#000000"` |
 
-[All effects and transitions](https://prefix-tree.github.io/cutcraft/reference/effects/) · [Units](https://prefix-tree.github.io/cutcraft/reference/effects/#units)
+[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
 
 ## `crossfade`
 
@@ -473,7 +473,7 @@ Drawn without a shader.
 |---|---|---|
 | `curve` | "linear" \| "ease" \| "ease-in" \| "ease-out" \| "ease-in-out" | `"ease"` |
 
-[All effects and transitions](https://prefix-tree.github.io/cutcraft/reference/effects/) · [Units](https://prefix-tree.github.io/cutcraft/reference/effects/#units)
+[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
 
 ## `dipToBlack`
 
@@ -487,7 +487,7 @@ Drawn without a shader.
 |---|---|---|
 | `holdDuration` | number (0..30) | `0.1` |
 
-[All effects and transitions](https://prefix-tree.github.io/cutcraft/reference/effects/) · [Units](https://prefix-tree.github.io/cutcraft/reference/effects/#units)
+[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
 
 ## `dipToWhite`
 
@@ -501,7 +501,7 @@ Drawn without a shader.
 |---|---|---|
 | `holdDuration` | number (0..30) | `0.1` |
 
-[All effects and transitions](https://prefix-tree.github.io/cutcraft/reference/effects/) · [Units](https://prefix-tree.github.io/cutcraft/reference/effects/#units)
+[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
 
 ## `wipe`
 
@@ -515,7 +515,7 @@ Drawn without a shader.
 |---|---|---|
 | `direction` | "left" \| "right" \| "up" \| "down" | `"left"` |
 
-[All effects and transitions](https://prefix-tree.github.io/cutcraft/reference/effects/) · [Units](https://prefix-tree.github.io/cutcraft/reference/effects/#units)
+[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
 
 ## `slide`
 
@@ -530,7 +530,7 @@ Drawn without a shader.
 | `direction` | "left" \| "right" \| "up" \| "down" | `"left"` |
 | `pushOut` | boolean | `false` |
 
-[All effects and transitions](https://prefix-tree.github.io/cutcraft/reference/effects/) · [Units](https://prefix-tree.github.io/cutcraft/reference/effects/#units)
+[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
 
 ## `push`
 
@@ -544,7 +544,7 @@ Drawn without a shader.
 |---|---|---|
 | `direction` | "left" \| "right" \| "up" \| "down" | `"left"` |
 
-[All effects and transitions](https://prefix-tree.github.io/cutcraft/reference/effects/) · [Units](https://prefix-tree.github.io/cutcraft/reference/effects/#units)
+[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
 
 ## `iris`
 
@@ -562,7 +562,7 @@ Drawn by a shader, as a crossfade where WebGL is missing.
 | `center` | [number, number] | `[0.5,0.5]` |
 | `feather` | number (0..200) | `2` |
 
-[All effects and transitions](https://prefix-tree.github.io/cutcraft/reference/effects/) · [Units](https://prefix-tree.github.io/cutcraft/reference/effects/#units)
+[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
 
 ## `clockWipe`
 
@@ -579,7 +579,7 @@ Drawn by a shader, as a crossfade where WebGL is missing.
 | `center` | [number, number] | `[0.5,0.5]` |
 | `softness` | number (0..1) | `0.002778` |
 
-[All effects and transitions](https://prefix-tree.github.io/cutcraft/reference/effects/) · [Units](https://prefix-tree.github.io/cutcraft/reference/effects/#units)
+[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
 
 ## `blinds`
 
@@ -595,7 +595,7 @@ Drawn by a shader, as a crossfade where WebGL is missing.
 | `angle` | number | `90` |
 | `softness` | number (0..1) | `0.1` |
 
-[All effects and transitions](https://prefix-tree.github.io/cutcraft/reference/effects/) · [Units](https://prefix-tree.github.io/cutcraft/reference/effects/#units)
+[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
 
 ## `filmBurn`
 
@@ -613,7 +613,7 @@ Drawn by a shader, as a crossfade where WebGL is missing.
 | `edge` | number (0..500) | `24` |
 | `color` | string | `"#ff7a1a"` |
 
-[All effects and transitions](https://prefix-tree.github.io/cutcraft/reference/effects/) · [Units](https://prefix-tree.github.io/cutcraft/reference/effects/#units)
+[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
 
 ## `pixelDissolve`
 
@@ -630,7 +630,7 @@ Drawn by a shader, as a crossfade where WebGL is missing.
 | `seed` | integer (0..4294967295) | `0` |
 | `softness` | number (0..1) | `0.15` |
 
-[All effects and transitions](https://prefix-tree.github.io/cutcraft/reference/effects/) · [Units](https://prefix-tree.github.io/cutcraft/reference/effects/#units)
+[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
 
 ## `zoom`
 
@@ -646,4 +646,4 @@ Drawn by a shader, as a crossfade where WebGL is missing.
 | `scale` | number (1..4) | `1.6` |
 | `blur` | number (0..1) | `0.5` |
 
-[All effects and transitions](https://prefix-tree.github.io/cutcraft/reference/effects/) · [Units](https://prefix-tree.github.io/cutcraft/reference/effects/#units)
+[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
