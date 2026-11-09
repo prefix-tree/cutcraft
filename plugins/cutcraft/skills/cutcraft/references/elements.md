@@ -365,7 +365,7 @@ A look on its parent: colour grading, blur, glow, outline, keying, corner pin, v
 | prop | type | default | required |
 |---|---|---|---|
 | `id` | string |  | yes |
-| `type` | "brightness" \| "contrast" \| "saturation" \| "hue" \| "blur" \| … 23 more \| string |  | yes |
+| `type` | "brightness" \| "contrast" \| "saturation" \| "hue" \| "blur" \| … 28 more \| string |  | yes |
 | `params` | object | `{}` |  |
 | `enabled` | boolean | `true` |  |
 

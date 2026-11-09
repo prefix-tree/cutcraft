@@ -8,21 +8,22 @@ A param's name says what kind of value it is, and each kind has one scale:
 
 | Kind | Scale | Params |
 |---|---|---|
-| strength, mix or share | a fraction, 0 to 1, or -1 to 1 when it goes both ways | `amount`, `opacity`, `softness`, `tolerance`, `tint`, `temperature`, `shadows`, `highlights`, `threshold`, `spill`, `black`, `white`, `blur`, `roundness`, `star` |
-| gain | a multiplier | `intensity`, `scale` |
+| strength, mix or share | a fraction, 0 to 1, or -1 to 1 when it goes both ways | `amount`, `opacity`, `softness`, `tolerance`, `tint`, `temperature`, `shadows`, `highlights`, `threshold`, `spill`, `black`, `white`, `blur`, `roundness`, `star`, `thickness`, `spread` (of the frame's diagonal) |
+| gain | a multiplier | `intensity`, `scale`, `contrast` |
 | exponent | a power, 1 changes nothing | `gamma` |
-| distance | pixels of the composition; a blur's `radius` (and `bevel`'s `size`) is its Gaussian's standard deviation, as CSS `blur()` reads it | `radius`, `width`, `feather`, `length`, `distance`, `size`, `edge`, `x`, `y` |
+| distance | pixels of the composition; a blur's `radius` (and `bevel`'s `size`) is its Gaussian's standard deviation, as CSS `blur()` reads it | `radius`, `width`, `feather`, `length`, `distance`, `size`, `spacing`, `edge`, `x`, `y` |
 | angle | degrees, clockwise from up | `angle`, `rotation`, `startAngle` |
 | position | fractions of the frame, `[x, y]` from the top left | `center`, `box`, the corners |
-| colour | `"#rgb"` or `"#rrggbb"` | `color`, `dark`, `light` |
+| colour | `"#rgb"` or `"#rrggbb"` | `color`, `dark`, `light`, `ink`, `paper` |
 | exposure | stops | `stops` |
 | duration | seconds | `holdDuration` |
-| count | a whole number | `sides`, `slats`, `columns`, `rows`, `samples` |
+| rate | per second: pixels for `speed`, changes of the pattern for `evolution` | `speed`, `evolution` |
+| count | a whole number | `sides`, `slats`, `columns`, `rows`, `samples`, `octaves` |
 | seed | a whole number; the same seed draws the same pattern | `seed` |
 | switch | `true` or `false` | `fade`, `inverted`, `outlineOnly`, `pushOut`, `radial` |
 | curve | `[input, output]` points, 0 to 1 | `rgb`, `red`, `green`, `blue` |
 | asset | `"asset:<id>"` from the manifest | `src` |
-| choice | a string | `direction`, `curve` |
+| choice | a string | `direction`, `curve`, `mode`, `blend` |
 
 ## `brightness`
 
@@ -458,6 +459,98 @@ Drawn as a shader.
 | `amount` | number (0..1) | `0.4` |
 | `highlight` | string | `"#ffffff"` |
 | `shade` | string | `"#000000"` |
+
+[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
+
+## `halftone`
+
+Prints the picture as a screen of dots, in one ink or four.
+
+### Params
+
+Drawn as a shader.
+
+| param | type | default |
+|---|---|---|
+| `size` | number (2..200) | `8` |
+| `angle` | number | `45` |
+| `mode` | "mono" \| "cmyk" | `"mono"` |
+| `ink` | string | `"#111111"` |
+| `paper` | string | `"#ffffff"` |
+| `amount` | number (0..1) | `1` |
+
+[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
+
+## `pixelate`
+
+Turns the picture, or a box of it, into a coarse mosaic.
+
+### Params
+
+Drawn as a shader.
+
+| param | type | default |
+|---|---|---|
+| `size` | number (1..200) | `12` |
+| `box` | [number, number, number, number] | `[0,0,1,1]` |
+| `feather` | number (0..500) | `0` |
+
+[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
+
+## `scanlines`
+
+Lays the dark lines of an old screen over the picture.
+
+### Params
+
+Drawn as a shader.
+
+| param | type | default |
+|---|---|---|
+| `spacing` | number (2..200) | `4` |
+| `thickness` | number (0..1) | `0.5` |
+| `intensity` | number (0..1) | `0.35` |
+| `speed` | number (-2000..2000) | `0` |
+| `angle` | number | `0` |
+
+[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
+
+## `lightLeak`
+
+Washes warm light in from the edges, as light leaking into a film camera.
+
+### Params
+
+Drawn as a shader.
+
+| param | type | default |
+|---|---|---|
+| `color` | string | `"#ff8a3d"` |
+| `intensity` | number (0..1) | `0.6` |
+| `spread` | number (0.05..2) | `0.6` |
+| `evolution` | number (0..10) | `0.15` |
+| `seed` | integer (0..∞) | `0` |
+
+[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
+
+## `fractalNoise`
+
+Blends a moving cloud of noise over the picture: mist, smoke or texture.
+
+### Params
+
+Drawn as a shader.
+
+| param | type | default |
+|---|---|---|
+| `size` | number (2..2000) | `160` |
+| `octaves` | integer (1..8) | `5` |
+| `evolution` | number (0..10) | `0.2` |
+| `contrast` | number (0..10) | `1` |
+| `color` | string | `"#ffffff"` |
+| `blend` | "normal" \| "multiply" \| "screen" \| "overlay" \| "softLight" | `"overlay"` |
+| `opacity` | number (0..1) | `0.5` |
+| `seed` | integer (0..∞) | `0` |
 
 [All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
 
