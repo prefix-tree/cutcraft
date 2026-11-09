@@ -2,7 +2,7 @@
 
 # cutcraft
 
-The [CutCraft](https://prefix-tree.github.io/cutcraft/) command line. It exports a TSX video file to video, audio or
+The [CutCraft](https://cutcraft.prefixtree.xyz/) command line. It exports a TSX video file to video, audio or
 a still image, writes its captions as subtitles, checks its layout, and adds media to the manifest. The export runs the real player in headless Chrome,
 which the first export downloads (`npx cutcraft browser install` does it ahead of time).
 
@@ -34,7 +34,7 @@ file's folder, one per asset id, or in the folder you pass to `--media`.
 | `--font <spec>` | A font beyond the ones the file declares, for this export: `Name=file.ttf`. |
 | `--json` | Print the layout check as JSON. It exits with code 3 when it finds issues. |
 
-`npx cutcraft --help` prints them all, and [Exporting](https://prefix-tree.github.io/cutcraft/guide/exporting)
+`npx cutcraft --help` prints them all, and [Exporting](https://cutcraft.prefixtree.xyz/guide/exporting)
 explains each one. To export from your own code, use [`@cutcraft/render`](https://www.npmjs.com/package/@cutcraft/render).
 
 Needs Node 22.19 or later. MIT licensed.

@@ -4,7 +4,7 @@
   "private": true,
   "description": "A video-editing DSL: a model writes a TSX file, the browser renders it, the editor edits the same file.",
   "license": "MIT",
-  "homepage": "https://prefix-tree.github.io/cutcraft/",
+  "homepage": "https://cutcraft.prefixtree.xyz/",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/prefix-tree/cutcraft.git"

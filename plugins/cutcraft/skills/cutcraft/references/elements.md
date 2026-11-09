@@ -20,7 +20,7 @@ The video: frame rate, size, background and theme. It ends where its content end
 | `theme` | { extends, palette, fonts, radius, motion, styles } |  |  |
 | `motionBlur` | { shutterAngle, samples } |  |  |
 
-Children: `track`, `marker`, `multicam`, `captions`. [All elements](https://prefix-tree.github.io/cutcraft/reference/elements/)
+Children: `track`, `marker`, `multicam`, `captions`. [All elements](https://cutcraft.prefixtree.xyz/reference/elements/)
 
 ## `<Track>`
 
@@ -40,7 +40,7 @@ A row of elements. A sequence track plays its children back to back; a free trac
 | `solo` | boolean | `false` |  |
 | `group` | string |  |  |
 
-Children: `clip`, `audio`, `gap`, `transition`, `title`, `shape`, `svg`, `sticker`, `adjustment`, `nested`, `layer`, `multicam`. [All elements](https://prefix-tree.github.io/cutcraft/reference/elements/)
+Children: `clip`, `audio`, `gap`, `transition`, `title`, `shape`, `svg`, `sticker`, `adjustment`, `nested`, `layer`, `multicam`. [All elements](https://cutcraft.prefixtree.xyz/reference/elements/)
 
 ## `<Clip>`
 
@@ -71,7 +71,7 @@ A stretch of a video or image asset, trimmed by seconds, transcript words or cam
 | `duck` | { under, to, attack, release } |  |  |
 | `frame` | { focus } |  |  |
 
-Timed, visual, audible, trims its source, transformable. Children: `effect`, `keyframe`, `mask`, `speedKey`, `freeze`. [All elements](https://prefix-tree.github.io/cutcraft/reference/elements/)
+Timed, visual, audible, trims its source, transformable. Children: `effect`, `keyframe`, `mask`, `speedKey`, `freeze`. [All elements](https://cutcraft.prefixtree.xyz/reference/elements/)
 
 ## `<Gap>`
 
@@ -84,7 +84,7 @@ Empty time between clips on a sequence track.
 | `id` | string |  | yes |
 | `duration` | number |  | yes |
 
-Timed. No children. [All elements](https://prefix-tree.github.io/cutcraft/reference/elements/)
+Timed. No children. [All elements](https://cutcraft.prefixtree.xyz/reference/elements/)
 
 ## `<Transition>`
 
@@ -101,9 +101,9 @@ A blend between the two clips it sits between on a sequence track.
 | `on` | string |  |  |
 | `edge` | "in" \| "out" |  |  |
 
-Every built-in type and its params: [Effects and transitions](https://prefix-tree.github.io/cutcraft/reference/effects/).
+Every built-in type and its params: [Effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/).
 
-Timed, visual. No children. [All elements](https://prefix-tree.github.io/cutcraft/reference/elements/)
+Timed, visual. No children. [All elements](https://cutcraft.prefixtree.xyz/reference/elements/)
 
 ## `<Marker>`
 
@@ -118,7 +118,7 @@ A named point on the timeline.
 | `label` | string | `""` |  |
 | `color` | string |  |  |
 
-No children. [All elements](https://prefix-tree.github.io/cutcraft/reference/elements/)
+No children. [All elements](https://cutcraft.prefixtree.xyz/reference/elements/)
 
 ## `<Layer>`
 
@@ -139,13 +139,13 @@ Free code in the frame: any React, CSS, canvas or WebGL, placed on the timeline 
 | `transform` | { position, scale, rotation, anchor, opacity, borderRadius, crop } |  |  |
 | `blend` | "normal" \| "multiply" \| "screen" \| "overlay" \| "darken" \| … 13 more |  |  |
 
-Timed, visual, transformable. Children: `effect`, `keyframe`. [All elements](https://prefix-tree.github.io/cutcraft/reference/elements/)
+Timed, visual, transformable. Children: `effect`, `keyframe`. [All elements](https://cutcraft.prefixtree.xyz/reference/elements/)
 
 ## `<Three>`
 
 A three.js scene on the timeline: plain three.js in `setup`, or React Three Fiber children, on the video's clock.
 
-The player draws it once the host calls `installFreeCodeLibraries()` ([Free code](https://prefix-tree.github.io/cutcraft/guide/free-code#three-js-and-motion)); the export draws it the same way, in headless Chrome ([Exporting](https://prefix-tree.github.io/cutcraft/guide/exporting)).
+The player draws it once the host calls `installFreeCodeLibraries()` ([Free code](https://cutcraft.prefixtree.xyz/guide/free-code#three-js-and-motion)); the export draws it the same way, in headless Chrome ([Exporting](https://cutcraft.prefixtree.xyz/guide/exporting)).
 
 ### Props
 
@@ -165,13 +165,13 @@ The player draws it once the host calls `installFreeCodeLibraries()` ([Free code
 | `background` | string |  |  |
 | `setup` | any |  |  |
 
-Timed, visual, transformable. Children: `effect`, `keyframe`. [All elements](https://prefix-tree.github.io/cutcraft/reference/elements/)
+Timed, visual, transformable. Children: `effect`, `keyframe`. [All elements](https://cutcraft.prefixtree.xyz/reference/elements/)
 
 ## `<Motion>`
 
 Children animated by a Motion `sequence` on the video's clock.
 
-The player draws it once the host calls `installFreeCodeLibraries()` ([Free code](https://prefix-tree.github.io/cutcraft/guide/free-code#three-js-and-motion)); the export draws it the same way, in headless Chrome ([Exporting](https://prefix-tree.github.io/cutcraft/guide/exporting)).
+The player draws it once the host calls `installFreeCodeLibraries()` ([Free code](https://cutcraft.prefixtree.xyz/guide/free-code#three-js-and-motion)); the export draws it the same way, in headless Chrome ([Exporting](https://cutcraft.prefixtree.xyz/guide/exporting)).
 
 ### Props
 
@@ -189,7 +189,7 @@ The player draws it once the host calls `installFreeCodeLibraries()` ([Free code
 | `blend` | "normal" \| "multiply" \| "screen" \| "overlay" \| "darken" \| … 13 more |  |  |
 | `sequence` | [string, object] \| [string, object, object][] | `[]` |  |
 
-Timed, visual, transformable. Children: `effect`, `keyframe`. [All elements](https://prefix-tree.github.io/cutcraft/reference/elements/)
+Timed, visual, transformable. Children: `effect`, `keyframe`. [All elements](https://cutcraft.prefixtree.xyz/reference/elements/)
 
 ## `<Title>`
 
@@ -229,7 +229,7 @@ Text over the picture in the theme's type, with entrances by letter, word or lin
 | `decoration` | "none" \| "underline" \| "line-through" \| "overline" |  |  |
 | `animation` | { preset, in, out, stagger, unit, params } |  |  |
 
-Timed, visual, transformable. Children: `effect`, `keyframe`, `mask`. [All elements](https://prefix-tree.github.io/cutcraft/reference/elements/)
+Timed, visual, transformable. Children: `effect`, `keyframe`, `mask`. [All elements](https://cutcraft.prefixtree.xyz/reference/elements/)
 
 ## `<Captions>`
 
@@ -248,7 +248,7 @@ Subtitles from an asset's transcript that follow the clips through every trim.
 | `maxGap` | number (0..∞) | `0.8` |  |
 | `breakAfter` | string[] |  |  |
 
-Visual. Children: `caption`. [All elements](https://prefix-tree.github.io/cutcraft/reference/elements/)
+Visual. Children: `caption`. [All elements](https://cutcraft.prefixtree.xyz/reference/elements/)
 
 ## `<Caption>`
 
@@ -264,7 +264,7 @@ One cue inside `<Captions>`, written by hand: its text, start and end.
 | `text` | string |  | yes |
 | `words` | { text, start, end }[] |  |  |
 
-Timed, visual. No children. [All elements](https://prefix-tree.github.io/cutcraft/reference/elements/)
+Timed, visual. No children. [All elements](https://cutcraft.prefixtree.xyz/reference/elements/)
 
 ## `<Shape>`
 
@@ -300,7 +300,7 @@ A vector shape (rectangle, circle, star, polygon, path) with fill, stroke and sh
 | `starPoints` | integer (3..∞) |  |  |
 | `innerRadius` | number (0..1) |  |  |
 
-Timed, visual, transformable. Children: `effect`, `keyframe`, `mask`. [All elements](https://prefix-tree.github.io/cutcraft/reference/elements/)
+Timed, visual, transformable. Children: `effect`, `keyframe`, `mask`. [All elements](https://cutcraft.prefixtree.xyz/reference/elements/)
 
 ## `<Svg>`
 
@@ -329,7 +329,7 @@ One-off vector art from inline SVG markup or a file.
 | `enter` | { type, duration, easing } |  |  |
 | `exit` | { type, duration, easing } |  |  |
 
-Timed, visual, transformable. Children: `effect`, `keyframe`, `mask`. [All elements](https://prefix-tree.github.io/cutcraft/reference/elements/)
+Timed, visual, transformable. Children: `effect`, `keyframe`, `mask`. [All elements](https://cutcraft.prefixtree.xyz/reference/elements/)
 
 ## `<Sticker>`
 
@@ -354,7 +354,7 @@ A ready-made icon or sticker by name.
 | `style` | string |  |  |
 | `src` | string |  | yes |
 
-Timed, visual, transformable. Children: `effect`, `keyframe`, `mask`. [All elements](https://prefix-tree.github.io/cutcraft/reference/elements/)
+Timed, visual, transformable. Children: `effect`, `keyframe`, `mask`. [All elements](https://cutcraft.prefixtree.xyz/reference/elements/)
 
 ## `<Effect>`
 
@@ -365,13 +365,13 @@ A look on its parent: colour grading, blur, glow, outline, keying, corner pin, v
 | prop | type | default | required |
 |---|---|---|---|
 | `id` | string |  | yes |
-| `type` | "brightness" \| "contrast" \| "saturation" \| "hue" \| "blur" \| … 23 more \| string |  | yes |
+| `type` | "brightness" \| "contrast" \| "saturation" \| "hue" \| "blur" \| … 28 more \| string |  | yes |
 | `params` | object | `{}` |  |
 | `enabled` | boolean | `true` |  |
 
-Every built-in type and its params: [Effects and transitions](https://prefix-tree.github.io/cutcraft/reference/effects/).
+Every built-in type and its params: [Effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/).
 
-Children: `keyframe`. [All elements](https://prefix-tree.github.io/cutcraft/reference/elements/)
+Children: `keyframe`. [All elements](https://cutcraft.prefixtree.xyz/reference/elements/)
 
 ## `<Adjustment>`
 
@@ -392,7 +392,7 @@ Filters everything beneath it for its own stretch of time.
 | `enabled` | boolean | `true` |  |
 | `transform` | { position, scale, rotation, anchor, opacity, borderRadius, crop } |  |  |
 
-Timed, visual, trims its source. Children: `effect`, `keyframe`. [All elements](https://prefix-tree.github.io/cutcraft/reference/elements/)
+Timed, visual, trims its source. Children: `effect`, `keyframe`. [All elements](https://cutcraft.prefixtree.xyz/reference/elements/)
 
 ## `<Mask>`
 
@@ -412,7 +412,7 @@ Shows only a shape of its clip, with a feathered edge or inverted.
 | `opacity` | number (0..1) | `1` |  |
 | `easing` | "linear" \| "ease-in" \| "ease-out" \| "ease-in-out" | `"linear"` |  |
 
-Children: `keyframe`. [All elements](https://prefix-tree.github.io/cutcraft/reference/elements/)
+Children: `keyframe`. [All elements](https://cutcraft.prefixtree.xyz/reference/elements/)
 
 ## `<Keyframe>`
 
@@ -429,7 +429,7 @@ Animates one property of its parent between values, with easing.
 | `value` | any |  | yes |
 | `easing` | "linear" \| "ease" \| "ease-in" \| "ease-out" \| "ease-in-out" \| … 46 more | `"linear"` |  |
 
-No children. [All elements](https://prefix-tree.github.io/cutcraft/reference/elements/)
+No children. [All elements](https://cutcraft.prefixtree.xyz/reference/elements/)
 
 ## `<SpeedKey>`
 
@@ -444,7 +444,7 @@ Changes its clip's speed from a moment on, eased: speed ramps.
 | `speed` | number (0.1..20) |  | yes |
 | `easing` | "linear" \| "ease" \| "ease-in" \| "ease-out" \| "ease-in-out" \| … 46 more | `"linear"` |  |
 
-No children. [All elements](https://prefix-tree.github.io/cutcraft/reference/elements/)
+No children. [All elements](https://cutcraft.prefixtree.xyz/reference/elements/)
 
 ## `<Freeze>`
 
@@ -459,7 +459,7 @@ Holds one frame of its clip for a while, then plays on.
 | `start` | number (0..∞) |  | yes |
 | `duration` | number |  | yes |
 
-No children. [All elements](https://prefix-tree.github.io/cutcraft/reference/elements/)
+No children. [All elements](https://cutcraft.prefixtree.xyz/reference/elements/)
 
 ## `<Nested>`
 
@@ -484,7 +484,7 @@ A sequence written once as a component and placed like a clip.
 | `out` | number (0..∞) \| string |  |  |
 | `volume` | number (0..4) | `1` |  |
 
-Timed, visual, audible, trims its source, transformable. Children: `effect`, `keyframe`, `mask`, `speedKey`, `freeze`. [All elements](https://prefix-tree.github.io/cutcraft/reference/elements/)
+Timed, visual, audible, trims its source, transformable. Children: `effect`, `keyframe`, `mask`, `speedKey`, `freeze`. [All elements](https://cutcraft.prefixtree.xyz/reference/elements/)
 
 ## `<Multicam>`
 
@@ -499,7 +499,7 @@ Several camera angles of one take; `<Cut>`s pick which one shows.
 | `sync` | number (0..∞) | `0` |  |
 | `activeAngle` | string |  |  |
 
-Children: `angle`, `cut`. [All elements](https://prefix-tree.github.io/cutcraft/reference/elements/)
+Children: `angle`, `cut`. [All elements](https://cutcraft.prefixtree.xyz/reference/elements/)
 
 ## `<Angle>`
 
@@ -515,7 +515,7 @@ One camera of a `<Multicam>`: its asset and sync offset.
 | `color` | string |  |  |
 | `name` | string |  |  |
 
-No children. [All elements](https://prefix-tree.github.io/cutcraft/reference/elements/)
+No children. [All elements](https://cutcraft.prefixtree.xyz/reference/elements/)
 
 ## `<Cut>`
 
@@ -529,7 +529,7 @@ Switches a `<Multicam>` to an angle at a moment.
 | `at` | number (0..∞) |  | yes |
 | `angle` | string |  | yes |
 
-No children. [All elements](https://prefix-tree.github.io/cutcraft/reference/elements/)
+No children. [All elements](https://cutcraft.prefixtree.xyz/reference/elements/)
 
 ## `<Audio>`
 
@@ -555,4 +555,4 @@ A stretch of a sound asset: volume, fades, ducking under another track, automati
 | `automation` | { volume, pan } |  |  |
 | `duck` | { under, to, attack, release } |  |  |
 
-Timed, audible, trims its source. Children: `keyframe`. [All elements](https://prefix-tree.github.io/cutcraft/reference/elements/)
+Timed, audible, trims its source. Children: `keyframe`. [All elements](https://cutcraft.prefixtree.xyz/reference/elements/)

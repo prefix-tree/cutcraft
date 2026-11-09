@@ -18,7 +18,7 @@ export default defineConfig({
   title: "CutCraft",
   description:
     "Video editor as code: LLMs write code well and math badly, so a model writes a TSX file of words and shots, and CutCraft does the arithmetic, plays it in the browser, edits it and exports it.",
-  base: "/cutcraft/",
+  base: "/",
   cleanUrls: true,
   // The decision records' index is the folder's README, so it reads on GitHub too.
   rewrites: { "decisions/README.md": "decisions/index.md" },
@@ -26,7 +26,7 @@ export default defineConfig({
   // Code in one dark style in both colour schemes, so it reads as the screen it describes and joins the videos above it.
   markdown: { theme: { light: "vitesse-dark", dark: "vitesse-dark" } },
   head: [
-    ["link", { rel: "icon", type: "image/svg+xml", href: "/cutcraft/favicon.svg" }],
+    ["link", { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" }],
     ["link", { rel: "preconnect", href: "https://fonts.gstatic.com", crossorigin: "" }],
     [
       "link",

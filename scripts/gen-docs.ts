@@ -681,7 +681,7 @@ for (const name of Object.keys(TRANSITIONS) as (keyof typeof TRANSITIONS)[]) {
 }
 // The agent skill's references: the same pages, for a model reading files. What only the site can show (the
 // rendered examples, where an element is used) is left out, and the site's links become absolute.
-const SITE = "https://prefix-tree.github.io/cutcraft";
+const SITE = "https://cutcraft.prefixtree.xyz";
 const skillRefs = join(root, "plugins", "cutcraft", "skills", "cutcraft", "references");
 function forAgent(page: string, demote = true): string {
   const text = page

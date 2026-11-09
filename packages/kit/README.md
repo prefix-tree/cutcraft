@@ -2,7 +2,7 @@
 
 # @cutcraft/kit
 
-The core of [CutCraft](https://prefix-tree.github.io/cutcraft/): the elements a video file is written in, the resolver
+The core of [CutCraft](https://cutcraft.prefixtree.xyz/): the elements a video file is written in, the resolver
 that turns a file into exact placements, the actions an editor runs on it, and the tools that write those edits back
 into the file's text. It has no DOM and runs anywhere.
 
@@ -67,8 +67,8 @@ file in the browser, and [`cutcraft`](https://www.npmjs.com/package/cutcraft) ex
 
 ## Docs
 
-- [The file](https://prefix-tree.github.io/cutcraft/guide/the-file) and [Time by meaning](https://prefix-tree.github.io/cutcraft/guide/time)
-- [Editing](https://prefix-tree.github.io/cutcraft/guide/editing)
-- [Elements](https://prefix-tree.github.io/cutcraft/reference/elements/) and [actions](https://prefix-tree.github.io/cutcraft/reference/actions)
+- [The file](https://cutcraft.prefixtree.xyz/guide/the-file) and [Time by meaning](https://cutcraft.prefixtree.xyz/guide/time)
+- [Editing](https://cutcraft.prefixtree.xyz/guide/editing)
+- [Elements](https://cutcraft.prefixtree.xyz/reference/elements/) and [actions](https://cutcraft.prefixtree.xyz/reference/actions)
 
 MIT licensed.
