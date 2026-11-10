@@ -10,6 +10,7 @@ import type { FontFile, FontWeight } from "./fonts";
 import { inspect } from "./inspect";
 import { checkLayout, formatLayout, type Insets, SAFE_ZONES, type SafeZoneName } from "./layout-check";
 import { loadVideo } from "./load";
+import { renderLook } from "./look";
 import { directoryResolver } from "./media";
 import { renderVideo } from "./renderer";
 import { renderStill } from "./still";
@@ -23,6 +24,7 @@ const USAGE = `Usage: cutcraft <file.tsx> --out <video.mp4|.webm|.mp3|.wav> [opt
        cutcraft <file.tsx> --check-layout [--safe-zone <zone>] [--subject <x,y,w,h>] [--json] [options]
        cutcraft <file.tsx> --srt <captions.srt> | --vtt <captions.vtt> [--from <s> --to <s>]
        cutcraft inspect <file.tsx> [--at <moments>] [--json] [--manifest <file>] [--props <json>]
+       cutcraft look <file.tsx> [--at <moments> | --around <id>] [--without <id>] [--out look.png] [options]
        cutcraft add <media file>... [--manifest manifest.json] [--id <id>] [--transcript <file>]
        cutcraft browser install
 
@@ -33,6 +35,14 @@ const USAGE = `Usage: cutcraft <file.tsx> --out <video.mp4|.webm|.mp3|.wav> [opt
                         the words each clip plays, effects, keyframes and cuts; --json prints flat rows instead
   --at <moments>        (inspect) what is on screen and heard at each moment, comma-separated. A moment is one of:
                         ${MOMENT_FORMS}
+  look                  draw many frames in one browser start, as one contact sheet (--out, default look.png), and
+                        print what each cell is as JSON. Without --at or --around: the first frame of each clip,
+                        both sides of every cut and each overlay, as an editor skims a cut
+  --around <id>         (look) five moments across a transition, or an element coming in, in and going out
+  --without <id>        (look) each frame twice, with and without an effect, an adjustment or an overlay
+  --cell <px>           (look) the width of a cell's picture (default 480)
+  --columns <n>         (look) cells in a row (default up to 4)
+  --frames <dir>        (look) also write each cell's full frame there as PNG
   add                   write each media file's entry into the manifest (default: manifest.json beside it): its
                         kind, length, size, frame rate and sound, read from the file, and its words from the
                         transcript beside it (talk.json from Whisper or ElevenLabs, talk.vtt or talk.srt)
@@ -103,6 +113,11 @@ async function main(): Promise<number> {
       srt: { type: "string" },
       vtt: { type: "string" },
       at: { type: "string" },
+      around: { type: "string" },
+      without: { type: "string" },
+      cell: { type: "string" },
+      columns: { type: "string" },
+      frames: { type: "string" },
     },
   });
   if (positionals[0] === "add") return add(positionals.slice(1), values);
@@ -135,6 +150,41 @@ async function main(): Promise<number> {
     const path = cached ?? (await installChrome((m) => process.stderr.write(`${m}\n`)));
     process.stderr.write(`Chrome is at ${path}${cached ? " (already in the cache)" : ""}\n`);
     return 0;
+  }
+  if (positionals[0] === "look") {
+    const target = positionals[1];
+    if (!target || positionals.length > 2) {
+      process.stderr.write(USAGE);
+      return 2;
+    }
+    const video = await loadVideo(target, {
+      ...(values.manifest ? { manifest: resolve(values.manifest) } : {}),
+      ...(values.props ? { props: JSON.parse(values.props) as Record<string, unknown> } : {}),
+      ...(values.import ? { imports: Object.fromEntries(values.import.map(readImport)) } : {}),
+    });
+    for (const e of video.state.errors) process.stderr.write(`warning: ${e.id ?? "?"}: ${e.message}\n`);
+    const result = await renderLook({
+      state: video.state,
+      source: video.source,
+      media: directoryResolver(resolve(values.media ?? dirname(target)), video.manifest),
+      out: resolve(values.out ?? "look.png"),
+      fonts: (values.font ?? []).map(readFont),
+      onLog: (m: string) => process.stderr.write(`${m}\n`),
+      ...(values.at !== undefined ? { at: values.at } : {}),
+      ...(values.around !== undefined ? { around: values.around } : {}),
+      ...(values.without !== undefined ? { without: values.without } : {}),
+      ...(values.cell ? { cell: Number(values.cell) } : {}),
+      ...(values.columns ? { columns: Number(values.columns) } : {}),
+      ...(values.frames ? { frames: resolve(values.frames) } : {}),
+      ...(values.continue ? { onAssetError: "continue" as const } : {}),
+    });
+    for (const w of result.warnings) process.stderr.write(`warning: ${w}\n`);
+    for (const e of result.errors) process.stderr.write(`error: ${e}\n`);
+    const { errors: _errors, warnings: _warnings, ...legend } = result;
+    process.stdout.write(`${JSON.stringify(legend, null, 2)}\n`);
+    if (result.sheet)
+      process.stderr.write(`${result.sheet}: ${result.cells.length} cells, ${result.width}x${result.height}\n`);
+    return result.errors.length > 0 ? 1 : 0;
   }
   const [file] = positionals;
   const subtitlesOnly = !values.out && !values["check-layout"] && Boolean(values.srt || values.vtt);

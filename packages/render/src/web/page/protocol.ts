@@ -8,6 +8,8 @@ export interface PageJob {
   readonly manifest: unknown;
   /** Every face the page sets text in, each served at its `url`: the file's own, read in Node, and `--font`. */
   readonly fonts: readonly PageFont[];
+  /** Effects a sheet may draw a frame without: the page keeps a second state with these switched off. */
+  readonly disabled?: readonly string[];
 }
 
 interface PageFont {
@@ -46,6 +48,34 @@ interface AudioResult {
   readonly warnings: readonly string[];
 }
 
+/** One cell of a contact sheet: a frame, and the words under it. */
+export interface SheetCell {
+  /** Composition seconds. */
+  readonly t: number;
+  readonly label: string;
+  /** A second line under the label. */
+  readonly sub?: string;
+  /** Draw the frame without something: the job's `disabled` effects, or one DOM overlay by its id. */
+  readonly without?: { readonly effects?: true; readonly overlay?: string };
+}
+
+export interface SheetRequest {
+  readonly cells: readonly SheetCell[];
+  readonly columns: number;
+  /** The width of a cell's picture, in pixels; its height follows the composition's shape. */
+  readonly cellWidth: number;
+  readonly type: "image/png" | "image/jpeg";
+  /** Keep each cell's frame at full size too, for `frame(index)`. */
+  readonly keepFrames?: boolean;
+}
+
+/** The size of a drawn sheet, and its bytes' length. */
+export interface SheetResult {
+  readonly length: number;
+  readonly width: number;
+  readonly height: number;
+}
+
 /** An overlay's ink at one moment, in composition pixels: what the layout check measures. */
 export interface InkBounds {
   readonly id: string;
@@ -73,6 +103,10 @@ export interface PageApi {
   bounds(t: number): Promise<readonly InkBounds[]>;
   /** Draws one frame as PNG or JPEG; returns its length in bytes. */
   still(t: number, type: "image/png" | "image/jpeg", quality?: number): Promise<number>;
+  /** Draws every cell's frame onto one image, in rows, each with its label; its bytes wait for `read`. */
+  sheet(request: SheetRequest): Promise<SheetResult>;
+  /** Makes cell `index` of the last sheet (drawn with `keepFrames`) the result to `read`; returns its length. */
+  frame(index: number): number;
   /** Base64 of the last result's bytes [offset, offset + length). */
   read(offset: number, length: number): string;
 }

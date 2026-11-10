@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   type AssetManifest,
+  aroundMoments,
   collectModule,
   MAX_RANGE_MOMENTS,
   parseMoment,
@@ -9,6 +10,7 @@ import {
   playsOf,
   resolve,
   resolveMoments,
+  skimMoments,
 } from "@cutcraft/kit";
 import { loadModule } from "@cutcraft/kit/source";
 
@@ -148,5 +150,66 @@ describe("moments", () => {
 
   it("a word the cut left out is not on the timeline", () => {
     expect(at(stateOf(CUT), "word:20").errors).toEqual(["word:20: no clip on the timeline plays it"]);
+  });
+});
+
+describe("the moments around one thing", () => {
+  it("a transition: the frame before it, its first, middle and last frame, and the frame after", () => {
+    const { moments, errors } = aroundMoments(stateOf(CUT), "x1");
+    expect(errors).toEqual([]);
+    expect(moments.map((m) => [m.label, m.frame])).toEqual([
+      ["x1.before", 71],
+      ["x1.start", 72],
+      ["x1.mid", 80],
+      ["x1.end", 86],
+      ["x1.after", 87],
+    ]);
+  });
+
+  it("an element: coming in, in, and going out, by the length of its own entrance and exit", () => {
+    const state = stateOf(`<Track id="text" layout="free">
+  <Title id="t" start={1} duration={4} enter={{ type: "fade", duration: 1 }} exit={{ type: "fade", duration: 0.4 }}>Hi</Title>
+</Track>`);
+    expect(aroundMoments(state, "t").moments.map((m) => [m.label, m.time])).toEqual([
+      ["t.start", 1],
+      ["t.entering", 1.5],
+      ["t.mid", 3],
+      ["t.leaving", 4.8],
+      ["t.end", Math.round((5 - 1 / 30) * 1000) / 1000],
+    ]);
+  });
+
+  it("says when there is no such element", () => {
+    expect(aroundMoments(stateOf(CUT), "nope")).toEqual({
+      moments: [],
+      errors: ['nope: the file has no element with the id "nope"'],
+    });
+  });
+});
+
+describe("the moments an editor skims", () => {
+  it("each clip's first frame, both sides and the middle of a transition, each overlay once", () => {
+    expect(skimMoments(stateOf(CUT)).map((m) => [m.label, m.frame])).toEqual([
+      ["hook.start", 0],
+      ["point.mid", 45],
+      ["x1.before", 71],
+      ["x1.mid", 80],
+      ["x1.after", 87],
+    ]);
+  });
+
+  it("a hard cut is the frame before it and the frame it lands on; overlays up together share one look", () => {
+    const state = stateOf(`<Track id="main">
+  <Clip id="a" src="asset:talk" in={0} out={2} />
+  <Clip id="b" src="asset:broll" in={0} out={2} />
+</Track>
+<Track id="text" layout="free">
+  <Title id="name" start={2.5} duration={1}>Name</Title>
+  <Title id="role" start={2.6} duration={0.9}>Role</Title>
+</Track>`);
+    const moments = skimMoments(state);
+    expect(moments.map((m) => m.label)).toEqual(["a.start", "b.before", "b.start", "name.mid"]);
+    expect(moments.map((m) => m.frame)).toEqual([0, 59, 60, 90]);
+    expect(new Set(moments.map((m) => m.frame)).size).toBe(moments.length);
   });
 });

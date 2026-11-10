@@ -47,11 +47,17 @@ Work in this order, and check after each stage.
    ```
    Exit code 0 is clean, 3 means it found layout issues (listed with their line), 1 is an error, 2 is a bad argument.
    For a vertical video pass `--safe-zone tiktok`, `reels` or `shorts`.
-6. **Look at it.** Render stills at the moments that matter (the first frame of each clip, the frames around each cut,
-   each graphic fully in) and read the images. Take the seconds from `inspect --at`:
+6. **Look at it.** `look` draws many frames in one go, on one contact sheet, and prints what each cell is. With no
+   moments it shows what an editor skims: each clip's first frame, both sides of every cut, each overlay. Read the
+   image after each stage:
    ```sh
-   npx cutcraft video.tsx --manifest manifest.json --still 4.5 --out frame.png
+   npx cutcraft look video.tsx --manifest manifest.json --out look.png
+   npx cutcraft look video.tsx --manifest manifest.json --around lt --out lt.png
+   npx cutcraft look video.tsx --manifest manifest.json --at hook.mid,close.mid --without grade --out grade.png
    ```
+   `--around <id>` follows the thing you just changed: a transition from before to after, or an element coming in, in
+   and going out. `--without <id>` shows each frame with and without an effect or an overlay, side by side.
+   `--at` takes the same moments as `inspect`. For one frame at full size: `--still 4.5 --out frame.png`.
 7. **Render.**
    ```sh
    npx cutcraft video.tsx --manifest manifest.json --out video.mp4

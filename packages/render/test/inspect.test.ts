@@ -179,3 +179,23 @@ describe("cutcraft inspect", () => {
     expect(run.stderr).toContain("cutcraft inspect <file.tsx>");
   });
 });
+
+describe("cutcraft look", () => {
+  const cli = join(import.meta.dirname, "..", "src", "cli.ts");
+  const env = { ...process.env, CUTCRAFT_CHROMIUM: "/nonexistent/chrome" };
+
+  it("exits 2 with the usage when no file is given", () => {
+    const run = spawnSync("node", ["--import", "tsx", cli, "look"], { encoding: "utf8", env });
+    expect(run.status).toBe(2);
+    expect(run.stderr).toContain("cutcraft look <file.tsx>");
+  });
+
+  it("refuses what it cannot draw before it starts a browser", () => {
+    const run = spawnSync("node", ["--import", "tsx", cli, "look", file, "--without", "hook"], {
+      encoding: "utf8",
+      env,
+    });
+    expect(run.status).toBe(1);
+    expect(run.stderr).toContain("error: --without hook: a clip cannot be left out without moving the cut");
+  });
+});

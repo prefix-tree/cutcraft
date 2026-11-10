@@ -1,7 +1,7 @@
 # CLI
 
 `cutcraft` exports a file to video, audio, a still or subtitles, checks its layout, reads its timeline back as text,
-and adds media to the manifest.
+draws a sheet of its frames to look at, and adds media to the manifest.
 
 ```sh
 npm install cutcraft
@@ -10,6 +10,7 @@ npx cutcraft <file.tsx> --still <seconds> --out <image.png|.jpg> [options]
 npx cutcraft <file.tsx> --check-layout [--safe-zone <zone>] [--subject <x,y,w,h>] [--json] [options]
 npx cutcraft <file.tsx> --srt <captions.srt> | --vtt <captions.vtt> [--from <s> --to <s>]
 npx cutcraft inspect <file.tsx> [--at <moments>] [--json] [--manifest <file>] [--props <json>]
+npx cutcraft look <file.tsx> [--at <moments> | --around <id>] [--without <id>] [--out look.png] [options]
 npx cutcraft add <media file>... [--manifest manifest.json] [--id <id>] [--transcript <file>]
 npx cutcraft browser install
 ```
@@ -111,12 +112,55 @@ Every answer gives the seconds, the frame and what the moment is, so a moment fo
 or the word to edit. A moment that cannot be found is an error that says why, and the command exits 1; the others are
 still printed.
 
+## Look
+
+`cutcraft look video.tsx` draws many frames in one browser start and lays them out on one contact sheet, each cell
+labelled with its seconds, its frame and what it shows. One look costs about what one `--still` does, however many
+frames it holds, so it is the way to check a cut by eye: an agent reads the one image.
+
+![A contact sheet of ten frames of a cut: each clip's first frame, both sides and the middle of two transitions, and each title, with its time, frame and name under it](/reference/look.jpg)
+
+With no moments named, it picks the ones an editor skims: the first frame of each clip, both sides and the middle of
+every transition (or the two frames either side of a hard cut), and each overlay once. The frames are drawn by the
+export, so each is the frame the export would write.
+
+It prints a legend as JSON, one entry per cell, so a frame found by eye leads back to the element or word to edit:
+
+```json
+{
+  "sheet": "/work/look.png",
+  "width": 1960,
+  "height": 974,
+  "columns": 4,
+  "cells": [
+    { "index": 0, "row": 0, "column": 0, "label": "open.start", "time": 0, "frame": 0,
+      "about": "first frame of clip open", "seen": ["open"] },
+    { "index": 1, "row": 0, "column": 1, "label": "title.mid", "time": 1.4, "frame": 42,
+      "about": "middle of title title", "seen": ["title", "open"] }
+  ]
+}
+```
+
+| Option | |
+|---|---|
+| `--at <moments>` | The moments to draw, comma-separated, written as for [`inspect`](#inspect): `hook.end,x1,word:14,2..6/0.5`. |
+| `--around <id>` | Five moments across one thing instead. A transition: the frame before it, its first, middle and last frame, and the frame after. Any other element: its first frame, half way in, its middle, half way out and its last frame. |
+| `--without <id>` | Each frame twice, side by side: as written, and without one effect, one `<Adjustment>` (all its effects) or one overlay (a title, a shape, an SVG, a sticker, a layer, the captions). A clip cannot be left out: that would move the cut. |
+| `--out <file>` | The sheet: `.png`, or `.jpg` for a smaller file. Default `look.png`. |
+| `--cell <px>` | The width of a cell's picture. Default 480. |
+| `--columns <n>` | Cells in a row. Default up to 4. |
+| `--frames <dir>` | Also write each cell's frame at full size there, as PNG; the legend names each file. |
+| `--manifest`, `--media`, `--props`, `--font`, `--import`, `--continue` | As for an export. |
+
+A sheet holds at most 64 cells. A moment that cannot be found is reported and the command exits 1, after drawing the
+others.
+
 ## Exit codes
 
 | Code | |
 |---|---|
 | 0 | Done. |
-| 1 | An error, such as a missing asset, a file that doesn't load, or a moment `inspect` cannot find. |
+| 1 | An error, such as a missing asset, a file that doesn't load, or a moment `inspect` or `look` cannot find. |
 | 2 | Wrong arguments; the usage text is printed. |
 | 3 | The layout check found issues. |
 
