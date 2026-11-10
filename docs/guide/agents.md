@@ -28,8 +28,8 @@ npm install cutcraft @cutcraft/kit react zod
 ## What it teaches
 
 - **The loop.** Add the media to the manifest with `cutcraft add` (transcripts included), write `video.tsx`, read
-  the timeline back with `cutcraft inspect`, check it with `--check-layout`, look at stills with `--still`, then
-  render with `--out`, and with `--props` for variants.
+  the timeline back with `cutcraft inspect`, check it with `--check-layout`, look at a sheet of its frames with
+  `cutcraft look`, then render with `--out`, and with `--props` for variants.
 - **The file.** Its shape, `schema` and `defaults`, and the rules an editor relies on: literal ids, cuts on words and
   shots, anchors, transitions between clips, captions that follow the clips.
 - **The look.** A theme first, tokens instead of literal colours, presets for text, the ready-made components, effects

@@ -6,7 +6,7 @@ import type { MediaResolver } from "@cutcraft/player/engine";
 
 import type { FontFile } from "../fonts";
 import { findChrome } from "./chrome";
-import type { AudioRequest, InkBounds, PageApi, SegmentRequest } from "./page/protocol";
+import type { AudioRequest, InkBounds, PageApi, SegmentRequest, SheetRequest } from "./page/protocol";
 import { type PageServer, servePage } from "./server";
 
 const PLAYER_WARNING = "[cutcut/player] ";
@@ -35,6 +35,8 @@ export interface BrowserEngineOptions {
   readonly executablePath?: string;
   /** Pages that render pieces at the same time; default 1. */
   readonly tabs?: number;
+  /** Effects a contact sheet may draw a frame without. */
+  readonly disabled?: readonly string[];
   /** Messages the page warns with (an asset it cannot read, an engine that is missing). */
   readonly warn?: (message: string) => void;
   /** Progress while Chrome is being downloaded. */
@@ -85,7 +87,12 @@ export class BrowserEngine {
       ...(options.log ? { log: options.log } : {}),
     });
     const server = await servePage(
-      { source: options.source, props: options.props ?? {}, manifest: options.manifest },
+      {
+        source: options.source,
+        props: options.props ?? {},
+        manifest: options.manifest,
+        ...(options.disabled?.length ? { disabled: options.disabled } : {}),
+      },
       options.media,
       options.fonts ?? [],
     );
@@ -126,6 +133,21 @@ export class BrowserEngine {
         { t, type, quality },
       );
       return read(page, length);
+    });
+  }
+
+  /** A contact sheet of frames, drawn in one page; with `keepFrames`, each cell's full frame too. */
+  async sheet(
+    request: SheetRequest,
+  ): Promise<{ bytes: Uint8Array; width: number; height: number; frames: Uint8Array[] }> {
+    return this.on(async (page) => {
+      const result = await page.evaluate((r: SheetRequest) => window.__cutcraft!.sheet(r), request);
+      const bytes = await read(page, result.length);
+      const frames: Uint8Array[] = [];
+      if (request.keepFrames)
+        for (let i = 0; i < request.cells.length; i++)
+          frames.push(await read(page, await page.evaluate((n: number) => window.__cutcraft!.frame(n), i)));
+      return { bytes, width: result.width, height: result.height, frames };
     });
   }
 

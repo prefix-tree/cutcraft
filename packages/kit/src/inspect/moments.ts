@@ -227,3 +227,105 @@ function resolveRef(
 function round(x: number): number {
   return Math.round(x * 1000) / 1000 + 0;
 }
+
+/** Overlays an editor looks at once each: what is drawn over the footage, and what grades it. */
+const OVERLAYS = new Set(["title", "shape", "svg", "sticker", "layer", "motion", "three", "adjustment"]);
+
+/**
+ * Five moments around one thing. A transition: the last frame before it, its first frame, its middle, its last
+ * frame and the first frame after it. Any other element: its first frame, half way through its entrance, its
+ * middle, half way through its exit and its last frame.
+ */
+export function aroundMoments(
+  state: ResolvedState,
+  id: string,
+): { readonly moments: Moment[]; readonly errors: string[] } {
+  const p = state.items.get(id);
+  if (!p) return { moments: [], errors: [`${id}: the file has no element with the id "${id}"`] };
+  if (!(p.end > p.start))
+    return { moments: [], errors: [`${id}: ${p.kind} "${id}" has no time of its own on the timeline`] };
+  const { fps, duration } = state.composition;
+  const frames = Math.max(1, Math.round(duration * fps));
+  const f = 1 / fps;
+  const last = Math.max(p.start, p.end - f);
+  const moment = (label: string, time: number, about: string): Moment => {
+    const t = Math.min(Math.max(0, time), duration);
+    return { label, time: round(t), frame: Math.min(frames - 1, Math.max(0, Math.round(t * fps + 1e-6))), about };
+  };
+  if (p.kind === "transition") {
+    const [a, b] = p.between ?? ["the clip before", "the clip after"];
+    return {
+      errors: [],
+      moments: [
+        moment(`${id}.before`, p.start - f, `last frame of ${a} before ${id}`),
+        moment(`${id}.start`, p.start, `first frame of ${id}`),
+        moment(`${id}.mid`, (p.start + p.end) / 2, `middle of ${id}`),
+        moment(`${id}.end`, last, `last frame of ${id}`),
+        moment(`${id}.after`, p.end, `first frame of ${b} after ${id}`),
+      ],
+    };
+  }
+  // How long it takes to come in and to go out: its own entrance and exit, or a title's animation.
+  const length = (own: unknown, animated: unknown): number => {
+    const seconds = Number((own as { duration?: unknown } | undefined)?.duration ?? animated ?? 0.3);
+    return Math.min(Number.isFinite(seconds) && seconds > 0 ? seconds : 0.3, (p.end - p.start) / 4);
+  };
+  const animation = p.props.animation as { in?: unknown; out?: unknown } | undefined;
+  const enter = length(p.props.enter, animation?.in),
+    exit = length(p.props.exit, animation?.out);
+  return {
+    errors: [],
+    moments: [
+      moment(`${id}.start`, p.start, `first frame of ${p.kind} ${id}`),
+      moment(`${id}.entering`, p.start + enter / 2, `${p.kind} ${id} half way in`),
+      moment(`${id}.mid`, (p.start + p.end) / 2, `middle of ${p.kind} ${id}`),
+      moment(`${id}.leaving`, p.end - exit / 2, `${p.kind} ${id} half way out`),
+      moment(`${id}.end`, last, `last frame of ${p.kind} ${id}`),
+    ],
+  };
+}
+
+/**
+ * The moments an editor skims a cut by: the first full frame of each clip, both sides of every cut, and the middle
+ * of every overlay; one per frame, in time order.
+ */
+export function skimMoments(state: ResolvedState): Moment[] {
+  const { fps, duration } = state.composition;
+  const frames = Math.max(1, Math.round(duration * fps));
+  const f = 1 / fps;
+  const found: Moment[] = [];
+  const add = (label: string, time: number, about: string): void => {
+    const t = Math.min(Math.max(0, time), duration);
+    found.push({ label, time: round(t), frame: Math.min(frames - 1, Math.max(0, Math.round(t * fps + 1e-6))), about });
+  };
+  const overlayMids = new Set<string>();
+  const transitions = [...state.items.values()].filter((p) => p.kind === "transition");
+  for (const p of state.items.values()) {
+    if (!(p.end > p.start) || p.track === null) continue;
+    if (p.kind === "clip" || p.kind === "nested") {
+      // A clip that comes in through a transition is fully there once the transition is over.
+      const into = transitions.find((t) => t.between?.[1] === p.id);
+      if (into) {
+        add(`${into.id}.before`, into.start - f, `last frame of ${into.between?.[0]} before ${into.id}`);
+        add(`${into.id}.mid`, (into.start + into.end) / 2, `middle of ${into.id}`);
+        add(`${into.id}.after`, into.end, `first frame of ${p.id} after ${into.id}`);
+      } else {
+        if (p.start > f / 2) add(`${p.id}.before`, p.start - f, `last frame before ${p.kind} ${p.id}`);
+        add(`${p.id}.start`, p.start, `first frame of ${p.kind} ${p.id}`);
+      }
+    } else if (OVERLAYS.has(p.kind)) {
+      overlayMids.add(`${p.id}.mid`);
+      add(`${p.id}.mid`, (p.start + p.end) / 2, `middle of ${p.kind} ${p.id}`);
+    }
+  }
+  // One moment per frame; overlays that are up together (a lower third's card, name and role) share one look.
+  const kept: Moment[] = [];
+  for (const m of found.sort((a, b) => a.time - b.time)) {
+    const previous = kept[kept.length - 1];
+    if (previous?.frame === m.frame) continue;
+    if (previous && overlayMids.has(m.label) && overlayMids.has(previous.label) && m.time - previous.time < 0.25)
+      continue;
+    kept.push(m);
+  }
+  return kept;
+}

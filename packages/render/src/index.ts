@@ -26,6 +26,7 @@ export {
   subjectRects,
 } from "./layout-check";
 export { type LoadedVideo, type LoadOptions, loadVideo } from "./load";
+export { type LookCell, type LookOptions, type LookResult, MAX_LOOK_CELLS, renderLook } from "./look";
 export { directoryResolver } from "./media";
 export {
   envelopeAt,

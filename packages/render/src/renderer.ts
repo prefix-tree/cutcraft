@@ -92,6 +92,8 @@ export async function openEngine(options: {
   readonly media: MediaResolver;
   readonly fonts?: readonly FontFile[] | undefined;
   readonly tabs?: number | undefined;
+  /** Effects a contact sheet may draw a frame without. */
+  readonly disabled?: readonly string[] | undefined;
   readonly warnings: string[];
   readonly onLog?: ((message: string) => void) | undefined;
 }): Promise<BrowserEngine> {
@@ -105,6 +107,7 @@ export async function openEngine(options: {
     ...(options.source.props ? { props: options.source.props } : {}),
     ...(options.source.executablePath ? { executablePath: options.source.executablePath } : {}),
     ...(options.tabs ? { tabs: options.tabs } : {}),
+    ...(options.disabled?.length ? { disabled: options.disabled } : {}),
     ...(options.onLog ? { log: options.onLog } : {}),
     warn: (m) => {
       if (!options.warnings.includes(m)) options.warnings.push(m);

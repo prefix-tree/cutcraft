@@ -22,6 +22,7 @@ import { installFreeCodeLibraries } from "@cutcraft/graphics/libraries";
 import {
   type AssetManifest,
   collectModule,
+  createPatchLog,
   layerFramesPending,
   motionBlurOf,
   resolve,
@@ -29,10 +30,11 @@ import {
 } from "@cutcraft/kit";
 import { loadModule } from "@cutcraft/kit/source";
 import { addFontFaces, backdropTracks, Player, type PlayerRef } from "@cutcraft/player";
+import { SETTLE_MS } from "@cutcraft/player/engine";
 
 import { renderSoundtrack } from "./audio";
 import { inkOf, offFrame, pastEdges } from "./ink";
-import type { AudioRequest, InkBounds, PageApi, PageJob, SegmentRequest } from "./protocol";
+import type { AudioRequest, InkBounds, PageApi, PageJob, SegmentRequest, SheetRequest } from "./protocol";
 
 declare global {
   interface Window {
@@ -59,7 +61,15 @@ async function start(): Promise<void> {
   const mod = loadModule(job.source, { imports });
   const manifest = job.manifest as AssetManifest;
   const props = { ...(mod.defaults ?? {}), ...job.props };
-  const state = resolve(collectModule(mod as never, props), manifest);
+  const tree = collectModule(mod as never, props);
+  const state = resolve(tree, manifest);
+  // The same file with some effects switched off, for a sheet's "without" cells: a patch on each, nothing else moved.
+  let bare = state;
+  if (job.disabled?.length) {
+    const log = createPatchLog();
+    for (const id of job.disabled) log.append({ op: "set", id, prop: "enabled", value: false });
+    bare = resolve(tree, manifest, log);
+  }
   const element = mod.default(props);
   const { width, height, fps } = state.composition;
   const media = { resolve: async (id: string) => ({ kind: "url" as const, url: `/media/${encodeURIComponent(id)}` }) };
@@ -72,18 +82,34 @@ async function start(): Promise<void> {
   root.style.height = `${height}px`;
   const errors: string[] = [];
   const ref = createRef<PlayerRef>();
-  createRoot(root).render(
-    <Player
-      ref={ref}
-      state={state}
-      element={element}
-      media={media}
-      fit="none"
-      controls={false}
-      coreOptions={{ loadFonts: false, exactTime: true }}
-      onError={(e) => errors.push(`${e.asset ?? e.id ?? "?"}: ${e.error.message}`)}
-    />,
-  );
+  const reactRoot = createRoot(root);
+  let shown = state;
+  const render = (which: typeof state): void =>
+    reactRoot.render(
+      <Player
+        ref={ref}
+        state={which}
+        element={element}
+        media={media}
+        fit="none"
+        controls={false}
+        coreOptions={{ loadFonts: false, exactTime: true }}
+        onError={(e) => errors.push(`${e.asset ?? e.id ?? "?"}: ${e.error.message}`)}
+      />,
+    );
+  /** Puts the file, or the file without its disabled effects, in the player. */
+  const show = async (which: typeof state): Promise<void> => {
+    if (shown === which) return;
+    shown = which;
+    render(which);
+    // React commits on its own schedule: the frame is drawn only once the player holds this state.
+    while (ref.current?.core.state !== which) await tick();
+    // A player given a new state redraws its own playhead at once and again once it has settled. A frame stepped
+    // before that second redraw would be painted over by it, so it is waited out: this timer is set after the
+    // player's, with the same delay, so it fires after it, and the next step then runs after that redraw.
+    await new Promise((r) => setTimeout(r, SETTLE_MS));
+  };
+  render(state);
   while (!ref.current) await tick();
   const core = ref.current.core;
   const ctx = cap.getContext("2d") as CanvasRenderingContext2D & {
@@ -115,6 +141,12 @@ async function start(): Promise<void> {
     await core.compositor.step(t);
     await settle();
     await painted(cap);
+    // A face is fetched only when layout first sets text in it, which can be this paint: `settle` looked before the
+    // fetch began. Text painted meanwhile is in the fallback face, so the frame waits for the face and paints again.
+    while (document.fonts.status === "loading") {
+      await document.fonts.ready;
+      await painted(cap);
+    }
     ctx.clearRect(0, 0, width, height);
     try {
       ctx.drawElementImage(root, 0, 0);
@@ -130,6 +162,14 @@ async function start(): Promise<void> {
   const backdrop = backdropTracks(state);
 
   let out: Uint8Array = new Uint8Array();
+  /** The full frames of the last sheet, when it was asked to keep them. */
+  let kept: Uint8Array[] = [];
+  const encode = async (canvas: HTMLCanvasElement, type: string, quality?: number): Promise<Uint8Array> => {
+    const blob = await new Promise<Blob>((ok, fail) =>
+      canvas.toBlob((b) => (b ? ok(b) : fail(new Error("the picture could not be encoded"))), type, quality),
+    );
+    return new Uint8Array(await blob.arrayBuffer());
+  };
   const api: PageApi = {
     composition: { width, height, fps, duration: state.composition.duration },
     errors,
@@ -203,10 +243,69 @@ async function start(): Promise<void> {
     },
     async still(t: number, type: "image/png" | "image/jpeg", quality?: number) {
       await frame(t);
-      const blob = await new Promise<Blob>((ok, fail) =>
-        cap.toBlob((b) => (b ? ok(b) : fail(new Error("the frame could not be encoded"))), type, quality),
-      );
-      out = new Uint8Array(await blob.arrayBuffer());
+      out = await encode(cap, type, quality);
+      return out.length;
+    },
+    async sheet(r: SheetRequest) {
+      const cellHeight = Math.round((r.cellWidth * height) / width);
+      const band = 44;
+      const gap = 8;
+      const rows = Math.ceil(r.cells.length / r.columns);
+      const sheet = document.createElement("canvas");
+      sheet.width = r.columns * r.cellWidth + (r.columns + 1) * gap;
+      sheet.height = rows * (cellHeight + band) + (rows + 1) * gap;
+      const g = sheet.getContext("2d") as CanvasRenderingContext2D;
+      // The labels are set in a bundled face, so a sheet reads the same on every machine.
+      await document.fonts.load('500 14px "JetBrains Mono"');
+      g.fillStyle = "#16161d";
+      g.fillRect(0, 0, sheet.width, sheet.height);
+      g.imageSmoothingQuality = "high";
+      g.textBaseline = "middle";
+      kept = [];
+      try {
+        // The cells of the file as written first, then the ones without its disabled effects: the state changes once.
+        const order = [...r.cells.entries()].sort(
+          ([, a], [, b]) => Number(Boolean(a.without?.effects)) - Number(Boolean(b.without?.effects)),
+        );
+        const frames: Uint8Array[] = [];
+        for (const [i, cell] of order) {
+          await show(cell.without?.effects ? bare : state);
+          // An overlay is in the DOM only while it is on screen, so it is hidden after a step that mounts it.
+          if (cell.without?.overlay) await core.compositor.step(cell.t).then(settle);
+          const target = cell.without?.overlay
+            ? root.querySelector<HTMLElement>(`[data-el="${CSS.escape(cell.without.overlay)}"]`)
+            : null;
+          const before = target?.style.visibility ?? "";
+          if (target) target.style.visibility = "hidden";
+          try {
+            await frame(cell.t);
+          } finally {
+            if (target) target.style.visibility = before;
+          }
+          const x = gap + (i % r.columns) * (r.cellWidth + gap);
+          const y = gap + Math.floor(i / r.columns) * (cellHeight + band + gap);
+          g.drawImage(cap, x, y, r.cellWidth, cellHeight);
+          g.fillStyle = "#f2f1ee";
+          g.font = '500 14px "JetBrains Mono", monospace';
+          g.fillText(cell.label, x + 2, y + cellHeight + 14, r.cellWidth - 4);
+          if (cell.sub) {
+            g.fillStyle = "#a9a8b0";
+            g.font = '400 12px "JetBrains Mono", monospace';
+            g.fillText(cell.sub, x + 2, y + cellHeight + 32, r.cellWidth - 4);
+          }
+          if (r.keepFrames) frames[i] = await encode(cap, "image/png");
+        }
+        kept = frames;
+      } finally {
+        await show(state);
+      }
+      out = await encode(sheet, r.type, 0.9);
+      return { length: out.length, width: sheet.width, height: sheet.height };
+    },
+    frame(index: number) {
+      const bytes = kept[index];
+      if (!bytes) throw new Error(`the last sheet kept no frame ${index}`);
+      out = bytes;
       return out.length;
     },
     read(offset: number, length: number) {
