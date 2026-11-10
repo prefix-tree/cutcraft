@@ -1,6 +1,7 @@
 # CLI
 
-`cutcraft` exports a file to video, audio, a still or subtitles, checks its layout, and adds media to the manifest.
+`cutcraft` exports a file to video, audio, a still or subtitles, checks its layout, reads its timeline back as text,
+and adds media to the manifest.
 
 ```sh
 npm install cutcraft
@@ -8,6 +9,7 @@ npx cutcraft <file.tsx> --out <video.mp4|.webm|.mp3|.wav> [options]
 npx cutcraft <file.tsx> --still <seconds> --out <image.png|.jpg> [options]
 npx cutcraft <file.tsx> --check-layout [--safe-zone <zone>] [--subject <x,y,w,h>] [--json] [options]
 npx cutcraft <file.tsx> --srt <captions.srt> | --vtt <captions.vtt> [--from <s> --to <s>]
+npx cutcraft inspect <file.tsx> [--at <moments>] [--json] [--manifest <file>] [--props <json>]
 npx cutcraft add <media file>... [--manifest manifest.json] [--id <id>] [--transcript <file>]
 npx cutcraft browser install
 ```
@@ -54,12 +56,67 @@ time. `CUTCRAFT_CHROMIUM` names a Chrome or Chromium 153 or later to use instead
 
 [Checking the layout](https://cutcraft.prefixtree.xyz/guide/exporting#checking-the-layout) explains the rules and the output.
 
+## Inspect
+
+`cutcraft inspect video.tsx` prints the timeline the way an editor reads it: each track and its elements with their
+seconds, the words each clip plays, effects, keyframes and cuts. It runs the resolver only, so it starts no browser,
+needs no media files and answers at once. It is how an agent, or a script, reads a cut back.
+
+```
+video.tsx  1920x1080  30 fps  25.60 s (768 frames)  0 errors
+track main (sequence)
+     0.00–5.20     clip        hook  asset:founder 5.60–10.80  words 12–23 "Small software still deserves a real cloud It s…"
+     4.80–5.20     transition  x1  crossfade (hook → broll)
+     4.80–10.80    clip        broll  asset:product 6.00–12.00  keyframes: transform.scale.x, transform.scale.y
+track overlays (sequence)
+     0.40–3.20     title       title  "Shed"  anchor start +0.4
+cuts: 4.80 hook→broll (x1), 10.80 broll→demo
+```
+
+`--at` says what is on screen and heard at each moment instead: the elements from the top of the picture down, each
+effect's params and the transform after keyframes, each sound's gain, the word being said and the caption.
+
+```
+$ npx cutcraft inspect video.tsx --at word:14,x1
+word:14  1.00 s  frame 30  (word 14 "still" in hook)
+  seen: title tagline  4% through  "A cloud for small software"  transform position.x=0 position.y=300
+  seen: title title  21% through  "Shed"  transform position.x=0 position.y=140
+  seen: clip hook  19% through  source 6.60 s
+  heard: hook (asset:founder) gain 1.00
+  heard: bed (asset:music) gain 0.05
+  said: word 14 "still" in hook
+  caption: "Small software still deserves a real cloud."
+```
+
+| Option | |
+|---|---|
+| `--at <moments>` | The moments to describe, comma-separated. Without it, the whole timeline. |
+| `--json` | Flat rows instead of text: `composition`, `tracks`, `elements`, `effects`, `keyframes`, `words`, `cuts` and `errors`, each row with its seconds and its frames; with `--at`, an `at` array too. Made for `jq` or a short script: `cutcraft inspect video.tsx --json \| jq '.cuts'`. |
+| `--manifest`, `--props`, `--import` | As for an export. |
+
+A moment is written the way the file is written, or as plain time:
+
+| Moment | Meaning |
+|---|---|
+| `4.5` | Seconds of the finished video. A bare number is always seconds. |
+| `90f` | Frame 90, at the composition's frame rate. |
+| `2..6/0.5` | Every half second from 2 to 6; `2..6` is its two ends. Frames work too: `0..90f/30f`. |
+| `hook`, `hook.start`, `hook.mid`, `hook.end` | An element by its id: its middle, its start, or the last frame it is on. |
+| `x1` | A transition by its id: the last frame before it and the first after it. |
+| `word:14`, `word:14.end` | Where the finished video says that word. When two clips play it, name one: `hook@word:14`. |
+| `shot:1`, `silence:2` | The same for a shot or a silence, with `.end` and `clip@` too. |
+| `marker:intro` | A marker. |
+
+Every answer gives the seconds, the frame and what the moment is, so a moment found by time leads back to the element
+or the word to edit. A moment that cannot be found is an error that says why, and the command exits 1; the others are
+still printed.
+
 ## Exit codes
 
 | Code | |
 |---|---|
 | 0 | Done. |
-| 1 | An error, such as a missing asset or a file that doesn't load. |
+| 1 | An error, such as a missing asset, a file that doesn't load, or a moment `inspect` cannot find. |
 | 2 | Wrong arguments; the usage text is printed. |
 | 3 | The layout check found issues. |
 

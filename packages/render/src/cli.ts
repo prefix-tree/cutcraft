@@ -2,11 +2,12 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { parseArgs } from "node:util";
 
-import { subtitles } from "@cutcraft/kit";
+import { MOMENT_FORMS, subtitles } from "@cutcraft/kit";
 
 import { addAsset, describeAdded } from "./add";
 import { QUALITIES, type QualityName, type VideoCodec } from "./encoding";
 import type { FontFile, FontWeight } from "./fonts";
+import { inspect } from "./inspect";
 import { checkLayout, formatLayout, type Insets, SAFE_ZONES, type SafeZoneName } from "./layout-check";
 import { loadVideo } from "./load";
 import { directoryResolver } from "./media";
@@ -21,12 +22,17 @@ const USAGE = `Usage: cutcraft <file.tsx> --out <video.mp4|.webm|.mp3|.wav> [opt
        cutcraft <file.tsx> --still <seconds> --out <image.png|.jpg> [options]
        cutcraft <file.tsx> --check-layout [--safe-zone <zone>] [--subject <x,y,w,h>] [--json] [options]
        cutcraft <file.tsx> --srt <captions.srt> | --vtt <captions.vtt> [--from <s> --to <s>]
+       cutcraft inspect <file.tsx> [--at <moments>] [--json] [--manifest <file>] [--props <json>]
        cutcraft add <media file>... [--manifest manifest.json] [--id <id>] [--transcript <file>]
        cutcraft browser install
 
   Every export draws its frames in Chrome. The first one downloads Chrome for Testing ${CHROME_MILESTONE} into
   ~/.cache/cutcraft/browsers (or CUTCRAFT_BROWSER_CACHE); CUTCRAFT_CHROMIUM names a Chrome 153+ to use instead.
 
+  inspect               print the timeline as text, without a browser: each track and element with its seconds,
+                        the words each clip plays, effects, keyframes and cuts; --json prints flat rows instead
+  --at <moments>        (inspect) what is on screen and heard at each moment, comma-separated. A moment is one of:
+                        ${MOMENT_FORMS}
   add                   write each media file's entry into the manifest (default: manifest.json beside it): its
                         kind, length, size, frame rate and sound, read from the file, and its words from the
                         transcript beside it (talk.json from Whisper or ElevenLabs, talk.vtt or talk.srt)
@@ -96,9 +102,29 @@ async function main(): Promise<number> {
       transcript: { type: "string" },
       srt: { type: "string" },
       vtt: { type: "string" },
+      at: { type: "string" },
     },
   });
   if (positionals[0] === "add") return add(positionals.slice(1), values);
+  if (positionals[0] === "inspect") {
+    const target = positionals[1];
+    if (!target || positionals.length > 2) {
+      process.stderr.write(USAGE);
+      return 2;
+    }
+    const video = await loadVideo(target, {
+      ...(values.manifest ? { manifest: resolve(values.manifest) } : {}),
+      ...(values.props ? { props: JSON.parse(values.props) as Record<string, unknown> } : {}),
+      ...(values.import ? { imports: Object.fromEntries(values.import.map(readImport)) } : {}),
+    });
+    const result = inspect(target, video.state, {
+      ...(values.at !== undefined ? { at: values.at } : {}),
+      ...(values.json ? { json: true } : {}),
+    });
+    process.stdout.write(result.output);
+    for (const e of result.errors) process.stderr.write(`error: ${e}\n`);
+    return result.errors.length > 0 ? 1 : 0;
+  }
   if (positionals[0] === "browser") {
     if (positionals[1] !== "install") {
       process.stderr.write(USAGE);

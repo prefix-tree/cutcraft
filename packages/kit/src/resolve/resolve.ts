@@ -20,6 +20,7 @@ import type { DeclaredFont } from "../theme/fonts";
 import { applyTheme, type ResolvedTheme, resolveTheme, type ThemeOrigin } from "../theme/theme";
 import {
   type AssetPlay,
+  assetPlay,
   type CueOptions,
   cueNodes,
   onTimeline,
@@ -1349,17 +1350,15 @@ function assetPlays(src: string, pending: Map<string, Pending>, tracks: readonly
     if (!p.source || p.start === undefined || !sameAsset(p.source.asset, src)) continue;
     if (p.track && hidden.has(p.track)) continue;
     if (p.node.kind !== "clip" && p.node.kind !== "audio") continue;
-    const keys = speedKeysOf(p.node.children),
-      holds = freezeHoldsOf(p.node.children);
-    plays.push({
-      id: p.node.id,
-      start: p.start,
-      in: p.source.in,
-      out: p.duration === undefined ? Number.POSITIVE_INFINITY : p.source.out,
-      speed: p.source.speed,
-      ...(keys.length > 0 ? { keys } : {}),
-      ...(holds.length > 0 ? { holds } : {}),
-    });
+    plays.push(
+      assetPlay({
+        id: p.node.id,
+        start: p.start,
+        source: p.source,
+        open: p.duration === undefined,
+        children: p.node.children,
+      }),
+    );
   }
   return plays.sort((a, b) => a.start - b.start);
 }

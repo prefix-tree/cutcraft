@@ -1,5 +1,5 @@
 import { type AssetEntry, assetIdOf, type TranscriptWord } from "../manifest/types";
-import { type FreezeHold, freezeUnshift, type RampKey, rampInverse } from "./speed";
+import { type FreezeHold, freezeHoldsOf, freezeUnshift, type RampKey, rampInverse, speedKeysOf } from "./speed";
 import type { CollectedNode } from "./tree";
 
 /** Where an asset plays on the timeline: enough of a placement to map asset seconds to composition seconds. */
@@ -44,6 +44,30 @@ export interface Cue {
 export const DEFAULT_CUE_OPTIONS: CueOptions = { maxChars: 42, maxDuration: 5, maxGap: 0.8 };
 
 const SENTENCE_END = /[.!?…]["')\]]?$/;
+
+/**
+ * The play of one clip or audio placement: where its source range sits on the timeline, with its speed keys and
+ * freezes. `open` is a placement whose length is not known yet (`duration="fill"`).
+ */
+export function assetPlay(p: {
+  readonly id: string;
+  readonly start: number;
+  readonly source: { readonly in: number; readonly out: number; readonly speed: number };
+  readonly open?: boolean;
+  readonly children: readonly { readonly kind: string; readonly props: Readonly<Record<string, unknown>> }[];
+}): AssetPlay {
+  const keys = speedKeysOf(p.children),
+    holds = freezeHoldsOf(p.children);
+  return {
+    id: p.id,
+    start: p.start,
+    in: p.source.in,
+    out: p.open ? Number.POSITIVE_INFINITY : p.source.out,
+    speed: p.source.speed,
+    ...(keys.length > 0 ? { keys } : {}),
+    ...(holds.length > 0 ? { holds } : {}),
+  };
+}
 
 /** Composition time of an asset second, through the first play that covers it; null when it is not on the timeline. */
 export function onTimeline(sec: number, plays: readonly AssetPlay[]): number | null {
