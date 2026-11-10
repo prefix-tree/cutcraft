@@ -118,7 +118,7 @@ still printed.
 labelled with its seconds, its frame and what it shows. One look costs about what one `--still` does, however many
 frames it holds, so it is the way to check a cut by eye: an agent reads the one image.
 
-![A contact sheet of ten frames of a cut: each clip's first frame, both sides and the middle of two transitions, and each title, with its time, frame and name under it](https://cutcraft.prefixtree.xyz/reference/look.jpg)
+[![A contact sheet of ten frames of a cut: each clip's first frame, both sides and the middle of two transitions, and each title, with its time, frame and name under it](https://cutcraft.prefixtree.xyz/reference/look.jpg)](https://cutcraft.prefixtree.xyz/reference/look.jpg)
 
 With no moments named, it picks the ones an editor skims: the first frame of each clip, both sides and the middle of
 every transition (or the two frames either side of a hard cut), and each overlay once. The frames are drawn by the
@@ -151,6 +151,24 @@ It prints a legend as JSON, one entry per cell, so a frame found by eye leads ba
 | `--columns <n>` | Cells in a row. Default up to 4. |
 | `--frames <dir>` | Also write each cell's frame at full size there, as PNG; the legend names each file. |
 | `--manifest`, `--media`, `--props`, `--font`, `--import`, `--continue` | As for an export. |
+
+**Around a cut.** `--around` follows one thing through: here a wipe, from the frame before it to the frame after.
+With `--without title` each moment is drawn twice, so the title's exit can be judged against the cut beneath it.
+
+```sh
+npx cutcraft look edit.tsx --around x1 --without title --columns 6
+```
+
+[![Ten frames across a wipe between two clips, in pairs: each moment with the title "Cut by words" and without it](https://cutcraft.prefixtree.xyz/reference/look-around.jpg)](https://cutcraft.prefixtree.xyz/reference/look-around.jpg)
+
+**With and without.** Naming an effect or an `<Adjustment>` shows what it does to the same frame. Here a grade that
+starts half way through the shot: at 1 s it changes nothing, at 2.5 s the graded frame is warmer and brighter.
+
+```sh
+npx cutcraft look colour-grade.tsx --at 1,2.5 --without grade
+```
+
+[![Four frames of coffee being poured: at 1 second the two are the same; at 2.5 seconds the one with the grade is warmer and brighter than the one without](https://cutcraft.prefixtree.xyz/reference/look-without.jpg)](https://cutcraft.prefixtree.xyz/reference/look-without.jpg)
 
 A sheet holds at most 64 cells. A moment that cannot be found is reported and the command exits 1, after drawing the
 others.
