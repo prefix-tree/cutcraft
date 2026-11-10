@@ -26,6 +26,7 @@ export {
   type TransitionParams,
 } from "./effects/registry";
 export { type ColourFunction, fusedColourSource } from "./effects/shapes";
+export * from "./inspect/index";
 export * from "./jsx/animate";
 export * from "./jsx/capabilities";
 export * from "./jsx/curves";

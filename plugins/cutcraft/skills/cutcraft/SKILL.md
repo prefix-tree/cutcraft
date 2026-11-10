@@ -30,19 +30,29 @@ Work in this order, and check after each stage.
    This writes `manifest.json`: each asset's id (the file name without its extension), kind, length, size and, for
    speech, every word with its time. Read it: the word indexes you cut on come from there.
 3. **Write `video.tsx`** (shape and rules below).
-4. **Check it.** Every command prints `warning: <id>: <message>` for each problem in the file; fix them all. The layout
+4. **Read it back.** `inspect` prints the timeline as the resolver sees it: every element with its seconds, the words
+   each clip plays, effects, keyframes and cuts. It starts no browser, so use it freely, after every edit:
+   ```sh
+   npx cutcraft inspect video.tsx --manifest manifest.json
+   npx cutcraft inspect video.tsx --manifest manifest.json --at hook.end,x1,word:14,lt.mid
+   ```
+   `--at` says what is on screen and heard at each moment, with effect values after keyframes and the word being said.
+   A moment is an element's id (with `.start`, `.mid` or `.end`), a transition's id (both sides of the cut), `word:14`
+   (or `hook@word:14`), `shot:1`, `marker:intro`, seconds (`4.5`), a frame (`90f`) or a range (`2..6/0.5`). `--json`
+   prints flat rows for `jq`.
+5. **Check it.** Every command prints `warning: <id>: <message>` for each problem in the file; fix them all. The layout
    check also reports overlays that leave the frame or the safe zone, or cover the captions or the subject:
    ```sh
    npx cutcraft video.tsx --manifest manifest.json --check-layout
    ```
    Exit code 0 is clean, 3 means it found layout issues (listed with their line), 1 is an error, 2 is a bad argument.
    For a vertical video pass `--safe-zone tiktok`, `reels` or `shorts`.
-5. **Look at it.** Render stills at the moments that matter (the first frame of each clip, the frames around each cut,
-   each graphic fully in) and read the images:
+6. **Look at it.** Render stills at the moments that matter (the first frame of each clip, the frames around each cut,
+   each graphic fully in) and read the images. Take the seconds from `inspect --at`:
    ```sh
    npx cutcraft video.tsx --manifest manifest.json --still 4.5 --out frame.png
    ```
-6. **Render.**
+7. **Render.**
    ```sh
    npx cutcraft video.tsx --manifest manifest.json --out video.mp4
    npx cutcraft video.tsx --manifest manifest.json --props '{"product":"Pixel"}' --out pixel.mp4

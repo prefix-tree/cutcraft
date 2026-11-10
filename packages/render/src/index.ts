@@ -2,6 +2,17 @@ export { type AddOptions, type AddResult, addAsset } from "./add";
 export { type Container, containerOf, QUALITIES, type QualityName, type VideoCodec } from "./encoding";
 export { type FontFile, type FontWeight, loadFonts } from "./fonts";
 export {
+  describeAt,
+  formatAt,
+  formatTimeline,
+  type HeardElement,
+  type InspectOptions,
+  type InspectResult,
+  inspect,
+  type MomentView,
+  type SeenElement,
+} from "./inspect";
+export {
   checkLayout,
   formatLayout,
   type Insets,
