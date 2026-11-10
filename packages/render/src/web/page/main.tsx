@@ -30,6 +30,7 @@ import {
 } from "@cutcraft/kit";
 import { loadModule } from "@cutcraft/kit/source";
 import { addFontFaces, backdropTracks, Player, type PlayerRef } from "@cutcraft/player";
+import { SETTLE_MS } from "@cutcraft/player/engine";
 
 import { renderSoundtrack } from "./audio";
 import { inkOf, offFrame, pastEdges } from "./ink";
@@ -103,6 +104,10 @@ async function start(): Promise<void> {
     render(which);
     // React commits on its own schedule: the frame is drawn only once the player holds this state.
     while (ref.current?.core.state !== which) await tick();
+    // A player given a new state redraws its own playhead at once and again once it has settled. A frame stepped
+    // before that second redraw would be painted over by it, so it is waited out: this timer is set after the
+    // player's, with the same delay, so it fires after it, and the next step then runs after that redraw.
+    await new Promise((r) => setTimeout(r, SETTLE_MS));
   };
   render(state);
   while (!ref.current) await tick();
@@ -136,6 +141,12 @@ async function start(): Promise<void> {
     await core.compositor.step(t);
     await settle();
     await painted(cap);
+    // A face is fetched only when layout first sets text in it, which can be this paint: `settle` looked before the
+    // fetch began. Text painted meanwhile is in the fallback face, so the frame waits for the face and paints again.
+    while (document.fonts.status === "loading") {
+      await document.fonts.ready;
+      await painted(cap);
+    }
     ctx.clearRect(0, 0, width, height);
     try {
       ctx.drawElementImage(root, 0, 0);
@@ -252,7 +263,12 @@ async function start(): Promise<void> {
       g.textBaseline = "middle";
       kept = [];
       try {
-        for (const [i, cell] of r.cells.entries()) {
+        // The cells of the file as written first, then the ones without its disabled effects: the state changes once.
+        const order = [...r.cells.entries()].sort(
+          ([, a], [, b]) => Number(Boolean(a.without?.effects)) - Number(Boolean(b.without?.effects)),
+        );
+        const frames: Uint8Array[] = [];
+        for (const [i, cell] of order) {
           await show(cell.without?.effects ? bare : state);
           // An overlay is in the DOM only while it is on screen, so it is hidden after a step that mounts it.
           if (cell.without?.overlay) await core.compositor.step(cell.t).then(settle);
@@ -277,8 +293,9 @@ async function start(): Promise<void> {
             g.font = '400 12px "JetBrains Mono", monospace';
             g.fillText(cell.sub, x + 2, y + cellHeight + 32, r.cellWidth - 4);
           }
-          if (r.keepFrames) kept.push(await encode(cap, "image/png"));
+          if (r.keepFrames) frames[i] = await encode(cap, "image/png");
         }
+        kept = frames;
       } finally {
         await show(state);
       }
