@@ -1,6 +1,6 @@
 // `renderLook`: many frames from one browser start, on one sheet, each cell the frame a still draws at that time.
 // Needs a Chrome or Chromium 153+ in CUTCRAFT_CHROMIUM.
-import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 import { manifest as mediaManifest } from "../../../player/e2e/app/composition";
@@ -25,7 +25,7 @@ const W = 320,
 
 /** A two-clip cut with a crossfade, a title over the first clip and an effect on it; parts can be left out. */
 const video = (
-  options: { effect?: boolean; title?: boolean } = {},
+  options: { effect?: boolean; title?: boolean; words?: string } = {},
 ) => `import { Clip, Composition, Effect, Title, Track, Transition } from "@cutcraft/kit";
 export const manifest = ${JSON.stringify({ assets: mediaManifest.assets })};
 export default function Video() {
@@ -39,7 +39,7 @@ export default function Video() {
         <Clip id="solid" src="asset:solid" in={0} out={1.4} fit="cover" />
       </Track>
       <Track id="text" layout="free">
-        ${options.title === false ? "" : `<Title id="point" start={0.2} duration={1} size={40} enter={{ type: "none" }} exit={{ type: "none" }}>Point</Title>`}
+        ${options.title === false ? "" : `<Title id="point" start={0.2} duration={1} size={40} enter={{ type: "none" }} exit={{ type: "none" }}>${options.words ?? "Point"}</Title>`}
       </Track>
     </Composition>
   );
@@ -161,7 +161,7 @@ it("looks around a transition: before, across and after it, and writes each fram
     state: v.state,
     source: v.source,
     media: v.media,
-    out: join(dir, "around.jpg"),
+    out: join(dir, "around.png"),
     around: "x1",
     frames,
   });
@@ -208,4 +208,90 @@ it("refuses what it cannot draw, before starting a browser", async () => {
   const none = await renderLook({ ...base, out, at: "nope" });
   expect(none.sheet).toBeNull();
   expect(existsSync(out)).toBe(false);
+});
+
+describe("with a cache folder", () => {
+  it("draws a sheet once: the same look again reads every cell, and gives the same sheet", async () => {
+    const v = await load("cache", video());
+    const cacheDir = join(dir, "cache-a");
+    const base = { state: v.state, source: v.source, media: v.media, at: "0.5,point.end,2.5", cell: W };
+    const first = await renderLook({ ...base, out: join(dir, "c1.png"), cacheDir });
+    expect(first.cached).toBe(0);
+    const second = await renderLook({ ...base, out: join(dir, "c2.png"), cacheDir });
+    expect(second.cached).toBe(3);
+    expect(readFileSync(join(dir, "c2.png")).equals(readFileSync(join(dir, "c1.png")))).toBe(true);
+    // And it is the sheet drawn with no cache at all.
+    const plain = await renderLook({ ...base, out: join(dir, "c3.png") });
+    expect(plain.cached).toBe(0);
+    expect(readFileSync(join(dir, "c3.png")).equals(readFileSync(join(dir, "c1.png")))).toBe(true);
+    expect(second.cells).toEqual(first.cells);
+  });
+
+  it("after an edit, draws again only the cells the edit changed, and never shows a stale one", async () => {
+    const cacheDir = join(dir, "cache-b");
+    const look = async (name: string, source: string) => {
+      const v = await load(name, source);
+      const out = join(dir, `${name}.png`);
+      const result = await renderLook({
+        state: v.state,
+        source: v.source,
+        media: v.media,
+        out,
+        cacheDir,
+        at: "0.5,2.5",
+        cell: W,
+      });
+      return { result, sheet: readImage(out) };
+    };
+    await look("edit-before", video());
+    // The title's words change: the cell under the title is drawn again, the cell after it is not.
+    const after = await look("edit-after", video({ words: "Other" }));
+    expect(after.result.cached).toBe(1);
+    expect(same(cellDifference(after.sheet, 0, 0, await still("edit-after", video({ words: "Other" }), 0.5)))).toBe(
+      true,
+    );
+    expect(same(cellDifference(after.sheet, 0, 0, await still("edit-before", video(), 0.5)))).toBe(false);
+    // Back to the first file: both cells are still there from the first look.
+    expect((await look("edit-back", video())).result.cached).toBe(2);
+  });
+
+  it("keeps full frames too when they are asked for", async () => {
+    const v = await load("frames-cache", video());
+    const cacheDir = join(dir, "cache-c");
+    const base = { state: v.state, source: v.source, media: v.media, at: "0.5", cell: W, cacheDir };
+    const first = await renderLook({ ...base, out: join(dir, "f1.png"), frames: join(dir, "f1") });
+    const second = await renderLook({ ...base, out: join(dir, "f2.png"), frames: join(dir, "f2") });
+    expect([first.cached, second.cached]).toEqual([0, 1]);
+    expect(readFileSync(second.cells[0]?.file as string).equals(readFileSync(first.cells[0]?.file as string))).toBe(
+      true,
+    );
+    // A cell kept without its frame is drawn again when the frame is wanted.
+    await renderLook({ ...base, at: "2.5", out: join(dir, "f3.png") });
+    const wanted = await renderLook({ ...base, at: "2.5", out: join(dir, "f4.png"), frames: join(dir, "f4") });
+    expect(wanted.cached).toBe(0);
+  });
+
+  it("a still is read back the same way, and drawn again when its frame changes", async () => {
+    const cacheDir = join(dir, "cache-d");
+    const draw = async (name: string, source: string) => {
+      const v = await load(name, source);
+      const out = join(dir, `${name}-still.png`);
+      const result = await renderStill({ state: v.state, source: v.source, media: v.media, out, time: 0.5, cacheDir });
+      return { cached: result.cached, bytes: readFileSync(out) };
+    };
+    const first = await draw("s1", video());
+    const second = await draw("s2", video());
+    expect([first.cached, second.cached]).toEqual([false, true]);
+    expect(second.bytes.equals(first.bytes)).toBe(true);
+    const edited = await draw("s3", video({ words: "Other" }));
+    expect(edited.cached).toBe(false);
+    expect(edited.bytes.equals(first.bytes)).toBe(false);
+  });
+});
+
+it("writes a sheet as a PNG only", async () => {
+  const v = await load("jpg", video());
+  await expect(
+    renderLook({ state: v.state, source: v.source, media: v.media, out: join(dir, "sheet.jpg") }),
+  ).rejects.toThrow("a sheet is a PNG");
 });

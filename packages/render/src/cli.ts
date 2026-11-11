@@ -1,5 +1,5 @@
 import { readFileSync, writeFileSync } from "node:fs";
-import { dirname, resolve } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { parseArgs } from "node:util";
 
 import { MOMENT_FORMS, subtitles } from "@cutcraft/kit";
@@ -43,6 +43,9 @@ const USAGE = `Usage: cutcraft <file.tsx> --out <video.mp4|.webm|.mp3|.wav> [opt
   --cell <px>           (look) the width of a cell's picture (default 480)
   --columns <n>         (look) cells in a row (default up to 4)
   --frames <dir>        (look) also write each cell's full frame there as PNG
+  --no-cache            (look, --still) draw every frame again. Without it, frames are kept in .cutcraft/cache
+                        beside the file, keyed by what draws them, and a frame an edit did not touch is read from
+                        there without starting a browser
   add                   write each media file's entry into the manifest (default: manifest.json beside it): its
                         kind, length, size, frame rate and sound, read from the file, and its words from the
                         transcript beside it (talk.json from Whisper or ElevenLabs, talk.vtt or talk.srt)
@@ -118,6 +121,7 @@ async function main(): Promise<number> {
       cell: { type: "string" },
       columns: { type: "string" },
       frames: { type: "string" },
+      "no-cache": { type: "boolean" },
     },
   });
   if (positionals[0] === "add") return add(positionals.slice(1), values);
@@ -176,6 +180,7 @@ async function main(): Promise<number> {
       ...(values.cell ? { cell: Number(values.cell) } : {}),
       ...(values.columns ? { columns: Number(values.columns) } : {}),
       ...(values.frames ? { frames: resolve(values.frames) } : {}),
+      ...(values["no-cache"] ? {} : { cacheDir: cacheDirOf(target) }),
       ...(values.continue ? { onAssetError: "continue" as const } : {}),
     });
     for (const w of result.warnings) process.stderr.write(`warning: ${w}\n`);
@@ -183,7 +188,9 @@ async function main(): Promise<number> {
     const { errors: _errors, warnings: _warnings, ...legend } = result;
     process.stdout.write(`${JSON.stringify(legend, null, 2)}\n`);
     if (result.sheet)
-      process.stderr.write(`${result.sheet}: ${result.cells.length} cells, ${result.width}x${result.height}\n`);
+      process.stderr.write(
+        `${result.sheet}: ${result.cells.length} cells, ${result.width}x${result.height}${result.cached > 0 ? ` (${result.cached} from the cache)` : ""}\n`,
+      );
     return result.errors.length > 0 ? 1 : 0;
   }
   const [file] = positionals;
@@ -246,9 +253,12 @@ async function main(): Promise<number> {
       out: resolve(out),
       time,
       ...(values.continue ? { onAssetError: "continue" as const } : {}),
+      ...(values["no-cache"] ? {} : { cacheDir: cacheDirOf(file) }),
     });
     for (const w of still.warnings) process.stderr.write(`warning: ${w}\n`);
-    process.stderr.write(`${values.out}: frame ${still.frame}, ${still.width}x${still.height}\n`);
+    process.stderr.write(
+      `${values.out}: frame ${still.frame}, ${still.width}x${still.height}${still.cached ? " (from the cache)" : ""}\n`,
+    );
     return 0;
   }
   if (values.quality !== undefined && !(values.quality in QUALITIES))
@@ -325,6 +335,11 @@ async function add(
     process.stderr.write(`${describeAdded(result)} → ${result.manifest}\n`);
   }
   return 0;
+}
+
+/** Where a file's frames are kept: `.cutcraft/cache` beside it. */
+function cacheDirOf(file: string): string {
+  return join(dirname(resolve(file)), ".cutcraft", "cache");
 }
 
 function readFont(spec: string): FontFile {

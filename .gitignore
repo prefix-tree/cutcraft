@@ -14,3 +14,4 @@ packages/render/bench/.cache
 packages/render/bench-results.json
 packages/render/scenarios-results.json
 packages/render/scenarios-quality.json
+.cutcraft/

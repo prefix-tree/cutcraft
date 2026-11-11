@@ -27,7 +27,7 @@ time. `CUTCRAFT_CHROMIUM` names a Chrome or Chromium 153 or later to use instead
 | Option | |
 |---|---|
 | `--out <file>` | Where to write. `.mp4` gives H.264 and AAC, `.webm` VP9 and Opus. `.mp3` and `.wav` hold the soundtrack alone. |
-| `--still <s>` | Write the frame at this time instead, to a `.png` or `.jpg` `--out`. |
+| `--still <s>` | Write the frame at this time instead, to a `.png` or `.jpg` `--out`. It is kept in [the frame cache](#the-frame-cache); `--no-cache` draws it again. |
 | `--srt <file>` `--vtt <file>` | Also write the captions the cut plays as SRT or WebVTT, timed like the export. Without `--out`, write only them ([Subtitle files](https://cutcraft.prefixtree.xyz/guide/captions-and-sound#subtitle-files)). |
 | `--manifest <file>` | The asset manifest. Without it the file's own `manifest` export is used. |
 | `--media <dir>` | One file per asset id, with or without an extension (`podcast.webm`, `podcast`). Default: the file's folder. |
@@ -146,10 +146,11 @@ It prints a legend as JSON, one entry per cell, so a frame found by eye leads ba
 | `--at <moments>` | The moments to draw, comma-separated, written as for [`inspect`](#inspect): `hook.end,x1,word:14,2..6/0.5`. |
 | `--around <id>` | Five moments across one thing instead. A transition: the frame before it, its first, middle and last frame, and the frame after. Any other element: its first frame, half way in, its middle, half way out and its last frame. |
 | `--without <id>` | Each frame twice, side by side: as written, and without one effect, one `<Adjustment>` (all its effects) or one overlay (a title, a shape, an SVG, a sticker, a layer, the captions). A clip cannot be left out: that would move the cut. |
-| `--out <file>` | The sheet: `.png`, or `.jpg` for a smaller file. Default `look.png`. |
+| `--out <file>` | The sheet, a PNG. Default `look.png`. |
 | `--cell <px>` | The width of a cell's picture. Default 480. |
 | `--columns <n>` | Cells in a row. Default up to 4. |
 | `--frames <dir>` | Also write each cell's frame at full size there, as PNG; the legend names each file. |
+| `--no-cache` | Draw every cell again ([The frame cache](#the-frame-cache)). |
 | `--manifest`, `--media`, `--props`, `--font`, `--import`, `--continue` | As for an export. |
 
 **Around a cut.** `--around` follows one thing through: here a wipe, from the frame before it to the frame after.
@@ -172,6 +173,23 @@ npx cutcraft look colour-grade.tsx --at 1,2.5 --without grade
 
 A sheet holds at most 64 cells. A moment that cannot be found is reported and the command exits 1, after drawing the
 others.
+
+### The frame cache
+
+`look` and `--still` keep what they draw in `.cutcraft/cache`, beside the file. Each frame is kept under a key made
+from everything that decides its pixels: the elements on screen at that time with their resolved props, the media
+files they read (by size and modified time), the composition's settings, the fonts, and the version of CutCraft and of
+Chrome. So after an edit only the frames the edit changed are drawn again, and a look whose cells are all kept starts
+no browser and answers in about a second. The legend's `cached` says how many cells were read back.
+
+- Trimming the last clip leaves the frames of the clips before it as they were. Changing a title's words redraws only
+  the frames it is on.
+- A frame that free code draws (a `<Layer>`, `<Motion>` or `<Three>`, or an effect the file declares) is keyed by the
+  file's whole text too, since that code can read anything in it. Code brought in with `--import` is not seen: after
+  changing such a module, pass `--no-cache`.
+- A frame drawn with a placeholder for media that could not be read is not kept.
+
+The folder is safe to delete, and belongs in `.gitignore`.
 
 ## Exit codes
 
