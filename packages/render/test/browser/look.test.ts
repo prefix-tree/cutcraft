@@ -1,6 +1,6 @@
 // `renderLook`: many frames from one browser start, on one sheet, each cell the frame a still draws at that time.
 // Needs a Chrome or Chromium 153+ in CUTCRAFT_CHROMIUM.
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 import { manifest as mediaManifest } from "../../../player/e2e/app/composition";
@@ -294,4 +294,124 @@ it("writes a sheet as a PNG only", async () => {
   await expect(
     renderLook({ state: v.state, source: v.source, media: v.media, out: join(dir, "sheet.jpg") }),
   ).rejects.toThrow("a sheet is a PNG");
+});
+
+describe("--listen", () => {
+  const LISTEN = 132;
+  // bars carries a 440 Hz tone and plays from 0 to 2 s; solid has no sound and plays to 3 s.
+  const spoken = (volume?: number) => {
+    const assets = {
+      ...mediaManifest.assets,
+      bars: {
+        ...mediaManifest.assets.bars,
+        transcript: {
+          words: [
+            { i: 0, text: "one", start: 0.2, end: 0.6 },
+            { i: 1, text: "two", start: 1, end: 1.4 },
+            { i: 2, text: "late", start: 5, end: 5.4 },
+          ],
+        },
+      },
+    };
+    return video()
+      .replace(JSON.stringify({ assets: mediaManifest.assets }), JSON.stringify({ assets }))
+      .replace(`fit="cover">`, `fit="cover"${volume === undefined ? "" : ` volume={${volume}}`}>`);
+  };
+  const listen = async (name: string, source: string, stretch: string, more: { cacheDir?: string } = {}) => {
+    const v = await load(name, source);
+    const out = join(dir, `${name}.png`);
+    const result = await renderLook({
+      state: v.state,
+      source: v.source,
+      media: v.media,
+      out,
+      at: "0.5,2.5",
+      cell: W,
+      listen: stretch,
+      ...more,
+    });
+    expect(result.errors).toEqual([]);
+    return { result, out };
+  };
+
+  it("puts the sound of the stretch under the cells, and says how loud it is and where it is silent", async () => {
+    const { result, out } = await listen("hear", spoken(), "all");
+    const cellsHeight = H + BAND + 2 * GAP;
+    expect(result.height).toBe(cellsHeight + LISTEN + GAP);
+    expect(result.listen).toMatchObject({
+      from: 0,
+      to: 3,
+      strip: { x: GAP, y: cellsHeight, width: 2 * W + GAP, height: LISTEN },
+    });
+    const heard = result.listen as NonNullable<typeof result.listen>;
+    // The words the cut plays, not the one after the clip's out point.
+    expect(heard.words.map((w) => [w.i, w.text, w.start, w.clip])).toEqual([
+      [0, "one", 0.2, "bars"],
+      [1, "two", 1, "bars"],
+    ]);
+    expect(heard.peakDb).toBeGreaterThan(-30);
+    expect(heard.peakDb).toBeLessThanOrEqual(0);
+    expect(heard.rmsDb).toBeLessThan(heard.peakDb as number);
+    // The tone ends with its clip; what follows is silent to the end.
+    expect(heard.silences).toHaveLength(1);
+    const [from, to] = heard.silences[0] as readonly [number, number];
+    expect(from).toBeGreaterThan(1.5);
+    expect(from).toBeLessThan(2.1);
+    expect(to).toBeCloseTo(3, 1);
+    // The strip is drawn: its rows are not all the sheet's ground.
+    const sheet = readImage(out);
+    expect([sheet.width, sheet.height]).toEqual([result.width, result.height]);
+    const colours = new Set<number>();
+    for (let y = heard.strip.y; y < heard.strip.y + LISTEN; y++)
+      for (let x = GAP; x < GAP + heard.strip.width; x += 3) {
+        const o = (y * sheet.width + x) * 4;
+        colours.add(
+          ((sheet.rgba[o] as number) << 16) | ((sheet.rgba[o + 1] as number) << 8) | (sheet.rgba[o + 2] as number),
+        );
+      }
+    expect(colours.size).toBeGreaterThan(4);
+  });
+
+  it("hears a quieter clip as quieter", async () => {
+    const full = (await listen("loud", spoken(), "0..1.5")).result.listen;
+    const half = (await listen("quiet", spoken(0.5), "0..1.5")).result.listen;
+    expect(full?.silences).toEqual([]);
+    expect((full?.peakDb as number) - (half?.peakDb as number)).toBeCloseTo(6.02, 0);
+    expect((full?.rmsDb as number) - (half?.rmsDb as number)).toBeCloseTo(6.02, 0);
+  });
+
+  it("takes an element's id for the time it is on, and reports a silent stretch as silent", async () => {
+    const heard = (await listen("part", spoken(), "solid")).result.listen;
+    expect(heard).toMatchObject({ from: 1.6, to: 3, words: [] });
+    const quiet = (await listen("mute", spoken(), "2.2..3")).result.listen;
+    expect(quiet).toMatchObject({ peakDb: null, rmsDb: null, silences: [[2.2, 3]] });
+  });
+
+  it("refuses a stretch it cannot find", async () => {
+    const v = await load("bad", spoken());
+    const run = (stretch: string) =>
+      renderLook({ state: v.state, source: v.source, media: v.media, out: join(dir, "bad.png"), listen: stretch });
+    await expect(run("nothing")).rejects.toThrow('no element with the id "nothing"');
+    await expect(run("2..9")).rejects.toThrow("outside the video");
+    await expect(run("1.5")).rejects.toThrow("not a stretch");
+  });
+
+  it("keeps the strip in the cache, and hears again when the file changes", async () => {
+    const cacheDir = join(dir, "cache-listen");
+    const first = await listen("k1", spoken(), "all", { cacheDir });
+    const names = () =>
+      readdirSync(cacheDir)
+        .filter((n) => n.startsWith("listen-"))
+        .sort();
+    const kept = names();
+    expect(kept).toHaveLength(2);
+    const second = await listen("k2", spoken(), "all", { cacheDir });
+    expect(second.result.cached).toBe(2);
+    expect(second.result.listen).toEqual(first.result.listen);
+    expect(readFileSync(second.out).equals(readFileSync(first.out))).toBe(true);
+    expect(names()).toEqual(kept);
+    const quieter = await listen("k3", spoken(0.5), "all", { cacheDir });
+    expect(names()).toHaveLength(4);
+    expect(quieter.result.listen?.peakDb).toBeLessThan(first.result.listen?.peakDb as number);
+  });
 });

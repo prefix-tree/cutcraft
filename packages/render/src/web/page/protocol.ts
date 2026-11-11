@@ -71,6 +71,28 @@ export interface TilesRequest {
   readonly keepFrames?: boolean;
 }
 
+/** A picture of the sound of a stretch of the video, to go under a sheet's cells. */
+export interface ListenRequest {
+  /** Composition seconds. */
+  readonly from: number;
+  readonly to: number;
+  /** The strip's width, in pixels. */
+  readonly width: number;
+  /** The words said in the stretch, at the times they are said. */
+  readonly words: readonly { readonly text: string; readonly start: number; readonly end: number }[];
+}
+
+export interface ListenResult {
+  /** Bytes of the strip, a PNG, waiting for `read`. */
+  readonly length: number;
+  readonly peakDb: number | null;
+  readonly rmsDb: number | null;
+  readonly silences: readonly (readonly [number, number])[];
+}
+
+/** The height of a sound strip, in pixels. */
+export const LISTEN_HEIGHT = 132;
+
 /** An overlay's ink at one moment, in composition pixels: what the layout check measures. */
 export interface InkBounds {
   readonly id: string;
@@ -100,6 +122,8 @@ export interface PageApi {
   still(t: number, type: "image/png" | "image/jpeg", quality?: number): Promise<number>;
   /** Draws each cell as a tile: its frame scaled to the cell's width, with its label beneath. Returns how many. */
   tiles(request: TilesRequest): Promise<number>;
+  /** Mixes a stretch as the export does and draws it: the waveform, a time scale and the words. */
+  listen(request: ListenRequest): Promise<ListenResult>;
   /** Makes tile `index` of the last `tiles` call the result to `read`; returns its length. */
   tile(index: number): number;
   /** Makes the full frame of cell `index` (drawn with `keepFrames`) the result to `read`; returns its length. */

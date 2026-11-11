@@ -32,10 +32,18 @@ import { loadModule } from "@cutcraft/kit/source";
 import { addFontFaces, backdropTracks, Player, type PlayerRef } from "@cutcraft/player";
 import { SETTLE_MS } from "@cutcraft/player/engine";
 
-import { renderSoundtrack } from "./audio";
+import { measureSound, renderSoundtrack } from "./audio";
 import { inkOf, offFrame, pastEdges } from "./ink";
-import type { AudioRequest, InkBounds, PageApi, PageJob, SegmentRequest, TilesRequest } from "./protocol";
-import { TILE_BAND, TILE_GROUND } from "./protocol";
+import type {
+  AudioRequest,
+  InkBounds,
+  ListenRequest,
+  PageApi,
+  PageJob,
+  SegmentRequest,
+  TilesRequest,
+} from "./protocol";
+import { LISTEN_HEIGHT, TILE_BAND, TILE_GROUND } from "./protocol";
 
 declare global {
   interface Window {
@@ -297,6 +305,74 @@ async function start(): Promise<void> {
         await show(state);
       }
       return r.cells.length;
+    },
+    async listen(r: ListenRequest) {
+      const strip = document.createElement("canvas");
+      strip.width = r.width;
+      strip.height = LISTEN_HEIGHT;
+      const g = strip.getContext("2d") as CanvasRenderingContext2D;
+      await document.fonts.load('500 14px "JetBrains Mono"');
+      const sound = await measureSound(state, media, r.from, r.to, r.width);
+      g.fillStyle = TILE_GROUND;
+      g.fillRect(0, 0, strip.width, strip.height);
+      g.textBaseline = "middle";
+      const level = (v: number | null): string => (v === null ? "silent" : `${v.toFixed(1)} dBFS`);
+      g.fillStyle = "#f2f1ee";
+      g.font = '500 14px "JetBrains Mono", monospace';
+      g.fillText(
+        `sound ${r.from.toFixed(2)}..${r.to.toFixed(2)} s · peak ${level(sound.peakDb)} · rms ${level(sound.rmsDb)}`,
+        2,
+        12,
+        r.width - 4,
+      );
+      // The level over time, on a decibel scale from -60 dBFS at the bottom to full scale at the top: a linear
+      // waveform shows quiet speech as a flat line. Each column is its loudest sample, with its average level inside.
+      const top = 26,
+        tall = 64,
+        floor = -60;
+      const x = (t: number): number => ((t - r.from) / (r.to - r.from)) * r.width;
+      const rise = (v: number): number =>
+        v <= 0 ? 0 : Math.max(0, Math.min(1, 1 - (20 * Math.log10(v)) / floor)) * tall;
+      g.fillStyle = "#20202a";
+      g.fillRect(0, top, r.width, tall);
+      g.fillStyle = "#2f2f3d";
+      for (const [a, b] of sound.silences) g.fillRect(x(a), top, x(b) - x(a), tall);
+      g.fillStyle = "#56628a";
+      for (const [i, p] of sound.peaks.entries()) g.fillRect(i, top + tall - rise(p), 1, rise(p));
+      g.fillStyle = "#c8d2f0";
+      for (const [i, v] of sound.rms.entries()) g.fillRect(i, top + tall - rise(v), 1, rise(v));
+      // A line every 20 dB, named at the right edge.
+      g.font = '400 10px "JetBrains Mono", monospace';
+      for (const db of [-20, -40]) {
+        const y = top + (db / floor) * tall;
+        g.fillStyle = "rgba(242, 241, 238, 0.18)";
+        g.fillRect(0, y, r.width, 1);
+        g.fillStyle = "#8d8c96";
+        g.fillText(`${db}`, r.width - 22, y - 6);
+      }
+      // A time scale: a tick every step that leaves room for its number.
+      const steps = [0.1, 0.25, 0.5, 1, 2, 5, 10, 30, 60];
+      const step = steps.find((s) => ((r.to - r.from) / s) * 56 <= r.width) ?? 120;
+      g.font = '400 11px "JetBrains Mono", monospace';
+      g.fillStyle = "#8d8c96";
+      for (let t = Math.ceil(r.from / step - 1e-9) * step; t <= r.to + 1e-9; t += step) {
+        g.fillRect(x(t), top + tall, 1, 5);
+        g.fillText(`${Number(t.toFixed(2))}`, Math.min(x(t) + 3, r.width - 30), top + tall + 12);
+      }
+      // The words, each where it is said; one that would run into the word before it is left out.
+      g.font = '400 12px "JetBrains Mono", monospace';
+      let free = 0;
+      for (const word of r.words) {
+        const at = x(word.start);
+        g.fillStyle = "#4c4c5a";
+        g.fillRect(at, top, 1, tall);
+        if (at < free) continue;
+        g.fillStyle = "#f2f1ee";
+        g.fillText(word.text, at + 2, LISTEN_HEIGHT - 10);
+        free = at + 2 + g.measureText(word.text).width + 6;
+      }
+      out = await encode(strip, "image/png");
+      return { length: out.length, peakDb: sound.peakDb, rmsDb: sound.rmsDb, silences: sound.silences };
     },
     tile(index: number) {
       const bytes = keptTiles[index];
