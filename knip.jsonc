@@ -36,6 +36,10 @@
       // Cut files, loaded by path with loadVideo.
       "entry": ["*.ts", "*.tsx", "docs/*.tsx", "guide/*.tsx", "effects/*.tsx", "transitions/*.tsx", "components/*.tsx"]
     },
+    "examples/shorts": {
+      // Cut files, loaded by path with loadVideo.
+      "entry": ["*.tsx", "test/**/*.ts"]
+    },
     "recipes": {
       "entry": ["*.tsx", "test/**/*.ts"]
     }

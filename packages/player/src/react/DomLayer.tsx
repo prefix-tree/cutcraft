@@ -108,10 +108,12 @@ const Element = memo(
     // The box stays for as long as the element has an effect a shader draws, also at a moment when that effect
     // changes nothing and has no pass: taking the box away and putting it back would make the overlay's content
     // anew each time, and a three.js scene would be set up again in the middle of the video.
-    if (!content || !passes || (passes.length === 0 && !hasShaderEffect(item.children))) return content;
+    if (!content || item.placement.kind === "adjustment") return content;
+    const list = passes ?? [];
+    if (list.length === 0 && !hasShaderEffect(item.children)) return content;
     const { width, height } = state.composition;
     return (
-      <ShaderBox id={item.placement.id} width={width} height={height} passes={passes}>
+      <ShaderBox id={item.placement.id} width={width} height={height} passes={list}>
         {content}
       </ShaderBox>
     );
