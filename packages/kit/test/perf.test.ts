@@ -3,7 +3,12 @@ import { performance } from "node:perf_hooks";
 import { collectModule, createPatchLog, Executor, resolve, samePlacement } from "@cutcraft/kit";
 
 import { buildLarge } from "../fixtures/large";
-import { manifest } from "./helpers";
+import { manifest as sampleManifest } from "./helpers";
+
+// The large fixture runs for minutes; its music bed has to be as long, or the resolver says the bed runs out.
+const manifest = {
+  assets: { ...sampleManifest.assets, bed: { ...sampleManifest.assets.bed, duration: 600 } },
+} as typeof sampleManifest;
 
 /** Loose budgets: CI machines vary. The identity assertions are what keep the drag loop cheap. */
 const STEP_BUDGET_MS = 5;

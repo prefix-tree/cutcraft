@@ -259,6 +259,27 @@ export function freezeUnshift(holds: readonly FreezeHold[], u: number): number {
   return rel;
 }
 
+/**
+ * The holds a clip reaches when, without any hold, it would last `played` seconds. A hold starts at a time of the
+ * clip that counts the holds before it, so each one reached moves the end back. A hold at the clip's very end is
+ * reached: it holds the last frame. One written after that never begins, and adds nothing.
+ */
+export function reachedHolds(holds: readonly FreezeHold[], played: number): FreezeHold[] {
+  const reached: FreezeHold[] = [];
+  let shift = 0;
+  for (const h of holds) {
+    if (h.start - shift > played + 1e-9) break;
+    reached.push(h);
+    shift += h.duration;
+  }
+  return reached;
+}
+
+/** Seconds of holds inside the first `length` seconds of a clip: a hold cut off by the clip's end counts in part. */
+export function heldWithin(holds: readonly FreezeHold[], length: number): number {
+  return holds.reduce((n, h) => n + Math.min(h.duration, Math.max(0, length - h.start)), 0);
+}
+
 /** Total seconds the holds add to a clip. */
 export function holdTotal(holds: readonly FreezeHold[]): number {
   return holds.reduce((n, h) => n + h.duration, 0);
@@ -271,24 +292,32 @@ interface TimingChild {
 
 /** A clip's `<SpeedKey>` children, sorted by `at`. */
 export function speedKeysOf(children: readonly TimingChild[]): RampKey[] {
-  return children
-    .filter((c) => c.kind === "speedKey")
-    .map((c) => ({
-      at: Number(c.props.at ?? 0),
-      speed: Number(c.props.speed ?? 1),
-      easing: c.props.easing as string | undefined,
-    }))
-    .sort((a, b) => a.at - b.at);
+  return (
+    children
+      .filter((c) => c.kind === "speedKey")
+      .map((c) => ({
+        at: Number(c.props.at ?? 0),
+        speed: Number(c.props.speed ?? 1),
+        easing: c.props.easing as string | undefined,
+      }))
+      // A key the schema refuses is reported there and takes no part: the ramp's arithmetic needs speeds of 0.1 and up.
+      .filter((k) => Number.isFinite(k.at) && k.at >= 0 && Number.isFinite(k.speed) && k.speed >= 0.1)
+      .sort((a, b) => a.at - b.at)
+  );
 }
 
 /** A clip's `<Freeze>` children, sorted by `start`. */
 export function freezeHoldsOf(children: readonly TimingChild[]): FreezeHold[] {
-  return children
-    .filter((c) => c.kind === "freeze")
-    .map((c) => ({
-      at: Number(c.props.at ?? 0),
-      start: Number(c.props.start ?? 0),
-      duration: Number(c.props.duration ?? 0),
-    }))
-    .sort((a, b) => a.start - b.start);
+  return (
+    children
+      .filter((c) => c.kind === "freeze")
+      .map((c) => ({
+        at: Number(c.props.at ?? 0),
+        start: Number(c.props.start ?? 0),
+        duration: Number(c.props.duration ?? 0),
+      }))
+      // A hold the schema refuses is reported there and holds nothing.
+      .filter((h) => [h.at, h.start, h.duration].every(Number.isFinite) && h.at >= 0 && h.start >= 0 && h.duration > 0)
+      .sort((a, b) => a.start - b.start)
+  );
 }

@@ -31,7 +31,7 @@ import {
 } from "./captions";
 import type { ResolveError } from "./errors";
 import { overlay } from "./overlay";
-import { freezeHoldsOf, holdTotal, rampAdvance, rampInverse, speedKeysOf } from "./speed";
+import { freezeHoldsOf, heldWithin, holdTotal, rampAdvance, rampInverse, reachedHolds, speedKeysOf } from "./speed";
 import type { CollectedNode, CollectedTree, Editable, LayerInterior } from "./tree";
 
 export interface Placement {
@@ -275,16 +275,40 @@ function compute(
 
   let compositionEnd = 0;
   for (const p of pending.values()) {
-    if (p.start !== undefined && p.duration !== undefined && p.node.kind !== "transition")
+    // Something with no length shows and sounds nothing, so it does not make the video longer.
+    if (p.start !== undefined && p.duration !== undefined && p.duration > 0 && p.node.kind !== "transition")
       compositionEnd = Math.max(compositionEnd, p.start + p.duration);
   }
   for (const p of pending.values()) {
     if (p.durationDep?.kind === "fill" && p.start !== undefined) {
       p.duration = Math.max(0, compositionEnd - p.start);
-      if (p.source) p.source = { ...p.source, out: p.source.in + sourceSpan(p.node, p.duration, p.source.speed) };
+      if (p.source) {
+        let out = p.source.in + sourceSpan(p.node, p.duration, p.source.speed);
+        // A file cannot fill more time than it holds: it plays to its end and stops there.
+        const asset = lookupAsset(manifest, p.source.asset);
+        // (A multicam's last generated clip is left as it is: its angles are cut to the multicam's own length.)
+        const generated = pending.get(p.parent ?? "")?.node.kind === "multicam";
+        if (asset && asset.kind !== "image" && !generated && out > asset.duration + 0.05) {
+          const keys = speedKeysOf(p.node.children);
+          const left = Math.max(0, asset.duration - p.source.in);
+          const natural = keys.length > 0 ? rampInverse(keys, left) : left / p.source.speed;
+          const length = natural + holdTotal(reachedHolds(freezeHoldsOf(p.node.children), natural));
+          p.errors.push({
+            code: "TRIM_PAST_SOURCE",
+            id: p.node.id,
+            prop: "duration",
+            message: `${asset.id} is ${asset.duration}s long and cannot fill ${round3(p.duration)}s: it ends ${round3(p.duration - length)}s before the video does`,
+          });
+          p.duration = length;
+          out = asset.duration;
+        }
+        p.source = { ...p.source, out };
+      }
       delete p.durationDep;
     }
   }
+  // An element that matches a filling one could not take its length until now.
+  settleMatches(pending);
   for (const p of pending.values()) {
     if (p.start === undefined || p.duration === undefined) {
       p.errors.push({
@@ -349,7 +373,7 @@ function compute(
     const placement = place(p.node, p.track, p.parent, start, length, p.props, p.errors, p.source, p.between);
     items.set(p.node.id, placement);
     if (p.errors.length > 0) errors.push(...p.errors);
-    if (p.node.kind !== "transition") duration = Math.max(duration, placement.end);
+    if (p.node.kind !== "transition" && placement.end > placement.start) duration = Math.max(duration, placement.end);
     duration = placeChildren(p.node, placement, items, errors, place, duration, theme);
   }
 
@@ -498,7 +522,18 @@ function parseProps(node: CollectedNode, errors: ResolveError[], theme: Resolved
           },
         };
     } else {
-      data = { ...themed.props };
+      // A value the schema refuses is reported and then left out, so the element is placed as if the prop was not
+      // written: a speed of 0 or a negative duration must not reach the arithmetic and place something for ever, or
+      // backwards. Without the refused props the rest usually parses, and takes its defaults.
+      const kept: Record<string, unknown> = { ...themed.props };
+      for (const issue of result.error.issues) {
+        if (issue.path.length === 1) delete kept[String(issue.path[0])];
+        // A prop the element does not take at all.
+        else if (issue.path.length === 0 && issue.code === "unrecognized_keys")
+          for (const k of issue.keys) delete kept[k];
+      }
+      const again = schema.safeParse(kept);
+      data = again.success ? (again.data as Record<string, unknown>) : kept;
       own.push(
         ...result.error.issues.map(
           (issue) =>
@@ -660,9 +695,10 @@ function intrinsicCompute(
       sourceRange(p, asset, markers);
     }
   } else if (node.kind === "transition") {
-    p.duration = Number(props.duration ?? 0.5);
+    p.duration = lengthOr(props.duration, 0.5);
   } else if (node.kind === "gap") {
-    p.duration = Number(props.duration);
+    // A gap whose duration the schema refused holds no time.
+    p.duration = lengthOr(props.duration, 0);
   } else if (node.kind === "caption") {
     // Timed in the captions pass, once the clips that play the asset are placed.
   } else if (node.kind === "captions") {
@@ -781,6 +817,11 @@ function textureErrors(items: ReadonlyMap<string, Placement>, manifest: AssetMan
 }
 
 /** The seconds a time reference resolved to, or `fallback` with its error recorded. */
+/** A length in seconds as written, or `fallback` for one that is missing or is not a finite, non-negative number. */
+function lengthOr(value: unknown, fallback: number): number {
+  return typeof value === "number" && Number.isFinite(value) && value >= 0 ? value : fallback;
+}
+
 function secondsOr(p: Pending, resolved: ReturnType<typeof resolveTimeRef>, fallback: number): number {
   if (typeof resolved === "number") return resolved;
   p.errors.push(resolved);
@@ -795,7 +836,7 @@ function sourceRange(p: Pending, asset: AssetEntry, markers: ReadonlyMap<string,
   const inSec = secondsOr(p, inT, 0);
   const dur = props.duration;
   const keys = speedKeysOf(node.children);
-  const holds = holdTotal(freezeHoldsOf(node.children));
+  const allHolds = freezeHoldsOf(node.children);
   let outSec: number;
   /** Timeline seconds the source plays, when `duration` gave them exactly. */
   let played: number | undefined;
@@ -837,13 +878,25 @@ function sourceRange(p: Pending, asset: AssetEntry, markers: ReadonlyMap<string,
   }
   p.source = { in: inSec, out: outSec, speed, asset: asset.id };
   // Speed keys replace `speed`; freeze holds are inserted, so they lengthen the clip.
-  p.duration = (played ?? (keys.length > 0 ? rampInverse(keys, outSec - inSec) : (outSec - inSec) / speed)) + holds;
+  const natural = played ?? (keys.length > 0 ? rampInverse(keys, outSec - inSec) : (outSec - inSec) / speed);
+  const holds = reachedHolds(allHolds, natural);
+  for (const child of node.children) {
+    if (child.kind !== "freeze" || !allHolds.some((h) => h.start === Number(child.props.start))) continue;
+    if (holds.some((h) => h.start === Number(child.props.start))) continue;
+    p.errors.push({
+      code: "INVALID_TIME_RANGE",
+      id: child.id,
+      prop: "start",
+      message: `the freeze starts ${Number(child.props.start)}s into "${node.id}", after the clip has ended, so it never holds`,
+    });
+  }
+  p.duration = natural + holdTotal(holds);
 }
 
 /** Source seconds a clip plays over `length` timeline seconds: its freeze holds play none, its speed keys replace `speed`. */
 function sourceSpan(node: CollectedNode, length: number, speed: number): number {
   const keys = speedKeysOf(node.children);
-  const rel = Math.max(0, length - holdTotal(freezeHoldsOf(node.children)));
+  const rel = Math.max(0, length - heldWithin(freezeHoldsOf(node.children), length));
   return keys.length > 0 ? rampAdvance(keys, rel) : rel * speed;
 }
 
@@ -857,6 +910,8 @@ function placeTrack(
   let cursor = 0;
   let prevClip: Pending | null = null;
   let pendingTransition: Pending | null = null;
+  /** The length of the transition that leads into `prevClip`, to see that two transitions do not meet inside it. */
+  let intoPrev = 0;
   for (const child of trackNode.children) {
     const p = pending.get(child.id);
     if (!p) continue;
@@ -877,7 +932,16 @@ function placeTrack(
           id: child.id,
           message: "a transition between siblings needs a sequence track; use on/edge on free tracks",
         });
+        p.start = 0;
         continue;
+      }
+      if (pendingTransition) {
+        pendingTransition.errors.push({
+          code: "NOT_ADJACENT",
+          id: pendingTransition.node.id,
+          message: "a transition needs a clip on each side, not another transition",
+        });
+        pendingTransition.start = cursor;
       }
       pendingTransition = p;
       continue;
@@ -894,14 +958,15 @@ function placeTrack(
     }
     if (!caps.timed) continue;
     if (track.layout === "free") {
-      if (typeof p.props.start !== "number")
+      // A start the schema refused is already reported; it is not also missing.
+      if (typeof p.props.start !== "number" && child.props.start === undefined)
         p.errors.push({
           code: "MISSING_START",
           id: child.id,
           prop: "start",
           message: "elements on a free track need start",
         });
-      p.start = typeof p.props.start === "number" ? p.props.start : 0;
+      p.start = lengthOr(p.props.start, 0);
       continue;
     }
     if (typeof p.props.start === "number") {
@@ -931,18 +996,32 @@ function placeTrack(
       pendingTransition.start = cursor;
       pendingTransition = null;
     }
+    let into = 0;
     if (pendingTransition && prevClip) {
       const d = pendingTransition.duration ?? 0;
-      const start = Math.max(0, cursor - d);
-      pendingTransition.start = start;
-      pendingTransition.between = [prevClip.node.id, child.id];
-      if (d > (prevClip.duration ?? 0) || (p.duration !== undefined && d > p.duration)) {
+      const outgoing = prevClip.duration ?? 0;
+      if (d > outgoing || (p.duration !== undefined && d > p.duration)) {
         pendingTransition.errors.push({
           code: "INSUFFICIENT_HANDLES",
           id: pendingTransition.node.id,
           message: "transition is longer than one of its clips",
         });
+      } else if (intoPrev + d > outgoing + 1e-9) {
+        pendingTransition.errors.push({
+          code: "INSUFFICIENT_HANDLES",
+          id: pendingTransition.node.id,
+          message: `"${prevClip.node.id}" is shorter than the transitions on its two sides together, so they would overlap`,
+        });
       }
+      // A transition that does not fit is told above and held to what its clips have: the part of the outgoing clip
+      // that the transition before has not used, and the whole of the incoming one. Longer, the incoming clip would
+      // start before the outgoing one does.
+      const fit = Math.max(0, Math.min(d, outgoing - intoPrev, p.duration ?? Number.POSITIVE_INFINITY));
+      if (fit < d) pendingTransition.duration = fit;
+      into = fit;
+      const start = cursor - fit;
+      pendingTransition.start = start;
+      pendingTransition.between = [prevClip.node.id, child.id];
       cursor = start;
     } else if (pendingTransition) {
       pendingTransition.errors.push({
@@ -953,6 +1032,7 @@ function placeTrack(
       pendingTransition.start = cursor;
     }
     pendingTransition = null;
+    intoPrev = into;
     p.start = cursor;
     if (p.duration !== undefined) cursor += p.duration;
     else p.durationDep ??= { kind: "fill" }; // match deps settle later; cursor cannot advance past an unknown length
@@ -1109,6 +1189,8 @@ function iterateDependencies(pending: Map<string, Pending>, manifest: AssetManif
     if (!progressed) break;
   }
   for (const p of pending.values()) {
+    // A match on an element that fills the video is settled after the fill, not a cycle.
+    if (!p.anchorDep && p.durationDep?.kind === "match" && waitsForFill(p, pending)) continue;
     if ((p.anchorDep && p.start === undefined) || (p.durationDep?.kind === "match" && p.duration === undefined)) {
       p.errors.push({
         code: "CYCLE",
@@ -1122,6 +1204,47 @@ function iterateDependencies(pending: Map<string, Pending>, manifest: AssetManif
     }
   }
 }
+
+/** Whether `p`'s match leads, through other matches, to an element whose length is the video's. */
+function waitsForFill(p: Pending, pending: Map<string, Pending>): boolean {
+  const seen = new Set<Pending>();
+  for (let at: Pending | undefined = p; at && !seen.has(at); ) {
+    seen.add(at);
+    if (at.durationDep?.kind === "fill") return true;
+    if (at.durationDep?.kind !== "match") return false;
+    at = pending.get(at.durationDep.id);
+  }
+  return false;
+}
+
+/** Gives each element still waiting on a match its target's length, now that fills have theirs. */
+function settleMatches(pending: Map<string, Pending>): void {
+  for (let pass = 0; pass < MAX_PASSES; pass++) {
+    let progressed = false;
+    for (const p of pending.values()) {
+      if (p.durationDep?.kind !== "match" || p.duration !== undefined) continue;
+      const target = pending.get(p.durationDep.id);
+      if (target?.duration === undefined) continue;
+      p.duration = target.duration;
+      if (p.source) p.source = { ...p.source, out: p.source.in + sourceSpan(p.node, p.duration, p.source.speed) };
+      delete p.durationDep;
+      progressed = true;
+    }
+    if (!progressed) break;
+  }
+  for (const p of pending.values()) {
+    if (p.durationDep?.kind !== "match" || p.duration !== undefined) continue;
+    p.errors.push({
+      code: "CYCLE",
+      id: p.node.id,
+      message: `"${p.node.id}" depends on itself through anchors or match durations`,
+    });
+    p.duration = 0;
+    delete p.durationDep;
+  }
+}
+
+const round3 = (x: number): number => Math.round(x * 1000) / 1000;
 
 /**
  * Seconds after `target` starts at which it plays `at`, a word, shot or silence of its source:
@@ -1240,17 +1363,18 @@ function placeChildren(
     let start = parent.start;
     let duration = parent.duration;
     if (child.kind === "keyframe" || child.kind === "speedKey") {
-      start = parent.start + Number(props.at ?? 0);
+      start = parent.start + lengthOr(props.at, 0);
       duration = 0;
     }
     if (child.kind === "freeze") {
-      start = parent.start + Number(props.start ?? 0);
-      duration = Number(props.duration ?? 0);
+      start = parent.start + lengthOr(props.start, 0);
+      duration = lengthOr(props.duration, 0);
     }
     const placement = place(child, parent.track, node.id, start, duration, props, own, undefined, undefined);
     items.set(child.id, placement);
     if (own.length > 0) errors.push(...own);
-    if (child.kind !== "transition") end = Math.max(end, placement.end);
+    // What is inside an element does not make the video longer: a key or a hold written past its element's end is
+    // still that element's.
     end = placeChildren(child, placement, items, errors, place, end, theme);
   }
   return end;
