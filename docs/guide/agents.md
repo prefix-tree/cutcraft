@@ -61,6 +61,12 @@ the agent can see what a grade, a blur or a title actually does to the picture.
 
 [![Four frames of coffee being poured: at 1 second the two are the same; at 2.5 seconds the one with the grade is warmer and brighter than the one without](/reference/look-without.jpg)](/reference/look-without.jpg)
 
+**Listen to it.** `--listen all` adds a strip of the mix under the frames: its level over time, the words where they
+are said, and the silent stretches shaded. The legend gives the peak and average level in numbers, so the agent can
+tell that the music ducks under the voice, that nothing clips, and that no clip lost its sound.
+
+[![Three frames of a cut above a strip of its sound: a steady tone for two seconds with three words marked on it, two seconds of shaded silence, then a louder tone to the end](/reference/look-listen.png)](/reference/look-listen.png)
+
 Looking again is nearly free. Every frame drawn is kept beside the file, under a key made from what draws it, so
 after an edit only the frames that changed are drawn again: an agent can look after every step.
 

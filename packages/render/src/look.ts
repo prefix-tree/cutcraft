@@ -6,17 +6,19 @@ import { join } from "node:path";
 import {
   aroundMoments,
   createPatchLog,
+  listenRange,
   type Moment,
   parseMoments,
   type ResolvedState,
   resolve,
   resolveMoments,
   skimMoments,
+  spokenWords,
 } from "@cutcraft/kit";
 import type { MediaResolver } from "@cutcraft/player/engine";
 
 import type { FontFile } from "./fonts";
-import { FrameKeys, readCached, writeCached } from "./frame-cache";
+import { FrameKeys, readCached, wholeKey, writeCached } from "./frame-cache";
 import { describeAt } from "./inspect";
 import { blankPicture, decodePng, encodePng, paste } from "./png";
 import { type ExportSource, openEngine } from "./renderer";
@@ -48,6 +50,11 @@ export interface LookOptions {
   readonly cell?: number;
   /** Cells in a row; default up to 4 (an even number with `without`). */
   readonly columns?: number;
+  /**
+   * A stretch to show the sound of, under the cells: `all`, a range such as `2..6`, or an element's id. The strip
+   * holds the mix's waveform on a decibel scale, a time scale and the words said; the result says how loud it is and where it is silent.
+   */
+  readonly listen?: string;
   /** A folder to write each cell's full frame into as well, as PNG. */
   readonly frames?: string;
   /**
@@ -72,6 +79,27 @@ export interface LookCell extends Moment {
   readonly file?: string;
 }
 
+export interface LookSound {
+  /** The stretch, in seconds of the finished video. */
+  readonly from: number;
+  readonly to: number;
+  /** The loudest sample and the average level of the mix there, in dB relative to full scale; null for silence. */
+  readonly peakDb: number | null;
+  readonly rmsDb: number | null;
+  /** Stretches of at least 0.3 s quieter than -50 dBFS. */
+  readonly silences: readonly (readonly [number, number])[];
+  /** The words said, at the times they are said. */
+  readonly words: readonly {
+    readonly i: number;
+    readonly text: string;
+    readonly start: number;
+    readonly end: number;
+    readonly clip: string;
+  }[];
+  /** Where the strip is on the sheet, in pixels. */
+  readonly strip: { readonly x: number; readonly y: number; readonly width: number; readonly height: number };
+}
+
 export interface LookResult {
   /** The sheet written, or null when no moment could be drawn. */
   readonly sheet: string | null;
@@ -81,6 +109,8 @@ export interface LookResult {
   readonly cells: readonly LookCell[];
   /** How many of the cells were read from the cache instead of drawn. */
   readonly cached: number;
+  /** The sound of the stretch asked for with `listen`. */
+  readonly listen?: LookSound;
   /** Moments that could not be found, and why. */
   readonly errors: readonly string[];
   readonly warnings: readonly string[];
@@ -114,6 +144,8 @@ export async function renderLook(options: LookOptions): Promise<LookResult> {
         ? resolveMoments(state, parseMoments(options.at))
         : { moments: skimMoments(state), errors: [] };
   const out = options.without !== undefined ? leaveOut(state, options.without) : null;
+  const stretch = options.listen !== undefined ? listenRange(state, options.listen) : null;
+  if (stretch && "error" in stretch) throw new Error(`--listen ${stretch.error}`);
   const perMoment = out ? 2 : 1;
   if (picked.moments.length * perMoment > MAX_LOOK_CELLS)
     throw new Error(
@@ -193,19 +225,50 @@ export async function renderLook(options: LookOptions): Promise<LookResult> {
     }
   const missing = cells.map((_, i) => i).filter((i) => !tiles[i]);
 
-  // The browser starts only for the cells the cache does not hold.
-  if (missing.length > 0) {
+  // The sound strip is as wide as the cells and the gaps between them.
+  const stripWidth = perRow * cellWidth + (perRow - 1) * SHEET_GAP;
+  const words = stretch
+    ? spokenWords(state)
+        .filter((w) => w.end > stretch.from && w.start < stretch.to)
+        .map((w) => ({ i: w.i, text: w.text, start: w.start, end: w.end, clip: w.play }))
+    : [];
+  // Any part of the file can change its sound, so the strip is kept under a key of the whole file.
+  const soundName =
+    stretch && keys
+      ? `listen-${await wholeKey(keys, { listen: [stretch.from, stretch.to], width: stripWidth })}`
+      : null;
+  let sound: {
+    bytes: Uint8Array;
+    peakDb: number | null;
+    rmsDb: number | null;
+    silences: LookSound["silences"];
+  } | null = null;
+  if (stretch && soundName && options.cacheDir) {
+    const bytes = readCached(options.cacheDir, `${soundName}.png`);
+    const measured = readCached(options.cacheDir, `${soundName}.json`);
+    if (bytes && measured) sound = { bytes, ...JSON.parse(Buffer.from(measured).toString("utf8")) };
+  }
+
+  // The browser starts only for what the cache does not hold.
+  if (missing.length > 0 || (stretch && !sound)) {
     const engine = await openEngine({
       ...options,
       warnings,
       ...(out && "effects" in out ? { disabled: out.effects } : {}),
     });
     try {
-      const drawn = await engine.tiles({
-        cells: missing.map((i) => cells[i] as SheetCell),
-        cellWidth,
-        ...(options.frames ? { keepFrames: true } : {}),
-      });
+      const drawn =
+        missing.length > 0
+          ? await engine.tiles({
+              cells: missing.map((i) => cells[i] as SheetCell),
+              cellWidth,
+              ...(options.frames ? { keepFrames: true } : {}),
+            })
+          : { tiles: [], frames: [] };
+      const heard =
+        stretch && !sound
+          ? await engine.listen({ from: stretch.from, to: stretch.to, width: stripWidth, words })
+          : null;
       const failed = await engine.errors();
       if (failed.length > 0) {
         if (options.onAssetError !== "continue") throw new Error(`cannot render: ${failed.join("; ")}`);
@@ -221,6 +284,14 @@ export async function renderLook(options: LookOptions): Promise<LookResult> {
           if (frames[i]) writeCached(options.cacheDir, name.frame, frames[i] as Uint8Array);
         }
       }
+      if (heard) {
+        sound = heard;
+        if (options.cacheDir && soundName && failed.length === 0) {
+          const { bytes, ...measured } = heard;
+          writeCached(options.cacheDir, `${soundName}.png`, bytes);
+          writeCached(options.cacheDir, `${soundName}.json`, Buffer.from(JSON.stringify(measured)));
+        }
+      }
     } finally {
       await engine.close();
     }
@@ -230,11 +301,14 @@ export async function renderLook(options: LookOptions): Promise<LookResult> {
   const pictures = tiles.map((bytes) => decodePng(bytes as Uint8Array));
   const first = pictures[0] as (typeof pictures)[number];
   const rows = Math.ceil(cells.length / perRow);
+  const cellsHeight = rows * first.height + (rows + 1) * SHEET_GAP;
+  const strip = sound ? decodePng(sound.bytes) : null;
   const sheet = blankPicture(
     perRow * first.width + (perRow + 1) * SHEET_GAP,
-    rows * first.height + (rows + 1) * SHEET_GAP,
+    cellsHeight + (strip ? strip.height + SHEET_GAP : 0),
     SHEET_GROUND,
   );
+  if (strip) paste(sheet, strip, SHEET_GAP, cellsHeight);
   for (const [i, picture] of pictures.entries())
     paste(
       sheet,
@@ -260,6 +334,19 @@ export async function renderLook(options: LookOptions): Promise<LookResult> {
     columns: perRow,
     cells: legend.map((cell, i) => ({ ...cell, ...(files[i] ? { file: files[i] as string } : {}) })),
     cached: cells.length - missing.length,
+    ...(stretch && sound && strip
+      ? {
+          listen: {
+            from: stretch.from,
+            to: stretch.to,
+            peakDb: sound.peakDb,
+            rmsDb: sound.rmsDb,
+            silences: sound.silences,
+            words,
+            strip: { x: SHEET_GAP, y: cellsHeight, width: strip.width, height: strip.height },
+          },
+        }
+      : {}),
     errors: picked.errors,
     warnings,
   };

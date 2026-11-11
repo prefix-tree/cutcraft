@@ -329,3 +329,36 @@ export function skimMoments(state: ResolvedState): Moment[] {
   }
   return kept;
 }
+
+/**
+ * A stretch of the finished video to listen to: `all`, a range of times (`2..6`, `60f..180f`), or an element's id for
+ * the time it is on. Returns the stretch in seconds, or why it cannot be found.
+ */
+export function listenRange(
+  state: ResolvedState,
+  text: string,
+): { readonly from: number; readonly to: number } | { readonly error: string } {
+  const { fps, duration } = state.composition;
+  const input = text.trim();
+  if (input === "all") return { from: 0, to: round(duration) };
+  const parsed = parseMoment(input);
+  const seconds = (t: ParsedMoment & { kind: "time" }): number => t.seconds ?? (t.frame as number) / fps;
+  let from: number, to: number;
+  if (parsed.kind === "range" && !parsed.step) {
+    from = seconds(parsed.from);
+    to = seconds(parsed.to);
+  } else if (parsed.kind === "element" && !parsed.point) {
+    const p = state.items.get(parsed.id);
+    if (!p) return { error: `${input}: the file has no element with the id "${parsed.id}"` };
+    from = p.start;
+    to = p.end;
+  } else {
+    return { error: `"${input}" is not a stretch to listen to; give all, a range such as 2..6, or an element's id` };
+  }
+  if (!(to > from)) return { error: `${input}: a stretch runs forward and has a length` };
+  if (from < -1e-9 || to > duration + 1e-9)
+    return {
+      error: `${input}: ${round(from)}..${round(to)} s is outside the video, which is ${round(duration)} s long`,
+    };
+  return { from: round(Math.max(0, from)), to: round(Math.min(duration, to)) };
+}

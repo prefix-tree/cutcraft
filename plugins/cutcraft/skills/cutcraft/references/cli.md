@@ -10,7 +10,7 @@ npx cutcraft <file.tsx> --still <seconds> --out <image.png|.jpg> [options]
 npx cutcraft <file.tsx> --check-layout [--safe-zone <zone>] [--subject <x,y,w,h>] [--json] [options]
 npx cutcraft <file.tsx> --srt <captions.srt> | --vtt <captions.vtt> [--from <s> --to <s>]
 npx cutcraft inspect <file.tsx> [--at <moments>] [--json] [--manifest <file>] [--props <json>]
-npx cutcraft look <file.tsx> [--at <moments> | --around <id>] [--without <id>] [--out look.png] [options]
+npx cutcraft look <file.tsx> [--at <moments> | --around <id>] [--without <id>] [--listen <stretch>] [--out look.png] [options]
 npx cutcraft add <media file>... [--manifest manifest.json] [--id <id>] [--transcript <file>]
 npx cutcraft browser install
 ```
@@ -146,6 +146,7 @@ It prints a legend as JSON, one entry per cell, so a frame found by eye leads ba
 | `--at <moments>` | The moments to draw, comma-separated, written as for [`inspect`](#inspect): `hook.end,x1,word:14,2..6/0.5`. |
 | `--around <id>` | Five moments across one thing instead. A transition: the frame before it, its first, middle and last frame, and the frame after. Any other element: its first frame, half way in, its middle, half way out and its last frame. |
 | `--without <id>` | Each frame twice, side by side: as written, and without one effect, one `<Adjustment>` (all its effects) or one overlay (a title, a shape, an SVG, a sticker, a layer, the captions). A clip cannot be left out: that would move the cut. |
+| `--listen <stretch>` | The sound of a stretch, drawn under the cells: `all`, a range of times such as `2..6` or `60f..180f`, or an element's id for the time it is on ([Listening](#listening)). |
 | `--out <file>` | The sheet, a PNG. Default `look.png`. |
 | `--cell <px>` | The width of a cell's picture. Default 480. |
 | `--columns <n>` | Cells in a row. Default up to 4. |
@@ -170,6 +171,41 @@ npx cutcraft look colour-grade.tsx --at 1,2.5 --without grade
 ```
 
 [![Four frames of coffee being poured: at 1 second the two are the same; at 2.5 seconds the one with the grade is warmer and brighter than the one without](https://cutcraft.prefixtree.xyz/reference/look-without.jpg)](https://cutcraft.prefixtree.xyz/reference/look-without.jpg)
+
+### Listening
+
+A picture says nothing about the sound, so `--listen` adds a strip for it under the cells. The strip is the mix as an
+export would write it, after every volume, fade and duck: its level over time on a decibel scale from -60 dBFS to full
+scale, a time scale beneath it, and each word of the transcript where the cut says it. In each column the dim bar is
+the loudest sample and the bright bar is the average level. Silent stretches are shaded.
+
+```sh
+npx cutcraft look video.tsx --at 1,3,5 --listen all
+```
+
+[![Three frames of a cut above a strip of its sound: a steady tone for two seconds with three words marked on it, two seconds of shaded silence, then a louder tone to the end](https://cutcraft.prefixtree.xyz/reference/look-listen.png)](https://cutcraft.prefixtree.xyz/reference/look-listen.png)
+
+The legend carries the same as numbers, so a check needs no picture:
+
+```json
+"listen": {
+  "from": 0,
+  "to": 5.5,
+  "peakDb": -16.5,
+  "rmsDb": -25,
+  "silences": [[2, 4]],
+  "words": [{ "i": 0, "text": "Hello", "start": 0.2, "end": 0.6, "clip": "bars" }],
+  "strip": { "x": 8, "y": 240, "width": 976, "height": 132 }
+}
+```
+
+`peakDb` is the loudest sample of the stretch and `rmsDb` its average level, both in dB relative to full scale, and
+both `null` when the stretch is silent. A peak at 0 means the mix reaches full scale and may clip. `silences` lists every stretch of at least
+0.3 s that stays below -50 dBFS: a gap where the music should carry on, or a clip whose sound is missing. The words
+are the ones the cut plays inside the stretch, at the times it plays them.
+
+The strip is kept in the frame cache under a key of the whole file and every media file it plays, since any line of
+the file can change the mix. The same file is not mixed twice; any edit mixes it again.
 
 A sheet holds at most 64 cells. A moment that cannot be found is reported and the command exits 1, after drawing the
 others.

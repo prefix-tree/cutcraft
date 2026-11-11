@@ -153,6 +153,19 @@ export class FrameKeys {
     return known;
   }
 
+  /** See `wholeKey`: the whole file, every asset it plays, and `extra`. */
+  async whole_(extra: unknown): Promise<string> {
+    const assets = new Set<string>();
+    for (const p of this.input.state.items.values()) if (p.source) assets.add(p.source.asset.replace(/^asset:/, ""));
+    const stats = await Promise.all([...assets].sort().map(async (id) => `${id}=${await this.stat(id)}`));
+    const hash = createHash("sha256");
+    hash.update(this.shared);
+    hash.update(this.whole);
+    hash.update(`\n${stats.join("\n")}\n`);
+    hash.update(stable(extra, { free: false }));
+    return hash.digest("hex").slice(0, 40);
+  }
+
   /**
    * The key of frame `frame`, as a file-name-safe string. `extra` names anything else that decides the stored bytes:
    * the kind of picture, its size, its label.
@@ -198,6 +211,11 @@ export class FrameKeys {
     if (flags.free) hash.update(this.whole);
     return hash.digest("hex").slice(0, 40);
   }
+}
+
+/** A key for something every part of the file can decide, such as its sound over a stretch. */
+export async function wholeKey(keys: FrameKeys, extra: unknown): Promise<string> {
+  return keys.whole_(extra);
 }
 
 /** A file from the cache, or null. */

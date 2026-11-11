@@ -4,6 +4,7 @@ import {
   type AssetManifest,
   aroundMoments,
   collectModule,
+  listenRange,
   MAX_RANGE_MOMENTS,
   parseMoment,
   parseMoments,
@@ -211,5 +212,27 @@ describe("the moments an editor skims", () => {
     expect(moments.map((m) => m.label)).toEqual(["a.start", "b.before", "b.start", "name.mid"]);
     expect(moments.map((m) => m.frame)).toEqual([0, 59, 60, 90]);
     expect(new Set(moments.map((m) => m.frame)).size).toBe(moments.length);
+  });
+});
+
+describe("a stretch to listen to", () => {
+  it("is the whole video, a range of times or frames, or the time an element is on", () => {
+    const state = stateOf(CUT);
+    expect(listenRange(state, "all")).toEqual({ from: 0, to: 7.4 });
+    expect(listenRange(state, "2..6")).toEqual({ from: 2, to: 6 });
+    expect(listenRange(state, "30f..90f")).toEqual({ from: 1, to: 3 });
+    expect(listenRange(state, "broll")).toEqual({ from: 2.4, to: 7.4 });
+    expect(listenRange(state, "x1")).toEqual({ from: 2.4, to: 2.9 });
+  });
+
+  it("says why a stretch cannot be found", () => {
+    const state = stateOf(CUT);
+    const error = (text: string) => (listenRange(state, text) as { error: string }).error;
+    expect(error("nope")).toContain('no element with the id "nope"');
+    expect(error("4.5")).toContain("not a stretch to listen to");
+    expect(error("hook.end")).toContain("not a stretch to listen to");
+    expect(error("2..6/0.5")).toContain("not a stretch to listen to");
+    expect(error("6..2")).toContain("runs forward");
+    expect(error("2..9")).toContain("outside the video");
   });
 });

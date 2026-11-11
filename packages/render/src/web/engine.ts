@@ -6,7 +6,15 @@ import type { MediaResolver } from "@cutcraft/player/engine";
 
 import type { FontFile } from "../fonts";
 import { findChrome } from "./chrome";
-import type { AudioRequest, InkBounds, PageApi, SegmentRequest, TilesRequest } from "./page/protocol";
+import type {
+  AudioRequest,
+  InkBounds,
+  ListenRequest,
+  ListenResult,
+  PageApi,
+  SegmentRequest,
+  TilesRequest,
+} from "./page/protocol";
 import { type PageServer, servePage } from "./server";
 
 const PLAYER_WARNING = "[cutcut/player] ";
@@ -148,6 +156,14 @@ export class BrowserEngine {
           frames.push(await read(page, await page.evaluate((n: number) => window.__cutcraft!.frame(n), i)));
       }
       return { tiles, frames };
+    });
+  }
+
+  /** A picture of the sound of a stretch, with what was measured of it. */
+  async listen(request: ListenRequest): Promise<Omit<ListenResult, "length"> & { bytes: Uint8Array }> {
+    return this.on(async (page) => {
+      const { length, ...measured } = await page.evaluate((r: ListenRequest) => window.__cutcraft!.listen(r), request);
+      return { ...measured, bytes: await read(page, length) };
     });
   }
 

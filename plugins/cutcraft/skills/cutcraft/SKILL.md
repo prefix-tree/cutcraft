@@ -58,6 +58,9 @@ Work in this order, and check after each stage.
    `--around <id>` follows the thing you just changed: a transition from before to after, or an element coming in, in
    and going out. `--without <id>` shows each frame with and without an effect or an overlay, side by side.
    `--at` takes the same moments as `inspect`. For one frame at full size: `--still 4.5 --out frame.png`.
+   `--listen all` (or `2..6`, or an element's id) adds the sound under the frames: the mix's level over time, the
+   words where they are said, silences shaded, and `peakDb`, `rmsDb` and `silences` in the printed legend. Use it
+   after any change to volume, music or the order of clips.
    Frames are kept in `.cutcraft/cache` beside the file, so looking again after an edit only draws what changed:
    look as often as you like. Add `.cutcraft/` to `.gitignore`.
 7. **Render.**

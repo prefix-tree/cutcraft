@@ -24,7 +24,8 @@ const USAGE = `Usage: cutcraft <file.tsx> --out <video.mp4|.webm|.mp3|.wav> [opt
        cutcraft <file.tsx> --check-layout [--safe-zone <zone>] [--subject <x,y,w,h>] [--json] [options]
        cutcraft <file.tsx> --srt <captions.srt> | --vtt <captions.vtt> [--from <s> --to <s>]
        cutcraft inspect <file.tsx> [--at <moments>] [--json] [--manifest <file>] [--props <json>]
-       cutcraft look <file.tsx> [--at <moments> | --around <id>] [--without <id>] [--out look.png] [options]
+       cutcraft look <file.tsx> [--at <moments> | --around <id>] [--without <id>] [--listen <stretch>]
+                    [--out look.png] [options]
        cutcraft add <media file>... [--manifest manifest.json] [--id <id>] [--transcript <file>]
        cutcraft browser install
 
@@ -40,6 +41,9 @@ const USAGE = `Usage: cutcraft <file.tsx> --out <video.mp4|.webm|.mp3|.wav> [opt
                         both sides of every cut and each overlay, as an editor skims a cut
   --around <id>         (look) five moments across a transition, or an element coming in, in and going out
   --without <id>        (look) each frame twice, with and without an effect, an adjustment or an overlay
+  --listen <stretch>    (look) show the sound of a stretch under the cells: all, a range such as 2..6, or an
+                        element's id. The strip is the mix's waveform with a time scale and the words said; the
+                        legend says how loud it is and where it is silent
   --cell <px>           (look) the width of a cell's picture (default 480)
   --columns <n>         (look) cells in a row (default up to 4)
   --frames <dir>        (look) also write each cell's full frame there as PNG
@@ -122,6 +126,7 @@ async function main(): Promise<number> {
       columns: { type: "string" },
       frames: { type: "string" },
       "no-cache": { type: "boolean" },
+      listen: { type: "string" },
     },
   });
   if (positionals[0] === "add") return add(positionals.slice(1), values);
@@ -180,6 +185,7 @@ async function main(): Promise<number> {
       ...(values.cell ? { cell: Number(values.cell) } : {}),
       ...(values.columns ? { columns: Number(values.columns) } : {}),
       ...(values.frames ? { frames: resolve(values.frames) } : {}),
+      ...(values.listen !== undefined ? { listen: values.listen } : {}),
       ...(values["no-cache"] ? {} : { cacheDir: cacheDirOf(target) }),
       ...(values.continue ? { onAssetError: "continue" as const } : {}),
     });

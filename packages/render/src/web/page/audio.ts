@@ -100,3 +100,92 @@ export async function renderSoundtrack(
   }
   return { bytes: new Uint8Array(target.buffer as ArrayBuffer), codec, warnings: [] };
 }
+
+/** What a stretch of the mix sounds like, measured: for a picture of it, and for the numbers beside it. */
+export interface SoundMeasure {
+  /** The loudest sample of each column, 0..1, and the root mean square of each. */
+  readonly peaks: number[];
+  readonly rms: number[];
+  /** The loudest sample of the stretch and its root mean square, in dB relative to full scale; null for silence. */
+  readonly peakDb: number | null;
+  readonly rmsDb: number | null;
+  /** Stretches of at least 0.3 s quieter than -50 dBFS, in composition seconds. */
+  readonly silences: [number, number][];
+}
+
+const SILENCE_DB = -50;
+const SILENCE_MIN_S = 0.3;
+const WINDOW_S = 0.05;
+
+const db = (x: number): number | null => (x > 0 ? Math.round(200 * Math.log10(x)) / 10 : null);
+
+/** Mixes composition seconds [from, to) as the export does, and measures the mix in `columns` equal slices. */
+export async function measureSound(
+  state: ResolvedState,
+  media: MediaResolver,
+  from: number,
+  to: number,
+  columns: number,
+): Promise<SoundMeasure> {
+  const peaks = new Array<number>(columns).fill(0);
+  const squares = new Array<number>(columns).fill(0);
+  const counts = new Array<number>(columns).fill(0);
+  const plan = buildAudioPlan(
+    state,
+    from,
+    to,
+    makeNestedResolver(() => state),
+  );
+  const sampleRate = Number(state.items.get(state.composition.id)?.props.sampleRate ?? 48000);
+  const total = Math.max(1, Math.ceil((to - from) * sampleRate));
+  const windowFrames = Math.max(1, Math.round(WINDOW_S * sampleRate));
+  const windows = new Array<number>(Math.ceil(total / windowFrames)).fill(0);
+  let peak = 0,
+    sum = 0,
+    seen = 0;
+  if (plan.length > 0) {
+    const pcm = new MediabunnyPcm(media);
+    try {
+      for await (const block of mixPlan(plan, pcm, { sampleRate, from, to })) {
+        for (let i = 0; i < block.left.length; i++) {
+          const l = block.left[i] as number,
+            r = block.right[i] as number;
+          const loud = Math.max(Math.abs(l), Math.abs(r));
+          const power = (l * l + r * r) / 2;
+          const column = Math.min(columns - 1, Math.floor((seen / total) * columns));
+          if (loud > (peaks[column] as number)) peaks[column] = loud;
+          squares[column] = (squares[column] as number) + power;
+          counts[column] = (counts[column] as number) + 1;
+          const w = Math.floor(seen / windowFrames);
+          windows[w] = (windows[w] as number) + power;
+          if (loud > peak) peak = loud;
+          sum += power;
+          seen++;
+        }
+      }
+    } finally {
+      pcm.dispose();
+    }
+  }
+  // Windows of 50 ms below the floor, joined, and kept when they last.
+  const floor = 10 ** (SILENCE_DB / 20);
+  const silences: [number, number][] = [];
+  let start: number | null = null;
+  for (let w = 0; w <= windows.length; w++) {
+    const quiet = w < windows.length && Math.sqrt((windows[w] as number) / windowFrames) < floor;
+    if (quiet && start === null) start = w;
+    if (!quiet && start !== null) {
+      const a = from + (start * windowFrames) / sampleRate;
+      const b = Math.min(to, from + (w * windowFrames) / sampleRate);
+      if (b - a >= SILENCE_MIN_S) silences.push([Math.round(a * 1000) / 1000, Math.round(b * 1000) / 1000]);
+      start = null;
+    }
+  }
+  return {
+    peaks: peaks.map((p) => Math.min(1, p)),
+    rms: squares.map((s, i) => Math.min(1, Math.sqrt(s / Math.max(1, counts[i] as number)))),
+    peakDb: db(peak),
+    rmsDb: db(seen > 0 ? Math.sqrt(sum / seen) : 0),
+    silences,
+  };
+}
