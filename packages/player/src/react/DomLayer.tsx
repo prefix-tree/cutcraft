@@ -105,16 +105,32 @@ const Element = memo(
         : effectPipeline(state, item.children, item.placement.id, time - item.placement.start, {
             shaders: htmlInCanvas(),
           }).shaders;
-    if (!passes?.length || !content) return content;
+    // The box stays for as long as the element has an effect a shader draws, also at a moment when that effect
+    // changes nothing and has no pass: taking the box away and putting it back would make the overlay's content
+    // anew each time, and a three.js scene would be set up again in the middle of the video.
+    if (!content || item.placement.kind === "adjustment") return content;
+    const list = passes ?? [];
+    if (list.length === 0 && !hasShaderEffect(item.children)) return content;
     const { width, height } = state.composition;
     return (
-      <ShaderBox id={item.placement.id} width={width} height={height} passes={passes}>
+      <ShaderBox id={item.placement.id} width={width} height={height} passes={list}>
         {content}
       </ShaderBox>
     );
   },
   (a, b) => sameElement(a, b),
 );
+
+/** Whether an element has an enabled effect that is drawn by a shader: a built-in one, or one the file declares. */
+function hasShaderEffect(children: readonly Placement[]): boolean {
+  if (!htmlInCanvas()) return false;
+  return children.some(
+    (c) =>
+      c.kind === "effect" &&
+      c.props.enabled !== false &&
+      (typeof c.props.type !== "string" || effectEntry(c.props.type)?.draw.kind === "shader"),
+  );
+}
 
 /** Vignette and grain are painted on the canvas; an overlay has no pass for them yet, so the preview says so once. */
 function warnPostOnOverlay(id: string, children: readonly Placement[]): void {
