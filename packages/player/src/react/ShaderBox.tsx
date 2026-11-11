@@ -1,6 +1,6 @@
 import { type ReactNode, useLayoutEffect, useRef } from "react";
 
-import { holdLayerFrame } from "@cutcraft/kit";
+import { holdLayerFrame, layerFramesPending } from "@cutcraft/kit";
 
 import { defaultCreateCanvas } from "../media/frame-source";
 import type { ShaderPass } from "../model/shaders";
@@ -13,6 +13,11 @@ type DrawingContext = CanvasRenderingContext2D & { drawElementImage(element: Ele
 
 /** One WebGL runner per frame size for the whole page: a browser allows only a few WebGL contexts at once. */
 const runners = new Map<string, ShaderRunner>();
+/** Boxes whose draw is pending: each holds the frame, and they are not what a box waits for. */
+let boxesPending = 0;
+/** How many times a box looks again for an engine inside it to finish, a paint apart, before it draws anyway. */
+const ENGINE_WAITS = 600;
+
 function runnerFor(width: number, height: number): ShaderRunner {
   const key = `${width}x${height}`;
   let runner = runners.get(key);
@@ -44,17 +49,41 @@ export function ShaderBox(p: {
     const inner = innerRef.current;
     if (!supported || !canvas || !inner) return;
     const release = holdLayerFrame();
+    boxesPending++;
     let done = false;
-    const draw = () => {
+    let waits = 0;
+    let frame = 0;
+    const finish = () => {
       if (done) return;
       done = true;
+      boxesPending--;
+      release();
+    };
+    const request = (canvas as unknown as { requestPaint?: () => void }).requestPaint;
+    // The canvas's children are laid out and painted by the time `paint` fires; without it, two animation frames.
+    const arm = () => {
+      canvas.addEventListener("paint", draw, { once: true });
+      if (typeof request === "function") request.call(canvas);
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => requestAnimationFrame(draw));
+    };
+    const draw = () => {
+      if (done) return;
+      // An engine inside the box (a three.js canvas made a moment ago) has not drawn this frame yet: its picture
+      // would be missing from the box. Look again once it has, and after the paint that shows it.
+      if (layerFramesPending() > boxesPending && waits++ < ENGINE_WAITS) {
+        canvas.removeEventListener("paint", draw);
+        arm();
+        return;
+      }
       try {
         const ctx = canvas.getContext("2d") as DrawingContext | null;
         if (!ctx) return;
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         ctx.clearRect(0, 0, p.width, p.height);
         ctx.drawElementImage(inner, 0, 0);
-        const result = runnerFor(p.width, p.height).effects(canvas as AnyCanvas, p.passes);
+        // No pass at this moment (every effect is at a value that changes nothing): the picture is shown as it is.
+        const result = p.passes.length > 0 ? runnerFor(p.width, p.height).effects(canvas as AnyCanvas, p.passes) : null;
         if (result) {
           ctx.clearRect(0, 0, p.width, p.height);
           ctx.drawImage(result as CanvasImageSource, 0, 0);
@@ -62,19 +91,14 @@ export function ShaderBox(p: {
       } catch (error) {
         devWarn(`shader-error:${p.id}`, `"${p.id}": ${error instanceof Error ? error.message : String(error)}`);
       } finally {
-        release();
+        finish();
       }
     };
-    // The canvas's children are laid out and painted by the time `paint` fires; without it, two animation frames.
-    const request = (canvas as unknown as { requestPaint?: () => void }).requestPaint;
-    canvas.addEventListener("paint", draw, { once: true });
-    if (typeof request === "function") request.call(canvas);
-    const frame = requestAnimationFrame(() => requestAnimationFrame(draw));
+    arm();
     return () => {
       canvas.removeEventListener("paint", draw);
       cancelAnimationFrame(frame);
-      done = true;
-      release();
+      finish();
     };
   });
   if (!supported) {

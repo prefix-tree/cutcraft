@@ -170,3 +170,52 @@ export default function Video() {
   for (let i = 0; i < fa.rgba.length; i++) sum += Math.abs((fb.rgba[i] as number) - (fa.rgba[i] as number));
   expect(sum / fa.rgba.length).toBeLessThan(4);
 });
+
+it("keeps a three.js scene on screen, and sets it up once, when an effect on it starts to do something", async () => {
+  // The glow is at 0 until 0.5 s, where it has no pass at all, then rises. The scene counts its own setups in the
+  // red of its background, so a second setup shows.
+  const source = `import { Composition, Effect, Keyframe, Three, Track } from "@cutcraft/kit";
+export const manifest = { assets: {} };
+let setups = 0;
+export default function Video() {
+  return (
+    <Composition fps={30} width={320} height={180}>
+      <Track id="fx" layout="free">
+        <Three id="cube" start={0} duration={1} camera={{ position: [0, 0, 4], fov: 40 }}
+          setup={({ scene, THREE }) => {
+            setups++;
+            scene.background = new THREE.Color(setups === 1 ? "#102030" : "#ff0000");
+            const box = new THREE.Mesh(new THREE.BoxGeometry(1.4, 1.4, 1.4), new THREE.MeshBasicMaterial({ color: "#ff3300" }));
+            scene.add(box);
+            return ({ time }) => { box.rotation.set(time, time * 1.3, 0); };
+          }}>
+          <Effect id="glow" type="glow" params={{ radius: 4, intensity: 0, threshold: 0.95, tint: 0 }}>
+            <Keyframe id="k1" param="intensity" at={0.5} value={0} />
+            <Keyframe id="k2" param="intensity" at={0.6} value={1} />
+          </Effect>
+        </Three>
+      </Track>
+    </Composition>
+  );
+}
+`;
+  const loaded = await loadVideo(cut("glow.tsx", source));
+  expect(loaded.state.errors).toEqual([]);
+  const out = join(dir, "glow.mp4");
+  await renderVideo({
+    state: loaded.state,
+    media: directoryResolver(dir, loaded.manifest),
+    out,
+    source: loaded.source,
+  });
+  const times = [0.4, 0.5, 16 / 30, 17 / 30, 0.6, 0.7, 0.9];
+  const frames = await framesAt(out, times, 30);
+  for (const t of times) {
+    const frame = frames.get(t) as DecodedFrame;
+    expect({ t, cube: isOrange(pixel(frame, 160, 90)), ground: isNight(pixel(frame, 300, 170)) }).toEqual({
+      t,
+      cube: true,
+      ground: true,
+    });
+  }
+});

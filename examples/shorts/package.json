@@ -1,0 +1,25 @@
+{
+  "name": "@cutcraft/example-shorts",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Short vertical explainers made of pure animation: each one file, no footage.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@cutcraft/kit": "workspace:*",
+    "@cutcraft/render": "workspace:*",
+    "react": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}
