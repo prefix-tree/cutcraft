@@ -52,6 +52,7 @@ export function ShaderBox(p: {
     boxesPending++;
     let done = false;
     let waits = 0;
+    let repainted = false;
     let frame = 0;
     const finish = () => {
       if (done) return;
@@ -72,6 +73,14 @@ export function ShaderBox(p: {
       // An engine inside the box (a three.js canvas made a moment ago) has not drawn this frame yet: its picture
       // would be missing from the box. Look again once it has, and after the paint that shows it.
       if (layerFramesPending() > boxesPending && waits++ < ENGINE_WAITS) {
+        canvas.removeEventListener("paint", draw);
+        arm();
+        return;
+      }
+      // A canvas inside the box (three.js draws into one) shows what it drew only after the browser has painted
+      // it: at this paint the box would still be given the canvas's frame before. One more paint, then draw.
+      if (!repainted && inner.querySelector("canvas")) {
+        repainted = true;
         canvas.removeEventListener("paint", draw);
         arm();
         return;

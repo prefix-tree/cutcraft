@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { Composition, Effect, Keyframe, Layer, Three, Track, useLayer } from "@cutcraft/kit";
+import { Caption, Captions, Composition, Effect, Keyframe, Layer, Three, Track, useLayer } from "@cutcraft/kit";
 
 // What a person may change without touching the film: the words, and the two wall colours the bounce light picks up.
 export const schema = z.object({
@@ -257,111 +257,37 @@ export default function Video({ hook, outro, warmWall, coolWall }: z.infer<typeo
         </Three>
       </Track>
 
-      <Track id="words" layout="free">
-        <Layer id="hook" start={0} duration={3}>
-          <Headline text={hook} />
-        </Layer>
-        <Layer id="bare" start={3.1} duration={1.8}>
-          <Headline text="Here it is with no lighting. Just paint." small />
-        </Layer>
-        <Layer id="trick-1" start={5} duration={4.4}>
-          <Trick n={1} name="Direct light" line="One sun. A surface that faces it gets brighter." />
-        </Layer>
-        <Layer id="trick-2" start={9.5} duration={4.4}>
-          <Trick n={2} name="Shadows" line="A picture taken from the sun. What it cannot see goes dark." />
-        </Layer>
-        <Layer id="trick-3" start={14} duration={4.4}>
-          <Trick n={3} name="Bounce light" line="Small coloured lights stand in for light bouncing off the walls." />
-        </Layer>
-        <Layer id="trick-4" start={18.5} duration={4.4}>
-          <Trick
-            n={4}
-            name="Ambient occlusion"
-            line="Corners and gaps are darkened ahead of time. No light involved."
-          />
-        </Layer>
-        <Layer id="trick-5" start={23} duration={3.9}>
-          <Trick n={5} name="Bloom" line="Bright pixels are blurred and added on top. Now the lamp glows." />
-        </Layer>
-        <Layer id="outro" start={27} duration={3}>
-          <Headline text={outro} />
-        </Layer>
-      </Track>
-
       <Track id="switches" layout="free">
         <Layer id="list" start={0} duration={30}>
           <Switches />
         </Layer>
       </Track>
+
+      {/* What is said, as ordinary subtitles at the top: only how each trick works. */}
+      <Captions
+        id="subtitles"
+        style={{ font: "Inter", size: 54, weight: 700, color: "#ffffff", background: "#000000c0", position: "top" }}
+      >
+        <Caption id="s-hook" start={0.2} end={2.8} text={hook} />
+        <Caption id="s-bare" start={3.1} end={4.9} text="Here is the room with no lighting. Just paint." />
+        <Caption id="s-1a" start={5} end={7.1} text="Direct light: one sun." />
+        <Caption id="s-1b" start={7.1} end={9.3} text="A surface that faces it gets brighter." />
+        <Caption id="s-2a" start={9.5} end={11.6} text="Shadows: a picture taken from the sun." />
+        <Caption id="s-2b" start={11.6} end={13.8} text="What the sun cannot see goes dark." />
+        <Caption id="s-3a" start={14} end={16.1} text="Bounce light: small coloured lights" />
+        <Caption id="s-3b" start={16.1} end={18.3} text="stand in for light bouncing off the walls." />
+        <Caption id="s-4a" start={18.5} end={20.6} text="Ambient occlusion: corners and gaps" />
+        <Caption id="s-4b" start={20.6} end={22.8} text="are darkened ahead of time. No light involved." />
+        <Caption id="s-5a" start={23} end={24.9} text="Bloom: bright pixels are blurred" />
+        <Caption id="s-5b" start={24.9} end={26.8} text="and added on top. Now the lamp glows." />
+        <Caption id="s-outro" start={27} end={29.8} text={outro} />
+      </Captions>
     </Composition>
   );
 }
 
 const FONT = "'Space Grotesk', 'Inter', sans-serif";
-const INK = "#f4f1ea";
 const ACCENT = "#ffc857";
-
-/** In over the first 0.45 s, out over the last 0.35 s. */
-function useInOut(): { opacity: number; rise: number } {
-  const { elapsed, remaining } = useLayer();
-  const a = smooth(elapsed, 0, 0.45);
-  const b = smooth(remaining, 0, 0.35);
-  return { opacity: Math.min(a, b), rise: (1 - a) * 28 };
-}
-
-/** A line of large words near the top, inside the area the apps leave clear. */
-function Headline({ text, small = false }: { text: string; small?: boolean }) {
-  const { opacity, rise } = useInOut();
-  return (
-    <div
-      style={{
-        position: "absolute",
-        left: 84,
-        right: 150,
-        top: 240,
-        opacity,
-        transform: `translateY(${rise}px)`,
-        fontFamily: FONT,
-        fontWeight: 700,
-        fontSize: small ? 68 : 98,
-        lineHeight: 1.04,
-        letterSpacing: "-0.02em",
-        color: INK,
-        textShadow: "0 4px 30px rgba(0,0,0,0.55)",
-      }}
-    >
-      {text}
-    </div>
-  );
-}
-
-/** One trick: its number, its name, and one line of what it does. */
-function Trick({ n, name, line }: { n: number; name: string; line: string }) {
-  const { opacity, rise } = useInOut();
-  return (
-    <div
-      style={{
-        position: "absolute",
-        left: 84,
-        right: 150,
-        top: 240,
-        opacity,
-        transform: `translateY(${rise}px)`,
-        fontFamily: FONT,
-        color: INK,
-        textShadow: "0 4px 30px rgba(0,0,0,0.55)",
-      }}
-    >
-      <div style={{ fontSize: 34, fontWeight: 600, letterSpacing: "0.16em", color: ACCENT }}>
-        TRICK {n} OF {TRICKS.length}
-      </div>
-      <div style={{ fontSize: 88, fontWeight: 700, lineHeight: 1.02, letterSpacing: "-0.02em", marginTop: 12 }}>
-        {name}
-      </div>
-      <div style={{ fontSize: 46, fontWeight: 500, lineHeight: 1.2, marginTop: 22, opacity: 0.92 }}>{line}</div>
-    </div>
-  );
-}
 
 /** The five tricks as lamps in a row, each lit while its trick is on. */
 function Switches() {

@@ -37,5 +37,6 @@ npx cutcraft game-lighting.tsx --manifest manifest.json \
 - Each trick is a number from 0 to 1 worked out from the time. Direct light, shadows and bounce light are the
   strengths of lights. Ambient occlusion is baked into the vertices once, in `setup`, and faded in.
 - Bloom is not in the scene: it is a `glow` `<Effect>` on the `<Three>` tag, with keyframes.
-- The words are `<Layer>` elements on the timeline, each with a small React component, so an editor can move or
-  retime them.
+- The words are ordinary subtitles at the top: a `<Captions>` element with one `<Caption>` per line, each with its
+  start and end, so an editor can retime or reword them. They say only how each trick works.
+- The row of chips at the bottom is one `<Layer>` with a small React component that reads the video's time.

@@ -6,9 +6,9 @@ import { join } from "node:path";
 
 import { manifest as mediaManifest } from "../../../player/e2e/app/composition";
 import generateMedia, { mediaDir } from "../../../player/e2e/gen-media";
-import { directoryResolver, loadVideo, renderStill, renderVideo } from "../../src";
+import { directoryResolver, loadVideo, renderLook, renderStill, renderVideo } from "../../src";
 import { BrowserEngine } from "../../src/web/engine";
-import { type DecodedFrame, decodeAudio, decodeFrames, pixel } from "../helpers/output";
+import { type DecodedFrame, decodeAudio, decodeFrames, pixel, readImage } from "../helpers/output";
 
 const scratch = join(import.meta.dirname, "..", ".tmp", "browser-export");
 let dir = "";
@@ -171,7 +171,7 @@ export default function Video() {
   expect(sum / fa.rgba.length).toBeLessThan(4);
 });
 
-it("keeps a three.js scene on screen, and sets it up once, when an effect on it starts to do something", async () => {
+it("keeps a three.js scene under an effect on screen, set up once and showing each frame's own picture", async () => {
   // The glow is at 0 until 0.5 s, where it has no pass at all, then rises. The scene counts its own setups in the
   // red of its background, so a second setup shows.
   const source = `import { Composition, Effect, Keyframe, Three, Track } from "@cutcraft/kit";
@@ -187,7 +187,11 @@ export default function Video() {
             scene.background = new THREE.Color(setups === 1 ? "#102030" : "#ff0000");
             const box = new THREE.Mesh(new THREE.BoxGeometry(1.4, 1.4, 1.4), new THREE.MeshBasicMaterial({ color: "#ff3300" }));
             scene.add(box);
-            return ({ time }) => { box.rotation.set(time, time * 1.3, 0); };
+            // White from 0.75 s on: a picture one frame late shows as the wrong colour at that frame.
+            return ({ time }) => {
+              box.rotation.set(time, time * 1.3, 0);
+              box.material.color.set(time < 0.75 ? "#ff3300" : "#ffffff");
+            };
           }}>
           <Effect id="glow" type="glow" params={{ radius: 4, intensity: 0, threshold: 0.95, tint: 0 }}>
             <Keyframe id="k1" param="intensity" at={0.5} value={0} />
@@ -208,14 +212,28 @@ export default function Video() {
     out,
     source: loaded.source,
   });
-  const times = [0.4, 0.5, 16 / 30, 17 / 30, 0.6, 0.7, 0.9];
+  // Frames asked for out of order, as a contact sheet does: each cell is its own moment, not the one before it.
+  const sheet = join(dir, "glow.png");
+  await renderLook({
+    state: loaded.state,
+    media: directoryResolver(dir, loaded.manifest),
+    source: loaded.source,
+    out: sheet,
+    at: "0.9,0.2,0.9",
+    cell: 320,
+  });
+  const cells = readImage(sheet);
+  const cell = (i: number) => pixel(cells as unknown as DecodedFrame, 8 + i * 328 + 160, 8 + 90);
+  expect([isWhite(cell(0)), isOrange(cell(1)), isWhite(cell(2))]).toEqual([true, true, true]);
+  const times = [0.4, 0.5, 16 / 30, 17 / 30, 0.6, 0.7, 22 / 30, 23 / 30, 0.9];
   const frames = await framesAt(out, times, 30);
   for (const t of times) {
     const frame = frames.get(t) as DecodedFrame;
-    expect({ t, cube: isOrange(pixel(frame, 160, 90)), ground: isNight(pixel(frame, 300, 170)) }).toEqual({
+    const centre = pixel(frame, 160, 90);
+    expect({
       t,
-      cube: true,
-      ground: true,
-    });
+      cube: t * 30 < 22.5 ? isOrange(centre) : isWhite(centre),
+      ground: isNight(pixel(frame, 300, 170)),
+    }).toEqual({ t, cube: true, ground: true });
   }
 });
