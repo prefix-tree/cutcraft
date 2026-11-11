@@ -3,12 +3,13 @@
 Short vertical explainers made of pure animation. Each is one file with no footage: everything on screen is drawn by
 code on the video's clock, so the export shows exactly what the preview shows.
 
-Each film answers one "how does that work?" question in 20 to 40 seconds, at 1080x1920, with its words kept inside
+Each film answers one "how does that work?" question in 20 seconds to two minutes, at 1080x1920, with its words kept inside
 the area TikTok, Reels and Shorts leave clear. It ends as it begins, so it loops.
 
 | File | What it explains |
 |---|---|
 | `game-lighting.tsx` | How game lighting fakes it: a small room with no lighting, then direct light, shadows, bounce light, ambient occlusion and bloom switched on one at a time. |
+| `lighting-explained.tsx` | Every lighting trick a game uses, one at a time, each on the same small stage shown twice: without the trick on top, with it underneath. The opening and the first three so far: direct light, the shadow map, ambient light. |
 
 ## Render one
 

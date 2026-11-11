@@ -21,9 +21,9 @@ describe.each(FILES)("%s", (name) => {
     expect(lint(source, { manifest }).filter((d) => d.severity === "error")).toEqual([]);
   });
 
-  it("is a vertical video of 20 to 40 seconds", () => {
+  it("is a vertical video of 20 to 120 seconds", () => {
     expect([state.composition.width, state.composition.height]).toEqual([1080, 1920]);
     expect(state.composition.duration).toBeGreaterThanOrEqual(20);
-    expect(state.composition.duration).toBeLessThanOrEqual(40);
+    expect(state.composition.duration).toBeLessThanOrEqual(120);
   });
 });
