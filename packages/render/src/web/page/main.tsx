@@ -34,7 +34,8 @@ import { SETTLE_MS } from "@cutcraft/player/engine";
 
 import { renderSoundtrack } from "./audio";
 import { inkOf, offFrame, pastEdges } from "./ink";
-import type { AudioRequest, InkBounds, PageApi, PageJob, SegmentRequest, SheetRequest } from "./protocol";
+import type { AudioRequest, InkBounds, PageApi, PageJob, SegmentRequest, TilesRequest } from "./protocol";
+import { TILE_BAND, TILE_GROUND } from "./protocol";
 
 declare global {
   interface Window {
@@ -162,7 +163,8 @@ async function start(): Promise<void> {
   const backdrop = backdropTracks(state);
 
   let out: Uint8Array = new Uint8Array();
-  /** The full frames of the last sheet, when it was asked to keep them. */
+  /** The cells the last `tiles` call drew, and their full frames when it was asked to keep them. */
+  let keptTiles: Uint8Array[] = [];
   let kept: Uint8Array[] = [];
   const encode = async (canvas: HTMLCanvasElement, type: string, quality?: number): Promise<Uint8Array> => {
     const blob = await new Promise<Blob>((ok, fail) =>
@@ -246,28 +248,23 @@ async function start(): Promise<void> {
       out = await encode(cap, type, quality);
       return out.length;
     },
-    async sheet(r: SheetRequest) {
+    async tiles(r: TilesRequest) {
       const cellHeight = Math.round((r.cellWidth * height) / width);
-      const band = 44;
-      const gap = 8;
-      const rows = Math.ceil(r.cells.length / r.columns);
-      const sheet = document.createElement("canvas");
-      sheet.width = r.columns * r.cellWidth + (r.columns + 1) * gap;
-      sheet.height = rows * (cellHeight + band) + (rows + 1) * gap;
-      const g = sheet.getContext("2d") as CanvasRenderingContext2D;
+      const tile = document.createElement("canvas");
+      tile.width = r.cellWidth;
+      tile.height = cellHeight + TILE_BAND;
+      const g = tile.getContext("2d") as CanvasRenderingContext2D;
       // The labels are set in a bundled face, so a sheet reads the same on every machine.
       await document.fonts.load('500 14px "JetBrains Mono"');
-      g.fillStyle = "#16161d";
-      g.fillRect(0, 0, sheet.width, sheet.height);
       g.imageSmoothingQuality = "high";
       g.textBaseline = "middle";
+      keptTiles = [];
       kept = [];
       try {
         // The cells of the file as written first, then the ones without its disabled effects: the state changes once.
         const order = [...r.cells.entries()].sort(
           ([, a], [, b]) => Number(Boolean(a.without?.effects)) - Number(Boolean(b.without?.effects)),
         );
-        const frames: Uint8Array[] = [];
         for (const [i, cell] of order) {
           await show(cell.without?.effects ? bare : state);
           // An overlay is in the DOM only while it is on screen, so it is hidden after a step that mounts it.
@@ -282,29 +279,34 @@ async function start(): Promise<void> {
           } finally {
             if (target) target.style.visibility = before;
           }
-          const x = gap + (i % r.columns) * (r.cellWidth + gap);
-          const y = gap + Math.floor(i / r.columns) * (cellHeight + band + gap);
-          g.drawImage(cap, x, y, r.cellWidth, cellHeight);
+          g.fillStyle = TILE_GROUND;
+          g.fillRect(0, 0, tile.width, tile.height);
+          g.drawImage(cap, 0, 0, r.cellWidth, cellHeight);
           g.fillStyle = "#f2f1ee";
           g.font = '500 14px "JetBrains Mono", monospace';
-          g.fillText(cell.label, x + 2, y + cellHeight + 14, r.cellWidth - 4);
+          g.fillText(cell.label, 2, cellHeight + 14, r.cellWidth - 4);
           if (cell.sub) {
             g.fillStyle = "#a9a8b0";
             g.font = '400 12px "JetBrains Mono", monospace';
-            g.fillText(cell.sub, x + 2, y + cellHeight + 32, r.cellWidth - 4);
+            g.fillText(cell.sub, 2, cellHeight + 32, r.cellWidth - 4);
           }
-          if (r.keepFrames) frames[i] = await encode(cap, "image/png");
+          keptTiles[i] = await encode(tile, "image/png");
+          if (r.keepFrames) kept[i] = await encode(cap, "image/png");
         }
-        kept = frames;
       } finally {
         await show(state);
       }
-      out = await encode(sheet, r.type, 0.9);
-      return { length: out.length, width: sheet.width, height: sheet.height };
+      return r.cells.length;
+    },
+    tile(index: number) {
+      const bytes = keptTiles[index];
+      if (!bytes) throw new Error(`the last call drew no tile ${index}`);
+      out = bytes;
+      return out.length;
     },
     frame(index: number) {
       const bytes = kept[index];
-      if (!bytes) throw new Error(`the last sheet kept no frame ${index}`);
+      if (!bytes) throw new Error(`the last call kept no frame ${index}`);
       out = bytes;
       return out.length;
     },

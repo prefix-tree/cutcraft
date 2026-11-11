@@ -6,7 +6,7 @@ import type { MediaResolver } from "@cutcraft/player/engine";
 
 import type { FontFile } from "../fonts";
 import { findChrome } from "./chrome";
-import type { AudioRequest, InkBounds, PageApi, SegmentRequest, SheetRequest } from "./page/protocol";
+import type { AudioRequest, InkBounds, PageApi, SegmentRequest, TilesRequest } from "./page/protocol";
 import { type PageServer, servePage } from "./server";
 
 const PLAYER_WARNING = "[cutcut/player] ";
@@ -136,18 +136,18 @@ export class BrowserEngine {
     });
   }
 
-  /** A contact sheet of frames, drawn in one page; with `keepFrames`, each cell's full frame too. */
-  async sheet(
-    request: SheetRequest,
-  ): Promise<{ bytes: Uint8Array; width: number; height: number; frames: Uint8Array[] }> {
+  /** The cells of a contact sheet, each drawn as a PNG tile in one page; with `keepFrames`, each full frame too. */
+  async tiles(request: TilesRequest): Promise<{ tiles: Uint8Array[]; frames: Uint8Array[] }> {
     return this.on(async (page) => {
-      const result = await page.evaluate((r: SheetRequest) => window.__cutcraft!.sheet(r), request);
-      const bytes = await read(page, result.length);
+      const count = await page.evaluate((r: TilesRequest) => window.__cutcraft!.tiles(r), request);
+      const tiles: Uint8Array[] = [];
       const frames: Uint8Array[] = [];
-      if (request.keepFrames)
-        for (let i = 0; i < request.cells.length; i++)
+      for (let i = 0; i < count; i++) {
+        tiles.push(await read(page, await page.evaluate((n: number) => window.__cutcraft!.tile(n), i)));
+        if (request.keepFrames)
           frames.push(await read(page, await page.evaluate((n: number) => window.__cutcraft!.frame(n), i)));
-      return { bytes, width: result.width, height: result.height, frames };
+      }
+      return { tiles, frames };
     });
   }
 

@@ -61,6 +61,9 @@ the agent can see what a grade, a blur or a title actually does to the picture.
 
 [![Four frames of coffee being poured: at 1 second the two are the same; at 2.5 seconds the one with the grade is warmer and brighter than the one without](/reference/look-without.jpg)](/reference/look-without.jpg)
 
+Looking again is nearly free. Every frame drawn is kept beside the file, under a key made from what draws it, so
+after an edit only the frames that changed are drawn again: an agent can look after every step.
+
 Before any picture, `cutcraft inspect` reads the same timeline back as text, with no browser at all. The
 [CLI reference](/reference/cli#look) has every option of both.
 

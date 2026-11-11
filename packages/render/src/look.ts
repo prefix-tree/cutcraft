@@ -5,21 +5,29 @@ import { join } from "node:path";
 
 import {
   aroundMoments,
+  createPatchLog,
   type Moment,
   parseMoments,
   type ResolvedState,
+  resolve,
   resolveMoments,
   skimMoments,
 } from "@cutcraft/kit";
 import type { MediaResolver } from "@cutcraft/player/engine";
 
 import type { FontFile } from "./fonts";
+import { FrameKeys, readCached, writeCached } from "./frame-cache";
 import { describeAt } from "./inspect";
+import { blankPicture, decodePng, encodePng, paste } from "./png";
 import { type ExportSource, openEngine } from "./renderer";
 import type { SheetCell } from "./web/page/protocol";
 
 /** The most cells one sheet holds: past this a cell is too small to read, and the call too slow to be one look. */
 export const MAX_LOOK_CELLS = 64;
+
+/** The space between cells and around the sheet, in pixels, and the colour of it (the tiles' own ground). */
+const SHEET_GAP = 8;
+const SHEET_GROUND = [0x16, 0x16, 0x1d] as const;
 
 /** Overlays drawn as DOM, which a sheet can leave out by hiding them. */
 const DOM_OVERLAYS = new Set(["title", "shape", "svg", "sticker", "layer", "motion", "three", "captions"]);
@@ -28,7 +36,7 @@ export interface LookOptions {
   readonly state: ResolvedState;
   readonly source: ExportSource;
   readonly media: MediaResolver;
-  /** The sheet to write: .jpg or .jpeg writes a JPEG, anything else a PNG. */
+  /** The sheet to write, a PNG. */
   readonly out: string;
   /** Moments to look at, comma-separated (see `parseMoments`). */
   readonly at?: string;
@@ -42,6 +50,11 @@ export interface LookOptions {
   readonly columns?: number;
   /** A folder to write each cell's full frame into as well, as PNG. */
   readonly frames?: string;
+  /**
+   * A folder to keep drawn cells in, keyed by what draws them: a cell an edit did not touch is read from there, and
+   * a sheet of such cells starts no browser. Without it, nothing is kept.
+   */
+  readonly cacheDir?: string;
   readonly fonts?: readonly FontFile[];
   readonly onAssetError?: "throw" | "continue";
   readonly onLog?: (message: string) => void;
@@ -66,6 +79,8 @@ export interface LookResult {
   readonly height: number;
   readonly columns: number;
   readonly cells: readonly LookCell[];
+  /** How many of the cells were read from the cache instead of drawn. */
+  readonly cached: number;
   /** Moments that could not be found, and why. */
   readonly errors: readonly string[];
   readonly warnings: readonly string[];
@@ -91,6 +106,7 @@ function leaveOut(state: ResolvedState, id: string): { effects: string[] } | { o
 export async function renderLook(options: LookOptions): Promise<LookResult> {
   const { state } = options;
   if (options.at !== undefined && options.around !== undefined) throw new Error("give --at or --around, not both");
+  if (!/\.png$/i.test(options.out)) throw new Error(`a sheet is a PNG: ${options.out} does not end in .png`);
   const picked =
     options.around !== undefined
       ? aroundMoments(state, options.around)
@@ -106,7 +122,7 @@ export async function renderLook(options: LookOptions): Promise<LookResult> {
   const columns = Math.max(1, Math.floor(options.columns ?? Math.min(4, picked.moments.length * perMoment)) || 1);
   const perRow = out ? Math.max(2, columns - (columns % 2)) : columns;
   const warnings: string[] = [];
-  const empty = { width: 0, height: 0, columns: perRow, cells: [], errors: picked.errors, warnings };
+  const empty = { width: 0, height: 0, columns: perRow, cells: [], cached: 0, errors: picked.errors, warnings };
   if (picked.moments.length === 0) return { sheet: null, ...empty };
 
   const stamp = (m: Moment): string => `${m.time.toFixed(2)} s · f${m.frame} · ${m.label}`;
@@ -139,46 +155,112 @@ export async function renderLook(options: LookOptions): Promise<LookResult> {
     }
   }
 
-  const jpeg = /\.jpe?g$/i.test(options.out);
-  const engine = await openEngine({
-    ...options,
-    warnings,
-    ...(out && "effects" in out ? { disabled: out.effects } : {}),
-  });
-  try {
-    const sheet = await engine.sheet({
-      cells,
-      columns: perRow,
-      cellWidth: Math.max(64, Math.round(options.cell ?? 480)),
-      type: jpeg ? "image/jpeg" : "image/png",
-      ...(options.frames ? { keepFrames: true } : {}),
-    });
-    const failed = await engine.errors();
-    if (failed.length > 0) {
-      if (options.onAssetError !== "continue") throw new Error(`cannot render: ${failed.join("; ")}`);
-      for (const f of failed) warnings.push(`asset error: ${f}`);
-    }
-    await writeFile(options.out, sheet.bytes);
-    const files: string[] = [];
-    if (options.frames) {
-      await mkdir(options.frames, { recursive: true });
-      for (const [i, bytes] of sheet.frames.entries()) {
-        const cell = legend[i] as (typeof legend)[number];
-        const name = `${String(i).padStart(2, "0")}-f${cell.frame}${cell.variant === "without" ? "-without" : ""}.png`;
-        files.push(join(options.frames, name));
-        await writeFile(files[i] as string, bytes);
+  const cellWidth = Math.max(64, Math.round(options.cell ?? 480));
+  // A frame without some effects is a frame of the file with them switched off: the same state the page draws.
+  let bare = state;
+  if (out && "effects" in out) {
+    const log = createPatchLog();
+    for (const id of out.effects) log.append({ op: "set", id, prop: "enabled", value: false });
+    bare = resolve(state.tree, state.manifest, log);
+  }
+  // Each cell's files in the cache: its tile, and its full frame when those are asked for.
+  const keys = options.cacheDir
+    ? new FrameKeys({ state, source: options.source, media: options.media, fonts: options.fonts })
+    : null;
+  const names = await Promise.all(
+    cells.map(async (cell, i) => {
+      if (!keys) return null;
+      const frame = (legend[i] as (typeof legend)[number]).frame;
+      const drawnState = cell.without?.effects ? bare : state;
+      const hidden = cell.without?.overlay ?? null;
+      return {
+        tile: `tile-${await keys.key(frame, { tile: cellWidth, label: cell.label, sub: cell.sub, hidden }, drawnState)}.png`,
+        frame: `frame-${await keys.key(frame, { frame: true, hidden }, drawnState)}.png`,
+      };
+    }),
+  );
+  const tiles: (Uint8Array | null)[] = cells.map(() => null);
+  const frames: (Uint8Array | null)[] = cells.map(() => null);
+  if (options.cacheDir)
+    for (const [i, name] of names.entries()) {
+      if (!name) continue;
+      const tile = readCached(options.cacheDir, name.tile);
+      const frame = options.frames ? readCached(options.cacheDir, name.frame) : null;
+      if (tile && (!options.frames || frame)) {
+        tiles[i] = tile;
+        frames[i] = frame;
       }
     }
-    return {
-      sheet: options.out,
-      width: sheet.width,
-      height: sheet.height,
-      columns: perRow,
-      cells: legend.map((cell, i) => ({ ...cell, ...(files[i] ? { file: files[i] as string } : {}) })),
-      errors: picked.errors,
+  const missing = cells.map((_, i) => i).filter((i) => !tiles[i]);
+
+  // The browser starts only for the cells the cache does not hold.
+  if (missing.length > 0) {
+    const engine = await openEngine({
+      ...options,
       warnings,
-    };
-  } finally {
-    await engine.close();
+      ...(out && "effects" in out ? { disabled: out.effects } : {}),
+    });
+    try {
+      const drawn = await engine.tiles({
+        cells: missing.map((i) => cells[i] as SheetCell),
+        cellWidth,
+        ...(options.frames ? { keepFrames: true } : {}),
+      });
+      const failed = await engine.errors();
+      if (failed.length > 0) {
+        if (options.onAssetError !== "continue") throw new Error(`cannot render: ${failed.join("; ")}`);
+        for (const f of failed) warnings.push(`asset error: ${f}`);
+      }
+      for (const [n, i] of missing.entries()) {
+        tiles[i] = drawn.tiles[n] as Uint8Array;
+        frames[i] = drawn.frames[n] ?? null;
+        const name = names[i];
+        // A frame drawn with a placeholder for media that could not be read is not kept.
+        if (options.cacheDir && name && failed.length === 0) {
+          writeCached(options.cacheDir, name.tile, tiles[i] as Uint8Array);
+          if (frames[i]) writeCached(options.cacheDir, name.frame, frames[i] as Uint8Array);
+        }
+      }
+    } finally {
+      await engine.close();
+    }
   }
+
+  // The sheet is put together here, from tiles, so one made of cached cells needs no browser at all.
+  const pictures = tiles.map((bytes) => decodePng(bytes as Uint8Array));
+  const first = pictures[0] as (typeof pictures)[number];
+  const rows = Math.ceil(cells.length / perRow);
+  const sheet = blankPicture(
+    perRow * first.width + (perRow + 1) * SHEET_GAP,
+    rows * first.height + (rows + 1) * SHEET_GAP,
+    SHEET_GROUND,
+  );
+  for (const [i, picture] of pictures.entries())
+    paste(
+      sheet,
+      picture,
+      SHEET_GAP + (i % perRow) * (first.width + SHEET_GAP),
+      SHEET_GAP + Math.floor(i / perRow) * (first.height + SHEET_GAP),
+    );
+  await writeFile(options.out, encodePng(sheet));
+  const files: string[] = [];
+  if (options.frames) {
+    await mkdir(options.frames, { recursive: true });
+    for (const [i, bytes] of frames.entries()) {
+      const cell = legend[i] as (typeof legend)[number];
+      const name = `${String(i).padStart(2, "0")}-f${cell.frame}${cell.variant === "without" ? "-without" : ""}.png`;
+      files.push(join(options.frames, name));
+      await writeFile(files[i] as string, bytes as Uint8Array);
+    }
+  }
+  return {
+    sheet: options.out,
+    width: sheet.width,
+    height: sheet.height,
+    columns: perRow,
+    cells: legend.map((cell, i) => ({ ...cell, ...(files[i] ? { file: files[i] as string } : {}) })),
+    cached: cells.length - missing.length,
+    errors: picked.errors,
+    warnings,
+  };
 }
