@@ -9,11 +9,14 @@ name: Release
 # main.
 #
 # npm trusted publishing: each package on npm trusts this workflow file (release.yml in prefix-tree/cutcraft), so
-# GitHub's OIDC token stands in for an npm token. There is no secret to leak, and npm attaches provenance to each
-# version. Renaming this file breaks publishing until the packages' trusted publisher settings are updated too.
+# GitHub's OIDC token stands in for an npm token. There is no secret to leak, and npm attaches provenance when a
+# maintainer approves the staged version. Renaming this file breaks publishing until the packages' trusted publisher
+# settings are updated too. Leave "npm publish" unchecked on those publishers; this workflow only runs
+# `npm stage publish`.
 #
 # It can also be run by hand from main (Actions → Release → Run workflow), to retry a release whose tag is already
-# pushed: it then publishes the version main holds.
+# pushed: it then stages the version main holds. A version that is staged and not yet approved cannot be staged
+# again, and the OIDC token cannot list or reject it. Approve it, or reject it from npmjs.com, before retrying.
 on:
   push:
     tags: ["v*"]
@@ -42,8 +45,8 @@ jobs:
         with:
           node-version: 24
           cache: pnpm
-      # `pnpm publish` hands each packed tarball to npm, which does the trusted-publishing exchange from 11.5.1 on.
-      - run: npm install -g npm@^11.5.1 && npm --version
+      # `npm stage publish` needs npm 11.15.0 or newer. The OIDC exchange itself exists from 11.5.1.
+      - run: npm install -g npm@^11.15.0 && npm --version
       - name: Check the tag against main and the packages' version
         run: |
           version=$(node -p "require('./packages/kit/package.json').version")
@@ -73,7 +76,7 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm build
       - run: pnpm check:packages
-      # `changeset publish` runs `pnpm publish` for each package whose version is not on npm: pnpm packs it (swapping
-      # workspace:* for versions) and npm publishes the tarball with the OIDC token. The pushed tag names the release,
-      # so it makes no tags of its own.
-      - run: pnpm release --no-git-tag
+      # Packs each package whose version is not on npm (swapping workspace:* for versions) and runs
+      # `npm stage publish` on the tarball. The version stays un-installable until a maintainer approves it
+      # with 2FA. The pushed tag names the release, so this makes no git tags of its own.
+      - run: pnpm release
