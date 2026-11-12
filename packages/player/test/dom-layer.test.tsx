@@ -1,3 +1,5 @@
+import type { Placement } from "@cutcraft/kit";
+
 import { mountPlayer } from "./helpers/react";
 import { fixtureState } from "./helpers/state";
 
@@ -41,6 +43,40 @@ describe("DomLayer", () => {
     const s1 = m.container.querySelector('[data-el="s1"]') as HTMLElement;
     expect(s1.style.transform).toMatch(/^matrix\(/);
     expect(s1.style.width).toBe("400px");
+    await m.unmount();
+  });
+
+  it("puts a box behind the caption word being said, and only that one", async () => {
+    const state = fixtureState();
+    const items = new Map(state.items);
+    const cap = items.get("cap") as Placement;
+    const cue = items.get("cp2") as Placement;
+    items.set("cap", {
+      ...cap,
+      props: { ...cap.props, animation: "word-highlight", style: { highlight: "#111111", highlightBox: "#4aa3ff" } },
+    });
+    items.set("cp2", {
+      ...cue,
+      props: {
+        ...cue.props,
+        words: [
+          { text: "to", start: 4, end: 4.5 },
+          { text: "the", start: 4.5, end: 5 },
+          { text: "show", start: 5, end: 6 },
+        ],
+      },
+    });
+    const m = await mountPlayer({ ...state, items });
+    const boxed = () =>
+      [...m.container.querySelectorAll<HTMLElement>('[data-el="cp2"] span span')]
+        .filter((w) => w.style.background !== "")
+        .map((w) => w.textContent);
+    await m.seek(4.7);
+    expect(boxed()).toEqual(["the"]);
+    // The space between words is outside the box, and the line still reads as written.
+    expect(m.container.querySelector('[data-el="cp2"]')?.textContent).toBe("to the show");
+    await m.seek(5.5);
+    expect(boxed()).toEqual(["show"]);
     await m.unmount();
   });
 });

@@ -14,6 +14,7 @@ const COLOR_KEYS: ReadonlySet<string> = new Set([
   "background",
   "tint",
   "highlight",
+  "highlightBox",
   "upcoming",
   "frontColor",
   "sideColor",

@@ -138,6 +138,7 @@ export function captionsContent(p: {
     stroke?: { color: string; width: number };
     position?: string;
     highlight?: string;
+    highlightBox?: string;
     upcoming?: string;
   };
   const animation = String(props.animation ?? "none");
@@ -205,7 +206,29 @@ export function captionsContent(p: {
   );
 }
 
-function line(c: Placement, time: number, animation: string, style: { highlight?: string; upcoming?: string }) {
+/**
+ * The box behind the word being said. Its padding is taken back by a negative margin, so a word takes the same room
+ * with the box as without and the line does not move as the box passes along it.
+ */
+function wordBox(color: string): CSSProperties {
+  return {
+    background: color,
+    borderRadius: "0.2em",
+    padding: "0.04em 0.12em",
+    margin: "-0.04em -0.12em",
+    // The halo that lifts letters off footage only muddies them on a flat box.
+    textShadow: "none",
+    boxDecorationBreak: "clone",
+    WebkitBoxDecorationBreak: "clone",
+  };
+}
+
+function line(
+  c: Placement,
+  time: number,
+  animation: string,
+  style: { highlight?: string; highlightBox?: string; upcoming?: string },
+) {
   const text = String(c.props.text ?? "");
   const words = c.props.words as { text: string; start: number; end: number }[] | undefined;
   if (!words || words.length === 0 || animation === "none") {
@@ -226,9 +249,15 @@ function line(c: Placement, time: number, animation: string, style: { highlight?
       <span
         // biome-ignore lint/suspicious/noArrayIndexKey: a caption's words in time order, never reordered.
         key={i}
-        style={{ ...(color ? { color } : {}), ...(hidden ? { opacity: 0 } : {}) }}
+        style={hidden ? { opacity: 0 } : undefined}
       >
-        {w.text}
+        {/* The space sits outside the word, so a box hugs the word alone. */}
+        <span
+          data-word={current ? "current" : undefined}
+          style={{ ...(color ? { color } : {}), ...(current && style.highlightBox ? wordBox(style.highlightBox) : {}) }}
+        >
+          {w.text}
+        </span>
         {i < words.length - 1 ? " " : ""}
       </span>
     );
