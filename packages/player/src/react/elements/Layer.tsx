@@ -1,10 +1,11 @@
-import { type ReactNode, useLayoutEffect, useRef } from "react";
+import { type CSSProperties, type ReactNode, useLayoutEffect, useRef } from "react";
 
 import { layerEngine } from "@cutcraft/kit";
 
 import { layerClock } from "../../model/time";
 import { layerContent } from "../../overlays/content";
 import { dataAttrs, type ElementProps, overlayStyle } from "../../overlays/layout";
+import { themeTokens } from "../../overlays/svg-element";
 import { devWarn } from "../../warn";
 import { LayerContext } from "../context";
 import { holdCssAnimations } from "../hold-animations";
@@ -20,7 +21,7 @@ export function Layer(p: ElementProps & { readonly interior: ReactNode }) {
     holdCssAnimations(ref.current, clock.elapsed);
   });
   return (
-    <div ref={ref} {...dataAttrs(p.placement)} style={style}>
+    <div ref={ref} {...dataAttrs(p.placement)} style={{ ...themeVars(p.state.theme), ...style }}>
       <LayerContext.Provider value={clock}>
         {typeof p.placement.props.engine === "string" ? (
           <Engine name={p.placement.props.engine} props={p.placement.props}>
@@ -32,6 +33,19 @@ export function Layer(p: ElementProps & { readonly interior: ReactNode }) {
       </LayerContext.Provider>
     </div>
   );
+}
+
+const varsByTokens = new WeakMap<object, CSSProperties>();
+
+/** The theme as CSS variables on the Layer, so free code can write `var(--cc-accent)` or `var(--cc-heading)`. */
+function themeVars(theme: ElementProps["state"]["theme"]): CSSProperties {
+  const tokens = themeTokens(theme);
+  let vars = varsByTokens.get(tokens);
+  if (!vars) {
+    vars = Object.fromEntries(Object.entries(tokens).map(([k, v]) => [`--cc-${k}`, v])) as CSSProperties;
+    varsByTokens.set(tokens, vars);
+  }
+  return vars;
 }
 
 /** An engine Layer (`<Three>`, `<Motion>`): drawn by the engine the host installed, with the Layer's resolved props. */
