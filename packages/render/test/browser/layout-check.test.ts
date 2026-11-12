@@ -13,6 +13,7 @@ import {
   Svg,
   Title,
   Track,
+  TypeCard,
 } from "@cutcraft/kit";
 
 import { manifest } from "../../../player/e2e/app/composition";
@@ -383,6 +384,39 @@ describe("checkLayout", () => {
     const result = await check(el, manifest, { subject: { x: 0.3, y: 0.1, w: 0.4, h: 0.6 } });
     // The clip ends at 1 s; after it there is no footage, so no subject.
     expect(brief(result.issues)).toEqual(["subject:face>subject@0.00-0.90"]);
+  });
+
+  it("measures the captions alone when a type card is on screen with them", async () => {
+    // The card's lines are in the top half and the captions at the bottom: nothing covers anything.
+    const result = await check(
+      h(
+        Composition,
+        { fps: 10, width: 640, height: 360 },
+        h(
+          Track,
+          { id: "t", layout: "free" },
+          ...(TypeCard({
+            id: "tc",
+            start: 0,
+            duration: 1,
+            y: -80,
+            width: 400,
+            height: 140,
+            size: 36,
+            lines: [
+              { text: "STRESS", struck: { offset: 0.3 } },
+              { text: "ENERGY", offset: 0.2, pill: "#00aaff" },
+            ],
+          }) as never[]),
+        ),
+        h(
+          Captions,
+          { id: "caps", style: { position: "bottom", size: 30 } },
+          h(Caption, { id: "c1", start: 0, end: 1, text: "Hello world" }),
+        ),
+      ),
+    );
+    expect(brief(result.issues)).toEqual([]);
   });
 
   it("measures a moment when the captions have nothing to say", async () => {
