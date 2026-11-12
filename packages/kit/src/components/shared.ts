@@ -9,7 +9,8 @@ export const timingSchema = z.object({
   anchor: z.string().optional(),
   at: z.string().optional(),
   offset: z.number().optional(),
-  duration: z.union([z.number().positive(), z.literal("fill")]).optional(),
+  /** Seconds, `"fill"`, or `{ until: id }`: every part then ends when that element ends, a clip for one. */
+  duration: z.union([z.number().positive(), z.literal("fill"), z.object({ until: z.string() })]).optional(),
 });
 export type Timing = z.infer<typeof timingSchema>;
 
