@@ -25,6 +25,7 @@ There are three kinds of example, each a complete file:
 | A product launch or promo | [Product launch](#a-product-launch), the [walkthrough](/guide/writing-files), [Brand spot](/recipes/brand-spot) |
 | An interview or podcast cut | [Talking-head cut](/recipes/talking-head), [Multicam highlights](/recipes/highlights) |
 | A vertical short | [Kinetic type](#kinetic-type), [Captions and key points](#captions-and-key-points), [Vertical clip from a podcast](/recipes/vertical-podcast) |
+| An explainer with no footage | [How game lighting fakes it](#how-game-lighting-fakes-it) |
 | A product or screen demo | [Product demo with zoom-ins](/recipes/product-demo) |
 | Charts and numbers | [Data story](#a-data-story), [Stats with handles](/recipes/stats) |
 | An intro, outro or logo sting | [Logo reveal](#a-logo-reveal) |
@@ -36,7 +37,7 @@ There are three kinds of example, each a complete file:
 | Cuts on transcript words (`in="word:12"`) | [Product launch](#a-product-launch), [Data story](#a-data-story), [Talking-head cut](/recipes/talking-head) | [Time by meaning](/guide/time) |
 | Overlays on the word that names them (`anchor` + `at`) | [Product launch](#a-product-launch), [Kinetic type](#kinetic-type), [Captions](#captions-and-key-points) | [Time by meaning](/guide/time) |
 | Captions from the transcript | [Kinetic type](#kinetic-type), [Captions](#captions-and-key-points), [Vertical clip](/recipes/vertical-podcast) | [Captions and sound](/guide/captions-and-sound) |
-| three.js (`<Three>`) | [Product launch](#a-product-launch), [Logo reveal](#a-logo-reveal), [Brand spot](/recipes/brand-spot) | [Free code](/guide/free-code#three-js-and-motion) |
+| three.js (`<Three>`) | [Product launch](#a-product-launch), [Logo reveal](#a-logo-reveal), [How game lighting fakes it](#how-game-lighting-fakes-it), [Brand spot](/recipes/brand-spot) | [Free code](/guide/free-code#three-js-and-motion) |
 | Motion (`<Motion>`) | [Kinetic type](#kinetic-type), [Data story](#a-data-story), [An edit](#an-edit) | [Free code](/guide/free-code#three-js-and-motion) |
 | Any React in a `<Layer>` | [Data story](#a-data-story) (counters), [Stats with handles](/recipes/stats) | [Free code](/guide/free-code) |
 | Transitions and keyframes | [An edit](#an-edit), [Slideshow](/recipes/slideshow) | [Elements](/reference/elements/) |
@@ -63,6 +64,10 @@ rendered with `pnpm --filter @cutcraft/example-showcase render`; the guide's fea
 Content License. They are not committed; `gen` reads them from `examples/showcase/media/stock/` and checks their hashes. Every file renders through the player in
 [headless Chrome](/guide/exporting#the-browser-it-runs-in). The people on camera are stand-ins: their
 footage is a gradient, and the manifest holds the words they would say.
+
+The explainer at the end of this page is in
+[`examples/shorts`](https://github.com/prefix-tree/cutcraft/tree/main/examples/shorts), rendered with
+`pnpm --filter @cutcraft/example-shorts render`. It uses no media at all.
 
 ## The logo film
 
@@ -145,3 +150,21 @@ word.
 <div class="cc-pair"><video class="tall" :src="withBase('/showcase/captions.webm')" :poster="withBase('/showcase/captions.jpg')" controls muted loop playsinline></video></div>
 
 <<< ../examples/showcase/captions.tsx
+
+## How game lighting fakes it
+
+A vertical explainer made of pure animation: no footage, no media file. A small room is shown fully lit, then with
+no lighting at all, and then five tricks are switched on one at a time: direct light, shadows, bounce light, ambient
+occlusion and bloom. The subtitles at the top say how each one works, and the chips at the bottom light up as each
+comes on. It ends on the picture it opened with, so it loops.
+
+The room is one `<Three>` scene, and every light and the camera are set from the layer's time. The ambient occlusion
+is baked into the model's vertices when the scene is set up. Bloom is not in the scene: it is a `glow` effect on the
+`<Three>` tag, with keyframes. The opening and closing lines and the two wall colours are props, so a variant needs
+no edit.
+
+**Shows:** a three.js scene driven by the video's clock, a built-in effect with keyframes on a `<Three>` tag, written captions, a `<Layer>` that reads the time, props for variants. [Free code](/guide/free-code#three-js-and-motion) · [Captions and sound](/guide/captions-and-sound)
+
+<div class="cc-pair"><video class="tall" :src="withBase('/shorts/game-lighting.webm')" :poster="withBase('/shorts/game-lighting.jpg')" controls muted loop playsinline></video></div>
+
+<<< ../examples/shorts/game-lighting.tsx

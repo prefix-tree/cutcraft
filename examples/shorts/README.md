@@ -11,6 +11,15 @@ the area TikTok, Reels and Shorts leave clear. It ends as it begins, so it loops
 | `game-lighting.tsx` | How game lighting fakes it: a small room with no lighting, then direct light, shadows, bounce light, ambient occlusion and bloom switched on one at a time. |
 | `lighting-explained.tsx` | Every lighting trick a game uses, one at a time, each on the same small stage shown twice: without the trick on top, with it underneath. The opening and the first three so far: direct light, the shadow map, ambient light. |
 
+## On the documentation site
+
+`game-lighting.tsx` is on the [examples page](https://cutcraft.prefixtree.xyz/examples#how-game-lighting-fakes-it).
+Its video and poster in `docs/public/shorts` are made by:
+
+```sh
+pnpm --filter @cutcraft/example-shorts render
+```
+
 ## Render one
 
 ```sh
