@@ -384,4 +384,22 @@ describe("checkLayout", () => {
     // The clip ends at 1 s; after it there is no footage, so no subject.
     expect(brief(result.issues)).toEqual(["subject:face>subject@0.00-0.90"]);
   });
+
+  it("measures a moment when the captions have nothing to say", async () => {
+    // A cue for the first half second and none after: from then the captions element is on the page and empty.
+    const result = await check(
+      h(
+        Composition,
+        { fps: 10, width: 640, height: 360 },
+        h(Track, { id: "t", layout: "free" }, box("edge", 300, -60, 100, 100, 0, 1)),
+        h(
+          Captions,
+          { id: "caps", style: { position: "bottom", size: 30 } },
+          h(Caption, { id: "c1", start: 0, end: 0.5, text: "Hello" }),
+        ),
+      ),
+    );
+    expect(result.samples).toBe(10);
+    expect(brief(result.issues)).toEqual(["frame-edge:edge@0.00-0.90"]);
+  });
 });
