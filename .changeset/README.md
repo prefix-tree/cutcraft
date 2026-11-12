@@ -15,5 +15,7 @@ All `@cutcraft/*` packages and the `cutcraft` CLI share one version. A release t
 3. After it merges, tag the merge commit on `main` with the new version and push the tag:
    `git tag v0.2.0 && git push origin v0.2.0`. The tag starts the **Release** workflow
    (`.github/workflows/release.yml`). It checks that the tag matches the packages' version, points at `main` and has
-   no pending changesets, builds and checks the packages, and publishes each version not yet on npm through npm
-   trusted publishing (no token; npm adds provenance).
+   no pending changesets, builds and checks the packages, and stages each version not yet on npm through npm
+   trusted publishing (`npm stage publish`; no token). A maintainer approves each staged version on npmjs.com, with
+   2FA, before it can be installed. npm adds provenance when the staged version is approved. Leave "npm publish"
+   unchecked on each package's trusted publisher.

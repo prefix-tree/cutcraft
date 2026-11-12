@@ -26,7 +26,7 @@
     "docs:preview": "vitepress preview docs",
     "docs:gen": "tsx scripts/gen-docs.ts",
     "docs:check": "node --import tsx scripts/gen-docs.ts --check",
-    "docs:test": "node --import tsx --test scripts/generated-files.test.ts scripts/skill.test.ts",
+    "docs:test": "node --import tsx --test scripts/generated-files.test.ts scripts/skill.test.ts scripts/stage-release.test.mjs",
     "docs:bench": "tsx scripts/site-bench.ts",
     "docs:examples": "pnpm --filter @cutcraft/example-showcase docs",
     "build": "pnpm -r build",
@@ -34,7 +34,7 @@
     "fix": "biome check --write .",
     "prepare": "lefthook install",
     "changeset": "changeset",
-    "release": "changeset publish",
+    "release": "node scripts/stage-release.mjs",
     "check:packages": "node scripts/check-packages.mjs",
     "knip": "knip",
     "test:coverage": "pnpm -r test --coverage --coverage.reporter=text-summary --coverage.reporter=json-summary --coverage.reporter=html"
