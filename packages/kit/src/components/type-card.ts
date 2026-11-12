@@ -90,6 +90,17 @@ export function TypeCardLine(p: Look & { readonly show: number; readonly part: "
     ...p.lines.map((line, i) => {
       const mine = i === p.show;
       const size = line.size ?? p.size;
+      const color = line.color
+        ? css(line.color)
+        : line.pill
+          ? "var(--cc-background, #ffffff)"
+          : line.tone === "muted"
+            ? "var(--cc-muted, #8a8a93)"
+            : "var(--cc-text, #111114)";
+      // Every line keeps its room. The others are hidden, and never forced visible: whatever hides the whole layer
+      // (the layout check does, to measure one element at a time) must hide this part with it. Under a strike the
+      // line's own letters and pill are left clear, so only the bar shows.
+      const strike = mine && p.part === "strike";
       return h(
         "div",
         {
@@ -99,26 +110,20 @@ export function TypeCardLine(p: Look & { readonly show: number; readonly part: "
             font: `900 ${size}px var(--cc-heading, Inter), sans-serif`,
             lineHeight: 1.04,
             letterSpacing: "-0.01em",
-            color: line.color
-              ? css(line.color)
-              : line.pill
-                ? "var(--cc-background, #ffffff)"
-                : line.tone === "muted"
-                  ? "var(--cc-muted, #8a8a93)"
-                  : "var(--cc-text, #111114)",
-            ...(line.pill ? { background: css(line.pill), borderRadius: "0.16em", padding: "0.1em 0.32em" } : {}),
-            visibility: mine && p.part === "line" ? "visible" : "hidden",
+            color: strike ? "transparent" : color,
+            ...(line.pill
+              ? { background: strike ? "transparent" : css(line.pill), borderRadius: "0.16em", padding: "0.1em 0.32em" }
+              : {}),
+            ...(mine ? {} : { visibility: "hidden" }),
             ...(mine && p.part === "line"
               ? { opacity: q, transform: `translateY(${(1 - q) * 0.22}em) scale(${0.94 + 0.06 * q})` }
               : {}),
           },
         },
         line.text,
-        mine &&
-          p.part === "strike" &&
+        strike &&
           h("span", {
             style: {
-              visibility: "visible",
               position: "absolute",
               left: "-0.12em",
               right: "-0.12em",
@@ -126,7 +131,7 @@ export function TypeCardLine(p: Look & { readonly show: number; readonly part: "
               height: "0.1em",
               marginTop: "-0.05em",
               borderRadius: "0.05em",
-              background: "currentColor",
+              background: color,
               transformOrigin: "left center",
               transform: `scaleX(${q})`,
             },
