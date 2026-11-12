@@ -1,0 +1,1043 @@
+{
+ "language": "en",
+ "segments": [
+  {
+   "start": 1.92,
+   "end": 8.14,
+   "text": " So, I mentioned this before, eclipses don't happen every month because the Moon's orbit",
+   "words": [
+    {
+     "word": " So,",
+     "start": 1.92,
+     "end": 2.52
+    },
+    {
+     "word": " I",
+     "start": 2.86,
+     "end": 2.86
+    },
+    {
+     "word": " mentioned",
+     "start": 2.86,
+     "end": 3.74
+    },
+    {
+     "word": " this",
+     "start": 3.74,
+     "end": 3.92
+    },
+    {
+     "word": " before,",
+     "start": 3.92,
+     "end": 4.36
+    },
+    {
+     "word": " eclipses",
+     "start": 5.02,
+     "end": 5.42
+    },
+    {
+     "word": " don't",
+     "start": 5.42,
+     "end": 5.64
+    },
+    {
+     "word": " happen",
+     "start": 5.64,
+     "end": 5.96
+    },
+    {
+     "word": " every",
+     "start": 5.96,
+     "end": 6.24
+    },
+    {
+     "word": " month",
+     "start": 6.24,
+     "end": 6.6
+    },
+    {
+     "word": " because",
+     "start": 6.6,
+     "end": 7.16
+    },
+    {
+     "word": " the",
+     "start": 7.16,
+     "end": 7.56
+    },
+    {
+     "word": " Moon's",
+     "start": 7.56,
+     "end": 7.9
+    },
+    {
+     "word": " orbit",
+     "start": 7.9,
+     "end": 8.14
+    }
+   ]
+  },
+  {
+   "start": 8.14,
+   "end": 13.74,
+   "text": " is tilted by about five degrees, and so some months during the full Moon it's going to",
+   "words": [
+    {
+     "word": " is",
+     "start": 8.14,
+     "end": 8.32
+    },
+    {
+     "word": " tilted",
+     "start": 8.32,
+     "end": 8.68
+    },
+    {
+     "word": " by",
+     "start": 8.68,
+     "end": 8.98
+    },
+    {
+     "word": " about",
+     "start": 8.98,
+     "end": 9.2
+    },
+    {
+     "word": " five",
+     "start": 9.2,
+     "end": 9.58
+    },
+    {
+     "word": " degrees,",
+     "start": 9.58,
+     "end": 9.98
+    },
+    {
+     "word": " and",
+     "start": 10.36,
+     "end": 10.44
+    },
+    {
+     "word": " so",
+     "start": 10.44,
+     "end": 10.8
+    },
+    {
+     "word": " some",
+     "start": 10.8,
+     "end": 11.56
+    },
+    {
+     "word": " months",
+     "start": 11.56,
+     "end": 11.88
+    },
+    {
+     "word": " during",
+     "start": 11.88,
+     "end": 12.36
+    },
+    {
+     "word": " the",
+     "start": 12.36,
+     "end": 12.56
+    },
+    {
+     "word": " full",
+     "start": 12.56,
+     "end": 12.76
+    },
+    {
+     "word": " Moon",
+     "start": 12.76,
+     "end": 13.06
+    },
+    {
+     "word": " it's",
+     "start": 13.06,
+     "end": 13.4
+    },
+    {
+     "word": " going",
+     "start": 13.4,
+     "end": 13.58
+    },
+    {
+     "word": " to",
+     "start": 13.58,
+     "end": 13.74
+    }
+   ]
+  },
+  {
+   "start": 13.74,
+   "end": 17.86,
+   "text": " pass a little bit above the Earth's shadow, and some months it's going to pass a little",
+   "words": [
+    {
+     "word": " pass",
+     "start": 13.74,
+     "end": 14.06
+    },
+    {
+     "word": " a",
+     "start": 14.06,
+     "end": 14.26
+    },
+    {
+     "word": " little",
+     "start": 14.26,
+     "end": 14.38
+    },
+    {
+     "word": " bit",
+     "start": 14.38,
+     "end": 14.56
+    },
+    {
+     "word": " above",
+     "start": 14.56,
+     "end": 14.88
+    },
+    {
+     "word": " the",
+     "start": 14.88,
+     "end": 15.12
+    },
+    {
+     "word": " Earth's",
+     "start": 15.12,
+     "end": 15.38
+    },
+    {
+     "word": " shadow,",
+     "start": 15.38,
+     "end": 15.68
+    },
+    {
+     "word": " and",
+     "start": 16.02,
+     "end": 16.32
+    },
+    {
+     "word": " some",
+     "start": 16.32,
+     "end": 16.6
+    },
+    {
+     "word": " months",
+     "start": 16.6,
+     "end": 16.84
+    },
+    {
+     "word": " it's",
+     "start": 16.84,
+     "end": 17.08
+    },
+    {
+     "word": " going",
+     "start": 17.08,
+     "end": 17.22
+    },
+    {
+     "word": " to",
+     "start": 17.22,
+     "end": 17.32
+    },
+    {
+     "word": " pass",
+     "start": 17.32,
+     "end": 17.58
+    },
+    {
+     "word": " a",
+     "start": 17.58,
+     "end": 17.74
+    },
+    {
+     "word": " little",
+     "start": 17.74,
+     "end": 17.86
+    }
+   ]
+  },
+  {
+   "start": 17.86,
+   "end": 23.18,
+   "text": " bit below, but about once every six months it actually passes through the Earth's shadow.",
+   "words": [
+    {
+     "word": " bit",
+     "start": 17.86,
+     "end": 18.04
+    },
+    {
+     "word": " below,",
+     "start": 18.04,
+     "end": 18.44
+    },
+    {
+     "word": " but",
+     "start": 19.1,
+     "end": 19.58
+    },
+    {
+     "word": " about",
+     "start": 19.58,
+     "end": 19.8
+    },
+    {
+     "word": " once",
+     "start": 19.8,
+     "end": 20.06
+    },
+    {
+     "word": " every",
+     "start": 20.06,
+     "end": 20.32
+    },
+    {
+     "word": " six",
+     "start": 20.32,
+     "end": 20.58
+    },
+    {
+     "word": " months",
+     "start": 20.58,
+     "end": 20.9
+    },
+    {
+     "word": " it",
+     "start": 20.9,
+     "end": 21.18
+    },
+    {
+     "word": " actually",
+     "start": 21.18,
+     "end": 21.56
+    },
+    {
+     "word": " passes",
+     "start": 21.56,
+     "end": 22.0
+    },
+    {
+     "word": " through",
+     "start": 22.0,
+     "end": 22.44
+    },
+    {
+     "word": " the",
+     "start": 22.44,
+     "end": 22.62
+    },
+    {
+     "word": " Earth's",
+     "start": 22.62,
+     "end": 22.88
+    },
+    {
+     "word": " shadow.",
+     "start": 22.88,
+     "end": 23.18
+    }
+   ]
+  },
+  {
+   "start": 23.18,
+   "end": 28.6,
+   "text": " Now, it doesn't hit the middle of that shadow every time, so some lunar eclipses are just",
+   "words": [
+    {
+     "word": " Now,",
+     "start": 23.18,
+     "end": 23.64
+    },
+    {
+     "word": " it",
+     "start": 23.64,
+     "end": 24.3
+    },
+    {
+     "word": " doesn't",
+     "start": 24.3,
+     "end": 24.68
+    },
+    {
+     "word": " hit",
+     "start": 24.68,
+     "end": 25.02
+    },
+    {
+     "word": " the",
+     "start": 25.02,
+     "end": 25.22
+    },
+    {
+     "word": " middle",
+     "start": 25.22,
+     "end": 25.46
+    },
+    {
+     "word": " of",
+     "start": 25.46,
+     "end": 25.62
+    },
+    {
+     "word": " that",
+     "start": 25.62,
+     "end": 25.78
+    },
+    {
+     "word": " shadow",
+     "start": 25.78,
+     "end": 26.1
+    },
+    {
+     "word": " every",
+     "start": 26.1,
+     "end": 26.38
+    },
+    {
+     "word": " time,",
+     "start": 26.38,
+     "end": 26.8
+    },
+    {
+     "word": " so",
+     "start": 26.84,
+     "end": 27.14
+    },
+    {
+     "word": " some",
+     "start": 27.14,
+     "end": 27.56
+    },
+    {
+     "word": " lunar",
+     "start": 27.56,
+     "end": 27.8
+    },
+    {
+     "word": " eclipses",
+     "start": 27.8,
+     "end": 28.28
+    },
+    {
+     "word": " are",
+     "start": 28.28,
+     "end": 28.44
+    },
+    {
+     "word": " just",
+     "start": 28.44,
+     "end": 28.6
+    }
+   ]
+  },
+  {
+   "start": 28.6,
+   "end": 35.58,
+   "text": " partial, but every year or year and a half, we, on average, we get a total lunar eclipse",
+   "words": [
+    {
+     "word": " partial,",
+     "start": 28.6,
+     "end": 29.06
+    },
+    {
+     "word": " but",
+     "start": 29.62,
+     "end": 29.94
+    },
+    {
+     "word": " every",
+     "start": 29.94,
+     "end": 30.98
+    },
+    {
+     "word": " year",
+     "start": 30.98,
+     "end": 31.44
+    },
+    {
+     "word": " or",
+     "start": 31.44,
+     "end": 31.58
+    },
+    {
+     "word": " year",
+     "start": 31.58,
+     "end": 31.78
+    },
+    {
+     "word": " and",
+     "start": 31.78,
+     "end": 31.9
+    },
+    {
+     "word": " a",
+     "start": 31.9,
+     "end": 31.96
+    },
+    {
+     "word": " half,",
+     "start": 31.96,
+     "end": 32.26
+    },
+    {
+     "word": " we,",
+     "start": 33.06,
+     "end": 33.12
+    },
+    {
+     "word": " on",
+     "start": 33.36,
+     "end": 33.56
+    },
+    {
+     "word": " average,",
+     "start": 33.56,
+     "end": 33.84
+    },
+    {
+     "word": " we",
+     "start": 34.02,
+     "end": 34.12
+    },
+    {
+     "word": " get",
+     "start": 34.12,
+     "end": 34.4
+    },
+    {
+     "word": " a",
+     "start": 34.4,
+     "end": 34.84
+    },
+    {
+     "word": " total",
+     "start": 34.84,
+     "end": 34.98
+    },
+    {
+     "word": " lunar",
+     "start": 34.98,
+     "end": 35.26
+    },
+    {
+     "word": " eclipse",
+     "start": 35.26,
+     "end": 35.58
+    }
+   ]
+  },
+  {
+   "start": 35.58,
+   "end": 40.02,
+   "text": " where the Moon passes through the center of the Earth's shadow, and every part of the",
+   "words": [
+    {
+     "word": " where",
+     "start": 35.58,
+     "end": 35.8
+    },
+    {
+     "word": " the",
+     "start": 35.8,
+     "end": 35.96
+    },
+    {
+     "word": " Moon",
+     "start": 35.96,
+     "end": 36.12
+    },
+    {
+     "word": " passes",
+     "start": 36.12,
+     "end": 36.6
+    },
+    {
+     "word": " through",
+     "start": 36.6,
+     "end": 36.92
+    },
+    {
+     "word": " the",
+     "start": 36.92,
+     "end": 37.06
+    },
+    {
+     "word": " center",
+     "start": 37.06,
+     "end": 37.4
+    },
+    {
+     "word": " of",
+     "start": 37.4,
+     "end": 37.66
+    },
+    {
+     "word": " the",
+     "start": 37.66,
+     "end": 37.76
+    },
+    {
+     "word": " Earth's",
+     "start": 37.76,
+     "end": 38.02
+    },
+    {
+     "word": " shadow,",
+     "start": 38.02,
+     "end": 38.34
+    },
+    {
+     "word": " and",
+     "start": 38.8,
+     "end": 39.08
+    },
+    {
+     "word": " every",
+     "start": 39.08,
+     "end": 39.52
+    },
+    {
+     "word": " part",
+     "start": 39.52,
+     "end": 39.82
+    },
+    {
+     "word": " of",
+     "start": 39.82,
+     "end": 39.92
+    },
+    {
+     "word": " the",
+     "start": 39.92,
+     "end": 40.02
+    }
+   ]
+  },
+  {
+   "start": 40.02,
+   "end": 41.56,
+   "text": " Moon is blocked from the Sun.",
+   "words": [
+    {
+     "word": " Moon",
+     "start": 40.02,
+     "end": 40.24
+    },
+    {
+     "word": " is",
+     "start": 40.24,
+     "end": 40.56
+    },
+    {
+     "word": " blocked",
+     "start": 40.56,
+     "end": 40.86
+    },
+    {
+     "word": " from",
+     "start": 40.86,
+     "end": 41.14
+    },
+    {
+     "word": " the",
+     "start": 41.14,
+     "end": 41.3
+    },
+    {
+     "word": " Sun.",
+     "start": 41.3,
+     "end": 41.56
+    }
+   ]
+  },
+  {
+   "start": 50.5,
+   "end": 53.66,
+   "text": " I will absolutely be outside watching this eclipse.",
+   "words": [
+    {
+     "word": " I",
+     "start": 50.5,
+     "end": 51.1
+    },
+    {
+     "word": " will",
+     "start": 51.1,
+     "end": 51.7
+    },
+    {
+     "word": " absolutely",
+     "start": 51.7,
+     "end": 52.18
+    },
+    {
+     "word": " be",
+     "start": 52.18,
+     "end": 52.48
+    },
+    {
+     "word": " outside",
+     "start": 52.48,
+     "end": 52.7
+    },
+    {
+     "word": " watching",
+     "start": 52.7,
+     "end": 53.12
+    },
+    {
+     "word": " this",
+     "start": 53.12,
+     "end": 53.36
+    },
+    {
+     "word": " eclipse.",
+     "start": 53.36,
+     "end": 53.66
+    }
+   ]
+  },
+  {
+   "start": 54.84,
+   "end": 60.06,
+   "text": " The best thing about a lunar eclipse is that it's beautiful, so the Moon, during totality,",
+   "words": [
+    {
+     "word": " The",
+     "start": 54.84,
+     "end": 54.9
+    },
+    {
+     "word": " best",
+     "start": 54.9,
+     "end": 55.22
+    },
+    {
+     "word": " thing",
+     "start": 55.22,
+     "end": 55.42
+    },
+    {
+     "word": " about",
+     "start": 55.42,
+     "end": 55.6
+    },
+    {
+     "word": " a",
+     "start": 55.6,
+     "end": 55.72
+    },
+    {
+     "word": " lunar",
+     "start": 55.72,
+     "end": 55.86
+    },
+    {
+     "word": " eclipse",
+     "start": 55.86,
+     "end": 56.14
+    },
+    {
+     "word": " is",
+     "start": 56.14,
+     "end": 56.36
+    },
+    {
+     "word": " that",
+     "start": 56.36,
+     "end": 56.5
+    },
+    {
+     "word": " it's",
+     "start": 56.5,
+     "end": 56.7
+    },
+    {
+     "word": " beautiful,",
+     "start": 56.7,
+     "end": 57.04
+    },
+    {
+     "word": " so",
+     "start": 57.72,
+     "end": 58.02
+    },
+    {
+     "word": " the",
+     "start": 58.02,
+     "end": 58.84
+    },
+    {
+     "word": " Moon,",
+     "start": 58.84,
+     "end": 59.18
+    },
+    {
+     "word": " during",
+     "start": 59.2,
+     "end": 59.48
+    },
+    {
+     "word": " totality,",
+     "start": 59.48,
+     "end": 60.06
+    }
+   ]
+  },
+  {
+   "start": 60.24,
+   "end": 62.9,
+   "text": " will turn shades of orange and red and brown.",
+   "words": [
+    {
+     "word": " will",
+     "start": 60.24,
+     "end": 60.36
+    },
+    {
+     "word": " turn",
+     "start": 60.36,
+     "end": 60.74
+    },
+    {
+     "word": " shades",
+     "start": 60.74,
+     "end": 61.28
+    },
+    {
+     "word": " of",
+     "start": 61.28,
+     "end": 61.52
+    },
+    {
+     "word": " orange",
+     "start": 61.52,
+     "end": 61.88
+    },
+    {
+     "word": " and",
+     "start": 61.88,
+     "end": 62.16
+    },
+    {
+     "word": " red",
+     "start": 62.16,
+     "end": 62.4
+    },
+    {
+     "word": " and",
+     "start": 62.4,
+     "end": 62.58
+    },
+    {
+     "word": " brown.",
+     "start": 62.58,
+     "end": 62.9
+    }
+   ]
+  },
+  {
+   "start": 63.56,
+   "end": 70.16,
+   "text": " It's being hit by all of the sunrises and sunsets projected from the Earth, and those",
+   "words": [
+    {
+     "word": " It's",
+     "start": 63.56,
+     "end": 63.76
+    },
+    {
+     "word": " being",
+     "start": 63.76,
+     "end": 64.06
+    },
+    {
+     "word": " hit",
+     "start": 64.06,
+     "end": 65.02
+    },
+    {
+     "word": " by",
+     "start": 65.02,
+     "end": 65.3
+    },
+    {
+     "word": " all",
+     "start": 65.3,
+     "end": 65.76
+    },
+    {
+     "word": " of",
+     "start": 65.76,
+     "end": 65.96
+    },
+    {
+     "word": " the",
+     "start": 65.96,
+     "end": 66.12
+    },
+    {
+     "word": " sunrises",
+     "start": 66.12,
+     "end": 66.62
+    },
+    {
+     "word": " and",
+     "start": 66.62,
+     "end": 66.84
+    },
+    {
+     "word": " sunsets",
+     "start": 66.84,
+     "end": 67.32
+    },
+    {
+     "word": " projected",
+     "start": 67.32,
+     "end": 67.72
+    },
+    {
+     "word": " from",
+     "start": 67.72,
+     "end": 68.04
+    },
+    {
+     "word": " the",
+     "start": 68.04,
+     "end": 68.2
+    },
+    {
+     "word": " Earth,",
+     "start": 68.2,
+     "end": 68.42
+    },
+    {
+     "word": " and",
+     "start": 68.96,
+     "end": 69.78
+    },
+    {
+     "word": " those",
+     "start": 69.78,
+     "end": 70.16
+    }
+   ]
+  },
+  {
+   "start": 70.16,
+   "end": 76.62,
+   "text": " colors will change over time, and the Moon will be dim enough that it kind of looks almost",
+   "words": [
+    {
+     "word": " colors",
+     "start": 70.16,
+     "end": 70.52
+    },
+    {
+     "word": " will",
+     "start": 70.52,
+     "end": 70.8
+    },
+    {
+     "word": " change",
+     "start": 70.8,
+     "end": 71.22
+    },
+    {
+     "word": " over",
+     "start": 71.22,
+     "end": 71.48
+    },
+    {
+     "word": " time,",
+     "start": 71.48,
+     "end": 72.02
+    },
+    {
+     "word": " and",
+     "start": 73.2,
+     "end": 73.58
+    },
+    {
+     "word": " the",
+     "start": 73.58,
+     "end": 74.24
+    },
+    {
+     "word": " Moon",
+     "start": 74.24,
+     "end": 74.4
+    },
+    {
+     "word": " will",
+     "start": 74.4,
+     "end": 74.56
+    },
+    {
+     "word": " be",
+     "start": 74.56,
+     "end": 74.7
+    },
+    {
+     "word": " dim",
+     "start": 74.7,
+     "end": 74.92
+    },
+    {
+     "word": " enough",
+     "start": 74.92,
+     "end": 75.16
+    },
+    {
+     "word": " that",
+     "start": 75.16,
+     "end": 75.38
+    },
+    {
+     "word": " it",
+     "start": 75.38,
+     "end": 75.62
+    },
+    {
+     "word": " kind",
+     "start": 75.62,
+     "end": 75.84
+    },
+    {
+     "word": " of",
+     "start": 75.84,
+     "end": 76.0
+    },
+    {
+     "word": " looks",
+     "start": 76.0,
+     "end": 76.2
+    },
+    {
+     "word": " almost",
+     "start": 76.2,
+     "end": 76.62
+    }
+   ]
+  },
+  {
+   "start": 76.62,
+   "end": 77.3,
+   "text": " transparent.",
+   "words": [
+    {
+     "word": " transparent.",
+     "start": 76.62,
+     "end": 77.3
+    }
+   ]
+  }
+ ]
+}

@@ -1,14 +1,15 @@
 # Shorts
 
-Short vertical explainers made of pure animation. Each is one file with no footage: everything on screen is drawn by
-code on the video's clock, so the export shows exactly what the preview shows.
+Short vertical explainers. Each is one file, and each answers one "how does that work?" question in 20 seconds to
+two minutes, at 1080x1920, with its words kept inside the area TikTok, Reels and Shorts leave clear.
 
-Each film answers one "how does that work?" question in 20 seconds to two minutes, at 1080x1920, with its words kept inside
-the area TikTok, Reels and Shorts leave clear. It ends as it begins, so it loops.
+Two are pure animation with no footage: everything on screen is drawn by code on the video's clock. One is a talking
+head cut out of a real interview, with captions and cards timed by the words of its transcript.
 
 | File | What it explains |
 |---|---|
 | `game-lighting.tsx` | How game lighting fakes it: a small room with no lighting, then direct light, shadows, bounce light, ambient occlusion and bloom switched on one at a time. |
+| `lunar-eclipse.tsx` | Why there is no lunar eclipse every month, and why the Moon turns red: five cuts from a NASA interview, with word-timed captions, type cards, badges and a quotation. Footage credit in `media/CREDITS.md`. |
 | `lighting-explained.tsx` | Every lighting trick a game uses, one at a time, each on the same small stage shown twice: without the trick on top, with it underneath. The opening and the first three so far: direct light, the shadow map, ambient light. |
 
 ## On the documentation site
@@ -20,7 +21,15 @@ Its video and poster in `docs/public/shorts` are made by:
 pnpm --filter @cutcraft/example-shorts render
 ```
 
+`lunar-eclipse.tsx` is there too, [with its sound](https://cutcraft.prefixtree.xyz/examples#a-talking-head-with-cards).
+
 ## Render one
+
+The two animations need no media. The interview reads its clip from `media/`:
+
+```sh
+npx cutcraft lunar-eclipse.tsx --manifest manifest.json --media media --out out/lunar-eclipse.mp4
+```
 
 ```sh
 npx cutcraft game-lighting.tsx --manifest manifest.json --out out/game-lighting.mp4
@@ -50,3 +59,14 @@ npx cutcraft game-lighting.tsx --manifest manifest.json \
 - The words are ordinary subtitles at the top: a `<Captions>` element with one `<Caption>` per line, each with its
   start and end, so an editor can retime or reword them. They say only how each trick works.
 - The row of chips at the bottom is one `<Layer>` with a small React component that reads the video's time.
+
+## How lunar-eclipse.tsx is made
+
+- Every cut is made on a word: `<Clip in="word:5" out="word:19.end">`. The clip is 79 seconds of an interview and
+  the film plays five pieces of it.
+- The captions come from the transcript (`<Captions src="asset:eclipse">`), with a box behind the word being said.
+- Each card line, badge and highlight names the word it comes in on (`at="word:15"`) and lasts until its clip ends
+  (`duration={{ until: "why" }}`). No time is typed as seconds, so trimming a clip moves everything said over it.
+- The speaker is shown two ways from one square source: filling the frame, and in a box under a card with a `Frame`
+  drawn round it. Both are a `transform` on the clip.
+- The accent colour and the opening lines are props.

@@ -2,7 +2,7 @@
   "name": "@cutcraft/example-shorts",
   "version": "0.1.0",
   "private": true,
-  "description": "Short vertical explainers made of pure animation: each one file, no footage.",
+  "description": "Short vertical explainers, each one file: two of pure animation, one cut from an interview.",
   "license": "MIT",
   "type": "module",
   "scripts": {

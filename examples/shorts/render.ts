@@ -9,25 +9,29 @@ const here = import.meta.dirname;
 const out = join(here, "..", "..", "docs", "public", "shorts");
 mkdirSync(out, { recursive: true });
 
-/** Each file on the site, the second its poster is taken at, and the bitrate that keeps it small on a page. */
-const FILES: Record<string, { poster: number; bitrate: number }> = {
+/**
+ * Each file on the site, the second its poster is taken at, the bitrate that keeps it small on a page, and whether it
+ * has a soundtrack to keep.
+ */
+const FILES: Record<string, { poster: number; bitrate: number; sound?: boolean }> = {
   "game-lighting": { poster: 28, bitrate: 1_100_000 },
+  "lunar-eclipse": { poster: 4.5, bitrate: 1_400_000, sound: true },
 };
 
 /** Names given on the command line render alone: `pnpm --filter @cutcraft/example-shorts render game-lighting`. */
 const only = process.argv.slice(2);
 
-for (const [name, { poster, bitrate }] of Object.entries(FILES)) {
+for (const [name, { poster, bitrate, sound }] of Object.entries(FILES)) {
   if (only.length > 0 && !only.includes(name)) continue;
   const video = await loadVideo(join(here, `${name}.tsx`), { manifest: join(here, "manifest.json") });
   if (video.state.errors.length > 0)
     throw new Error(`${name}: ${video.state.errors.map((e) => `${e.id}: ${e.message}`).join("; ")}`);
-  const media = directoryResolver(here, video.manifest);
+  const media = directoryResolver(join(here, "media"), video.manifest);
   const result = await renderVideo({
     state: video.state,
     media,
     out: join(out, `${name}.webm`),
-    silent: true,
+    silent: !sound,
     bitrate,
     source: video.source,
   });

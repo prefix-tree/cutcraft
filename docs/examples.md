@@ -18,13 +18,32 @@ There are three kinds of example, each a complete file:
 - **Feature examples** in the guide: short files that each show one feature, rendered next to their code on the page
   that explains it (fonts, motion blur, your own effects and transitions, something over a cut).
 
+## A talking head with cards
+
+A vertical short cut out of a real interview: NASA's Ernie Wright on why there is no lunar eclipse every month, and
+why the Moon turns red when there is one. Five pieces of an eight minute interview, each cut on a word of the
+transcript. Press play for the sound.
+
+Nothing in the file is timed in seconds. The captions come from the transcript, with a box behind the word being
+said. Each card line, badge and highlight names the word it comes in on and lasts until its clip ends, so trimming a
+clip moves everything said over it. The speaker is shown two ways from one source, filling the frame and in a box
+under a card, and every word on screen sits in the area TikTok, Reels and Shorts leave clear.
+
+**Shows:** cuts on words, captions with a boxed word, `TypeCard` with a struck line and a pill, `QuoteCard`, `Badge`, `Frame`, graphics that last until their clip ends. [Time by meaning](/guide/time) · [Titles and graphics](/guide/titles-and-graphics#ready-made-components) · [Captions and sound](/guide/captions-and-sound)
+
+Footage: NASA's Scientific Visualization Studio, [item 14791](https://svs.gsfc.nasa.gov/14791/), public domain.
+
+<div class="cc-pair"><video class="tall" :src="withBase('/shorts/lunar-eclipse.webm')" :poster="withBase('/shorts/lunar-eclipse.jpg')" controls playsinline></video></div>
+
+<<< ../examples/shorts/lunar-eclipse.tsx
+
 ## Where to start
 
 | You're making | Start from |
 |---|---|
 | A product launch or promo | [Product launch](#a-product-launch), the [walkthrough](/guide/writing-files), [Brand spot](/recipes/brand-spot) |
-| An interview or podcast cut | [Talking-head cut](/recipes/talking-head), [Multicam highlights](/recipes/highlights) |
-| A vertical short | [Kinetic type](#kinetic-type), [Captions and key points](#captions-and-key-points), [Vertical clip from a podcast](/recipes/vertical-podcast) |
+| An interview or podcast cut | [A talking head with cards](#a-talking-head-with-cards), [Talking-head cut](/recipes/talking-head), [Multicam highlights](/recipes/highlights) |
+| A vertical short | [A talking head with cards](#a-talking-head-with-cards), [Kinetic type](#kinetic-type), [Captions and key points](#captions-and-key-points), [Vertical clip from a podcast](/recipes/vertical-podcast) |
 | An explainer with no footage | [How game lighting fakes it](#how-game-lighting-fakes-it) |
 | A product or screen demo | [Product demo with zoom-ins](/recipes/product-demo) |
 | Charts and numbers | [Data story](#a-data-story), [Stats with handles](/recipes/stats) |
@@ -36,7 +55,7 @@ There are three kinds of example, each a complete file:
 |---|---|---|
 | Cuts on transcript words (`in="word:12"`) | [Product launch](#a-product-launch), [Data story](#a-data-story), [Talking-head cut](/recipes/talking-head) | [Time by meaning](/guide/time) |
 | Overlays on the word that names them (`anchor` + `at`) | [Product launch](#a-product-launch), [Kinetic type](#kinetic-type), [Captions](#captions-and-key-points) | [Time by meaning](/guide/time) |
-| Captions from the transcript | [Kinetic type](#kinetic-type), [Captions](#captions-and-key-points), [Vertical clip](/recipes/vertical-podcast) | [Captions and sound](/guide/captions-and-sound) |
+| Captions from the transcript | [A talking head with cards](#a-talking-head-with-cards), [Kinetic type](#kinetic-type), [Captions](#captions-and-key-points), [Vertical clip](/recipes/vertical-podcast) | [Captions and sound](/guide/captions-and-sound) |
 | three.js (`<Three>`) | [Product launch](#a-product-launch), [Logo reveal](#a-logo-reveal), [How game lighting fakes it](#how-game-lighting-fakes-it), [Brand spot](/recipes/brand-spot) | [Free code](/guide/free-code#three-js-and-motion) |
 | Motion (`<Motion>`) | [Kinetic type](#kinetic-type), [Data story](#a-data-story), [An edit](#an-edit) | [Free code](/guide/free-code#three-js-and-motion) |
 | Any React in a `<Layer>` | [Data story](#a-data-story) (counters), [Stats with handles](/recipes/stats) | [Free code](/guide/free-code) |
