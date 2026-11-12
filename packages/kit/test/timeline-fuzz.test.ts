@@ -120,7 +120,9 @@ function randomTracks(seed: number): string {
 const SEEDS = Array.from({ length: 3000 }, (_, i) => i + 1);
 
 describe("timelines made at random", () => {
-  it("every one resolves without throwing and is sane", () => {
+  // Three thousand files take a few seconds, more under coverage on a shared CI machine: the default five-second
+  // limit is not enough there.
+  it("every one resolves without throwing and is sane", { timeout: 60_000 }, () => {
     for (const seed of SEEDS) {
       const tracks = randomTracks(seed);
       try {
