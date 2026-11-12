@@ -19,7 +19,7 @@ A stretch of a video or image asset, trimmed by seconds, transcript words or cam
 | `anchor` | "start" \| string |  |  |
 | `at` | string |  |  |
 | `offset` | number |  |  |
-| `duration` | number \| "fill" \| "source" \| { match } |  |  |
+| `duration` | number \| "fill" \| "source" \| { match } \| { until } |  |  |
 | `src` | string |  | yes |
 | `in` | number (0..∞) \| string |  |  |
 | `out` | number (0..∞) \| string |  |  |

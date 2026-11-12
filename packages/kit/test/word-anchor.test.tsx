@@ -123,4 +123,32 @@ describe("a graphic timed by a word of its anchor", () => {
     expect(exec.undo()?.ok).toBe(true);
     expect(exec.state().items.get("ten")?.props.at).toBe("word:9");
   });
+
+  describe("duration until another element ends", () => {
+    const length = (title: Record<string, unknown>) => {
+      const r = placed(edit({ title }));
+      return { start: r.start, duration: r.state.items.get("ten")?.duration, errors: r.errors };
+    };
+
+    it("lasts from its word to the end of the clip", () => {
+      // make-1 plays from 1 s to 5 s, and says word 9 at 3 s.
+      expect(length({ duration: { until: "make-1" } })).toEqual({ start: 3, duration: 2, errors: [] });
+    });
+
+    it("follows the other element when that one is retimed", () => {
+      expect(placed(edit({ gap: 2, title: { duration: { until: "make-2" } } })).state.items.get("ten")?.duration).toBe(
+        6,
+      );
+    });
+
+    it("has no length, and says so, when it starts after the other has ended", () => {
+      const r = length({ anchor: "make-2", at: "word:9", duration: { until: "make-1" } });
+      expect(r.duration).toBe(0);
+      expect(r.errors).toEqual(["INVALID_TIME_RANGE:duration"]);
+    });
+
+    it("reports a target that does not exist", () => {
+      expect(length({ duration: { until: "nobody" } }).errors).toEqual(["DANGLING_ANCHOR:duration"]);
+    });
+  });
 });

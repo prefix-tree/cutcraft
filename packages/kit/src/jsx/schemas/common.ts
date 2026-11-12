@@ -28,6 +28,8 @@ export const durationSchema = z.union([
   z.literal("fill"),
   z.literal("source"),
   z.strictObject({ match: idSchema }),
+  /** Lasts until the element named ends, wherever this one starts. */
+  z.strictObject({ until: idSchema }),
 ]);
 
 /** Props shared by everything that occupies time on a track. */

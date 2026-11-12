@@ -6,12 +6,28 @@ import { type AssetManifest, COMPONENTS, collectModule, Executor, resolve } from
 import { bake, buildSourceIndex, foldToSource, lint, loadModule } from "@cutcraft/kit/source";
 
 const manifest: AssetManifest = {
-  assets: { shot: { id: "shot", kind: "video", duration: 10, fps: 30, width: 1920, height: 1080 } },
+  assets: {
+    shot: {
+      id: "shot",
+      kind: "video",
+      duration: 10,
+      fps: 30,
+      width: 1920,
+      height: 1080,
+      transcript: {
+        words: [
+          { i: 0, text: "Stress", start: 1.5, end: 1.9 },
+          { i: 1, text: "is", start: 2.5, end: 2.6 },
+          { i: 2, text: "energy", start: 3.25, end: 3.7 },
+        ],
+      },
+    },
+  },
 };
 
 const file = (
   body: string,
-) => `import { Arrow, Background, Badge, Callout, Clip, Composition, Counter, Highlight, LowerThird, ProgressBar, Sticker, Track } from "@cutcraft/kit";
+) => `import { Arrow, Background, Badge, Callout, Clip, Composition, Counter, Frame, Highlight, LowerThird, ProgressBar, QuoteCard, Sticker, Track, TypeCard } from "@cutcraft/kit";
 
 export default function Video() {
   return (
@@ -60,6 +76,15 @@ const USES: Record<keyof typeof COMPONENTS, { use: string; parts: string[] }> = 
     parts: ["hl:svg"],
   },
   Background: { use: '<Background id="bg" start={0} duration={6} variant="dots" />', parts: ["bg:svg"] },
+  TypeCard: {
+    use: '<TypeCard id="tc" start={1} duration={3} lines={[{ text: "STRESS", struck: true }, { text: "ENERGY", offset: 1, pill: "$accent" }]} />',
+    parts: ["tc-card:layer", "tc-line-1:layer", "tc-strike-1:layer", "tc-line-2:layer"],
+  },
+  QuoteCard: {
+    use: '<QuoteCard id="qc" start={1} duration={3} source="A handbook" text="It plays many other important roles." highlights={[{ text: "many other", offset: 0.5 }]} />',
+    parts: ["qc-card:layer", "qc-mark-1:layer"],
+  },
+  Frame: { use: '<Frame id="fr" start={1} duration={3} width={800} height={600} />', parts: ["fr:shape"] },
 };
 
 describe.each(Object.entries(USES))("%s", (name, { use, parts }) => {
@@ -91,6 +116,35 @@ describe("components", () => {
     expect(state.errors).toEqual([]);
     expect(state.items.get("lt-card")!.start).toBeCloseTo(2, 3);
     expect(state.items.get("lt-name")!.start).toBeCloseTo(2.15, 3);
+  });
+
+  it("bring each part of a card in at its own word, and take them all away with the card", () => {
+    const { state } = resolved(
+      `<TypeCard id="tc" anchor="shot" at="word:0" duration={4} lines={[
+        { text: "STRESS", struck: { at: "word:2" } },
+        { text: "ENERGY", at: "word:2", offset: 0.25 },
+        { text: "hormone", offset: 3 },
+      ]} />`,
+    );
+    expect(state.errors).toEqual([]);
+    const span = (id: string) => {
+      const p = state.items.get(id)!;
+      return [p.start, p.start + p.duration].map((x) => Math.round(x * 1000) / 1000);
+    };
+    // The card: from word 0 (1.5 s) for 4 s. A line with no cue comes in with the card.
+    expect(span("tc-card")).toEqual([1.5, 5.5]);
+    expect(span("tc-line-1")).toEqual([1.5, 5.5]);
+    expect(span("tc-strike-1")).toEqual([3.25, 5.5]);
+    expect(span("tc-line-2")).toEqual([3.5, 5.5]);
+    // Seconds after the card, not after the video's start.
+    expect(span("tc-line-3")).toEqual([4.5, 5.5]);
+  });
+
+  it("say when a card's word has no clip to be a word of, or a highlight is not in the text", () => {
+    const word = resolved('<TypeCard id="tc" start={0} duration={2} lines={[{ text: "A", at: "word:1" }]} />');
+    expect(word.state.errors.map((e) => e.message).join(" ")).toMatch(/TypeCard: at="word:1" needs the card's anchor/);
+    const mark = resolved('<QuoteCard id="qc" start={0} duration={2} text="Short." highlights={[{ text: "long" }]} />');
+    expect(mark.state.errors.map((e) => e.message).join(" ")).toMatch(/QuoteCard: .*"long" is not in the text/);
   });
 
   it("say which prop is wrong", () => {

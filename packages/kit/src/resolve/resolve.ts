@@ -107,7 +107,7 @@ interface Pending {
   source?: Placement["source"];
   /** Intrinsic length, when it does not depend on other elements. */
   duration?: number;
-  durationDep?: { kind: "match"; id: string } | { kind: "fill" };
+  durationDep?: { kind: "match"; id: string } | { kind: "until"; id: string } | { kind: "fill" };
   start?: number;
   /** `at` is a word, shot or silence of the anchor's source: the start is where the anchor plays it, plus `offset`. */
   anchorDep?: { id: string | "start"; offset: number; edge?: "end"; at?: string };
@@ -722,8 +722,7 @@ function intrinsicCompute(
         message: `<${node.kind}> has no source to take a duration from`,
       });
       p.duration = DEFAULT_OVERLAY_DURATION;
-    } else if (typeof dur === "object" && dur && "match" in dur)
-      p.durationDep = { kind: "match", id: String((dur as { match: string }).match) };
+    } else if (typeof dur === "object" && dur) p.durationDep = otherDep(dur);
   }
   return p;
 }
@@ -855,7 +854,7 @@ function sourceRange(p: Pending, asset: AssetEntry, markers: ReadonlyMap<string,
     played = dur;
     outSec = inSec + (keys.length > 0 ? rampAdvance(keys, dur) : dur * speed);
   } else if (dur === "fill" || (typeof dur === "object" && dur !== null)) {
-    p.durationDep = dur === "fill" ? { kind: "fill" } : { kind: "match", id: String((dur as { match: string }).match) };
+    p.durationDep = dur === "fill" ? { kind: "fill" } : otherDep(dur);
     p.source = { in: inSec, out: inSec, speed, asset: asset.id };
     return;
   } else {
@@ -1036,12 +1035,12 @@ function placeTrack(
     p.start = cursor;
     if (p.duration !== undefined) cursor += p.duration;
     else p.durationDep ??= { kind: "fill" }; // match deps settle later; cursor cannot advance past an unknown length
-    if (p.durationDep?.kind === "match") {
+    if (p.durationDep?.kind === "match" || p.durationDep?.kind === "until") {
       p.errors.push({
         code: "AMBIGUOUS_DURATION",
         id: child.id,
         prop: "duration",
-        message: "match durations are not allowed inside a sequence",
+        message: `${p.durationDep.kind} durations are not allowed inside a sequence`,
       });
       p.duration = 0;
       delete p.durationDep;
@@ -1166,32 +1165,27 @@ function iterateDependencies(pending: Map<string, Pending>, manifest: AssetManif
           progressed = true;
         }
       }
-      if (p.durationDep?.kind === "match" && p.duration === undefined) {
+      if (follows(p) && p.duration === undefined) {
         const target = pending.get(p.durationDep.id);
         if (!target) {
           p.errors.push({
             code: "DANGLING_ANCHOR",
             id: p.node.id,
             prop: "duration",
-            message: `match target "${p.durationDep.id}" does not exist`,
+            message: `${p.durationDep.kind} target "${p.durationDep.id}" does not exist`,
           });
           p.duration = 0;
-          delete p.durationDep;
+          delete (p as Pending).durationDep;
           progressed = true;
-        } else if (target.duration !== undefined) {
-          p.duration = target.duration;
-          if (p.source) p.source = { ...p.source, out: p.source.in + sourceSpan(p.node, p.duration, p.source.speed) };
-          delete p.durationDep;
-          progressed = true;
-        }
+        } else if (takeLength(p, target)) progressed = true;
       }
     }
     if (!progressed) break;
   }
   for (const p of pending.values()) {
     // A match on an element that fills the video is settled after the fill, not a cycle.
-    if (!p.anchorDep && p.durationDep?.kind === "match" && waitsForFill(p, pending)) continue;
-    if ((p.anchorDep && p.start === undefined) || (p.durationDep?.kind === "match" && p.duration === undefined)) {
+    if (!p.anchorDep && follows(p) && waitsForFill(p, pending)) continue;
+    if ((p.anchorDep && p.start === undefined) || (follows(p) && p.duration === undefined)) {
       p.errors.push({
         code: "CYCLE",
         id: p.node.id,
@@ -1205,13 +1199,52 @@ function iterateDependencies(pending: Map<string, Pending>, manifest: AssetManif
   }
 }
 
+/** The dependency a `duration={{ match }}` or `duration={{ until }}` names. */
+function otherDep(dur: object): { kind: "match" | "until"; id: string } {
+  return "until" in dur
+    ? { kind: "until", id: String((dur as { until: string }).until) }
+    : { kind: "match", id: String((dur as { match: string }).match) };
+}
+
+type Following = Pending & { durationDep: { kind: "match" | "until"; id: string } };
+
+/** Whether `p`'s length comes from another element: as long as it (`match`), or until it ends (`until`). */
+function follows(p: Pending): p is Following {
+  return p.durationDep?.kind === "match" || p.durationDep?.kind === "until";
+}
+
+/**
+ * Gives `p` its length from `target` once enough is known: the target's length for a match; for an until, the time
+ * from `p`'s own start to the target's end. An element that starts after its target has ended has no length, and
+ * says so. False while it has to wait.
+ */
+function takeLength(p: Following, target: Pending): boolean {
+  if (target.duration === undefined) return false;
+  if (p.durationDep.kind === "match") p.duration = target.duration;
+  else {
+    if (p.start === undefined || target.start === undefined) return false;
+    const left = round3(target.start + target.duration - p.start);
+    if (left <= 0)
+      p.errors.push({
+        code: "INVALID_TIME_RANGE",
+        id: p.node.id,
+        prop: "duration",
+        message: `"${p.node.id}" starts at ${round3(p.start)} s, after "${p.durationDep.id}" has ended (${round3(target.start + target.duration)} s), so it has no length`,
+      });
+    p.duration = Math.max(0, left);
+  }
+  if (p.source) p.source = { ...p.source, out: p.source.in + sourceSpan(p.node, p.duration, p.source.speed) };
+  delete (p as Pending).durationDep;
+  return true;
+}
+
 /** Whether `p`'s match leads, through other matches, to an element whose length is the video's. */
 function waitsForFill(p: Pending, pending: Map<string, Pending>): boolean {
   const seen = new Set<Pending>();
   for (let at: Pending | undefined = p; at && !seen.has(at); ) {
     seen.add(at);
     if (at.durationDep?.kind === "fill") return true;
-    if (at.durationDep?.kind !== "match") return false;
+    if (!follows(at)) return false;
     at = pending.get(at.durationDep.id);
   }
   return false;
@@ -1222,25 +1255,21 @@ function settleMatches(pending: Map<string, Pending>): void {
   for (let pass = 0; pass < MAX_PASSES; pass++) {
     let progressed = false;
     for (const p of pending.values()) {
-      if (p.durationDep?.kind !== "match" || p.duration !== undefined) continue;
+      if (!follows(p) || p.duration !== undefined) continue;
       const target = pending.get(p.durationDep.id);
-      if (target?.duration === undefined) continue;
-      p.duration = target.duration;
-      if (p.source) p.source = { ...p.source, out: p.source.in + sourceSpan(p.node, p.duration, p.source.speed) };
-      delete p.durationDep;
-      progressed = true;
+      if (target && takeLength(p, target)) progressed = true;
     }
     if (!progressed) break;
   }
   for (const p of pending.values()) {
-    if (p.durationDep?.kind !== "match" || p.duration !== undefined) continue;
+    if (!follows(p) || p.duration !== undefined) continue;
     p.errors.push({
       code: "CYCLE",
       id: p.node.id,
       message: `"${p.node.id}" depends on itself through anchors or match durations`,
     });
     p.duration = 0;
-    delete p.durationDep;
+    delete (p as Pending).durationDep;
   }
 }
 

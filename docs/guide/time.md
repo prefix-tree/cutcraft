@@ -85,6 +85,16 @@ also takes `shot:N` and `silence:N`. If an edit cuts the word out of the clip, t
 at the nearest part the clip still plays. Clips that play in reverse, or that have speed keys or freezes, don't
 support `at` yet; use `offset` there.
 
+A graphic can also last until another element ends, wherever it starts itself. Three lines that come in on three
+words and leave together with their card:
+
+```tsx
+<Title id="line-2" anchor="make-1" at="word:150" duration={{ until: "card" }}>10× output</Title>
+```
+
+The other form, `match` in place of `until`, makes it as long as `card` whenever it starts. An element that starts
+after the one it waits for has ended has no length, and that is an error.
+
 ## Transitions sit between clips
 
 A `<Transition>` goes between the two clips it joins on a sequence track. The clips overlap by its duration, so both

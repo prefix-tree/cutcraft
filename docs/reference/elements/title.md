@@ -19,7 +19,7 @@ Text over the picture in the theme's type, with entrances by letter, word or lin
 | `anchor` | "start" \| string |  |  |
 | `at` | string |  |  |
 | `offset` | number |  |  |
-| `duration` | number \| "fill" \| "source" \| { match } |  |  |
+| `duration` | number \| "fill" \| "source" \| { match } \| { until } |  |  |
 | `transform` | { position, scale, rotation, anchor, opacity, borderRadius, crop } |  |  |
 | `fit` | "contain" \| "cover" \| "stretch" \| "none" |  |  |
 | `blend` | "normal" \| "multiply" \| "screen" \| "overlay" \| "darken" \| … 13 more |  |  |

@@ -77,7 +77,7 @@ them. For a plain offset shadow, the CSS [`shadow`](/reference/effects/shadow) e
 
 ## Ready-made components
 
-Lower thirds, callouts, badges, counters, progress bars, arrows, highlights and backgrounds come as components:
+Lower thirds, callouts, badges, counters, progress bars, arrows, highlights, backgrounds and cards come as components:
 ordinary functions, imported from `@cutcraft/kit`, that return the kit's own titles, shapes and SVG. So a lower third
 is timed by a word like any title, the theme styles it, and the layout check sees its text:
 
@@ -88,8 +88,23 @@ is timed by a word like any title, the theme styles it, and the layout check see
 </Example>
 
 Each one's parts get ids from its own (`lt-card`, `lt-name`, `lt-role`). Editing a part in the editor writes that use
-out into the file as plain elements, which you then own. [Components](/reference/components/) shows all eight, each
+out into the file as plain elements, which you then own. [Components](/reference/components/) shows them all, each
 with its props.
+
+Three of them are made for a talking head cut into a short. `TypeCard` is a card of big type that builds line by
+line, with a pill behind a line or a strike through it. `QuoteCard` is a passage with its source and a marker that
+sweeps across the phrases that matter. `Frame` is a rounded border for the speaker under a card. A card's lines and
+marks each take `at="word:N"`, a word of the card's `anchor`, so they come in as the word is said and stay in step
+when the cut changes:
+
+<Example src="previews/components/type-card" alt="Big type building line by line: a struck-out word, then its replacement on a pill">
+
+<<< @/../examples/showcase/components/type-card.tsx
+
+</Example>
+
+The text of these cards is laid out by the browser inside a `<Layer>`, since only the browser knows how wide a word
+is. Each line and each mark is a layer of its own on the timeline.
 
 For anything they don't cover, write it as free code: a `<Motion>` sequence, an SVG chart animated by Motion, a few
 lines of React in a `<Layer>`, or a 3D scene in a `<Three>`. The [examples](/examples) show each one next to its file,
