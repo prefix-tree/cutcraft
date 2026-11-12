@@ -31,7 +31,16 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       # The render tests generate their test media with ffmpeg; the export tests run in the e2e job.
-      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      # The package mirrors can stall for an hour: each try is cut off after a few minutes, and there are three.
+      - name: Install ffmpeg
+        timeout-minutes: 24
+        run: |
+          for attempt in 1 2 3; do
+            if sudo timeout 120 apt-get update && sudo timeout 300 apt-get install -y ffmpeg; then exit 0; fi
+            echo "apt attempt $attempt failed or timed out"
+            sleep 10
+          done
+          exit 1
       - run: pnpm typecheck
       - run: pnpm lint
       - run: pnpm knip
@@ -77,7 +86,16 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      # The package mirrors can stall for an hour: each try is cut off after a few minutes, and there are three.
+      - name: Install ffmpeg
+        timeout-minutes: 24
+        run: |
+          for attempt in 1 2 3; do
+            if sudo timeout 120 apt-get update && sudo timeout 300 apt-get install -y ffmpeg; then exit 0; fi
+            echo "apt attempt $attempt failed or timed out"
+            sleep 10
+          done
+          exit 1
       - uses: actions/cache@v6
         with:
           path: ~/.cache/ms-playwright
@@ -136,7 +154,16 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      # The package mirrors can stall for an hour: each try is cut off after a few minutes, and there are three.
+      - name: Install ffmpeg
+        timeout-minutes: 24
+        run: |
+          for attempt in 1 2 3; do
+            if sudo timeout 120 apt-get update && sudo timeout 300 apt-get install -y ffmpeg; then exit 0; fi
+            echo "apt attempt $attempt failed or timed out"
+            sleep 10
+          done
+          exit 1
       # The same Chrome as the e2e job, from the same cache.
       - uses: actions/cache@v6
         with:
