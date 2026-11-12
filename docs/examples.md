@@ -18,25 +18,6 @@ There are three kinds of example, each a complete file:
 - **Feature examples** in the guide: short files that each show one feature, rendered next to their code on the page
   that explains it (fonts, motion blur, your own effects and transitions, something over a cut).
 
-## A talking head with cards
-
-A vertical short cut out of a real interview: NASA's Ernie Wright on why there is no lunar eclipse every month, and
-why the Moon turns red when there is one. Five pieces of an eight minute interview, each cut on a word of the
-transcript. Press play for the sound.
-
-Nothing in the file is timed in seconds. The captions come from the transcript, with a box behind the word being
-said. Each card line, badge and highlight names the word it comes in on and lasts until its clip ends, so trimming a
-clip moves everything said over it. The speaker is shown two ways from one source, filling the frame and in a box
-under a card, and every word on screen sits in the area TikTok, Reels and Shorts leave clear.
-
-**Shows:** cuts on words, captions with a boxed word, `TypeCard` with a struck line and a pill, `QuoteCard`, `Badge`, `Frame`, graphics that last until their clip ends. [Time by meaning](/guide/time) · [Titles and graphics](/guide/titles-and-graphics#ready-made-components) · [Captions and sound](/guide/captions-and-sound)
-
-Footage: NASA's Scientific Visualization Studio, [item 14791](https://svs.gsfc.nasa.gov/14791/), public domain.
-
-<div class="cc-pair"><video class="tall" :src="withBase('/shorts/lunar-eclipse.webm')" :poster="withBase('/shorts/lunar-eclipse.jpg')" controls playsinline></video></div>
-
-<<< ../examples/shorts/lunar-eclipse.tsx
-
 ## Where to start
 
 | You're making | Start from |
@@ -81,12 +62,14 @@ rendered with `pnpm --filter @cutcraft/example-showcase render`; the guide's fea
 (`pnpm --filter @cutcraft/example-showcase gen`), except the two coffee shots in the effect and transition demos, close and wide: Pixabay videos
 [209419](https://pixabay.com/videos/id-209419/) and [209424](https://pixabay.com/videos/id-209424/), under the Pixabay
 Content License. They are not committed; `gen` reads them from `examples/showcase/media/stock/` and checks their hashes. Every file renders through the player in
-[headless Chrome](/guide/exporting#the-browser-it-runs-in). The people on camera are stand-ins: their
+[headless Chrome](/guide/exporting#the-browser-it-runs-in). The people on camera in these are stand-ins: their
 footage is a gradient, and the manifest holds the words they would say.
 
-The explainer at the end of this page is in
+The two shorts at the end of this page are in
 [`examples/shorts`](https://github.com/prefix-tree/cutcraft/tree/main/examples/shorts), rendered with
-`pnpm --filter @cutcraft/example-shorts render`. It uses no media at all.
+`pnpm --filter @cutcraft/example-shorts render`. The lighting explainer uses no media at all. The talking head is
+real footage: 79 seconds of a NASA interview, in the public domain, committed with its transcript and credit in
+`examples/shorts/media`.
 
 ## The logo film
 
@@ -187,3 +170,22 @@ no edit.
 <div class="cc-pair"><video class="tall" :src="withBase('/shorts/game-lighting.webm')" :poster="withBase('/shorts/game-lighting.jpg')" controls muted loop playsinline></video></div>
 
 <<< ../examples/shorts/game-lighting.tsx
+
+## A talking head with cards
+
+A vertical short cut out of a real interview: NASA's Ernie Wright on why there is no lunar eclipse every month, and
+why the Moon turns red when there is one. Five pieces of an eight minute interview, each cut on a word of the
+transcript. Press play for the sound.
+
+Nothing in the file is timed in seconds. The captions come from the transcript, with a box behind the word being
+said. Each card line, badge and highlight names the word it comes in on and lasts until its clip ends, so trimming a
+clip moves everything said over it. The speaker is shown two ways from one source, filling the frame and in a box
+under a card, and every word on screen sits in the area TikTok, Reels and Shorts leave clear.
+
+**Shows:** cuts on words, captions with a boxed word, `TypeCard` with a struck line and a pill, `QuoteCard`, `Badge`, `Frame`, graphics that last until their clip ends. [Time by meaning](/guide/time) · [Titles and graphics](/guide/titles-and-graphics#ready-made-components) · [Captions and sound](/guide/captions-and-sound)
+
+Footage: NASA's Scientific Visualization Studio, [item 14791](https://svs.gsfc.nasa.gov/14791/), public domain.
+
+<div class="cc-pair"><video class="tall" :src="withBase('/shorts/lunar-eclipse.webm')" :poster="withBase('/shorts/lunar-eclipse.jpg')" controls playsinline></video></div>
+
+<<< ../examples/shorts/lunar-eclipse.tsx
