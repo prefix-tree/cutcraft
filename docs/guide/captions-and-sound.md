@@ -51,8 +51,20 @@ change with it.
 <Captions id="captions" src="asset:founder" style={{ position: "bottom", size: 44 }} animation="karaoke" />
 ```
 
-`animation` colours the words as they are said: `word-highlight`, `word-by-word`, `karaoke`, `bounce` or
-`typewriter`. `style` sets the font, size, colours, background, stroke and position.
+`animation` colours the words as they are said: `word-highlight`, `word-by-word`, `karaoke` or `typewriter`.
+`style` sets the font, size, colours, background, stroke and position.
+
+With a word animation, `highlight` is the colour of the word being said, and `highlightBox` puts a filled, rounded
+box behind it:
+
+```tsx
+<Captions
+  id="captions"
+  src="asset:founder"
+  animation="word-highlight"
+  style={{ color: "#111111", highlight: "#111111", highlightBox: "#4aa3ff" }}
+/>
+```
 
 `breakAfter` ends a line after each word you name, whatever the limits above would do:
 
