@@ -21,7 +21,7 @@ The player draws it once the host calls `installFreeCodeLibraries()` ([Free code
 | `anchor` | "start" \| string |  |  |
 | `at` | string |  |  |
 | `offset` | number |  |  |
-| `duration` | number \| "fill" \| "source" \| { match } |  |  |
+| `duration` | number \| "fill" \| "source" \| { match } \| { until } |  |  |
 | `enter` | { type, duration, easing } |  |  |
 | `exit` | { type, duration, easing } |  |  |
 | `transform` | { position, scale, rotation, anchor, opacity, borderRadius, crop } |  |  |

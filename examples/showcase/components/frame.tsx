@@ -9,7 +9,7 @@ export default function Video() {
       width={1080}
       height={1920}
       theme={{ extends: "paper" }}
-      background={{ mode: "color", color: "#f4f1ea" }}
+      background={{ mode: "color", color: "$background" }}
     >
       <Track id="main" layout="free">
         <Clip
@@ -17,7 +17,7 @@ export default function Video() {
           src="asset:coffee"
           start={0}
           in={12}
-          out={16}
+          out={15}
           transform={{
             // 920 x 720 of a 960 x 540 picture: its full height and 0.72 of its width.
             crop: { x: 0.14, y: 0, width: 0.72, height: 1 },
@@ -31,11 +31,11 @@ export default function Video() {
         <TypeCard
           id="card"
           start={0}
-          duration={4}
+          duration={3}
           y={-470}
           width={920}
           height={760}
-          fill="#ffffff"
+          fill="$surface"
           cornerRadius={28}
           size={120}
           lines={[
@@ -43,7 +43,7 @@ export default function Video() {
             { text: "SLOWLY", offset: 0.5, pill: "$accent" },
           ]}
         />
-        <Frame id="speaker" start={0} duration={4} y={420} width={920} height={720} />
+        <Frame id="speaker" start={0} duration={3} y={420} width={920} height={720} />
       </Track>
     </Composition>
   );

@@ -165,3 +165,71 @@ Besides the timing props (`start`, `anchor`, `at`, `offset`, `duration`):
 | `spacing` | number | `48` |
 
 [All components](https://cutcraft.prefixtree.xyz/reference/components/)
+
+## `TypeCard`
+
+A card of big type that builds line by line, with pills and struck-out lines.
+
+### Props
+
+Besides the timing props (`start`, `anchor`, `at`, `offset`, `duration`):
+
+| param | type | default |
+|---|---|---|
+| `id` | string |  |
+| `x` | number | `0` |
+| `y` | number | `0` |
+| `width` | number |  |
+| `height` | number |  |
+| `fill` | string | `"$surface"` |
+| `cornerRadius` | number (0..∞) | `0` |
+| `size` | number | `120` |
+| `align` | "left" \| "center" | `"center"` |
+| `lines` | { text, size, tone, pill, color, at, offset, struck }[] |  |
+
+[All components](https://cutcraft.prefixtree.xyz/reference/components/)
+
+## `QuoteCard`
+
+A passage on a paper card with its source, and a marker over the phrases that matter.
+
+### Props
+
+Besides the timing props (`start`, `anchor`, `at`, `offset`, `duration`):
+
+| param | type | default |
+|---|---|---|
+| `id` | string |  |
+| `x` | number | `0` |
+| `y` | number | `0` |
+| `width` | number | `860` |
+| `source` | string |  |
+| `text` | string |  |
+| `size` | number | `40` |
+| `fill` | string | `"#ffffff"` |
+| `color` | string | `"#16161a"` |
+| `accent` | string | `"$accent"` |
+| `highlights` | { text, color, at, offset }[] | `[]` |
+
+[All components](https://cutcraft.prefixtree.xyz/reference/components/)
+
+## `Frame`
+
+A rounded border around part of the picture.
+
+### Props
+
+Besides the timing props (`start`, `anchor`, `at`, `offset`, `duration`):
+
+| param | type | default |
+|---|---|---|
+| `id` | string |  |
+| `x` | number | `0` |
+| `y` | number | `0` |
+| `width` | number |  |
+| `height` | number |  |
+| `color` | string | `"$accent"` |
+| `thickness` | number | `8` |
+| `cornerRadius` | number (0..∞) | `28` |
+
+[All components](https://cutcraft.prefixtree.xyz/reference/components/)

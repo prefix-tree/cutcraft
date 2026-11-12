@@ -11,8 +11,10 @@ const lineSchema = z.object({
   size: z.number().positive().optional(),
   /** `strong` is the card's text colour, `muted` its quiet one. */
   tone: z.enum(["strong", "muted"]).default("strong"),
-  /** A filled pill behind the line, in this colour. */
+  /** A filled pill behind the line, in this colour. Its letters then take the theme's background colour, as a badge's do. */
   pill: z.string().optional(),
+  /** The letters' colour, when neither the tone nor the pill's default will do. */
+  color: z.string().optional(),
   ...cueProps,
   /** Strike the line out: `true` half a second after it comes in, or at a cue of its own. */
   struck: z.union([z.boolean(), z.object(cueProps)]).optional(),
@@ -97,7 +99,13 @@ export function TypeCardLine(p: Look & { readonly show: number; readonly part: "
             font: `900 ${size}px var(--cc-heading, Inter), sans-serif`,
             lineHeight: 1.04,
             letterSpacing: "-0.01em",
-            color: line.tone === "muted" ? "var(--cc-muted, #8a8a93)" : "var(--cc-text, #111114)",
+            color: line.color
+              ? css(line.color)
+              : line.pill
+                ? "var(--cc-background, #ffffff)"
+                : line.tone === "muted"
+                  ? "var(--cc-muted, #8a8a93)"
+                  : "var(--cc-text, #111114)",
             ...(line.pill ? { background: css(line.pill), borderRadius: "0.16em", padding: "0.1em 0.32em" } : {}),
             visibility: mine && p.part === "line" ? "visible" : "hidden",
             ...(mine && p.part === "line"
@@ -140,7 +148,7 @@ export function TypeCard(props: z.input<typeof typeCardSchema>) {
   const card = `${p.id}-card`;
   const exit = { exit: { type: "fade", duration: 0.2 } };
   return [
-    h(Layer, { id: card, ...timing(t), enter: { type: "fade", duration: 0.2 }, ...exit }, h(TypeCardBack, look)),
+    h(Layer, { id: card, ...timing(t), enter: { type: "fade", duration: 0.2 }, ...exit }, h(TypeCardBack, { ...look })),
     ...lines.flatMap((line, i) => {
       const struck = line.struck === true ? { ...line, offset: (line.offset ?? 0) + 0.5 } : line.struck;
       return [

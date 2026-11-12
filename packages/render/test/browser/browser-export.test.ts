@@ -237,3 +237,61 @@ export default function Video() {
     }).toEqual({ t, cube: true, ground: true });
   }
 });
+
+it("builds a type card line by line, strikes a line out, and ends every part with the card", async () => {
+  const loaded = await loadVideo(
+    cut(
+      "type-card.tsx",
+      `import { Composition, Track, TypeCard } from "@cutcraft/kit";
+export const manifest = { assets: {} };
+export default function Video() {
+  return (
+    <Composition fps={30} width={640} height={360} theme={{ extends: "paper" }}>
+      <Track id="over" layout="free">
+        <TypeCard id="tc" start={0} duration={3} fill="#ffffff" size={70} lines={[
+          { text: "STRESS", struck: { offset: 1.5 } },
+          { text: "ENERGY", offset: 0.8 },
+        ]} />
+      </Track>
+    </Composition>
+  );
+}
+`,
+    ),
+  );
+  // Ink on the white card, above and below the middle of the frame: the first line sits above it, the second below.
+  const ink = async (time: number) => {
+    const out = join(dir, `type-card-${time}.png`);
+    await renderStill({
+      state: loaded.state,
+      media: directoryResolver(dir, loaded.manifest),
+      out,
+      time,
+      source: loaded.source,
+    });
+    const frame = readImage(out);
+    let top = 0;
+    let bottom = 0;
+    for (let y = 0; y < frame.height; y++)
+      for (let x = 0; x < frame.width; x++) {
+        const [r, g, b] = pixel(frame, x, y);
+        if (r + g + b < 380) y < frame.height / 2 ? top++ : bottom++;
+      }
+    return { top, bottom };
+  };
+  const first = await ink(0.6);
+  const both = await ink(1.3);
+  const struck = await ink(2.4);
+  expect(first.top).toBeGreaterThan(2000);
+  expect(first.bottom).toBe(0);
+  expect(both.bottom).toBeGreaterThan(2000);
+  // The first line does not move when the second comes in, and the strike adds a bar of ink to it.
+  expect(both.top).toBe(first.top);
+  expect(struck.top).toBeGreaterThan(both.top + 500);
+  expect(struck.bottom).toBe(both.bottom);
+  const ends = ["tc-card", "tc-line-1", "tc-strike-1", "tc-line-2"].map((id) => {
+    const p = loaded.state.items.get(id);
+    return p ? p.start + p.duration : -1;
+  });
+  expect(ends).toEqual([3, 3, 3, 3]);
+}, 120_000);

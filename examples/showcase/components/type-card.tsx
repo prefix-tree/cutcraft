@@ -8,13 +8,13 @@ export default function Video() {
         <TypeCard
           id="job"
           start={0}
-          duration={4}
+          duration={3}
           size={150}
           lines={[
             { text: "COFFEE IS", tone: "muted", size: 84 },
-            { text: "BITTER", offset: 0.4, struck: { offset: 1.5 } },
-            { text: "SWEET", offset: 1.9, pill: "$accent" },
-            { text: "when it is fresh", offset: 2.5, size: 64, tone: "muted" },
+            { text: "BITTER", offset: 0.4, struck: { offset: 1.2 } },
+            { text: "SWEET", offset: 1.5, pill: "$accent" },
+            { text: "when it is fresh", offset: 1.9, size: 64, tone: "muted" },
           ]}
         />
       </Track>

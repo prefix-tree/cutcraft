@@ -13,7 +13,7 @@ A stretch of a sound asset: volume, fades, ducking under another track, automati
 | `anchor` | "start" \| string |  |  |
 | `at` | string |  |  |
 | `offset` | number |  |  |
-| `duration` | number \| "fill" \| "source" \| { match } |  |  |
+| `duration` | number \| "fill" \| "source" \| { match } \| { until } |  |  |
 | `src` | string |  | yes |
 | `in` | number (0..∞) \| string |  |  |
 | `out` | number (0..∞) \| string |  |  |

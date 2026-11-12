@@ -12,27 +12,23 @@ const markSchema = z.object({
   ...cueProps,
 });
 
-export const quoteCardSchema = timingSchema
-  .extend({
-    id: z.string(),
-    ...boxProps,
-    width: z.number().positive().default(860),
-    /** Where the words come from, in small type above them. */
-    source: z.string().optional(),
-    text: z.string(),
-    size: z.number().positive().default(40),
-    fill: z.string().default("#ffffff"),
-    color: z.string().default("#16161a"),
-    /** The marker's colour, for highlights that do not name their own. */
-    accent: z.string().default("$accent"),
-    highlights: z.array(markSchema).default([]),
-  })
-  .superRefine((p, ctx) => {
-    p.highlights.forEach((m, i) => {
-      if (!p.text.includes(m.text))
-        ctx.addIssue({ code: "custom", path: ["highlights", i, "text"], message: `"${m.text}" is not in the text` });
-    });
-  });
+export const quoteCardSchema = timingSchema.extend({
+  id: z.string(),
+  ...boxProps,
+  width: z.number().positive().default(860),
+  /** Where the words come from, in small type above them. */
+  source: z.string().optional(),
+  text: z.string(),
+  size: z.number().positive().default(40),
+  fill: z.string().default("#ffffff"),
+  color: z.string().default("#16161a"),
+  /** The marker's colour, for highlights that do not name their own. */
+  accent: z.string().default("$accent"),
+  highlights: z.array(markSchema).default([]),
+});
+
+/** A colour thinned to a marker's wash. */
+const wash = (color: string): string => `color-mix(in srgb, ${css(color)} 42%, transparent)`;
 
 interface Look {
   readonly x: number;
@@ -63,7 +59,8 @@ export function QuoteCardPart(p: Look & { readonly mark?: { readonly text: strin
             key: "mark",
             style: {
               color: css(p.color),
-              backgroundImage: `linear-gradient(${css(p.mark.color)}, ${css(p.mark.color)})`,
+              // A marker is a wash of its colour, so the words stay readable through any accent.
+              backgroundImage: `linear-gradient(${wash(p.mark.color)}, ${wash(p.mark.color)})`,
               backgroundRepeat: "no-repeat",
               backgroundSize: `${q * 100}% 100%`,
               borderRadius: "0.14em",
@@ -117,13 +114,15 @@ export function QuoteCardPart(p: Look & { readonly mark?: { readonly text: strin
  */
 export function QuoteCard(props: z.input<typeof quoteCardSchema>) {
   const p = parse("QuoteCard", quoteCardSchema, props);
+  const missing = p.highlights.find((m) => !p.text.includes(m.text));
+  if (missing) throw new Error(`QuoteCard: highlights "${missing.text}" is not in the text`);
   const t = timingOf(p);
   const { x, y, width, source, text, size, fill, color } = p;
   const look: Look = { x, y, width, source, text, size, fill, color };
   const card = `${p.id}-card`;
   const exit = { exit: { type: "fade", duration: 0.2 } };
   return [
-    h(Layer, { id: card, ...timing(t), ...exit }, h(QuoteCardPart, look)),
+    h(Layer, { id: card, ...timing(t), ...exit }, h(QuoteCardPart, { ...look })),
     ...p.highlights.map((m, i) =>
       h(
         Layer,

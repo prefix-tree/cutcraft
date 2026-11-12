@@ -55,7 +55,7 @@ A stretch of a video or image asset, trimmed by seconds, transcript words or cam
 | `anchor` | "start" \| string |  |  |
 | `at` | string |  |  |
 | `offset` | number |  |  |
-| `duration` | number \| "fill" \| "source" \| { match } |  |  |
+| `duration` | number \| "fill" \| "source" \| { match } \| { until } |  |  |
 | `src` | string |  | yes |
 | `in` | number (0..∞) \| string |  |  |
 | `out` | number (0..∞) \| string |  |  |
@@ -133,7 +133,7 @@ Free code in the frame: any React, CSS, canvas or WebGL, placed on the timeline 
 | `anchor` | "start" \| string |  |  |
 | `at` | string |  |  |
 | `offset` | number |  |  |
-| `duration` | number \| "fill" \| "source" \| { match } |  |  |
+| `duration` | number \| "fill" \| "source" \| { match } \| { until } |  |  |
 | `enter` | { type, duration, easing } |  |  |
 | `exit` | { type, duration, easing } |  |  |
 | `transform` | { position, scale, rotation, anchor, opacity, borderRadius, crop } |  |  |
@@ -156,7 +156,7 @@ The player draws it once the host calls `installFreeCodeLibraries()` ([Free code
 | `anchor` | "start" \| string |  |  |
 | `at` | string |  |  |
 | `offset` | number |  |  |
-| `duration` | number \| "fill" \| "source" \| { match } |  |  |
+| `duration` | number \| "fill" \| "source" \| { match } \| { until } |  |  |
 | `enter` | { type, duration, easing } |  |  |
 | `exit` | { type, duration, easing } |  |  |
 | `transform` | { position, scale, rotation, anchor, opacity, borderRadius, crop } |  |  |
@@ -182,7 +182,7 @@ The player draws it once the host calls `installFreeCodeLibraries()` ([Free code
 | `anchor` | "start" \| string |  |  |
 | `at` | string |  |  |
 | `offset` | number |  |  |
-| `duration` | number \| "fill" \| "source" \| { match } |  |  |
+| `duration` | number \| "fill" \| "source" \| { match } \| { until } |  |  |
 | `enter` | { type, duration, easing } |  |  |
 | `exit` | { type, duration, easing } |  |  |
 | `transform` | { position, scale, rotation, anchor, opacity, borderRadius, crop } |  |  |
@@ -204,7 +204,7 @@ Text over the picture in the theme's type, with entrances by letter, word or lin
 | `anchor` | "start" \| string |  |  |
 | `at` | string |  |  |
 | `offset` | number |  |  |
-| `duration` | number \| "fill" \| "source" \| { match } |  |  |
+| `duration` | number \| "fill" \| "source" \| { match } \| { until } |  |  |
 | `transform` | { position, scale, rotation, anchor, opacity, borderRadius, crop } |  |  |
 | `fit` | "contain" \| "cover" \| "stretch" \| "none" |  |  |
 | `blend` | "normal" \| "multiply" \| "screen" \| "overlay" \| "darken" \| … 13 more |  |  |
@@ -279,7 +279,7 @@ A vector shape (rectangle, circle, star, polygon, path) with fill, stroke and sh
 | `anchor` | "start" \| string |  |  |
 | `at` | string |  |  |
 | `offset` | number |  |  |
-| `duration` | number \| "fill" \| "source" \| { match } |  |  |
+| `duration` | number \| "fill" \| "source" \| { match } \| { until } |  |  |
 | `transform` | { position, scale, rotation, anchor, opacity, borderRadius, crop } |  |  |
 | `fit` | "contain" \| "cover" \| "stretch" \| "none" |  |  |
 | `blend` | "normal" \| "multiply" \| "screen" \| "overlay" \| "darken" \| … 13 more |  |  |
@@ -315,7 +315,7 @@ One-off vector art from inline SVG markup or a file.
 | `anchor` | "start" \| string |  |  |
 | `at` | string |  |  |
 | `offset` | number |  |  |
-| `duration` | number \| "fill" \| "source" \| { match } |  |  |
+| `duration` | number \| "fill" \| "source" \| { match } \| { until } |  |  |
 | `transform` | { position, scale, rotation, anchor, opacity, borderRadius, crop } |  |  |
 | `fit` | "contain" \| "cover" \| "stretch" \| "none" |  |  |
 | `blend` | "normal" \| "multiply" \| "screen" \| "overlay" \| "darken" \| … 13 more |  |  |
@@ -344,7 +344,7 @@ A ready-made icon or sticker by name.
 | `anchor` | "start" \| string |  |  |
 | `at` | string |  |  |
 | `offset` | number |  |  |
-| `duration` | number \| "fill" \| "source" \| { match } |  |  |
+| `duration` | number \| "fill" \| "source" \| { match } \| { until } |  |  |
 | `transform` | { position, scale, rotation, anchor, opacity, borderRadius, crop } |  |  |
 | `fit` | "contain" \| "cover" \| "stretch" \| "none" |  |  |
 | `blend` | "normal" \| "multiply" \| "screen" \| "overlay" \| "darken" \| … 13 more |  |  |
@@ -386,7 +386,7 @@ Filters everything beneath it for its own stretch of time.
 | `anchor` | "start" \| string |  |  |
 | `at` | string |  |  |
 | `offset` | number |  |  |
-| `duration` | number \| "fill" \| "source" \| { match } |  |  |
+| `duration` | number \| "fill" \| "source" \| { match } \| { until } |  |  |
 | `opacity` | number (0..1) | `1` |  |
 | `blend` | "normal" \| "multiply" \| "screen" \| "overlay" \| "darken" \| … 13 more | `"normal"` |  |
 | `enabled` | boolean | `true` |  |
@@ -474,7 +474,7 @@ A sequence written once as a component and placed like a clip.
 | `anchor` | "start" \| string |  |  |
 | `at` | string |  |  |
 | `offset` | number |  |  |
-| `duration` | number \| "fill" \| "source" \| { match } |  |  |
+| `duration` | number \| "fill" \| "source" \| { match } \| { until } |  |  |
 | `transform` | { position, scale, rotation, anchor, opacity, borderRadius, crop } |  |  |
 | `fit` | "contain" \| "cover" \| "stretch" \| "none" |  |  |
 | `blend` | "normal" \| "multiply" \| "screen" \| "overlay" \| "darken" \| … 13 more |  |  |
@@ -544,7 +544,7 @@ A stretch of a sound asset: volume, fades, ducking under another track, automati
 | `anchor` | "start" \| string |  |  |
 | `at` | string |  |  |
 | `offset` | number |  |  |
-| `duration` | number \| "fill" \| "source" \| { match } |  |  |
+| `duration` | number \| "fill" \| "source" \| { match } \| { until } |  |  |
 | `src` | string |  | yes |
 | `in` | number (0..∞) \| string |  |  |
 | `out` | number (0..∞) \| string |  |  |

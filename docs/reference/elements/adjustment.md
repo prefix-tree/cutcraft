@@ -17,7 +17,7 @@ Filters everything beneath it for its own stretch of time.
 | `anchor` | "start" \| string |  |  |
 | `at` | string |  |  |
 | `offset` | number |  |  |
-| `duration` | number \| "fill" \| "source" \| { match } |  |  |
+| `duration` | number \| "fill" \| "source" \| { match } \| { until } |  |  |
 | `opacity` | number (0..1) | `1` |  |
 | `blend` | "normal" \| "multiply" \| "screen" \| "overlay" \| "darken" \| … 13 more | `"normal"` |  |
 | `enabled` | boolean | `true` |  |

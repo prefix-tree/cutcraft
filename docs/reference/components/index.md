@@ -11,6 +11,9 @@ Ready-made pieces: lower thirds, callouts, counters and the like. Each is an ord
 <PreviewCard code hover title="Arrow" link="/reference/components/arrow" src="previews/components/arrow" text="An arrow drawn from one point to another, straight or bowed." />
 <PreviewCard code hover title="Highlight" link="/reference/components/highlight" src="previews/components/highlight" text="A hand-drawn underline, marker stroke, circle or strike on something in the frame." />
 <PreviewCard code hover title="Background" link="/reference/components/background" src="previews/components/background" text="A full-frame gradient, dots or grid to put beneath everything." />
+<PreviewCard code hover title="TypeCard" link="/reference/components/type-card" src="previews/components/type-card" text="A card of big type that builds line by line, with pills and struck-out lines." />
+<PreviewCard code hover title="QuoteCard" link="/reference/components/quote-card" src="previews/components/quote-card" text="A passage on a paper card with its source, and a marker over the phrases that matter." />
+<PreviewCard code hover title="Frame" link="/reference/components/frame" src="previews/components/frame" text="A rounded border around part of the picture." />
 </div>
 
 Positions are pixels from the frame's centre, as every element's `transform.position`, and the defaults suit a 1920x1080 frame. Colours default to theme tokens (`$primary`, `$surface`, `$text`), so a theme restyles them. Every component takes the timing props any element takes: `start`, or `anchor` with `at` and `offset`, and `duration`.
