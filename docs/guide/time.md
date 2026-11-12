@@ -92,6 +92,12 @@ words and leave together with their card:
 <Title id="line-2" anchor="make-1" at="word:150" duration={{ until: "card" }}>10× output</Title>
 ```
 
+A ready-made component takes it too, so a card or a lower third can last as long as the clip it sits over:
+
+```tsx
+<LowerThird id="name" anchor="hook" duration={{ until: "hook" }} name="Maya Chen" />
+```
+
 The other form, `match` in place of `until`, makes it as long as `card` whenever it starts. An element that starts
 after the one it waits for has ended has no length, and that is an error.
 

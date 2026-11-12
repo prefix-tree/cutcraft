@@ -147,6 +147,21 @@ describe("components", () => {
     expect(mark.state.errors.map((e) => e.message).join(" ")).toMatch(/QuoteCard: .*"long" is not in the text/);
   });
 
+  it("last until another element ends, every part of them, however late a part comes in", () => {
+    const { state } = resolved(
+      `<LowerThird id="lt" anchor="shot" offset={2} duration={{ until: "shot" }} name="Maya" role="Founder" />
+        <TypeCard id="tc" anchor="shot" at="word:0" duration={{ until: "shot" }} lines={[{ text: "A" }, { text: "B", at: "word:2" }]} />`,
+    );
+    expect(state.errors).toEqual([]);
+    const ends = ["lt-card", "lt-bar", "lt-name", "lt-role", "tc-card", "tc-line-1", "tc-line-2"].map((id) => {
+      const p = state.items.get(id)!;
+      return Math.round((p.start + p.duration) * 1000) / 1000;
+    });
+    // The clip plays from 0 to 6 s.
+    expect(ends).toEqual([6, 6, 6, 6, 6, 6, 6]);
+    expect(state.items.get("lt-role")!.start).toBeGreaterThan(state.items.get("lt-card")!.start);
+  });
+
   it("say which prop is wrong", () => {
     const { state } = resolved('<ProgressBar id="pb" start={0} duration={2} value={2} />');
     expect(state.errors.map((e) => e.message).join(" ")).toMatch(/ProgressBar: value/);
