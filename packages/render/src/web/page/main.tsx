@@ -226,7 +226,13 @@ async function start(): Promise<void> {
             // drawElementImage draws only into the canvas that holds the element, so the capture canvas measures.
             await painted(cap);
             ctx.clearRect(0, 0, width, height);
-            ctx.drawElementImage(root, 0, 0);
+            // An overlay that paints nothing just now (captions between two lines, an empty layer) leaves the browser
+            // with no picture of the page to draw, and it says so by throwing. Nothing painted is no ink.
+            try {
+              ctx.drawElementImage(root, 0, 0);
+            } catch (e) {
+              if (!(e instanceof DOMException) || e.name !== "InvalidStateError") throw e;
+            }
             const r = el.getBoundingClientRect();
             const o = root.getBoundingClientRect();
             const k = width / o.width;
