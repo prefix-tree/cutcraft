@@ -15,6 +15,8 @@ export const captionStyleSchema = z.strictObject({
   stroke: z.strictObject({ color: colorSchema, width: z.number().min(0).max(40) }).optional(),
   position: zCaptionPosition.optional(),
   highlight: colorSchema.optional(),
+  /** A filled, rounded box behind the word being said. `highlight` stays the colour of its letters. */
+  highlightBox: colorSchema.optional(),
   upcoming: colorSchema.optional(),
 });
 

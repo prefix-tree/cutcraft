@@ -238,6 +238,63 @@ export default function Video() {
   }
 });
 
+it("draws a box behind the caption word being said, and moves it along the line", async () => {
+  const loaded = await loadVideo(
+    cut(
+      "word-box.tsx",
+      `import { Caption, Captions, Composition, Shape, Track } from "@cutcraft/kit";
+export const manifest = { assets: {} };
+export default function Video() {
+  return (
+    <Composition fps={30} width={640} height={360}>
+      <Track id="bg" layout="free">
+        <Shape id="paper" start={0} duration={3} shape="rectangle" width={640} height={360} fill="#f0f0f0" />
+      </Track>
+      <Captions id="cap" animation="word-highlight"
+        style={{ size: 40, color: "#111111", highlight: "#111111", highlightBox: "#00c800", shadow: { color: "#f0f0f0" } }}>
+        <Caption id="c1" start={0} end={3} text="left middle right" words={[
+          { text: "left", start: 0, end: 1 },
+          { text: "middle", start: 1, end: 2 },
+          { text: "right", start: 2, end: 3 },
+        ]} />
+      </Captions>
+    </Composition>
+  );
+}
+`,
+    ),
+  );
+  // Where the box's green is on screen: how many pixels, and their mean x.
+  const box = async (time: number) => {
+    const out = join(dir, `word-box-${time}.png`);
+    await renderStill({
+      state: loaded.state,
+      media: directoryResolver(dir, loaded.manifest),
+      out,
+      time,
+      source: loaded.source,
+    });
+    const frame = readImage(out);
+    let count = 0;
+    let sum = 0;
+    for (let y = 0; y < frame.height; y++)
+      for (let x = 0; x < frame.width; x++) {
+        const [r, g, b] = pixel(frame, x, y);
+        if (g > 170 && r < 60 && b < 60) {
+          count++;
+          sum += x;
+        }
+      }
+    return { count, x: count ? sum / count : -1 };
+  };
+  const first = await box(0.5);
+  const last = await box(2.5);
+  expect(first.count).toBeGreaterThan(1500);
+  expect(last.count).toBeGreaterThan(1500);
+  expect(first.x).toBeLessThan(300);
+  expect(last.x).toBeGreaterThan(340);
+}, 120_000);
+
 it("builds a type card line by line, strikes a line out, and ends every part with the card", async () => {
   const loaded = await loadVideo(
     cut(

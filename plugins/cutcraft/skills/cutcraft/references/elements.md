@@ -241,7 +241,7 @@ Subtitles from an asset's transcript that follow the clips through every trim.
 |---|---|---|---|
 | `id` | string |  | yes |
 | `src` | string |  |  |
-| `style` | string \| { font, size, weight, color, background, shadow, stroke, position, highlight, upcoming } |  |  |
+| `style` | string \| { font, size, weight, color, background, shadow, stroke, position, highlight, highlightBox, upcoming } |  |  |
 | `animation` | "none" \| "word-highlight" \| "word-by-word" \| "karaoke" \| "typewriter" | `"none"` |  |
 | `maxChars` | integer |  |  |
 | `maxDuration` | number | `5` |  |

@@ -58,7 +58,7 @@ function Helper(...) {...}                       // helpers that make elements a
 | `<Shape>` | ShapeClip | `style` (theme preset), `shape` (rectangle, circle, ellipse, triangle, arrow, line, polygon, path, star), `points`, `fill`, `stroke`, `shadow`, `shadows`, `cornerRadius`/`cornerRadii`, `starPoints`, `innerRadius`; `enter`, `exit`; transform/blend/emphasis; children `<Effect>`, `<Keyframe>` |
 | `<Svg>` | SVGClip | `style`, `src` or `content`, `viewBox`, `preserveAspectRatio`, `color={{ mode, tint, opacity }}`, `enter`, `exit` |
 | `<Sticker>` | StickerClip | `style`, `src`, `category`, `name`; `enter`, `exit`; transform/blend/emphasis |
-| `<Captions>` | Timeline.subtitles | `src="asset:ID"` (generated children from the transcript) or literal `<Caption id start end text words>` children; `style={{ font, size, color, background, position, highlight, upcoming }}` or a theme preset name, `animation`. One per composition. |
+| `<Captions>` | Timeline.subtitles | `src="asset:ID"` (generated children from the transcript) or literal `<Caption id start end text words>` children; `style={{ font, size, weight, color, background, shadow, stroke, position, highlight, highlightBox, upcoming }}` or a theme preset name, `animation`. One per composition. |
 | `<Marker>` | Marker | `at`, `label`, `color`; child of `<Composition>` |
 | `<Adjustment>` | AdjustmentLayer | `affects="all" \| [trackId]`, `opacity`, `blend`, `enabled`, `transform`; children `<Effect>` |
 | `<Mask>` | Mask | child of a visual element: `type: shape\|drawn\|matte`, `shape` or `path={{ points, closed }}`, `feather` 0–100, `inverted`, `expansion` −100..100, `opacity`, `matte={{ source, channel: alpha\|luminance\|bounds }}`; children `<Keyframe property="path">` |
