@@ -486,7 +486,9 @@ export default function Video() {
     for (let y = 0; y < frame.height; y++)
       for (let x = 0; x < frame.width; x++) {
         const [r, g, b] = pixel(frame, x, y);
-        if (r + g + b < 380) y < frame.height / 2 ? top++ : bottom++;
+        if (r + g + b >= 380) continue;
+        if (y < frame.height / 2) top++;
+        else bottom++;
       }
     return { top, bottom };
   };

@@ -65,7 +65,7 @@ paused, a loop keeps running; that is a preview difference, not a wrong export.
 `measureSound` measures the mix before the clamp and reports integrated loudness (LUFS, ITU-R BS.1770 with gating),
 true peak (4× oversampled) and the number of clipped samples with the first one's time. `look --listen` prints them
 and warns about clipping, and `renderVideo` adds a warning to its result. The measure is ported from HyperFrames'
-`audioAnalysis.ts`.
+`audioAnalysis.ts` and made to read the mix block by block, so a long soundtrack is never held whole.
 
 No limiter or loudness target yet. One would have to run identically in the player's Web Audio graph and in the
 export's mixer, or the two stop matching (the mixer parity test). Measuring comes first; a limiter is its own record.
