@@ -25,7 +25,7 @@ There are three kinds of example, each a complete file:
 | A product launch or promo | [Product launch](#a-product-launch), the [walkthrough](/guide/writing-files), [Brand spot](/recipes/brand-spot) |
 | An interview or podcast cut | [A talking head with cards](#a-talking-head-with-cards), [Talking-head cut](/recipes/talking-head), [Multicam highlights](/recipes/highlights) |
 | A vertical short | [A talking head with cards](#a-talking-head-with-cards), [Kinetic type](#kinetic-type), [Captions and key points](#captions-and-key-points), [Vertical clip from a podcast](/recipes/vertical-podcast) |
-| An explainer with no footage | [How game lighting fakes it](#how-game-lighting-fakes-it) |
+| An explainer with no footage | [One pixel](#one-pixel), [How game lighting fakes it](#how-game-lighting-fakes-it) |
 | A product or screen demo | [Product demo with zoom-ins](/recipes/product-demo) |
 | Charts and numbers | [Data story](#a-data-story), [Stats with handles](/recipes/stats) |
 | An intro, outro or logo sting | [Logo reveal](#a-logo-reveal) |
@@ -37,7 +37,7 @@ There are three kinds of example, each a complete file:
 | Cuts on transcript words (`in="word:12"`) | [Product launch](#a-product-launch), [Data story](#a-data-story), [Talking-head cut](/recipes/talking-head) | [Time by meaning](/guide/time) |
 | Overlays on the word that names them (`anchor` + `at`) | [Product launch](#a-product-launch), [Kinetic type](#kinetic-type), [Captions](#captions-and-key-points) | [Time by meaning](/guide/time) |
 | Captions from the transcript | [A talking head with cards](#a-talking-head-with-cards), [Kinetic type](#kinetic-type), [Captions](#captions-and-key-points), [Vertical clip](/recipes/vertical-podcast) | [Captions and sound](/guide/captions-and-sound) |
-| three.js (`<Three>`) | [Product launch](#a-product-launch), [Logo reveal](#a-logo-reveal), [How game lighting fakes it](#how-game-lighting-fakes-it), [Brand spot](/recipes/brand-spot) | [Free code](/guide/free-code#three-js-and-motion) |
+| three.js (`<Three>`) | [Product launch](#a-product-launch), [Logo reveal](#a-logo-reveal), [How game lighting fakes it](#how-game-lighting-fakes-it), [One pixel](#one-pixel), [Brand spot](/recipes/brand-spot) | [Free code](/guide/free-code#three-js-and-motion) |
 | Motion (`<Motion>`) | [Kinetic type](#kinetic-type), [Data story](#a-data-story), [An edit](#an-edit) | [Free code](/guide/free-code#three-js-and-motion) |
 | Any React in a `<Layer>` | [Data story](#a-data-story) (counters), [Stats with handles](/recipes/stats) | [Free code](/guide/free-code) |
 | Transitions and keyframes | [An edit](#an-edit), [Slideshow](/recipes/slideshow) | [Elements](/reference/elements/) |
@@ -65,9 +65,9 @@ Content License. They are not committed; `gen` reads them from `examples/showcas
 [headless Chrome](/guide/exporting#the-browser-it-runs-in). The people on camera in these are stand-ins: their
 footage is a gradient, and the manifest holds the words they would say.
 
-The two shorts at the end of this page are in
+The three shorts at the end of this page are in
 [`examples/shorts`](https://github.com/prefix-tree/cutcraft/tree/main/examples/shorts), rendered with
-`pnpm --filter @cutcraft/example-shorts render`. The lighting explainer uses no media at all. The talking head is
+`pnpm --filter @cutcraft/example-shorts render`. The two lighting explainers use no media at all. The talking head is
 real footage: 79 seconds of a NASA interview, in the public domain, committed with its transcript and credit in
 `examples/shorts/media`.
 
@@ -189,3 +189,22 @@ Footage: NASA's Scientific Visualization Studio, [item 14791](https://svs.gsfc.n
 <div class="cc-pair"><video class="tall" :src="withBase('/shorts/lunar-eclipse.webm')" :poster="withBase('/shorts/lunar-eclipse.jpg')" controls playsinline></video></div>
 
 <<< ../examples/shorts/lunar-eclipse.tsx
+
+## One pixel
+
+A two minute explainer of how a game lights a room, for someone who has never thought about it, told by following
+one dot of the screen. It opens with light going straight through a ball, explains why real light is too slow to
+copy, and then shows five cheats: is the surface facing the lamp, can the lamp see it, light bounced off a wall and
+worked out in advance, tight places darkened, and the brightest dots smeared into a glow. It has no footage and no
+media.
+
+The narration leads. The script is one string in the file, with a cue marked on the words that matter, and every
+animation reads those cue times. There is no voice in it: the subtitles show a phrase at a time with a box on the word
+being said, timed at a speaking pace, for a voice to be recorded over. Two stages take turns: a three.js room, and
+the same room cut in half and drawn as a diagram, where the floor is a row of dots with a brightness number on each.
+
+**Shows:** a film timed from its script, subtitles with a boxed word, a `<Three>` scene with each trick as a switch, an SVG diagram in a `<Layer>` driven by the video's time, a built-in effect with keyframes. [Free code](/guide/free-code) · [Captions and sound](/guide/captions-and-sound)
+
+<div class="cc-pair"><video class="tall" :src="withBase('/shorts/one-pixel.webm')" :poster="withBase('/shorts/one-pixel.jpg')" controls muted loop playsinline></video></div>
+
+<<< ../examples/shorts/one-pixel.tsx
