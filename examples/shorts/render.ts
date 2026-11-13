@@ -34,8 +34,6 @@ for (const [name, { poster, bitrate, sound }] of Object.entries(FILES)) {
     out: join(out, `${name}.webm`),
     silent: !sound,
     bitrate,
-    // Three pages of the browser draw pieces at once: a film with a three.js scene is slow to draw on one.
-    tabs: 3,
     source: video.source,
   });
   for (const w of result.warnings) process.stderr.write(`${name}: warning: ${w}\n`);
