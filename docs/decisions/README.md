@@ -35,3 +35,4 @@ use that name.
 | [0025](./0025-sound-effects.md) | Sound gets effects: one DSP, run live and in the export (proposed) |
 | [0026](./0026-an-agent-looks-at-the-timeline.md) | An agent looks at the timeline: inspect, look, and a frame cache (proposed) |
 | [0027](./0027-what-we-adopt-from-hyperframes.md) | What we adopt from HyperFrames (proposed) |
+| [0028](./0028-tools-for-narrated-explainers.md) | Tools for narrated explainers: a narration helper, motion and placement in the CLI, pinned labels, diagram parts, `study` (proposed) |
