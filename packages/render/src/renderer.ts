@@ -53,6 +53,8 @@ export interface RenderOptions {
   readonly audioBitrate?: number;
   readonly onProgress?: (progress: { readonly frame: number; readonly frames: number }) => void;
   /** Progress while Chrome is being downloaded, on the first export. */
+  /** Seconds one frame may take before the export fails with the frame and the step it was in; default 60. */
+  readonly frameTimeout?: number;
   readonly onLog?: (message: string) => void;
   readonly signal?: AbortSignal;
   /** What to do when an asset cannot be opened or decoded: stop (default) or draw the grey placeholder and go on. */
@@ -94,6 +96,7 @@ export async function openEngine(options: {
   readonly tabs?: number | undefined;
   /** Effects a contact sheet may draw a frame without. */
   readonly disabled?: readonly string[] | undefined;
+  readonly frameTimeout?: number | undefined;
   readonly warnings: string[];
   readonly onLog?: ((message: string) => void) | undefined;
 }): Promise<BrowserEngine> {
@@ -107,6 +110,7 @@ export async function openEngine(options: {
     ...(options.source.props ? { props: options.source.props } : {}),
     ...(options.source.executablePath ? { executablePath: options.source.executablePath } : {}),
     ...(options.tabs ? { tabs: options.tabs } : {}),
+    ...(options.frameTimeout ? { frameTimeout: options.frameTimeout } : {}),
     ...(options.disabled?.length ? { disabled: options.disabled } : {}),
     ...(options.onLog ? { log: options.onLog } : {}),
     warn: (m) => {

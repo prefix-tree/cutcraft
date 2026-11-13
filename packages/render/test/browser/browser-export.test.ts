@@ -508,3 +508,51 @@ export default function Video() {
   });
   expect(ends).toEqual([3, 3, 3, 3]);
 }, 120_000);
+
+describe("a frame that goes wrong", () => {
+  const layer = (body: string) =>
+    cut(
+      "wrong.tsx",
+      `import { Composition, Layer, Track, holdLayerFrame } from "@cutcraft/kit";
+import { useEffect } from "react";
+export const manifest = { assets: {} };
+function Box() {
+  useEffect(() => {
+    ${body}
+  }, []);
+  return <div style={{ width: 80, height: 80, background: "#ff5500" }} />;
+}
+export default function Video() {
+  return (
+    <Composition fps={30} width={320} height={180}>
+      <Track id="o" layout="free"><Layer id="l" start={0} duration={0.1}><Box /></Layer></Track>
+    </Composition>
+  );
+}
+`,
+    );
+  const run = async (file: string, name: string, more: { frameTimeout?: number } = {}) => {
+    const loaded = await loadVideo(file);
+    const media = directoryResolver(mediaDir, loaded.manifest);
+    return renderVideo({ state: loaded.state, media, out: join(dir, name), source: loaded.source, ...more });
+  };
+
+  it("fails with the frame and the step it was in when a frame outlasts its deadline", async () => {
+    // A hold that is never released: the page waits for the layer to draw, and it never says it has.
+    const file = layer("holdLayerFrame();");
+    await expect(run(file, "stuck.webm", { frameTimeout: 2 })).rejects.toThrow(
+      /frame 0 \(0\.00 s\) did not finish within 2 s: stuck in settle/,
+    );
+  });
+
+  it("says how many frames were captured without a paint signal", async () => {
+    // The capture canvas stops asking for a paint, so the paint event never comes.
+    const file = layer(`document.getElementById("cap").requestPaint = () => {};`);
+    const result = await run(file, "unpainted.webm");
+    const told = result.warnings.filter((w) => w.includes("without the browser confirming the paint"));
+    expect(told).toHaveLength(1);
+    expect(told[0]).toMatch(/^\d+ frames were captured/);
+    const fine = await run(layer(""), "painted.webm");
+    expect(fine.warnings.filter((w) => w.includes("confirming the paint"))).toEqual([]);
+  });
+});

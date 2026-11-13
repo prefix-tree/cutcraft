@@ -45,6 +45,8 @@ export interface BrowserEngineOptions {
   readonly tabs?: number;
   /** Effects a contact sheet may draw a frame without. */
   readonly disabled?: readonly string[];
+  /** Seconds one frame may take before the export fails; default 60. */
+  readonly frameTimeout?: number;
   /** Messages the page warns with (an asset it cannot read, an engine that is missing). */
   readonly warn?: (message: string) => void;
   /** Progress while Chrome is being downloaded. */
@@ -79,6 +81,7 @@ export class BrowserEngine {
     private readonly pages: readonly Page[],
     private readonly server: PageServer,
     readonly composition: PageApi["composition"],
+    private readonly warn: ((message: string) => void) | undefined,
   ) {
     this.idle = [...pages];
   }
@@ -100,6 +103,7 @@ export class BrowserEngine {
         props: options.props ?? {},
         manifest: options.manifest,
         startedAt: Date.now(),
+        frameTimeout: (options.frameTimeout ?? 60) * 1000,
         ...(options.disabled?.length ? { disabled: options.disabled } : {}),
       },
       options.media,
@@ -117,7 +121,7 @@ export class BrowserEngine {
       for (let i = 0; i < tabs; i++)
         pages.push(await openPage(browser, server.url, i === 0 ? options.warn : undefined));
       const composition = await (pages[0] as Page).evaluate<PageApi["composition"]>("window.__cutcraft.composition");
-      return new BrowserEngine(browser, pages, server, composition);
+      return new BrowserEngine(browser, pages, server, composition, options.warn);
     } catch (error) {
       await browser?.close();
       await server.close();
@@ -190,6 +194,15 @@ export class BrowserEngine {
   }
 
   async close(): Promise<void> {
+    // Said once, here, so every command that drew frames reports it.
+    const counts = await Promise.all(
+      this.pages.map((p) => p.evaluate<number>("window.__cutcraft.paintFallbacks").catch(() => 0)),
+    );
+    const fallbacks = counts.reduce((a, b) => a + b, 0);
+    if (fallbacks > 0)
+      this.warn?.(
+        `${fallbacks} frame${fallbacks === 1 ? " was" : "s were"} captured without the browser confirming the paint, and may show the frame before`,
+      );
     await this.browser.close().catch(() => undefined);
     await this.server.close();
   }

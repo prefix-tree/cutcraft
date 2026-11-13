@@ -148,14 +148,43 @@ async function start(): Promise<void> {
     for (let i = 0; i < sum.length; i++) average.data[i] = Math.round((sum[i] as number) / times.length);
     ctx.putImageData(average, 0, 0);
   };
+  /** What the frame being drawn is doing, for the message when it never finishes. */
+  let stage = "step";
+  /**
+   * Runs a part of the frame at `t`. An error from it names the frame; when it outlasts the deadline, the frame
+   * fails with the step it was in, so a stuck decoder or a layer that never draws ends the export with a reason.
+   */
+  const withinDeadline = async <T,>(t: number, work: () => Promise<T>): Promise<T> => {
+    let timer = 0;
+    const late = new Promise<never>((_, fail) => {
+      timer = window.setTimeout(
+        () => fail(new Error(`did not finish within ${job.frameTimeout / 1000} s: stuck in ${stage}`)),
+        job.frameTimeout,
+      );
+    });
+    try {
+      return await Promise.race([work(), late]);
+    } catch (error) {
+      const said = error instanceof Error ? error.message : String(error);
+      throw new Error(
+        `frame ${Math.round(t * fps)} (${t.toFixed(2)} s) ${said.startsWith("did not finish") ? "" : "failed: "}${said}`,
+      );
+    } finally {
+      clearTimeout(timer);
+    }
+  };
   /** Draws the single moment `t` into the capture canvas. */
-  const capture = async (t: number): Promise<void> => {
+  const capture = (t: number): Promise<void> => withinDeadline(t, () => draw(t));
+  const draw = async (t: number): Promise<void> => {
     clock.set(t);
+    stage = "step";
     await core.compositor.step(t);
+    stage = "settle";
     await settle();
     // The file's animation-frame callbacks for this frame: after the commit, so a loop a layer started as it mounted
     // ticks in its first frame, and then React's update from them is waited for.
     if (clock.flush()) await settle();
+    stage = "paint";
     await painted(cap);
     // A face is fetched only when layout first sets text in it, which can be this paint: `settle` looked before the
     // fetch began. Text painted meanwhile is in the fallback face, so the frame waits for the face and paints again.
@@ -163,6 +192,7 @@ async function start(): Promise<void> {
       await document.fonts.ready;
       await painted(cap);
     }
+    stage = "draw";
     ctx.clearRect(0, 0, width, height);
     try {
       ctx.drawElementImage(root, 0, 0);
@@ -190,6 +220,9 @@ async function start(): Promise<void> {
   const api: PageApi = {
     composition: { width, height, fps, duration: state.composition.duration },
     errors,
+    get paintFallbacks() {
+      return paintFallbacks;
+    },
     async segment(r: SegmentRequest) {
       const target = new BufferTarget();
       const output = new Output({
@@ -206,7 +239,10 @@ async function start(): Promise<void> {
       await output.start();
       for (let n = r.first; n < r.last; n++) {
         await frame(n / fps);
-        await source.add((n - r.first) / fps, 1 / fps);
+        await withinDeadline(n / fps, () => {
+          stage = "encode";
+          return source.add((n - r.first) / fps, 1 / fps);
+        });
       }
       await output.finalize();
       out = new Uint8Array(target.buffer as ArrayBuffer);
@@ -443,6 +479,8 @@ async function settle(): Promise<void> {
   }
 }
 
+/** How many times `painted` gave up on the paint event; the export reports it, as such a frame may be stale. */
+let paintFallbacks = 0;
 /**
  * The canvas's subtree has been laid out and painted, so drawElementImage sees this frame. A browser without the
  * `paint` event (or one that never fires it) falls back to two animation frames after a second.
@@ -450,17 +488,19 @@ async function settle(): Promise<void> {
 function painted(cap: HTMLCanvasElement): Promise<void> {
   const request = (cap as unknown as { requestPaint?: () => void }).requestPaint;
   const frames = (): Promise<void> => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(() => r())));
-  if (typeof request !== "function") return frames();
   return new Promise((r) => {
     let done = false;
-    const finish = () => {
+    const finish = (fallback: boolean) => {
       if (done) return;
       done = true;
+      clearTimeout(timer);
+      if (fallback) paintFallbacks++;
       r();
     };
-    cap.addEventListener("paint", finish, { once: true });
+    const timer = setTimeout(() => void frames().then(() => finish(true)), typeof request === "function" ? 1000 : 0);
+    if (typeof request !== "function") return;
+    cap.addEventListener("paint", () => finish(false), { once: true });
     request.call(cap);
-    setTimeout(() => void frames().then(finish), 1000);
   });
 }
 

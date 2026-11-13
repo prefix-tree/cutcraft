@@ -14,6 +14,8 @@ export interface PageJob {
   readonly disabled?: readonly string[];
   /** The wall-clock time (ms since the epoch) the file's `Date` reads at composition time 0, the same on every page. */
   readonly startedAt: number;
+  /** Milliseconds one frame may take before the page fails it. */
+  readonly frameTimeout: number;
 }
 
 interface PageFont {
@@ -116,6 +118,8 @@ export interface PageApi {
     readonly duration: number;
   };
   readonly errors: readonly string[];
+  /** Frames captured after the browser never signalled their paint: each waited two animation frames instead. */
+  readonly paintFallbacks: number;
   /** Encodes frames [first, last) into a small container, timestamps from 0; returns its length in bytes. */
   segment(request: SegmentRequest): Promise<number>;
   /** Mixes and encodes the soundtrack; its bytes wait for `read`. */
