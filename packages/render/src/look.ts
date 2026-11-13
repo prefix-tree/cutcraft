@@ -65,6 +65,8 @@ export interface LookOptions {
   readonly cacheDir?: string;
   readonly fonts?: readonly FontFile[];
   readonly onAssetError?: "throw" | "continue";
+  /** Seconds one frame may take before the export fails with the frame and the step it was in; default 60. */
+  readonly frameTimeout?: number;
   readonly onLog?: (message: string) => void;
 }
 

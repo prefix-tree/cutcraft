@@ -95,6 +95,8 @@ export interface LayoutCheckOptions {
   readonly step?: number;
   readonly from?: number;
   readonly to?: number;
+  /** Seconds one frame may take before the export fails with the frame and the step it was in; default 60. */
+  readonly frameTimeout?: number;
   /** Progress while Chrome is being downloaded, on the first run. */
   readonly onLog?: (message: string) => void;
 }

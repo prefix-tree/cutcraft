@@ -241,6 +241,7 @@ one is cached or `CUTCRAFT_CHROMIUM` names one (`findChrome`, `installChrome`).
 | `onLog` | `(message: string) => void` | | Progress while Chrome downloads, on the first export. |
 | `signal` | `AbortSignal` | | Stops the render when aborted. |
 | `onAssetError` | `"throw" \| "continue"` | `"throw"` | When an asset cannot be opened or decoded: stop, or draw the grey placeholder and go on. |
+| `frameTimeout` | `number` | `60` | Seconds one frame may take before the export fails with the frame and the step it was in. `renderStill`, `renderLook` and `checkLayout` take it too. |
 
 `RenderResult`:
 
@@ -252,7 +253,7 @@ one is cached or `CUTCRAFT_CHROMIUM` names one (`findChrome`, `installChrome`).
 | `wallMs` | `number` | Time the render took, starting the browser included. |
 | `tabs` | `number` | Pages that rendered pieces at once. |
 | `copiedFrames` | `number` | Frames copied from a source instead of rendered. |
-| `warnings` | `string[]` | What was left out and why, a soundtrack that clips, and asset errors under `onAssetError: "continue"`. |
+| `warnings` | `string[]` | What was left out and why, a soundtrack that clips, frames captured without a paint signal, and asset errors under `onAssetError: "continue"`. |
 
 `containerOf(out)` returns the container a file name asks for, by the same rule as `container`.
 
