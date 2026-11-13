@@ -1,7 +1,8 @@
 import { Caption, Captions, Composition, Effect, Keyframe, Layer, Three, Track, useLayer } from "@cutcraft/kit";
 
 // "One pixel": how a game lights a room, told by following one dot of the screen. A narrator's words lead; the
-// subtitles show them as they are said, and each thing on screen arrives on the word that names it.
+// subtitles show a phrase at a time with a box on the word being said, and each thing on screen arrives on the
+// word that names it.
 //
 // There is no voice in this file. The words are timed at a speaking pace, so a voice can be recorded over the film;
 // if it runs differently, its transcript replaces the times worked out below and the picture follows.
@@ -59,7 +60,7 @@ const breath = (word: string): number => (/[.?!:]$/.test(word) ? 0.25 : /,$/.tes
 const ms = (t: number): number => Math.round(t * 1000) / 1000;
 
 const cue: Record<string, number> = {};
-/** The subtitles: up to three words at a time, never across a comma or a full stop. */
+/** The subtitles: a phrase at a time, so a line can be read as it is said. */
 const lines: { text: string; start: number; end: number; words: Said[] }[] = [];
 {
   let t = 0.3;
@@ -90,10 +91,26 @@ const lines: { text: string; start: number; end: number; words: Said[] }[] = [];
       const end = t + say(text);
       open.push({ text, start: ms(t), end: ms(end) });
       t = end + breath(text);
-      if (open.length === 3 || breath(text) > 0) close();
+      // A line ends with its sentence, or at a comma once it has some length, or when it would run too long.
+      const length = open.reduce((n, w) => n + w.text.length + 1, 0);
+      if (/[.?!]$/.test(text) || (/,$/.test(text) && length >= 18) || length >= 44) close();
     }
   }
   close();
+  // No line of one or two words left over from a long sentence: it takes words back from the line before it.
+  lines.forEach((line, i) => {
+    const before = lines[i - 1];
+    if (!before || /[.?!]$/.test(before.text)) return;
+    while (line.words.length < 3 && before.words.length > 4) {
+      const word = before.words.pop();
+      if (word) line.words.unshift(word);
+    }
+    for (const each of [before, line]) {
+      each.text = each.words.map((w) => w.text).join(" ");
+      each.start = each.words[0]?.start ?? each.start;
+      each.end = ms((each.words[each.words.length - 1]?.end ?? each.end) + 0.12);
+    }
+  });
   // A subtitle stays up for a moment after its last word, but never into the next one.
   lines.forEach((line, i) => {
     const next = lines[i + 1];
@@ -891,8 +908,16 @@ export default function Video() {
 
       <Captions
         id="said"
-        animation="word-by-word"
-        style={{ position: "top", size: 76, weight: 800, color: "#8b93a8", highlight: "#ffffff" }}
+        animation="karaoke"
+        style={{
+          position: "top",
+          size: 62,
+          weight: 800,
+          color: "#ffffff",
+          upcoming: "#8b93a8",
+          highlight: "#14141c",
+          highlightBox: GOLD,
+        }}
       >
         {lines.map((line, i) => (
           <Caption
