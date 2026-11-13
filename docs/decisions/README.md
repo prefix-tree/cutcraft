@@ -34,3 +34,4 @@ use that name.
 | [0024](./0024-graphic-kinds-become-components.md) | Graphic kinds become components; icon stickers are removed |
 | [0025](./0025-sound-effects.md) | Sound gets effects: one DSP, run live and in the export (proposed) |
 | [0026](./0026-an-agent-looks-at-the-timeline.md) | An agent looks at the timeline: inspect, look, and a frame cache (proposed) |
+| [0027](./0027-what-we-adopt-from-hyperframes.md) | What we adopt from HyperFrames (proposed) |

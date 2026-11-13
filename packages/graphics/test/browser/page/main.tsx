@@ -2,11 +2,11 @@
 
 import { useFrame } from "@react-three/fiber";
 import { motion, useTransform } from "motion/react";
-import { createRef, useRef } from "react";
+import { createRef, useEffect, useRef } from "react";
 import { createRoot } from "react-dom/client";
 import type { Mesh, MeshBasicMaterial } from "three";
 
-import { Composition, collect, Layer, Motion, resolve, Three, Track } from "@cutcraft/kit";
+import { Composition, collect, Layer, Motion, resolve, Three, Track, useLayer } from "@cutcraft/kit";
 import { Player, type PlayerRef } from "@cutcraft/player";
 
 import { installFreeCodeLibraries } from "../../../src/libraries";
@@ -77,6 +77,41 @@ function Keyframes() {
   );
 }
 
+/** A CSS transition that a moment of the layer starts: opacity 0 to 1 over two seconds, from one second in. */
+function Transition() {
+  const { elapsed } = useLayer();
+  return (
+    <div
+      id="transition-box"
+      style={{
+        position: "absolute",
+        top: 240,
+        width: 50,
+        height: 50,
+        background: "#f0f",
+        opacity: elapsed >= 1 ? 1 : 0,
+        transition: "opacity 2s linear",
+      }}
+    />
+  );
+}
+
+/** A Web Animation the component starts itself, when it mounts. */
+function Scripted() {
+  const box = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const animation = box.current!.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 2000, fill: "forwards" });
+    return () => animation.cancel();
+  }, []);
+  return (
+    <div
+      ref={box}
+      id="scripted-box"
+      style={{ position: "absolute", top: 300, width: 50, height: 50, background: "#0ff" }}
+    />
+  );
+}
+
 const element = (
   <Composition fps={30} width={640} height={360}>
     <Track id="free" layout="free">
@@ -95,6 +130,13 @@ const element = (
       </Layer>
       <Layer id="css" start={0} duration={4}>
         <Keyframes />
+      </Layer>
+      {/* Later than the rest, so the seeks of the other tests never start them. */}
+      <Layer id="transition" start={4} duration={4}>
+        <Transition />
+      </Layer>
+      <Layer id="scripted" start={4} duration={4}>
+        <Scripted />
       </Layer>
       {/* The tags, as a file writes them: plain three.js pasted into setup, and a Motion sequence. */}
       <Three

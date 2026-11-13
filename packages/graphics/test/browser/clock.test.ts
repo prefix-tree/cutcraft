@@ -92,6 +92,27 @@ describe("free code on the video's clock", () => {
     expect((await at(0.5)).taggedOpacity).toBeCloseTo(0.25, 1);
   });
 
+  const opacity = async (t: number, id: string): Promise<number> => {
+    await page.evaluate((s) => window.__seek(s), t);
+    return page.evaluate((sel) => Number(getComputedStyle(document.querySelector(sel)!).opacity), id);
+  };
+
+  it("holds a CSS transition from the moment that started it, and scrubs within its run", async () => {
+    expect(await opacity(4.5, "#transition-box")).toBe(0);
+    // One second into the layer the style changes: the transition begins there.
+    expect(await opacity(5, "#transition-box")).toBeCloseTo(0, 1);
+    expect(await opacity(6, "#transition-box")).toBeCloseTo(0.5, 1);
+    expect(await opacity(5.5, "#transition-box")).toBeCloseTo(0.25, 1);
+    expect(await opacity(6.5, "#transition-box")).toBeCloseTo(0.75, 1);
+  });
+
+  it("holds an animation made with element.animate() as its layer mounts from the layer's start", async () => {
+    // Made at the first seek into the layer, half a second in: it is where it would be had it played from the start.
+    expect(await opacity(4.5, "#scripted-box")).toBeCloseTo(0.25, 1);
+    expect(await opacity(5.5, "#scripted-box")).toBeCloseTo(0.75, 1);
+    expect(await opacity(5, "#scripted-box")).toBeCloseTo(0.5, 1);
+  });
+
   it("holds CSS animations at the layer's time, both ways", async () => {
     expect((await at(1)).cssOpacity).toBeCloseTo(0.5, 1);
     expect((await at(0.5)).cssOpacity).toBeCloseTo(0.25, 1);

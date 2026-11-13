@@ -78,6 +78,20 @@ describe("lint", () => {
     ]);
   });
 
+  it("warns about Math.random and about clock globals reached through window", () => {
+    const extra = [
+      'import { random } from "@cutcraft/kit";',
+      "function Bad() { const x = Math.random(); window.requestAnimationFrame(() => {}); const t = globalThis.performance.now(); return <div>{x + t}</div>; }",
+      "function Good() { const x = random(7); requestAnimationFrame(() => {}); return <div>{x + performance.now() + Math.floor(1.5)}</div>; }",
+    ].join("\n");
+    const d = lint(wrap('<Track id="t"><Layer id="l" duration={3}><Bad /><Good /></Layer></Track>', extra));
+    expect(d.filter((x) => x.rule === "free-code-clock").map((x) => x.message.split(" ")[0])).toEqual([
+      "Math.random()",
+      "window.requestAnimationFrame",
+      "globalThis.performance",
+    ]);
+  });
+
   it("warns about three.js and Motion on their own clocks, and names the adapter", () => {
     const extra = [
       'import { Canvas } from "@react-three/fiber";',

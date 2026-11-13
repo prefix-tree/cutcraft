@@ -54,11 +54,30 @@ function Countdown() {
 ```
 
 Scrub and the countdown shows the right number; pause and it stops. CSS animations inside a Layer are held at the
-layer's time as well, so they start when the layer starts and scrub with the video.
+layer's time as well, so they start when the layer starts and scrub with the video. So is an animation a component
+makes with `element.animate()` as it mounts.
 
-The rule of thumb: compute what you draw from the time. Code that builds up state frame by frame, or runs on
-`setTimeout` or `setInterval`, shows something different after a seek. The lint warns about timers, `<video>` and
-`<audio>` elements (use `<Clip>` and `<Audio>`), and canvases created with `willReadFrequently`.
+A CSS transition, or an `element.animate()` made later, is held from the frame that started it. It plays right when
+the video plays through and in an export, and scrubs within its run. A seek that jumps over its start misses it, and
+an export in several pieces (`tabs`) can cut one short, so prefer a CSS animation or `useT()` for anything that
+matters.
+
+In an export, the file's own code also gets the video's clock where it asks the browser for time:
+
+- `requestAnimationFrame` callbacks run once per frame, with the frame's time as their timestamp;
+- `performance.now()` is the frame's time in milliseconds, and `Date.now()` and `new Date()` move with it;
+- `Math.random()` gives the same numbers in every export.
+
+So a loop written the usual way exports at the right speed on any machine. This goes by name: write
+`requestAnimationFrame(...)`, not `window.requestAnimationFrame(...)`, which is still the browser's own. A library
+the file imports keeps the browser's clock too; `<ThreeScene>` and `useTimeline` put three.js and Motion on the
+video's. The live preview runs these on the browser's clock, which agrees with the video while it plays.
+
+The rule of thumb stays: compute what you draw from the time. Code that builds up state frame by frame, or runs on
+`setTimeout` or `setInterval`, shows something different after a seek, and in an export in several pieces. The lint
+warns about timers, `Math.random()` (use `random(seed)` from `@cutcraft/kit`, which is the same number in the
+preview too), clock globals reached through `window`, `<video>` and `<audio>` elements (use `<Clip>` and `<Audio>`),
+and canvases created with `willReadFrequently`.
 
 ## Animation helpers
 

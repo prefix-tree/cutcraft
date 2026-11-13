@@ -34,6 +34,11 @@ export const ALLOWED_IMPORTS: Readonly<Record<string, unknown>> = {
 export interface LoadOptions {
   /** Modules the host offers beyond `ALLOWED_IMPORTS`, by import name: the libraries free code in a Layer may use. */
   readonly imports?: Readonly<Record<string, unknown>>;
+  /**
+   * Names the file's code sees in place of the globals of that name, such as an export's `performance` and
+   * `requestAnimationFrame` on the video's clock. Only the file's own code: a library it imports sees the real ones.
+   */
+  readonly scope?: Readonly<Record<string, unknown>>;
 }
 
 export function loadModule(source: string, options: LoadOptions = {}): CutModule {
@@ -54,7 +59,13 @@ export function loadModule(source: string, options: LoadOptions = {}): CutModule
   };
   // What the file declares (effects, transitions, fonts) are values: collectModule finds them on its elements and
   // among its exports, so nothing is registered while it runs.
-  new Function("require", "exports", "module", code)(require, module.exports, module);
+  const scope = Object.entries(options.scope ?? {});
+  new Function("require", "exports", "module", ...scope.map(([name]) => name), code)(
+    require,
+    module.exports,
+    module,
+    ...scope.map(([, value]) => value),
+  );
   if (typeof module.exports.default !== "function") throw new Error("The file has no default export (the video).");
   return module.exports as unknown as CutModule;
 }

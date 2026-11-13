@@ -16,6 +16,12 @@ describe("loadModule", () => {
     expect(() => loadModule(source)).toThrow("which this host does not offer");
   });
 
+  it("gives the file's code the host's scope in place of the globals of those names", () => {
+    const source = "export default function V() { return performance.now(); }";
+    expect(loadModule(source, { scope: { performance: { now: () => 1234 } } }).default({})).toBe(1234);
+    expect(loadModule(source).default({})).not.toBe(1234);
+  });
+
   it("offers the modules the host passes, for free code in a Layer", () => {
     const source = `import { wave } from "shader-lib";\nexport default function V() { return wave; }`;
     const mod = loadModule(source, { imports: { "shader-lib": { wave: "sin" } } });

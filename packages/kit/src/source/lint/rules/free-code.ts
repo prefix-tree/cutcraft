@@ -20,9 +20,12 @@ export const strayHtml: Rule = {
 };
 
 /**
- * Free code renders frame by frame against the video's own clock. `useT()`, requestAnimationFrame, Date, performance
- * and CSS animations follow it; timers, media elements playing on their own and canvases kept on the CPU do not.
+ * Free code renders frame by frame against the video's own clock. `useT()` and CSS animations follow it everywhere;
+ * in an export the file's own requestAnimationFrame, Date, performance and Math.random do too, by name. Timers, the
+ * same reached through `window`, media elements playing on their own and canvases kept on the CPU do not.
  */
+/** Globals an export gives the file on the video's clock, when called by their bare name. */
+const ON_THE_CLOCK = new Set(["requestAnimationFrame", "cancelAnimationFrame", "performance", "Date"]);
 /** Libraries with a clock of their own, by module: the imports that run on it, and the adapter that puts them on the video's. */
 const OWN_CLOCK: Readonly<Record<string, { readonly names: readonly string[]; readonly use: string }>> = {
   "@react-three/fiber": { names: ["Canvas"], use: "<ThreeScene> from @cutcraft/graphics/three" },
@@ -74,12 +77,28 @@ export const freeCodeClock: Rule = {
             node,
             `${name} runs on the wall clock, so an export would not repeat it frame for frame; derive the change from useT() instead`,
           );
+        if (name === "random" && t.isMemberExpression(callee) && t.isIdentifier(callee.object, { name: "Math" }))
+          warn(
+            node,
+            "Math.random() gives each run of the file its own numbers, so pieces of an export rendered side by side can disagree; use random(seed) from @cutcraft/kit",
+          );
         const own = t.isIdentifier(callee) ? ownClock.get(callee.name) : undefined;
         if (own)
           warn(
             node,
             `${own.imported}() plays on its library's own clock, so a scrub or an export does not follow it; use ${own.use}`,
           );
+      } else if (
+        t.isMemberExpression(node) &&
+        t.isIdentifier(node.object) &&
+        (node.object.name === "window" || node.object.name === "globalThis") &&
+        t.isIdentifier(node.property) &&
+        ON_THE_CLOCK.has(node.property.name)
+      ) {
+        warn(
+          node,
+          `${node.object.name}.${node.property.name} is the browser's own, on the wall clock; write ${node.property.name} without ${node.object.name}. and an export runs it on the video's clock`,
+        );
       } else if (t.isJSXOpeningElement(node)) {
         const el = node.name;
         if (t.isJSXIdentifier(el) && (el.name === "video" || el.name === "audio")) {

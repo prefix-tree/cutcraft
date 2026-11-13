@@ -99,6 +99,7 @@ export class BrowserEngine {
         source: options.source,
         props: options.props ?? {},
         manifest: options.manifest,
+        startedAt: Date.now(),
         ...(options.disabled?.length ? { disabled: options.disabled } : {}),
       },
       options.media,

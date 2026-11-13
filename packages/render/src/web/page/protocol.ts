@@ -10,6 +10,8 @@ export interface PageJob {
   readonly fonts: readonly PageFont[];
   /** Effects a sheet may draw a frame without: the page keeps a second state with these switched off. */
   readonly disabled?: readonly string[];
+  /** The wall-clock time (ms since the epoch) the file's `Date` reads at composition time 0, the same on every page. */
+  readonly startedAt: number;
 }
 
 interface PageFont {

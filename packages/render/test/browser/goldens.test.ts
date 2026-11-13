@@ -1,7 +1,8 @@
 // Golden stills: every built-in shader effect, drawn by the export on a fixed test chart, against a PNG checked in
 // under test/goldens. They guard the effects' refactors: a change that moves a pixel by more than the tolerance fails.
 // Needs a Chrome or Chromium 153+ in CUTCRAFT_CHROMIUM. CUTCRAFT_UPDATE_GOLDENS=1 writes the stills as the new goldens;
-// a failing still is kept beside the test output (test/.tmp/goldens-actual) to compare or adopt.
+// a failing still is kept beside the test output (test/.tmp/goldens-actual) to compare or adopt. The goldens are drawn
+// on CI's Linux, and a Mac draws text and WebGL a little differently: scripts/goldens-linux.sh runs them as CI does.
 import { copyFileSync, existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -226,20 +227,81 @@ it("has a golden case for every built-in shader effect", () => {
   expect(BUILT_IN_SHADERS.map((s) => s.name).filter((name) => !covered.has(name))).toEqual([]);
 });
 
+/** Compares a still with the golden of that name, or writes it as the golden under CUTCRAFT_UPDATE_GOLDENS=1. */
+function matchesGolden(name: string, out: string): void {
+  const golden = join(goldens, `${name}.png`);
+  if (update) {
+    copyFileSync(out, golden);
+    return;
+  }
+  if (!existsSync(golden)) {
+    // Kept with the drifted stills, so CI's goldens-actual artifact carries a new golden drawn on Linux to adopt.
+    mkdirSync(actual, { recursive: true });
+    copyFileSync(out, join(actual, `${name}.png`));
+  }
+  expect(existsSync(golden), `no golden for ${name}: run with CUTCRAFT_UPDATE_GOLDENS=1`).toBe(true);
+  const { off, max } = difference(out, golden);
+  if (off > 0.002 || max > 32) {
+    mkdirSync(actual, { recursive: true });
+    copyFileSync(out, join(actual, `${name}.png`));
+  }
+  expect({ name, off: off <= 0.002, max: max <= 32 }).toEqual({ name, off: true, max: true });
+}
+
 describe.each(CASES)("golden: $name", (c) => {
   it("matches its golden", async () => {
-    const out = await still(c);
-    const golden = join(goldens, `${c.name}.png`);
-    if (update) {
-      copyFileSync(out, golden);
-      return;
-    }
-    expect(existsSync(golden), `no golden for ${c.name}: run with CUTCRAFT_UPDATE_GOLDENS=1`).toBe(true);
-    const { off, max } = difference(out, golden);
-    if (off > 0.002 || max > 32) {
-      mkdirSync(actual, { recursive: true });
-      copyFileSync(out, join(actual, `${c.name}.png`));
-    }
-    expect({ name: c.name, off: off <= 0.002, max: max <= 32 }).toEqual({ name: c.name, off: true, max: true });
+    matchesGolden(c.name, await still(c));
+  });
+});
+
+// A whole frame as a file composes it: footage with a grade, a wipe, a title, word-highlighted captions and a Motion
+// layer, so a change to the resolver, the compositor, text layout or caption timing that moves a pixel shows. Only
+// the solid and the logo: the bars carry a counter drawn only by an ffmpeg with drawtext, so they differ by machine.
+// solid 0–2, wipe 1.4–2, logo 1.4–3.4; the title 0.2–3; the dot slides right over 0.5–2.5.
+const COMPOSED = `import { Caption, Captions, Clip, Composition, Effect, Motion, Title, Track, Transition } from "@cutcraft/kit";
+export const manifest = ${JSON.stringify(mediaManifest)};
+export default function Video() {
+  return (
+    <Composition fps={30} width={480} height={270} background={{ mode: "color", color: "#000000" }}>
+      <Track id="main">
+        <Clip id="solid" src="asset:solid" in={0} out={2}>
+          <Effect id="grade" type="levels" params={{ black: 0.05, white: 0.9, gamma: 1.2 }} />
+        </Clip>
+        <Transition id="w" type="wipe" duration={0.6} params={{ direction: "left" }} />
+        <Clip id="logo" src="asset:logo" duration={2} fit="contain" />
+      </Track>
+      <Track id="overlays" layout="free">
+        <Title id="title" start={0.2} duration={2.8} size={36} color="#ffffff">Golden frame</Title>
+        <Motion id="dot" start={0.5} duration={2} sequence={[[".dot", { x: [0, 300] }, { duration: 2, ease: "linear" }]]}>
+          <div className="dot" style={{ position: "absolute", left: 40, top: 200, width: 30, height: 30, borderRadius: 15, background: "#ffcc00" }} />
+        </Motion>
+      </Track>
+      <Captions id="cap" animation="word-highlight" style={{ size: 24, color: "#ffffff", highlight: "#ff3366" }}>
+        <Caption id="c1" start={0} end={3.4} text="every frame matters" words={[
+          { text: "every", start: 0, end: 1 },
+          { text: "frame", start: 1, end: 2 },
+          { text: "matters", start: 2, end: 3.4 },
+        ]} />
+      </Captions>
+    </Composition>
+  );
+}
+`;
+
+describe("golden: a composed frame", () => {
+  it.each([0.7, 1.7, 2.8])("at %s s", async (time) => {
+    const file = join(dir, "composed.tsx");
+    writeFileSync(file, COMPOSED);
+    const loaded = await loadVideo(file);
+    expect(loaded.state.errors).toEqual([]);
+    const out = join(dir, `composed-${time}.png`);
+    await renderStill({
+      state: loaded.state,
+      media: directoryResolver(mediaDir, loaded.manifest),
+      out,
+      time,
+      source: loaded.source,
+    });
+    matchesGolden(`composed-${time}`, out);
   });
 });
