@@ -22,31 +22,32 @@ const MONO = "'JetBrains Mono', 'DejaVu Sans Mono', Menlo, monospace";
 // A word in [brackets] is a cue the picture listens for. (1.5) is a pause of that many seconds, with nothing said;
 // {name} marks a moment by name without a word.
 const SCRIPT = `
-How does a video game [light] a room? (0.5)
-Real light is a nightmare to copy. Every lamp throws out [billions] of rays.
+In a video game, light goes straight [through] this ball. No [shadow].
+Nothing in a game blocks light, unless the game is told to [fake] it. (0.4)
+[Real] light is a nightmare to copy. Every lamp throws out [billions] of rays.
 Each one bounces off the walls, the floor, the ball, again and again, before it reaches your eye.
 An animated film can spend [hours] working that out for a single picture.
-A game has to do it sixty times every [second]. It can't. So it [cheats]. (0.7)
+A game has to do it sixty times every [second]. It can't. So it [cheats]. (0.5)
 Your screen is millions of tiny [dots]. All the game really does is pick a colour for each one.
 Let's follow [one] dot and watch how it gets its light. (0.4)
 Here's the first cheat. Think of standing in the [sun]. Turn your face [towards] it and you feel the warmth.
 Turn [away] and you don't. The game asks every surface the same thing: are you [facing] the lamp?
-Facing it: [bright]. Turned away: [dark]. (0.8) {room1} (2.2) {back1}
+Facing it: [bright]. Turned away: [dark]. (0.8) {room1} (1.8) {back1}
 But that's not enough, because the [ball] is in the way, and the floor behind it is still bright.
 So the game does something clever. It takes a [photo] from where the lamp is.
 Anything the lamp can see in that photo gets light. Anything [hidden] behind something else doesn't.
-That's all a shadow is: a place the lamp can't see. (0.6) {room2} (2.2) {back2}
+That's all a shadow is: a place the lamp can't see. (0.6) {room2} (1.8) {back2}
 Now the shadow is pure [black], and that looks wrong. In real life light [bounces].
 Hold a white sheet of paper next to a red wall and the paper turns a little [pink].
 Working that out properly is far too slow. So the game's makers work it out [once], long before you play,
-and paint the answer onto the room. (0.6) {room3} (2.2) {back3}
+and paint the answer onto the room. (0.6) {room3} (1.8) {back3}
 Look where the ball [touches] the floor. Less light gets into tight places,
 the way the corners of a room always look a little dimmer. The game doesn't work out why.
-It just finds the corners and [darkens] them. (0.6) {room4} (1.6)
+It just finds the corners and [darkens] them. (0.6) {room4} (1.2)
 Last one. A screen can't actually be [dazzling]. So the brightest dots are [smeared] outwards, just a little,
 and your eye reads that as glare. (0.5)
 Five small cheats, for every dot, sixty times a [again]. (0.3)
-That's the light you've been looking at in every game you've ever played. (1.4) {end}
+That's the light you've been looking at in every game you've ever played. (1.0) {end}
 `;
 
 interface Said {
@@ -55,7 +56,7 @@ interface Said {
   readonly end: number;
 }
 /** Seconds a word takes to say at an explainer's pace, and the breath a comma or a full stop takes after it. */
-const say = (word: string): number => 0.09 + 0.041 * word.replace(/[^a-z]/gi, "").length;
+const say = (word: string): number => 0.09 + 0.04 * word.replace(/[^a-z]/gi, "").length;
 const breath = (word: string): number => (/[.?!:]$/.test(word) ? 0.25 : /,$/.test(word) ? 0.11 : 0);
 const ms = (t: number): number => Math.round(t * 1000) / 1000;
 
@@ -118,7 +119,10 @@ const lines: { text: string; start: number; end: number; words: Said[] }[] = [];
   });
 }
 type Cue =
-  | "light"
+  | "through"
+  | "shadow"
+  | "fake"
+  | "Real"
   | "billions"
   | "hours"
   | "second"
@@ -275,7 +279,9 @@ function Slice() {
       </defs>
       <rect width="1080" height="1920" fill="url(#op-grid)" opacity=".7" />
       {/* A slow drift, so the diagram is never a still picture. */}
-      <g transform={`translate(0 ${mix(18, -18, ease(time, at.dots, at.room4))})`}>
+      <g
+        transform={`translate(540 ${900 + mix(18, -18, ease(time, at.dots, at.room4))}) scale(1.16) translate(-540 -900)`}
+      >
         <line x1="140" y1="520" x2="940" y2="520" stroke="#6f6a60" strokeWidth="8" />
         <line x1="140" y1="516" x2="140" y2={FLOOR + 4} stroke={CREAM} strokeWidth="10" />
         <line x1="940" y1="516" x2="940" y2={FLOOR + 4} stroke={RED} strokeWidth="16" opacity={1 - 0.45 * dim * one} />
@@ -567,6 +573,187 @@ function Numbers() {
   );
 }
 
+// ---- The opening -------------------------------------------------------------------------------------------------
+// The film starts in the slice with everything already going: the lamp on, its rays falling on every dot, the
+// numbers bright. The ball rolls in under the lamp and the light goes straight through it.
+const NAMES = [
+  { text: "LAMP", from: 0.15, x: 470, y: 600, to: [LAMP.x + 30, LAMP.y - 8] },
+  { text: "LIGHT", from: 0.45, x: 330, y: 1010, to: [262, 930] },
+  { text: "DOTS", from: 0.75, x: 250, y: 1420, to: [dotX(1) + 36, 1330] },
+] as const;
+
+function Intro() {
+  const { time: now } = useLayer();
+  // It is on screen until real light is explained, and comes back for the last moment so the film loops.
+  const again = ease(now, at.end - 0.7, at.end - 0.2);
+  const here = Math.max(1 - ease(now, at.Real - 0.35, at.Real), again);
+  if (here <= 0) return null;
+  const time = again > 0 ? 0 : now;
+  const glow = { filter: "drop-shadow(0 0 10px #ffc857) drop-shadow(0 0 3px #ffc857)" };
+  // The ball rolls in from the right and settles where it will stay for the rest of the film.
+  const rolled = ease(time, 0.35, 1.15);
+  const ballX = mix(1180, BALL.x, rolled);
+  const turn = ((ballX - BALL.x) / BALL.r) * (180 / Math.PI);
+  // The rays are seen to pass through it as soon as it arrives, well before the word.
+  const through = ease(time, 1.0, 1.35);
+  const missing = ease(time, at.shadow, at.shadow + 0.3) * (1 - ease(time, at.fake - 0.1, at.fake + 0.1));
+  const faked = ease(time, at.fake, at.fake + 0.35);
+  return (
+    <svg
+      viewBox="0 0 1080 1920"
+      width="1080"
+      height="1920"
+      role="img"
+      aria-label="Light from the lamp going straight through the ball"
+      style={{ position: "absolute", inset: 0, opacity: here, background: INK }}
+    >
+      <defs>
+        <radialGradient id="in-ball" cx="34%" cy="30%" r="80%">
+          <stop offset="0" stopColor="#fffaf0" />
+          <stop offset=".55" stopColor="#cfc7b8" />
+          <stop offset="1" stopColor="#5d584f" />
+        </radialGradient>
+        <radialGradient id="in-halo">
+          <stop offset="0" stopColor="#fff1c9" stopOpacity=".95" />
+          <stop offset=".35" stopColor={GOLD} stopOpacity=".3" />
+          <stop offset="1" stopColor={GOLD} stopOpacity="0" />
+        </radialGradient>
+        <pattern id="in-grid" width="60" height="60" patternUnits="userSpaceOnUse">
+          <path d="M60 0H0V60" fill="none" stroke="#161b2b" strokeWidth="2" />
+        </pattern>
+      </defs>
+      <rect width="1080" height="1920" fill="url(#in-grid)" opacity=".7" />
+      <g transform={`translate(540 ${900 + mix(26, 18, ease(time, 0, at.Real))}) scale(1.16) translate(-540 -900)`}>
+        <line x1="140" y1="520" x2="940" y2="520" stroke="#6f6a60" strokeWidth="8" />
+        <line x1="140" y1="516" x2="140" y2={FLOOR + 4} stroke={CREAM} strokeWidth="10" />
+        <line x1="940" y1="516" x2="940" y2={FLOOR + 4} stroke={RED} strokeWidth="16" />
+        <line x1="135" y1={FLOOR} x2="948" y2={FLOOR} stroke={CREAM} strokeWidth="8" />
+
+        {/* Where a shadow ought to be, and is not; then the fake one the game puts there. */}
+        <polygon points={WEDGE} fill="#000000" opacity={0.85 * faked} />
+        <polygon
+          points={WEDGE}
+          fill="none"
+          stroke="#ffffff"
+          strokeWidth="4"
+          strokeDasharray="12 10"
+          opacity={missing}
+        />
+
+        <line x1={LAMP.x} y1="520" x2={LAMP.x} y2={LAMP.y - 26} stroke="#555c70" strokeWidth="5" />
+        <circle cx={LAMP.x} cy={LAMP.y} r={130 + 8 * Math.sin(time * 6)} fill="url(#in-halo)" />
+
+        {/* The light: a ray to every dot, each with a pulse running down it, so the picture is alive from the
+            first frame. The three that meet the ball go straight on through it. */}
+        {FACING.map((_, i) => {
+          const blocked = i in HIDDEN;
+          const end = [dotX(i) + 36, FLOOR] as const;
+          const run = (time * 1.3 + i * 0.37) % 1;
+          return (
+            <g key={i} opacity={blocked ? 1 - faked : 1}>
+              <line
+                x1={LAMP.x}
+                y1={LAMP.y}
+                x2={end[0]}
+                y2={end[1]}
+                stroke={GOLD}
+                strokeWidth={blocked ? mix(3, 6, through) : 3}
+                opacity={blocked ? mix(0.5, 1, through) : 0.5}
+                style={blocked && through > 0 ? glow : undefined}
+              />
+              <circle cx={mix(LAMP.x, end[0], run)} cy={mix(LAMP.y, end[1], run)} r="6" fill="#fff3c4" style={glow} />
+            </g>
+          );
+        })}
+        <circle cx={LAMP.x} cy={LAMP.y} r="26" fill="#fff6dc" />
+
+        <g transform={`translate(${ballX} ${BALL.y}) rotate(${turn})`} opacity={0.94}>
+          <circle r={BALL.r} fill="url(#in-ball)" />
+          <circle cx={BALL.r * 0.45} cy={-BALL.r * 0.35} r="9" fill="#8d877b" />
+        </g>
+        {/* The rays again, over the ball, so they are seen to pass through it. */}
+        {[5, 6, 7].map((i) => (
+          <line
+            key={i}
+            x1={LAMP.x}
+            y1={LAMP.y}
+            x2={dotX(i) + 36}
+            y2={FLOOR}
+            stroke={GOLD}
+            strokeWidth="5"
+            strokeDasharray="14 12"
+            strokeDashoffset={-time * 60}
+            opacity={through * (1 - faked)}
+            style={glow}
+          />
+        ))}
+
+        {FACING.map((facing, i) => {
+          const value = Math.round(i in HIDDEN ? facing * (1 - faked) : facing);
+          const grey = Math.round(40 + value * 2.1);
+          return (
+            <g key={i}>
+              <rect x={dotX(i)} y="1200" width="72" height="64" rx="8" fill={`rgb(${grey},${grey},${grey})`} />
+              <text
+                x={dotX(i) + 36}
+                y="1314"
+                textAnchor="middle"
+                fontFamily={MONO}
+                fontWeight="700"
+                fontSize="32"
+                fill={i in HIDDEN && (missing > 0 || faked > 0) ? "#ffffff" : "#9aa2b8"}
+              >
+                {value}
+              </text>
+            </g>
+          );
+        })}
+
+        {NAMES.map((name) => {
+          const shown = ease(time, name.from, name.from + 0.22);
+          return (
+            <g key={name.text} opacity={shown}>
+              <line
+                x1={name.x}
+                y1={name.y - 12}
+                x2={mix(name.x, name.to[0], shown)}
+                y2={mix(name.y - 12, name.to[1], shown)}
+                stroke="#ffffff"
+                strokeWidth="3"
+              />
+              <text
+                x={name.x}
+                y={name.y + 24}
+                textAnchor="middle"
+                fontFamily={SANS}
+                fontWeight="800"
+                fontSize="32"
+                letterSpacing="4"
+                fill="#ffffff"
+              >
+                {name.text}
+              </text>
+            </g>
+          );
+        })}
+        <text
+          x="660"
+          y="1420"
+          textAnchor="middle"
+          fontFamily={SANS}
+          fontWeight="800"
+          fontSize="32"
+          letterSpacing="4"
+          fill="#ffffff"
+          opacity={missing}
+        >
+          NO SHADOW
+        </text>
+      </g>
+    </svg>
+  );
+}
+
 /** "A film can spend hours on one picture; a game has a sixtieth of a second": a clock, then a counter. */
 function Clock() {
   const { time } = useLayer();
@@ -609,7 +796,7 @@ export default function Video() {
           start={0}
           duration={LENGTH}
           background={INK}
-          camera={{ position: [-7.5, 6.5, 19], lookAt: [0.2, 1.7, 0], fov: 30 }}
+          camera={{ position: [-5.0, 4.9, 15.2], lookAt: [-0.15, 1.85, 0.2], fov: 30 }}
           setup={({ scene, camera, renderer, THREE }) => {
             renderer.shadowMap.enabled = true;
             renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -631,7 +818,7 @@ export default function Video() {
             const ground = new THREE.GridHelper(120, 120, "#1c2236", "#141929");
             ground.position.y = -0.31;
             scene.add(ground);
-            const ball = new THREE.Mesh(new THREE.SphereGeometry(0.7, 64, 48), paint("#e4ddcf"));
+            const ball = new THREE.Mesh(new THREE.SphereGeometry(0.7, 64, 48), paint("#d2c4a6"));
             ball.position.set(0.5, 0.7, 0.4);
             ball.castShadow = true;
             scene.add(ball);
@@ -756,6 +943,11 @@ export default function Video() {
 
             // Where the camera stands for each part of the film: where it is, and what it looks at.
             type Pose = readonly [eye: readonly [number, number, number], aim: readonly [number, number, number]];
+            // The room is first seen close, as real light is explained, and pulls back while the rays fill it.
+            const CLOSE: Pose = [
+              [-5.0, 4.9, 15.2],
+              [-0.15, 1.85, 0.2],
+            ];
             const OPEN: Pose = [
               [-7.5, 6.5, 19],
               [0.2, 1.7, 0],
@@ -841,15 +1033,12 @@ export default function Video() {
               const bounced = Math.max(whole, on(at.room3));
               const corners = Math.max(whole, on(at.room4));
               paintOnly.intensity = 1.9 * cheated * (1 - on(at.room1)) + 0.07 * on(at.room1) * (1 - on(at.room3));
-              lamp.intensity = 13 * facing * (1 + 0.35 * ease(time, at.light, at.light + 0.25) * whole);
+              lamp.intensity = 13 * facing;
               lamp.shadow.intensity = shadow;
               bounce.intensity = 1.5 * bounced;
               fill.intensity = 0.3 * bounced;
               blob.opacity = 0.55 * corners;
               edge.opacity = 0.5 * corners;
-              bulb.scale.setScalar(
-                1 + 0.45 * ease(time, at.light, at.light + 0.2) * (1 - ease(time, at.light + 0.2, at.light + 0.9)),
-              );
               (bulb.material as InstanceType<typeof THREE.MeshBasicMaterial>).color.set(
                 facing > 0.5 ? "#ffffff" : "#8b8778",
               );
@@ -863,13 +1052,14 @@ export default function Video() {
               // The camera. The opening: a slow push in from the open corner, then round to face the room side-on,
               // which is the view the slice is drawn from. After that the slice covers the room between cuts, so
               // each cut has its own place to stand, and drifts while it is up.
-              stand(OPEN);
+              stand(CLOSE);
+              move(OPEN, ease(time, at.Real - 0.3, at.billions + 0.6));
               move(
                 [
                   [-6.2, 5.6, 16.5],
                   [0.2, 1.5, 0],
                 ],
-                ease(time, 0, at.cheats),
+                ease(time, at.billions, at.cheats),
               );
               move(SIDE, ease(time, at.cheats + 0.5, at.dots + 0.1));
               cutAt.forEach((from, k) => {
@@ -904,6 +1094,9 @@ export default function Video() {
         <Layer id="numbers" start={0} duration={LENGTH}>
           <Numbers />
         </Layer>
+        <Layer id="intro" start={0} duration={LENGTH}>
+          <Intro />
+        </Layer>
       </Track>
 
       <Captions
@@ -917,6 +1110,7 @@ export default function Video() {
           upcoming: "#8b93a8",
           highlight: "#14141c",
           highlightBox: GOLD,
+          background: "#0a0c13d0",
         }}
       >
         {lines.map((line, i) => (
