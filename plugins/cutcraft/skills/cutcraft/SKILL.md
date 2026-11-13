@@ -58,11 +58,18 @@ Work in this order, and check after each stage.
    `--around <id>` follows the thing you just changed: a transition from before to after, or an element coming in, in
    and going out. `--without <id>` shows each frame with and without an effect or an overlay, side by side.
    `--at` takes the same moments as `inspect`. For one frame at full size: `--still 4.5 --out frame.png`.
+   To show a person the whole video on one sheet, list the moments that matter in seconds, one per beat, and set
+   the row length. Each cell is printed with its time and frame, so they can point at one:
+   ```sh
+   npx cutcraft look video.tsx --manifest manifest.json --at 1.2,12,20,26.5,31,36,44,52.5 --columns 4 --out sheet.png
+   ```
+   Send that sheet when you report on a video, and before rendering one that takes minutes: it is drawn in seconds.
    `--listen all` (or `2..6`, or an element's id) adds the sound under the frames: the mix's level over time, the
    words where they are said, silences shaded, and `peakDb`, `rmsDb` and `silences` in the printed legend. Use it
    after any change to volume, music or the order of clips.
    Frames are kept in `.cutcraft/cache` beside the file, so looking again after an edit only draws what changed:
-   look as often as you like. Add `.cutcraft/` to `.gitignore`.
+   look as often as you like. Add `.cutcraft/` to `.gitignore`. The cache does not see code brought in with
+   `--import`: after changing such a module, pass `--no-cache` once.
 7. **Render.**
    ```sh
    npx cutcraft video.tsx --manifest manifest.json --out video.mp4
