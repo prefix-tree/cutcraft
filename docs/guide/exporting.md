@@ -221,6 +221,31 @@ frame (backgrounds) are not checked, and neither is an element fainter than
 `checkLayout({ state, media, source: { ...video.source, file }, safeZone, subject })`, and `formatLayout(result)` for
 the text.
 
+## When a frame never finishes
+
+Each frame has a deadline, 60 seconds unless `--frame-timeout` (or `frameTimeout`) says otherwise. A frame that
+outlasts it ends the export with the frame, its time and the step it was in:
+
+```
+frame 412 (13.73 s) did not finish within 60 s: stuck in settle
+```
+
+| Step | What the page was waiting for |
+|---|---|
+| `step` | The player, to decode and place that moment's media. A damaged or very large source is the usual cause. |
+| `settle` | A font, an image, or a layer that holds the frame until it has drawn (three.js, a shader) and never lets go. |
+| `paint` | The browser, to paint the page. |
+| `draw` | The painted page, to be copied into the frame. |
+| `encode` | The video encoder, to take the frame. |
+
+`cutcraft look video.tsx --at 13.73` draws that one moment, which is the quick way to see what is on screen there.
+A very slow machine can need a longer deadline for heavy frames; raise it only once you know the frame does finish.
+
+An export can also end with a warning that some frames `were captured without the browser confirming the paint`.
+The page asks the browser to say when a frame is painted, and waits a second for the answer; without one it goes on
+after two animation frames, and such a frame may show the moment before. It should not happen in the Chrome CutCraft
+installs. If it does, look at those frames before you publish.
+
 ## Checking an export
 
 To check a file you exported:

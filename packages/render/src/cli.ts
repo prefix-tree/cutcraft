@@ -79,6 +79,7 @@ const USAGE = `Usage: cutcraft <file.tsx> --out <video.mp4|.webm|.mp3|.wav> [opt
   --copy                copy encoded pictures from the source where a cut shows nothing else (VP9 at the composition's
                         size and rate), and render only the ends; fast for plain cuts
   --keyframe <seconds>  seconds between keyframes (default 2)
+  --frame-timeout <s>   seconds one frame may take before the command fails, naming the frame (default 60)
   --silent              no soundtrack
   --font <spec>         extra font for titles: Name=file.ttf, Name:700=file.ttf or Name:700:italic=file.ttf
   --import <spec>       a module the file may import beyond react, zod and the kit: three, or name=specifier
@@ -93,6 +94,7 @@ async function main(): Promise<number> {
     options: {
       out: { type: "string" },
       tabs: { type: "string" },
+      "frame-timeout": { type: "string" },
       keyframe: { type: "string" },
       manifest: { type: "string" },
       media: { type: "string" },
@@ -130,6 +132,10 @@ async function main(): Promise<number> {
     },
   });
   if (positionals[0] === "add") return add(positionals.slice(1), values);
+  const limit = values["frame-timeout"] === undefined ? undefined : Number(values["frame-timeout"]);
+  if (limit !== undefined && !(limit > 0))
+    throw new Error(`--frame-timeout wants seconds above 0, got "${values["frame-timeout"]}"`);
+  const frameTimeout = limit === undefined ? {} : { frameTimeout: limit };
   if (positionals[0] === "inspect") {
     const target = positionals[1];
     if (!target || positionals.length > 2) {
@@ -179,6 +185,7 @@ async function main(): Promise<number> {
       out: resolve(values.out ?? "look.png"),
       fonts: (values.font ?? []).map(readFont),
       onLog: (m: string) => process.stderr.write(`${m}\n`),
+      ...frameTimeout,
       ...(values.at !== undefined ? { at: values.at } : {}),
       ...(values.around !== undefined ? { around: values.around } : {}),
       ...(values.without !== undefined ? { without: values.without } : {}),
@@ -236,6 +243,7 @@ async function main(): Promise<number> {
     media,
     fonts,
     onLog: (m: string) => process.stderr.write(`${m}\n`),
+    ...frameTimeout,
   };
   if (values["check-layout"]) {
     const result = await checkLayout({

@@ -39,6 +39,7 @@ time. `CUTCRAFT_CHROMIUM` names a Chrome or Chromium 153 or later to use instead
 | `--bitrate <bps>` | Video bits per second. Default: about 0.1 per pixel per frame. |
 | `--quality <preset>` | `very-low`, `low`, `medium`, `high` or `very-high`: the encoder picks the bitrate for the size and codec. In place of `--bitrate`. |
 | `--keyframe <s>` | Seconds between keyframes. Default 2. |
+| `--frame-timeout <s>` | Seconds one frame may take before the command fails, naming the frame and the step it was in. Default 60 ([When a frame never finishes](/guide/exporting#when-a-frame-never-finishes)). |
 | `--silent` | No soundtrack. |
 | `--font Name[:weight[:style]]=file` | A font for this export beyond the ones the file declares ([Fonts](/guide/themes#fonts)), repeatable. TTF, OTF, WOFF or WOFF2. |
 | `--continue` | Draw the grey placeholder for an asset that cannot be read, instead of stopping. |
@@ -152,7 +153,7 @@ It prints a legend as JSON, one entry per cell, so a frame found by eye leads ba
 | `--columns <n>` | Cells in a row. Default up to 4. |
 | `--frames <dir>` | Also write each cell's frame at full size there, as PNG; the legend names each file. |
 | `--no-cache` | Draw every cell again ([The frame cache](#the-frame-cache)). |
-| `--manifest`, `--media`, `--props`, `--font`, `--import`, `--continue` | As for an export. |
+| `--manifest`, `--media`, `--props`, `--font`, `--import`, `--continue`, `--frame-timeout` | As for an export. |
 
 **Around a cut.** `--around` follows one thing through: here a wipe, from the frame before it to the frame after.
 With `--without title` each moment is drawn twice, so the title's exit can be judged against the cut beneath it.
