@@ -22,31 +22,32 @@ const MONO = "'JetBrains Mono', 'DejaVu Sans Mono', Menlo, monospace";
 // A word in [brackets] is a cue the picture listens for. (1.5) is a pause of that many seconds, with nothing said;
 // {name} marks a moment by name without a word.
 const SCRIPT = `
-How does a video game [light] a room? (0.5)
-Real light is a nightmare to copy. Every lamp throws out [billions] of rays.
+In a video game, this [lamp] gives off no light. This [shadow] isn't cast by anything.
+And this [glow] was smudged on afterwards. So what are you actually [looking] at? (0.3)
+[Real] light is a nightmare to copy. Every lamp throws out [billions] of rays.
 Each one bounces off the walls, the floor, the ball, again and again, before it reaches your eye.
 An animated film can spend [hours] working that out for a single picture.
-A game has to do it sixty times every [second]. It can't. So it [cheats]. (0.7)
+A game has to do it sixty times every [second]. It can't. So it [cheats]. (0.5)
 Your screen is millions of tiny [dots]. All the game really does is pick a colour for each one.
 Let's follow [one] dot and watch how it gets its light. (0.4)
 Here's the first cheat. Think of standing in the [sun]. Turn your face [towards] it and you feel the warmth.
 Turn [away] and you don't. The game asks every surface the same thing: are you [facing] the lamp?
-Facing it: [bright]. Turned away: [dark]. (0.8) {room1} (2.2) {back1}
+Facing it: [bright]. Turned away: [dark]. (0.8) {room1} (1.8) {back1}
 But that's not enough, because the [ball] is in the way, and the floor behind it is still bright.
 So the game does something clever. It takes a [photo] from where the lamp is.
 Anything the lamp can see in that photo gets light. Anything [hidden] behind something else doesn't.
-That's all a shadow is: a place the lamp can't see. (0.6) {room2} (2.2) {back2}
+That's all a shadow is: a place the lamp can't see. (0.6) {room2} (1.8) {back2}
 Now the shadow is pure [black], and that looks wrong. In real life light [bounces].
 Hold a white sheet of paper next to a red wall and the paper turns a little [pink].
 Working that out properly is far too slow. So the game's makers work it out [once], long before you play,
-and paint the answer onto the room. (0.6) {room3} (2.2) {back3}
+and paint the answer onto the room. (0.6) {room3} (1.8) {back3}
 Look where the ball [touches] the floor. Less light gets into tight places,
 the way the corners of a room always look a little dimmer. The game doesn't work out why.
-It just finds the corners and [darkens] them. (0.6) {room4} (1.6)
+It just finds the corners and [darkens] them. (0.6) {room4} (1.2)
 Last one. A screen can't actually be [dazzling]. So the brightest dots are [smeared] outwards, just a little,
 and your eye reads that as glare. (0.5)
 Five small cheats, for every dot, sixty times a [again]. (0.3)
-That's the light you've been looking at in every game you've ever played. (1.4) {end}
+That's the light you've been looking at in every game you've ever played. (1.0) {end}
 `;
 
 interface Said {
@@ -55,7 +56,7 @@ interface Said {
   readonly end: number;
 }
 /** Seconds a word takes to say at an explainer's pace, and the breath a comma or a full stop takes after it. */
-const say = (word: string): number => 0.09 + 0.041 * word.replace(/[^a-z]/gi, "").length;
+const say = (word: string): number => 0.09 + 0.04 * word.replace(/[^a-z]/gi, "").length;
 const breath = (word: string): number => (/[.?!:]$/.test(word) ? 0.25 : /,$/.test(word) ? 0.11 : 0);
 const ms = (t: number): number => Math.round(t * 1000) / 1000;
 
@@ -118,7 +119,11 @@ const lines: { text: string; start: number; end: number; words: Said[] }[] = [];
   });
 }
 type Cue =
-  | "light"
+  | "lamp"
+  | "shadow"
+  | "glow"
+  | "looking"
+  | "Real"
   | "billions"
   | "hours"
   | "second"
@@ -567,6 +572,98 @@ function Numbers() {
   );
 }
 
+// ---- The opening's camera ----------------------------------------------------------------------------------------
+// The room is a three.js scene and the labels are drawn over it, so both need to know where the camera is. The
+// opening's camera move is written here once: the scene stands where it says, and the labels work out from it
+// where on the frame the lamp and the shadow are.
+type Point = readonly [number, number, number];
+const START = { eye: [-5.0, 4.9, 15.2], aim: [-0.15, 1.85, 0.2] } as const satisfies { eye: Point; aim: Point };
+const NEAR = { eye: [-4.6, 4.7, 14.3], aim: [-0.1, 1.8, 0.2] } as const satisfies { eye: Point; aim: Point };
+const FOV = 30;
+const between = (a: Point, b: Point, k: number): Point => [mix(a[0], b[0], k), mix(a[1], b[1], k), mix(a[2], b[2], k)];
+const openingCamera = (time: number): { eye: Point; aim: Point } => {
+  const k = ease(time, 0, at.looking + 0.6);
+  return { eye: between(START.eye, NEAR.eye, k), aim: between(START.aim, NEAR.aim, k) };
+};
+/** Where a point of the room lands on the 1080 x 1920 frame, for a camera at `eye` looking at `aim`. */
+function onFrame(point: Point, { eye, aim }: { eye: Point; aim: Point }): [number, number] {
+  const sub = (a: Point, b: Point): Point => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
+  const dot = (a: Point, b: Point): number => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+  const unit = (a: Point): Point => {
+    const n = Math.hypot(...a);
+    return [a[0] / n, a[1] / n, a[2] / n];
+  };
+  const cross = (a: Point, b: Point): Point => [
+    a[1] * b[2] - a[2] * b[1],
+    a[2] * b[0] - a[0] * b[2],
+    a[0] * b[1] - a[1] * b[0],
+  ];
+  const forward = unit(sub(aim, eye));
+  const right = unit(cross(forward, [0, 1, 0]));
+  const up = cross(right, forward);
+  const to = sub(point, eye);
+  const scale = 960 / Math.tan((FOV * Math.PI) / 360) / dot(to, forward);
+  return [540 + dot(to, right) * scale, 960 - dot(to, up) * scale];
+}
+
+/** The three things the opening names, each with a label that arrives on its word, pointing at the thing. */
+const NAMED = [
+  { word: "lamp", text: "LAMP", at: [-1.9, 3.6, 0.6], by: [60, 210] },
+  { word: "shadow", text: "SHADOW", at: [1.45, 0, 0.35], by: [-60, 170] },
+  { word: "glow", text: "GLOW", at: [-1.5, 3.45, 0.6], by: [250, 40] },
+] as const satisfies readonly { word: Cue; text: string; at: Point; by: readonly [number, number] }[];
+
+function Labels() {
+  const { time } = useLayer();
+  const leaving = 1 - ease(time, at.looking + 0.5, at.looking + 1.0);
+  if (leaving <= 0) return null;
+  return (
+    <svg
+      viewBox="0 0 1080 1920"
+      width="1080"
+      height="1920"
+      role="img"
+      aria-label="Labels on the lamp, the shadow and the glow"
+      style={{ position: "absolute", inset: 0, opacity: leaving }}
+    >
+      {NAMED.map((label) => {
+        const shown = ease(time, at[label.word], at[label.word] + 0.25);
+        const [px, py] = onFrame(label.at, openingCamera(time));
+        const x = px + label.by[0];
+        const y = py + label.by[1];
+        return (
+          <g key={label.word} opacity={shown}>
+            <line
+              x1={x}
+              y1={y - 12}
+              x2={mix(x, px, shown)}
+              y2={mix(y - 12, py, shown)}
+              stroke="#ffffff"
+              strokeWidth="3"
+            />
+            <circle cx={px} cy={py} r={6 * shown} fill="#ffffff" />
+            <text
+              x={x}
+              y={y + 24}
+              textAnchor="middle"
+              fontFamily={SANS}
+              fontWeight="800"
+              fontSize="34"
+              letterSpacing="4"
+              fill="#ffffff"
+              stroke={INK}
+              strokeWidth="8"
+              paintOrder="stroke"
+            >
+              {label.text}
+            </text>
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
+
 /** "A film can spend hours on one picture; a game has a sixtieth of a second": a clock, then a counter. */
 function Clock() {
   const { time } = useLayer();
@@ -609,7 +706,7 @@ export default function Video() {
           start={0}
           duration={LENGTH}
           background={INK}
-          camera={{ position: [-7.5, 6.5, 19], lookAt: [0.2, 1.7, 0], fov: 30 }}
+          camera={{ position: [...START.eye], lookAt: [...START.aim], fov: FOV }}
           setup={({ scene, camera, renderer, THREE }) => {
             renderer.shadowMap.enabled = true;
             renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -631,7 +728,7 @@ export default function Video() {
             const ground = new THREE.GridHelper(120, 120, "#1c2236", "#141929");
             ground.position.y = -0.31;
             scene.add(ground);
-            const ball = new THREE.Mesh(new THREE.SphereGeometry(0.7, 64, 48), paint("#e4ddcf"));
+            const ball = new THREE.Mesh(new THREE.SphereGeometry(0.7, 64, 48), paint("#d2c4a6"));
             ball.position.set(0.5, 0.7, 0.4);
             ball.castShadow = true;
             scene.add(ball);
@@ -703,6 +800,18 @@ export default function Video() {
               mesh.rotation.set(...turn);
               scene.add(mesh);
             };
+            // The shadow as a game has it once the light is gone: a dark patch lying on the floor, which can be
+            // picked up.
+            const patch = soft((g) => {
+              const fade = g.createRadialGradient(128, 128, 60, 128, 128, 126);
+              fade.addColorStop(0, "rgba(0,0,0,0.95)");
+              fade.addColorStop(1, "rgba(0,0,0,0)");
+              g.fillStyle = fade;
+              g.fillRect(0, 0, 256, 256);
+            });
+            const sticker = new THREE.Mesh(new THREE.PlaneGeometry(2.5, 1.5), patch);
+            patch.side = THREE.DoubleSide;
+            scene.add(sticker);
             const flatDown = -Math.PI / 2;
             laid(blob, [2.3, 2.3], [0.5, 0.012, 0.4], [flatDown, 0, 0]);
             laid(edge, [6.7, 1.1], [0, 0.012, -2.8], [flatDown, 0, 0]);
@@ -835,23 +944,29 @@ export default function Video() {
               // the room switches that trick on, and it stays on: facing the lamp, the shadow, the bounce, the
               // corners. By the end it is the room from the first frame again.
               const cheated = ease(time, at.cheats - 0.05, at.cheats + 0.25);
-              const whole = 1 - cheated;
+              // The opening takes the room apart before any of that: on "lamp" its light goes, leaving paint and a
+              // shadow that is only a dark patch; on "shadow" the patch lifts off. "Real light" puts it all back.
+              const taken = ease(time, at.lamp - 0.05, at.lamp + 0.2) * (1 - ease(time, at.Real - 0.1, at.Real + 0.5));
+              const whole = (1 - cheated) * (1 - taken);
+              const lifted = ease(time, at.shadow, at.shadow + 0.6);
+              patch.opacity = 0.7 * taken * (1 - ease(lifted, 0.6, 1));
+              sticker.position.set(1.35 + 0.3 * lifted, 0.014 + 1.5 * lifted, 0.35);
+              sticker.rotation.set(-Math.PI / 2 + 0.5 * lifted, 0, 0.35 * lifted);
               const facing = Math.max(whole, on(at.room1));
               const shadow = Math.max(whole, on(at.room2));
               const bounced = Math.max(whole, on(at.room3));
               const corners = Math.max(whole, on(at.room4));
-              paintOnly.intensity = 1.9 * cheated * (1 - on(at.room1)) + 0.07 * on(at.room1) * (1 - on(at.room3));
-              lamp.intensity = 13 * facing * (1 + 0.35 * ease(time, at.light, at.light + 0.25) * whole);
+              paintOnly.intensity =
+                1.9 * Math.max(cheated, taken) * (1 - on(at.room1)) + 0.07 * on(at.room1) * (1 - on(at.room3));
+              lamp.intensity = 13 * facing;
               lamp.shadow.intensity = shadow;
               bounce.intensity = 1.5 * bounced;
               fill.intensity = 0.3 * bounced;
               blob.opacity = 0.55 * corners;
               edge.opacity = 0.5 * corners;
-              bulb.scale.setScalar(
-                1 + 0.45 * ease(time, at.light, at.light + 0.2) * (1 - ease(time, at.light + 0.2, at.light + 0.9)),
-              );
+              // The bulb looks lit all through the opening: that is the point of "gives off no light".
               (bulb.material as InstanceType<typeof THREE.MeshBasicMaterial>).color.set(
-                facing > 0.5 ? "#ffffff" : "#8b8778",
+                facing > 0.5 || time < at.cheats ? "#ffffff" : "#8b8778",
               );
 
               // The rays arrive bounce by bounce, and all go at once.
@@ -863,13 +978,15 @@ export default function Video() {
               // The camera. The opening: a slow push in from the open corner, then round to face the room side-on,
               // which is the view the slice is drawn from. After that the slice covers the room between cuts, so
               // each cut has its own place to stand, and drifts while it is up.
-              stand(OPEN);
+              const opening = openingCamera(time);
+              stand([opening.eye, opening.aim]);
+              move(OPEN, ease(time, at.Real - 0.3, at.billions + 0.6));
               move(
                 [
                   [-6.2, 5.6, 16.5],
                   [0.2, 1.5, 0],
                 ],
-                ease(time, 0, at.cheats),
+                ease(time, at.billions, at.cheats),
               );
               move(SIDE, ease(time, at.cheats + 0.5, at.dots + 0.1));
               cutAt.forEach((from, k) => {
@@ -880,7 +997,7 @@ export default function Video() {
               });
               // The last trick stays in the room: up to the lamp. Then back out to where the film began.
               move(LAMP_SHOT, ease(time, at.room4 + 1.0, at.dazzling));
-              move(OPEN, ease(time, at.again - 1.2, at.end - 0.6));
+              move([START.eye, START.aim], ease(time, at.again - 1.2, at.end - 0.6));
               camera.position.copy(eye);
               camera.lookAt(aim);
             };
@@ -888,6 +1005,11 @@ export default function Video() {
         >
           {/* The glow of the lamp and of the rays is done to the finished picture, as a game does it. */}
           <Effect id="bloom" type="glow" params={{ radius: 64, intensity: 2.2, threshold: 0.84, tint: 0 }}>
+            {/* The opening: "this glow was smudged on afterwards", and it is wiped off. Real light brings it back. */}
+            <Keyframe id="bloom-first" param="intensity" at={at.glow} value={2.2} />
+            <Keyframe id="bloom-wiped" param="intensity" at={at.glow + 0.3} value={0} />
+            <Keyframe id="bloom-gone" param="intensity" at={at.Real - 0.1} value={0} />
+            <Keyframe id="bloom-real" param="intensity" at={at.Real + 0.5} value={2.2} />
             <Keyframe id="bloom-on" param="intensity" at={at.cheats - 0.05} value={2.2} />
             <Keyframe id="bloom-off" param="intensity" at={at.cheats + 0.3} value={0} />
             {/* The last trick: the lamp is a flat disc until its brightness is smeared outwards. */}
@@ -895,6 +1017,9 @@ export default function Video() {
             <Keyframe id="bloom-back" param="intensity" at={at.smeared + 0.6} value={2.2} />
           </Effect>
         </Three>
+        <Layer id="labels" start={0} duration={LENGTH}>
+          <Labels />
+        </Layer>
         <Layer id="clock" start={0} duration={LENGTH}>
           <Clock />
         </Layer>
@@ -917,6 +1042,7 @@ export default function Video() {
           upcoming: "#8b93a8",
           highlight: "#14141c",
           highlightBox: GOLD,
+          background: "#0a0c13d0",
         }}
       >
         {lines.map((line, i) => (
