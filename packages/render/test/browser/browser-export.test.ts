@@ -104,6 +104,95 @@ it("exports three.js and Motion as the player draws them, on each layer's own cl
   expect(isWhite(pixel(late, 120, 50))).toBe(true);
 });
 
+it("runs the file's own requestAnimationFrame, element.animate and Math.random on the video's clock, in one piece or three", async () => {
+  // Four boxes, each 20 px wide on its own row. Red is moved by an animation-frame loop from the loop's timestamp,
+  // green by performance.now() read in that loop, blue by a Web Animation made as the layer mounts: all three are
+  // at 100 px a second. Yellow is put where Math.random() says. White slides 200 px in a second by a CSS transition
+  // that half a second into the layer starts.
+  const loaded = await loadVideo(
+    cut(
+      "own-clock.tsx",
+      `import { useEffect, useRef, useState } from "react";
+import { Composition, Layer, Track, useLayer } from "@cutcraft/kit";
+export const manifest = { assets: {} };
+const box = (top, background) => ({ position: "absolute", top, left: 0, width: 20, height: 20, background });
+function Boxes() {
+  const [stamp, setStamp] = useState(0);
+  const [now, setNow] = useState(0);
+  const [luck] = useState(() => Math.floor(Math.random() * 250));
+  const blue = useRef(null);
+  const { elapsed } = useLayer();
+  useEffect(() => {
+    let id = 0;
+    const loop = (ms) => {
+      setStamp(ms / 10);
+      setNow(performance.now() / 10);
+      id = requestAnimationFrame(loop);
+    };
+    id = requestAnimationFrame(loop);
+    const slide = blue.current.animate([{ left: "0px" }, { left: "200px" }], { duration: 2000, fill: "forwards" });
+    return () => { cancelAnimationFrame(id); slide.cancel(); };
+  }, []);
+  return (
+    <>
+      <div style={{ ...box(10, "#ff0000"), left: stamp }} />
+      <div style={{ ...box(40, "#00ff00"), left: now }} />
+      <div ref={blue} style={box(70, "#0000ff")} />
+      <div style={{ ...box(100, "#ffff00"), left: luck }} />
+      <div style={{ ...box(130, "#ffffff"), left: elapsed >= 0.5 ? 200 : 0, transition: "left 1s linear" }} />
+    </>
+  );
+}
+export default function Video() {
+  return (
+    <Composition fps={30} width={320} height={180} background={{ mode: "color", color: "#000000" }}>
+      <Track id="fx" layout="free">
+        <Layer id="l" start={0} duration={2}><Boxes /></Layer>
+      </Track>
+    </Composition>
+  );
+}
+`,
+    ),
+  );
+  expect(loaded.state.errors).toEqual([]);
+  const media = directoryResolver(dir, loaded.manifest);
+  const render = async (name: string, tabs: number) => {
+    const out = join(dir, name);
+    const result = await renderVideo({
+      state: loaded.state,
+      media,
+      out,
+      source: loaded.source,
+      keyFrameInterval: 0.5,
+      tabs,
+    });
+    expect(result.tabs).toBe(tabs);
+    return framesAt(out, [0.3, 1.0, 1.7], 30);
+  };
+  /** The left edge of the box on the row at `y`: the first pixel there that is not the black background. */
+  const left = (frame: DecodedFrame, y: number): number => {
+    for (let x = 0; x < frame.width; x++) if (pixel(frame, x, y).some((v) => v > 128)) return x;
+    return -1;
+  };
+  const one = await render("own-clock-1.mp4", 1);
+  const three = await render("own-clock-3.mp4", 3);
+  for (const t of [0.3, 1.0, 1.7]) {
+    const a = one.get(t) as DecodedFrame;
+    const b = three.get(t) as DecodedFrame;
+    // The loop's timestamp, performance.now() and the Web Animation are all at the frame's time.
+    for (const y of [20, 50, 80]) expect(Math.abs(left(a, y) - t * 100), `row ${y} at ${t} s`).toBeLessThanOrEqual(2);
+    // And a piece that starts mid-video draws them, and the random box, where one piece does.
+    for (const y of [20, 50, 80, 110])
+      expect(Math.abs(left(b, y) - left(a, y)), `row ${y} at ${t} s, three pieces`).toBeLessThanOrEqual(2);
+  }
+  expect(left(one.get(0.3) as DecodedFrame, 110)).toBeGreaterThanOrEqual(0);
+  // The transition, in one piece: not begun at 0.3 s, halfway at 1 s, done by 1.7 s.
+  expect(left(one.get(0.3) as DecodedFrame, 140)).toBeLessThanOrEqual(2);
+  expect(Math.abs(left(one.get(1.0) as DecodedFrame, 140) - 100)).toBeLessThanOrEqual(8);
+  expect(Math.abs(left(one.get(1.7) as DecodedFrame, 140) - 200)).toBeLessThanOrEqual(2);
+});
+
 it("redraws a shader on a layer from the layer's content of each frame", async () => {
   // A red box slides right on a Motion layer whose own effect swaps red and blue: a blue box where the box is now,
   // black where it was. The layer is a capture canvas drawn inside the export's, so a stale inner snapshot shows here.

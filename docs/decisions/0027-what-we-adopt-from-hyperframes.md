@@ -37,23 +37,28 @@ Adopt eight things. Ported code keeps its Apache-2.0 notice in the file header, 
 
 ### 1. Free code runs on the video's clock in the export
 
-The export page installs, before any free code loads:
+The file's own code gets, in an export, names that shadow the browser's:
 
 - `performance.now()` and `Date.now()` that return the frame's time (and `new Date()` with no argument the same);
-- a `requestAnimationFrame` whose callbacks are queued and run once per frame, after the compositor steps, with the
+- a `requestAnimationFrame` whose callbacks are queued and run once per frame, after the frame's commit, with the
   frame's time as their timestamp;
-- a `Math.random` from a fixed seed (mulberry32, as HyperFrames uses).
+- a `Math.random` that gives one fixed sequence.
 
-CutCraft's own code (`painted()`, `ShaderBox`'s wait for a paint) keeps the browser's `requestAnimationFrame`.
-Timers are left alone: React's scheduler uses them. A fixed seed does not make a layer that spans two tabs agree,
-since each tab draws its first frame at a different time, so the lint rule points `Math.random()` inside a layer to
-the kit's `random(seed)`.
+HyperFrames replaces the page's globals. We do not: the kit's `loadModule` already runs the file as the body of a
+function, so these are passed as parameters of that function (`scope`), and only the file sees them. React's
+scheduler, the player, `ShaderBox`'s and the capture's waits for a paint, and the libraries keep the browser's clock;
+three.js and Motion are put on the video's by their adapters. The cost is that `window.requestAnimationFrame` and
+`globalThis.performance` are still the browser's own, so the lint rule warns about those forms. Timers are left
+alone. A fixed sequence does not make a layer that mounts at different moments in two tabs agree, so the lint rule
+points `Math.random()` to the kit's `random(seed)`.
 
 `holdCssAnimations` becomes a hold on every Web Animation under the layer: CSS animations and transitions, and
-`element.animate()`. Each animation's zero is the layer time when it is first seen. This applies in the player too.
+`element.animate()`. A CSS animation's zero is the layer's start, as before, and so is that of an animation made as
+the layer's interior mounts. A transition, or an animation made later, begins at the layer time it is first seen.
+This applies in the player too.
 
-The live player keeps the browser's clock. While playing at speed it agrees with the video. While paused, a loop
-keeps running; that is a preview difference, not a wrong export.
+The live player keeps the browser's clock for the rest. While playing at speed it agrees with the video. While
+paused, a loop keeps running; that is a preview difference, not a wrong export.
 
 ### 2. The soundtrack is measured before it is clamped
 
@@ -117,9 +122,10 @@ shadow or a stroke the measure cannot credit.
 - A clipped or very loud soundtrack is reported. It is still exported as it is.
 - A hung export fails with a reason instead of running forever. A frame slower than the deadline on a very slow
   machine fails too; the deadline is an option.
-- The clock shim is the one change here that can break an export that works today: our own code calls
-  `requestAnimationFrame`, and a callback queued where a real paint was expected would draw a frame late. Its tests
-  cover `ShaderBox`, `painted()` and a loop that integrates over the timestamp.
+- The clock reaches only the file's own code, so it cannot hold up a paint our own code waits for. What it misses is
+  time asked for through `window`, and time a library asks for itself.
+- A CSS transition is state, not a function of time: an export in several tabs that starts a piece after the
+  transition began draws it finished. One tab, the default, draws it right.
 - Goldens drift with Chrome and font rasterisers. They are tied to the pinned Chrome, and a Chrome bump updates them
   in the same pull request.
 
@@ -152,9 +158,9 @@ runtimes, where our export runs the player's own painter.
 Each step is one pull request with its tests, docs and changeset.
 
 1. **Regression tests** (decision 5). First, because steps 2 and 5 change what the page draws.
-2. **The video clock** (decision 1). The shim on the export page, the Web Animation hold in the player, the lint hint
-   for `Math.random()`. Tests: a `requestAnimationFrame` loop and a CSS transition export the same frames at one and
-   three tabs; `ShaderBox` still draws its pass.
+2. **The video clock** (decision 1). The scope on the export page, the Web Animation hold in the player, the lint
+   hints. Tests: a `requestAnimationFrame` loop, an `element.animate()` and `Math.random()` export the same frames at
+   one and three tabs; a CSS transition runs on the video's time in one.
 3. **Sound measured before the clamp** (decision 2). Tests: a mix known to clip reports its count and first time; a
    −23 LUFS reference tone measures within 0.5 LU.
 4. **No silent hang** (decision 3). Tests: a layer that never releases its hold fails with its frame and step under a

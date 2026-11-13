@@ -1,4 +1,4 @@
-import { type CSSProperties, type ReactNode, useLayoutEffect, useRef } from "react";
+import { type CSSProperties, type ReactNode, useEffect, useLayoutEffect, useRef } from "react";
 
 import { layerEngine } from "@cutcraft/kit";
 
@@ -19,6 +19,13 @@ export function Layer(p: ElementProps & { readonly interior: ReactNode }) {
   // Every render, not only when time moves: an interior that mounts new CSS animations must not let them run free.
   useLayoutEffect(() => {
     holdCssAnimations(ref.current, clock.elapsed);
+  });
+  // And after the interior's own effects, where `element.animate()` is called: held from the render that made it,
+  // or from the layer's start when that is the interior mounting.
+  const mounting = useRef(true);
+  useEffect(() => {
+    holdCssAnimations(ref.current, clock.elapsed, mounting.current);
+    mounting.current = false;
   });
   return (
     <div ref={ref} {...dataAttrs(p.placement)} style={{ ...themeVars(p.state.theme), ...style }}>

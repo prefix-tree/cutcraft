@@ -33,6 +33,7 @@ import { addFontFaces, backdropTracks, Player, type PlayerRef } from "@cutcraft/
 import { SETTLE_MS } from "@cutcraft/player/engine";
 
 import { measureSound, renderSoundtrack } from "./audio";
+import { createFreeCodeClock } from "./clock";
 import { inkOf, offFrame, pastEdges } from "./ink";
 import type {
   AudioRequest,
@@ -67,7 +68,9 @@ async function start(): Promise<void> {
   // export needs no network once Google's are cached. The player is told not to fetch them again.
   await addFontFaces(job.fonts.map((f) => ({ family: f.family, weight: f.weight, style: f.style, source: f.url })));
   const imports = installFreeCodeLibraries();
-  const mod = loadModule(job.source, { imports });
+  // The file's own requestAnimationFrame, performance, Date and Math.random run on the video's clock, set per frame.
+  const clock = createFreeCodeClock(job.startedAt);
+  const mod = loadModule(job.source, { imports, scope: clock.scope });
   const manifest = job.manifest as AssetManifest;
   const props = { ...(mod.defaults ?? {}), ...job.props };
   const tree = collectModule(mod as never, props);
@@ -147,8 +150,12 @@ async function start(): Promise<void> {
   };
   /** Draws the single moment `t` into the capture canvas. */
   const capture = async (t: number): Promise<void> => {
+    clock.set(t);
     await core.compositor.step(t);
     await settle();
+    // The file's animation-frame callbacks for this frame: after the commit, so a loop a layer started as it mounted
+    // ticks in its first frame, and then React's update from them is waited for.
+    if (clock.flush()) await settle();
     await painted(cap);
     // A face is fetched only when layout first sets text in it, which can be this paint: `settle` looked before the
     // fetch began. Text painted meanwhile is in the fallback face, so the frame waits for the face and paints again.
