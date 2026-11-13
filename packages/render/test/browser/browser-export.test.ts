@@ -59,6 +59,22 @@ async function framesAt(file: string, times: readonly number[], fps: number): Pr
   return out;
 }
 
+/** The share of pixels inside `[x0, y0, x1, y1)` whose colour differs by more than 30 in some channel between two frames. */
+function changed(
+  a: DecodedFrame,
+  b: DecodedFrame,
+  [x0, y0, x1, y1]: readonly [number, number, number, number],
+): number {
+  let count = 0;
+  for (let y = y0; y < y1; y++)
+    for (let x = x0; x < x1; x++) {
+      const p = pixel(a, x, y),
+        q = pixel(b, x, y);
+      if (p.some((v, i) => Math.abs(v - (q[i] as number)) > 30)) count++;
+    }
+  return count / ((x1 - x0) * (y1 - y0));
+}
+
 const isOrange = ([r, g, b]: readonly [number, number, number]): boolean => r > 200 && g < 140 && b < 80;
 const isWhite = ([r, g, b]: readonly [number, number, number]): boolean => r > 220 && g > 220 && b > 220;
 const isNight = ([r, g, b]: readonly [number, number, number]): boolean => r < 50 && g < 60 && b < 80;
@@ -80,9 +96,58 @@ it("exports three.js and Motion as the player draws them, on each layer's own cl
   // The cube is in the middle from the start, on the scene's background.
   expect(isOrange(pixel(early, 320, 180))).toBe(true);
   expect(isNight(pixel(early, 600, 340))).toBe(true);
+  // And it turns: some Chrome versions drew a WebGL canvas through drawElementImage as its first frame forever, which
+  // the centre pixel alone would not see.
+  expect(changed(early, late, [220, 80, 420, 280])).toBeGreaterThan(0.05);
   // The word's layer starts at 0.5 s: hidden at 0.2 s, fully in by 1.2 s (0.7 s into its 0.5 s fade).
   expect(isWhite(pixel(early, 120, 50))).toBe(false);
   expect(isWhite(pixel(late, 120, 50))).toBe(true);
+});
+
+it("redraws a shader on a layer from the layer's content of each frame", async () => {
+  // A red box slides right on a Motion layer whose own effect swaps red and blue: a blue box where the box is now,
+  // black where it was. The layer is a capture canvas drawn inside the export's, so a stale inner snapshot shows here.
+  const loaded = await loadVideo(
+    cut(
+      "layer-shader.tsx",
+      `import { Composition, effect, Effect, Motion, Track } from "@cutcraft/kit";
+export const manifest = { assets: {} };
+const swap = effect({
+  name: "swap",
+  shader: "vec4 effect(vec2 uv) { vec4 c = texture(image, uv); return vec4(c.b, c.g, c.r, c.a); }",
+});
+export default function Video() {
+  return (
+    <Composition fps={30} width={320} height={180} background={{ mode: "color", color: "#000000" }}>
+      <Track id="fx" layout="free">
+        <Motion id="m" start={0} duration={1} sequence={[[".box", { x: [0, 200] }, { duration: 1, ease: "linear" }]]}>
+          <Effect id="e" type={swap} />
+          <div className="box" style={{ position: "absolute", left: 10, top: 60, width: 60, height: 60, background: "#ff0000" }} />
+        </Motion>
+      </Track>
+    </Composition>
+  );
+}
+`,
+    ),
+  );
+  expect(loaded.state.errors).toEqual([]);
+  const out = join(dir, "layer-shader.mp4");
+  await renderVideo({
+    state: loaded.state,
+    media: directoryResolver(dir, loaded.manifest),
+    out,
+    source: loaded.source,
+  });
+  const frames = await framesAt(out, [0.1, 0.9], 30);
+  const early = frames.get(0.1) as DecodedFrame;
+  const late = frames.get(0.9) as DecodedFrame;
+  const isBlue = ([r, g, b]: readonly [number, number, number]): boolean => b > 200 && r < 60 && g < 60;
+  // At 0.1 s the box spans x 30..90; at 0.9 s, 190..250.
+  expect(isBlue(pixel(early, 60, 90))).toBe(true);
+  expect(isBlue(pixel(early, 220, 90))).toBe(false);
+  expect(isBlue(pixel(late, 220, 90))).toBe(true);
+  expect(isNight(pixel(late, 60, 90))).toBe(true);
 });
 
 it("draws the same picture for a frame however it was reached, in any browser session", async () => {
