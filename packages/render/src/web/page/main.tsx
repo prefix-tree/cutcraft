@@ -333,7 +333,9 @@ async function start(): Promise<void> {
       g.fillStyle = "#f2f1ee";
       g.font = '500 14px "JetBrains Mono", monospace';
       g.fillText(
-        `sound ${r.from.toFixed(2)}..${r.to.toFixed(2)} s · peak ${level(sound.peakDb)} · rms ${level(sound.rmsDb)}`,
+        `sound ${r.from.toFixed(2)}..${r.to.toFixed(2)} s · peak ${level(sound.peakDb)} · rms ${level(sound.rmsDb)}${
+          sound.lufs === null ? "" : ` · ${sound.lufs.toFixed(1)} LUFS`
+        }${sound.clipped > 0 ? ` · clips at ${(sound.clippedAt ?? 0).toFixed(2)} s` : ""}`,
         2,
         12,
         r.width - 4,
@@ -385,7 +387,8 @@ async function start(): Promise<void> {
         free = at + 2 + g.measureText(word.text).width + 6;
       }
       out = await encode(strip, "image/png");
-      return { length: out.length, peakDb: sound.peakDb, rmsDb: sound.rmsDb, silences: sound.silences };
+      const { peaks: _peaks, rms: _rms, ...measured } = sound;
+      return { length: out.length, ...measured };
     },
     tile(index: number) {
       const bytes = keptTiles[index];

@@ -252,7 +252,7 @@ one is cached or `CUTCRAFT_CHROMIUM` names one (`findChrome`, `installChrome`).
 | `wallMs` | `number` | Time the render took, starting the browser included. |
 | `tabs` | `number` | Pages that rendered pieces at once. |
 | `copiedFrames` | `number` | Frames copied from a source instead of rendered. |
-| `warnings` | `string[]` | What was left out and why, and asset errors under `onAssetError: "continue"`. |
+| `warnings` | `string[]` | What was left out and why, a soundtrack that clips, and asset errors under `onAssetError: "continue"`. |
 
 `containerOf(out)` returns the container a file name asks for, by the same rule as `container`.
 

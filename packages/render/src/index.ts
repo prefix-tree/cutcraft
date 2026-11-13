@@ -34,6 +34,7 @@ export {
   MAX_LOOK_CELLS,
   renderLook,
 } from "./look";
+export type { Loudness } from "./loudness";
 export { directoryResolver } from "./media";
 export {
   envelopeAt,

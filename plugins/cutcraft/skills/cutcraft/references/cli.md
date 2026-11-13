@@ -174,8 +174,8 @@ npx cutcraft look colour-grade.tsx --at 1,2.5 --without grade
 
 ### Listening
 
-A picture says nothing about the sound, so `--listen` adds a strip for it under the cells. The strip is the mix as an
-export would write it, after every volume, fade and duck: its level over time on a decibel scale from -60 dBFS to full
+A picture says nothing about the sound, so `--listen` adds a strip for it under the cells. The strip is the mix an
+export makes, after every volume, fade and duck, measured before the export clamps it to full scale: its level over time on a decibel scale from -60 dBFS to full
 scale, a time scale beneath it, and each word of the transcript where the cut says it. In each column the dim bar is
 the loudest sample and the bright bar is the average level. Silent stretches are shaded.
 
@@ -193,6 +193,10 @@ The legend carries the same as numbers, so a check needs no picture:
   "to": 5.5,
   "peakDb": -16.5,
   "rmsDb": -25,
+  "lufs": -24.1,
+  "truePeakDb": -16.4,
+  "clipped": 0,
+  "clippedAt": null,
   "silences": [[2, 4]],
   "words": [{ "i": 0, "text": "Hello", "start": 0.2, "end": 0.6, "clip": "bars" }],
   "strip": { "x": 8, "y": 240, "width": 976, "height": 132 }
@@ -200,7 +204,13 @@ The legend carries the same as numbers, so a check needs no picture:
 ```
 
 `peakDb` is the loudest sample of the stretch and `rmsDb` its average level, both in dB relative to full scale, and
-both `null` when the stretch is silent. A peak at 0 means the mix reaches full scale and may clip. `silences` lists every stretch of at least
+both `null` when the stretch is silent. `lufs` is the integrated loudness of the stretch (ITU-R BS.1770, the measure
+streaming services and broadcasters set their targets in), and `truePeakDb` the peak of the wave between its samples
+as well as on them.
+
+The export clamps the mix to full scale, which is heard as distortion. A `peakDb` above 0 is sound it will cut off:
+`clipped` counts the samples above full scale, `clippedAt` is the time of the first, and `look` and `render` both
+print a warning. Lower a `volume` or duck the music until it is gone; nothing limits the mix for you. `silences` lists every stretch of at least
 0.3 s that stays below -50 dBFS: a gap where the music should carry on, or a clip whose sound is missing. The words
 are the ones the cut plays inside the stretch, at the times it plays them.
 
