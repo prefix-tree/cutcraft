@@ -9,7 +9,6 @@ import { Caption, Captions, Composition, Effect, Keyframe, Layer, Three, Track, 
 // Two stages. The room: a small 3D room, which is what the game shows. The slice: the same room cut in half and
 // seen from the side, where each trick is explained; its floor is a row of dots, each with its brightness.
 //
-// This file holds the opening and the first trick. The other four follow the same pattern.
 
 const INK = "#0a0c13";
 const GOLD = "#ffc857";
@@ -31,7 +30,22 @@ Your screen is millions of tiny [dots]. All the game really does is pick a colou
 Let's follow [one] dot and watch how it gets its light. (0.4)
 Here's the first cheat. Think of standing in the [sun]. Turn your face [towards] it and you feel the warmth.
 Turn [away] and you don't. The game asks every surface the same thing: are you [facing] the lamp?
-Facing it: [bright]. Turned away: [dark]. (0.8) {room} (2.4) {end}
+Facing it: [bright]. Turned away: [dark]. (0.8) {room1} (2.2) {back1}
+But that's not enough, because the [ball] is in the way, and the floor behind it is still bright.
+So the game does something clever. It takes a [photo] from where the lamp is.
+Anything the lamp can see in that photo gets light. Anything [hidden] behind something else doesn't.
+That's all a shadow is: a place the lamp can't see. (0.6) {room2} (2.2) {back2}
+Now the shadow is pure [black], and that looks wrong. In real life light [bounces].
+Hold a white sheet of paper next to a red wall and the paper turns a little [pink].
+Working that out properly is far too slow. So the game's makers work it out [once], long before you play,
+and paint the answer onto the room. (0.6) {room3} (2.2) {back3}
+Look where the ball [touches] the floor. Less light gets into tight places,
+the way the corners of a room always look a little dimmer. The game doesn't work out why.
+It just finds the corners and [darkens] them. (0.6) {room4} (1.6)
+Last one. A screen can't actually be [dazzling]. So the brightest dots are [smeared] outwards, just a little,
+and your eye reads that as glare. (0.5)
+Five small cheats, for every dot, sixty times a [again]. (0.3)
+That's the light you've been looking at in every game you've ever played. (1.4) {end}
 `;
 
 interface Said {
@@ -40,8 +54,8 @@ interface Said {
   readonly end: number;
 }
 /** Seconds a word takes to say at an explainer's pace, and the breath a comma or a full stop takes after it. */
-const say = (word: string): number => 0.1 + 0.044 * word.replace(/[^a-z]/gi, "").length;
-const breath = (word: string): number => (/[.?!:]$/.test(word) ? 0.28 : /,$/.test(word) ? 0.13 : 0);
+const say = (word: string): number => 0.09 + 0.041 * word.replace(/[^a-z]/gi, "").length;
+const breath = (word: string): number => (/[.?!:]$/.test(word) ? 0.25 : /,$/.test(word) ? 0.11 : 0);
 const ms = (t: number): number => Math.round(t * 1000) / 1000;
 
 const cue: Record<string, number> = {};
@@ -86,7 +100,7 @@ const lines: { text: string; start: number; end: number; words: Said[] }[] = [];
     if (next && line.end > next.start) line.end = next.start;
   });
 }
-const at = cue as Record<
+type Cue =
   | "light"
   | "billions"
   | "hours"
@@ -100,10 +114,27 @@ const at = cue as Record<
   | "facing"
   | "bright"
   | "dark"
-  | "room"
-  | "end",
-  number
->;
+  | "room1"
+  | "back1"
+  | "ball"
+  | "photo"
+  | "hidden"
+  | "room2"
+  | "back2"
+  | "black"
+  | "bounces"
+  | "pink"
+  | "once"
+  | "room3"
+  | "back3"
+  | "touches"
+  | "darkens"
+  | "room4"
+  | "dazzling"
+  | "smeared"
+  | "again"
+  | "end";
+const at = cue as Record<Cue, number>;
 const LENGTH = Math.ceil(at.end * 10) / 10;
 if (typeof process !== "undefined" && process.env.ONE_PIXEL_CUES) console.error(JSON.stringify(cue));
 
@@ -123,23 +154,80 @@ const dotX = (i: number): number => 140 + 80 * i;
 const OURS = 7;
 /** Each dot's brightness with only "are you facing the lamp?" answered: high under the lamp, falling with distance. */
 const FACING = [78, 92, 96, 90, 82, 74, 66, 58, 50, 42];
+/** The dots the ball hides from the lamp, and what the bounce off the red wall gives each of them back. */
+const HIDDEN: Readonly<Record<number, number>> = { 5: 8, 6: 11, 7: 14 };
+/** What darkening the tight places takes away: where the ball meets the floor, and at the foot of the wall. */
+const TIGHT: Readonly<Record<number, number>> = { 5: 3, 6: 2, 9: 4 };
+
+/** The lamp's lines of sight to the floor: where each one ends, and whether the ball stopped it on the way. */
+const SIGHT = Array.from({ length: 17 }, (_, k) => {
+  const x = 170 + 46 * k;
+  const dx = x - LAMP.x;
+  const dy = FLOOR - LAMP.y;
+  const length = Math.hypot(dx, dy);
+  const ux = dx / length;
+  const uy = dy / length;
+  const along = (BALL.x - LAMP.x) * ux + (BALL.y - LAMP.y) * uy;
+  const off = (BALL.x - LAMP.x) ** 2 + (BALL.y - LAMP.y) ** 2 - along ** 2;
+  if (off >= BALL.r ** 2) return { x, y: FLOOR, blocked: false };
+  const reach = along - Math.sqrt(BALL.r ** 2 - off);
+  return { x: LAMP.x + ux * reach, y: LAMP.y + uy * reach, blocked: true };
+});
+/** The part of the room the lamp cannot see: from the ball's edges down to the floor. */
+const WEDGE = "566,1028 672,1066 768,1180 547,1180";
+const WALL_HIT = { x: 932, y: 880 };
+
+/** When the slice is on screen: for each trick's explanation, stepping aside for the room after each one. */
+const sliceShown = (time: number): number =>
+  (
+    [
+      [at.dots - 0.5, at.room1],
+      [at.back1, at.room2],
+      [at.back2, at.room3],
+      [at.back3, at.room4],
+    ] as const
+  ).reduce((most, [from, to]) => Math.max(most, ease(time, from, from + 0.35) * (1 - ease(time, to - 0.3, to))), 0);
 
 function Slice() {
   const { time } = useLayer();
-  // The slice comes in as the room turns side-on, and steps aside for the room at the end of the trick.
-  const here = ease(time, at.dots - 0.5, at.dots + 0.1) * (1 - ease(time, at.room - 0.25, at.room + 0.1));
+  const here = sliceShown(time);
   if (here <= 0) return null;
+  const glow = { filter: "drop-shadow(0 0 10px #ffc857) drop-shadow(0 0 3px #ffc857)" };
   const lampOn = ease(time, at.sun - 0.1, at.sun + 0.5);
+  const framed = ease(time, at.one, at.one + 0.35);
+  const ours = dotX(OURS) + 36;
+
+  // The first trick: is this surface facing the lamp? Its drawing leaves when the room takes over.
+  const one = 1 - ease(time, at.room1 - 0.2, at.room1);
   const counted = ease(time, at.bright, at.bright + 0.9);
   const dim = ease(time, at.dark, at.dark + 0.6);
-  const framed = ease(time, at.one, at.one + 0.35);
-  const pinUp = ease(time, at.towards, at.towards + 0.35);
-  const rayIn = ease(time, at.towards + 0.2, at.towards + 0.7);
-  const wallPin = ease(time, at.away, at.away + 0.35);
-  const fan = ease(time, at.facing, at.facing + 0.8);
-  const wrong = ease(time, at.dark + 0.7, at.dark + 1.3);
+  const pinUp = ease(time, at.towards, at.towards + 0.35) * one;
+  const rayIn = ease(time, at.towards + 0.2, at.towards + 0.7) * one;
+  const wallPin = ease(time, at.away, at.away + 0.35) * one;
+  const fan = ease(time, at.facing, at.facing + 0.8) * one;
   const px = dotX(3) + 36;
-  const glow = { filter: "drop-shadow(0 0 10px #ffc857) drop-shadow(0 0 3px #ffc857)" };
+
+  // The second: the ball is in the way. A ray that goes through it, then the lamp's photo, then the shadow.
+  const through =
+    Math.max(ease(time, at.dark + 0.7, at.dark + 1.3) * one, ease(time, at.ball, at.ball + 0.5)) *
+    (1 - ease(time, at.photo - 0.2, at.photo + 0.2));
+  const pulse = ease(time, at.ball, at.ball + 0.3) * (1 - ease(time, at.ball + 0.5, at.ball + 1.1));
+  const photo = ease(time, at.photo, at.photo + 0.4) * (1 - ease(time, at.room2 - 0.2, at.room2));
+  const sweep = ease(time, at.photo + 0.2, at.photo + 1.6);
+  const dark = ease(time, at.hidden, at.hidden + 0.7);
+
+  // The third: light bounces off the red wall into the shadow. Worked out once, in advance.
+  const flash = ease(time, at.black, at.black + 0.3) * (1 - ease(time, at.black + 0.6, at.black + 1.2));
+  const toWall = ease(time, at.bounces, at.bounces + 0.45);
+  const fromWall = ease(time, at.bounces + 0.45, at.bounces + 0.95);
+  const bounced = toWall * (1 - ease(time, at.room3 - 0.2, at.room3));
+  const pink = ease(time, at.pink, at.pink + 0.8);
+  const stamp = ease(time, at.once, at.once + 0.25) * (1 - ease(time, at.room3 - 0.4, at.room3 - 0.1));
+
+  // The fourth: tight places are darkened.
+  const ring = ease(time, at.touches, at.touches + 0.4);
+  const tight = ease(time, at.darkens, at.darkens + 0.7);
+
   return (
     <svg
       viewBox="0 0 1080 1920"
@@ -160,17 +248,54 @@ function Slice() {
           <stop offset=".35" stopColor={GOLD} stopOpacity=".3" />
           <stop offset="1" stopColor={GOLD} stopOpacity="0" />
         </radialGradient>
+        <radialGradient id="op-soft">
+          <stop offset="0" stopColor="#000000" stopOpacity=".8" />
+          <stop offset="1" stopColor="#000000" stopOpacity="0" />
+        </radialGradient>
         <pattern id="op-grid" width="60" height="60" patternUnits="userSpaceOnUse">
           <path d="M60 0H0V60" fill="none" stroke="#161b2b" strokeWidth="2" />
         </pattern>
       </defs>
       <rect width="1080" height="1920" fill="url(#op-grid)" opacity=".7" />
       {/* A slow drift, so the diagram is never a still picture. */}
-      <g transform={`translate(0 ${mix(18, -18, ease(time, at.dots, at.room))})`}>
+      <g transform={`translate(0 ${mix(18, -18, ease(time, at.dots, at.room4))})`}>
         <line x1="140" y1="520" x2="940" y2="520" stroke="#6f6a60" strokeWidth="8" />
         <line x1="140" y1="516" x2="140" y2={FLOOR + 4} stroke={CREAM} strokeWidth="10" />
-        <line x1="940" y1="516" x2="940" y2={FLOOR + 4} stroke={RED} strokeWidth="16" opacity={1 - 0.45 * dim} />
+        <line x1="940" y1="516" x2="940" y2={FLOOR + 4} stroke={RED} strokeWidth="16" opacity={1 - 0.45 * dim * one} />
         <line x1="135" y1={FLOOR} x2="948" y2={FLOOR} stroke={CREAM} strokeWidth="8" />
+
+        {/* The shadow: the part of the room the lamp cannot see. Black, until the bounce warms it. */}
+        <polygon
+          points={WEDGE}
+          fill={`rgb(${Math.round(58 * pink)},${Math.round(31 * pink)},${Math.round(26 * pink)})`}
+          opacity={0.85 * dark}
+        />
+        <polygon points={WEDGE} fill="none" stroke="#ffffff" strokeWidth="5" opacity={flash} />
+        <ellipse cx={BALL.x} cy={FLOOR} rx="130" ry="34" fill="url(#op-soft)" opacity={tight} />
+        <ellipse cx="930" cy={FLOOR - 8} rx="64" ry="64" fill="url(#op-soft)" opacity={tight} />
+
+        {/* The lamp's photo: its lines of sight sweep across the room and stop at whatever they meet first. */}
+        {SIGHT.map((line, k) => {
+          const drawn = ease(sweep, k / 20, k / 20 + 0.2);
+          return (
+            <g key={line.x} opacity={drawn > 0 ? photo : 0}>
+              <line
+                x1={LAMP.x}
+                y1={LAMP.y}
+                x2={mix(LAMP.x, line.x, drawn)}
+                y2={mix(LAMP.y, line.y, drawn)}
+                stroke={GOLD}
+                strokeWidth="3"
+                opacity={line.blocked ? 0.95 : 0.45}
+              />
+              {line.blocked && <circle cx={line.x} cy={line.y} r={7 * ease(drawn, 0.9, 1)} fill={GOLD} />}
+            </g>
+          );
+        })}
+        <g transform={`translate(${LAMP.x - 64} ${LAMP.y - 40}) scale(${photo})`} opacity={photo}>
+          <rect x="-34" y="-22" width="68" height="46" rx="8" fill="#10141f" stroke="#ffffff" strokeWidth="4" />
+          <circle r="12" fill="none" stroke="#ffffff" strokeWidth="4" />
+        </g>
 
         {/* The lamp. */}
         <line x1={LAMP.x} y1="520" x2={LAMP.x} y2={LAMP.y - 26} stroke="#555c70" strokeWidth="5" />
@@ -180,7 +305,6 @@ function Slice() {
         {/* "Are you facing the lamp?", asked of every dot at once. */}
         {FACING.map((_, i) => (
           <line
-            // biome-ignore lint/suspicious/noArrayIndexKey: ten fixed dots.
             key={i}
             x1={LAMP.x}
             y1={LAMP.y}
@@ -188,7 +312,7 @@ function Slice() {
             y2={mix(LAMP.y, FLOOR, fan)}
             stroke={GOLD}
             strokeWidth="3"
-            opacity={fan > 0 && i !== 3 && i !== OURS ? 0.4 * (1 - 0.5 * wrong) : 0}
+            opacity={fan > 0 && i !== 3 && i !== OURS ? 0.4 * fan : 0}
           />
         ))}
         {/* One dot answers first: a pin for the way the floor faces, a ray for the way to the lamp. */}
@@ -200,7 +324,7 @@ function Slice() {
           stroke={GOLD}
           strokeWidth="6"
           strokeLinecap="round"
-          opacity={rayIn > 0 ? 1 : 0}
+          opacity={rayIn > 0 ? one : 0}
           style={glow}
         />
         <line
@@ -233,7 +357,7 @@ function Slice() {
           y2={mix(LAMP.y, 860, wallPin)}
           stroke={GOLD}
           strokeWidth="4"
-          opacity={wallPin > 0 ? 0.55 : 0}
+          opacity={wallPin > 0 ? 0.55 * one : 0}
         />
         <text
           x="870"
@@ -243,35 +367,103 @@ function Slice() {
           fontWeight="700"
           fontSize="40"
           fill="#ffffff"
-          opacity={dim}
+          opacity={dim * one}
         >
           31
         </text>
-        {/* What is wrong with this answer: the lamp's ray goes straight through the ball to our dot. */}
+        {/* What is wrong with that answer: the lamp's ray goes straight through the ball to our dot. */}
         <line
           x1={LAMP.x}
           y1={LAMP.y}
-          x2={mix(LAMP.x, dotX(OURS) + 36, wrong)}
-          y2={mix(LAMP.y, FLOOR, wrong)}
+          x2={ours}
+          y2={FLOOR}
           stroke={GOLD}
           strokeWidth="5"
           strokeDasharray="12 12"
-          opacity={wrong > 0 ? 1 : 0}
+          opacity={through}
           style={glow}
         />
 
+        {/* The bounce: out from the lamp, off the red wall, and into the shadow, red now. */}
+        <line
+          x1={LAMP.x}
+          y1={LAMP.y}
+          x2={mix(LAMP.x, WALL_HIT.x, toWall)}
+          y2={mix(LAMP.y, WALL_HIT.y, toWall)}
+          stroke={GOLD}
+          strokeWidth="6"
+          strokeLinecap="round"
+          opacity={bounced}
+          style={glow}
+        />
+        <line
+          x1={WALL_HIT.x}
+          y1={WALL_HIT.y}
+          x2={mix(WALL_HIT.x, ours, fromWall)}
+          y2={mix(WALL_HIT.y, FLOOR, fromWall)}
+          stroke="#ff7a5c"
+          strokeWidth="6"
+          strokeLinecap="round"
+          opacity={fromWall > 0 ? bounced : 0}
+          style={{ filter: "drop-shadow(0 0 10px #ff7a5c)" }}
+        />
+        <circle cx={WALL_HIT.x} cy={WALL_HIT.y} r={12 * ease(toWall, 0.9, 1)} fill="#ff7a5c" opacity={bounced} />
+
         <circle cx={BALL.x} cy={BALL.y} r={BALL.r} fill={CREAM} />
         <circle cx={BALL.x} cy={BALL.y} r={BALL.r} fill="url(#op-ball)" opacity={counted} />
+        <circle
+          cx={BALL.x}
+          cy={BALL.y}
+          r={BALL.r + 10 + 14 * pulse}
+          fill="none"
+          stroke="#ffffff"
+          strokeWidth="5"
+          opacity={pulse}
+        />
+        {/* The tight places, pointed out before they are darkened. */}
+        <circle
+          cx={BALL.x}
+          cy={FLOOR}
+          r="150"
+          fill="none"
+          stroke="#ffffff"
+          strokeWidth="5"
+          strokeDasharray="14 12"
+          opacity={ring * (1 - 0.6 * tight)}
+        />
+        <circle
+          cx="925"
+          cy={FLOOR - 5}
+          r="70"
+          fill="none"
+          stroke="#ffffff"
+          strokeWidth="5"
+          strokeDasharray="14 12"
+          opacity={ring * (1 - 0.6 * tight)}
+        />
 
         {/* The floor, as the screen has it: a row of dots, each with a number for how bright it is. */}
         {FACING.map((facing, i) => {
-          const value = Math.round(mix(50, facing, ease(time, at.bright + i * 0.05, at.bright + 0.7 + i * 0.05)));
+          const lit = mix(50, facing, ease(time, at.bright + i * 0.05, at.bright + 0.7 + i * 0.05));
+          // Our dot goes dark first, then the others the lamp cannot see.
+          const hid = i in HIDDEN ? ease(time, at.hidden + (OURS - i) * 0.18, at.hidden + 0.5 + (OURS - i) * 0.18) : 0;
+          const back = i in HIDDEN ? (HIDDEN[i] ?? 0) * ease(time, at.pink + (OURS - i) * 0.12, at.pink + 0.7) : 0;
+          const taken = (TIGHT[i] ?? 0) * tight;
+          const value = Math.round(lit * (1 - hid) + back - taken);
           const grey = Math.round(40 + value * 2.1);
+          const warm = i in HIDDEN ? pink : 0;
           const shown = ease(time, at.dots + i * 0.04, at.dots + 0.4 + i * 0.04);
+          const changing = (hid > 0 && hid < 1) || (i in HIDDEN && pink > 0 && pink < 1) || (taken > 0 && tight < 1);
           return (
-            // biome-ignore lint/suspicious/noArrayIndexKey: ten fixed dots.
             <g key={i} opacity={shown}>
-              <rect x={dotX(i)} y="1200" width="72" height="64" rx="8" fill={`rgb(${grey},${grey},${grey})`} />
+              <rect
+                x={dotX(i)}
+                y="1200"
+                width="72"
+                height="64"
+                rx="8"
+                fill={`rgb(${Math.round(grey + 44 * warm)},${grey},${Math.round(grey - 10 * warm)})`}
+              />
               <text
                 x={dotX(i) + 36}
                 y="1314"
@@ -279,18 +471,18 @@ function Slice() {
                 fontFamily={MONO}
                 fontWeight="700"
                 fontSize="32"
-                fill={i === OURS || i === 3 ? "#ffffff" : "#9aa2b8"}
+                fill={i === OURS || (i === 3 && one > 0) || changing ? "#ffffff" : "#9aa2b8"}
               >
                 {value}
               </text>
             </g>
           );
         })}
-        <g opacity={framed} transform={`translate(${dotX(OURS) + 36} 1232) scale(${mix(1.8, 1, framed)})`}>
+        <g opacity={framed} transform={`translate(${ours} 1232) scale(${mix(1.8, 1, framed)})`}>
           <rect x="-43" y="-39" width="86" height="78" rx="12" fill="none" stroke="#ffffff" strokeWidth="5" />
         </g>
         <text
-          x={dotX(OURS) + 36}
+          x={ours}
           y="1364"
           textAnchor="middle"
           fontFamily={SANS}
@@ -301,7 +493,59 @@ function Slice() {
         >
           our dot
         </text>
+
+        {/* "Worked out once, long before you play." */}
+        <g transform={`translate(360 1480) rotate(-6) scale(${mix(1.5, 1, stamp)})`} opacity={stamp}>
+          <rect x="-230" y="-40" width="460" height="80" rx="10" fill="none" stroke={GOLD} strokeWidth="5" />
+          <text y="13" textAnchor="middle" fontFamily={MONO} fontWeight="700" fontSize="36" fill={GOLD}>
+            DONE IN ADVANCE
+          </text>
+        </g>
       </g>
+    </svg>
+  );
+}
+
+/** "For every dot, sixty times a second": for a moment the room is all numbers. */
+function Numbers() {
+  const { time } = useLayer();
+  const shown = ease(time, at.again - 0.1, at.again + 0.3) * (1 - ease(time, at.again + 1.0, at.again + 1.8));
+  if (shown <= 0) return null;
+  const cells: { x: number; y: number; value: number }[] = [];
+  let seed = 5;
+  for (let row = 0; row < 12; row++)
+    for (let col = 0; col < 9; col++) {
+      seed = (seed * 16807) % 2147483647;
+      // The numbers tick over, the way they would sixty times a second.
+      const value = Math.floor(((seed / 2147483647) * 100 + Math.floor(time * 12) * (7 + ((row * 9 + col) % 5))) % 100);
+      cells.push({ x: 110 + col * 107, y: 520 + row * 78, value });
+    }
+  return (
+    <svg
+      viewBox="0 0 1080 1920"
+      width="1080"
+      height="1920"
+      role="img"
+      aria-label="Every dot's brightness"
+      style={{ position: "absolute", inset: 0, opacity: shown * 0.85 }}
+    >
+      {cells.map((cell) => (
+        <text
+          key={`${cell.x}-${cell.y}`}
+          x={cell.x}
+          y={cell.y}
+          textAnchor="middle"
+          fontFamily={MONO}
+          fontWeight="700"
+          fontSize="30"
+          fill="#ffffff"
+          stroke={INK}
+          strokeWidth="6"
+          paintOrder="stroke"
+        >
+          {cell.value}
+        </text>
+      ))}
     </svg>
   );
 }
@@ -366,6 +610,10 @@ export default function Video() {
             slab([7, 0.3, 7], [0, -0.15, 0], CREAM);
             slab([7, 5.2, 0.3], [0, 2.45, -3.5], "#cfc8ba");
             slab([0.3, 5.2, 7], [3.5, 2.45, 0], RED);
+            // The dark stage the room stands on: a faint grid, the same one the slice is drawn on.
+            const ground = new THREE.GridHelper(120, 120, "#1c2236", "#141929");
+            ground.position.y = -0.31;
+            scene.add(ground);
             const ball = new THREE.Mesh(new THREE.SphereGeometry(0.7, 64, 48), paint("#e4ddcf"));
             ball.position.set(0.5, 0.7, 0.4);
             ball.castShadow = true;
@@ -379,7 +627,7 @@ export default function Video() {
             cord.position.set(lampAt.x, lampAt.y + 0.9, lampAt.z);
             const bulb = new THREE.Mesh(
               new THREE.SphereGeometry(0.16, 32, 24),
-              new THREE.MeshBasicMaterial({ color: "#fff6dc" }),
+              new THREE.MeshBasicMaterial({ color: "#ffffff" }),
             );
             bulb.position.copy(lampAt);
             scene.add(cord, bulb);
@@ -392,10 +640,58 @@ export default function Video() {
             lamp.shadow.mapSize.set(1024, 1024);
             lamp.shadow.bias = -0.002;
             lamp.shadow.radius = 5;
-            const bounce = new THREE.PointLight("#ff6a4a", 0, 9, 1.4);
-            bounce.position.set(2.7, 1.3, 0.4);
+            const bounce = new THREE.PointLight("#ff6a4a", 0, 10, 1.2);
+            bounce.position.set(1.7, 1.4, 0.8);
             const fill = new THREE.HemisphereLight("#cdd6ff", "#3a2a22", 0);
             scene.add(paintOnly, lamp, bounce, fill);
+
+            // The darkened tight places: soft dark patches laid where the ball meets the floor and along the foot
+            // of the walls. Nothing works them out; they are painted there, which is the cheat.
+            const soft = (draw: (g: CanvasRenderingContext2D) => void) => {
+              const canvas = document.createElement("canvas");
+              canvas.width = 256;
+              canvas.height = 256;
+              const g = canvas.getContext("2d");
+              if (g) draw(g);
+              return new THREE.MeshBasicMaterial({
+                map: new THREE.CanvasTexture(canvas),
+                transparent: true,
+                depthWrite: false,
+                opacity: 0,
+              });
+            };
+            const blob = soft((g) => {
+              const fade = g.createRadialGradient(128, 128, 0, 128, 128, 128);
+              fade.addColorStop(0, "rgba(0,0,0,0.9)");
+              fade.addColorStop(0.45, "rgba(0,0,0,0.5)");
+              fade.addColorStop(1, "rgba(0,0,0,0)");
+              g.fillStyle = fade;
+              g.fillRect(0, 0, 256, 256);
+            });
+            const edge = soft((g) => {
+              const fade = g.createLinearGradient(0, 0, 0, 256);
+              fade.addColorStop(0, "rgba(0,0,0,0.75)");
+              fade.addColorStop(1, "rgba(0,0,0,0)");
+              g.fillStyle = fade;
+              g.fillRect(0, 0, 256, 256);
+            });
+            const laid = (
+              material: InstanceType<typeof THREE.MeshBasicMaterial>,
+              size: [number, number],
+              where: [number, number, number],
+              turn: [number, number, number],
+            ) => {
+              const mesh = new THREE.Mesh(new THREE.PlaneGeometry(...size), material);
+              mesh.position.set(...where);
+              mesh.rotation.set(...turn);
+              scene.add(mesh);
+            };
+            const flatDown = -Math.PI / 2;
+            laid(blob, [2.3, 2.3], [0.5, 0.012, 0.4], [flatDown, 0, 0]);
+            laid(edge, [6.7, 1.1], [0, 0.012, -2.8], [flatDown, 0, 0]);
+            laid(edge, [6.7, 1.1], [2.8, 0.012, 0], [flatDown, 0, -Math.PI / 2]);
+            laid(edge, [6.7, 0.9], [0, 0.45, -3.34], [Math.PI, 0, 0]);
+            laid(edge, [6.7, 0.9], [3.34, 0.45, 0], [Math.PI, Math.PI / 2, 0]);
 
             // "Billions of rays": lines that leave the lamp and bounce from surface to surface.
             let seed = 11;
@@ -441,24 +737,104 @@ export default function Video() {
             );
             scene.add(rays);
 
+            // Where the camera stands for each part of the film: where it is, and what it looks at.
+            type Pose = readonly [eye: readonly [number, number, number], aim: readonly [number, number, number]];
+            const OPEN: Pose = [
+              [-7.5, 6.5, 19],
+              [0.2, 1.7, 0],
+            ];
+            const SIDE: Pose = [
+              [0, 2.2, 24],
+              [0, 2.2, 0],
+            ];
+            const CUTS: readonly [from: Pose, to: Pose][] = [
+              [
+                [
+                  [-6.6, 5.8, 17.4],
+                  [0.2, 1.5, 0],
+                ],
+                [
+                  [-6.0, 5.8, 16.4],
+                  [0.2, 1.5, 0],
+                ],
+              ],
+              // The shadow: from above, looking down at the floor behind the ball.
+              [
+                [
+                  [-5.2, 8.4, 13.5],
+                  [0.9, 0.2, 0.3],
+                ],
+                [
+                  [-4.6, 8.4, 12.6],
+                  [0.9, 0.2, 0.3],
+                ],
+              ],
+              // The bounce: turned towards the red wall.
+              [
+                [
+                  [-7.6, 4.6, 14.5],
+                  [1.2, 1.2, 0],
+                ],
+                [
+                  [-7.0, 4.6, 13.8],
+                  [1.2, 1.2, 0],
+                ],
+              ],
+              // The corners: low and close, where the ball rests on the floor.
+              [
+                [
+                  [-3.4, 2.3, 9.2],
+                  [0.6, 0.5, 0.2],
+                ],
+                [
+                  [-3.0, 2.1, 8.4],
+                  [0.6, 0.5, 0.2],
+                ],
+              ],
+            ];
+            const LAMP_SHOT: Pose = [
+              [-3.6, 4.2, 9.5],
+              [-1.7, 3.3, 0.6],
+            ];
             const eye = new THREE.Vector3();
             const aim = new THREE.Vector3();
+            const toEye = new THREE.Vector3();
+            const toAim = new THREE.Vector3();
+            const stand = (pose: Pose) => {
+              eye.set(...pose[0]);
+              aim.set(...pose[1]);
+            };
+            const move = (pose: Pose, k: number) => {
+              eye.lerp(toEye.set(...pose[0]), k);
+              aim.lerp(toAim.set(...pose[1]), k);
+            };
+            const cutAt = [at.room1, at.room2, at.room3, at.room4] as const;
+            const on = (from: number): number => (time_ >= from - 0.3 ? 1 : 0);
+            let time_ = 0;
+
             return ({ time }) => {
-              // Which room this is. Until "cheats": everything on. After it: paint only. In the cut at the end of the
-              // first trick: the lamp's direct light and nothing else, so there is no shadow yet.
+              time_ = time;
+              // Which room this is. Until "cheats": everything on. After it: paint only. Then each trick's cut to
+              // the room switches that trick on, and it stays on: facing the lamp, the shadow, the bounce, the
+              // corners. By the end it is the room from the first frame again.
               const cheated = ease(time, at.cheats - 0.05, at.cheats + 0.25);
-              const first = time >= at.room - 0.3 ? 1 : 0;
-              const full = 1 - cheated;
-              paintOnly.intensity = 1.9 * cheated * (1 - first) + 0.08 * first;
-              lamp.intensity = 13 * (full + first) * (1 + 0.35 * ease(time, at.light, at.light + 0.25) * full);
-              lamp.shadow.intensity = full;
-              bounce.intensity = 2.2 * full;
-              fill.intensity = 0.3 * full;
+              const whole = 1 - cheated;
+              const facing = Math.max(whole, on(at.room1));
+              const shadow = Math.max(whole, on(at.room2));
+              const bounced = Math.max(whole, on(at.room3));
+              const corners = Math.max(whole, on(at.room4));
+              paintOnly.intensity = 1.9 * cheated * (1 - on(at.room1)) + 0.07 * on(at.room1) * (1 - on(at.room3));
+              lamp.intensity = 13 * facing * (1 + 0.35 * ease(time, at.light, at.light + 0.25) * whole);
+              lamp.shadow.intensity = shadow;
+              bounce.intensity = 1.5 * bounced;
+              fill.intensity = 0.3 * bounced;
+              blob.opacity = 0.55 * corners;
+              edge.opacity = 0.5 * corners;
               bulb.scale.setScalar(
                 1 + 0.45 * ease(time, at.light, at.light + 0.2) * (1 - ease(time, at.light + 0.2, at.light + 0.9)),
               );
               (bulb.material as InstanceType<typeof THREE.MeshBasicMaterial>).color.set(
-                full + first > 0.5 ? "#fff6dc" : "#8b8778",
+                facing > 0.5 ? "#ffffff" : "#8b8778",
               );
 
               // The rays arrive bounce by bounce, and all go at once.
@@ -467,27 +843,39 @@ export default function Video() {
               rays.visible = grown > 0 && cheated < 1;
               (rays.material as InstanceType<typeof THREE.LineBasicMaterial>).opacity = 0.32 * (1 - cheated);
 
-              // The camera: a slow push in from the open corner; then round to face the room side-on, which is the
-              // view the slice is drawn from; and back to the corner for the cut at the end.
-              const push = ease(time, 0, at.cheats);
-              const side = ease(time, at.cheats + 0.5, at.dots + 0.1) * (1 - first);
-              eye.set(mix(-7.5, -6.2, push), mix(6.5, 5.6, push), mix(19, 16.5, push));
-              aim.set(0.2, mix(1.7, 1.5, push), 0);
-              if (first) {
-                const drift = ease(time, at.room, at.end);
-                eye.set(mix(-6.6, -6.0, drift), 5.8, mix(17.4, 16.4, drift));
-              }
-              eye.lerp(new THREE.Vector3(0, 2.2, 24), side);
-              aim.lerp(new THREE.Vector3(0, 2.2, 0), side);
+              // The camera. The opening: a slow push in from the open corner, then round to face the room side-on,
+              // which is the view the slice is drawn from. After that the slice covers the room between cuts, so
+              // each cut has its own place to stand, and drifts while it is up.
+              stand(OPEN);
+              move(
+                [
+                  [-6.2, 5.6, 16.5],
+                  [0.2, 1.5, 0],
+                ],
+                ease(time, 0, at.cheats),
+              );
+              move(SIDE, ease(time, at.cheats + 0.5, at.dots + 0.1));
+              cutAt.forEach((from, k) => {
+                const cut = CUTS[k];
+                if (!cut || time < from - 0.3) return;
+                stand(cut[0]);
+                move(cut[1], ease(time, from - 0.3, from + 2.6));
+              });
+              // The last trick stays in the room: up to the lamp. Then back out to where the film began.
+              move(LAMP_SHOT, ease(time, at.room4 + 1.0, at.dazzling));
+              move(OPEN, ease(time, at.again - 1.2, at.end - 0.6));
               camera.position.copy(eye);
               camera.lookAt(aim);
             };
           }}
         >
           {/* The glow of the lamp and of the rays is done to the finished picture, as a game does it. */}
-          <Effect id="bloom" type="glow" params={{ radius: 30, intensity: 0.9, threshold: 0.9, tint: 0 }}>
-            <Keyframe id="bloom-on" param="intensity" at={at.cheats - 0.05} value={0.9} />
+          <Effect id="bloom" type="glow" params={{ radius: 64, intensity: 2.2, threshold: 0.84, tint: 0 }}>
+            <Keyframe id="bloom-on" param="intensity" at={at.cheats - 0.05} value={2.2} />
             <Keyframe id="bloom-off" param="intensity" at={at.cheats + 0.3} value={0} />
+            {/* The last trick: the lamp is a flat disc until its brightness is smeared outwards. */}
+            <Keyframe id="bloom-flat" param="intensity" at={at.smeared} value={0} />
+            <Keyframe id="bloom-back" param="intensity" at={at.smeared + 0.6} value={2.2} />
           </Effect>
         </Three>
         <Layer id="clock" start={0} duration={LENGTH}>
@@ -495,6 +883,9 @@ export default function Video() {
         </Layer>
         <Layer id="slice" start={0} duration={LENGTH}>
           <Slice />
+        </Layer>
+        <Layer id="numbers" start={0} duration={LENGTH}>
+          <Numbers />
         </Layer>
       </Track>
 
