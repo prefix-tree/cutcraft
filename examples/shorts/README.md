@@ -3,13 +3,14 @@
 Short vertical explainers. Each is one file, and each answers one "how does that work?" question in 20 seconds to
 two minutes, at 1080x1920, with its words kept inside the area TikTok, Reels and Shorts leave clear.
 
-Two are pure animation with no footage: everything on screen is drawn by code on the video's clock. One is a talking
+Three are pure animation with no footage: everything on screen is drawn by code on the video's clock. One is a talking
 head cut out of a real interview, with captions and cards timed by the words of its transcript.
 
 | File | What it explains |
 |---|---|
 | `game-lighting.tsx` | How game lighting fakes it: a small room with no lighting, then direct light, shadows, bounce light, ambient occlusion and bloom switched on one at a time. |
 | `lunar-eclipse.tsx` | Why there is no lunar eclipse every month, and why the Moon turns red: five cuts from a NASA interview, with word-timed captions, type cards, badges and a quotation. Footage credit in `media/CREDITS.md`. |
+| `one-pixel.tsx` | How a game lights a room, told by following one dot of the screen: why real light is too slow to copy, then five cheats (facing the lamp, the shadow, the bounce, the corners, the glow). Two stages: a 3D room, and the same room cut in half as a diagram with a brightness number on every dot. Subtitles only, timed word by word for a voice to be added. A first cut. |
 | `lighting-explained.tsx` | Every lighting trick a game uses, one at a time, each on the same small stage shown twice: without the trick on top, with it underneath. The opening and the first three so far: direct light, the shadow map, ambient light. |
 
 ## On the documentation site
