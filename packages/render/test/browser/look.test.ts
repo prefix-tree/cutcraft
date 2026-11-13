@@ -5,7 +5,7 @@ import { join } from "node:path";
 
 import { manifest as mediaManifest } from "../../../player/e2e/app/composition";
 import generateMedia, { mediaDir } from "../../../player/e2e/gen-media";
-import { directoryResolver, loadVideo, MAX_LOOK_CELLS, renderLook, renderStill } from "../../src";
+import { directoryResolver, loadVideo, MAX_LOOK_CELLS, renderLook, renderStill, renderVideo } from "../../src";
 import { readImage } from "../helpers/output";
 
 const scratch = join(import.meta.dirname, "..", ".tmp", "look");
@@ -378,6 +378,35 @@ describe("--listen", () => {
     expect(full?.silences).toEqual([]);
     expect((full?.peakDb as number) - (half?.peakDb as number)).toBeCloseTo(6.02, 0);
     expect((full?.rmsDb as number) - (half?.rmsDb as number)).toBeCloseTo(6.02, 0);
+  });
+
+  it("says when the mix goes above full scale, in the legend and in the export", async () => {
+    const clips = (w: string): boolean => w.startsWith("the soundtrack clips: ");
+    // The tone four times over, each at four times its level.
+    const more = [1, 2, 3]
+      .map((n) => `<Track id="l${n}"><Clip id="c${n}" src="asset:bars" in={0} out={2} volume={4} /></Track>`)
+      .join("");
+    const loud = spoken(4).replace(`<Track id="text"`, `${more}<Track id="text"`);
+    const { result } = await listen("clips", loud, "all");
+    const heard = result.listen as NonNullable<typeof result.listen>;
+    expect(heard.clipped).toBeGreaterThan(0);
+    expect(heard.clippedAt).toBeLessThan(2);
+    expect(heard.peakDb).toBeGreaterThan(0);
+    expect(heard.truePeakDb).toBeGreaterThanOrEqual(heard.peakDb as number);
+    expect(result.warnings.filter(clips)).toHaveLength(1);
+    const v = await load("clips-out", loud);
+    const rendered = await renderVideo({
+      state: v.state,
+      source: v.source,
+      media: v.media,
+      out: join(dir, "clips.wav"),
+    });
+    expect(rendered.warnings.filter(clips)).toEqual(result.warnings.filter(clips));
+
+    const calm = (await listen("calm", spoken(), "all")).result;
+    expect(calm.listen).toMatchObject({ clipped: 0, clippedAt: null });
+    expect(calm.listen?.lufs).toBeLessThan(calm.listen?.peakDb as number);
+    expect(calm.warnings.filter(clips)).toEqual([]);
   });
 
   it("takes an element's id for the time it is on, and reports a silent stretch as silent", async () => {

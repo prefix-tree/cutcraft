@@ -19,6 +19,7 @@ import {
 import type { ResolvedState } from "@cutcraft/kit";
 import { buildAudioPlan, type MediaResolver, makeNestedResolver } from "@cutcraft/player/engine";
 
+import { clippingWarning, createLoudnessMeter, type Loudness } from "../../loudness";
 import { mixPlan } from "../../mixer";
 import { MediabunnyPcm } from "../../pcm";
 import type { AudioRequest } from "./protocol";
@@ -76,11 +77,15 @@ export async function renderSoundtrack(
   output.addAudioTrack(source);
   await output.start();
   const pcm = new MediabunnyPcm(media);
+  // Measured before the clamp, then clamped here, so the mix runs once and the file sounds as it did.
+  const meter = createLoudnessMeter(sampleRate);
   try {
-    for await (const block of mixPlan(plan, pcm, { sampleRate, from: r.from, to: r.to })) {
+    for await (const block of mixPlan(plan, pcm, { sampleRate, from: r.from, to: r.to, clamp: false })) {
+      meter.add(block.left, block.right);
       const planar = new Float32Array(block.left.length * 2);
       planar.set(block.left, 0);
       planar.set(block.right, block.left.length);
+      for (let i = 0; i < planar.length; i++) planar[i] = Math.max(-1, Math.min(1, planar[i] as number));
       const sample = new AudioSample({
         data: planar,
         format: "f32-planar",
@@ -98,15 +103,19 @@ export async function renderSoundtrack(
   } finally {
     pcm.dispose();
   }
-  return { bytes: new Uint8Array(target.buffer as ArrayBuffer), codec, warnings: [] };
+  const clips = clippingWarning(meter.result(), r.from);
+  return { bytes: new Uint8Array(target.buffer as ArrayBuffer), codec, warnings: clips ? [clips] : [] };
 }
 
 /** What a stretch of the mix sounds like, measured: for a picture of it, and for the numbers beside it. */
-export interface SoundMeasure {
+export interface SoundMeasure extends Loudness {
   /** The loudest sample of each column, 0..1, and the root mean square of each. */
   readonly peaks: number[];
   readonly rms: number[];
-  /** The loudest sample of the stretch and its root mean square, in dB relative to full scale; null for silence. */
+  /**
+   * The loudest sample of the stretch and its root mean square, in dB relative to full scale; null for silence. The
+   * mix is measured before the export clamps it, so a peak above 0 is sound the file will clip.
+   */
   readonly peakDb: number | null;
   readonly rmsDb: number | null;
   /** Stretches of at least 0.3 s quieter than -50 dBFS, in composition seconds. */
@@ -143,10 +152,12 @@ export async function measureSound(
   let peak = 0,
     sum = 0,
     seen = 0;
+  const meter = createLoudnessMeter(sampleRate);
   if (plan.length > 0) {
     const pcm = new MediabunnyPcm(media);
     try {
-      for await (const block of mixPlan(plan, pcm, { sampleRate, from, to })) {
+      for await (const block of mixPlan(plan, pcm, { sampleRate, from, to, clamp: false })) {
+        meter.add(block.left, block.right);
         for (let i = 0; i < block.left.length; i++) {
           const l = block.left[i] as number,
             r = block.right[i] as number;
@@ -181,7 +192,10 @@ export async function measureSound(
       start = null;
     }
   }
+  const loudness = meter.result();
   return {
+    ...loudness,
+    clippedAt: loudness.clippedAt === null ? null : Math.round((from + loudness.clippedAt) * 1000) / 1000,
     peaks: peaks.map((p) => Math.min(1, p)),
     rms: squares.map((s, i) => Math.min(1, Math.sqrt(s / Math.max(1, counts[i] as number)))),
     peakDb: db(peak),

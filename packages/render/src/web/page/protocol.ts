@@ -1,5 +1,7 @@
 // What Node and the export page say to each other. Shared types only: no code runs from here.
 
+import type { Loudness } from "../../loudness";
+
 /** Served as /job.json: what the page loads. */
 export interface PageJob {
   /** The cut file's source text, evaluated with the kit's `loadModule` as the editor does. */
@@ -84,7 +86,7 @@ export interface ListenRequest {
   readonly words: readonly { readonly text: string; readonly start: number; readonly end: number }[];
 }
 
-export interface ListenResult {
+export interface ListenResult extends Loudness {
   /** Bytes of the strip, a PNG, waiting for `read`. */
   readonly length: number;
   readonly peakDb: number | null;

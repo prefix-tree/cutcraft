@@ -148,6 +148,9 @@ describe("mixBlock", () => {
     const [l] = mixBlock([a, b], 0, 4800, SR);
     expect(Math.max(...l)).toBe(1);
     expect(Math.min(...l)).toBe(-1);
+    // Unclamped, for the loudness meter, which has to see what the clamp cuts off.
+    const [raw] = mixBlock([a, b], 0, 4800, SR, false);
+    expect(Math.max(...raw)).toBeCloseTo(1.6, 2);
   });
 
   it("pans like a Web Audio StereoPannerNode", () => {

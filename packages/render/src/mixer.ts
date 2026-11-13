@@ -88,6 +88,7 @@ export function mixBlock(
   startFrame: number,
   frames: number,
   sampleRate: number,
+  clamp = true,
 ): [Float32Array, Float32Array] {
   const left = new Float32Array(frames);
   const right = new Float32Array(frames);
@@ -143,7 +144,7 @@ export function mixBlock(
       right[i] = (right[i] as number) + r * g;
     }
   }
-  for (let i = 0; i < frames; i++) {
+  for (let i = 0; clamp && i < frames; i++) {
     left[i] = Math.max(-1, Math.min(1, left[i] as number));
     right[i] = Math.max(-1, Math.min(1, right[i] as number));
   }
@@ -162,6 +163,8 @@ export interface MixOptions {
   readonly to: number;
   /** Frames per block; default 4096. */
   readonly blockFrames?: number;
+  /** False leaves samples above full scale as they are, for measuring; default true. */
+  readonly clamp?: boolean;
 }
 
 export interface MixedBlock {
@@ -209,7 +212,7 @@ export async function* mixPlan(
       const o = sorted.find((x) => key(x) === k);
       if (o && o.compEnd <= t0) loading.delete(k);
     }
-    const [left, right] = mixBlock(sources, f, frames, sr);
+    const [left, right] = mixBlock(sources, f, frames, sr, options.clamp);
     yield { timestamp: (f - startFrame) / sr, left, right };
   }
 }

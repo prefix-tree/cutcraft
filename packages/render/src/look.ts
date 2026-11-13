@@ -20,6 +20,7 @@ import type { MediaResolver } from "@cutcraft/player/engine";
 import type { FontFile } from "./fonts";
 import { FrameKeys, readCached, wholeKey, writeCached } from "./frame-cache";
 import { describeAt } from "./inspect";
+import { clippingWarning, type Loudness } from "./loudness";
 import { blankPicture, decodePng, encodePng, paste } from "./png";
 import { type ExportSource, openEngine } from "./renderer";
 import type { SheetCell } from "./web/page/protocol";
@@ -79,11 +80,14 @@ export interface LookCell extends Moment {
   readonly file?: string;
 }
 
-export interface LookSound {
+export interface LookSound extends Loudness {
   /** The stretch, in seconds of the finished video. */
   readonly from: number;
   readonly to: number;
-  /** The loudest sample and the average level of the mix there, in dB relative to full scale; null for silence. */
+  /**
+   * The loudest sample and the average level of the mix there, in dB relative to full scale; null for silence. The
+   * mix is measured before the export clamps it: a peak above 0 clips in the file, and `clipped` counts the samples.
+   */
   readonly peakDb: number | null;
   readonly rmsDb: number | null;
   /** Stretches of at least 0.3 s quieter than -50 dBFS. */
@@ -237,12 +241,7 @@ export async function renderLook(options: LookOptions): Promise<LookResult> {
     stretch && keys
       ? `listen-${await wholeKey(keys, { listen: [stretch.from, stretch.to], width: stripWidth })}`
       : null;
-  let sound: {
-    bytes: Uint8Array;
-    peakDb: number | null;
-    rmsDb: number | null;
-    silences: LookSound["silences"];
-  } | null = null;
+  let sound: (Pick<LookSound, "peakDb" | "rmsDb" | "silences"> & Loudness & { bytes: Uint8Array }) | null = null;
   if (stretch && soundName && options.cacheDir) {
     const bytes = readCached(options.cacheDir, `${soundName}.png`);
     const measured = readCached(options.cacheDir, `${soundName}.json`);
@@ -297,6 +296,10 @@ export async function renderLook(options: LookOptions): Promise<LookResult> {
     }
   }
 
+  // clippedAt is already in the video's seconds here.
+  const clips = sound ? clippingWarning(sound) : null;
+  if (clips) warnings.push(clips);
+
   // The sheet is put together here, from tiles, so one made of cached cells needs no browser at all.
   const pictures = tiles.map((bytes) => decodePng(bytes as Uint8Array));
   const first = pictures[0] as (typeof pictures)[number];
@@ -341,6 +344,10 @@ export async function renderLook(options: LookOptions): Promise<LookResult> {
             to: stretch.to,
             peakDb: sound.peakDb,
             rmsDb: sound.rmsDb,
+            lufs: sound.lufs,
+            truePeakDb: sound.truePeakDb,
+            clipped: sound.clipped,
+            clippedAt: sound.clippedAt,
             silences: sound.silences,
             words,
             strip: { x: SHEET_GAP, y: cellsHeight, width: strip.width, height: strip.height },
