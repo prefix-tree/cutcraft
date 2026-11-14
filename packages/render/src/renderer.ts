@@ -1,4 +1,5 @@
 import { writeFile } from "node:fs/promises";
+import { join, parse } from "node:path";
 
 import { EncodedVideoPacketSource, FilePathTarget, Output } from "mediabunny";
 
@@ -98,10 +99,8 @@ const DRAFT_SCALE = 0.5;
 
 /** Where a draft of `out` is written: beside it, marked in its name, so a draft never replaces the video. */
 export function draftPath(out: string): string {
-  const dot = out.lastIndexOf(".");
-  return dot > Math.max(out.lastIndexOf("/"), out.lastIndexOf("\\"))
-    ? `${out.slice(0, dot)}.draft${out.slice(dot)}`
-    : `${out}.draft`;
+  const { dir, name, ext } = parse(out);
+  return join(dir, `${name}.draft${ext}`);
 }
 
 /** Opens the export page for a file: the browser, its fonts, and how many pages render at once. */
@@ -144,11 +143,12 @@ export async function renderVideo(options: RenderOptions): Promise<RenderResult>
   const { state } = options;
   const draft = options.draft === true;
   if (draft && options.smartCopy) throw new Error("a draft renders every frame it shows: leave out the copy option");
-  // A draft counts in its own frames, half as many a second, and writes pictures half as wide and as high.
-  const fps = draft ? state.composition.fps / DRAFT_FRAME_STEP : state.composition.fps;
+  // What the file is written at. A draft counts in its own frames, half as many a second, and writes pictures half
+  // as wide and as high; everything below counts frames at this rate.
+  const outFps = draft ? state.composition.fps / DRAFT_FRAME_STEP : state.composition.fps;
   const even = (n: number): number => Math.max(2, Math.round((n * DRAFT_SCALE) / 2) * 2);
-  const width = draft ? even(state.composition.width) : state.composition.width;
-  const height = draft ? even(state.composition.height) : state.composition.height;
+  const outWidth = draft ? even(state.composition.width) : state.composition.width;
+  const outHeight = draft ? even(state.composition.height) : state.composition.height;
   const container = options.container ?? containerOf(options.out);
   const audioOnly = container === "mp3" || container === "wav";
   if (audioOnly && draft) throw new Error(`a draft is of the picture: a .${container} file holds only the soundtrack`);
@@ -161,12 +161,12 @@ export async function renderVideo(options: RenderOptions): Promise<RenderResult>
     );
   const from = Math.max(0, options.from ?? 0);
   const to = Math.min(state.composition.duration, options.to ?? state.composition.duration);
-  const first = Math.round(from * fps);
-  const last = Math.ceil(to * fps - FRAME_EPS);
+  const first = Math.round(from * outFps);
+  const last = Math.ceil(to * outFps - FRAME_EPS);
   const total = Math.max(0, last - first);
   if (total === 0) throw new Error("nothing to render: the range holds no frames");
   const keyFrameInterval = options.keyFrameInterval ?? 2;
-  const gopFrames = Math.max(1, Math.round(keyFrameInterval * fps));
+  const gopFrames = Math.max(1, Math.round(keyFrameInterval * outFps));
   const tabs = Math.max(1, Math.floor(options.tabs ?? 1));
 
   const warnings: string[] = [];
@@ -201,7 +201,7 @@ export async function renderVideo(options: RenderOptions): Promise<RenderResult>
 
     output = new Output({ format: outputFormat(videoContainer), target: new FilePathTarget(options.out) });
     const video = new EncodedVideoPacketSource(codec);
-    output.addVideoTrack(video, { frameRate: fps });
+    output.addVideoTrack(video, { frameRate: outFps });
     if (soundtrack?.bytes) {
       feed = await AudioFeed.open(soundtrack.bytes);
       output.addAudioTrack(feed.source);
@@ -221,14 +221,14 @@ export async function renderVideo(options: RenderOptions): Promise<RenderResult>
             last: piece.last,
             container: videoContainer,
             codec,
-            bitrate: options.bitrate ?? Math.round(width * height * fps * 0.1),
+            bitrate: options.bitrate ?? Math.round(outWidth * outHeight * outFps * 0.1),
             ...(options.quality
               ? { quality: options.quality }
               : draft && options.bitrate === undefined
                 ? { quality: "low" as const }
                 : {}),
             keyFrameInterval,
-            ...(draft ? { fps, scale: DRAFT_SCALE } : {}),
+            ...(draft ? { fps: outFps, scale: DRAFT_SCALE } : {}),
           }),
     );
     for (const r of rendered) r?.catch(() => undefined);
@@ -237,10 +237,10 @@ export async function renderVideo(options: RenderOptions): Promise<RenderResult>
     for (const [i, piece] of pieces.entries()) {
       if (options.signal?.aborted) throw new Error("render aborted");
       if (piece.kind === "copy") {
-        await feedCopy(piece, { source: video, fps, originFrame: first, config }, ahead);
+        await feedCopy(piece, { source: video, fps: outFps, originFrame: first, config }, ahead);
       } else {
         const bytes = await (rendered[i] as Promise<Uint8Array>);
-        await feedSegment(bytes, { source: video, fps, offsetFrames: piece.first - first, config }, ahead);
+        await feedSegment(bytes, { source: video, fps: outFps, offsetFrames: piece.first - first, config }, ahead);
       }
       done += piece.last - piece.first;
       options.onProgress?.({ frame: done, frames: total });
@@ -265,9 +265,9 @@ export async function renderVideo(options: RenderOptions): Promise<RenderResult>
     return {
       frames,
       audio,
-      fps,
-      width,
-      height,
+      fps: outFps,
+      width: outWidth,
+      height: outHeight,
       wallMs: performance.now() - started,
       tabs,
       copiedFrames,
