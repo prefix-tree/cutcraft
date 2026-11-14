@@ -12,14 +12,14 @@ import { checkLayout, formatLayout, type Insets, SAFE_ZONES, type SafeZoneName }
 import { loadVideo } from "./load";
 import { renderLook } from "./look";
 import { directoryResolver } from "./media";
-import { renderVideo } from "./renderer";
+import { draftPath, renderVideo } from "./renderer";
 import { renderStill } from "./still";
 import { CHROME_MILESTONE, cachedChrome, installChrome } from "./web/chrome";
 
 /** --check-layout found issues: apart from 1 (an error) and 2 (usage), so a script can tell them apart. */
 const EXIT_LAYOUT_ISSUES = 3;
 
-const USAGE = `Usage: cutcraft <file.tsx> --out <video.mp4|.webm|.mp3|.wav> [options]
+const USAGE = `Usage: cutcraft <file.tsx> --out <video.mp4|.webm|.mp3|.wav> [--draft] [options]
        cutcraft <file.tsx> --still <seconds> --out <image.png|.jpg> [options]
        cutcraft <file.tsx> --check-layout [--safe-zone <zone>] [--subject <x,y,w,h>] [--json] [options]
        cutcraft <file.tsx> --srt <captions.srt> | --vtt <captions.vtt> [--from <s> --to <s>]
@@ -75,6 +75,8 @@ const USAGE = `Usage: cutcraft <file.tsx> --out <video.mp4|.webm|.mp3|.wav> [opt
   --codec <name>        avc (default for .mp4), vp9 (default for .webm), or av1 in either
   --bitrate <bps>       video bits per second (default: about 0.1 per pixel per frame)
   --quality <preset>    very-low, low, medium, high or very-high, in place of --bitrate
+  --draft               a render for watching, not keeping: every second frame, each shown twice as long, at half
+                        the width and height and a low quality preset. Written beside --out as <name>.draft.<ext>
   --tabs <n>            pages of the browser that render pieces at once (default 1)
   --copy                copy encoded pictures from the source where a cut shows nothing else (VP9 at the composition's
                         size and rate), and render only the ends; fast for plain cuts
@@ -123,6 +125,7 @@ async function main(): Promise<number> {
       vtt: { type: "string" },
       at: { type: "string" },
       around: { type: "string" },
+      draft: { type: "boolean" },
       without: { type: "string" },
       cell: { type: "string" },
       columns: { type: "string" },
@@ -167,6 +170,7 @@ async function main(): Promise<number> {
     return 0;
   }
   if (positionals[0] === "look") {
+    if (values.draft) throw new Error("--draft is a render of the video; look draws its own small frames");
     const target = positionals[1];
     if (!target || positionals.length > 2) {
       process.stderr.write(USAGE);
@@ -245,6 +249,10 @@ async function main(): Promise<number> {
     onLog: (m: string) => process.stderr.write(`${m}\n`),
     ...frameTimeout,
   };
+  if (values.draft && (values["check-layout"] || values.still !== undefined || values.copy))
+    throw new Error(
+      `--draft is a render of the video for watching; leave out ${values["check-layout"] ? "--check-layout" : values.still !== undefined ? "--still" : "--copy"}`,
+    );
   if (values["check-layout"]) {
     const result = await checkLayout({
       ...common,
@@ -284,9 +292,12 @@ async function main(): Promise<number> {
   const tabs = values.tabs === undefined ? 1 : Math.floor(Number(values.tabs));
   if (!(tabs >= 1)) throw new Error(`--tabs wants a number of pages, got "${values.tabs}"`);
   const tty = process.stderr.isTTY && !values.quiet;
+  // A draft goes beside the file --out names, under its own name: it never replaces the video.
+  const written = values.draft ? draftPath(out) : out;
   const result = await renderVideo({
     ...common,
-    out: resolve(out),
+    out: resolve(written),
+    ...(values.draft ? { draft: true } : {}),
     tabs,
     ...(values.from ? { from: Number(values.from) } : {}),
     ...(values.to ? { to: Number(values.to) } : {}),
@@ -303,7 +314,7 @@ async function main(): Promise<number> {
   for (const w of result.warnings) process.stderr.write(`warning: ${w}\n`);
   const seconds = (result.wallMs / 1000).toFixed(1);
   process.stderr.write(
-    `${values.out}: ${result.frames} frames, ${result.width}x${result.height} at ${result.fps} fps${result.audio ? ", with sound" : ""}, in ${seconds}s${result.tabs > 1 ? ` on ${result.tabs} tabs` : ""}${result.copiedFrames > 0 ? `, ${result.copiedFrames} frames copied` : ""} (${(result.frames / (result.wallMs / 1000)).toFixed(1)} fps)\n`,
+    `${written}: ${values.draft ? "a draft, every second frame at half size: " : ""}${result.frames} frames, ${result.width}x${result.height} at ${result.fps} fps${result.audio ? ", with sound" : ""}, in ${seconds}s${result.tabs > 1 ? ` on ${result.tabs} tabs` : ""}${result.copiedFrames > 0 ? `, ${result.copiedFrames} frames copied` : ""} (${(result.frames / (result.wallMs / 1000)).toFixed(1)} fps)\n`,
   );
   return 0;
 }

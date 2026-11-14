@@ -47,6 +47,11 @@ export interface RenderOptions {
    * one VP9 file (at the composition's size and frame rate, no overlay or effect), and render only the ends.
    */
   readonly smartCopy?: boolean;
+  /**
+   * A render for watching, not keeping: every second frame, each shown twice as long, at half the width and height,
+   * at the encoder's `low` preset unless `bitrate` or `quality` is given. The length and the sound are unchanged.
+   */
+  readonly draft?: boolean;
   /** Skip the soundtrack. */
   readonly silent?: boolean;
   /** Audio bits per second; default 128 kbit/s. */
@@ -87,6 +92,18 @@ export interface RenderResult {
   readonly warnings: readonly string[];
 }
 
+/** A draft draws one frame in this many, and writes its pictures at this fraction of the width and height. */
+const DRAFT_FRAME_STEP = 2;
+const DRAFT_SCALE = 0.5;
+
+/** Where a draft of `out` is written: beside it, marked in its name, so a draft never replaces the video. */
+export function draftPath(out: string): string {
+  const dot = out.lastIndexOf(".");
+  return dot > Math.max(out.lastIndexOf("/"), out.lastIndexOf("\\"))
+    ? `${out.slice(0, dot)}.draft${out.slice(dot)}`
+    : `${out}.draft`;
+}
+
 /** Opens the export page for a file: the browser, its fonts, and how many pages render at once. */
 export async function openEngine(options: {
   readonly state: ResolvedState;
@@ -125,9 +142,16 @@ export async function openEngine(options: {
  */
 export async function renderVideo(options: RenderOptions): Promise<RenderResult> {
   const { state } = options;
-  const { fps, width, height } = state.composition;
+  const draft = options.draft === true;
+  if (draft && options.smartCopy) throw new Error("a draft renders every frame it shows: leave out the copy option");
+  // A draft counts in its own frames, half as many a second, and writes pictures half as wide and as high.
+  const fps = draft ? state.composition.fps / DRAFT_FRAME_STEP : state.composition.fps;
+  const even = (n: number): number => Math.max(2, Math.round((n * DRAFT_SCALE) / 2) * 2);
+  const width = draft ? even(state.composition.width) : state.composition.width;
+  const height = draft ? even(state.composition.height) : state.composition.height;
   const container = options.container ?? containerOf(options.out);
   const audioOnly = container === "mp3" || container === "wav";
+  if (audioOnly && draft) throw new Error(`a draft is of the picture: a .${container} file holds only the soundtrack`);
   if (audioOnly && options.silent) throw new Error(`nothing to render: a .${container} file holds only the soundtrack`);
   const videoContainer = (audioOnly ? "webm" : container) as VideoContainer;
   const codec = options.videoCodec ?? (videoContainer === "mp4" ? "avc" : "vp9");
@@ -198,8 +222,13 @@ export async function renderVideo(options: RenderOptions): Promise<RenderResult>
             container: videoContainer,
             codec,
             bitrate: options.bitrate ?? Math.round(width * height * fps * 0.1),
-            ...(options.quality ? { quality: options.quality } : {}),
+            ...(options.quality
+              ? { quality: options.quality }
+              : draft && options.bitrate === undefined
+                ? { quality: "low" as const }
+                : {}),
             keyFrameInterval,
+            ...(draft ? { fps, scale: DRAFT_SCALE } : {}),
           }),
     );
     for (const r of rendered) r?.catch(() => undefined);

@@ -46,6 +46,6 @@ export {
   type PcmBuffer,
   type PcmProvider,
 } from "./mixer";
-export { type ExportSource, type RenderOptions, type RenderResult, renderVideo } from "./renderer";
+export { draftPath, type ExportSource, type RenderOptions, type RenderResult, renderVideo } from "./renderer";
 export { renderStill, type StillOptions, type StillResult } from "./still";
 export { browserCacheDir, CHROME_MILESTONE, findChrome, installChrome } from "./web/chrome";
