@@ -47,9 +47,16 @@ export interface LookOptions {
   readonly around?: string;
   /** An effect, an adjustment or an overlay to draw each frame with and without, side by side. */
   readonly without?: string;
-  /** The width of a cell's picture; default 480. */
+  /**
+   * A stretch to read a move across: a range such as `2..3` or an element's id. The sheet is a strip of small
+   * frames at even steps from its start to its end, each labelled with its time alone.
+   */
+  readonly motion?: string;
+  /** Seconds between the frames of a `motion` strip. Left out: the step that gives twelve frames. */
+  readonly step?: number;
+  /** The width of a cell's picture; default 480 (240 in a `motion` strip, 180 for a portrait video). */
   readonly cell?: number;
-  /** Cells in a row; default up to 4 (an even number with `without`). */
+  /** Cells in a row; default up to 4 (an even number with `without`), up to 12 in a `motion` strip. */
   readonly columns?: number;
   /**
    * A stretch to show the sound of, under the cells: `all`, a range such as `2..6`, or an element's id. The strip
@@ -115,6 +122,8 @@ export interface LookResult {
   readonly cells: readonly LookCell[];
   /** How many of the cells were read from the cache instead of drawn. */
   readonly cached: number;
+  /** The stretch a `motion` strip covers and the seconds between its frames. */
+  readonly motion?: { readonly from: number; readonly to: number; readonly step: number };
   /** The sound of the stretch asked for with `listen`. */
   readonly listen?: LookSound;
   /** Moments that could not be found, and why. */
@@ -138,13 +147,56 @@ function leaveOut(state: ResolvedState, id: string): { effects: string[] } | { o
   );
 }
 
+/** The frames a motion strip shows by default. */
+const MOTION_CELLS = 12;
+
+/** The frames of a stretch at even steps, first to last, each frame once. */
+function motionMoments(
+  state: ResolvedState,
+  text: string,
+  step: number | undefined,
+): { moments: Moment[]; motion: { from: number; to: number; step: number } } {
+  const stretch = listenRange(state, text, "show as a strip");
+  if ("error" in stretch) throw new Error(`--motion ${stretch.error}`);
+  if (step !== undefined && !(step > 0)) throw new Error("--step must be more than 0");
+  const { fps, duration } = state.composition;
+  const frames = Math.max(1, Math.round(duration * fps));
+  // Never finer than a frame: two cells of the same frame say nothing.
+  const every = Math.max(1 / fps, step ?? (stretch.to - stretch.from) / (MOTION_CELLS - 1));
+  const count = Math.floor((stretch.to - stretch.from) / every + 1e-9) + 1;
+  if (count > MAX_LOOK_CELLS)
+    throw new Error(
+      `that is ${count} cells; one look holds at most ${MAX_LOOK_CELLS}. Give a larger --step or a shorter stretch`,
+    );
+  const moments: Moment[] = [];
+  for (let i = 0; i < count; i++) {
+    const time = stretch.from + i * every;
+    const frame = Math.min(frames - 1, Math.max(0, Math.round(time * fps + 1e-6)));
+    if (moments.some((m) => m.frame === frame)) continue;
+    const at = Math.round(time * 1000) / 1000;
+    moments.push({ label: at.toFixed(2), time: at, frame, about: `in ${text}` });
+  }
+  return { moments, motion: { ...stretch, step: Math.round(every * 1000) / 1000 } };
+}
+
+/** Refuses options that do not go together, before anything is drawn. */
+function validateLook(options: LookOptions): void {
+  if (options.at !== undefined && options.around !== undefined) throw new Error("give --at or --around, not both");
+  if (!/\.png$/i.test(options.out)) throw new Error(`a sheet is a PNG: ${options.out} does not end in .png`);
+  if (options.motion !== undefined)
+    for (const other of ["at", "around", "without"] as const)
+      if (options[other] !== undefined) throw new Error(`--motion shows one stretch on its own; leave out --${other}`);
+  if (options.step !== undefined && options.motion === undefined) throw new Error("--step goes with --motion");
+}
+
 /** Draws the moments asked for, or the ones an editor would skim, onto one sheet. */
 export async function renderLook(options: LookOptions): Promise<LookResult> {
   const { state } = options;
-  if (options.at !== undefined && options.around !== undefined) throw new Error("give --at or --around, not both");
-  if (!/\.png$/i.test(options.out)) throw new Error(`a sheet is a PNG: ${options.out} does not end in .png`);
-  const picked =
-    options.around !== undefined
+  validateLook(options);
+  const strip = options.motion !== undefined ? motionMoments(state, options.motion, options.step) : null;
+  const picked = strip
+    ? { moments: strip.moments, errors: [] }
+    : options.around !== undefined
       ? aroundMoments(state, options.around)
       : options.at !== undefined
         ? resolveMoments(state, parseMoments(options.at))
@@ -157,13 +209,17 @@ export async function renderLook(options: LookOptions): Promise<LookResult> {
     throw new Error(
       `that is ${picked.moments.length * perMoment} cells; one look holds at most ${MAX_LOOK_CELLS}. Ask for fewer moments (a range with a larger step, or --around one element)`,
     );
-  const columns = Math.max(1, Math.floor(options.columns ?? Math.min(4, picked.moments.length * perMoment)) || 1);
+  const columns = Math.max(
+    1,
+    Math.floor(options.columns ?? Math.min(strip ? MOTION_CELLS : 4, picked.moments.length * perMoment)) || 1,
+  );
   const perRow = out ? Math.max(2, columns - (columns % 2)) : columns;
   const warnings: string[] = [];
   const empty = { width: 0, height: 0, columns: perRow, cells: [], cached: 0, errors: picked.errors, warnings };
   if (picked.moments.length === 0) return { sheet: null, ...empty };
 
-  const stamp = (m: Moment): string => `${m.time.toFixed(2)} s · f${m.frame} · ${m.label}`;
+  // A strip's cells are narrow, so each carries its time and nothing else.
+  const stamp = (m: Moment): string => (strip ? m.label : `${m.time.toFixed(2)} s · f${m.frame} · ${m.label}`);
   const cells: SheetCell[] = [];
   const legend: Omit<LookCell, "file">[] = [];
   for (const m of picked.moments) {
@@ -179,7 +235,7 @@ export async function renderLook(options: LookOptions): Promise<LookResult> {
       cells.push({
         t: m.frame / state.composition.fps,
         label: stamp(m),
-        sub: variant ? `${variant} ${options.without}` : m.about,
+        ...(strip ? {} : { sub: variant ? `${variant} ${options.without}` : m.about }),
         ...(without ? { without } : {}),
       });
       legend.push({
@@ -193,7 +249,8 @@ export async function renderLook(options: LookOptions): Promise<LookResult> {
     }
   }
 
-  const cellWidth = Math.max(64, Math.round(options.cell ?? 480));
+  const portrait = state.composition.height > state.composition.width;
+  const cellWidth = Math.max(64, Math.round(options.cell ?? (strip ? (portrait ? 180 : 240) : 480)));
   // A frame without some effects is a frame of the file with them switched off: the same state the page draws.
   let bare = state;
   if (out && "effects" in out) {
@@ -307,13 +364,13 @@ export async function renderLook(options: LookOptions): Promise<LookResult> {
   const first = pictures[0] as (typeof pictures)[number];
   const rows = Math.ceil(cells.length / perRow);
   const cellsHeight = rows * first.height + (rows + 1) * SHEET_GAP;
-  const strip = sound ? decodePng(sound.bytes) : null;
+  const soundStrip = sound ? decodePng(sound.bytes) : null;
   const sheet = blankPicture(
     perRow * first.width + (perRow + 1) * SHEET_GAP,
-    cellsHeight + (strip ? strip.height + SHEET_GAP : 0),
+    cellsHeight + (soundStrip ? soundStrip.height + SHEET_GAP : 0),
     SHEET_GROUND,
   );
-  if (strip) paste(sheet, strip, SHEET_GAP, cellsHeight);
+  if (soundStrip) paste(sheet, soundStrip, SHEET_GAP, cellsHeight);
   for (const [i, picture] of pictures.entries())
     paste(
       sheet,
@@ -339,7 +396,8 @@ export async function renderLook(options: LookOptions): Promise<LookResult> {
     columns: perRow,
     cells: legend.map((cell, i) => ({ ...cell, ...(files[i] ? { file: files[i] as string } : {}) })),
     cached: cells.length - missing.length,
-    ...(stretch && sound && strip
+    ...(strip ? { motion: strip.motion } : {}),
+    ...(stretch && sound && soundStrip
       ? {
           listen: {
             from: stretch.from,
@@ -352,7 +410,7 @@ export async function renderLook(options: LookOptions): Promise<LookResult> {
             clippedAt: sound.clippedAt,
             silences: sound.silences,
             words,
-            strip: { x: SHEET_GAP, y: cellsHeight, width: strip.width, height: strip.height },
+            strip: { x: SHEET_GAP, y: cellsHeight, width: soundStrip.width, height: soundStrip.height },
           },
         }
       : {}),

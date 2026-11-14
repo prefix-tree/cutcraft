@@ -444,3 +444,104 @@ describe("--listen", () => {
     expect(quieter.result.listen?.peakDb).toBeLessThan(first.result.listen?.peakDb as number);
   });
 });
+
+describe("--motion", () => {
+  /** A white square that crosses a black frame from left to right in two seconds. */
+  const mover = `import { Composition, Keyframe, Shape, Track } from "@cutcraft/kit";
+export const manifest = { assets: {} };
+export default function Video() {
+  return (
+    <Composition fps={30} width={${W}} height={${H}} background={{ mode: "color", color: "#000000" }}>
+      <Track id="t" layout="free">
+        <Shape id="box" shape="rectangle" start={0} duration={3} width={40} height={40} fill="#ffffff">
+          <Keyframe id="k1" property="transform.position.x" at={0} value={-120} />
+          <Keyframe id="k2" property="transform.position.x" at={2} value={120} />
+        </Shape>
+      </Track>
+    </Composition>
+  );
+}
+`;
+  const CELL = 240,
+    CELL_H = (CELL * H) / W;
+
+  /** The column of a cell where the square's middle is, in the cell's pixels. */
+  function squareAt(sheet: Image, column: number): number {
+    const x0 = GAP + column * (CELL + GAP),
+      y = GAP + Math.round(CELL_H / 2);
+    let sum = 0,
+      n = 0;
+    for (let x = 0; x < CELL; x++)
+      if ((sheet.rgba[(y * sheet.width + x0 + x) * 4] as number) > 128) {
+        sum += x;
+        n++;
+      }
+    return n > 0 ? sum / n : -1;
+  }
+
+  it("shows a stretch as one row of small frames at even steps, each labelled with its time", async () => {
+    const v = await load("motion", mover);
+    const out = join(dir, "motion.png");
+    const result = await renderLook({ state: v.state, source: v.source, media: v.media, out, motion: "0.4..1.5" });
+    expect(result.errors).toEqual([]);
+    // Twelve frames from the first moment to the last, in one row.
+    expect(result.cells).toHaveLength(12);
+    expect(result.columns).toBe(12);
+    expect(result.cells.every((c) => c.row === 0)).toBe(true);
+    expect(result.motion).toEqual({ from: 0.4, to: 1.5, step: 0.1 });
+    expect(result.cells.map((c) => c.label)).toEqual([
+      "0.40",
+      "0.50",
+      "0.60",
+      "0.70",
+      "0.80",
+      "0.90",
+      "1.00",
+      "1.10",
+      "1.20",
+      "1.30",
+      "1.40",
+      "1.50",
+    ]);
+    const sheet = readImage(out);
+    expect(sheet.width).toBe(12 * CELL + 13 * GAP);
+    // Read left to right, the square moves right in every cell.
+    const places = result.cells.map((c) => squareAt(sheet, c.column));
+    expect(places[0]).toBeGreaterThan(0);
+    for (let i = 1; i < places.length; i++) expect(places[i]).toBeGreaterThan(places[i - 1] as number);
+  });
+
+  it("takes a step, an element's id and a row length, and never shows a frame twice", async () => {
+    const v = await load("motion-step", mover);
+    const look = (options: Record<string, unknown>) =>
+      renderLook({ state: v.state, source: v.source, media: v.media, out: join(dir, "motion-step.png"), ...options });
+    const stepped = await look({ motion: "0..1", step: 0.25 });
+    expect(stepped.cells.map((c) => c.time)).toEqual([0, 0.25, 0.5, 0.75, 1]);
+    expect(stepped.motion).toEqual({ from: 0, to: 1, step: 0.25 });
+    const wrapped = await look({ motion: "box", step: 1, columns: 3 });
+    expect(wrapped.cells.map((c) => [c.row, c.column])).toEqual([
+      [0, 0],
+      [0, 1],
+      [0, 2],
+      [1, 0],
+    ]);
+    // Five frames long: twelve steps across it would repeat frames, so there are five cells.
+    const short = await look({ motion: "4f..8f" });
+    expect(short.cells.map((c) => c.frame)).toEqual([4, 5, 6, 7, 8]);
+  });
+
+  it("refuses what it cannot show", async () => {
+    const v = await load("motion-no", mover);
+    const look = (options: Record<string, unknown>) =>
+      renderLook({ state: v.state, source: v.source, media: v.media, out: join(dir, "motion-no.png"), ...options });
+    await expect(look({ motion: "0..1", at: "0.5" })).rejects.toThrow(
+      "--motion shows one stretch on its own; leave out --at",
+    );
+    await expect(look({ motion: "0..1", without: "box" })).rejects.toThrow("leave out --without");
+    await expect(look({ motion: "nothing" })).rejects.toThrow(
+      '--motion nothing: the file has no element with the id "nothing"',
+    );
+    await expect(look({ motion: "0..3", step: 0.01 })).rejects.toThrow("that is 91 cells; one look holds at most 64");
+    await expect(look({ at: "0.5", step: 0.1 })).rejects.toThrow("--step goes with --motion");
+  });
+});

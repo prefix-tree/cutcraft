@@ -71,6 +71,11 @@ Work in this order, and check after each stage.
    npx cutcraft look video.tsx --manifest manifest.json --at 1.2,12,20,26.5,31,36,44,52.5 --columns 4 --out sheet.png
    ```
    Send that sheet when you report on a video, and before rendering one that takes minutes: it is drawn in seconds.
+   To judge a move (an entrance, a transition, easing), read it as a strip of small frames at even steps:
+   ```sh
+   npx cutcraft look video.tsx --manifest manifest.json --motion 0.3..1.3 --out move.png
+   ```
+   `--motion` takes a range or an element's id; `--step 0.05` sets the seconds between frames (twelve frames without it).
    `--listen all` (or `2..6`, or an element's id) adds the sound under the frames: the mix's level over time, the
    words where they are said, silences shaded, and `peakDb`, `rmsDb` and `silences` in the printed legend. Use it
    after any change to volume, music or the order of clips.
