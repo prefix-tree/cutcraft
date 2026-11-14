@@ -546,12 +546,17 @@ export default function Video() {
   });
 
   it("says how many frames were captured without a paint signal", async () => {
-    // The capture canvas stops asking for a paint, so the paint event never comes.
-    const file = layer(`document.getElementById("cap").requestPaint = () => {};`);
+    // The capture canvas stops asking for a paint, and any paint the browser makes of its own accord is kept from
+    // the export: no frame gets its signal. The layer's effect does this, so it has to have run before frame 0.
+    const file = layer(
+      `const cap = document.getElementById("cap");
+    cap.requestPaint = () => {};
+    cap.addEventListener("paint", (event) => event.stopImmediatePropagation(), true);`,
+    );
     const result = await run(file, "unpainted.webm");
     const told = result.warnings.filter((w) => w.includes("without the browser confirming the paint"));
-    expect(told).toHaveLength(1);
-    expect(told[0]).toMatch(/^\d+ frames were captured/);
+    // All three frames of the video, the first among them.
+    expect(told).toEqual([expect.stringMatching(/^3 frames were captured/)]);
     const fine = await run(layer(""), "painted.webm");
     expect(fine.warnings.filter((w) => w.includes("confirming the paint"))).toEqual([]);
   });
