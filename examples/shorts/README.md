@@ -22,6 +22,7 @@ Its video and poster in `docs/public/shorts` are made by:
 pnpm --filter @cutcraft/example-shorts render
 ```
 
+`one-pixel.tsx` is there as well, [under its own heading](https://cutcraft.prefixtree.xyz/examples#one-pixel).
 `lunar-eclipse.tsx` is there too, [with its sound](https://cutcraft.prefixtree.xyz/examples#a-talking-head-with-cards).
 
 ## Render one

@@ -16,6 +16,7 @@ mkdirSync(out, { recursive: true });
 const FILES: Record<string, { poster: number; bitrate: number; sound?: boolean }> = {
   "game-lighting": { poster: 28, bitrate: 1_100_000 },
   "lunar-eclipse": { poster: 4.5, bitrate: 1_400_000, sound: true },
+  "one-pixel": { poster: 2.6, bitrate: 900_000 },
 };
 
 /** Names given on the command line render alone: `pnpm --filter @cutcraft/example-shorts render game-lighting`. */
