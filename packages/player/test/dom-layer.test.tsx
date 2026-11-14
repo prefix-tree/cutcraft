@@ -79,4 +79,22 @@ describe("DomLayer", () => {
     expect(boxed()).toEqual(["show"]);
     await m.unmount();
   });
+
+  it("puts the captions at the height their position names, a word or a fraction of the frame", async () => {
+    const at = async (position: unknown) => {
+      const state = fixtureState();
+      const items = new Map(state.items);
+      const cap = items.get("cap") as Placement;
+      items.set("cap", { ...cap, props: { ...cap.props, style: { position } } });
+      const m = await mountPlayer({ ...state, items });
+      await m.seek(0.5);
+      const box = m.container.querySelector('[data-kind="captions"]') as HTMLElement;
+      const placed = { top: box.style.top, bottom: box.style.bottom, transform: box.style.transform };
+      await m.unmount();
+      return placed;
+    };
+    expect(await at(0.6)).toEqual({ top: "60%", bottom: "", transform: "translateY(-50%)" });
+    expect(await at("center")).toEqual({ top: "50%", bottom: "", transform: "translateY(-50%)" });
+    expect((await at("bottom")).top).toBe("");
+  });
 });

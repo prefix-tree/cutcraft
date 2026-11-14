@@ -54,6 +54,10 @@ change with it.
 `animation` colours the words as they are said: `word-highlight`, `word-by-word`, `karaoke` or `typewriter`.
 `style` sets the font, size, colours, background, stroke and position.
 
+`position` is `top`, `center` or `bottom`, or a number from 0 to 1 for the height the captions' middle sits at.
+Over a talking head in a vertical video, `position: 0.6` puts them under the chin, clear of the mouth and above the
+part of the frame the platforms cover.
+
 With a word animation, `highlight` is the colour of the word being said, and `highlightBox` puts a filled, rounded
 box behind it:
 

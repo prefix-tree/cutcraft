@@ -13,7 +13,11 @@ export const captionStyleSchema = z.strictObject({
   shadow: shadowSchema.optional(),
   /** An outline around the letters, drawn under them. */
   stroke: z.strictObject({ color: colorSchema, width: z.number().min(0).max(40) }).optional(),
-  position: zCaptionPosition.optional(),
+  /**
+   * Where the captions sit: `top`, `center` or `bottom`, or a number from 0 (the top of the frame) to 1 (the
+   * bottom) for the height their middle is at. `0.6` puts them under a speaker's chin in a vertical video.
+   */
+  position: z.union([zCaptionPosition, z.number().min(0).max(1)]).optional(),
   highlight: colorSchema.optional(),
   /** A filled, rounded box behind the word being said. `highlight` stays the colour of its letters. */
   highlightBox: colorSchema.optional(),

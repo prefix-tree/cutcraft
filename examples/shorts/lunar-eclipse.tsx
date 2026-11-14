@@ -22,16 +22,17 @@ export const defaults = {
 };
 
 // Where things go. TikTok and Reels cover the top of the frame and its bottom third with their own controls, so
-// every word sits in the band between: a card at the top of it, the captions in the middle, a badge under them.
+// every word sits in the band between: a card at the top of it, a badge under that, the captions lowest. The
+// captions' height is set so they fall under the speaker's chin, never across his mouth.
 // The speaker goes where words cannot: the whole frame behind them, or a box in the bottom half under a card.
 //
-// The speaker in the 1080 x 1080 source, three ways. FULL and CLOSE are 9:16 windows on him. BOXED is a 920 x 700
+// The speaker in the 1080 x 1080 source, three ways. FULL and CLOSE are 9:16 windows on him. BOXED is a 920 x 580
 // window, scaled to the box's width and moved to its centre.
 const FULL = { crop: { x: 0.2, y: 0, width: 0.5625, height: 1 } };
-const CLOSE = { crop: { x: 0.25, y: 0, width: 0.46, height: 0.818 } };
-const BOX = { y: 430, width: 920, height: 700 };
+const CLOSE = { crop: { x: 0.247, y: 0, width: 0.506, height: 0.9 } };
+const BOX = { y: 545, width: 920, height: 580 };
 const BOXED = {
-  crop: { x: 0.04, y: 0.05, width: 0.92, height: 0.7 },
+  crop: { x: 0.04, y: 0.05, width: 0.92, height: 0.58 },
   scale: BOX.width / 1080,
   position: { x: 0, y: BOX.y },
   borderRadius: 28,
@@ -39,7 +40,7 @@ const BOXED = {
 // The border round the box is drawn under the footage, a little larger than it, so only its outer edge shows.
 const RING = { y: BOX.y, width: BOX.width + 16, height: BOX.height + 16, thickness: 16, cornerRadius: 36 };
 // The card that sits above the box.
-const CARD = { y: -380, width: 700, height: 560, cornerRadius: 28 };
+const CARD = { y: -360, width: 700, height: 620, cornerRadius: 28 };
 // The interview was recorded quietly; each clip is raised to a normal speaking level.
 const VOICE = 2.2;
 
@@ -86,8 +87,26 @@ export default function Video({ accent, question, wrong }: z.infer<typeof schema
           ]}
         />
 
-        <Badge id="above" anchor="miss" at="word:35" duration={{ until: "miss" }} text="ABOVE" y={125} size={52} />
-        <Badge id="below" anchor="miss" at="word:45" duration={{ until: "miss" }} text="BELOW" y={230} size={52} />
+        <Badge
+          id="above"
+          anchor="miss"
+          at="word:35"
+          duration={{ until: "miss" }}
+          text="ABOVE"
+          x={-150}
+          y={50}
+          size={52}
+        />
+        <Badge
+          id="below"
+          anchor="miss"
+          at="word:45"
+          duration={{ until: "miss" }}
+          text="BELOW"
+          x={150}
+          y={50}
+          size={52}
+        />
 
         {/* The number is the point, so it gets the card. */}
         <TypeCard
@@ -104,14 +123,14 @@ export default function Video({ accent, question, wrong }: z.infer<typeof schema
           ]}
         />
 
-        <Badge id="totality" anchor="red" at="word:143" duration={{ until: "red" }} text="TOTALITY" y={180} size={52} />
+        <Badge id="totality" anchor="red" at="word:143" duration={{ until: "red" }} text="TOTALITY" y={100} size={46} />
 
         {/* His own sentence as a quotation, the phrase marked as he reaches it. */}
         <QuoteCard
           id="quote"
           anchor="sunsets"
           duration={{ until: "sunsets" }}
-          y={-380}
+          y={-360}
           width={660}
           size={46}
           fill="$surface"
@@ -127,7 +146,7 @@ export default function Video({ accent, question, wrong }: z.infer<typeof schema
         src="asset:eclipse"
         animation="word-highlight"
         maxChars={22}
-        style={{ position: "center", size: 60, weight: 800, highlight: "#14141c", highlightBox: "$accent" }}
+        style={{ position: 0.6, size: 60, weight: 800, highlight: "#14141c", highlightBox: "$accent" }}
       />
     </Composition>
   );
