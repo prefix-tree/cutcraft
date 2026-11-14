@@ -142,17 +142,19 @@ async function main(): Promise<number> {
   if (limit !== undefined && !(limit > 0))
     throw new Error(`--frame-timeout wants seconds above 0, got "${values["frame-timeout"]}"`);
   const frameTimeout = limit === undefined ? {} : { frameTimeout: limit };
+  // How every command loads the file: the manifest, the props and the modules given on the command line.
+  const loadOptions = {
+    ...(values.manifest ? { manifest: resolve(values.manifest) } : {}),
+    ...(values.props ? { props: JSON.parse(values.props) as Record<string, unknown> } : {}),
+    ...(values.import ? { imports: Object.fromEntries(values.import.map(readImport)) } : {}),
+  };
   if (positionals[0] === "inspect") {
     const target = positionals[1];
     if (!target || positionals.length > 2) {
       process.stderr.write(USAGE);
       return 2;
     }
-    const video = await loadVideo(target, {
-      ...(values.manifest ? { manifest: resolve(values.manifest) } : {}),
-      ...(values.props ? { props: JSON.parse(values.props) as Record<string, unknown> } : {}),
-      ...(values.import ? { imports: Object.fromEntries(values.import.map(readImport)) } : {}),
-    });
+    const video = await loadVideo(target, loadOptions);
     const result = inspect(target, video.state, {
       ...(values.at !== undefined ? { at: values.at } : {}),
       ...(values.json ? { json: true } : {}),
@@ -178,11 +180,7 @@ async function main(): Promise<number> {
       process.stderr.write(USAGE);
       return 2;
     }
-    const video = await loadVideo(target, {
-      ...(values.manifest ? { manifest: resolve(values.manifest) } : {}),
-      ...(values.props ? { props: JSON.parse(values.props) as Record<string, unknown> } : {}),
-      ...(values.import ? { imports: Object.fromEntries(values.import.map(readImport)) } : {}),
-    });
+    const video = await loadVideo(target, loadOptions);
     for (const e of video.state.errors) process.stderr.write(`warning: ${e.id ?? "?"}: ${e.message}\n`);
     const result = await renderLook({
       state: video.state,
@@ -218,11 +216,7 @@ async function main(): Promise<number> {
       process.stderr.write(USAGE);
       return 2;
     }
-    const video = await loadVideo(target, {
-      ...(values.manifest ? { manifest: resolve(values.manifest) } : {}),
-      ...(values.props ? { props: JSON.parse(values.props) as Record<string, unknown> } : {}),
-      ...(values.import ? { imports: Object.fromEntries(values.import.map(readImport)) } : {}),
-    });
+    const video = await loadVideo(target, loadOptions);
     for (const e of video.state.errors) process.stderr.write(`warning: ${e.id ?? "?"}: ${e.message}\n`);
     const result = await whereThings({
       state: video.state,
@@ -246,11 +240,6 @@ async function main(): Promise<number> {
     process.stderr.write(USAGE);
     return values.help ? 0 : 2;
   }
-  const loadOptions = {
-    ...(values.manifest ? { manifest: resolve(values.manifest) } : {}),
-    ...(values.props ? { props: JSON.parse(values.props) as Record<string, unknown> } : {}),
-    ...(values.import ? { imports: Object.fromEntries(values.import.map(readImport)) } : {}),
-  };
   const loaded = await loadVideo(file, loadOptions);
   for (const e of loaded.state.errors) process.stderr.write(`warning: ${e.id ?? "?"}: ${e.message}\n`);
   const media = directoryResolver(resolve(values.media ?? dirname(file)), loaded.manifest);

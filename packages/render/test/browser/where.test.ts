@@ -194,4 +194,43 @@ export default function Video() {
     expect(edge?.source?.code).toContain('data-name="edge"');
     expect(formatLayout(result)).toContain("where.tsx:14:19: safe-zone:");
   });
+
+  it("leaves out a part the code itself has hidden, and finds each layer's own part of a shared name", async () => {
+    const file = join(dir, "twins.tsx");
+    const text = `import { Composition, Layer, Track } from "@cutcraft/kit";
+export const manifest = { assets: {} };
+export default function Video() {
+  return (
+    <Composition fps={30} width={540} height={960} background={{ mode: "color", color: "#000000" }}>
+      <Track id="t" layout="free">
+        <Layer id="one" start={0} duration={2}>
+          <div data-name="tag" style={{ position: "absolute", left: 500, top: 300, width: 30, height: 30, background: "#ffffff" }} />
+          <div data-name="ghost" style={{ position: "absolute", left: 200, top: 300, width: 30, height: 30, background: "#ffffff", visibility: "hidden" }} />
+        </Layer>
+        <Layer id="two" start={0} duration={2}>
+          <div data-name="tag" style={{ position: "absolute", left: 500, top: 500, width: 30, height: 30, background: "#ffffff" }} />
+        </Layer>
+      </Track>
+    </Composition>
+  );
+}
+`;
+    writeFileSync(file, text);
+    const v = await loadVideo(file);
+    expect(v.state.errors).toEqual([]);
+    const media = directoryResolver(dir, v.manifest);
+    const report = await whereThings({ state: v.state, source: v.source, media, at: "1" });
+    expect(report.moments[0]?.things.map((t) => t.id).sort()).toEqual(["one", "one/tag", "two", "two/tag"]);
+    const result = await checkLayout({
+      state: v.state,
+      media,
+      source: { ...v.source, file: "twins.tsx" },
+      safeZone: "tiktok",
+      step: 1,
+    });
+    const line = (id: string) => result.issues.find((i) => i.id === id)?.source?.line;
+    const lines = text.split("\n");
+    expect(lines[(line("one/tag") as number) - 1]).toContain("top: 300");
+    expect(lines[(line("two/tag") as number) - 1]).toContain("top: 500");
+  });
 });

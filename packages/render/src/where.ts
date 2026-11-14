@@ -4,11 +4,8 @@ import { type Moment, parseMoments, type ResolvedState, resolveMoments } from "@
 import type { DrawRect, MediaResolver } from "@cutcraft/player/engine";
 
 import type { FontFile } from "./fonts";
-import { collision, type Insets, overflow, rect, rounded, SAFE_ZONES, type SafeZoneName } from "./layout-check";
+import { collision, type Insets, overflow, rect, rounded, SAFE_ZONES, type SafeZoneName, SLACK } from "./layout-check";
 import { type ExportSource, openEngine } from "./renderer";
-
-/** Pixels a thing may stray past an edge before it counts as outside: the ink scan's own slack. */
-const SLACK = 2;
 
 export interface WhereOptions {
   readonly state: ResolvedState;

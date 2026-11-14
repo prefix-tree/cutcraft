@@ -110,7 +110,7 @@ export interface LayoutCheckResult {
 }
 
 /** Pixels an element may stray before it counts: the ink scan's own slack. */
-const SLACK = 2;
+export const SLACK = 2;
 /** A subject box is used this many seconds either side of the time it was sampled at. */
 const SUBJECT_REACH = 1;
 
@@ -148,8 +148,6 @@ export async function checkLayout(options: LayoutCheckOptions): Promise<LayoutCh
   const engine = await openEngine({ ...options, warnings });
   const issues: Run[] = [];
   const open = new Map<string, Run>();
-  /** What the parts of each element have been reported for at the sample being checked. */
-  let saidByParts: Set<string> | null = null;
   /** Records a breach at frame `n` with its size (`worst` decides the moment the issue describes). */
   const report = (
     rule: LayoutRule,
@@ -158,11 +156,13 @@ export async function checkLayout(options: LayoutCheckOptions): Promise<LayoutCh
     worst: number,
     box: DrawRect,
     area: DrawRect,
-    other?: string,
+    other: string | undefined,
+    /** What the parts of each element have been reported for at this sample: an element is not reported again. */
+    saidByParts: Set<string>,
   ): void => {
     const own = rule === "frame-edge" || rule === "safe-zone" ? "edge" : `${rule}|${other ?? ""}`;
-    if (b.of !== undefined) saidByParts?.add(`${b.of}|${own}`);
-    else if (saidByParts?.has(`${b.id}|${own}`)) return;
+    if (b.of !== undefined) saidByParts.add(`${b.of}|${own}`);
+    else if (saidByParts.has(`${b.id}|${own}`)) return;
     const key = `${rule}|${b.id}|${other ?? ""}`;
     let run = open.get(key);
     if (!run || run.n !== n - step) {
@@ -197,24 +197,24 @@ export async function checkLayout(options: LayoutCheckOptions): Promise<LayoutCh
       const all = (await engine.bounds(t, { parts: true })).filter((b) => !b.backdrop && !covers(b.rect, frame));
       // Parts first: where a part a layer's code named breaks a rule, the layer is not reported for it as well.
       const shown = [...all.filter((b) => b.kind === "part"), ...all.filter((b) => b.kind !== "part")];
-      saidByParts = new Set<string>();
+      const said = new Set<string>();
       const captions = shown.filter((b) => b.kind === "captions");
       const subjects = subjectRects(state, t, options.subject);
       for (const b of shown) {
         const out = overflow(b.rect, frame);
-        if (out > SLACK) report("frame-edge", b, n, out, b.rect, frame);
+        if (out > SLACK) report("frame-edge", b, n, out, b.rect, frame, undefined, said);
         else if (overflow(b.rect, safe) > SLACK)
-          report("safe-zone", b, n, overflow(b.rect, safe), b.rect, safe, zoneName);
+          report("safe-zone", b, n, overflow(b.rect, safe), b.rect, safe, zoneName, said);
         if (b.kind !== "captions") {
           for (const c of captions) {
             const hit = collision(b.parts, c.parts);
-            if (hit) report("captions", b, n, hit.size, hit.mine, hit.theirs, c.id);
+            if (hit) report("captions", b, n, hit.size, hit.mine, hit.theirs, c.id, said);
           }
         }
         for (const s of subjects) {
           const hit = collision(b.parts, [s]);
           if (hit) {
-            report("subject", b, n, hit.size, hit.mine, hit.theirs, "subject");
+            report("subject", b, n, hit.size, hit.mine, hit.theirs, "subject", said);
             break;
           }
         }
@@ -400,11 +400,16 @@ function locate(file: string, index: SourceIndex, state: ResolvedState, id: stri
     // A part is found by its name where the file writes it; a name the file builds is found at its layer.
     const slash = id.lastIndexOf("/");
     const name = id.slice(slash + 1);
-    const found = ['"', "'", "`"].map((q) => index.text.indexOf(`data-name=${q}${name}${q}`)).find((i) => i >= 0);
-    const braced =
-      found ?? ['"', "'", "`"].map((q) => index.text.indexOf(`data-name={${q}${name}${q}}`)).find((i) => i >= 0);
-    if (braced === undefined) return locate(file, index, state, id.slice(0, slash), "layer");
-    return spotAt(file, index, braced);
+    const layer = id.slice(0, slash);
+    // Looked for inside the layer that drew it: another layer may name a part of its own the same.
+    const [from, to] = index.elements.get(layer)?.range ?? [0, index.text.length];
+    const inside = index.text.slice(from, to);
+    const at = ['"', "'", "`"]
+      .flatMap((q) => [`data-name=${q}${name}${q}`, `data-name={${q}${name}${q}}`])
+      .map((written) => inside.indexOf(written))
+      .find((i) => i >= 0);
+    if (at === undefined) return locate(file, index, state, layer, "layer");
+    return spotAt(file, index, from + at);
   }
   const node = state.tree.byId.get(id);
   const site = node?.editable === "generated" ? undefined : index.elements.get(id);

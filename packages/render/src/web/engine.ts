@@ -184,10 +184,10 @@ export class BrowserEngine {
   /** The ink of each overlay and of the captions at `t`, for the layout check. */
   async bounds(t: number, options?: BoundsOptions): Promise<readonly InkBounds[]> {
     return this.on((page) =>
-      page.evaluate(([at, o]: [number, BoundsOptions | undefined]) => window.__cutcraft!.bounds(at, o), [
+      page.evaluate((r: { t: number; options?: BoundsOptions }) => window.__cutcraft!.bounds(r.t, r.options), {
         t,
-        options,
-      ] as [number, BoundsOptions | undefined]),
+        ...(options ? { options } : {}),
+      }),
     );
   }
 

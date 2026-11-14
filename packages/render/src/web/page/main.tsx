@@ -285,6 +285,17 @@ async function start(): Promise<void> {
           el.style.visibility = before;
         }
       };
+      // Which named parts are drawn is asked now, while the page is as the file left it: once the page is hidden to
+      // measure, a part the file's own code hid looks the same as any other.
+      const partsOf = new Map<Element, (HTMLElement | SVGElement)[]>();
+      if (options?.parts)
+        for (const el of cells)
+          partsOf.set(
+            el,
+            [...el.querySelectorAll<HTMLElement | SVGElement>("[data-name]")].filter(
+              (part) => part.checkVisibility?.({ opacityProperty: true, visibilityProperty: true }) ?? true,
+            ),
+          );
       const found: InkBounds[] = [];
       root.style.visibility = "hidden";
       try {
@@ -295,13 +306,10 @@ async function start(): Promise<void> {
           const under = track !== undefined && backdrop.has(track);
           const id = el.dataset.el as string;
           found.push({ id, kind: el.dataset.kind as string, ...ink, backdrop: under });
-          if (!options?.parts) continue;
           // What the element's own code named: each part alone, measured the same way.
-          for (const part of el.querySelectorAll<HTMLElement | SVGElement>("[data-name]")) {
+          for (const part of partsOf.get(el) ?? []) {
             const name = part.dataset.name;
-            // A part that is not drawn just now (faded out, or not displayed) costs no paint to find that out.
-            const drawn = part.checkVisibility?.({ opacityProperty: true, visibilityProperty: false }) ?? true;
-            const partInk = name && drawn ? await measure(part) : null;
+            const partInk = name ? await measure(part) : null;
             if (name && partInk) found.push({ id: `${id}/${name}`, kind: "part", of: id, ...partInk, backdrop: under });
           }
         }
