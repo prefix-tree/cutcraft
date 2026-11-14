@@ -15,6 +15,7 @@ import { directoryResolver } from "./media";
 import { renderVideo } from "./renderer";
 import { renderStill } from "./still";
 import { CHROME_MILESTONE, cachedChrome, installChrome } from "./web/chrome";
+import { formatWhere, whereThings } from "./where";
 
 /** --check-layout found issues: apart from 1 (an error) and 2 (usage), so a script can tell them apart. */
 const EXIT_LAYOUT_ISSUES = 3;
@@ -26,6 +27,7 @@ const USAGE = `Usage: cutcraft <file.tsx> --out <video.mp4|.webm|.mp3|.wav> [opt
        cutcraft inspect <file.tsx> [--at <moments>] [--json] [--manifest <file>] [--props <json>]
        cutcraft look <file.tsx> [--at <moments> | --around <id>] [--without <id>] [--listen <stretch>]
                     [--out look.png] [options]
+       cutcraft where <file.tsx> --at <moments> [--safe-zone <zone>] [--json] [options]
        cutcraft add <media file>... [--manifest manifest.json] [--id <id>] [--transcript <file>]
        cutcraft browser install
 
@@ -65,6 +67,10 @@ const USAGE = `Usage: cutcraft <file.tsx> --out <video.mp4|.webm|.mp3|.wav> [opt
   --check-layout        print every overlay that leaves the frame or the safe zone, or covers captions or the
                         subject: where it is in the file, when, and how to fix it, as a compiler does; writes no file
   --json                print the layout check as JSON instead; it exits 3 when it finds issues
+  where                 print where each thing on screen is at each moment of --at: its box in pixels, whether it
+                        is in the frame and in each safe zone (tiktok, reels and shorts for a portrait video,
+                        or the one --safe-zone names), and what it overlaps. A part a layer's code names with
+                        data-name="lamp" is listed too, as <layer id>/lamp; --json prints the same as data
   --safe-zone <zone>    tiktok, reels, shorts, title-safe (default) or action-safe, or top,right,bottom,left fractions
   --subject <x,y,w,h>   where the subject is, as fractions of the frame, for footage the manifest has no subjects for
   --step <s>            seconds between layout samples (default: every frame)
@@ -204,6 +210,34 @@ async function main(): Promise<number> {
       process.stderr.write(
         `${result.sheet}: ${result.cells.length} cells, ${result.width}x${result.height}${result.cached > 0 ? ` (${result.cached} from the cache)` : ""}\n`,
       );
+    return result.errors.length > 0 ? 1 : 0;
+  }
+  if (positionals[0] === "where") {
+    const target = positionals[1];
+    if (!target || positionals.length > 2 || values.at === undefined) {
+      process.stderr.write(USAGE);
+      return 2;
+    }
+    const video = await loadVideo(target, {
+      ...(values.manifest ? { manifest: resolve(values.manifest) } : {}),
+      ...(values.props ? { props: JSON.parse(values.props) as Record<string, unknown> } : {}),
+      ...(values.import ? { imports: Object.fromEntries(values.import.map(readImport)) } : {}),
+    });
+    for (const e of video.state.errors) process.stderr.write(`warning: ${e.id ?? "?"}: ${e.message}\n`);
+    const result = await whereThings({
+      state: video.state,
+      source: video.source,
+      media: directoryResolver(resolve(values.media ?? dirname(target)), video.manifest),
+      at: values.at,
+      fonts: (values.font ?? []).map(readFont),
+      onLog: (m: string) => process.stderr.write(`${m}\n`),
+      ...frameTimeout,
+      ...(values["safe-zone"] ? { safeZone: readZone(values["safe-zone"]) } : {}),
+    });
+    for (const w of result.warnings) process.stderr.write(`warning: ${w}\n`);
+    for (const e of result.errors) process.stderr.write(`error: ${e}\n`);
+    const { errors: _errors, warnings: _warnings, ...report } = result;
+    process.stdout.write(values.json ? `${JSON.stringify(report, null, 2)}\n` : formatWhere(result));
     return result.errors.length > 0 ? 1 : 0;
   }
   const [file] = positionals;

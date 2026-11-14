@@ -8,6 +8,7 @@ import type { FontFile } from "../fonts";
 import { findChrome } from "./chrome";
 import type {
   AudioRequest,
+  BoundsOptions,
   InkBounds,
   ListenRequest,
   ListenResult,
@@ -181,8 +182,13 @@ export class BrowserEngine {
   }
 
   /** The ink of each overlay and of the captions at `t`, for the layout check. */
-  async bounds(t: number): Promise<readonly InkBounds[]> {
-    return this.on((page) => page.evaluate((at: number) => window.__cutcraft!.bounds(at), t));
+  async bounds(t: number, options?: BoundsOptions): Promise<readonly InkBounds[]> {
+    return this.on((page) =>
+      page.evaluate(([at, o]: [number, BoundsOptions | undefined]) => window.__cutcraft!.bounds(at, o), [
+        t,
+        options,
+      ] as [number, BoundsOptions | undefined]),
+    );
   }
 
   /** Asset errors the pages' players have reported so far, with the resolver's reason for media it could not serve. */

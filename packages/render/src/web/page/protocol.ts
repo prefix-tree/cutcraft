@@ -107,6 +107,13 @@ export interface InkBounds {
   readonly parts: readonly { readonly x: number; readonly y: number; readonly w: number; readonly h: number }[];
   /** On a track beneath the footage. */
   readonly backdrop: boolean;
+  /** For a part (kind `part`): the id of the element whose code drew it. Its own id is `<that id>/<its name>`. */
+  readonly of?: string;
+}
+
+export interface BoundsOptions {
+  /** Also measure what an element's own code named with `data-name`, each as a part. */
+  readonly parts?: boolean;
 }
 
 /** `window.__cutcraft` once the page is ready. Byte results stay in the page until `read` takes them. */
@@ -124,8 +131,8 @@ export interface PageApi {
   segment(request: SegmentRequest): Promise<number>;
   /** Mixes and encodes the soundtrack; its bytes wait for `read`. */
   audio(request: AudioRequest): Promise<AudioResult>;
-  /** Steps to `t` and measures the ink of each overlay and of the captions there. */
-  bounds(t: number): Promise<readonly InkBounds[]>;
+  /** Steps to `t` and measures the ink of each overlay and of the captions there, and of named parts when asked. */
+  bounds(t: number, options?: BoundsOptions): Promise<readonly InkBounds[]>;
   /** Draws one frame as PNG or JPEG; returns its length in bytes. */
   still(t: number, type: "image/png" | "image/jpeg", quality?: number): Promise<number>;
   /** Draws each cell as a tile: its frame scaled to the cell's width, with its label beneath. Returns how many. */
