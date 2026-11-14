@@ -141,9 +141,10 @@ same. Its pictures are half as wide and half as high, encoded at the `low` quali
 `--quality` is given. It is written beside the file `--out` names as `video.draft.mp4`, so a draft never replaces the
 video.
 
-A draft takes about half the time, because drawing a frame is most of what an export does and a draft draws half of
-them. Each frame is still drawn at full size and scaled down afterwards, so a draft's pictures are the video's own,
-smaller. To see one move without rendering at all, use [`look --motion`](/reference/cli#motion).
+A draft is faster because it draws half the frames, but not twice as fast: each frame is still drawn at full size
+and scaled down afterwards, and drawing is most of what an export does. A two minute film with a three.js scene took
+a little over nine minutes as a draft against about twelve in full. A draft's pictures are the video's own, smaller.
+To see one move without rendering at all, use [`look --motion`](/reference/cli#motion).
 
 ### `--tabs`
 
