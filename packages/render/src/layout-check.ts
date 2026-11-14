@@ -110,14 +110,15 @@ export interface LayoutCheckResult {
 }
 
 /** Pixels an element may stray before it counts: the ink scan's own slack. */
-const SLACK = 2;
+export const SLACK = 2;
 /** A subject box is used this many seconds either side of the time it was sampled at. */
 const SUBJECT_REACH = 1;
 
 type Run = { -readonly [K in keyof LayoutIssue]: LayoutIssue[K] } & { n: number; worst: number };
 
 /**
- * Samples the composition and reports every overlay (titles, shapes, SVG, stickers, layers, and captions) that
+ * Samples the composition and reports every overlay (titles, shapes, SVG, stickers, layers, and captions), and every
+ * part a layer's code named with `data-name`, that
  * leaves the frame, leaves the safe zone, covers captions (not captions themselves), or covers the subject, as runs
  * of consecutive offending samples. Overlays beneath the footage, and ones whose ink fills the frame (backgrounds),
  * are not checked; neither is a moment where an element is fainter than 10%.
@@ -155,8 +156,13 @@ export async function checkLayout(options: LayoutCheckOptions): Promise<LayoutCh
     worst: number,
     box: DrawRect,
     area: DrawRect,
-    other?: string,
+    other: string | undefined,
+    /** What the parts of each element have been reported for at this sample: an element is not reported again. */
+    saidByParts: Set<string>,
   ): void => {
+    const own = rule === "frame-edge" || rule === "safe-zone" ? "edge" : `${rule}|${other ?? ""}`;
+    if (b.of !== undefined) saidByParts.add(`${b.of}|${own}`);
+    else if (saidByParts.has(`${b.id}|${own}`)) return;
     const key = `${rule}|${b.id}|${other ?? ""}`;
     let run = open.get(key);
     if (!run || run.n !== n - step) {
@@ -188,24 +194,27 @@ export async function checkLayout(options: LayoutCheckOptions): Promise<LayoutCh
     for (let n = first; n < last; n += step) {
       samples++;
       const t = n / fps;
-      const shown = (await engine.bounds(t)).filter((b) => !b.backdrop && !covers(b.rect, frame));
+      const all = (await engine.bounds(t, { parts: true })).filter((b) => !b.backdrop && !covers(b.rect, frame));
+      // Parts first: where a part a layer's code named breaks a rule, the layer is not reported for it as well.
+      const shown = [...all.filter((b) => b.kind === "part"), ...all.filter((b) => b.kind !== "part")];
+      const said = new Set<string>();
       const captions = shown.filter((b) => b.kind === "captions");
       const subjects = subjectRects(state, t, options.subject);
       for (const b of shown) {
         const out = overflow(b.rect, frame);
-        if (out > SLACK) report("frame-edge", b, n, out, b.rect, frame);
+        if (out > SLACK) report("frame-edge", b, n, out, b.rect, frame, undefined, said);
         else if (overflow(b.rect, safe) > SLACK)
-          report("safe-zone", b, n, overflow(b.rect, safe), b.rect, safe, zoneName);
+          report("safe-zone", b, n, overflow(b.rect, safe), b.rect, safe, zoneName, said);
         if (b.kind !== "captions") {
           for (const c of captions) {
             const hit = collision(b.parts, c.parts);
-            if (hit) report("captions", b, n, hit.size, hit.mine, hit.theirs, c.id);
+            if (hit) report("captions", b, n, hit.size, hit.mine, hit.theirs, c.id, said);
           }
         }
         for (const s of subjects) {
           const hit = collision(b.parts, [s]);
           if (hit) {
-            report("subject", b, n, hit.size, hit.mine, hit.theirs, "subject");
+            report("subject", b, n, hit.size, hit.mine, hit.theirs, "subject", said);
             break;
           }
         }
@@ -243,7 +252,7 @@ export async function checkLayout(options: LayoutCheckOptions): Promise<LayoutCh
 }
 
 /** How far `r` reaches past `area` on its worst side, in pixels; 0 or less when inside. */
-function overflow(r: DrawRect, area: DrawRect): number {
+export function overflow(r: DrawRect, area: DrawRect): number {
   return Math.max(area.x - r.x, area.y - r.y, r.x + r.w - (area.x + area.w), r.y + r.h - (area.y + area.h));
 }
 
@@ -274,7 +283,7 @@ function union(boxes: readonly DrawRect[]): DrawRect {
  * Where two sets of ink boxes overlap: the parts of each that touch the other, and the overlapping area in px².
  * The slack applies to the overlap as a whole, since a thin element's cells can each be thinner than it.
  */
-function collision(
+export function collision(
   mine: readonly DrawRect[],
   theirs: readonly DrawRect[],
 ): { mine: DrawRect; theirs: DrawRect; size: number } | null {
@@ -296,14 +305,14 @@ function collision(
   return { mine: union([...a]), theirs: union([...b]), size: hits.reduce((sum, i) => sum + i.w * i.h, 0) };
 }
 
-function rounded(r: DrawRect): DrawRect {
+export function rounded(r: DrawRect): DrawRect {
   const x = Math.round(r.x),
     y = Math.round(r.y);
   return { x, y, w: Math.round(r.x + r.w) - x, h: Math.round(r.y + r.h) - y };
 }
 
 const s2 = (t: number): string => `${t.toFixed(2)} s`;
-const rect = (r: DrawRect): string => `x ${r.x}..${r.x + r.w}, y ${r.y}..${r.y + r.h}`;
+export const rect = (r: DrawRect): string => `x ${r.x}..${r.x + r.w}, y ${r.y}..${r.y + r.h}`;
 const SIDE = { left: "on the left", top: "at the top", right: "on the right", bottom: "at the bottom" } as const;
 const signed = (v: number): string => (v > 0 ? `+${v}` : `${v}`);
 
@@ -316,6 +325,7 @@ function moveText(kind: string, dx: number, dy: number): string {
     .filter(Boolean)
     .join(" and ");
   if (kind === "captions") return `move the captions ${words} (style.position, or a smaller style.size)`;
+  if (kind === "part") return `move it ${words}, in the layer's code where it is drawn`;
   const props = [dx && `transform.position.x ${signed(dx)}`, dy && `transform.position.y ${signed(dy)}`]
     .filter(Boolean)
     .join(", ");
@@ -344,7 +354,7 @@ function describe(issue: LayoutIssue): LayoutIssue {
       return {
         ...issue,
         message,
-        fix: `it is ${box.w}×${box.h} px but the ${issue.rule === "frame-edge" ? "frame" : "zone"} is ${Math.round(area.w)}×${Math.round(area.h)}: scale it to ${scale} or less (transform.scale) and keep it within ${rect(area)}`,
+        fix: `it is ${box.w}×${box.h} px but the ${issue.rule === "frame-edge" ? "frame" : "zone"} is ${Math.round(area.w)}×${Math.round(area.h)}: ${issue.kind === "part" ? `draw it at ${scale} of its size or less` : `scale it to ${scale} or less (transform.scale)`} and keep it within ${rect(area)}`,
       };
     }
     const dx =
@@ -386,6 +396,21 @@ function describe(issue: LayoutIssue): LayoutIssue {
  * shows no single place for it.
  */
 function locate(file: string, index: SourceIndex, state: ResolvedState, id: string, kind: string): SourceSpot | null {
+  if (kind === "part") {
+    // A part is found by its name where the file writes it; a name the file builds is found at its layer.
+    const slash = id.lastIndexOf("/");
+    const name = id.slice(slash + 1);
+    const layer = id.slice(0, slash);
+    // Looked for inside the layer that drew it: another layer may name a part of its own the same.
+    const [from, to] = index.elements.get(layer)?.range ?? [0, index.text.length];
+    const inside = index.text.slice(from, to);
+    const at = ['"', "'", "`"]
+      .flatMap((q) => [`data-name=${q}${name}${q}`, `data-name={${q}${name}${q}}`])
+      .map((written) => inside.indexOf(written))
+      .find((i) => i >= 0);
+    if (at === undefined) return locate(file, index, state, layer, "layer");
+    return spotAt(file, index, from + at);
+  }
   const node = state.tree.byId.get(id);
   const site = node?.editable === "generated" ? undefined : index.elements.get(id);
   const origin = node?.origin;
@@ -407,6 +432,11 @@ function locate(file: string, index: SourceIndex, state: ResolvedState, id: stri
     at = r;
     loop = true;
   }
+  return { ...spotAt(file, index, at), ...(helper ? { helper } : {}), ...(loop ? { loop: true as const } : {}) };
+}
+
+/** The line and column of an offset in the file, with that line's text. */
+function spotAt(file: string, index: SourceIndex, at: number): SourceSpot {
   const before = index.text.slice(0, at);
   const lineStart = before.lastIndexOf("\n") + 1;
   const lineEnd = index.text.indexOf("\n", at);
@@ -415,8 +445,6 @@ function locate(file: string, index: SourceIndex, state: ResolvedState, id: stri
     line: before.split("\n").length,
     column: at - lineStart + 1,
     code: index.text.slice(lineStart, lineEnd < 0 ? undefined : lineEnd),
-    ...(helper ? { helper } : {}),
-    ...(loop ? { loop: true as const } : {}),
   };
 }
 

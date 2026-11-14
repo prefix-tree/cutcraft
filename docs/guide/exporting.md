@@ -221,6 +221,47 @@ frame (backgrounds) are not checked, and neither is an element fainter than
 `checkLayout({ state, media, source: { ...video.source, file }, safeZone, subject })`, and `formatLayout(result)` for
 the text.
 
+### Naming the parts of a layer
+
+To the check a `<Layer>` is one box, whatever its code draws. Give an element inside it a `data-name` and the check
+measures that element on its own:
+
+```tsx
+<Layer id="diagram" start={0} duration={8}>
+  <svg width={1080} height={1920}>
+    <text data-name="lamp-label" x={470} y={624}>LAMP</text>
+  </svg>
+</Layer>
+```
+
+It is reported as the part `diagram/lamp-label`, at the line that names it, and the layer is not reported a second
+time for the same thing. Its advice is a move in pixels to make in the layer's code. Code that names nothing is
+checked as before, as one layer. A part that is faded out or not displayed is not measured.
+
+## Where things are
+
+The check speaks only when a rule is broken. `cutcraft where` answers the plainer question, where is everything at
+this moment:
+
+```sh
+npx cutcraft where video.tsx --at 2.6 --safe-zone tiktok
+```
+
+```
+2.60 s (frame 78)
+  diagram             layer     x 96..980, y 520..1340    in frame   tiktok: in
+  diagram/lamp-label  part      x 398..516, y 577..604    in frame   tiktok: in
+  diagram/dots-label  part      x 145..259, y 1527..1556  in frame   tiktok: out bottom 296 px
+  said                captions  x 253..827, y 1154..1250  in frame   tiktok: in   over "diagram" (574 x 96 px)
+```
+
+There is a row for each overlay, for the captions and for each named part: its ink as a box in pixels from the top
+left, whether that is inside the frame and inside the safe zone and by how much it is not, and what it overlaps.
+`--at` takes the moments `inspect` and `look` take, several at once. Without `--safe-zone` a portrait video is held
+against `tiktok`, `reels` and `shorts` together, and any other against `title-safe`. `--json` prints the same as
+data. It reports and never fails a file for what it finds: `--check-layout` is the judge. From code:
+`whereThings({ state, source, media, at })` and `formatWhere(result)`.
+
 ## When a frame never finishes
 
 Each frame has a deadline, 60 seconds unless `--frame-timeout` (or `frameTimeout`) says otherwise. A frame that
