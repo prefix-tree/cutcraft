@@ -126,7 +126,25 @@ check reports each as a `not-rendered` warning.
 
 ## Faster
 
-Two options, in the order to try them.
+A draft to watch while you work, then two options for the real export, in the order to try them.
+
+### A draft
+
+`--draft` renders the video for watching, not for keeping:
+
+```sh
+npx cutcraft video.tsx --out video.mp4 --draft
+```
+
+It draws every second frame and shows each twice as long, so the draft is as long as the video and its sound is the
+same. Its pictures are half as wide and half as high, encoded at the `low` quality preset unless `--bitrate` or
+`--quality` is given. It is written beside the file `--out` names as `video.draft.mp4`, so a draft never replaces the
+video.
+
+A draft is faster because it draws half the frames, but not twice as fast: each frame is still drawn at full size
+and scaled down afterwards, and drawing is most of what an export does. A two minute film with a three.js scene took
+a little over nine minutes as a draft against about twelve in full. A draft's pictures are the video's own, smaller.
+To see one move without rendering at all, use [`look --motion`](/reference/cli#motion).
 
 ### `--tabs`
 
@@ -220,6 +238,47 @@ frame (backgrounds) are not checked, and neither is an element fainter than
 10%. The check draws each overlay alone in the export page and measures its ink. From code:
 `checkLayout({ state, media, source: { ...video.source, file }, safeZone, subject })`, and `formatLayout(result)` for
 the text.
+
+### Naming the parts of a layer
+
+To the check a `<Layer>` is one box, whatever its code draws. Give an element inside it a `data-name` and the check
+measures that element on its own:
+
+```tsx
+<Layer id="diagram" start={0} duration={8}>
+  <svg width={1080} height={1920}>
+    <text data-name="lamp-label" x={470} y={624}>LAMP</text>
+  </svg>
+</Layer>
+```
+
+It is reported as the part `diagram/lamp-label`, at the line that names it, and the layer is not reported a second
+time for the same thing. Its advice is a move in pixels to make in the layer's code. Code that names nothing is
+checked as before, as one layer. A part that is faded out or not displayed is not measured.
+
+## Where things are
+
+The check speaks only when a rule is broken. `cutcraft where` answers the plainer question, where is everything at
+this moment:
+
+```sh
+npx cutcraft where video.tsx --at 2.6 --safe-zone tiktok
+```
+
+```
+2.60 s (frame 78)
+  diagram             layer     x 96..980, y 520..1340    in frame   tiktok: in
+  diagram/lamp-label  part      x 398..516, y 577..604    in frame   tiktok: in
+  diagram/dots-label  part      x 145..259, y 1527..1556  in frame   tiktok: out bottom 296 px
+  said                captions  x 253..827, y 1154..1250  in frame   tiktok: in   over "diagram" (574 x 96 px)
+```
+
+There is a row for each overlay, for the captions and for each named part: its ink as a box in pixels from the top
+left, whether that is inside the frame and inside the safe zone and by how much it is not, and what it overlaps.
+`--at` takes the moments `inspect` and `look` take, several at once. Without `--safe-zone` a portrait video is held
+against `tiktok`, `reels` and `shorts` together, and any other against `title-safe`. `--json` prints the same as
+data. It reports and never fails a file for what it finds: `--check-layout` is the judge. From code:
+`whereThings({ state, source, media, at })` and `formatWhere(result)`.
 
 ## When a frame never finishes
 

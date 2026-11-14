@@ -436,4 +436,27 @@ describe("checkLayout", () => {
     expect(result.samples).toBe(10);
     expect(brief(result.issues)).toEqual(["frame-edge:edge@0.00-0.90"]);
   });
+
+  it("measures the captions where their x, y and width put them", async () => {
+    const caps = (props: Record<string, unknown>) =>
+      check(
+        h(
+          Composition,
+          { fps: 10, width: 640, height: 360 },
+          h(
+            Captions,
+            { id: "caps", style: { size: 30 }, ...props },
+            h(Caption, { id: "c1", start: 0, end: 1, text: "Hello world" }),
+          ),
+        ),
+      );
+    // In a narrow column at the left, clear of the edges: nothing to report.
+    expect(brief((await caps({ x: -150, y: 0, width: 240, align: "left" })).issues)).toEqual([]);
+    // Pushed right until the line crosses the frame's edge: reported, with the props that move it back.
+    const { issues } = await caps({ x: 280, y: 0 });
+    expect(brief(issues)).toEqual(["frame-edge:caps@0.00-0.90"]);
+    expect(issues[0]!.fix).toMatch(
+      /^move the captions left \d+ px \(their x and y, a narrower width, or a smaller style\.size\)/,
+    );
+  });
 });

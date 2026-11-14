@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { zCaptionAnimation } from "../enums";
 import { assetRefSchema, colorSchema, idSchema, shadowSchema, timeRefSchema } from "./common";
-import { zCaptionPosition } from "./enums-local";
+import { zCaptionPosition, zTextAlign } from "./enums-local";
 
 export const captionStyleSchema = z.strictObject({
   font: z.string().optional(),
@@ -31,6 +31,16 @@ export const captionsSchema = z.strictObject({
   /** Caption styling, or the name of a theme captions preset. */
   style: z.union([idSchema, captionStyleSchema]).optional(),
   animation: zCaptionAnimation.default("none"),
+  /**
+   * Where the middle of the captions is, in pixels right of the frame's centre and below it, as on a card or a
+   * badge. `y` takes the place of `style.position`; `x` alone keeps the height that names.
+   */
+  x: z.number().optional(),
+  y: z.number().optional(),
+  /** The widest a caption line may be, in pixels. Left out: the frame, less a margin at each side. */
+  width: z.number().positive().optional(),
+  /** Which side of that width the lines sit against. Left out: `center`. */
+  align: zTextAlign.optional(),
   /** Generation limits: a cue breaks at a sentence end, a long pause, or when one of these would be exceeded. */
   /** Left out: as many as fit one line at the caption size on this frame (at most 42). */
   maxChars: z.number().int().positive().optional(),

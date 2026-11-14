@@ -5,13 +5,14 @@ draws a sheet of its frames to look at, and adds media to the manifest.
 
 ```sh
 npm install cutcraft
-npx cutcraft <file.tsx> --out <video.mp4|.webm|.mp3|.wav> [options]
+npx cutcraft <file.tsx> --out <video.mp4|.webm|.mp3|.wav> [--draft] [options]
 npx cutcraft <file.tsx> --still <seconds> --out <image.png|.jpg> [options]
 npx cutcraft <file.tsx> --check-layout [--safe-zone <zone>] [--subject <x,y,w,h>] [--json] [options]
 npx cutcraft <file.tsx> --srt <captions.srt> | --vtt <captions.vtt> [--from <s> --to <s>]
 npx cutcraft inspect <file.tsx> [--at <moments>] [--json] [--manifest <file>] [--props <json>]
 npx cutcraft look <file.tsx> [--at <moments> | --around <id>] [--without <id>] [--listen <stretch>] [--out look.png] [options]
 npx cutcraft look <file.tsx> --motion <stretch> [--step <s>] [--listen <stretch>] [--out look.png] [options]
+npx cutcraft where <file.tsx> --at <moments> [--safe-zone <zone>] [--json] [options]
 npx cutcraft add <media file>... [--manifest manifest.json] [--id <id>] [--transcript <file>]
 npx cutcraft browser install
 ```
@@ -34,6 +35,7 @@ time. `CUTCRAFT_CHROMIUM` names a Chrome or Chromium 153 or later to use instead
 | `--media <dir>` | One file per asset id, with or without an extension (`podcast.webm`, `podcast`). Default: the file's folder. |
 | `--props <json>` | Props for the file's component, over its `defaults`. |
 | `--from <s>` `--to <s>` | Render only this part of the composition. |
+| `--draft` | A render for watching, not keeping: every second frame, each shown twice as long, at half the width and height and the `low` quality preset. Written beside `--out` as `<name>.draft.<ext>` ([A draft](https://cutcraft.prefixtree.xyz/guide/exporting#a-draft)). Not with `--still`, `--check-layout`, `--copy` or `look`. |
 | `--tabs <n>` | Pages of the browser that render pieces at once. Default 1 ([Faster](https://cutcraft.prefixtree.xyz/guide/exporting#faster)). |
 | `--copy` | Copy untouched stretches of a VP9 source into a VP9 export without re-encoding them ([Faster](https://cutcraft.prefixtree.xyz/guide/exporting#faster)). |
 | `--codec <name>` | `avc` (the default in MP4), `vp9` (the default in WebM), or `av1` in either. A codec the container cannot hold (VP9 in MP4) is an error. |
@@ -51,13 +53,28 @@ time. `CUTCRAFT_CHROMIUM` names a Chrome or Chromium 153 or later to use instead
 
 | Option | |
 |---|---|
-| `--check-layout` | Report every overlay that leaves the frame or the safe zone, or covers the captions or the subject, at its line in the file. Writes no file. |
+| `--check-layout` | Report every overlay, and every part a layer's code names with `data-name`, that leaves the frame or the safe zone, or covers the captions or the subject, at its line in the file. Writes no file. |
 | `--safe-zone <zone>` | `tiktok`, `reels`, `shorts`, `title-safe` (the default) or `action-safe`, or `top,right,bottom,left` fractions. |
 | `--subject <x,y,w,h>` | Where the subject is, as fractions of the frame, for footage whose manifest has no subjects. |
 | `--step <s>` | Seconds between samples. Default: every frame. |
 | `--json` | Print the report as JSON. |
 
 [Checking the layout](https://cutcraft.prefixtree.xyz/guide/exporting#checking-the-layout) explains the rules and the output.
+
+## Where
+
+`cutcraft where video.tsx --at <moments>` prints where each thing on screen is at each moment: every overlay, the
+captions, and every part a layer's code names with `data-name`. Each row gives the thing's ink as a box in pixels,
+whether it is in the frame and in each safe zone, and what it overlaps.
+
+| Option | |
+|---|---|
+| `--at <moments>` | The moments to report, comma-separated, written as for [`inspect`](#inspect). Required. |
+| `--safe-zone <zone>` | The zone to hold each thing against, as for the layout check. Default: `tiktok`, `reels` and `shorts` for a portrait video, `title-safe` for any other. |
+| `--json` | Print the report as JSON: per moment, each thing's `id`, `kind`, `box`, `inFrame`, `zones` and `over`. |
+| `--manifest`, `--media`, `--props`, `--font`, `--import`, `--frame-timeout` | As for an export. |
+
+[Where things are](https://cutcraft.prefixtree.xyz/guide/exporting#where-things-are) shows the output.
 
 ## Inspect
 

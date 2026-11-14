@@ -383,6 +383,7 @@ function Slice() {
           opacity={wallPin > 0 ? 0.55 * one : 0}
         />
         <text
+          data-name="wall-value"
           x="870"
           y="820"
           textAnchor="middle"
@@ -505,6 +506,7 @@ function Slice() {
           <rect x="-43" y="-39" width="86" height="78" rx="12" fill="none" stroke="#ffffff" strokeWidth="5" />
         </g>
         <text
+          data-name="our-dot"
           x={ours}
           y="1364"
           textAnchor="middle"
@@ -518,7 +520,7 @@ function Slice() {
         </text>
 
         {/* "Worked out once, long before you play." */}
-        <g transform={`translate(360 1480) rotate(-6) scale(${mix(1.5, 1, stamp)})`} opacity={stamp}>
+        <g data-name="stamp" transform={`translate(360 1480) rotate(-6) scale(${mix(1.5, 1, stamp)})`} opacity={stamp}>
           <rect x="-230" y="-40" width="460" height="80" rx="10" fill="none" stroke={GOLD} strokeWidth="5" />
           <text y="13" textAnchor="middle" fontFamily={MONO} fontWeight="700" fontSize="36" fill={GOLD}>
             DONE IN ADVANCE
@@ -722,6 +724,7 @@ function Intro() {
                 strokeWidth="3"
               />
               <text
+                data-name={`${name.text.toLowerCase()}-label`}
                 x={name.x}
                 y={name.y + 24}
                 textAnchor="middle"
@@ -737,6 +740,7 @@ function Intro() {
           );
         })}
         <text
+          data-name="no-shadow"
           x="660"
           y="1420"
           textAnchor="middle"

@@ -16,6 +16,7 @@ import {
   WebMOutputFormat,
 } from "mediabunny";
 import { createRef } from "react";
+import { flushSync } from "react-dom";
 import { createRoot } from "react-dom/client";
 
 import { installFreeCodeLibraries } from "@cutcraft/graphics/libraries";
@@ -37,6 +38,7 @@ import { createFreeCodeClock } from "./clock";
 import { inkOf, offFrame, pastEdges } from "./ink";
 import type {
   AudioRequest,
+  BoundsOptions,
   InkBounds,
   ListenRequest,
   PageApi,
@@ -182,8 +184,14 @@ async function start(): Promise<void> {
     stage = "settle";
     await settle();
     // The file's animation-frame callbacks for this frame: after the commit, so a loop a layer started as it mounted
-    // ticks in its first frame, and then React's update from them is waited for.
-    if (clock.flush()) await settle();
+    // ticks in its first frame. React commits what they set before `flushSync` returns: a setState from a callback
+    // that is no React event is otherwise left to React's scheduler, which no wait here is ordered after, and the
+    // frame was now and then captured with the state of the frame before.
+    let ran = false;
+    flushSync(() => {
+      ran = clock.flush();
+    });
+    if (ran) await settle();
     stage = "paint";
     await painted(cap);
     // A face is fetched only when layout first sets text in it, which can be this paint: `settle` looked before the
@@ -229,19 +237,32 @@ async function start(): Promise<void> {
         format: r.container === "mp4" ? new Mp4OutputFormat() : new WebMOutputFormat(),
         target,
       });
-      const source = new CanvasSource(cap, {
+      const rate = r.fps ?? fps;
+      // A smaller picture is the captured frame drawn down into a second canvas, with even sides for the encoder.
+      const scale = r.scale ?? 1;
+      const small = scale < 1 ? document.createElement("canvas") : null;
+      if (small) {
+        small.width = Math.max(2, Math.round((width * scale) / 2) * 2);
+        small.height = Math.max(2, Math.round((height * scale) / 2) * 2);
+      }
+      const smallCtx = small?.getContext("2d") ?? null;
+      const source = new CanvasSource(small ?? cap, {
         codec: r.codec,
         bitrate: r.quality ? QUALITY[r.quality] : r.bitrate,
         keyFrameInterval: r.keyFrameInterval,
         latencyMode: "quality",
       });
-      output.addVideoTrack(source, { frameRate: fps });
+      output.addVideoTrack(source, { frameRate: rate });
       await output.start();
       for (let n = r.first; n < r.last; n++) {
-        await frame(n / fps);
-        await withinDeadline(n / fps, () => {
+        await frame(n / rate);
+        if (small && smallCtx) {
+          smallCtx.clearRect(0, 0, small.width, small.height);
+          smallCtx.drawImage(cap, 0, 0, small.width, small.height);
+        }
+        await withinDeadline(n / rate, () => {
           stage = "encode";
-          return source.add((n - r.first) / fps, 1 / fps);
+          return source.add((n - r.first) / rate, 1 / rate);
         });
       }
       await output.finalize();
@@ -253,45 +274,63 @@ async function start(): Promise<void> {
       out = track.bytes ?? new Uint8Array();
       return { length: out.length, codec: track.codec, warnings: track.warnings };
     },
-    async bounds(t: number) {
+    async bounds(t: number, options?: BoundsOptions) {
       await capture(t);
       // Each overlay alone: everything else hidden, the frame drawn, its pixels scanned for ink.
       const cells = [...root.querySelectorAll<HTMLElement>("[data-el][data-kind]")].filter(
         (el) => MEASURED.has(el.dataset.kind ?? "") && !el.parentElement?.closest("[data-el]"),
       );
+      /** The ink of one element, with the rest of the page hidden. */
+      const measure = async (el: HTMLElement | SVGElement) => {
+        const before = el.style.visibility;
+        el.style.visibility = "visible";
+        try {
+          // drawElementImage draws only into the canvas that holds the element, so the capture canvas measures.
+          await painted(cap);
+          ctx.clearRect(0, 0, width, height);
+          // An overlay that paints nothing just now (captions between two lines, an empty layer) leaves the browser
+          // with no picture of the page to draw, and it says so by throwing. Nothing painted is no ink.
+          try {
+            ctx.drawElementImage(root, 0, 0);
+          } catch (e) {
+            if (!(e instanceof DOMException) || e.name !== "InvalidStateError") throw e;
+          }
+          const r = el.getBoundingClientRect();
+          const o = root.getBoundingClientRect();
+          const k = width / o.width;
+          const box = { x: (r.left - o.left) * k, y: (r.top - o.top) * k, w: r.width * k, h: r.height * k };
+          const seen = inkOf(ctx.getImageData(0, 0, width, height).data, width, height);
+          return seen ? pastEdges(seen, box, width, height) : offFrame(box, width, height);
+        } finally {
+          el.style.visibility = before;
+        }
+      };
+      // Which named parts are drawn is asked now, while the page is as the file left it: once the page is hidden to
+      // measure, a part the file's own code hid looks the same as any other.
+      const partsOf = new Map<Element, (HTMLElement | SVGElement)[]>();
+      if (options?.parts)
+        for (const el of cells)
+          partsOf.set(
+            el,
+            [...el.querySelectorAll<HTMLElement | SVGElement>("[data-name]")].filter(
+              (part) => part.checkVisibility?.({ opacityProperty: true, visibilityProperty: true }) ?? true,
+            ),
+          );
       const found: InkBounds[] = [];
       root.style.visibility = "hidden";
       try {
         for (const el of cells) {
-          const before = el.style.visibility;
-          el.style.visibility = "visible";
-          try {
-            // drawElementImage draws only into the canvas that holds the element, so the capture canvas measures.
-            await painted(cap);
-            ctx.clearRect(0, 0, width, height);
-            // An overlay that paints nothing just now (captions between two lines, an empty layer) leaves the browser
-            // with no picture of the page to draw, and it says so by throwing. Nothing painted is no ink.
-            try {
-              ctx.drawElementImage(root, 0, 0);
-            } catch (e) {
-              if (!(e instanceof DOMException) || e.name !== "InvalidStateError") throw e;
-            }
-            const r = el.getBoundingClientRect();
-            const o = root.getBoundingClientRect();
-            const k = width / o.width;
-            const box = { x: (r.left - o.left) * k, y: (r.top - o.top) * k, w: r.width * k, h: r.height * k };
-            const seen = inkOf(ctx.getImageData(0, 0, width, height).data, width, height);
-            const ink = seen ? pastEdges(seen, box, width, height) : offFrame(box, width, height);
-            if (!ink) continue;
-            const track = el.closest<HTMLElement>("[data-track]")?.dataset.track;
-            found.push({
-              id: el.dataset.el as string,
-              kind: el.dataset.kind as string,
-              ...ink,
-              backdrop: track !== undefined && backdrop.has(track),
-            });
-          } finally {
-            el.style.visibility = before;
+          const ink = await measure(el);
+          if (!ink) continue;
+          const track = el.closest<HTMLElement>("[data-track]")?.dataset.track;
+          const under = track !== undefined && backdrop.has(track);
+          const id = el.dataset.el as string;
+          found.push({ id, kind: el.dataset.kind as string, ...ink, backdrop: under });
+          // What the element's own code named: each part alone, measured the same way.
+          for (const part of partsOf.get(el) ?? []) {
+            const name = part.dataset.name;
+            const partInk = name ? await measure(part) : null;
+            if (name && partInk) found.push({ id: `${id}/${name}`, kind: "part", of: id, ...partInk, backdrop: under });
           }
         }
       } finally {
@@ -453,8 +492,9 @@ function tick(): Promise<void> {
 }
 
 /**
- * After a step: React has committed the new time (its update is flushed before the next task), every engine layer
- * has drawn it, every face its text uses has loaded, and every image or SVG file an overlay shows has loaded. A three.js renderer created by a layer that just appeared
+ * After a step: React has committed the new time (the player's time is an external store, whose update React
+ * flushes before the next task; an ordinary setState is not, see `draw`), every engine layer has drawn it, every
+ * face its text uses has loaded, and every image or SVG file an overlay shows has loaded. A three.js renderer created by a layer that just appeared
  * takes a few frames; a bundled face (fonts.css) is fetched only once text first uses it, so text that appears after
  * the first frame would otherwise be captured in the fallback face.
  */

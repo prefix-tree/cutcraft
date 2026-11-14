@@ -23,7 +23,8 @@ export const defaults = {
 
 // Where things go. TikTok and Reels cover the top of the frame and its bottom third with their own controls, so
 // every word sits in the band between: a card at the top of it, a badge under that, the captions lowest. The
-// captions' height is set so they fall under the speaker's chin, never across his mouth.
+// captions' y, counted from the frame's centre like a card's, puts them under the speaker's chin, never across his
+// mouth.
 // The speaker goes where words cannot: the whole frame behind them, or a box in the bottom half under a card.
 //
 // The speaker in the 1080 x 1080 source, three ways. FULL and CLOSE are 9:16 windows on him. BOXED is a 920 x 580
@@ -146,7 +147,8 @@ export default function Video({ accent, question, wrong }: z.infer<typeof schema
         src="asset:eclipse"
         animation="word-highlight"
         maxChars={22}
-        style={{ position: 0.6, size: 60, weight: 800, highlight: "#14141c", highlightBox: "$accent" }}
+        y={192}
+        style={{ size: 60, weight: 800, highlight: "#14141c", highlightBox: "$accent" }}
       />
     </Composition>
   );
