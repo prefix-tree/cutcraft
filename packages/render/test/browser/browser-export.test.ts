@@ -546,12 +546,17 @@ export default function Video() {
   });
 
   it("says how many frames were captured without a paint signal", async () => {
-    // The capture canvas stops asking for a paint, so the paint event never comes.
-    const file = layer(`document.getElementById("cap").requestPaint = () => {};`);
+    // A browser that never fires the paint event. Not asking for a paint is not enough: under load Chrome paints the
+    // canvas's children on its own and fires the event anyway, so the page is also kept from hearing it.
+    const file = layer(`const cap = document.getElementById("cap");
+    cap.requestPaint = () => {};
+    const add = cap.addEventListener.bind(cap);
+    cap.addEventListener = (type, ...rest) => { if (type !== "paint") add(type, ...rest); };`);
     const result = await run(file, "unpainted.webm");
     const told = result.warnings.filter((w) => w.includes("without the browser confirming the paint"));
     expect(told).toHaveLength(1);
-    expect(told[0]).toMatch(/^\d+ frames were captured/);
+    // The layer lasts 3 frames, and not one of them heard a paint.
+    expect(told[0]).toMatch(/^3 frames were captured/);
     const fine = await run(layer(""), "painted.webm");
     expect(fine.warnings.filter((w) => w.includes("confirming the paint"))).toEqual([]);
   });
