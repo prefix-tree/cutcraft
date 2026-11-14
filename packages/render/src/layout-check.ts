@@ -315,7 +315,8 @@ function moveText(kind: string, dx: number, dy: number): string {
   ]
     .filter(Boolean)
     .join(" and ");
-  if (kind === "captions") return `move the captions ${words} (style.position, or a smaller style.size)`;
+  if (kind === "captions")
+    return `move the captions ${words} (their x and y, a narrower width, or a smaller style.size)`;
   const props = [dx && `transform.position.x ${signed(dx)}`, dy && `transform.position.y ${signed(dy)}`]
     .filter(Boolean)
     .join(", ");
