@@ -16,6 +16,7 @@ import {
   WebMOutputFormat,
 } from "mediabunny";
 import { createRef } from "react";
+import { flushSync } from "react-dom";
 import { createRoot } from "react-dom/client";
 
 import { installFreeCodeLibraries } from "@cutcraft/graphics/libraries";
@@ -183,8 +184,14 @@ async function start(): Promise<void> {
     stage = "settle";
     await settle();
     // The file's animation-frame callbacks for this frame: after the commit, so a loop a layer started as it mounted
-    // ticks in its first frame, and then React's update from them is waited for.
-    if (clock.flush()) await settle();
+    // ticks in its first frame. React commits what they set before `flushSync` returns: a setState from a callback
+    // that is no React event is otherwise left to React's scheduler, which no wait here is ordered after, and the
+    // frame was now and then captured with the state of the frame before.
+    let ran = false;
+    flushSync(() => {
+      ran = clock.flush();
+    });
+    if (ran) await settle();
     stage = "paint";
     await painted(cap);
     // A face is fetched only when layout first sets text in it, which can be this paint: `settle` looked before the
@@ -472,8 +479,9 @@ function tick(): Promise<void> {
 }
 
 /**
- * After a step: React has committed the new time (its update is flushed before the next task), every engine layer
- * has drawn it, every face its text uses has loaded, and every image or SVG file an overlay shows has loaded. A three.js renderer created by a layer that just appeared
+ * After a step: React has committed the new time (the player's time is an external store, whose update React
+ * flushes before the next task; an ordinary setState is not, see `draw`), every engine layer has drawn it, every
+ * face its text uses has loaded, and every image or SVG file an overlay shows has loaded. A three.js renderer created by a layer that just appeared
  * takes a few frames; a bundled face (fonts.css) is fetched only once text first uses it, so text that appears after
  * the first frame would otherwise be captured in the fallback face.
  */
