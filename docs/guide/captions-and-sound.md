@@ -58,6 +58,19 @@ change with it.
 Over a talking head in a vertical video, `position: 0.6` puts them under the chin, clear of the mouth and above the
 part of the frame the platforms cover.
 
+### Placing captions
+
+For an exact place, give the captions numbers, as you would a card or a badge. `x` and `y` are the middle of the
+captions, in pixels right of the frame's centre and below it. `width` is the widest a line may be, and `align` is
+the side of that width the lines sit against: `left`, `center` or `right`.
+
+```tsx
+<Captions id="captions" src="asset:founder" x={-200} y={192} width={520} align="left" />
+```
+
+`y` takes the place of `style.position`. `x`, `width` and `align` work with either. The layout check measures the
+captions where these put them.
+
 With a word animation, `highlight` is the colour of the word being said, and `highlightBox` puts a filled, rounded
 box behind it:
 
