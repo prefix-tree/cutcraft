@@ -11,6 +11,7 @@ npx cutcraft <file.tsx> --check-layout [--safe-zone <zone>] [--subject <x,y,w,h>
 npx cutcraft <file.tsx> --srt <captions.srt> | --vtt <captions.vtt> [--from <s> --to <s>]
 npx cutcraft inspect <file.tsx> [--at <moments>] [--json] [--manifest <file>] [--props <json>]
 npx cutcraft look <file.tsx> [--at <moments> | --around <id>] [--without <id>] [--listen <stretch>] [--out look.png] [options]
+npx cutcraft look <file.tsx> --motion <stretch> [--step <s>] [--listen <stretch>] [--out look.png] [options]
 npx cutcraft add <media file>... [--manifest manifest.json] [--id <id>] [--transcript <file>]
 npx cutcraft browser install
 ```
@@ -147,10 +148,12 @@ It prints a legend as JSON, one entry per cell, so a frame found by eye leads ba
 | `--at <moments>` | The moments to draw, comma-separated, written as for [`inspect`](#inspect): `hook.end,x1,word:14,2..6/0.5`. |
 | `--around <id>` | Five moments across one thing instead. A transition: the frame before it, its first, middle and last frame, and the frame after. Any other element: its first frame, half way in, its middle, half way out and its last frame. |
 | `--without <id>` | Each frame twice, side by side: as written, and without one effect, one `<Adjustment>` (all its effects) or one overlay (a title, a shape, an SVG, a sticker, a layer, the captions). A clip cannot be left out: that would move the cut. |
+| `--motion <stretch>` | A strip of small frames at even steps across a stretch, to read a move ([Motion](#motion)). Not with `--at`, `--around` or `--without`. |
+| `--step <s>` | With `--motion`: the seconds between frames. Left out: the step that gives twelve frames. |
 | `--listen <stretch>` | The sound of a stretch, drawn under the cells: `all`, a range of times such as `2..6` or `60f..180f`, or an element's id for the time it is on ([Listening](#listening)). |
 | `--out <file>` | The sheet, a PNG. Default `look.png`. |
-| `--cell <px>` | The width of a cell's picture. Default 480. |
-| `--columns <n>` | Cells in a row. Default up to 4. |
+| `--cell <px>` | The width of a cell's picture. Default 480. In a `--motion` strip: 240, or 180 for a portrait video. |
+| `--columns <n>` | Cells in a row. Default up to 4, and up to 12 in a `--motion` strip. |
 | `--frames <dir>` | Also write each cell's frame at full size there, as PNG; the legend names each file. |
 | `--no-cache` | Draw every cell again ([The frame cache](#the-frame-cache)). |
 | `--manifest`, `--media`, `--props`, `--font`, `--import`, `--continue`, `--frame-timeout` | As for an export. |
@@ -172,6 +175,26 @@ npx cutcraft look colour-grade.tsx --at 1,2.5 --without grade
 ```
 
 [![Four frames of coffee being poured: at 1 second the two are the same; at 2.5 seconds the one with the grade is warmer and brighter than the one without](https://cutcraft.prefixtree.xyz/reference/look-without.jpg)](https://cutcraft.prefixtree.xyz/reference/look-without.jpg)
+
+### Motion
+
+A still says where a thing is, not how it gets there. `--motion` draws one short stretch as a strip of small frames
+at even steps, read left to right, each labelled with its time in seconds. The stretch is a range of times such as
+`0.3..1.3` or `9f..39f`, or an element's id for the time it is on.
+
+```sh
+npx cutcraft look one-pixel.tsx --motion 0.3..1.3
+```
+
+[![Twelve small frames in a row, from 0.30 s to 1.30 s: a ball rolls in from the right of a diagram and stops, then four rays of light thicken across it](https://cutcraft.prefixtree.xyz/reference/look-motion.png)](https://cutcraft.prefixtree.xyz/reference/look-motion.png)
+
+Without `--step` the strip has twelve frames, fewer when the stretch is shorter than twelve frames: no frame is
+shown twice. `--step 0.05` sets the seconds between frames, and `--columns` wraps a long strip into rows. A strip
+holds at most 64 frames. The legend gains the stretch and the step:
+
+```json
+"motion": { "from": 0.3, "to": 1.3, "step": 0.091 }
+```
 
 ### Listening
 

@@ -26,6 +26,7 @@ const USAGE = `Usage: cutcraft <file.tsx> --out <video.mp4|.webm|.mp3|.wav> [opt
        cutcraft inspect <file.tsx> [--at <moments>] [--json] [--manifest <file>] [--props <json>]
        cutcraft look <file.tsx> [--at <moments> | --around <id>] [--without <id>] [--listen <stretch>]
                     [--out look.png] [options]
+       cutcraft look <file.tsx> --motion <stretch> [--step <s>] [--listen <stretch>] [--out look.png] [options]
        cutcraft add <media file>... [--manifest manifest.json] [--id <id>] [--transcript <file>]
        cutcraft browser install
 
@@ -41,11 +42,15 @@ const USAGE = `Usage: cutcraft <file.tsx> --out <video.mp4|.webm|.mp3|.wav> [opt
                         both sides of every cut and each overlay, as an editor skims a cut
   --around <id>         (look) five moments across a transition, or an element coming in, in and going out
   --without <id>        (look) each frame twice, with and without an effect, an adjustment or an overlay
+  --motion <stretch>    (look) read a move: a strip of small frames at even steps across a range such as 2..3 or
+                        an element's id, each labelled with its time. Twelve frames unless --step <s> says how
+                        far apart they are. On its own: not with --at, --around or --without
   --listen <stretch>    (look) show the sound of a stretch under the cells: all, a range such as 2..6, or an
                         element's id. The strip is the mix's waveform with a time scale and the words said; the
                         legend says how loud it is and where it is silent
-  --cell <px>           (look) the width of a cell's picture (default 480)
-  --columns <n>         (look) cells in a row (default up to 4)
+  --cell <px>           (look) the width of a cell's picture (default 480; in a --motion strip 240, or 180 for
+                        a portrait video)
+  --columns <n>         (look) cells in a row (default up to 4, up to 12 in a --motion strip)
   --frames <dir>        (look) also write each cell's full frame there as PNG
   --no-cache            (look, --still) draw every frame again. Without it, frames are kept in .cutcraft/cache
                         beside the file, keyed by what draws them, and a frame an edit did not touch is read from
@@ -67,7 +72,8 @@ const USAGE = `Usage: cutcraft <file.tsx> --out <video.mp4|.webm|.mp3|.wav> [opt
   --json                print the layout check as JSON instead; it exits 3 when it finds issues
   --safe-zone <zone>    tiktok, reels, shorts, title-safe (default) or action-safe, or top,right,bottom,left fractions
   --subject <x,y,w,h>   where the subject is, as fractions of the frame, for footage the manifest has no subjects for
-  --step <s>            seconds between layout samples (default: every frame)
+  --step <s>            seconds between layout samples (default: every frame), or between the frames of a
+                        --motion strip
   --manifest <file>     asset manifest JSON (default: the file's \`manifest\` export)
   --media <dir>         folder holding one file per asset id (default: the file's folder)
   --props <json>        props for the file's component
@@ -123,6 +129,7 @@ async function main(): Promise<number> {
       vtt: { type: "string" },
       at: { type: "string" },
       around: { type: "string" },
+      motion: { type: "string" },
       without: { type: "string" },
       cell: { type: "string" },
       columns: { type: "string" },
@@ -188,6 +195,8 @@ async function main(): Promise<number> {
       ...frameTimeout,
       ...(values.at !== undefined ? { at: values.at } : {}),
       ...(values.around !== undefined ? { around: values.around } : {}),
+      ...(values.motion !== undefined ? { motion: values.motion } : {}),
+      ...(values.step ? { step: Number(values.step) } : {}),
       ...(values.without !== undefined ? { without: values.without } : {}),
       ...(values.cell ? { cell: Number(values.cell) } : {}),
       ...(values.columns ? { columns: Number(values.columns) } : {}),
