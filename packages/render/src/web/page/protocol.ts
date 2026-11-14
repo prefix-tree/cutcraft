@@ -35,6 +35,13 @@ export interface SegmentRequest {
   readonly quality?: "very-low" | "low" | "medium" | "high" | "very-high";
   /** Seconds between keyframes. */
   readonly keyFrameInterval: number;
+  /**
+   * Frames a second to draw and count `first` and `last` in, when not the composition's: a draft draws fewer, each
+   * shown for longer.
+   */
+  readonly fps?: number;
+  /** Encode each frame at this fraction of its width and height; a draft's pictures are smaller. */
+  readonly scale?: number;
 }
 
 /** The soundtrack of composition seconds [from, to), encoded for this container. */

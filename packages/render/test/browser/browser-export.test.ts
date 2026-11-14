@@ -6,9 +6,9 @@ import { join } from "node:path";
 
 import { manifest as mediaManifest } from "../../../player/e2e/app/composition";
 import generateMedia, { mediaDir } from "../../../player/e2e/gen-media";
-import { directoryResolver, loadVideo, renderLook, renderStill, renderVideo } from "../../src";
+import { directoryResolver, draftPath, loadVideo, renderLook, renderStill, renderVideo } from "../../src";
 import { BrowserEngine } from "../../src/web/engine";
-import { type DecodedFrame, decodeAudio, decodeFrames, pixel, readImage } from "../helpers/output";
+import { type DecodedFrame, decodeAudio, decodeFrames, pixel, probe, readImage } from "../helpers/output";
 
 const scratch = join(import.meta.dirname, "..", ".tmp", "browser-export");
 let dir = "";
@@ -554,5 +554,74 @@ export default function Video() {
     expect(told[0]).toMatch(/^\d+ frames were captured/);
     const fine = await run(layer(""), "painted.webm");
     expect(fine.warnings.filter((w) => w.includes("confirming the paint"))).toEqual([]);
+  });
+});
+
+describe("a draft", () => {
+  // A white square that crosses a black frame in two seconds, with a tone under it.
+  const MOVER = `import { Clip, Composition, Keyframe, Shape, Track } from "@cutcraft/kit";
+export const manifest = ${JSON.stringify({ assets: mediaManifest.assets })};
+export default function Video() {
+  return (
+    <Composition fps={30} width={640} height={360} background={{ mode: "color", color: "#000000" }}>
+      <Track id="sound"><Clip id="tone" src="asset:bars" in={0} out={2} transform={{ opacity: 0 }} /></Track>
+      <Track id="t" layout="free">
+        <Shape id="box" shape="rectangle" start={0} duration={2} width={80} height={80} fill="#ffffff">
+          <Keyframe id="k1" property="transform.position.x" at={0} value={-240} />
+          <Keyframe id="k2" property="transform.position.x" at={2} value={240} />
+        </Shape>
+      </Track>
+    </Composition>
+  );
+}
+`;
+
+  it("is as long as the video, with half the frames at half the size, and leaves the video's own render alone", async () => {
+    const loaded = await loadVideo(cut("draft.tsx", MOVER));
+    expect(loaded.state.errors).toEqual([]);
+    const media = directoryResolver(mediaDir, loaded.manifest);
+    const common = { state: loaded.state, source: loaded.source, media };
+    const out = join(dir, "draft.webm");
+    const full = await renderVideo({ ...common, out });
+    const draft = await renderVideo({ ...common, out: draftPath(out), draft: true });
+    expect(draftPath(out)).toBe(join(dir, "draft.draft.webm"));
+    expect([full.frames, full.fps, full.width, full.height]).toEqual([60, 30, 640, 360]);
+    expect([draft.frames, draft.fps, draft.width, draft.height]).toEqual([30, 15, 320, 180]);
+    const a = probe(out),
+      b = probe(draftPath(out));
+    expect([a.frames, a.width, a.height]).toEqual([60, 640, 360]);
+    expect([b.frames, b.width, b.height]).toEqual([30, 320, 180]);
+    expect(b.duration).toBeCloseTo(a.duration, 1);
+    // The sound is the video's own.
+    expect(draft.audio).toBe(full.audio);
+    // The same moments: the square is where the video has it, at half the scale.
+    const middle = (frame: DecodedFrame): number => {
+      const y = Math.round(frame.height / 2);
+      let sum = 0,
+        n = 0;
+      for (let x = 0; x < frame.width; x++)
+        if ((pixel(frame, x, y)[0] as number) > 128) {
+          sum += x;
+          n++;
+        }
+      return sum / n;
+    };
+    const whole = await framesAt(out, [0.4, 1.6], 30);
+    const half = await framesAt(draftPath(out), [0.4, 1.6], 15);
+    for (const t of [0.4, 1.6])
+      expect(middle(half.get(t) as DecodedFrame) * 2).toBeCloseTo(middle(whole.get(t) as DecodedFrame), -1);
+  });
+
+  it("is refused where there is nothing to draft", async () => {
+    const loaded = await loadVideo(cut("draft-no.tsx", MOVER));
+    const common = { state: loaded.state, source: loaded.source, media: directoryResolver(mediaDir, loaded.manifest) };
+    await expect(renderVideo({ ...common, out: join(dir, "d.mp3"), draft: true })).rejects.toThrow(
+      "a draft is of the picture: a .mp3 file holds only the soundtrack",
+    );
+    await expect(renderVideo({ ...common, out: join(dir, "d.webm"), draft: true, smartCopy: true })).rejects.toThrow(
+      "a draft renders every frame it shows",
+    );
+    expect(draftPath("out/film.mp4")).toBe("out/film.draft.mp4");
+    expect(draftPath("out.dir/film")).toBe("out.dir/film.draft");
   });
 });

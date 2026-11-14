@@ -237,19 +237,32 @@ async function start(): Promise<void> {
         format: r.container === "mp4" ? new Mp4OutputFormat() : new WebMOutputFormat(),
         target,
       });
-      const source = new CanvasSource(cap, {
+      const rate = r.fps ?? fps;
+      // A smaller picture is the captured frame drawn down into a second canvas, with even sides for the encoder.
+      const scale = r.scale ?? 1;
+      const small = scale < 1 ? document.createElement("canvas") : null;
+      if (small) {
+        small.width = Math.max(2, Math.round((width * scale) / 2) * 2);
+        small.height = Math.max(2, Math.round((height * scale) / 2) * 2);
+      }
+      const smallCtx = small?.getContext("2d") ?? null;
+      const source = new CanvasSource(small ?? cap, {
         codec: r.codec,
         bitrate: r.quality ? QUALITY[r.quality] : r.bitrate,
         keyFrameInterval: r.keyFrameInterval,
         latencyMode: "quality",
       });
-      output.addVideoTrack(source, { frameRate: fps });
+      output.addVideoTrack(source, { frameRate: rate });
       await output.start();
       for (let n = r.first; n < r.last; n++) {
-        await frame(n / fps);
-        await withinDeadline(n / fps, () => {
+        await frame(n / rate);
+        if (small && smallCtx) {
+          smallCtx.clearRect(0, 0, small.width, small.height);
+          smallCtx.drawImage(cap, 0, 0, small.width, small.height);
+        }
+        await withinDeadline(n / rate, () => {
           stage = "encode";
-          return source.add((n - r.first) / fps, 1 / fps);
+          return source.add((n - r.first) / rate, 1 / rate);
         });
       }
       await output.finalize();

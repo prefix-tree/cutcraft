@@ -126,7 +126,25 @@ check reports each as a `not-rendered` warning.
 
 ## Faster
 
-Two options, in the order to try them.
+A draft to watch while you work, then two options for the real export, in the order to try them.
+
+### A draft
+
+`--draft` renders the video for watching, not for keeping:
+
+```sh
+npx cutcraft video.tsx --out video.mp4 --draft
+```
+
+It draws every second frame and shows each twice as long, so the draft is as long as the video and its sound is the
+same. Its pictures are half as wide and half as high, encoded at the `low` quality preset unless `--bitrate` or
+`--quality` is given. It is written beside the file `--out` names as `video.draft.mp4`, so a draft never replaces the
+video.
+
+A draft is faster because it draws half the frames, but not twice as fast: each frame is still drawn at full size
+and scaled down afterwards, and drawing is most of what an export does. A two minute film with a three.js scene took
+a little over nine minutes as a draft against about twelve in full. A draft's pictures are the video's own, smaller.
+To see one move without rendering at all, use [`look --motion`](/reference/cli#motion).
 
 ### `--tabs`
 

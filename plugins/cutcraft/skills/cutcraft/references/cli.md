@@ -5,7 +5,7 @@ draws a sheet of its frames to look at, and adds media to the manifest.
 
 ```sh
 npm install cutcraft
-npx cutcraft <file.tsx> --out <video.mp4|.webm|.mp3|.wav> [options]
+npx cutcraft <file.tsx> --out <video.mp4|.webm|.mp3|.wav> [--draft] [options]
 npx cutcraft <file.tsx> --still <seconds> --out <image.png|.jpg> [options]
 npx cutcraft <file.tsx> --check-layout [--safe-zone <zone>] [--subject <x,y,w,h>] [--json] [options]
 npx cutcraft <file.tsx> --srt <captions.srt> | --vtt <captions.vtt> [--from <s> --to <s>]
@@ -34,6 +34,7 @@ time. `CUTCRAFT_CHROMIUM` names a Chrome or Chromium 153 or later to use instead
 | `--media <dir>` | One file per asset id, with or without an extension (`podcast.webm`, `podcast`). Default: the file's folder. |
 | `--props <json>` | Props for the file's component, over its `defaults`. |
 | `--from <s>` `--to <s>` | Render only this part of the composition. |
+| `--draft` | A render for watching, not keeping: every second frame, each shown twice as long, at half the width and height and the `low` quality preset. Written beside `--out` as `<name>.draft.<ext>` ([A draft](https://cutcraft.prefixtree.xyz/guide/exporting#a-draft)). Not with `--still`, `--check-layout`, `--copy` or `look`. |
 | `--tabs <n>` | Pages of the browser that render pieces at once. Default 1 ([Faster](https://cutcraft.prefixtree.xyz/guide/exporting#faster)). |
 | `--copy` | Copy untouched stretches of a VP9 source into a VP9 export without re-encoding them ([Faster](https://cutcraft.prefixtree.xyz/guide/exporting#faster)). |
 | `--codec <name>` | `avc` (the default in MP4), `vp9` (the default in WebM), or `av1` in either. A codec the container cannot hold (VP9 in MP4) is an error. |
