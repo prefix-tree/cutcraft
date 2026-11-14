@@ -23,8 +23,8 @@ There are three kinds of example, each a complete file:
 | You're making | Start from |
 |---|---|
 | A product launch or promo | [Product launch](#a-product-launch), the [walkthrough](/guide/writing-files), [Brand spot](/recipes/brand-spot) |
-| An interview or podcast cut | [A talking head with cards](#a-talking-head-with-cards), [Talking-head cut](/recipes/talking-head), [Multicam highlights](/recipes/highlights) |
-| A vertical short | [A talking head with cards](#a-talking-head-with-cards), [Kinetic type](#kinetic-type), [Captions and key points](#captions-and-key-points), [Vertical clip from a podcast](/recipes/vertical-podcast) |
+| An interview or podcast cut | [A talking head with a diagram](#a-talking-head-with-a-diagram), [Talking-head cut](/recipes/talking-head), [Multicam highlights](/recipes/highlights) |
+| A vertical short | [A talking head with a diagram](#a-talking-head-with-a-diagram), [Kinetic type](#kinetic-type), [Captions and key points](#captions-and-key-points), [Vertical clip from a podcast](/recipes/vertical-podcast) |
 | An explainer with no footage | [One pixel](#one-pixel), [How game lighting fakes it](#how-game-lighting-fakes-it) |
 | A product or screen demo | [Product demo with zoom-ins](/recipes/product-demo) |
 | Charts and numbers | [Data story](#a-data-story), [Stats with handles](/recipes/stats) |
@@ -36,7 +36,7 @@ There are three kinds of example, each a complete file:
 |---|---|---|
 | Cuts on transcript words (`in="word:12"`) | [Product launch](#a-product-launch), [Data story](#a-data-story), [Talking-head cut](/recipes/talking-head) | [Time by meaning](/guide/time) |
 | Overlays on the word that names them (`anchor` + `at`) | [Product launch](#a-product-launch), [Kinetic type](#kinetic-type), [Captions](#captions-and-key-points) | [Time by meaning](/guide/time) |
-| Captions from the transcript | [A talking head with cards](#a-talking-head-with-cards), [Kinetic type](#kinetic-type), [Captions](#captions-and-key-points), [Vertical clip](/recipes/vertical-podcast) | [Captions and sound](/guide/captions-and-sound) |
+| Captions from the transcript | [A talking head with a diagram](#a-talking-head-with-a-diagram), [Kinetic type](#kinetic-type), [Captions](#captions-and-key-points), [Vertical clip](/recipes/vertical-podcast) | [Captions and sound](/guide/captions-and-sound) |
 | three.js (`<Three>`) | [Product launch](#a-product-launch), [Logo reveal](#a-logo-reveal), [How game lighting fakes it](#how-game-lighting-fakes-it), [One pixel](#one-pixel), [Brand spot](/recipes/brand-spot) | [Free code](/guide/free-code#three-js-and-motion) |
 | Motion (`<Motion>`) | [Kinetic type](#kinetic-type), [Data story](#a-data-story), [An edit](#an-edit) | [Free code](/guide/free-code#three-js-and-motion) |
 | Any React in a `<Layer>` | [Data story](#a-data-story) (counters), [Stats with handles](/recipes/stats) | [Free code](/guide/free-code) |
@@ -171,18 +171,21 @@ no edit.
 
 <<< ../examples/shorts/game-lighting.tsx
 
-## A talking head with cards
+## A talking head with a diagram
 
 A vertical short cut out of a real interview: NASA's Ernie Wright on why there is no lunar eclipse every month, and
 why the Moon turns red when there is one. Five pieces of an eight minute interview, each cut on a word of the
 transcript. Press play for the sound.
 
-Nothing in the file is timed in seconds. The captions come from the transcript, with a box behind the word being
-said. Each card line, badge and highlight names the word it comes in on and lasts until its clip ends, so trimming a
-clip moves everything said over it. The speaker is shown two ways from one source, filling the frame and in a box
-under a card, and every word on screen sits in the area TikTok, Reels and Shorts leave clear.
+A diagram above the speaker moves on his words. The Moon's path tips as he says "tilted", the Moon passes over the
+Earth's shadow on "above" and under it on "below", six months are counted and it goes through, and it takes each
+colour as he names it. The diagram is ordinary React in `<Layer>`s. Each layer starts on a word, draws the whole
+panel from there on and lasts until its clip ends, so no cut and no cue in the file is typed in seconds, and
+trimming a clip moves everything drawn over it. The captions come from the transcript, with a box behind the word
+being said. The Moon, the Earth and the labels are named with `data-name`, so the layout check holds each one to the
+area TikTok, Reels and Shorts leave clear.
 
-**Shows:** cuts on words, captions with a boxed word, `TypeCard` with a struck line and a pill, `QuoteCard`, `Badge`, `Frame`, graphics that last until their clip ends. [Time by meaning](/guide/time) · [Titles and graphics](/guide/titles-and-graphics#ready-made-components) · [Captions and sound](/guide/captions-and-sound)
+**Shows:** cuts on words, captions with a boxed word and a chosen height, free code in a `<Layer>` started on a word, named parts for the layout check, `Frame`, graphics that last until their clip ends. [Time by meaning](/guide/time) · [Free code](/guide/free-code) · [Captions and sound](/guide/captions-and-sound) · [Checking the layout](/guide/exporting#checking-the-layout)
 
 Footage: NASA's Scientific Visualization Studio, [item 14791](https://svs.gsfc.nasa.gov/14791/), public domain.
 
