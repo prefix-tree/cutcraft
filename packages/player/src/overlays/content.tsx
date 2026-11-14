@@ -7,6 +7,7 @@ import { type Placement, TEXT_ANIMATION_PRESETS } from "@cutcraft/kit";
 
 import { isVisibleAt } from "../model/visible";
 import { devWarn } from "../warn";
+import { captionPlace, captionPlacement } from "./caption-placement";
 import type { ElementProps } from "./layout";
 
 /**
@@ -150,41 +151,12 @@ export function captionsContent(p: {
     )
     .sort((a, b) => a.start - b.start);
   const comp = p.state.composition;
-  // Vertical video: the platform's own UI covers the bottom fifth and the right edge, so captions sit above it.
-  const portrait = comp.height > comp.width;
   // Without a shadow of its own, a tight dark halo under a soft drop: it reads as an outline on a white shirt or sky.
   const shadow = style.shadow
     ? `${style.shadow.x ?? 0}px ${style.shadow.y ?? 0}px ${style.shadow.blur ?? 0}px ${style.shadow.color}`
     : "0 0 3px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.55), 0 2px 14px rgba(0,0,0,0.75)";
-  // Placed by numbers when the file gives them: x and y are the block's middle from the frame's centre, in pixels.
-  const x = typeof props.x === "number" ? props.x : 0;
-  const y = typeof props.y === "number" ? props.y : undefined;
-  const width = typeof props.width === "number" ? props.width : undefined;
-  const align = props.align === "left" || props.align === "right" ? props.align : "center";
-  const middle = y !== undefined || typeof style.position === "number" || style.position === "center";
   const container: CSSProperties = {
-    position: "absolute",
-    ...(width === undefined
-      ? { left: 0, right: 0, padding: portrait ? "0 12%" : "0 8%" }
-      : { left: "50%", width, marginLeft: -width / 2 }),
-    ...(y !== undefined
-      ? { top: `calc(50% ${y < 0 ? "-" : "+"} ${Math.abs(y)}px)` }
-      : typeof style.position === "number"
-        ? // A number is the height of the captions' middle, as a fraction of the frame.
-          { top: `${style.position * 100}%` }
-        : style.position === "top"
-          ? { top: comp.height * 0.08 }
-          : style.position === "center"
-            ? { top: "50%" }
-            : { bottom: comp.height * (portrait ? 0.2 : 0.08) }),
-    ...(x !== 0
-      ? { transform: middle ? `translate(${x}px, -50%)` : `translateX(${x}px)` }
-      : middle
-        ? { transform: "translateY(-50%)" }
-        : {}),
-    display: "flex",
-    flexDirection: "column",
-    alignItems: align === "left" ? "flex-start" : align === "right" ? "flex-end" : "center",
+    ...captionPlacement(captionPlace(props, style), comp),
     gap: 8,
     pointerEvents: "none",
     fontFamily: style.font ?? "Inter",
@@ -196,7 +168,6 @@ export function captionsContent(p: {
     ...(style.stroke
       ? { WebkitTextStroke: `${style.stroke.width}px ${style.stroke.color}`, paintOrder: "stroke fill" }
       : {}),
-    textAlign: align,
     lineHeight: 1.15,
   };
   return (

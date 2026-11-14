@@ -93,48 +93,24 @@ describe("DomLayer", () => {
       await m.unmount();
       return placed;
     };
-    expect(await at(0.6)).toEqual({ top: "60%", bottom: "", transform: "translateY(-50%)" });
-    expect(await at("center")).toEqual({ top: "50%", bottom: "", transform: "translateY(-50%)" });
+    expect(await at(0.6)).toEqual({ top: "60%", bottom: "", transform: "translate(0, -50%)" });
+    expect(await at("center")).toEqual({ top: "50%", bottom: "", transform: "translate(0, -50%)" });
     expect((await at("bottom")).top).toBe("");
   });
 
-  it("places the captions by numbers: x and y from the centre, a width and a side", async () => {
-    const at = async (props: Record<string, unknown>) => {
-      const state = fixtureState();
-      const items = new Map(state.items);
-      const cap = items.get("cap") as Placement;
-      items.set("cap", { ...cap, props: { ...cap.props, ...props } });
-      const m = await mountPlayer({ ...state, items });
-      await m.seek(0.5);
-      const box = m.container.querySelector('[data-kind="captions"]') as HTMLElement;
-      const { top, bottom, left, width, marginLeft, transform, textAlign, alignItems } = box.style;
-      await m.unmount();
-      return { top, bottom, left, width, marginLeft, transform, textAlign, alignItems };
-    };
-    // y is the middle's height and takes the place of the style's position.
-    expect(await at({ y: 120, style: { position: "top" } })).toMatchObject({
-      top: "calc(50% + 120px)",
-      bottom: "",
-      transform: "translateY(-50%)",
-    });
-    // x moves the block sideways and leaves the height where the position puts it.
-    expect(await at({ x: -80 })).toMatchObject({ top: "", transform: "translateX(-80px)" });
-    expect(await at({ x: 40, y: -10 })).toMatchObject({ top: "calc(50% - 10px)", transform: "translate(40px, -50%)" });
-    // A width is a box centred on x; the lines sit against the side named.
-    expect(await at({ width: 300, align: "left" })).toMatchObject({
-      left: "50%",
-      width: "300px",
-      marginLeft: "-150px",
-      textAlign: "left",
-      alignItems: "flex-start",
-    });
-    // Nothing given: across the frame and centred, as before.
-    expect(await at({})).toMatchObject({
-      left: "0px",
-      width: "",
-      transform: "",
-      textAlign: "center",
-      alignItems: "center",
-    });
+  it("places the captions by the numbers on the element", async () => {
+    // What each number does is tested on captionPlacement; here, that the element's props reach the page.
+    const state = fixtureState();
+    const items = new Map(state.items);
+    const cap = items.get("cap") as Placement;
+    items.set("cap", { ...cap, props: { ...cap.props, x: 40, y: -10, width: 300, align: "left" } });
+    const m = await mountPlayer({ ...state, items });
+    await m.seek(0.5);
+    const box = m.container.querySelector('[data-kind="captions"]') as HTMLElement;
+    expect(box.style.top).toBe("calc(50% - 10px)");
+    expect(box.style.width).toBe("300px");
+    expect(box.style.transform).toBe("translate(calc(-50% + 40px), -50%)");
+    expect(box.style.textAlign).toBe("left");
+    await m.unmount();
   });
 });
