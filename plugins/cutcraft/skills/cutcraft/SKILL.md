@@ -47,6 +47,13 @@ Work in this order, and check after each stage.
    ```
    Exit code 0 is clean, 3 means it found layout issues (listed with their line), 1 is an error, 2 is a bad argument.
    For a vertical video pass `--safe-zone tiktok`, `reels` or `shorts`.
+   To the check a `<Layer>` is one box. Put `data-name="lamp-label"` on what its code draws (a label, a group) and
+   each is checked on its own, as `<layer id>/lamp-label`. To read where everything is at a moment, in pixels,
+   with what is outside each safe zone and what overlaps what:
+   ```sh
+   npx cutcraft where video.tsx --manifest manifest.json --at 2.6,hook.mid
+   ```
+   Place things from those numbers; do not guess from a picture.
 6. **Look at it.** `look` draws many frames in one go, on one contact sheet, and prints what each cell is. With no
    moments it shows what an editor skims: each clip's first frame, both sides of every cut, each overlay. Read the
    image after each stage:

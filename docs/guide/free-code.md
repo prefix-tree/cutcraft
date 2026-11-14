@@ -101,6 +101,16 @@ function Badge() {
 
 A `<Keyframe>` can use `easing="spring"` too.
 
+## Naming what you draw
+
+Give an element a `data-name` and the tools can tell it from the rest of the layer: the layout check reports it by
+that name, and `cutcraft where` lists it with its place on the frame
+([Where things are](/guide/exporting#where-things-are)).
+
+```tsx
+<text data-name="lamp-label" x={470} y={624}>LAMP</text>
+```
+
 ## Editing what's inside
 
 An editor treats the inside of a Layer as code: to change it, you or a model edit the text. There is one shortcut.

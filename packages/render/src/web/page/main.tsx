@@ -299,7 +299,9 @@ async function start(): Promise<void> {
           // What the element's own code named: each part alone, measured the same way.
           for (const part of el.querySelectorAll<HTMLElement | SVGElement>("[data-name]")) {
             const name = part.dataset.name;
-            const partInk = name ? await measure(part) : null;
+            // A part that is not drawn just now (faded out, or not displayed) costs no paint to find that out.
+            const drawn = part.checkVisibility?.({ opacityProperty: true, visibilityProperty: false }) ?? true;
+            const partInk = name && drawn ? await measure(part) : null;
             if (name && partInk) found.push({ id: `${id}/${name}`, kind: "part", of: id, ...partInk, backdrop: under });
           }
         }

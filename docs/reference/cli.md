@@ -11,6 +11,7 @@ npx cutcraft <file.tsx> --check-layout [--safe-zone <zone>] [--subject <x,y,w,h>
 npx cutcraft <file.tsx> --srt <captions.srt> | --vtt <captions.vtt> [--from <s> --to <s>]
 npx cutcraft inspect <file.tsx> [--at <moments>] [--json] [--manifest <file>] [--props <json>]
 npx cutcraft look <file.tsx> [--at <moments> | --around <id>] [--without <id>] [--listen <stretch>] [--out look.png] [options]
+npx cutcraft where <file.tsx> --at <moments> [--safe-zone <zone>] [--json] [options]
 npx cutcraft add <media file>... [--manifest manifest.json] [--id <id>] [--transcript <file>]
 npx cutcraft browser install
 ```
@@ -50,13 +51,28 @@ time. `CUTCRAFT_CHROMIUM` names a Chrome or Chromium 153 or later to use instead
 
 | Option | |
 |---|---|
-| `--check-layout` | Report every overlay that leaves the frame or the safe zone, or covers the captions or the subject, at its line in the file. Writes no file. |
+| `--check-layout` | Report every overlay, and every part a layer's code names with `data-name`, that leaves the frame or the safe zone, or covers the captions or the subject, at its line in the file. Writes no file. |
 | `--safe-zone <zone>` | `tiktok`, `reels`, `shorts`, `title-safe` (the default) or `action-safe`, or `top,right,bottom,left` fractions. |
 | `--subject <x,y,w,h>` | Where the subject is, as fractions of the frame, for footage whose manifest has no subjects. |
 | `--step <s>` | Seconds between samples. Default: every frame. |
 | `--json` | Print the report as JSON. |
 
 [Checking the layout](/guide/exporting#checking-the-layout) explains the rules and the output.
+
+## Where
+
+`cutcraft where video.tsx --at <moments>` prints where each thing on screen is at each moment: every overlay, the
+captions, and every part a layer's code names with `data-name`. Each row gives the thing's ink as a box in pixels,
+whether it is in the frame and in each safe zone, and what it overlaps.
+
+| Option | |
+|---|---|
+| `--at <moments>` | The moments to report, comma-separated, written as for [`inspect`](#inspect). Required. |
+| `--safe-zone <zone>` | The zone to hold each thing against, as for the layout check. Default: `tiktok`, `reels` and `shorts` for a portrait video, `title-safe` for any other. |
+| `--json` | Print the report as JSON: per moment, each thing's `id`, `kind`, `box`, `inFrame`, `zones` and `over`. |
+| `--manifest`, `--media`, `--props`, `--font`, `--import`, `--frame-timeout` | As for an export. |
+
+[Where things are](/guide/exporting#where-things-are) shows the output.
 
 ## Inspect
 
