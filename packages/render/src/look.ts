@@ -156,9 +156,8 @@ function motionMoments(
   text: string,
   step: number | undefined,
 ): { moments: Moment[]; motion: { from: number; to: number; step: number } } {
-  const stretch = listenRange(state, text);
-  if ("error" in stretch)
-    throw new Error(`--motion ${stretch.error.replace("a stretch to listen to; give all,", "a stretch; give")}`);
+  const stretch = listenRange(state, text, "show as a strip");
+  if ("error" in stretch) throw new Error(`--motion ${stretch.error}`);
   if (step !== undefined && !(step > 0)) throw new Error("--step must be more than 0");
   const { fps, duration } = state.composition;
   const frames = Math.max(1, Math.round(duration * fps));
@@ -180,15 +179,20 @@ function motionMoments(
   return { moments, motion: { ...stretch, step: Math.round(every * 1000) / 1000 } };
 }
 
-/** Draws the moments asked for, or the ones an editor would skim, onto one sheet. */
-export async function renderLook(options: LookOptions): Promise<LookResult> {
-  const { state } = options;
+/** Refuses options that do not go together, before anything is drawn. */
+function validateLook(options: LookOptions): void {
   if (options.at !== undefined && options.around !== undefined) throw new Error("give --at or --around, not both");
   if (!/\.png$/i.test(options.out)) throw new Error(`a sheet is a PNG: ${options.out} does not end in .png`);
   if (options.motion !== undefined)
     for (const other of ["at", "around", "without"] as const)
       if (options[other] !== undefined) throw new Error(`--motion shows one stretch on its own; leave out --${other}`);
   if (options.step !== undefined && options.motion === undefined) throw new Error("--step goes with --motion");
+}
+
+/** Draws the moments asked for, or the ones an editor would skim, onto one sheet. */
+export async function renderLook(options: LookOptions): Promise<LookResult> {
+  const { state } = options;
+  validateLook(options);
   const strip = options.motion !== undefined ? motionMoments(state, options.motion, options.step) : null;
   const picked = strip
     ? { moments: strip.moments, errors: [] }

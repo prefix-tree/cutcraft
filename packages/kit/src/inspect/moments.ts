@@ -337,6 +337,8 @@ export function skimMoments(state: ResolvedState): Moment[] {
 export function listenRange(
   state: ResolvedState,
   text: string,
+  /** What the stretch is for, as the error says it: "listen to" by default. */
+  purpose = "listen to",
 ): { readonly from: number; readonly to: number } | { readonly error: string } {
   const { fps, duration } = state.composition;
   const input = text.trim();
@@ -353,7 +355,7 @@ export function listenRange(
     from = p.start;
     to = p.end;
   } else {
-    return { error: `"${input}" is not a stretch to listen to; give all, a range such as 2..6, or an element's id` };
+    return { error: `"${input}" is not a stretch to ${purpose}; give all, a range such as 2..6, or an element's id` };
   }
   if (!(to > from)) return { error: `${input}: a stretch runs forward and has a length` };
   if (from < -1e-9 || to > duration + 1e-9)

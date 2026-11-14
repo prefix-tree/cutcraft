@@ -1,5 +1,6 @@
 ---
 "@cutcraft/render": minor
+"@cutcraft/kit": patch
 ---
 
 `cutcraft look --motion <stretch>` draws a short stretch as a strip of small frames at even steps, each labelled
