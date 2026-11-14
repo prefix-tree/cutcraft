@@ -136,7 +136,7 @@ export function captionsContent(p: {
     background?: string;
     shadow?: { color: string; blur?: number; x?: number; y?: number };
     stroke?: { color: string; width: number };
-    position?: string;
+    position?: string | number;
     highlight?: string;
     highlightBox?: string;
     upcoming?: string;
@@ -161,11 +161,14 @@ export function captionsContent(p: {
     left: 0,
     right: 0,
     padding: portrait ? "0 12%" : "0 8%",
-    ...(style.position === "top"
-      ? { top: comp.height * 0.08 }
-      : style.position === "center"
-        ? { top: "50%", transform: "translateY(-50%)" }
-        : { bottom: comp.height * (portrait ? 0.2 : 0.08) }),
+    ...(typeof style.position === "number"
+      ? // A number is the height of the captions' middle, as a fraction of the frame.
+        { top: `${style.position * 100}%`, transform: "translateY(-50%)" }
+      : style.position === "top"
+        ? { top: comp.height * 0.08 }
+        : style.position === "center"
+          ? { top: "50%", transform: "translateY(-50%)" }
+          : { bottom: comp.height * (portrait ? 0.2 : 0.08) }),
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
