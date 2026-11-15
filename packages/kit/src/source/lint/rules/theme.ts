@@ -1,4 +1,5 @@
 import type { Json } from "../../../patches/types";
+import { findFont, nearestFont } from "../../../theme/font-catalog";
 import { isBundledFont } from "../../../theme/fonts";
 import { STYLED_KINDS, TOKEN_PATTERN } from "../../../theme/schema";
 import { type ResolvedTheme, resolveTheme, themeToken } from "../../../theme/theme";
@@ -114,6 +115,26 @@ export const themeLiterals: Rule = {
   },
 };
 
+/** What to write so a font that is not available becomes so. */
+function fix(family: string): string {
+  const listed = findFont(family);
+  if (listed)
+    return `Declare it at the top of the file: const ${identifier(listed.family)} = googleFont("${listed.family}")`;
+  const near = nearestFont(family);
+  if (near)
+    return near.source === "bundled"
+      ? `Did you mean "${near.family}", which is bundled?`
+      : `Did you mean "${near.family}"? Declare it: const ${identifier(near.family)} = googleFont("${near.family}")`;
+  return "If it is on Google Fonts, declare it with googleFont(); `cutcraft fonts` lists families to choose from";
+}
+
+/** A variable name for a family: "Bebas Neue" is `bebasNeue`, "Source Serif 4" is `sourceSerif4`. */
+export function identifier(family: string): string {
+  const words = family.split(/[^A-Za-z0-9]+/).filter(Boolean);
+  const name = words.map((w, i) => (i === 0 ? w.toLowerCase() : w[0]?.toUpperCase() + w.slice(1))).join("");
+  return /^[0-9]/.test(name) || name === "" ? `font${name}` : name;
+}
+
 /** Fonts no renderer ships and the file does not declare (`font()`, `googleFont()`): the export sets them in Inter. */
 export const fontAvailable: Rule = {
   name: "font-available",
@@ -134,7 +155,7 @@ export const fontAvailable: Rule = {
       out.push({
         rule: "font-available",
         severity: "warning",
-        message: `"${site.id}.${path}" uses font "${family}", which is neither bundled nor declared with font() or googleFont(); the export sets it in Inter`,
+        message: `"${site.id}.${path}" uses font "${family}", which is neither bundled nor declared with font() or googleFont(); the export sets it in Inter. ${fix(family)}`,
         range: [prop.range[0], prop.range[1]],
         id: site.id,
         prop: name,

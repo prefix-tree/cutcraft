@@ -50,7 +50,8 @@
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run",
     "test:watch": "vitest",
-    "bench": "tsx scripts/bench.ts"
+    "bench": "tsx scripts/bench.ts",
+    "gen:fonts": "tsx scripts/gen-font-catalog.ts"
   },
   "peerDependencies": {
     "react": "^19.0.0"

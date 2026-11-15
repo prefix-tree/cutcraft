@@ -1,3 +1,5 @@
+import { GOOGLE_FACES } from "./font-faces.generated";
+
 /**
  * The font families the player ships: the preview and the export load them
  * from `@cutcraft/player/fonts.css`. All are under the SIL
@@ -120,13 +122,37 @@ export function font(options: {
  *
  *   const titan = googleFont("Titan One");
  *   const inter = googleFont("Inter Tight", { weights: [400, 700], styles: ["normal", "italic"] });
+ *
+ * For a family the catalogue lists (`FONT_CATALOG`), a weight or an italic it does not have is refused here, with the
+ * ones it has.
  */
 export function googleFont(
   family: string,
   options: { readonly weights?: readonly number[]; readonly styles?: readonly FontStyle[] } = {},
 ): FontRef {
   const faces: DeclaredFont[] = [];
+  const known = GOOGLE_FACES[family];
   for (const weight of options.weights ?? [400])
-    for (const style of options.styles ?? ["normal"]) faces.push({ family, weight, style, source: { kind: "google" } });
+    for (const style of options.styles ?? ["normal"]) {
+      const has = style === "italic" ? known?.italics : known?.weights;
+      if (has && !has.includes(weight))
+        throw new Error(
+          `Google font "${family}" has no ${weight} ${style}; it has ${has.length > 0 ? `${style} in ${has.join(", ")}` : `no ${style} at all`}`,
+        );
+      faces.push({ family, weight, style, source: { kind: "google" } });
+    }
   return fontRef(family, faces);
+}
+
+/**
+ * A CSS `font-family` value for free code: the family in quotes, then any fallbacks. A declared font already stands for
+ * its family, so `fontFamily: titan` is enough for most; use this for a fallback, and for a family whose name has a
+ * word that starts with a digit ("Press Start 2P", "Source Serif 4"), which CSS only reads in quotes.
+ *
+ *   <div style={{ fontFamily: fontFamily(pixel, "monospace") }}>
+ *
+ * The result is plain text, so export the font it names: that is how the player and the export know to load it.
+ */
+export function fontFamily(font: FontRef | string, ...fallbacks: readonly string[]): string {
+  return [`"${String(font).replace(/["\\]/g, "\\$&")}"`, ...fallbacks].join(", ");
 }
