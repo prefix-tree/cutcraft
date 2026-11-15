@@ -14,7 +14,8 @@ export interface NarratedLine {
   readonly text: string;
   readonly start: number;
   readonly end: number;
-  readonly words: readonly NarratedWord[];
+  /** A plain array, so a line's words go straight into `<Caption words>`. */
+  readonly words: NarratedWord[];
 }
 
 /** How long things take to say, in seconds. */

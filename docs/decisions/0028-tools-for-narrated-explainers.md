@@ -129,9 +129,11 @@ access an environment may not give. Working on a file keeps the command small an
 
 ## Work plan
 
-1. **Where things landed** (decision 5): the report, then `--zones` on `look`.
-2. **The narration helper** (decision 1), with `one-pixel.tsx` moved onto it.
-3. **Motion** (decision 2): `look --motion`, then `--draft`.
+1. **Where things landed** (decision 5): the report, then `--zones` on `look`. Landed: `cutcraft where` and named
+   parts in #100, `look --zones` in #105.
+2. **The narration helper** (decision 1), with `one-pixel.tsx` moved onto it. Landed as `narrate` in the kit.
+3. **Motion** (decision 2): `look --motion`, then `--draft`. Landed in #98 and #99. The draft draws every frame at
+   full size, so it saves about a quarter of the time; drawing at a reduced size is not done.
 4. **The pinned label** (decision 3).
 5. **Diagram parts** (decision 4), with `one-pixel.tsx`'s diagram rewritten on them.
 6. **`cutcraft study`** (decision 6).
