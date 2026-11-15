@@ -38,7 +38,7 @@
     },
     "examples/shorts": {
       // Cut files, loaded by path with loadVideo.
-      "entry": ["*.tsx", "test/**/*.ts"]
+      "entry": ["*.tsx", "cards/*.tsx", "test/**/*.ts"]
     },
     "recipes": {
       "entry": ["*.tsx", "test/**/*.ts"]
