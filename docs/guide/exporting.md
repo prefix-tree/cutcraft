@@ -256,6 +256,16 @@ It is reported as the part `diagram/lamp-label`, at the line that names it, and 
 time for the same thing. Its advice is a move in pixels to make in the layer's code. Code that names nothing is
 checked as before, as one layer. A part that is faded out or not displayed is not measured.
 
+A layer that is a ground for other things, such as a scrim that darkens the footage under a title, says so with
+`data-ground` on an element inside it. The check then treats it like a background beneath the footage: it is not
+held to the safe zone and is not said to cover the captions.
+
+```tsx
+<Layer id="scrim" anchor="talk" duration={{ until: "talk" }}>
+  <div data-ground style={{ position: "absolute", inset: 0, background: "linear-gradient(transparent 60%, #0b1530)" }} />
+</Layer>
+```
+
 ## Where things are
 
 The check speaks only when a rule is broken. `cutcraft where` answers the plainer question, where is everything at
