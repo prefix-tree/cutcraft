@@ -15,7 +15,8 @@ const INK = "#0a0c13";
 const GOLD = "#ffc857";
 const CREAM = "#d9d2c4";
 const RED = "#c9523a";
-const SANS = "Inter, 'Helvetica Neue', Arial, sans-serif";
+// The film's own face, for the subtitles and the labels; the numbers are set in a monospace.
+const SANS = "'Space Grotesk', 'Helvetica Neue', Arial, sans-serif";
 const MONO = "'JetBrains Mono', 'DejaVu Sans Mono', Menlo, monospace";
 
 // ---- The narration ---------------------------------------------------------------------------------------------
@@ -594,10 +595,12 @@ function Numbers() {
 // ---- The opening -------------------------------------------------------------------------------------------------
 // The film starts in the slice with everything already going: the lamp on, its rays falling on every dot, the
 // numbers bright. The ball rolls in under the lamp and the light goes straight through it.
+// Each label, and the line from it to the thing it names. The line leaves the word from `off`, a point beside or
+// above it, so it never runs through the letters.
 const NAMES = [
-  { text: "LAMP", from: 0.15, x: 470, y: 600, to: [LAMP.x + 30, LAMP.y - 8] },
-  { text: "LIGHT", from: 0.45, x: 330, y: 1010, to: [262, 930] },
-  { text: "DOTS", from: 0.75, x: 250, y: 1420, to: [dotX(1) + 36, 1330] },
+  { text: "LAMP", from: 0.15, x: 470, y: 600, off: [-76, 10], to: [LAMP.x + 30, LAMP.y - 8] },
+  { text: "LIGHT", from: 0.45, x: 330, y: 1010, off: [0, -16], to: [262, 930] },
+  { text: "DOTS", from: 0.75, x: 250, y: 1420, off: [0, -16], to: [dotX(1) + 36, 1330] },
 ] as const;
 
 function Intro() {
@@ -734,10 +737,10 @@ function Intro() {
           return (
             <g key={name.text} opacity={shown}>
               <line
-                x1={name.x}
-                y1={name.y - 12}
-                x2={mix(name.x, name.to[0], shown)}
-                y2={mix(name.y - 12, name.to[1], shown)}
+                x1={name.x + name.off[0]}
+                y1={name.y + name.off[1]}
+                x2={mix(name.x + name.off[0], name.to[0], shown)}
+                y2={mix(name.y + name.off[1], name.to[1], shown)}
                 stroke="#ffffff"
                 strokeWidth="3"
               />
@@ -1128,8 +1131,9 @@ export default function Video() {
         y={-587}
         width={756}
         style={{
+          font: "Space Grotesk",
           size: 54,
-          weight: 800,
+          weight: 700,
           color: "#ffffff",
           upcoming: "#8b93a8",
           highlight: "#14141c",
