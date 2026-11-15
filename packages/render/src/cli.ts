@@ -7,6 +7,7 @@ import { MOMENT_FORMS, subtitles } from "@cutcraft/kit";
 import { addAsset, describeAdded } from "./add";
 import { QUALITIES, type QualityName, type VideoCodec } from "./encoding";
 import type { FontFile, FontWeight } from "./fonts";
+import { fontSheet, formatFonts, listFonts } from "./fonts-list";
 import { inspect } from "./inspect";
 import { checkLayout, formatLayout, type Insets, SAFE_ZONES, type SafeZoneName } from "./layout-check";
 import { loadVideo } from "./load";
@@ -29,6 +30,7 @@ const USAGE = `Usage: cutcraft <file.tsx> --out <video.mp4|.webm|.mp3|.wav> [--d
                     [--zones <zone>] [--out look.png] [options]
        cutcraft look <file.tsx> --motion <stretch> [--step <s>] [--listen <stretch>] [--out look.png] [options]
        cutcraft where <file.tsx> --at <moments> [--safe-zone <zone>] [--json] [options]
+       cutcraft fonts [--for <role>] [--category <category>] [--sheet fonts.png [--text <words>]] [--json]
        cutcraft add <media file>... [--manifest manifest.json] [--id <id>] [--transcript <file>]
        cutcraft browser install
 
@@ -61,6 +63,14 @@ const USAGE = `Usage: cutcraft <file.tsx> --out <video.mp4|.webm|.mp3|.wav> [--d
   --no-cache            (look, --still) draw every frame again. Without it, frames are kept in .cutcraft/cache
                         beside the file, keyed by what draws them, and a frame an edit did not touch is read from
                         there without starting a browser
+  fonts                 list the fonts to choose from: the bundled families and a short list from Google Fonts,
+                        each with its category, its weights, what it suits and how it looks; --json prints rows
+  --for <role>          (fonts) only families that suit a role: headline, body, captions, numbers or accent
+  --category <name>     (fonts) only one category: sans, serif, slab, condensed, display, handwriting or mono
+  --sheet <image>       (fonts) also draw the listed families as one image, each setting the same words in its
+                        heaviest weight and its regular one. The first time, Google's are downloaded into the
+                        font cache
+  --text <words>        (fonts --sheet) the words to set; default "Make It Move 2026"
   add                   write each media file's entry into the manifest (default: manifest.json beside it): its
                         kind, length, size, frame rate and sound, read from the file, and its words from the
                         transcript beside it (talk.json from Whisper or ElevenLabs, talk.vtt or talk.srt)
@@ -111,6 +121,10 @@ async function main(): Promise<number> {
     allowPositionals: true,
     options: {
       out: { type: "string" },
+      for: { type: "string" },
+      category: { type: "string" },
+      sheet: { type: "string" },
+      text: { type: "string" },
       tabs: { type: "string" },
       "frame-timeout": { type: "string" },
       keyframe: { type: "string" },
@@ -163,6 +177,31 @@ async function main(): Promise<number> {
     ...(values.props ? { props: JSON.parse(values.props) as Record<string, unknown> } : {}),
     ...(values.import ? { imports: Object.fromEntries(values.import.map(readImport)) } : {}),
   };
+  if (positionals[0] === "fonts") {
+    if (positionals.length > 1) {
+      process.stderr.write(USAGE);
+      return 2;
+    }
+    const fonts = listFonts({
+      ...(values.for === undefined ? {} : { role: values.for }),
+      ...(values.category === undefined ? {} : { category: values.category }),
+    });
+    if (values.sheet !== undefined) {
+      const drawn = await fontSheet({
+        fonts,
+        out: resolve(values.sheet),
+        ...(values.text === undefined ? {} : { text: values.text }),
+        onLog: (m: string) => process.stderr.write(`${m}\n`),
+        ...frameTimeout,
+      });
+      for (const w of drawn.warnings) process.stderr.write(`warning: ${w}\n`);
+      process.stderr.write(
+        `${values.sheet}: ${drawn.families.length} families, ${drawn.columns} to a row, ${drawn.width}x${drawn.height}\n`,
+      );
+    }
+    process.stdout.write(values.json ? `${JSON.stringify(fonts, null, 2)}\n` : formatFonts(fonts));
+    return 0;
+  }
   if (positionals[0] === "inspect") {
     const target = positionals[1];
     if (!target || positionals.length > 2) {
