@@ -5,7 +5,15 @@ import { join } from "node:path";
 
 import { manifest as mediaManifest } from "../../../player/e2e/app/composition";
 import generateMedia, { mediaDir } from "../../../player/e2e/gen-media";
-import { directoryResolver, loadVideo, MAX_LOOK_CELLS, renderLook, renderStill, renderVideo } from "../../src";
+import {
+  directoryResolver,
+  loadVideo,
+  MAX_LOOK_CELLS,
+  renderLook,
+  renderStill,
+  renderVideo,
+  whereThings,
+} from "../../src";
 import { readImage } from "../helpers/output";
 
 const scratch = join(import.meta.dirname, "..", ".tmp", "look");
@@ -543,5 +551,116 @@ export default function Video() {
     );
     await expect(look({ motion: "0..3", step: 0.01 })).rejects.toThrow("that is 91 cells; one look holds at most 64");
     await expect(look({ at: "0.5", step: 0.1 })).rejects.toThrow("--step goes with --motion");
+  });
+});
+
+describe("--zones", () => {
+  // On a grey frame: a square well inside the title-safe zone, one that runs off its right edge, and a layer whose
+  // code names one part. The zone is the middle 90%: x 16..304, y 9..171.
+  const zoned = `import { Composition, Layer, Shape, Track } from "@cutcraft/kit";
+export const manifest = { assets: {} };
+export default function Video() {
+  return (
+    <Composition fps={30} width={${W}} height={${H}} background={{ mode: "color", color: "#404040" }}>
+      <Track id="t" layout="free">
+        <Shape id="inside" shape="rectangle" start={0} duration={2} width={40} height={40} fill="#202020"
+          transform={{ position: { x: -60, y: 0 } }} />
+        <Shape id="over" shape="rectangle" start={0} duration={2} width={40} height={40} fill="#202020"
+          transform={{ position: { x: 135, y: 0 } }} />
+        <Layer id="drawn" start={0} duration={2}>
+          <div data-name="tag" style={{ position: "absolute", left: 150, top: 120, width: 30, height: 20, background: "#202020" }} />
+        </Layer>
+      </Track>
+    </Composition>
+  );
+}
+`;
+  /** A pixel of a cell's picture, at the frame's own size (cells here are as wide as the frame). */
+  const at = (sheet: Image, x: number, y: number, column = 0): [number, number, number] => {
+    const i = ((GAP + y) * sheet.width + GAP + column * (W + GAP) + x) * 4;
+    return [sheet.rgba[i] as number, sheet.rgba[i + 1] as number, sheet.rgba[i + 2] as number];
+  };
+  const lime = ([r, g, b]: [number, number, number]): boolean => g > 170 && g > r + 20 && g > b + 60;
+  const red = ([r, g, b]: [number, number, number]): boolean => r > 170 && r > g + 60 && r > b + 60;
+
+  async function look(name: string, options: Record<string, unknown> = {}) {
+    const v = await load(name, zoned);
+    const out = join(dir, `${name}.png`);
+    const result = await renderLook({
+      state: v.state,
+      source: v.source,
+      media: v.media,
+      out,
+      at: "1",
+      cell: W,
+      ...options,
+    });
+    return { result, sheet: readImage(out), v };
+  }
+
+  it("shades what is outside the zone and leaves what is inside as it was", async () => {
+    const plain = await look("zones-plain");
+    const zoned = await look("zones-on", { zones: "title-safe" });
+    // Outside the zone, at the left edge and at the top: darker than the frame alone.
+    for (const [x, y] of [
+      [6, 90],
+      [200, 3],
+    ] as const)
+      expect(at(zoned.sheet, x, y)[0]).toBeLessThan(at(plain.sheet, x, y)[0] - 20);
+    // Inside it, clear of every outline: untouched.
+    expect(at(zoned.sheet, 160, 40)).toEqual(at(plain.sheet, 160, 40));
+  });
+
+  it("outlines each thing where it is: lime inside the zone, red where it leaves it", async () => {
+    const { result, sheet, v } = await look("zones-boxes", { zones: "title-safe" });
+    const things = new Map(result.cells[0]?.things?.map((t) => [t.id, t]));
+    // The rows are the ones `where` gives for the moment.
+    const told = await whereThings({
+      state: v.state,
+      source: v.source,
+      media: v.media,
+      at: "1",
+      safeZone: "title-safe",
+    });
+    expect(result.cells[0]?.things).toEqual(told.moments[0]?.things);
+    const edge = (id: string): [number, number, number] => {
+      const b = things.get(id)?.box as { x: number; y: number; w: number; h: number };
+      // The middle of its top edge.
+      return at(sheet, Math.round(b.x + b.w / 2), Math.round(b.y));
+    };
+    expect(things.get("inside")?.zones["title-safe"]?.inside).toBe(true);
+    expect(lime(edge("inside"))).toBe(true);
+    expect(things.get("over")?.zones["title-safe"]).toEqual({ inside: false, out: [{ side: "right", px: 11 }] });
+    expect(red(edge("over"))).toBe(true);
+    // A layer whose code names a part is drawn as that part, and not as a box of its own.
+    expect([...things.keys()].sort()).toEqual(["drawn", "drawn/tag", "inside", "over"]);
+    expect(lime(edge("drawn/tag"))).toBe(true);
+  });
+
+  it("draws on a motion strip too, and tells the same things for each cell", async () => {
+    const { result } = await look("zones-strip", { at: undefined, motion: "0..1", step: 0.5, zones: "title-safe" });
+    expect(result.cells).toHaveLength(3);
+    for (const cell of result.cells)
+      expect(cell.things?.map((t) => t.id).sort()).toEqual(["drawn", "drawn/tag", "inside", "over"]);
+  });
+
+  it("keeps a zoned cell and what was measured in it, apart from the same cell without zones", async () => {
+    const cacheDir = join(dir, "zones-cache");
+    const first = await look("zones-cached", { zones: "title-safe", cacheDir });
+    expect(first.result.cached).toBe(0);
+    const again = await look("zones-cached", { zones: "title-safe", cacheDir });
+    expect(again.result.cached).toBe(1);
+    expect(again.result.cells[0]?.things).toEqual(first.result.cells[0]?.things);
+    expect(Buffer.compare(Buffer.from(again.sheet.rgba), Buffer.from(first.sheet.rgba))).toBe(0);
+    // The same moment without zones is another picture: it is drawn, not read back.
+    const plain = await look("zones-cached", { cacheDir });
+    expect(plain.result.cached).toBe(0);
+    expect(plain.result.cells[0]?.things).toBeUndefined();
+  });
+
+  it("is refused with --without", async () => {
+    await expect(look("zones-no", { zones: "title-safe", without: "inside" })).rejects.toThrow(
+      "--zones draws one picture of each moment; leave out --without",
+    );
   });
 });

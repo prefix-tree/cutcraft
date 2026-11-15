@@ -20,10 +20,12 @@ import type { MediaResolver } from "@cutcraft/player/engine";
 import type { FontFile } from "./fonts";
 import { FrameKeys, readCached, wholeKey, writeCached } from "./frame-cache";
 import { describeAt } from "./inspect";
+import type { Insets, SafeZoneName } from "./layout-check";
 import { clippingWarning, type Loudness } from "./loudness";
 import { blankPicture, decodePng, encodePng, paste } from "./png";
 import { type ExportSource, openEngine } from "./renderer";
-import type { SheetCell } from "./web/page/protocol";
+import type { InkBounds, SheetCell } from "./web/page/protocol";
+import { describeThings, type WhereThing, zoneRect } from "./where";
 
 /** The most cells one sheet holds: past this a cell is too small to read, and the call too slow to be one look. */
 export const MAX_LOOK_CELLS = 64;
@@ -54,6 +56,12 @@ export interface LookOptions {
   readonly motion?: string;
   /** Seconds between the frames of a `motion` strip. Left out: the step that gives twelve frames. */
   readonly step?: number;
+  /**
+   * A safe zone to draw over every cell, by name or as margins: what is outside it is shaded, and each overlay, the
+   * captions and each named part is outlined, red where it leaves the zone or the frame. The legend's cells gain
+   * `things`, the rows `whereThings` gives for that moment.
+   */
+  readonly zones?: SafeZoneName | Insets;
   /** The width of a cell's picture; default 480 (240 in a `motion` strip, 180 for a portrait video). */
   readonly cell?: number;
   /** Cells in a row; default up to 4 (an even number with `without`), up to 12 in a `motion` strip. */
@@ -85,6 +93,8 @@ export interface LookCell extends Moment {
   readonly variant?: "with" | "without";
   /** The ids of what is drawn, from the top of the picture down. */
   readonly seen: readonly string[];
+  /** With `zones`: where each thing in the cell is, against the frame and the zone. */
+  readonly things?: readonly WhereThing[];
   /** The cell's full frame, with `frames`. */
   readonly file?: string;
 }
@@ -187,6 +197,8 @@ function validateLook(options: LookOptions): void {
     for (const other of ["at", "around", "without"] as const)
       if (options[other] !== undefined) throw new Error(`--motion shows one stretch on its own; leave out --${other}`);
   if (options.step !== undefined && options.motion === undefined) throw new Error("--step goes with --motion");
+  if (options.zones !== undefined && options.without !== undefined)
+    throw new Error("--zones draws one picture of each moment; leave out --without");
 }
 
 /** Draws the moments asked for, or the ones an editor would skim, onto one sheet. */
@@ -258,7 +270,13 @@ export async function renderLook(options: LookOptions): Promise<LookResult> {
     for (const id of out.effects) log.append({ op: "set", id, prop: "enabled", value: false });
     bare = resolve(state.tree, state.manifest, log);
   }
-  // Each cell's files in the cache: its tile, and its full frame when those are asked for.
+  // The zone as a rectangle of the frame, and its name for the rows. A strip's cells are too small for words.
+  const { width: W, height: H } = state.composition;
+  const zone = options.zones !== undefined ? zoneRect(options.zones, W, H) : null;
+  const zoneName = typeof options.zones === "string" ? options.zones : "custom";
+  const labels = !strip;
+  // Each cell's files in the cache: its tile (with what was measured in it, beside it), and its full frame when
+  // those are asked for.
   const keys = options.cacheDir
     ? new FrameKeys({ state, source: options.source, media: options.media, fonts: options.fonts })
     : null;
@@ -269,21 +287,25 @@ export async function renderLook(options: LookOptions): Promise<LookResult> {
       const drawnState = cell.without?.effects ? bare : state;
       const hidden = cell.without?.overlay ?? null;
       return {
-        tile: `tile-${await keys.key(frame, { tile: cellWidth, label: cell.label, sub: cell.sub, hidden }, drawnState)}.png`,
+        tile: `tile-${await keys.key(frame, { tile: cellWidth, label: cell.label, sub: cell.sub, hidden, ...(zone ? { zone, labels } : {}) }, drawnState)}.png`,
         frame: `frame-${await keys.key(frame, { frame: true, hidden }, drawnState)}.png`,
       };
     }),
   );
   const tiles: (Uint8Array | null)[] = cells.map(() => null);
   const frames: (Uint8Array | null)[] = cells.map(() => null);
+  const measured: (readonly InkBounds[] | null)[] = cells.map(() => null);
+  const boundsFile = (tile: string): string => tile.replace(/\.png$/, ".json");
   if (options.cacheDir)
     for (const [i, name] of names.entries()) {
       if (!name) continue;
       const tile = readCached(options.cacheDir, name.tile);
       const frame = options.frames ? readCached(options.cacheDir, name.frame) : null;
-      if (tile && (!options.frames || frame)) {
+      const bounds = zone ? readCached(options.cacheDir, boundsFile(name.tile)) : null;
+      if (tile && (!options.frames || frame) && (!zone || bounds)) {
         tiles[i] = tile;
         frames[i] = frame;
+        if (bounds) measured[i] = JSON.parse(Buffer.from(bounds).toString("utf8")) as InkBounds[];
       }
     }
   const missing = cells.map((_, i) => i).filter((i) => !tiles[i]);
@@ -321,8 +343,9 @@ export async function renderLook(options: LookOptions): Promise<LookResult> {
               cells: missing.map((i) => cells[i] as SheetCell),
               cellWidth,
               ...(options.frames ? { keepFrames: true } : {}),
+              ...(zone ? { zone, labels } : {}),
             })
-          : { tiles: [], frames: [] };
+          : { tiles: [], frames: [], bounds: [] };
       const heard =
         stretch && !sound
           ? await engine.listen({ from: stretch.from, to: stretch.to, width: stripWidth, words })
@@ -335,10 +358,13 @@ export async function renderLook(options: LookOptions): Promise<LookResult> {
       for (const [n, i] of missing.entries()) {
         tiles[i] = drawn.tiles[n] as Uint8Array;
         frames[i] = drawn.frames[n] ?? null;
+        measured[i] = drawn.bounds[n] ?? null;
         const name = names[i];
         // A frame drawn with a placeholder for media that could not be read is not kept.
         if (options.cacheDir && name && failed.length === 0) {
           writeCached(options.cacheDir, name.tile, tiles[i] as Uint8Array);
+          if (measured[i])
+            writeCached(options.cacheDir, boundsFile(name.tile), Buffer.from(JSON.stringify(measured[i])));
           if (frames[i]) writeCached(options.cacheDir, name.frame, frames[i] as Uint8Array);
         }
       }
@@ -394,7 +420,15 @@ export async function renderLook(options: LookOptions): Promise<LookResult> {
     width: sheet.width,
     height: sheet.height,
     columns: perRow,
-    cells: legend.map((cell, i) => ({ ...cell, ...(files[i] ? { file: files[i] as string } : {}) })),
+    cells: legend.map((cell, i) => ({
+      ...cell,
+      ...(zone && measured[i]
+        ? {
+            things: describeThings(measured[i] as readonly InkBounds[], [[zoneName, zone]], { x: 0, y: 0, w: W, h: H }),
+          }
+        : {}),
+      ...(files[i] ? { file: files[i] as string } : {}),
+    })),
     cached: cells.length - missing.length,
     ...(strip ? { motion: strip.motion } : {}),
     ...(stretch && sound && soundStrip

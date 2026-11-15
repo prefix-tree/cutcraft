@@ -6,6 +6,7 @@ import type { DrawRect, MediaResolver } from "@cutcraft/player/engine";
 import type { FontFile } from "./fonts";
 import { collision, type Insets, overflow, rect, rounded, SAFE_ZONES, type SafeZoneName, SLACK } from "./layout-check";
 import { type ExportSource, openEngine } from "./renderer";
+import type { InkBounds } from "./web/page/protocol";
 
 export interface WhereOptions {
   readonly state: ResolvedState;
@@ -66,6 +67,46 @@ function past(box: DrawRect, area: DrawRect): { side: Side; px: number }[] {
   return all.filter(([, px]) => px > SLACK).map(([side, px]) => ({ side, px: Math.round(px) }));
 }
 
+/**
+ * What was measured at one moment, as rows: each thing's box, whether it is in the frame and in each zone, and what
+ * it overlaps. `zones` are named rectangles in composition pixels.
+ */
+export function describeThings(
+  found: readonly InkBounds[],
+  zones: readonly (readonly [string, DrawRect])[],
+  frame: DrawRect,
+): WhereThing[] {
+  return found.map((b) => ({
+    id: b.id,
+    kind: b.kind,
+    box: rounded(b.rect),
+    inFrame: overflow(b.rect, frame) <= SLACK,
+    zones: Object.fromEntries(
+      zones.map(([name, area]) => {
+        const out = past(b.rect, area);
+        return [name, { inside: out.length === 0, out }];
+      }),
+    ),
+    // A part is always over the element that drew it, and that element over its parts: neither is news.
+    over: found.flatMap((o) => {
+      if (o === b || o.id === b.of || o.of === b.id) return [];
+      const hit = collision(b.parts, o.parts);
+      return hit ? [{ id: o.id, box: rounded(hit.mine) }] : [];
+    }),
+  }));
+}
+
+/** The rectangle a zone leaves clear, in a frame of the given size. */
+export function zoneRect(zone: SafeZoneName | Insets, width: number, height: number): DrawRect {
+  const z: Insets = typeof zone === "object" ? zone : SAFE_ZONES[zone];
+  return {
+    x: z.left * width,
+    y: z.top * height,
+    w: width - (z.left + z.right) * width,
+    h: height - (z.top + z.bottom) * height,
+  };
+}
+
 /** Measures every overlay, the captions and each named part at the moments asked for. */
 export async function whereThings(options: WhereOptions): Promise<WhereResult> {
   const { state } = options;
@@ -79,10 +120,10 @@ export async function whereThings(options: WhereOptions): Promise<WhereResult> {
         : H > W
           ? ["tiktok", "reels", "shorts"]
           : ["title-safe"];
-  const areas = names.map((name): [string, DrawRect] => {
-    const z: Insets = typeof options.safeZone === "object" ? options.safeZone : SAFE_ZONES[name as SafeZoneName];
-    return [name, { x: z.left * W, y: z.top * H, w: W - (z.left + z.right) * W, h: H - (z.top + z.bottom) * H }];
-  });
+  const areas = names.map((name): [string, DrawRect] => [
+    name,
+    zoneRect(typeof options.safeZone === "object" ? options.safeZone : (name as SafeZoneName), W, H),
+  ]);
   const frame: DrawRect = { x: 0, y: 0, w: W, h: H };
   const warnings: string[] = [];
   const moments: WhereMoment[] = [];
@@ -100,27 +141,7 @@ export async function whereThings(options: WhereOptions): Promise<WhereResult> {
           );
         seen.add(b.id);
       }
-      moments.push({
-        ...m,
-        things: found.map((b) => ({
-          id: b.id,
-          kind: b.kind,
-          box: rounded(b.rect),
-          inFrame: overflow(b.rect, frame) <= SLACK,
-          zones: Object.fromEntries(
-            areas.map(([name, area]) => {
-              const out = past(b.rect, area);
-              return [name, { inside: out.length === 0, out }];
-            }),
-          ),
-          // A part is always over the element that drew it, and that element over its parts: neither is news.
-          over: found.flatMap((o) => {
-            if (o === b || o.id === b.of || o.of === b.id) return [];
-            const hit = collision(b.parts, o.parts);
-            return hit ? [{ id: o.id, box: rounded(hit.mine) }] : [];
-          }),
-        })),
-      });
+      moments.push({ ...m, things: describeThings(found, areas, frame) });
     }
     const failed = await engine.errors();
     for (const f of failed) warnings.push(`asset error: ${f}`);

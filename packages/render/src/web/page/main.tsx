@@ -218,6 +218,7 @@ async function start(): Promise<void> {
   let out: Uint8Array = new Uint8Array();
   /** The cells the last `tiles` call drew, and their full frames when it was asked to keep them. */
   let keptTiles: Uint8Array[] = [];
+  let keptBounds: (readonly InkBounds[])[] = [];
   let kept: Uint8Array[] = [];
   const encode = async (canvas: HTMLCanvasElement, type: string, quality?: number): Promise<Uint8Array> => {
     const blob = await new Promise<Blob>((ok, fail) =>
@@ -355,6 +356,7 @@ async function start(): Promise<void> {
       g.imageSmoothingQuality = "high";
       g.textBaseline = "middle";
       keptTiles = [];
+      keptBounds = [];
       kept = [];
       try {
         // The cells of the file as written first, then the ones without its disabled effects: the state changes once.
@@ -371,6 +373,8 @@ async function start(): Promise<void> {
           const before = target?.style.visibility ?? "";
           if (target) target.style.visibility = "hidden";
           try {
+            // Measured first: measuring draws each thing alone into the capture canvas, so the frame is drawn after.
+            if (r.zone) keptBounds[i] = await api.bounds(cell.t, { parts: true });
             await frame(cell.t);
           } finally {
             if (target) target.style.visibility = before;
@@ -378,6 +382,13 @@ async function start(): Promise<void> {
           g.fillStyle = TILE_GROUND;
           g.fillRect(0, 0, tile.width, tile.height);
           g.drawImage(cap, 0, 0, r.cellWidth, cellHeight);
+          if (r.zone)
+            drawZone(g, r.zone, keptBounds[i] ?? [], {
+              scale: r.cellWidth / width,
+              width,
+              height,
+              labels: r.labels === true,
+            });
           g.fillStyle = "#f2f1ee";
           g.font = '500 14px "JetBrains Mono", monospace';
           g.fillText(cell.label, 2, cellHeight + 14, r.cellWidth - 4);
@@ -471,6 +482,11 @@ async function start(): Promise<void> {
       out = bytes;
       return out.length;
     },
+    tileBounds(index: number) {
+      const bounds = keptBounds[index];
+      if (!bounds) throw new Error(`the last call measured no tile ${index}`);
+      return bounds;
+    },
     frame(index: number) {
       const bytes = kept[index];
       if (!bytes) throw new Error(`the last call kept no frame ${index}`);
@@ -485,6 +501,69 @@ async function start(): Promise<void> {
     },
   };
   window.__cutcraft = api;
+}
+
+/** Pixels a thing may stray past an edge before it counts as outside: the ink scan's own slack. */
+const ZONE_SLACK = 2;
+const ZONE_IN = "#a3e635";
+const ZONE_OUT = "#ff4d4d";
+
+/**
+ * Draws a safe zone over a cell's picture: what is outside it shaded, a line at its edge, and an outline round each
+ * thing measured, red where it leaves the zone or the frame. A layer whose code named parts is drawn as its parts;
+ * what fills the frame, or sits beneath the footage, is not drawn.
+ */
+function drawZone(
+  g: CanvasRenderingContext2D,
+  zone: { readonly x: number; readonly y: number; readonly w: number; readonly h: number },
+  bounds: readonly InkBounds[],
+  o: { readonly scale: number; readonly width: number; readonly height: number; readonly labels: boolean },
+): void {
+  const k = o.scale;
+  g.save();
+  // Everything outside the zone, as one shape: the frame with the zone cut out of it.
+  const outside = new Path2D();
+  outside.rect(0, 0, o.width * k, o.height * k);
+  outside.rect(zone.x * k, zone.y * k, zone.w * k, zone.h * k);
+  g.fillStyle = "rgba(0, 0, 0, 0.45)";
+  g.fill(outside, "evenodd");
+  g.strokeStyle = "rgba(255, 255, 255, 0.75)";
+  g.lineWidth = 1;
+  g.setLineDash([4, 3]);
+  g.strokeRect(zone.x * k + 0.5, zone.y * k + 0.5, zone.w * k - 1, zone.h * k - 1);
+  g.setLineDash([]);
+  const withParts = new Set(bounds.flatMap((b) => (b.of ? [b.of] : [])));
+  for (const b of bounds) {
+    const { x, y, w, h } = b.rect;
+    const fills = x <= ZONE_SLACK && y <= ZONE_SLACK && x + w >= o.width - ZONE_SLACK && y + h >= o.height - ZONE_SLACK;
+    if (b.backdrop || fills || withParts.has(b.id)) continue;
+    const out =
+      Math.max(zone.x - x, zone.y - y, x + w - (zone.x + zone.w), y + h - (zone.y + zone.h)) > ZONE_SLACK ||
+      Math.max(-x, -y, x + w - o.width, y + h - o.height) > ZONE_SLACK;
+    if (out) {
+      // The part of it that is outside the zone.
+      g.save();
+      g.clip(outside, "evenodd");
+      g.fillStyle = "rgba(255, 77, 77, 0.3)";
+      g.fillRect(x * k, y * k, w * k, h * k);
+      g.restore();
+    }
+    g.strokeStyle = out ? ZONE_OUT : ZONE_IN;
+    g.lineWidth = 1.5;
+    g.strokeRect(x * k, y * k, w * k, h * k);
+    if (!o.labels) continue;
+    g.font = '500 11px "JetBrains Mono", monospace';
+    g.textBaseline = "middle";
+    const wide = g.measureText(b.id).width + 6;
+    // Above the outline, or inside its top edge where there is no room above.
+    const top = y * k >= 14 ? y * k - 14 : y * k + 1;
+    const left = Math.min(Math.max(0, x * k), o.width * k - wide);
+    g.fillStyle = "rgba(10, 12, 19, 0.85)";
+    g.fillRect(left, top, wide, 13);
+    g.fillStyle = out ? ZONE_OUT : ZONE_IN;
+    g.fillText(b.id, left + 3, top + 7);
+  }
+  g.restore();
 }
 
 function tick(): Promise<void> {
