@@ -169,6 +169,11 @@ Give the video one look and say it once.
   `mono`, `bold`) gives a palette, fonts, a radius, a motion style and presets. Brand it with
   `palette: { primary: "#ff5a1f" }`, `fonts: { heading: "Playfair Display" }` and
   `motion: "calm" | "snappy" | "bouncy" | "editorial" | "none"`.
+- **Choose a font by looking.** `cutcraft fonts --for headline` lists families with what each suits and its weights
+  (`--category condensed|serif|display|…` narrows it). `cutcraft fonts --for headline --sheet fonts.png --text "YOUR
+  WORDS"` draws them; read the image, then pick. A starred family is bundled: use its name. Any other is declared at
+  the top of the file, `const bebasNeue = googleFont("Bebas Neue", { weights: [400] })`, and passed as the value:
+  `fonts: { heading: bebasNeue }` or `font={bebasNeue}`. Ask only for weights the list shows.
 - **Tokens, not literals.** Colours: `$primary`, `$secondary`, `$accent`, `$background`, `$surface`, `$text`,
   `$muted`, `$onPrimary`. Fonts: `$heading`, `$body`, `$mono`. Corners: `$radius`.
 - **Presets for text.** `<Title style="h1">`, also `h2`, `kicker`, `body`, `caption`, `quote`, `label`, `code`,

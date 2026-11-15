@@ -34,7 +34,11 @@ for (const { family } of GOOGLE_PICKS) {
     missing.push(family);
     continue;
   }
-  const keys = Object.keys(found.fonts);
+  // Only what `googleFont()` can declare: 100, 200 … 900. A family's extra weights (Nunito's 1000) are left out.
+  const keys = Object.keys(found.fonts).filter((k) => {
+    const weight = Number.parseInt(k, 10);
+    return weight >= 100 && weight <= 900 && weight % 100 === 0;
+  });
   const weights = keys
     .filter((k) => /^\d+$/.test(k))
     .map(Number)

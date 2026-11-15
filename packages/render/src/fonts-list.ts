@@ -132,7 +132,7 @@ export default function Sheet() {
                 <div style={{ ...line, fontFamily: '"Inter"', fontSize: 20, fontWeight: 700 }}>
                   {cell.family} <span style={{ fontWeight: 400, color: "#8b93a3" }}>{cell.note}</span>
                 </div>
-                <div style={{ ...line, fontFamily: JSON.stringify(cell.family), fontWeight: cell.heavy, fontSize: 60, lineHeight: "84px" }}>{TEXT}</div>
+                <div style={{ ...line, fontFamily: JSON.stringify(cell.family), fontWeight: cell.heavy, fontSize: 52, lineHeight: "84px" }}>{TEXT}</div>
                 {cell.regular === null ? null : (
                   <div style={{ ...line, fontFamily: JSON.stringify(cell.family), fontWeight: cell.regular, fontSize: 28, lineHeight: "40px" }}>{TEXT}</div>
                 )}

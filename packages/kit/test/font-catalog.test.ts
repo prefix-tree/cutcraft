@@ -12,7 +12,10 @@ describe("the font catalogue", () => {
       expect(font.weights.length, font.family).toBeGreaterThan(0);
       expect(font.roles.length, font.family).toBeGreaterThan(0);
       expect(font.feel.length, font.family).toBeGreaterThan(20);
-      for (const weight of [...font.weights, ...font.italics]) expect(weight % 100, font.family).toBe(0);
+      // Every weight is one googleFont() can declare.
+      for (const weight of font.weights) expect(() => googleFont(font.family, { weights: [weight] })).not.toThrow();
+      for (const weight of font.italics)
+        expect(() => googleFont(font.family, { weights: [weight], styles: ["italic"] })).not.toThrow();
     }
   });
 

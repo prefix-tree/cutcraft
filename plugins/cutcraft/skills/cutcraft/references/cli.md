@@ -295,6 +295,27 @@ no browser and answers in about a second. The legend's `cached` says how many ce
 
 The folder is safe to delete, and belongs in `.gitignore`.
 
+## Fonts
+
+```sh
+cutcraft fonts [--for <role>] [--category <category>] [--sheet fonts.png [--text <words>]] [--json]
+```
+
+Lists the fonts to choose from, without a file: the bundled families (starred, used by name) and a short list from
+Google Fonts (declared with `googleFont()`). Each line has the family, its category, its weights, what it suits and
+how it looks.
+
+| Option | Does |
+|---|---|
+| `--for <role>` | Only families that suit `headline`, `body`, `captions`, `numbers` or `accent` |
+| `--category <name>` | Only `sans`, `serif`, `slab`, `condensed`, `display`, `handwriting` or `mono` |
+| `--sheet <image>` | Also draws the listed families as one image, three to a row, each setting the same words in its heaviest weight and its regular one. `.jpg` writes a JPEG, anything else a PNG |
+| `--text <words>` | The words the sheet sets. Default: `Make It Move 2026` |
+| `--json` | Prints the entries as JSON: `family`, `source`, `category`, `weights`, `italics`, `roles`, `feel`, `pairs` |
+
+The sheet is drawn in Chrome like any frame. The first time, Google's faces are downloaded into the font cache
+(`~/.cache/cutcraft/fonts`), so it needs the network once. See [Choosing a font](https://cutcraft.prefixtree.xyz/guide/themes#choosing-a-font).
+
 ## Exit codes
 
 | Code | |
