@@ -5,7 +5,7 @@
 
 import { z } from "zod";
 
-import { Captions, Clip, Composition, Keyframe, Layer, Track, useLayer } from "@cutcraft/kit";
+import { Captions, Clip, Composition, googleFont, Keyframe, Layer, Track, useLayer } from "@cutcraft/kit";
 
 export const schema = z.object({
   /** The one colour that is not navy or white. */
@@ -14,6 +14,10 @@ export const schema = z.object({
 export const defaults: z.infer<typeof schema> = { accent: "#ffd23f" };
 
 const NAVY = "#0b1530";
+
+// The short's own type: a heavy geometric sans, chosen from `cutcraft fonts --for headline --category sans --sheet`
+// set in its own words. The other shorts use Space Grotesk and Inter.
+const poppins = googleFont("Poppins", { weights: [800] });
 
 // The source is 1920x1080 and cuts between two cameras, at these seconds of the excerpt.
 const TO_LEX = 341 / 30;
@@ -142,9 +146,9 @@ export default function Video({ accent }: z.infer<typeof schema>) {
         maxChars={18}
         breakAfter={["word:39"]}
         x={-36}
-        y={215}
+        y={195}
         width={756}
-        style={{ font: "Space Grotesk", size: 60, weight: 700, color: "$text", highlight: "$accent" }}
+        style={{ font: poppins, size: 60, weight: 800, color: "$text", highlight: "$accent" }}
       />
     </Composition>
   );
