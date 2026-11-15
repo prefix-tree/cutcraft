@@ -1,4 +1,15 @@
-import { Caption, Captions, Composition, Effect, Keyframe, Layer, Three, Track, useLayer } from "@cutcraft/kit";
+import {
+  Caption,
+  Captions,
+  Composition,
+  Effect,
+  Keyframe,
+  Layer,
+  narrate,
+  Three,
+  Track,
+  useLayer,
+} from "@cutcraft/kit";
 
 // "One pixel": how a game lights a room, told by following one dot of the screen. A narrator's words lead; the
 // subtitles show a phrase at a time with a box on the word being said, and each thing on screen arrives on the
@@ -50,114 +61,12 @@ Five small cheats, for every dot, sixty times a [again]. (0.3)
 That's the light you've been looking at in every game you've ever played. (1.0) {end}
 `;
 
-interface Said {
-  readonly text: string;
-  readonly start: number;
-  readonly end: number;
-}
-/** Seconds a word takes to say at an explainer's pace, and the breath a comma or a full stop takes after it. */
-const say = (word: string): number => 0.09 + 0.04 * word.replace(/[^a-z]/gi, "").length;
-const breath = (word: string): number => (/[.?!:]$/.test(word) ? 0.25 : /,$/.test(word) ? 0.11 : 0);
-const ms = (t: number): number => Math.round(t * 1000) / 1000;
-
-const cue: Record<string, number> = {};
-/** The subtitles: a phrase at a time, so a line can be read as it is said. */
-const lines: { text: string; start: number; end: number; words: Said[] }[] = [];
-{
-  let t = 0.3;
-  let open: Said[] = [];
-  const close = () => {
-    const first = open[0];
-    const last = open[open.length - 1];
-    if (first && last)
-      lines.push({
-        text: open.map((w) => w.text).join(" "),
-        start: first.start,
-        end: ms(last.end + 0.12),
-        words: open,
-      });
-    open = [];
-  };
-  for (const raw of SCRIPT.split(/\s+/).filter(Boolean)) {
-    const pause = /^\(([\d.]+)\)$/.exec(raw);
-    const mark = /^\{(\w+)\}$/.exec(raw);
-    if (pause) {
-      close();
-      t += Number(pause[1]);
-    } else if (mark?.[1]) cue[mark[1]] = ms(t);
-    else {
-      const text = raw.replace(/[[\]]/g, "");
-      const named = /\[(\w+)\]/.exec(raw);
-      if (named?.[1]) cue[named[1]] = ms(t);
-      const end = t + say(text);
-      open.push({ text, start: ms(t), end: ms(end) });
-      t = end + breath(text);
-      // A line ends with its sentence, or at a comma once it has some length, or when it would run too long.
-      const length = open.reduce((n, w) => n + w.text.length + 1, 0);
-      if (/[.?!]$/.test(text) || (/,$/.test(text) && length >= 18) || length >= 44) close();
-    }
-  }
-  close();
-  // No line of one or two words left over from a long sentence: it takes words back from the line before it.
-  lines.forEach((line, i) => {
-    const before = lines[i - 1];
-    if (!before || /[.?!]$/.test(before.text)) return;
-    while (line.words.length < 3 && before.words.length > 4) {
-      const word = before.words.pop();
-      if (word) line.words.unshift(word);
-    }
-    for (const each of [before, line]) {
-      each.text = each.words.map((w) => w.text).join(" ");
-      each.start = each.words[0]?.start ?? each.start;
-      each.end = ms((each.words[each.words.length - 1]?.end ?? each.end) + 0.12);
-    }
-  });
-  // A subtitle stays up for a moment after its last word, but never into the next one.
-  lines.forEach((line, i) => {
-    const next = lines[i + 1];
-    if (next && line.end > next.start) line.end = next.start;
-  });
-}
-type Cue =
-  | "through"
-  | "shadow"
-  | "fake"
-  | "Real"
-  | "billions"
-  | "hours"
-  | "second"
-  | "cheats"
-  | "dots"
-  | "one"
-  | "sun"
-  | "towards"
-  | "away"
-  | "facing"
-  | "bright"
-  | "dark"
-  | "room1"
-  | "back1"
-  | "ball"
-  | "photo"
-  | "hidden"
-  | "room2"
-  | "back2"
-  | "black"
-  | "bounces"
-  | "pink"
-  | "once"
-  | "room3"
-  | "back3"
-  | "touches"
-  | "darkens"
-  | "room4"
-  | "dazzling"
-  | "smeared"
-  | "again"
-  | "end";
-const at = cue as Record<Cue, number>;
-const LENGTH = Math.ceil(at.end * 10) / 10;
-if (typeof process !== "undefined" && process.env.ONE_PIXEL_CUES) console.error(JSON.stringify(cue));
+// The script as times: every word, the subtitles a phrase at a time, and the cues by name. There is no voice yet, so
+// the times are worked out from a speaking pace; given a recorded voice's transcript, `narrate` takes them from it.
+const story = narrate(SCRIPT);
+/** The time of a cue, in seconds. A name the script does not have stops the file from loading. */
+const at = story.at;
+const LENGTH = Math.ceil(story.duration * 10) / 10;
 
 /** 0 before `a`, 1 after `b`, eased between: how far along something is. */
 const ease = (t: number, a: number, b: number): number => {
@@ -202,10 +111,10 @@ const WALL_HIT = { x: 932, y: 880 };
 const sliceShown = (time: number): number =>
   (
     [
-      [at.dots - 0.5, at.room1],
-      [at.back1, at.room2],
-      [at.back2, at.room3],
-      [at.back3, at.room4],
+      [at("dots") - 0.5, at("room1")],
+      [at("back1"), at("room2")],
+      [at("back2"), at("room3")],
+      [at("back3"), at("room4")],
     ] as const
   ).reduce((most, [from, to]) => Math.max(most, ease(time, from, from + 0.35) * (1 - ease(time, to - 0.3, to))), 0);
 
@@ -214,40 +123,40 @@ function Slice() {
   const here = sliceShown(time);
   if (here <= 0) return null;
   const glow = { filter: "drop-shadow(0 0 10px #ffc857) drop-shadow(0 0 3px #ffc857)" };
-  const lampOn = ease(time, at.sun - 0.1, at.sun + 0.5);
-  const framed = ease(time, at.one, at.one + 0.35);
+  const lampOn = ease(time, at("sun") - 0.1, at("sun") + 0.5);
+  const framed = ease(time, at("one"), at("one") + 0.35);
   const ours = dotX(OURS) + 36;
 
   // The first trick: is this surface facing the lamp? Its drawing leaves when the room takes over.
-  const one = 1 - ease(time, at.room1 - 0.2, at.room1);
-  const counted = ease(time, at.bright, at.bright + 0.9);
-  const dim = ease(time, at.dark, at.dark + 0.6);
-  const pinUp = ease(time, at.towards, at.towards + 0.35) * one;
-  const rayIn = ease(time, at.towards + 0.2, at.towards + 0.7) * one;
-  const wallPin = ease(time, at.away, at.away + 0.35) * one;
-  const fan = ease(time, at.facing, at.facing + 0.8) * one;
+  const one = 1 - ease(time, at("room1") - 0.2, at("room1"));
+  const counted = ease(time, at("bright"), at("bright") + 0.9);
+  const dim = ease(time, at("dark"), at("dark") + 0.6);
+  const pinUp = ease(time, at("towards"), at("towards") + 0.35) * one;
+  const rayIn = ease(time, at("towards") + 0.2, at("towards") + 0.7) * one;
+  const wallPin = ease(time, at("away"), at("away") + 0.35) * one;
+  const fan = ease(time, at("facing"), at("facing") + 0.8) * one;
   const px = dotX(3) + 36;
 
   // The second: the ball is in the way. A ray that goes through it, then the lamp's photo, then the shadow.
   const through =
-    Math.max(ease(time, at.dark + 0.7, at.dark + 1.3) * one, ease(time, at.ball, at.ball + 0.5)) *
-    (1 - ease(time, at.photo - 0.2, at.photo + 0.2));
-  const pulse = ease(time, at.ball, at.ball + 0.3) * (1 - ease(time, at.ball + 0.5, at.ball + 1.1));
-  const photo = ease(time, at.photo, at.photo + 0.4) * (1 - ease(time, at.room2 - 0.2, at.room2));
-  const sweep = ease(time, at.photo + 0.2, at.photo + 1.6);
-  const dark = ease(time, at.hidden, at.hidden + 0.7);
+    Math.max(ease(time, at("dark") + 0.7, at("dark") + 1.3) * one, ease(time, at("ball"), at("ball") + 0.5)) *
+    (1 - ease(time, at("photo") - 0.2, at("photo") + 0.2));
+  const pulse = ease(time, at("ball"), at("ball") + 0.3) * (1 - ease(time, at("ball") + 0.5, at("ball") + 1.1));
+  const photo = ease(time, at("photo"), at("photo") + 0.4) * (1 - ease(time, at("room2") - 0.2, at("room2")));
+  const sweep = ease(time, at("photo") + 0.2, at("photo") + 1.6);
+  const dark = ease(time, at("hidden"), at("hidden") + 0.7);
 
   // The third: light bounces off the red wall into the shadow. Worked out once, in advance.
-  const flash = ease(time, at.black, at.black + 0.3) * (1 - ease(time, at.black + 0.6, at.black + 1.2));
-  const toWall = ease(time, at.bounces, at.bounces + 0.45);
-  const fromWall = ease(time, at.bounces + 0.45, at.bounces + 0.95);
-  const bounced = toWall * (1 - ease(time, at.room3 - 0.2, at.room3));
-  const pink = ease(time, at.pink, at.pink + 0.8);
-  const stamp = ease(time, at.once, at.once + 0.25) * (1 - ease(time, at.room3 - 0.4, at.room3 - 0.1));
+  const flash = ease(time, at("black"), at("black") + 0.3) * (1 - ease(time, at("black") + 0.6, at("black") + 1.2));
+  const toWall = ease(time, at("bounces"), at("bounces") + 0.45);
+  const fromWall = ease(time, at("bounces") + 0.45, at("bounces") + 0.95);
+  const bounced = toWall * (1 - ease(time, at("room3") - 0.2, at("room3")));
+  const pink = ease(time, at("pink"), at("pink") + 0.8);
+  const stamp = ease(time, at("once"), at("once") + 0.25) * (1 - ease(time, at("room3") - 0.4, at("room3") - 0.1));
 
   // The fourth: tight places are darkened.
-  const ring = ease(time, at.touches, at.touches + 0.4);
-  const tight = ease(time, at.darkens, at.darkens + 0.7);
+  const ring = ease(time, at("touches"), at("touches") + 0.4);
+  const tight = ease(time, at("darkens"), at("darkens") + 0.7);
 
   return (
     <svg
@@ -280,7 +189,7 @@ function Slice() {
       <rect width="1080" height="1920" fill="url(#op-grid)" opacity=".7" />
       {/* A slow drift, so the diagram is never a still picture. */}
       <g
-        transform={`translate(540 ${900 + mix(18, -18, ease(time, at.dots, at.room4))}) scale(1.16) translate(-540 -900)`}
+        transform={`translate(540 ${900 + mix(18, -18, ease(time, at("dots"), at("room4")))}) scale(1.16) translate(-540 -900)`}
       >
         <line x1="140" y1="520" x2="940" y2="520" stroke="#6f6a60" strokeWidth="8" />
         <line x1="140" y1="516" x2="140" y2={FLOOR + 4} stroke={CREAM} strokeWidth="10" />
@@ -468,15 +377,17 @@ function Slice() {
 
         {/* The floor, as the screen has it: a row of dots, each with a number for how bright it is. */}
         {FACING.map((facing, i) => {
-          const lit = mix(50, facing, ease(time, at.bright + i * 0.05, at.bright + 0.7 + i * 0.05));
+          const lit = mix(50, facing, ease(time, at("bright") + i * 0.05, at("bright") + 0.7 + i * 0.05));
           // Our dot goes dark first, then the others the lamp cannot see.
-          const hid = i in HIDDEN ? ease(time, at.hidden + (OURS - i) * 0.18, at.hidden + 0.5 + (OURS - i) * 0.18) : 0;
-          const back = i in HIDDEN ? (HIDDEN[i] ?? 0) * ease(time, at.pink + (OURS - i) * 0.12, at.pink + 0.7) : 0;
+          const hid =
+            i in HIDDEN ? ease(time, at("hidden") + (OURS - i) * 0.18, at("hidden") + 0.5 + (OURS - i) * 0.18) : 0;
+          const back =
+            i in HIDDEN ? (HIDDEN[i] ?? 0) * ease(time, at("pink") + (OURS - i) * 0.12, at("pink") + 0.7) : 0;
           const taken = (TIGHT[i] ?? 0) * tight;
           const value = Math.round(lit * (1 - hid) + back - taken);
           const grey = Math.round(40 + value * 2.1);
           const warm = i in HIDDEN ? pink : 0;
-          const shown = ease(time, at.dots + i * 0.04, at.dots + 0.4 + i * 0.04);
+          const shown = ease(time, at("dots") + i * 0.04, at("dots") + 0.4 + i * 0.04);
           const changing = (hid > 0 && hid < 1) || (i in HIDDEN && pink > 0 && pink < 1) || (taken > 0 && tight < 1);
           return (
             <g key={i} opacity={shown}>
@@ -534,7 +445,8 @@ function Slice() {
 /** "For every dot, sixty times a second": for a moment the room is all numbers. */
 function Numbers() {
   const { time } = useLayer();
-  const shown = ease(time, at.again - 0.1, at.again + 0.3) * (1 - ease(time, at.again + 1.0, at.again + 1.8));
+  const shown =
+    ease(time, at("again") - 0.1, at("again") + 0.3) * (1 - ease(time, at("again") + 1.0, at("again") + 1.8));
   if (shown <= 0) return null;
   const cells: { x: number; y: number; value: number }[] = [];
   let seed = 5;
@@ -587,8 +499,8 @@ const NAMES = [
 function Intro() {
   const { time: now } = useLayer();
   // It is on screen until real light is explained, and comes back for the last moment so the film loops.
-  const again = ease(now, at.end - 0.7, at.end - 0.2);
-  const here = Math.max(1 - ease(now, at.Real - 0.35, at.Real), again);
+  const again = ease(now, at("end") - 0.7, at("end") - 0.2);
+  const here = Math.max(1 - ease(now, at("Real") - 0.35, at("Real")), again);
   if (here <= 0) return null;
   const time = again > 0 ? 0 : now;
   const glow = { filter: "drop-shadow(0 0 10px #ffc857) drop-shadow(0 0 3px #ffc857)" };
@@ -598,8 +510,8 @@ function Intro() {
   const turn = ((ballX - BALL.x) / BALL.r) * (180 / Math.PI);
   // The rays are seen to pass through it as soon as it arrives, well before the word.
   const through = ease(time, 1.0, 1.35);
-  const missing = ease(time, at.shadow, at.shadow + 0.3) * (1 - ease(time, at.fake - 0.1, at.fake + 0.1));
-  const faked = ease(time, at.fake, at.fake + 0.35);
+  const missing = ease(time, at("shadow"), at("shadow") + 0.3) * (1 - ease(time, at("fake") - 0.1, at("fake") + 0.1));
+  const faked = ease(time, at("fake"), at("fake") + 0.35);
   return (
     <svg
       viewBox="0 0 1080 1920"
@@ -625,7 +537,7 @@ function Intro() {
         </pattern>
       </defs>
       <rect width="1080" height="1920" fill="url(#in-grid)" opacity=".7" />
-      <g transform={`translate(540 ${900 + mix(26, 18, ease(time, 0, at.Real))}) scale(1.16) translate(-540 -900)`}>
+      <g transform={`translate(540 ${900 + mix(26, 18, ease(time, 0, at("Real")))}) scale(1.16) translate(-540 -900)`}>
         <line x1="140" y1="520" x2="940" y2="520" stroke="#6f6a60" strokeWidth="8" />
         <line x1="140" y1="516" x2="140" y2={FLOOR + 4} stroke={CREAM} strokeWidth="10" />
         <line x1="940" y1="516" x2="940" y2={FLOOR + 4} stroke={RED} strokeWidth="16" />
@@ -761,11 +673,12 @@ function Intro() {
 /** "A film can spend hours on one picture; a game has a sixtieth of a second": a clock, then a counter. */
 function Clock() {
   const { time } = useLayer();
-  const shown = ease(time, at.hours - 0.2, at.hours + 0.2) * (1 - ease(time, at.cheats - 0.1, at.cheats + 0.2));
+  const shown =
+    ease(time, at("hours") - 0.2, at("hours") + 0.2) * (1 - ease(time, at("cheats") - 0.1, at("cheats") + 0.2));
   if (shown <= 0) return null;
-  const hours = (time - at.hours) * 5.5;
-  const fast = ease(time, at.second - 0.3, at.second + 0.1);
-  const count = Math.round(mix(1, 60, ease(time, at.second, at.cheats - 0.3)));
+  const hours = (time - at("hours")) * 5.5;
+  const fast = ease(time, at("second") - 0.3, at("second") + 0.1);
+  const count = Math.round(mix(1, 60, ease(time, at("second"), at("cheats") - 0.3)));
   return (
     <svg
       viewBox="0 0 1080 1920"
@@ -1021,7 +934,7 @@ export default function Video() {
               eye.lerp(toEye.set(...pose[0]), k);
               aim.lerp(toAim.set(...pose[1]), k);
             };
-            const cutAt = [at.room1, at.room2, at.room3, at.room4] as const;
+            const cutAt = [at("room1"), at("room2"), at("room3"), at("room4")] as const;
             const on = (from: number): number => (time_ >= from - 0.3 ? 1 : 0);
             let time_ = 0;
 
@@ -1030,13 +943,14 @@ export default function Video() {
               // Which room this is. Until "cheats": everything on. After it: paint only. Then each trick's cut to
               // the room switches that trick on, and it stays on: facing the lamp, the shadow, the bounce, the
               // corners. By the end it is the room from the first frame again.
-              const cheated = ease(time, at.cheats - 0.05, at.cheats + 0.25);
+              const cheated = ease(time, at("cheats") - 0.05, at("cheats") + 0.25);
               const whole = 1 - cheated;
-              const facing = Math.max(whole, on(at.room1));
-              const shadow = Math.max(whole, on(at.room2));
-              const bounced = Math.max(whole, on(at.room3));
-              const corners = Math.max(whole, on(at.room4));
-              paintOnly.intensity = 1.9 * cheated * (1 - on(at.room1)) + 0.07 * on(at.room1) * (1 - on(at.room3));
+              const facing = Math.max(whole, on(at("room1")));
+              const shadow = Math.max(whole, on(at("room2")));
+              const bounced = Math.max(whole, on(at("room3")));
+              const corners = Math.max(whole, on(at("room4")));
+              paintOnly.intensity =
+                1.9 * cheated * (1 - on(at("room1"))) + 0.07 * on(at("room1")) * (1 - on(at("room3")));
               lamp.intensity = 13 * facing;
               lamp.shadow.intensity = shadow;
               bounce.intensity = 1.5 * bounced;
@@ -1048,7 +962,7 @@ export default function Video() {
               );
 
               // The rays arrive bounce by bounce, and all go at once.
-              const grown = ease(time, at.billions, at.hours - 0.3);
+              const grown = ease(time, at("billions"), at("hours") - 0.3);
               tangle.setDrawRange(0, Math.floor(grown * RAYS * BOUNCES) * 2);
               rays.visible = grown > 0 && cheated < 1;
               (rays.material as InstanceType<typeof THREE.LineBasicMaterial>).opacity = 0.32 * (1 - cheated);
@@ -1057,15 +971,15 @@ export default function Video() {
               // which is the view the slice is drawn from. After that the slice covers the room between cuts, so
               // each cut has its own place to stand, and drifts while it is up.
               stand(CLOSE);
-              move(OPEN, ease(time, at.Real - 0.3, at.billions + 0.6));
+              move(OPEN, ease(time, at("Real") - 0.3, at("billions") + 0.6));
               move(
                 [
                   [-6.2, 5.6, 16.5],
                   [0.2, 1.5, 0],
                 ],
-                ease(time, at.billions, at.cheats),
+                ease(time, at("billions"), at("cheats")),
               );
-              move(SIDE, ease(time, at.cheats + 0.5, at.dots + 0.1));
+              move(SIDE, ease(time, at("cheats") + 0.5, at("dots") + 0.1));
               cutAt.forEach((from, k) => {
                 const cut = CUTS[k];
                 if (!cut || time < from - 0.3) return;
@@ -1073,8 +987,8 @@ export default function Video() {
                 move(cut[1], ease(time, from - 0.3, from + 2.6));
               });
               // The last trick stays in the room: up to the lamp. Then back out to where the film began.
-              move(LAMP_SHOT, ease(time, at.room4 + 1.0, at.dazzling));
-              move(OPEN, ease(time, at.again - 1.2, at.end - 0.6));
+              move(LAMP_SHOT, ease(time, at("room4") + 1.0, at("dazzling")));
+              move(OPEN, ease(time, at("again") - 1.2, at("end") - 0.6));
               camera.position.copy(eye);
               camera.lookAt(aim);
             };
@@ -1082,11 +996,11 @@ export default function Video() {
         >
           {/* The glow of the lamp and of the rays is done to the finished picture, as a game does it. */}
           <Effect id="bloom" type="glow" params={{ radius: 64, intensity: 2.2, threshold: 0.84, tint: 0 }}>
-            <Keyframe id="bloom-on" param="intensity" at={at.cheats - 0.05} value={2.2} />
-            <Keyframe id="bloom-off" param="intensity" at={at.cheats + 0.3} value={0} />
+            <Keyframe id="bloom-on" param="intensity" at={at("cheats") - 0.05} value={2.2} />
+            <Keyframe id="bloom-off" param="intensity" at={at("cheats") + 0.3} value={0} />
             {/* The last trick: the lamp is a flat disc until its brightness is smeared outwards. */}
-            <Keyframe id="bloom-flat" param="intensity" at={at.smeared} value={0} />
-            <Keyframe id="bloom-back" param="intensity" at={at.smeared + 0.6} value={2.2} />
+            <Keyframe id="bloom-flat" param="intensity" at={at("smeared")} value={0} />
+            <Keyframe id="bloom-back" param="intensity" at={at("smeared") + 0.6} value={2.2} />
           </Effect>
         </Three>
         <Layer id="clock" start={0} duration={LENGTH}>
@@ -1117,7 +1031,7 @@ export default function Video() {
           background: "#0a0c13d0",
         }}
       >
-        {lines.map((line, i) => (
+        {story.lines.map((line, i) => (
           <Caption
             key={line.start}
             id={`said-${i + 1}`}
