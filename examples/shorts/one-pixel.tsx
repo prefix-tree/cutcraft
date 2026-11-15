@@ -26,7 +26,8 @@ const INK = "#0a0c13";
 const GOLD = "#ffc857";
 const CREAM = "#d9d2c4";
 const RED = "#c9523a";
-const SANS = "Inter, 'Helvetica Neue', Arial, sans-serif";
+// The film's own face, for the subtitles and the labels; the numbers are set in a monospace.
+const SANS = "'Space Grotesk', 'Helvetica Neue', Arial, sans-serif";
 const MONO = "'JetBrains Mono', 'DejaVu Sans Mono', Menlo, monospace";
 
 // ---- The narration ---------------------------------------------------------------------------------------------
@@ -69,6 +70,14 @@ const at = story.at;
 const LENGTH = Math.ceil(story.duration * 10) / 10;
 
 /** 0 before `a`, 1 after `b`, eased between: how far along something is. */
+// Where the diagram goes. TikTok, Reels and Shorts each cover the top of the frame, its bottom third and a strip at
+// the sides with their own controls; what all three leave clear is x 120..888, y 288..1248. The captions take the
+// top of that, and the diagram, which is drawn about x 150..930 and y 540..1540, is scaled into the rest.
+const FIT = { scale: 0.75, x: 504, y: 869, from: { x: 540, y: 1040 } };
+/** The diagram's place on the frame, `drift` pixels lower: it eases a little over the film so it is never still. */
+const fit = (drift = 0): string =>
+  `translate(${FIT.x} ${FIT.y + drift}) scale(${FIT.scale}) translate(${-FIT.from.x} ${-FIT.from.y})`;
+
 const ease = (t: number, a: number, b: number): number => {
   const x = Math.min(1, Math.max(0, (t - a) / (b - a)));
   return x * x * (3 - 2 * x);
@@ -188,13 +197,21 @@ function Slice() {
       </defs>
       <rect width="1080" height="1920" fill="url(#op-grid)" opacity=".7" />
       {/* A slow drift, so the diagram is never a still picture. */}
-      <g
-        transform={`translate(540 ${900 + mix(18, -18, ease(time, at("dots"), at("room4")))}) scale(1.16) translate(-540 -900)`}
-      >
-        <line x1="140" y1="520" x2="940" y2="520" stroke="#6f6a60" strokeWidth="8" />
-        <line x1="140" y1="516" x2="140" y2={FLOOR + 4} stroke={CREAM} strokeWidth="10" />
-        <line x1="940" y1="516" x2="940" y2={FLOOR + 4} stroke={RED} strokeWidth="16" opacity={1 - 0.45 * dim * one} />
-        <line x1="135" y1={FLOOR} x2="948" y2={FLOOR} stroke={CREAM} strokeWidth="8" />
+      <g transform={fit(mix(12, -12, ease(time, at("dots"), at("room4"))))}>
+        <g data-name="room">
+          <line x1="140" y1="520" x2="940" y2="520" stroke="#6f6a60" strokeWidth="8" />
+          <line x1="140" y1="516" x2="140" y2={FLOOR + 4} stroke={CREAM} strokeWidth="10" />
+          <line
+            x1="940"
+            y1="516"
+            x2="940"
+            y2={FLOOR + 4}
+            stroke={RED}
+            strokeWidth="16"
+            opacity={1 - 0.45 * dim * one}
+          />
+          <line x1="135" y1={FLOOR} x2="948" y2={FLOOR} stroke={CREAM} strokeWidth="8" />
+        </g>
 
         {/* The shadow: the part of the room the lamp cannot see. Black, until the bounce warms it. */}
         <polygon
@@ -298,7 +315,7 @@ function Slice() {
           textAnchor="middle"
           fontFamily={MONO}
           fontWeight="700"
-          fontSize="40"
+          fontSize="48"
           fill="#ffffff"
           opacity={dim * one}
         >
@@ -405,7 +422,7 @@ function Slice() {
                 textAnchor="middle"
                 fontFamily={MONO}
                 fontWeight="700"
-                fontSize="32"
+                fontSize="42"
                 fill={i === OURS || (i === 3 && one > 0) || changing ? "#ffffff" : "#9aa2b8"}
               >
                 {value}
@@ -423,7 +440,7 @@ function Slice() {
           textAnchor="middle"
           fontFamily={SANS}
           fontWeight="600"
-          fontSize="28"
+          fontSize="38"
           fill="#ffffff"
           opacity={framed}
         >
@@ -433,7 +450,7 @@ function Slice() {
         {/* "Worked out once, long before you play." */}
         <g data-name="stamp" transform={`translate(360 1480) rotate(-6) scale(${mix(1.5, 1, stamp)})`} opacity={stamp}>
           <rect x="-230" y="-40" width="460" height="80" rx="10" fill="none" stroke={GOLD} strokeWidth="5" />
-          <text y="13" textAnchor="middle" fontFamily={MONO} fontWeight="700" fontSize="36" fill={GOLD}>
+          <text y="13" textAnchor="middle" fontFamily={MONO} fontWeight="700" fontSize="42" fill={GOLD}>
             DONE IN ADVANCE
           </text>
         </g>
@@ -455,7 +472,7 @@ function Numbers() {
       seed = (seed * 16807) % 2147483647;
       // The numbers tick over, the way they would sixty times a second.
       const value = Math.floor(((seed / 2147483647) * 100 + Math.floor(time * 12) * (7 + ((row * 9 + col) % 5))) % 100);
-      cells.push({ x: 110 + col * 107, y: 520 + row * 78, value });
+      cells.push({ x: 168 + col * 84, y: 570 + row * 58, value });
     }
   return (
     <svg
@@ -490,10 +507,12 @@ function Numbers() {
 // ---- The opening -------------------------------------------------------------------------------------------------
 // The film starts in the slice with everything already going: the lamp on, its rays falling on every dot, the
 // numbers bright. The ball rolls in under the lamp and the light goes straight through it.
+// Each label, and the line from it to the thing it names. The line leaves the word from `off`, a point beside or
+// above it, so it never runs through the letters.
 const NAMES = [
-  { text: "LAMP", from: 0.15, x: 470, y: 600, to: [LAMP.x + 30, LAMP.y - 8] },
-  { text: "LIGHT", from: 0.45, x: 330, y: 1010, to: [262, 930] },
-  { text: "DOTS", from: 0.75, x: 250, y: 1420, to: [dotX(1) + 36, 1330] },
+  { text: "LAMP", from: 0.15, x: 470, y: 600, off: [-76, 10], to: [LAMP.x + 30, LAMP.y - 8] },
+  { text: "LIGHT", from: 0.45, x: 330, y: 1010, off: [0, -16], to: [262, 930] },
+  { text: "DOTS", from: 0.75, x: 250, y: 1420, off: [0, -16], to: [dotX(1) + 36, 1330] },
 ] as const;
 
 function Intro() {
@@ -537,11 +556,13 @@ function Intro() {
         </pattern>
       </defs>
       <rect width="1080" height="1920" fill="url(#in-grid)" opacity=".7" />
-      <g transform={`translate(540 ${900 + mix(26, 18, ease(time, 0, at("Real")))}) scale(1.16) translate(-540 -900)`}>
-        <line x1="140" y1="520" x2="940" y2="520" stroke="#6f6a60" strokeWidth="8" />
-        <line x1="140" y1="516" x2="140" y2={FLOOR + 4} stroke={CREAM} strokeWidth="10" />
-        <line x1="940" y1="516" x2="940" y2={FLOOR + 4} stroke={RED} strokeWidth="16" />
-        <line x1="135" y1={FLOOR} x2="948" y2={FLOOR} stroke={CREAM} strokeWidth="8" />
+      <g transform={fit(mix(17, 12, ease(time, 0, at("Real"))))}>
+        <g data-name="room">
+          <line x1="140" y1="520" x2="940" y2="520" stroke="#6f6a60" strokeWidth="8" />
+          <line x1="140" y1="516" x2="140" y2={FLOOR + 4} stroke={CREAM} strokeWidth="10" />
+          <line x1="940" y1="516" x2="940" y2={FLOOR + 4} stroke={RED} strokeWidth="16" />
+          <line x1="135" y1={FLOOR} x2="948" y2={FLOOR} stroke={CREAM} strokeWidth="8" />
+        </g>
 
         {/* Where a shadow ought to be, and is not; then the fake one the game puts there. */}
         <polygon points={WEDGE} fill="#000000" opacity={0.85 * faked} />
@@ -614,7 +635,7 @@ function Intro() {
                 textAnchor="middle"
                 fontFamily={MONO}
                 fontWeight="700"
-                fontSize="32"
+                fontSize="42"
                 fill={i in HIDDEN && (missing > 0 || faked > 0) ? "#ffffff" : "#9aa2b8"}
               >
                 {value}
@@ -628,10 +649,10 @@ function Intro() {
           return (
             <g key={name.text} opacity={shown}>
               <line
-                x1={name.x}
-                y1={name.y - 12}
-                x2={mix(name.x, name.to[0], shown)}
-                y2={mix(name.y - 12, name.to[1], shown)}
+                x1={name.x + name.off[0]}
+                y1={name.y + name.off[1]}
+                x2={mix(name.x + name.off[0], name.to[0], shown)}
+                y2={mix(name.y + name.off[1], name.to[1], shown)}
                 stroke="#ffffff"
                 strokeWidth="3"
               />
@@ -642,7 +663,7 @@ function Intro() {
                 textAnchor="middle"
                 fontFamily={SANS}
                 fontWeight="800"
-                fontSize="32"
+                fontSize="42"
                 letterSpacing="4"
                 fill="#ffffff"
               >
@@ -658,7 +679,7 @@ function Intro() {
           textAnchor="middle"
           fontFamily={SANS}
           fontWeight="800"
-          fontSize="32"
+          fontSize="42"
           letterSpacing="4"
           fill="#ffffff"
           opacity={missing}
@@ -688,7 +709,7 @@ function Clock() {
       aria-label="A clock"
       style={{ position: "absolute", inset: 0, opacity: shown }}
     >
-      <g transform="translate(540 1560)">
+      <g transform="translate(270 1120)">
         <circle r={mix(104, 70, fast)} fill="#10141fd9" stroke="#ffffff" strokeWidth="7" />
         <g opacity={1 - fast}>
           <line y2="-72" stroke="#ffffff" strokeWidth="7" strokeLinecap="round" transform={`rotate(${hours * 360})`} />
@@ -1020,10 +1041,13 @@ export default function Video() {
       <Captions
         id="said"
         animation="karaoke"
+        x={-36}
+        y={-587}
+        width={756}
         style={{
-          position: "top",
-          size: 62,
-          weight: 800,
+          font: "Space Grotesk",
+          size: 54,
+          weight: 700,
           color: "#ffffff",
           upcoming: "#8b93a8",
           highlight: "#14141c",

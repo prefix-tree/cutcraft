@@ -207,6 +207,10 @@ animation reads those cue times. There is no voice in it: the subtitles show a p
 being said, timed at a speaking pace, for a voice to be recorded over. Two stages take turns: a three.js room, and
 the same room cut in half and drawn as a diagram, where the floor is a row of dots with a brightness number on each.
 
+The diagram and the subtitles keep inside the area TikTok, Reels and Shorts all leave clear of their own controls,
+which is why the lower third of the frame holds only the background. One constant in the file places the diagram,
+its labels are named with `data-name`, and `--check-layout` passes on all three zones.
+
 **Shows:** a film timed from its script, subtitles with a boxed word, a `<Three>` scene with each trick as a switch, an SVG diagram in a `<Layer>` driven by the video's time, a built-in effect with keyframes. [Free code](/guide/free-code) · [Captions and sound](/guide/captions-and-sound)
 
 <div class="cc-pair"><video class="tall" :src="withBase('/shorts/one-pixel.webm')" :poster="withBase('/shorts/one-pixel.jpg')" controls muted loop playsinline></video></div>
