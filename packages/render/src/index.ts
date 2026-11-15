@@ -2,6 +2,14 @@ export { type AddOptions, type AddResult, addAsset } from "./add";
 export { type Container, containerOf, QUALITIES, type QualityName, type VideoCodec } from "./encoding";
 export { type FontFile, type FontWeight, loadFonts } from "./fonts";
 export {
+  type FontFilter,
+  type FontSheetOptions,
+  type FontSheetResult,
+  fontSheet,
+  formatFonts,
+  listFonts,
+} from "./fonts-list";
+export {
   describeAt,
   formatAt,
   formatTimeline,
