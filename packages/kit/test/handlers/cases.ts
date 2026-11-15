@@ -35,6 +35,7 @@ export const CASES: Partial<Record<ActionType, ActionInput>> = {
     params: { theme: { extends: "paper", palette: { primary: "#0055ff" } } },
   },
   "theme/setToken": { type: "theme/setToken", params: { token: "$primary", value: "#ff5a1f" } },
+  "font/use": { type: "font/use", params: { role: "heading", family: "Bebas Neue" } },
   "batch/apply": {
     type: "batch/apply",
     params: {

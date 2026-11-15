@@ -1,5 +1,6 @@
 import type { Json } from "../../patches/types";
 import { FONT_KEYS } from "../../theme/builtins";
+import { findFont, nearestFont } from "../../theme/font-catalog";
 import { themeSchema } from "../../theme/schema";
 import {
   define,
@@ -93,6 +94,113 @@ define(makePropHandler({
     return ok;
   },
 }));
+
+/** The catalogue weight nearest the one wanted: a family with one weight is used in it, whatever was asked. */
+function nearestWeight(weights: readonly number[], wanted: number): number {
+  return weights.reduce((best, w) => (Math.abs(w - wanted) < Math.abs(best - wanted) ? w : best), weights[0] as number);
+}
+
+/** What `font/use` writes: the family where it is used, and the Google faces the preview must load for it. */
+function fontWrites(
+  p: Action<"font/use">["params"],
+  state: Parameters<typeof rawProp>[0],
+): { id: string; props: Record<string, Json | undefined> }[] {
+  const writes: { id: string; props: Record<string, Json | undefined> }[] = [];
+  const weight = p.weight === undefined ? {} : { weight: p.weight };
+  let wanted = p.weight ?? 400;
+  if (p.role !== undefined) {
+    const theme = currentTheme(state);
+    const prior = (theme.fonts ?? {}) as Record<string, Json>;
+    writes.push({ id: "composition", props: { theme: { ...theme, fonts: { ...prior, [p.role]: p.family } } } });
+  } else if (p.id !== undefined) {
+    const item = state.items.get(p.id);
+    if (item?.kind === "captions") {
+      const style = rawProp(state, p.id, "style");
+      const prior = isObject(style) ? style : {};
+      if (p.weight === undefined && typeof prior.weight === "number") wanted = prior.weight;
+      writes.push({ id: p.id, props: { style: { ...prior, font: p.family, ...weight } } });
+    } else {
+      const own = rawProp(state, p.id, "weight");
+      if (p.weight === undefined && typeof own === "number") wanted = own;
+      writes.push({ id: p.id, props: { font: p.family, ...weight } });
+    }
+  }
+  const listed = findFont(p.family);
+  if (listed?.source === "google") {
+    const face = nearestWeight(listed.weights, wanted);
+    const declared = state.fonts.some((f) => f.family === listed.family && f.weight === face && f.style === "normal");
+    if (!declared) {
+      const prior = rawProp(state, "composition", "$fonts");
+      const faces = isObject(prior) ? prior : {};
+      const had = Array.isArray(faces[listed.family]) ? (faces[listed.family] as number[]) : [];
+      const fonts = { ...faces, [listed.family]: [...new Set([...had, face])].sort((a, b) => a - b) };
+      const theme = writes.find((w) => w.id === "composition");
+      if (theme) theme.props.$fonts = fonts;
+      else writes.push({ id: "composition", props: { $fonts: fonts } });
+    }
+  }
+  return writes;
+}
+
+define({
+  type: "font/use",
+  validate: (a, state) => {
+    const p = a.params;
+    if ((p.id === undefined) === (p.role === undefined))
+      return invalid({ code: "INVALID_PARAMS", message: "give an element `id` or a theme `role`, one of them" });
+    const listed = findFont(p.family);
+    const declared = state.fonts.filter((f) => f.family === p.family);
+    if (!listed && declared.length === 0) {
+      const near = nearestFont(p.family);
+      return invalid({
+        code: "INVALID_PARAMS",
+        path: "family",
+        message: `"${p.family}" is not bundled, not declared in the file and not in the font catalogue${near ? `; did you mean "${near.family}"?` : ""}`,
+      });
+    }
+    if (p.weight !== undefined) {
+      const has = listed ? listed.weights : declared.map((f) => f.weight);
+      if (!has.includes(p.weight))
+        return invalid({
+          code: "INVALID_PARAMS",
+          path: "weight",
+          message: `"${p.family}" has no weight ${p.weight}; it has ${[...new Set(has)].join(", ")}`,
+        });
+    }
+    if (p.role !== undefined)
+      return /^[A-Za-z][A-Za-z0-9_-]*$/.test(p.role)
+        ? validateTarget(state, "composition", ["theme"])
+        : invalid({ code: "INVALID_PARAMS", path: "role", message: `"${p.role}" is not a font role` });
+    const item = requireElement(state, p.id);
+    if (isError(item)) return invalid(item);
+    if (item.kind !== "title" && item.kind !== "captions")
+      return invalid({ code: "INVALID_PARAMS", path: "id", message: `a ${item.kind} takes no font` });
+    if (item.kind === "captions" && typeof rawProp(state, item.id, "style") === "string")
+      return invalid({
+        code: "INVALID_PARAMS",
+        path: "id",
+        message: `"${item.id}" takes its style from a theme preset; set the theme's font role instead`,
+      });
+    return validateTarget(state, p.id, item.kind === "captions" ? ["style"] : ["font", "weight"]);
+  },
+  apply: (a, log, ctx) => {
+    for (const w of fontWrites(a.params, ctx.before)) setProps(log, w.id, w.props);
+  },
+  invert: (a, before) =>
+    fontWrites(a.params, before).map(
+      (w): ActionInput => ({
+        type: "source/setProps",
+        params: {
+          id: w.id,
+          props: Object.fromEntries(Object.keys(w.props).map((k) => [k, rawProp(before, w.id, k)])) as Record<
+            string,
+            never
+          >,
+        },
+      }),
+    ),
+  fold: () => [],
+});
 
 /** The file's own theme literal, after patches; empty when it has none. */
 function currentTheme(state: Parameters<typeof rawProp>[0]): Record<string, Json> {
