@@ -35,6 +35,7 @@ export * from "./jsx/effect-params";
 export * from "./jsx/elements";
 export * from "./jsx/engines";
 export * from "./jsx/enums";
+export * from "./jsx/narrate";
 export * from "./jsx/rendering";
 export type { Transform } from "./jsx/schemas/common";
 export type { ThreeFrameArgs, ThreeSetupArgs, ThreeSetupFunction } from "./jsx/schemas/overlays";
