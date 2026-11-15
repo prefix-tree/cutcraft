@@ -203,7 +203,8 @@ copy, and then shows five cheats: is the surface facing the lamp, can the lamp s
 worked out in advance, tight places darkened, and the brightest dots smeared into a glow. It has no footage and no
 media.
 
-The narration leads. The script is one string in the file, with a cue marked on the words that matter, and every
+The narration leads. The script is one string in the file, with a cue marked on the words that matter. The kit's
+[`narrate`](/guide/captions-and-sound#narration-from-a-script) turns it into word times, subtitles and cues, and every
 animation reads those cue times. There is no voice in it: the subtitles show a phrase at a time with a box on the word
 being said, timed at a speaking pace, for a voice to be recorded over. Two stages take turns: a three.js room, and
 the same room cut in half and drawn as a diagram, where the floor is a row of dots with a brightness number on each.

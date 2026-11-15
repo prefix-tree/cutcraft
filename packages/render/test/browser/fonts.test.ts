@@ -89,3 +89,27 @@ it("sets a bundled face in a still of text that appears after the first frame", 
   // JetBrains Mono comes with the player (fonts.css) and loads only once text uses it, here at 0.3 s.
   expect(await width("late", `"JetBrains Mono"`, [], "", 0.3)).toBeGreaterThan(fallback * 1.5);
 });
+
+describe("fontSheet", () => {
+  it("draws the bundled families as one image, a cell each, without the network", async () => {
+    const { fontSheet } = await import("../../src/fonts-list");
+    const { fontsFor } = await import("@cutcraft/kit");
+    const { mkdtempSync, readFileSync, rmSync } = await import("node:fs");
+    const { tmpdir } = await import("node:os");
+    const { join } = await import("node:path");
+    const dir = mkdtempSync(join(tmpdir(), "cutcraft-sheet-"));
+    try {
+      const out = join(dir, "fonts.png");
+      const bundled = fontsFor().filter((f) => f.source === "bundled");
+      const sheet = await fontSheet({ fonts: bundled, out, text: "Hello 123" });
+      expect(sheet).toMatchObject({ width: 1920, height: 380, columns: 3, warnings: [] });
+      expect(sheet.families).toEqual(bundled.map((f) => f.family));
+      const png = readFileSync(out);
+      expect(png.subarray(1, 4).toString()).toBe("PNG");
+      expect(png.readUInt32BE(16)).toBe(1920);
+      expect(png.readUInt32BE(20)).toBe(380);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});

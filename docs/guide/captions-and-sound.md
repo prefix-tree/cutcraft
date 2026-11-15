@@ -104,6 +104,76 @@ markers.
 Generated captions show as generated in an editor. The first edit to one of them writes all of them into the file as
 `<Caption>` children and then applies the edit; undoing it removes them again and generation resumes.
 
+## Narration from a script
+
+A film with no speaker in it, an explainer told by a voice, starts from its words. `narrate` turns the script into
+times: when each word is said, the subtitles a phrase at a time, and the moments the picture listens for.
+
+```tsx
+import { Caption, Captions, Composition, Layer, narrate, Track } from "@cutcraft/kit";
+
+const story = narrate(`
+A game has no real [light]. (0.5)
+For every dot it asks one question: is this surface [facing] the lamp? {answer}
+`);
+
+export default function Video() {
+  return (
+    <Composition fps={30} width={1080} height={1920}>
+      <Track id="picture" layout="free">
+        <Layer id="room" start={0} duration={story.duration}>
+          <Room />
+        </Layer>
+        <Layer id="lamp" start={story.at("light")} duration={2}>
+          <Lamp />
+        </Layer>
+      </Track>
+      <Captions id="said" animation="karaoke">
+        {story.lines.map((line, i) => (
+          <Caption key={line.start} id={`said-${i + 1}`} start={line.start} end={line.end} text={line.text} words={line.words} />
+        ))}
+      </Captions>
+    </Composition>
+  );
+}
+```
+
+In the script:
+
+- a word in square brackets is a cue at the start of that word, named by the word: `story.at("light")`;
+- a number in round brackets is a pause of that many seconds with nothing said, and it ends the subtitle line;
+- a name in curly brackets is a cue at that moment with no word.
+
+`story.at(name)` is the cue's time in seconds. A name the script does not have is an error when the file loads,
+with the names it does have, so a mistyped cue cannot leave an animation that never runs. `story.cues` is all of
+them, `story.words` every word with its start and end, and `story.duration` when the narration is over, which
+is how long the layer behind everything lasts in the example.
+
+`story.lines` are the subtitles. A line ends with its sentence, at a pause, at a comma once the line is 18
+characters long, or at `lineLength` (44) characters. A line of one or two words left over from a long sentence
+takes words back from the line before it. Each line stays for `hold` (0.12 s) after its last word, and never into
+the next one.
+
+With no voice the times come from a speaking pace: every word takes 0.09 s and 0.04 s more for each letter, with a
+breath of 0.11 s after a comma and 0.25 s after a full stop. `start` (0.3 s) is the time before the first word.
+All of these are options:
+
+```ts
+narrate(script, { start: 0.5, pace: { letter: 0.05 }, lineLength: 36, hold: 0.2 });
+```
+
+When the voice is recorded, give `narrate` its transcript and every time comes from the recording:
+
+```ts
+const story = narrate(script, { transcript: manifest.assets.voice.transcript });
+```
+
+The script's words are matched to the transcript's in order, ignoring case and punctuation. A written pause is not
+added, because the voice's own silence is already in its times; a cue in curly brackets sits after the word before
+it by the pause written between them, and never later than the next word. A word the voice did not say as written
+is timed between the words either side of it and listed in `story.warnings`. A transcript with fewer than half the
+script's words is refused as the wrong recording.
+
 ## Subtitle files
 
 `--srt` and `--vtt` write the captions the cut plays as a subtitle file, timed like the export. With `--from`, the

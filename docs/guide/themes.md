@@ -146,6 +146,40 @@ and the export draws no frame until they have loaded. Export a face nothing name
 of a family set by its regular one, or one only a free-code component uses, so it is loaded. A family that is neither bundled nor declared
 is set in Inter, and the [`font-available` lint](#lint) names it.
 
+### Choosing a font
+
+The kit carries a short catalogue of fonts to choose from: the five bundled families and 67 from Google Fonts, picked
+for video. Each entry says what category it is in, which weights it has, what it suits (a headline, body text,
+captions, numbers, an accent), how it looks in a line, and which families go with it. The weights come from Google's
+own list, so they are the ones a declaration can ask for.
+
+```sh
+cutcraft fonts --for headline --category condensed
+cutcraft fonts --category condensed --sheet fonts.png --text "ROASTED THIS WEEK"
+```
+
+The first prints the families as a table. The second also draws them, each setting your words in its heaviest weight
+and its regular one, so the choice is made by looking:
+
+![Nine condensed families, each setting the words ROASTED THIS WEEK](/guide/font-sheet.jpg)
+
+In code the same list is `FONT_CATALOG`, with `findFont(family)` and `fontsFor({ role, category })`. An editor's
+font picker lists it. Any other Google family still works with `googleFont()`; the catalogue only does not describe
+it. For a family the catalogue lists, `googleFont()` refuses a weight or an italic the family does not have, and says
+which it has.
+
+In free code a declared font is a CSS `fontFamily` as it is. Two cases want `fontFamily(font, ...fallbacks)`, which
+writes the family in quotes: a fallback after it, and a family with a word that starts with a digit, such as
+Press Start 2P or Source Serif 4, which CSS reads only in quotes.
+
+```tsx
+export const pixel = googleFont("Press Start 2P");
+
+<div style={{ fontFamily: fontFamily(pixel, "monospace") }}>GAME OVER</div>
+```
+
+The result is plain text, so export the font it names. That is how the player and the export know to load it.
+
 Keep the calls at the top of the file with literal arguments, where the editor and lint can read them; the
 [`declaration` lint](#lint) says when one is not. To add a face for a single export without editing the file, pass
 `--font` on the [command line](/reference/cli) or `fonts` to `renderVideo`.
@@ -176,6 +210,7 @@ it restyles.
   on a title, shape, SVG, sticker, captions or marker. Shadows are exempt.
   The message names the token when the colour matches one.
 - `font-available` (warning): a font no renderer ships and the file does not
-  declare.
+  declare. For a family in the catalogue the message gives the declaration to write; for a name close to one, it asks
+  whether that one was meant.
 - `declaration` (warning): a `font()`, `googleFont()`, `effect()` or `transition()` call inside a
   function, or with arguments that are not literal, or one neither exported nor used.

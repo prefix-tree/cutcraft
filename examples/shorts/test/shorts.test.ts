@@ -4,7 +4,7 @@ import { join } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
-import { type AssetManifest, collectModule, resolve } from "@cutcraft/kit";
+import { type AssetManifest, collectModule, narrate, resolve } from "@cutcraft/kit";
 import { lint, loadModule } from "@cutcraft/kit/source";
 
 const root = join(import.meta.dirname, "..");
@@ -57,5 +57,63 @@ describe("lunar-eclipse.tsx", () => {
     );
     for (const g of [...state.items.values()].filter((p) => ["layer", "shape", "title"].includes(p.kind)))
       expect([g.id, cuts.has(Math.round((g.start + g.duration) * 1000))]).toEqual([g.id, true]);
+  });
+});
+
+describe("one-pixel.tsx", () => {
+  const source = readFileSync(join(root, "one-pixel.tsx"), "utf8");
+  const script = /const SCRIPT = `([\s\S]*?)`;/.exec(source)?.[1] ?? "";
+
+  it("keeps its cues where its animations were written for", () => {
+    // The film's script, timed by the kit's `narrate` at its default pace. The picture was built against these
+    // times: a change to the helper's defaults that moves them moves every animation in the film.
+    expect(narrate(script).cues).toEqual({
+      through: 2.2,
+      shadow: 3.49,
+      fake: 7.1,
+      Real: 8.17,
+      billions: 11.21,
+      hours: 18.93,
+      second: 23.31,
+      cheats: 24.9,
+      dots: 27.56,
+      one: 31.69,
+      sun: 36.97,
+      towards: 38.18,
+      away: 40.43,
+      facing: 44.39,
+      bright: 46.18,
+      dark: 47.59,
+      room1: 48.89,
+      back1: 50.69,
+      ball: 52.42,
+      photo: 58.29,
+      hidden: 63.2,
+      room2: 68.71,
+      back2: 70.51,
+      black: 71.68,
+      bounces: 74.33,
+      pink: 78.84,
+      once: 83.3,
+      room3: 87.41,
+      back3: 89.21,
+      touches: 90.21,
+      darkens: 99.48,
+      room4: 100.95,
+      dazzling: 104.15,
+      smeared: 106.1,
+      again: 112.74,
+      end: 118.28,
+    });
+  });
+
+  it("shows the script as subtitles, a phrase at a time", () => {
+    const mod = loadModule(source) as { defaults?: Record<string, unknown> };
+    const state = resolve(collectModule(mod as never, mod.defaults ?? {}), manifest);
+    const cues = [...state.items.values()].filter((p) => p.kind === "caption").sort((a, b) => a.start - b.start);
+    expect(cues).toHaveLength(61);
+    expect([cues[0]?.props.text, cues[0]?.start]).toEqual(["In a video game, light goes straight", 0.3]);
+    expect([cues[60]?.props.text, cues[60]?.start]).toEqual(["game you've ever played.", 115.91]);
+    expect(state.composition.duration).toBe(118.3);
   });
 });
