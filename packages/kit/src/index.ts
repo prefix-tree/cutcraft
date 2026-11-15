@@ -4,6 +4,7 @@ export * from "./actions/history";
 export * from "./actions/registry";
 export * from "./actions/types";
 export * from "./components/index";
+export * from "./diagram/index";
 export { type GaussOutside, type GaussWhat, gaussScale, gaussSources, gaussSteps } from "./effects/gauss";
 export {
   BUILT_IN_SHADERS,
