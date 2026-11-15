@@ -154,6 +154,10 @@ export default function Video({ product, who }: z.infer<typeof schema>) {
 8. **Captions follow the clips.** `<Captions src="asset:talk">` with no children makes cues from the words the
    timeline plays (`maxChars`, `maxDuration`, `maxGap` tune them). Or write
    `<Caption start="word:N" end="word:M.end" text="…">` cues. At most one `<Captions>`.
+   For a film told by a voice with no speaker in it, write the script as one string and time it with `narrate`:
+   `[word]` is a cue, `(1.5)` a pause in seconds, `{name}` a cue with no word. Use `story.at("word")` for `start`
+   props and in free code, and map `story.lines` to `<Caption>` children with their `words`. Give it the voice's
+   transcript when there is one and every time follows the recording.
 9. **Sound.** Dialogue on the first track, music on a free track with `duck={{ under: "main", to: 0.2 }}` so it dips
    under speech.
 10. **Helpers used once stay editable.** A helper used twice makes generated elements the editor must bake before
