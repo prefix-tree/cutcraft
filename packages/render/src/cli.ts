@@ -26,7 +26,7 @@ const USAGE = `Usage: cutcraft <file.tsx> --out <video.mp4|.webm|.mp3|.wav> [--d
        cutcraft <file.tsx> --srt <captions.srt> | --vtt <captions.vtt> [--from <s> --to <s>]
        cutcraft inspect <file.tsx> [--at <moments>] [--json] [--manifest <file>] [--props <json>]
        cutcraft look <file.tsx> [--at <moments> | --around <id>] [--without <id>] [--listen <stretch>]
-                    [--out look.png] [options]
+                    [--zones <zone>] [--out look.png] [options]
        cutcraft look <file.tsx> --motion <stretch> [--step <s>] [--listen <stretch>] [--out look.png] [options]
        cutcraft where <file.tsx> --at <moments> [--safe-zone <zone>] [--json] [options]
        cutcraft add <media file>... [--manifest manifest.json] [--id <id>] [--transcript <file>]
@@ -47,6 +47,10 @@ const USAGE = `Usage: cutcraft <file.tsx> --out <video.mp4|.webm|.mp3|.wav> [--d
   --motion <stretch>    (look) read a move: a strip of small frames at even steps across a range such as 2..3 or
                         an element's id, each labelled with its time. Twelve frames unless --step <s> says how
                         far apart they are. On its own: not with --at, --around or --without
+  --zones <zone>        (look) draw a safe zone over every cell (the zones --safe-zone takes): what is outside it
+                        shaded, and an outline round each overlay, the captions and each named part, red where
+                        it leaves the zone or the frame. The legend's cells gain "things": where each one is.
+                        Not with --without
   --listen <stretch>    (look) show the sound of a stretch under the cells: all, a range such as 2..6, or an
                         element's id. The strip is the mix's waveform with a time scale and the words said; the
                         legend says how loud it is and where it is silent
@@ -138,6 +142,7 @@ async function main(): Promise<number> {
       at: { type: "string" },
       around: { type: "string" },
       motion: { type: "string" },
+      zones: { type: "string" },
       draft: { type: "boolean" },
       without: { type: "string" },
       cell: { type: "string" },
@@ -204,6 +209,7 @@ async function main(): Promise<number> {
       ...(values.at !== undefined ? { at: values.at } : {}),
       ...(values.around !== undefined ? { around: values.around } : {}),
       ...(values.motion !== undefined ? { motion: values.motion } : {}),
+      ...(values.zones !== undefined ? { zones: readZone(values.zones) } : {}),
       ...(values.step ? { step: Number(values.step) } : {}),
       ...(values.without !== undefined ? { without: values.without } : {}),
       ...(values.cell ? { cell: Number(values.cell) } : {}),

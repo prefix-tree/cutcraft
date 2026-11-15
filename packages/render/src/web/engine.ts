@@ -151,17 +151,21 @@ export class BrowserEngine {
   }
 
   /** The cells of a contact sheet, each drawn as a PNG tile in one page; with `keepFrames`, each full frame too. */
-  async tiles(request: TilesRequest): Promise<{ tiles: Uint8Array[]; frames: Uint8Array[] }> {
+  async tiles(
+    request: TilesRequest,
+  ): Promise<{ tiles: Uint8Array[]; frames: Uint8Array[]; bounds: (readonly InkBounds[])[] }> {
     return this.on(async (page) => {
       const count = await page.evaluate((r: TilesRequest) => window.__cutcraft!.tiles(r), request);
       const tiles: Uint8Array[] = [];
       const frames: Uint8Array[] = [];
+      const bounds: (readonly InkBounds[])[] = [];
       for (let i = 0; i < count; i++) {
         tiles.push(await read(page, await page.evaluate((n: number) => window.__cutcraft!.tile(n), i)));
+        if (request.zone) bounds.push(await page.evaluate((n: number) => window.__cutcraft!.tileBounds(n), i));
         if (request.keepFrames)
           frames.push(await read(page, await page.evaluate((n: number) => window.__cutcraft!.frame(n), i)));
       }
-      return { tiles, frames };
+      return { tiles, frames, bounds };
     });
   }
 

@@ -82,6 +82,13 @@ export interface TilesRequest {
   readonly cellWidth: number;
   /** Keep each cell's frame at full size too, for `frame(index)`. */
   readonly keepFrames?: boolean;
+  /**
+   * A safe zone, in composition pixels: each cell is measured, and drawn with what is outside the zone shaded and
+   * an outline round each thing, red where it leaves the zone or the frame. `tileBounds(index)` has what was measured.
+   */
+  readonly zone?: { readonly x: number; readonly y: number; readonly w: number; readonly h: number };
+  /** With `zone`: write each thing's id at its outline. Off for cells too small to read words on. */
+  readonly labels?: boolean;
 }
 
 /** A picture of the sound of a stretch of the video, to go under a sheet's cells. */
@@ -148,6 +155,8 @@ export interface PageApi {
   listen(request: ListenRequest): Promise<ListenResult>;
   /** Makes tile `index` of the last `tiles` call the result to `read`; returns its length. */
   tile(index: number): number;
+  /** What was measured in cell `index` of the last `tiles` call that had a `zone`. */
+  tileBounds(index: number): readonly InkBounds[];
   /** Makes the full frame of cell `index` (drawn with `keepFrames`) the result to `read`; returns its length. */
   frame(index: number): number;
   /** Base64 of the last result's bytes [offset, offset + length). */
