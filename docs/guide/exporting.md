@@ -277,7 +277,8 @@ There is a row for each overlay, for the captions and for each named part: its i
 left, whether that is inside the frame and inside the safe zone and by how much it is not, and what it overlaps.
 `--at` takes the moments `inspect` and `look` take, several at once. Without `--safe-zone` a portrait video is held
 against `tiktok`, `reels` and `shorts` together, and any other against `title-safe`. `--json` prints the same as
-data. It reports and never fails a file for what it finds: `--check-layout` is the judge. From code:
+data. It reports and never fails a file for what it finds: `--check-layout` is the judge. To see the same on the
+frames, [`look --zones`](/reference/cli#with-the-zones-drawn) draws the zone and each box over a sheet. From code:
 `whereThings({ state, source, media, at })` and `formatWhere(result)`.
 
 ## When a frame never finishes

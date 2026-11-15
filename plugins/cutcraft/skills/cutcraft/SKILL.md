@@ -53,7 +53,8 @@ Work in this order, and check after each stage.
    ```sh
    npx cutcraft where video.tsx --manifest manifest.json --at 2.6,hook.mid
    ```
-   Place things from those numbers; do not guess from a picture.
+   Place things from those numbers; do not guess from a picture. To see them on the frames, add `--zones tiktok`
+   to a `look`: the zone is drawn on every cell and each thing outlined, red where it leaves the zone.
 6. **Look at it.** `look` draws many frames in one go, on one contact sheet, and prints what each cell is. With no
    moments it shows what an editor skims: each clip's first frame, both sides of every cut, each overlay. Read the
    image after each stage:

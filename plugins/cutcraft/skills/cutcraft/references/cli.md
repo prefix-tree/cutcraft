@@ -10,7 +10,7 @@ npx cutcraft <file.tsx> --still <seconds> --out <image.png|.jpg> [options]
 npx cutcraft <file.tsx> --check-layout [--safe-zone <zone>] [--subject <x,y,w,h>] [--json] [options]
 npx cutcraft <file.tsx> --srt <captions.srt> | --vtt <captions.vtt> [--from <s> --to <s>]
 npx cutcraft inspect <file.tsx> [--at <moments>] [--json] [--manifest <file>] [--props <json>]
-npx cutcraft look <file.tsx> [--at <moments> | --around <id>] [--without <id>] [--listen <stretch>] [--out look.png] [options]
+npx cutcraft look <file.tsx> [--at <moments> | --around <id>] [--without <id>] [--listen <stretch>] [--zones <zone>] [--out look.png] [options]
 npx cutcraft look <file.tsx> --motion <stretch> [--step <s>] [--listen <stretch>] [--out look.png] [options]
 npx cutcraft where <file.tsx> --at <moments> [--safe-zone <zone>] [--json] [options]
 npx cutcraft add <media file>... [--manifest manifest.json] [--id <id>] [--transcript <file>]
@@ -167,6 +167,7 @@ It prints a legend as JSON, one entry per cell, so a frame found by eye leads ba
 | `--without <id>` | Each frame twice, side by side: as written, and without one effect, one `<Adjustment>` (all its effects) or one overlay (a title, a shape, an SVG, a sticker, a layer, the captions). A clip cannot be left out: that would move the cut. |
 | `--motion <stretch>` | A strip of small frames at even steps across a stretch, to read a move ([Motion](#motion)). Not with `--at`, `--around` or `--without`. |
 | `--step <s>` | With `--motion`: the seconds between frames. Left out: the step that gives twelve frames. |
+| `--zones <zone>` | A safe zone drawn over every cell, with an outline round each thing ([With the zones drawn](#with-the-zones-drawn)). Not with `--without`. |
 | `--listen <stretch>` | The sound of a stretch, drawn under the cells: `all`, a range of times such as `2..6` or `60f..180f`, or an element's id for the time it is on ([Listening](#listening)). |
 | `--out <file>` | The sheet, a PNG. Default `look.png`. |
 | `--cell <px>` | The width of a cell's picture. Default 480. In a `--motion` strip: 240, or 180 for a portrait video. |
@@ -212,6 +213,22 @@ holds at most 64 frames. The legend gains the stretch and the step:
 ```json
 "motion": { "from": 0.3, "to": 1.3, "step": 0.091 }
 ```
+
+### With the zones drawn
+
+`--zones` draws a safe zone over every cell: what is outside it is shaded, and each overlay, the captions and each
+part a layer's code names is outlined, lime inside the zone and red where it leaves the zone or the frame. It takes
+the zones `--safe-zone` takes. A layer with named parts is drawn as its parts; what fills the frame is left out.
+
+```sh
+npx cutcraft look one-pixel.tsx --at 2.6,22,53,84 --zones tiktok
+```
+
+[![Four frames of a film with TikTok's safe zone marked by a dashed line and the area outside it shaded. The captions at the top, a label and a clock at the bottom and a stamp are outlined in red; two labels inside the zone are outlined in lime](https://cutcraft.prefixtree.xyz/reference/look-zones.jpg)](https://cutcraft.prefixtree.xyz/reference/look-zones.jpg)
+
+The legend's cells gain `things`, the rows [`cutcraft where`](#where) prints for that moment, so the picture and
+the numbers come from one command. In a `--motion` strip the outlines are drawn without their names, as the cells
+are too small for words. `--zones` is not for use with `--without`.
 
 ### Listening
 
