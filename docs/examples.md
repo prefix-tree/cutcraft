@@ -182,7 +182,9 @@ Earth's shadow on "above" and under it on "below", six months are counted and it
 colour as he names it. The diagram is ordinary React in `<Layer>`s. Each layer starts on a word, draws the whole
 panel from there on and lasts until its clip ends, so no cut and no cue in the file is typed in seconds, and
 trimming a clip moves everything drawn over it. The captions come from the transcript, with a box behind the word
-being said. The Moon, the Earth and the labels are named with `data-name`, so the layout check holds each one to the
+being said. The angle that counts to five degrees, the row of months and the line through the wrong answer are the
+kit's [diagram parts](/guide/free-code#diagram-parts). The Moon, the Earth and the labels are named with
+`data-name`, so the layout check holds each one to the
 area TikTok, Reels and Shorts leave clear.
 
 **Shows:** cuts on words, captions with a boxed word and a chosen height, free code in a `<Layer>` started on a word, named parts for the layout check, `Frame`, graphics that last until their clip ends. [Time by meaning](/guide/time) · [Free code](/guide/free-code) · [Captions and sound](/guide/captions-and-sound) · [Checking the layout](/guide/exporting#checking-the-layout)
