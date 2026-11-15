@@ -1,5 +1,6 @@
 // Before and after, as one card to share: the interview as it was shot, and the short cut from it, playing in step.
-// The edit is the rendered `hundred-videos.tsx` (the asset `hundred-videos-short`), so render that file first.
+// The edit is the rendered `../hundred-videos.tsx` (the asset `hundred-videos-short`), so render that file first.
+// It is a 4:5 card, not a short, which is why it sits in its own folder.
 
 import { z } from "zod";
 
