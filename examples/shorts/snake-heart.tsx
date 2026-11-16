@@ -1,10 +1,9 @@
-import { useMemo } from "react";
 import { z } from "zod";
 
 import { Composition, fontFamily, googleFont, Layer, Track, useLayer } from "@cutcraft/kit";
 
 // "Snake heart": a game of snake played on a wall of Chinese characters. The snake eats the characters of one
-// phrase, over and over, and each one joins its body. Every time it eats, the whole wall changes. When
+// phrase, over and over, and each one joins its body. Every character of the wall changes on its own, each at its own pace, and all of them at once when the snake eats. When
 // it has eaten enough it takes a lap of the board and curls up into a heart made of the phrase.
 //
 // Nothing here is filmed or recorded. The whole game is worked out once, below, from a seed: where each character
@@ -27,34 +26,35 @@ export const schema = z.object({
 });
 export const defaults: z.infer<typeof schema> = { word: "我爱你", heart: "#e5383b" };
 
-// The board: nine big square cells across and sixteen down, filling the frame. The snake has all of it.
-const CELL = 120;
-const COLS = 9;
-const ROWS = 16;
+// The board: eight big square cells across, filling the frame; the top and bottom rows run off its edges. The
+// snake plays on the thirteen rows that are whole.
+const CELL = 135;
+const COLS = 8;
+const ROWS = 15;
 const X0 = (1080 - COLS * CELL) / 2;
 const Y0 = (1920 - ROWS * CELL) / 2;
-const AREA = { left: 0, right: COLS - 1, top: 0, bottom: ROWS - 1 };
+const AREA = { left: 0, right: COLS - 1, top: 1, bottom: 13 };
 
 type Cell = readonly [number, number];
 const key = ([x, y]: Cell): number => y * COLS + x;
 
 // The heart, as the way round its outline one cell at a time, starting at the bottom point and going up the left.
-// It is drawn on a 9 by 9 patch, as wide as the board, and placed on it at HEART_AT.
+// It is drawn on an 8 by 8 patch, as wide as the board, and placed on it at HEART_AT.
 const HEART_AT: Cell = [0, 2];
 const HEART_PATCH: readonly Cell[] = [
-  [4, 8], [3, 8], [3, 7], [2, 7], [2, 6], [1, 6], [1, 5], [0, 5], [0, 4], [0, 3], [0, 2], [0, 1],
-  [1, 1], [1, 0], [2, 0], [3, 0], [3, 1], [4, 1], [5, 1], [5, 0], [6, 0], [7, 0], [7, 1],
-  [8, 1], [8, 2], [8, 3], [8, 4], [8, 5], [7, 5], [7, 6], [6, 6], [6, 7], [5, 7], [5, 8],
+  [3, 7], [3, 6], [2, 6], [2, 5], [1, 5], [1, 4], [0, 4], [0, 3], [0, 2], [0, 1],
+  [1, 1], [1, 0], [2, 0], [2, 1], [3, 1], [4, 1], [5, 1], [5, 0], [6, 0], [6, 1],
+  [7, 1], [7, 2], [7, 3], [7, 4], [6, 4], [6, 5], [5, 5], [5, 6], [4, 6], [4, 7],
 ]; // biome-ignore format: the outline reads as a list of steps
 const HEART: readonly Cell[] = HEART_PATCH.map(([x, y]) => [x + HEART_AT[0], y + HEART_AT[1]] as const);
 const HEART_KEYS = new Set(HEART.map(key));
 /** The snake is as long as the heart's outline when it curls up. */
 const FULL = HEART.length;
 
-// The lap before the heart: back and forth across the rows under it, ending under the heart's point. It is at
-// least as long as the snake, so no part of the body is on the outline when the head starts it.
+// The lap before the heart: down the right side and back and forth across the rows under it, ending under the
+// heart's point. It is as long as the snake, so no part of the body is on the outline when the head starts it.
 const LAP: readonly Cell[] = [
-  [8, 11], [8, 15], [0, 15], [0, 14], [7, 14], [7, 13], [0, 13], [0, 12], [4, 12], [4, 11],
+  [7, 9], [7, 13], [0, 13], [0, 12], [6, 12], [6, 11], [0, 11], [0, 10], [3, 10],
 ]; // biome-ignore format: a list of corners
 
 /** A small seeded generator: the same game every time the file is loaded. */
@@ -87,7 +87,7 @@ interface Game {
  */
 function play(seed: number): Game {
   const random = seeded(seed);
-  const path: Cell[] = [[2, 13]];
+  const path: Cell[] = [[2, 12]];
   const length: number[] = [1];
   const food: { cell: Cell; from: number; eaten: number }[] = [];
   let size = 1;
@@ -195,10 +195,25 @@ const LENGTH = Math.ceil(((GAME.times[GAME.closed] as number) + HOLD) * 30) / 30
 
 // What the wall is made of: seasons, sky, and the things of a room and a street.
 const WALL_SET = [..."春夏秋冬日月星光年梦声歌诗画书茶酒灯窗桥路城门钟船信纸笔琴棋伞镜糖盐米面"];
-/** The wall after the snake has eaten `eaten` characters: one character for each cell, new every time it eats. */
-function wallAfter(eaten: number): string[] {
-  const random = seeded(1000 + eaten);
-  return Array.from({ length: COLS * ROWS }, () => WALL_SET[Math.floor(random() * WALL_SET.length)] as string);
+/** A whole number scrambled into another, the same every time. */
+const scramble = (n: number): number => {
+  let t = Math.imul(n ^ (n >>> 15), 0x2c1b3c6d);
+  t = Math.imul(t ^ (t >>> 12), 0x297a2d39);
+  return (t ^ (t >>> 15)) >>> 0;
+};
+/** Each cell of the wall keeps its own time: how long it holds a character, and how far into that it starts. */
+const RHYTHM = Array.from({ length: COLS * ROWS }, (_, i) => {
+  const random = seeded(500 + i);
+  return { every: 0.28 + 2.2 * random() ** 2, late: random() * 2.5 };
+});
+/**
+ * The character in cell `i` at `elapsed` seconds, after the snake has eaten `eaten`. A cell changes when its own
+ * time comes round, so the wall never changes all at once on its own; it does when the snake eats.
+ */
+function wallAt(i: number, elapsed: number, eaten: number): string {
+  const { every, late } = RHYTHM[i] as (typeof RHYTHM)[number];
+  const turn = Math.floor((elapsed + late) / every);
+  return WALL_SET[scramble(i * 7919 + turn * 104729 + eaten * 1299721) % WALL_SET.length] as string;
 }
 
 /** The step the game is at: the last one whose second has come. */
@@ -221,7 +236,7 @@ const LETTER = {
   alignItems: "center",
   justifyContent: "center",
   fontFamily: FACE,
-  fontSize: 100,
+  fontSize: 122,
   lineHeight: 1,
 } as const;
 const ease = (x: number): number => 1 - (1 - Math.min(1, Math.max(0, x))) ** 3;
@@ -231,15 +246,11 @@ function Wall() {
   const { elapsed } = useLayer();
   const done = elapsed - (GAME.times[GAME.closed] as number);
   const eaten = (GAME.length[stepAt(elapsed)] as number) - 1;
-  const wall = useMemo(
-    () =>
-      wallAfter(eaten).map((letter, i) => (
-        <div key={i} style={{ ...LETTER, ...box([i % COLS, Math.floor(i / COLS)]), color: WALL, fontWeight: 400 }}>
-          {letter}
-        </div>
-      )),
-    [eaten],
-  );
+  const wall = Array.from({ length: COLS * ROWS }, (_, i) => (
+    <div key={i} style={{ ...LETTER, ...box([i % COLS, Math.floor(i / COLS)]), color: WALL, fontWeight: 400 }}>
+      {wallAt(i, elapsed, eaten)}
+    </div>
+  ));
 
   return (
     <div
@@ -273,7 +284,7 @@ function Board({ word, heart }: z.infer<typeof schema>) {
 
   // Two beats of the heart once it is closed, then it rests a little larger than life.
   const beat = won ? 0.07 * Math.max(0, Math.sin(done * Math.PI * 2.2)) ** 6 : 0;
-  const centre = { x: X0 + (HEART_AT[0] + 4.5) * CELL, y: Y0 + (HEART_AT[1] + 4.5) * CELL };
+  const centre = { x: X0 + (HEART_AT[0] + 4) * CELL, y: Y0 + (HEART_AT[1] + 4) * CELL };
   const pulse = 0.5 + 0.5 * Math.sin(elapsed * Math.PI * 4);
 
   return (
@@ -287,7 +298,7 @@ function Board({ word, heart }: z.infer<typeof schema>) {
             background: BG,
             color: heart,
             fontWeight: 900,
-            fontSize: 104,
+            fontSize: 124,
           }}
         >
           <span style={{ display: "block", transform: `scale(${1 + 0.12 * pulse})` }}>
@@ -315,7 +326,7 @@ function Board({ word, heart }: z.infer<typeof schema>) {
                 ...LETTER,
                 ...box(cell),
                 background: BG,
-                fontSize: 108,
+                fontSize: 126,
                 fontWeight: 900,
                 color: turned > 0.5 ? heart : SNAKE,
                 textShadow: turned > 0.5 ? `0 0 ${34 * turned}px ${heart}` : "none",

@@ -273,15 +273,16 @@ Footage: [Lex Fridman Podcast #351](https://www.youtube.com/watch?v=Z3_PwvvfxIU)
 ### A game of snake that ends in a heart
 
 A game of snake on a wall of Chinese characters. The snake eats the characters of one phrase, 我爱你, and each joins
-its body. Every time it eats, the whole wall changes. When it is long enough it takes a lap of the board
-and curls up into a heart.
+its body. Every character of the wall changes on its own, each at its own pace, and all of them at once when the
+snake eats. When the snake is long enough it takes a lap of the board and curls up into a heart.
 
 <div class="cc-pair"><video class="tall" :src="withBase('/shorts/snake-heart.webm')" :poster="withBase('/shorts/snake-heart.jpg')" controls muted loop playsinline></video></div>
 
 Nothing is filmed and nothing is keyframed. The file plays the whole game once when it loads, from a seed: where each
 character appears, the shortest way to it that does not touch the body, and the second of every step. The `<Layer>`
-that draws it only asks which step the video's time has reached. The wall is a second layer, drawn again from a new
-seed each time the count of eaten characters goes up. The board is nine cells across and fills the frame, so the
+that draws it only asks which step the video's time has reached. The wall is a second layer: each cell has its own
+period, and its character is worked out from the time and the count of eaten characters. The board is eight cells
+across and fills the frame, so the
 snake and the heart pass under the places where a phone app draws its buttons. The face is Noto Sans SC, declared
 with `googleFont()`, in black, grey, white and one red. The phrase and the heart's colour are props.
 
