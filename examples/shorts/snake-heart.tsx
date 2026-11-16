@@ -1,30 +1,32 @@
 import { useMemo } from "react";
 import { z } from "zod";
 
-import { Composition, Layer, Track, useLayer } from "@cutcraft/kit";
+import { Composition, fontFamily, googleFont, Layer, Track, useLayer } from "@cutcraft/kit";
 
-// "Snake heart": a game of snake played on a wall of letters. The snake eats the letters of one word, over and over,
-// and each one becomes a tile of its body. When it has eaten enough it takes a lap of the board and curls up into a
-// heart made of the word.
+// "Snake heart": a game of snake played on a wall of Chinese characters. The snake eats the characters of one
+// phrase, over and over, and each one becomes a tile of its body. Every time it eats, the whole wall changes. When
+// it has eaten enough it takes a lap of the board and curls up into a heart made of the phrase.
 //
-// Nothing here is filmed or recorded. The whole game is worked out once, below, from a seed: where each letter
-// appears, the way the snake takes to it without running into itself, and how fast it goes. The layer then only
-// asks "which step is it at this second" and draws that.
+// Nothing here is filmed or recorded. The whole game is worked out once, below, from a seed: where each character
+// appears, the way the snake takes to it without running into itself, and how fast it goes. The layers then only
+// ask "which step is it at this second" and draw that.
 
 const BG = "#150d1f";
 const WALL = "#3b2b4d";
 const TILE = "#f6eee2";
 const HEAD = "#ffd166";
 const INK = "#1b1226";
-const MONO = '"JetBrains Mono", monospace';
+// One face for the wall and the tiles, with the characters of Simplified Chinese.
+export const noto = googleFont("Noto Sans SC", { weights: [400, 900] });
+const FACE = fontFamily(noto, "sans-serif");
 
 export const schema = z.object({
-  /** The word the snake eats and the heart is made of. */
+  /** The phrase the snake eats and the heart is made of, one character to a tile. */
   word: z.string().min(1).max(8),
   /** The colour of the letter to eat, and of the heart. */
   heart: z.string(),
 });
-export const defaults: z.infer<typeof schema> = { word: "LOVE", heart: "#ff4d6d" };
+export const defaults: z.infer<typeof schema> = { word: "我爱你", heart: "#ff4d6d" };
 
 // The board: square cells over the whole frame. The game is played in the middle of it, inside the part of a phone
 // screen that an app's buttons leave clear.
@@ -194,11 +196,26 @@ const GAME = firstGame();
 const HOLD = 3.4;
 const LENGTH = Math.ceil(((GAME.times[GAME.closed] as number) + HOLD) * 30) / 30;
 
-/** The letters of the wall: one for each cell, the same every time. */
-const WALL_LETTERS = (() => {
-  const random = seeded(99);
-  return Array.from({ length: COLS * ROWS }, () => String.fromCharCode(65 + Math.floor(random() * 26)));
-})();
+// What the wall is made of: seasons, sky, and the things of a room and a street.
+const WALL_SET = [..."春夏秋冬日月星光年梦声歌诗画书茶酒灯窗桥路城门钟船信纸笔琴棋伞镜糖盐米面"];
+/** The wall after the snake has eaten `eaten` characters: one character for each cell, new every time it eats. */
+function wallAfter(eaten: number): string[] {
+  const random = seeded(1000 + eaten);
+  return Array.from({ length: COLS * ROWS }, () => WALL_SET[Math.floor(random() * WALL_SET.length)] as string);
+}
+
+/** The step the game is at: the last one whose second has come. */
+function stepAt(elapsed: number): number {
+  let step = 0;
+  for (let lo = 0, hi = GAME.path.length - 1; lo <= hi; ) {
+    const mid = (lo + hi) >> 1;
+    if ((GAME.times[mid] as number) <= elapsed) {
+      step = mid;
+      lo = mid + 1;
+    } else hi = mid - 1;
+  }
+  return step;
+}
 
 const box = (cell: Cell) => ({ left: X0 + cell[0] * CELL, top: Y0 + cell[1] * CELL, width: CELL, height: CELL });
 const LETTER = {
@@ -206,24 +223,25 @@ const LETTER = {
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  fontFamily: MONO,
-  fontSize: 44,
+  fontFamily: FACE,
+  fontSize: 50,
   lineHeight: 1,
 } as const;
 const ease = (x: number): number => 1 - (1 - Math.min(1, Math.max(0, x))) ** 3;
 
-/** The wall of letters the game is played on. It fades back when the heart is closed. */
+/** The wall of characters the game is played on. It changes each time the snake eats, and fades back at the heart. */
 function Wall() {
   const { elapsed } = useLayer();
   const done = elapsed - (GAME.times[GAME.closed] as number);
+  const eaten = (GAME.length[stepAt(elapsed)] as number) - 1;
   const wall = useMemo(
     () =>
-      WALL_LETTERS.map((letter, i) => (
+      wallAfter(eaten).map((letter, i) => (
         <div key={i} style={{ ...LETTER, ...box([i % COLS, Math.floor(i / COLS)]), color: WALL, fontWeight: 400 }}>
           {letter}
         </div>
       )),
-    [],
+    [eaten],
   );
 
   return (
@@ -248,15 +266,8 @@ function Board({ word, heart }: z.infer<typeof schema>) {
   const { elapsed } = useLayer();
   const { path, length, food, times, closed } = GAME;
 
-  // The step the game is at: the last one whose second has come.
-  let step = 0;
-  for (let lo = 0, hi = path.length - 1; lo <= hi; ) {
-    const mid = (lo + hi) >> 1;
-    if ((times[mid] as number) <= elapsed) {
-      step = mid;
-      lo = mid + 1;
-    } else hi = mid - 1;
-  }
+  const step = stepAt(elapsed);
+  const chars = [...word];
   const size = length[step] as number;
   const body = path.slice(Math.max(0, step - size + 1), step + 1);
   const next = food.find((f) => f.from <= step && step < f.eaten);
@@ -281,15 +292,15 @@ function Board({ word, heart }: z.infer<typeof schema>) {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          fontFamily: MONO,
-          fontSize: 30,
-          fontWeight: 700,
+          fontFamily: FACE,
+          fontSize: 32,
+          fontWeight: 900,
           letterSpacing: 4,
           color: TILE,
           background: BG,
         }}
       >
-        <span>SNAKE</span>
+        <span>贪吃蛇</span>
         <span style={{ color: won ? heart : TILE }}>{won ? `♥ ${size}` : String(size - 1).padStart(2, "0")}</span>
       </div>
 
@@ -301,11 +312,13 @@ function Board({ word, heart }: z.infer<typeof schema>) {
             ...box(next.cell),
             background: BG,
             color: heart,
-            fontWeight: 700,
+            fontWeight: 900,
             fontSize: 50,
           }}
         >
-          <span style={{ display: "block", transform: `scale(${1 + 0.12 * pulse})` }}>{word[size % word.length]}</span>
+          <span style={{ display: "block", transform: `scale(${1 + 0.12 * pulse})` }}>
+            {chars[size % chars.length]}
+          </span>
         </div>
       )}
 
@@ -331,14 +344,14 @@ function Board({ word, heart }: z.infer<typeof schema>) {
                   width: "100%",
                   height: "100%",
                   borderRadius: 12,
-                  fontWeight: 700,
-                  fontSize: 38,
+                  fontSize: 40,
+                  fontWeight: 900,
                   color: INK,
                   background: turned > 0.5 ? heart : head ? HEAD : TILE,
                   boxShadow: turned > 0.5 ? `0 0 ${24 * turned}px ${heart}aa` : "none",
                 }}
               >
-                {word[j % word.length]}
+                {chars[j % chars.length]}
               </div>
             </div>
           );
