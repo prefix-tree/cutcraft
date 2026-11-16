@@ -270,6 +270,26 @@ Footage: [Lex Fridman Podcast #351](https://www.youtube.com/watch?v=Z3_PwvvfxIU)
 
 <<< ../examples/shorts/hundred-videos.tsx
 
+### A game of snake that ends in a heart
+
+A game of snake on a wall of Chinese characters. The snake eats the characters of one phrase, 我爱你, and each joins
+its body. Every character of the wall changes on its own, each at its own pace, and all of them at once when the
+snake eats. When the snake is long enough it takes a lap of the board and curls up into a heart.
+
+<div class="cc-pair"><video class="tall" :src="withBase('/shorts/snake-heart.webm')" :poster="withBase('/shorts/snake-heart.jpg')" controls muted loop playsinline></video></div>
+
+Nothing is filmed and nothing is keyframed. The game is in the file as data: where the snake starts, every step it
+takes and where each character appears. A small program played it once to find a way that never touches the body;
+only the result is kept. The `<Layer>` that draws it asks which step the video's time has reached. The wall is a second layer: each cell has its own
+period, and its character is worked out from the time and the count of eaten characters. The board is eight cells
+across and fills the frame, so the
+snake and the heart pass under the places where a phone app draws its buttons. The face is Noto Sans SC, declared
+with `googleFont()`, in black, grey, white and one red. The phrase and the heart's colour are props.
+
+**Shows:** a game kept as data and drawn from the video's time, a ground layer, props that change the film. [Free code](/guide/free-code)
+
+<<< ../examples/shorts/snake-heart.tsx
+
 ## Rendering them yourself
 
 Each showcase video is one file in
