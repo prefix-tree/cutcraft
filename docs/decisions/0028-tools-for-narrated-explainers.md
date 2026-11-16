@@ -135,7 +135,8 @@ access an environment may not give. Working on a file keeps the command small an
 3. **Motion** (decision 2): `look --motion`, then `--draft`. Landed in #98 and #99. The draft draws every frame at
    full size, so it saves about a quarter of the time; drawing at a reduced size is not done.
 4. **The pinned label** (decision 3).
-5. **Diagram parts** (decision 4), with `one-pixel.tsx`'s diagram rewritten on them.
+5. **Diagram parts** (decision 4), with `one-pixel.tsx`'s diagram rewritten on them. Landed: `DrawnLine`, `Label`,
+   `CountUp` and `Cells` in the kit, used by the eclipse short. `one-pixel.tsx` is not moved onto them yet.
 6. **`cutcraft study`** (decision 6).
 
 Each is its own pull request with tests and docs. This record changes no code.

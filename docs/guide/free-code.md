@@ -111,6 +111,49 @@ that name, and `cutcraft where` lists it with its place on the frame
 <text data-name="lamp-label" x={470} y={624}>LAMP</text>
 ```
 
+## Diagram parts
+
+A diagram in a layer is mostly the same few things: a line that draws itself, a word with a line to what it names,
+a number that counts, a row of cells. The kit has each as a part. They are React components that render SVG and
+read the layer's clock; they go inside an `<svg>` and take the SVG props of what they draw.
+
+```tsx
+import { Cells, CountUp, DrawnLine, Label, Layer } from "@cutcraft/kit";
+
+<Layer id="lamp" anchor="hook" at="word:14" duration={{ until: "hook" }}>
+  <svg width={1080} height={1920} style={{ position: "absolute", inset: 0, color: "white" }}>
+    <DrawnLine from={[300, 640]} to={[620, 1100]} over={0.6} stroke="gold" strokeWidth={6} strokeLinecap="round" />
+    <Label text="LAMP" x={470} y={600} to={[330, 632]} after={0.2} fontSize={40} letterSpacing={4} />
+    <CountUp to={60} x={540} y={1300} after={0.8} over={1.2} fontSize={62} textAnchor="middle" />
+    <Cells values={[78, 92, 96, 90]} x={240} y={1400} size={72} lit={2} litFill="gold" fill="#444" highlight={3} />
+  </svg>
+</Layer>
+```
+
+Each part says when it happens one of two ways, and how long it takes:
+
+- `at` is seconds of the video, which is what a [narration](/guide/captions-and-sound#narration-from-a-script)'s
+  cue gives: `at={story.at("lamp")}`.
+- `after` is seconds since the layer started, for a layer that itself starts on a word, as above. With neither, the
+  part starts with its layer.
+- `over` is how long it takes, 0.4 s unless you say. `easing` is one of the kit's easing names, `ease-in-out`
+  unless you say.
+- Or give `progress`, a number from 0 to 1, and drive the part from your own arithmetic.
+
+| Part | Draws | Props of its own |
+|---|---|---|
+| `DrawnLine` | A line that draws itself from one point to another. Nothing before it starts. | `from`, `to` (each `[x, y]`), and a line's props. |
+| `Label` | A word that fades in, with a line from beside the word to the point it names. | `text`, `x`, `y` (the word's middle), `to`, `side`, `gap`, `textWidth`, `lineStroke`, `lineWidth`, `name`, and a text's props. |
+| `CountUp` | A number that counts. | `from` (0), `to`, `format`, and a text's props. |
+| `Cells` | A row of cells, each with a value under it if you give them. | `values` or `count`, `x`, `y`, `size`, `height`, `gap`, `radius`, `fill`, `litFill`, `lit`, `highlight`, `highlightStroke`, `valueProps`, `valueGap`, `name`. |
+
+A label's line leaves from the edge of the word that faces the point, so it never runs through the letters; `side`
+picks the edge when the guess is wrong. A label names itself for the layout check (its text in lower case, or
+`name`), and `Cells` takes a `name`, so `cutcraft where` and `--check-layout` see them as parts of the layer.
+
+`useProgress({ at, after, over, easing })` is the arithmetic the parts share, for your own drawing: 0 before, 1
+after, eased between. `progress(clock, when)` is the same for a clock you already hold.
+
 ## Editing what's inside
 
 An editor treats the inside of a Layer as code: to change it, you or a model edit the text. There is one shortcut.
