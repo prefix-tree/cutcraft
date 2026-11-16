@@ -8,7 +8,7 @@ import { type AssetManifest, collectModule, narrate, resolve } from "@cutcraft/k
 import { lint, loadModule } from "@cutcraft/kit/source";
 
 const root = join(import.meta.dirname, "..");
-const manifest = JSON.parse(readFileSync(join(root, "manifest.json"), "utf8")) as AssetManifest;
+const manifest = JSON.parse(readFileSync(join(root, "cutcraft.json"), "utf8")) as AssetManifest;
 const FILES = readdirSync(root).filter((f) => f.endsWith(".tsx"));
 
 describe.each(FILES)("%s", (name) => {

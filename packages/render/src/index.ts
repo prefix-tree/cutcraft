@@ -43,6 +43,7 @@ export {
   renderLook,
 } from "./look";
 export type { Loudness } from "./loudness";
+export { type FoundManifest, findManifest } from "./manifest-file";
 export { directoryResolver } from "./media";
 export {
   envelopeAt,

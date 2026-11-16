@@ -30,23 +30,23 @@ pnpm --filter @cutcraft/example-shorts render
 The two animations need no media. The interview reads its clip from `media/`:
 
 ```sh
-npx cutcraft lunar-eclipse.tsx --manifest manifest.json --media media --out out/lunar-eclipse.mp4
+npx cutcraft lunar-eclipse.tsx --out out/lunar-eclipse.mp4
 ```
 
 ```sh
-npx cutcraft game-lighting.tsx --manifest manifest.json --out out/game-lighting.mp4
+npx cutcraft game-lighting.tsx --out out/game-lighting.mp4
 ```
 
 Look at it without rendering the whole film:
 
 ```sh
-npx cutcraft look game-lighting.tsx --manifest manifest.json --at 1.5,8,12.5,17,21.5,25.5 --out look.png
+npx cutcraft look game-lighting.tsx --at 1.5,8,12.5,17,21.5,25.5 --out look.png
 ```
 
 The words and the two wall colours are props, so a variant needs no edit:
 
 ```sh
-npx cutcraft game-lighting.tsx --manifest manifest.json \
+npx cutcraft game-lighting.tsx \
   --props '{"hook":"Your favourite game is lying to you.","warmWall":"#7a4fd6","coolWall":"#e0a526"}' \
   --out out/game-lighting-purple.mp4
 ```

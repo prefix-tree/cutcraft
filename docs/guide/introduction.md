@@ -59,12 +59,12 @@ paid tier for companies, or Diffusion Studio, whose engine watermarks every fram
 
 ```
 video.tsx      ┐                                       ┌─▶ <Player>   plays it in a page
-manifest.json  ├─▶ resolve ─▶ every element in seconds ├─▶ actions    edit it; each edit is written back to video.tsx
+cutcraft.json  ├─▶ resolve ─▶ every element in seconds ├─▶ actions    edit it; each edit is written back to video.tsx
 media files    ┘                                       └─▶ export     MP4, WebM or a still
 ```
 
 - **The file** (`video.tsx`) says what happens and when, in words, shots and seconds. [The file](./the-file)
-- **The manifest** (`manifest.json`) lists the assets the file may use, by id, with what CutCraft can't read from a
+- **The manifest** (`cutcraft.json`) lists the assets the file may use, by id, with what CutCraft can't read from a
   file name: length, size, and for speech the words and when each is said. The **media** are the files themselves.
 - **Resolving** turns the file and the manifest into seconds for every element. Everything after works from that.
 - **The player** draws it in the browser; **the export** writes a file. Both use the same engine, so what you preview

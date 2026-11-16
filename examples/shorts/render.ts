@@ -27,7 +27,7 @@ const only = process.argv.slice(2);
 
 for (const [name, { poster, bitrate, sound }] of Object.entries(FILES)) {
   if (only.length > 0 && !only.includes(name)) continue;
-  const video = await loadVideo(join(here, `${name}.tsx`), { manifest: join(here, "manifest.json") });
+  const video = await loadVideo(join(here, `${name}.tsx`), { manifest: join(here, "cutcraft.json") });
   if (video.state.errors.length > 0)
     throw new Error(`${name}: ${video.state.errors.map((e) => `${e.id}: ${e.message}`).join("; ")}`);
   // A card's picture of a short is that short as it was just rendered, in the site's folder.

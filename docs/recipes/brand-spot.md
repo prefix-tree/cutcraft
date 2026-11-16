@@ -40,7 +40,7 @@ theme's palette, fonts and radius.
 
 ```sh
 for t in midnight paper neon; do
-  cutcraft recipes/brand-spot.tsx --manifest recipes/manifest.json --media <dir> --props "{\"theme\":\"$t\"}" --out spot-$t.mp4
+  cutcraft recipes/brand-spot.tsx --media <dir> --props "{\"theme\":\"$t\"}" --out spot-$t.mp4
 done
 ```
 

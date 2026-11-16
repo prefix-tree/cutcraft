@@ -3,21 +3,27 @@
 // words live, so the preview and the export always agree on `word:N`. A `.cube` file is a LUT, checked and listed.
 import { existsSync, readFileSync } from "node:fs";
 import { readFile, writeFile } from "node:fs/promises";
-import { basename, dirname, extname, join } from "node:path";
+import { basename, dirname, extname, join, resolve } from "node:path";
 
 import { ALL_FORMATS, FilePathSource, Input } from "mediabunny";
 
 import { type AssetEntry, type AssetManifest, parseCube, parseTranscript } from "@cutcraft/kit";
 
 import { imageSize } from "./image-size";
+import { findManifest, MANIFEST_FILE, OLD_MANIFEST_FILE } from "./manifest-file";
 
 const IMAGE = new Set([".png", ".jpg", ".jpeg", ".webp", ".gif", ".svg"]);
 /** Transcripts beside the media, best first: JSON from a speech-to-text tool has word times; subtitles do not. */
 const TRANSCRIPTS = [".json", ".vtt", ".srt"] as const;
 
 export interface AddOptions {
-  /** The manifest to write; default `manifest.json` beside the media. Created when missing. */
+  /**
+   * The manifest to write. Default: the nearest `cutcraft.json` from `cwd` upward; a `manifest.json` already in
+   * `cwd` or beside the media; otherwise a new `cutcraft.json` in `cwd`.
+   */
   readonly manifest?: string;
+  /** The folder the lookup starts in; default the process's. */
+  readonly cwd?: string;
   /** The asset id; default the file name without its extension. */
   readonly id?: string;
   /** A transcript file other than the one beside the media. */
@@ -37,7 +43,7 @@ export interface AddResult {
 export async function addAsset(media: string, options: AddOptions = {}): Promise<AddResult> {
   if (!existsSync(media)) throw new Error(`${media} does not exist`);
   const id = options.id ?? basename(media, extname(media));
-  const manifestPath = options.manifest ?? join(dirname(media), "manifest.json");
+  const manifestPath = options.manifest ?? manifestFor(media, options.cwd ?? process.cwd());
   const manifest: AssetManifest = existsSync(manifestPath)
     ? (JSON.parse(readFileSync(manifestPath, "utf8")) as AssetManifest)
     : { assets: {} };
@@ -50,7 +56,7 @@ export async function addAsset(media: string, options: AddOptions = {}): Promise
       ? undefined
       : (options.transcript ??
         TRANSCRIPTS.map((ext) => join(dirname(media), `${basename(media, extname(media))}${ext}`)).find(
-          (f) => f !== manifestPath && existsSync(f),
+          (f) => resolve(f) !== resolve(manifestPath) && existsSync(f),
         ));
   let transcript: AssetEntry["transcript"];
   let estimated = false;
@@ -83,6 +89,14 @@ export async function addAsset(media: string, options: AddOptions = {}): Promise
     estimated,
     warnings,
   };
+}
+
+/** The manifest `add` writes when none is named. */
+function manifestFor(media: string, cwd: string): string {
+  const found = findManifest(cwd);
+  if (found.path) return found.path;
+  const beside = join(dirname(media), OLD_MANIFEST_FILE);
+  return existsSync(beside) ? beside : join(cwd, MANIFEST_FILE);
 }
 
 type Probed = Pick<AssetEntry, "kind" | "duration" | "fps" | "width" | "height" | "audio">;

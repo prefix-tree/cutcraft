@@ -9,7 +9,7 @@ import { loadModule } from "@cutcraft/kit/source";
 const dir = join(import.meta.dirname, "..", "..", "..", "examples", "launch-recap");
 const state = resolve(
   collectModule(loadModule(readFileSync(join(dir, "video.tsx"), "utf8")) as never),
-  JSON.parse(readFileSync(join(dir, "manifest.json"), "utf8")),
+  JSON.parse(readFileSync(join(dir, "cutcraft.json"), "utf8")),
 );
 const rows = timelineRows(state);
 

@@ -16,7 +16,7 @@ file shows which feature, see [Examples](/examples#where-to-start).
 | [Brand spot in any theme](./brand-spot) | A spot drawn around a screen recording with `<Motion>`, a `<Layer>` and `<Three>` confetti, a backdrop beneath it; one prop swaps the theme and with it every colour and font. |
 | [Multicam highlights](./highlights) | Two cameras of one scene switched at camera B's shot boundaries, with the dense segment picked by the transcript's silences. |
 
-The fixture manifest they share is `recipes/manifest.json`: a two-speaker
+The fixture manifest they share is `recipes/cutcraft.json`: a two-speaker
 podcast with punctuation, silences and shots, a narrated voice track, a screen
 recording, product footage with shots, two camera angles, four photos, a
 music bed and a logo.
