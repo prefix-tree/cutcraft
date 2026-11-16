@@ -17,6 +17,5 @@ Several camera angles of one take; `<Cut>`s pick which one shows.
 | `id` | string |  | yes |
 | `name` | string |  |  |
 | `sync` | number (0..∞) | `0` |  |
-| `activeAngle` | string |  |  |
 
 Children: `angle`, `cut`. [All elements](/reference/elements/)

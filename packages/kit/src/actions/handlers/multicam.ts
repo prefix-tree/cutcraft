@@ -81,16 +81,6 @@ define({
   fold: () => [],
 });
 
-define(makePropHandler({
-  type: "multicam/setActiveAngle",
-  kinds: ["multicam"],
-  write: (p) => ({ activeAngle: p.angle }),
-  validate: (a, state) =>
-    rawNode(state, a.params.angle)?.parent === a.params.id
-      ? ok
-      : invalid({ code: "ELEMENT_NOT_FOUND", message: `angle "${a.params.angle}" is not in this multicam` }),
-}));
-
 define({
   type: "multicam/addCut",
   validate: (a, state) => {

@@ -199,3 +199,31 @@ describe("cutcraft look", () => {
     expect(run.stderr).toContain("error: --without hook: a clip cannot be left out without moving the cut");
   });
 });
+
+describe("inspect, a transition at one edge", () => {
+  it("names the element and the edge", async () => {
+    const edge = join(dir, "edge.tsx");
+    writeFileSync(
+      edge,
+      `import { Clip, Composition, Track, Transition } from "@cutcraft/kit";
+export const manifest = { assets: { broll: { id: "broll", kind: "video", duration: 10, fps: 30, width: 640, height: 360 } } };
+export default function Video() {
+  return (
+    <Composition fps={30} width={640} height={360}>
+      <Track id="over" layout="free">
+        <Clip id="pip" src="asset:broll" in={0} out={2} start={1} />
+        <Transition id="pin" on="pip" edge="in" type="wipe" duration={0.6} />
+        <Transition id="pout" on="pip" edge="out" duration={0.5} />
+      </Track>
+    </Composition>
+  );
+}
+`,
+    );
+    const video = await loadVideo(edge);
+    const { output, errors } = inspect(edge, video.state, {});
+    expect(errors).toEqual([]);
+    expect(output).toMatch(/1\.00–1\.60\s+transition\s+pin\s+wipe \(in of pip\)/);
+    expect(output).toMatch(/2\.50–3\.00\s+transition\s+pout\s+crossfade \(out of pip\)/);
+  });
+});

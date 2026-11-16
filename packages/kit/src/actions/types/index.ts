@@ -164,7 +164,8 @@ export interface AudioActions {
   "audio/setVolume": { id: Id; volume: number };
   "audio/setFade": { id: Id; in?: number; out?: number };
   "audio/setAutomation": { id: Id; lane: "volume" | "pan"; points: readonly (readonly [number, number])[] };
-  "audio/setDuck": { id: Id; duck?: { under: Id; to: number; attack?: number; release?: number } };
+  /** `under` is a track id or a track role, as in a file. */
+  "audio/setDuck": { id: Id; duck?: { under: string; to: number; attack?: number; release?: number } };
 }
 
 interface Overlay {
@@ -235,7 +236,6 @@ export interface MulticamActions {
   "multicam/create": { id: Id; trackId: Id; place: PlacementSpec; angles: readonly NodeSpec[]; sync?: number };
   "multicam/remove": { id: Id };
   "multicam/restore": { id: Id; node: NodeSpec; trackId: Id; place: PlacementSpec };
-  "multicam/setActiveAngle": { id: Id; angle: Id };
   "multicam/addCut": { id: Id; cutId: Id; at: number; angle: Id };
   "multicam/moveCut": { cutId: Id; at: number };
   "multicam/removeCut": { cutId: Id };
