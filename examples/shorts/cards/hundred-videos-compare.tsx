@@ -97,7 +97,14 @@ export default function Video(props: z.infer<typeof schema>) {
       </Track>
       {/* The source, with its sound. */}
       <Track id="before">
-        <Clip id="raw" src="asset:hundred-videos" in={FROM} out={TO} transform={boxed(BEFORE, SOURCE_FITTED)} />
+        <Clip
+          id="raw"
+          src="asset:hundred-videos"
+          in={FROM}
+          out={TO}
+          volume={0.9}
+          transform={boxed(BEFORE, SOURCE_FITTED)}
+        />
       </Track>
       {/* The short, silent here: it carries the same sound. */}
       <Track id="after">

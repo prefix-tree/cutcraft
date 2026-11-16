@@ -35,6 +35,8 @@ const poppins = googleFont("Poppins", { weights: [800] });
 const TO_LEX = 341 / 30;
 const TO_BEAST = 471 / 30;
 const END = 44;
+// The recording peaks at full scale; a little under it, so nothing clips once it is encoded again.
+const VOICE = 0.9;
 
 // A framing is the part of the source that is shown and where it sits. The part is fitted to the frame's width, so
 // a 9:16 part fills the frame and a wider one makes a panel; `y` moves it down from the frame's centre.
@@ -439,25 +441,61 @@ export default function Video({ accent }: z.infer<typeof schema>) {
     >
       <Track id="talk">
         {/* "for the average person like us, who don't have these exceptional personalities and backgrounds in filmmaking" */}
-        <Clip id="us" src="asset:hundred-videos" in="word:1" out="word:20.end" transform={framed(BEAST_FULL)} />
+        <Clip
+          id="us"
+          src="asset:hundred-videos"
+          volume={VOICE}
+          in="word:1"
+          out="word:20.end"
+          transform={framed(BEAST_FULL)}
+        />
         {/* "just make a hundred videos, improve something each time, and then talk to me on your hundred-first video" */}
-        <Clip id="hundred" src="asset:hundred-videos" in="word:21" out={TO_LEX} transform={framed(BEAST_EXPLAIN)}>
+        <Clip
+          id="hundred"
+          src="asset:hundred-videos"
+          volume={VOICE}
+          in="word:21"
+          out={TO_LEX}
+          transform={framed(BEAST_EXPLAIN)}
+        >
           <Reframe id="hundred" from={BEAST_FULL} to={BEAST_EXPLAIN} />
         </Clip>
         {/* Lex: "the improve something each time is the tricky one. How do you improve something each time?" */}
-        <Clip id="how" src="asset:hundred-videos" in={TO_LEX} out={TO_BEAST} transform={framed(LEX_FULL)} />
+        <Clip
+          id="how"
+          src="asset:hundred-videos"
+          volume={VOICE}
+          in={TO_LEX}
+          out={TO_BEAST}
+          transform={framed(LEX_FULL)}
+        />
         {/* "the second one, put more effort into the script. The third one … the sixth one, a new title" */}
-        <Clip id="list" src="asset:hundred-videos" in={TO_BEAST} out="word:122.end" transform={framed(BEAST_EXPLAIN)} />
+        <Clip
+          id="list"
+          src="asset:hundred-videos"
+          volume={VOICE}
+          in={TO_BEAST}
+          out="word:122.end"
+          transform={framed(BEAST_EXPLAIN)}
+        />
         {/* "there's infinite ways … every little thing can be improved, and they can never not be improved" */}
         <Clip
           id="infinite"
           src="asset:hundred-videos"
+          volume={VOICE}
           in="word:123"
           out="word:172.end"
           transform={framed(BEAST_EXPLAIN)}
         />
         {/* "there's literally no such thing as a perfect video" */}
-        <Clip id="perfect" src="asset:hundred-videos" in="word:173" out={END} transform={framed(BEAST_FULL)}>
+        <Clip
+          id="perfect"
+          src="asset:hundred-videos"
+          volume={VOICE}
+          in="word:173"
+          out={END}
+          transform={framed(BEAST_FULL)}
+        >
           <Reframe id="perfect" from={BEAST_EXPLAIN} to={BEAST_FULL} />
         </Clip>
       </Track>

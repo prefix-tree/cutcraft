@@ -2265,6 +2265,19 @@
           }
         ]
       }
+    },
+    "hundred-videos-short": {
+      "kind": "video",
+      "duration": 43.566,
+      "fps": 30,
+      "width": 1080,
+      "height": 1920,
+      "audio": {
+        "sampleRate": 48000,
+        "channels": 2,
+        "streams": 1
+      },
+      "id": "hundred-videos-short"
     }
   }
 }
