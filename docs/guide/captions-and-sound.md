@@ -3,10 +3,10 @@
 This page covers what the viewer reads and hears: captions made from a transcript, narration timed from a script,
 subtitle files, and music and voice-over. Captions come first; [Sound](#sound) is at the end.
 
-**See it in:** [Kinetic type](/examples#kinetic-type) and [Captions and key points](/examples#captions-and-key-points)
-(karaoke captions), [A talking head with a diagram](/examples#a-talking-head-with-a-diagram) (captions placed off the
-speaker's face), [An interview that changes layout](/examples#an-interview-that-changes-layout-with-the-story) (a box
-behind the word being said), [One pixel](/examples#one-pixel) (narration timed from a script),
+**See it in:** [Kinetic type](/examples/kinetic) and [Captions and key points](/examples/captions)
+(karaoke captions), [A talking head with a diagram](/examples/lunar-eclipse) (captions placed off the
+speaker's face), [An interview that changes layout](/examples/hundred-videos) (a box
+behind the word being said), [One pixel](/examples/one-pixel) (narration timed from a script),
 [Vertical clip from a podcast](/recipes/vertical-podcast) (short lines in 9:16), [Talking-head cut](/recipes/talking-head)
 (a music bed that ducks under speech).
 

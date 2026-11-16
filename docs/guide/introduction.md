@@ -85,5 +85,5 @@ It comes as five npm packages, free under the MIT licence:
 - [Quick start](./getting-started): make a video, look at it and export it.
 - [Anatomy of a video](./anatomy): the composition, tracks, clips and layers, one at a time.
 - [With your agent](./agents): install the skill and ask for a video.
-- [Examples](/examples): finished videos next to the files that made them.
+- [Examples](/examples/): finished videos next to the files that made them.
 - [Core principles](./principles): why CutCraft is built this way.

@@ -47,7 +47,7 @@ export default defineConfig({
       { text: "Guide", link: "/guide/introduction", activeMatch: "^/(guide|decisions)/" },
       { text: "Reference", link: "/reference/elements/", activeMatch: "^/reference/(?!effects|transitions)" },
       { text: "Effects", link: "/reference/effects/", activeMatch: "^/reference/(effects|transitions)/" },
-      { text: "Examples", link: "/examples", activeMatch: "^/(examples|recipes)" },
+      { text: "Examples", link: "/examples/", activeMatch: "^/(examples|recipes)" },
       { text: "Playground", link: "/playground", activeMatch: "^/playground" },
     ],
     sidebar: [
@@ -100,7 +100,25 @@ export default defineConfig({
       {
         text: "Examples",
         items: [
-          { text: "Showcase", link: "/examples" },
+          {
+            text: "Showcase",
+            link: "/examples/",
+            collapsed: true,
+            items: [
+              { text: "The logo film", link: "/examples/hero" },
+              { text: "A product launch", link: "/examples/launch" },
+              { text: "Kinetic type", link: "/examples/kinetic" },
+              { text: "A data story", link: "/examples/data" },
+              { text: "A logo reveal", link: "/examples/logo" },
+              { text: "An edit", link: "/examples/edit" },
+              { text: "Captions and key points", link: "/examples/captions" },
+              { text: "How game lighting fakes it", link: "/examples/game-lighting" },
+              { text: "A talking head with a diagram", link: "/examples/lunar-eclipse" },
+              { text: "One pixel", link: "/examples/one-pixel" },
+              { text: "An interview that changes layout", link: "/examples/hundred-videos" },
+              { text: "A game of snake that ends in a heart", link: "/examples/snake-heart" },
+            ],
+          },
           { text: "A launch video, line by line", link: "/guide/writing-files" },
           {
             text: "Recipes",

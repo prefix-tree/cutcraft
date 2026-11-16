@@ -4,7 +4,7 @@ A CutCraft video is one TSX module. [Anatomy of a video](./anatomy) introduces t
 [Anatomy of an element](./elements) the props on each; this page covers the file around them: what it exports, what
 it may import, and the few rules that keep it editable.
 
-**See it in:** every [showcase file](/examples) (each has `schema` and `defaults`), [Variants from one file](/recipes/variants)
+**See it in:** every [showcase file](/examples/) (each has `schema` and `defaults`), [Variants from one file](/recipes/variants)
 (one cut, many versions), and the [walkthrough](/guide/writing-files), which explains a whole file line by line.
 
 ```tsx

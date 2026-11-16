@@ -3,7 +3,7 @@
 Complete files for the videos CutCraft is made for. Each one passes the lint
 with no warnings, resolves with no errors, and has a test that pins what it
 places. Copy them as starting points. For finished videos, and a table of which
-file shows which feature, see [Examples](/examples#where-to-start).
+file shows which feature, see [Examples](/examples/#where-to-start).
 
 | Recipe | What it shows |
 |---|---|

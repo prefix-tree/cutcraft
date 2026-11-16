@@ -37,7 +37,7 @@ you fine-tune it on a timeline, and it exports to MP4.</p>
 
 <Gallery />
 
-<p class="home-links">Each one is a file rendered by CutCraft's own export. Hover to play; open one to read the file. Also as recipes: <a :href="withBase('/recipes/talking-head')">interviews</a> · <a :href="withBase('/recipes/product-demo')">product demos</a> · <a :href="withBase('/recipes/vertical-podcast')">podcast clips</a> · <a :href="withBase('/recipes/variants')">variants</a> · <a :href="withBase('/examples')">all examples →</a></p>
+<p class="home-links">Each one is a file rendered by CutCraft's own export. Hover to play; open one to read the file. Also as recipes: <a :href="withBase('/recipes/talking-head')">interviews</a> · <a :href="withBase('/recipes/product-demo')">product demos</a> · <a :href="withBase('/recipes/vertical-podcast')">podcast clips</a> · <a :href="withBase('/recipes/variants')">variants</a> · <a :href="withBase('/examples/')">all examples →</a></p>
 
 </section>
 

@@ -193,12 +193,12 @@ const slug = (name: string): string => name.toLowerCase();
 
 /** The complete files readers can learn from, and where each is shown: the showcase videos, the walkthrough, the recipes. */
 const SHOWCASE_SECTIONS: Record<string, [string, string]> = {
-  launch: ["Product launch", "/examples#a-product-launch"],
-  kinetic: ["Kinetic type", "/examples#kinetic-type"],
-  data: ["Data story", "/examples#a-data-story"],
-  logo: ["Logo reveal", "/examples#a-logo-reveal"],
-  edit: ["An edit", "/examples#an-edit"],
-  captions: ["Captions and key points", "/examples#captions-and-key-points"],
+  launch: ["Product launch", "/examples/launch"],
+  kinetic: ["Kinetic type", "/examples/kinetic"],
+  data: ["Data story", "/examples/data"],
+  logo: ["Logo reveal", "/examples/logo"],
+  edit: ["An edit", "/examples/edit"],
+  captions: ["Captions and key points", "/examples/captions"],
 };
 const LEARNING_FILES: readonly { readonly title: string; readonly link: string; readonly text: string }[] = [
   ...Object.entries(SHOWCASE_SECTIONS).map(([file, [title, link]]) => ({

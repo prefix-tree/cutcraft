@@ -191,7 +191,7 @@ the other three out; the export always draws them. For a plain offset shadow, th
 ## When nothing fits
 
 Write it as free code: a `<Motion>` sequence, an SVG chart animated by Motion, a few lines of React in a `<Layer>`,
-or a 3D scene in a `<Three>`. The [examples](/examples) show each one next to its file, and
+or a 3D scene in a `<Three>`. The [examples](/examples/) show each one next to its file, and
 [Free code](./free-code) explains the tags.
 
 ## Next

@@ -4,7 +4,7 @@ A transition blends one clip into the next: a crossfade, a dip to black, a wipe,
 one between two clips, which types there are, how to bring a single element in or out, and how to play a flash, a light leak or a whoosh over a cut without
 changing it.
 
-**See it in:** [An edit](/examples#an-edit) (a wipe and a slide), [Effects and transitions](/reference/effects/#transitions)
+**See it in:** [An edit](/examples/edit) (a wipe and a slide), [Effects and transitions](/reference/effects/#transitions)
 (every transition playing).
 
 Write a `<Transition>` between the two clips it joins on a sequence track:

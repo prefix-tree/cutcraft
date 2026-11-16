@@ -20,7 +20,7 @@ const ITEMS: readonly (Omit<GalleryItem, "lines"> & { readonly file: string })[]
     kind: "Logo film",
     src: "showcase/hero",
     aspect: 16 / 9,
-    link: "/examples#the-logo-film",
+    link: "/examples/hero",
     file: "showcase/hero.tsx",
   },
   {
@@ -28,7 +28,7 @@ const ITEMS: readonly (Omit<GalleryItem, "lines"> & { readonly file: string })[]
     kind: "3D explainer",
     src: "shorts/game-lighting",
     aspect: 9 / 16,
-    link: "/examples#how-game-lighting-fakes-it",
+    link: "/examples/game-lighting",
     file: "shorts/game-lighting.tsx",
   },
   {
@@ -36,7 +36,7 @@ const ITEMS: readonly (Omit<GalleryItem, "lines"> & { readonly file: string })[]
     kind: "Product launch",
     src: "showcase/launch",
     aspect: 16 / 9,
-    link: "/examples#a-product-launch",
+    link: "/examples/launch",
     file: "showcase/launch.tsx",
   },
   {
@@ -44,7 +44,7 @@ const ITEMS: readonly (Omit<GalleryItem, "lines"> & { readonly file: string })[]
     kind: "Data story",
     src: "showcase/data",
     aspect: 16 / 9,
-    link: "/examples#a-data-story",
+    link: "/examples/data",
     file: "showcase/data.tsx",
   },
   {
@@ -52,7 +52,7 @@ const ITEMS: readonly (Omit<GalleryItem, "lines"> & { readonly file: string })[]
     kind: "Narrated explainer",
     src: "shorts/one-pixel",
     aspect: 9 / 16,
-    link: "/examples#one-pixel",
+    link: "/examples/one-pixel",
     file: "shorts/one-pixel.tsx",
   },
   {
@@ -60,7 +60,7 @@ const ITEMS: readonly (Omit<GalleryItem, "lines"> & { readonly file: string })[]
     kind: "Before and after",
     src: "shorts/hundred-videos-compare",
     aspect: 4 / 5,
-    link: "/examples#an-interview-that-changes-layout-with-the-story",
+    link: "/examples/hundred-videos",
     file: "shorts/cards/hundred-videos-compare.tsx",
   },
   {
@@ -68,7 +68,7 @@ const ITEMS: readonly (Omit<GalleryItem, "lines"> & { readonly file: string })[]
     kind: "Logo reveal",
     src: "showcase/logo",
     aspect: 16 / 9,
-    link: "/examples#a-logo-reveal",
+    link: "/examples/logo",
     file: "showcase/logo.tsx",
   },
   {
@@ -76,7 +76,7 @@ const ITEMS: readonly (Omit<GalleryItem, "lines"> & { readonly file: string })[]
     kind: "Talking-head short",
     src: "shorts/lunar-eclipse",
     aspect: 9 / 16,
-    link: "/examples#a-talking-head-with-a-diagram",
+    link: "/examples/lunar-eclipse",
     file: "shorts/lunar-eclipse.tsx",
   },
   {
@@ -84,7 +84,7 @@ const ITEMS: readonly (Omit<GalleryItem, "lines"> & { readonly file: string })[]
     kind: "Kinetic type",
     src: "showcase/kinetic",
     aspect: 9 / 16,
-    link: "/examples#kinetic-type",
+    link: "/examples/kinetic",
     file: "showcase/kinetic.tsx",
   },
   {
@@ -92,7 +92,7 @@ const ITEMS: readonly (Omit<GalleryItem, "lines"> & { readonly file: string })[]
     kind: "Interview short",
     src: "shorts/hundred-videos",
     aspect: 9 / 16,
-    link: "/examples#an-interview-that-changes-layout-with-the-story",
+    link: "/examples/hundred-videos",
     file: "shorts/hundred-videos.tsx",
   },
   {
@@ -100,7 +100,7 @@ const ITEMS: readonly (Omit<GalleryItem, "lines"> & { readonly file: string })[]
     kind: "Edit",
     src: "showcase/edit",
     aspect: 16 / 9,
-    link: "/examples#an-edit",
+    link: "/examples/edit",
     file: "showcase/edit.tsx",
   },
   {
@@ -108,8 +108,16 @@ const ITEMS: readonly (Omit<GalleryItem, "lines"> & { readonly file: string })[]
     kind: "Captions",
     src: "showcase/captions",
     aspect: 9 / 16,
-    link: "/examples#captions-and-key-points",
+    link: "/examples/captions",
     file: "showcase/captions.tsx",
+  },
+  {
+    title: "A game of snake that ends in a heart",
+    kind: "Generative short",
+    src: "shorts/snake-heart",
+    aspect: 9 / 16,
+    link: "/examples/snake-heart",
+    file: "shorts/snake-heart.tsx",
   },
 ];
 

@@ -5,11 +5,11 @@ CutCraft's elements, so an editor can trim and move things, but what you draw is
 React component: hooks, CSS 3D transforms, filters and blend modes, a canvas, WebGL, a chart library. `<Three>` and
 `<Motion>` bring three.js and Motion onto the timeline.
 
-**See it in:** [How game lighting fakes it](/examples#how-game-lighting-fakes-it) (a `<Three>` room lit from the
-layer's time), [One pixel](/examples#one-pixel) (diagrams drawn with the diagram parts),
-[Product launch](/examples#a-product-launch) (`<Three>` and `<Motion>`), [Kinetic type](/examples#kinetic-type)
-(`<Motion>` phrases on their words), [Data story](/examples#a-data-story) (SVG in `<Motion>`, React counters in a
-`<Layer>`), [Logo reveal](/examples#a-logo-reveal) (three.js particles), [Stats with handles](/recipes/stats) (a
+**See it in:** [How game lighting fakes it](/examples/game-lighting) (a `<Three>` room lit from the
+layer's time), [One pixel](/examples/one-pixel) (diagrams drawn with the diagram parts),
+[Product launch](/examples/launch) (`<Three>` and `<Motion>`), [Kinetic type](/examples/kinetic)
+(`<Motion>` phrases on their words), [Data story](/examples/data) (SVG in `<Motion>`, React counters in a
+`<Layer>`), [Logo reveal](/examples/logo) (three.js particles), [Stats with handles](/recipes/stats) (a
 component in a `<Layer>` with editable props).
 
 ## A Layer holds any React

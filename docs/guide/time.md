@@ -4,8 +4,8 @@ Every element in a video says when it plays. Most of the time that is seconds, o
 clips one after another. This page covers the ways to say when, from plain seconds to "start with the hook" and "on
 word 12".
 
-**See it in:** [Product launch](/examples#a-product-launch) (cuts and callouts on words),
-[Kinetic type](/examples#kinetic-type) (type on words), [Talking-head cut](/recipes/talking-head) (an answer cut to its
+**See it in:** [Product launch](/examples/launch) (cuts and callouts on words),
+[Kinetic type](/examples/kinetic) (type on words), [Talking-head cut](/recipes/talking-head) (an answer cut to its
 sentences), [Multicam highlights](/recipes/highlights) (shots and silences).
 
 ```tsx

@@ -141,5 +141,5 @@ const state = resolve(collectModule(file), manifest);
 
 - [Anatomy of a video](./anatomy): the composition, tracks, clips, layers and the rest, one at a time.
 - [With your agent](./agents): install the CutCraft skill and ask for a video in plain words.
-- [Examples](/examples): finished videos next to the files that made them.
+- [Examples](/examples/): finished videos next to the files that made them.
 - [Exporting](./exporting) and the [CLI reference](/reference/cli) for every option.

@@ -12,7 +12,7 @@ Animates one property of its parent between values, with easing.
 
 </Example>
 
-**Used in:** [An edit](/examples#an-edit) · [the walkthrough](/guide/writing-files) · [Product demo with zoom-ins](/recipes/product-demo) · [Slideshow with motion](/recipes/slideshow)
+**Used in:** [An edit](/examples/edit) · [the walkthrough](/guide/writing-files) · [Product demo with zoom-ins](/recipes/product-demo) · [Slideshow with motion](/recipes/slideshow)
 
 ## Props
 
