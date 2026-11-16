@@ -280,10 +280,10 @@ and curls up into a heart.
 
 Nothing is filmed and nothing is keyframed. The file plays the whole game once when it loads, from a seed: where each
 character appears, the shortest way to it that does not touch the body, and the second of every step. The `<Layer>`
-that draws it only asks which step the video's time has reached. The wall is a second layer marked as a ground, so
-the layout check holds the snake and the score to the safe zone and not the background; it is drawn again from a new
-seed each time the count of eaten characters goes up. The face is Noto Sans SC, declared with `googleFont()`, in black, grey, white and one red. The
-phrase and the heart's colour are props.
+that draws it only asks which step the video's time has reached. The wall is a second layer, drawn again from a new
+seed each time the count of eaten characters goes up. The board is nine cells across and fills the frame, so the
+snake and the heart pass under the places where a phone app draws its buttons. The face is Noto Sans SC, declared
+with `googleFont()`, in black, grey, white and one red. The phrase and the heart's colour are props.
 
 **Shows:** a simulation run once and drawn from the video's time, a ground layer, props that change the film. [Free code](/guide/free-code)
 

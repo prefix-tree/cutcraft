@@ -27,36 +27,34 @@ export const schema = z.object({
 });
 export const defaults: z.infer<typeof schema> = { word: "我爱你", heart: "#e5383b" };
 
-// The board: square cells over the whole frame. The game is played in the middle of it, inside the part of a phone
-// screen that an app's buttons leave clear.
-const CELL = 68;
-const COLS = 16;
-const ROWS = 28;
+// The board: nine big square cells across and sixteen down, filling the frame. The snake has all of it.
+const CELL = 120;
+const COLS = 9;
+const ROWS = 16;
 const X0 = (1080 - COLS * CELL) / 2;
 const Y0 = (1920 - ROWS * CELL) / 2;
-const AREA = { left: 1, right: 13, top: 5, bottom: 17 };
+const AREA = { left: 0, right: COLS - 1, top: 0, bottom: ROWS - 1 };
 
 type Cell = readonly [number, number];
 const key = ([x, y]: Cell): number => y * COLS + x;
 
 // The heart, as the way round its outline one cell at a time, starting at the bottom point and going up the left.
-// It is drawn on an 11 by 10 patch and placed on the board at HEART_AT.
-const HEART_AT: Cell = [2, 5];
+// It is drawn on a 9 by 9 patch, as wide as the board, and placed on it at HEART_AT.
+const HEART_AT: Cell = [0, 2];
 const HEART_PATCH: readonly Cell[] = [
-  [5, 9], [4, 9], [4, 8], [3, 8], [3, 7], [2, 7], [2, 6], [1, 6], [1, 5], [0, 5], [0, 4],
-  [0, 3], [0, 2], [0, 1], [1, 1], [1, 0], [2, 0], [3, 0], [3, 1], [4, 1], [4, 2], [5, 2],
-  [6, 2], [6, 1], [7, 1], [7, 0], [8, 0], [9, 0], [9, 1], [10, 1], [10, 2], [10, 3], [10, 4],
-  [10, 5], [9, 5], [9, 6], [8, 6], [8, 7], [7, 7], [7, 8], [6, 8], [6, 9],
+  [4, 8], [3, 8], [3, 7], [2, 7], [2, 6], [1, 6], [1, 5], [0, 5], [0, 4], [0, 3], [0, 2], [0, 1],
+  [1, 1], [1, 0], [2, 0], [3, 0], [3, 1], [4, 1], [5, 1], [5, 0], [6, 0], [7, 0], [7, 1],
+  [8, 1], [8, 2], [8, 3], [8, 4], [8, 5], [7, 5], [7, 6], [6, 6], [6, 7], [5, 7], [5, 8],
 ]; // biome-ignore format: the outline reads as a list of steps
 const HEART: readonly Cell[] = HEART_PATCH.map(([x, y]) => [x + HEART_AT[0], y + HEART_AT[1]] as const);
 const HEART_KEYS = new Set(HEART.map(key));
 /** The snake is as long as the heart's outline when it curls up. */
 const FULL = HEART.length;
 
-// The lap before the heart: down the right side and back and forth along the bottom, ending under the heart's
-// point. It is at least as long as the snake, so no part of the body is on the outline when the head starts it.
+// The lap before the heart: back and forth across the rows under it, ending under the heart's point. It is at
+// least as long as the snake, so no part of the body is on the outline when the head starts it.
 const LAP: readonly Cell[] = [
-  [13, 5], [13, 17], [1, 17], [1, 16], [12, 16], [12, 15], [7, 15],
+  [8, 11], [8, 15], [0, 15], [0, 14], [7, 14], [7, 13], [0, 13], [0, 12], [4, 12], [4, 11],
 ]; // biome-ignore format: a list of corners
 
 /** A small seeded generator: the same game every time the file is loaded. */
@@ -89,7 +87,7 @@ interface Game {
  */
 function play(seed: number): Game {
   const random = seeded(seed);
-  const path: Cell[] = [[4, 16]];
+  const path: Cell[] = [[2, 13]];
   const length: number[] = [1];
   const food: { cell: Cell; from: number; eaten: number }[] = [];
   let size = 1;
@@ -170,7 +168,7 @@ function play(seed: number): Game {
   const wander = closed - FULL;
   const times: number[] = [0.6];
   for (let i = 1; i < path.length; i++) {
-    const speed = 8 + 24 * Math.min(1, i / wander) ** 0.7;
+    const speed = 9 + 16 * Math.min(1, i / wander) ** 0.7;
     times.push((times[i - 1] as number) + 1 / speed);
   }
   return { path, length, food, times, closed };
@@ -178,7 +176,7 @@ function play(seed: number): Game {
 
 /** The first seed whose game ends well: every letter reached, the lap clear, and no part of the body in the heart's way. */
 function firstGame(): Game {
-  for (let seed = 47; seed < 500; seed++) {
+  for (let seed = 1; seed < 500; seed++) {
     try {
       const game = play(seed);
       const lap = game.path.slice(game.closed - 2 * FULL + 1, game.closed - FULL + 1);
@@ -223,7 +221,7 @@ const LETTER = {
   alignItems: "center",
   justifyContent: "center",
   fontFamily: FACE,
-  fontSize: 50,
+  fontSize: 100,
   lineHeight: 1,
 } as const;
 const ease = (x: number): number => 1 - (1 - Math.min(1, Math.max(0, x))) ** 3;
@@ -275,34 +273,11 @@ function Board({ word, heart }: z.infer<typeof schema>) {
 
   // Two beats of the heart once it is closed, then it rests a little larger than life.
   const beat = won ? 0.07 * Math.max(0, Math.sin(done * Math.PI * 2.2)) ** 6 : 0;
-  const centre = { x: X0 + (HEART_AT[0] + 5.5) * CELL, y: Y0 + (HEART_AT[1] + 5) * CELL };
+  const centre = { x: X0 + (HEART_AT[0] + 4.5) * CELL, y: Y0 + (HEART_AT[1] + 4.5) * CELL };
   const pulse = 0.5 + 0.5 * Math.sin(elapsed * Math.PI * 4);
 
   return (
     <div style={{ position: "absolute", left: 0, top: 0, width: 1080, height: 1920 }}>
-      <div
-        data-name="score"
-        style={{
-          position: "absolute",
-          left: X0 + 2 * CELL,
-          top: Y0 + 4 * CELL,
-          width: 11 * CELL,
-          height: CELL,
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          fontFamily: FACE,
-          fontSize: 32,
-          fontWeight: 900,
-          letterSpacing: 4,
-          color: SNAKE,
-          background: BG,
-        }}
-      >
-        <span>贪吃蛇</span>
-        <span style={{ color: won ? heart : SNAKE }}>{won ? `♥ ${size}` : String(size - 1).padStart(2, "0")}</span>
-      </div>
-
       {next && (
         <div
           data-name="letter"
@@ -312,7 +287,7 @@ function Board({ word, heart }: z.infer<typeof schema>) {
             background: BG,
             color: heart,
             fontWeight: 900,
-            fontSize: 50,
+            fontSize: 104,
           }}
         >
           <span style={{ display: "block", transform: `scale(${1 + 0.12 * pulse})` }}>
@@ -340,10 +315,10 @@ function Board({ word, heart }: z.infer<typeof schema>) {
                 ...LETTER,
                 ...box(cell),
                 background: BG,
-                fontSize: 58,
+                fontSize: 108,
                 fontWeight: 900,
                 color: turned > 0.5 ? heart : SNAKE,
-                textShadow: turned > 0.5 ? `0 0 ${22 * turned}px ${heart}` : "none",
+                textShadow: turned > 0.5 ? `0 0 ${34 * turned}px ${heart}` : "none",
               }}
             >
               {chars[j % chars.length]}
