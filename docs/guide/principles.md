@@ -26,9 +26,9 @@ Decided in [0002](/decisions/0002-fixed-vocabulary-and-literal-ids) and
 
 ## 3. Time by meaning
 
-A cut says where it happens, not when: `in="word:12"`, `out="word:23.end"`, `at="shot:1"`. These resolve against the
-asset manifest, through every trim and speed change. Tracks play their clips back to back by default, and an overlay
-anchors to the clip it belongs to. Captions follow the clips that play their words, so a trim never leaves a caption
+Seconds work everywhere, and a cut can also say what it belongs to: `in="word:12"`, `out="word:23.end"`,
+`at="shot:1"`. These resolve against the asset manifest, through every trim and speed change. Tracks play their clips
+back to back by default, and an overlay anchors to the clip it belongs to. Captions follow the clips that play their words, so a trim never leaves a caption
 behind.
 
 Decided in [0005](/decisions/0005-sequence-tracks-and-anchors),
@@ -79,6 +79,16 @@ Tokens such as `$primary` resolve before the schema reads the props, an element'
 is written into the file by resolving.
 
 Decided in [0016](/decisions/0016-a-theme-lives-in-the-file).
+
+## 9. A cut can be checked without watching it
+
+A model can't watch a video, and a person shouldn't have to watch it again after every change. So the command line
+reads the timeline back as text (`inspect`), draws many frames from one browser start (`look`), and caches each frame
+by what draws it, so looking again after an edit is nearly free. A narrated film's words, lines and cues come from its
+script with a helper, `narrate()`, not a new element.
+
+Decided in [0026](/decisions/0026-an-agent-looks-at-the-timeline) and
+[0028](/decisions/0028-tools-for-narrated-explainers).
 
 ## Free to use
 

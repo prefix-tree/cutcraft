@@ -1,3 +1,7 @@
+---
+editLink: false
+---
+
 # `crossfade`
 
 Fades one clip into the next.
@@ -14,8 +18,8 @@ The coffee footage is Pixabay videos [209419](https://pixabay.com/videos/id-2094
 
 Drawn without a shader.
 
-| param | type | default |
-|---|---|---|
-| `curve` | "linear" \| "ease" \| "ease-in" \| "ease-out" \| "ease-in-out" | `"ease"` |
+| param | type | default | description |
+|---|---|---|---|
+| `curve` | "linear" \| "ease" \| "ease-in" \| "ease-out" \| "ease-in-out" | `"ease"` | How the fade eases over its duration. |
 
 [All effects and transitions](/reference/effects/) · [Units](/reference/effects/#units)

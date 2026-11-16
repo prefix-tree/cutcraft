@@ -4,14 +4,19 @@ import { Svg } from "../jsx/elements";
 import { h, parse, svgIn, timing, timingOf, timingSchema } from "./shared";
 
 export const highlightSchema = timingSchema.extend({
+  /** The id of the element it draws. */
   id: z.string(),
   /** `underline` under it, `marker` behind it, `circle` round it, `strike` through it. */
   variant: z.enum(["underline", "marker", "circle", "strike"]).default("underline"),
   /** What it marks: a box's centre and size, in pixels from the frame's centre. */
   x: z.number().default(0),
+  /** The marked box's centre, in pixels below the frame's centre. */
   y: z.number().default(0),
+  /** The marked box's width in pixels. */
   width: z.number().positive(),
+  /** The marked box's height in pixels; a marker stroke is about as thick. */
   height: z.number().positive(),
+  /** The mark's colour; a marker stroke is drawn see-through. */
   color: z.string().default("$accent"),
 });
 

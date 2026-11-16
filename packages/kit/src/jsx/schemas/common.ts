@@ -34,8 +34,9 @@ export const durationSchema = z.union([
 
 /** Props shared by everything that occupies time on a track. */
 export const timedProps = {
+  /** The element's name: unique in the file, and what anchors, ducking and the editor refer to it by. */
   id: idSchema,
-  /** Free-layout tracks only. */
+  /** Seconds from the start of the video. Free-layout tracks only; on a sequence track the element follows the one before it. */
   start: z.number().nonnegative().optional(),
   /** Overlays: start relative to another element's start, or to its end with `id.end`. */
   anchor: z
@@ -49,7 +50,12 @@ export const timedProps = {
     .string()
     .regex(/^(word|shot|silence):\d+(\.end)?$/, 'at looks like "word:12", "word:12.end", "shot:3" or "silence:1"')
     .optional(),
+  /** Seconds added to the start that `anchor` and `at` give; negative starts earlier. */
   offset: z.number().optional(),
+  /**
+   * How long it plays: seconds; `"source"` for the whole trimmed source; `"fill"` to run to the end of the
+   * composition; `{ match: id }` for as long as another element; `{ until: id }` to end when another element ends.
+   */
   duration: durationSchema.optional(),
 };
 
@@ -57,12 +63,19 @@ export const vec2Schema = z.strictObject({ x: z.number(), y: z.number() });
 export const vec3Schema = z.strictObject({ x: z.number(), y: z.number(), z: z.number() });
 
 export const transformSchema = z.strictObject({
+  /** Pixels to move the element by, right and down from where its fit puts it (the frame's centre). */
   position: vec2Schema.optional(),
+  /** A multiplier, the same on both axes or `{ x, y }`. */
   scale: z.union([z.number().min(0).max(10), vec2Schema]).optional(),
+  /** Degrees, clockwise. */
   rotation: z.number().min(-360).max(360).optional(),
+  /** The point it scales and rotates around, as fractions of its own box; left out, its centre `{ x: 0.5, y: 0.5 }`. */
   anchor: vec2Schema.optional(),
+  /** 0 is invisible, 1 opaque. */
   opacity: z.number().min(0).max(1).optional(),
+  /** Rounded corners, in pixels or a theme token such as `$radius`. */
   borderRadius: themedLengthSchema.optional(),
+  /** The part of the source to show, as fractions of its width and height from the top left. */
   crop: z
     .strictObject({
       x: z.number().min(0).max(1),
@@ -74,22 +87,33 @@ export const transformSchema = z.strictObject({
 });
 
 export const visualProps = {
+  /** Where it sits and how it is turned: position, scale, rotation, anchor, opacity, rounded corners and crop. */
   transform: transformSchema.optional(),
+  /** How it fills the frame: `contain` shows all of it, `cover` fills the frame and crops, `stretch` distorts to fill, `none` keeps its own size. */
   fit: zFitMode.optional(),
+  /** How it mixes with what is under it, as CSS `mix-blend-mode` does. */
   blend: zBlendMode.optional(),
+  /** How strongly it blends: multiplied into its opacity. */
   blendOpacity: z.number().min(0).max(1).optional(),
 };
 
 export const automationPointsSchema = z.array(z.tuple([z.number().nonnegative(), z.number()]));
 
 export const audioProps = {
+  /** A gain: 1 plays the source as it is, 0 mutes it, 2 is twice as loud. */
   volume: z.number().min(0).max(4).optional(),
+  /** Seconds the sound fades in at the start and out at the end. */
   fade: z
     .strictObject({ in: z.number().nonnegative().optional(), out: z.number().nonnegative().optional() })
     .optional(),
+  /** Volume and pan over time, as `[seconds into the element, value]` points; pan runs from -1 (left) to 1 (right). */
   automation: z
     .strictObject({ volume: automationPointsSchema.optional(), pan: automationPointsSchema.optional() })
     .optional(),
+  /**
+   * Turns this sound down while another plays: `under` is a track id or a track role (`dialogue`), `to` the volume
+   * it falls to, `attack` and `release` the seconds it takes to fall and recover.
+   */
   duck: z
     .strictObject({
       under: idSchema,
@@ -134,6 +158,8 @@ export const graphicAnimationSchema = z.strictObject({
 });
 
 export const entranceProps = {
+  /** How it comes in: a fade, slide, scale or wipe over its first seconds, with an easing. */
   enter: graphicAnimationSchema.optional(),
+  /** How it goes out, over its last seconds, as `enter`. */
   exit: graphicAnimationSchema.optional(),
 };

@@ -1,3 +1,7 @@
+---
+editLink: false
+---
+
 # `<Cut>`
 
 Switches a `<Multicam>` to an angle at a moment.
@@ -12,10 +16,10 @@ Switches a `<Multicam>` to an angle at a moment.
 
 ## Props
 
-| prop | type | default | required |
-|---|---|---|---|
-| `id` | string |  | yes |
-| `at` | number (0..∞) |  | yes |
-| `angle` | string |  | yes |
+| prop | type | default | required | description |
+|---|---|---|---|---|
+| `id` | string |  | yes | The cut's name. |
+| `at` | number (0..∞) |  | yes | Seconds into the multicam where it switches. |
+| `angle` | string |  | yes | The angle it switches to. |
 
 No children. [All elements](/reference/elements/)

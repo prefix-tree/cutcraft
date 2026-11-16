@@ -1,3 +1,7 @@
+---
+editLink: false
+---
+
 # `scanlines`
 
 Lays the dark lines of an old screen over the picture.
@@ -14,12 +18,12 @@ The coffee footage is Pixabay videos [209419](https://pixabay.com/videos/id-2094
 
 Drawn as a shader.
 
-| param | type | default |
-|---|---|---|
-| `spacing` | number (2..200) | `4` |
-| `thickness` | number (0..1) | `0.5` |
-| `intensity` | number (0..1) | `0.35` |
-| `speed` | number (-2000..2000) | `0` |
-| `angle` | number | `0` |
+| param | type | default | description |
+|---|---|---|---|
+| `spacing` | number (2..200) | `4` | The distance from one line to the next, in pixels. |
+| `thickness` | number (0..1) | `0.5` | How much of the space between lines each dark line covers. |
+| `intensity` | number (0..1) | `0.35` | How dark the lines are: 0 is invisible, 1 is black. |
+| `speed` | number (-2000..2000) | `0` | How fast the lines roll across the picture, in pixels per second. |
+| `angle` | number | `0` | How far the lines are turned, in degrees: 0 is horizontal, 90 vertical. |
 
 [All effects and transitions](/reference/effects/) · [Units](/reference/effects/#units)

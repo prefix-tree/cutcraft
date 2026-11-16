@@ -1,3 +1,7 @@
+---
+editLink: false
+---
+
 # `Callout`
 
 A note in a box, with a line drawn to what it is about.
@@ -14,14 +18,14 @@ The coffee footage is Pixabay videos [209419](https://pixabay.com/videos/id-2094
 
 Besides the timing props (`start`, `anchor`, `at`, `offset`, `duration`):
 
-| param | type | default |
-|---|---|---|
-| `id` | string |  |
-| `text` | string |  |
-| `x` | number | `320` |
-| `y` | number | `-220` |
-| `width` | number | `420` |
-| `to` | { x, y } |  |
-| `color` | string | `"$accent"` |
+| param | type | default | description |
+|---|---|---|---|
+| `id` | string |  | The component's id; each of its parts' ids starts with it. |
+| `text` | string |  | The note, in the body face; the box grows taller to fit it. |
+| `x` | number | `320` | The box's centre, in pixels from the frame's centre. |
+| `y` | number | `-220` | The box's centre, in pixels below the frame's centre. |
+| `width` | number (> 0) | `420` | The box's width in pixels. |
+| `to` | { x, y } |  | What it points at; without it, the box stands alone. |
+| `color` | string | `"$accent"` | The colour of the box's border, the line and its dot. |
 
 [All components](/reference/components/)

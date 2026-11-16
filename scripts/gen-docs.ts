@@ -21,6 +21,7 @@ import {
 } from "../packages/kit/src/index";
 import { EFFECT_DEMOS, effectExample, TRANSITION_TEXT, transitionExample } from "./effect-example";
 import { syncGeneratedFiles } from "./generated-files";
+import { readPropDocs } from "./prop-docs";
 
 /**
  * Generated reference pages: the element table from the Zod schemas and the
@@ -34,6 +35,19 @@ const check = process.argv.includes("--check");
 if (process.argv.slice(2).some((arg) => arg !== "--check")) throw new Error("Usage: gen-docs.ts [--check]");
 const generated = new Map<string, string>();
 const write = (path: string, content: string) => generated.set(relative(root, path).split(sep).join("/"), content);
+/** A generated page: its "Edit this page" link is off, as an edit to it is overwritten; the code it comes from is the place. */
+const page = (markdown: string): string => `---\neditLink: false\n---\n\n${markdown}`;
+const DOCS = readPropDocs();
+/** Props and actions with no JSDoc: the check fails on them, so every row of a table says what it is. */
+const undocumented: string[] = [];
+/** A prop's description for a table cell, recorded as missing when there is none. */
+function describe(table: string, prop: string): string {
+  const doc = DOCS.props.get(table)?.get(prop);
+  if (!doc) undocumented.push(`${table} ${prop}`);
+  return cell(doc ?? "");
+}
+/** Text for a Markdown table cell: one line, with its pipes escaped. */
+const cell = (text: string): string => text.replace(/\s*\n\s*/g, " ").replace(/\|/g, "\\|");
 
 type JsonSchema = {
   type?: string | string[];
@@ -50,6 +64,8 @@ type JsonSchema = {
   description?: string;
   minimum?: number;
   maximum?: number;
+  exclusiveMinimum?: number;
+  exclusiveMaximum?: number;
 };
 
 /** A prop's type for a table; `limit` cuts a long list of values short, saying how many more. */
@@ -72,7 +88,12 @@ function typeOf(s: JsonSchema, limit = Infinity): string {
     // `z.int()` bounds every integer by the safe range: that says nothing, so it reads as no bound.
     const min = s.minimum === undefined || s.minimum <= Number.MIN_SAFE_INTEGER ? undefined : s.minimum;
     const max = s.maximum === undefined || s.maximum >= Number.MAX_SAFE_INTEGER ? undefined : s.maximum;
-    if (min !== undefined || max !== undefined) return `${s.type} (${min ?? "−∞"}..${max ?? "∞"})`;
+    // `.positive()` is an exclusive bound: `> 0`.
+    if (min === undefined && max === undefined && s.exclusiveMinimum !== undefined && s.exclusiveMaximum === undefined)
+      return `${s.type} (> ${s.exclusiveMinimum})`;
+    const low = min ?? (s.exclusiveMinimum === undefined ? undefined : `>${s.exclusiveMinimum}`);
+    const high = max ?? (s.exclusiveMaximum === undefined ? undefined : `<${s.exclusiveMaximum}`);
+    if (low !== undefined || high !== undefined) return `${s.type} (${low ?? "−∞"}..${high ?? "∞"})`;
   }
   return s.type ?? "any";
 }
@@ -216,7 +237,7 @@ function elementsIndex(): string {
   const lines = [
     "# Elements",
     "",
-    "The elements a file is written in: the timeline (clips, tracks, transitions, captions), free code, titles, shapes and effects. Each page shows an example as the export renders it, with the file that made it, then the element's props. Generated from the Zod schemas in `packages/kit/src/jsx/schemas`; run `pnpm docs:gen`, and `pnpm docs:examples` for the videos.",
+    "The elements a file is written in: the timeline (clips, tracks, transitions, captions), free code, titles, shapes and effects. Each page shows an example as the export renders it, with the file that made it, then the element's props. Every element is built from the same parts (an id, its timing, where it sits, how it looks, its children): [Anatomy of an element](/guide/elements) explains them once. Generated from the Zod schemas in `packages/kit/src/jsx/schemas`; run `pnpm docs:gen`, and `pnpm docs:examples` for the videos.",
     "",
   ];
   for (const [group, items] of Object.entries(ELEMENT_DOCS)) {
@@ -272,11 +293,13 @@ function elementPage(name: string, summary: string): string {
     c.transformable && "transformable",
   ].filter(Boolean);
   lines.push("## Props", "");
-  lines.push("| prop | type | default | required |", "|---|---|---|---|");
+  lines.push("| prop | type | default | required | description |", "|---|---|---|---|---|");
   const required = new Set(schema.required ?? []);
   for (const [prop, s] of Object.entries(schema.properties ?? {})) {
     const def = defaultOf(s.default);
-    lines.push(`| \`${prop}\` | ${typeOf(s, 6)} | ${def} | ${required.has(prop) ? "yes" : ""} |`);
+    lines.push(
+      `| \`${prop}\` | ${typeOf(s, 6)} | ${def} | ${required.has(prop) ? "yes" : ""} | ${describe(`element:${name}`, prop)} |`,
+    );
   }
   if (name === "Effect" || name === "Transition")
     lines.push("", "Every built-in type and its params: [Effects and transitions](/reference/effects/).");
@@ -296,15 +319,17 @@ const DRAWN: Record<string, string> = {
   look: "drawn without a shader",
 };
 
-/** One effect's or transition's params as a table, from its schema. */
-function paramsTable(schema: z.ZodType): string[] {
+/** One effect's, transition's or component's params as a table, from its schema; `table` names its JSDoc. */
+function paramsTable(schema: z.ZodType, table: string): string[] {
   const json = z.toJSONSchema(schema, { unrepresentable: "any", io: "input" }) as JsonSchema;
   const props = Object.entries(json.properties ?? {});
   if (props.length === 0) return ["No params.", ""];
   return [
-    "| param | type | default |",
-    "|---|---|---|",
-    ...props.map(([name, p]) => `| \`${name}\` | ${typeOf(p, 6)} | ${defaultOf(p.default)} |`),
+    "| param | type | default | description |",
+    "|---|---|---|---|",
+    ...props.map(
+      ([name, p]) => `| \`${name}\` | ${typeOf(p, 6)} | ${defaultOf(p.default)} | ${describe(table, name)} |`,
+    ),
     "",
   ];
 }
@@ -321,7 +346,7 @@ function componentsIndex(): string {
   const lines = [
     "# Components",
     "",
-    "Ready-made pieces: lower thirds, callouts, counters and the like. Each is an ordinary function that returns the kit's own elements (titles, shapes, SVG, a layer where something moves every frame), so it is timed by words, styled by the theme and checked like any element. Editing one of its parts in the editor writes that use out into the file as plain elements. Import them from `@cutcraft/kit`. Generated from `packages/kit/src/components` by `pnpm docs:gen`.",
+    "Ready-made pieces: lower thirds, callouts, counters, cards and the like. Import them from `@cutcraft/kit` and write them on a track like any element. Generated from `packages/kit/src/components` by `pnpm docs:gen`.",
     "",
     '<div class="cc-cards">',
   ];
@@ -332,7 +357,24 @@ function componentsIndex(): string {
   lines.push(
     "</div>",
     "",
-    "Positions are pixels from the frame's centre, as every element's `transform.position`, and the defaults suit a 1920x1080 frame. Colours default to theme tokens (`$primary`, `$surface`, `$text`), so a theme restyles them. Every component takes the timing props any element takes: `start`, or `anchor` with `at` and `offset`, and `duration`.",
+    "## Anatomy of a component",
+    "",
+    "A component is an ordinary function that returns the kit's own elements: titles, shapes, SVG, and a layer where something moves every frame. So it behaves like the elements it is made of.",
+    "",
+    "```tsx",
+    '<LowerThird id="name" start={0.5} duration={4} name="Maya Chen" role="Founder, Shed" />',
+    "```",
+    "",
+    "| Part | How it works |",
+    "|---|---|",
+    "| `id` | Names the component. Each element it makes has an id that starts with it: `name-card`, `name-bar`, `name-name`, `name-role`. |",
+    "| Timing | The same props as any element: `start`, or `anchor` with `at` and `offset`, and `duration`, including `{ until: id }`. Its parts come in and go out inside that time. |",
+    "| Position | `x` and `y` are pixels from the frame's centre, as every element's `transform.position`. The defaults suit a 1920x1080 frame. |",
+    "| Look | Colours default to theme tokens (`$primary`, `$surface`, `$text`) and text to the theme's fonts, so a theme restyles every component. |",
+    "| Its own props | The words and options it draws, listed on its page: `name` and `role` for a lower third, `to` and `format` for a counter. |",
+    "| In an editor | Its props are editable in an inspector. Editing one of its parts writes that use out into the file as plain elements, and the edit applies to them. |",
+    "",
+    "Any function that returns elements works the same way, so you can write your own ([Helpers](/guide/the-file#helpers)). [Anatomy of an element](/guide/elements) covers the parts every element shares.",
     "",
   );
   return lines.join("\n");
@@ -360,7 +402,10 @@ function componentPage(name: keyof typeof COMPONENTS): string {
     "",
     "Besides the timing props (`start`, `anchor`, `at`, `offset`, `duration`):",
     "",
-    ...paramsTable(c.props.omit({ start: true, anchor: true, at: true, offset: true, duration: true })),
+    ...paramsTable(
+      c.props.omit({ start: true, anchor: true, at: true, offset: true, duration: true }),
+      `component:${name}`,
+    ),
     "[All components](/reference/components/)",
     "",
   ].join("\n");
@@ -465,7 +510,7 @@ function effectPage(name: keyof typeof EFFECTS): string {
     "",
     `Drawn as ${DRAWN[e.draw.kind]}${fallback}.`,
     "",
-    ...paramsTable(e.params),
+    ...paramsTable(e.params, `effect:${name}`),
     "[All effects and transitions](/reference/effects/) · [Units](/reference/effects/#units)",
     "",
   ].join("\n");
@@ -492,7 +537,7 @@ function transitionPage(name: keyof typeof TRANSITIONS): string {
     "",
     `Drawn ${t.draw.kind === "shader" ? "by a shader" : "without a shader"}${fallback}.`,
     "",
-    ...paramsTable(t.params),
+    ...paramsTable(t.params, `transition:${name}`),
     "[All effects and transitions](/reference/effects/) · [Units](/reference/effects/#units)",
     "",
   ].join("\n");
@@ -511,29 +556,7 @@ const attr = (text: string): string =>
   text.replace(/`/g, "").replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/\{\{/g, "&#123;&#123;");
 const capital = (s: string): string => `${s[0]!.toUpperCase()}${s.slice(1)}`;
 
-/** A line on the actions page for the actions whose name does not say it all. */
-const ACTION_NOTES: Readonly<Record<string, string>> = {
-  "batch/apply": "one history entry for multi-action gestures and compound inverses",
-  "composition/setProps": "the tweaks panel: rewrites the file's `defaults` literal",
-  "composition/setTheme": "the file's theme: swap it, extend it or remove it in one step",
-  "theme/setToken": "one palette colour, font role or radius in the file's theme",
-  "clip/setSource": "media-slot replacement",
-  "keyframe/restore": "undo of keyframe/remove keeps its easing",
-  "caption/setAnimation": "caption animation style as its own action",
-  "multicam/restoreCut": "undo of removeCut",
-  "multicam/remove": "a multicam group is an element and can be deleted",
-  "mask/restore": "undo of mask/remove",
-  "layer/setTiming": "the <Layer> escape hatch",
-  "layer/setTransform": "the <Layer> escape hatch",
-  "layer/setProps": "the handles of a Layer's component",
-  "source/bake": "expand generated elements into literals",
-  "source/setProp": "generic inspector write",
-  "source/setProps": "the inverse of every prop-writing action",
-  "track/setLayout": "sequence ↔ free",
-};
-
 function actionsPage(): string {
-  const notes = new Map(Object.entries(ACTION_NOTES));
   const groups = new Map<string, string[]>();
   for (const type of listHandlers()) {
     const ns = type.split("/")[0]!;
@@ -544,12 +567,16 @@ function actionsPage(): string {
     "",
     `Generated from the registered handlers (${listHandlers().length}). Do not edit by hand; run \`pnpm docs:gen\`.`,
     "",
-    "Every action has `validate`, `apply`, `invert` and `fold`; the inverse is never null. Params are typed in `packages/kit/src/actions/types/index.ts`.",
+    "Every action has `validate`, `apply`, `invert` and `fold`; the inverse is never null. Each runs as `{ type, params }`; the params and notes here are read from `packages/kit/src/actions/types/index.ts`.",
     "",
   ];
   for (const [ns, types] of [...groups].sort()) {
-    lines.push(`## \`${ns}/\``, "", "| action | note |", "|---|---|");
-    for (const type of [...types].sort()) lines.push(`| \`${type}\` | ${notes.get(type) ?? ""} |`);
+    lines.push(`## \`${ns}/\``, "", "| action | params | what it does |", "|---|---|---|");
+    for (const type of [...types].sort()) {
+      const doc = DOCS.actions.get(type);
+      if (!doc?.note) undocumented.push(`action ${type}`);
+      lines.push(`| \`${type}\` | \`${cell(doc?.params ?? "")}\` | ${cell(doc?.note ?? "")} |`);
+    }
     lines.push("");
   }
   return lines.join("\n");
@@ -639,13 +666,13 @@ function escapeTags(markdown: string): string {
     .join("\n");
 }
 
-write(join(out, "elements", "index.md"), escapeTags(elementsIndex()));
+write(join(out, "elements", "index.md"), page(escapeTags(elementsIndex())));
 const documented = Object.values(ELEMENT_DOCS).flat();
 const missing = Object.keys(ELEMENTS).filter((name) => !documented.some(([e]) => e === name));
 if (missing.length) throw new Error(`no summary in ELEMENT_DOCS for ${missing.join(", ")}`);
 for (const [name, summary] of documented)
-  write(join(out, "elements", `${slug(name)}.md`), escapeTags(elementPage(name, summary)));
-write(join(out, "actions.md"), escapeTags(actionsPage()));
+  write(join(out, "elements", `${slug(name)}.md`), page(escapeTags(elementPage(name, summary))));
+write(join(out, "actions.md"), page(escapeTags(actionsPage())));
 // The sidebars of the generated sections, read by the site's config.
 const sidebar = {
   elements: Object.entries(ELEMENT_DOCS).map(([group, items]) => ({
@@ -663,18 +690,18 @@ const sidebar = {
   })),
 };
 write(join(root, "docs", ".vitepress", "sidebar.generated.json"), `${JSON.stringify(sidebar, null, 2)}\n`);
-write(join(out, "rendering.md"), escapeTags(renderingPage()));
-write(join(out, "effects", "index.md"), `${escapeTags(effectsIndex())}\n${redirectScript()}`);
-write(join(out, "components", "index.md"), escapeTags(componentsIndex()));
+write(join(out, "rendering.md"), page(escapeTags(renderingPage())));
+write(join(out, "effects", "index.md"), page(`${escapeTags(effectsIndex())}\n${redirectScript()}`));
+write(join(out, "components", "index.md"), page(escapeTags(componentsIndex())));
 for (const name of Object.keys(COMPONENTS) as (keyof typeof COMPONENTS)[])
-  write(join(out, "components", `${kebab(name)}.md`), escapeTags(componentPage(name)));
+  write(join(out, "components", `${kebab(name)}.md`), page(escapeTags(componentPage(name))));
 for (const name of Object.keys(EFFECTS) as (keyof typeof EFFECTS)[]) {
-  write(join(out, "effects", `${name}.md`), escapeTags(effectPage(name)));
+  write(join(out, "effects", `${name}.md`), page(escapeTags(effectPage(name))));
   const file = join(root, "examples", "showcase", "effects", `${name}.tsx`);
   write(file, formatted(file, effectExample(name)));
 }
 for (const name of Object.keys(TRANSITIONS) as (keyof typeof TRANSITIONS)[]) {
-  write(join(out, "transitions", `${name}.md`), escapeTags(transitionPage(name)));
+  write(join(out, "transitions", `${name}.md`), page(escapeTags(transitionPage(name))));
   const file = join(root, "examples", "showcase", "transitions", `${name}.tsx`);
   write(file, formatted(file, transitionExample(name)));
 }
@@ -719,12 +746,29 @@ write(
   ),
 );
 write(join(skillRefs, "rendering.md"), `${forAgent(renderingPage(), false)}\n`);
-write(
-  join(skillRefs, "cli.md"),
-  `${forAgent(readFileSync(join(root, "docs", "reference", "cli.md"), "utf8"), false)}\n`,
+// The CLI page's synopsis is the `--help` text's usage lines, so the two cannot differ; the rest of the page is
+// written by hand, and the check fails on a flag the help names that the page never mentions.
+const cliPage = join(out, "cli.md");
+const usage = /const USAGE = `([\s\S]*?)`;/.exec(
+  readFileSync(join(root, "packages", "render", "src", "cli.ts"), "utf8"),
+)?.[1];
+if (!usage) throw new Error("no USAGE in packages/render/src/cli.ts");
+const synopsis = usage
+  .slice(0, usage.indexOf("\n\n"))
+  .replace(/^Usage: /, "")
+  .replace(/\n {8,}(?=\[)/g, " ") // a line continued under the one before
+  .split("\n")
+  .map((line) => `npx ${line.trim()}`);
+const cliText = readFileSync(cliPage, "utf8").replace(
+  /(```sh\nnpm install cutcraft\n)[\s\S]*?(\n```)/,
+  (_, open: string, close: string) => `${open}${synopsis.join("\n")}${close}`,
 );
+for (const flag of new Set(usage.match(/--[a-z][a-z-]*/g)))
+  if (!cliText.includes(flag)) undocumented.push(`cli ${flag} (docs/reference/cli.md)`);
+write(cliPage, cliText);
+write(join(skillRefs, "cli.md"), `${forAgent(cliText, false)}\n`);
 
-const problems = syncGeneratedFiles(root, generated, {
+const problems: string[] = syncGeneratedFiles(root, generated, {
   check,
   directories: [
     "docs/reference/elements",
@@ -737,8 +781,11 @@ const problems = syncGeneratedFiles(root, generated, {
   ],
   obsolete: ["docs/reference/elements.md", "docs/reference/effects.md", "docs/reference/graphics"],
 });
+problems.push(...[...new Set(undocumented)].map((u) => `no JSDoc: ${u}`));
 if (problems.length) {
-  console.error(`Generated reference is stale (${problems.length} files). Run pnpm docs:gen.`);
+  console.error(
+    `Generated reference is stale or undocumented (${problems.length}). Run pnpm docs:gen; document each prop and action in its code.`,
+  );
   for (const problem of problems) console.error(problem);
   process.exitCode = 1;
 } else {

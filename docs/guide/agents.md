@@ -42,37 +42,14 @@ from CutCraft's code, so they match the version on the main branch.
 
 ## How the agent looks at a cut
 
-An agent cannot watch a video, so it looks at sheets of frames, each drawn by one command in a few seconds. Every
-cell is labelled with its time, its frame and what it is, and a legend printed beside the image says which elements
-are on screen in each. The frames are the export's own, so what a sheet shows is what the file renders.
-
-**Skim the cut.** After each stage of an edit, `cutcraft look video.tsx` shows what an editor would scrub through:
-the first frame of each clip, both sides and the middle of every transition, and each title once.
+An agent cannot watch a video, so it checks a cut the way a person skims one: it reads the timeline back as text with
+`cutcraft inspect`, looks at sheets of frames with `cutcraft look`, and runs the layout check. Each takes seconds, and
+looking again after an edit redraws only the frames that changed, so it can look after every step.
 
 [![A contact sheet of ten frames of a cut: each clip's first frame, both sides and the middle of two transitions, and each title, with its time, frame and name under it](/reference/look.jpg)](/reference/look.jpg)
 
-**Follow what just changed.** `--around x1` walks through one transition, or through one title coming in and going
-out. Here each moment is also drawn without the title, to see how it leaves over the cut.
-
-[![Ten frames across a wipe between two clips, in pairs: each moment with the title "Cut by words" and without it](/reference/look-around.jpg)](/reference/look-around.jpg)
-
-**Compare with and without.** `--without grade` draws each frame as written and without one effect, side by side, so
-the agent can see what a grade, a blur or a title actually does to the picture.
-
-[![Four frames of coffee being poured: at 1 second the two are the same; at 2.5 seconds the one with the grade is warmer and brighter than the one without](/reference/look-without.jpg)](/reference/look-without.jpg)
-
-**Listen to it.** `--listen all` adds a strip of the mix under the frames: its level over time, the words where they
-are said, and the silent stretches shaded. The legend gives the peak, the average level and the loudness (LUFS) in numbers, and counts the samples
-above full scale, so the agent can tell that the music ducks under the voice, that nothing clips, and that no clip
-lost its sound.
-
-[![Three frames of a cut above a strip of its sound: a steady tone for two seconds with three words marked on it, two seconds of shaded silence, then a louder tone to the end](/reference/look-listen.png)](/reference/look-listen.png)
-
-Looking again is nearly free. Every frame drawn is kept beside the file, under a key made from what draws it, so
-after an edit only the frames that changed are drawn again: an agent can look after every step.
-
-Before any picture, `cutcraft inspect` reads the same timeline back as text, with no browser at all. The
-[CLI reference](/reference/cli#look) has every option of both.
+[Checking a cut](./checking) shows every kind of sheet: across one transition, with and without an effect, a move as
+a strip of frames, the safe zone drawn on, and the sound.
 
 ## Ask for a video
 

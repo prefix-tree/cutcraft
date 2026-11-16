@@ -1,3 +1,7 @@
+---
+editLink: false
+---
+
 # What renders
 
 What the player and the export draw, out of what the schemas accept. Generated from `packages/kit/src/jsx/rendering.ts` by `pnpm docs:gen`; do not edit by hand.

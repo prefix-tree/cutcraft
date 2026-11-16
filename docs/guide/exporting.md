@@ -1,43 +1,68 @@
 # Exporting
 
-`@cutcraft/render` turns a file into an MP4 or WebM, a soundtrack (MP3 or WAV) or a still (PNG or JPEG). The export
-runs the real player in headless Chrome: it steps the file frame by frame, waits for every clip, title, three.js
-scene and Motion sequence to draw the frame, then captures and encodes it there with the browser's own encoders. The
-preview and the export are the same code, so what the preview shows is what the file holds.
-
-## From the command line
+`@cutcraft/render` turns a file into a video (MP4 or WebM), a soundtrack (MP3 or WAV) or a still (PNG or JPEG). The
+export runs the same player as the preview, so what the preview shows is what the file holds. This page covers the
+formats, exporting on a server, motion blur, and making an export faster.
 
 ```sh
 npm install cutcraft
-npx cutcraft video.tsx --media ./media --out video.mp4
+npx cutcraft video.tsx --out video.mp4
 ```
 
-`--out` picks the format by its extension: `.mp4` (H.264 and AAC), `.webm` (VP9 and Opus), or `.mp3` and `.wav` for
-the soundtrack alone. `--codec av1` writes AV1 in either container. `--still 2 --out poster.png` writes one frame.
-The manifest is the nearest `cutcraft.json` from the file's folder upward, unless the file exports its own `manifest`
-or `--manifest` names one. The media comes from `--media`, one file per asset id, or else from the file's folder, the
-manifest's folder or `media/` beside the manifest ([how both are found](/reference/cli#where-the-manifest-and-the-media-are-found)). The [CLI reference](/reference/cli) lists every option.
+To check the file before or after you export it, see [Checking a cut](./checking).
 
-The export loads a file the way the editor does: it may import `react`, `zod` and
-`@cutcraft/kit`, plus what `--import` offers. A file that imports anything else
-fails with the same message in both, so a file that exports also opens in the editor.
+## From the command line
+
+`--out` names the file to write, and its extension picks the format. The other inputs come from the file when you
+leave them out:
+
+| Option | Gives | When left out |
+|---|---|---|
+| `--out` | The file to write; its extension picks the format. | Required. |
+| `--manifest` | The manifest. | The file's own `manifest` export, or else the nearest `cutcraft.json` from the file's folder upward. |
+| `--media` | A folder with one file per asset id. | The file's folder, the manifest's folder, or `media/` beside the manifest. |
+
+[Where the manifest and the media are found](/reference/cli#where-the-manifest-and-the-media-are-found) has the details, and the [CLI reference](/reference/cli) lists every option.
+
+The export loads a file the way the editor does: it may import `react`, `zod` and `@cutcraft/kit`, plus what
+`--import` offers. A file that imports anything else fails with the same message in both, so a file that exports
+also opens in the editor.
+
+## Formats
+
+| `--out` | Writes |
+|---|---|
+| `video.mp4` | H.264 video and AAC sound. |
+| `video.webm` | VP9 video and Opus sound. |
+| `sound.mp3`, `sound.wav` | The soundtrack alone. |
+| `poster.png`, `poster.jpg` with `--still 2` | One frame, at 2 seconds. |
+
+`--codec av1` writes AV1 video in either container.
 
 ## The browser it runs in
 
-The first export downloads Chrome for Testing into `~/.cache/cutcraft/browsers` once and reuses it
-after that. `npx cutcraft browser install` downloads it ahead of time, for a Docker image or a CI cache.
-`CUTCRAFT_BROWSER_CACHE` moves the cache, and `CUTCRAFT_CHROMIUM` names a Chrome or Chromium 153 or later to use
-instead of downloading one.
+The export runs the real player in headless Chrome. It steps the file frame by frame, waits for every clip, title,
+three.js scene and Motion sequence to draw the frame, then captures and encodes it in the page with the browser's own
+encoders.
 
-The capture uses HTML-in-Canvas (`drawElementImage`), which Chrome ships behind a flag the export turns on. Without a
-GPU, WebGL runs in software: about 6 frames a second at 1080p on a 4-core machine for a file with three.js, plus a
-few seconds to start the browser. With a GPU it is much faster.
+The first export downloads Chrome for Testing into `~/.cache/cutcraft/browsers` once and reuses it after that.
+
+| To | Use |
+|---|---|
+| Download it ahead of time, for a Docker image or a CI cache | `npx cutcraft browser install` |
+| Keep the cache somewhere else | `CUTCRAFT_BROWSER_CACHE` |
+| Use your own Chrome or Chromium 153 or later instead of downloading one | `CUTCRAFT_CHROMIUM` |
+
+The capture uses HTML-in-Canvas (`drawElementImage`), which Chrome ships behind a flag the export turns on.
+
+Without a GPU, WebGL runs in software: about 6 frames a second at 1080p on a 4-core machine for a file with three.js,
+plus a few seconds to start the browser. With a GPU it is much faster.
 
 ## On a server
 
-Chrome needs a few system libraries that a desktop has and a slim Linux image does not. On Debian or Ubuntu,
-`playwright-core` (installed with the export) lists and installs them, and `cutcraft browser install` puts Chrome in the
-image, so no export downloads it at run time:
+A slim Linux image lacks a few system libraries Chrome needs that a desktop has. On Debian or Ubuntu,
+`playwright-core` (installed with the export) lists and installs them, and `cutcraft browser install` puts Chrome in
+the image, so no export downloads it at run time:
 
 ```dockerfile
 FROM node:22-bookworm-slim
@@ -49,9 +74,11 @@ COPY . .
 CMD ["npx", "cutcraft", "video.tsx", "--out", "out/video.mp4"]
 ```
 
-`npx playwright-core install-deps --dry-run chromium` prints the packages instead of installing them, for an image
-built another way. In GitHub Actions the runners already have them; cache the browser so it downloads once per
-CutCraft version:
+For an image built another way, `npx playwright-core install-deps --dry-run chromium` prints the packages instead of
+installing them.
+
+In GitHub Actions the runners already have the libraries. Cache the browser so it downloads once per CutCraft
+version:
 
 ```yaml
 - uses: actions/cache@v4
@@ -62,10 +89,12 @@ CutCraft version:
 - run: npx cutcraft video.tsx --out video.mp4
 ```
 
-With no GPU, as on most servers, Chrome draws on the CPU; `--tabs` spreads the pieces over more cores
-([Faster](#faster)).
+Most servers have no GPU, so Chrome draws on the CPU. `--tabs` spreads the work over more cores ([Faster](#faster)).
 
-### Motion blur
+## Motion blur
+
+Motion blur smears whatever moves, the way a film camera does while its shutter is open. Turn it on with
+`motionBlur` on the `<Composition>`:
 
 <Example src="previews/guide/motion-blur" alt="A puck crossing the frame, blurred along its path">
 
@@ -73,17 +102,131 @@ With no GPU, as on most servers, Chrome draws on the CPU; `--tabs` spreads the p
 
 </Example>
 
-A film camera blurs whatever moves while its shutter is open. With `motionBlur`, the browser export draws each frame
-`samples` times while the shutter is open and averages the pictures. Every frame in CutCraft is a function of time,
-so footage, titles, `<Motion>`, three.js and free code all blur the same way.
+| Option | Does |
+|---|---|
+| `shutterAngle` | How long the shutter stays open, as a share of the frame. 180 (half the frame, the film default) looks natural, 90 is crisper and choppier, 360 blurs the most. |
+| `samples` | How many pictures are averaged per frame, 2 to 64, default 8. More is smoother and slower: 8 samples take about eight times as long. |
 
-`shutterAngle` sets how long the shutter stays open, as a share of the frame: 180 (half the frame, the film default)
-looks natural, 90 is crisper and choppier, and 360 blurs the most. `samples` (2 to 64, default 8) trades smoothness for
-time, because the export draws that many pictures per frame: 8 samples take about eight times as long.
+The export draws each frame `samples` times across the open shutter and averages the pictures. Every frame in
+CutCraft is a function of time, so footage, titles, `<Motion>`, three.js and free code all blur the same way.
 
+::: tip
 The blur shows in exported videos and stills. The preview stays sharp.
+:::
+
+## Faster
+
+Start with a draft to watch while you work. For the real export, try `--tabs`, then `--copy`.
+
+### A draft
+
+`--draft` renders the video for watching, not for keeping:
+
+```sh
+npx cutcraft video.tsx --out video.mp4 --draft
+```
+
+- It draws every second frame and shows each twice as long, so the draft is as long as the video and its sound is
+  the same.
+- Its pictures are half as wide and half as high, encoded at the `low` quality preset unless `--bitrate` or
+  `--quality` is given.
+- It is written beside the file `--out` names, as `video.draft.mp4`, so a draft never replaces the video.
+
+A draft draws half the frames, but it is not twice as fast. Each frame is still drawn at full size and scaled down
+afterwards, and drawing is most of what an export does. A two minute film with a three.js scene took a little over
+nine minutes as a draft against about twelve in full.
+
+A draft's pictures are the video's own, smaller. To see one move without rendering at all, use
+[`look --motion`](/reference/cli#motion).
+
+### `--tabs`
+
+`--tabs 3` renders with three pages of the browser at once (the default is one), each on its own share of the
+frames. The pictures are
+the same as one page's, frame for frame; only where the keyframes fall differs.
+
+Each page holds its own decoders and encoder, so memory grows with the count. On a machine with spare cores, two to
+four pages help most.
+
+::: details How the frames are shared
+The frames are cut into runs of whole keyframe intervals, and each page renders and encodes its runs into small
+containers. Node joins them in order with the soundtrack, copying the encoded packets.
+:::
+
+### `--copy`
+
+`--copy` skips drawing where the picture is nothing but a stretch of one source file. The encoded packets of whole
+groups of pictures are copied, and only the ends are rendered. Copied pictures keep the source's quality and are not
+decoded or encoded at all.
+
+It applies to a stretch of frames when all of these hold:
+
+- the source is VP9 and so is the output;
+- the source has the composition's size and frame rate;
+- one clip is shown, untransformed, at full size, at speed 1, with no fade, filter, crop, mask or blend, and no
+  transition, title, caption or any other overlay at those times, and the file has no motion blur.
+
+A stretch that does not qualify is rendered as usual.
+
+::: warning
+`--copy` is opt-in because a source whose stream does not match the encoder's fails when the pieces are joined,
+instead of falling back.
+:::
+
+[How the export works](./export-architecture) explains what runs where: the page, the pieces and the sound.
+
+## When a frame never finishes
+
+Each frame has a deadline: 60 seconds unless `--frame-timeout` (or `frameTimeout` from code) says otherwise. A frame
+that outlasts it ends the export with the frame, its time and the step it was in:
+
+```
+frame 412 (13.73 s) did not finish within 60 s: stuck in settle
+```
+
+| Step | What the page was waiting for |
+|---|---|
+| `step` | The player, to decode and place that moment's media. A damaged or very large source is the usual cause. |
+| `settle` | A font, an image, or a layer that holds the frame until it has drawn (three.js, a shader) and never lets go. |
+| `paint` | The browser, to paint the page. |
+| `draw` | The painted page, to be copied into the frame. |
+| `encode` | The video encoder, to take the frame. |
+
+`cutcraft look video.tsx --at 13.73` draws that one moment, the quick way to see what is on screen there. A very slow
+machine can need a longer deadline for heavy frames; raise it only once you know the frame does finish.
+
+::: details "Captured without the browser confirming the paint"
+An export can end with a warning that some frames `were captured without the browser confirming the paint`. The page
+asks the browser to say when a frame is painted, and waits a second for the answer. Without one it goes on after two
+animation frames, and such a frame may show the moment before.
+
+It should not happen in the Chrome CutCraft installs. If it does, look at those frames before you publish.
+:::
+
+## What it draws
+
+The export draws everything the preview draws, because it is the preview: footage, transitions, effects, crops,
+masks, blend modes, titles, shapes, SVG, stickers, layers with any CSS and React, captions, `<Three>`, `<Motion>`,
+and the effects and transitions a file declares in GLSL. A few limits remain, listed in
+[What renders](/reference/rendering), and the check reports each as a `not-rendered` warning.
+
+**Fonts.** Inter, Space Grotesk, Playfair Display, DM Sans and JetBrains Mono are bundled (regular and bold, italic
+where the family has one; see [Themes](/guide/themes#fonts)). A title that names another font falls back to Inter
+unless the file declares it (`font()`, `googleFont()`) or you pass it with `--font`. TTF, OTF, WOFF and WOFF2 all
+work.
+
+**Sound.** Volume, fades, ducking, pan and speed are mixed in, and mute and solo apply.
+
+::: details How the sound is mixed and encoded
+Sound is mixed in the page by `mixPlan`, a pure function of the audio plan: volume, fades, automation, ducking, pan,
+speed and speed-key ramps (pitch follows speed, as in the preview), silence through freeze holds, and sample-rate
+conversion. Chrome encodes Opus itself; AAC and MP3 go through Mediabunny's WebAssembly encoders, since Chrome for
+Testing has none.
+:::
 
 ## From code
+
+`renderVideo` and `renderStill` do from a script what the command line does.
 
 ```ts
 import { directoryResolver, loadVideo, renderStill, renderVideo } from "@cutcraft/render";
@@ -104,230 +247,17 @@ const result = await renderVideo({
 await renderStill({ state: video.state, source: video.source, media, out: "poster.png", time: 2 });
 ```
 
-`renderVideo` stops with an error when an asset cannot be opened or decoded,
-rather than drawing a placeholder into a video you will publish
-(`onAssetError: "continue"` changes that). `result.warnings` lists what was
-left out and why.
-
-## What it draws
-
-Everything the preview draws, because it is the preview: footage, transitions, effects, crops, masks, blend modes,
-titles, shapes, SVG, stickers, layers with any CSS and React, captions, `<Three>`, `<Motion>`, and the effects and
-transitions a file declares in GLSL. A few limits remain, listed in [What renders](/reference/rendering), and the
-check reports each as a `not-rendered` warning.
-
-- Fonts: Inter, Space Grotesk, Playfair Display, DM Sans and JetBrains Mono are bundled (regular and bold, italic
-  where the family has one; see [Themes](/guide/themes#fonts)). A title that names another font falls back to Inter
-  unless the file declares it (`font()`, `googleFont()`) or you pass it with `--font`. TTF, OTF, WOFF and WOFF2 all
-  work.
-- Sound is mixed in the page by `mixPlan`, a pure function of the audio plan: volume, fades, automation, ducking,
-  pan, speed and speed-key ramps (pitch follows speed, as in the preview), silence through freeze holds, and
-  sample-rate conversion. Mute and solo apply. Chrome encodes Opus itself; AAC and MP3 go through Mediabunny's
-  WebAssembly encoders, since Chrome for Testing has none.
-
-## Faster
-
-A draft to watch while you work, then two options for the real export, in the order to try them.
-
-### A draft
-
-`--draft` renders the video for watching, not for keeping:
-
-```sh
-npx cutcraft video.tsx --out video.mp4 --draft
-```
-
-It draws every second frame and shows each twice as long, so the draft is as long as the video and its sound is the
-same. Its pictures are half as wide and half as high, encoded at the `low` quality preset unless `--bitrate` or
-`--quality` is given. It is written beside the file `--out` names as `video.draft.mp4`, so a draft never replaces the
-video.
-
-A draft is faster because it draws half the frames, but not twice as fast: each frame is still drawn at full size
-and scaled down afterwards, and drawing is most of what an export does. A two minute film with a three.js scene took
-a little over nine minutes as a draft against about twelve in full. A draft's pictures are the video's own, smaller.
-To see one move without rendering at all, use [`look --motion`](/reference/cli#motion).
-
-### `--tabs`
-
-The frames are cut into runs of whole keyframe intervals, and each page of the browser renders and encodes its runs
-into small containers. Node joins them in order with the soundtrack, copying the encoded packets. The pictures are
-the same as one page's, frame for frame; only where the keyframes fall differs. Each page holds its own decoders and
-encoder, so memory grows with the count; on a machine with spare cores, two to four pages help most.
-
-### `--copy`
-
-Where the picture is nothing but a stretch of one source file, the encoded packets of whole groups of pictures are
-copied and only the ends are rendered. It applies when all of these hold for a stretch of frames:
-
-- the source is VP9 and so is the output;
-- the source has the composition's size and frame rate;
-- one clip is shown, untransformed, at full size, at speed 1, with no fade, filter, crop, mask or blend, and no
-  transition, title, caption or any other overlay at those times, and the file has no motion blur.
-
-Copied pictures keep the source's quality and are not decoded or encoded at all. A stretch that does not qualify is
-rendered as usual. `--copy` is opt-in because a source whose stream the encoder's does not match fails when the
-pieces are joined instead of falling back.
-
-[How the export works](./export-architecture) explains what runs where: the page, the pieces and the sound.
-
-## Checking the layout
-
-`--check-layout` samples every frame (or every `--step` seconds) and reports
-each overlay that leaves the frame, leaves the safe zone, covers the captions
-or covers the subject, with the first and last time it does. It measures the
-pixels each element actually draws (titles, shapes, SVG, stickers, graphics,
-layers and captions) after its entrance, exit, keyframes and transform, so a
-slide that crosses the edge between two spot checks is caught. Hollow
-graphics count by the cells their ink touches, so corner brackets around a
-face do not cover it. It writes no file. Like a compiler, it points each
-issue at its place in the file (the element's `transform`, the helper call
-that made it, or the JSX in the loop that made it), lists issues by line,
-says what is wrong in one sentence, and gives the smallest fix. It exits 3
-when it finds issues (1 is an error, 2 the usage text), so a script can stop
-on them:
-
-```sh
-cutcraft video.tsx --check-layout --safe-zone tiktok --subject 0.2,0.18,0.6,0.37
-```
-
-```text
-video.tsx:30:9: subject: title "t1" covers the subject from 0.53 s to 2.40 s.
-  30 |         <Title id="t1" anchor="v1" offset={0.5} duration={2} size={40}>Hello</Title>
-     |         ^
-  fix: move it down 89 px (transform.position.y +89), then check again: the move may run into something else
-
-1 layout issue on 1 element in 900 samples (every frame, safe zone tiktok).
-```
-
-`--json` prints the same as data, for a program or an agent that wants the
-numbers:
-
-```json
-{
-  "summary": "1 layout issue on 1 element in 900 samples (every frame, safe zone tiktok).",
-  "issues": [{
-    "rule": "subject", "id": "t1", "kind": "title", "with": "subject", "from": 0.533, "to": 2.4, "at": 0.533,
-    "box": { "x": 273, "y": 165, "w": 96, "h": 30 }, "area": { "x": 224, "y": 72, "w": 192, "h": 180 },
-    "message": "title \"t1\" covers the subject from 0.53 s to 2.40 s.",
-    "fix": "move it down 89 px (transform.position.y +89), then check again: the move may run into something else",
-    "source": { "file": "video.tsx", "line": 30, "column": 9, "code": "        <Title id=\"t1\" …>Hello</Title>" }
-  }],
-  "samples": 900,
-  "warnings": []
-}
-```
-
-`from` and `to` are the first and last offending samples; `at` is the worst
-one, where `box` is the element's ink and `area` is what it breaks (the
-frame, the zone, or the captions' or subject's box). Pixels are composition
-pixels from the top left. A bad `--step`, `--from` or `--to` is an error, not
-an empty report.
-
-| Rule | |
-|---|---|
-| `frame-edge` | Part of the element is outside the frame. |
-| `safe-zone` | Inside the frame but outside the zone; `with` names it. `--safe-zone` takes `tiktok`, `reels`, `shorts` (the platforms' published zones for 1080×1920), `title-safe` (the default) or `action-safe`, or `top,right,bottom,left` fractions. |
-| `captions` | The element overlaps a captions line; `with` is the captions element. |
-| `subject` | The element overlaps the subject. |
-
-The subject comes from the manifest: an asset's `subjects` are boxes sampled
-over its source time, as fractions of its picture (`{ t, x, y, w, h }`), and
-the check maps them through each clip's crop, fit and transform. Footage whose
-manifest entry has none uses `--subject x,y,w,h`, fractions of the frame,
-while it is on screen. Overlays beneath the footage and ones that fill the
-frame (backgrounds) are not checked, and neither is an element fainter than
-10%. The check draws each overlay alone in the export page and measures its ink. From code:
-`checkLayout({ state, media, source: { ...video.source, file }, safeZone, subject })`, and `formatLayout(result)` for
-the text.
-
-### Naming the parts of a layer
-
-To the check a `<Layer>` is one box, whatever its code draws. Give an element inside it a `data-name` and the check
-measures that element on its own:
-
-```tsx
-<Layer id="diagram" start={0} duration={8}>
-  <svg width={1080} height={1920}>
-    <text data-name="lamp-label" x={470} y={624}>LAMP</text>
-  </svg>
-</Layer>
-```
-
-It is reported as the part `diagram/lamp-label`, at the line that names it, and the layer is not reported a second
-time for the same thing. Its advice is a move in pixels to make in the layer's code. Code that names nothing is
-checked as before, as one layer. A part that is faded out or not displayed is not measured.
-
-A layer that is a ground for other things, such as a scrim that darkens the footage under a title, says so with
-`data-ground` on an element inside it. The check then treats it like a background beneath the footage: it is not
-held to the safe zone and is not said to cover the captions.
-
-```tsx
-<Layer id="scrim" anchor="talk" duration={{ until: "talk" }}>
-  <div data-ground style={{ position: "absolute", inset: 0, background: "linear-gradient(transparent 60%, #0b1530)" }} />
-</Layer>
-```
-
-## Where things are
-
-The check speaks only when a rule is broken. `cutcraft where` answers the plainer question, where is everything at
-this moment:
-
-```sh
-npx cutcraft where video.tsx --at 2.6 --safe-zone tiktok
-```
-
-```
-2.60 s (frame 78)
-  diagram             layer     x 96..980, y 520..1340    in frame   tiktok: in
-  diagram/lamp-label  part      x 398..516, y 577..604    in frame   tiktok: in
-  diagram/dots-label  part      x 145..259, y 1527..1556  in frame   tiktok: out bottom 296 px
-  said                captions  x 253..827, y 1154..1250  in frame   tiktok: in   over "diagram" (574 x 96 px)
-```
-
-There is a row for each overlay, for the captions and for each named part: its ink as a box in pixels from the top
-left, whether that is inside the frame and inside the safe zone and by how much it is not, and what it overlaps.
-`--at` takes the moments `inspect` and `look` take, several at once. Without `--safe-zone` a portrait video is held
-against `tiktok`, `reels` and `shorts` together, and any other against `title-safe`. `--json` prints the same as
-data. It reports and never fails a file for what it finds: `--check-layout` is the judge. To see the same on the
-frames, [`look --zones`](/reference/cli#with-the-zones-drawn) draws the zone and each box over a sheet. From code:
-`whereThings({ state, source, media, at })` and `formatWhere(result)`.
-
-## When a frame never finishes
-
-Each frame has a deadline, 60 seconds unless `--frame-timeout` (or `frameTimeout`) says otherwise. A frame that
-outlasts it ends the export with the frame, its time and the step it was in:
-
-```
-frame 412 (13.73 s) did not finish within 60 s: stuck in settle
-```
-
-| Step | What the page was waiting for |
-|---|---|
-| `step` | The player, to decode and place that moment's media. A damaged or very large source is the usual cause. |
-| `settle` | A font, an image, or a layer that holds the frame until it has drawn (three.js, a shader) and never lets go. |
-| `paint` | The browser, to paint the page. |
-| `draw` | The painted page, to be copied into the frame. |
-| `encode` | The video encoder, to take the frame. |
-
-`cutcraft look video.tsx --at 13.73` draws that one moment, which is the quick way to see what is on screen there.
-A very slow machine can need a longer deadline for heavy frames; raise it only once you know the frame does finish.
-
-An export can also end with a warning that some frames `were captured without the browser confirming the paint`.
-The page asks the browser to say when a frame is painted, and waits a second for the answer; without one it goes on
-after two animation frames, and such a frame may show the moment before. It should not happen in the Chrome CutCraft
-installs. If it does, look at those frames before you publish.
-
-## Checking an export
-
-To check a file you exported:
-
-```sh
-ffprobe -v error -show_streams video.webm                 # codec, size, frame count, one video and one audio stream
-ffmpeg -v error -xerror -i video.webm -f null -           # decodes without a single error
-ffmpeg -i video.webm -vf "select=eq(n\,90)" -frames:v 1 frame.png   # one frame, to look at
-```
+`renderVideo` stops with an error when an asset cannot be opened or decoded, rather than drawing a placeholder into a
+video you will publish. `onAssetError: "continue"` changes that. `result.warnings` lists what was left out and why.
 
 ## Requirements
 
 Node 22.19 or later, and the Chrome the first export downloads (or `CUTCRAFT_CHROMIUM`). There is no FFmpeg and no
 native module to install.
+
+## Next
+
+- [Checking a cut](./checking): read the timeline, look at frames, check the layout and the exported file.
+- [How the export works](./export-architecture): what runs in Node and what runs in the page.
+- [CLI reference](/reference/cli): every command and option.
+- [What renders](/reference/rendering): the few things the export draws differently.

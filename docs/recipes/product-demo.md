@@ -26,4 +26,4 @@ The `screen` asset has no transcript, so it is trimmed by seconds. The `voice` a
 ## What to check
 
 - No lint warnings expected.
-- `captureSheet([2.5, 3.5, 5, 9.5])`: full frame, the zoomed frame, the hold, the second ring.
+- `npx cutcraft look product-demo.tsx --at 2.5,3.5,5,9.5`: full frame, the zoomed frame, the hold, the second ring.

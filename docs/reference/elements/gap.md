@@ -1,3 +1,7 @@
+---
+editLink: false
+---
+
 # `<Gap>`
 
 Empty time between clips on a sequence track.
@@ -10,9 +14,9 @@ Empty time between clips on a sequence track.
 
 ## Props
 
-| prop | type | default | required |
-|---|---|---|---|
-| `id` | string |  | yes |
-| `duration` | number |  | yes |
+| prop | type | default | required | description |
+|---|---|---|---|---|
+| `id` | string |  | yes | The gap's name. |
+| `duration` | number (> 0) |  | yes | Seconds of empty time before the next element on the track. |
 
 Timed. No children. [All elements](/reference/elements/)

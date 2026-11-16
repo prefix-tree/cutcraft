@@ -1,3 +1,7 @@
+---
+editLink: false
+---
+
 # `hue`
 
 Turns every colour around the colour wheel.
@@ -14,8 +18,8 @@ The coffee footage is Pixabay videos [209419](https://pixabay.com/videos/id-2094
 
 Drawn as a CSS filter; no WebGL needed.
 
-| param | type | default |
-|---|---|---|
-| `angle` | number | `0` |
+| param | type | default | description |
+|---|---|---|---|
+| `angle` | number | `0` | How far every colour turns around the colour wheel, in degrees. |
 
 [All effects and transitions](/reference/effects/) · [Units](/reference/effects/#units)

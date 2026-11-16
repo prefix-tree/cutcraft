@@ -15,9 +15,13 @@ import { HEX, UV } from "./glsl";
 const colorKey = shaderDefinition("effect", {
   name: "colorKey",
   params: z.object({
+    /** The colour to key out: the screen's colour. */
     color: HEX.default("#00ff00"),
+    /** How far a colour may lie from the key colour and still be removed fully. */
     tolerance: z.number().min(0).max(1).default(0.3),
+    /** How wide the fade is between removed and kept colours, past `tolerance`. */
     softness: z.number().min(0).max(1).default(0.1),
+    /** How much of the screen's light bounced onto the subject to take out: 0 keeps it, 1 removes it fully. */
     spill: z.number().min(0).max(1).default(0.5),
   }),
   shader: `vec2 ck_chroma(vec3 c) {
@@ -64,12 +68,17 @@ const regionBlur = {
   ...shaderDefinition("effect", {
     name: "regionBlur",
     params: z.object({
+      /** The box to blur, as `[x, y, width, height]` fractions of the frame from the top left. */
       box: z
         .tuple([z.number(), z.number(), z.number().positive(), z.number().positive()])
         .default([0.25, 0.25, 0.5, 0.5]),
+      /** How strong the blur is, in pixels: the Gaussian's standard deviation. */
       radius: z.number().min(0).max(200).default(7),
+      /** How far in from the box's edge the blur fades in, in pixels. */
       feather: z.number().min(0).max(500).default(10),
+      /** How round the box's corners are: 0 is square, 1 rounds the short side fully. */
       roundness: z.number().min(0).max(1).default(0),
+      /** Blur everything outside the box instead of inside it. */
       inverted: z.boolean().default(false),
     }),
     passes: REGION_BLUR.passes,
@@ -86,9 +95,13 @@ const regionBlur = {
 const cornerPin = shaderDefinition("effect", {
   name: "cornerPin",
   params: z.object({
+    /** Where the picture's top-left corner goes, as `[x, y]` fractions of the frame from the top left. */
     topLeft: UV.default([0, 0]),
+    /** Where the picture's top-right corner goes, as `[x, y]` fractions of the frame from the top left. */
     topRight: UV.default([1, 0]),
+    /** Where the picture's bottom-right corner goes, as `[x, y]` fractions of the frame from the top left. */
     bottomRight: UV.default([1, 1]),
+    /** Where the picture's bottom-left corner goes, as `[x, y]` fractions of the frame from the top left. */
     bottomLeft: UV.default([0, 1]),
   }),
   shader: `vec4 effect(vec2 uv) {
@@ -120,8 +133,11 @@ const cornerPin = shaderDefinition("effect", {
 const zoomBlur = shaderDefinition("effect", {
   name: "zoomBlur",
   params: z.object({
+    /** How long the streaks are at the corners, in pixels; they shorten toward the centre. */
     length: z.number().min(0).max(500).default(40),
+    /** The point the streaks run toward, as `[x, y]` fractions of the frame from the top left. */
     center: UV.default([0.5, 0.5]),
+    /** The most reads along each streak: more is smoother and slower. */
     samples: z.number().int().min(1).max(64).default(24),
   }),
   shader: `vec4 effect(vec2 uv) {
@@ -148,9 +164,13 @@ const zoomBlur = shaderDefinition("effect", {
 const chromaticAberration = shaderDefinition("effect", {
   name: "chromaticAberration",
   params: z.object({
+    /** How far red and blue split from green, in pixels; with `radial`, the split at the corners. */
     distance: z.number().min(0).max(100).default(4),
+    /** The direction of the split, in degrees clockwise from up: 90 splits sideways. Unused with `radial`. */
     angle: z.number().default(90),
+    /** Split outward from `center`, growing toward the edges as a lens does, instead of along `angle`. */
     radial: z.boolean().default(false),
+    /** Where a radial split points out from, as `[x, y]` fractions of the frame from the top left. */
     center: UV.default([0.5, 0.5]),
   }),
   shader: `vec4 effect(vec2 uv) {

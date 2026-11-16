@@ -4,12 +4,19 @@ import { Shape, Title } from "../jsx/elements";
 import { h, parse, timing, timingOf, timingSchema } from "./shared";
 
 export const badgeSchema = timingSchema.extend({
+  /** The component's id; each of its parts' ids starts with it. */
   id: z.string(),
+  /** The word on the pill; the pill widens to fit it. */
   text: z.string(),
+  /** The pill's centre, in pixels from the frame's centre. */
   x: z.number().default(0),
+  /** The pill's centre, in pixels below the frame's centre. */
   y: z.number().default(0),
+  /** Letter height in pixels; the pill scales with it. */
   size: z.number().positive().default(30),
+  /** The pill's colour. */
   color: z.string().default("$accent"),
+  /** The letters' colour. */
   textColor: z.string().default("$background"),
 });
 

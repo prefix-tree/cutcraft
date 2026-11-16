@@ -1,3 +1,7 @@
+---
+editLink: false
+---
+
 # `dipToBlack`
 
 Fades out to black, then in to the next clip.
@@ -14,8 +18,8 @@ The coffee footage is Pixabay videos [209419](https://pixabay.com/videos/id-2094
 
 Drawn without a shader.
 
-| param | type | default |
-|---|---|---|
-| `holdDuration` | number (0..30) | `0.1` |
+| param | type | default | description |
+|---|---|---|---|
+| `holdDuration` | number (0..30) | `0.1` | How long the picture holds at full black around the middle, in seconds. |
 
 [All effects and transitions](/reference/effects/) · [Units](/reference/effects/#units)

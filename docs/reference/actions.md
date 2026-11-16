@@ -1,240 +1,244 @@
+---
+editLink: false
+---
+
 # Actions
 
 Generated from the registered handlers (115). Do not edit by hand; run `pnpm docs:gen`.
 
-Every action has `validate`, `apply`, `invert` and `fold`; the inverse is never null. Params are typed in `packages/kit/src/actions/types/index.ts`.
+Every action has `validate`, `apply`, `invert` and `fold`; the inverse is never null. Each runs as `{ type, params }`; the params and notes here are read from `packages/kit/src/actions/types/index.ts`.
 
 ## `adjustment/`
 
-| action | note |
-|---|---|
-| `adjustment/create` |  |
-| `adjustment/remove` |  |
-| `adjustment/update` |  |
+| action | params | what it does |
+|---|---|---|
+| `adjustment/create` | `{ id, kind, trackId, place, props, text?, children?, after? }` | Adds an &lt;Adjustment> layer to a track at `place`, with its props. |
+| `adjustment/remove` | `{ id }` | Deletes an adjustment layer. |
+| `adjustment/update` | `{ id, props }` | Sets literal props on an adjustment layer. |
 
 ## `audio/`
 
-| action | note |
-|---|---|
-| `audio/add` |  |
-| `audio/setAutomation` |  |
-| `audio/setDuck` |  |
-| `audio/setFade` |  |
-| `audio/setVolume` |  |
+| action | params | what it does |
+|---|---|---|
+| `audio/add` | `{ id, trackId, src, place, in?, out?, duration? }` | An &lt;Audio> (sound only: music, a voice-over), placed like a clip; `duration: "fill"` runs to the composition's end. |
+| `audio/setAutomation` | `{ id, lane, points }` | Replaces one automation lane, `volume` or `pan`, with `[seconds, value]` points. |
+| `audio/setDuck` | `{ id, duck? }` | Turns this sound down to `to` while the track `under` plays, over `attack` and `release` seconds; omit `duck` to stop ducking. `under` is a track id or a track role, as in a file. |
+| `audio/setFade` | `{ id, in?, out? }` | Sets the fade-in and/or fade-out length in seconds; merges into `fade`. |
+| `audio/setVolume` | `{ id, volume }` | Sets the element's volume, 0 to 4 (1 leaves it as recorded). |
 
 ## `batch/`
 
-| action | note |
-|---|---|
-| `batch/apply` | one history entry for multi-action gestures and compound inverses |
+| action | params | what it does |
+|---|---|---|
+| `batch/apply` | `{ actions }` | Runs several actions as one history entry, each checked against the state the one before left; its undo is their inverses in reverse. Multi-action gestures and compound inverses use it. |
 
 ## `caption/`
 
-| action | note |
-|---|---|
-| `caption/add` |  |
-| `caption/import` |  |
-| `caption/remove` |  |
-| `caption/restore` |  |
-| `caption/setAll` |  |
-| `caption/setAnimation` | caption animation style as its own action |
-| `caption/setStyle` |  |
-| `caption/update` |  |
+| action | params | what it does |
+|---|---|---|
+| `caption/add` | `{ captionsId, captionId, start, end, text, words? }` | Adds one cue; if the cues were generated from `src`, they all become literal first. |
+| `caption/import` | `{ captionsId, src?, items? }` | Creates the composition's one &lt;Captions> from `src` or `items`, or replaces the src and items of the existing one. |
+| `caption/remove` | `{ captionId }` | Deletes one cue; deleting a generated cue makes the others literal first. |
+| `caption/restore` | `{ captionsId, node, after }` | The undo of caption/remove: puts the cue back where it was. |
+| `caption/setAll` | `{ captionsId, nodes, after? }` | Replaces every literal cue with `nodes`; empty `nodes` lets the cues generated from `src` come back. |
+| `caption/setAnimation` | `{ captionsId, animation }` | Sets how caption words animate in (`animation`), separate from the style. |
+| `caption/setStyle` | `{ captionsId, style? }` | Sets the captions' `style`; omit it to clear. |
+| `caption/update` | `{ captionId, text?, start?, end?, words? }` | Changes a cue's text, times or words; editing a generated cue makes every cue literal first. |
 
 ## `clip/`
 
-| action | note |
-|---|---|
-| `clip/add` |  |
-| `clip/closeGapBefore` |  |
-| `clip/merge` |  |
-| `clip/move` |  |
-| `clip/remove` |  |
-| `clip/restore` |  |
-| `clip/restoreTiming` |  |
-| `clip/rippleDelete` |  |
-| `clip/rippleRestore` |  |
-| `clip/roll` |  |
-| `clip/setAnchor` |  |
-| `clip/setBlend` |  |
-| `clip/setFit` |  |
-| `clip/setReverse` |  |
-| `clip/setSource` | media-slot replacement |
-| `clip/setSpeed` |  |
-| `clip/slide` |  |
-| `clip/slip` |  |
-| `clip/split` |  |
-| `clip/trim` |  |
-| `clip/trimToPlayhead` |  |
+| action | params | what it does |
+|---|---|---|
+| `clip/add` | `{ id, trackId, src, place, in?, out?, duration? }` | Puts a &lt;Clip> of `src` on a track at `place`; `in` with `out` or `duration` picks the source range (not both). |
+| `clip/closeGapBefore` | `{ id }` | Closes the gap before an element: on a free track it and every later element shift left to meet the previous one; on a sequence the &lt;Gap> before it is removed. |
+| `clip/merge` | `{ id, rightId, original }` | The undo of clip/split: removes both halves and puts back the `original` element. |
+| `clip/move` | `{ id, trackId?, place }` | Moves an element: reorders it in a sequence (`after`), sets its start on a free track, or re-anchors it; `trackId` moves it to another track. A generated element must be baked first. |
+| `clip/remove` | `{ id }` | Deletes an element from its track: a clip, gap, title or anything else placed on a track. |
+| `clip/restore` | `{ id, node, trackId, place }` | The undo of clip/remove: puts the element back on its track at its old placement. |
+| `clip/restoreTiming` | `{ id, in?, out?, duration?, start? }` | Writes back the given timing props (`in`, `out`, `duration`, `start`) as they were; used to undo timing edits. |
+| `clip/rippleDelete` | `{ id }` | Deletes the element and, on a free track, pulls every later element left by its length; a sequence closes up by itself. |
+| `clip/rippleRestore` | `{ id, node, trackId, place, affected }` | The undo of clip/rippleDelete: puts the element back and restores the starts it shifted. |
+| `clip/roll` | `{ leftId, rightId, delta }` | Moves the cut between two adjacent source clips by `delta`; the total length stays the same. |
+| `clip/setAnchor` | `{ id, anchor?, offset? }` | Anchors the element to another element (or `"start"`) at `offset` seconds; omit `anchor` to unanchor. A new anchor drops a word `at`. |
+| `clip/setBlend` | `{ id, mode?, opacity? }` | Sets the blend `mode` and/or blend `opacity` of a visual element. |
+| `clip/setFit` | `{ id, value? }` | Sets how a clip or nested scene fills the frame (`fit`); omit `value` to reset it. |
+| `clip/setReverse` | `{ id, value }` | Plays the source backwards, or forwards again. |
+| `clip/setSource` | `{ id, src }` | Replaces the media in a slot: swaps `src` on a clip, audio, svg or sticker and keeps its timing and everything else. |
+| `clip/setSpeed` | `{ id, speed }` | Sets playback speed, 0.1 to 20; the timeline length follows and `out` stays. |
+| `clip/slide` | `{ id, delta }` | Moves a clip by `delta` between its neighbours, keeping its content; the previous clip's tail and the next clip's head absorb it. Both neighbours must be source clips. |
+| `clip/slip` | `{ id, delta }` | Shifts the source window by `delta` seconds without moving the element on the timeline. |
+| `clip/split` | `{ id, at, newId }` | Cuts an element in two at timeline time `at`; the right half gets `newId`, and keyframes, speed keys and freezes go to the half they fall in. |
+| `clip/trim` | `{ id, edge, value }` | Moves one edge. For a source clip `value` is the new source in or out (seconds, or a transcript or shot reference); for anything else it is the timeline time of that edge. |
+| `clip/trimToPlayhead` | `{ id, at, edge }` | Trims the `in` or `out` edge to timeline time `at`, which must fall inside the element. |
 
 ## `composition/`
 
-| action | note |
-|---|---|
-| `composition/setBackground` |  |
-| `composition/setProps` | the tweaks panel: rewrites the file's `defaults` literal |
-| `composition/setTheme` | the file's theme: swap it, extend it or remove it in one step |
-| `composition/updateSettings` |  |
+| action | params | what it does |
+|---|---|---|
+| `composition/setBackground` | `{ mode?, color? }` | Sets what shows behind every track: a `color`, or a `blur` of the picture; merges into the current `background`. |
+| `composition/setProps` | `{ defaults }` | The tweaks panel: rewrites the file's `defaults` literal. |
+| `composition/setTheme` | `{ theme, merge? }` | Swap the theme (or remove it with null); with `merge`, lay the given parts over the current theme instead. |
+| `composition/updateSettings` | `{ fps?, width?, height?, sampleRate?, channels? }` | Sets the composition's fps, size, sample rate or channel count; only the fields given change. |
 
 ## `effect/`
 
-| action | note |
-|---|---|
-| `effect/add` |  |
-| `effect/remove` |  |
-| `effect/restore` |  |
-| `effect/setOrder` |  |
-| `effect/setStack` |  |
-| `effect/toggle` |  |
-| `effect/update` |  |
+| action | params | what it does |
+|---|---|---|
+| `effect/add` | `{ id, childId, type, params?, index? }` | Adds an effect of `type` (built in, or a shader the file declares) to element `id` at `index` (last by default), turned on. |
+| `effect/remove` | `{ id, childId }` | Removes one effect from an element's stack. |
+| `effect/restore` | `{ id, node, after }` | The undo of effect/remove: puts the effect back at its old place in the stack. |
+| `effect/setOrder` | `{ id, childIds }` | Reorders an element's effect stack; `childIds` must name every effect once. |
+| `effect/setStack` | `{ id, nodes, after? }` | Replaces an element's whole effect stack with `nodes`. |
+| `effect/toggle` | `{ id, childId, enabled }` | Turns one effect on or off without removing it. |
+| `effect/update` | `{ id, childId, params }` | Merges `params` into one effect's params. |
 
 ## `font/`
 
-| action | note |
-|---|---|
-| `font/use` |  |
+| action | params | what it does |
+|---|---|---|
+| `font/use` | `{ id?, role?, family, weight? }` | Set a font from a picker: on a title or the captions (`id`), or as a theme role (`role`: `heading`, `body`, `mono`). The family is bundled, declared in the file, or in the font catalogue; a catalogue family the file does not declare is loaded for the preview at once, and the fold writes its `googleFont()` declaration. |
 
 ## `keyframe/`
 
-| action | note |
-|---|---|
-| `keyframe/add` |  |
-| `keyframe/move` |  |
-| `keyframe/remove` |  |
-| `keyframe/restore` | undo of keyframe/remove keeps its easing |
-| `keyframe/setAll` |  |
-| `keyframe/update` |  |
+| action | params | what it does |
+|---|---|---|
+| `keyframe/add` | `{ id, keyId, property?, param?, at, value, easing? }` | `property` animates the element `id`; `param` animates a param of the effect `id`. One of the two. |
+| `keyframe/move` | `{ id, keyId, at }` | Moves a keyframe to `at`, seconds from the element's start; it must stay inside the element. |
+| `keyframe/remove` | `{ id, keyId }` | Deletes one keyframe. |
+| `keyframe/restore` | `{ id, node, after }` | The undo of keyframe/remove: puts the keyframe back in place, with its value and easing. |
+| `keyframe/setAll` | `{ id, nodes, after? }` | Replaces every keyframe on the element with `nodes`. |
+| `keyframe/update` | `{ id, keyId, value?, easing? }` | Changes a keyframe's value and/or easing. |
 
 ## `layer/`
 
-| action | note |
-|---|---|
-| `layer/setProps` | the handles of a Layer's component |
-| `layer/setTiming` | the &lt;Layer> escape hatch |
-| `layer/setTransform` | the &lt;Layer> escape hatch |
+| action | params | what it does |
+|---|---|---|
+| `layer/setProps` | `{ id, props }` | Sets the handles of a Layer: the props of the one component inside it. |
+| `layer/setTiming` | `{ id, duration?, anchor?, offset?, start? }` | Sets a &lt;Layer>'s duration, anchor, offset or start; the escape hatch for timing a Layer. A new anchor drops a word `at`. |
+| `layer/setTransform` | `{ id, transform }` | Deep-merges `transform` into a &lt;Layer>'s transform; the escape hatch for placing a Layer. |
 
 ## `marker/`
 
-| action | note |
-|---|---|
-| `marker/add` |  |
-| `marker/remove` |  |
-| `marker/restore` |  |
-| `marker/update` |  |
+| action | params | what it does |
+|---|---|---|
+| `marker/add` | `{ markerId, at, label?, color? }` | Adds a timeline marker at `at` seconds, with an optional label and colour. |
+| `marker/remove` | `{ markerId }` | Deletes a marker. |
+| `marker/restore` | `{ node, after }` | The undo of marker/remove: puts the marker back where it was. |
+| `marker/update` | `{ markerId, at?, label?, color? }` | Changes a marker's time, label or colour. |
 
 ## `mask/`
 
-| action | note |
-|---|---|
-| `mask/create` |  |
-| `mask/remove` |  |
-| `mask/restore` | undo of mask/remove |
-| `mask/setPath` |  |
-| `mask/update` |  |
+| action | params | what it does |
+|---|---|---|
+| `mask/create` | `{ id, parentId, props }` | Adds a mask to the visual element `parentId`. |
+| `mask/remove` | `{ id }` | Deletes a mask. |
+| `mask/restore` | `{ id, parentId, node, after }` | The undo of mask/remove: puts the mask back on its element. |
+| `mask/setPath` | `{ id, path }` | Gives a mask a drawn `path`, replacing its preset `shape`. |
+| `mask/update` | `{ id, props }` | Sets literal props on a mask. |
 
 ## `multicam/`
 
-| action | note |
-|---|---|
-| `multicam/addCut` |  |
-| `multicam/create` |  |
-| `multicam/flatten` |  |
-| `multicam/moveCut` |  |
-| `multicam/remove` | a multicam group is an element and can be deleted |
-| `multicam/removeCut` |  |
-| `multicam/restore` |  |
-| `multicam/restoreCut` | undo of removeCut |
+| action | params | what it does |
+|---|---|---|
+| `multicam/addCut` | `{ id, cutId, at, angle }` | Adds a cut at `at` that switches the multicam to `angle`. |
+| `multicam/create` | `{ id, trackId, place, angles, sync? }` | Adds a &lt;Multicam> of `angles` to a track at `place`; `sync` is the timeline time the angles line up at. |
+| `multicam/flatten` | `{ id }` | Replaces the multicam by one literal &lt;Clip> per cut, at the time and source range the cut played; free tracks only. |
+| `multicam/moveCut` | `{ cutId, at }` | Moves a cut to `at`. |
+| `multicam/remove` | `{ id }` | Deletes a multicam group with its angles and cuts; a group is an element like any other. |
+| `multicam/removeCut` | `{ cutId }` | Deletes a cut. |
+| `multicam/restore` | `{ id, node, trackId, place }` | The undo of multicam/remove: puts the group back on its track at its old placement. |
+| `multicam/restoreCut` | `{ id, node, after }` | The undo of multicam/removeCut: puts the cut back in place. |
 
 ## `nested/`
 
-| action | note |
-|---|---|
-| `nested/create` |  |
-| `nested/extract` |  |
-| `nested/remove` |  |
-| `nested/update` |  |
+| action | params | what it does |
+|---|---|---|
+| `nested/create` | `{ id, kind, trackId, place, props, text?, children?, after? }` | Adds a &lt;Nested> scene to a track at `place`, with its props. |
+| `nested/extract` | `{ id }` | Replaces a &lt;Nested> scene by its contents: one free track per inner track, inserted below, every item at the time it played; on a sequence a &lt;Gap> keeps its slot. |
+| `nested/remove` | `{ id }` | Deletes a nested scene. |
+| `nested/update` | `{ id, props }` | Sets literal props on a nested scene. |
 
 ## `shape/`
 
-| action | note |
-|---|---|
-| `shape/create` |  |
-| `shape/remove` |  |
-| `shape/update` |  |
+| action | params | what it does |
+|---|---|---|
+| `shape/create` | `{ id, kind, trackId, place, props, text?, children?, after? }` | Adds a &lt;Shape> to a track at `place`, with its props. |
+| `shape/remove` | `{ id }` | Deletes a shape. |
+| `shape/update` | `{ id, props }` | Sets literal props on a shape. |
 
 ## `source/`
 
-| action | note |
-|---|---|
-| `source/bake` | expand generated elements into literals |
-| `source/setProp` | generic inspector write |
-| `source/setProps` | the inverse of every prop-writing action |
+| action | params | what it does |
+|---|---|---|
+| `source/bake` | `{ id }` | Marks a generated element so the next fold writes it and its children as literals; undo is a file revert. |
+| `source/setProp` | `{ id, prop, value }` | Writes one literal prop on any element; the inspector's generic write. |
+| `source/setProps` | `{ id, props }` | Several literal props at once; the inverse of every prop-writing action. |
 
 ## `speed/`
 
-| action | note |
-|---|---|
-| `speed/setFreezes` |  |
-| `speed/setKeys` |  |
+| action | params | what it does |
+|---|---|---|
+| `speed/setFreezes` | `{ id, freezes, after? }` | Replaces the element's freeze frames with `freezes`. |
+| `speed/setKeys` | `{ id, keys, after? }` | Replaces the element's speed-ramp keys with `keys`. |
 
 ## `sticker/`
 
-| action | note |
-|---|---|
-| `sticker/create` |  |
-| `sticker/remove` |  |
-| `sticker/update` |  |
+| action | params | what it does |
+|---|---|---|
+| `sticker/create` | `{ id, kind, trackId, place, props, text?, children?, after? }` | Adds a &lt;Sticker> to a track at `place`, with its props. |
+| `sticker/remove` | `{ id }` | Deletes a sticker. |
+| `sticker/update` | `{ id, props }` | Sets literal props on a sticker. |
 
 ## `svg/`
 
-| action | note |
-|---|---|
-| `svg/create` |  |
-| `svg/remove` |  |
-| `svg/update` |  |
+| action | params | what it does |
+|---|---|---|
+| `svg/create` | `{ id, kind, trackId, place, props, text?, children?, after? }` | Adds an &lt;Svg> to a track at `place`, with its props. |
+| `svg/remove` | `{ id }` | Deletes an svg. |
+| `svg/update` | `{ id, props }` | Sets literal props on an svg. |
 
 ## `text/`
 
-| action | note |
-|---|---|
-| `text/create` |  |
-| `text/remove` |  |
-| `text/setContent` |  |
-| `text/update` |  |
+| action | params | what it does |
+|---|---|---|
+| `text/create` | `{ id, kind, trackId, place, props, text?, children?, after? }` | Adds a &lt;Title> to a track at `place`, with its props and text. |
+| `text/remove` | `{ id }` | Deletes a title. |
+| `text/setContent` | `{ id, text }` | Replaces a title's text. |
+| `text/update` | `{ id, props }` | Sets literal props on a title. |
 
 ## `theme/`
 
-| action | note |
-|---|---|
-| `theme/setToken` | one palette colour, font role or radius in the file's theme |
+| action | params | what it does |
+|---|---|---|
+| `theme/setToken` | `{ token, value }` | One theme value: a palette colour, a font role or `radius`, by token name without the `$`. |
 
 ## `track/`
 
-| action | note |
-|---|---|
-| `track/add` |  |
-| `track/consolidate` |  |
-| `track/duplicate` |  |
-| `track/remove` |  |
-| `track/rename` |  |
-| `track/reorder` |  |
-| `track/restore` |  |
-| `track/restorePositions` |  |
-| `track/setFlag` |  |
-| `track/setGroup` |  |
-| `track/setLayout` | sequence ↔ free |
+| action | params | what it does |
+|---|---|---|
+| `track/add` | `{ trackId, position?, layout?, role?, name? }` | Adds an empty track at `position` (last by default), with an optional layout, role and name. |
+| `track/consolidate` | `{ trackId }` | Free tracks only: packs every element from 0 with no gaps, keeping their order. |
+| `track/duplicate` | `{ sourceTrackId, trackId, idMap, position? }` | Copies a track and its contents to `position` (below the source by default), named "&lt;name> Copy"; `idMap` names the copies, other ids get a `_<trackId>` suffix, and anchors inside the track follow the copies. |
+| `track/remove` | `{ trackId }` | Deletes a track and everything on it. |
+| `track/rename` | `{ trackId, name }` | Sets the track's name. |
+| `track/reorder` | `{ trackId, position }` | Moves the track to `position` in the stack. |
+| `track/restore` | `{ trackId, node, position }` | The undo of track/remove: puts the track back where it was, with its contents. |
+| `track/restorePositions` | `{ trackId, positions }` | Sets the `start` of several elements at once; the undo of track/consolidate and of clip/closeGapBefore on a free track. |
+| `track/setFlag` | `{ trackId, flag, value }` | Turns one track flag on or off: `locked`, `hidden`, `muted` or `solo`. |
+| `track/setGroup` | `{ trackId, group? }` | Puts the track in a group, or takes it out when `group` is omitted. |
+| `track/setLayout` | `{ trackId, layout }` | Switches a track between sequence and free layout, keeping every element where it played: free gets explicit starts, sequence gets a &lt;Gap> per hole. Overlapping items cannot become a sequence. |
 
 ## `transform/`
 
-| action | note |
-|---|---|
-| `transform/update` |  |
+| action | params | what it does |
+|---|---|---|
+| `transform/update` | `{ id, transform }` | Deep-merges `transform` into a visual element's transform; only the fields given change. |
 
 ## `transition/`
 
-| action | note |
-|---|---|
-| `transition/add` |  |
-| `transition/remove` |  |
-| `transition/restore` |  |
-| `transition/update` |  |
+| action | params | what it does |
+|---|---|---|
+| `transition/add` | `{ transitionId, between, type, duration, params? }` | Adds a transition between two adjacent clips on a sequence track (`between: [a, b]`), or on one edge of a clip on any track (`{ on, edge }`); it may not be longer than its clips. |
+| `transition/remove` | `{ transitionId }` | Deletes a transition. |
+| `transition/restore` | `{ transitionId, node, trackId, after }` | The undo of transition/remove: puts the transition back where it was. |
+| `transition/update` | `{ transitionId, type?, duration?, params? }` | Changes a transition's type, duration or params; a new `type` resets params to its defaults plus any given. |

@@ -1,3 +1,7 @@
+---
+editLink: false
+---
+
 # `Highlight`
 
 A hand-drawn underline, marker stroke, circle or strike on something in the frame.
@@ -12,14 +16,14 @@ A hand-drawn underline, marker stroke, circle or strike on something in the fram
 
 Besides the timing props (`start`, `anchor`, `at`, `offset`, `duration`):
 
-| param | type | default |
-|---|---|---|
-| `id` | string |  |
-| `variant` | "underline" \| "marker" \| "circle" \| "strike" | `"underline"` |
-| `x` | number | `0` |
-| `y` | number | `0` |
-| `width` | number |  |
-| `height` | number |  |
-| `color` | string | `"$accent"` |
+| param | type | default | description |
+|---|---|---|---|
+| `id` | string |  | The id of the element it draws. |
+| `variant` | "underline" \| "marker" \| "circle" \| "strike" | `"underline"` | `underline` under it, `marker` behind it, `circle` round it, `strike` through it. |
+| `x` | number | `0` | What it marks: a box's centre and size, in pixels from the frame's centre. |
+| `y` | number | `0` | The marked box's centre, in pixels below the frame's centre. |
+| `width` | number (> 0) |  | The marked box's width in pixels. |
+| `height` | number (> 0) |  | The marked box's height in pixels; a marker stroke is about as thick. |
+| `color` | string | `"$accent"` | The mark's colour; a marker stroke is drawn see-through. |
 
 [All components](/reference/components/)

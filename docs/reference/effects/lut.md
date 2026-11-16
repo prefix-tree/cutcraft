@@ -1,3 +1,7 @@
+---
+editLink: false
+---
+
 # `lut`
 
 Grades through a 3D lookup table from a `.cube` file.
@@ -14,9 +18,9 @@ The coffee footage is Pixabay videos [209419](https://pixabay.com/videos/id-2094
 
 Drawn as a shader.
 
-| param | type | default |
-|---|---|---|
-| `src` | string |  |
-| `amount` | number (0..1) | `1` |
+| param | type | default | description |
+|---|---|---|---|
+| `src` | string |  | The lookup table, as `"asset:<id>"`: a `.cube` file in the manifest. |
+| `amount` | number (0..1) | `1` | How much of the graded picture to mix in: 0 leaves the picture as it was, 1 is the full grade. |
 
 [All effects and transitions](/reference/effects/) · [Units](/reference/effects/#units)

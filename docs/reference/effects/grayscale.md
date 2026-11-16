@@ -1,3 +1,7 @@
+---
+editLink: false
+---
+
 # `grayscale`
 
 Takes the colour out.
@@ -14,8 +18,8 @@ The coffee footage is Pixabay videos [209419](https://pixabay.com/videos/id-2094
 
 Drawn as a CSS filter; no WebGL needed.
 
-| param | type | default |
-|---|---|---|
-| `amount` | number (0..1) | `1` |
+| param | type | default | description |
+|---|---|---|---|
+| `amount` | number (0..1) | `1` | How much colour to take out: 0 leaves the picture as it was, 1 is fully grey. |
 
 [All effects and transitions](/reference/effects/) · [Units](/reference/effects/#units)

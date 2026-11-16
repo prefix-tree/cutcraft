@@ -24,4 +24,4 @@ Image assets report a duration of 0 and are held for `duration`. The push is two
 ## What to check
 
 - No lint warnings expected.
-- `captureSheet([0.5, 3.7, 7.5, 13.5])`: the title, a crossfade mid-way, a pushed-in photo, the last photo.
+- `npx cutcraft look slideshow.tsx --at 0.5,3.7,7.5,13.5`: the title, a crossfade mid-way, a pushed-in photo, the last photo.

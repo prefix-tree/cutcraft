@@ -18,11 +18,17 @@ const BOX = z.tuple([z.number(), z.number(), z.number().positive(), z.number().p
 const halftone = shaderDefinition("effect", {
   name: "halftone",
   params: z.object({
+    /** How big each dot's cell is, in pixels. */
     size: z.number().min(2).max(200).default(8),
+    /** How far the dot grid is turned, in degrees. In `cmyk` it is the black screen's angle, and the others are set from it. */
     angle: z.number().default(45),
+    /** `mono` prints `ink` on `paper` by brightness; `cmyk` prints cyan, magenta, yellow and black dots, each on its own screen. */
     mode: z.enum(["mono", "cmyk"]).default("mono"),
+    /** The colour of the dots in `mono`. */
     ink: HEX.default("#111111"),
+    /** The colour under the dots. */
     paper: HEX.default("#ffffff"),
+    /** How much of the effect to mix in: 0 leaves the picture as it was, 1 is the full effect. */
     amount: z.number().min(0).max(1).default(1),
   }),
   shader: glsl`${COLOUR}vec2 ht_turn(vec2 p, float a) { float s = sin(a), c = cos(a); return vec2(c * p.x - s * p.y, s * p.x + c * p.y); }
@@ -78,8 +84,11 @@ vec4 effect(vec2 uv) {
 const pixelate = shaderDefinition("effect", {
   name: "pixelate",
   params: z.object({
+    /** How big each mosaic cell is, in pixels; 1 leaves the picture as it was. */
     size: z.number().min(1).max(200).default(12),
+    /** The part of the frame to pixelate, as `[x, y, width, height]` fractions of the frame from the top left. */
     box: BOX.default([0, 0, 1, 1]),
+    /** How far in from the box's edge the mosaic fades in, in pixels. */
     feather: z.number().min(0).max(500).default(0),
   }),
   shader: `vec4 effect(vec2 uv) {
@@ -102,10 +111,15 @@ const pixelate = shaderDefinition("effect", {
 const scanlines = shaderDefinition("effect", {
   name: "scanlines",
   params: z.object({
+    /** The distance from one line to the next, in pixels. */
     spacing: z.number().min(2).max(200).default(4),
+    /** How much of the space between lines each dark line covers. */
     thickness: z.number().min(0).max(1).default(0.5),
+    /** How dark the lines are: 0 is invisible, 1 is black. */
     intensity: z.number().min(0).max(1).default(0.35),
+    /** How fast the lines roll across the picture, in pixels per second. */
     speed: z.number().min(-2000).max(2000).default(0),
+    /** How far the lines are turned, in degrees: 0 is horizontal, 90 vertical. */
     angle: z.number().default(0),
   }),
   shader: glsl`${COLOUR}vec4 effect(vec2 uv) {
@@ -130,10 +144,15 @@ const scanlines = shaderDefinition("effect", {
 const lightLeak = shaderDefinition("effect", {
   name: "lightLeak",
   params: z.object({
+    /** The colour of the light. */
     color: HEX.default("#ff8a3d"),
+    /** How bright the light is: the most it lightens the picture. */
     intensity: z.number().min(0).max(1).default(0.6),
+    /** How far each bloom of light spreads, as a share of the frame's diagonal. */
     spread: z.number().min(0.05).max(2).default(0.6),
+    /** How fast the light wanders and pulses, in changes per second. */
     evolution: z.number().min(0).max(10).default(0.15),
+    /** Picks the pattern; the same seed draws the same light. */
     seed: z.number().int().min(0).default(0),
   }),
   shader: glsl`${NOISE}${BLEND}vec4 effect(vec2 uv) {
@@ -166,13 +185,21 @@ const lightLeak = shaderDefinition("effect", {
 const fractalNoise = shaderDefinition("effect", {
   name: "fractalNoise",
   params: z.object({
+    /** How big the noise's features are, in pixels. */
     size: z.number().min(2).max(2000).default(160),
+    /** How many layers of finer detail the noise has. */
     octaves: z.number().int().min(1).max(8).default(5),
+    /** How fast the pattern changes in place, in changes per second. */
     evolution: z.number().min(0).max(10).default(0.2),
+    /** How far the noise is stretched from mid-grey, as a multiplier. */
     contrast: z.number().min(0).max(10).default(1),
+    /** The colour the noise is tinted with. */
     color: HEX.default("#ffffff"),
+    /** How the noise is blended onto the picture, as a W3C blend mode. */
     blend: z.enum(BLEND_MODES).default("overlay"),
+    /** How much of the blended noise to mix in: 0 leaves the picture as it was, 1 is the full blend. */
     opacity: z.number().min(0).max(1).default(0.5),
+    /** Picks the pattern; the same seed draws the same noise. */
     seed: z.number().int().min(0).default(0),
   }),
   shader: glsl`${NOISE3}${BLEND}vec4 effect(vec2 uv) {

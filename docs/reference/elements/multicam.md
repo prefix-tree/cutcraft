@@ -1,3 +1,7 @@
+---
+editLink: false
+---
+
 # `<Multicam>`
 
 Several camera angles of one take; `<Cut>`s pick which one shows.
@@ -12,10 +16,10 @@ Several camera angles of one take; `<Cut>`s pick which one shows.
 
 ## Props
 
-| prop | type | default | required |
-|---|---|---|---|
-| `id` | string |  | yes |
-| `name` | string |  |  |
-| `sync` | number (0..∞) | `0` |  |
+| prop | type | default | required | description |
+|---|---|---|---|---|
+| `id` | string |  | yes | The group's name. |
+| `name` | string |  |  | A label for the editor. |
+| `sync` | number (0..∞) | `0` |  | Timeline time at which every angle is aligned (plus each angle's own offset). |
 
 Children: `angle`, `cut`. [All elements](/reference/elements/)

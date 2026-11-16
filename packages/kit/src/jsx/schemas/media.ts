@@ -3,10 +3,15 @@ import { z } from "zod";
 import { assetRefSchema, audioProps, timedProps, timeRefSchema, visualProps } from "./common";
 
 const sourceProps = {
+  /** The media, as `asset:<id>` from the manifest. */
   src: assetRefSchema,
+  /** Where in the source it starts: seconds, or a word, shot or silence of its transcript (`word:12`). */
   in: timeRefSchema.optional(),
+  /** Where in the source it ends, as `in`; `word:40.end` ends after the word is said. */
   out: timeRefSchema.optional(),
+  /** Playback rate: 2 plays twice as fast and half as long. */
   speed: z.number().min(0.1).max(20).default(1),
+  /** Plays the trimmed source backwards. */
   reverse: z.boolean().default(false),
 };
 

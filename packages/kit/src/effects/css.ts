@@ -53,20 +53,73 @@ const css = <S extends z.ZodRawShape>(
   css: write,
 });
 
-export const brightness = css({ amount: change(0) }, (p) => `brightness(${1 + num(p, "amount", 0)})`);
-export const contrast = css({ amount: change(0) }, (p) => `contrast(${1 + num(p, "amount", 0)})`);
-export const saturation = css({ amount: change(0) }, (p) => `saturate(${1 + num(p, "amount", 0)})`);
-export const blur = css({ radius: z.number().min(0).max(200).default(4) }, (p) => `blur(${num(p, "radius", 4)}px)`);
-export const hue = css({ angle: z.number().default(0) }, (p) => `hue-rotate(${num(p, "angle", 0)}deg)`);
-export const grayscale = css({ amount: share(1) }, (p) => `grayscale(${num(p, "amount", 1)})`);
-export const sepia = css({ amount: share(1) }, (p) => `sepia(${num(p, "amount", 1)})`);
-export const invert = css({ amount: share(1) }, (p) => `invert(${num(p, "amount", 1)})`);
+export const brightness = css(
+  {
+    /** How much lighter or darker: -1 is black, 0 leaves the picture as it was, 1 doubles its brightness. */
+    amount: change(0),
+  },
+  (p) => `brightness(${1 + num(p, "amount", 0)})`,
+);
+export const contrast = css(
+  {
+    /** How far lights and darks move apart: -1 is flat grey, 0 leaves the picture as it was, 1 doubles the contrast. */
+    amount: change(0),
+  },
+  (p) => `contrast(${1 + num(p, "amount", 0)})`,
+);
+export const saturation = css(
+  {
+    /** How much richer or greyer the colours get: -1 is grey, 0 leaves the picture as it was, 1 doubles the saturation. */
+    amount: change(0),
+  },
+  (p) => `saturate(${1 + num(p, "amount", 0)})`,
+);
+export const blur = css(
+  {
+    /** How soft the picture gets, in pixels: the Gaussian's standard deviation, as CSS `blur()` reads it. */
+    radius: z.number().min(0).max(200).default(4),
+  },
+  (p) => `blur(${num(p, "radius", 4)}px)`,
+);
+export const hue = css(
+  {
+    /** How far every colour turns around the colour wheel, in degrees. */
+    angle: z.number().default(0),
+  },
+  (p) => `hue-rotate(${num(p, "angle", 0)}deg)`,
+);
+export const grayscale = css(
+  {
+    /** How much colour to take out: 0 leaves the picture as it was, 1 is fully grey. */
+    amount: share(1),
+  },
+  (p) => `grayscale(${num(p, "amount", 1)})`,
+);
+export const sepia = css(
+  {
+    /** How much to tone the picture brown: 0 leaves it as it was, 1 is full sepia. */
+    amount: share(1),
+  },
+  (p) => `sepia(${num(p, "amount", 1)})`,
+);
+export const invert = css(
+  {
+    /** How far to turn the picture into its negative: 0 leaves it as it was, 0.5 is flat grey, 1 is the full negative. */
+    amount: share(1),
+  },
+  (p) => `invert(${num(p, "amount", 1)})`,
+);
 export const shadow = css(
   {
+    /** How far the shadow falls to the right, in pixels; negative falls left. */
     x: z.number().default(0),
+    /** How far the shadow falls down, in pixels; negative falls up. */
     y: z.number().default(4),
+    /** How soft the shadow's edge is, in pixels: the blur's standard deviation. */
     radius: z.number().min(0).max(200).default(8),
+    /** The shadow's colour. */
     color: HEX.default("#000000"),
+    /** How dark the shadow is: 0 is invisible, 1 is solid colour. */
     opacity: share(0.5),
   },
   (p) =>

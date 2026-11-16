@@ -5,15 +5,25 @@ import { useLayer } from "../jsx/use-t";
 import { h, parse, timing, timingOf, timingSchema } from "./shared";
 
 export const counterSchema = timingSchema.extend({
+  /** The component's id; each of its parts' ids starts with it. */
   id: z.string(),
+  /** The number it counts from. */
   from: z.number().default(0),
+  /** The number it counts to and then holds. */
   to: z.number(),
+  /** How many digits show after the decimal point. */
   decimals: z.number().int().min(0).max(4).default(0),
+  /** Text before the number, such as `$`. */
   prefix: z.string().default(""),
+  /** Text after the number, such as `%`. */
   suffix: z.string().default(""),
+  /** A line under the number, in the body face and the muted colour. Left out: the number alone. */
   label: z.string().optional(),
+  /** The number's centre, in pixels from the frame's centre. */
   x: z.number().default(0),
+  /** The number's centre, in pixels below the frame's centre. */
   y: z.number().default(0),
+  /** The number's letter height in pixels; the label is about a fifth of it. */
   size: z.number().positive().default(140),
   /** Seconds the count takes; it then holds. */
   countFor: z.number().positive().default(1.5),

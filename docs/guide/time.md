@@ -1,16 +1,117 @@
-# Time by meaning
+# Timing
 
-A CutCraft file rarely says "at 8.43 seconds". It says "on word 12", "where the second shot ends", "right after the
-hook". CutCraft works out the seconds from the [asset manifest](./introduction#how-it-fits-together) and works them
-out again after every edit.
+Every element in a video says when it plays. Most of the time that is seconds, or nothing at all: a track plays its
+clips one after another. This page covers the ways to say when, from plain seconds to "start with the hook" and "on
+word 12".
 
 **See it in:** [Product launch](/examples#a-product-launch) (cuts and callouts on words),
 [Kinetic type](/examples#kinetic-type) (type on words), [Talking-head cut](/recipes/talking-head) (an answer cut to its
 sentences), [Multicam highlights](/recipes/highlights) (shots and silences).
 
-## Time references
+```tsx
+<Track id="main">
+  <Clip id="intro" src="asset:intro" />
+  <Clip id="demo" src="asset:demo" in={2} out={9} />
+</Track>
+<Track id="text" layout="free">
+  <Title id="name" start={1} duration={3}>Shed</Title>
+</Track>
+```
 
-`in` and `out` on a clip take seconds or a reference into the clip's source:
+`intro` plays first, then seconds 2 to 9 of `demo`. The title comes in at one second and stays for three.
+
+| To say | Write |
+|---|---|
+| Play after the one before | Nothing: put it on a sequence track. |
+| Start at a time | `start={1}` on a free track. |
+| Start with another element | `anchor="hook"`, plus `offset` seconds. |
+| Last a time, or as long as something else | `duration={3}`, `"source"`, `"fill"`, `{ match }`, `{ until }`. |
+| Cut or start on a word, a shot or a pause | `in="word:12"`, `at="word:12"`. |
+
+## Sequence tracks place by order
+
+A `<Track>` is a sequence by default: its clips play back to back in the order they are written, and no clip has a
+`start`. Trim the first clip and everything after it moves up.
+
+```tsx
+<Track id="main">
+  <Clip id="hook" src="asset:founder" in={4.2} out={9.8} />
+  <Clip id="broll" src="asset:product" in={0} out={3} />
+  <Clip id="demo" src="asset:screen" in={2} duration={7} />
+</Track>
+```
+
+`in` and `out` are seconds of the clip's source. `duration` in place of `out` says how long it plays instead. When
+you drag a clip's edge in an editor, the editor writes seconds, because that is what the gesture said.
+
+Writing `start` on a clip in a sequence is a lint error (`no-start-on-sequence`). A `<Gap>` leaves empty time, which
+shows black unless another track covers it, so the lint warns about it on the main track (`sequence-gap`). Pauses
+usually belong inside a clip, as silence kept in its trim.
+
+## Free tracks place by start
+
+A track with `layout="free"` places each element at its own `start`, in seconds from the start of the video. Music is
+the usual case:
+
+```tsx
+<Track id="music" layout="free">
+  <Audio id="bed" src="asset:music" start={0} duration="fill" volume={0.35} />
+</Track>
+```
+
+`duration="fill"` runs it to the end of the video, however long the edit becomes.
+
+## Start with another element {#overlays-anchor}
+
+An overlay usually says what it belongs to rather than when it starts. `anchor` names another element, and the
+overlay starts when that element starts, plus `offset` seconds:
+
+```tsx
+<Title id="title" anchor="start" offset={0.4} duration={2.8}>Shed</Title>
+<Title id="tagline" anchor="title" offset={0.5} duration={2.3}>A cloud for small software</Title>
+<Layer id="cta" anchor="outro" offset={0.3} duration={2.5}>…</Layer>
+```
+
+Move `outro` and the call to action moves with it.
+
+| Anchor | Starts |
+|---|---|
+| `anchor="start"` | At the start of the video. |
+| `anchor="hook"` | When `hook` starts. |
+| `anchor="hook.end"` | When `hook` ends. |
+| `offset={0.3}` | That many seconds later; negative is earlier. |
+
+An anchor that points at nothing, or a loop of anchors, is an error.
+
+## How long it plays
+
+`duration` takes seconds, or a word that ties it to something else:
+
+| Value | Plays |
+|---|---|
+| `2.5` | For 2.5 seconds. |
+| `"source"` | For the whole trimmed source (clips and audio). |
+| `"fill"` | To the end of the video, however long it becomes. |
+| `{ match: "card" }` | As long as `card`, whenever it starts. |
+| `{ until: "card" }` | Until `card` ends, wherever this one starts. |
+
+`until` lets elements that come in at different times leave together. A ready-made component takes it too, so a card
+or a lower third can last as long as the clip it sits over:
+
+```tsx
+<Title id="subtitle" anchor="headline" offset={0.6} duration={{ until: "card" }}>Built for small teams</Title>
+<LowerThird id="name" anchor="hook" duration={{ until: "hook" }} name="Maya Chen" />
+```
+
+An element that starts after the one it waits for has ended has no length, and that is an error.
+
+## Time by words, shots and pauses {#time-references}
+
+A time can also name a moment in the media: a word of its transcript, a cut between shots, a pause. CutCraft works out
+the seconds from the transcripts and shots in the manifest, and works them out again after every edit, so a cut stays
+on its word when the clip is trimmed or moved.
+
+`in` and `out` on a clip take seconds or one of these references into the clip's source:
 
 | Reference | Means |
 |---|---|
@@ -26,170 +127,41 @@ sentences), [Multicam highlights](/recipes/highlights) (shots and silences).
 <Clip id="demo" src="asset:screen" in={2} duration={7} />
 ```
 
-A recording with no transcript uses numbers, as `demo` does. When you drag a clip's edge in an editor, the editor
-writes seconds, because that is what the gesture said.
+A recording with no transcript uses numbers, as `demo` does.
 
-The lint helps with numbers too. A numeric `in` or `out` that lands inside a spoken word gets a warning naming the
-`word:N` to use (`cut-inside-word`). A cut within a few frames of the source's own shot change, which would flash
-the other shot, gets one naming the `shot:N` edge (`cut-near-shot`).
-
-## Sequence tracks place by order
-
-A `<Track>` is a sequence by default: its clips play back to back in the order they are written, and no clip has a
-`start`. Trim the first clip and everything after it moves up.
-
-```tsx
-<Track id="main">
-  <Clip id="hook" src="asset:founder" in="word:12" out="word:23.end" />
-  <Clip id="broll" src="asset:product" in="shot:1" out="shot:1.end" />
-  <Clip id="close" src="asset:founder" in="word:40" out="word:52.end" />
-</Track>
-```
-
-Writing `start` on a clip in a sequence is a lint error (`no-start-on-sequence`). A `<Gap>` leaves empty time, which
-shows black unless another track covers it, so the lint warns about it on the main track (`sequence-gap`). Pauses
-usually belong inside a clip, as silence kept in its trim.
-
-A track with `layout="free"` places each element at its own `start`. Music is the usual case:
-
-```tsx
-<Track id="music" layout="free">
-  <Audio id="bed" src="asset:music" start={0} duration="fill" volume={0.35} />
-</Track>
-```
-
-`duration="fill"` runs it to the end of the video, however long the edit becomes.
-
-## Overlays anchor
-
-An overlay usually says what it belongs to rather than when it starts. `anchor` names another element, and the
-overlay starts when that element starts, plus `offset` seconds:
-
-```tsx
-<Title id="title" anchor="start" offset={0.4} duration={2.8}>Shed</Title>
-<Title id="tagline" anchor="title" offset={0.5} duration={2.3}>A cloud for small software</Title>
-<Layer id="cta" anchor="outro" offset={0.3} duration={2.5}>…</Layer>
-```
-
-`anchor="start"` is the start of the video. Move `outro` and the call to action moves with it. An anchor that points
-at nothing, or a loop of anchors, is an error.
+### Start an overlay on a word
 
 When a graphic belongs to a spoken word, anchor it to the clip that says the word and name the word with `at`:
 
 ```tsx
 <Title id="ten-x" anchor="make-1" at="word:146" duration={3}>10× output</Title>
-```
-
-The title starts where the clip plays word 146, even after the clip is moved or trimmed in front of the word. `at`
-also takes `shot:N` and `silence:N`. If an edit cuts the word out of the clip, that is an error, and the title waits
-at the nearest part the clip still plays. Clips that play in reverse, or that have speed keys or freezes, don't
-support `at` yet; use `offset` there.
-
-A graphic can also last until another element ends, wherever it starts itself. Three lines that come in on three
-words and leave together with their card:
-
-```tsx
 <Title id="line-2" anchor="make-1" at="word:150" duration={{ until: "card" }}>10× output</Title>
 ```
 
-A ready-made component takes it too, so a card or a lower third can last as long as the clip it sits over:
+The title starts where the clip plays word 146, even after the clip is moved or trimmed in front of the word. `at`
+also takes `shot:N` and `silence:N`, each with `.end`. Lines that come in on their own words can still leave together
+with `until`, as `line-2` does with its card.
 
-```tsx
-<LowerThird id="name" anchor="hook" duration={{ until: "hook" }} name="Maya Chen" />
-```
+::: warning Limits of `at`
+If an edit cuts the word out of the clip, that is an error, and the title waits at the nearest part the clip still
+plays. Clips that play in reverse, or that have speed keys or freezes, don't support `at` yet; use `offset` there.
+:::
 
-The other form, `match` in place of `until`, makes it as long as `card` whenever it starts. An element that starts
-after the one it waits for has ended has no length, and that is an error.
+### Help with numeric cuts
 
-## Transitions sit between clips
-
-A `<Transition>` goes between the two clips it joins on a sequence track. The clips overlap by its duration, so both
-need that much extra footage at the join.
-
-```tsx
-<Clip id="hook" src="asset:founder" in="word:12" out="word:23.end" />
-<Transition id="x1" type="crossfade" duration={0.4} />
-<Clip id="broll" src="asset:product" in="shot:1" out="shot:1.end" />
-```
-
-Crossfade, dips to black or white, wipe, slide and push are built in, and six more drawn as shaders:
-
-- [`iris`](/reference/transitions/iris) opens the next clip from `center` as a circle, or a polygon with `sides` (3 to 64; 0 is the circle), or a star when `star`
-  sets the inner points' radius (0 to 0.95 of the outer). `rotation` turns it, `feather` softens its edge in pixels.
-- [`clockWipe`](/reference/transitions/clockWipe) sweeps around `center` from `startAngle` (degrees clockwise from up), with `direction` `"clockwise"`,
-  `"counterclockwise"` or `"both"` ways at once. `softness` softens the edge, as a share of the turn.
-- [`blinds`](/reference/transitions/blinds) opens `slats` bands along `angle` (degrees clockwise from up, so the default 90 gives vertical slats), each
-  across its width; `softness` softens them, as a share of a slat.
-- [`filmBurn`](/reference/transitions/filmBurn) burns a ragged hole from `center` with a glowing edge in `color`; `size` sets the size of its ragged
-  pattern and `edge` the width of the glow, both in pixels, and `seed` picks another pattern.
-- [`pixelDissolve`](/reference/transitions/pixelDissolve) switches `columns` by `rows` blocks one at a time, in an order set by `seed`; `softness` is how long
-  each block takes, as a share of the transition.
-- [`zoom`](/reference/transitions/zoom) pushes into the outgoing clip toward `center` and settles the next one from `scale`, with a `blur` along the
-  motion.
-
-```tsx
-<Transition id="x2" type="iris" duration={0.8} params={{ sides: 5, star: 0.45, feather: 4 }} />
-```
-
-The shader transitions need WebGL, which the player and the export have; where it is missing they play as a
-crossfade. Any other look is a few lines of GLSL that
-you declare with `transition()`
-([Effects and transitions of your own](./free-code#effects-and-transitions-of-your-own)).
-A type that is neither built in nor declared is an error.
-
-## A transition at one edge
-
-A transition can also bring one element in or take it out, with nothing on the other side. Give it `on`, the id of
-the element, and `edge`, `"in"` or `"out"`. The two props go together. It plays at that edge of the element, against
-whatever is beneath it: the tracks below, or the background.
-
-```tsx
-<Track id="over" layout="free">
-  <Clip id="pip" src="asset:product" in="shot:1" out="shot:1.end" start={{ at: "hook", offset: 1 }} />
-  <Transition id="pip-in" on="pip" edge="in" type="wipe" duration={0.6} />
-  <Transition id="pip-out" on="pip" edge="out" type="crossfade" duration={0.6} />
-</Track>
-```
-
-This is the form for a free track, where elements are placed and do not follow each other, so there is no pair of
-neighbours to join. It works on a sequence track too, for example to open on the first clip or close on the last. The
-transition runs inside the element's own time: the element is not made longer and nothing overlaps, so it needs no
-extra footage. At the edge of a title or another overlay, a shader transition plays as a fade.
-
-## At a cut: light leaks, flashes and whooshes
-
-Something that plays over a cut, without moving the cut, goes on a free track and anchors to the clip that comes in.
-A negative `offset` starts it before the cut. Here a warm flare peaks as the founder cuts to the product shot:
-
-<Example src="previews/guide/at-a-cut" alt="A warm flare over the cut from one shot to the next">
-
-<<< @/../examples/showcase/guide/at-a-cut.tsx
-
-</Example>
-
-Trim `talk` and the cut moves, and the flare moves with it. Nothing is added to the main track, so the video stays as
-long as its clips. A sound effect anchors the same way:
-
-```tsx
-<Track id="sfx" layout="free" role="effects">
-  <Audio id="whoosh" src="asset:whoosh" anchor="product" offset={-0.2} />
-</Track>
-```
-
-A sound can also anchor to a transition, and then starts when the transition does:
-
-```tsx
-<Transition id="x1" type="crossfade" duration={0.4} />
-<Audio id="swish" src="asset:swish" anchor="x1" />
-```
-
-The flare here is a `<Motion>` layer. It can as well be footage (a light-leak or flash clip, usually with
-`blend="screen"` or `blend="add"`), any `<Layer>` of free code, or a clip with an effect you declared. Sound effects are `<Audio>` elements; a track with
-`role="effects"` keeps them apart from dialogue and music in the mix ([Sound](./captions-and-sound#sound)).
+The lint helps when you cut in seconds too. A numeric `in` or `out` that lands inside a spoken word gets a warning
+naming the `word:N` to use (`cut-inside-word`). A cut within a few frames of the source's own shot change, which
+would flash the other shot, gets one naming the `shot:N` edge (`cut-near-shot`).
 
 ## Speed and freezes
 
 `<SpeedKey>` changes a clip's speed from a moment on, eased into the new speed, and `<Freeze>` holds one frame for a
 while before the clip plays on. The sound follows both: it speeds up with the picture and goes silent through a
-freeze. See
-[`<SpeedKey>`](/reference/elements/speedkey) and [`<Freeze>`](/reference/elements/freeze).
+freeze. See [`<SpeedKey>`](/reference/elements/speedkey) and [`<Freeze>`](/reference/elements/freeze).
+
+## Next
+
+- [Transitions](./transitions): blends between clips, and light leaks and whooshes over a cut.
+- [The file](./the-file): what else a file holds, and the rules that keep it editable.
+- [Captions and sound](./captions-and-sound): captions from the transcript, and the mix.
+- [Elements](/reference/elements/): every element and its props.

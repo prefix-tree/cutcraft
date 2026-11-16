@@ -84,7 +84,7 @@ export default function Video({ product, tagline, accent, cta }: z.infer<typeof 
         >
           {tagline}
         </Title>
-        <LowerThird who="Bohdan Snisar" what="Founder, Shed" accent={accent} />
+        <NameCard who="Bohdan Snisar" what="Founder, Shed" accent={accent} />
         <Layer id="cta" anchor="outro" offset={0.3} duration={2.5}>
           <CallToAction text={cta} accent={accent} />
         </Layer>
@@ -115,7 +115,7 @@ export default function Video({ product, tagline, accent, cta }: z.infer<typeof 
 }
 
 /** Used once, so its three elements are ordinary editable literals; timing stays literal inside. */
-function LowerThird({ who, what, accent }: { who: string; what: string; accent: string }) {
+function NameCard({ who, what, accent }: { who: string; what: string; accent: string }) {
   return (
     <>
       <Shape

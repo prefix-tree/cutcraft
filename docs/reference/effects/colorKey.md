@@ -1,3 +1,7 @@
+---
+editLink: false
+---
+
 # `colorKey`
 
 Makes one colour transparent: a green screen.
@@ -14,11 +18,11 @@ The coffee footage is Pixabay videos [209419](https://pixabay.com/videos/id-2094
 
 Drawn as a shader.
 
-| param | type | default |
-|---|---|---|
-| `color` | string | `"#00ff00"` |
-| `tolerance` | number (0..1) | `0.3` |
-| `softness` | number (0..1) | `0.1` |
-| `spill` | number (0..1) | `0.5` |
+| param | type | default | description |
+|---|---|---|---|
+| `color` | string | `"#00ff00"` | The colour to key out: the screen's colour. |
+| `tolerance` | number (0..1) | `0.3` | How far a colour may lie from the key colour and still be removed fully. |
+| `softness` | number (0..1) | `0.1` | How wide the fade is between removed and kept colours, past `tolerance`. |
+| `spill` | number (0..1) | `0.5` | How much of the screen's light bounced onto the subject to take out: 0 keeps it, 1 removes it fully. |
 
 [All effects and transitions](/reference/effects/) · [Units](/reference/effects/#units)

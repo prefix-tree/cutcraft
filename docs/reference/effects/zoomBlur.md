@@ -1,3 +1,7 @@
+---
+editLink: false
+---
+
 # `zoomBlur`
 
 Streaks the picture out from a centre.
@@ -14,10 +18,10 @@ The coffee footage is Pixabay videos [209419](https://pixabay.com/videos/id-2094
 
 Drawn as a shader.
 
-| param | type | default |
-|---|---|---|
-| `length` | number (0..500) | `40` |
-| `center` | [number, number] | `[0.5,0.5]` |
-| `samples` | integer (1..64) | `24` |
+| param | type | default | description |
+|---|---|---|---|
+| `length` | number (0..500) | `40` | How long the streaks are at the corners, in pixels; they shorten toward the centre. |
+| `center` | [number, number] | `[0.5,0.5]` | The point the streaks run toward, as `[x, y]` fractions of the frame from the top left. |
+| `samples` | integer (1..64) | `24` | The most reads along each streak: more is smoother and slower. |
 
 [All effects and transitions](/reference/effects/) · [Units](/reference/effects/#units)

@@ -4,12 +4,17 @@ import { Svg } from "../jsx/elements";
 import { h, parse, pointSchema, svgIn, timing, timingOf, timingSchema } from "./shared";
 
 export const arrowSchema = timingSchema.extend({
+  /** The id of the element it draws. */
   id: z.string(),
+  /** Where the line starts, in pixels from the frame's centre. */
   from: pointSchema,
+  /** Where the head points, in pixels from the frame's centre. */
   to: pointSchema,
   /** How far the line bows to its left, in pixels; 0 is straight. */
   curve: z.number().default(0),
+  /** The colour of the line and its head. */
   color: z.string().default("$accent"),
+  /** The line's thickness in pixels; the head scales with it. */
   width: z.number().positive().default(6),
 });
 

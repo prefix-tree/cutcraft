@@ -1,3 +1,7 @@
+---
+editLink: false
+---
+
 # `<Marker>`
 
 A named point on the timeline.
@@ -6,11 +10,11 @@ A named point on the timeline.
 
 ## Props
 
-| prop | type | default | required |
-|---|---|---|---|
-| `id` | string |  | yes |
-| `at` | number (0..∞) |  | yes |
-| `label` | string | `""` |  |
-| `color` | string |  |  |
+| prop | type | default | required | description |
+|---|---|---|---|---|
+| `id` | string |  | yes | The marker's name: `marker:<id>` refers to it as a time. |
+| `at` | number (0..∞) |  | yes | Seconds from the start of the video. |
+| `label` | string | `""` |  | Text shown on the editor's ruler. |
+| `color` | string |  |  | Its colour on the ruler. |
 
 No children. [All elements](/reference/elements/)

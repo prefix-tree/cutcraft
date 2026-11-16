@@ -1,3 +1,7 @@
+---
+editLink: false
+---
+
 # `exposure`
 
 Brightens or darkens in stops, as a camera would.
@@ -14,8 +18,8 @@ The coffee footage is Pixabay videos [209419](https://pixabay.com/videos/id-2094
 
 Drawn as a shader, with a CSS filter where WebGL is missing.
 
-| param | type | default |
-|---|---|---|
-| `stops` | number (-5..5) | `0` |
+| param | type | default | description |
+|---|---|---|---|
+| `stops` | number (-5..5) | `0` | How much brighter or darker, in stops: +1 doubles the light, -1 halves it. |
 
 [All effects and transitions](/reference/effects/) · [Units](/reference/effects/#units)

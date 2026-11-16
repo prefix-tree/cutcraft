@@ -1,7 +1,8 @@
 # The file
 
-A CutCraft video is one TSX module. It has a default export, a component that returns a `<Composition>`, and two
-optional exports for the values you want to change later without touching the edit.
+A CutCraft video is one TSX module. [Anatomy of a video](./anatomy) introduces the elements inside it and
+[Anatomy of an element](./elements) the props on each; this page covers the file around them: what it exports, what
+it may import, and the few rules that keep it editable.
 
 **See it in:** every [showcase file](/examples) (each has `schema` and `defaults`), [Variants from one file](/recipes/variants)
 (one cut, many versions), and the [walkthrough](/guide/writing-files), which explains a whole file line by line.
@@ -35,8 +36,40 @@ export default function Video({ product, accent }: z.infer<typeof schema>) {
 There is no project file next to it. The editor edits this file, the player plays it, and the export renders it. A
 model that wrote it can read your changes in it later, because they are in the same text.
 
+## What a file exports
+
+| Export | Is |
+|---|---|
+| `default` | A component that returns a `<Composition>`: the video. |
+| `schema` | Optional. A zod object of the values someone should be able to change. |
+| `defaults` | Optional. The values the video renders with. |
+| `manifest` | Optional. The media the file uses; the command line uses it instead of the nearest `cutcraft.json`, unless given `--manifest`. |
+
+## What a file may import
+
 A file may import `react`, `zod` and `@cutcraft/kit`. The app that loads it can offer more, such as three.js (see
-[Free code](./free-code#libraries)). An import the app doesn't offer fails with a message that lists what it does offer.
+[Free code](./free-code#libraries)). An import the app doesn't offer fails with a message that lists what it does
+offer.
+
+## The lint
+
+The rules on this page are checked by the **lint**: `lint()` from `@cutcraft/kit/source`. An editor runs it on the
+file as you type and shows its findings like a compiler's warnings, each naming its rule (`literal-ids`). The command
+line doesn't run it yet. [Lint](./editing#lint) lists every rule.
+
+## `schema` and `defaults` are the knobs
+
+`schema` describes the values someone should be able to change: a product name, a colour, a call to action. An
+inspector shows a control for each field, using its description as the label. Changing one renders the video with the
+new value, and saving rewrites the `defaults` literal and nothing else.
+
+How an editor treats a prop depends on what it is written as:
+
+| Written as | In the editor |
+|---|---|
+| A literal, `out={9}` | Editable: a drag rewrites the value. |
+| A schema value, `color={accent}` | Bound: a drag changes the value in `defaults`, and every element that reads it follows. |
+| An expression, `out={start + 2}` | Locked: nothing says what a new value should become. The editor offers to replace it with a literal first, and the lint warns (`expression-locked`). |
 
 ## Timeline elements and free code
 
@@ -45,29 +78,19 @@ nothing themselves. CutCraft reads their props to place footage and sound in tim
 from its timeline. That only works for elements it knows, so a `<div>` placed straight in a track draws nothing and
 the lint warns about it.
 
-Everything drawn over the footage can be free code. Put it in a `<Layer>` and any React, CSS, canvas or WebGL
-renders: see [Free code](./free-code). The ready-made `<Title>`, `<Shape>`, `<Svg>` and the rest, and components like
-`LowerThird` built from them, are there for the common cases, with props an inspector can edit.
+Everything drawn over the footage can be free code: put it in a `<Layer>` and any React, CSS, canvas or WebGL renders
+([Free code](./free-code)). The ready-made `<Title>`, `<Shape>`, `<Svg>` and the rest, and components like
+`LowerThird` built from them, cover the common cases with props an inspector can edit
+([Elements, components and free code](./elements#elements-components-and-free-code)).
 
 ## Every element has a literal id
 
 `hook`, `broll`, `title`. A drag on the timeline finds its element by id, and the edit it makes names the same id.
-The player puts `data-el="hook"` on what it draws, so an editor can select things in the preview too. An id written
-as an expression, like ``id={`clip-${i}`}``, can't be found that way, so the lint reports it (`literal-ids`).
-Inside a helper that makes several elements, a generated pattern is fine.
+The player puts `data-el="hook"` on what it draws, so an editor can select things in the preview too.
 
-Ids must be unique among timeline elements. An `id` on a `<div>` inside a Layer is ordinary HTML and doesn't count.
-
-## `schema` and `defaults` are the knobs
-
-`schema` describes the values someone should be able to change: a product name, a colour, a call to action. An
-inspector shows a control for each field, using its description as the label. Changing one renders the video with
-the new value, and saving rewrites the `defaults` literal and nothing else.
-
-A prop that reads a schema value, like `color={accent}`, is bound: dragging it in the editor changes the value in
-`defaults`, and every element that reads it follows. A prop computed from an expression, like `out={start + 2}`, is
-locked, because nothing says what a new value should become. The editor offers to replace it with a literal first,
-and the lint warns about it (`expression-locked`).
+- An id written as an expression, like ``id={`clip-${i}`}``, can't be found that way, so the lint reports it
+  (`literal-ids`). Inside a [helper](#helpers) that makes several elements, a generated pattern is fine.
+- Ids must be unique among timeline elements. An `id` on a `<div>` inside a Layer is ordinary HTML and doesn't count.
 
 ## Children for collections
 
@@ -82,14 +105,14 @@ keyframe or move one caption.
 </Clip>
 ```
 
+[What it holds](./elements#_6-what-it-holds-children) lists every kind of child.
+
 ## Helpers
 
-A function that returns timeline elements is a helper. A helper used once stays fully editable: its elements resolve
-to plain values, and the editor edits them directly. Used twice, its elements are marked as generated, and the first
-edit to one copy writes that helper's output into the file as literals before applying the change.
+A function that returns timeline elements is a helper. Use one to write a group of elements once, such as a name card:
 
 ```tsx
-function LowerThird({ who, what }: { who: string; what: string }) {
+function NameCard({ who, what }: { who: string; what: string }) {
   return <>
     <Shape id="lt-bg" anchor="close" offset={0.5} duration={3.2} shape="rectangle" width={760} height={150} />
     <Title id="lt-who" anchor="lt-bg" duration={3.2}>{who}</Title>
@@ -98,6 +121,20 @@ function LowerThird({ who, what }: { who: string; what: string }) {
 }
 ```
 
-CutCraft calls a helper like a plain function to find its elements, so a helper that makes timeline elements must
-be pure: no state or effects, and no hooks other than `useT()` and `useLayer()`. The lint checks this
-(`pure-helpers`). Components that only draw, inside a `<Layer>`, can use any hooks they like.
+| Used | In the editor |
+|---|---|
+| Once | Fully editable: its elements resolve to plain values, and the editor edits them directly. |
+| Twice or more | Its elements are marked as generated. The first edit to one copy writes that helper's output into the file as literals, then applies the change. |
+
+::: warning Helpers must be pure
+CutCraft calls a helper like a plain function to find its elements, so a helper that makes timeline elements must be
+pure: no state or effects, and no hooks other than `useT()` and `useLayer()`. The lint checks this (`pure-helpers`).
+Components that only draw, inside a `<Layer>`, can use any hooks they like.
+:::
+
+## Next
+
+- [Timing](./time): every way to say when.
+- [Free code](./free-code): what a layer can draw.
+- [Editing](./editing): how an editor changes the file, and every lint rule.
+- [Variants from one file](/recipes/variants): one cut, many versions from `schema`.

@@ -4,14 +4,19 @@ import { Shape, Svg, Title } from "../jsx/elements";
 import { h, parse, pointSchema, svgIn, timing, timingOf, timingSchema } from "./shared";
 
 export const calloutSchema = timingSchema.extend({
+  /** The component's id; each of its parts' ids starts with it. */
   id: z.string(),
+  /** The note, in the body face; the box grows taller to fit it. */
   text: z.string(),
   /** The box's centre, in pixels from the frame's centre. */
   x: z.number().default(320),
+  /** The box's centre, in pixels below the frame's centre. */
   y: z.number().default(-220),
+  /** The box's width in pixels. */
   width: z.number().positive().default(420),
   /** What it points at; without it, the box stands alone. */
   to: pointSchema.optional(),
+  /** The colour of the box's border, the line and its dot. */
   color: z.string().default("$accent"),
 });
 

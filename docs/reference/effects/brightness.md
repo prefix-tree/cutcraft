@@ -1,3 +1,7 @@
+---
+editLink: false
+---
+
 # `brightness`
 
 Lightens or darkens the picture.
@@ -14,8 +18,8 @@ The coffee footage is Pixabay videos [209419](https://pixabay.com/videos/id-2094
 
 Drawn as a CSS filter; no WebGL needed.
 
-| param | type | default |
-|---|---|---|
-| `amount` | number (-1..1) | `0` |
+| param | type | default | description |
+|---|---|---|---|
+| `amount` | number (-1..1) | `0` | How much lighter or darker: -1 is black, 0 leaves the picture as it was, 1 doubles its brightness. |
 
 [All effects and transitions](/reference/effects/) · [Units](/reference/effects/#units)

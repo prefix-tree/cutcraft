@@ -21,15 +21,22 @@ const lineSchema = z.object({
 });
 
 export const typeCardSchema = timingSchema.extend({
+  /** The component's id; each of its parts' ids starts with it. */
   id: z.string(),
   ...boxProps,
-  /** The card's size in pixels; the whole frame when left out. */
+  /** The card's width in pixels; the whole frame when left out. */
   width: z.number().positive().optional(),
+  /** The card's height in pixels. Left out, like `width`: the whole frame. */
   height: z.number().positive().optional(),
+  /** The card's background colour. */
   fill: z.string().default("$surface"),
+  /** How round the card's corners are, in pixels. */
   cornerRadius: z.number().min(0).default(0),
+  /** Letter height in pixels, for the lines that do not set their own. */
   size: z.number().positive().default(120),
+  /** The lines sit centred, or flush left. */
   align: z.enum(["left", "center"]).default("center"),
+  /** The lines, top to bottom; each comes in at its own cue. */
   lines: z.array(lineSchema).min(1),
 });
 

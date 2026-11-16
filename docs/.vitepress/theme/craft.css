@@ -149,7 +149,7 @@
   color: var(--cc-accent);
 }
 
-/* ── The landing page: a hero, then sections that alternate a video and its words ─────────────────────── */
+/* ── The landing page: a hero, the gallery, then the idea, features, the playground and the effects ──── */
 
 .home {
   max-width: 1152px;
@@ -164,36 +164,18 @@
   border-top: 0;
   padding-top: 0;
 }
-/* Hero: the pitch centred above the film. */
+/* Hero: the pitch, centred, above the gallery, on a woodblock print (HeroPrint) that runs the page's full width. */
+/* The print is wider than the page's column: the page clips it at the window's edge, never scrolling sideways. */
+.VPPage:has(.home) {
+  overflow-x: clip;
+}
 .home-hero {
+  position: relative;
+  isolation: isolate;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-}
-.vp-doc a.home-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 28px;
-  padding: 5px 14px 5px 5px;
-  border: 1px solid var(--cc-rule);
-  border-radius: 999px;
-  font-size: 13.5px;
-  text-decoration: none;
-  color: var(--cc-ink-2);
-  transition: border-color 0.15s;
-}
-.vp-doc a.home-pill:hover {
-  border-color: var(--cc-accent);
-}
-.home-pill span {
-  padding: 2px 9px;
-  border-radius: 999px;
-  background: var(--cc-accent);
-  color: #ffffff;
-  font-family: var(--cc-mono);
-  font-size: 12px;
 }
 .home-hero h1 {
   font-size: clamp(42px, 7vw, 80px);
@@ -212,11 +194,6 @@
   max-width: 540px;
   margin-bottom: 14px;
   text-align: left;
-}
-.home-hero .cc-hero-video {
-  width: 100%;
-  max-width: 1040px;
-  margin-top: 48px;
 }
 .home-actions {
   display: flex;
@@ -261,29 +238,6 @@
   color: var(--cc-grey);
   margin: 0 !important;
 }
-.cc-hero-video {
-  position: relative;
-}
-.cc-hero-video video {
-  display: block;
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  border-radius: 8px;
-  border: 1px solid var(--cc-rule);
-  background: #101014;
-}
-.cc-hero-play {
-  position: absolute;
-  inset: 0;
-  margin: auto;
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  background: rgba(16, 16, 20, 0.7);
-  color: #ffffff;
-  font-size: 22px;
-}
-.cc-hero-play:focus-visible,
 .cc-command button:focus-visible {
   outline: 2px solid var(--cc-accent);
   outline-offset: 2px;
@@ -338,7 +292,7 @@
   clip: rect(0 0 0 0);
 }
 
-/* The effects strip: one row of cards that scrolls inside its own box. */
+/* The effects strip: one row of cards that scrolls inside its own box, at every width. */
 .home-strip-lead {
   color: var(--cc-grey);
   margin-top: -4px !important;
@@ -356,13 +310,6 @@
 }
 .home-strip-row .cc-card {
   scroll-snap-align: start;
-}
-@media (min-width: 1100px) {
-  .home-strip-row {
-    grid-auto-flow: row;
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-    overflow-x: visible;
-  }
 }
 .home-links {
   font-family: var(--cc-mono);
@@ -718,7 +665,7 @@
   }
 }
 
-/* The idea: the goal in one paragraph; the licence below it. */
+/* The idea: the goal in one paragraph. */
 .home-goal h2 {
   margin-top: 0 !important;
   padding-top: 0 !important;
@@ -730,12 +677,240 @@
   line-height: 1.5 !important;
   color: var(--cc-ink);
 }
-.home-free p {
-  max-width: 780px;
-  margin: 0 0 10px;
-  font-size: 16px;
-  line-height: 1.6;
+
+/* The gallery: the examples as a masonry of posters under the hero, four columns, three, then two on a phone. */
+.home-gallery {
+  margin-top: 64px !important;
 }
-.home .home-goal + .home-free {
-  margin-top: 28px;
+.cc-gallery {
+  columns: 4;
+  column-gap: 16px;
+}
+@media (max-width: 1100px) {
+  .cc-gallery {
+    columns: 3;
+  }
+}
+.vp-doc a.cc-gallery-tile {
+  position: relative;
+  display: block;
+  margin-bottom: 16px;
+  break-inside: avoid;
+  overflow: hidden;
+  border: 1px solid var(--cc-rule);
+  border-radius: 8px;
+  background: #101014;
+  text-decoration: none;
+  color: #ffffff;
+}
+.cc-gallery-tile video {
+  display: block;
+  width: 100%;
+  object-fit: cover;
+}
+.cc-gallery-caption {
+  position: absolute;
+  inset: auto 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 36px 14px 12px;
+  background: linear-gradient(transparent, rgba(16, 16, 20, 0.85));
+}
+.cc-gallery-kind,
+.cc-gallery-lines {
+  font-family: var(--cc-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.7);
+}
+.cc-gallery-title {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.cc-gallery-lines {
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.vp-doc a.cc-gallery-tile:hover .cc-gallery-lines,
+.vp-doc a.cc-gallery-tile:focus-visible .cc-gallery-lines {
+  opacity: 1;
+}
+.vp-doc a.cc-gallery-tile:focus-visible {
+  outline: 2px solid var(--cc-accent);
+  outline-offset: 2px;
+}
+@media (max-width: 900px) {
+  .cc-gallery {
+    columns: 2;
+  }
+}
+@media (max-width: 560px) {
+  .cc-gallery {
+    column-gap: 10px;
+  }
+  .vp-doc a.cc-gallery-tile {
+    margin-bottom: 10px;
+  }
+  .cc-gallery-caption {
+    padding: 28px 10px 8px;
+  }
+  .cc-gallery-kind {
+    display: none;
+  }
+  .cc-gallery-title {
+    font-size: 13px;
+  }
+}
+@media (hover: none) {
+  /* No hover on a touch screen: the line count shows from the start. */
+  .cc-gallery-lines {
+    opacity: 1;
+  }
+}
+
+/* The hero's print: grain over the paper, the cut sun at the right of the headline, waves along the bottom. */
+.cc-print {
+  position: absolute;
+  z-index: -1;
+  top: -56px;
+  bottom: -60px;
+  left: 50%;
+  width: 100vw;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.cc-print > svg {
+  position: absolute;
+}
+.cc-print-grain {
+  inset: 0;
+  -webkit-mask-image: linear-gradient(transparent, #000 30%, #000 70%, transparent);
+  mask-image: linear-gradient(transparent, #000 30%, #000 70%, transparent);
+}
+.cc-print-grain path {
+  stroke: var(--cc-ink);
+  stroke-width: 1;
+  opacity: 0.06;
+}
+.cc-print-sun {
+  top: -44px;
+  left: calc(50% + 480px);
+  width: 300px;
+  overflow: visible;
+}
+.cc-print-half circle {
+  fill: var(--cc-accent);
+  stroke: var(--cc-ink);
+  stroke-width: 6;
+}
+.cc-print-half path {
+  fill: none;
+  stroke: var(--cc-ink);
+  stroke-width: 3;
+  opacity: 0.45;
+}
+/* The katana: a stroke along the cut that draws once, then the halves slide apart along it, as in the logo. */
+.cc-print-cut {
+  stroke: var(--cc-ink);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  opacity: 0;
+  animation: cc-print-cut 0.9s 0.35s cubic-bezier(0.7, 0, 0.3, 1) both;
+}
+.cc-print-half {
+  transform: translate(0, 0);
+  animation: 0.7s 0.75s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.cc-print-half.above {
+  animation-name: cc-print-above;
+}
+.cc-print-half.below {
+  animation-name: cc-print-below;
+}
+@keyframes cc-print-cut {
+  0% {
+    opacity: 1;
+    stroke-dashoffset: 1;
+  }
+  45% {
+    opacity: 1;
+    stroke-dashoffset: 0;
+  }
+  100% {
+    opacity: 0;
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes cc-print-above {
+  to {
+    transform: translate(-12px, -12px);
+  }
+}
+@keyframes cc-print-below {
+  to {
+    transform: translate(12px, 12px);
+  }
+}
+.cc-print-sea {
+  left: 0;
+  bottom: 0;
+  height: 80px;
+  -webkit-mask-image: linear-gradient(transparent, #000 70%);
+  mask-image: linear-gradient(transparent, #000 70%);
+}
+.cc-print-sea circle {
+  fill: var(--cc-paper);
+  stroke: var(--cc-ink);
+  stroke-width: 1.2;
+  stroke-opacity: 0.14;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cc-print-cut {
+    animation: none;
+  }
+  .cc-print-half {
+    animation-duration: 0s;
+    animation-delay: 0s;
+  }
+}
+@media (max-width: 1100px) {
+  .cc-print-sun {
+    left: auto;
+    right: -70px;
+    top: -24px;
+    width: 260px;
+    opacity: 0.35;
+  }
+}
+@media (max-width: 560px) {
+  .cc-print-sun {
+    right: -80px;
+    width: 200px;
+  }
+  .cc-print-sea {
+    height: 100px;
+  }
+}
+
+/* The seal by the meta line: 切, "cut", pressed in vermilion. */
+.cc-seal {
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  margin-left: 8px;
+  vertical-align: -6px;
+  border: 1.5px solid var(--cc-accent);
+  border-radius: 3px;
+  color: var(--cc-accent);
+  font-family: "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif JP", serif;
+  font-size: 14px;
+  line-height: 1;
+  letter-spacing: 0;
+  transform: rotate(-4deg);
 }
