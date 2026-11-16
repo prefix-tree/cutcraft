@@ -13,7 +13,7 @@ npx cutcraft inspect <file.tsx> [--at <moments>] [--json] [--manifest <file>] [-
 npx cutcraft look <file.tsx> [--at <moments> | --around <id>] [--without <id>] [--listen <stretch>] [--zones <zone>] [--out look.png] [options]
 npx cutcraft look <file.tsx> --motion <stretch> [--step <s>] [--listen <stretch>] [--out look.png] [options]
 npx cutcraft where <file.tsx> --at <moments> [--safe-zone <zone>] [--json] [options]
-npx cutcraft add <media file>... [--manifest manifest.json] [--id <id>] [--transcript <file>]
+npx cutcraft add <media file>... [--manifest <file>] [--id <id>] [--transcript <file>]
 npx cutcraft browser install
 ```
 
@@ -31,8 +31,8 @@ time. `CUTCRAFT_CHROMIUM` names a Chrome or Chromium 153 or later to use instead
 | `--out <file>` | Where to write. `.mp4` gives H.264 and AAC, `.webm` VP9 and Opus. `.mp3` and `.wav` hold the soundtrack alone. |
 | `--still <s>` | Write the frame at this time instead, to a `.png` or `.jpg` `--out`. It is kept in [the frame cache](#the-frame-cache); `--no-cache` draws it again. |
 | `--srt <file>` `--vtt <file>` | Also write the captions the cut plays as SRT or WebVTT, timed like the export. Without `--out`, write only them ([Subtitle files](https://cutcraft.prefixtree.xyz/guide/captions-and-sound#subtitle-files)). |
-| `--manifest <file>` | The asset manifest. Without it the file's own `manifest` export is used. |
-| `--media <dir>` | One file per asset id, with or without an extension (`podcast.webm`, `podcast`). Default: the file's folder. |
+| `--manifest <file>` | The asset manifest. Without it, see [Where the manifest and the media are found](#where-the-manifest-and-the-media-are-found). |
+| `--media <dir>` | One file per asset id, with or without an extension (`podcast.webm`, `podcast`). Without it, the same section says where they are looked for. |
 | `--props <json>` | Props for the file's component, over its `defaults`. |
 | `--from <s>` `--to <s>` | Render only this part of the composition. |
 | `--draft` | A render for watching, not keeping: every second frame, each shown twice as long, at half the width and height and the `low` quality preset. Written beside `--out` as `<name>.draft.<ext>` ([A draft](https://cutcraft.prefixtree.xyz/guide/exporting#a-draft)). Not with `--still`, `--check-layout`, `--copy` or `look`. |
@@ -325,6 +325,33 @@ The sheet is drawn in Chrome like any frame. The first time, Google's faces are 
 | 2 | Wrong arguments; the usage text is printed. |
 | 3 | The layout check found issues. |
 
+## Where the manifest and the media are found
+
+Every command that reads a video file needs its manifest. It takes the first of these:
+
+1. The file given to `--manifest`.
+2. The `manifest` the video file exports.
+3. `cutcraft.json` in the video file's folder, or in the nearest folder above it that has one.
+4. `manifest.json` in the video file's own folder. This is the older name. Folders above are not searched for it,
+   because other tools keep a file of that name.
+
+When none is found, the error lists the folders that were searched. One `cutcraft.json` at the top of a project
+serves every video file in the folders below it.
+
+Without `--media`, each asset's file is looked for in the video file's folder, then in the folder of the manifest
+file, then in `media/` beside the manifest file. With `--media`, only that folder is searched.
+
+```
+project/
+  cutcraft.json
+  media/talk.mp4
+  videos/launch.tsx
+```
+
+```sh
+npx cutcraft videos/launch.tsx --out launch.mp4
+```
+
 ## Adding media
 
 `cutcraft add talk.mp4` writes the media file's entry into the manifest. It reads the kind, length, size, frame rate
@@ -335,6 +362,6 @@ is added as a LUT (kind `lut`) after it is checked, for [`<Effect type="lut">`](
 
 | Option | |
 |---|---|
-| `--manifest <file>` | The manifest to write. Default: `manifest.json` beside the media, created when missing. |
+| `--manifest <file>` | The manifest to write, created when missing. Without it, the nearest `cutcraft.json` from the current folder upward is updated. If there is none, a `manifest.json` already in the current folder or beside the media is updated, and otherwise `cutcraft.json` is created in the current folder. |
 | `--id <id>` | The asset id. Default: the file name without its extension. One file only. |
 | `--transcript <file>` | A transcript other than the one beside the media. One file only. |

@@ -12,5 +12,5 @@ action.
 The product name, the tagline, the accent colour and the call to action must
 be tweakable afterwards without touching the edit.
 
-Assets are in `manifest.json`: the founder interview (with transcript, shots
+Assets are in `cutcraft.json`: the founder interview (with transcript, shots
 and silences), product b-roll, a screen recording, a music track and the logo.

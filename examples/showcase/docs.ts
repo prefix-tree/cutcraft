@@ -38,7 +38,7 @@ for (const { dir, file, out } of files.sort((a, b) => a.file.localeCompare(b.fil
   const name = basename(file, ".tsx");
   if (only.length > 0 && !only.includes(name)) continue;
   mkdirSync(out, { recursive: true });
-  const video = await loadVideo(join(here, dir, file), { manifest: join(here, "manifest.json") });
+  const video = await loadVideo(join(here, dir, file), { manifest: join(here, "cutcraft.json") });
   if (video.state.errors.length > 0)
     throw new Error(`${name}: ${video.state.errors.map((e) => `${e.id}: ${e.message}`).join("; ")}`);
   const media = directoryResolver(join(here, "media"), video.manifest);

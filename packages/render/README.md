@@ -17,7 +17,7 @@ npm install @cutcraft/render
 ```ts
 import { directoryResolver, loadVideo, renderVideo } from "@cutcraft/render";
 
-const video = await loadVideo("video.tsx", { manifest: "manifest.json" });
+const video = await loadVideo("video.tsx");
 await renderVideo({
   state: video.state,
   source: video.source,

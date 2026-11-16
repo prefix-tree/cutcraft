@@ -111,6 +111,29 @@ describe("cutcraft", () => {
     expect(r.stderr).toMatch(/error: .*no media file for asset "bars"/);
   });
 
+  it("finds the project's manifest and media from a video in a subfolder", () => {
+    const project = join(dir, "project");
+    mkdirSync(join(project, "media"), { recursive: true });
+    mkdirSync(join(project, "videos"));
+    copyFileSync(join(mediaDir, "bars.webm"), join(project, "media", "bars.webm"));
+    writeFileSync(
+      join(project, "cutcraft.json"),
+      JSON.stringify({
+        assets: { bars: { id: "bars", kind: "video", duration: 10, fps: 30, width: 640, height: 360 } },
+      }),
+    );
+    const file = join(project, "videos", "tiny.tsx");
+    writeFileSync(
+      file,
+      `import { Clip, Composition, Track } from "@cutcraft/kit";\nexport default function Video() { return <Composition fps={30} width={640} height={360}><Track id="t"><Clip id="c" src="asset:bars" in={0} out={0.5} /></Track></Composition>; }\n`,
+    );
+    const out = join(project, "tiny.webm");
+    const r = run(file, "--out", out, "--silent", "--quiet");
+    expect(r.stderr).toContain("15 frames");
+    expect(r.status).toBe(0);
+    expect(probe(out)).toMatchObject({ codec: "vp9", frames: 15 });
+  });
+
   it("prints usage when there is nothing to render", () => {
     const r = run();
     expect(r.status).toBe(2);

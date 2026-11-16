@@ -173,7 +173,7 @@ Renders a file to a video, a soundtrack, a still image or a layout report, from 
 ```ts
 import { directoryResolver, loadVideo, renderVideo } from "@cutcraft/render";
 
-const video = await loadVideo("video.tsx", { manifest: "manifest.json" });
+const video = await loadVideo("video.tsx");
 const result = await renderVideo({
   state: video.state,
   source: video.source,
@@ -323,7 +323,7 @@ Samples the composition in the export page, drawing each overlay alone to measur
 ### addAsset
 
 ```ts
-const { entry, manifest } = await addAsset("media/talk.mp4", { manifest: "manifest.json" });
+const { entry, manifest } = await addAsset("media/talk.mp4", { manifest: "cutcraft.json" });
 ```
 
 What `cutcraft add` does: probes the media (kind, duration, fps, size, sound), reads the transcript beside it

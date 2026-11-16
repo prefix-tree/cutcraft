@@ -27,14 +27,14 @@ Work in this order, and check after each stage.
    ```sh
    npx cutcraft add talk.mp4 broll.mp4 music.mp3
    ```
-   This writes `manifest.json`: each asset's id (the file name without its extension), kind, length, size and, for
-   speech, every word with its time. Read it: the word indexes you cut on come from there.
+   This writes `cutcraft.json` in the current folder, or updates the nearest one above it: each asset's id (the file
+   name without its extension), kind, length, size and, for speech, every word with its time. Read it: the word indexes you cut on come from there.
 3. **Write `video.tsx`** (shape and rules below).
 4. **Read it back.** `inspect` prints the timeline as the resolver sees it: every element with its seconds, the words
    each clip plays, effects, keyframes and cuts. It starts no browser, so use it freely, after every edit:
    ```sh
-   npx cutcraft inspect video.tsx --manifest manifest.json
-   npx cutcraft inspect video.tsx --manifest manifest.json --at hook.end,x1,word:14,lt.mid
+   npx cutcraft inspect video.tsx
+   npx cutcraft inspect video.tsx --at hook.end,x1,word:14,lt.mid
    ```
    `--at` says what is on screen and heard at each moment, with effect values after keyframes and the word being said.
    A moment is an element's id (with `.start`, `.mid` or `.end`), a transition's id (both sides of the cut), `word:14`
@@ -43,7 +43,7 @@ Work in this order, and check after each stage.
 5. **Check it.** Every command prints `warning: <id>: <message>` for each problem in the file; fix them all. The layout
    check also reports overlays that leave the frame or the safe zone, or cover the captions or the subject:
    ```sh
-   npx cutcraft video.tsx --manifest manifest.json --check-layout
+   npx cutcraft video.tsx --check-layout
    ```
    Exit code 0 is clean, 3 means it found layout issues (listed with their line), 1 is an error, 2 is a bad argument.
    For a vertical video pass `--safe-zone tiktok`, `reels` or `shorts`.
@@ -51,7 +51,7 @@ Work in this order, and check after each stage.
    each is checked on its own, as `<layer id>/lamp-label`. To read where everything is at a moment, in pixels,
    with what is outside each safe zone and what overlaps what:
    ```sh
-   npx cutcraft where video.tsx --manifest manifest.json --at 2.6,hook.mid
+   npx cutcraft where video.tsx --at 2.6,hook.mid
    ```
    For a diagram inside a `<Layer>`, use the kit's parts in an `<svg>`: `DrawnLine` (a line that draws itself),
    `Label` (a word with a line to what it names, which names itself for this check), `CountUp` and `Cells`. Each
@@ -62,9 +62,9 @@ Work in this order, and check after each stage.
    moments it shows what an editor skims: each clip's first frame, both sides of every cut, each overlay. Read the
    image after each stage:
    ```sh
-   npx cutcraft look video.tsx --manifest manifest.json --out look.png
-   npx cutcraft look video.tsx --manifest manifest.json --around lt --out lt.png
-   npx cutcraft look video.tsx --manifest manifest.json --at hook.mid,close.mid --without grade --out grade.png
+   npx cutcraft look video.tsx --out look.png
+   npx cutcraft look video.tsx --around lt --out lt.png
+   npx cutcraft look video.tsx --at hook.mid,close.mid --without grade --out grade.png
    ```
    `--around <id>` follows the thing you just changed: a transition from before to after, or an element coming in, in
    and going out. `--without <id>` shows each frame with and without an effect or an overlay, side by side.
@@ -72,12 +72,12 @@ Work in this order, and check after each stage.
    To show a person the whole video on one sheet, list the moments that matter in seconds, one per beat, and set
    the row length. Each cell is printed with its time and frame, so they can point at one:
    ```sh
-   npx cutcraft look video.tsx --manifest manifest.json --at 1.2,12,20,26.5,31,36,44,52.5 --columns 4 --out sheet.png
+   npx cutcraft look video.tsx --at 1.2,12,20,26.5,31,36,44,52.5 --columns 4 --out sheet.png
    ```
    Send that sheet when you report on a video, and before rendering one that takes minutes: it is drawn in seconds.
    To judge a move (an entrance, a transition, easing), read it as a strip of small frames at even steps:
    ```sh
-   npx cutcraft look video.tsx --manifest manifest.json --motion 0.3..1.3 --out move.png
+   npx cutcraft look video.tsx --motion 0.3..1.3 --out move.png
    ```
    `--motion` takes a range or an element's id; `--step 0.05` sets the seconds between frames (twelve frames without it).
    `--listen all` (or `2..6`, or an element's id) adds the sound under the frames: the mix's level over time, the
@@ -88,12 +88,13 @@ Work in this order, and check after each stage.
    `--import`: after changing such a module, pass `--no-cache` once.
 7. **Render.**
    ```sh
-   npx cutcraft video.tsx --manifest manifest.json --out video.mp4
-   npx cutcraft video.tsx --manifest manifest.json --props '{"product":"Pixel"}' --out pixel.mp4
-   npx cutcraft video.tsx --manifest manifest.json --srt captions.srt
+   npx cutcraft video.tsx --out video.mp4
+   npx cutcraft video.tsx --props '{"product":"Pixel"}' --out pixel.mp4
+   npx cutcraft video.tsx --srt captions.srt
    ```
    `.mp4` is H.264 and AAC, `.webm` VP9 and Opus, `.mp3` or `.wav` the sound alone. The first export downloads a
-   Chrome to draw with. Media is found in the file's folder, or in `--media <dir>`.
+   Chrome to draw with. Commands find `cutcraft.json` in the file's folder or a folder above it. Media is found in the file's folder,
+   beside the manifest, in `media/` beside it, or in `--media <dir>`.
 
 Scale the check to the change: a one-word trim needs no still; new graphics always do.
 

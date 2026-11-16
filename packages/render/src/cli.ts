@@ -12,6 +12,7 @@ import { inspect } from "./inspect";
 import { checkLayout, formatLayout, type Insets, SAFE_ZONES, type SafeZoneName } from "./layout-check";
 import { loadVideo } from "./load";
 import { renderLook } from "./look";
+import { mediaFolders } from "./manifest-file";
 import { directoryResolver } from "./media";
 import { draftPath, renderVideo } from "./renderer";
 import { renderStill } from "./still";
@@ -31,7 +32,7 @@ const USAGE = `Usage: cutcraft <file.tsx> --out <video.mp4|.webm|.mp3|.wav> [--d
        cutcraft look <file.tsx> --motion <stretch> [--step <s>] [--listen <stretch>] [--out look.png] [options]
        cutcraft where <file.tsx> --at <moments> [--safe-zone <zone>] [--json] [options]
        cutcraft fonts [--for <role>] [--category <category>] [--sheet fonts.png [--text <words>]] [--json]
-       cutcraft add <media file>... [--manifest manifest.json] [--id <id>] [--transcript <file>]
+       cutcraft add <media file>... [--manifest <file>] [--id <id>] [--transcript <file>]
        cutcraft browser install
 
   Every export draws its frames in Chrome. The first one downloads Chrome for Testing ${CHROME_MILESTONE} into
@@ -71,7 +72,7 @@ const USAGE = `Usage: cutcraft <file.tsx> --out <video.mp4|.webm|.mp3|.wav> [--d
                         heaviest weight and its regular one. The first time, Google's are downloaded into the
                         font cache
   --text <words>        (fonts --sheet) the words to set; default "Make It Move 2026"
-  add                   write each media file's entry into the manifest (default: manifest.json beside it): its
+  add                   write each media file's entry into the manifest (default: the nearest cutcraft.json): its
                         kind, length, size, frame rate and sound, read from the file, and its words from the
                         transcript beside it (talk.json from Whisper or ElevenLabs, talk.vtt or talk.srt)
   --id <id>             (add) the asset id; default the file name without its extension
@@ -94,8 +95,10 @@ const USAGE = `Usage: cutcraft <file.tsx> --out <video.mp4|.webm|.mp3|.wav> [--d
   --subject <x,y,w,h>   where the subject is, as fractions of the frame, for footage the manifest has no subjects for
   --step <s>            seconds between layout samples (default: every frame), or between the frames of a
                         --motion strip
-  --manifest <file>     asset manifest JSON (default: the file's \`manifest\` export)
-  --media <dir>         folder holding one file per asset id (default: the file's folder)
+  --manifest <file>     asset manifest JSON (default: the file's \`manifest\` export, then the nearest
+                        cutcraft.json from the file's folder upward)
+  --media <dir>         folder holding one file per asset id (default: the file's folder, the manifest's,
+                        then media/ beside the manifest)
   --props <json>        props for the file's component
   --from <s> --to <s>   render only this part of the composition
   --codec <name>        avc (default for .mp4), vp9 (default for .webm), or av1 in either
@@ -240,7 +243,7 @@ async function main(): Promise<number> {
     const result = await renderLook({
       state: video.state,
       source: video.source,
-      media: directoryResolver(resolve(values.media ?? dirname(target)), video.manifest),
+      media: directoryResolver(mediaIn(values.media, target, video.manifestPath), video.manifest),
       out: resolve(values.out ?? "look.png"),
       fonts: (values.font ?? []).map(readFont),
       onLog: (m: string) => process.stderr.write(`${m}\n`),
@@ -279,7 +282,7 @@ async function main(): Promise<number> {
     const result = await whereThings({
       state: video.state,
       source: video.source,
-      media: directoryResolver(resolve(values.media ?? dirname(target)), video.manifest),
+      media: directoryResolver(mediaIn(values.media, target, video.manifestPath), video.manifest),
       at: values.at,
       fonts: (values.font ?? []).map(readFont),
       onLog: (m: string) => process.stderr.write(`${m}\n`),
@@ -300,7 +303,7 @@ async function main(): Promise<number> {
   }
   const loaded = await loadVideo(file, loadOptions);
   for (const e of loaded.state.errors) process.stderr.write(`warning: ${e.id ?? "?"}: ${e.message}\n`);
-  const media = directoryResolver(resolve(values.media ?? dirname(file)), loaded.manifest);
+  const media = directoryResolver(mediaIn(values.media, file, loaded.manifestPath), loaded.manifest);
   // Subtitles first: they need no rendering, and a long export should not be the thing that delays them.
   for (const [format, path] of [
     ["srt", values.srt],
@@ -415,6 +418,10 @@ function readSubject(spec: string): { x: number; y: number; w: number; h: number
   const [x = 0, y = 0, w = 0, h = 0] = numbers(spec, "--subject");
   return { x, y, w, h };
 }
+
+/** Where media is looked for: the folder named, or the video's, the manifest's and `media/` beside the manifest. */
+const mediaIn = (given: string | undefined, video: string, manifestPath: string | undefined): string[] =>
+  given === undefined ? mediaFolders(dirname(resolve(video)), manifestPath) : [resolve(given)];
 
 /** `cutcraft add <media>...`: one manifest entry per file. */
 async function add(

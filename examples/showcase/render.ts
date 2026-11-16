@@ -29,7 +29,7 @@ const only = process.argv.slice(2);
 
 for (const [name, poster] of Object.entries(FILES)) {
   if (only.length > 0 && !only.includes(name)) continue;
-  const video = await loadVideo(join(here, `${name}.tsx`), { manifest: join(here, "manifest.json") });
+  const video = await loadVideo(join(here, `${name}.tsx`), { manifest: join(here, "cutcraft.json") });
   if (video.state.errors.length > 0)
     throw new Error(`${name}: ${video.state.errors.map((e) => `${e.id}: ${e.message}`).join("; ")}`);
   const media = directoryResolver(join(here, "media"), video.manifest);

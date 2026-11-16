@@ -9,13 +9,14 @@ preview and the export are the same code, so what the preview shows is what the 
 
 ```sh
 npm install cutcraft
-npx cutcraft video.tsx --manifest manifest.json --media ./media --out video.mp4
+npx cutcraft video.tsx --media ./media --out video.mp4
 ```
 
 `--out` picks the format by its extension: `.mp4` (H.264 and AAC), `.webm` (VP9 and Opus), or `.mp3` and `.wav` for
 the soundtrack alone. `--codec av1` writes AV1 in either container. `--still 2 --out poster.png` writes one frame.
-The manifest comes from `--manifest` or the file's own `manifest` export, and the media from `--media`, one file per
-asset id, or else the file's folder. The [CLI reference](/reference/cli) lists every option.
+The manifest is the nearest `cutcraft.json` from the file's folder upward, unless the file exports its own `manifest`
+or `--manifest` names one. The media comes from `--media`, one file per asset id, or else from the file's folder, the
+manifest's folder or `media/` beside the manifest ([how both are found](/reference/cli#where-the-manifest-and-the-media-are-found)). The [CLI reference](/reference/cli) lists every option.
 
 The export loads a file the way the editor does: it may import `react`, `zod` and
 `@cutcraft/kit`, plus what `--import` offers. A file that imports anything else
@@ -87,7 +88,7 @@ The blur shows in exported videos and stills. The preview stays sharp.
 ```ts
 import { directoryResolver, loadVideo, renderStill, renderVideo } from "@cutcraft/render";
 
-const video = await loadVideo("video.tsx", { manifest: "manifest.json" });
+const video = await loadVideo("video.tsx");
 const media = directoryResolver("media", video.manifest);
 const result = await renderVideo({
   state: video.state,

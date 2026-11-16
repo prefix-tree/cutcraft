@@ -54,7 +54,7 @@ Put a video next to the file, `talk.mp4` say, and add it to the manifest:
 
 ```sh
 npx cutcraft add talk.mp4
-# talk: video, 10.2 s, 1920x1080 at 30 fps, with sound → manifest.json
+# talk: video, 10.2 s, 1920x1080 at 30 fps, with sound → cutcraft.json
 ```
 
 The manifest names each asset the file may use and holds what CutCraft reads from the media once, so that editing
@@ -88,10 +88,11 @@ export default function Video() {
 ```
 
 ```sh
-npx cutcraft video.tsx --manifest manifest.json --out video.mp4
+npx cutcraft video.tsx --out video.mp4
 ```
 
-`src="asset:talk"` finds `talk.mp4` (or `talk.webm`, `talk.mov`…) in the file's folder; `--media <dir>` points
+The command finds `cutcraft.json` in the file's folder or a folder above it. `src="asset:talk"` finds `talk.mp4` (or
+`talk.webm`, `talk.mov`…) in the file's folder, beside the manifest or in `media/` beside it; `--media <dir>` points
 somewhere else. The `main` track lays its clips end to end; the `text` track places each element where you say.
 
 ## 3. Cut on words
@@ -102,7 +103,7 @@ again:
 
 ```sh
 npx cutcraft add talk.mp4
-# talk: video, 10.2 s, 1920x1080 at 30 fps, with sound, 6 words from talk.json → manifest.json
+# talk: video, 10.2 s, 1920x1080 at 30 fps, with sound, 6 words from talk.json → cutcraft.json
 ```
 
 The asset now holds when each word is said:
@@ -156,8 +157,8 @@ with them.
 ## More commands
 
 ```sh
-npx cutcraft video.tsx --manifest manifest.json --still 1 --out poster.png    # one frame
-npx cutcraft video.tsx --manifest manifest.json --check-layout                # overlays off the frame or over the captions
+npx cutcraft video.tsx --still 1 --out poster.png    # one frame
+npx cutcraft video.tsx --check-layout                # overlays off the frame or over the captions
 ```
 
 ## Play it in a page
@@ -170,7 +171,7 @@ import { collectModule, resolve } from "@cutcraft/kit";
 import { Player } from "@cutcraft/player";
 import "@cutcraft/player/fonts.css";
 
-import manifest from "./manifest.json";
+import manifest from "./cutcraft.json";
 import * as file from "./video";
 
 installFreeCodeLibraries(); // only if the file uses <Three> or <Motion>
