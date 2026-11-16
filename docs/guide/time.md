@@ -132,10 +132,29 @@ Crossfade, dips to black or white, wipe, slide and push are built in, and six mo
 ```
 
 The shader transitions need WebGL, which the player and the export have; where it is missing they play as a
-crossfade. At the edge of a title or another overlay they play as a fade. Any other look is a few lines of GLSL that
+crossfade. Any other look is a few lines of GLSL that
 you declare with `transition()`
 ([Effects and transitions of your own](./free-code#effects-and-transitions-of-your-own)).
 A type that is neither built in nor declared is an error.
+
+## A transition at one edge
+
+A transition can also bring one element in or take it out, with nothing on the other side. Give it `on`, the id of
+the element, and `edge`, `"in"` or `"out"`. The two props go together. It plays at that edge of the element, against
+whatever is beneath it: the tracks below, or the background.
+
+```tsx
+<Track id="over" layout="free">
+  <Clip id="pip" src="asset:product" in="shot:1" out="shot:1.end" start={{ at: "hook", offset: 1 }} />
+  <Transition id="pip-in" on="pip" edge="in" type="wipe" duration={0.6} />
+  <Transition id="pip-out" on="pip" edge="out" type="crossfade" duration={0.6} />
+</Track>
+```
+
+This is the form for a free track, where elements are placed and do not follow each other, so there is no pair of
+neighbours to join. It works on a sequence track too, for example to open on the first clip or close on the last. The
+transition runs inside the element's own time: the element is not made longer and nothing overlaps, so it needs no
+extra footage. At the edge of a title or another overlay, a shader transition plays as a fade.
 
 ## At a cut: light leaks, flashes and whooshes
 

@@ -30,6 +30,9 @@ export interface ElementRow {
   readonly type?: string;
   readonly from?: string;
   readonly to?: string;
+  /** For a transition at one edge of an element: the element and which edge. */
+  readonly on?: string;
+  readonly edge?: "in" | "out";
   /** A marker's label. */
   readonly label?: string;
 }
@@ -233,6 +236,9 @@ function elementRow(state: ResolvedState, p: Placement, frame: (t: number) => nu
     ...(p.kind === "transition" && typeof props.type === "string" ? { type: props.type } : {}),
     ...(p.kind === "transition" && typeof props.type !== "string" ? { type: shaderName(props.type) } : {}),
     ...(p.between ? { from: p.between[0], to: p.between[1] } : {}),
+    ...(p.kind === "transition" && typeof p.props.on === "string"
+      ? { on: p.props.on, edge: p.props.edge === "in" ? ("in" as const) : ("out" as const) }
+      : {}),
     ...(typeof props.label === "string" ? { label: props.label } : {}),
   };
 }

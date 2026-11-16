@@ -523,7 +523,6 @@ const ACTION_NOTES: Readonly<Record<string, string>> = {
   "multicam/restoreCut": "undo of removeCut",
   "multicam/remove": "a multicam group is an element and can be deleted",
   "mask/restore": "undo of mask/remove",
-  "multicam/setActiveAngle": "angle selection",
   "layer/setTiming": "the <Layer> escape hatch",
   "layer/setTransform": "the <Layer> escape hatch",
   "layer/setProps": "the handles of a Layer's component",

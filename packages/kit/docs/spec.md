@@ -147,7 +147,7 @@ Fold: `prop` = rewrite a literal prop; `ins`/`rm`/`mv` = element insert/remove/r
 
 **mask/** (4): `create {id, parentId, props}`, `update`, `remove`, `setPath {path}`; keyframe/* on the mask id.
 
-**multicam/** (6): `create {id, angles[], sync}`, `setActiveAngle`, `addCut {cutId, at, angle}`, `moveCut`, `removeCut`, `flatten {id}` (bake cuts into literal clips).
+**multicam/** (5): `create {id, angles[], sync}`, `addCut {cutId, at, angle}`, `moveCut`, `removeCut`, `flatten {id}` (bake cuts into literal clips).
 
 **layer/** (2): `setTiming`, `setTransform`. **source/** (2): `bake {id}`, `setProp {id, prop, value}` (generic inspector write). The model's file writes are outside the action system and the history.
 
