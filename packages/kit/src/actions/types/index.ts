@@ -23,6 +23,12 @@ export interface CompositionActions {
   "composition/setTheme": { theme: Readonly<Record<string, Json>> | null; merge?: boolean };
   /** One theme value: a palette colour, a font role or `radius`, by token name without the `$`. */
   "theme/setToken": { token: string; value: string | number };
+  /**
+   * Set a font from a picker: on a title or the captions (`id`), or as a theme role (`role`: `heading`, `body`,
+   * `mono`). The family is bundled, declared in the file, or in the font catalogue; a catalogue family the file does
+   * not declare is loaded for the preview at once, and the fold writes its `googleFont()` declaration.
+   */
+  "font/use": { id?: Id; role?: string; family: string; weight?: number };
   "batch/apply": { actions: readonly ActionInput[] };
 }
 
@@ -300,6 +306,7 @@ export const AUTO_GROUP_TYPES: ReadonlySet<ActionType> = new Set<ActionType>([
   "composition/updateSettings",
   "composition/setBackground",
   "theme/setToken",
+  "font/use",
   "text/update",
   "shape/update",
   "svg/update",

@@ -6,10 +6,12 @@ import { ELEMENTS } from "../jsx/elements";
 import type { Json, NetPatch, PatchLog } from "../patches/types";
 import type { ResolvedState } from "../resolve/resolve";
 import { INTERIOR_PREFIX } from "../resolve/tree";
+import { findFont } from "../theme/font-catalog";
 import { bake } from "./bake";
 import { applyEdits, lineRange, type SourceEdit } from "./edits";
 import { buildSourceIndex, type ElementSite, type SourceIndex } from "./index";
 import { declaredIdentifiers } from "./lint/rules/fonts";
+import { identifier } from "./lint/rules/theme";
 import type { Range } from "./parse";
 import { parseSource } from "./parse";
 import { Identifier, printElement, printLiteral, printProp } from "./print";
@@ -60,7 +62,7 @@ export function fold(
   log: PatchLog,
   index: SourceIndex,
   state: ResolvedState,
-): { edits: SourceEdit[]; needsBake: string[]; skipped: FoldResult["skipped"] } {
+): { edits: SourceEdit[]; needsBake: string[]; skipped: FoldResult["skipped"]; fonts: FontsToDeclare } {
   const edits: SourceEdit[] = [];
   const needsBake: string[] = [];
   const skipped: { id: string; reason: string }[] = [];
@@ -68,14 +70,41 @@ export function fold(
   const groups = new Map<string, PlacedGroup>();
   // An effect, transition or font the file declares is written as its identifier (`type={glitch}`), not as its name.
   const idents = declaredIdentifiers(index);
+  // Catalogue families this fold writes that the file does not declare yet: `foldToSource` declares them.
+  const fonts: FontsToDeclare = new Map();
+  // The weights a font picker asked for (`font/use`), kept on the composition until now.
+  const picked = log.net.get("composition")?.props.get("$fonts");
+  const taken = topLevelNames(index);
+  const fontValue = (family: Json | undefined): Json | undefined => {
+    if (typeof family !== "string") return family;
+    const known = idents.get(`font:${family}`);
+    if (known) return new Identifier(known) as unknown as Json;
+    const listed = findFont(family);
+    if (listed?.source !== "google" || listed.family !== family) return family;
+    let entry = fonts.get(family);
+    if (!entry) {
+      let name = identifier(family);
+      while (taken.has(name)) name = `${name}Font`;
+      taken.add(name);
+      const asked = isRecord(picked) && Array.isArray(picked[family]) ? (picked[family] as number[]) : [];
+      const weights = asked.length > 0 ? asked : [listed.weights.includes(400) ? 400 : (listed.weights[0] as number)];
+      entry = { identifier: name, weights };
+      fonts.set(family, entry);
+    }
+    return new Identifier(entry.identifier) as unknown as Json;
+  };
   const declared = (kind: string, prop: string, value: Json | undefined): Json | undefined => {
+    // A font where it is nested: a theme's roles, a caption style.
+    if (kind === "composition" && prop === "theme" && isRecord(value) && isRecord(value.fonts))
+      return {
+        ...value,
+        fonts: Object.fromEntries(Object.entries(value.fonts).map(([role, family]) => [role, fontValue(family)])),
+      } as Json;
+    if (kind === "captions" && prop === "style" && isRecord(value) && typeof value.font === "string")
+      return { ...value, font: fontValue(value.font) } as Json;
     if (typeof value !== "string") return value;
-    const key =
-      prop === "type" && (kind === "effect" || kind === "transition")
-        ? `${kind}:${value}`
-        : prop === "font"
-          ? `font:${value}`
-          : null;
+    if (prop === "font") return fontValue(value);
+    const key = prop === "type" && (kind === "effect" || kind === "transition") ? `${kind}:${value}` : null;
     const ident = key ? idents.get(key) : undefined;
     return ident ? (new Identifier(ident) as unknown as Json) : value;
   };
@@ -131,6 +160,11 @@ export function fold(
     if (net.bake) {
       needsBake.push(id);
       continue;
+    }
+    if (id === "composition" && net.props.has("$fonts")) {
+      // Not a prop of the file: the faces it names are declared by `foldToSource`, for the families written here.
+      net.props.delete("$fonts");
+      if (net.props.size === 0 && net.presence === "present" && !net.place && net.text === undefined) continue;
     }
     if (id === "composition" && net.props.has("$defaults")) {
       const value = net.props.get("$defaults");
@@ -224,7 +258,131 @@ export function fold(
     edits.push(insertEdit(index, group.ids[0] as string, group.point, printed));
     for (const [id, from] of group.moved) edits.push({ kind: "remove", id, range: from, text: "" });
   }
-  return { edits: lastWriteWins(edits), needsBake: [...new Set(needsBake)], skipped };
+  // A weight the picker asked for of a family the file already declares: the declaration gains it.
+  if (isRecord(picked))
+    for (const [family, weights] of Object.entries(picked)) {
+      const ident = idents.get(`font:${family}`);
+      if (ident && !fonts.has(family) && Array.isArray(weights))
+        fonts.set(family, { identifier: ident, weights: weights as number[] });
+    }
+  return { edits: lastWriteWins(edits), needsBake: [...new Set(needsBake)], skipped, fonts };
+}
+
+/** Catalogue families to declare (or whose declaration gains weights), by family. */
+type FontsToDeclare = Map<string, { readonly identifier: string; readonly weights: readonly number[] }>;
+
+const isRecord = (v: unknown): v is Record<string, Json> => typeof v === "object" && v !== null && !Array.isArray(v);
+
+/** Every name bound at the top of the file: imports, variables, functions, classes. */
+function topLevelNames(index: SourceIndex): Set<string> {
+  const names = new Set<string>();
+  for (const node of index.ast.program.body) {
+    const decl = t.isExportNamedDeclaration(node) || t.isExportDefaultDeclaration(node) ? node.declaration : node;
+    if (t.isImportDeclaration(decl)) for (const s of decl.specifiers) names.add(s.local.name);
+    else if (t.isVariableDeclaration(decl)) {
+      for (const d of decl.declarations) if (t.isIdentifier(d.id)) names.add(d.id.name);
+    } else if ((t.isFunctionDeclaration(decl) || t.isClassDeclaration(decl)) && decl.id) names.add(decl.id.name);
+  }
+  return names;
+}
+
+/**
+ * Edits that declare the Google families a fold wrote by identifier: `const bebasNeue = googleFont("Bebas Neue");`
+ * after the imports, with `googleFont` added to the kit import. A family the file declares already has the weights
+ * it lacks added to its `weights`.
+ */
+function fontDeclarations(text: string, fonts: FontsToDeclare): SourceEdit[] {
+  if (fonts.size === 0) return [];
+  const { ast } = parseSource(text);
+  const edits: SourceEdit[] = [];
+  const imports = ast.program.body.filter(t.isImportDeclaration);
+  const kitImport = imports.find((node) => node.source.value === "@cutcraft/kit" || node.source.value === "@cut/kit");
+  const local =
+    kitImport?.specifiers.find(
+      (s): s is t.ImportSpecifier => t.isImportSpecifier(s) && t.isIdentifier(s.imported, { name: "googleFont" }),
+    )?.local.name ?? null;
+  const calls = new Map<string, t.CallExpression>();
+  if (local)
+    for (const node of ast.program.body) {
+      const decl = t.isExportNamedDeclaration(node) ? node.declaration : node;
+      if (!t.isVariableDeclaration(decl)) continue;
+      for (const d of decl.declarations) {
+        const call = d.init;
+        if (!t.isCallExpression(call) || !t.isIdentifier(call.callee, { name: local })) continue;
+        const [family] = call.arguments;
+        if (t.isStringLiteral(family) && !calls.has(family.value)) calls.set(family.value, call);
+      }
+    }
+  const fresh: string[] = [];
+  for (const [family, { identifier: name, weights }] of fonts) {
+    const call = calls.get(family);
+    if (!call) {
+      const options = weights.length === 1 && weights[0] === 400 ? "" : `, { weights: [${weights.join(", ")}] }`;
+      fresh.push(`const ${name} = ${local ?? "googleFont"}(${JSON.stringify(family)}${options});`);
+      continue;
+    }
+    const [first, options] = call.arguments;
+    const list = (all: readonly number[]) => `[${[...new Set(all)].sort((a, b) => a - b).join(", ")}]`;
+    if (!options) {
+      if (weights.every((w) => w === 400)) continue;
+      const end = (first as t.Node).end as number;
+      edits.push({
+        kind: "insert",
+        id: "composition",
+        range: [end, end],
+        text: `, { weights: ${list([400, ...weights])} }`,
+      });
+    } else if (t.isObjectExpression(options)) {
+      const prop = options.properties.find(
+        (p): p is t.ObjectProperty => t.isObjectProperty(p) && t.isIdentifier(p.key, { name: "weights" }),
+      );
+      if (!prop) {
+        if (weights.every((w) => w === 400)) continue;
+        const start = (options.start as number) + 1;
+        edits.push({
+          kind: "insert",
+          id: "composition",
+          range: [start, start],
+          text: ` weights: ${list([400, ...weights])},`,
+        });
+      } else if (t.isArrayExpression(prop.value) && prop.value.elements.every((e) => t.isNumericLiteral(e))) {
+        const have = prop.value.elements.map((e) => (e as t.NumericLiteral).value);
+        if (weights.every((w) => have.includes(w))) continue;
+        edits.push({
+          kind: "prop",
+          id: "composition",
+          prop: "weights",
+          range: [prop.value.start as number, prop.value.end as number],
+          text: list([...have, ...weights]),
+        });
+      }
+    }
+  }
+  if (fresh.length > 0) {
+    const pos = imports.at(-1)?.end ?? ast.program.directives.at(-1)?.end ?? 0;
+    edits.push({ kind: "insert", id: "composition", range: [pos, pos], text: `\n\n${fresh.join("\n")}` });
+    if (!local) {
+      const named = kitImport?.specifiers.filter(t.isImportSpecifier) ?? [];
+      const last = named.at(-1);
+      if (last)
+        edits.push({
+          kind: "insert",
+          id: "composition",
+          range: [last.end as number, last.end as number],
+          text: ", googleFont",
+        });
+      else {
+        const top = imports[0]?.start ?? 0;
+        edits.push({
+          kind: "insert",
+          id: "composition",
+          range: [top, top],
+          text: `import { googleFont } from "@cutcraft/kit";\n`,
+        });
+      }
+    }
+  }
+  return edits;
 }
 
 interface PlacedGroup {
@@ -262,12 +420,19 @@ export function foldToSource(text: string, log: PatchLog, state: ResolvedState, 
   let allEdits: SourceEdit[] = [];
   for (let round = 0; round < maxRounds; round++) {
     const index = buildSourceIndex(current);
-    const { edits, needsBake, skipped } = fold(log, index, state);
+    const { edits, needsBake, skipped, fonts } = fold(log, index, state);
     if (needsBake.length === 0) {
       allEdits = [...allEdits, ...edits];
       const folded = applyEdits(current, edits);
       const imports = elementImports(folded);
-      return { text: applyEdits(folded, imports), edits: [...allEdits, ...imports], baked, skipped };
+      const withImports = applyEdits(folded, imports);
+      const declarations = fontDeclarations(withImports, fonts);
+      return {
+        text: applyEdits(withImports, declarations),
+        edits: [...allEdits, ...imports, ...declarations],
+        baked,
+        skipped,
+      };
     }
     let bakeEdits: SourceEdit[] = [];
     for (const id of needsBake) {
