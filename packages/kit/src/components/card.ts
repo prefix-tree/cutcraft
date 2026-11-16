@@ -7,7 +7,9 @@ import { type Timing, timing } from "./shared";
 
 /** Where a card sits: its centre from the frame's centre, and its size. */
 export const boxProps = {
+  /** The card's centre, in pixels from the frame's centre. */
   x: z.number().default(0),
+  /** The card's centre, in pixels below the frame's centre. */
   y: z.number().default(0),
 };
 

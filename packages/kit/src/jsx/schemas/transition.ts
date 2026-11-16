@@ -9,13 +9,17 @@ export { TRANSITION_PARAMS };
 
 export const transitionSchema = z
   .strictObject({
+    /** The transition's name. */
     id: idSchema,
     /** A built-in transition, or one the file declares with `transition()`. */
     type: z.union([zTransitionType, z.string().min(1)]).default("crossfade"),
+    /** Seconds it takes; it overlaps the two clips by this much. */
     duration: z.number().min(0.001).max(30).default(0.5),
+    /** The type's own settings; each type's page lists them. */
     params: z.record(z.string(), z.unknown()).default({}),
     /** Edge form: a transition at one edge of a single clip. Omit for a transition between two siblings. */
     on: idSchema.optional(),
+    /** With `on`: `in` at the clip's start, `out` at its end. */
     edge: z.enum(["in", "out"]).optional(),
   })
   .refine((v) => (v.on === undefined) === (v.edge === undefined), { message: "on and edge go together" })

@@ -1,24 +1,46 @@
 # Editing
 
-`@cutcraft/kit` has what an editor needs: a resolver that places every element in time, actions for every
-gesture with undo, and a fold that writes the result back into the file. An editor's state is the file plus a log of
-patches. Gestures run actions, the resolver applies the log over the file, and at sync points the log is folded
-into the file's text.
+This page is for building a video editor on CutCraft. In such an editor the user drags, trims and types on a timeline
+and a preview, every gesture can be undone, and each change lands in the file's text. The model that wrote the file
+then reads a file that differs from what it wrote by exactly what the user did.
 
-## Resolve
+`@cutcraft/kit` has the pieces, in the order you need them:
+
+| Piece | Does | Section |
+|---|---|---|
+| The resolver | Places every element in time, for the timeline and the [player](./player). | [Place every element](#place-every-element) |
+| Actions | Run each gesture, check it, and undo it. | [Run a gesture](#run-a-gesture) |
+| The patch log | Holds what the user changed, over the file. | [The patch log](#the-patch-log) |
+| The fold | Writes the log back into the file's text. | [Write the edit into the file](#write-the-edit-into-the-file) |
+| Lint | Checks the file follows the conventions an editor relies on. | [Lint](#lint) |
+
+An editor's state is the file plus a log of patches. Gestures run actions, the resolver applies the log over the
+file, and at sync points the log is folded into the file's text.
+
+## Place every element
+
+The resolver turns the file into absolute placements: when each element starts and ends.
 
 ```ts
 const tree = collectModule(file);          // walk the element tree, expand pure helpers, index by id
 const state = resolve(tree, manifest, log); // absolute placements, memoised per log version
 ```
 
-`ResolvedState` holds the composition settings, the tracks, `items`
-(`Map<id, Placement>` with `start`, `end`, `duration`, `source`, parsed `props`,
-`editable`, `lockedProps`, `errors`) and the typed error list. Placements that
-did not change between resolves are the same object, so a UI can memoise on them. A change costs about 2 µs per
-element.
+`ResolvedState` holds:
 
-## Actions
+| Field | Is |
+|---|---|
+| composition settings | Size, frame rate and the rest of the `<Composition>`. |
+| tracks | The tracks, in order. |
+| `items` | A `Map<id, Placement>`, each with `start`, `end`, `duration`, `source`, parsed `props`, `editable`, `lockedProps` and `errors`. |
+| errors | The typed error list. |
+
+Placements that did not change between resolves are the same object, so a UI can memoise on them. A change costs
+about 2 µs per element.
+
+## Run a gesture
+
+Every gesture is an action. The `Executor` checks it, records it and keeps the history for undo:
 
 ```ts
 const exec = new Executor({ tree, manifest });
@@ -29,95 +51,136 @@ exec.undo(); exec.redo();
 exec.beginGroup("drag"); … exec.endGroup();   // one history entry for a gesture
 ```
 
+The [action reference](../reference/actions.md) lists all 120.
+
+**Undo.** History auto-groups rapid same-type, same-target updates (a slider drag) within 100 ms, and keeps explicit
+groups (`beginGroup`, `endGroup`) for gestures.
+
+::: details What each action is made of
 Every handler has four faces:
 
-| face | input | output |
+| Face | Input | Output |
 |---|---|---|
 | `validate` | action, resolved state | ok, or typed errors (`ELEMENT_NOT_FOUND`, `TRACK_LOCKED`, `LOCKED_PROP`, `OUT_OF_BOUNDS`, `NOT_ADJACENT`, …) |
 | `apply` | action, patch log | appends `set`, `text`, `insert`, `remove`, `move`, `bake` patches |
 | `invert` | action, state before | the inverse action, never null |
 | `fold` | action, source index | source edits, when the generic fold is not enough |
+:::
 
-The [action reference](../reference/actions.md) lists all 120. History auto-groups rapid same-type, same-target
-updates (a slider drag) within 100 ms and keeps explicit groups for gestures.
+## The patch log
 
-## Patches
+Actions append patches to a log. The resolver overlays the log's net effect on the collected tree, and untouched
+nodes keep their identity.
 
-The log keeps every patch and a reduced net effect per element: last write
-wins per prop, a removal of an inserted element forgets it, an insert after a
-remove of the same id replaces it. The resolver overlays the net effect on the
-collected tree; untouched nodes keep their identity.
+::: details How the net effect is reduced
+The log keeps every patch and a reduced net effect per element:
 
-## Fold
+- last write wins per prop;
+- a removal of an inserted element forgets it;
+- an insert after a remove of the same id replaces it.
+:::
+
+## Write the edit into the file
+
+The fold turns the log into edits to the file's text, at sync points:
 
 ```ts
 const { text: next, edits, baked } = foldToSource(text, exec.log(), exec.state());
 ```
 
-The source index maps every id to its ranges in the text. A `set` patch on a
-literal prop becomes one edit covering the old value token; an `insert` prints
-the element in place with the parent's indentation; a `remove` deletes the
-element's range; a patch on a `generated` element bakes the helper's output into
-literals first, re-indexes and folds again. After the fold the model reads a
-file that differs from what it wrote by exactly what the user did.
+After the fold the model reads a file that differs from what it wrote by exactly what the user did.
 
-When the model writes the file, the executor is reset with the new tree
-(`replaceTree`): the log and history belong to the previous version of the
-file.
+::: details How each patch becomes an edit
+The source index maps every id to its ranges in the text.
 
-Three actions rewrite structure rather than a value, and fold the same way:
+| Patch | Becomes |
+|---|---|
+| `set` on a literal prop | One edit covering the old value token. |
+| `insert` | The element printed in place, with the parent's indentation. |
+| `remove` | The element's range deleted. |
+| Any patch on a `generated` element | The helper's output baked into literals first; then the file is re-indexed and folded again. |
+:::
 
-- `track/setLayout` converts a track. To free: every sequenced child gets its
-  resolved `start`, a transition between siblings becomes an edge transition
-  on the outgoing clip, gaps go. To sequence: children are reordered by
-  start, holes become `<Gap>`s and starts are dropped; overlapping items are
-  refused, since a sequence cannot express them. Nothing moves in time.
-- `multicam/flatten` replaces a `<Multicam>` on a free track by one literal
-  `<Clip>` per cut, at the time and source range the cut resolved to; a cut
-  that ran past its source is cut short where the source ends.
-- `nested/extract` writes a scene's tracks into the file: one free track per
-  inner track, inserted after the nested element's track, every item at the
-  time it played; on a sequence track a `<Gap>` keeps the slot. A nested
-  with `in`, `out` or a transform is refused, as are scenes with transitions.
+### When the model rewrites the file
+
+When the model writes the file, reset the executor with the new tree (`replaceTree`). The log and history belong to
+the previous version of the file.
+
+### Actions that change structure
+
+Three actions rewrite structure rather than a value, and fold the same way. Nothing moves in time.
+
+**`track/setLayout`** converts a track.
+
+- To free: every sequenced child gets its resolved `start`, a transition between siblings becomes an edge transition
+  on the outgoing clip, and gaps go.
+- To sequence: children are reordered by start, holes become `<Gap>`s and starts are dropped. Overlapping items are
+  refused, since a sequence cannot express them.
+
+**`multicam/flatten`** replaces a `<Multicam>` on a free track by one literal `<Clip>` per cut, at the time and source
+range the cut resolved to. A cut that ran past its source is cut short where the source ends.
+
+**`nested/extract`** writes a scene's tracks into the file: one free track per inner track, inserted after the nested
+element's track, every item at the time it played. On a sequence track a `<Gap>` keeps the slot. A nested element
+with `in`, `out` or a transform is refused, as are scenes with transitions.
 
 ## Lint
+
+Lint checks a file's text against the conventions that keep it editable, and flags cuts and code that will look wrong.
 
 ```ts
 lint(text, { manifest })   // Diagnostic[] with rule, severity, message, range, id, prop
 ```
 
-Rules: `literal-ids`, `unique-ids`, `no-start-on-sequence`, `pure-helpers`,
-`expression-locked`, `one-captions`, `ambiguous-duration`, `file-shape`,
-`missing-asset`. They are the conventions that keep a file editable. Two warnings check the cut rather than
-the file: `sequence-gap` (a `<Gap>` on the first sequence track, which is
-black unless another track covers it) and `cut-inside-word` (a numeric `in`
-or `out` that lands strictly inside a transcript word; it needs the manifest
-and names the `word:N` reference to use instead). Two more read the
-source's own cuts from the manifest's shots: `cut-near-shot` (an `in` just
-before a shot change or an `out` just after one, which flashes a few frames
-of the other shot; it names the `shot:N` edge to use) and
-`shot-change-inside-crop` (one `transform.crop` over a range the camera cuts
-inside, so the framing the crop was set for ends mid-clip; split there), and `repeated-source` (two clips on
-one track playing overlapping stretches of the same asset, usually a split that kept the old clip).
+**The file.** These keep a file editable:
 
-Three more look at what will be drawn: `stray-html` (HTML straight in a track, where nothing draws it),
-`free-code-clock` (free code off the video's clock; see [Free code](./free-code#the-video-s-clock)) and
-`not-rendered` (one of the few things the renderers draw differently from what the file says, listed in
-[What renders](/reference/rendering)).
+| Rule | Severity |
+|---|---|
+| `literal-ids` | error |
+| `unique-ids` | error |
+| `no-start-on-sequence` | error |
+| `pure-helpers` | error |
+| `expression-locked` | warning |
+| `one-captions` | error |
+| `ambiguous-duration` | error |
+| `file-shape` | error |
+| `missing-asset` | error |
+
+**The cut.** These warnings check the cut rather than the file:
+
+| Rule | Reports |
+|---|---|
+| `sequence-gap` | A `<Gap>` on the first sequence track, which is black unless another track covers it. |
+| `cut-inside-word` | A numeric `in` or `out` that lands strictly inside a transcript word. It needs the manifest, and names the `word:N` reference to use instead. |
+| `cut-near-shot` | An `in` just before a shot change or an `out` just after one, which flashes a few frames of the other shot. It reads the source's cuts from the manifest's shots, and names the `shot:N` edge to use. |
+| `shot-change-inside-crop` | One `transform.crop` over a range the camera cuts inside, so the framing the crop was set for ends mid-clip. Split there. |
+| `repeated-source` | Two clips on one track playing overlapping stretches of the same asset, usually a split that kept the old clip. |
+
+**What will be drawn.** These warnings look at the picture:
+
+| Rule | Reports |
+|---|---|
+| `stray-html` | HTML straight in a track, where nothing draws it. |
+| `free-code-clock` | Free code off the video's clock ([Free code](./free-code#the-video-s-clock)). |
+| `not-rendered` | One of the few things the renderers draw differently from what the file says, listed in [What renders](/reference/rendering). |
 
 ## A font picker
 
-A picker lists `FONT_CATALOG` (the bundled families and a short list from Google Fonts, each with its category, its
-weights, what it suits and a line on how it looks) and the families the file itself declares, which are on
-`state.fonts`. Choosing one is one action:
+A font picker lists the fonts a user can choose, and choosing one is one action. List `FONT_CATALOG` (the bundled
+families and a short list from Google Fonts, each with its category, its weights, what it suits and a line on how it
+looks) and the families the file itself declares, which are on `state.fonts`.
 
 ```ts
 exec.execute({ type: "font/use", params: { id: "headline", family: "Bebas Neue" } });
 exec.execute({ type: "font/use", params: { role: "heading", family: "Oswald", weight: 700 } });
 ```
 
-`id` names a title or the captions; `role` names a theme font (`heading`, `body`, `mono`). The action refuses a
-family that is not bundled, not declared and not in the catalogue, and a weight the family does not have.
+| Param | Names |
+|---|---|
+| `id` | A title or the captions. |
+| `role` | A theme font: `heading`, `body` or `mono`. |
+| `family` | The family. It must be bundled, declared by the file, or in the catalogue. |
+| `weight` | A weight the family has. |
 
 A Google family the file does not declare yet is added to `state.fonts` at once, so the preview loads it and shows
 it. On fold the file gains the declaration and the use site names it:
@@ -133,3 +196,10 @@ const bebasNeue = googleFont("Bebas Neue");
 A weight added to a family the file already declares is added to that declaration's `weights`. Undo takes the font
 and the face to load away together. The same write-back applies to any action that sets a catalogue family as a
 font, such as `text/update`.
+
+## Next
+
+- [Player](./player): the preview your editor shows.
+- [Action reference](../reference/actions.md): all 120 actions.
+- [The file](./the-file): the conventions lint checks.
+- [Themes and fonts](./themes#fonts): bundled fonts and declaring your own.

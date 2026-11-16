@@ -1,3 +1,7 @@
+---
+editLink: false
+---
+
 # `blur`
 
 Softens the picture; the radius is the Gaussian's standard deviation, in pixels.
@@ -14,8 +18,8 @@ The coffee footage is Pixabay videos [209419](https://pixabay.com/videos/id-2094
 
 Drawn as a CSS filter; no WebGL needed.
 
-| param | type | default |
-|---|---|---|
-| `radius` | number (0..200) | `4` |
+| param | type | default | description |
+|---|---|---|---|
+| `radius` | number (0..200) | `4` | How soft the picture gets, in pixels: the Gaussian's standard deviation, as CSS `blur()` reads it. |
 
 [All effects and transitions](/reference/effects/) · [Units](/reference/effects/#units)

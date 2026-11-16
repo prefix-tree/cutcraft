@@ -1,3 +1,7 @@
+---
+editLink: false
+---
+
 # `duotone`
 
 Maps the picture's brightness onto two colours.
@@ -14,10 +18,10 @@ The coffee footage is Pixabay videos [209419](https://pixabay.com/videos/id-2094
 
 Drawn as a shader.
 
-| param | type | default |
-|---|---|---|
-| `dark` | string | `"#1d2b53"` |
-| `light` | string | `"#ffd27f"` |
-| `amount` | number (0..1) | `1` |
+| param | type | default | description |
+|---|---|---|---|
+| `dark` | string | `"#1d2b53"` | The colour the picture's blacks become. |
+| `light` | string | `"#ffd27f"` | The colour the picture's whites become. |
+| `amount` | number (0..1) | `1` | How much of the effect to mix in: 0 leaves the picture as it was, 1 is the full effect. |
 
 [All effects and transitions](/reference/effects/) · [Units](/reference/effects/#units)

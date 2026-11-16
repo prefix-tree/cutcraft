@@ -37,22 +37,37 @@ export const titleSchema = z.strictObject({
   ...entranceProps,
   /** A theme preset for titles; without one, the theme's `default` title preset applies. */
   style: idSchema.optional(),
+  /** The font family: a bundled one, one the file declares, or one from the font catalogue. A theme preset may set it instead. */
   font: z.string().default("Inter"),
+  /** The letters' size, in pixels. */
   size: z.number().min(1).max(1000).default(48),
+  /** How heavy the letters are: 100 to 900, or `normal` and `bold`. */
   weight: z.union([z.number().int().min(100).max(900).multipleOf(100), z.enum(["normal", "bold"])]).default("bold"),
+  /** Slanted letters. */
   italic: z.boolean().default(false),
+  /** The letters' colour, or a theme token such as `$text`. */
   color: colorSchema.default("#ffffff"),
+  /** A colour filling the text box behind the letters. */
   background: colorSchema.optional(),
+  /** An outline around the letters: its colour and width in pixels. */
   stroke: z.strictObject({ color: colorSchema, width: z.number().min(0).max(100) }).optional(),
+  /** A drop shadow under the letters: colour, blur and offset in pixels. */
   shadow: shadowSchema.optional(),
+  /** Which side of the text box the lines sit against. */
   align: zTextAlign.default("center"),
+  /** Where in the text box's height the text sits. */
   valign: zTextValign.default("middle"),
   /** The text box, in composition pixels; the whole frame when left out, so background, align and valign work inside it. */
   width: z.number().positive().optional(),
+  /** The text box's height, in pixels, as `width`. */
   height: z.number().positive().optional(),
+  /** The distance between lines, as a multiple of the letters' size. */
   lineHeight: z.number().min(0.1).max(10).default(1.2),
+  /** Extra space between letters, in pixels. */
   letterSpacing: z.number().min(-100).max(100).default(0),
+  /** A line under, over or through the letters. */
   decoration: zTextDecoration.optional(),
+  /** An entrance and exit by letter, word or line: a preset, its seconds in and out, and the delay between units. */
   animation: textAnimationSchema.optional(),
 });
 
@@ -83,19 +98,31 @@ export const shapeSchema = z.strictObject({
   ...entranceProps,
   /** A theme preset for shapes. */
   style: idSchema.optional(),
+  /** Which shape it draws. */
   shape: zShapeType,
+  /** The shape's box, in pixels; left out, 200. */
   width: z.number().positive().optional(),
+  /** The shape's box height, in pixels; left out, 200. */
   height: z.number().positive().optional(),
+  /** A polygon's or path's corners, as fractions of the box from its top left. */
   points: z.array(vec2Schema).optional(),
+  /** A colour, or `{ type, color, gradient, opacity }` for a gradient or no fill. */
   fill: fillSchema.optional(),
+  /** The outline: colour, width in pixels, opacity, dashes, caps and joins. */
   stroke: strokeSchema.optional(),
+  /** A drop shadow: colour, blur and offset in pixels. */
   shadow: shadowSchema.optional(),
+  /** Several shadows, drawn in order, for layered or inner shadows. */
   shadows: z.array(shadowSchema).optional(),
+  /** A rectangle's rounded corners, in pixels or a theme token such as `$radius`. */
   cornerRadius: themedLengthSchema.optional(),
+  /** A rectangle's corners rounded one by one, in pixels. */
   cornerRadii: z
     .strictObject({ topLeft: z.number(), topRight: z.number(), bottomRight: z.number(), bottomLeft: z.number() })
     .optional(),
+  /** How many points a star has; left out, 5. */
   starPoints: z.number().int().min(3).optional(),
+  /** A star's inner corners, as a fraction of its outer radius; left out, 0.5. */
   innerRadius: z.number().min(0).max(1).optional(),
 });
 
@@ -105,12 +132,17 @@ export const svgSchema = z
     ...visualProps,
     /** A theme preset for svg elements. */
     style: idSchema.optional(),
+    /** An SVG file from the manifest, as `asset:<id>`. Give this or `content`. */
     src: assetRefSchema.optional(),
+    /** Inline SVG markup. Give this or `src`. */
     content: z.string().optional(),
+    /** The part of the drawing to show, in its own units, as the SVG `viewBox` attribute. */
     viewBox: z
       .strictObject({ minX: z.number(), minY: z.number(), width: z.number().positive(), height: z.number().positive() })
       .optional(),
+    /** How the drawing fits its box, as the SVG attribute of that name (`xMidYMid meet`). */
     preserveAspectRatio: z.string().optional(),
+    /** Recolours it: `tint` keeps the shading and colours it, `replace` paints every drawn pixel; `opacity` is how much. */
     color: z
       .strictObject({ mode: zSvgColorMode, tint: colorSchema.optional(), opacity: z.number().min(0).max(1).optional() })
       .optional(),
@@ -132,9 +164,13 @@ export const stickerSchema = z.strictObject({
 
 export const adjustmentSchema = z.strictObject({
   ...timedProps,
+  /** How much of its effects to mix over the picture beneath. */
   opacity: z.number().min(0).max(1).default(1),
+  /** How the filtered picture mixes with the one beneath, as CSS `mix-blend-mode` does. */
   blend: zBlendMode.default("normal"),
+  /** Off, it filters nothing and stays in the file. */
   enabled: z.boolean().default(true),
+  /** Limits it to a region: position, scale, rotation and crop of the area it filters. */
   transform: transformSchema.optional(),
 });
 
@@ -146,15 +182,20 @@ export const nestedSchema = z.strictObject({
     z.custom<(props: Record<string, unknown>) => unknown>((v) => typeof v === "function"),
     z.string().startsWith("file:"),
   ]),
+  /** Where in the nested sequence it starts, in its own seconds. */
   in: timeRefSchema.optional(),
+  /** Where in the nested sequence it ends, as `in`. */
   out: timeRefSchema.optional(),
+  /** A gain on all its sound: 1 as it is, 0 muted. */
   volume: z.number().min(0).max(4).default(1),
 });
 
 export const layerSchema = z.strictObject({
   ...timedProps,
   ...entranceProps,
+  /** Moves, scales, turns and fades the whole layer, as on any element; the editor's handles write it. */
   transform: transformSchema.optional(),
+  /** How the layer mixes with what is under it, as CSS `mix-blend-mode` does. */
   blend: zBlendMode.optional(),
 });
 
@@ -195,6 +236,7 @@ export type ThreeSetupFunction = (setup: ThreeSetupArgs) => ThreeSetupResult;
  */
 export const threeSchema = layerSchema.extend({
   engine: z.literal("three"),
+  /** The camera: `position` and `lookAt` as `[x, y, z]`, `fov` in degrees, clipping planes, zoom, or orthographic. */
   camera: z
     .strictObject({
       position: vec3Schema.optional(),
@@ -206,7 +248,9 @@ export const threeSchema = layerSchema.extend({
       orthographic: z.boolean().optional(),
     })
     .optional(),
+  /** The scene's background colour; left out, transparent over what is beneath. */
   background: colorSchema.optional(),
+  /** Builds the scene once from `{ scene, camera, renderer, THREE, width, height }`, and may return `update(frame)` for every frame. */
   setup: z.custom<ThreeSetupFunction>((v) => typeof v === "function", "setup must be a function").optional(),
 });
 
@@ -219,5 +263,6 @@ const motionStepSchema = z.union([
 /** `<Motion>`: a Layer whose children are animated by a Motion sequence on the video's clock. */
 export const motionSchema = layerSchema.extend({
   engine: z.literal("motion"),
+  /** Motion steps: `[selector, keyframes, options]`, where `at` in the options is seconds into the layer. */
   sequence: z.array(motionStepSchema).default([]),
 });

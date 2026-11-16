@@ -1,3 +1,7 @@
+---
+editLink: false
+---
+
 # `vignette`
 
 Darkens the edges of a clip, a nested sequence, or everything beneath an adjustment.
@@ -14,8 +18,8 @@ The coffee footage is Pixabay videos [209419](https://pixabay.com/videos/id-2094
 
 Drawn as painting on the element's pixels; no WebGL needed.
 
-| param | type | default |
-|---|---|---|
-| `amount` | number (0..1) | `0.5` |
+| param | type | default | description |
+|---|---|---|---|
+| `amount` | number (0..1) | `0.5` | How dark the edges get: 0 leaves them as they were, 1 fades the corners to black. |
 
 [All effects and transitions](/reference/effects/) · [Units](/reference/effects/#units)

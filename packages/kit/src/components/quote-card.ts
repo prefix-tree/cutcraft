@@ -13,17 +13,24 @@ const markSchema = z.object({
 });
 
 export const quoteCardSchema = timingSchema.extend({
+  /** The component's id; each of its parts' ids starts with it. */
   id: z.string(),
   ...boxProps,
+  /** The card's width in pixels; the passage wraps inside it. */
   width: z.number().positive().default(860),
   /** Where the words come from, in small type above them. */
   source: z.string().optional(),
+  /** The passage; its line breaks are kept. */
   text: z.string(),
+  /** Letter height in pixels; the padding and corners scale with it. */
   size: z.number().positive().default(40),
+  /** The paper's colour. */
   fill: z.string().default("#ffffff"),
+  /** The words' colour. */
   color: z.string().default("#16161a"),
   /** The marker's colour, for highlights that do not name their own. */
   accent: z.string().default("$accent"),
+  /** The phrases to mark, each at its own cue; each must appear in `text` as written. */
   highlights: z.array(markSchema).default([]),
 });
 

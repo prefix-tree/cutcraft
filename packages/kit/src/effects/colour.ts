@@ -15,8 +15,11 @@ import { colorTransform } from "./shapes";
 const levels = colorTransform({
   name: "levels",
   params: z.object({
+    /** The input level that becomes black: tones at or below it go to black. */
     black: z.number().min(0).max(1).default(0),
+    /** The input level that becomes white: tones at or above it go to white. */
     white: z.number().min(0).max(1).default(1),
+    /** The curve on the midtones: above 1 lifts them, below 1 deepens them. */
     gamma: z.number().min(0.01).max(10).default(1),
   }),
   rgb: `  float range = max(params.white - params.black, 1e-5);
@@ -33,7 +36,9 @@ const levels = colorTransform({
 const lut = colorTransform({
   name: "lut",
   params: z.object({
+    /** The lookup table, as `"asset:<id>"`: a `.cube` file in the manifest. */
     src: z.string().regex(/^asset:/, 'the LUT, as "asset:ID": a .cube file in the manifest'),
+    /** How much of the graded picture to mix in: 0 leaves the picture as it was, 1 is the full grade. */
     amount: z.number().min(0).max(1).default(1),
   }),
   rgb: `  float n = float(textureSize(params.src, 0).x);
@@ -45,7 +50,10 @@ const lut = colorTransform({
 /** Exposure in stops, as a camera's: light scaled by 2^stops where it is linear, so +1 doubles it. */
 const exposure = colorTransform({
   name: "exposure",
-  params: z.object({ stops: z.number().min(-5).max(5).default(0) }),
+  params: z.object({
+    /** How much brighter or darker, in stops: +1 doubles the light, -1 halves it. */
+    stops: z.number().min(-5).max(5).default(0),
+  }),
   uses: [COLOUR],
   rgb: "  return clamp(cc_srgb(cc_linear(c) * exp2(params.stops)), 0.0, 1.0);",
   neutral: { stops: 0 },
@@ -58,7 +66,10 @@ const exposure = colorTransform({
  */
 const vibrance = colorTransform({
   name: "vibrance",
-  params: z.object({ amount: z.number().min(-1).max(1).default(0) }),
+  params: z.object({
+    /** How much to saturate the muted colours, leaving strong ones nearly alone; negative takes colour out of all of them evenly. */
+    amount: z.number().min(-1).max(1).default(0),
+  }),
   uses: [COLOUR],
   rgb: `  float spread = max(c.r, max(c.g, c.b)) - min(c.r, min(c.g, c.b));
   float k = params.amount > 0.0 ? params.amount * (1.0 - spread) : params.amount;
@@ -75,7 +86,9 @@ const vibrance = colorTransform({
 const whiteBalance = colorTransform({
   name: "whiteBalance",
   params: z.object({
+    /** Warms the picture when positive and cools it when negative. */
     temperature: z.number().min(-1).max(1).default(0),
+    /** Tints the picture toward magenta when positive and toward green when negative. */
     tint: z.number().min(-1).max(1).default(0),
   }),
   uses: [COLOUR],
@@ -122,8 +135,11 @@ const shadowsHighlights = {
   ...shaderDefinition("effect", {
     name: "shadowsHighlights",
     params: z.object({
+      /** How much to brighten the shadows, or darken them when negative: up to 2 stops at 1. */
       shadows: z.number().min(-1).max(1).default(0),
+      /** How much to brighten the highlights, or darken them when negative: up to 2 stops at 1. */
       highlights: z.number().min(-1).max(1).default(0),
+      /** How far around each pixel it looks to tell shadow from highlight, in pixels: the blur's standard deviation. */
       radius: z.number().min(0.5).max(200).default(10),
     }),
     passes: SHADOWS_HIGHLIGHTS.passes,
@@ -136,8 +152,11 @@ const shadowsHighlights = {
 const duotone = colorTransform({
   name: "duotone",
   params: z.object({
+    /** The colour the picture's blacks become. */
     dark: HEX.default("#1d2b53"),
+    /** The colour the picture's whites become. */
     light: HEX.default("#ffd27f"),
+    /** How much of the effect to mix in: 0 leaves the picture as it was, 1 is the full effect. */
     amount: z.number().min(0).max(1).default(1),
   }),
   uses: [COLOUR],
@@ -170,7 +189,16 @@ const IDENTITY_CURVE = [
 const curves = {
   ...colorTransform({
     name: "curves",
-    params: z.object({ rgb: curvePoints, red: curvePoints, green: curvePoints, blue: curvePoints }),
+    params: z.object({
+      /** The tone curve for all three channels, applied first: `[input, output]` points, input rising. */
+      rgb: curvePoints,
+      /** The tone curve for the red channel, applied after `rgb`. */
+      red: curvePoints,
+      /** The tone curve for the green channel, applied after `rgb`. */
+      green: curvePoints,
+      /** The tone curve for the blue channel, applied after `rgb`. */
+      blue: curvePoints,
+    }),
     rgb: `  vec3 at = (clamp(c, 0.0, 1.0) * 255.0 + 0.5) / 256.0;
   return vec3(texture(curve, vec2(at.r, 0.5)).r, texture(curve, vec2(at.g, 0.5)).g, texture(curve, vec2(at.b, 0.5)).b);`,
     neutral: { rgb: IDENTITY_CURVE, red: IDENTITY_CURVE, green: IDENTITY_CURVE, blue: IDENTITY_CURVE },

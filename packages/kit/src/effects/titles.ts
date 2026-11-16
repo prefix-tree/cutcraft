@@ -37,10 +37,15 @@ const glow = {
   ...shaderDefinition("effect", {
     name: "glow",
     params: z.object({
+      /** How far the glow spreads, in pixels: the blur's standard deviation. */
       radius: z.number().min(0).max(200).default(7),
+      /** How strong the glow is, as a multiplier. */
       intensity: z.number().min(0).max(4).default(1),
+      /** The brightness the glow starts from: 0 glows the whole element; above it only the bright parts glow, with a bloom over them. */
       threshold: z.number().min(0).max(1).default(0),
+      /** The colour the glow is tinted toward. */
       color: HEX.default("#ffffff"),
+      /** How far the glow is coloured toward `color`: 0 keeps the element's own colours, 1 is all `color`. */
       tint: z.number().min(0).max(1).default(1),
     }),
     passes: GLOW.passes,
@@ -58,9 +63,13 @@ const glow = {
 const outline = shaderDefinition("effect", {
   name: "outline",
   params: z.object({
+    /** How thick the outline is, in pixels. */
     width: z.number().min(0).max(64).default(8),
+    /** The outline's colour. */
     color: HEX.default("#ffffff"),
+    /** How opaque the outline is: 0 is invisible, 1 is solid. */
     opacity: z.number().min(0).max(1).default(1),
+    /** Draw only the outline, filled in, without the element over it. */
     outlineOnly: z.boolean().default(false),
   }),
   passes: [
@@ -108,10 +117,15 @@ const outline = shaderDefinition("effect", {
 const longShadow = shaderDefinition("effect", {
   name: "longShadow",
   params: z.object({
+    /** How far the shadow reaches, in pixels. */
     length: z.number().min(0).max(2000).default(240),
+    /** The direction the shadow falls, in degrees clockwise from up: 135 falls down and right. */
     angle: z.number().default(135),
+    /** The shadow's colour. */
     color: HEX.default("#777777"),
+    /** How opaque the shadow is: 0 is invisible, 1 is solid. */
     opacity: z.number().min(0).max(1).default(1),
+    /** Thin the shadow out toward its far end. */
     fade: z.boolean().default(false),
   }),
   shader: glsl`${OVER}vec4 effect(vec2 uv) {
@@ -160,10 +174,15 @@ const bevel = {
   ...shaderDefinition("effect", {
     name: "bevel",
     params: z.object({
+      /** How wide the raised edge is, in pixels: the standard deviation of the blur that shapes it. */
       size: z.number().min(0).max(200).default(1.5),
+      /** Where the light comes from, in degrees clockwise from up. */
       angle: z.number().default(-60),
+      /** How strong the shading is: 0 leaves the element as it was, 1 is the full highlight and shade. */
       amount: z.number().min(0).max(1).default(0.4),
+      /** The colour of the edges facing the light. */
       highlight: HEX.default("#ffffff"),
+      /** The colour of the edges facing away from the light. */
       shade: HEX.default("#000000"),
     }),
     passes: BEVEL.passes,

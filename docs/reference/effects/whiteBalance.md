@@ -1,3 +1,7 @@
+---
+editLink: false
+---
+
 # `whiteBalance`
 
 Warms or cools the picture, and tints it toward green or magenta.
@@ -14,9 +18,9 @@ The coffee footage is Pixabay videos [209419](https://pixabay.com/videos/id-2094
 
 Drawn as a shader, with a CSS filter where WebGL is missing.
 
-| param | type | default |
-|---|---|---|
-| `temperature` | number (-1..1) | `0` |
-| `tint` | number (-1..1) | `0` |
+| param | type | default | description |
+|---|---|---|---|
+| `temperature` | number (-1..1) | `0` | Warms the picture when positive and cools it when negative. |
+| `tint` | number (-1..1) | `0` | Tints the picture toward magenta when positive and toward green when negative. |
 
 [All effects and transitions](/reference/effects/) · [Units](/reference/effects/#units)

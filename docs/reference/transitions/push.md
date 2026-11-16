@@ -1,3 +1,7 @@
+---
+editLink: false
+---
+
 # `push`
 
 Pushes the first clip out as the next comes in.
@@ -14,8 +18,8 @@ The coffee footage is Pixabay videos [209419](https://pixabay.com/videos/id-2094
 
 Drawn without a shader.
 
-| param | type | default |
-|---|---|---|
-| `direction` | "left" \| "right" \| "up" \| "down" | `"left"` |
+| param | type | default | description |
+|---|---|---|---|
+| `direction` | "left" \| "right" \| "up" \| "down" | `"left"` | The way both clips move: `left` brings the next one in from the right and pushes the outgoing one out to the left. |
 
 [All effects and transitions](/reference/effects/) · [Units](/reference/effects/#units)

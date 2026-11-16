@@ -50,7 +50,7 @@ export default function Video({ product, tagline, accent, cta }: z.infer<typeof 
       <Track id="overlays" name="Overlays">
         <Title id="title" anchor="start" offset={0.4} duration={2.8} size={120} …>{product}</Title>
         <Title id="tagline" anchor="title" offset={0.5} duration={2.3} …>{tagline}</Title>
-        <LowerThird who="Bohdan Snisar" what="Founder, Shed" accent={accent} />
+        <NameCard who="Bohdan Snisar" what="Founder, Shed" accent={accent} />
         <Layer id="cta" anchor="outro" offset={0.3} duration={2.5}>
           <CallToAction text={cta} accent={accent} />
         </Layer>
@@ -58,8 +58,8 @@ export default function Video({ product, tagline, accent, cta }: z.infer<typeof 
       <Track id="music" layout="free" role="music">
         <Audio id="bed" src="asset:music" start={0} duration="fill" volume={0.35} fade={{ in: 0.5, out: 1.5 }} duck={{ under: "main", to: 0.15 }} />
       </Track>
-      <Captions id="captions" style={{ position: "bottom", size: 44 }}>
-        <Caption id="cap-1" start={0} end={3} text="Small software still deserves a real cloud." />
+      <Captions id="captions" src="asset:founder" style={{ position: "bottom", size: 44 }}>
+        <Caption id="cap-1" start="word:12" end="word:18.end" text="Small software still deserves a real cloud." />
         …
       </Captions>
     </Composition>
@@ -67,7 +67,13 @@ export default function Video({ product, tagline, accent, cta }: z.infer<typeof 
 }
 ```
 
-The whole file is 95 lines. It resolves to 29 elements and 25.6 seconds.
+This is the file with its two helpers left out; it resolves to 29 elements and 25.6 seconds.
+
+::: details The whole file
+
+<<< @/../examples/launch-recap/video.tsx
+
+:::
 
 ## What each part does
 
@@ -76,7 +82,7 @@ rewrites `defaults` and nothing else ([The file](./the-file#schema-and-defaults-
 
 `in="word:12" out="word:23.end"` is the sentence "Small software still deserves a real cloud. It should take one
 file." CutCraft turns it into 5.6 to 10.8 seconds of the interview. `in="shot:1"` is the b-roll's second shot. The
-screen recording has no transcript, so `demo` uses seconds ([Time by meaning](./time#time-references)).
+screen recording has no transcript, so `demo` uses seconds ([Timing](./time#time-references)).
 
 `main` is a sequence track. `hook`, `broll`, `demo`, `close` and `outro` play back to back, and the two crossfades
 overlap their neighbours by 0.4 seconds. No clip has a `start`, so trimming `hook` moves everything after it
@@ -89,14 +95,16 @@ call to action with `outro`. Move the close and the lower third follows; no over
 The push-in is four `<Keyframe>` children on `broll`, so an editor can change one key
 ([Children for collections](./the-file#children-for-collections)).
 
-`LowerThird` is a helper that returns a shape and two titles. It is used once, so its elements stay as editable as
+`NameCard` is a helper that returns a shape and two titles. The kit has a ready-made
+[`LowerThird`](/reference/components/lower-third) too; this file draws its own. It is used once, so its elements stay as editable as
 any other ([Helpers](./the-file#helpers)).
 
 The call to action is free code: a `<div>` with a progress bar inside `<Layer id="cta">`, timed by `useT()`. The Layer
 holds one component, so an inspector can edit its `text` and `accent` props ([Free code](./free-code)).
 
-The music bed starts at 0, runs to the end with `duration="fill"`, and ducks under the interview; the captions come
-from the founder's words ([Captions and sound](./captions-and-sound)).
+The music bed starts at 0, runs to the end with `duration="fill"`, and ducks under the interview. The captions are
+four lines written by hand, each timed by the founder's words, so they move with the clips that say them
+([Captions and sound](./captions-and-sound#write-lines-by-hand)).
 
 ## What the player does with it
 

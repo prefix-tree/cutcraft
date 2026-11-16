@@ -57,29 +57,44 @@ export default defineConfig({
           { text: "Introduction", link: "/guide/introduction" },
           { text: "Quick start", link: "/guide/getting-started" },
           { text: "With your agent", link: "/guide/agents" },
-          { text: "The core idea", link: "/guide/core-idea" },
         ],
       },
       {
-        text: "Writing videos",
+        // The model a reader needs before the task guides, in reading order.
+        text: "Concepts",
         items: [
+          { text: "Anatomy of a video", link: "/guide/anatomy" },
+          { text: "Anatomy of an element", link: "/guide/elements" },
+          { text: "Timing", link: "/guide/time" },
           { text: "The file", link: "/guide/the-file" },
-          { text: "Time by meaning", link: "/guide/time" },
+        ],
+      },
+      {
+        text: "Build a video",
+        items: [
           { text: "Titles and graphics", link: "/guide/titles-and-graphics" },
           { text: "Captions and sound", link: "/guide/captions-and-sound" },
+          { text: "Transitions", link: "/guide/transitions" },
           { text: "Colour and grading", link: "/guide/colour" },
           { text: "Keying, blurs and pins", link: "/guide/footage-tools" },
-          { text: "Themes", link: "/guide/themes" },
+          { text: "Themes and fonts", link: "/guide/themes" },
           { text: "Free code", link: "/guide/free-code" },
+          { text: "Your own effects", link: "/guide/custom-effects" },
         ],
       },
       {
-        text: "Play, edit, export",
+        text: "Check and export",
+        items: [
+          { text: "Checking a cut", link: "/guide/checking" },
+          { text: "Exporting", link: "/guide/exporting" },
+          { text: "How the export works", link: "/guide/export-architecture" },
+        ],
+      },
+      {
+        text: "Embed and edit",
         items: [
           { text: "Player", link: "/guide/player" },
           { text: "Editing", link: "/guide/editing" },
-          { text: "Exporting", link: "/guide/exporting" },
-          { text: "How the export works", link: "/guide/export-architecture" },
         ],
       },
       {

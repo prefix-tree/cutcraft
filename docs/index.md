@@ -9,14 +9,13 @@ aside: false
 
 <script setup>
 import { withBase } from "vitepress";
-import kit from "../packages/kit/package.json";
 </script>
 
 <div class="home vp-doc">
 
 <section class="home-hero">
 
-<a class="home-pill" href="https://github.com/prefix-tree/cutcraft/blob/main/packages/kit/CHANGELOG.md"><span>v{{ kit.version }}</span> Effects rebuilt for real footage →</a>
+<HeroPrint />
 
 # Video editor as code
 
@@ -30,9 +29,15 @@ you fine-tune it on a timeline, and it exports to MP4.</p>
 
 <CopyCommand command="npm install cutcraft @cutcraft/kit react zod" />
 
-<p class="home-meta">MIT licence · no paid tier · no watermark · exports MP4, WebM and stills</p>
+<p class="home-meta">Free and open source · MIT · no watermark · exports MP4, WebM and stills<span class="cc-seal" aria-hidden="true">切</span></p>
 
-<HeroVideo src="showcase/hero" alt="A woodblock print: waves roll in, a red sun rises through mist, a katana cuts it in two, and the print draws in to the CutCraft logo beside the words made by your agent, edited by hand, owned as code" />
+</section>
+
+<section class="home-gallery" aria-label="Made with CutCraft">
+
+<Gallery />
+
+<p class="home-links">Each one is a file rendered by CutCraft's own export. Hover to play; open one to read the file. Also as recipes: <a :href="withBase('/recipes/talking-head')">interviews</a> · <a :href="withBase('/recipes/product-demo')">product demos</a> · <a :href="withBase('/recipes/vertical-podcast')">podcast clips</a> · <a :href="withBase('/recipes/variants')">variants</a> · <a :href="withBase('/examples')">all examples →</a></p>
 
 </section>
 
@@ -43,13 +48,6 @@ you fine-tune it on a timeline, and it exports to MP4.</p>
 <p class="home-goal-lead">Everything a desktop editor gives you (tracks, cuts, transitions, titles, captions, colour,
 keying and export) as one file that you, your agent and your code all edit. Where the timeline stops, write any React,
 CSS or WebGL.</p>
-
-</section>
-
-<section class="home-free">
-
-**Free for everyone, under the MIT licence.** The player, the editor actions, the export and the checks: no paid tier,
-no licence key, no watermark on the frames, for a person, a startup or a company.
 
 </section>
 
@@ -108,25 +106,6 @@ no licence key, no watermark on the frames, for a person, a startup or a company
 </div>
 
 <p class="home-links"><a :href="withBase('/reference/effects/')">All 45 effects and transitions →</a></p>
-
-</section>
-
-<section class="home-examples">
-
-## What you can build
-
-<p class="home-strip-lead">Each one is a short file rendered by CutCraft's own export. Open a card to see the file that made it.</p>
-
-<div class="cc-cards home-cards">
-<PreviewCard title="Product launches" link="/examples#a-product-launch" src="showcase/launch" text="A founder on camera, a three.js phone, each feature on its word." />
-<PreviewCard title="Vertical shorts" link="/examples#captions-and-key-points" src="showcase/captions" text="Captions from the transcript, key points on the words that say them." />
-<PreviewCard title="Kinetic type" link="/examples#kinetic-type" src="showcase/kinetic" text="Motion sequences that land on their words." />
-<PreviewCard title="Data stories" link="/examples#a-data-story" src="showcase/data" text="Charts and counters in SVG and React, each number on its word." />
-<PreviewCard title="Logo reveals" link="/examples#a-logo-reveal" src="showcase/logo" text="three.js particles that settle into a name." />
-<PreviewCard title="Edits" link="/examples#an-edit" src="showcase/edit" text="Shots joined by a wipe and a slide, with a push-in on keyframes." />
-</div>
-
-<p class="home-links">Also as recipes: <a :href="withBase('/recipes/talking-head')">interviews</a> · <a :href="withBase('/recipes/product-demo')">product demos</a> · <a :href="withBase('/recipes/vertical-podcast')">podcast clips</a> · <a :href="withBase('/recipes/slideshow')">slideshows</a> · <a :href="withBase('/recipes/variants')">variants</a> · <a :href="withBase('/examples')">all examples →</a></p>
 
 </section>
 

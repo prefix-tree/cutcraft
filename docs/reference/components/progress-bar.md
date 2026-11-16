@@ -1,3 +1,7 @@
+---
+editLink: false
+---
+
 # `ProgressBar`
 
 A bar that fills from the left to its value.
@@ -14,15 +18,15 @@ The coffee footage is Pixabay videos [209419](https://pixabay.com/videos/id-2094
 
 Besides the timing props (`start`, `anchor`, `at`, `offset`, `duration`):
 
-| param | type | default |
-|---|---|---|
-| `id` | string |  |
-| `value` | number (0..1) | `1` |
-| `x` | number | `0` |
-| `y` | number | `440` |
-| `width` | number | `1200` |
-| `height` | number | `14` |
-| `color` | string | `"$primary"` |
-| `fillFor` | number | `1.2` |
+| param | type | default | description |
+|---|---|---|---|
+| `id` | string |  | The component's id; each of its parts' ids starts with it. |
+| `value` | number (0..1) | `1` | How full it ends, 0 to 1. |
+| `x` | number | `0` | The bar's centre, in pixels from the frame's centre. |
+| `y` | number | `440` | The bar's centre, in pixels below the frame's centre. |
+| `width` | number (> 0) | `1200` | The full bar's length in pixels. |
+| `height` | number (> 0) | `14` | The bar's thickness in pixels; its ends are rounded. |
+| `color` | string | `"$primary"` | The fill's colour; the track under it is a faint `$muted`. |
+| `fillFor` | number (> 0) | `1.2` | Seconds it takes to fill. |
 
 [All components](/reference/components/)

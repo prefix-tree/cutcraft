@@ -1,3 +1,7 @@
+---
+editLink: false
+---
+
 # `cornerPin`
 
 Moves the picture's four corners, to place it in a screen or a frame.
@@ -14,11 +18,11 @@ The coffee footage is Pixabay videos [209419](https://pixabay.com/videos/id-2094
 
 Drawn as a shader.
 
-| param | type | default |
-|---|---|---|
-| `topLeft` | [number, number] | `[0,0]` |
-| `topRight` | [number, number] | `[1,0]` |
-| `bottomRight` | [number, number] | `[1,1]` |
-| `bottomLeft` | [number, number] | `[0,1]` |
+| param | type | default | description |
+|---|---|---|---|
+| `topLeft` | [number, number] | `[0,0]` | Where the picture's top-left corner goes, as `[x, y]` fractions of the frame from the top left. |
+| `topRight` | [number, number] | `[1,0]` | Where the picture's top-right corner goes, as `[x, y]` fractions of the frame from the top left. |
+| `bottomRight` | [number, number] | `[1,1]` | Where the picture's bottom-right corner goes, as `[x, y]` fractions of the frame from the top left. |
+| `bottomLeft` | [number, number] | `[0,1]` | Where the picture's bottom-left corner goes, as `[x, y]` fractions of the frame from the top left. |
 
 [All effects and transitions](/reference/effects/) · [Units](/reference/effects/#units)

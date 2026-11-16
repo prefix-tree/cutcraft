@@ -1,3 +1,7 @@
+---
+editLink: false
+---
+
 # `grain`
 
 Adds moving film grain to a clip, a nested sequence, or everything beneath an adjustment.
@@ -14,8 +18,8 @@ The coffee footage is Pixabay videos [209419](https://pixabay.com/videos/id-2094
 
 Drawn as painting on the element's pixels; no WebGL needed.
 
-| param | type | default |
-|---|---|---|
-| `amount` | number (0..1) | `0.2` |
+| param | type | default | description |
+|---|---|---|---|
+| `amount` | number (0..1) | `0.2` | How strong the grain is: 0 is none, 1 is specks of solid black and white. |
 
 [All effects and transitions](/reference/effects/) · [Units](/reference/effects/#units)

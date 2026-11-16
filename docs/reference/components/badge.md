@@ -1,3 +1,7 @@
+---
+editLink: false
+---
+
 # `Badge`
 
 A short word on a pill that pops in.
@@ -14,14 +18,14 @@ The coffee footage is Pixabay videos [209419](https://pixabay.com/videos/id-2094
 
 Besides the timing props (`start`, `anchor`, `at`, `offset`, `duration`):
 
-| param | type | default |
-|---|---|---|
-| `id` | string |  |
-| `text` | string |  |
-| `x` | number | `0` |
-| `y` | number | `0` |
-| `size` | number | `30` |
-| `color` | string | `"$accent"` |
-| `textColor` | string | `"$background"` |
+| param | type | default | description |
+|---|---|---|---|
+| `id` | string |  | The component's id; each of its parts' ids starts with it. |
+| `text` | string |  | The word on the pill; the pill widens to fit it. |
+| `x` | number | `0` | The pill's centre, in pixels from the frame's centre. |
+| `y` | number | `0` | The pill's centre, in pixels below the frame's centre. |
+| `size` | number (> 0) | `30` | Letter height in pixels; the pill scales with it. |
+| `color` | string | `"$accent"` | The pill's colour. |
+| `textColor` | string | `"$background"` | The letters' colour. |
 
 [All components](/reference/components/)

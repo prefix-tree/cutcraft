@@ -1,3 +1,7 @@
+---
+editLink: false
+---
+
 # `chromaticAberration`
 
 Splits red and blue apart, as a cheap lens does.
@@ -14,11 +18,11 @@ The coffee footage is Pixabay videos [209419](https://pixabay.com/videos/id-2094
 
 Drawn as a shader.
 
-| param | type | default |
-|---|---|---|
-| `distance` | number (0..100) | `4` |
-| `angle` | number | `90` |
-| `radial` | boolean | `false` |
-| `center` | [number, number] | `[0.5,0.5]` |
+| param | type | default | description |
+|---|---|---|---|
+| `distance` | number (0..100) | `4` | How far red and blue split from green, in pixels; with `radial`, the split at the corners. |
+| `angle` | number | `90` | The direction of the split, in degrees clockwise from up: 90 splits sideways. Unused with `radial`. |
+| `radial` | boolean | `false` | Split outward from `center`, growing toward the edges as a lens does, instead of along `angle`. |
+| `center` | [number, number] | `[0.5,0.5]` | Where a radial split points out from, as `[x, y]` fractions of the frame from the top left. |
 
 [All effects and transitions](/reference/effects/) · [Units](/reference/effects/#units)

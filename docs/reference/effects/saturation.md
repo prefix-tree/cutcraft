@@ -1,3 +1,7 @@
+---
+editLink: false
+---
+
 # `saturation`
 
 Makes colours richer or greyer.
@@ -14,8 +18,8 @@ The coffee footage is Pixabay videos [209419](https://pixabay.com/videos/id-2094
 
 Drawn as a CSS filter; no WebGL needed.
 
-| param | type | default |
-|---|---|---|
-| `amount` | number (-1..1) | `0` |
+| param | type | default | description |
+|---|---|---|---|
+| `amount` | number (-1..1) | `0` | How much richer or greyer the colours get: -1 is grey, 0 leaves the picture as it was, 1 doubles the saturation. |
 
 [All effects and transitions](/reference/effects/) · [Units](/reference/effects/#units)

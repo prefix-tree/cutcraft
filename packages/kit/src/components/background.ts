@@ -4,12 +4,15 @@ import { Svg } from "../jsx/elements";
 import { h, parse, svgIn, timing, timingOf, timingSchema } from "./shared";
 
 export const backgroundSchema = timingSchema.extend({
+  /** The id of the element it draws. */
   id: z.string(),
   /** `gradient` from one colour to the other, `dots` or `grid` in the second colour over the first. */
   variant: z.enum(["gradient", "dots", "grid"]).default("gradient"),
   /** The frame's size: a background covers it. */
   width: z.number().positive().default(1920),
+  /** The frame's height in pixels. */
   height: z.number().positive().default(1080),
+  /** The base colour and a second: the gradient's two ends, or the dots or grid drawn over the base. */
   colors: z.tuple([z.string(), z.string()]).default(["$background", "$primary"]),
   /** The dots' or the grid's spacing, in pixels. */
   spacing: z.number().positive().default(48),

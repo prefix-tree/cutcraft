@@ -24,4 +24,4 @@ The `product` asset has four shots; `bg` and `bg2` are shots 1 and 2 at half opa
 ## What to check
 
 - No lint warnings expected.
-- `captureSheet([1, 3.5, 7, 9])`: counting, settled, the second counter counting, settled. The counters are DOM, so they appear in the player and not on the canvas sheet; check them in the preview.
+- `npx cutcraft look stats.tsx --at 1,3.5,7,9`: counting, settled, the second counter counting, settled.

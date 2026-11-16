@@ -1,12 +1,16 @@
 # Free code
 
-The timeline part of a file uses CutCraft's elements, so an editor can trim and move things. What you draw is up to
-you. A `<Layer>` holds any React component: hooks, CSS 3D transforms, filters and blend modes, a canvas, WebGL, a
-chart library. `<Three>` and `<Motion>` bring three.js and Motion onto the timeline.
+When the ready-made elements don't draw what you want, draw it yourself. The timeline part of a file uses
+CutCraft's elements, so an editor can trim and move things, but what you draw is up to you. A `<Layer>` holds any
+React component: hooks, CSS 3D transforms, filters and blend modes, a canvas, WebGL, a chart library. `<Three>` and
+`<Motion>` bring three.js and Motion onto the timeline.
 
-**See it in:** [Product launch](/examples#a-product-launch) (`<Three>` and `<Motion>`), [Data story](/examples#a-data-story)
-(SVG in `<Motion>`, React counters in a `<Layer>`), [Logo reveal](/examples#a-logo-reveal) (three.js particles),
-[Stats with handles](/recipes/stats) (a component in a `<Layer>` with editable props).
+**See it in:** [How game lighting fakes it](/examples#how-game-lighting-fakes-it) (a `<Three>` room lit from the
+layer's time), [One pixel](/examples#one-pixel) (diagrams drawn with the diagram parts),
+[Product launch](/examples#a-product-launch) (`<Three>` and `<Motion>`), [Kinetic type](/examples#kinetic-type)
+(`<Motion>` phrases on their words), [Data story](/examples#a-data-story) (SVG in `<Motion>`, React counters in a
+`<Layer>`), [Logo reveal](/examples#a-logo-reveal) (three.js particles), [Stats with handles](/recipes/stats) (a
+component in a `<Layer>` with editable props).
 
 ## A Layer holds any React
 
@@ -42,9 +46,10 @@ A Layer without a `transform` covers the whole frame, so a full-screen scene is 
 Free code has to show the right picture for any moment, because the player seeks, scrubs backwards and plays at
 different speeds, and the export renders frames one by one. So time comes from the video, not the wall clock.
 
-- `useT()` is the layer's progress, from 0 at its start to 1 at its end.
-- `useLayer()` gives the rest: `elapsed` and `remaining` in seconds, the layer's `duration`, the video's `time` and
-  `fps`.
+| Hook | Gives |
+|---|---|
+| `useT()` | The layer's progress, from 0 at its start to 1 at its end. |
+| `useLayer()` | `elapsed` and `remaining` in seconds, the layer's `duration`, the video's `time` and `fps`. |
 
 ```tsx
 function Countdown() {
@@ -57,11 +62,17 @@ Scrub and the countdown shows the right number; pause and it stops. CSS animatio
 layer's time as well, so they start when the layer starts and scrub with the video. So is an animation a component
 makes with `element.animate()` as it mounts.
 
+The rule of thumb: compute what you draw from the time. Code that builds up state frame by frame, or runs on
+`setTimeout` or `setInterval`, shows something different after a seek, and in an export in several pieces.
+
+::: details CSS transitions and later animations
 A CSS transition, or an `element.animate()` made later, is held from the frame that started it. It plays right when
 the video plays through and in an export, and scrubs within its run. A seek that jumps over its start misses it, and
 an export in several pieces (`tabs`) can cut one short, so prefer a CSS animation or `useT()` for anything that
 matters.
+:::
 
+::: details The browser's clock in an export
 In an export, the file's own code also gets the video's clock where it asks the browser for time:
 
 - `requestAnimationFrame` callbacks run once per frame, with the frame's time as their timestamp;
@@ -72,23 +83,25 @@ So a loop written the usual way exports at the right speed on any machine. This 
 `requestAnimationFrame(...)`, not `window.requestAnimationFrame(...)`, which is still the browser's own. A library
 the file imports keeps the browser's clock too; `<ThreeScene>` and `useTimeline` put three.js and Motion on the
 video's. The live preview runs these on the browser's clock, which agrees with the video while it plays.
+:::
 
-The rule of thumb stays: compute what you draw from the time. Code that builds up state frame by frame, or runs on
-`setTimeout` or `setInterval`, shows something different after a seek, and in an export in several pieces. The lint
-warns about timers, `Math.random()` (use `random(seed)` from `@cutcraft/kit`, which is the same number in the
-preview too), clock globals reached through `window`, `<video>` and `<audio>` elements (use `<Clip>` and `<Audio>`),
-and canvases created with `willReadFrequently`.
+The lint warns about what goes off the video's clock:
+
+- timers (`setTimeout`, `setInterval`);
+- `Math.random()`: use `random(seed)` from `@cutcraft/kit`, which is the same number in the preview too;
+- clock globals reached through `window`;
+- `<video>` and `<audio>` elements: use `<Clip>` and `<Audio>`;
+- canvases created with `willReadFrequently`.
 
 ## Animation helpers
 
 `@cutcraft/kit` exports three pure functions for shaping time:
 
-- `interpolate(x, inputRange, outputRange, options)` maps a value across ranges, with easing. It extends past the ends
-  unless you pass `extrapolateLeft` or `extrapolateRight: "clamp"`.
-- `spring({ time, from, to, mass, damping, stiffness })` is where a spring is `time` seconds after it is let go
-  (mass 1, damping 10 and stiffness 100 by default).
-- `random(seed)` returns a number from 0 to 1 that is always the same for the same seed, so scattered things stay put
-  from frame to frame.
+| Function | Does |
+|---|---|
+| `interpolate(x, inputRange, outputRange, options)` | Maps a value across ranges, with easing. It extends past the ends unless you pass `extrapolateLeft` or `extrapolateRight: "clamp"`. |
+| `spring({ time, from, to, mass, damping, stiffness })` | Where a spring is `time` seconds after it is let go (mass 1, damping 10 and stiffness 100 by default). |
+| `random(seed)` | A number from 0 to 1, always the same for the same seed, so scattered things stay put from frame to frame. |
 
 ```tsx
 function Badge() {
@@ -100,16 +113,6 @@ function Badge() {
 ```
 
 A `<Keyframe>` can use `easing="spring"` too.
-
-## Naming what you draw
-
-Give an element a `data-name` and the tools can tell it from the rest of the layer: the layout check reports it by
-that name, and `cutcraft where` lists it with its place on the frame
-([Where things are](/guide/exporting#where-things-are)).
-
-```tsx
-<text data-name="lamp-label" x={470} y={624}>LAMP</text>
-```
 
 ## Diagram parts
 
@@ -130,15 +133,15 @@ import { Cells, CountUp, DrawnLine, Label, Layer } from "@cutcraft/kit";
 </Layer>
 ```
 
-Each part says when it happens one of two ways, and how long it takes:
+Each part says when it happens one of two ways, and how long it takes. These props are shared by every part:
 
-- `at` is seconds of the video, which is what a [narration](/guide/captions-and-sound#narration-from-a-script)'s
-  cue gives: `at={story.at("lamp")}`.
-- `after` is seconds since the layer started, for a layer that itself starts on a word, as above. With neither, the
-  part starts with its layer.
-- `over` is how long it takes, 0.4 s unless you say. `easing` is one of the kit's easing names, `ease-in-out`
-  unless you say.
-- Or give `progress`, a number from 0 to 1, and drive the part from your own arithmetic.
+| Prop | Means |
+|---|---|
+| `at` | Seconds of the video, which is what a [narration](/guide/captions-and-sound#narration-from-a-script)'s cue gives: `at={story.at("lamp")}`. |
+| `after` | Seconds since the layer started, for a layer that itself starts on a word, as above. With neither `at` nor `after`, the part starts with its layer. |
+| `over` | How long it takes; 0.4 s unless you say. |
+| `easing` | One of the kit's easing names; `ease-in-out` unless you say. |
+| `progress` | A number from 0 to 1, in place of the others, to drive the part from your own arithmetic. |
 
 | Part | Draws | Props of its own |
 |---|---|---|
@@ -153,6 +156,16 @@ picks the edge when the guess is wrong. A label names itself for the layout chec
 
 `useProgress({ at, after, over, easing })` is the arithmetic the parts share, for your own drawing: 0 before, 1
 after, eased between. `progress(clock, when)` is the same for a clock you already hold.
+
+## Naming what you draw
+
+Give an element a `data-name` and the tools can tell it from the rest of the layer: the layout check reports it by
+that name, and `cutcraft where` lists it with its place on the frame
+([Where things are](/guide/checking#where-things-are-at-a-moment)).
+
+```tsx
+<text data-name="lamp-label" x={470} y={624}>LAMP</text>
+```
 
 ## Editing what's inside
 
@@ -174,6 +187,8 @@ editable this way, though the Layer itself can still be moved and trimmed.
 When the app that loads the file has installed them (below), a file gets two more tags. Both sit on the timeline like
 a Layer: `id`, `start` or `anchor` and `at`, `duration`, `transform`, `enter` and `exit`.
 
+### `<Three>`
+
 `<Three>` holds a three.js scene. Write plain three.js in `setup`. It runs once with `{ scene, camera, renderer,
 THREE, width, height }`, and the function it returns runs for every frame with `{ time, t, duration }`, where `time`
 is seconds since the tag started:
@@ -190,9 +205,13 @@ is seconds since the tag started:
 ```
 
 Set the scene from `time` instead of adding up small steps, because the player may ask for any frame, including an
-earlier one after a scrub. What `setup` added is removed when the tag ends. `camera` (`position`, `lookAt`, `fov`,
-`near`, `far`, `zoom`, `orthographic`) and `background` are props the inspector can edit. React Three Fiber works as
-children too, in place of `setup` or next to it, and `useFrame`'s `clock.elapsedTime` is the same `time`:
+earlier one after a scrub. What `setup` added is removed when the tag ends.
+
+`camera` (`position`, `lookAt`, `fov`, `near`, `far`, `zoom`, `orthographic`) and `background` are props the inspector
+can edit.
+
+React Three Fiber works as children too, in place of `setup` or next to it, and `useFrame`'s `clock.elapsedTime` is
+the same `time`:
 
 ```tsx
 <Three id="logo" start={2} duration={3} camera={{ position: [0, 0, 4] }}>
@@ -200,6 +219,8 @@ children too, in place of `setup` or next to it, and `useFrame`'s `clock.elapsed
   <Logo />
 </Three>
 ```
+
+### `<Motion>`
 
 `<Motion>` plays a Motion `sequence` over its children. Each step names a selector inside the tag, its keyframes,
 and options such as `duration`, `at`, `ease` and `delay`:
@@ -215,10 +236,7 @@ and options such as `duration`, `at`, `ease` and `delay`:
 </Motion>
 ```
 
-Four complete files use these tags: a [product launch](/examples#a-product-launch) (a `<Three>` phone and word-timed
-callouts), [kinetic type](/examples#kinetic-type) (`<Motion>` phrases on their words), a
-[data story](/examples#a-data-story) (SVG bars animated by Motion, React counters in a `<Layer>`) and a
-[logo reveal](/examples#a-logo-reveal) (three.js particles settling into a name).
+### Inside a plain Layer
 
 Inside a plain `<Layer>`, use the same libraries through adapters that follow the layer's clock: `<ThreeScene>` from
 `@cutcraft/graphics/three` (a React Three Fiber canvas), and `useTimeline(sequence)` and `useLayerTime()` from
@@ -227,130 +245,9 @@ Inside a plain `<Layer>`, use the same libraries through adapters that follow th
 
 ## Effects and transitions of your own
 
-Most built-in effects run as shaders, through the same pipeline as yours: the colour tools in
-[Colour and grading](./colour), the footage tools, and the title looks, and so do the built-in shader transitions
-([Transitions](./time#transitions-sit-between-clips)). The simple adjustments (brightness, blur and the like) are CSS
-filters, and vignette and grain are painted.
-Anything else is a few lines of GLSL: declare it at the top of the file with `effect()` or `transition()`, and pass
-what it returns as an `<Effect>` or `<Transition>` type. TypeScript then checks the params you write against the
-schema you declared, as it does for the built-in types.
-
-An effect on a clip: a two-colour tone (the built-in `duotone` does the same; this shows how it is written), with two
-colour params and a third that the keyframes animate from the plain footage to the full effect.
-
-<Example src="previews/guide/shader-effect" alt="Fractal footage turned navy and gold by a duotone effect">
-
-<<< @/../examples/showcase/guide/shader-effect.tsx
-
-</Example>
-
-A transition: the incoming clip opens as a circle from the centre.
-
-<Example src="previews/guide/shader-transition" alt="A circle of the next clip opening over the first">
-
-<<< @/../examples/showcase/guide/shader-transition.tsx
-
-</Example>
-
-An effect defines `vec4 effect(vec2 uv)` and reads its picture as `image`. A transition defines
-`vec4 transition(vec2 uv)` and reads the outgoing picture as `from`, the incoming one as `to`, and how far it has got
-as `progress`, from 0 to 1. Both also get `resolution` (the frame in pixels) and `time` (seconds into the element).
-`uv` (0, 0) is the top left. Return plain colour; the player premultiplies it.
-
-An effect that needs more than one pass (a blur in two directions, a glow drawn from a blurred copy) gives `passes`, a
-list of shaders, in place of `shader`. Each defines `vec4 effect(vec2 uv)` and runs in order: `image` is the pass
-before's result (the element's picture for the first), and `original` is the element's picture in every pass. Every
-pass gets the same params. A separable Gaussian blur, as an example, with `radius` its standard deviation in pixels
-as CSS `blur()` reads it (25 taps out to three deviations):
-
-```tsx
-const soften = effect({
-  name: "soften",
-  params: z.object({ radius: z.number().min(0).max(40).default(4) }),
-  passes: [
-    `vec4 effect(vec2 uv) {
-      float s = max(params.radius, 0.001);
-      vec4 sum = vec4(0.0);
-      float total = 0.0;
-      for (int i = -12; i <= 12; i++) {
-        float d = float(i) * s / 4.0;
-        float w = exp(-d * d / (2.0 * s * s));
-        sum += w * texture(image, uv + vec2(d / resolution.x, 0.0));
-        total += w;
-      }
-      return sum / total;
-    }`,
-    `vec4 effect(vec2 uv) {
-      float s = max(params.radius, 0.001);
-      vec4 sum = vec4(0.0);
-      float total = 0.0;
-      for (int i = -12; i <= 12; i++) {
-        float d = float(i) * s / 4.0;
-        float w = exp(-d * d / (2.0 * s * s));
-        sum += w * texture(image, uv + vec2(0.0, d / resolution.y));
-        total += w;
-      }
-      return sum / total;
-    }`,
-  ],
-});
-```
-
-The shader reads each param as `params.<name>`, so a param can take any name, `length` and `image` included. A
-number becomes a `float`, a boolean a `bool`, an array of two, three or four numbers a `vec2`, `vec3` or `vec4`, and a
-colour string such as `"#ff8800"` a `vec3`. A `z.enum` becomes an `int`, and the shader names its options:
-`params.direction == params.direction.left`. The types come from the schema, once. `effect()` refuses a shader that
-reads a param its schema does not declare, or one no uniform can carry. The zod schema checks the values and fills in defaults, a [`<Keyframe>`](/reference/elements/keyframe) inside the
-`<Effect>` animates one with `param="<name>"` (the resolver checks the name and the values against the schema), and
-an editor can build its inspector from the schema.
-
-A param can also name an asset, `"asset:ID"`, and the shader reads that file as a texture: an image as a `sampler2D`, a
-LUT (`.cube`) as a `sampler3D`. The player loads it before the frame that needs it. The resolver checks that the asset
-is in the manifest and is an image or a LUT. Textures reach effects on clips, nested sequences and adjustments; on an
-overlay, an effect with an asset param is not drawn yet.
-
-The built-in `lut` effect reads a LUT this way: see [Colour and grading](./colour#a-look-from-a-lut).
-
-An element's effects run in the order they appear in the file, yours and the built-in ones alike, after its mask,
-vignette and grain. That holds on a `<Clip>`, a `<Nested>`, an `<Adjustment>` (where they change everything beneath
-it, its vignette and grain included) and an overlay, which does not draw vignette or grain yet: the lint says so. When none of an element's effects needs a shader, its built-in ones draw as one CSS filter;
-once one does, they all run as shader passes, so the order stays the one you wrote. Consecutive built-in colour
-effects (exposure, white balance, curves, a LUT, brightness and the like) are drawn together as one pass, still in that
-order, and a built-in whose params change nothing (an amount at 0) is not drawn at all. Under a shader transition,
-each clip's effects run before the two are blended.
-
-<Example src="previews/guide/effect-order" alt="The same shot twice: toned navy and amber on the left, grey on the right">
-
-<<< @/../examples/showcase/guide/effect-order.tsx
-
-</Example>
-
-Overlays take the same effects: titles, shapes, SVG, stickers and any `<Layer>`, including `<Three>` and `<Motion>`.
-Write the `<Effect>` inside the element, next to its text or its free code. Here one colour-split effect runs on a
-title and, more gently, on a Motion badge, while the footage under them stays as it is:
-
-<Example src="previews/guide/title-effect" alt="A white title and an orange badge with red and blue fringes over fractal footage">
-
-<<< @/../examples/showcase/guide/title-effect.tsx
-
-</Example>
-
-An overlay is DOM, so the player draws it into a canvas with HTML-in-Canvas and runs its effects over that picture,
-in file order. HTML-in-Canvas is a Chrome feature that is still behind a flag: turn on
-`chrome://flags/#canvas-draw-element` to see overlay effects in the preview. Without it the preview draws the
-overlay's built-in effects as CSS, leaves out the ones only a shader draws, and warns once. The export always draws
-them all, because its browser has the feature on.
-
-Keep `effect()` and `transition()` at the top of the file with a literal `name` and `shader` (or `passes`), where
-the editor and lint can read them; the `declaration` lint ([Lint](/guide/editing#lint)) says when one is not. A
-declaration is a value, not a registration: each file's effects belong to it alone, so many players on one page never
-see each other's. The player finds an effect on the element that uses it, and among the file's exports, so
-`export const` the ones the editor should offer before anything uses them. The editor's
-[actions](/reference/actions) take the names too, for example `effect/add` and `transition/update`, and write
-`type={glitch}` back into the file.
-
-The player draws these shaders with WebGL in any browser, and the export draws them the same way, in the
-[Chrome it runs in](/guide/exporting#the-browser-it-runs-in).
+A look the built-in effects don't have is a few lines of GLSL, declared in the file with `effect()` or
+`transition()` and used as an `<Effect>` or `<Transition>` type. [Your own effects and transitions](./custom-effects)
+shows how.
 
 ## Libraries
 
@@ -375,3 +272,9 @@ way: add it to `imports` under the name the file imports. The export takes the s
 The player draws all of this, and so does the export, because the export is the player: it runs in headless Chrome,
 frame by frame, with the same sound ([Exporting](/guide/exporting)). A Layer can use any CSS and any React the
 preview can.
+
+## Next
+
+- [Your own effects and transitions](./custom-effects): a look in GLSL, declared in the file.
+- [Checking a cut](./checking): look at frames, and check that what a layer draws stays in frame.
+- [Exporting](./exporting): formats, a server, and faster exports.

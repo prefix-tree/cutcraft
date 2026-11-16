@@ -13,6 +13,7 @@ npx cutcraft inspect <file.tsx> [--at <moments>] [--json] [--manifest <file>] [-
 npx cutcraft look <file.tsx> [--at <moments> | --around <id>] [--without <id>] [--listen <stretch>] [--zones <zone>] [--out look.png] [options]
 npx cutcraft look <file.tsx> --motion <stretch> [--step <s>] [--listen <stretch>] [--out look.png] [options]
 npx cutcraft where <file.tsx> --at <moments> [--safe-zone <zone>] [--json] [options]
+npx cutcraft fonts [--for <role>] [--category <category>] [--sheet fonts.png [--text <words>]] [--json]
 npx cutcraft add <media file>... [--manifest manifest.json] [--id <id>] [--transcript <file>]
 npx cutcraft browser install
 ```
@@ -59,7 +60,7 @@ time. `CUTCRAFT_CHROMIUM` names a Chrome or Chromium 153 or later to use instead
 | `--step <s>` | Seconds between samples. Default: every frame. |
 | `--json` | Print the report as JSON. |
 
-[Checking the layout](/guide/exporting#checking-the-layout) explains the rules and the output.
+[Checking the layout](/guide/checking#check-the-layout) explains the rules and the output.
 
 ## Where
 
@@ -74,7 +75,7 @@ whether it is in the frame and in each safe zone, and what it overlaps.
 | `--json` | Print the report as JSON: per moment, each thing's `id`, `kind`, `box`, `inFrame`, `zones` and `over`. |
 | `--manifest`, `--media`, `--props`, `--font`, `--import`, `--frame-timeout` | As for an export. |
 
-[Where things are](/guide/exporting#where-things-are) shows the output.
+[Where things are](/guide/checking#where-things-are-at-a-moment) shows the output.
 
 ## Inspect
 

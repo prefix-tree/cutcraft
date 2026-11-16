@@ -4,13 +4,19 @@ import { Keyframe, Shape } from "../jsx/elements";
 import { h, parse, timing, timingOf, timingSchema } from "./shared";
 
 export const progressBarSchema = timingSchema.extend({
+  /** The component's id; each of its parts' ids starts with it. */
   id: z.string(),
   /** How full it ends, 0 to 1. */
   value: z.number().min(0).max(1).default(1),
+  /** The bar's centre, in pixels from the frame's centre. */
   x: z.number().default(0),
+  /** The bar's centre, in pixels below the frame's centre. */
   y: z.number().default(440),
+  /** The full bar's length in pixels. */
   width: z.number().positive().default(1200),
+  /** The bar's thickness in pixels; its ends are rounded. */
   height: z.number().positive().default(14),
+  /** The fill's colour; the track under it is a faint `$muted`. */
   color: z.string().default("$primary"),
   /** Seconds it takes to fill. */
   fillFor: z.number().positive().default(1.2),

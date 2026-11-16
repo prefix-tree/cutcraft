@@ -1,3 +1,7 @@
+---
+editLink: false
+---
+
 # `vibrance`
 
 Lifts the muted colours more than the strong ones.
@@ -14,8 +18,8 @@ The coffee footage is Pixabay videos [209419](https://pixabay.com/videos/id-2094
 
 Drawn as a shader, with a CSS filter where WebGL is missing.
 
-| param | type | default |
-|---|---|---|
-| `amount` | number (-1..1) | `0` |
+| param | type | default | description |
+|---|---|---|---|
+| `amount` | number (-1..1) | `0` | How much to saturate the muted colours, leaving strong ones nearly alone; negative takes colour out of all of them evenly. |
 
 [All effects and transitions](/reference/effects/) · [Units](/reference/effects/#units)

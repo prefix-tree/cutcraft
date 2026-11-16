@@ -4,14 +4,21 @@ import { Shape } from "../jsx/elements";
 import { h, parse, timing, timingOf, timingSchema } from "./shared";
 
 export const frameSchema = timingSchema.extend({
+  /** The id of the element it draws. */
   id: z.string(),
   /** The frame's centre from the frame's centre, and its size, in pixels. */
   x: z.number().default(0),
+  /** The border's centre, in pixels below the frame's centre. */
   y: z.number().default(0),
+  /** The border's width in pixels. */
   width: z.number().positive(),
+  /** The border's height in pixels. */
   height: z.number().positive(),
+  /** The border's colour. */
   color: z.string().default("$accent"),
+  /** The border's line thickness in pixels. */
   thickness: z.number().positive().default(8),
+  /** How round the corners are, in pixels. */
   cornerRadius: z.number().min(0).default(28),
 });
 

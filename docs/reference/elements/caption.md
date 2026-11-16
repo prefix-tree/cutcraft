@@ -1,3 +1,7 @@
+---
+editLink: false
+---
+
 # `<Caption>`
 
 One cue inside `<Captions>`, written by hand: its text, start and end.
@@ -12,12 +16,12 @@ One cue inside `<Captions>`, written by hand: its text, start and end.
 
 ## Props
 
-| prop | type | default | required |
-|---|---|---|---|
-| `id` | string |  | yes |
-| `start` | number (0..∞) \| string |  | yes |
-| `end` | number (0..∞) \| string |  | yes |
-| `text` | string |  | yes |
-| `words` | { text, start, end }[] |  |  |
+| prop | type | default | required | description |
+|---|---|---|---|---|
+| `id` | string |  | yes | The cue's name. |
+| `start` | number (0..∞) \| string |  | yes | When it appears: seconds, or a word of the captions' source (`word:12`). |
+| `end` | number (0..∞) \| string |  | yes | When it goes, as `start`. |
+| `text` | string |  | yes | What it says. |
+| `words` | { text, start, end }[] |  |  | Each word and its time in the video, in seconds, which the word animations highlight; left out, the cue shows as plain text. |
 
 Timed, visual. No children. [All elements](/reference/elements/)

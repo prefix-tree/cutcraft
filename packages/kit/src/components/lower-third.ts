@@ -4,15 +4,21 @@ import { Shape, Title } from "../jsx/elements";
 import { h, parse, timing, timingOf, timingSchema } from "./shared";
 
 export const lowerThirdSchema = timingSchema.extend({
+  /** The component's id; each of its parts' ids starts with it. */
   id: z.string(),
+  /** The name, in the heading face. */
   name: z.string(),
+  /** The line under the name, in the body face. Left out: a shorter card with the name alone. */
   role: z.string().optional(),
   /** `card`: on a surface card; `bar`: the words beside an accent bar, straight over the picture. */
   variant: z.enum(["card", "bar"]).default("card"),
   /** The card's centre, in pixels from the frame's centre. */
   x: z.number().default(-560),
+  /** The card's centre, in pixels below the frame's centre. */
   y: z.number().default(330),
+  /** The card's width in pixels; the words wrap inside it. */
   width: z.number().positive().default(640),
+  /** The colour of the bar beside the words. */
   accent: z.string().default("$primary"),
 });
 

@@ -116,13 +116,48 @@ const shaderTransition = <P extends z.ZodObject>(def: ShaderDefinition<P>): Tran
 export const TRANSITIONS = {
   crossfade: look(
     "crossfade",
-    z.strictObject({ curve: z.enum(["linear", "ease", "ease-in", "ease-out", "ease-in-out"]).default("ease") }),
+    z.strictObject({
+      /** How the fade eases over its duration. */
+      curve: z.enum(["linear", "ease", "ease-in", "ease-out", "ease-in-out"]).default("ease"),
+    }),
   ),
-  dipToBlack: look("dipToBlack", z.strictObject({ holdDuration: z.number().min(0).max(30).default(0.1) })),
-  dipToWhite: look("dipToWhite", z.strictObject({ holdDuration: z.number().min(0).max(30).default(0.1) })),
-  wipe: look("wipe", z.strictObject({ direction: dir4.default("left") })),
-  slide: look("slide", z.strictObject({ direction: dir4.default("left"), pushOut: z.boolean().default(false) })),
-  push: look("push", z.strictObject({ direction: dir4.default("left") })),
+  dipToBlack: look(
+    "dipToBlack",
+    z.strictObject({
+      /** How long the picture holds at full black around the middle, in seconds. */
+      holdDuration: z.number().min(0).max(30).default(0.1),
+    }),
+  ),
+  dipToWhite: look(
+    "dipToWhite",
+    z.strictObject({
+      /** How long the picture holds at full white around the middle, in seconds. */
+      holdDuration: z.number().min(0).max(30).default(0.1),
+    }),
+  ),
+  wipe: look(
+    "wipe",
+    z.strictObject({
+      /** The way the wipe's edge travels: `left` reveals the next clip from the right edge. */
+      direction: dir4.default("left"),
+    }),
+  ),
+  slide: look(
+    "slide",
+    z.strictObject({
+      /** The way the next clip moves in: `left` brings it in from the right. */
+      direction: dir4.default("left"),
+      /** Push the outgoing clip out the same way, instead of leaving it in place under the next one. */
+      pushOut: z.boolean().default(false),
+    }),
+  ),
+  push: look(
+    "push",
+    z.strictObject({
+      /** The way both clips move: `left` brings the next one in from the right and pushes the outgoing one out to the left. */
+      direction: dir4.default("left"),
+    }),
+  ),
   iris: shaderTransition(iris),
   clockWipe: shaderTransition(clockWipe),
   blinds: shaderTransition(blinds),

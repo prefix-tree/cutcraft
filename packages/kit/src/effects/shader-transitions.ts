@@ -14,10 +14,15 @@ import { maskTransition } from "./shapes";
 const iris = maskTransition({
   name: "iris",
   params: z.object({
+    /** How many corners the shape has: below 3 it is a circle. */
     sides: z.number().int().min(0).max(64).default(0),
+    /** How deep a star's points are: the inner corners' distance from the centre as a share of the outer ones'. 0 draws a plain polygon. */
     star: z.number().min(0).max(0.95).default(0),
+    /** How far the shape is turned, in degrees clockwise. */
     rotation: z.number().default(0),
+    /** Where the shape opens from, as `[x, y]` fractions of the frame from the top left. */
     center: UV.default([0.5, 0.5]),
+    /** How soft the shape's edge is, in pixels. */
     feather: z.number().min(0).max(200).default(2),
   }),
   uses: [FARTHEST],
@@ -47,9 +52,13 @@ const iris = maskTransition({
 const clockWipe = maskTransition({
   name: "clockWipe",
   params: z.object({
+    /** Where the sweep starts, in degrees clockwise from up. */
     startAngle: z.number().default(0),
+    /** Which way it sweeps: `clockwise`, `counterclockwise`, or `both` ways at once. */
     direction: z.enum(["clockwise", "counterclockwise", "both"]).default("clockwise"),
+    /** The point it sweeps around, as `[x, y]` fractions of the frame from the top left. */
     center: UV.default([0.5, 0.5]),
+    /** How soft the moving edge is, as a share of a full turn. */
     softness: z
       .number()
       .min(0)
@@ -76,8 +85,11 @@ const clockWipe = maskTransition({
 const blinds = maskTransition({
   name: "blinds",
   params: z.object({
+    /** How many slats cross the frame. */
     slats: z.number().int().min(1).max(100).default(12),
+    /** The direction the slats open in, in degrees clockwise from up: 90 opens them sideways, as vertical slats. */
     angle: z.number().default(90),
+    /** How soft each opening edge is, as a share of a slat. */
     softness: z.number().min(0).max(1).default(0.1),
   }),
   mask: `  float a = radians(params.angle);
@@ -98,10 +110,15 @@ const blinds = maskTransition({
 const filmBurn = shaderDefinition("transition", {
   name: "filmBurn",
   params: z.object({
+    /** Picks the ragged pattern; the same seed burns the same way. */
     seed: z.number().int().min(0).max(4294967295).default(0),
+    /** Where the burn starts, as `[x, y]` fractions of the frame from the top left. */
     center: UV.default([0.5, 0.5]),
+    /** How big the burn's ragged features are, in pixels. */
     size: z.number().min(4).max(2000).default(120),
+    /** How wide the glowing band ahead of the hole is, in pixels. */
     edge: z.number().min(0).max(500).default(24),
+    /** The colour of the glowing band. */
     color: HEX.default("#ff7a1a"),
   }),
   shader: glsl`${NOISE}${FARTHEST}vec4 transition(vec2 uv) {
@@ -127,9 +144,13 @@ const filmBurn = shaderDefinition("transition", {
 const pixelDissolve = maskTransition({
   name: "pixelDissolve",
   params: z.object({
+    /** How many blocks across the frame. */
     columns: z.number().int().min(1).max(200).default(16),
+    /** How many blocks down the frame. */
     rows: z.number().int().min(1).max(200).default(9),
+    /** Picks the order the blocks switch in; the same seed switches them the same way. */
     seed: z.number().int().min(0).max(4294967295).default(0),
+    /** How long each block takes to switch, as a share of the transition: 0 switches each at once. */
     softness: z.number().min(0).max(1).default(0.15),
   }),
   uses: [NOISE],
@@ -146,8 +167,11 @@ const pixelDissolve = maskTransition({
 const zoom = shaderDefinition("transition", {
   name: "zoom",
   params: z.object({
+    /** The point the clips zoom toward, as `[x, y]` fractions of the frame from the top left. */
     center: UV.default([0.5, 0.5]),
+    /** How far the clips zoom, as a multiplier: the outgoing clip grows to it and the next one shrinks from it. */
     scale: z.number().min(1).max(4).default(1.6),
+    /** How much the clips smear along the zoom, most at the middle: 0 is none. */
     blur: z.number().min(0).max(1).default(0.5),
   }),
   shader: `vec4 cc_zoomed(sampler2D picture, vec2 uv, float s, float smear) {
