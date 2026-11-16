@@ -38,7 +38,7 @@ Every handler has four faces:
 | `invert` | action, state before | the inverse action, never null |
 | `fold` | action, source index | source edits, when the generic fold is not enough |
 
-The [action reference](../reference/actions.md) lists all 119. History auto-groups rapid same-type, same-target
+The [action reference](../reference/actions.md) lists all 120. History auto-groups rapid same-type, same-target
 updates (a slider drag) within 100 ms and keeps explicit groups for gestures.
 
 ## Patches
@@ -104,3 +104,32 @@ Three more look at what will be drawn: `stray-html` (HTML straight in a track, w
 `free-code-clock` (free code off the video's clock; see [Free code](./free-code#the-video-s-clock)) and
 `not-rendered` (one of the few things the renderers draw differently from what the file says, listed in
 [What renders](/reference/rendering)).
+
+## A font picker
+
+A picker lists `FONT_CATALOG` (the bundled families and a short list from Google Fonts, each with its category, its
+weights, what it suits and a line on how it looks) and the families the file itself declares, which are on
+`state.fonts`. Choosing one is one action:
+
+```ts
+exec.execute({ type: "font/use", params: { id: "headline", family: "Bebas Neue" } });
+exec.execute({ type: "font/use", params: { role: "heading", family: "Oswald", weight: 700 } });
+```
+
+`id` names a title or the captions; `role` names a theme font (`heading`, `body`, `mono`). The action refuses a
+family that is not bundled, not declared and not in the catalogue, and a weight the family does not have.
+
+A Google family the file does not declare yet is added to `state.fonts` at once, so the preview loads it and shows
+it. On fold the file gains the declaration and the use site names it:
+
+```tsx
+import { Composition, Title, Track, googleFont } from "@cutcraft/kit";
+
+const bebasNeue = googleFont("Bebas Neue");
+
+<Title id="headline" font={bebasNeue}>…</Title>
+```
+
+A weight added to a family the file already declares is added to that declaration's `weights`. Undo takes the font
+and the face to load away together. The same write-back applies to any action that sets a catalogue family as a
+font, such as `text/update`.

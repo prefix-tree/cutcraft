@@ -197,6 +197,7 @@ show which values follow the theme.
 |---|---|
 | `composition/setTheme` `{ theme, merge? }` | Replaces the theme (or removes it with `null`); with `merge`, lays the parts over the current one |
 | `theme/setToken` `{ token, value }` | Sets one palette colour, font role or `radius` |
+| `font/use` `{ id or role, family, weight? }` | Sets a font from the catalogue on a title, the captions or a theme role, and declares it |
 
 Both fold into the composition's `theme` literal and undo in one step. Elements
 the theme does not touch keep their placements, so a swap re-renders only what

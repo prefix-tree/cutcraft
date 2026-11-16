@@ -1,6 +1,6 @@
 # Actions
 
-Generated from the registered handlers (115). Do not edit by hand; run `pnpm docs:gen`.
+Generated from the registered handlers (116). Do not edit by hand; run `pnpm docs:gen`.
 
 Every action has `validate`, `apply`, `invert` and `fold`; the inverse is never null. Params are typed in `packages/kit/src/actions/types/index.ts`.
 
@@ -87,6 +87,12 @@ Every action has `validate`, `apply`, `invert` and `fold`; the inverse is never 
 | `effect/setStack` |  |
 | `effect/toggle` |  |
 | `effect/update` |  |
+
+## `font/`
+
+| action | note |
+|---|---|
+| `font/use` |  |
 
 ## `keyframe/`
 

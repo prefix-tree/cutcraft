@@ -1,6 +1,18 @@
 import { z } from "zod";
 
-import { Captions, Clip, Composition, Frame, Layer, Track, useLayer } from "@cutcraft/kit";
+import {
+  Captions,
+  Cells,
+  Clip,
+  Composition,
+  CountUp,
+  DrawnLine,
+  Frame,
+  Layer,
+  Track,
+  useLayer,
+  useProgress,
+} from "@cutcraft/kit";
 
 // A talking head cut into a short: NASA's Ernie Wright on why there is no lunar eclipse every month, and why the
 // Moon turns red when there is one. Five cuts out of an eight minute interview, each made on a word of the
@@ -311,16 +323,17 @@ function Diagram(p: DiagramProps) {
             strokeWidth="5"
             strokeLinecap="round"
           />
-          <text
+          <CountUp
+            to={5}
+            progress={p.degrees / 5}
+            format={(degrees) => `${Math.round(degrees)}°`}
             x={EARTH.x + 150}
             y={EARTH.y + 128}
             fontFamily={HEAD}
             fontWeight="800"
             fontSize="46"
             fill="var(--cc-accent)"
-          >
-            {`${Math.round(p.degrees)}°`}
-          </text>
+          />
         </g>
       ) : null}
       <circle data-name="earth" cx={EARTH.x} cy={EARTH.y} r={EARTH.r} fill="#3d6fd6" />
@@ -339,18 +352,19 @@ function Diagram(p: DiagramProps) {
       ) : null}
       <circle data-name="moon" cx={at.x} cy={at.y} r={MOON_R} fill={tone} opacity={p.moon ?? 1} />
       {p.months !== undefined ? (
-        <g data-name="months">
-          {[0, 1, 2, 3, 4, 5].map((i) => (
-            <rect
-              key={i}
-              x={390 + i * 58}
-              y={PANEL.y + PANEL.height - 94}
-              width="44"
-              height="44"
-              rx="9"
-              fill={i < lit ? "var(--cc-accent)" : "var(--cc-background)"}
-            />
-          ))}
+        <g>
+          <Cells
+            name="months"
+            count={6}
+            x={390}
+            y={PANEL.y + PANEL.height - 94}
+            size={44}
+            gap={14}
+            radius={9}
+            fill="var(--cc-background)"
+            litFill="var(--cc-accent)"
+            lit={lit}
+          />
           <text
             x="372"
             y={PANEL.y + PANEL.height - 62}
@@ -410,17 +424,14 @@ function Lines({
       <text x="540" y="656" textAnchor="middle" fontFamily={HEAD} fontWeight="800" fontSize="68" fill="var(--cc-text)">
         {wrong}
       </text>
-      {struck > 0 ? (
-        <line
-          x1={540 - half}
-          y1="634"
-          x2={540 - half + 2 * half * struck}
-          y2="634"
-          stroke="var(--cc-accent)"
-          strokeWidth="9"
-          strokeLinecap="round"
-        />
-      ) : null}
+      <DrawnLine
+        from={[540 - half, 634]}
+        to={[540 + half, 634]}
+        progress={struck}
+        stroke="var(--cc-accent)"
+        strokeWidth="9"
+        strokeLinecap="round"
+      />
     </g>
   );
 }
@@ -435,11 +446,11 @@ function Question({ question, wrong }: { question: string; wrong: string }) {
 
 /** The answer is struck out; then the picture of why takes its place: a level path would put the Moon in the shadow. */
 function Stage({ question, wrong }: { question: string; wrong: string }) {
-  const { elapsed } = useLayer();
-  const swap = ease(elapsed, 0.45, 1.05);
+  const struck = useProgress({ over: 0.3 });
+  const swap = useProgress({ after: 0.45, over: 0.6 });
   return (
     <Panel>
-      <Lines question={question} wrong={wrong} struck={ease(elapsed, 0, 0.3)} opacity={1 - swap} />
+      <Lines question={question} wrong={wrong} struck={struck} opacity={1 - swap} />
       <Diagram tilt={0} opacity={swap} />
     </Panel>
   );
@@ -455,7 +466,7 @@ function Still(p: DiagramProps) {
 }
 
 function Tilt() {
-  const k = ease(useLayer().elapsed, 0, 0.9);
+  const k = useProgress({ over: 0.9 });
   return (
     <Panel>
       <Diagram tilt={TILT * k} degrees={5 * k} />
@@ -466,7 +477,7 @@ function Tilt() {
 /** The Moon runs out along the path to where the full Moon is, and the gap to the shadow is marked. */
 function Pass({ side }: { side: 1 | -1 }) {
   const { elapsed } = useLayer();
-  const out = ease(elapsed, 0, 1.3);
+  const out = useProgress({ over: 1.3 });
   return (
     <Panel>
       <Diagram tilt={side * TILT} along={out} trail={out < 1} {...(elapsed > 1.4 ? { gap: side } : {})} degrees={5} />
@@ -477,12 +488,14 @@ function Pass({ side }: { side: 1 | -1 }) {
 /** Another month: the Moon goes, the path swings the other way up, and the Moon comes back under the shadow. */
 function Swing() {
   const { elapsed } = useLayer();
-  const k = ease(elapsed, 0.15, 1.0);
+  const k = useProgress({ after: 0.15, over: 0.85 });
+  // The Moon fades out and back in while the path swings.
+  const gone = useProgress({ over: 1.15 });
   return (
     <Panel>
       <Diagram
         tilt={mix(TILT, -TILT, k)}
-        moon={Math.abs(1 - 2 * ease(elapsed, 0, 1.15))}
+        moon={Math.abs(1 - 2 * gone)}
         {...(elapsed > 1.3 ? { gap: -1 as const } : {})}
       />
     </Panel>
@@ -492,7 +505,7 @@ function Swing() {
 /** Six months are counted while the path comes most of the way level. */
 function Months() {
   const { elapsed } = useLayer();
-  const k = ease(elapsed, 0.1, 1.2);
+  const k = useProgress({ after: 0.1, over: 1.1 });
   return (
     <Panel>
       <Diagram tilt={mix(-TILT, -TILT * 0.45, k)} months={Math.floor(clamp((elapsed - 0.1) / 1.0) * 6 + 0.001)} />
@@ -502,7 +515,7 @@ function Months() {
 
 /** The path is level: the Moon goes into the shadow and loses the sunlight. */
 function Through() {
-  const k = ease(useLayer().elapsed, 0, 0.9);
+  const k = useProgress({ over: 0.9 });
   return (
     <Panel>
       <Diagram tilt={mix(-TILT * 0.45, 0, k)} months={6} tone={blend(MOON, DIM, ease(k, 0.55, 1))} />
@@ -512,7 +525,7 @@ function Through() {
 
 /** The Moon alone, going from one colour to the next. */
 function Disc({ from, to }: { from: string; to: string }) {
-  const k = ease(useLayer().elapsed, 0, 0.35);
+  const k = useProgress({ over: 0.35 });
   const y = PANEL.y + PANEL.height / 2;
   const r = 170;
   // Its seas, darker patches that keep their place as the colour changes.
@@ -534,10 +547,11 @@ function Disc({ from, to }: { from: string; to: string }) {
 
 /** Closer on the Earth, the Moon inside its shadow. `rim` lights the edge of the Earth; `rays` carry that light in. */
 function Sunsets({ rim = false, rays = false }: { rim?: boolean; rays?: boolean }) {
-  const { elapsed } = useLayer();
   // Each layer draws what the one before it ended on, and moves only its own part.
-  const lit = rim ? (rays ? 1 : ease(elapsed, 0, 0.6)) : 0;
-  const reach = rays ? ease(elapsed, 0, 0.8) : 0;
+  const lighting = useProgress({ over: 0.6 });
+  const reaching = useProgress({ over: 0.8 });
+  const lit = rim ? (rays ? 1 : lighting) : 0;
+  const reach = rays ? reaching : 0;
   const E = { x: 400, y: 620, r: 128 };
   const M = { x: 760, y: 620, r: 42 };
   const far = 866;

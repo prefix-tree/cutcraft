@@ -417,9 +417,27 @@ function compute(
     manifest,
     log,
     theme,
-    fonts: original.fonts ?? [],
+    fonts: withPickedFonts(original.fonts ?? [], root.props.$fonts),
     shaders: original.shaders ?? [],
   };
+}
+
+/**
+ * The file's faces, and the Google faces an editor's font picker asked for (`font/use` keeps them on the composition
+ * as `$fonts`, family to weights) until the fold writes their declaration: the preview loads them at once.
+ */
+function withPickedFonts(declared: readonly DeclaredFont[], picked: unknown): readonly DeclaredFont[] {
+  if (typeof picked !== "object" || picked === null) return declared;
+  const extra: DeclaredFont[] = [];
+  for (const [family, weights] of Object.entries(picked as Record<string, unknown>)) {
+    if (!Array.isArray(weights)) continue;
+    for (const weight of weights) {
+      if (typeof weight !== "number") continue;
+      if (declared.some((f) => f.family === family && f.weight === weight && f.style === "normal")) continue;
+      extra.push({ family, weight, style: "normal", source: { kind: "google" } });
+    }
+  }
+  return extra.length > 0 ? [...declared, ...extra] : declared;
 }
 
 interface ParsedProps {

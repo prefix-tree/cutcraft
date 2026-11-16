@@ -234,6 +234,48 @@ export default function Video() {
     expect(lines[(line("two/tag") as number) - 1]).toContain("top: 500");
   });
 
+  it("measures the kit's diagram parts in the page, by the names they give themselves", async () => {
+    const file = join(dir, "parts.tsx");
+    writeFileSync(
+      file,
+      `import { Cells, Composition, DrawnLine, Label, Layer, Track } from "@cutcraft/kit";
+export const manifest = { assets: {} };
+export default function Video() {
+  return (
+    <Composition fps={30} width={540} height={960} background={{ mode: "color", color: "#000000" }}>
+      <Track id="t" layout="free">
+        <Layer id="drawn" start={0} duration={2}>
+          <svg width={540} height={960} style={{ position: "absolute", left: 0, top: 0 }}>
+            <Label text="LAMP" x={300} y={200} fontSize={40} fill="#ffffff" to={[120, 260]} after={0.2} over={0.3} />
+            <Cells name="dots" count={4} x={100} y={500} size={40} gap={10} fill="#888888" />
+            <DrawnLine from={[100, 700]} to={[400, 700]} at={0.5} over={1} easing="linear" stroke="#ffffff" strokeWidth={6} data-name="ray" />
+          </svg>
+        </Layer>
+      </Track>
+    </Composition>
+  );
+}
+`,
+    );
+    const v = await loadVideo(file);
+    expect(v.state.errors).toEqual([]);
+    const result = await whereThings({
+      state: v.state,
+      source: v.source,
+      media: directoryResolver(dir, v.manifest),
+      at: "1",
+    });
+    const things = new Map(result.moments[0]?.things.map((t) => [t.id, t]));
+    // The label names itself after its word; its box takes in the line to the point it names.
+    const lamp = things.get("drawn/lamp")?.box as { x: number; y: number; w: number; h: number };
+    expect(lamp.x).toBeLessThanOrEqual(122);
+    expect(lamp.x + lamp.w).toBeGreaterThan(330);
+    expect(lamp.y + lamp.h).toBeGreaterThanOrEqual(258);
+    near(things.get("drawn/dots"), 100, 500, 190, 40);
+    // At 1 s the line that takes a second from 0.5 s is half drawn: 150 of its 300 px, 6 px thick.
+    near(things.get("drawn/ray"), 100, 697, 150, 6);
+  });
+
   it("takes a layer that calls itself a ground for one: it covers nothing and leaves no zone", async () => {
     const scrim = (ground: boolean) => `import { Caption, Captions, Composition, Layer, Track } from "@cutcraft/kit";
 export const manifest = { assets: {} };
