@@ -23,7 +23,7 @@ There are three kinds of example, each a complete file:
 | You're making | Start from |
 |---|---|
 | A product launch or promo | [Product launch](#a-product-launch), the [walkthrough](/guide/writing-files), [Brand spot](/recipes/brand-spot) |
-| An interview or podcast cut | [A talking head with a diagram](#a-talking-head-with-a-diagram), [Talking-head cut](/recipes/talking-head), [Multicam highlights](/recipes/highlights) |
+| An interview or podcast cut | [A talking head with a diagram](#a-talking-head-with-a-diagram), [An interview that changes layout](#an-interview-that-changes-layout-with-the-story), [Talking-head cut](/recipes/talking-head), [Multicam highlights](/recipes/highlights) |
 | A vertical short | [A talking head with a diagram](#a-talking-head-with-a-diagram), [Kinetic type](#kinetic-type), [Captions and key points](#captions-and-key-points), [Vertical clip from a podcast](/recipes/vertical-podcast) |
 | An explainer with no footage | [One pixel](#one-pixel), [How game lighting fakes it](#how-game-lighting-fakes-it) |
 | A product or screen demo | [Product demo with zoom-ins](/recipes/product-demo) |
@@ -65,11 +65,12 @@ Content License. They are not committed; `gen` reads them from `examples/showcas
 [headless Chrome](/guide/exporting#the-browser-it-runs-in). The people on camera in these are stand-ins: their
 footage is a gradient, and the manifest holds the words they would say.
 
-The three shorts at the end of this page are in
+The four shorts at the end of this page are in
 [`examples/shorts`](https://github.com/prefix-tree/cutcraft/tree/main/examples/shorts), rendered with
 `pnpm --filter @cutcraft/example-shorts render`. The two lighting explainers use no media at all. The talking head is
 real footage: 79 seconds of a NASA interview, in the public domain, committed with its transcript and credit in
-`examples/shorts/media`.
+`examples/shorts/media`. The interview that changes layout is a 44 second excerpt of a podcast, which is the
+podcast's copyright and is credited in the same folder.
 
 ## The logo film
 
@@ -218,3 +219,36 @@ its labels are named with `data-name`, and `--check-layout` passes on all three 
 <div class="cc-pair"><video class="tall" :src="withBase('/shorts/one-pixel.webm')" :poster="withBase('/shorts/one-pixel.jpg')" controls muted loop playsinline></video></div>
 
 <<< ../examples/shorts/one-pixel.tsx
+
+## An interview that changes layout with the story
+
+Forty-four seconds of MrBeast on the Lex Fridman Podcast, shot landscape with two cameras, cut as a vertical short.
+Press play for the sound.
+
+<div class="cc-pair"><video :src="withBase('/shorts/hundred-videos-compare.webm')" :poster="withBase('/shorts/hundred-videos-compare.jpg')" controls playsinline></video></div>
+
+The layout follows what is being said. The set-up, the question and the conclusion are full screen on whoever is
+speaking. While he explains, the same shot eases back and up, the picture darkens from his chest down, and a graphic
+sits under his face: a hundred cells filling as he says "a hundred videos", the five things he lists arriving one at
+a time with the earlier ones dimmed, and the loop he describes with each word he names joining it.
+
+The picture moves smoothly only when the layout changes: keyframes on the clip's crop and position, over half a
+second. Where the source itself cuts between its two cameras, the crop switches on that frame. The speaker's pauses
+are as recorded; nothing is closed up.
+
+Everything that must be read is inside the area TikTok, Reels and Shorts all leave clear, and the
+[layout check](/guide/exporting#checking-the-layout) passes on all three. The darkening is a `<Layer>` marked
+`data-ground`, so the check takes it for the ground that the graphics and subtitles sit on. The graphics use the
+kit's [diagram parts](/guide/free-code#diagram-parts) and name their own parts with `data-name`. The subtitles are
+set in Poppins, declared with `googleFont()` and chosen from a `cutcraft fonts --sheet` of the short's own words.
+
+The card above is a second file, `cards/hundred-videos-compare.tsx`: the source and the rendered short playing in
+step, for showing what an edit did.
+
+**Shows:** reframing 16:9 to 9:16 round whoever speaks, keyframes on `transform.crop`, direct cuts on the source's camera cuts, a scrim marked `data-ground`, graphics timed to words with `useProgress`, word-highlight subtitles placed with `x`, `y` and `width`, a Google font, three safe zones. [Time by meaning](/guide/time) · [Free code](/guide/free-code) · [Themes](/guide/themes#choosing-a-font) · [Checking the layout](/guide/exporting#checking-the-layout)
+
+Footage: [Lex Fridman Podcast #351](https://www.youtube.com/watch?v=Z3_PwvvfxIU), a 44 second excerpt, the copyright of the podcast. It is not covered by this project's licence, and neither speaker has anything to do with this project.
+
+<div class="cc-pair"><video class="tall" :src="withBase('/shorts/hundred-videos.webm')" :poster="withBase('/shorts/hundred-videos.jpg')" controls playsinline></video></div>
+
+<<< ../examples/shorts/hundred-videos.tsx
