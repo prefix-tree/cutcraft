@@ -159,7 +159,7 @@ pixel dissolve and zoom. [Transition](https://cutcraft.prefixtree.xyz/reference/
 
 ### Colour, keying and effects
 
-Twenty-eight effects, from exposure and curves to a chroma key, a region blur and glow, run in the order the file lists them.
+Thirty-three effects, from exposure and curves to a chroma key, a region blur and glow, run in the order the file lists them.
 [Colour and grading](https://cutcraft.prefixtree.xyz/guide/colour), [Keying, blurs and pins](https://cutcraft.prefixtree.xyz/guide/footage-tools)
 
 ```tsx
@@ -195,6 +195,37 @@ that same player in headless Chrome: MP4 (H.264 or AV1), WebM (VP9 or AV1), MP3 
 checks the file before it plays, and a layout check reports overlays that leave the safe zone or cover the captions or
 the subject, at their line in the file. [Player](https://cutcraft.prefixtree.xyz/guide/player), [Exporting](https://cutcraft.prefixtree.xyz/guide/exporting),
 [What renders](https://cutcraft.prefixtree.xyz/reference/rendering)
+
+### Read a cut without watching it
+
+A model cannot watch a video, and a person should not have to render one to check a cut. `cutcraft inspect` prints
+the timeline as the resolver sees it, every element with its seconds and the words each clip plays. It starts no
+browser:
+
+```
+$ npx cutcraft inspect video.tsx
+video.tsx  1920x1080  30 fps  25.60 s (768 frames)  0 errors
+track main (sequence)
+     0.00–5.20     clip        hook  asset:founder 5.60–10.80  words 12–23 "Small software still deserves a real cloud It s…"
+     4.80–5.20     transition  x1  crossfade (hook → broll)
+     4.80–10.80    clip        broll  asset:product 6.00–12.00  keyframes: transform.scale.x, transform.scale.y
+    10.80–17.80    clip        demo  asset:screen 2.00–9.00
+```
+
+`cutcraft look` draws the frames worth seeing on one sheet: each clip's first frame, both sides and the middle of
+each transition, and each title, with its time and name under it. `--at` picks moments by name (`hook.mid`,
+`word:14`), and `--motion` lays out a move frame by frame.
+
+```sh
+npx cutcraft look video.tsx --out look.png
+npx cutcraft where video.tsx --at title.mid     # where each thing is on screen, in pixels
+```
+
+<p align="center">
+  <img src="docs/public/reference/look.jpg" width="640" alt="A contact sheet of ten frames of a cut: each clip's first frame, both sides and the middle of two transitions, and each title, with its time, frame and name under it">
+</p>
+
+[The command line](https://cutcraft.prefixtree.xyz/reference/cli)
 
 ## Quick start
 
@@ -255,11 +286,11 @@ Other agents take the [`skills/cutcraft`](plugins/cutcraft/skills/cutcraft) fold
 
 | Package | What it is |
 |---|---|
-| [`cutcraft`](packages/cli) | The command line: export a file to video, audio or a still, or check its layout. |
+| [`cutcraft`](packages/cli) | The command line: export a file to video, audio or a still, print its timeline, draw a sheet of stills, check its layout, list fonts, and add media to the manifest. |
 | [`@cutcraft/kit`](packages/kit) | The elements, time references, resolver, editor actions, source edits and lint. No DOM. |
 | [`@cutcraft/player`](packages/player) | The browser player and the React `<Player>`. |
 | [`@cutcraft/render`](packages/render) | The export as a library: `loadVideo` and `renderVideo`, driving the player in headless Chrome. |
-| [`@cutcraft/graphics`](packages/graphics) | three.js and Motion on the video's clock for `<Three>` and `<Motion>`, and the 34 `<Graphic>` kinds, which are deprecated and will be removed. |
+| [`@cutcraft/graphics`](packages/graphics) | three.js and Motion on the video's clock for `<Three>` and `<Motion>`. Ready-made lower thirds, callouts, badges and counters are components in `@cutcraft/kit`. |
 
 The repository also holds [eight recipes](https://cutcraft.prefixtree.xyz/recipes/) (complete files for common
 videos, each tested) and [the worked example](examples/launch-recap).
