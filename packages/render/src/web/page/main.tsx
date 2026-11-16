@@ -324,7 +324,9 @@ async function start(): Promise<void> {
           const ink = await measure(el);
           if (!ink) continue;
           const track = el.closest<HTMLElement>("[data-track]")?.dataset.track;
-          const under = track !== undefined && backdrop.has(track);
+          // A ground: beneath the footage, or a layer whose code says so with `data-ground` (a scrim over the footage,
+          // which things are meant to sit on).
+          const under = (track !== undefined && backdrop.has(track)) || el.querySelector("[data-ground]") !== null;
           const id = el.dataset.el as string;
           found.push({ id, kind: el.dataset.kind as string, ...ink, backdrop: under });
           // What the element's own code named: each part alone, measured the same way.

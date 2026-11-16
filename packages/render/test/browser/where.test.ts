@@ -275,4 +275,44 @@ export default function Video() {
     // At 1 s the line that takes a second from 0.5 s is half drawn: 150 of its 300 px, 6 px thick.
     near(things.get("drawn/ray"), 100, 697, 150, 6);
   });
+
+  it("takes a layer that calls itself a ground for one: it covers nothing and leaves no zone", async () => {
+    const scrim = (ground: boolean) => `import { Caption, Captions, Composition, Layer, Track } from "@cutcraft/kit";
+export const manifest = { assets: {} };
+export default function Video() {
+  return (
+    <Composition fps={30} width={540} height={960} background={{ mode: "color", color: "#000000" }}>
+      <Track id="t" layout="free">
+        <Layer id="scrim" start={0} duration={2}>
+          <div ${ground ? "data-ground " : ""}style={{ position: "absolute", left: 0, right: 0, top: 480, bottom: 0, background: "#102040" }} />
+        </Layer>
+      </Track>
+      <Captions id="caps" style={{ position: 0.6 }}>
+        <Caption id="c1" start={0} end={2} text="hello there" />
+      </Captions>
+    </Composition>
+  );
+}
+`;
+    const issues = async (ground: boolean) => {
+      const file = join(dir, ground ? "ground.tsx" : "band.tsx");
+      writeFileSync(file, scrim(ground));
+      const v = await loadVideo(file);
+      expect(v.state.errors).toEqual([]);
+      const result = await checkLayout({
+        state: v.state,
+        media: directoryResolver(dir, v.manifest),
+        source: { ...v.source, file },
+        safeZone: "tiktok",
+        step: 1,
+      });
+      return result.issues
+        .filter((i) => i.id === "scrim")
+        .map((i) => i.rule)
+        .sort();
+    };
+    // The same band without the mark is a box: over the captions and out of the zone.
+    expect(await issues(false)).toEqual(["captions", "safe-zone"]);
+    expect(await issues(true)).toEqual([]);
+  });
 });
