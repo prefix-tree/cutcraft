@@ -272,8 +272,8 @@ Footage: [Lex Fridman Podcast #351](https://www.youtube.com/watch?v=Z3_PwvvfxIU)
 
 ### A game of snake that ends in a heart
 
-A game of snake on a wall of Chinese characters. The snake eats the characters of one phrase, 我爱你, and each becomes
-a tile of its body. Every time it eats, the whole wall changes. When it is long enough it takes a lap of the board
+A game of snake on a wall of Chinese characters. The snake eats the characters of one phrase, 我爱你, and each joins
+its body. Every time it eats, the whole wall changes. When it is long enough it takes a lap of the board
 and curls up into a heart.
 
 <div class="cc-pair"><video class="tall" :src="withBase('/shorts/snake-heart.webm')" :poster="withBase('/shorts/snake-heart.jpg')" controls muted loop playsinline></video></div>
@@ -282,7 +282,7 @@ Nothing is filmed and nothing is keyframed. The file plays the whole game once w
 character appears, the shortest way to it that does not touch the body, and the second of every step. The `<Layer>`
 that draws it only asks which step the video's time has reached. The wall is a second layer marked as a ground, so
 the layout check holds the snake and the score to the safe zone and not the background; it is drawn again from a new
-seed each time the count of eaten characters goes up. The face is Noto Sans SC, declared with `googleFont()`. The
+seed each time the count of eaten characters goes up. The face is Noto Sans SC, declared with `googleFont()`, in black, grey, white and one red. The
 phrase and the heart's colour are props.
 
 **Shows:** a simulation run once and drawn from the video's time, a ground layer, props that change the film. [Free code](/guide/free-code)

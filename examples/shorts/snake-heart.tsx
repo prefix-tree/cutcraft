@@ -4,29 +4,28 @@ import { z } from "zod";
 import { Composition, fontFamily, googleFont, Layer, Track, useLayer } from "@cutcraft/kit";
 
 // "Snake heart": a game of snake played on a wall of Chinese characters. The snake eats the characters of one
-// phrase, over and over, and each one becomes a tile of its body. Every time it eats, the whole wall changes. When
+// phrase, over and over, and each one joins its body. Every time it eats, the whole wall changes. When
 // it has eaten enough it takes a lap of the board and curls up into a heart made of the phrase.
 //
 // Nothing here is filmed or recorded. The whole game is worked out once, below, from a seed: where each character
 // appears, the way the snake takes to it without running into itself, and how fast it goes. The layers then only
 // ask "which step is it at this second" and draw that.
 
-const BG = "#150d1f";
-const WALL = "#3b2b4d";
-const TILE = "#f6eee2";
-const HEAD = "#ffd166";
-const INK = "#1b1226";
-// One face for the wall and the tiles, with the characters of Simplified Chinese.
+// Black, grey, white and one red: the wall is grey, the snake is white, and what it wants is red.
+const BG = "#000000";
+const WALL = "#4a4a4a";
+const SNAKE = "#ffffff";
+// One face for the wall and the snake, with the characters of Simplified Chinese.
 export const noto = googleFont("Noto Sans SC", { weights: [400, 900] });
 const FACE = fontFamily(noto, "sans-serif");
 
 export const schema = z.object({
-  /** The phrase the snake eats and the heart is made of, one character to a tile. */
+  /** The phrase the snake eats and the heart is made of, one character to a cell. */
   word: z.string().min(1).max(8),
   /** The colour of the letter to eat, and of the heart. */
   heart: z.string(),
 });
-export const defaults: z.infer<typeof schema> = { word: "我爱你", heart: "#ff4d6d" };
+export const defaults: z.infer<typeof schema> = { word: "我爱你", heart: "#e5383b" };
 
 // The board: square cells over the whole frame. The game is played in the middle of it, inside the part of a phone
 // screen that an app's buttons leave clear.
@@ -296,12 +295,12 @@ function Board({ word, heart }: z.infer<typeof schema>) {
           fontSize: 32,
           fontWeight: 900,
           letterSpacing: 4,
-          color: TILE,
+          color: SNAKE,
           background: BG,
         }}
       >
         <span>贪吃蛇</span>
-        <span style={{ color: won ? heart : TILE }}>{won ? `♥ ${size}` : String(size - 1).padStart(2, "0")}</span>
+        <span style={{ color: won ? heart : SNAKE }}>{won ? `♥ ${size}` : String(size - 1).padStart(2, "0")}</span>
       </div>
 
       {next && (
@@ -332,27 +331,22 @@ function Board({ word, heart }: z.infer<typeof schema>) {
         }}
       >
         {body.map((cell, j) => {
-          const head = j === body.length - 1;
-          // The heart turns its colour tile by tile, from the tail round to the head.
+          // The heart turns its colour character by character, from the tail round to the head.
           const turned = won ? ease((done - j * 0.012) / 0.25) : 0;
           return (
-            <div key={key(cell)} style={{ position: "absolute", ...box(cell), padding: 4, boxSizing: "border-box" }}>
-              <div
-                style={{
-                  ...LETTER,
-                  position: "relative",
-                  width: "100%",
-                  height: "100%",
-                  borderRadius: 12,
-                  fontSize: 40,
-                  fontWeight: 900,
-                  color: INK,
-                  background: turned > 0.5 ? heart : head ? HEAD : TILE,
-                  boxShadow: turned > 0.5 ? `0 0 ${24 * turned}px ${heart}aa` : "none",
-                }}
-              >
-                {chars[j % chars.length]}
-              </div>
+            <div
+              key={key(cell)}
+              style={{
+                ...LETTER,
+                ...box(cell),
+                background: BG,
+                fontSize: 58,
+                fontWeight: 900,
+                color: turned > 0.5 ? heart : SNAKE,
+                textShadow: turned > 0.5 ? `0 0 ${22 * turned}px ${heart}` : "none",
+              }}
+            >
+              {chars[j % chars.length]}
             </div>
           );
         })}
