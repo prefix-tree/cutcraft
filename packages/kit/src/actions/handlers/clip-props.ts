@@ -118,9 +118,15 @@ define(makePropHandler({
   kinds: AUDIO_KINDS,
   write: (p) => ({ duck: p.duck as Json | undefined }),
   validate: (a, state) =>
-    a.params.duck === undefined || state.tracks.some((t) => t.id === a.params.duck?.under)
+    // As in a file: the track to duck under by its id, or every track of a role.
+    a.params.duck === undefined ||
+    state.tracks.some((t) => t.id === a.params.duck?.under || t.role === a.params.duck?.under)
       ? ok
-      : invalid({ code: "ELEMENT_NOT_FOUND", message: "duck.under must be a track id", path: "duck.under" }),
+      : invalid({
+          code: "ELEMENT_NOT_FOUND",
+          message: `duck.under "${a.params.duck.under}" is neither a track id nor a track role`,
+          path: "duck.under",
+        }),
 }));
 
 /** Replace the whole child collection of one kind. */

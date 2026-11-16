@@ -4,7 +4,7 @@ editLink: false
 
 # Actions
 
-Generated from the registered handlers (116). Do not edit by hand; run `pnpm docs:gen`.
+Generated from the registered handlers (115). Do not edit by hand; run `pnpm docs:gen`.
 
 Every action has `validate`, `apply`, `invert` and `fold`; the inverse is never null. Each runs as `{ type, params }`; the params and notes here are read from `packages/kit/src/actions/types/index.ts`.
 
@@ -22,7 +22,7 @@ Every action has `validate`, `apply`, `invert` and `fold`; the inverse is never 
 |---|---|---|
 | `audio/add` | `{ id, trackId, src, place, in?, out?, duration? }` | An &lt;Audio> (sound only: music, a voice-over), placed like a clip; `duration: "fill"` runs to the composition's end. |
 | `audio/setAutomation` | `{ id, lane, points }` | Replaces one automation lane, `volume` or `pan`, with `[seconds, value]` points. |
-| `audio/setDuck` | `{ id, duck? }` | Turns this sound down to `to` while the track `under` plays, over `attack` and `release` seconds; omit `duck` to stop ducking. |
+| `audio/setDuck` | `{ id, duck? }` | Turns this sound down to `to` while the track `under` plays, over `attack` and `release` seconds; omit `duck` to stop ducking. `under` is a track id or a track role, as in a file. |
 | `audio/setFade` | `{ id, in?, out? }` | Sets the fade-in and/or fade-out length in seconds; merges into `fade`. |
 | `audio/setVolume` | `{ id, volume }` | Sets the element's volume, 0 to 4 (1 leaves it as recorded). |
 
@@ -148,7 +148,6 @@ Every action has `validate`, `apply`, `invert` and `fold`; the inverse is never 
 | `multicam/removeCut` | `{ cutId }` | Deletes a cut. |
 | `multicam/restore` | `{ id, node, trackId, place }` | The undo of multicam/remove: puts the group back on its track at its old placement. |
 | `multicam/restoreCut` | `{ id, node, after }` | The undo of multicam/removeCut: puts the cut back in place. |
-| `multicam/setActiveAngle` | `{ id, angle }` | Selects the multicam's active angle (`activeAngle`); the picture follows the cuts, not this. |
 
 ## `nested/`
 

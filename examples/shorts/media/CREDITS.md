@@ -14,7 +14,7 @@ Ernie Wright, of NASA's Scientific Visualization Studio, answering questions abo
 
 `eclipse.json` is the transcript of those 79 seconds with a time for every word, made with the open-source Whisper
 model (`small.en`) and corrected by hand for capital letters. `cutcraft add media/eclipse.webm` reads it into
-`manifest.json`.
+`cutcraft.json`.
 
 ## hundred-videos.webm
 
@@ -30,4 +30,4 @@ MrBeast (Jimmy Donaldson) and Lex Fridman, talking about how to get better at ma
 
 `hundred-videos.json` is the transcript of those 44 seconds with a time for every word, made with the open-source
 Whisper model (`small.en`) and corrected by hand in four places. `cutcraft add media/hundred-videos.webm` reads it
-into `manifest.json`.
+into `cutcraft.json`.

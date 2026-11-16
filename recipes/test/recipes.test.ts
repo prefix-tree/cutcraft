@@ -16,7 +16,7 @@ import * as variants from "../variants";
 import * as verticalPodcast from "../vertical-podcast";
 
 const root = join(import.meta.dirname, "..");
-const manifest = JSON.parse(readFileSync(join(root, "manifest.json"), "utf8")) as AssetManifest;
+const manifest = JSON.parse(readFileSync(join(root, "cutcraft.json"), "utf8")) as AssetManifest;
 
 type Module = Parameters<typeof collectModule>[0];
 const recipes: { name: string; file: string; mod: Module; check: (state: ResolvedState) => void }[] = [

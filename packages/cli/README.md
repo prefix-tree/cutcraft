@@ -18,8 +18,10 @@ npx cutcraft video.tsx --still 2 --out poster.png          # the frame at 2 s, o
 npx cutcraft video.tsx --check-layout --safe-zone tiktok   # overlays off the frame, the safe zone or the captions
 ```
 
-The asset manifest comes from the file's `manifest` export or from `--manifest manifest.json`. Media files sit in the
-file's folder, one per asset id, or in the folder you pass to `--media`.
+The asset manifest is `cutcraft.json`, found in the file's folder or the nearest folder above it; `cutcraft add`
+writes it. A file may export its own `manifest` instead, and `--manifest <file>` names another. Media files sit in
+the file's folder, beside the manifest or in `media/` beside it, one per asset id, or in the folder you pass to
+`--media`.
 
 ## Options people reach for
 

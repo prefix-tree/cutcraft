@@ -12,7 +12,7 @@ after every change.
 | Where each thing sits at a moment | `cutcraft where video.tsx --at 2.6` |
 | Whether the exported file is sound | `ffprobe` and `ffmpeg` |
 
-Every command takes `--manifest manifest.json` when the file doesn't export its manifest.
+Every command finds the nearest `cutcraft.json` from the file's folder upward; `--manifest` names another.
 
 ## Read the timeline as text
 

@@ -4,7 +4,7 @@
 
 A 25 s product recap written by a model from [`brief.md`](brief.md) under the
 instructions in [`prompt.md`](prompt.md), against the assets in
-[`manifest.json`](manifest.json). The result is [`video.tsx`](video.tsx):
+[`cutcraft.json`](cutcraft.json). The result is [`video.tsx`](video.tsx):
 the file is the video. The guide that explains every choice in it is
 `docs/guide/writing-files.md`.
 

@@ -54,7 +54,7 @@ as code. Where the elements stop, a `<Layer>` holds any React, CSS, canvas or We
 
 ```
 video.tsx      ┐                                       ┌─▶ <Player>   plays it in a page
-manifest.json  ├─▶ resolve ─▶ every element in seconds ├─▶ actions    edit it; each edit is written back to video.tsx
+cutcraft.json  ├─▶ resolve ─▶ every element in seconds ├─▶ actions    edit it; each edit is written back to video.tsx
 media files    ┘                                       └─▶ export     MP4, WebM, a still or subtitles
 ```
 
@@ -63,7 +63,7 @@ editor and the export all work from that one result, so the preview and the expo
 
 In practice:
 
-1. `npx cutcraft add talk.mp4` lists the media in `manifest.json`.
+1. `npx cutcraft add talk.mp4` lists the media in `cutcraft.json`, the manifest.
 2. You write `video.tsx`, or your agent does with the [CutCraft skill](./agents).
 3. `npx cutcraft look video.tsx` draws a sheet of its frames, and `cutcraft inspect` prints the timeline as text,
    so a cut can be checked without watching it.

@@ -267,9 +267,9 @@ export interface AudioActions {
   "audio/setAutomation": { id: Id; lane: "volume" | "pan"; points: readonly (readonly [number, number])[] };
   /**
    * Turns this sound down to `to` while the track `under` plays, over `attack` and `release` seconds; omit `duck` to
-   * stop ducking.
+   * stop ducking. `under` is a track id or a track role, as in a file.
    */
-  "audio/setDuck": { id: Id; duck?: { under: Id; to: number; attack?: number; release?: number } };
+  "audio/setDuck": { id: Id; duck?: { under: string; to: number; attack?: number; release?: number } };
 }
 
 interface Overlay {
@@ -385,8 +385,6 @@ export interface MulticamActions {
   "multicam/remove": { id: Id };
   /** The undo of multicam/remove: puts the group back on its track at its old placement. */
   "multicam/restore": { id: Id; node: NodeSpec; trackId: Id; place: PlacementSpec };
-  /** Selects the multicam's active angle (`activeAngle`); the picture follows the cuts, not this. */
-  "multicam/setActiveAngle": { id: Id; angle: Id };
   /** Adds a cut at `at` that switches the multicam to `angle`. */
   "multicam/addCut": { id: Id; cutId: Id; at: number; angle: Id };
   /** Moves a cut to `at`. */

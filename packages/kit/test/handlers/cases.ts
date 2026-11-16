@@ -370,7 +370,6 @@ export const CASES: Partial<Record<ActionType, ActionInput>> = {
       place: { start: 1 },
     },
   },
-  "multicam/setActiveAngle": { type: "multicam/setActiveAngle", params: { id: "mc1", angle: "an2" } },
   "multicam/addCut": { type: "multicam/addCut", params: { id: "mc1", cutId: "cu9", at: 4, angle: "an1" } },
   "multicam/moveCut": { type: "multicam/moveCut", params: { cutId: "cu2", at: 3 } },
   "multicam/removeCut": { type: "multicam/removeCut", params: { cutId: "cu2" } },

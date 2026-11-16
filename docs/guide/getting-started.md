@@ -23,10 +23,10 @@ from Whisper or ElevenLabs, or a `talk.srt` or `talk.vtt`. Then add it:
 
 ```sh
 npx cutcraft add talk.mp4
-# talk: video, 32.0 s, 1920x1080 at 30 fps, with sound, 96 words from talk.json → manifest.json
+# talk: video, 32.0 s, 1920x1080 at 30 fps, with sound, 96 words from talk.json → cutcraft.json
 ```
 
-`manifest.json` lists the media the video may use, each by an id (`talk`), with what CutCraft reads from the file
+`cutcraft.json` is the manifest. It lists the media the video may use, each by an id (`talk`), with what CutCraft reads from the file
 once: its length, size, frame rate, sound and the words of its transcript. The video refers to it as `asset:talk`.
 
 ## 3. Write the video
@@ -58,20 +58,23 @@ transcript, leave out `<Captions>`. [Anatomy of a video](./anatomy) explains eac
 ## 4. Look at it
 
 ```sh
-npx cutcraft look video.tsx --manifest manifest.json
+npx cutcraft look video.tsx
 ```
 
 This writes `look.png`, a sheet of frames from the video: the first frame of each clip, each title and the edges of
 every cut, each labelled with its time. It takes a few seconds and needs no player.
 
-`npx cutcraft inspect video.tsx --manifest manifest.json` prints the timeline as text instead: each element with its
+`npx cutcraft inspect video.tsx` prints the timeline as text instead: each element with its
 start and end, and the words each clip plays.
 
 ## 5. Export it
 
 ```sh
-npx cutcraft video.tsx --manifest manifest.json --out video.mp4
+npx cutcraft video.tsx --out video.mp4
 ```
+
+Each command finds `cutcraft.json` in the file's folder or a folder above it, and finds `talk.mp4` beside the file,
+beside the manifest or in `media/` next to it. `--manifest` and `--media` point elsewhere.
 
 The first export downloads Chrome for Testing, which takes a minute; later ones start in seconds. `--draft` renders
 a quick half-size copy beside it (`video.draft.mp4`) to watch while you work, and `--still 3 --out poster.png` writes
@@ -123,7 +126,7 @@ import { collectModule, resolve } from "@cutcraft/kit";
 import { Player } from "@cutcraft/player";
 import "@cutcraft/player/fonts.css";
 
-import manifest from "./manifest.json";
+import manifest from "./cutcraft.json";
 import * as file from "./video";
 
 const state = resolve(collectModule(file), manifest);

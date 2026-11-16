@@ -6,7 +6,7 @@ formats, exporting on a server, motion blur, and making an export faster.
 
 ```sh
 npm install cutcraft
-npx cutcraft video.tsx --manifest manifest.json --media ./media --out video.mp4
+npx cutcraft video.tsx --out video.mp4
 ```
 
 To check the file before or after you export it, see [Checking a cut](./checking).
@@ -19,10 +19,10 @@ leave them out:
 | Option | Gives | When left out |
 |---|---|---|
 | `--out` | The file to write; its extension picks the format. | Required. |
-| `--manifest` | The manifest. | The file's own `manifest` export. |
-| `--media` | A folder with one file per asset id. | The file's folder. |
+| `--manifest` | The manifest. | The file's own `manifest` export, or else the nearest `cutcraft.json` from the file's folder upward. |
+| `--media` | A folder with one file per asset id. | The file's folder, the manifest's folder, or `media/` beside the manifest. |
 
-The [CLI reference](/reference/cli) lists every option.
+[Where the manifest and the media are found](/reference/cli#where-the-manifest-and-the-media-are-found) has the details, and the [CLI reference](/reference/cli) lists every option.
 
 The export loads a file the way the editor does: it may import `react`, `zod` and `@cutcraft/kit`, plus what
 `--import` offers. A file that imports anything else fails with the same message in both, so a file that exports
@@ -231,7 +231,7 @@ Testing has none.
 ```ts
 import { directoryResolver, loadVideo, renderStill, renderVideo } from "@cutcraft/render";
 
-const video = await loadVideo("video.tsx", { manifest: "manifest.json" });
+const video = await loadVideo("video.tsx");
 const media = directoryResolver("media", video.manifest);
 const result = await renderVideo({
   state: video.state,

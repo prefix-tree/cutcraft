@@ -8,7 +8,7 @@ import * as file from "../video";
 
 const root = join(import.meta.dirname, "..");
 const text = readFileSync(join(root, "video.tsx"), "utf8");
-const manifest = JSON.parse(readFileSync(join(root, "manifest.json"), "utf8")) as AssetManifest;
+const manifest = JSON.parse(readFileSync(join(root, "cutcraft.json"), "utf8")) as AssetManifest;
 
 describe("the launch recap file", () => {
   const tree = collectModule(file);

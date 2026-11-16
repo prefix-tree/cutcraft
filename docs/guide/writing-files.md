@@ -15,7 +15,7 @@ wrote. It shows what each part of the file does and links to the guide page that
 > The product name, the tagline, the accent colour and the call to action must
 > be tweakable afterwards without touching the edit.
 
-With it came `manifest.json`: five assets. The founder interview has sixty timed words, three shots and four silences;
+With it came `cutcraft.json`: five assets. The founder interview has sixty timed words, three shots and four silences;
 the product b-roll has three shots; then a screen recording, a music track and the logo.
 
 ## The file

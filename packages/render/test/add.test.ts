@@ -38,9 +38,9 @@ afterAll(() => rmSync(scratch, { recursive: true, force: true }));
 const manifestAt = (path: string) => JSON.parse(readFileSync(path, "utf8"));
 
 describe("addAsset", () => {
-  it("probes a video and writes its entry into a new manifest beside it", async () => {
-    const result = await addAsset(join(dir, "bars.webm"));
-    expect(result.manifest).toBe(join(dir, "manifest.json"));
+  it("probes a video and writes its entry into a new manifest in the current folder", async () => {
+    const result = await addAsset(join(dir, "bars.webm"), { cwd: dir });
+    expect(result.manifest).toBe(join(dir, "cutcraft.json"));
     expect(manifestAt(result.manifest).assets.bars).toEqual({
       id: "bars",
       kind: "video",
@@ -149,10 +149,31 @@ export default function Video() {
     mkdirSync(round);
     copyFileSync(join(mediaDir, "bars.webm"), join(round, "bars.webm"));
     writeFileSync(join(round, "bars.srt"), subtitles(state, { format: "srt" }));
-    const { entry } = await addAsset(join(round, "bars.webm"));
+    const { entry } = await addAsset(join(round, "bars.webm"), { cwd: round });
     const cues = [...state.items.values()].filter((p) => p.kind === "caption");
     expect(entry.transcript?.words.map((w) => w.text.toLowerCase())).toEqual(words.map((w) => w.toLowerCase()));
     for (const w of entry.transcript?.words ?? [])
       expect(cues.some((c) => w.start >= c.start - 0.001 && w.end <= c.end + 0.001)).toBe(true);
+  });
+
+  it("writes the nearest cutcraft.json above the current folder", async () => {
+    const project = mkdtempSync(join(scratch, "p-"));
+    const media = join(project, "media");
+    mkdirSync(media);
+    copyFileSync(join(mediaDir, "solid.webm"), join(media, "solid.webm"));
+    writeFileSync(join(project, "cutcraft.json"), JSON.stringify({ assets: {} }));
+    const result = await addAsset(join(media, "solid.webm"), { cwd: media });
+    expect(result.manifest).toBe(join(project, "cutcraft.json"));
+    expect(manifestAt(result.manifest).assets.solid.kind).toBe("video");
+  });
+
+  it("keeps writing a manifest.json that is already beside the media", async () => {
+    const project = mkdtempSync(join(scratch, "o-"));
+    const media = join(project, "media");
+    mkdirSync(media);
+    copyFileSync(join(mediaDir, "solid.webm"), join(media, "solid.webm"));
+    writeFileSync(join(media, "manifest.json"), JSON.stringify({ assets: {} }));
+    const result = await addAsset(join(media, "solid.webm"), { cwd: project });
+    expect(result.manifest).toBe(join(media, "manifest.json"));
   });
 });

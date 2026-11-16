@@ -43,7 +43,7 @@ model that wrote it can read your changes in it later, because they are in the s
 | `default` | A component that returns a `<Composition>`: the video. |
 | `schema` | Optional. A zod object of the values someone should be able to change. |
 | `defaults` | Optional. The values the video renders with. |
-| `manifest` | Optional. The media the file uses; the command line reads it unless given `--manifest`. |
+| `manifest` | Optional. The media the file uses; the command line uses it instead of the nearest `cutcraft.json`, unless given `--manifest`. |
 
 ## What a file may import
 

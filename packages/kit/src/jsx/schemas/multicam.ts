@@ -9,8 +9,6 @@ export const multicamSchema = z.strictObject({
   name: z.string().optional(),
   /** Timeline time at which every angle is aligned (plus each angle's own offset). */
   sync: z.number().nonnegative().default(0),
-  /** The angle selected in the editor. What plays is set by the `<Cut>`s. */
-  activeAngle: idSchema.optional(),
 });
 
 export const angleSchema = z.strictObject({

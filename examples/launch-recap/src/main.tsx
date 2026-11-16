@@ -6,7 +6,7 @@ import "@cutcraft/player/fonts.css";
 import { useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 
-import manifestJson from "../manifest.json";
+import manifestJson from "../cutcraft.json";
 import * as file from "../video";
 import text from "../video.tsx?raw";
 

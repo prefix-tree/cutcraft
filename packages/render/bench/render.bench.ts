@@ -139,7 +139,7 @@ const cases: Case[] = [
   {
     name: "cuts only, 20 s 1080p30 (five hard cuts, one source, its own sound)",
     file: join(cache, "cuts.tsx"),
-    manifest: join(cache, "cuts.manifest.json"),
+    manifest: join(cache, "cuts.cutcraft.json"),
     media: join(cache, "media"),
     seconds: 20,
     prepare: () => {
@@ -176,7 +176,7 @@ const cases: Case[] = [
       }
       writeFileSync(join(cache, "cuts.tsx"), CUTS);
       writeFileSync(
-        join(cache, "cuts.manifest.json"),
+        join(cache, "cuts.cutcraft.json"),
         JSON.stringify({
           assets: {
             src: {
@@ -197,7 +197,7 @@ const cases: Case[] = [
     (e): Case => ({
       name: `effects: ${e.label}`,
       file: join(cache, `effects-${e.key}.tsx`),
-      manifest: join(cache, "effects.manifest.json"),
+      manifest: join(cache, "effects.cutcraft.json"),
       media: join(cache, "media"),
       seconds: 5,
       prepare: () => {
@@ -206,7 +206,7 @@ const cases: Case[] = [
         writeFileSync(join(cache, "media", "warm.cube"), warmCube());
         writeFileSync(join(cache, `effects-${e.key}.tsx`), effectsFile(e.effects));
         writeFileSync(
-          join(cache, "effects.manifest.json"),
+          join(cache, "effects.cutcraft.json"),
           JSON.stringify({
             assets: {
               src: { id: "src", kind: "video", duration: 20, fps: 30, width: 1920, height: 1080 },
@@ -220,13 +220,13 @@ const cases: Case[] = [
   {
     name: "talking head, first 20 s of 1080p30 (generated captions on screen throughout; small stand-in footage)",
     file: join(root, "recipes", "talking-head.tsx"),
-    manifest: join(root, "recipes", "manifest.json"),
+    manifest: join(root, "recipes", "cutcraft.json"),
     media: join(cache, "recipes-media"),
     seconds: 20,
     prepare: () => {
       if (!existsSync(join(cache, "recipes-media", "podcast.webm")))
         makePlaceholders(
-          JSON.parse(readFileSync(join(root, "recipes", "manifest.json"), "utf8")) as AssetManifest,
+          JSON.parse(readFileSync(join(root, "recipes", "cutcraft.json"), "utf8")) as AssetManifest,
           join(cache, "recipes-media"),
         );
     },
@@ -234,7 +234,7 @@ const cases: Case[] = [
   {
     name: "launch recap, first 10 s of 1080p30 (titles, captions, three sources)",
     file: join(root, "examples", "launch-recap", "video.tsx"),
-    manifest: join(root, "examples", "launch-recap", "manifest.json"),
+    manifest: join(root, "examples", "launch-recap", "cutcraft.json"),
     media: join(root, "examples", "launch-recap", "public"),
     seconds: 10,
   },

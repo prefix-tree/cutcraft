@@ -1,7 +1,7 @@
 # Transitions
 
 A transition blends one clip into the next: a crossfade, a dip to black, a wipe, an iris. This page shows how to put
-one between two clips, which types there are, and how to play a flash, a light leak or a whoosh over a cut without
+one between two clips, which types there are, how to bring a single element in or out, and how to play a flash, a light leak or a whoosh over a cut without
 changing it.
 
 **See it in:** [An edit](/examples#an-edit) (a wipe and a slide), [Effects and transitions](/reference/effects/#transitions)
@@ -59,6 +59,28 @@ Params go in `params`:
 The shader transitions need WebGL, which the player and the export have; where it is missing they play as a
 crossfade. At the edge of a title or another overlay they play as a fade.
 :::
+
+## At one edge of an element
+
+A transition can also bring one element in or take it out, with nothing on the other side. Give it `on`, the id of
+the element, and `edge`, `"in"` or `"out"`. It plays at that edge, against whatever is beneath the element.
+
+```tsx
+<Track id="over" layout="free">
+  <Clip id="pip" src="asset:product" in="shot:1" out="shot:1.end" start={{ at: "hook", offset: 1 }} />
+  <Transition id="pip-in" on="pip" edge="in" type="wipe" duration={0.6} />
+  <Transition id="pip-out" on="pip" edge="out" type="crossfade" duration={0.6} />
+</Track>
+```
+
+| | Between two clips | At one edge |
+|---|---|---|
+| Written | Between the clips, on a sequence track | Anywhere in the track, with `on` and `edge` |
+| Plays against | The other clip | The tracks below, or the background |
+| Extra footage | Both clips, by `duration` | None: it plays inside the element's own time |
+
+Use it on a free track, where nothing sits next to the element to blend with, or on a sequence track to open on the
+first clip or close on the last. `on` and `edge` always go together.
 
 ## Make your own
 
