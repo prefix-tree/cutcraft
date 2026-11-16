@@ -3,7 +3,7 @@
 
 import { Children, type CSSProperties, cloneElement, isValidElement, type ReactNode } from "react";
 
-import { type Placement, TEXT_ANIMATION_PRESETS } from "@cutcraft/kit";
+import { fontFamily, type Placement, TEXT_ANIMATION_PRESETS } from "@cutcraft/kit";
 
 import { isVisibleAt } from "../model/visible";
 import { devWarn } from "../warn";
@@ -45,7 +45,9 @@ export function titleContent(p: ElementProps & { readonly text: string }): React
     alignItems: props.valign === "top" ? "flex-start" : props.valign === "bottom" ? "flex-end" : "center",
     justifyContent: props.align === "left" ? "flex-start" : props.align === "right" ? "flex-end" : "center",
     textAlign: (props.align as CSSProperties["textAlign"]) ?? "center",
-    fontFamily: String(props.font ?? "Inter"),
+    // Quoted: a family with a word that starts with a digit ("Source Sans 3") is not valid CSS without quotes,
+    // and the browser would drop the declaration and set the text in its default face.
+    fontFamily: fontFamily(String(props.font ?? "Inter")),
     fontSize: Number(props.size ?? 48),
     fontWeight: typeof weight === "number" ? weight : weight === "normal" ? 400 : 700,
     fontStyle: props.italic ? "italic" : "normal",
@@ -159,7 +161,7 @@ export function captionsContent(p: {
     ...captionPlacement(captionPlace(props, style), comp),
     gap: 8,
     pointerEvents: "none",
-    fontFamily: style.font ?? "Inter",
+    fontFamily: fontFamily(style.font ?? "Inter"),
     fontSize: style.size ?? Math.round(comp.height / 24),
     color: style.color ?? "#ffffff",
     fontWeight: style.weight === "normal" ? 400 : style.weight === "bold" ? 700 : Number(style.weight ?? 800),

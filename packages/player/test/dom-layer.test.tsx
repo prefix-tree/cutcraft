@@ -46,6 +46,23 @@ describe("DomLayer", () => {
     await m.unmount();
   });
 
+  it("quotes the font family of a title and of captions, so a name with a digit is valid CSS", async () => {
+    const state = fixtureState();
+    const items = new Map(state.items);
+    const title = items.get("t1") as Placement;
+    const cap = items.get("cap") as Placement;
+    items.set("t1", { ...title, props: { ...title.props, font: "Source Sans 3" } });
+    items.set("cap", { ...cap, props: { ...cap.props, style: { font: "Exo 2" } } });
+    const m = await mountPlayer({ ...state, items });
+    await m.seek(1.5);
+    const fonts = [...m.container.querySelectorAll<HTMLElement>("[style]")].map((e) => e.style.fontFamily);
+    expect(fonts).toContain('"Source Sans 3"');
+    await m.seek(0.5);
+    const later = [...m.container.querySelectorAll<HTMLElement>("[style]")].map((e) => e.style.fontFamily);
+    expect(later).toContain('"Exo 2"');
+    await m.unmount();
+  });
+
   it("puts a box behind the caption word being said, and only that one", async () => {
     const state = fixtureState();
     const items = new Map(state.items);
