@@ -1,5 +1,54 @@
 # @cutcraft/kit
 
+## 0.4.0
+
+### Minor Changes
+
+- 96799e4: Captions can sit at any height. `style={{ position: 0.6 }}` on `<Captions>` puts their middle 60% of the way down the frame; `top`, `center` and `bottom` work as before. Over a talking head in a vertical video, `center` lands on the speaker's mouth and `bottom` is under the platforms' controls; a number between puts the captions under the chin.
+- 12fbb4e: Captions can be placed exactly: `x` and `y` on `<Captions>` are the middle of the captions in pixels from the
+  frame's centre, `width` is the widest a line may be, and `align` is the side the lines sit against. `y` takes the
+  place of `style.position`, which stays as the short form. The layout check's advice for captions names these.
+- 22d44a7: Captions can box the word being said. `style={{ highlightBox: "#4aa3ff" }}` on `<Captions>` puts a filled, rounded box behind the current word with any word animation (`word-highlight`, `karaoke`, `word-by-word`); `highlight` stays the colour of its letters. The box takes no room of its own, so the line does not move as the box passes along it.
+- b0f2630: Three components for a talking head cut into a short, and a way for a graphic to end with another element:
+  
+  - `TypeCard`: a card of big type that builds line by line. A line can sit on a pill, and a line can be struck out. Each line and strike takes `at="word:N"` (a word of the card's `anchor`) or an `offset` in seconds.
+  - `QuoteCard`: a passage on a paper card with its source above it, and a marker that sweeps across the phrases you name, each at its own word or offset.
+  - `Frame`: a rounded border around part of the picture, for the speaker under a card.
+  - `duration={{ until: "id" }}` on any element outside a sequence: it lasts from its own start until that element ends. One that starts after its target has ended reports `INVALID_TIME_RANGE`.
+  - Inside a `<Layer>`, the theme is now there as CSS variables (`var(--cc-accent)`, `var(--cc-heading)` and the rest). `Counter` read them already and was getting its fallbacks, so it now draws in the theme's heading font and text colour.
+- 1f5e897: Parts for drawing a diagram inside a `<Layer>`: `DrawnLine` (a line that draws itself), `Label` (a word with a
+  line to the point it names, named for the layout check), `CountUp` (a number that counts) and `Cells` (a row of
+  cells with values). Each renders SVG and happens `at` a second of the video or `after` so many seconds of its
+  layer, taking `over` seconds. `useProgress` and `progress` give the same timing to your own drawing.
+- 9b27e92: Five new effects. `halftone` prints the picture as a dot screen, in one ink or in CMYK. `pixelate` makes a mosaic of the frame or of a box in it. `scanlines` adds the rolling lines of an old screen. `lightLeak` washes wandering warm light over the picture. `fractalNoise` blends evolving clouds of noise over it, as mist, texture or a moving background. They are shader effects with no CSS fallback, and every param keyframes. These names are now built in, so a file that declares its own effect under one of them needs to rename it.
+- 06ad6a4: A font catalogue and `cutcraft fonts`. The kit exports `FONT_CATALOG` (the bundled families and a short list from Google Fonts, each with its category, weights, roles, a line on how it looks and its pairings), `findFont`, `fontsFor`, `nearestFont` and `fontFamily`. `cutcraft fonts` prints the list, filtered with `--for` and `--category`, and `--sheet` draws the families as one image setting your words. `googleFont()` now refuses a weight or an italic a listed family does not have, and the `font-available` lint gives the declaration to write.
+- a12dd56: `font/use`, the action a font picker calls: it sets a family from the font catalogue on a title, the captions or a theme role. A Google family the file does not declare is loaded for the preview at once, and the fold writes its `googleFont()` declaration, adds the import and names it at the use site; a new weight of a declared family is added to its `weights`.
+- 8cf667b: `audio/setDuck` takes a track role in `duck.under`, as a file does; it used to refuse anything but a track id. `<Multicam activeAngle>` and the `multicam/setActiveAngle` action are removed: nothing in the player or the export read the prop, so it changed nothing. A file that sets it now fails with an unrecognized key. `cutcraft inspect` names the element and the edge of a transition written with `on` and `edge`, where it printed `undefined → undefined`.
+- 96b43b4: Free code runs on the video's clock in an export. The file's own `requestAnimationFrame` callbacks run once per frame with the frame's time, `performance.now()`, `Date.now()` and `new Date()` follow it, and `Math.random()` gives the same numbers in every export, so a loop written the usual way exports at the same speed on any machine. A Layer now holds CSS transitions and `element.animate()` animations at the layer's time as well as CSS animations, in the player and the export. `loadModule` takes a `scope` of names the file sees in place of globals. The `free-code-clock` lint warns about `Math.random()` (use `random(seed)`) and about `window.requestAnimationFrame`, `window.performance` and `window.Date`, which stay on the browser's clock.
+- ad357a2: `cutcraft inspect video.tsx` reads a timeline back as text, with no browser: each track's elements with their seconds, the words each clip plays, effects, keyframes and cuts, or with `--json` as flat rows for `jq`. `--at` says what is on screen and heard at chosen moments, with effect values after keyframes. A moment is written the way the file is (`hook.end`, `x1`, `word:14`, `hook@word:14`, `shot:1`, `marker:intro`) or as time (`4.5`, `90f`, `2..6/0.5`). The kit exports what it is built from: `timelineRows`, `parseMoments`, `resolveMoments`, `playsOf` and `spokenWords`; `@cutcraft/render` exports `inspect` and `describeAt`.
+- 4dbdc56: `cutcraft look --listen <stretch>` shows the sound of a stretch under the sheet's cells: the mix an export would write, as its level over time on a decibel scale, with a time scale, the words of the transcript where the cut says them, and silent stretches shaded. The stretch is `all`, a range such as `2..6` or `60f..180f`, or an element's id. The legend gains `listen`: the stretch, `peakDb` and `rmsDb` in dBFS (null for silence), `silences` (at least 0.3 s below -50 dBFS) and the words. The strip is kept in the frame cache under a key of the whole file and its media. `renderLook` takes `listen`, and the kit exports `listenRange`.
+- fd5c06c: `cutcraft look video.tsx` draws many frames in one browser start, on one contact sheet with a JSON legend that says what each cell is. With no moments it skims the cut as an editor does (each clip's first frame, both sides of every cut, each overlay); `--at` takes the moments `inspect` takes, `--around <id>` follows a transition or an element coming in and going out, and `--without <id>` draws each frame with and without an effect, an adjustment or an overlay, side by side. The kit exports `aroundMoments` and `skimMoments`; `@cutcraft/render` exports `renderLook`.
+- c425d5c: `narrate(script)` times a narration. In the script a word in square brackets is a cue, a number in round brackets
+  a pause in seconds, and a name in curly brackets a cue with no word. It returns every word with its start and end,
+  the subtitles a phrase at a time, the cues by name (`at(name)` throws on a name the script does not have) and the
+  duration. The times come from a speaking pace, or from the transcript of a recorded voice.
+
+### Patch Changes
+
+- 98d38b7: The ready-made components take `duration={{ until: "id" }}`, as plain elements do. A `LowerThird`, `TypeCard` or any other component can now last until a clip ends, and every one of its parts ends there, however late the part comes in. Before, a component refused the prop with "duration Invalid input".
+- 4fb0ebb: `cutcraft look --motion <stretch>` draws a short stretch as a strip of small frames at even steps, each labelled
+  with its time, so a move, an entrance or a transition can be read left to right without a render. The stretch is a
+  range or an element's id; `--step` sets the seconds between frames, twelve frames without it.
+- f22acb1: The resolver no longer places anything at a time that is not a number, before zero, backwards or for ever, whatever the file says. Found by a new suite of 129 pinned edge cases and 3,000 timelines made at random:
+  
+  - A prop the schema refuses (a speed of 0, a negative duration or start, a prop the element does not take) is reported as before and then left out, so the element takes its default instead of the refused value.
+  - A transition that does not fit is reported and held to what its clips have. Two transitions that would meet inside a short clip are now reported (`INSUFFICIENT_HANDLES`), and two transitions in a row report `NOT_ADJACENT`.
+  - A `duration="fill"` clip or music bed shorter than the video stops where its file ends and reports `TRIM_PAST_SOURCE`, instead of claiming to play past the end of the file.
+  - `duration={{ match }}` on an element that fills now takes its length instead of reporting a cycle.
+  - A `<Freeze>` that starts after its clip has ended no longer lengthens the clip, and reports `INVALID_TIME_RANGE`. A speed key or a hold written past its clip's end no longer lengthens the video.
+  - An element with no length no longer makes the video longer.
+- 3da2e2a: `TypeCard` no longer confuses `cutcraft --check-layout`. The line a card part shows used to force itself visible, so it stayed on screen while the check hid everything else to measure one element, and every card was reported as covering the captions. A part now only hides the other lines, and a strike leaves its line's letters clear instead.
+
 ## 0.3.0
 
 ### Minor Changes

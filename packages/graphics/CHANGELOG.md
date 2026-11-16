@@ -1,5 +1,29 @@
 # @cutcraft/graphics
 
+## 0.4.0
+
+### Patch Changes
+
+- Updated dependencies [96799e4]
+- Updated dependencies [12fbb4e]
+- Updated dependencies [22d44a7]
+- Updated dependencies [b0f2630]
+- Updated dependencies [98d38b7]
+- Updated dependencies [1f5e897]
+- Updated dependencies [9b27e92]
+- Updated dependencies [06ad6a4]
+- Updated dependencies [a12dd56]
+- Updated dependencies [8cf667b]
+- Updated dependencies [96b43b4]
+- Updated dependencies [ad357a2]
+- Updated dependencies [4dbdc56]
+- Updated dependencies [4fb0ebb]
+- Updated dependencies [fd5c06c]
+- Updated dependencies [c425d5c]
+- Updated dependencies [f22acb1]
+- Updated dependencies [3da2e2a]
+  - @cutcraft/kit@0.4.0
+
 ## 0.3.0
 
 ### Minor Changes

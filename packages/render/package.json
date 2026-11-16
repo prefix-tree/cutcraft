@@ -1,6 +1,6 @@
 {
   "name": "@cutcraft/render",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "The export: a cut file to MP4, WebM, MP3 or WAV, drawn by the real player in headless Chrome.",
   "keywords": [
     "video",

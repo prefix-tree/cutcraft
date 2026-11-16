@@ -1,5 +1,47 @@
 # @cutcraft/player
 
+## 0.4.0
+
+### Minor Changes
+
+- 96799e4: Captions can sit at any height. `style={{ position: 0.6 }}` on `<Captions>` puts their middle 60% of the way down the frame; `top`, `center` and `bottom` work as before. Over a talking head in a vertical video, `center` lands on the speaker's mouth and `bottom` is under the platforms' controls; a number between puts the captions under the chin.
+- 12fbb4e: Captions can be placed exactly: `x` and `y` on `<Captions>` are the middle of the captions in pixels from the
+  frame's centre, `width` is the widest a line may be, and `align` is the side the lines sit against. `y` takes the
+  place of `style.position`, which stays as the short form. The layout check's advice for captions names these.
+- 22d44a7: Captions can box the word being said. `style={{ highlightBox: "#4aa3ff" }}` on `<Captions>` puts a filled, rounded box behind the current word with any word animation (`word-highlight`, `karaoke`, `word-by-word`); `highlight` stays the colour of its letters. The box takes no room of its own, so the line does not move as the box passes along it.
+- b0f2630: Three components for a talking head cut into a short, and a way for a graphic to end with another element:
+  
+  - `TypeCard`: a card of big type that builds line by line. A line can sit on a pill, and a line can be struck out. Each line and strike takes `at="word:N"` (a word of the card's `anchor`) or an `offset` in seconds.
+  - `QuoteCard`: a passage on a paper card with its source above it, and a marker that sweeps across the phrases you name, each at its own word or offset.
+  - `Frame`: a rounded border around part of the picture, for the speaker under a card.
+  - `duration={{ until: "id" }}` on any element outside a sequence: it lasts from its own start until that element ends. One that starts after its target has ended reports `INVALID_TIME_RANGE`.
+  - Inside a `<Layer>`, the theme is now there as CSS variables (`var(--cc-accent)`, `var(--cc-heading)` and the rest). `Counter` read them already and was getting its fallbacks, so it now draws in the theme's heading font and text colour.
+- 96b43b4: Free code runs on the video's clock in an export. The file's own `requestAnimationFrame` callbacks run once per frame with the frame's time, `performance.now()`, `Date.now()` and `new Date()` follow it, and `Math.random()` gives the same numbers in every export, so a loop written the usual way exports at the same speed on any machine. A Layer now holds CSS transitions and `element.animate()` animations at the layer's time as well as CSS animations, in the player and the export. `loadModule` takes a `scope` of names the file sees in place of globals. The `free-code-clock` lint warns about `Math.random()` (use `random(seed)`) and about `window.requestAnimationFrame`, `window.performance` and `window.Date`, which stay on the browser's clock.
+
+### Patch Changes
+
+- d597a1e: A title or captions set in a font whose name has a word starting with a digit ("Source Sans 3", "Exo 2", "Press Start 2P") drew in the browser's default serif face, in the preview and in an export. The family is now written into CSS in quotes.
+- 0760cb9: An overlay with a shader effect keeps its place in the page while that effect is at a value that changes nothing. Before, the overlay's content was made anew at the first frame the effect did something: a `<Three>` scene was set up a second time in the middle of the video, and the export captured that frame before the new scene had drawn, so the scene was missing from one frame. The box that runs an overlay's shaders now also waits for a three.js canvas inside it to draw before it takes the picture. A canvas inside the box is also given one more paint before the picture is taken: a contact sheet, which asks for frames out of order, showed a three.js scene under an effect as it was at the frame asked for before.
+- Updated dependencies [96799e4]
+- Updated dependencies [12fbb4e]
+- Updated dependencies [22d44a7]
+- Updated dependencies [b0f2630]
+- Updated dependencies [98d38b7]
+- Updated dependencies [1f5e897]
+- Updated dependencies [9b27e92]
+- Updated dependencies [06ad6a4]
+- Updated dependencies [a12dd56]
+- Updated dependencies [8cf667b]
+- Updated dependencies [96b43b4]
+- Updated dependencies [ad357a2]
+- Updated dependencies [4dbdc56]
+- Updated dependencies [4fb0ebb]
+- Updated dependencies [fd5c06c]
+- Updated dependencies [c425d5c]
+- Updated dependencies [f22acb1]
+- Updated dependencies [3da2e2a]
+  - @cutcraft/kit@0.4.0
+
 ## 0.3.0
 
 ### Minor Changes

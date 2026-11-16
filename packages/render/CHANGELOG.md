@@ -1,5 +1,68 @@
 # @cutcraft/render
 
+## 0.4.0
+
+### Minor Changes
+
+- 7595324: `cutcraft <file> --out video.mp4 --draft` renders the video for watching: every second frame, each shown twice as
+  long, at half the width and height and the `low` quality preset. The length and the sound are unchanged. It is
+  written beside `--out` as `video.draft.mp4` and never replaces the video. From code: `renderVideo({ draft: true })`
+  and `draftPath(out)`.
+- 09a773a: An export no longer hangs in silence. Each frame has a deadline (60 s; `--frame-timeout <s>`, or `frameTimeout` on `renderVideo`, `renderStill`, `renderLook` and `checkLayout`), and a frame that outlasts it fails the command with the frame, its time and the step it was in: `frame 412 (13.73 s) did not finish within 60 s: stuck in settle`. Any other error while a frame is drawn now names the frame too. When the browser never confirms a frame's paint and the page goes on without it, the result carries a warning with how many frames that touched.
+- 19fbf0b: The manifest is found without `--manifest`: commands take the nearest `cutcraft.json` from the video file's folder upward, so videos in subfolders share one. A `manifest.json` beside the video file is still read. `cutcraft add` updates the nearest `cutcraft.json` from the current folder upward and creates one there when there is none; it used to create `manifest.json` beside the media. Without `--media`, media is looked for in the video file's folder, the manifest's folder and `media/` beside the manifest. `loadVideo` returns `manifestPath`, `directoryResolver` takes a list of folders, and `findManifest` is exported.
+- 06ad6a4: A font catalogue and `cutcraft fonts`. The kit exports `FONT_CATALOG` (the bundled families and a short list from Google Fonts, each with its category, weights, roles, a line on how it looks and its pairings), `findFont`, `fontsFor`, `nearestFont` and `fontFamily`. `cutcraft fonts` prints the list, filtered with `--for` and `--category`, and `--sheet` draws the families as one image setting your words. `googleFont()` now refuses a weight or an italic a listed family does not have, and the `font-available` lint gives the declaration to write.
+- 2ba9bb8: `cutcraft look` and `--still` keep the frames they draw in `.cutcraft/cache` beside the file, each under a key made from what draws it (the elements on screen with their resolved props, the media files, the composition, the fonts, the versions of CutCraft and Chrome). After an edit only the frames it changed are drawn again, and a look whose cells are all kept starts no browser. `--no-cache` draws everything again; `renderLook` and `renderStill` take a `cacheDir` and report what was `cached`. A look's sheet is now always a PNG, put together in Node from its cells: `--out sheet.jpg` is an error.
+- 96b43b4: Free code runs on the video's clock in an export. The file's own `requestAnimationFrame` callbacks run once per frame with the frame's time, `performance.now()`, `Date.now()` and `new Date()` follow it, and `Math.random()` gives the same numbers in every export, so a loop written the usual way exports at the same speed on any machine. A Layer now holds CSS transitions and `element.animate()` animations at the layer's time as well as CSS animations, in the player and the export. `loadModule` takes a `scope` of names the file sees in place of globals. The `free-code-clock` lint warns about `Math.random()` (use `random(seed)`) and about `window.requestAnimationFrame`, `window.performance` and `window.Date`, which stay on the browser's clock.
+- ad357a2: `cutcraft inspect video.tsx` reads a timeline back as text, with no browser: each track's elements with their seconds, the words each clip plays, effects, keyframes and cuts, or with `--json` as flat rows for `jq`. `--at` says what is on screen and heard at chosen moments, with effect values after keyframes. A moment is written the way the file is (`hook.end`, `x1`, `word:14`, `hook@word:14`, `shot:1`, `marker:intro`) or as time (`4.5`, `90f`, `2..6/0.5`). The kit exports what it is built from: `timelineRows`, `parseMoments`, `resolveMoments`, `playsOf` and `spokenWords`; `@cutcraft/render` exports `inspect` and `describeAt`.
+- 4dbdc56: `cutcraft look --listen <stretch>` shows the sound of a stretch under the sheet's cells: the mix an export would write, as its level over time on a decibel scale, with a time scale, the words of the transcript where the cut says them, and silent stretches shaded. The stretch is `all`, a range such as `2..6` or `60f..180f`, or an element's id. The legend gains `listen`: the stretch, `peakDb` and `rmsDb` in dBFS (null for silence), `silences` (at least 0.3 s below -50 dBFS) and the words. The strip is kept in the frame cache under a key of the whole file and its media. `renderLook` takes `listen`, and the kit exports `listenRange`.
+- 4fb0ebb: `cutcraft look --motion <stretch>` draws a short stretch as a strip of small frames at even steps, each labelled
+  with its time, so a move, an entrance or a transition can be read left to right without a render. The stretch is a
+  range or an element's id; `--step` sets the seconds between frames, twelve frames without it.
+- d43b815: `cutcraft look --zones <zone>` draws a safe zone over every cell of a sheet: what is outside it is shaded, and each
+  overlay, the captions and each named part is outlined, lime inside the zone and red where it leaves the zone or the
+  frame. The legend's cells gain `things`, the rows `cutcraft where` gives for that moment. From code: the `zones`
+  option of `renderLook`, and `describeThings` and `zoneRect`.
+- fd5c06c: `cutcraft look video.tsx` draws many frames in one browser start, on one contact sheet with a JSON legend that says what each cell is. With no moments it skims the cut as an editor does (each clip's first frame, both sides of every cut, each overlay); `--at` takes the moments `inspect` takes, `--around <id>` follows a transition or an element coming in and going out, and `--without <id>` draws each frame with and without an effect, an adjustment or an overlay, side by side. The kit exports `aroundMoments` and `skimMoments`; `@cutcraft/render` exports `renderLook`.
+- 12bdf63: The soundtrack is measured before it is clamped to full scale. `look --listen` reports `lufs` (integrated loudness, ITU-R BS.1770), `truePeakDb`, `clipped` (samples above full scale) and `clippedAt` (the time of the first), and its `peakDb` can now be above 0. `look` and `render` warn when the mix clips. The exported sound is as before: nothing limits it.
+- 1a535f5: `cutcraft where <file> --at <moments>` prints where each overlay, the captions and each named part is at a moment:
+  its ink as a box in pixels, whether it is in the frame and in each safe zone, and what it overlaps. An element
+  inside a `<Layer>` that carries `data-name` is a named part: `where` lists it as `<layer id>/<name>`, and
+  `--check-layout` now checks it on its own and reports it at the line that names it. From code: `whereThings` and
+  `formatWhere`.
+
+### Patch Changes
+
+- 12fbb4e: Captions can be placed exactly: `x` and `y` on `<Captions>` are the middle of the captions in pixels from the
+  frame's centre, `width` is the widest a line may be, and `align` is the side the lines sit against. `y` takes the
+  place of `style.position`, which stays as the short form. The layout check's advice for captions names these.
+- 8b3bb93: An export no longer draws the odd frame one step behind when the file sets React state from its own `requestAnimationFrame` loop. The update was left to React's scheduler and about one frame in fifty was captured before it was committed; the export page now has React commit it before the frame is painted.
+- 8cf667b: `audio/setDuck` takes a track role in `duck.under`, as a file does; it used to refuse anything but a track id. `<Multicam activeAngle>` and the `multicam/setActiveAngle` action are removed: nothing in the player or the export read the prop, so it changed nothing. A file that sets it now fails with an unrecognized key. `cutcraft inspect` names the element and the edge of a transition written with `on` and `edge`, where it printed `undefined → undefined`.
+- 6526cb1: A `<Layer>` can mark itself as a ground with `data-ground` on an element inside it (a scrim over the footage that titles and captions sit on). The layout check, `cutcraft where` and `look --zones` then treat it like a background beneath the footage: it is not held to the safe zone and is not reported as covering the captions.
+- b4d81bb: `cutcraft --check-layout` no longer stops with "No cached paint record for element" on a video whose captions have a pause between two lines. An overlay that draws nothing at the moment measured is now counted as having no ink, which is what it has.
+- Updated dependencies [96799e4]
+- Updated dependencies [12fbb4e]
+- Updated dependencies [22d44a7]
+- Updated dependencies [b0f2630]
+- Updated dependencies [98d38b7]
+- Updated dependencies [1f5e897]
+- Updated dependencies [9b27e92]
+- Updated dependencies [06ad6a4]
+- Updated dependencies [d597a1e]
+- Updated dependencies [a12dd56]
+- Updated dependencies [8cf667b]
+- Updated dependencies [96b43b4]
+- Updated dependencies [ad357a2]
+- Updated dependencies [4dbdc56]
+- Updated dependencies [4fb0ebb]
+- Updated dependencies [fd5c06c]
+- Updated dependencies [c425d5c]
+- Updated dependencies [0760cb9]
+- Updated dependencies [f22acb1]
+- Updated dependencies [3da2e2a]
+  - @cutcraft/kit@0.4.0
+  - @cutcraft/player@0.4.0
+  - @cutcraft/graphics@0.4.0
+
 ## 0.3.0
 
 ### Minor Changes
