@@ -3,12 +3,13 @@ import { z } from "zod";
 import { Composition, fontFamily, googleFont, Layer, Track, useLayer } from "@cutcraft/kit";
 
 // "Snake heart": a game of snake played on a wall of Chinese characters. The snake eats the characters of one
-// phrase, over and over, and each one joins its body. Every character of the wall changes on its own, each at its own pace, and all of them at once when the snake eats. When
-// it has eaten enough it takes a lap of the board and curls up into a heart made of the phrase.
+// phrase, over and over, and each one joins its body. Every character of the wall changes on its own, each at its
+// own pace, and all of them at once when the snake eats. When the snake has eaten enough it takes a lap of the
+// board and curls up into a heart made of the phrase.
 //
-// Nothing here is filmed or recorded. The whole game is worked out once, below, from a seed: where each character
-// appears, the way the snake takes to it without running into itself, and how fast it goes. The layers then only
-// ask "which step is it at this second" and draw that.
+// Nothing here is filmed or recorded. The game is written out below as data: where the snake starts, every step it
+// takes and where each character appears. The layers then only ask "which step is it at this second" and draw
+// that.
 
 // Black, grey, white and one red: the wall is grey, the snake is white, and what it wants is red.
 const BG = "#000000";
@@ -26,38 +27,36 @@ export const schema = z.object({
 });
 export const defaults: z.infer<typeof schema> = { word: "我爱你", heart: "#e5383b" };
 
-// The board: eight big square cells across, filling the frame; the top and bottom rows run off its edges. The
-// snake plays on the thirteen rows that are whole.
+// The board: eight big square cells across, filling the frame; the top and bottom rows run off its edges, and
+// the snake keeps to the thirteen rows that are whole.
 const CELL = 135;
 const COLS = 8;
 const ROWS = 15;
 const X0 = (1080 - COLS * CELL) / 2;
 const Y0 = (1920 - ROWS * CELL) / 2;
-const AREA = { left: 0, right: COLS - 1, top: 1, bottom: 13 };
 
 type Cell = readonly [number, number];
 const key = ([x, y]: Cell): number => y * COLS + x;
 
-// The heart, as the way round its outline one cell at a time, starting at the bottom point and going up the left.
-// It is drawn on an 8 by 8 patch, as wide as the board, and placed on it at HEART_AT.
+// Where the heart sits: an 8 by 8 patch as wide as the board, with its top-left cell here.
 const HEART_AT: Cell = [0, 2];
-const HEART_PATCH: readonly Cell[] = [
-  [3, 7], [3, 6], [2, 6], [2, 5], [1, 5], [1, 4], [0, 4], [0, 3], [0, 2], [0, 1],
-  [1, 1], [1, 0], [2, 0], [2, 1], [3, 1], [4, 1], [5, 1], [5, 0], [6, 0], [6, 1],
-  [7, 1], [7, 2], [7, 3], [7, 4], [6, 4], [6, 5], [5, 5], [5, 6], [4, 6], [4, 7],
-]; // biome-ignore format: the outline reads as a list of steps
-const HEART: readonly Cell[] = HEART_PATCH.map(([x, y]) => [x + HEART_AT[0], y + HEART_AT[1]] as const);
-const HEART_KEYS = new Set(HEART.map(key));
-/** The snake is as long as the heart's outline when it curls up. */
-const FULL = HEART.length;
 
-// The lap before the heart: down the right side and back and forth across the rows under it, ending under the
-// heart's point. It is as long as the snake, so no part of the body is on the outline when the head starts it.
-const LAP: readonly Cell[] = [
-  [7, 9], [7, 13], [0, 13], [0, 12], [6, 12], [6, 11], [0, 11], [0, 10], [3, 10],
-]; // biome-ignore format: a list of corners
+// The game, written out. It was played once by a small program that sent the snake the shortest way to each
+// character without touching its own body, then on a lap under the heart and round the heart's outline. What is
+// kept is the result: where the snake starts, every step it takes, and where each character to eat appears.
+const START: Cell = [2, 12];
+const MOVES = [
+  "RRRUUUUUUUUUUULDDDDDDDDDDDDRRRUUUUUUUUULLLDDDDDDLDDDRUUULUUULLUUUURRUURDDDLDDDDDDLUUUUUUULLDDDRDDRRR",
+  "DDDRUUUULLLUUUURRRRDLDDRDDDDDDDLLLLLUUUUUUUURRURUULLURRRDDDDLDDDDDDDLLLDRRRRUUUUUUURUULLLLDDDDDLDDDD",
+  "RRRRRRULLLLUUUUUUUULLLUUURRRRRRRDDDDDDDDDDDDLLLLLLLURRRRRRULLLLLLURRRUULULULUUURURDRRRURDRDDDLDLDLD",
+].join("");
+const FOOD: readonly Cell[] = [
+  [5, 1], [4, 13], [7, 4], [4, 10], [3, 13], [3, 7], [1, 6], [1, 3], [3, 1], [3, 10], [2, 3], [0, 6], [4, 11],
+  [2, 3], [6, 3], [5, 6], [6, 13], [1, 10], [1, 5], [3, 4], [4, 2], [2, 1], [4, 12], [1, 13], [5, 6], [2, 9],
+  [7, 13], [5, 12], [0, 1],
+]; // biome-ignore format: a list of cells
 
-/** A small seeded generator: the same game every time the file is loaded. */
+/** A small seeded generator: the same wall every time the file is loaded. */
 function seeded(seed: number): () => number {
   let a = seed >>> 0;
   return () => {
@@ -68,127 +67,38 @@ function seeded(seed: number): () => number {
   };
 }
 
-interface Game {
-  /** Every cell the head is on, in order. */
-  readonly path: readonly Cell[];
-  /** The snake's length at each step. */
-  readonly length: readonly number[];
-  /** Each letter to eat: where it is, the step it appears at and the step it is eaten at. */
-  readonly food: readonly { readonly cell: Cell; readonly from: number; readonly eaten: number }[];
-  /** The second each step happens at. */
-  readonly times: readonly number[];
-  /** The step the head finishes the heart at. */
-  readonly closed: number;
-}
-
-/**
- * Plays the game. The head goes to each letter by the shortest way that does not touch the body, where a cell the
- * tail will have left by the time the head gets there counts as free.
- */
-function play(seed: number): Game {
-  const random = seeded(seed);
-  const path: Cell[] = [[2, 12]];
+/** The game step by step: the head's cell, the snake's length, the character on offer and the second of each step. */
+const GAME = (() => {
+  const STEP = { R: [1, 0], L: [-1, 0], D: [0, 1], U: [0, -1] } as const;
+  const path: Cell[] = [START];
+  for (const move of MOVES) {
+    const [x, y] = path.at(-1) as Cell;
+    const [dx, dy] = STEP[move as keyof typeof STEP];
+    path.push([x + dx, y + dy]);
+  }
+  // A character appears when the one before it is eaten, and is eaten when the head reaches it.
   const length: number[] = [1];
   const food: { cell: Cell; from: number; eaten: number }[] = [];
-  let size = 1;
-
-  /** The steps from the head to `goal`, or nothing when the body is in the way. */
-  const route = (goal: Cell, avoidHeart: boolean): Cell[] | undefined => {
-    const head = path.at(-1) as Cell;
-    // A cell of the body is free again once the tail has passed it: the j-th cell from the tail, after j + 1 steps.
-    const freeAfter = new Map<number, number>();
-    const body = path.slice(-size);
-    body.forEach((cell, j) => freeAfter.set(key(cell), j + 1));
-    const from = new Map<number, Cell | null>([[key(head), null]]);
-    let frontier: Cell[] = [head];
-    for (let steps = 1; frontier.length > 0 && !from.has(key(goal)); steps++) {
-      const next: Cell[] = [];
-      for (const [x, y] of frontier) {
-        for (const cell of [
-          [x + 1, y],
-          [x - 1, y],
-          [x, y + 1],
-          [x, y - 1],
-        ] as Cell[]) {
-          const k = key(cell);
-          if (cell[0] < AREA.left || cell[0] > AREA.right || cell[1] < AREA.top || cell[1] > AREA.bottom) continue;
-          if (from.has(k) || (freeAfter.get(k) ?? 0) >= steps) continue;
-          if (avoidHeart && HEART_KEYS.has(k)) continue;
-          from.set(k, [x, y]);
-          next.push(cell);
-        }
-      }
-      frontier = next;
+  let from = 0;
+  for (let step = 1; step < path.length; step++) {
+    const next = FOOD[food.length];
+    const ate = next !== undefined && key(next) === key(path[step] as Cell);
+    if (ate) {
+      food.push({ cell: next, from, eaten: step });
+      from = step;
     }
-    if (!from.has(key(goal))) return undefined;
-    const steps: Cell[] = [];
-    for (let at: Cell | null = goal; at && key(at) !== key(head); at = from.get(key(at)) ?? null) steps.unshift(at);
-    return steps;
-  };
-  const walk = (steps: readonly Cell[]): void => {
-    for (const cell of steps) {
-      path.push(cell);
-      length.push(size);
-    }
-  };
-
-  // The letters, one at a time, until the snake is as long as the heart's outline.
-  while (size < FULL) {
-    let placed = false;
-    for (let tries = 0; tries < 400 && !placed; tries++) {
-      const cell: Cell = [
-        AREA.left + Math.floor(random() * (AREA.right - AREA.left + 1)),
-        AREA.top + Math.floor(random() * (AREA.bottom - AREA.top + 1)),
-      ];
-      if (path.slice(-size).some((b) => key(b) === key(cell))) continue;
-      const steps = route(cell, false);
-      // A letter two steps away is no chase; one the body walls off is not offered.
-      if (!steps || steps.length < 3) continue;
-      const from = path.length - 1;
-      walk(steps);
-      size++;
-      length[length.length - 1] = size;
-      food.push({ cell, from, eaten: path.length - 1 });
-      placed = true;
-    }
-    if (!placed) throw new Error("no letter the snake can reach");
+    length.push((length[step - 1] as number) + (ate ? 1 : 0));
   }
-
-  // The lap, then the heart.
-  // The way to the lap's first corner may cross the outline; from there on the outline is kept clear.
-  for (const [i, corner] of LAP.entries()) {
-    const steps = route(corner, i > 0);
-    if (!steps) throw new Error("the lap is blocked");
-    walk(steps);
-  }
-  walk(HEART);
   const closed = path.length - 1;
-
   // It starts at a walking pace and ends fast, like a game that is going well.
-  const wander = closed - FULL;
+  const wander = closed - (length[closed] as number);
   const times: number[] = [0.6];
   for (let i = 1; i < path.length; i++) {
     const speed = 9 + 16 * Math.min(1, i / wander) ** 0.7;
     times.push((times[i - 1] as number) + 1 / speed);
   }
   return { path, length, food, times, closed };
-}
-
-/** The first seed whose game ends well: every letter reached, the lap clear, and no part of the body in the heart's way. */
-function firstGame(): Game {
-  for (let seed = 1; seed < 500; seed++) {
-    try {
-      const game = play(seed);
-      const lap = game.path.slice(game.closed - 2 * FULL + 1, game.closed - FULL + 1);
-      if (lap.every((cell) => !HEART_KEYS.has(key(cell)))) return game;
-    } catch {
-      // This seed walls the snake in; the next one may not.
-    }
-  }
-  throw new Error("snake-heart: no seed gives a game that ends in the heart");
-}
-
-const GAME = firstGame();
+})();
 /** How long the heart beats for after the snake has closed it. */
 const HOLD = 3.4;
 const LENGTH = Math.ceil(((GAME.times[GAME.closed] as number) + HOLD) * 30) / 30;
