@@ -6,9 +6,11 @@
   "rules": { "exports": "warn", "types": "warn", "enumMembers": "warn" },
   "workspaces": {
     ".": {
-      // The playground's modules are imported from Playground.vue, which knip does not read.
+      // The playground's modules are imported from Playground.vue, and the gallery's data from Gallery.vue; knip does
+      // not read .vue files.
       "entry": [
         "scripts/*.{ts,mjs}",
+        "docs/gallery.data.ts",
         "docs/.vitepress/config.mts",
         "docs/.vitepress/theme/index.ts",
         "docs/.vitepress/theme/playground/mount.tsx"
