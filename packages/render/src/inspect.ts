@@ -178,6 +178,7 @@ export function formatTimeline(file: string, rows: TimelineRows): string {
     const parts = [when, e.kind.padEnd(10), e.id];
     if (e.kind === "transition")
       parts.push(`${e.type ?? ""} (${e.on === undefined ? `${e.from} → ${e.to}` : `${e.edge} of ${e.on}`})`);
+    if (e.ground) parts.push("ground");
     if (e.asset)
       parts.push(
         `asset:${e.asset} ${seconds(e.in ?? 0)}–${seconds(e.out ?? 0)}${e.speed !== 1 ? ` at ${e.speed}x` : ""}`,

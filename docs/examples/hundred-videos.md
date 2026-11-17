@@ -16,7 +16,7 @@ Forty-four seconds of a two-camera podcast, cut as a vertical short whose layout
 
 - **Reframing 16:9 to 9:16** round whoever speaks, with **keyframes on `transform.crop`** over half a second when the layout changes.
 - **Direct cuts on the source's own camera cuts**: the crop switches on that frame.
-- **A scrim `<Layer>` marked `data-ground`**, so the layout check treats it as the ground graphics sit on.
+- **A scrim `<Layer ground>`**, so the layout check treats it as the ground graphics sit on.
 - **Graphics timed to words with `useProgress`**, built from [diagram parts](/guide/free-code#diagram-parts) and named with `data-name`.
 - **Word-highlight subtitles** placed with `x`, `y` and `width`, in Poppins via `googleFont()`.
 

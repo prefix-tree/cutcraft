@@ -35,6 +35,8 @@ export interface ElementRow {
   readonly edge?: "in" | "out";
   /** A marker's label. */
   readonly label?: string;
+  /** A layer the file marks as a ground for other things. */
+  readonly ground?: true;
 }
 
 export interface EffectRow {
@@ -240,6 +242,7 @@ function elementRow(state: ResolvedState, p: Placement, frame: (t: number) => nu
       ? { on: p.props.on, edge: p.props.edge === "in" ? ("in" as const) : ("out" as const) }
       : {}),
     ...(typeof props.label === "string" ? { label: props.label } : {}),
+    ...(p.kind === "layer" && props.ground === true ? { ground: true as const } : {}),
   };
 }
 

@@ -129,7 +129,6 @@ function Wall() {
   const faded = progress(clock, { after: CLOSED_AT, over: 0.6, easing: "ease-out" });
   return (
     <div
-      data-ground
       style={{
         position: "absolute",
         left: 0,
@@ -235,7 +234,7 @@ export default function Video(props: z.infer<typeof schema>) {
   return (
     <Composition fps={30} width={1080} height={1920} background={{ mode: "color", color: BG }}>
       <Track id="wall" layout="free">
-        <Layer id="letters" start={0} duration={LENGTH}>
+        <Layer id="letters" start={0} duration={LENGTH} ground>
           <Wall />
         </Layer>
       </Track>
