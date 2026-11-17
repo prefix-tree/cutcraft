@@ -227,3 +227,32 @@ export default function Video() {
     expect(output).toMatch(/2\.50–3\.00\s+transition\s+pout\s+crossfade \(out of pip\)/);
   });
 });
+
+describe("inspect, a layer that is a ground", () => {
+  it("says so on its line and in its row", async () => {
+    const ground = join(dir, "ground.tsx");
+    writeFileSync(
+      ground,
+      `import { Composition, Layer, Track } from "@cutcraft/kit";
+export const manifest = { assets: {} };
+export default function Video() {
+  return (
+    <Composition fps={30} width={640} height={360}>
+      <Track id="t" layout="free">
+        <Layer id="wall" start={0} duration={2} ground><div /></Layer>
+        <Layer id="card" start={0} duration={2}><div /></Layer>
+      </Track>
+    </Composition>
+  );
+}
+`,
+    );
+    const video = await loadVideo(ground);
+    expect(video.state.errors).toEqual([]);
+    const { output } = inspect(ground, video.state, {});
+    expect(output).toMatch(/layer\s+wall\s+ground/);
+    expect(output).not.toMatch(/layer\s+card\s+ground/);
+    const rows = JSON.parse(inspect(ground, video.state, { json: true }).output);
+    expect(JSON.stringify(rows)).toContain('"ground":true');
+  });
+});

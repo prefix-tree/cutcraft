@@ -138,6 +138,7 @@ Free code in the frame: any React, CSS, canvas or WebGL, placed on the timeline 
 | `exit` | { type, duration, easing } |  |  | How it goes out, over its last seconds, as `enter`. |
 | `transform` | { position, scale, rotation, anchor, opacity, borderRadius, crop } |  |  | Moves, scales, turns and fades the whole layer, as on any element; the editor's handles write it. |
 | `blend` | "normal" \| "multiply" \| "screen" \| "overlay" \| "darken" \| … 13 more |  |  | How the layer mixes with what is under it, as CSS `mix-blend-mode` does. |
+| `ground` | boolean |  |  | The layer is a ground that other things sit on: a wall behind a game, a scrim that darkens footage under a title. The layout check then treats it like a background: it is not held to the safe zone and is not said to cover the captions. |
 
 Timed, visual, transformable. Children: `effect`, `keyframe`. [All elements](https://cutcraft.prefixtree.xyz/reference/elements/)
 
@@ -161,6 +162,7 @@ The player draws it once the host calls `installFreeCodeLibraries()` ([Free code
 | `exit` | { type, duration, easing } |  |  | How it goes out, over its last seconds, as `enter`. |
 | `transform` | { position, scale, rotation, anchor, opacity, borderRadius, crop } |  |  | Moves, scales, turns and fades the whole layer, as on any element; the editor's handles write it. |
 | `blend` | "normal" \| "multiply" \| "screen" \| "overlay" \| "darken" \| … 13 more |  |  | How the layer mixes with what is under it, as CSS `mix-blend-mode` does. |
+| `ground` | boolean |  |  | The layer is a ground that other things sit on: a wall behind a game, a scrim that darkens footage under a title. The layout check then treats it like a background: it is not held to the safe zone and is not said to cover the captions. |
 | `camera` | { position, lookAt, fov, near, far, zoom, orthographic } |  |  | The camera: `position` and `lookAt` as `[x, y, z]`, `fov` in degrees, clipping planes, zoom, or orthographic. |
 | `background` | string |  |  | The scene's background colour; left out, transparent over what is beneath. |
 | `setup` | any |  |  | Builds the scene once from `{ scene, camera, renderer, THREE, width, height }`, and may return `update(frame)` for every frame. |
@@ -187,6 +189,7 @@ The player draws it once the host calls `installFreeCodeLibraries()` ([Free code
 | `exit` | { type, duration, easing } |  |  | How it goes out, over its last seconds, as `enter`. |
 | `transform` | { position, scale, rotation, anchor, opacity, borderRadius, crop } |  |  | Moves, scales, turns and fades the whole layer, as on any element; the editor's handles write it. |
 | `blend` | "normal" \| "multiply" \| "screen" \| "overlay" \| "darken" \| … 13 more |  |  | How the layer mixes with what is under it, as CSS `mix-blend-mode` does. |
+| `ground` | boolean |  |  | The layer is a ground that other things sit on: a wall behind a game, a scrim that darkens footage under a title. The layout check then treats it like a background: it is not held to the safe zone and is not said to cover the captions. |
 | `sequence` | [string, object] \| [string, object, object][] | `[]` |  | Motion steps: `[selector, keyframes, options]`, where `at` in the options is seconds into the layer. |
 
 Timed, visual, transformable. Children: `effect`, `keyframe`. [All elements](https://cutcraft.prefixtree.xyz/reference/elements/)

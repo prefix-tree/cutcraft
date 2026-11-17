@@ -197,6 +197,12 @@ export const layerSchema = z.strictObject({
   transform: transformSchema.optional(),
   /** How the layer mixes with what is under it, as CSS `mix-blend-mode` does. */
   blend: zBlendMode.optional(),
+  /**
+   * The layer is a ground that other things sit on: a wall behind a game, a scrim that darkens footage under a
+   * title. The layout check then treats it like a background: it is not held to the safe zone and is not said to
+   * cover the captions.
+   */
+  ground: z.boolean().optional(),
 });
 
 const vec3Schema = z.tuple([z.number(), z.number(), z.number()]);

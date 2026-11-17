@@ -413,9 +413,7 @@ function Scrim({ fadeIn = 0, fadeOut = 0 }: { fadeIn?: number; fadeOut?: number 
   const { elapsed, remaining } = useLayer();
   const shown = Math.min(fadeIn > 0 ? elapsed / fadeIn : 1, fadeOut > 0 ? remaining / fadeOut : 1, 1);
   return (
-    // `data-ground`: to the layout check this is a ground that things sit on, not a box that covers them.
     <div
-      data-ground
       style={{
         position: "absolute",
         inset: 0,
@@ -501,13 +499,13 @@ export default function Video({ accent }: z.infer<typeof schema>) {
       </Track>
 
       <Track id="scrim" layout="free">
-        <Layer id="scrim-hundred" anchor="hundred" duration={{ until: "hundred" }}>
+        <Layer id="scrim-hundred" anchor="hundred" duration={{ until: "hundred" }} ground>
           <Scrim fadeIn={MOVE} />
         </Layer>
-        <Layer id="scrim-list" anchor="list" duration={{ until: "infinite" }}>
+        <Layer id="scrim-list" anchor="list" duration={{ until: "infinite" }} ground>
           <Scrim />
         </Layer>
-        <Layer id="scrim-out" anchor="perfect" duration={MOVE}>
+        <Layer id="scrim-out" anchor="perfect" duration={MOVE} ground>
           <Scrim fadeOut={MOVE} />
         </Layer>
       </Track>

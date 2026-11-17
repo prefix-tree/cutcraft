@@ -179,12 +179,13 @@ time for the same thing. Its advice is a move in pixels to make in the layer's c
 checked as before, as one layer. A part that is faded out or not displayed is not measured.
 
 A layer that is a ground for other things, such as a scrim that darkens the footage under a title, says so with
-`data-ground` on an element inside it. The check then treats it like a background beneath the footage: it is not
-held to the safe zone and is not said to cover the captions.
+the `ground` prop. The check then treats it like a background beneath the footage: it is not held to the safe zone
+and is not said to cover the captions. `cutcraft inspect` marks it `ground`. `<Three>` and `<Motion>` are layers and
+take the prop too.
 
 ```tsx
-<Layer id="scrim" anchor="talk" duration={{ until: "talk" }}>
-  <div data-ground style={{ position: "absolute", inset: 0, background: "linear-gradient(transparent 60%, #0b1530)" }} />
+<Layer id="scrim" anchor="talk" duration={{ until: "talk" }} ground>
+  <div style={{ position: "absolute", inset: 0, background: "linear-gradient(transparent 60%, #0b1530)" }} />
 </Layer>
 ```
 

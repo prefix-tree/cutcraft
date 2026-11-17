@@ -283,8 +283,8 @@ export default function Video() {
   return (
     <Composition fps={30} width={540} height={960} background={{ mode: "color", color: "#000000" }}>
       <Track id="t" layout="free">
-        <Layer id="scrim" start={0} duration={2}>
-          <div ${ground ? "data-ground " : ""}style={{ position: "absolute", left: 0, right: 0, top: 480, bottom: 0, background: "#102040" }} />
+        <Layer id="scrim" start={0} duration={2}${ground ? " ground" : ""}>
+          <div style={{ position: "absolute", left: 0, right: 0, top: 480, bottom: 0, background: "#102040" }} />
         </Layer>
       </Track>
       <Captions id="caps" style={{ position: 0.6 }}>
