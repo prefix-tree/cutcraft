@@ -61,7 +61,28 @@ export function spring({ time, from = 0, to = 1, overshootClamping = false, ...c
   return overshootClamping ? (to >= from ? Math.min(v, to) : Math.max(v, to)) : v;
 }
 
-/** A number in [0, 1) fixed by `seed`: the same seed gives the same number every frame, in the preview and the export. */
-export function random(seed: string | number): number {
-  return generator(hash(String(seed)))();
+/**
+ * A number in [0, 1) fixed by its keys: the same keys give the same number every frame, in the preview and the
+ * export. Several keys name one number among many, in any order of asking: `random("wall", cell, turn)`.
+ */
+export function random(...keys: readonly (string | number)[]): number {
+  return generator(hash(keys.join("\u001f")))();
+}
+
+/**
+ * Which step a moment has reached: the index of the last of `times` that is not after `t`, or -1 before the first.
+ * `times` are seconds in increasing order, the moment of each step of something that happens in steps.
+ */
+export function stepAt(times: readonly number[], t: number): number {
+  let lo = 0,
+    hi = times.length - 1,
+    step = -1;
+  while (lo <= hi) {
+    const mid = (lo + hi) >> 1;
+    if ((times[mid] as number) <= t) {
+      step = mid;
+      lo = mid + 1;
+    } else hi = mid - 1;
+  }
+  return step;
 }

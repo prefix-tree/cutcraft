@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { EASING_FN, interpolate, random, spring } from "@cutcraft/kit";
+import { EASING_FN, interpolate, random, spring, stepAt } from "@cutcraft/kit";
 
 describe("interpolate", () => {
   it("maps across a range, piecewise", () => {
@@ -61,6 +61,8 @@ describe("the spring easing", () => {
   });
 });
 
+const STAR_3 = 0.6176510180812329; // random("star-3") before it took several keys
+
 describe("random", () => {
   it("is fixed by its seed and spread over [0, 1)", () => {
     expect(random("star-3")).toBe(random("star-3"));
@@ -70,5 +72,37 @@ describe("random", () => {
     expect(Math.min(...values)).toBeGreaterThanOrEqual(0);
     expect(Math.max(...values)).toBeLessThan(1);
     expect(values.reduce((a, b) => a + b, 0) / 1000).toBeCloseTo(0.5, 1);
+  });
+
+  it("takes several keys, and one key is what it always was", () => {
+    expect(random("wall", 3, 12)).toBe(random("wall", 3, 12));
+    expect(random("wall", 3, 12)).not.toBe(random("wall", 3, 13));
+    expect(random("wall", 3, 12)).not.toBe(random("wall", 12, 3));
+    // Keys are kept apart: two keys are not the one key they would spell if run together.
+    expect(random("a", "b")).not.toBe(random("ab"));
+    expect(random("star-3")).toBeCloseTo(STAR_3, 12);
+  });
+});
+
+describe("stepAt", () => {
+  const times = [0.5, 1, 1.5, 4];
+  it("is the last step whose time has come", () => {
+    expect(stepAt(times, 0)).toBe(-1);
+    expect(stepAt(times, 0.5)).toBe(0);
+    expect(stepAt(times, 0.99)).toBe(0);
+    expect(stepAt(times, 1)).toBe(1);
+    expect(stepAt(times, 3.9)).toBe(2);
+    expect(stepAt(times, 4)).toBe(3);
+    expect(stepAt(times, 100)).toBe(3);
+  });
+
+  it("has no step in an empty list", () => {
+    expect(stepAt([], 5)).toBe(-1);
+  });
+
+  it("agrees with counting, on a long list", () => {
+    const many = Array.from({ length: 500 }, (_, i) => i * 0.07);
+    for (const t of [0, 0.069, 0.07, 3.33, 17.2, 34.93, 40])
+      expect(stepAt(many, t)).toBe(many.filter((at) => at <= t).length - 1);
   });
 });
