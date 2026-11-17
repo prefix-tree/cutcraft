@@ -1,6 +1,6 @@
 import { isValidElement, type ReactElement, type ReactNode } from "react";
 
-import { Cells, CountUp, DrawnLine, installLayerClock, Label, type LayerClock, progress } from "../src";
+import { Cells, CountUp, DrawnLine, grid, installLayerClock, Label, type LayerClock, progress } from "../src";
 
 /** The layer's clock, set by hand: seconds of the video, and seconds since the layer started. */
 let now = { time: 0, elapsed: 0 };
@@ -186,5 +186,30 @@ describe("Cells", () => {
       "none",
       "#fff",
     ]);
+  });
+});
+
+describe("grid", () => {
+  it("gives every cell its place and its box, along the rows", () => {
+    const board = grid({ columns: 4, rows: 3, width: 400, height: 150 });
+    expect(board.cell).toEqual({ width: 100, height: 50 });
+    expect(board.cells).toHaveLength(12);
+    expect(board.cells[0]).toEqual({ index: 0, column: 0, row: 0, left: 0, top: 0, width: 100, height: 50 });
+    expect(board.cells[5]).toEqual({ index: 5, column: 1, row: 1, left: 100, top: 50, width: 100, height: 50 });
+    expect(board.cells[11]).toMatchObject({ column: 3, row: 2, left: 300, top: 100 });
+  });
+
+  it("starts where it is told, and a rect is the same box as the cell", () => {
+    const board = grid({ columns: 8, rows: 15, width: 1080, height: 2025, y: -52.5 });
+    expect(board.rect(0, 0)).toEqual({ left: 0, top: -52.5, width: 135, height: 135 });
+    const { index: _index, column: _column, row: _row, ...box } = board.cells[9] as (typeof board.cells)[number];
+    expect(board.rect(1, 1)).toEqual(box);
+    // A place off the grid is where that cell would be, for something that leaves the board.
+    expect(board.rect(-1, 15)).toEqual({ left: -135, top: 1972.5, width: 135, height: 135 });
+  });
+
+  it("refuses a grid with no cells", () => {
+    expect(() => grid({ columns: 0, rows: 3, width: 10, height: 10 })).toThrow("whole numbers of columns and rows");
+    expect(() => grid({ columns: 2.5, rows: 3, width: 10, height: 10 })).toThrow("whole numbers");
   });
 });

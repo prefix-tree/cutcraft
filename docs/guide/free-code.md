@@ -95,13 +95,14 @@ The lint warns about what goes off the video's clock:
 
 ## Animation helpers
 
-`@cutcraft/kit` exports three pure functions for shaping time:
+`@cutcraft/kit` exports four pure functions for shaping time:
 
 | Function | Does |
 |---|---|
 | `interpolate(x, inputRange, outputRange, options)` | Maps a value across ranges, with easing. It extends past the ends unless you pass `extrapolateLeft` or `extrapolateRight: "clamp"`. |
 | `spring({ time, from, to, mass, damping, stiffness })` | Where a spring is `time` seconds after it is let go (mass 1, damping 10 and stiffness 100 by default). |
-| `random(seed)` | A number from 0 to 1, always the same for the same seed, so scattered things stay put from frame to frame. |
+| `random(...keys)` | A number from 0 to 1, always the same for the same keys, so scattered things stay put from frame to frame. Several keys name one number among many: `random("star", i)`. |
+| `stepAt(times, t)` | Which step a moment has reached: the index of the last of `times` (seconds, increasing) that is not after `t`, or -1 before the first. For anything that happens in steps. |
 
 ```tsx
 function Badge() {
@@ -156,6 +157,39 @@ picks the edge when the guess is wrong. A label names itself for the layout chec
 
 `useProgress({ at, after, over, easing })` is the arithmetic the parts share, for your own drawing: 0 before, 1
 after, eased between. `progress(clock, when)` is the same for a clock you already hold.
+
+## A grid
+
+`grid()` is geometry and draws nothing. Give it the columns, the rows and the size of the whole, and it hands back
+every cell with its `index`, `column`, `row` and box, and `rect(column, row)` for one cell. What goes in a cell is
+yours, in a `div`, an SVG or a canvas:
+
+```tsx
+import { grid, random, useT } from "@cutcraft/kit";
+
+const board = grid({ columns: 8, rows: 15, width: 1080, height: 2025, y: -52 });
+const LETTERS = [..."ABCDEFGHJKLMNPRSTUVWXYZ"];
+
+function Wall() {
+  const t = useT();
+  return board.cells.map((cell) => {
+    // Each cell keeps its own time, so the wall never changes all at once.
+    const every = 0.3 + 2 * random("pace", cell.index);
+    const turn = Math.floor((t + random("late", cell.index)) / every);
+    const letter = LETTERS[Math.floor(random("letter", cell.index, turn) * LETTERS.length)];
+    return (
+      <div key={cell.index} style={{ position: "absolute", ...board.rect(cell.column, cell.row) }}>
+        {letter}
+      </div>
+    );
+  });
+}
+```
+
+For many things that start one after another, `progress(clock, { after: start + i * 0.05 })` in a loop gives each
+its own 0 to 1; it is `useProgress` without the hook, so it can be called once for each item. The
+[snake short](/examples/snake-heart) is built from these: a `grid` for its board, `stepAt`
+for which step the game has reached, and `random` for its wall.
 
 ## Naming what you draw
 
