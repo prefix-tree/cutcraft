@@ -1503,10 +1503,8 @@ body {
   --cc-ink: #121212;
   background-color: var(--cc-accent);
   background-image:
-    radial-gradient(circle, #121212 3px, transparent 3.5px),
-    radial-gradient(circle, #121212 3px, transparent 3.5px),
-    radial-gradient(circle, #121212 3px, transparent 3.5px),
-    radial-gradient(circle, #121212 3px, transparent 3.5px);
+    radial-gradient(circle, #121212 3px, transparent 3.5px), radial-gradient(circle, #121212 3px, transparent 3.5px),
+    radial-gradient(circle, #121212 3px, transparent 3.5px), radial-gradient(circle, #121212 3px, transparent 3.5px);
 }
 .home-spec {
   position: relative;
