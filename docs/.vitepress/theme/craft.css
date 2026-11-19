@@ -12,6 +12,10 @@
   --cc-display: "Barlow Condensed", "Inter", system-ui, sans-serif;
   --cc-pixel: "Doto", "Geist Mono", ui-monospace, monospace;
   --cc-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  /* Brutalism, as the logo: a heavy ink line and a hard shadow with no blur. In dark mode the ink is white. */
+  --cc-line: 2px solid var(--cc-ink);
+  --cc-hard: 6px 6px 0 var(--cc-ink);
+  --cc-hard-sm: 4px 4px 0 var(--cc-ink);
 
   --vp-font-family-base: "Inter", system-ui, sans-serif;
   --vp-font-family-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -49,14 +53,13 @@
   --vp-code-bg: #1a1a1a;
 }
 
-/* Square edges and no soft shadows, as on a poster. */
+/* Square edges, as on a poster; the brutalist section at the end adds the borders and hard shadows. */
 .vp-doc div[class*="language-"],
 .custom-block,
 .vp-doc :not(pre) > code,
 .DocSearch-Button,
 .VPNavBarSearch .DocSearch-Button {
-  border-radius: 4px !important;
-  box-shadow: none !important;
+  border-radius: 0 !important;
 }
 
 /* Labels: monospace small capitals, spaced. */
@@ -506,7 +509,7 @@
   --vp-code-copy-code-active-text: var(--cc-ink-2);
 }
 .vp-doc div[class*="language-"] {
-  border-radius: 8px !important;
+  border-radius: 0 !important;
   border: 1px solid #23232c;
 }
 .vp-doc div[class*="language-"] pre {
@@ -787,5 +790,89 @@
   /* No hover on a touch screen: the line count shows from the start. */
   .cc-gallery-lines {
     opacity: 1;
+  }
+}
+
+/* ── Brutalism: square boxes, heavy ink lines and hard offset shadows, like the logo ──────────────────────── */
+
+.VPNav .VPNavBar:not(.home.top) .divider-line,
+.VPNavBar .divider-line {
+  background-color: var(--cc-ink) !important;
+  height: 2px !important;
+}
+.DocSearch-Button {
+  border: var(--cc-line) !important;
+}
+
+/* Boxes: code, examples, the playground, the install command, notes. */
+.vp-doc div[class*="language-"],
+.vp-doc .cc-example,
+.cc-playground,
+.cc-command,
+.vp-doc .custom-block {
+  border: var(--cc-line) !important;
+  border-radius: 0 !important;
+  box-shadow: var(--cc-hard) !important;
+}
+/* A code block inside an example is part of its box. */
+.vp-doc .cc-example div[class*="language-"] {
+  border: 0 !important;
+  box-shadow: none !important;
+}
+.vp-doc .cc-example,
+.cc-playground {
+  margin-right: 6px;
+}
+
+/* Buttons: pressed into the page on hover, like a key. */
+.vp-doc a.home-button {
+  border: var(--cc-line);
+  border-radius: 0;
+  box-shadow: var(--cc-hard-sm);
+  transition:
+    transform 0.1s,
+    box-shadow 0.1s,
+    background 0.15s;
+}
+.vp-doc a.home-button:hover {
+  border-color: var(--cc-ink);
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 var(--cc-ink);
+}
+.vp-doc a.home-button:active {
+  transform: translate(4px, 4px);
+  box-shadow: none;
+}
+.vp-doc a.home-button.primary,
+.vp-doc a.home-button.primary:hover {
+  background: var(--cc-accent);
+  border-color: var(--cc-ink);
+  color: #0a0a0a;
+}
+
+/* Videos and cards: square, outlined; a card lifts onto its shadow when hovered. */
+.cc-preview,
+.cc-pair video,
+.cc-gallery-tile {
+  border-radius: 0 !important;
+}
+.vp-doc a.cc-card .cc-preview,
+.cc-pair video {
+  border: var(--cc-line);
+}
+.vp-doc a.cc-card .cc-preview {
+  transition:
+    transform 0.1s,
+    box-shadow 0.1s;
+}
+.vp-doc a.cc-card:hover .cc-preview,
+.vp-doc a.cc-card:focus-visible .cc-preview {
+  transform: translate(-3px, -3px);
+  box-shadow: var(--cc-hard-sm);
+}
+@media (prefers-reduced-motion: reduce) {
+  .vp-doc a.home-button,
+  .vp-doc a.cc-card .cc-preview {
+    transition: none;
   }
 }
