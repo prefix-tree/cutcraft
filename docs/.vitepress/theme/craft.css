@@ -1,5 +1,6 @@
-/* UberScene's site, set like a poster: black and white, one orange accent, Doto (dot matrix) for the wordmark, Barlow
-   Condensed in capitals for headlines, Inter for text, Geist Mono for labels, and hairline rules for structure. */
+/* UberScene's site, set like a brutalist poster: black and white, one orange accent, heavy ink lines and hard
+   shadows. Doto (dot matrix) for the wordmark and numbers, Barlow Condensed capitals for headlines, Inter for text, Geist
+   Mono for labels. */
 
 :root {
   --cc-paper: #ffffff;
@@ -14,8 +15,9 @@
   --cc-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
   /* Brutalism, as the logo: a heavy ink line and a hard shadow with no blur. In dark mode the ink is white. */
   --cc-line: 2px solid var(--cc-ink);
+  --cc-line-heavy: 3px solid var(--cc-ink);
   /* The second shadow fills the bottom-left corner, so the shadow sits flush under the box's left edge. */
-  --cc-hard: 6px 6px 0 var(--cc-ink), 0 6px 0 var(--cc-ink);
+  --cc-hard: 8px 8px 0 var(--cc-ink), 0 8px 0 var(--cc-ink);
   --cc-hard-sm: 4px 4px 0 var(--cc-ink), 0 4px 0 var(--cc-ink);
 
   --vp-font-family-base: "Inter", system-ui, sans-serif;
@@ -84,7 +86,8 @@
   background: var(--cc-rule) !important;
 }
 .VPNavBarMenuLink {
-  font-size: 11px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
 }
 .VPNavBarMenuLink.active {
   color: var(--cc-accent) !important;
@@ -118,9 +121,9 @@
   font-size: 32px;
   line-height: 1.05;
   font-weight: 700;
-  border-top: 1px solid var(--cc-rule);
-  padding-top: 24px;
-  margin-top: 52px;
+  border-top: var(--cc-line-heavy);
+  padding-top: 20px;
+  margin-top: 56px;
 }
 .vp-doc h3 {
   font-size: 22px;
@@ -154,186 +157,347 @@
   color: var(--cc-accent);
 }
 
-/* ── The landing page: a hero, the gallery, then the idea, features, the playground and the effects ──── */
+/* ── The landing page, brutalist: a poster-sized headline, a ticker, numbered sections, ruled grids ─────── */
 
+html {
+  overflow-x: clip;
+}
 .home {
-  max-width: 1152px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 56px 24px 96px;
+  padding: 48px 24px 0;
+  counter-reset: home-section;
 }
 .home section + section {
-  margin-top: 88px;
+  margin-top: 112px;
 }
 .home h2 {
   margin-top: 0;
   border-top: 0;
   padding-top: 0;
 }
-/* Hero, after remotion.dev: one centred sentence on the page's own background, the install command and the buttons
-   under it, and the live playground below. */
+
+/* Hero: left-aligned, set as large as the page allows, the last words on an orange block. */
 .home-hero {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
+  align-items: flex-start;
+  text-align: left;
   padding: 8px 0 0;
 }
-.vp-doc .home-title {
-  max-width: 900px;
+.vp-doc p.home-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 28px;
+}
+.home-tags span {
+  padding: 4px 10px;
+  border: var(--cc-line);
+  font-family: var(--cc-mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  line-height: 1.4;
+}
+.home-tags span:first-child {
+  background: var(--cc-ink);
+  color: var(--cc-paper);
+}
+.vp-doc .home-title,
+.home.vp-doc h1.home-title {
+  max-width: none;
   margin: 0;
-  font-family: var(--vp-font-family-base);
-  font-size: clamp(40px, 6vw, 72px);
-  font-weight: 700;
-  line-height: 1;
-  letter-spacing: -0.04em;
+  font-family: var(--cc-display);
+  font-size: clamp(48px, 13.5vw, 196px);
+  font-weight: 800;
+  line-height: 0.84;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
   color: var(--cc-ink);
 }
-.home-lead {
-  max-width: 640px;
-  margin: 16px 0 20px !important;
-  font-size: 19px !important;
-  line-height: 1.5 !important;
-  color: var(--cc-ink-2);
+.home-title-line {
+  display: block;
+}
+.home-title-mark {
+  display: inline-block;
+  margin-top: 0.08em;
+  padding: 0.02em 0.12em 0;
+  background: var(--cc-accent);
+  color: #0a0a0a;
+  border: var(--cc-line-heavy);
+  box-shadow: var(--cc-hard);
+  white-space: nowrap;
+}
+.vp-doc p.home-lead {
+  max-width: 620px;
+  margin: 40px 0 28px !important;
+  font-size: 21px !important;
+  line-height: 1.45 !important;
+  font-weight: 500;
+  color: var(--cc-ink);
 }
 .home-hero .cc-command {
   width: 100%;
-  max-width: 520px;
+  max-width: 620px;
   text-align: left;
 }
 .home-actions {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
-  gap: 10px;
-  margin: 14px 0 10px;
+  justify-content: flex-start;
+  gap: 14px;
+  margin: 26px 0 0;
 }
 .vp-doc a.home-button {
   display: inline-block;
-  padding: 10px 20px;
-  border: 1px solid var(--cc-rule);
-  border-radius: 999px;
-  font-size: 15px;
-  font-weight: 600;
+  padding: 12px 22px;
+  background: var(--cc-paper);
+  font-family: var(--cc-mono);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
   text-decoration: none;
   color: var(--cc-ink);
-  transition:
-    border-color 0.15s,
-    background 0.15s;
-}
-.vp-doc a.home-button:hover {
-  border-color: var(--cc-ink);
-}
-.vp-doc a.home-button.primary {
-  background: var(--cc-ink);
-  border-color: var(--cc-ink);
-  color: var(--cc-paper);
-}
-.vp-doc a.home-button.primary:hover {
-  background: var(--cc-accent);
-  border-color: var(--cc-accent);
 }
 
-/* The landing page's headings are sentence case in Inter, not the docs' condensed capitals. */
+/* The ticker: a full-width ink band of claims that scrolls sideways. */
+.home-ticker {
+  width: 100vw;
+  margin: 96px 0 0 calc(50% - 50vw);
+  overflow: hidden;
+  border-block: var(--cc-line-heavy);
+  background: var(--cc-ink);
+  color: var(--cc-paper);
+}
+.home-ticker-track {
+  display: flex;
+  width: max-content;
+  animation: home-ticker 40s linear infinite;
+}
+.home-ticker span {
+  padding: 14px 0;
+  font-family: var(--cc-display);
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.home-ticker span::after {
+  content: "■";
+  margin: 0 28px;
+  font-size: 0.6em;
+  vertical-align: 0.2em;
+  color: var(--cc-accent);
+}
+@keyframes home-ticker {
+  to {
+    transform: translateX(-50%);
+  }
+}
+.home-ticker + section {
+  margin-top: 96px !important;
+}
+
+/* Section heads: a number in dot matrix over a condensed capital headline and a heavy rule. */
 .home.vp-doc h1,
 .home.vp-doc h2,
 .home.vp-doc h3 {
-  font-family: var(--vp-font-family-base);
-  text-transform: none;
+  font-family: var(--cc-display);
+  text-transform: uppercase;
 }
 .home.vp-doc h2 {
-  font-size: 36px;
-  font-weight: 700;
-  letter-spacing: -0.03em;
+  counter-increment: home-section;
+  position: relative;
+  margin-bottom: 28px;
+  padding-top: 18px;
+  border-top: var(--cc-line-heavy);
+  font-size: clamp(44px, 6.5vw, 84px);
+  font-weight: 800;
+  line-height: 0.9;
+  letter-spacing: -0.005em;
+}
+.home.vp-doc h2::before {
+  content: counter(home-section, decimal-leading-zero);
+  display: block;
+  margin-bottom: 10px;
+  font-family: var(--cc-pixel);
+  font-size: 28px;
+  font-weight: 900;
+  line-height: 1;
+  color: var(--cc-accent);
+}
+.home.vp-doc h2 .header-anchor {
+  display: none;
 }
 
 .home-meta {
-  margin: 0 0 -40px !important;
+  margin: 0 !important;
   font-size: 14px;
   color: var(--cc-grey);
 }
 
-/* Why: three reasons side by side. Features: a list in columns, each a name and a line. */
-.home-why-grid {
+/* Why: three cells in one ruled box. Features: a ruled grid of cells that invert under the pointer. */
+.home-why-grid,
+.vp-doc ul.home-feature-list {
   display: grid;
+  border: var(--cc-line-heavy);
+  box-shadow: var(--cc-hard);
+  background: var(--cc-paper);
+}
+.home-why-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 32px;
+}
+.home-why-grid > div {
+  padding: 26px 24px 30px;
+}
+.home-why-grid > div + div {
+  border-left: var(--cc-line-heavy);
 }
 .vp-doc .home-why-grid h3 {
-  margin: 0 0 8px;
-  font-size: 20px;
+  margin: 0 0 14px;
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 0.95;
 }
 .vp-doc .home-why-grid p {
   margin: 0;
+  font-size: 16px;
   color: var(--cc-ink-2);
 }
 .vp-doc ul.home-feature-list {
-  display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0 32px;
+  gap: 0;
+  margin: 0 6px 0 0;
   padding: 0;
   list-style: none;
+  counter-reset: home-feature;
 }
 .vp-doc ul.home-feature-list li {
+  counter-increment: home-feature;
+  position: relative;
   margin: 0;
-  padding: 14px 0;
+  padding: 18px 22px 20px 64px;
   border-top: var(--cc-line);
   color: var(--cc-ink-2);
+  transition:
+    background 0.1s,
+    color 0.1s;
+}
+.vp-doc ul.home-feature-list li:nth-child(-n + 2) {
+  border-top: 0;
+}
+.vp-doc ul.home-feature-list li:nth-child(even) {
+  border-left: var(--cc-line);
+}
+.vp-doc ul.home-feature-list li::before {
+  content: counter(home-feature, decimal-leading-zero);
+  position: absolute;
+  left: 22px;
+  top: 21px;
+  font-family: var(--cc-mono);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--cc-grey);
 }
 .vp-doc ul.home-feature-list strong {
   display: block;
+  margin-bottom: 2px;
+  font-family: var(--cc-display);
+  font-size: 22px;
+  font-weight: 700;
+  text-transform: uppercase;
   color: var(--cc-ink);
+}
+.vp-doc ul.home-feature-list li:hover {
+  background: var(--cc-ink);
+  color: var(--cc-paper);
+}
+.vp-doc ul.home-feature-list li:hover strong,
+.vp-doc ul.home-feature-list li:hover::before {
+  color: var(--cc-accent);
 }
 @media (max-width: 860px) {
   .home-why-grid,
   .vp-doc ul.home-feature-list {
     grid-template-columns: minmax(0, 1fr);
   }
+  .home-why-grid > div + div {
+    border-left: 0;
+    border-top: var(--cc-line-heavy);
+  }
+  .vp-doc ul.home-feature-list li:nth-child(even) {
+    border-left: 0;
+  }
+  .vp-doc ul.home-feature-list li:nth-child(2) {
+    border-top: var(--cc-line);
+  }
 }
 
 /* Chapters: one feature each, its rendered video beside the file that made it. */
-.home-chapter-lead {
-  max-width: 720px;
+.vp-doc p.home-chapter-lead {
+  max-width: 760px;
+  margin: 0 0 28px;
+  font-size: 17px;
   color: var(--cc-ink-2);
 }
 .home-chapter-lead a {
-  font-weight: 600;
+  display: inline-block;
+  margin-left: 4px;
+  padding: 0 6px;
+  background: var(--cc-ink);
+  color: var(--cc-paper) !important;
+  font-family: var(--cc-mono);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   text-decoration: none !important;
   white-space: nowrap;
+}
+.home-chapter-lead a:hover {
+  background: var(--cc-accent);
+  color: #0a0a0a !important;
 }
 .vp-doc .home-chapter .cc-example {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   align-items: center;
-  border-radius: 12px;
 }
 .vp-doc .home-chapter .cc-example-code {
   align-self: stretch;
   max-height: 460px;
   overflow: auto;
+  border-left: var(--cc-line-heavy);
 }
 @media (max-width: 860px) {
   .home-hero {
-    padding-top: 16px;
+    padding-top: 8px;
   }
   .vp-doc .home-chapter .cc-example {
     grid-template-columns: minmax(0, 1fr);
   }
+  .vp-doc .home-chapter .cc-example-code {
+    border-left: 0;
+    border-top: var(--cc-line-heavy);
+  }
 }
 .cc-command button:focus-visible {
-  outline: 2px solid var(--cc-accent);
+  outline: 3px solid var(--cc-accent);
   outline-offset: 2px;
 }
 
-/* The install command: one ink line with a copy button. */
+/* The install command: one ink bar with a copy key. */
 .cc-command {
   display: flex;
   align-items: center;
   gap: 12px;
   max-width: 100%;
-  padding: 10px 10px 10px 16px;
-  border: 1px solid #23232c;
-  border-radius: 6px;
-  background: var(--vp-code-block-bg);
+  padding: 10px 10px 10px 18px;
+  background: #0a0a0a;
 }
 .vp-doc .cc-command code {
   flex: 1;
@@ -341,29 +505,32 @@
   overflow-x: auto;
   white-space: nowrap;
   font-family: var(--cc-mono);
-  font-size: 13.5px;
-  color: var(--vp-code-block-color) !important;
+  font-size: 14px;
+  color: #ffffff !important;
   background: transparent !important;
   padding: 0 !important;
 }
 .cc-command-prompt {
-  color: #8b8794;
-  margin-right: 10px;
+  color: var(--cc-accent);
+  margin-right: 12px;
   user-select: none;
 }
 .cc-command button {
   flex: none;
-  padding: 6px 12px;
-  border-radius: 4px;
-  background: #26262f;
-  color: #e6e3dc;
+  padding: 7px 14px;
+  border: 2px solid #ffffff;
+  background: #0a0a0a;
+  color: #ffffff;
   font-family: var(--cc-mono);
-  font-size: 11.5px;
-  letter-spacing: 0.08em;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 .cc-command button:hover {
-  background: #31313c;
+  background: var(--cc-accent);
+  border-color: var(--cc-accent);
+  color: #0a0a0a;
 }
 .cc-sr {
   position: absolute;
@@ -403,25 +570,71 @@
   font-weight: 500;
 }
 
-/* What's inside: two columns of short claims. */
-.home-foot {
-  padding-top: 24px;
-  border-top: 1px solid var(--cc-rule);
-  font-size: 14px;
-  color: var(--cc-grey);
+/* The foot: a full-width ink block under the wordmark, set as wide as the page. */
+.home section.home-foot {
+  width: 100vw;
+  margin: 128px 0 0 calc(50% - 50vw);
+  padding: 56px max(24px, calc(50vw - 576px)) 64px;
+  border-top: var(--cc-line-heavy);
+  background: #0a0a0a;
+  color: #bdbdbd;
+  font-family: var(--cc-mono);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+}
+.dark .home section.home-foot {
+  border-top-color: #ffffff;
+}
+.vp-doc p.home-foot-mark {
+  margin: 0 0 36px !important;
+  font-family: var(--cc-pixel);
+  font-size: clamp(56px, 14vw, 200px);
+  font-weight: 900;
+  line-height: 0.85;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  color: var(--cc-accent);
+  white-space: nowrap;
+}
+.home-foot strong {
+  color: #ffffff;
+}
+.vp-doc .home-foot a {
+  color: #ffffff;
+  text-decoration-color: var(--cc-accent);
+}
+.vp-doc .home-foot a:hover {
+  color: var(--cc-accent);
 }
 
 @media (max-width: 768px) {
   .home {
-    padding: 28px 16px 72px;
+    padding: 28px 16px 0;
   }
   .home section + section {
+    margin-top: 80px;
+  }
+  .home-ticker {
     margin-top: 64px;
+  }
+  .home-ticker span {
+    font-size: 22px;
+  }
+  .home section.home-foot {
+    padding: 40px 16px 48px;
   }
   /* VitePress pulls code blocks out to the edge on a phone (-24px); here they keep the page's 16px gutter. */
   .home.vp-doc div[class*="language-"] {
     margin-left: 0;
     margin-right: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-ticker-track {
+    animation: none;
+  }
+  .vp-doc ul.home-feature-list li {
+    transition: none;
   }
 }
 
@@ -837,7 +1050,7 @@
 .VPNav .VPNavBar:not(.home.top) .divider-line,
 .VPNavBar .divider-line {
   background-color: var(--cc-ink) !important;
-  height: 2px !important;
+  height: 3px !important;
 }
 .DocSearch-Button {
   border: var(--cc-line) !important;
@@ -849,7 +1062,7 @@
 .cc-playground,
 .cc-command,
 .vp-doc .custom-block {
-  border: var(--cc-line) !important;
+  border: var(--cc-line-heavy) !important;
   border-radius: 0 !important;
   box-shadow: var(--cc-hard) !important;
 }
@@ -860,7 +1073,10 @@
 }
 .vp-doc .cc-example,
 .cc-playground {
-  margin-right: 6px;
+  margin-right: 8px;
+}
+.vp-doc a.cc-gallery-tile {
+  border: var(--cc-line-heavy);
 }
 
 /* Buttons: pressed into the page on hover, like a key. */

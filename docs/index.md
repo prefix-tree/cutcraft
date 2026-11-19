@@ -15,7 +15,9 @@ import { withBase } from "vitepress";
 
 <section class="home-hero">
 
-<h1 class="home-title">Make videos with code.</h1>
+<p class="home-tags"><span>Open source</span><span>MIT</span><span>TSX → MP4</span></p>
+
+<h1 class="home-title"><span class="home-title-line">Make videos</span> <span class="home-title-line"><span class="home-title-mark">with code.</span></span></h1>
 
 <p class="home-lead">Write a video as a React file. Play it in the browser, fine-tune it on a timeline, export it to MP4.</p>
 
@@ -27,9 +29,9 @@ import { withBase } from "vitepress";
 <a class="home-button" href="https://github.com/prefix-tree/uberscene">GitHub</a>
 </div>
 
-<p class="home-meta">Free and open source · MIT licence</p>
-
 </section>
+
+<div class="home-ticker" aria-hidden="true"><div class="home-ticker-track"><span>TSX in, MP4 out</span><span>45 effects and transitions</span><span>115 undoable actions</span><span>Frame-exact player</span><span>Captions from the transcript</span><span>Three.js on the clock</span><span>Diff it, review it, ship it</span><span>TSX in, MP4 out</span><span>45 effects and transitions</span><span>115 undoable actions</span><span>Frame-exact player</span><span>Captions from the transcript</span><span>Three.js on the clock</span><span>Diff it, review it, ship it</span></div></div>
 
 <section class="home-live" aria-label="Try it">
 
@@ -205,6 +207,8 @@ const { text: next } = foldToSource(text, exec.log(), exec.state());
 </section>
 
 <section class="home-foot">
+
+<p class="home-foot-mark" aria-hidden="true">UberScene</p>
 
 **Free and open source under the MIT licence.** <a :href="withBase('/examples/')">More examples →</a>
 
