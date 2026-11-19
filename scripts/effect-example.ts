@@ -6,7 +6,7 @@
 // - colour, footage, basic adjustments, vignette and grain: one of the four coffee shots (colour on the red cup, the
 //   lens and print looks on the espresso machine, the frame-wide looks on the wide pour, the rest on the close pour),
 //   the effect keyed from where it changes nothing up to its example value, then held, so the video shows the change;
-// - title looks: one word over the espresso machine's dark wall, the look keyed up the same way;
+// - title looks: one word over the espresso machine, defocused and darkened like a title card's ground, the look keyed up the same way;
 // - transitions: one coffee shot into another, the pair turning through the four shots, at the transition's defaults.
 import type { EFFECTS, TRANSITIONS } from "../packages/kit/src/effects/registry";
 
@@ -221,12 +221,13 @@ export const EFFECT_DEMOS: Readonly<Record<keyof typeof EFFECTS, EffectDemo>> = 
   outline: {
     text: "Draws a line around the element's shape.",
     on: "title",
-    params: { color: "#c8402a" },
-    animate: [{ param: "width", from: 0, to: 6 }],
+    params: { color: "#f4efe6" },
+    animate: [{ param: "width", from: 0, to: 4 }],
   },
   longShadow: {
     text: "Extrudes a long, hard shadow from the element's shape.",
     on: "title",
+    params: { color: "#5a3a22", length: 160 },
     animate: [{ param: "opacity", from: 0, to: 1 }],
   },
   bevel: {
@@ -350,12 +351,16 @@ export function effectExample(name: keyof typeof EFFECTS): string {
   if (demo.on === "title")
     tracks.push(
       '      <Track id="main">',
-      ...shot("backdrop", ESPRESSO.src, 10, []),
+      // The shot behind the word is defocused and darkened, as a title card's would be, so the look reads on its own.
+      ...shot("backdrop", ESPRESSO.src, 10, [
+        '          <Effect id="soft" type="blur" params={{ radius: 10 }} />',
+        '          <Effect id="dim" type="brightness" params={{ amount: -0.35 }} />',
+      ]),
       "      </Track>",
       '      <Track id="text" layout="free">',
-      `        <Title id="word" start={0} duration={${EXAMPLE_SECONDS}} size={140} color="#e8a33d">`,
+      `        <Title id="word" start={0} duration={${EXAMPLE_SECONDS}} size={128} color="#e8a33d">`,
       ...look,
-      "          Shed",
+      "          Crema",
       "        </Title>",
       "      </Track>",
     );

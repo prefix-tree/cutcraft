@@ -3,7 +3,7 @@ import { z } from "zod";
 import { Composition, Motion, Three, Track } from "@uberscene/kit";
 
 export const schema = z.object({ name: z.string(), tagline: z.string(), accent: z.string() });
-export const defaults = { name: "Shed", tagline: "A cloud for small software", accent: "#e8a33d" };
+export const defaults = { name: "Halvard", tagline: "Coffee roasted on Mondays", accent: "#e8a33d" };
 
 /**
  * A logo reveal for an intro or outro: three.js particles drift in and settle into the name, which then hands off
@@ -21,14 +21,14 @@ export default function Video({ name, tagline, accent }: z.infer<typeof schema>)
           camera={{ position: [0, 0, 10], fov: 40 }}
           setup={({ scene, THREE }) => {
             // Where the particles end: points sampled from the name drawn on a canvas.
-            const W = 480;
+            const W = 600;
             const H = 160;
             const art = document.createElement("canvas");
             art.width = W;
             art.height = H;
             const g = art.getContext("2d") as CanvasRenderingContext2D;
             g.fillStyle = "#fff";
-            g.font = "700 132px 'Space Grotesk', sans-serif";
+            g.font = "700 116px 'Space Grotesk', sans-serif";
             g.textAlign = "center";
             g.textBaseline = "middle";
             g.fillText(name, W / 2, H / 2);
@@ -36,7 +36,7 @@ export default function Video({ name, tagline, accent }: z.infer<typeof schema>)
             const targets: number[] = [];
             for (let y = 0; y < H; y += 3)
               for (let x = 0; x < W; x += 3)
-                if ((pixels[(y * W + x) * 4 + 3] as number) > 128) targets.push((x - W / 2) / 48, (H / 2 - y) / 48, 0);
+                if ((pixels[(y * W + x) * 4 + 3] as number) > 128) targets.push((x - W / 2) / 56, (H / 2 - y) / 56, 0);
 
             // Seeded, so every run (and every export) scatters the same way.
             let seed = 7;

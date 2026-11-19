@@ -3,7 +3,7 @@ import { Captions, Clip, Composition, Title, Track } from "@uberscene/kit";
 /** A vertical short: captions come from the words the clip plays, and the key point starts on the word that names it. */
 export default function Video() {
   return (
-    <Composition fps={30} width={540} height={960} theme={{ extends: "midnight", palette: { primary: "#c8402a" } }}>
+    <Composition fps={30} width={540} height={960} theme={{ extends: "midnight", palette: { primary: "#e8a33d" } }}>
       <Track id="main" name="Speaker">
         <Clip id="talk" src="asset:speaker" in="word:0" out="word:24.end" fit="cover" />
       </Track>
@@ -19,7 +19,7 @@ export default function Video() {
           size={34}
           transform={{ position: { x: 0, y: 115 }, borderRadius: 18 }}
         >
-          The point lands here
+          Crema: the sign of a good shot
         </Title>
       </Track>
       <Captions id="captions" src="asset:speaker" style={{ size: 34 }} animation="karaoke" />

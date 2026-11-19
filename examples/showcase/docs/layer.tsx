@@ -21,17 +21,20 @@ function Elapsed() {
   return (
     <div
       style={{
-        display: "flex",
-        width: "100%",
-        height: "100%",
-        alignItems: "center",
-        justifyContent: "center",
-        color: "#ffffff",
-        fontSize: 120,
-        fontWeight: 700,
+        position: "absolute",
+        right: 200,
+        bottom: 36,
+        textAlign: "right",
+        color: "#f4efe6",
+        fontFamily: "'Space Grotesk', sans-serif",
       }}
     >
-      {t.toFixed(1)} s
+      <div style={{ color: "#e8a33d", fontSize: 22, fontWeight: 600, letterSpacing: "0.12em", marginBottom: 10 }}>
+        BREW TIME
+      </div>
+      <div style={{ fontSize: 88, fontWeight: 700, lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>
+        {t.toFixed(1)} s
+      </div>
     </div>
   );
 }

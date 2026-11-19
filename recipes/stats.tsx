@@ -35,11 +35,11 @@ export default function Video({ accent }: z.infer<typeof schema>) {
         >
           Last quarter
         </Title>
-        <Layer id="stat-deploys" anchor="bg" offset={0.8} duration={5} transform={{ position: { x: -360, y: 0 } }}>
-          <Counter value={12800} label="deployments" accent={accent} />
+        <Layer id="stat-cups" anchor="bg" offset={0.8} duration={5} transform={{ position: { x: -360, y: 0 } }}>
+          <Counter value={12800} label="cups poured" accent={accent} />
         </Layer>
-        <Layer id="stat-uptime" anchor="bg2" offset={0.4} duration={5} transform={{ position: { x: 360, y: 0 } }}>
-          <Counter value={99.97} label="% uptime" accent={accent} />
+        <Layer id="stat-on-time" anchor="bg2" offset={0.4} duration={5} transform={{ position: { x: 360, y: 0 } }}>
+          <Counter value={99.97} label="% of orders on time" accent={accent} />
         </Layer>
       </Track>
     </Composition>

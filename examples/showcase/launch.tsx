@@ -3,7 +3,7 @@ import { z } from "zod";
 import { Clip, Composition, Motion, Three, Track, Transition } from "@uberscene/kit";
 
 export const schema = z.object({ product: z.string(), founder: z.string(), accent: z.string() });
-export const defaults = { product: "Shed", founder: "Maya Chen", accent: "#e8a33d" };
+export const defaults = { product: "Halvard", founder: "Maya Chen", accent: "#e8a33d" };
 
 const pill = {
   position: "absolute",
@@ -17,8 +17,8 @@ const pill = {
 } as const;
 
 /**
- * A product launch: the founder on camera, a three.js device turning beside them, and each feature called out on the
- * word that names it. Trim the founder's clip and every callout moves with its word.
+ * A roastery's launch: the founder at the bench, a three.js bag of the new roast turning beside them, and each promise
+ * called out on the word that names it. Trim the founder's clip and every callout moves with its word.
  */
 export default function Video({ product, founder, accent }: z.infer<typeof schema>) {
   return (
@@ -31,54 +31,59 @@ export default function Video({ product, founder, accent }: z.infer<typeof schem
         <Clip id="close" src="asset:founder" in="word:12" out="word:25.end" fit="cover" />
       </Track>
 
-      <Track id="device" name="Device" layout="free">
-        {/* The device turns in as the founder says the product's name, and keeps turning to the end. */}
+      <Track id="bag" name="Bag" layout="free">
+        {/* The bag turns in as the founder says the roastery's name, and keeps turning to the end. */}
         <Three
-          id="phone"
+          id="roast"
           anchor="talk"
           at="word:1"
           duration={12}
           camera={{ position: [0, 0, 6], fov: 35 }}
           setup={({ scene, THREE }) => {
-            const body = new THREE.Mesh(
-              new THREE.BoxGeometry(1.5, 3, 0.16),
-              new THREE.MeshStandardMaterial({ color: "#1b2a4a", metalness: 0.5, roughness: 0.3 }),
+            // A kraft paper bag, a little rounded by its shading, with a printed label on the front.
+            const bag = new THREE.Mesh(
+              new THREE.BoxGeometry(1.5, 2.3, 0.55),
+              new THREE.MeshStandardMaterial({ color: "#b0875c", metalness: 0, roughness: 0.92 }),
             );
-            // The screen: the product's name drawn on a canvas, shown on the front face.
             const art = document.createElement("canvas");
             art.width = 300;
-            art.height = 600;
+            art.height = 420;
             const g = art.getContext("2d") as CanvasRenderingContext2D;
-            const grad = g.createLinearGradient(0, 0, 0, 600);
-            grad.addColorStop(0, accent);
-            grad.addColorStop(1, "#c8402a");
-            g.fillStyle = grad;
-            g.fillRect(0, 0, 300, 600);
+            g.fillStyle = "#f4efe6";
+            g.fillRect(0, 0, 300, 420);
+            g.fillStyle = accent;
+            g.fillRect(0, 0, 300, 18);
             g.fillStyle = "#101421";
-            g.font = "700 64px 'Space Grotesk', sans-serif";
             g.textAlign = "center";
-            g.fillText(product, 150, 320);
+            g.font = "700 52px 'Space Grotesk', sans-serif";
+            g.fillText(product.toUpperCase(), 150, 150);
+            g.font = "500 24px Inter, sans-serif";
+            g.fillText("Monday roast", 150, 200);
+            g.fillRect(110, 240, 80, 3);
+            g.font = "500 22px Inter, sans-serif";
+            g.fillText("Single origin", 150, 300);
+            g.fillText("250 g", 150, 340);
             const texture = new THREE.CanvasTexture(art);
             texture.colorSpace = THREE.SRGBColorSpace;
-            const screen = new THREE.Mesh(
-              new THREE.PlaneGeometry(1.36, 2.8),
+            const label = new THREE.Mesh(
+              new THREE.PlaneGeometry(1.1, 1.54),
               new THREE.MeshBasicMaterial({ map: texture }),
             );
-            screen.position.z = 0.082;
-            const phone = new THREE.Group();
-            phone.add(body, screen);
-            phone.position.x = 1.7;
-            scene.add(phone);
-            scene.add(new THREE.AmbientLight("#ffffff", 0.6));
-            const key = new THREE.DirectionalLight("#ffffff", 2.2);
+            label.position.set(0, -0.1, 0.277);
+            const roast = new THREE.Group();
+            roast.add(bag, label);
+            roast.position.x = 1.75;
+            scene.add(roast);
+            scene.add(new THREE.AmbientLight("#ffffff", 0.7));
+            const key = new THREE.DirectionalLight("#fff1dd", 2.4);
             key.position.set(-3, 4, 5);
             scene.add(key);
             return ({ time }) => {
               const enter = Math.min(1, time / 1.2);
               const ease = 1 - (1 - enter) ** 3;
-              phone.scale.setScalar(0.6 + 0.4 * ease);
-              phone.rotation.y = (1 - ease) * -Math.PI + Math.sin(time * 0.7) * 0.45;
-              phone.rotation.x = Math.sin(time * 0.5) * 0.08;
+              roast.scale.setScalar(0.6 + 0.4 * ease);
+              roast.rotation.y = (1 - ease) * -Math.PI + Math.sin(time * 0.7) * 0.45;
+              roast.rotation.x = Math.sin(time * 0.5) * 0.08;
             };
           }}
         />
@@ -124,33 +129,33 @@ export default function Video({ product, founder, accent }: z.infer<typeof schem
             className="role"
             style={{ position: "absolute", left: 80, top: 446, color: "#c9c2b8", font: "500 22px Inter, sans-serif" }}
           >
-            Founder, {product}
+            Head roaster, {product}
           </div>
         </Motion>
         <Motion
-          id="builds"
+          id="monday"
           anchor="talk"
           at="word:8"
           duration={2.6}
           sequence={[[".pill", { opacity: [0, 1], x: [-40, 0] }, { duration: 0.4, ease: "easeOut" }]]}
         >
           <div className="pill" style={{ ...pill, top: 200 }}>
-            Builds from your repo
+            Roasted every Monday
           </div>
         </Motion>
         <Motion
-          id="sandbox"
+          id="two-days"
           anchor="close"
           at="word:17"
           duration={2.4}
           sequence={[[".pill", { opacity: [0, 1], x: [-40, 0] }, { duration: 0.4, ease: "easeOut" }]]}
         >
           <div className="pill" style={{ ...pill, top: 200 }}>
-            Every app in a sandbox
+            Shipped in two days
           </div>
         </Motion>
         <Motion
-          id="zero"
+          id="to-order"
           anchor="close"
           at="word:21"
           duration={2}
@@ -160,7 +165,7 @@ export default function Video({ product, founder, accent }: z.infer<typeof schem
           ]}
         >
           <div className="pill" style={{ ...pill, top: 200 }}>
-            Scales to zero
+            Brewed to order
           </div>
         </Motion>
       </Track>

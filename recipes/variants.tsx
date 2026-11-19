@@ -9,7 +9,7 @@ import { Captions, Clip, Composition, knob, THEME_NAMES, Title, Track } from "@u
  * so titles and captions take both through tokens. A variant is `defaults`
  * with overrides:
  *
- *   resolve(collectModule(file, { headline: "Software pequeño, nube real", theme: "paper", accent: "#ffcc00" }), manifest)
+ *   resolve(collectModule(file, { headline: "Café fresco, mañanas lentas", theme: "paper", accent: "#ffcc00" }), manifest)
  *
  * The editor's tweaks panel edits the same props; a change folds into `defaults`.
  */
@@ -22,8 +22,8 @@ export const schema = z.object({
 });
 
 export const defaults = {
-  headline: "Small software, real cloud",
-  cta: "Try it today",
+  headline: "Fresh coffee, slow mornings",
+  cta: "Visit us today",
   theme: "midnight",
   accent: "#ff5a1f",
   logo: "asset:logo",

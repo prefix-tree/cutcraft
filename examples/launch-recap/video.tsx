@@ -25,10 +25,10 @@ export const schema = z.object({
 });
 
 export const defaults = {
-  product: "Shed",
-  tagline: "A cloud for small software",
-  accent: "#ff5a1f",
-  cta: "getshard.sh",
+  product: "Halvard",
+  tagline: "Coffee roasted on Mondays",
+  accent: "#e8a33d",
+  cta: "Visit us this week",
 };
 
 export default function Video({ product, tagline, accent, cta }: z.infer<typeof schema>) {
@@ -85,7 +85,7 @@ export default function Video({ product, tagline, accent, cta }: z.infer<typeof 
         >
           {tagline}
         </Title>
-        <NameCard who="Bohdan Snisar" what="Founder, Shed" accent={accent} />
+        <NameCard who="Ines Moreau" what="Head barista, Halvard" accent={accent} />
         <Layer id="cta" anchor="outro" offset={0.3} duration={2.5}>
           <CallToAction text={cta} accent={accent} />
         </Layer>
@@ -106,10 +106,10 @@ export default function Video({ product, tagline, accent, cta }: z.infer<typeof 
 
       {/* Word references on a caption mean where the word plays: the cues follow hook and close wherever they are trimmed to. */}
       <Captions id="captions" src="asset:founder" style={{ position: "bottom", size: 44 }}>
-        <Caption id="cap-1" start="word:12" end="word:18.end" text="Small software still deserves a real cloud." />
-        <Caption id="cap-2" start="word:19" end="word:23.end" text="It should take one file." />
-        <Caption id="cap-3" start="word:40" end="word:48.end" text="You write the file, your agent writes the file," />
-        <Caption id="cap-4" start="word:49" end="word:52.end" text="and it just runs." />
+        <Caption id="cap-1" start="word:12" end="word:18.end" text="Good coffee still deserves a slow morning." />
+        <Caption id="cap-2" start="word:19" end="word:23.end" text="It should take one cup." />
+        <Caption id="cap-3" start="word:40" end="word:48.end" text="You grind the beans, the kettle pours the water," />
+        <Caption id="cap-4" start="word:49" end="word:52.end" text="and it just blooms." />
       </Captions>
     </Composition>
   );

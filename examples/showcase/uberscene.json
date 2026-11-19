@@ -17,55 +17,55 @@
           },
           {
             "i": 1,
-            "text": "cut",
+            "text": "shot",
             "start": 0.88,
             "end": 1.2
           },
           {
             "i": 2,
-            "text": "is",
+            "text": "starts",
             "start": 1.28,
             "end": 1.57
           },
           {
             "i": 3,
-            "text": "a",
+            "text": "with",
             "start": 1.65,
             "end": 1.91
           },
           {
             "i": 4,
-            "text": "line",
+            "text": "a",
             "start": 1.99,
             "end": 2.35
           },
           {
             "i": 5,
-            "text": "of",
+            "text": "fresh",
             "start": 2.43,
             "end": 2.72
           },
           {
             "i": 6,
-            "text": "code.",
+            "text": "grind.",
             "start": 2.8,
             "end": 3.16
           },
           {
             "i": 7,
-            "text": "Move",
+            "text": "Tamp",
             "start": 3.61,
             "end": 3.97
           },
           {
             "i": 8,
-            "text": "a",
+            "text": "it",
             "start": 4.05,
             "end": 4.3
           },
           {
             "i": 9,
-            "text": "clip",
+            "text": "level",
             "start": 4.38,
             "end": 4.74
           },
@@ -83,25 +83,25 @@
           },
           {
             "i": 12,
-            "text": "words",
+            "text": "water",
             "start": 5.63,
             "end": 6.03
           },
           {
             "i": 13,
-            "text": "move",
+            "text": "finds",
             "start": 6.11,
             "end": 6.47
           },
           {
             "i": 14,
-            "text": "with",
+            "text": "its",
             "start": 6.55,
             "end": 6.91
           },
           {
             "i": 15,
-            "text": "it.",
+            "text": "way.",
             "start": 6.99,
             "end": 7.28
           },
@@ -113,7 +113,7 @@
           },
           {
             "i": 17,
-            "text": "point",
+            "text": "crema",
             "start": 8.13,
             "end": 8.53
           },
@@ -131,31 +131,31 @@
           },
           {
             "i": 20,
-            "text": "the",
+            "text": "top",
             "start": 9.45,
             "end": 9.78
           },
           {
             "i": 21,
-            "text": "word",
+            "text": "when",
             "start": 9.86,
             "end": 10.21
           },
           {
             "i": 22,
-            "text": "that",
+            "text": "the",
             "start": 10.29,
             "end": 10.65
           },
           {
             "i": 23,
-            "text": "names",
+            "text": "shot's",
             "start": 10.73,
             "end": 11.13
           },
           {
             "i": 24,
-            "text": "it.",
+            "text": "right.",
             "start": 11.21,
             "end": 11.5
           }
@@ -179,7 +179,7 @@
           },
           {
             "i": 1,
-            "text": "Shed.",
+            "text": "Halvard.",
             "start": 0.82,
             "end": 1.16
           },
@@ -191,7 +191,7 @@
           },
           {
             "i": 3,
-            "text": "cloud",
+            "text": "roastery",
             "start": 1.95,
             "end": 2.34
           },
@@ -203,49 +203,49 @@
           },
           {
             "i": 5,
-            "text": "small",
+            "text": "slow",
             "start": 2.8,
             "end": 3.19
           },
           {
             "i": 6,
-            "text": "software.",
+            "text": "mornings.",
             "start": 3.27,
             "end": 3.79
           },
           {
             "i": 7,
-            "text": "It",
+            "text": "We",
             "start": 4.29,
             "end": 4.54
           },
           {
             "i": 8,
-            "text": "builds",
+            "text": "roast",
             "start": 4.62,
             "end": 5.05
           },
           {
             "i": 9,
-            "text": "from",
+            "text": "on",
             "start": 5.13,
             "end": 5.47
           },
           {
             "i": 10,
-            "text": "your",
+            "text": "Monday",
             "start": 5.55,
             "end": 5.89
           },
           {
             "i": 11,
-            "text": "repo,",
+            "text": "mornings,",
             "start": 5.97,
             "end": 6.31
           },
           {
             "i": 12,
-            "text": "runs",
+            "text": "ship",
             "start": 6.81,
             "end": 7.15
           },
@@ -257,7 +257,7 @@
           },
           {
             "i": 14,
-            "text": "app",
+            "text": "bag",
             "start": 7.7,
             "end": 8
           },
@@ -269,13 +269,13 @@
           },
           {
             "i": 16,
-            "text": "a",
+            "text": "two",
             "start": 8.41,
             "end": 8.62
           },
           {
             "i": 17,
-            "text": "sandbox,",
+            "text": "days,",
             "start": 8.7,
             "end": 9.17
           },
@@ -287,7 +287,7 @@
           },
           {
             "i": 19,
-            "text": "scales",
+            "text": "brew",
             "start": 10.05,
             "end": 10.48
           },
@@ -299,7 +299,7 @@
           },
           {
             "i": 21,
-            "text": "zero",
+            "text": "order",
             "start": 10.89,
             "end": 11.23
           },
@@ -311,19 +311,19 @@
           },
           {
             "i": 23,
-            "text": "nobody",
+            "text": "you",
             "start": 11.73,
             "end": 12.16
           },
           {
             "i": 24,
-            "text": "uses",
+            "text": "visit",
             "start": 12.24,
             "end": 12.58
           },
           {
             "i": 25,
-            "text": "it.",
+            "text": "us.",
             "start": 12.66,
             "end": 12.91
           }
@@ -359,7 +359,7 @@
           },
           {
             "i": 3,
-            "text": "release",
+            "text": "roast",
             "start": 1.53,
             "end": 2
           },
@@ -413,13 +413,13 @@
           },
           {
             "i": 12,
-            "text": "Teams",
+            "text": "We",
             "start": 6.52,
             "end": 6.91
           },
           {
             "i": 13,
-            "text": "ship",
+            "text": "roast",
             "start": 6.99,
             "end": 7.33
           },
@@ -455,7 +455,7 @@
           },
           {
             "i": 19,
-            "text": "incidents",
+            "text": "waste",
             "start": 9.9,
             "end": 10.46
           },

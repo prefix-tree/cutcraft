@@ -4,7 +4,7 @@ export default function Video() {
   return (
     <Composition fps={30} width={960} height={540}>
       <Track id="main">
-        <Clip id="shot" src="asset:espresso" in={3} out={7} fit="cover" />
+        <Clip id="shot" src="asset:coffee" in={3} out={7} fit="cover" />
       </Track>
       <Track id="text">
         <Title
@@ -14,9 +14,12 @@ export default function Video() {
           duration={3.4}
           style="h1"
           size={64}
+          width={360}
+          align="left"
+          transform={{ position: { x: -280, y: 190 } }}
           animation={{ preset: "word-by-word" }}
         >
-          Cut by words, not seconds
+          Bloom first
         </Title>
       </Track>
     </Composition>

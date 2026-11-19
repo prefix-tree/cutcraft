@@ -17,7 +17,7 @@ export default function Video() {
           shape="circle"
           width={90}
           height={90}
-          fill="#c8402a"
+          fill="#e8a33d"
           transform={{ position: { x: 360, y: -170 } }}
         />
       </Track>
