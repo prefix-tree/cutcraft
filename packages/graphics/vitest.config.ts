@@ -4,7 +4,7 @@ export default defineConfig({
   test: {
     globals: true,
     // test/browser runs in Chromium: test:browser.
-    include: ["test/*.test.ts"],
+    include: ["test/*.test.ts", "test/*.test.tsx"],
     alias: {
       "@cutcraft/kit/source": new URL("../kit/src/source/index-public.ts", import.meta.url).pathname,
       "@cutcraft/kit": new URL("../kit/src/index.ts", import.meta.url).pathname,

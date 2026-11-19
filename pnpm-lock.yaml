@@ -328,9 +328,6 @@ importers:
       '@types/react':
         specifier: 'catalog:'
         version: 19.3.0
-      '@types/react-dom':
-        specifier: 'catalog:'
-        version: 19.3.0(@types/react@19.3.0)
       '@vitest/coverage-v8':
         specifier: 'catalog:'
         version: 5.0.5(vitest@5.0.5)
@@ -340,9 +337,6 @@ importers:
       react:
         specifier: 'catalog:'
         version: 19.3.1
-      react-dom:
-        specifier: 'catalog:'
-        version: 19.3.1(react@19.3.1)
       tsx:
         specifier: 'catalog:'
         version: 4.23.15
