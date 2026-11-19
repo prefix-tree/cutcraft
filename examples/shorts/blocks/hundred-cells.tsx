@@ -120,7 +120,6 @@ export function HundredCells(props: Partial<HundredCellsProps>) {
     <Board ink={ink}>
       {Array.from({ length: rows }, (_, row) => (
         <Cells
-          // biome-ignore lint/suspicious/noArrayIndexKey: rows are a fixed stack, told apart by their place.
           key={row}
           {...(row === 0 ? { name: "grid" } : {})}
           count={Math.min(p.columns, p.total - row * p.columns)}

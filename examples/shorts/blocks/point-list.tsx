@@ -116,7 +116,6 @@ function Icon({ kind, ink, accent, type }: { kind: IconKind; ink: string; accent
     return (
       <g>
         {[26, 54, 78, 40, 66, 30, 48].map((h, i) => (
-          // biome-ignore lint/suspicious/noArrayIndexKey: the bars are a fixed drawing.
           <rect key={i} x={i * 15} y={40 - h / 2} width={9} height={h} rx={4.5} fill={i === 2 ? accent : ink} />
         ))}
       </g>
