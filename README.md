@@ -125,13 +125,42 @@ $ npx uberscene look video.tsx --out look.png     # a contact sheet of the frame
 
 ## Quick start
 
+### With your agent
+
+1. Install UberScene in your project:
+
+   ```sh
+   npm install uberscene @uberscene/kit react zod
+   ```
+
+2. Give your agent the UberScene skill. In Claude Code:
+
+   ```
+   /plugin marketplace add prefix-tree/uberscene
+   /plugin install uberscene@prefix-tree
+   ```
+
+   For any other agent, write the skill into your project with `npx uberscene skills install` (it goes to
+   `.claude/skills/uberscene`; pass `--dir .agents/skills/uberscene` for another place).
+
+3. Put your footage in the project folder, with a transcript beside each recording (`talk.json` from Whisper, or
+   `talk.srt`), and ask for the video the way you would brief an editor:
+
+   > Make a 30 second vertical clip from talk.mp4 for Reels. Open on the sentence about shipping on Fridays, add
+   > karaoke captions and a lower third with my name, Maya Chen, Founder. Render it to video.mp4.
+
+The agent writes `video.tsx`, checks it with `uberscene inspect` and `uberscene look`, and renders the MP4. Ask for
+changes in words, or open the file in an editor: both change the same file. More in
+[With your agent](https://cutcraft.prefixtree.xyz/guide/agents).
+
+### By hand
+
 ```sh
 npm install uberscene @uberscene/kit react zod
 npx uberscene hello.tsx --out hello.mp4
 ```
 
-The [guide](https://cutcraft.prefixtree.xyz/guide/getting-started) starts with a video that needs no footage. For
-coding agents there is an [Agent Skill](plugins/uberscene): `/plugin marketplace add prefix-tree/uberscene`.
+The [guide](https://cutcraft.prefixtree.xyz/guide/getting-started) starts with a video that needs no footage.
 
 ## Packages
 
