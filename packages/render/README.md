@@ -1,21 +1,21 @@
-<p align="center"><img src="https://raw.githubusercontent.com/prefix-tree/cutcraft/main/docs/public/logo.svg" width="64" alt="CutCraft"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/prefix-tree/uberscene/main/docs/public/logo.svg" width="64" alt="UberScene"></p>
 
-# @cutcraft/render
+# @uberscene/render
 
-Exports a [CutCraft](https://cutcraft.prefixtree.xyz/) video file: MP4 or WebM, an MP3 or WAV soundtrack, or a
+Exports a [UberScene](https://cutcraft.prefixtree.xyz/) video file: MP4 or WebM, an MP3 or WAV soundtrack, or a
 PNG or JPEG still. It runs the real player in headless Chrome, so the exported file matches the preview frame for
-frame. The first export downloads Chrome for Testing into `~/.cache/cutcraft/browsers`; `CUTCRAFT_CHROMIUM` names a
+frame. The first export downloads Chrome for Testing into `~/.cache/uberscene/browsers`; `UBERSCENE_CHROMIUM` names a
 Chrome 153+ to use instead.
 
-For the command line, install [`cutcraft`](https://www.npmjs.com/package/cutcraft). This package is the library behind
+For the command line, install [`uberscene`](https://www.npmjs.com/package/uberscene). This package is the library behind
 it.
 
 ```sh
-npm install @cutcraft/render
+npm install @uberscene/render
 ```
 
 ```ts
-import { directoryResolver, loadVideo, renderVideo } from "@cutcraft/render";
+import { directoryResolver, loadVideo, renderVideo } from "@uberscene/render";
 
 const video = await loadVideo("video.tsx");
 await renderVideo({
@@ -27,7 +27,7 @@ await renderVideo({
 });
 ```
 
-`loadVideo` reads the file the way the editor does: it may import `react`, `zod` and `@cutcraft/kit`, plus the modules
+`loadVideo` reads the file the way the editor does: it may import `react`, `zod` and `@uberscene/kit`, plus the modules
 you list in `imports`. `directoryResolver` finds one file per asset id in a folder.
 
 ## What it does

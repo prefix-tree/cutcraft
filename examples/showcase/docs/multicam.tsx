@@ -1,4 +1,4 @@
-import { Angle, Composition, Cut, Multicam, Title, Track } from "@cutcraft/kit";
+import { Angle, Composition, Cut, Multicam, Title, Track } from "@uberscene/kit";
 
 export default function Video() {
   return (

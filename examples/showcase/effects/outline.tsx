@@ -1,4 +1,4 @@
-import { Clip, Composition, Effect, Keyframe, Title, Track } from "@cutcraft/kit";
+import { Clip, Composition, Effect, Keyframe, Title, Track } from "@uberscene/kit";
 
 // outline: Draws a line around the element's shape.
 export default function Video() {

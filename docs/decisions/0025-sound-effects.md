@@ -11,7 +11,7 @@ loudness target. Every talking-head cut, podcast clip and launch video needs mos
 the rumble, tame the sibilance, even the level), music is ducked and limited, and the whole mix is brought to the
 loudness the platform plays at (about -14 LUFS for YouTube and Spotify, -16 for podcasts, -23 for broadcast). Premiere
 Pro's Essential Sound panel is the reference for what an editor expects to find, and it is the biggest gap between
-CutCraft and a desktop editor's timeline.
+UberScene and a desktop editor's timeline.
 
 Two things about how sound works now decide the design.
 
@@ -30,7 +30,7 @@ Two things about how sound works now decide the design.
 
 ### One DSP implementation, in TypeScript, run in both places
 
-Every sound effect is our own code in `@cutcraft/kit` (`packages/kit/src/sound/`): a pure processor over planar
+Every sound effect is our own code in `@uberscene/kit` (`packages/kit/src/sound/`): a pure processor over planar
 `Float32Array` blocks, `process(state, input, params) → output`, with its state as plain data. The export runs it
 directly in the mixer. The player runs the same module inside an `AudioWorkletProcessor`. Web Audio's effect nodes
 are not used. Sample for sample, the preview and the export run the same arithmetic, which a test checks.
@@ -94,7 +94,7 @@ Times stay in seconds (`attack: 0.01`). The first set:
 
 ### The manifest learns each asset's loudness
 
-`cutcraft add` measures each sound asset with the same BS.1770 code and stores, under `audio.loudness`, its
+`uberscene add` measures each sound asset with the same BS.1770 code and stores, under `audio.loudness`, its
 integrated loudness, true peak and the 100 ms block energies BS.1770 gates over (ten numbers a second per channel).
 From those, the integrated loudness of any range of the asset is exact at block granularity without decoding it
 again. That gives two things:
@@ -155,7 +155,7 @@ Each step is one pull request with its tests, docs and changeset.
 2. **Dynamics.** `compressor`, `limiter` (with true peak), `gate` and `deEsser`. Tests: static curves, attack and
    release times, true-peak detection on intersample peaks.
 3. **Buses.** `<Effect>` on `<Track>`, and the mixer's per-track sums, with ducking reading the processed track.
-4. **Loudness.** BS.1770 in the kit, `audio.loudness` written by `cutcraft add`, `normalize` on clips,
+4. **Loudness.** BS.1770 in the kit, `audio.loudness` written by `uberscene add`, `normalize` on clips,
    `<Composition loudness>` with the two-pass export, and the layout check's loudness line. Tests against EBU Tech 3341.
 5. **Space and presets.** `reverb` and `delay`, then the `VoiceClean`, `MusicBed` and `PodcastMaster` components, with
    demo pages that let the docs play each before and after.

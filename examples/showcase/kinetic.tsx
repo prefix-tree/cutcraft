@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { Captions, Clip, Composition, Layer, Motion, Track } from "@cutcraft/kit";
+import { Captions, Clip, Composition, Layer, Motion, Track } from "@uberscene/kit";
 
 export const schema = z.object({ accent: z.string() });
 export const defaults = { accent: "#e8a33d" };

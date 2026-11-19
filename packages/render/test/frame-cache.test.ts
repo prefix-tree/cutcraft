@@ -24,7 +24,7 @@ const MANIFEST = `export const manifest = { assets: {
 
 /** A two-clip cut: a title over the first clip, an effect on the second, and whatever `more` adds to the text track. */
 const video = (o: { title?: string; out?: number; stops?: number; more?: string; top?: string; fps?: number } = {}) => `
-import { Clip, Composition, Effect, Layer, Title, Track, useLayer } from "@cutcraft/kit";
+import { Clip, Composition, Effect, Layer, Title, Track, useLayer } from "@uberscene/kit";
 ${MANIFEST}
 ${o.top ?? ""}
 export default function Video() {
@@ -110,7 +110,7 @@ describe("frame keys", () => {
     const write = (label: string) =>
       writeFileSync(
         join(dir, "blocks", "count.tsx"),
-        `import { useLayer } from "@cutcraft/kit";\nexport function Count() { const { elapsed } = useLayer(); return <div>${label} {elapsed}</div>; }`,
+        `import { useLayer } from "@uberscene/kit";\nexport function Count() { const { elapsed } = useLayer(); return <div>${label} {elapsed}</div>; }`,
       );
     write("a");
     const before = await keysOf(video({ more: layer, top }), FRAMES);

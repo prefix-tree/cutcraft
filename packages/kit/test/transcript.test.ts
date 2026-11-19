@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { parseTranscript } from "@cutcraft/kit";
+import { parseTranscript } from "@uberscene/kit";
 
 const brief = (text: string, format?: "srt" | "vtt" | "json") =>
   parseTranscript(text, format).words.map((w) => [w.text, w.start, w.end, w.speaker ?? null, w.estimated ?? false]);
@@ -128,7 +128,7 @@ intro
     ]);
   });
 
-  it("passes CutCraft's own word list through, renumbered", () => {
+  it("passes UberScene's own word list through, renumbered", () => {
     const own = JSON.stringify({ words: [{ i: 7, text: "Hi", start: 1, end: 1.2, estimated: true }] });
     expect(parseTranscript(own).words).toEqual([{ i: 0, text: "Hi", start: 1, end: 1.2, estimated: true }]);
   });

@@ -3,7 +3,7 @@
 // with WebGL 2. Passes between the first and the last draw into textures, not the canvas. Where there is no WebGL 2,
 // `available` is false and the painter draws without them.
 
-import type { ShaderStep, ShaderUniform } from "@cutcraft/kit";
+import type { ShaderStep, ShaderUniform } from "@uberscene/kit";
 
 import type { ShaderTexture, ShaderTextures } from "../media/shader-textures";
 import type { ShaderPass, TransitionPass } from "../model/shaders";
@@ -13,13 +13,13 @@ type Gl = WebGL2RenderingContext;
 
 const VERTEX = `#version 300 es
 in vec2 position;
-uniform float cutcraft_flip;
-out vec2 cutcraft_uv;
+uniform float uberscene_flip;
+out vec2 uberscene_uv;
 void main() {
   // uv (0, 0) is the picture's top left, as in CSS.
-  cutcraft_uv = vec2((position.x + 1.0) / 2.0, (1.0 - position.y) / 2.0);
+  uberscene_uv = vec2((position.x + 1.0) / 2.0, (1.0 - position.y) / 2.0);
   // Into a texture, row 0 is the top, the way an uploaded canvas lies, so the next pass reads it the same way up.
-  gl_Position = vec4(position.x, position.y * cutcraft_flip, 0.0, 1.0);
+  gl_Position = vec4(position.x, position.y * uberscene_flip, 0.0, 1.0);
 }`;
 
 /** Names the runner gives every shader; a computed table may not take one. */
@@ -162,13 +162,13 @@ ${inputs}
 uniform vec2 resolution;
 uniform float time;
 ${[...named, ...uniforms].join("\n")}
-in vec2 cutcraft_uv;
-out vec4 cutcraft_out;
+in vec2 uberscene_uv;
+out vec4 uberscene_out;
 #line 1
 ${code}
 void main() {
-  vec4 c = ${kind}(cutcraft_uv);
-  cutcraft_out = ${final ? "vec4(c.rgb * c.a, c.a)" : "c"};
+  vec4 c = ${kind}(uberscene_uv);
+  uberscene_out = ${final ? "vec4(c.rgb * c.a, c.a)" : "c"};
 }`;
 }
 
@@ -527,7 +527,7 @@ export class ShaderRunner {
       gl.bindTexture(kind === "3d" ? gl.TEXTURE_3D : gl.TEXTURE_2D, texture);
       gl.uniform1i(this.location(gl, program, name), unit);
     });
-    gl.uniform1f(this.location(gl, program, "cutcraft_flip"), target ? -1 : 1);
+    gl.uniform1f(this.location(gl, program, "uberscene_flip"), target ? -1 : 1);
     gl.uniform2f(this.location(gl, program, "resolution"), this.width, this.height);
     for (const [name, value] of Object.entries(values)) gl.uniform1f(this.location(gl, program, name), value);
     for (const d of declared) {

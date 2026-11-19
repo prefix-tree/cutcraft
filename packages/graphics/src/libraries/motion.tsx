@@ -7,7 +7,7 @@ import {
 } from "motion/react";
 import { type DependencyList, type ReactNode, type RefObject, useLayoutEffect, useRef } from "react";
 
-import { useLayer } from "@cutcraft/kit";
+import { useLayer } from "@uberscene/kit";
 
 /**
  * Seconds since the layer started, as a Motion value: feed it to `useTransform` and style a `motion` element with

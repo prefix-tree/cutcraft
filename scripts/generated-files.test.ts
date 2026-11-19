@@ -25,7 +25,7 @@ const expected = new Map([
 ]);
 
 function fixture(run: (root: string) => void) {
-  const root = mkdtempSync(join(tmpdir(), "cutcraft-reference-"));
+  const root = mkdtempSync(join(tmpdir(), "uberscene-reference-"));
   try {
     run(root);
   } finally {

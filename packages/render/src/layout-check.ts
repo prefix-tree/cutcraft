@@ -1,5 +1,5 @@
-import { lookupAsset, type ResolvedState, type SubjectBox } from "@cutcraft/kit";
-import { buildSourceIndex, type SourceIndex } from "@cutcraft/kit/source";
+import { lookupAsset, type ResolvedState, type SubjectBox } from "@uberscene/kit";
+import { buildSourceIndex, type SourceIndex } from "@uberscene/kit/source";
 import {
   boundsOf,
   buildFramePlan,
@@ -8,7 +8,7 @@ import {
   type DrawRect,
   FRAME_EPS,
   type MediaResolver,
-} from "@cutcraft/player/engine";
+} from "@uberscene/player/engine";
 
 import type { FontFile } from "./fonts";
 import { type ExportSource, openEngine } from "./renderer";

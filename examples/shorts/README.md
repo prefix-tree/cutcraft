@@ -20,7 +20,7 @@ head cut out of a real interview, with captions and cards timed by the words of 
 Its video and poster in `docs/public/shorts` are made by:
 
 ```sh
-pnpm --filter @cutcraft/example-shorts render
+pnpm --filter @uberscene/example-shorts render
 ```
 
 `one-pixel.tsx` is there as well, [under its own heading](https://cutcraft.prefixtree.xyz/examples#one-pixel).
@@ -31,23 +31,23 @@ pnpm --filter @cutcraft/example-shorts render
 The two animations need no media. The interview reads its clip from `media/`:
 
 ```sh
-npx cutcraft lunar-eclipse.tsx --out out/lunar-eclipse.mp4
+npx uberscene lunar-eclipse.tsx --out out/lunar-eclipse.mp4
 ```
 
 ```sh
-npx cutcraft game-lighting.tsx --out out/game-lighting.mp4
+npx uberscene game-lighting.tsx --out out/game-lighting.mp4
 ```
 
 Look at it without rendering the whole film:
 
 ```sh
-npx cutcraft look game-lighting.tsx --at 1.5,8,12.5,17,21.5,25.5 --out look.png
+npx uberscene look game-lighting.tsx --at 1.5,8,12.5,17,21.5,25.5 --out look.png
 ```
 
 The words and the two wall colours are props, so a variant needs no edit:
 
 ```sh
-npx cutcraft game-lighting.tsx \
+npx uberscene game-lighting.tsx \
   --props '{"hook":"Your favourite game is lying to you.","warmWall":"#7a4fd6","coolWall":"#e0a526"}' \
   --out out/game-lighting-purple.mp4
 ```

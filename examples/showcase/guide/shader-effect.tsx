@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { Clip, Composition, Effect, effect, Keyframe, Track } from "@cutcraft/kit";
+import { Clip, Composition, Effect, effect, Keyframe, Track } from "@uberscene/kit";
 
 // A two-colour tone (the kit has one built in, `duotone`; this is how such an effect is written): each pixel's
 // brightness picks a colour between `dark` and `light`. Colour params arrive in the shader as vec3; `strength` blends

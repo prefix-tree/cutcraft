@@ -1,7 +1,7 @@
 // The export page: the real Player, stepped frame by frame, captured with HTML-in-Canvas (`drawElementImage`) and
 // encoded with WebCodecs. Node serves this page with a job (the cut file's source, its props, its manifest), asks for
 // runs of frames, the soundtrack, or the ink of the overlays at a moment, and reads the bytes back.
-import "@cutcraft/player/fonts.css";
+import "@uberscene/player/fonts.css";
 
 import {
   BufferTarget,
@@ -19,7 +19,7 @@ import { createRef } from "react";
 import { flushSync } from "react-dom";
 import { createRoot } from "react-dom/client";
 
-import { installFreeCodeLibraries } from "@cutcraft/graphics/libraries";
+import { installFreeCodeLibraries } from "@uberscene/graphics/libraries";
 import {
   type AssetManifest,
   collectModule,
@@ -28,10 +28,10 @@ import {
   motionBlurOf,
   resolve,
   shutterTimes,
-} from "@cutcraft/kit";
-import { loadModule } from "@cutcraft/kit/source";
-import { addFontFaces, backdropTracks, Player, type PlayerRef } from "@cutcraft/player";
-import { SETTLE_MS } from "@cutcraft/player/engine";
+} from "@uberscene/kit";
+import { loadModule } from "@uberscene/kit/source";
+import { addFontFaces, backdropTracks, Player, type PlayerRef } from "@uberscene/player";
+import { SETTLE_MS } from "@uberscene/player/engine";
 
 import { measureSound, renderSoundtrack } from "./audio";
 import { createFreeCodeClock } from "./clock";
@@ -50,7 +50,7 @@ import { LISTEN_HEIGHT, TILE_BAND, TILE_GROUND } from "./protocol";
 
 declare global {
   interface Window {
-    __cutcraft?: PageApi;
+    __uberscene?: PageApi;
   }
 }
 
@@ -502,7 +502,7 @@ async function start(): Promise<void> {
       return btoa(s);
     },
   };
-  window.__cutcraft = api;
+  window.__uberscene = api;
 }
 
 /** Pixels a thing may stray past an edge before it counts as outside: the ink scan's own slack. */
@@ -626,6 +626,6 @@ function painted(cap: HTMLCanvasElement): Promise<void> {
 }
 
 start().catch((error: unknown) => {
-  (window as unknown as { __cutcraftError: string }).__cutcraftError =
+  (window as unknown as { __ubersceneError: string }).__ubersceneError =
     error instanceof Error ? (error.stack ?? error.message) : String(error);
 });

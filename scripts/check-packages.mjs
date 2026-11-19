@@ -17,7 +17,7 @@ const PACKAGES = [
 ];
 
 const bin = (name) => join(root, "node_modules", ".bin", name);
-const out = mkdtempSync(join(tmpdir(), "cutcraft-packs-"));
+const out = mkdtempSync(join(tmpdir(), "uberscene-packs-"));
 let failed = false;
 try {
   for (const { dir, attw = [] } of PACKAGES) {
@@ -28,6 +28,15 @@ try {
       out,
       readdirSync(out).find((f) => !before.has(f)),
     );
+    // The CLI's `skills install` writes the skill the render package carries; a build that lost it would ship none.
+    if (dir === "packages/render") {
+      const listed = execFileSync("tar", ["-tzf", tarball], { encoding: "utf8" });
+      if (listed.includes("package/dist/skill/uberscene/SKILL.md")) console.log(`ok    skill   ${dir}`);
+      else {
+        failed = true;
+        console.log(`FAIL  skill   ${dir}: dist/skill/uberscene/SKILL.md is not in the package`);
+      }
+    }
     for (const [tool, args] of [
       ["publint", [tarball, "--strict"]],
       // ESM only: the packages do not ship CommonJS, so node10 and require() resolution are not checked.

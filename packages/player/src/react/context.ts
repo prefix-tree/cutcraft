@@ -1,6 +1,6 @@
 import { createContext } from "react";
 
-import type { LayerClock } from "@cutcraft/kit";
+import type { LayerClock } from "@uberscene/kit";
 
 import type { PlayerCore } from "../player";
 

@@ -1,9 +1,9 @@
 // Renders the shorts shown on the documentation site: a WebM and a poster frame in docs/public/shorts, through the
-// same loader and renderer as `cutcraft`. A file that does not resolve cleanly stops the run.
+// same loader and renderer as `uberscene`. A file that does not resolve cleanly stops the run.
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
 
-import { directoryResolver, loadVideo, renderStill, renderVideo } from "@cutcraft/render";
+import { directoryResolver, loadVideo, renderStill, renderVideo } from "@uberscene/render";
 
 const here = import.meta.dirname;
 const out = join(here, "..", "..", "docs", "public", "shorts");
@@ -23,12 +23,12 @@ const FILES: Record<string, { poster: number; bitrate: number; sound?: boolean }
   "cards/hundred-videos-compare": { poster: 21, bitrate: 1_400_000, sound: true },
 };
 
-/** Names given on the command line render alone: `pnpm --filter @cutcraft/example-shorts render game-lighting`. */
+/** Names given on the command line render alone: `pnpm --filter @uberscene/example-shorts render game-lighting`. */
 const only = process.argv.slice(2);
 
 for (const [name, { poster, bitrate, sound }] of Object.entries(FILES)) {
   if (only.length > 0 && !only.includes(name)) continue;
-  const video = await loadVideo(join(here, `${name}.tsx`), { manifest: join(here, "cutcraft.json") });
+  const video = await loadVideo(join(here, `${name}.tsx`), { manifest: join(here, "uberscene.json") });
   if (video.state.errors.length > 0)
     throw new Error(`${name}: ${video.state.errors.map((e) => `${e.id}: ${e.message}`).join("; ")}`);
   // A card's picture of a short is that short as it was just rendered, in the site's folder.

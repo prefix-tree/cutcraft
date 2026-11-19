@@ -24,4 +24,4 @@ The `podcast` transcript carries a `speaker` per word, which chose each clip's c
 ## What to check
 
 - No lint warnings expected.
-- `npx cutcraft look vertical-podcast.tsx --at 0.3,2.2,6,14`: Ana, Ben, a name tag, a caption with the current word highlighted.
+- `npx uberscene look vertical-podcast.tsx --at 0.3,2.2,6,14`: Ana, Ben, a name tag, a caption with the current word highlighted.

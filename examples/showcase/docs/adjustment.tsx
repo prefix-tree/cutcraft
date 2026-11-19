@@ -1,4 +1,4 @@
-import { Adjustment, Clip, Composition, Effect, Track } from "@cutcraft/kit";
+import { Adjustment, Clip, Composition, Effect, Track } from "@uberscene/kit";
 
 export default function Video() {
   return (

@@ -1,7 +1,7 @@
 import { writeFile } from "node:fs/promises";
 
-import type { ResolvedState } from "@cutcraft/kit";
-import { FRAME_EPS, type MediaResolver } from "@cutcraft/player/engine";
+import type { ResolvedState } from "@uberscene/kit";
+import { FRAME_EPS, type MediaResolver } from "@uberscene/player/engine";
 
 import type { FontFile } from "./fonts";
 import { FrameKeys, readCached, writeCached } from "./frame-cache";

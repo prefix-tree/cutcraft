@@ -1,4 +1,4 @@
-import { Clip, Composition, Effect, Keyframe, Track } from "@cutcraft/kit";
+import { Clip, Composition, Effect, Keyframe, Track } from "@uberscene/kit";
 
 // blur: Softens the picture; the radius is the Gaussian's standard deviation, in pixels.
 export default function Video() {

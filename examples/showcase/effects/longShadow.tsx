@@ -1,4 +1,4 @@
-import { Clip, Composition, Effect, Keyframe, Title, Track } from "@cutcraft/kit";
+import { Clip, Composition, Effect, Keyframe, Title, Track } from "@uberscene/kit";
 
 // longShadow: Extrudes a long, hard shadow from the element's shape.
 export default function Video() {

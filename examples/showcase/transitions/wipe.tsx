@@ -1,4 +1,4 @@
-import { Clip, Composition, Track, Transition } from "@cutcraft/kit";
+import { Clip, Composition, Track, Transition } from "@uberscene/kit";
 
 // wipe: Wipes the next clip over the first, edge first.
 export default function Video() {

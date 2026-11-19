@@ -1,7 +1,7 @@
 # Player
 
-`@cutcraft/player` plays a file in the browser. It is the preview in an editor, and it works as a plain video player
-on a page too. Read this page when you embed CutCraft video in your own app.
+`@uberscene/player` plays a file in the browser. It is the preview in an editor, and it works as a plain video player
+on a page too. Read this page when you embed UberScene video in your own app.
 
 ## Play a file
 
@@ -9,13 +9,13 @@ Install the player with the kit and React, then give `<Player>` the resolved fil
 media:
 
 ```sh
-npm install @cutcraft/player @cutcraft/kit react react-dom
+npm install @uberscene/player @uberscene/kit react react-dom
 ```
 
 ```tsx
-import { collectModule, resolve } from "@cutcraft/kit";
-import { Player } from "@cutcraft/player";
-import "@cutcraft/player/fonts.css";
+import { collectModule, resolve } from "@uberscene/kit";
+import { Player } from "@uberscene/player";
+import "@uberscene/player/fonts.css";
 import * as file from "./video";
 
 const state = resolve(collectModule(file), manifest);
@@ -33,19 +33,19 @@ const state = resolve(collectModule(file), manifest);
 A font the file declares with `font({ src: "asset:brand" })` is looked up in `media` the same way, as `brand`
 ([Fonts](./themes#fonts)). `ref.current.core.fontsReady` resolves once the file's fonts have loaded.
 
-The [API reference](/reference/api#cutcraft-player) lists every prop, method and event.
+The [API reference](/reference/api#uberscene-player) lists every prop, method and event.
 
 ## Files with `<Three>` or `<Motion>`
 
 The player draws these once the page has installed their engines. Call `installFreeCodeLibraries()` from
-`@cutcraft/graphics` once, before the player mounts:
+`@uberscene/graphics` once, before the player mounts:
 
 ```sh
-npm install @cutcraft/graphics   # brings three.js, React Three Fiber and Motion with it
+npm install @uberscene/graphics   # brings three.js, React Three Fiber and Motion with it
 ```
 
 ```tsx
-import { installFreeCodeLibraries } from "@cutcraft/graphics/libraries";
+import { installFreeCodeLibraries } from "@uberscene/graphics/libraries";
 
 installFreeCodeLibraries();
 ```
@@ -54,14 +54,14 @@ Without it those layers stay empty, and the console says which engine is missing
 
 ## A file loaded as text
 
-For a file that arrives at run time (one a model just wrote, say), use `loadModule` from `@cutcraft/kit/source` in
+For a file that arrives at run time (one a model just wrote, say), use `loadModule` from `@uberscene/kit/source` in
 place of the `import`. Pass it what `installFreeCodeLibraries()` returns, so the file may import three.js and Motion
 too:
 
 ```tsx
-import { installFreeCodeLibraries } from "@cutcraft/graphics/libraries";
-import { collectModule, resolve } from "@cutcraft/kit";
-import { loadModule } from "@cutcraft/kit/source";
+import { installFreeCodeLibraries } from "@uberscene/graphics/libraries";
+import { collectModule, resolve } from "@uberscene/kit";
+import { loadModule } from "@uberscene/kit/source";
 
 const imports = installFreeCodeLibraries();
 const file = loadModule(sourceText, { imports });
@@ -98,7 +98,7 @@ way for a test, or an agent, to check a cut: the first frame of each clip and th
 
 ::: warning
 The sheet holds the canvas only. Titles and layers are in the DOM, so they are not on it. For full frames, use
-[`cutcraft look`](./checking#look-at-frames).
+[`uberscene look`](./checking#look-at-frames).
 :::
 
 ## Without React
@@ -126,5 +126,5 @@ What isn't drawn yet is in [What renders](/reference/rendering).
 ## Next
 
 - [Editing](./editing): build an editor around the player.
-- [API reference](/reference/api#cutcraft-player): every prop, method and event.
+- [API reference](/reference/api#uberscene-player): every prop, method and event.
 - [How the export works](./export-architecture): the same player, run headless to write a file.

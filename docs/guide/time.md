@@ -107,7 +107,7 @@ An element that starts after the one it waits for has ended has no length, and t
 
 ## Time by words, shots and pauses {#time-references}
 
-A time can also name a moment in the media: a word of its transcript, a cut between shots, a pause. CutCraft works out
+A time can also name a moment in the media: a word of its transcript, a cut between shots, a pause. UberScene works out
 the seconds from the transcripts and shots in the manifest, and works them out again after every edit, so a cut stays
 on its word when the clip is trimmed or moved.
 

@@ -73,7 +73,7 @@ take them, each as `{ type, duration, easing }`.
 ## Ready-made components
 
 Lower thirds, callouts, badges, counters, progress bars, arrows, highlights, backgrounds and cards come ready-made.
-Each is an ordinary function, imported from `@cutcraft/kit`, that returns the kit's own titles, shapes and SVG. So a
+Each is an ordinary function, imported from `@uberscene/kit`, that returns the kit's own titles, shapes and SVG. So a
 lower third is timed by a word like any title, the theme styles it, and the layout check sees its text.
 
 <Example src="previews/components/lower-third" alt="A lower third on a card, sliding up over the coffee shot">

@@ -15,7 +15,7 @@ function cut(name: string, imports: string, duration = "1"): string {
   writeFileSync(
     file,
     `${imports}
-import { Clip, Composition, Title, Track } from "@cutcraft/kit";
+import { Clip, Composition, Title, Track } from "@uberscene/kit";
 ${MANIFEST}
 export default function Video() {
   return (
@@ -59,7 +59,7 @@ describe("loadVideo", () => {
 });
 
 describe("loadVideo, the file's own modules", () => {
-  const VIDEO = `import { Composition, Layer, Track } from "@cutcraft/kit";
+  const VIDEO = `import { Composition, Layer, Track } from "@uberscene/kit";
 import { Badge } from "./blocks/badge";
 ${MANIFEST}
 export default function Video() {
@@ -94,11 +94,11 @@ export default function Video() {
     );
   });
 
-  it("refuses a module outside the project, the folder of the nearest cutcraft.json", async () => {
+  it("refuses a module outside the project, the folder of the nearest uberscene.json", async () => {
     const outer = mkdtempSync(join(scratch, "own-"));
     const project = join(outer, "project");
     mkdirSync(join(project, "videos"), { recursive: true });
-    writeFileSync(join(project, "cutcraft.json"), JSON.stringify({ assets: {} }));
+    writeFileSync(join(project, "uberscene.json"), JSON.stringify({ assets: {} }));
     writeFileSync(join(project, "shared.tsx"), "export const Badge = () => null;");
     writeFileSync(join(outer, "secret.tsx"), "export const Badge = () => null;");
     // Up a folder, but still inside the project: allowed.

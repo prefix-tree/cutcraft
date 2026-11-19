@@ -132,7 +132,7 @@ export interface BoundsOptions {
   readonly parts?: boolean;
 }
 
-/** `window.__cutcraft` once the page is ready. Byte results stay in the page until `read` takes them. */
+/** `window.__uberscene` once the page is ready. Byte results stay in the page until `read` takes them. */
 export interface PageApi {
   readonly composition: {
     readonly width: number;

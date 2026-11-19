@@ -11,8 +11,8 @@
 // to the same file and folds them once, as a session in the editor does.
 import { describe, expect, it } from "vitest";
 
-import type { ActionInput, ResolvedState } from "@cutcraft/kit";
-import { foldToSource, lint } from "@cutcraft/kit/source";
+import type { ActionInput, ResolvedState } from "@uberscene/kit";
+import { foldToSource, lint } from "@uberscene/kit/source";
 
 import { serialize } from "../helpers";
 import { CORPUS, type CorpusFile, executorFor, resolveText } from "./corpus";

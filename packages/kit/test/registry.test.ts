@@ -11,14 +11,14 @@ import {
   resolve,
   TRANSITION_FAMILIES,
   TRANSITIONS,
-} from "@cutcraft/kit";
-import { loadModule } from "@cutcraft/kit/source";
+} from "@uberscene/kit";
+import { loadModule } from "@uberscene/kit/source";
 
 const manifest = { assets: { city: { id: "city", kind: "video" as const, duration: 10 } } };
 const errorsOf = (effects: string) =>
   resolve(
     collectModule(
-      loadModule(`import { Clip, Composition, Effect, Track } from "@cutcraft/kit";
+      loadModule(`import { Clip, Composition, Effect, Track } from "@uberscene/kit";
 export default function V() { return <Composition fps={30} width={640} height={360}><Track id="t"><Clip id="c" src="asset:city">${effects}</Clip></Track></Composition>; }`) as never,
     ),
     manifest,
@@ -47,7 +47,7 @@ describe("the effect registry", () => {
     ]);
     const state = resolve(
       collectModule(
-        loadModule(`import { Clip, Composition, Effect, Track } from "@cutcraft/kit";
+        loadModule(`import { Clip, Composition, Effect, Track } from "@uberscene/kit";
 export default function V() { return <Composition fps={30} width={640} height={360}><Track id="t"><Clip id="c" src="asset:city"><Effect id="s" type="shadow" /></Clip></Track></Composition>; }`) as never,
       ),
       manifest,
@@ -106,7 +106,7 @@ export default function V() { return <Composition fps={30} width={640} height={3
     const errors = (body: string) =>
       resolve(
         collectModule(
-          loadModule(`import { Clip, ColorGrade, Composition, Effect, Keyframe, Track } from "@cutcraft/kit";
+          loadModule(`import { Clip, ColorGrade, Composition, Effect, Keyframe, Track } from "@uberscene/kit";
 export default function V() { return <Composition fps={30} width={640} height={360}><Track id="t"><Clip id="c" src="asset:city">${body}</Clip></Track></Composition>; }`) as never,
         ),
         manifest,

@@ -1,4 +1,4 @@
-import type { Placement, ResolvedState } from "@cutcraft/kit";
+import type { Placement, ResolvedState } from "@uberscene/kit";
 
 import { captionsContent } from "../../overlays/content";
 

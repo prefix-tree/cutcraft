@@ -100,20 +100,20 @@ jobs:
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
-      - run: pnpm --filter @cutcraft/player exec playwright install --with-deps chromium
-      - run: pnpm --filter @cutcraft/player test:e2e
+      - run: pnpm --filter @uberscene/player exec playwright install --with-deps chromium
+      - run: pnpm --filter @uberscene/player test:e2e
       # The export needs drawElementImage (Chrome 153+); Playwright's pinned Chromium (141) predates it. The export
       # downloads the Chrome for Testing it is tested against, as on a user's machine, once per CHROME_MILESTONE: the
       # key follows chrome.ts, and `browser install` keeps a cached Chrome without asking the network.
       - uses: actions/cache@v6
         with:
-          path: ~/.cache/cutcraft/browsers
-          key: cutcraft-chrome-${{ runner.os }}-${{ hashFiles('packages/render/src/web/chrome.ts') }}
-      - run: pnpm --filter @cutcraft/render exec tsx src/cli.ts browser install
+          path: ~/.cache/uberscene/browsers
+          key: uberscene-chrome-${{ runner.os }}-${{ hashFiles('packages/render/src/web/chrome.ts') }}
+      - run: pnpm --filter @uberscene/render exec tsx src/cli.ts browser install
       # The export: video, sound, stills, smart copy, the layout check, the CLI and the recipes.
-      - run: pnpm --filter @cutcraft/render test:browser
+      - run: pnpm --filter @uberscene/render test:browser
       # Free code on the video's clock: three.js, Motion and CSS animations in the real Player.
-      - run: pnpm --filter @cutcraft/graphics test:browser
+      - run: pnpm --filter @uberscene/graphics test:browser
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
@@ -167,11 +167,11 @@ jobs:
       # The same Chrome as the e2e job, from the same cache.
       - uses: actions/cache@v6
         with:
-          path: ~/.cache/cutcraft/browsers
-          key: cutcraft-chrome-${{ runner.os }}-${{ hashFiles('packages/render/src/web/chrome.ts') }}
-      - run: pnpm --filter @cutcraft/render exec tsx src/cli.ts browser install
-      - run: pnpm --filter @cutcraft/render bench --json bench-results.json | tee bench.md
-      - run: pnpm --filter @cutcraft/render bench --tabs 4 --json bench-results-4.json | tee -a bench.md
+          path: ~/.cache/uberscene/browsers
+          key: uberscene-chrome-${{ runner.os }}-${{ hashFiles('packages/render/src/web/chrome.ts') }}
+      - run: pnpm --filter @uberscene/render exec tsx src/cli.ts browser install
+      - run: pnpm --filter @uberscene/render bench --json bench-results.json | tee bench.md
+      - run: pnpm --filter @uberscene/render bench --tabs 4 --json bench-results-4.json | tee -a bench.md
       - uses: actions/upload-artifact@v4
         with:
           name: render-bench

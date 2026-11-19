@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for looking. CutCraft is small and opinionated; the fastest way to help is a
+Thanks for looking. UberScene is small and opinionated; the fastest way to help is a
 focused pull request with a test.
 
 ## Setup
@@ -17,16 +17,16 @@ focused pull request with a test.
 - The export (`packages/render`) runs the player in headless Chrome. Its tests make their media with the system
   `ffmpeg` (`sudo apt-get install ffmpeg`), which needs the `drawtext` filter (FFmpeg built with libfreetype;
   Homebrew's `ffmpeg` may lack it), and read the exports back with `ffmpeg` and `ffprobe`. `pnpm --filter
-  @cutcraft/render test` runs the parts that need no browser; `test:browser` runs the export itself, in the Chrome for
-  Testing it downloads (or `CUTCRAFT_CHROMIUM`). `bench` measures frames per second.
-- Browser tests: `pnpm --filter @cutcraft/player test:e2e` needs `ffmpeg` on the
+  @uberscene/render test` runs the parts that need no browser; `test:browser` runs the export itself, in the Chrome for
+  Testing it downloads (or `UBERSCENE_CHROMIUM`). `bench` measures frames per second.
+- Browser tests: `pnpm --filter @uberscene/player test:e2e` needs `ffmpeg` on the
   path and Playwright's Chromium (`pnpm exec playwright install --with-deps chromium`
   from `packages/player`). They generate their media on first run.
 - Docs: `pnpm docs:dev` serves the site; `pnpm docs:gen` regenerates the reference pages from the code.
   `pnpm docs:check` recomputes the pages and sidebar in memory and fails on changed, missing, unexpected or
   obsolete generated files, without rewriting them. Run `pnpm docs:test` for its read-only/drift regression tests.
   CI runs both checks; commit regenerated pages alongside the source changes that require them.
-- The example: `pnpm --filter @cutcraft/example-launch-recap gen` then `dev`.
+- The example: `pnpm --filter @uberscene/example-launch-recap gen` then `dev`.
 
 ## Where things live
 
@@ -87,7 +87,7 @@ It needs Pages enabled for the repository with "GitHub Actions" as the source.
 ## Benchmarks
 
 Benchmarks run only on request. `gh workflow run ci.yml` runs the export
-benchmark (`pnpm --filter @cutcraft/render bench`, on one page and on four) on a
+benchmark (`pnpm --filter @uberscene/render bench`, on one page and on four) on a
 4-core runner, with results in the job log and the `render-bench` artifact.
 `gh workflow run docs.yml -f bench=true` measures the landing page's editor
 number again before deploying. Otherwise the site uses the committed

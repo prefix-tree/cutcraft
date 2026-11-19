@@ -1,4 +1,4 @@
-import { backdropTracks, buildFramePlan } from "@cutcraft/player";
+import { backdropTracks, buildFramePlan } from "@uberscene/player";
 
 import { mountPlayer } from "./helpers/react";
 import { makeState } from "./helpers/state";

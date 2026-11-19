@@ -1,4 +1,4 @@
-import { Clip, Composition, Effect, Keyframe, Title, Track } from "@cutcraft/kit";
+import { Clip, Composition, Effect, Keyframe, Title, Track } from "@uberscene/kit";
 
 // bevel: Gives the element's shape a raised, lit edge.
 export default function Video() {

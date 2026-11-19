@@ -25,4 +25,4 @@ The `product` footage and the `logo` image are shared; everything that changes i
 ## What to check
 
 - No lint warnings expected.
-- `npx cutcraft look variants.tsx --at 0.8,7,12.5` per variant: the headline in the brand colour and the theme's heading font, the detail shot, the card.
+- `npx uberscene look variants.tsx --at 0.8,7,12.5` per variant: the headline in the brand colour and the theme's heading font, the detail shot, the card.

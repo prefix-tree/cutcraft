@@ -1,4 +1,4 @@
-import { Clip, Composition, Effect, Track } from "@cutcraft/kit";
+import { Clip, Composition, Effect, Track } from "@uberscene/kit";
 
 // The same two effects in either order. Left: grayscale, then duotone, which maps the grey onto navy and amber.
 // Right: duotone, then grayscale, which takes the colour back out. Effects run in the order the file lists them.

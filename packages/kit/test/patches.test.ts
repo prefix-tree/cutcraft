@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { type CollectedNode, createPatchLog } from "@cutcraft/kit";
+import { type CollectedNode, createPatchLog } from "@uberscene/kit";
 
 const node = (id: string, props: Record<string, unknown> = {}): CollectedNode => ({
   id,

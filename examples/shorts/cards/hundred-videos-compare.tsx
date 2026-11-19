@@ -4,7 +4,7 @@
 
 import { z } from "zod";
 
-import { Clip, Composition, Layer, Track } from "@cutcraft/kit";
+import { Clip, Composition, Layer, Track } from "@uberscene/kit";
 
 export const schema = z.object({
   /** The label over the source. */
@@ -14,7 +14,7 @@ export const schema = z.object({
   /** The colour behind the second label. */
   accent: z.string(),
 });
-export const defaults: z.infer<typeof schema> = { before: "Raw video", after: "CutCraft edit", accent: "#ffd23f" };
+export const defaults: z.infer<typeof schema> = { before: "Raw video", after: "UberScene edit", accent: "#ffd23f" };
 
 // A 4:5 card, the shape a feed post takes.
 const FRAME = { width: 1080, height: 1350 };

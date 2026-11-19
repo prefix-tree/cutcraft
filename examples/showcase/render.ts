@@ -1,10 +1,10 @@
 // Renders each showcase file for the documentation site: a looping WebM and a poster frame in docs/public/showcase,
-// through the same loader and renderer as `cutcraft`. A file that does not resolve cleanly stops the run. The export runs in
+// through the same loader and renderer as `uberscene`. A file that does not resolve cleanly stops the run. The export runs in
 // headless Chrome, downloaded on the first run.
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
 
-import { directoryResolver, loadVideo, renderStill, renderVideo } from "@cutcraft/render";
+import { directoryResolver, loadVideo, renderStill, renderVideo } from "@uberscene/render";
 
 const here = import.meta.dirname;
 const out = join(here, "..", "..", "docs", "public", "showcase");
@@ -24,12 +24,12 @@ const FILES: Record<string, number> = {
 /** Files encoded at a set bitrate instead of the medium preset: the hero loops on the landing page, so it stays small. */
 const BITRATE: Record<string, number> = { hero: 1_500_000 };
 
-/** Names given on the command line render alone: `pnpm --filter @cutcraft/example-showcase render hero`. */
+/** Names given on the command line render alone: `pnpm --filter @uberscene/example-showcase render hero`. */
 const only = process.argv.slice(2);
 
 for (const [name, poster] of Object.entries(FILES)) {
   if (only.length > 0 && !only.includes(name)) continue;
-  const video = await loadVideo(join(here, `${name}.tsx`), { manifest: join(here, "cutcraft.json") });
+  const video = await loadVideo(join(here, `${name}.tsx`), { manifest: join(here, "uberscene.json") });
   if (video.state.errors.length > 0)
     throw new Error(`${name}: ${video.state.errors.map((e) => `${e.id}: ${e.message}`).join("; ")}`);
   const media = directoryResolver(join(here, "media"), video.manifest);

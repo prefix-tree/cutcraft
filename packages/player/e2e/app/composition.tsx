@@ -1,4 +1,4 @@
-import { type AssetManifest, Audio, Clip, Composition, Layer, Title, Track, Transition, useT } from "@cutcraft/kit";
+import { type AssetManifest, Audio, Clip, Composition, Layer, Title, Track, Transition, useT } from "@uberscene/kit";
 
 export const manifest: AssetManifest = {
   assets: {

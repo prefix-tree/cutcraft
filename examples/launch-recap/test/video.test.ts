@@ -1,14 +1,14 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-import { type AssetManifest, collectModule, Executor, resolve } from "@cutcraft/kit";
-import { buildSourceIndex, foldToSource, lint } from "@cutcraft/kit/source";
+import { type AssetManifest, collectModule, Executor, resolve } from "@uberscene/kit";
+import { buildSourceIndex, foldToSource, lint } from "@uberscene/kit/source";
 
 import * as file from "../video";
 
 const root = join(import.meta.dirname, "..");
 const text = readFileSync(join(root, "video.tsx"), "utf8");
-const manifest = JSON.parse(readFileSync(join(root, "cutcraft.json"), "utf8")) as AssetManifest;
+const manifest = JSON.parse(readFileSync(join(root, "uberscene.json"), "utf8")) as AssetManifest;
 
 describe("the launch recap file", () => {
   const tree = collectModule(file);

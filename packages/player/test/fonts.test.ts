@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { DeclaredFont } from "@cutcraft/kit";
+import type { DeclaredFont } from "@uberscene/kit";
 
 import { fromMap, loadFileFonts } from "../src/media";
 

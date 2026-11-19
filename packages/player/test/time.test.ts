@@ -1,5 +1,5 @@
-import { rampAdvance, rampInverse, speedKeysOf } from "@cutcraft/kit";
-import { frameIndex, frameTime, layerClock, localT, placementSourceTime, timecode } from "@cutcraft/player";
+import { rampAdvance, rampInverse, speedKeysOf } from "@uberscene/kit";
+import { frameIndex, frameTime, layerClock, localT, placementSourceTime, timecode } from "@uberscene/player";
 
 import { childrenOf, fixtureState, makeState } from "./helpers/state";
 

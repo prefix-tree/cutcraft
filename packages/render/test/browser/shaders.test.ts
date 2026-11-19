@@ -1,5 +1,5 @@
 // Effects and transitions a file declares (effect, transition), drawn by the browser export with WebGL.
-// Needs a Chrome or Chromium 153+ in CUTCRAFT_CHROMIUM.
+// Needs a Chrome or Chromium 153+ in UBERSCENE_CHROMIUM.
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -38,7 +38,7 @@ async function colourAt(
   writeFileSync(
     file,
     `import { z } from "zod";
-import { Adjustment, Clip, Composition, effect, transition, Effect, Keyframe, Layer, Motion, Title, Track, Transition } from "@cutcraft/kit";
+import { Adjustment, Clip, Composition, effect, transition, Effect, Keyframe, Layer, Motion, Title, Track, Transition } from "@uberscene/kit";
 export const manifest = ${JSON.stringify(manifest)};
 ${declarations}
 export default function Video() {
@@ -680,7 +680,7 @@ describe("shader transitions", () => {
     const probe = join(dir, `${name}-probe.tsx`);
     writeFileSync(
       probe,
-      `import { Clip, Composition, Track, Transition } from "@cutcraft/kit";
+      `import { Clip, Composition, Track, Transition } from "@uberscene/kit";
 export const manifest = ${JSON.stringify(mediaManifest)};
 export default function Video() { return <Composition fps={30} width={320} height={180}>${body}</Composition>; }`,
     );
@@ -830,7 +830,7 @@ const square = effect({ name: "square", shader: "vec4 effect(vec2 uv) { vec4 c =
     const probe = join(dir, "order-probe.tsx");
     writeFileSync(
       probe,
-      `import { Clip, Composition, Effect, Track, Transition } from "@cutcraft/kit";
+      `import { Clip, Composition, Effect, Track, Transition } from "@uberscene/kit";
 export const manifest = ${JSON.stringify(mediaManifest)};
 export default function Video() { return <Composition fps={30} width={320} height={180}>${body}</Composition>; }`,
     );
@@ -873,7 +873,7 @@ it("blends two clips with a declared transition", async () => {
   const file = join(dir, "probe.tsx");
   writeFileSync(
     file,
-    `import { Clip, Composition, transition, Track, Transition } from "@cutcraft/kit";
+    `import { Clip, Composition, transition, Track, Transition } from "@uberscene/kit";
 export const manifest = ${JSON.stringify(mediaManifest)};
 ${declarations}
 export default function Video() { return <Composition fps={30} width={320} height={180}>${body}</Composition>; }`,

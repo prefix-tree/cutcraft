@@ -1,4 +1,4 @@
-import { Clip, Composition, Effect, Keyframe, Title, Track } from "@cutcraft/kit";
+import { Clip, Composition, Effect, Keyframe, Title, Track } from "@uberscene/kit";
 
 // glow: Lights a halo around the bright parts.
 export default function Video() {

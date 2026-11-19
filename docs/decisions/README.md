@@ -1,11 +1,11 @@
 # Decision records
 
-Why CutCraft is built the way it is, one decision per file, in the order they were
+Why UberScene is built the way it is, one decision per file, in the order they were
 made. A record is never edited to say something else; a change of mind adds a
 new record that supersedes the old one. [Core principles](../guide/principles.md)
 sums them up.
 
-CutCraft was called cutcut when the early records were written, and a few still
+UberScene was called cutcut when the early records were written, and a few still
 use that name.
 
 | | Decision |
@@ -36,3 +36,4 @@ use that name.
 | [0026](./0026-an-agent-looks-at-the-timeline.md) | An agent looks at the timeline: inspect, look, and a frame cache (proposed) |
 | [0027](./0027-what-we-adopt-from-hyperframes.md) | What we adopt from HyperFrames (proposed) |
 | [0028](./0028-tools-for-narrated-explainers.md) | Tools for narrated explainers: a narration helper, motion and placement in the CLI, pinned labels, diagram parts, `study` (proposed) |
+| [0029](./0029-one-hook-for-libraries-that-seek.md) | One hook for libraries that seek: `useSeekable` |

@@ -1,4 +1,4 @@
-import { Clip, Composition, Motion, Track } from "@cutcraft/kit";
+import { Clip, Composition, Motion, Track } from "@uberscene/kit";
 
 // A puck that crosses the frame in under a second and comes back: each exported frame averages
 // 8 moments across a half-frame shutter, so it smears the way a film camera would.

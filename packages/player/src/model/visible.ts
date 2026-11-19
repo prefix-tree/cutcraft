@@ -1,4 +1,4 @@
-import { capabilitiesOf, type Placement, type ResolvedState, type ResolvedTrack } from "@cutcraft/kit";
+import { capabilitiesOf, type Placement, type ResolvedState, type ResolvedTrack } from "@uberscene/kit";
 
 import { ease } from "./keyframes";
 

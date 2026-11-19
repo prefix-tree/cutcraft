@@ -1,6 +1,6 @@
 import type { ReactElement, ReactNode } from "react";
 
-import * as kit from "@cutcraft/kit";
+import * as kit from "@uberscene/kit";
 
 /** Each kit element by the name the kit exports it as. */
 const NAMES = new Map<unknown, string>(Object.entries(kit).map(([name, value]) => [value, name]));
@@ -30,5 +30,5 @@ export function toSource(root: ReactElement): string {
     return inner ? `<${name}${attrs}>${inner}</${name}>` : `<${name}${attrs} />`;
   };
   const body = write(root);
-  return `import { ${[...used].sort().join(", ")} } from "@cutcraft/kit";\n\nexport default function Video() {\n  return ${body};\n}\n`;
+  return `import { ${[...used].sort().join(", ")} } from "@uberscene/kit";\n\nexport default function Video() {\n  return ${body};\n}\n`;
 }

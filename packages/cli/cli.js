@@ -1,2 +1,2 @@
 #!/usr/bin/env node
-import "@cutcraft/render/cli";
+import "@uberscene/render/cli";

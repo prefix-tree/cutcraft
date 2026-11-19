@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { gaussScale, gaussSources, gaussSteps } from "@cutcraft/kit";
+import { gaussScale, gaussSources, gaussSteps } from "@uberscene/kit";
 
 describe("the shared Gaussian", () => {
   it("draws a blur of 4 px or more at half size, and of 8 px or more at a quarter", () => {

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { type AssetManifest, collectModule, planCues, resolve, subtitles, type TimelineWord } from "@cutcraft/kit";
-import { loadModule } from "@cutcraft/kit/source";
+import { type AssetManifest, collectModule, planCues, resolve, subtitles, type TimelineWord } from "@uberscene/kit";
+import { loadModule } from "@uberscene/kit/source";
 
 const words = ["Small", "software", "deserves", "a", "real", "cloud.", "It", "should", "be", "cheap."];
 const manifest: AssetManifest = {
@@ -21,7 +21,7 @@ const manifest: AssetManifest = {
 const stateOf = (captions: string, clip = `in={0} out={10}`) =>
   resolve(
     collectModule(
-      loadModule(`import { Caption, Captions, Clip, Composition, Track } from "@cutcraft/kit";
+      loadModule(`import { Caption, Captions, Clip, Composition, Track } from "@uberscene/kit";
 export default function Video() {
   return (
     <Composition fps={30} width={640} height={360}>

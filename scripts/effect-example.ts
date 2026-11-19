@@ -330,7 +330,7 @@ export function effectExample(name: keyof typeof EFFECTS): string {
     "Track",
   ];
   return [
-    `import { ${imports.join(", ")} } from "@cutcraft/kit";`,
+    `import { ${imports.join(", ")} } from "@uberscene/kit";`,
     "",
     `// ${name}: ${demo.text.replace(/`/g, "")}`,
     "export default function Video() {",
@@ -347,7 +347,7 @@ export function effectExample(name: keyof typeof EFFECTS): string {
 /** The whole file a built-in transition's demo renders: the close-up into the wide shot, at the transition's defaults. */
 export function transitionExample(name: keyof typeof TRANSITIONS): string {
   return [
-    'import { Clip, Composition, Track, Transition } from "@cutcraft/kit";',
+    'import { Clip, Composition, Track, Transition } from "@uberscene/kit";',
     "",
     `// ${name}: ${TRANSITION_TEXT[name]}`,
     "export default function Video() {",

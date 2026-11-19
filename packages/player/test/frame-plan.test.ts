@@ -1,5 +1,5 @@
-import type { ResolvedState } from "@cutcraft/kit";
-import { buildFramePlan, captureWarnings, visiblePlacements } from "@cutcraft/player";
+import type { ResolvedState } from "@uberscene/kit";
+import { buildFramePlan, captureWarnings, visiblePlacements } from "@uberscene/player";
 
 import { overlayLayout } from "../src/overlays/layout";
 import { fixtureState, makeState } from "./helpers/state";

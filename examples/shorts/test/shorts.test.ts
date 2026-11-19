@@ -4,11 +4,11 @@ import { join } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
-import { type AssetManifest, collectModule, narrate, resolve } from "@cutcraft/kit";
-import { lint, loadModule } from "@cutcraft/kit/source";
+import { type AssetManifest, collectModule, narrate, resolve } from "@uberscene/kit";
+import { lint, loadModule } from "@uberscene/kit/source";
 
 const root = join(import.meta.dirname, "..");
-const manifest = JSON.parse(readFileSync(join(root, "cutcraft.json"), "utf8")) as AssetManifest;
+const manifest = JSON.parse(readFileSync(join(root, "uberscene.json"), "utf8")) as AssetManifest;
 const FILES = readdirSync(root).filter((f) => f.endsWith(".tsx"));
 
 describe.each(FILES)("%s", (name) => {

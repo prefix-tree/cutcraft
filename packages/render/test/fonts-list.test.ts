@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { collectModule, FONT_CATALOG, findFont, resolve } from "@cutcraft/kit";
-import { loadModule } from "@cutcraft/kit/source";
+import { collectModule, FONT_CATALOG, findFont, resolve } from "@uberscene/kit";
+import { loadModule } from "@uberscene/kit/source";
 
 import { formatFonts, listFonts, sheetSource } from "../src/fonts-list";
 
-describe("cutcraft fonts", () => {
+describe("uberscene fonts", () => {
   it("lists the whole catalogue, or the families for a role, a category or both", () => {
     expect(listFonts()).toHaveLength(FONT_CATALOG.length);
     expect(listFonts({ category: "condensed" }).map((f) => f.family)).toContain("Anton");

@@ -2,12 +2,12 @@
 
 The functions, components and options you call from code: the player in the browser, the export you drive from Node, and the kit entry points both build on.
 
-## @cutcraft/player
+## @uberscene/player
 
 ```tsx
-import { Player, type PlayerRef } from "@cutcraft/player";
-import "@cutcraft/player/fonts.css";
-import { collectModule, resolve } from "@cutcraft/kit";
+import { Player, type PlayerRef } from "@uberscene/player";
+import "@uberscene/player/fonts.css";
+import { collectModule, resolve } from "@uberscene/kit";
 import * as file from "./video";
 
 const state = resolve(collectModule(file), manifest);
@@ -22,7 +22,7 @@ const ref = useRef<PlayerRef>(null);
 />;
 ```
 
-Import `@cutcraft/player/fonts.css` once in the app. It loads the bundled font families, so the preview sets text in the same faces as the export.
+Import `@uberscene/player/fonts.css` once in the app. It loads the bundled font families, so the preview sets text in the same faces as the export.
 
 ### `<Player>` props
 
@@ -91,7 +91,7 @@ Inside a file, use the kit's `useT()` and `useLayer()` instead. A mounted `<Play
 The player without React. `<Player>` is a thin wrapper over it.
 
 ```ts
-import { PlayerCore } from "@cutcraft/player";
+import { PlayerCore } from "@uberscene/player";
 
 const core = new PlayerCore({ state, media: { founder: blob } });
 core.attachCanvas(canvas);
@@ -166,12 +166,12 @@ type MediaHandle =
 
 A map passed as `media` is turned into a resolver that answers a string with `url` and a Blob with `blob`, and rejects an id it does not hold.
 
-## @cutcraft/render
+## @uberscene/render
 
 Renders a file to a video, a soundtrack, a still image or a layout report, from Node, through the player in headless Chrome.
 
 ```ts
-import { directoryResolver, loadVideo, renderVideo } from "@cutcraft/render";
+import { directoryResolver, loadVideo, renderVideo } from "@uberscene/render";
 
 const video = await loadVideo("video.tsx");
 const result = await renderVideo({
@@ -217,7 +217,7 @@ Finds each asset's file in `dir`: `<dir>/<id>` with no extension or with one of 
 
 Renders the composition to a file in headless Chrome: the real player draws each frame, and the browser encodes the
 pictures and the soundtrack. Node joins the pieces into the file. The first call downloads Chrome for Testing unless
-one is cached or `CUTCRAFT_CHROMIUM` names one (`findChrome`, `installChrome`).
+one is cached or `UBERSCENE_CHROMIUM` names one (`findChrome`, `installChrome`).
 
 | Option | Type | Default | |
 |---|---|---|---|
@@ -323,10 +323,10 @@ Samples the composition in the export page, drawing each overlay alone to measur
 ### addAsset
 
 ```ts
-const { entry, manifest } = await addAsset("media/talk.mp4", { manifest: "cutcraft.json" });
+const { entry, manifest } = await addAsset("media/talk.mp4", { manifest: "uberscene.json" });
 ```
 
-What `cutcraft add` does: probes the media (kind, duration, fps, size, sound), reads the transcript beside it
+What `uberscene add` does: probes the media (kind, duration, fps, size, sound), reads the transcript beside it
 (`talk.json`, `talk.vtt`, `talk.srt`) or `transcript`, and writes the entry into the manifest. Options: `manifest`,
 `id`, `transcript`. The result also has `transcript` (the file read), `estimated` and `warnings`.
 
@@ -341,11 +341,11 @@ What `cutcraft add` does: probes the media (kind, duration, fps, size, sound), r
 
 Plumbing for the CLI and other packages: `mixBlock`, `mixPlan`, `envelopeAt`, `loadFonts`, `subjectRects`.
 
-## @cutcraft/kit
+## @uberscene/kit
 
 The kit has no DOM. It turns a file into a resolved state, edits it with actions, and writes edits back to the text. See [Editing](/guide/editing) for how these fit together and [Actions](/reference/actions) for every action.
 
-From `@cutcraft/kit`:
+From `@uberscene/kit`:
 
 | Export | Signature | |
 |---|---|---|
@@ -354,6 +354,7 @@ From `@cutcraft/kit`:
 | `Executor` | `new Executor({ tree, manifest, log?, history? })` | Runs actions: `execute(input)`, `undo()`, `redo()`, `state()`, `log()`, `history()`, `beginGroup()`, `endGroup()`, `replaceTree(tree)`. |
 | `useT` | `() => number` | Progress through the enclosing `<Layer>`, 0 to 1. Needs a mounted player. |
 | `useLayer` | `() => LayerClock` | The layer's clock: `t`, `elapsed`, `remaining`, `duration`, `time`, `fps`. Needs a mounted player. |
+| `useSeekable` | `(create: (scope) => Seekable, deps?) => RefObject` | Plays an animation from another library (GSAP, Anime.js, Lottie) on the layer's clock: built once on the ref's element, seeked to the layer's seconds every frame, reverted when the layer ends. Needs a mounted player. |
 | `interpolate` | `(input, inputRange, outputRange, options?: { easing?, extrapolateLeft?, extrapolateRight? }) => number` | Piecewise map from one range onto another. Extends past the ends unless `"clamp"`. |
 | `spring` | `({ time, from?, to?, mass?, damping?, stiffness?, overshootClamping? }) => number` | A physical spring at `time` seconds. Defaults: `from` 0, `to` 1, mass 1, damping 10, stiffness 100. |
 | `DrawnLine`, `Label`, `CountUp`, `Cells` | React components | Parts for drawing a diagram inside a `<Layer>`: a line that draws itself, a word with a line to what it names, a number that counts, a row of cells. Each renders SVG and happens `at` a second of the video, or `after` so many seconds of its layer, taking `over` seconds ([Diagram parts](/guide/free-code#diagram-parts)). |
@@ -371,15 +372,15 @@ From `@cutcraft/kit`:
 | `parseCube` | `(text: string) => { size, domainMin, domainMax, data, title? }` | Reads a 3D `.cube` LUT; throws naming the line that is wrong ([A look from a LUT](/guide/colour#a-look-from-a-lut)). |
 | `font` | `({ family, src: "asset:<id>", weight?, style? }) => FontRef` | Declares a face from a font file and returns it as a value that stands for its family wherever a string goes ([Fonts](/guide/themes#fonts)). The faces a file uses or exports are on `state.fonts`. |
 | `googleFont` | `(family, { weights?, styles? }?) => FontRef` | Declares a Google Fonts family, one face per weight and style, and returns it as a value that stands for its family. The export downloads it once into a local cache. |
-| `FONT_CATALOG`, `findFont`, `fontsFor`, `nearestFont` | `readonly CatalogFont[]`, `(family) => CatalogFont \| undefined`, `({ role?, category? }?) => CatalogFont[]`, `(family) => CatalogFont \| undefined` | The fonts to choose from: the bundled families and a short list from Google Fonts, each with its category, the roles it suits, a line on how it looks, what it pairs with, and its weights. What `cutcraft fonts` prints and what a font picker lists; `nearestFont` finds the family a misspelt name meant ([Choosing a font](/guide/themes#choosing-a-font)). |
+| `FONT_CATALOG`, `findFont`, `fontsFor`, `nearestFont` | `readonly CatalogFont[]`, `(family) => CatalogFont \| undefined`, `({ role?, category? }?) => CatalogFont[]`, `(family) => CatalogFont \| undefined` | The fonts to choose from: the bundled families and a short list from Google Fonts, each with its category, the roles it suits, a line on how it looks, what it pairs with, and its weights. What `uberscene fonts` prints and what a font picker lists; `nearestFont` finds the family a misspelt name meant ([Choosing a font](/guide/themes#choosing-a-font)). |
 | `THEMES`, `THEME_NAMES`, `MOTIONS`, `MOTION_NAMES` | registries | The built-in themes (`midnight`, `paper`, `neon`, `pastel`, `mono`, `bold`) and motion styles a file's `theme` can name or extend ([Themes](/guide/themes)). |
 | `LowerThird`, `Callout`, `Counter`, `TypeCard`, `QuoteCard`, `Frame`, … and `COMPONENTS` | `(props) => element` | The ready-made components, and the registry the [components reference](/reference/components/) is generated from. |
 
-From `@cutcraft/kit/source`:
+From `@uberscene/kit/source`:
 
 | Export | Signature | |
 |---|---|---|
-| `loadModule` | `(source: string, options?: { imports?, scope?, files? }) => CutModule` | Evaluates a file's text. It may import `react`, `zod` and `@cutcraft/kit`, plus `imports`, and its own modules from `files` (path from the file's folder to text). |
+| `loadModule` | `(source: string, options?: { imports?, scope?, files? }) => CutModule` | Evaluates a file's text. It may import `react`, `zod` and `@uberscene/kit`, plus `imports`, and its own modules from `files` (path from the file's folder to text). |
 | `gatherLocalFiles` | `(source: string, read: (path) => string \| undefined, options?: { name?, imports? }) => Record<string, string>` | The texts of the modules a file imports by `./` or `../`, and of the ones they import, read through `read` (which may throw to refuse a path). Pass the result to `loadModule` as `files`. |
 | `lint` | `(text: string, options?: { manifest?, rules? }) => Diagnostic[]` | Static checks that keep a file editable. Each `Diagnostic` has `rule`, `severity`, `message`, `range`, and `id` and `prop` when known. |
 | `foldToSource` | `(text: string, log: PatchLog, state: ResolvedState, maxRounds?: number) => FoldResult` | Writes the patch log's net effect back into the text. `FoldResult` has `text`, `edits`, `baked` and `skipped`. |

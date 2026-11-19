@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { builtInShader, collectModule, resolve } from "@cutcraft/kit";
-import { loadModule } from "@cutcraft/kit/source";
+import { builtInShader, collectModule, resolve } from "@uberscene/kit";
+import { loadModule } from "@uberscene/kit/source";
 
 const stateOf = (effects: string) =>
   resolve(
     collectModule(
-      loadModule(`import { Composition, Effect, Title, Track } from "@cutcraft/kit";
+      loadModule(`import { Composition, Effect, Title, Track } from "@uberscene/kit";
 export default function V() { return <Composition fps={30} width={640} height={360}><Track id="t" layout="free"><Title id="h" start={0} duration={2}>Hi${effects}</Title></Track></Composition>; }`) as never,
     ),
     { assets: {} },

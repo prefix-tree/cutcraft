@@ -27,7 +27,7 @@
       "ignoreDependencies": ["@fontsource/.+"]
     },
     "packages/render": {
-      "entry": ["bench/**/*.{ts,tsx}"],
+      "entry": ["bench/**/*.{ts,tsx}", "scripts/*.mjs"],
       // Vite pre-bundles zod for the export page (src/web/server.ts), which loads cut files that import it.
       "ignoreDependencies": ["zod"]
     },

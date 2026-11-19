@@ -1,5 +1,5 @@
 {
-  "name": "@cutcraft/render",
+  "name": "@uberscene/render",
   "version": "0.4.0",
   "description": "The export: a cut file to MP4, WebM, MP3 or WAV, drawn by the real player in headless Chrome.",
   "keywords": [
@@ -18,11 +18,11 @@
   "homepage": "https://cutcraft.prefixtree.xyz/",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/prefix-tree/cutcraft.git",
+    "url": "git+https://github.com/prefix-tree/uberscene.git",
     "directory": "packages/render"
   },
   "bugs": {
-    "url": "https://github.com/prefix-tree/cutcraft/issues"
+    "url": "https://github.com/prefix-tree/uberscene/issues"
   },
   "type": "module",
   "engines": {
@@ -43,7 +43,7 @@
     }
   },
   "scripts": {
-    "build": "tsdown src/index.ts src/cli.ts --dts && vite build -c src/web/vite.config.ts",
+    "build": "tsdown src/index.ts src/cli.ts --dts && vite build -c src/web/vite.config.ts && node scripts/copy-skill.mjs",
     "prepack": "pnpm run build",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run",
@@ -51,9 +51,9 @@
     "test:browser": "vitest run -c vitest.browser.config.ts"
   },
   "dependencies": {
-    "@cutcraft/graphics": "workspace:*",
-    "@cutcraft/kit": "workspace:*",
-    "@cutcraft/player": "workspace:*",
+    "@uberscene/graphics": "workspace:*",
+    "@uberscene/kit": "workspace:*",
+    "@uberscene/player": "workspace:*",
     "@mediabunny/aac-encoder": "1.65.2",
     "@mediabunny/mp3-encoder": "1.65.2",
     "@puppeteer/browsers": "^3.2.6",

@@ -1,5 +1,5 @@
-import { collectModule, createPatchLog, resolve } from "@cutcraft/kit";
-import { type ElementCellProps, sameElement, visiblePlacements } from "@cutcraft/player";
+import { collectModule, createPatchLog, resolve } from "@uberscene/kit";
+import { type ElementCellProps, sameElement, visiblePlacements } from "@uberscene/player";
 
 import * as sample from "../../kit/fixtures/sample";
 import { fixtureManifest } from "./helpers/state";

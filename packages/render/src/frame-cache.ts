@@ -1,13 +1,13 @@
 // Frames on disk, keyed by what draws them. A frame's key is a hash of everything that decides its pixels: the
 // elements on screen at that time with their resolved props, the media files they read, the composition's settings,
-// the fonts, and the version of CutCraft and of Chrome. A frame an edit did not touch keeps its key, so it is read
+// the fonts, and the version of UberScene and of Chrome. A frame an edit did not touch keeps its key, so it is read
 // from disk instead of drawn again; a frame it did touch gets a new key, and the old file is simply never read.
 import { createHash } from "node:crypto";
 import { mkdirSync, readFileSync, renameSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
-import { motionBlurOf, type Placement, type ResolvedState, shutterTimes } from "@cutcraft/kit";
-import type { MediaResolver } from "@cutcraft/player/engine";
+import { motionBlurOf, type Placement, type ResolvedState, shutterTimes } from "@uberscene/kit";
+import type { MediaResolver } from "@uberscene/player/engine";
 
 import type { FontFile } from "./fonts";
 import type { ExportSource } from "./renderer";
@@ -118,7 +118,7 @@ export class FrameKeys {
       {
         format: CACHE_FORMAT,
         version: VERSION,
-        chrome: [CHROME_MILESTONE, source.executablePath ?? process.env.CUTCRAFT_CHROMIUM ?? ""],
+        chrome: [CHROME_MILESTONE, source.executablePath ?? process.env.UBERSCENE_CHROMIUM ?? ""],
         // Not the duration: a cut that grows at its end leaves the frames before it as they were.
         composition: {
           id: state.composition.id,

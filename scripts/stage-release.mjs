@@ -47,7 +47,7 @@ function stageRelease() {
     return;
   }
 
-  const out = mkdtempSync(join(tmpdir(), "cutcraft-stage-"));
+  const out = mkdtempSync(join(tmpdir(), "uberscene-stage-"));
   try {
     for (const pkg of pending) {
       const cwd = join(root, pkg.dir);

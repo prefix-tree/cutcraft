@@ -1,4 +1,4 @@
-import type { FitMode, Placement, Transform } from "@cutcraft/kit";
+import type { FitMode, Placement, Transform } from "@uberscene/kit";
 
 import { keyframedValue } from "./keyframes";
 

@@ -1,5 +1,5 @@
 // Fonts in the browser export: the faces the file declares and the ones passed beside it (`--font`) are read in Node
-// and set in the page before it draws a frame. Needs a Chrome or Chromium 153+ in CUTCRAFT_CHROMIUM.
+// and set in the page before it draws a frame. Needs a Chrome or Chromium 153+ in UBERSCENE_CHROMIUM.
 import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { join } from "node:path";
@@ -37,7 +37,7 @@ async function width(
   const file = join(dir, `${name}.tsx`);
   writeFileSync(
     file,
-    `import { Composition, font, Title, Track } from "@cutcraft/kit";
+    `import { Composition, font, Title, Track } from "@uberscene/kit";
 export const manifest = { assets: {} };
 const brand = ${brand};
 const START = ${start};
@@ -93,11 +93,11 @@ it("sets a bundled face in a still of text that appears after the first frame", 
 describe("fontSheet", () => {
   it("draws the bundled families as one image, a cell each, without the network", async () => {
     const { fontSheet } = await import("../../src/fonts-list");
-    const { fontsFor } = await import("@cutcraft/kit");
+    const { fontsFor } = await import("@uberscene/kit");
     const { mkdtempSync, readFileSync, rmSync } = await import("node:fs");
     const { tmpdir } = await import("node:os");
     const { join } = await import("node:path");
-    const dir = mkdtempSync(join(tmpdir(), "cutcraft-sheet-"));
+    const dir = mkdtempSync(join(tmpdir(), "uberscene-sheet-"));
     try {
       const out = join(dir, "fonts.png");
       const bundled = fontsFor().filter((f) => f.source === "bundled");

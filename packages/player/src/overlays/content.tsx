@@ -3,7 +3,7 @@
 
 import { Children, type CSSProperties, cloneElement, isValidElement, type ReactNode } from "react";
 
-import { fontFamily, type Placement, TEXT_ANIMATION_PRESETS } from "@cutcraft/kit";
+import { fontFamily, type Placement, TEXT_ANIMATION_PRESETS } from "@uberscene/kit";
 
 import { isVisibleAt } from "../model/visible";
 import { devWarn } from "../warn";

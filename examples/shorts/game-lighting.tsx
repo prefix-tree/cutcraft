@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { Caption, Captions, Composition, Effect, Keyframe, Layer, Three, Track, useLayer } from "@cutcraft/kit";
+import { Caption, Captions, Composition, Effect, Keyframe, Layer, Three, Track, useLayer } from "@uberscene/kit";
 
 // What a person may change without touching the film: the words, and the two wall colours the bounce light picks up.
 export const schema = z.object({

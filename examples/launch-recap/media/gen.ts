@@ -3,7 +3,7 @@ import { existsSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
 
 /**
- * Placeholder footage matching `cutcraft.json`, generated once with ffmpeg
+ * Placeholder footage matching `uberscene.json`, generated once with ffmpeg
  * into `public/`. Swap in real files with the same names (or edit the
  * manifest) and nothing in `video.tsx` changes.
  */

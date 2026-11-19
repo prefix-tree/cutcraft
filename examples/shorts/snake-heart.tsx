@@ -11,7 +11,7 @@ import {
   stepAt,
   Track,
   useLayer,
-} from "@cutcraft/kit";
+} from "@uberscene/kit";
 
 // "Snake heart": a game of snake played on a wall of Chinese characters. The snake eats the characters of one
 // phrase, over and over, and each one joins its body. Every character of the wall changes on its own, each at its

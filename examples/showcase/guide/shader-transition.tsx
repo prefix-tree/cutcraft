@@ -1,4 +1,4 @@
-import { Clip, Composition, Track, Transition, transition } from "@cutcraft/kit";
+import { Clip, Composition, Track, Transition, transition } from "@uberscene/kit";
 
 // The incoming clip opens as a circle from the centre of the frame. (The built-in `iris` does this and more; this shows
 // how a transition of your own is written.)

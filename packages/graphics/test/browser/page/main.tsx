@@ -1,13 +1,15 @@
-// A Player with free code in three Layers: a three.js scene, a Motion timeline and a CSS animation. The test seeks it.
+// A Player with free code in Layers: a three.js scene, a Motion timeline, an Anime.js timeline and CSS animations.
+// The test seeks it.
 
 import { useFrame } from "@react-three/fiber";
+import { createTimeline } from "animejs";
 import { motion, useTransform } from "motion/react";
 import { createRef, useEffect, useRef } from "react";
 import { createRoot } from "react-dom/client";
 import type { Mesh, MeshBasicMaterial } from "three";
 
-import { Composition, collect, Layer, Motion, resolve, Three, Track, useLayer } from "@cutcraft/kit";
-import { Player, type PlayerRef } from "@cutcraft/player";
+import { Composition, collect, Layer, Motion, resolve, Three, Track, useLayer, useSeekable } from "@uberscene/kit";
+import { Player, type PlayerRef } from "@uberscene/player";
 
 import { installFreeCodeLibraries } from "../../../src/libraries";
 import { useLayerTime, useTimeline } from "../../../src/libraries/motion";
@@ -53,6 +55,27 @@ function Timeline() {
       <motion.div
         id="motion-value"
         style={{ position: "absolute", top: 60, width: 50, height: 50, background: "#0f0", x }}
+      />
+    </div>
+  );
+}
+
+/** An Anime.js timeline, paused and seeked by the kit's hook: opacity 0 to 1 over two seconds. */
+function Anime() {
+  const ref = useSeekable((el) => {
+    const tl = createTimeline({ autoplay: false }).add(el.firstElementChild!, {
+      opacity: [0, 1],
+      duration: 2000,
+      ease: "linear",
+    });
+    // Anime.js counts milliseconds.
+    return { seek: (s: number) => tl.seek(s * 1000), revert: () => tl.revert() };
+  });
+  return (
+    <div ref={ref}>
+      <div
+        id="anime-box"
+        style={{ position: "absolute", top: 120, left: 60, width: 50, height: 50, background: "#f80" }}
       />
     </div>
   );
@@ -127,6 +150,9 @@ const element = (
       </Layer>
       <Layer id="motion" start={0} duration={4}>
         <Timeline />
+      </Layer>
+      <Layer id="anime" start={0} duration={4}>
+        <Anime />
       </Layer>
       <Layer id="css" start={0} duration={4}>
         <Keyframes />

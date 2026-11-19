@@ -1,4 +1,4 @@
-# @cutcraft/render
+# @uberscene/render
 
 ## 0.4.0
 

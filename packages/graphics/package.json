@@ -1,7 +1,7 @@
 {
-  "name": "@cutcraft/graphics",
+  "name": "@uberscene/graphics",
   "version": "0.4.0",
-  "description": "Free-code libraries for CutCraft: three.js, React Three Fiber and Motion on the video's clock, for <Three> and <Motion>.",
+  "description": "Free-code libraries for UberScene: three.js, React Three Fiber and Motion on the video's clock, for <Three> and <Motion>.",
   "keywords": [
     "video",
     "video-editing",
@@ -18,11 +18,11 @@
   "homepage": "https://cutcraft.prefixtree.xyz/",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/prefix-tree/cutcraft.git",
+    "url": "git+https://github.com/prefix-tree/uberscene.git",
     "directory": "packages/graphics"
   },
   "bugs": {
-    "url": "https://github.com/prefix-tree/cutcraft/issues"
+    "url": "https://github.com/prefix-tree/uberscene/issues"
   },
   "type": "module",
   "sideEffects": false,
@@ -52,12 +52,12 @@
     "test:browser": "vitest run -c vitest.browser.config.ts"
   },
   "peerDependencies": {
-    "@cutcraft/kit": "workspace:*",
+    "@uberscene/kit": "workspace:*",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
   "peerDependenciesMeta": {
-    "@cutcraft/kit": {
+    "@uberscene/kit": {
       "optional": true
     },
     "react": {
@@ -73,8 +73,8 @@
     "three": "0.180.0"
   },
   "devDependencies": {
-    "@cutcraft/kit": "workspace:*",
-    "@cutcraft/player": "workspace:*",
+    "@uberscene/kit": "workspace:*",
+    "@uberscene/player": "workspace:*",
     "@playwright/test": "catalog:",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
@@ -82,6 +82,7 @@
     "@types/three": "0.180.0",
     "@vitejs/plugin-react": "catalog:",
     "@vitest/coverage-v8": "catalog:",
+    "animejs": "4.4.1",
     "jsdom": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",

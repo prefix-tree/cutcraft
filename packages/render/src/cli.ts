@@ -2,7 +2,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { parseArgs } from "node:util";
 
-import { MOMENT_FORMS, subtitles } from "@cutcraft/kit";
+import { MOMENT_FORMS, subtitles } from "@uberscene/kit";
 
 import { addAsset, describeAdded } from "./add";
 import { QUALITIES, type QualityName, type VideoCodec } from "./encoding";
@@ -15,6 +15,7 @@ import { renderLook } from "./look";
 import { mediaFolders } from "./manifest-file";
 import { directoryResolver } from "./media";
 import { draftPath, renderVideo } from "./renderer";
+import { installSkill } from "./skills";
 import { renderStill } from "./still";
 import { CHROME_MILESTONE, cachedChrome, installChrome } from "./web/chrome";
 import { formatWhere, whereThings } from "./where";
@@ -22,21 +23,22 @@ import { formatWhere, whereThings } from "./where";
 /** --check-layout found issues: apart from 1 (an error) and 2 (usage), so a script can tell them apart. */
 const EXIT_LAYOUT_ISSUES = 3;
 
-const USAGE = `Usage: cutcraft <file.tsx> --out <video.mp4|.webm|.mp3|.wav> [--draft] [options]
-       cutcraft <file.tsx> --still <seconds> --out <image.png|.jpg> [options]
-       cutcraft <file.tsx> --check-layout [--safe-zone <zone>] [--subject <x,y,w,h>] [--json] [options]
-       cutcraft <file.tsx> --srt <captions.srt> | --vtt <captions.vtt> [--from <s> --to <s>]
-       cutcraft inspect <file.tsx> [--at <moments>] [--json] [--manifest <file>] [--props <json>]
-       cutcraft look <file.tsx> [--at <moments> | --around <id>] [--without <id>] [--listen <stretch>]
+const USAGE = `Usage: uberscene <file.tsx> --out <video.mp4|.webm|.mp3|.wav> [--draft] [options]
+       uberscene <file.tsx> --still <seconds> --out <image.png|.jpg> [options]
+       uberscene <file.tsx> --check-layout [--safe-zone <zone>] [--subject <x,y,w,h>] [--json] [options]
+       uberscene <file.tsx> --srt <captions.srt> | --vtt <captions.vtt> [--from <s> --to <s>]
+       uberscene inspect <file.tsx> [--at <moments>] [--json] [--manifest <file>] [--props <json>]
+       uberscene look <file.tsx> [--at <moments> | --around <id>] [--without <id>] [--listen <stretch>]
                     [--zones <zone>] [--out look.png] [options]
-       cutcraft look <file.tsx> --motion <stretch> [--step <s>] [--listen <stretch>] [--out look.png] [options]
-       cutcraft where <file.tsx> --at <moments> [--safe-zone <zone>] [--json] [options]
-       cutcraft fonts [--for <role>] [--category <category>] [--sheet fonts.png [--text <words>]] [--json]
-       cutcraft add <media file>... [--manifest <file>] [--id <id>] [--transcript <file>]
-       cutcraft browser install
+       uberscene look <file.tsx> --motion <stretch> [--step <s>] [--listen <stretch>] [--out look.png] [options]
+       uberscene where <file.tsx> --at <moments> [--safe-zone <zone>] [--json] [options]
+       uberscene fonts [--for <role>] [--category <category>] [--sheet fonts.png [--text <words>]] [--json]
+       uberscene add <media file>... [--manifest <file>] [--id <id>] [--transcript <file>]
+       uberscene browser install
+       uberscene skills install [--dir <folder>] [--force]
 
   Every export draws its frames in Chrome. The first one downloads Chrome for Testing ${CHROME_MILESTONE} into
-  ~/.cache/cutcraft/browsers (or CUTCRAFT_BROWSER_CACHE); CUTCRAFT_CHROMIUM names a Chrome 153+ to use instead.
+  ~/.cache/uberscene/browsers (or UBERSCENE_BROWSER_CACHE); UBERSCENE_CHROMIUM names a Chrome 153+ to use instead.
 
   inspect               print the timeline as text, without a browser: each track and element with its seconds,
                         the words each clip plays, effects, keyframes and cuts; --json prints flat rows instead
@@ -61,7 +63,7 @@ const USAGE = `Usage: cutcraft <file.tsx> --out <video.mp4|.webm|.mp3|.wav> [--d
                         a portrait video)
   --columns <n>         (look) cells in a row (default up to 4, up to 12 in a --motion strip)
   --frames <dir>        (look) also write each cell's full frame there as PNG
-  --no-cache            (look, --still) draw every frame again. Without it, frames are kept in .cutcraft/cache
+  --no-cache            (look, --still) draw every frame again. Without it, frames are kept in .uberscene/cache
                         beside the file, keyed by what draws them, and a frame an edit did not touch is read from
                         there without starting a browser
   fonts                 list the fonts to choose from: the bundled families and a short list from Google Fonts,
@@ -72,7 +74,10 @@ const USAGE = `Usage: cutcraft <file.tsx> --out <video.mp4|.webm|.mp3|.wav> [--d
                         heaviest weight and its regular one. The first time, Google's are downloaded into the
                         font cache
   --text <words>        (fonts --sheet) the words to set; default "Make It Move 2026"
-  add                   write each media file's entry into the manifest (default: the nearest cutcraft.json): its
+  skills install        write the agent skill that ships with this CLI into .claude/skills/uberscene (or --dir
+                        <folder>), so the agent learns this version's commands. Again after an upgrade, it replaces
+                        the folder it wrote; a folder with edits, or one it did not write, wants --force
+  add                   write each media file's entry into the manifest (default: the nearest uberscene.json): its
                         kind, length, size, frame rate and sound, read from the file, and its words from the
                         transcript beside it (talk.json from Whisper or ElevenLabs, talk.vtt or talk.srt)
   --id <id>             (add) the asset id; default the file name without its extension
@@ -96,7 +101,7 @@ const USAGE = `Usage: cutcraft <file.tsx> --out <video.mp4|.webm|.mp3|.wav> [--d
   --step <s>            seconds between layout samples (default: every frame), or between the frames of a
                         --motion strip
   --manifest <file>     asset manifest JSON (default: the file's \`manifest\` export, then the nearest
-                        cutcraft.json from the file's folder upward)
+                        uberscene.json from the file's folder upward)
   --media <dir>         folder holding one file per asset id (default: the file's folder, the manifest's,
                         then media/ beside the manifest)
   --props <json>        props for the file's component
@@ -167,9 +172,26 @@ async function main(): Promise<number> {
       frames: { type: "string" },
       "no-cache": { type: "boolean" },
       listen: { type: "string" },
+      dir: { type: "string" },
+      force: { type: "boolean" },
     },
   });
   if (positionals[0] === "add") return add(positionals.slice(1), values);
+  if (positionals[0] === "skills") {
+    if (positionals[1] !== "install" || positionals.length > 2) {
+      process.stderr.write(USAGE);
+      return 2;
+    }
+    const result = installSkill({
+      ...(values.dir === undefined ? {} : { dir: values.dir }),
+      ...(values.force ? { force: true } : {}),
+    });
+    const from = result.previous && result.previous !== result.version ? ` (was ${result.previous})` : "";
+    process.stderr.write(
+      `the UberScene skill ${result.version}${from} → ${result.dir} (${result.files.length} files)\n`,
+    );
+    return 0;
+  }
   const limit = values["frame-timeout"] === undefined ? undefined : Number(values["frame-timeout"]);
   if (limit !== undefined && !(limit > 0))
     throw new Error(`--frame-timeout wants seconds above 0, got "${values["frame-timeout"]}"`);
@@ -423,7 +445,7 @@ function readSubject(spec: string): { x: number; y: number; w: number; h: number
 const mediaIn = (given: string | undefined, video: string, manifestPath: string | undefined): string[] =>
   given === undefined ? mediaFolders(dirname(resolve(video)), manifestPath) : [resolve(given)];
 
-/** `cutcraft add <media>...`: one manifest entry per file. */
+/** `uberscene add <media>...`: one manifest entry per file. */
 async function add(
   files: readonly string[],
   values: { manifest?: string | undefined; id?: string | undefined; transcript?: string | undefined },
@@ -446,9 +468,9 @@ async function add(
   return 0;
 }
 
-/** Where a file's frames are kept: `.cutcraft/cache` beside it. */
+/** Where a file's frames are kept: `.uberscene/cache` beside it. */
 function cacheDirOf(file: string): string {
-  return join(dirname(resolve(file)), ".cutcraft", "cache");
+  return join(dirname(resolve(file)), ".uberscene", "cache");
 }
 
 function readFont(spec: string): FontFile {

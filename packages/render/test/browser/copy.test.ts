@@ -12,7 +12,7 @@ const scratch = join(import.meta.dirname, "..", ".tmp", "copy");
 let dir = "";
 
 function source(body: string, comp = "fps={30} width={640} height={360}"): string {
-  return `import { Clip, Composition, Title, Track } from "@cutcraft/kit";
+  return `import { Clip, Composition, Title, Track } from "@uberscene/kit";
 export const manifest = ${JSON.stringify(manifest)};
 export default function Video() {
   return (

@@ -42,9 +42,9 @@
             "groups": [
               ":NODE:",
               ":BLANK_LINE:",
-              [":PACKAGE:", "!@cutcraft/**"],
+              [":PACKAGE:", "!@uberscene/**"],
               ":BLANK_LINE:",
-              "@cutcraft/**",
+              "@uberscene/**",
               ":BLANK_LINE:",
               ":PATH:"
             ]
@@ -95,7 +95,7 @@
         "useMathMinMax": "off"
       },
       "a11y": {
-        // `role` is a CutCraft prop on `<Track>` and friends ("music", "voice"), not an ARIA role.
+        // `role` is a UberScene prop on `<Track>` and friends ("music", "voice"), not an ARIA role.
         "useValidAriaRole": "off"
       }
     }

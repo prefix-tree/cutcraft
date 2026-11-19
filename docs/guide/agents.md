@@ -1,7 +1,7 @@
 # With your agent
 
-CutCraft was built for a model to write: a cut names words and shots instead of seconds, every element has an id a
-tool can find, and the command line checks the file like a compiler. The **CutCraft skill** puts all of that in front
+UberScene was built for a model to write: a cut names words and shots instead of seconds, every element has an id a
+tool can find, and the command line checks the file like a compiler. The **UberScene skill** puts all of that in front
 of your coding agent, so you can ask for a video in plain words and get a file, stills and a render back.
 
 ## Install it
@@ -9,27 +9,37 @@ of your coding agent, so you can ask for a video in plain words and get a file, 
 **In Claude Code**, add the repository as a plugin marketplace, then install the plugin:
 
 ```
-/plugin marketplace add prefix-tree/cutcraft
-/plugin install cutcraft@prefix-tree
+/plugin marketplace add prefix-tree/uberscene
+/plugin install uberscene@prefix-tree
 ```
 
-**In another agent**, or in Claude Code without the plugin, copy the skill's folder,
-[`plugins/cutcraft/skills/cutcraft`](https://github.com/prefix-tree/cutcraft/tree/main/plugins/cutcraft/skills/cutcraft),
-to where the agent reads skills: for Claude Code that is `.claude/skills/cutcraft/` in a project, or
-`~/.claude/skills/cutcraft/` for all of them. It follows the open [Agent Skills](https://agentskills.io) format: one
-`SKILL.md` and the reference files it links.
-
-The skill's first step installs CutCraft in the project:
+**From the command line**, in your project, write the skill that comes with the installed CLI:
 
 ```sh
-npm install cutcraft @cutcraft/kit react zod
+npx uberscene skills install                          # into .claude/skills/uberscene
+npx uberscene skills install --dir .agents/skills/uberscene
+```
+
+This skill always matches the CLI you have, so it never teaches a command your version lacks. Run it again after
+upgrading UberScene: it replaces the folder it wrote, and keeps a folder you have edited unless you add `--force`.
+
+**In another agent**, or in Claude Code without the plugin, you can also copy the skill's folder,
+[`plugins/uberscene/skills/uberscene`](https://github.com/prefix-tree/uberscene/tree/main/plugins/uberscene/skills/uberscene),
+to where the agent reads skills: for Claude Code that is `.claude/skills/uberscene/` in a project, or
+`~/.claude/skills/uberscene/` for all of them. It follows the open [Agent Skills](https://agentskills.io) format: one
+`SKILL.md` and the reference files it links.
+
+The skill's first step installs UberScene in the project:
+
+```sh
+npm install uberscene @uberscene/kit react zod
 ```
 
 ## What it teaches
 
-- **The loop.** Add the media to the manifest with `cutcraft add` (transcripts included), write `video.tsx`, read
-  the timeline back with `cutcraft inspect`, check it with `--check-layout`, look at a sheet of its frames with
-  `cutcraft look`, then render with `--out`, and with `--props` for variants.
+- **The loop.** Add the media to the manifest with `uberscene add` (transcripts included), write `video.tsx`, read
+  the timeline back with `uberscene inspect`, check it with `--check-layout`, look at a sheet of its frames with
+  `uberscene look`, then render with `--out`, and with `--props` for variants.
 - **The file.** Its shape, `schema` and `defaults`, and the rules an editor relies on: literal ids, cuts on words and
   shots, anchors, transitions between clips, captions that follow the clips.
 - **The look.** A theme first, tokens instead of literal colours, presets for text, the ready-made components, effects
@@ -38,12 +48,12 @@ npm install cutcraft @cutcraft/kit react zod
   checklist before handing over.
 
 Its reference files, every element, effect, transition and component with its props, and what renders, are generated
-from CutCraft's code, so they match the version on the main branch.
+from UberScene's code, so they match the version on the main branch.
 
 ## How the agent looks at a cut
 
 An agent cannot watch a video, so it checks a cut the way a person skims one: it reads the timeline back as text with
-`cutcraft inspect`, looks at sheets of frames with `cutcraft look`, and runs the layout check. Each takes seconds, and
+`uberscene inspect`, looks at sheets of frames with `uberscene look`, and runs the layout check. Each takes seconds, and
 looking again after an edit redraws only the frames that changed, so it can look after every step.
 
 [![A contact sheet of ten frames of a cut: each clip's first frame, both sides and the middle of two transitions, and each title, with its time, frame and name under it](/reference/look.jpg)](/reference/look.jpg)

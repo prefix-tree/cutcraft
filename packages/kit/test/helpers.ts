@@ -8,8 +8,8 @@ import {
   Executor,
   type ResolvedState,
   resolve,
-} from "@cutcraft/kit";
-import { buildSourceIndex } from "@cutcraft/kit/source";
+} from "@uberscene/kit";
+import { buildSourceIndex } from "@uberscene/kit/source";
 
 import * as sample from "../fixtures/sample";
 

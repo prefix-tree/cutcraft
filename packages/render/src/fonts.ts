@@ -3,8 +3,8 @@ import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
 
-import type { DeclaredFont } from "@cutcraft/kit";
-import type { MediaResolver } from "@cutcraft/player/engine";
+import type { DeclaredFont } from "@uberscene/kit";
+import type { MediaResolver } from "@uberscene/player/engine";
 
 export type FontWeight = 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900;
 
@@ -17,7 +17,7 @@ export interface FontFile {
 }
 
 export interface FontOptions {
-  /** Where Google Fonts files are kept once downloaded; default `CUTCRAFT_FONT_CACHE`, then `~/.cache/cutcraft/fonts`. */
+  /** Where Google Fonts files are kept once downloaded; default `UBERSCENE_FONT_CACHE`, then `~/.cache/uberscene/fonts`. */
   readonly cacheDir?: string;
   /** For tests: what downloads from Google. */
   readonly fetch?: typeof fetch;
@@ -60,7 +60,7 @@ export function googleCssUrl(face: Pick<DeclaredFont, "family" | "weight" | "sty
 }
 
 async function googleBytes(face: DeclaredFont, options: FontOptions): Promise<Buffer> {
-  const dir = options.cacheDir ?? process.env.CUTCRAFT_FONT_CACHE ?? join(homedir(), ".cache", "cutcraft", "fonts");
+  const dir = options.cacheDir ?? process.env.UBERSCENE_FONT_CACHE ?? join(homedir(), ".cache", "uberscene", "fonts");
   const file = join(dir, `${face.family.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}-${face.weight}-${face.style}.ttf`);
   if (existsSync(file)) return readFile(file);
   const get = options.fetch ?? fetch;
