@@ -47,6 +47,8 @@ export function overlay(tree: CollectedTree, log: PatchLog | undefined): Collect
     const kept: CollectedNode[] = [];
     for (const child of node.children) {
       if (movedAway.has(child.id)) continue;
+      // Back inside a node the log inserted: it is drawn there, not at its place in the source.
+      if (net.get(child.id)?.within !== undefined && tree.byId.get(child.id) === child) continue;
       const built = rebuild(child, node.id);
       if (built) kept.push(built);
     }
