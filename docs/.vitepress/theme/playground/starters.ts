@@ -1,5 +1,6 @@
 // The playground's starter files. Each uses only the coffee clip in docs/public/playground, so every one plays in the
-// browser with nothing else to download. aurora and product stay for links shared before the starters moved to coffee.
+// browser with nothing else to download. aurora and product stay for links shared before the starters moved to coffee;
+// their files are now cut from the espresso and red cup clips, so every picture here is coffee footage.
 
 export interface Starter {
   readonly name: string;
@@ -31,7 +32,7 @@ export default function Video() {
       </Track>
       <Track id="over" layout="free">
         <LowerThird id="name" anchor="product" offset={0.3} duration={2.2}
-          name="Shed Coffee" role="Roasted on Friday" x={-250} y={170} width={400} />
+          name="Halvard Coffee" role="Roasted on Monday" x={-250} y={170} width={400} />
       </Track>
     </Composition>
   );
@@ -51,7 +52,7 @@ export default function Video() {
         <Clip id="shot" src="asset:coffee" in={0} out={4} fit="cover" />
       </Track>
       <Track id="over" layout="free">
-        <LowerThird id="lt" start={0.3} duration={3.7} name="Maya Chen" role="Head roaster, Shed Coffee" x={-330} y={220} width={540} />
+        <LowerThird id="lt" start={0.3} duration={3.7} name="Maya Chen" role="Head roaster, Halvard" x={-330} y={220} width={540} />
         <Badge id="new" start={1} duration={3} text="Live" x={480} y={-260} />
       </Track>
     </Composition>

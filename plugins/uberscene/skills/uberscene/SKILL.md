@@ -139,7 +139,7 @@ export const schema = z.object({
   product: z.string().describe("Product name in the title"),
   who: z.string().describe("Name on the lower third"),
 });
-export const defaults = { product: "Shed", who: "Maya Chen" };
+export const defaults = { product: "Halvard", who: "Maya Chen" };
 
 export default function Video({ product, who }: z.infer<typeof schema>) {
   return (

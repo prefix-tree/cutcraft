@@ -1426,6 +1426,8 @@ body {
 .home.vp-doc h1.home-title {
   font-family: var(--cc-display);
   font-weight: 900;
+  /* Beside the spec sheet the title has about 0.6 of the width, so it scales with that, not the window: the longest
+     word must fit on one line. Kept small enough that the agent picker sits on a laptop's first screen. */
   font-size: clamp(52px, 7vw, 108px);
   line-height: 0.82;
   letter-spacing: 0;
@@ -1531,11 +1533,63 @@ body {
   transform: rotate(-6deg);
 }
 @media (max-width: 960px) {
+  .vp-doc .home-title,
+  .home.vp-doc h1.home-title {
+    font-size: clamp(64px, 11vw, 168px);
+  }
   .home-hero-grid {
     grid-template-columns: minmax(0, 1fr);
   }
   .home-spec {
     max-width: 520px;
+  }
+}
+
+/* Hero sheet: the coffee film as `look` draws it, framed like a plate, full width under the headline and the spec. */
+.vp-doc figure.home-sheet {
+  width: 100%;
+  margin: 48px 0 0;
+}
+.home-sheet > a {
+  display: block;
+  border: var(--cc-line-heavy);
+  box-shadow: var(--cc-hard);
+  margin: 0 8px 8px 0;
+  background: #16161d;
+  line-height: 0;
+}
+.home-sheet img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.home-sheet figcaption {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 16px;
+  margin-top: 14px;
+  font-size: 14px;
+  color: var(--cc-ink-2);
+}
+.home-sheet figcaption code {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  font-family: var(--cc-mono);
+  font-size: 13px;
+}
+.home-sheet figcaption a {
+  color: var(--cc-accent);
+  font-weight: 600;
+  white-space: nowrap;
+}
+@media (max-width: 640px) {
+  .vp-doc figure.home-sheet {
+    margin-top: 32px;
+  }
+  .home-sheet > a {
+    box-shadow: var(--cc-hard-sm);
+    margin: 0 4px 4px 0;
   }
 }
 

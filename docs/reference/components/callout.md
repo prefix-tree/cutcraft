@@ -12,7 +12,7 @@ A note in a box, with a line drawn to what it is about.
 
 </Example>
 
-The coffee footage is Pixabay videos [209419](https://pixabay.com/videos/id-209419/) and [209424](https://pixabay.com/videos/id-209424/), under the Pixabay Content License.
+The coffee footage is Pixabay videos [209419](https://pixabay.com/videos/id-209419/), [209424](https://pixabay.com/videos/id-209424/), [46989](https://pixabay.com/videos/id-46989/) and [251](https://pixabay.com/videos/id-251/), under the Pixabay Content License. The maker of the machine in the red cup shot has nothing to do with this project.
 
 ## Props
 
@@ -27,5 +27,6 @@ Besides the timing props (`start`, `anchor`, `at`, `offset`, `duration`):
 | `width` | number (> 0) | `420` | The box's width in pixels. |
 | `to` | { x, y } |  | What it points at; without it, the box stands alone. |
 | `color` | string | `"$accent"` | The colour of the box's border, the line and its dot. |
+| `size` | number (> 0) | `30` | The note's size in pixels; the box's height grows with it. |
 
 [All components](/reference/components/)

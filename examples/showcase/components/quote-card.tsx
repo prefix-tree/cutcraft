@@ -3,7 +3,12 @@ import { Background, Composition, QuoteCard, Track } from "@uberscene/kit";
 // QuoteCard: a passage with its source, and a marker that sweeps across the phrases that matter.
 export default function Video() {
   return (
-    <Composition fps={30} width={1920} height={1080} theme={{ extends: "paper" }}>
+    <Composition
+      fps={30}
+      width={1920}
+      height={1080}
+      theme={{ extends: "paper", palette: { primary: "#e8a33d", accent: "#e8a33d" } }}
+    >
       <Track id="back" layout="free">
         <Background id="bg" start={0} duration={3} variant="dots" />
       </Track>

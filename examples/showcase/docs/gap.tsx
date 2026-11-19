@@ -6,7 +6,7 @@ export default function Video() {
       <Track id="main">
         <Clip id="a" src="asset:coffee" in={0} out={1.5} fit="cover" />
         <Gap id="pause" duration={1} />
-        <Clip id="b" src="asset:coffee" in={5} out={6.5} fit="cover" />
+        <Clip id="b" src="asset:espresso" in={26} out={27.5} fit="cover" />
       </Track>
     </Composition>
   );

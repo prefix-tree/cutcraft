@@ -284,6 +284,9 @@ function elementPage(name: string, summary: string): string {
       "",
       "</Example>",
       "",
+      ...(showsStock(readFileSync(join(root, "examples", "showcase", "docs", `${ex}.tsx`), "utf8"))
+        ? [STOCK_CREDIT, ""]
+        : []),
     );
   else if (CODE_ONLY[name]) lines.push("```tsx", CODE_ONLY[name], "```", "");
   if (name in ENGINE_LAYERS) lines.push(ENGINE_NOTE, "");
@@ -339,9 +342,13 @@ function paramsTable(schema: z.ZodType, table: string): string[] {
   ];
 }
 
-/** The footage a demo shows that is not ours (the coffee close-up and wide shot), credited under it. */
+/** The footage a demo shows that is not ours (four stock coffee clips and the shots cut from them), credited under it. */
 const STOCK_CREDIT =
-  "The coffee footage is Pixabay videos [209419](https://pixabay.com/videos/id-209419/) and [209424](https://pixabay.com/videos/id-209424/), under the Pixabay Content License.";
+  "The coffee footage is Pixabay videos [209419](https://pixabay.com/videos/id-209419/), [209424](https://pixabay.com/videos/id-209424/), [46989](https://pixabay.com/videos/id-46989/) and [251](https://pixabay.com/videos/id-251/), under the Pixabay Content License. The maker of the machine in the red cup shot has nothing to do with this project.";
+
+/** Whether a demo's file shows footage: one of the stock clips, or a shot the showcase cuts from them. */
+const showsStock = (text: string): boolean =>
+  /asset:(coffee|coffeeWide|espresso|redCup|founder|analyst|product|speaker|greenscreen)"/.test(text);
 
 /** A component's page and file name: `LowerThird` is `lower-third`. */
 const kebab = (name: string): string => name.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase();
@@ -367,7 +374,7 @@ function componentsIndex(): string {
     "A component is an ordinary function that returns the kit's own elements: titles, shapes, SVG, and a layer where something moves every frame. So it behaves like the elements it is made of.",
     "",
     "```tsx",
-    '<LowerThird id="name" start={0.5} duration={4} name="Maya Chen" role="Founder, Shed" />',
+    '<LowerThird id="name" start={0.5} duration={4} name="Maya Chen" role="Head roaster, Halvard" />',
     "```",
     "",
     "| Part | How it works |",
@@ -400,7 +407,7 @@ function componentPage(name: keyof typeof COMPONENTS): string {
     "",
     "</Example>",
     "",
-    ...(readFileSync(join(root, "examples", "showcase", "components", `${file}.tsx`), "utf8").includes("asset:coffee")
+    ...(showsStock(readFileSync(join(root, "examples", "showcase", "components", `${file}.tsx`), "utf8"))
       ? [STOCK_CREDIT, ""]
       : []),
     "## Props",
@@ -510,7 +517,7 @@ function effectPage(name: keyof typeof EFFECTS): string {
     "",
     "</Example>",
     "",
-    ...(/asset:coffee/.test(effectExample(name)) ? [STOCK_CREDIT, ""] : []),
+    ...(showsStock(effectExample(name)) ? [STOCK_CREDIT, ""] : []),
     "## Params",
     "",
     `Drawn as ${DRAWN[e.draw.kind]}${fallback}.`,

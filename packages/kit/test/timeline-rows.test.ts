@@ -41,9 +41,9 @@ describe("the timeline as rows", () => {
       out: 10.8,
       speed: 1,
     });
-    expect(row("title")).toMatchObject({ kind: "title", text: "Shed", anchor: "start", offset: 0.4, start: 0.4 });
+    expect(row("title")).toMatchObject({ kind: "title", text: "Halvard", anchor: "start", offset: 0.4, start: 0.4 });
     expect(row("x1")).toMatchObject({ kind: "transition", type: "crossfade", from: "hook", to: "broll" });
-    expect(row("cap-2")).toMatchObject({ kind: "caption", parent: "captions", text: "It should take one file." });
+    expect(row("cap-2")).toMatchObject({ kind: "caption", parent: "captions", text: "It should take one cup." });
     expect(row("m-close")).toMatchObject({ kind: "marker", start: 17.4, label: "close" });
     // Tracks, effects and keyframes are rows of their own, not elements.
     expect(rows.elements.some((e) => ["track", "composition", "keyframe", "effect"].includes(e.kind))).toBe(false);
@@ -67,7 +67,7 @@ describe("the timeline as rows", () => {
       asset: "founder",
       clip: "hook",
       i: 12,
-      text: "Small",
+      text: "Good",
       start: 0,
       end: 0.3,
       startFrame: 0,

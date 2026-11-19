@@ -100,28 +100,28 @@
           },
           {
             "i": 12,
-            "text": "cutcut,",
+            "text": "cold",
             "start": 5.96,
             "end": 6.24,
             "speaker": "ana"
           },
           {
             "i": 13,
-            "text": "in",
+            "text": "brew,",
             "start": 6.32,
             "end": 6.6,
             "speaker": "ana"
           },
           {
             "i": 14,
-            "text": "one",
+            "text": "in",
             "start": 6.68,
             "end": 6.96,
             "speaker": "ana"
           },
           {
             "i": 15,
-            "text": "sentence?",
+            "text": "short?",
             "start": 7.04,
             "end": 7.32,
             "speaker": "ana"
@@ -142,84 +142,84 @@
           },
           {
             "i": 18,
-            "text": "a",
+            "text": "coffee",
             "start": 8.74,
             "end": 9.02,
             "speaker": "ben"
           },
           {
             "i": 19,
-            "text": "video",
+            "text": "steeped",
             "start": 9.1,
             "end": 9.38,
             "speaker": "ben"
           },
           {
             "i": 20,
-            "text": "file",
+            "text": "in",
             "start": 9.46,
             "end": 9.74,
             "speaker": "ben"
           },
           {
             "i": 21,
-            "text": "a",
+            "text": "cold",
             "start": 9.82,
             "end": 10.1,
             "speaker": "ben"
           },
           {
             "i": 22,
-            "text": "model",
+            "text": "water",
             "start": 10.18,
             "end": 10.46,
             "speaker": "ben"
           },
           {
             "i": 23,
-            "text": "can",
+            "text": "and",
             "start": 10.54,
             "end": 10.82,
             "speaker": "ben"
           },
           {
             "i": 24,
-            "text": "write",
+            "text": "left",
             "start": 10.9,
             "end": 11.18,
             "speaker": "ben"
           },
           {
             "i": 25,
-            "text": "and",
+            "text": "alone",
             "start": 11.26,
             "end": 11.54,
             "speaker": "ben"
           },
           {
             "i": 26,
-            "text": "a",
+            "text": "for",
             "start": 11.62,
             "end": 11.9,
             "speaker": "ben"
           },
           {
             "i": 27,
-            "text": "person",
+            "text": "a",
             "start": 11.98,
             "end": 12.26,
             "speaker": "ben"
           },
           {
             "i": 28,
-            "text": "can",
+            "text": "whole",
             "start": 12.34,
             "end": 12.62,
             "speaker": "ben"
           },
           {
             "i": 29,
-            "text": "edit.",
+            "text": "day.",
             "start": 12.7,
             "end": 12.98,
             "speaker": "ben"
@@ -275,91 +275,91 @@
           },
           {
             "i": 37,
-            "text": "a",
+            "text": "coffee",
             "start": 17.62,
             "end": 17.9,
             "speaker": "ben"
           },
           {
             "i": 38,
-            "text": "video",
+            "text": "steeped",
             "start": 17.98,
             "end": 18.26,
             "speaker": "ben"
           },
           {
             "i": 39,
-            "text": "file",
+            "text": "in",
             "start": 18.34,
             "end": 18.62,
             "speaker": "ben"
           },
           {
             "i": 40,
-            "text": "a",
+            "text": "cold",
             "start": 18.7,
             "end": 18.98,
             "speaker": "ben"
           },
           {
             "i": 41,
-            "text": "model",
+            "text": "water",
             "start": 19.06,
             "end": 19.34,
             "speaker": "ben"
           },
           {
             "i": 42,
-            "text": "can",
+            "text": "and",
             "start": 19.42,
             "end": 19.7,
             "speaker": "ben"
           },
           {
             "i": 43,
-            "text": "write",
+            "text": "simply",
             "start": 19.78,
             "end": 20.06,
             "speaker": "ben"
           },
           {
             "i": 44,
-            "text": "and",
+            "text": "left",
             "start": 20.14,
             "end": 20.42,
             "speaker": "ben"
           },
           {
             "i": 45,
-            "text": "a",
+            "text": "alone",
             "start": 20.5,
             "end": 20.78,
             "speaker": "ben"
           },
           {
             "i": 46,
-            "text": "person",
+            "text": "for",
             "start": 20.86,
             "end": 21.14,
             "speaker": "ben"
           },
           {
             "i": 47,
-            "text": "can",
+            "text": "a",
             "start": 21.22,
             "end": 21.5,
             "speaker": "ben"
           },
           {
             "i": 48,
-            "text": "still",
+            "text": "whole",
             "start": 21.58,
             "end": 21.86,
             "speaker": "ben"
           },
           {
             "i": 49,
-            "text": "edit.",
+            "text": "day.",
             "start": 21.94,
             "end": 22.22,
             "speaker": "ben"
@@ -373,14 +373,14 @@
           },
           {
             "i": 51,
-            "text": "a",
+            "text": "so",
             "start": 23.28,
             "end": 23.56,
             "speaker": "ana"
           },
           {
             "i": 52,
-            "text": "file?",
+            "text": "long?",
             "start": 23.64,
             "end": 23.92,
             "speaker": "ana"
@@ -394,70 +394,70 @@
           },
           {
             "i": 54,
-            "text": "the",
+            "text": "cold",
             "start": 24.98,
             "end": 25.26,
             "speaker": "ben"
           },
           {
             "i": 55,
-            "text": "model",
+            "text": "water",
             "start": 25.34,
             "end": 25.62,
             "speaker": "ben"
           },
           {
             "i": 56,
-            "text": "is",
+            "text": "pulls",
             "start": 25.7,
             "end": 25.98,
             "speaker": "ben"
           },
           {
             "i": 57,
-            "text": "good",
+            "text": "the",
             "start": 26.06,
             "end": 26.34,
             "speaker": "ben"
           },
           {
             "i": 58,
-            "text": "at",
+            "text": "flavour",
             "start": 26.42,
             "end": 26.7,
             "speaker": "ben"
           },
           {
             "i": 59,
-            "text": "code",
+            "text": "out",
             "start": 26.78,
             "end": 27.06,
             "speaker": "ben"
           },
           {
             "i": 60,
-            "text": "and",
+            "text": "slowly",
             "start": 27.14,
             "end": 27.42,
             "speaker": "ben"
           },
           {
             "i": 61,
-            "text": "bad",
+            "text": "and",
             "start": 27.5,
             "end": 27.78,
             "speaker": "ben"
           },
           {
             "i": 62,
-            "text": "at",
+            "text": "very",
             "start": 27.86,
             "end": 28.14,
             "speaker": "ben"
           },
           {
             "i": 63,
-            "text": "documents.",
+            "text": "gently.",
             "start": 28.22,
             "end": 28.5,
             "speaker": "ben"
@@ -478,7 +478,7 @@
           },
           {
             "i": 66,
-            "text": "editor?",
+            "text": "taste?",
             "start": 29.92,
             "end": 30.2,
             "speaker": "ana"
@@ -492,84 +492,84 @@
           },
           {
             "i": 68,
-            "text": "editor",
+            "text": "taste",
             "start": 31.26,
             "end": 31.54,
             "speaker": "ben"
           },
           {
             "i": 69,
-            "text": "writes",
+            "text": "is",
             "start": 31.62,
             "end": 31.9,
             "speaker": "ben"
           },
           {
             "i": 70,
-            "text": "back",
+            "text": "sweeter",
             "start": 31.98,
             "end": 32.26,
             "speaker": "ben"
           },
           {
             "i": 71,
-            "text": "into",
+            "text": "and",
             "start": 32.34,
             "end": 32.62,
             "speaker": "ben"
           },
           {
             "i": 72,
-            "text": "the",
+            "text": "rounder,",
             "start": 32.7,
             "end": 32.98,
             "speaker": "ben"
           },
           {
             "i": 73,
-            "text": "same",
+            "text": "with",
             "start": 33.06,
             "end": 33.34,
             "speaker": "ben"
           },
           {
             "i": 74,
-            "text": "file,",
+            "text": "almost",
             "start": 33.42,
             "end": 33.7,
             "speaker": "ben"
           },
           {
             "i": 75,
-            "text": "one",
+            "text": "none",
             "start": 33.78,
             "end": 34.06,
             "speaker": "ben"
           },
           {
             "i": 76,
-            "text": "token",
+            "text": "of",
             "start": 34.14,
             "end": 34.42,
             "speaker": "ben"
           },
           {
             "i": 77,
-            "text": "at",
+            "text": "the",
             "start": 34.5,
             "end": 34.78,
             "speaker": "ben"
           },
           {
             "i": 78,
-            "text": "a",
+            "text": "usual",
             "start": 34.86,
             "end": 35.14,
             "speaker": "ben"
           },
           {
             "i": 79,
-            "text": "time.",
+            "text": "bitterness.",
             "start": 35.22,
             "end": 35.5,
             "speaker": "ben"
@@ -716,28 +716,28 @@
           },
           {
             "i": 2,
-            "text": "dashboard.",
+            "text": "menu.",
             "start": 1.22,
             "end": 1.5,
             "speaker": "narrator"
           },
           {
             "i": 3,
-            "text": "Click",
+            "text": "Choose",
             "start": 3.1,
             "end": 3.38,
             "speaker": "narrator"
           },
           {
             "i": 4,
-            "text": "new",
+            "text": "a",
             "start": 3.46,
             "end": 3.74,
             "speaker": "narrator"
           },
           {
             "i": 5,
-            "text": "project.",
+            "text": "roast.",
             "start": 3.82,
             "end": 4.1,
             "speaker": "narrator"
@@ -758,7 +758,7 @@
           },
           {
             "i": 8,
-            "text": "template",
+            "text": "grind",
             "start": 6.42,
             "end": 6.7,
             "speaker": "narrator"
@@ -772,14 +772,14 @@
           },
           {
             "i": 10,
-            "text": "name",
+            "text": "a",
             "start": 7.14,
             "end": 7.42,
             "speaker": "narrator"
           },
           {
             "i": 11,
-            "text": "it.",
+            "text": "size.",
             "start": 7.5,
             "end": 7.78,
             "speaker": "narrator"
@@ -793,7 +793,7 @@
           },
           {
             "i": 13,
-            "text": "deploy.",
+            "text": "order.",
             "start": 9.74,
             "end": 10.02,
             "speaker": "narrator"
@@ -941,7 +941,7 @@
           },
           {
             "i": 11,
-            "text": "write",
+            "text": "grind",
             "start": 8.7,
             "end": 8.98,
             "speaker": "host"
@@ -955,7 +955,7 @@
           },
           {
             "i": 13,
-            "text": "file,",
+            "text": "beans,",
             "start": 9.42,
             "end": 9.7,
             "speaker": "host"
@@ -969,14 +969,14 @@
           },
           {
             "i": 15,
-            "text": "agent",
+            "text": "water",
             "start": 10.14,
             "end": 10.42,
             "speaker": "host"
           },
           {
             "i": 16,
-            "text": "writes",
+            "text": "does",
             "start": 10.5,
             "end": 10.78,
             "speaker": "host"
@@ -990,7 +990,7 @@
           },
           {
             "i": 18,
-            "text": "file,",
+            "text": "work,",
             "start": 11.22,
             "end": 11.5,
             "speaker": "host"
@@ -1011,7 +1011,7 @@
           },
           {
             "i": 21,
-            "text": "runs.",
+            "text": "blooms.",
             "start": 12.3,
             "end": 12.58,
             "speaker": "host"
@@ -1025,14 +1025,14 @@
           },
           {
             "i": 23,
-            "text": "project",
+            "text": "kitchen",
             "start": 13.64,
             "end": 13.92,
             "speaker": "host"
           },
           {
             "i": 24,
-            "text": "document,",
+            "text": "timer,",
             "start": 14.0,
             "end": 14.28,
             "speaker": "host"
@@ -1046,7 +1046,7 @@
           },
           {
             "i": 26,
-            "text": "sync,",
+            "text": "scale,",
             "start": 14.72,
             "end": 15.0,
             "speaker": "host"
@@ -1060,14 +1060,14 @@
           },
           {
             "i": 28,
-            "text": "export",
+            "text": "fancy",
             "start": 15.44,
             "end": 15.72,
             "speaker": "host"
           },
           {
             "i": 29,
-            "text": "step.",
+            "text": "kettle.",
             "start": 15.8,
             "end": 16.08,
             "speaker": "host"

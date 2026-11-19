@@ -24,7 +24,7 @@ export default function Video() {
           width={180}
           height={180}
           fill={{ type: "none" }}
-          stroke={{ color: "#c8402a", width: 14 }}
+          stroke={{ color: "#e8a33d", width: 14 }}
           transform={{ position: { x: 220, y: 0 } }}
           enter={{ type: "scale", duration: 0.5 }}
         />

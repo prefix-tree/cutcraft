@@ -112,6 +112,7 @@ export default defineConfig({
             collapsed: true,
             items: [
               { text: "The logo film", link: "/examples/hero" },
+              { text: "A coffee film", link: "/examples/coffee" },
               { text: "A product launch", link: "/examples/launch" },
               { text: "Kinetic type", link: "/examples/kinetic" },
               { text: "A data story", link: "/examples/data" },

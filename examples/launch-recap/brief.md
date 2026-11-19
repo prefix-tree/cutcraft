@@ -1,6 +1,6 @@
 # Brief
 
-Make a 25–30 second launch recap for **Shed**, a cloud for small software.
+Make a 25–30 second launch recap for **Halvard**, a small coffee roastery.
 
 Open on the founder's key sentence from the interview. Cut to product b-roll
 with a slow push-in, then the screen demo, then back to the founder for the
