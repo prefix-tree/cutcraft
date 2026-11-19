@@ -46,7 +46,7 @@ from above: the footage, then what goes over it, then the music.
     <Clip id="demo" src="asset:demo" in={2} out={9} />
   </Track>
   <Track id="text" layout="free">
-    <Title id="name" start={1} duration={3}>Shed</Title>
+    <Title id="name" start={1} duration={3}>Halvard</Title>
   </Track>
   <Track id="music" layout="free">
     <Audio id="bed" src="asset:music" start={0} duration="fill" volume={0.3} />

@@ -31,7 +31,7 @@ track main (sequence)
 track over (free)
      0.50–4.50     shape       name-card
      0.65–4.50     title       name-name  "Maya Chen"
-     0.80–4.50     title       name-role  "Founder, Shed"
+     0.80–4.50     title       name-role  "Head roaster, Halvard"
 composition
      0.00–10.00    captions    captions
        0.00–2.36     caption     captions-1  "So, I mentioned this before,"

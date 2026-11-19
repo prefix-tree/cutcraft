@@ -227,9 +227,9 @@ const exec = new Executor({ tree, manifest });
 
 // A drag on your timeline, a field in your form, a tool call:
 exec.execute({ type: "clip/trim",
-  params: { id: "hook", edge: "out", value: "word:22.end" } });
+  params: { id: "open", edge: "out", value: 6.5 } });
 exec.execute({ type: "text/setContent",
-  params: { id: "title", text: "Ships on Friday" } });
+  params: { id: "title", text: "Bloom first" } });
 exec.undo();
 exec.redo();
 
