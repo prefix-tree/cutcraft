@@ -224,8 +224,10 @@ component. `uberscene blocks` lists the ones that ship with the CLI, by the job 
 previews to choose by looking ([Blocks](/reference/cli#blocks)).
 
 A block is one file: its component, its props `schema` with a label for each, its `defaults`, and a `meta` that says
-what it is for. Copy the file into the project as `blocks/<name>.tsx`, import the component, and place it in a Layer as
-in the section above. What changes per use, the words, the colours, the numbers, its times, is a prop on the placement:
+what it is for. `uberscene blocks add <name>` copies the file into the project as `blocks/<name>.tsx` and records it,
+so `uberscene blocks update` can bring it up to a later version unless you have edited it. With `--into video.tsx
+--track <id> --at <moment>` it also writes the import and the Layer ([Adding a block](/reference/cli#adding-a-block)).
+What changes per use, the words, the colours, the numbers, its times, is a prop on the placement:
 
 ```tsx
 import { PointList } from "./blocks/point-list";

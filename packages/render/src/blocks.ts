@@ -49,13 +49,21 @@ export interface BlockFilter {
 }
 
 /** The blocks shipped with this package: copied into `dist/blocks` at build, read from the repository when run from source. */
-function blocksSource(): string {
+export function blocksSource(): string {
   const here = dirname(fileURLToPath(import.meta.url));
   const built = join(here, "blocks");
   if (hasBlocks(built)) return built;
   const repo = resolve(here, "..", "..", "..", "blocks");
   if (hasBlocks(repo)) return repo;
   throw new Error(`the blocks are not in this package (looked in ${built} and ${repo})`);
+}
+
+/** One block by its name, from the shipped blocks or `source`; an unknown name is an error listing the names. */
+export function findBlock(name: string, source?: string): BlockInfo {
+  const all = listBlocks(source === undefined ? {} : { source });
+  const found = all.find((b) => b.name === name);
+  if (!found) throw new Error(`there is no block "${name}"; the blocks are ${all.map((b) => b.name).join(", ")}`);
+  return found;
 }
 
 function hasBlocks(dir: string): boolean {

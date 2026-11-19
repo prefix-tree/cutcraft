@@ -39,7 +39,7 @@ references.
 | Captions | `<Captions>` from the transcript, or `<Caption>` cues; `animation`: `word-highlight`, `word-by-word`, `karaoke`, `typewriter`; `style.highlightBox` boxes the word being said; `x`, `y`, `width` place them |
 | Shapes and images | `<Shape>` (rectangle, circle, ellipse, triangle, arrow and more), `<Svg>` (inline markup or an SVG asset), `<Sticker>` (a PNG, SVG, WebP or GIF asset) |
 | Ready-made graphics | `LowerThird`, `Callout`, `Badge`, `Counter`, `ProgressBar`, `Arrow`, `Highlight`, `Background`, `TypeCard`, `QuoteCard`, `Frame` |
-| Ready-made scenes | Blocks: `uberscene blocks --for "<job>"` lists them with when to use each (`--sheet blocks.png` to look); copy one's `block.tsx` to `blocks/<name>.tsx` and place its component in a `<Layer>`, its props set there |
+| Ready-made scenes | Blocks: `uberscene blocks --for "<job>"` lists them with when to use each (`--sheet blocks.png` to look); `uberscene blocks add <name> --into video.tsx --track <id> --at hook@word:N` copies one to `blocks/<name>.tsx` and places its component in a `<Layer>`, its props set there; `blocks update` after an upgrade |
 | Sound | `<Audio>` for music and voice; `volume`, `fade={{ in, out }}`, `automation` for volume and pan over time, `duck={{ under, to }}` under a track or a role (`dialogue`) |
 | Anything else | `<Layer>` (any React), `<Three>` (three.js), `<Motion>` (Motion), all on the video's clock; see "Free code" under Look and graphics |
 | Variants | `schema` and `defaults`, then `--props '{"product":"Pixel"}'` at render |
