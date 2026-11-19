@@ -18,14 +18,18 @@ export const calloutSchema = timingSchema.extend({
   to: pointSchema.optional(),
   /** The colour of the box's border, the line and its dot. */
   color: z.string().default("$accent"),
+  /** The note's size in pixels; the box's height grows with it. */
+  size: z.number().positive().default(30),
 });
 
 /** A note on a surface box, with a line drawn from it to the thing it is about. */
 export function Callout(props: z.input<typeof calloutSchema>) {
   const p = parse("Callout", calloutSchema, props);
   const t = timingOf(p);
-  const lines = Math.max(1, Math.ceil((p.text.length * 17) / (p.width - 56)));
-  const height = 40 + lines * 40;
+  // The box was measured for a 30 px note; `k` keeps its padding and line height in proportion at any size.
+  const k = p.size / 30;
+  const lines = Math.max(1, Math.ceil((p.text.length * 17 * k) / (p.width - 56)));
+  const height = (40 + lines * 40) * k;
   const parts = [
     h(Shape, {
       id: `${p.id}-box`,
@@ -46,7 +50,7 @@ export function Callout(props: z.input<typeof calloutSchema>) {
         id: `${p.id}-text`,
         ...timing(t, 0.1),
         font: "$body",
-        size: 30,
+        size: p.size,
         weight: 600,
         color: "$text",
         width: p.width - 56,

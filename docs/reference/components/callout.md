@@ -27,5 +27,6 @@ Besides the timing props (`start`, `anchor`, `at`, `offset`, `duration`):
 | `width` | number (> 0) | `420` | The box's width in pixels. |
 | `to` | { x, y } |  | What it points at; without it, the box stands alone. |
 | `color` | string | `"$accent"` | The colour of the box's border, the line and its dot. |
+| `size` | number (> 0) | `30` | The note's size in pixels; the box's height grows with it. |
 
 [All components](/reference/components/)
