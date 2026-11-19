@@ -55,6 +55,9 @@ export function createPatchLog(options: PatchLogOptions = {}): PatchLog {
   return new Log(options);
 }
 
+/** Counts inserts and moves across every log, so places written later sort later. */
+let placed = 0;
+
 function entry(net: Map<string, NetPatch>, id: string): NetPatch {
   let e = net.get(id);
   if (!e) {
@@ -86,7 +89,7 @@ export function reduceInto(
     case "move": {
       const e = entry(net, patch.id);
       if (e.presence === "removed") throw new Error(`patch move on removed element ${patch.id}`);
-      e.place = { parent: patch.parent, after: patch.after };
+      e.place = { parent: patch.parent, after: patch.after, seq: placed++ };
       return;
     }
     case "remove": {
@@ -109,7 +112,7 @@ export function reduceInto(
       e.presence = sameAsSource ? "present" : "inserted";
       e.props.clear();
       e.node = patch.node;
-      e.place = { parent: patch.parent, after: patch.after };
+      e.place = { parent: patch.parent, after: patch.after, seq: placed++ };
       return;
     }
     case "bake": {

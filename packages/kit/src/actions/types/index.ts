@@ -95,13 +95,24 @@ export interface ClipActions {
     out?: TimeRef;
     duration?: number | "fill";
   };
-  /** Deletes an element from its track: a clip, gap, title or anything else placed on a track. */
+  /**
+   * Deletes an element from its track: a clip, gap, title or anything else placed on a track. What was placed from it
+   * comes along: titles anchored to it move to the clip before it, held inside that clip (removed with it when there is
+   * none), a transition left without a clip on one side is removed, and a length that followed it becomes seconds.
+   */
   "clip/remove": { id: Id };
   /** The undo of clip/remove: puts the element back on its track at its old placement. */
-  "clip/restore": { id: Id; node: NodeSpec; trackId: Id; place: PlacementSpec };
+  "clip/restore": {
+    id: Id;
+    node: NodeSpec;
+    trackId: Id;
+    place: PlacementSpec;
+    /** The sibling it went after, when that differs from what `place` gives (an anchored element keeps its line). */
+    after?: Id | null;
+  };
   /**
    * Deletes the element and, on a free track, pulls every later element left by its length; a sequence closes up by
-   * itself.
+   * itself. What was placed from it comes along as with clip/remove.
    */
   "clip/rippleDelete": { id: Id };
   /** The undo of clip/rippleDelete: puts the element back and restores the starts it shifted. */
@@ -119,12 +130,14 @@ export interface ClipActions {
   "clip/move": { id: Id; trackId?: Id; place: PlacementSpec };
   /**
    * Moves one edge. For a source clip `value` is the new source in or out (seconds, or a transcript or shot reference);
-   * for anything else it is the timeline time of that edge.
+   * for anything else it is the timeline time of that edge. A title at a word the trim takes away keeps its time as an
+   * offset, held inside the clip.
    */
   "clip/trim": { id: Id; edge: "in" | "out"; value: TimeRef };
   /**
    * Cuts an element in two at timeline time `at`; the right half gets `newId`, and keyframes, speed keys and freezes go
-   * to the half they fall in.
+   * to the half they fall in. Titles at a word of the right half, anchors on the element's end, lengths until it ends
+   * and a transition on its out edge move to `newId`.
    */
   "clip/split": { id: Id; at: number; newId: Id };
   /** The undo of clip/split: removes both halves and puts back the `original` element. */
