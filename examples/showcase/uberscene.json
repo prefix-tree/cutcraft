@@ -569,6 +569,72 @@
       "width": 960,
       "height": 540,
       "id": "redCup"
+    },
+    "whoosh": {
+      "kind": "audio",
+      "duration": 0.7,
+      "audio": {
+        "sampleRate": 48000,
+        "channels": 1,
+        "streams": 1
+      },
+      "id": "whoosh"
+    },
+    "swish": {
+      "kind": "audio",
+      "duration": 0.3,
+      "audio": {
+        "sampleRate": 48000,
+        "channels": 1,
+        "streams": 1
+      },
+      "id": "swish"
+    },
+    "click": {
+      "kind": "audio",
+      "duration": 0.045,
+      "audio": {
+        "sampleRate": 48000,
+        "channels": 1,
+        "streams": 1
+      },
+      "id": "click"
+    },
+    "pop": {
+      "kind": "audio",
+      "duration": 0.13,
+      "audio": {
+        "sampleRate": 48000,
+        "channels": 1,
+        "streams": 1
+      },
+      "id": "pop"
+    },
+    "riser": {
+      "kind": "audio",
+      "duration": 2,
+      "audio": {
+        "sampleRate": 48000,
+        "channels": 1,
+        "streams": 1
+      },
+      "id": "riser"
+    },
+    "chime": {
+      "kind": "audio",
+      "duration": 1.8,
+      "audio": {
+        "sampleRate": 48000,
+        "channels": 1,
+        "streams": 1
+      },
+      "id": "chime"
+    }
+  },
+  "blocks": {
+    "quote-build": {
+      "version": "0.5.0",
+      "hash": "7c8a92cd488954baef8f2ae6d6e7b0e834d4ff7e3f1501179e43520741c7ecf9"
     }
   }
 }

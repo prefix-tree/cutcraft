@@ -19,10 +19,14 @@ const FILES: Record<string, number> = {
   edit: 4,
   captions: 9.2,
   hero: 6.5,
+  coffee: 34.6,
 };
 
-/** Files encoded at a set bitrate instead of the medium preset: the hero loops on the landing page, so it stays small. */
-const BITRATE: Record<string, number> = { hero: 1_500_000 };
+/** Files encoded at a set bitrate instead of the medium preset: the hero and the coffee film play on the landing page, so they stay small. */
+const BITRATE: Record<string, number> = { hero: 1_500_000, coffee: 1_200_000 };
+
+/** Files that keep their sound: the coffee film's cues. The rest are silent loops. */
+const SOUND = new Set(["coffee"]);
 
 /** Names given on the command line render alone: `pnpm --filter @uberscene/example-showcase render hero`. */
 const only = process.argv.slice(2);
@@ -37,7 +41,7 @@ for (const [name, poster] of Object.entries(FILES)) {
     state: video.state,
     media,
     out: join(out, `${name}.webm`),
-    silent: true,
+    silent: !SOUND.has(name),
     ...(BITRATE[name] ? { bitrate: BITRATE[name] } : { quality: "medium" as const }),
     source: video.source,
   });

@@ -7,6 +7,8 @@ import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
+import { SOUNDS, wav } from "../shorts/media/sounds";
+
 const dir = join(import.meta.dirname, "media");
 mkdirSync(dir, { recursive: true });
 
@@ -191,4 +193,12 @@ if (!existsSync(cube)) {
         lines.push(`${(R ** 0.85).toFixed(5)} ${G.toFixed(5)} ${(B ** 1.15 * 0.95).toFixed(5)}`);
       }
   writeFileSync(cube, `${lines.join("\n")}\n`);
+}
+
+/** Sound cues for the coffee film, made by the shorts' synth, so they are the same bytes as the shorts' own. */
+for (const id of ["whoosh", "swish", "click", "pop", "riser", "chime"]) {
+  const file = join(dir, `${id}.wav`);
+  if (existsSync(file)) continue;
+  writeFileSync(file, wav((SOUNDS[id] as () => Float32Array)()));
+  process.stdout.write(`${id}.wav\n`);
 }
