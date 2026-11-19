@@ -28,14 +28,14 @@ const codesOf = (state: ResolvedState): string[] => [...new Set(state.errors.map
 function expectWrittenBack(file: CorpusFile, exec: ReturnType<typeof executorFor>, clean: boolean): void {
   const folded = foldToSource(file.text, exec.log(), exec.state());
   expect(folded.skipped).toEqual([]);
-  const reloaded = resolveText(folded.text, file.manifest);
+  const reloaded = resolveText(folded.text, file.manifest, file.files);
   expect(errorsOf(reloaded)).toEqual(errorsOf(exec.state()));
   expect(serialize(reloaded)).toEqual(serialize(exec.state()));
   if (clean) expect(lint(folded.text, { manifest: file.manifest }).filter((d) => d.severity === "error")).toEqual([]);
 }
 
 describe.each(CORPUS.map((file) => [file.name, file] as const))("%s", (name, file) => {
-  const start = resolveText(file.text, file.manifest);
+  const start = resolveText(file.text, file.manifest, file.files);
   const picked = EDITS.map((edit) => ({ edit, input: edit.pick(start) })).filter(
     (e): e is { edit: (typeof EDITS)[number]; input: ActionInput } => e.input !== undefined,
   );

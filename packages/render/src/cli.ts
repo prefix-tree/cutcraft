@@ -5,6 +5,7 @@ import { parseArgs } from "node:util";
 import { MOMENT_FORMS, subtitles } from "@uberscene/kit";
 
 import { addAsset, describeAdded } from "./add";
+import { blockSheet, formatBlocks, listBlocks } from "./blocks";
 import { QUALITIES, type QualityName, type VideoCodec } from "./encoding";
 import type { FontFile, FontWeight } from "./fonts";
 import { fontSheet, formatFonts, listFonts } from "./fonts-list";
@@ -33,6 +34,7 @@ const USAGE = `Usage: uberscene <file.tsx> --out <video.mp4|.webm|.mp3|.wav> [--
        uberscene look <file.tsx> --motion <stretch> [--step <s>] [--listen <stretch>] [--out look.png] [options]
        uberscene where <file.tsx> --at <moments> [--safe-zone <zone>] [--json] [options]
        uberscene fonts [--for <role>] [--category <category>] [--sheet fonts.png [--text <words>]] [--json]
+       uberscene blocks [--for <job>] [--aspect <shape>] [--sheet blocks.png] [--json]
        uberscene add <media file>... [--manifest <file>] [--id <id>] [--transcript <file>]
        uberscene browser install
        uberscene skills install [--dir <folder>] [--force]
@@ -74,6 +76,13 @@ const USAGE = `Usage: uberscene <file.tsx> --out <video.mp4|.webm|.mp3|.wav> [--
                         heaviest weight and its regular one. The first time, Google's are downloaded into the
                         font cache
   --text <words>        (fonts --sheet) the words to set; default "Make It Move 2026"
+  blocks                list the blocks that ship with this CLI: scene-sized pieces of motion design (a grid that
+                        counts, a wall of characters, a row of points) to copy into the project and place in a
+                        <Layer>, each with what it shows, when to use it and when not, its props and what times it
+  --for <job>           (blocks) only blocks whose title, description, uses or tags mention every word given
+  --aspect <shape>      (blocks) only blocks laid out for a frame shape: 9:16, 16:9, 1:1 or 4:5
+  --sheet <image>       (blocks) also paste the listed blocks' previews into one image, numbered as listed; no
+                        browser needed
   skills install        write the agent skill that ships with this CLI into .claude/skills/uberscene (or --dir
                         <folder>), so the agent learns this version's commands. Again after an upgrade, it replaces
                         the folder it wrote; a folder with edits, or one it did not write, wants --force
@@ -130,6 +139,7 @@ async function main(): Promise<number> {
     options: {
       out: { type: "string" },
       for: { type: "string" },
+      aspect: { type: "string" },
       category: { type: "string" },
       sheet: { type: "string" },
       text: { type: "string" },
@@ -225,6 +235,24 @@ async function main(): Promise<number> {
       );
     }
     process.stdout.write(values.json ? `${JSON.stringify(fonts, null, 2)}\n` : formatFonts(fonts));
+    return 0;
+  }
+  if (positionals[0] === "blocks") {
+    if (positionals.length > 1) {
+      process.stderr.write(USAGE);
+      return 2;
+    }
+    const blocks = listBlocks({
+      ...(values.for === undefined ? {} : { for: values.for }),
+      ...(values.aspect === undefined ? {} : { aspect: values.aspect }),
+    });
+    if (values.sheet !== undefined) {
+      const drawn = await blockSheet(blocks, resolve(values.sheet));
+      process.stderr.write(
+        `${values.sheet}: ${drawn.names.length} blocks, ${drawn.columns} to a row, ${drawn.width}x${drawn.height}\n`,
+      );
+    }
+    process.stdout.write(values.json ? `${JSON.stringify(blocks, null, 2)}\n` : formatBlocks(blocks));
     return 0;
   }
   if (positionals[0] === "inspect") {

@@ -14,6 +14,7 @@ npx uberscene look <file.tsx> [--at <moments> | --around <id>] [--without <id>] 
 npx uberscene look <file.tsx> --motion <stretch> [--step <s>] [--listen <stretch>] [--out look.png] [options]
 npx uberscene where <file.tsx> --at <moments> [--safe-zone <zone>] [--json] [options]
 npx uberscene fonts [--for <role>] [--category <category>] [--sheet fonts.png [--text <words>]] [--json]
+npx uberscene blocks [--for <job>] [--aspect <shape>] [--sheet blocks.png] [--json]
 npx uberscene add <media file>... [--manifest <file>] [--id <id>] [--transcript <file>]
 npx uberscene browser install
 npx uberscene skills install [--dir <folder>] [--force]
@@ -320,6 +321,39 @@ how it looks.
 
 The sheet is drawn in Chrome like any frame. The first time, Google's faces are downloaded into the font cache
 (`~/.cache/uberscene/fonts`), so it needs the network once. See [Choosing a font](/guide/themes#choosing-a-font).
+
+## Blocks
+
+```sh
+uberscene blocks [--for <job>] [--aspect <shape>] [--sheet blocks.png] [--json]
+```
+
+Lists the blocks that ship with this version of the CLI, without a file. A block is a scene-sized piece of motion
+design: a grid of cells that fills and counts, a wall of characters, a row of points lit in turn. Each entry says what
+it shows, when to use it and when not, what it pairs with, its props, the props that time it, the file to copy and
+the line that places it.
+
+| Option | Does |
+|---|---|
+| `--for <job>` | Only blocks whose title, description, uses or tags mention every word given: `--for count`, `--for "background letters"` |
+| `--aspect <shape>` | Only blocks laid out for a frame shape: `9:16`, `16:9`, `1:1` or `4:5` |
+| `--sheet <image>` | Also pastes the listed blocks' previews into one PNG, four to a row, in the order listed. No browser is started |
+| `--json` | Prints the entries as JSON: `name`, `title`, `what`, `useWhen`, `avoidWhen`, `pairsWith`, `tags`, `aspects`, `length`, `beats`, `component`, `props`, `dir`, `preview` |
+
+To use one, copy its `block.tsx` into the project as `blocks/<name>.tsx`, beside `uberscene.json`, import its
+component and place it in a `<Layer>`:
+
+```tsx
+import { HundredCells } from "./blocks/hundred-cells";
+
+<Layer id="hundred" anchor="hook" at="word:21" duration={4}>
+  <HundredCells label="DAYS" accent="$primary" />
+</Layer>
+```
+
+Its props are set where it is placed, so two placements of one block differ without two copies, and the editor's
+handles for a Layer's component edit them. Its colours default to theme tokens (`$accent`), so it takes the video's
+look. The copy is yours to edit. See [Blocks](/guide/free-code#blocks).
 
 ## Exit codes
 

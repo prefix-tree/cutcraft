@@ -29,6 +29,7 @@
     "docs:test": "node --import tsx --test scripts/generated-files.test.ts scripts/skill.test.ts scripts/stage-release.test.mjs",
     "docs:bench": "tsx scripts/site-bench.ts",
     "docs:examples": "pnpm --filter @uberscene/example-showcase docs",
+    "blocks:previews": "tsx packages/render/scripts/block-previews.ts",
     "build": "pnpm -r build",
     "format": "biome format --write .",
     "fix": "biome check --write .",
