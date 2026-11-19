@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="UberScene">
-  <!-- The logo for a dark page: the outline and the hard offset shadow in white instead of ink. -->
-  <rect x="72" y="72" width="416" height="416" fill="#ffffff"/>
-  <rect x="36" y="36" width="404" height="404" fill="#ff5a1f" stroke="#ffffff" stroke-width="24"/>
-  <path d="M128 112H204V276H272V112H348V364H128Z" fill="#0a0a0a"/>
+  <!-- The same slab on a dark page: with no outline or shadow, nothing needs to change colour. -->
+  <rect width="512" height="512" fill="#ff5a1f"/>
+  <path d="M96 0H216V312H296V0H416V424H96Z" fill="#0a0a0a"/>
+  <rect x="296" y="312" width="24" height="112" fill="#ff5a1f"/>
 </svg>
