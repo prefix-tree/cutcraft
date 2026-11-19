@@ -31,7 +31,7 @@ export interface LayerPlacement {
 export function insertLayer(text: string, placement: LayerPlacement): string {
   const index = buildSourceIndex(text);
   const track = index.elements.get(placement.track);
-  if (!track || track.kind !== "track") throw new Error(`there is no <Track id="${placement.track}"> in the file`);
+  if (track?.kind !== "track") throw new Error(`there is no <Track id="${placement.track}"> in the file`);
   if (index.elements.has(placement.id)) throw new Error(`the id "${placement.id}" is taken in the file`);
 
   const edits: SourceEdit[] = [];
