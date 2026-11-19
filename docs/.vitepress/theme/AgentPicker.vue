@@ -2,11 +2,19 @@
      takes the plugin; the agents that read the shared Agent Skills folder (.agents/skills) take the CLI's
      `skills install`, which writes the skill that matches the installed version. -->
 <script setup lang="ts">
+import { withBase } from "vitepress";
 import { computed, ref } from "vue";
 
 interface Agent {
   readonly id: string;
   readonly name: string;
+  /** Two letters for its key when it has no logo. */
+  readonly mark: string;
+  /**
+   * The agent's logo, served from docs/public (e.g. "/agents/codex.svg"). Use the file from the agent's own press or
+   * brand page and follow its usage rules; leave this out and the key shows the two letters instead.
+   */
+  readonly logo?: string;
   /** Where the lines are typed. */
   readonly where: string;
   readonly lines: readonly string[];
@@ -17,17 +25,19 @@ const SHARED = "npx uberscene skills install --dir .agents/skills/uberscene";
 const AGENTS: readonly Agent[] = [
   {
     id: "claude-code",
+    mark: "CC",
     name: "Claude Code",
     where: "In Claude Code, one line at a time",
     lines: ["/plugin marketplace add prefix-tree/uberscene", "/plugin install uberscene@prefix-tree"],
   },
-  { id: "codex", name: "Codex", where: "In your project's terminal", lines: [SHARED] },
-  { id: "cursor", name: "Cursor", where: "In your project's terminal", lines: [SHARED] },
-  { id: "gemini", name: "Gemini CLI", where: "In your project's terminal", lines: [SHARED] },
-  { id: "copilot", name: "Copilot", where: "In your project's terminal", lines: [SHARED] },
-  { id: "opencode", name: "OpenCode", where: "In your project's terminal", lines: [SHARED] },
+  { id: "codex", mark: "CX", name: "Codex", where: "In your project's terminal", lines: [SHARED] },
+  { id: "cursor", mark: "CU", name: "Cursor", where: "In your project's terminal", lines: [SHARED] },
+  { id: "gemini", mark: "GE", name: "Gemini CLI", where: "In your project's terminal", lines: [SHARED] },
+  { id: "copilot", mark: "CP", name: "Copilot", where: "In your project's terminal", lines: [SHARED] },
+  { id: "opencode", mark: "OC", name: "OpenCode", where: "In your project's terminal", lines: [SHARED] },
   {
     id: "other",
+    mark: "+",
     name: "Other",
     where: "In your project's terminal. Point --dir at the folder your agent reads skills from",
     lines: [SHARED],
@@ -69,7 +79,11 @@ function pick(id: string): void {
         :class="{ active: a.id === selected }"
         @click="pick(a.id)"
       >
-        {{ a.name }}
+        <span class="cc-agents-icon" aria-hidden="true">
+          <img v-if="a.logo" :src="withBase(a.logo)" alt="" width="28" height="28" />
+          <template v-else>{{ a.mark }}</template>
+        </span>
+        <span class="cc-agents-name">{{ a.name }}</span>
       </button>
     </div>
     <div class="cc-agents-panel" role="tabpanel" :aria-label="agent.name">
