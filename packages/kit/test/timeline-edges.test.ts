@@ -32,7 +32,7 @@ describe("a sequence of clips", () => {
 
   it("a still lasts five seconds unless told otherwise", () => {
     expect(
-      cut(T(`<Clip id="a" src="asset:logo" />` + `<Clip id="b" src="asset:logo" duration={2} />` + C("c", 0, 1))),
+      cut(T(`<Clip id="a" src="asset:logo" /><Clip id="b" src="asset:logo" duration={2} />${C("c", 0, 1)}`)),
     ).toMatchInlineSnapshot(`
       "
       duration 8
@@ -234,7 +234,7 @@ describe("trims the file cannot give", () => {
   });
 
   it("an asset the manifest does not have takes no time and the cut goes on", () => {
-    expect(cut(T(`<Clip id="a" src="asset:nope" in={0} out={2} />` + C("b", 0, 1)))).toMatchInlineSnapshot(`
+    expect(cut(T(`<Clip id="a" src="asset:nope" in={0} out={2} />${C("b", 0, 1)}`))).toMatchInlineSnapshot(`
       "
       duration 1
       a clip 0..0
@@ -462,7 +462,7 @@ describe("transitions", () => {
   });
 
   it("a transition with no duration lasts half a second", () => {
-    expect(cut(T(C("a", 0, 4) + `<Transition id="x" type="crossfade" />` + C("b", 4, 8)))).toMatchInlineSnapshot(`
+    expect(cut(T(`${C("a", 0, 4)}<Transition id="x" type="crossfade" />${C("b", 4, 8)}`))).toMatchInlineSnapshot(`
       "
       duration 7.5
       a clip 0..4 plays broll 0..4 x1
@@ -636,7 +636,7 @@ describe("free tracks", () => {
   });
   it("a prop the element does not take is told and left out", () => {
     expect(
-      cut(T(C("a", 0, 1, "start={0}") + `<Gap id="g" duration={2} start={-1} />`, `layout="free"`)),
+      cut(T(`${C("a", 0, 1, "start={0}")}<Gap id="g" duration={2} start={-1} />`, `layout="free"`)),
     ).toMatchInlineSnapshot(`
       "
       duration 2
@@ -1202,7 +1202,7 @@ describe("lengths taken from something else", () => {
   });
 
   it("match is not allowed on a sequence track", () => {
-    expect(cut(T(C("a", 0, 2) + `<Clip id="b" src="asset:broll" duration={{ match: "a" }} />`))).toMatchInlineSnapshot(`
+    expect(cut(T(`${C("a", 0, 2)}<Clip id="b" src="asset:broll" duration={{ match: "a" }} />`))).toMatchInlineSnapshot(`
       "
       duration 2
       a clip 0..2 plays broll 0..2 x1
@@ -1287,7 +1287,7 @@ describe("cuts by meaning", () => {
   });
 
   it("a word of a file with no transcript", () => {
-    expect(cut(T(`<Clip id="a" src="asset:broll" in="word:1" out="word:2" />` + C("b", 0, 1)))).toMatchInlineSnapshot(`
+    expect(cut(T(`<Clip id="a" src="asset:broll" in="word:1" out="word:2" />${C("b", 0, 1)}`))).toMatchInlineSnapshot(`
       "
       duration 1
       a clip 0..0 plays broll 0..0 x1
@@ -1319,7 +1319,7 @@ describe("cuts by meaning", () => {
 
   it("a shot the file does not have", () => {
     expect(
-      cut(T(`<Clip id="a" src="asset:broll" in="shot:5" out="shot:5.end" />` + C("b", 0, 1))),
+      cut(T(`<Clip id="a" src="asset:broll" in="shot:5" out="shot:5.end" />${C("b", 0, 1)}`)),
     ).toMatchInlineSnapshot(`
       "
       duration 1
@@ -1559,7 +1559,7 @@ describe("time changes inside a clip", () => {
 
 describe("captions and markers", () => {
   it("captions follow the words the cut plays", () => {
-    expect(cut(MAIN + `<Captions id="cap" src="asset:talk" />`)).toMatchInlineSnapshot(`
+    expect(cut(`${MAIN}<Captions id="cap" src="asset:talk" />`)).toMatchInlineSnapshot(`
       "
       duration 6.4
       hook clip 0..2.9 plays talk 2..4.9 x1
@@ -1574,7 +1574,7 @@ describe("captions and markers", () => {
   it("captions over a cut that plays the same words twice", () => {
     expect(
       cut(
-        T(W("a", "word:4", "word:9.end") + W("b", "word:6", "word:12.end")) + `<Captions id="cap" src="asset:talk" />`,
+        `${T(W("a", "word:4", "word:9.end") + W("b", "word:6", "word:12.end"))}<Captions id="cap" src="asset:talk" />`,
       ),
     ).toMatchInlineSnapshot(`
       "
@@ -1589,7 +1589,7 @@ describe("captions and markers", () => {
   });
 
   it("captions of a file the cut does not play", () => {
-    expect(cut(T(C("a", 0, 2)) + `<Captions id="cap" src="asset:talk" />`)).toMatchInlineSnapshot(`
+    expect(cut(`${T(C("a", 0, 2))}<Captions id="cap" src="asset:talk" />`)).toMatchInlineSnapshot(`
       "
       duration 2
       a clip 0..2 plays broll 0..2 x1
@@ -1600,7 +1600,7 @@ describe("captions and markers", () => {
 
   it("captions of a faster clip", () => {
     expect(
-      cut(T(W("a", "word:4", "word:9.end", "speed={2}")) + `<Captions id="cap" src="asset:talk" />`),
+      cut(`${T(W("a", "word:4", "word:9.end", "speed={2}"))}<Captions id="cap" src="asset:talk" />`),
     ).toMatchInlineSnapshot(`
       "
       duration 1.45
@@ -1613,7 +1613,7 @@ describe("captions and markers", () => {
 
   it("captions when a gap delays the speech", () => {
     expect(
-      cut(T(G("g", 2) + W("a", "word:4", "word:9.end")) + `<Captions id="cap" src="asset:talk" />`),
+      cut(`${T(G("g", 2) + W("a", "word:4", "word:9.end"))}<Captions id="cap" src="asset:talk" />`),
     ).toMatchInlineSnapshot(`
       "
       duration 4.9
@@ -1626,7 +1626,7 @@ describe("captions and markers", () => {
   });
 
   it("a marker is a point, and one past the end does not lengthen the video", () => {
-    expect(cut(`<Marker id="m1" at={1.5} /><Marker id="m2" at={99} />` + MAIN)).toMatchInlineSnapshot(`
+    expect(cut(`<Marker id="m1" at={1.5} /><Marker id="m2" at={99} />${MAIN}`)).toMatchInlineSnapshot(`
       "
       duration 6.4
       hook clip 0..2.9 plays talk 2..4.9 x1
