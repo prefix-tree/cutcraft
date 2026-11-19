@@ -1685,3 +1685,224 @@ body {
     margin-right: 4px;
   }
 }
+
+/* ── Docs pages: a familiar docs layout, set for reading ─────────────────────────────────────────────────────────
+   The landing page keeps the industrial look. A page with a sidebar is for reading, so it is plain: a near-white page
+   (near-black in the dark), text at 10:1 contrast or more and secondary text at 7:1, sentence-case headings in IBM
+   Plex, light code in a light page with GitHub's syntax colours, hairline rules, and a darker orange for links that
+   are text. */
+
+html:has(.VPContent.has-sidebar) {
+  --cc-paper: #fbfaf7;
+  --cc-paper-2: #f2f0eb;
+  --cc-ink: #161513;
+  --cc-ink-2: #3a3732;
+  --cc-grey: #55514a;
+  --cc-rule: #e2dfd8;
+  --cc-accent-text: #b23a0c;
+  --vp-c-bg: var(--cc-paper);
+  --vp-c-bg-alt: var(--cc-paper-2);
+  --vp-c-bg-soft: var(--cc-paper-2);
+  --vp-c-divider: var(--cc-rule);
+  --vp-c-gutter: var(--cc-rule);
+  --vp-code-bg: #eeebe4;
+  --vp-code-color: var(--cc-ink);
+  --vp-code-block-bg: #f5f3ee;
+  --vp-code-block-color: #24292e;
+  --vp-code-line-height: 1.7;
+  --vp-code-font-size: 14px;
+  --vp-code-copy-code-bg: #eeebe4;
+  --vp-code-copy-code-hover-bg: #e4e0d7;
+}
+html.dark:has(.VPContent.has-sidebar) {
+  --cc-paper: #121211;
+  --cc-paper-2: #1a1a18;
+  --cc-ink: #eeebe4;
+  --cc-ink-2: #cfcabf;
+  --cc-grey: #a39d91;
+  --cc-rule: #2d2c29;
+  --cc-accent-text: #ff8452;
+  --vp-code-bg: #242320;
+  --vp-code-block-bg: #1a1a18;
+  --vp-code-block-color: #e1e4e8;
+  --vp-code-copy-code-bg: #242320;
+  --vp-code-copy-code-hover-bg: #2d2c29;
+}
+html:has(.VPContent.has-sidebar) body {
+  background: var(--cc-paper);
+}
+
+/* The bar and the sidebar: plain, divided by hairlines. */
+html:has(.VPContent.has-sidebar) .VPNavBar .divider-line {
+  height: 1px !important;
+  background: var(--cc-rule) !important;
+  border-bottom: 0;
+}
+html:has(.VPContent.has-sidebar) .VPSidebar {
+  border-right: 1px solid var(--cc-rule);
+}
+.VPSidebarItem.level-0 > .item > .text {
+  color: var(--cc-grey);
+}
+html:has(.VPContent.has-sidebar) .VPSidebarItem .text {
+  color: var(--cc-ink-2);
+}
+html:has(.VPContent.has-sidebar) .VPSidebarItem.level-0 > .item > .text {
+  color: var(--cc-grey);
+}
+html:has(.VPContent.has-sidebar) .VPSidebarItem.is-active > .item .link > .text,
+html:has(.VPContent.has-sidebar) .VPNavBarMenuLink.active,
+html:has(.VPContent.has-sidebar) .VPDocAsideOutline .outline-link.active {
+  color: var(--cc-accent-text) !important;
+}
+html:has(.VPContent.has-sidebar) .VPDocAsideOutline .outline-link {
+  color: var(--cc-ink-2);
+}
+
+/* Text: IBM Plex at 16px on 28px, in sentence case. */
+.VPDoc .vp-doc {
+  color: var(--cc-ink);
+}
+.VPDoc .vp-doc p,
+.VPDoc .vp-doc li {
+  color: var(--cc-ink);
+}
+.VPDoc .vp-doc h1,
+.VPDoc .vp-doc h2,
+.VPDoc .vp-doc h3,
+.VPDoc .vp-doc h4 {
+  font-family: var(--vp-font-family-base);
+  text-transform: none;
+  color: var(--cc-ink);
+}
+.VPDoc .vp-doc h1 {
+  margin-bottom: 20px;
+  font-size: clamp(32px, 4vw, 40px);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+.VPDoc .vp-doc h2 {
+  margin-top: 48px;
+  padding-top: 24px;
+  border-top: 1px solid var(--cc-rule);
+  font-size: 26px;
+  font-weight: 650;
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+}
+.VPDoc .vp-doc h3 {
+  margin-top: 32px;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+}
+.VPDoc .vp-doc a {
+  color: var(--cc-ink);
+  font-weight: 500;
+  text-decoration-color: var(--cc-accent);
+  text-decoration-thickness: 1.5px;
+}
+.VPDoc .vp-doc a:hover {
+  color: var(--cc-accent-text);
+}
+.VPDoc .vp-doc th {
+  color: var(--cc-grey);
+}
+.VPDoc .vp-doc td,
+.VPDoc .vp-doc th {
+  border-color: var(--cc-rule);
+}
+
+/* Code: a light panel in a light page, a dark one in the dark, framed by a hairline; inline code a quiet chip. */
+.VPDoc .vp-doc div[class*="language-"] {
+  border: 1px solid var(--cc-rule) !important;
+  box-shadow: none !important;
+}
+.VPDoc .vp-doc div[class*="language-"] > span.lang {
+  color: var(--cc-grey);
+}
+.VPDoc .vp-doc :not(pre) > code {
+  padding: 2px 6px;
+  border: 1px solid var(--cc-rule);
+  background: var(--vp-code-bg) !important;
+  color: var(--cc-ink) !important;
+  font-size: 0.875em;
+}
+.VPDoc .vp-doc .cc-example {
+  border: 1px solid var(--cc-rule) !important;
+  box-shadow: none !important;
+  background: var(--vp-code-block-bg);
+}
+.VPDoc .vp-doc .cc-example-code div[class*="language-"] {
+  border: 0 !important;
+  border-top: 1px solid var(--cc-rule) !important;
+}
+
+/* Notes: a hairline box with a coloured edge, as in most docs. */
+.VPDoc .vp-doc .custom-block {
+  border: 1px solid var(--cc-rule) !important;
+  border-left: 4px solid var(--cc-grey) !important;
+  box-shadow: none !important;
+}
+.VPDoc .vp-doc .custom-block.tip {
+  border-left-color: #2f7d4f !important;
+}
+.VPDoc .vp-doc .custom-block.warning {
+  border-left-color: #b7791f !important;
+}
+.VPDoc .vp-doc .custom-block.danger {
+  border-left-color: #c0392b !important;
+}
+
+/* Videos and cards: a hairline frame, no lift. */
+.VPDoc .vp-doc a.cc-card .cc-preview,
+.VPDoc .cc-pair video {
+  border: 1px solid var(--cc-rule);
+}
+.VPDoc .vp-doc a.cc-card .cc-card-text {
+  color: var(--cc-grey);
+}
+
+/* The landing page's code stays on its dark steel panels, whatever the scheme. */
+.home .vp-code span {
+  color: var(--shiki-dark, inherit) !important;
+}
+
+/* The gallery: each title on a solid ink strip, so it never sits on the video's own words. */
+.cc-gallery-caption {
+  padding: 8px 12px 10px !important;
+  background: #121212 !important;
+  border-top: 2px solid var(--cc-accent);
+}
+.cc-gallery-tile video {
+  margin-bottom: 0;
+}
+.vp-doc a.cc-gallery-tile {
+  display: flex;
+  flex-direction: column;
+}
+.cc-gallery-caption {
+  position: static !important;
+}
+.cc-gallery-kind,
+.cc-gallery-lines {
+  color: #c9c4b9 !important;
+}
+
+/* Docs pages: the bar's rule and the search box as hairlines; gallery titles stay white on their strip. */
+html:has(.VPContent.has-sidebar) .VPNav .VPNavBar .divider-line,
+html:has(.VPContent.has-sidebar) .VPNav .VPNavBar:not(.home.top) .divider-line {
+  height: 1px !important;
+  background: var(--cc-rule) !important;
+  border-bottom: 0 !important;
+}
+html:has(.VPContent.has-sidebar) .DocSearch-Button {
+  border: 1px solid var(--cc-rule) !important;
+}
+.VPDoc .vp-doc a.cc-gallery-tile,
+.VPDoc .vp-doc a.cc-gallery-tile:hover {
+  color: #ffffff;
+  font-weight: 400;
+}
