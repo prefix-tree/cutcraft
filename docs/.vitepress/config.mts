@@ -32,7 +32,7 @@ export default defineConfig({
       "link",
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,600..900&family=Geist+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Doto:wght@800;900&family=Geist+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap",
       },
     ],
   ],
@@ -42,11 +42,9 @@ export default defineConfig({
   vite: { esbuild: { jsx: "automatic" }, build: { chunkSizeWarningLimit: 3000 } },
   themeConfig: {
     logo: "/logo.svg",
-    // The top bar names the four ways in (on every page, the landing one included); the sidebar is the map of the docs.
+    // The top bar names three ways in, as short as a poster (on every page, the landing one included); the sidebar is the map of the docs.
     nav: [
-      { text: "Guide", link: "/guide/introduction", activeMatch: "^/(guide|decisions)/" },
-      { text: "Reference", link: "/reference/elements/", activeMatch: "^/reference/(?!effects|transitions)" },
-      { text: "Effects", link: "/reference/effects/", activeMatch: "^/reference/(effects|transitions)/" },
+      { text: "Docs", link: "/guide/introduction", activeMatch: "^/(guide|decisions|reference)/" },
       { text: "Examples", link: "/examples/", activeMatch: "^/(examples|recipes)" },
       { text: "Playground", link: "/playground", activeMatch: "^/playground" },
     ],

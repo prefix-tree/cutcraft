@@ -15,56 +15,58 @@ import { withBase } from "vitepress";
 
 <section class="home-hero">
 
-<HeroPrint />
+<h1 class="home-mark">UberScene —</h1>
 
-# Video editor as code
+<div class="home-pitch">
 
-<p class="home-lead">Your video is a React file: cuts on words, titles, captions, colour and effects. Your agent writes it,
-you fine-tune it on a timeline, and it exports to MP4.</p>
+<p class="home-lead">Video as code. A React file of cuts, titles, captions and effects: your agent writes it, you fine-tune it on a timeline, and it exports to MP4.</p>
 
 <div class="home-actions">
 <a class="home-button primary" :href="withBase('/guide/getting-started')">Get started</a>
+<a class="home-button" :href="withBase('/examples/')">Examples</a>
 <a class="home-button" href="https://github.com/prefix-tree/cutcraft">GitHub</a>
 </div>
 
 <CopyCommand command="npm install uberscene @uberscene/kit react zod" />
 
-<p class="home-meta">Free and open source · MIT · no watermark · exports MP4, WebM and stills<span class="cc-seal" aria-hidden="true">切</span></p>
+<p class="home-meta">Free and open source · MIT · no watermark · MP4, WebM and stills</p>
+
+</div>
+
+<div class="home-hero-video"><Preview src="showcase/launch" alt="A product launch rendered by UberScene" /></div>
 
 </section>
 
-<section class="home-gallery" aria-label="Made with UberScene">
+<section class="home-kinetic" aria-label="The idea">
 
-<Gallery />
+<KineticType :words="['Cut on words,', 'not seconds.']" />
 
-<p class="home-links">Each one is a file rendered by UberScene's own export. Hover to play; open one to read the file. Also as recipes: <a :href="withBase('/recipes/talking-head')">interviews</a> · <a :href="withBase('/recipes/product-demo')">product demos</a> · <a :href="withBase('/recipes/vertical-podcast')">podcast clips</a> · <a :href="withBase('/recipes/variants')">variants</a> · <a :href="withBase('/examples/')">all examples →</a></p>
-
-</section>
-
-<section class="home-goal">
-
-## The idea
-
-<p class="home-goal-lead">Everything a desktop editor gives you (tracks, cuts, transitions, titles, captions, colour,
-keying and export) as one file that you, your agent and your code all edit. Where the timeline stops, write any React,
-CSS or WebGL.</p>
+<p class="home-strip-lead">A cut written as <code>8.43</code> seconds can land mid-word; a cut written as <code>word:12</code> lands on it. The file says what it means and UberScene does the arithmetic. Where the timeline stops, write any React, CSS or WebGL.</p>
 
 </section>
 
 <section class="home-features">
 
-## Features
+## What's in the file
 
-<p class="home-strip-lead">What a desktop editor does, as elements in one file. Each card opens the page that explains it.</p>
+<FeatureRows :rows="[
+  { title: 'Cut on words and shots', text: 'Clips start and end on a word of the transcript or a shot of the camera, through every trim.', link: '/guide/time', src: 'showcase/kinetic' },
+  { title: 'Captions and sound', text: 'Karaoke, word by word or typewriter, from the transcript or SRT, VTT and Whisper. Music ducks under speech.', link: '/guide/captions-and-sound', src: 'showcase/captions' },
+  { title: 'Colour, effects, transitions', text: 'Curves, LUTs, keying and glow; iris, film burn and blinds. Shaders in the preview and the export.', link: '/guide/colour', src: 'previews/guide/colour-grade' },
+  { title: 'Three.js, Motion, any React', text: 'Any component in a Layer, on the video\'s clock, frame-exact when you scrub or export.', link: '/guide/free-code', src: 'showcase/logo' },
+  { title: 'Edit by hand, keep the code', text: 'Every drag and trim is an undoable action, written back to the file as a one-value change.', link: '/guide/editing', src: 'showcase/edit' },
+  { title: 'Check a cut without watching it', text: 'Print the timeline, draw a contact sheet, find titles that cover faces or leave the safe zone.', link: '/guide/checking', src: 'showcase/data' },
+]" />
 
-<div class="cc-cards home-cards">
-<PreviewCard title="Captions that follow the words" link="/guide/captions-and-sound" src="showcase/captions" text="From the transcript, through every trim: karaoke, word by word or typewriter. Or import SRT, VTT or Whisper." />
-<PreviewCard title="Transitions" link="/reference/effects/#transitions" src="previews/transitions/iris" text="Fades, wipes, slides and pushes, and shader transitions: iris, clock wipe, blinds, film burn and more." />
-<PreviewCard title="Colour and effects" link="/guide/colour" src="previews/guide/colour-grade" text="Exposure, white balance, curves, LUTs, keying and glow, run as shaders in the preview and the export. Or write your own in GLSL." />
-<PreviewCard title="Ready-made components" link="/reference/components/" src="previews/components/lower-third" text="Lower thirds, callouts, counters and more: plain functions that follow words and take the theme's colours." />
-<PreviewCard title="Free code" link="/guide/free-code" src="showcase/logo" text="Any React, CSS or WebGL in a Layer, and three.js and Motion on the video's clock, frame-exact." />
-<PreviewCard title="Edit by hand, keep the code" link="/guide/editing" src="showcase/edit" text="Every drag and trim is an undoable action, written back to the file as a one-value change." />
-</div>
+</section>
+
+<section class="home-gallery" aria-label="Made with UberScene">
+
+## Made with UberScene
+
+<Gallery />
+
+<p class="home-links">Each one is a file rendered by UberScene's own export. Hover to play; open one to read the file. <a :href="withBase('/examples/')">All examples →</a></p>
 
 </section>
 
