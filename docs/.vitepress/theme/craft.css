@@ -167,7 +167,7 @@
 }
 /* Hero: a black poster the width of the window, whatever the colour scheme: the wordmark in dot matrix across the top,
    the pitch and the install command under it, and a rendered example playing at the right. */
-/* The band and the kinetic letters are wider than the page's column: the page clips them, never scrolling sideways. */
+/* The band is wider than the page's column: the page clips them, never scrolling sideways. */
 .VPPage:has(.home) {
   overflow-x: clip;
 }
@@ -250,13 +250,6 @@
 .vp-doc a.home-button.primary:hover {
   background: #ffffff;
   border-color: #ffffff;
-}
-.home-meta {
-  font-family: var(--cc-mono);
-  font-size: 12px !important;
-  letter-spacing: 0.06em;
-  color: #8a8a8a;
-  margin: 0 !important;
 }
 @media (max-width: 860px) {
   .home-hero {
@@ -531,13 +524,6 @@
   font-size: 0.86em;
 }
 
-/* Features: set apart from the idea above by a rule. */
-.home .home-features {
-  margin-top: 72px;
-  padding-top: 56px;
-  border-top: 1px solid var(--cc-rule);
-}
-
 /* The landing page's card grids (features, examples): three across. */
 .home .home-cards {
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -692,19 +678,6 @@
   }
 }
 
-/* The idea: the goal in one paragraph. */
-.home-goal h2 {
-  margin-top: 0 !important;
-  padding-top: 0 !important;
-  border-top: 0 !important;
-}
-.home-goal-lead {
-  max-width: 780px;
-  font-size: 22px !important;
-  line-height: 1.5 !important;
-  color: var(--cc-ink);
-}
-
 /* The gallery: the examples as a masonry of posters under the hero, four columns, three, then two on a phone. */
 .home-gallery {
   margin-top: 64px !important;
@@ -795,104 +768,5 @@
   /* No hover on a touch screen: the line count shows from the start. */
   .cc-gallery-lines {
     opacity: 1;
-  }
-}
-
-/* Kinetic type: letters scattered and turned until the block is in view, then set, as a cut assembles shots. */
-.cc-kinetic {
-  font-family: var(--cc-display);
-  font-size: clamp(52px, 10vw, 148px);
-  font-weight: 800;
-  line-height: 0.9;
-  text-transform: uppercase;
-  padding: 40px 0;
-}
-.cc-kinetic-line {
-  display: block;
-  white-space: nowrap;
-}
-.cc-kinetic-ch {
-  display: inline-block;
-  transform: var(--from);
-  opacity: 0.25;
-  transition:
-    transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1),
-    opacity 0.6s;
-}
-.cc-kinetic.set .cc-kinetic-ch {
-  transform: none;
-  opacity: 1;
-}
-.cc-kinetic-line:last-child .cc-kinetic-ch {
-  color: var(--cc-accent);
-}
-
-/* Feature rows: big condensed capitals with a grey line under each; the rest dim while one is hovered. */
-.cc-rows {
-  border-top: 1px solid var(--cc-rule);
-}
-.vp-doc a.cc-row {
-  display: block;
-  padding: 20px 0 18px;
-  border-bottom: 1px solid var(--cc-rule);
-  text-decoration: none;
-  color: var(--cc-ink);
-}
-.cc-row-title {
-  display: block;
-  font-family: var(--cc-display);
-  font-size: clamp(34px, 5.4vw, 76px);
-  font-weight: 700;
-  line-height: 0.95;
-  text-transform: uppercase;
-  transition: color 0.15s;
-}
-.cc-row-text {
-  display: block;
-  max-width: 620px;
-  margin-top: 8px;
-  font-size: 16px;
-  color: var(--cc-grey);
-}
-.cc-rows:hover .cc-row-title {
-  color: var(--cc-rule);
-}
-.vp-doc a.cc-row:hover .cc-row-title,
-.vp-doc a.cc-row:focus-visible .cc-row-title {
-  color: var(--cc-ink);
-}
-.vp-doc a.cc-row:focus-visible {
-  outline: 2px solid var(--cc-accent);
-  outline-offset: 4px;
-}
-/* The clip of the hovered row, in a window at the corner of the screen. */
-.cc-rows-peek {
-  position: fixed;
-  right: 24px;
-  bottom: 24px;
-  z-index: 20;
-  width: 340px;
-  aspect-ratio: 16 / 9;
-  background: #000000;
-  border: 1px solid #222222;
-  opacity: 0;
-  transform: translateY(8px);
-  transition:
-    opacity 0.2s,
-    transform 0.2s;
-  pointer-events: none;
-}
-.cc-rows-peek.on {
-  opacity: 1;
-  transform: none;
-}
-.cc-rows-peek video {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-@media (hover: none), (max-width: 860px) {
-  .cc-rows-peek {
-    display: none;
   }
 }
