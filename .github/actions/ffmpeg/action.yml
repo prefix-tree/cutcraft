@@ -1,0 +1,16 @@
+name: Install ffmpeg
+description: A static ffmpeg and ffprobe from GitHub releases, instead of apt, whose mirrors are slow and can stall.
+runs:
+  using: composite
+  steps:
+    # BtbN's release branch build: libvpx, libopus and libx264 included. The n8.1 file is rebuilt in place, so the
+    # minor version can move; pin a dated autobuild tag if a test ever depends on the exact build.
+    - shell: bash
+      run: |
+        dir="$RUNNER_TEMP/ffmpeg"
+        mkdir -p "$dir"
+        curl -fsSL --retry 3 --max-time 300 \
+          https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-n8.1-latest-linux64-gpl-8.1.tar.xz \
+          | tar -xJ --strip-components=2 -C "$dir" --wildcards '*/bin/ffmpeg' '*/bin/ffprobe'
+        echo "$dir" >> "$GITHUB_PATH"
+        "$dir/ffmpeg" -hide_banner -version | head -1
