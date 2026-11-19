@@ -1426,7 +1426,7 @@ body {
 .home.vp-doc h1.home-title {
   font-family: var(--cc-display);
   font-weight: 900;
-  font-size: clamp(64px, 11vw, 168px);
+  font-size: clamp(52px, 7vw, 108px);
   line-height: 0.82;
   letter-spacing: 0;
 }
@@ -2200,4 +2200,15 @@ html:has(.VPContent.has-sidebar) .DocSearch-Button {
   .vp-doc .cc-agents-line code {
     font-size: 12.5px;
   }
+}
+
+/* The hero, tightened so the agent picker and the npm line sit on the first screen of a laptop. */
+.vp-doc p.home-tags {
+  margin-bottom: 20px;
+}
+.vp-doc p.home-lead {
+  margin: 26px 0 22px !important;
+}
+.home-actions {
+  margin-top: 20px;
 }
