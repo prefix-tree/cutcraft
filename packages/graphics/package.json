@@ -82,6 +82,7 @@
     "@types/three": "0.180.0",
     "@vitejs/plugin-react": "catalog:",
     "@vitest/coverage-v8": "catalog:",
+    "animejs": "4.4.1",
     "jsdom": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
