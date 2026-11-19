@@ -60,6 +60,16 @@ const stock: readonly {
     start: 0,
     duration: 36,
   },
+  {
+    // The download's name (46989-449623829_medium.mp4) gives the Pixabay video's id.
+    id: "espresso",
+    file: "espresso.mp4",
+    sha256: "d3cab14722d4e26efc3a2e29931ace323cf21cacb08f64772f4d65f96ec75377",
+    page: "https://pixabay.com/videos/id-46989/",
+    credit: "Espresso machine filling three glasses, Pixabay video 46989, Pixabay Content License",
+    start: 0,
+    duration: 34,
+  },
 ];
 
 for (const [name, source] of Object.entries(clips)) {
