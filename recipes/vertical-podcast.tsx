@@ -1,9 +1,9 @@
 import { z } from "zod";
 
-import { Captions, Clip, Composition, Title, Track } from "@uberscene/kit";
+import { Captions, Clip, Composition, knob, Title, Track } from "@uberscene/kit";
 
 export const schema = z.object({
-  accent: z.string().describe("Name-tag and karaoke colour"),
+  accent: knob.color().describe("Name-tag and karaoke colour"),
 });
 
 export const defaults = { accent: "#5ad1ff" };

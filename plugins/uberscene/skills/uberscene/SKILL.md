@@ -134,7 +134,10 @@ import { z } from "zod";
 import { Captions, Clip, Composition, LowerThird, Title, Track, Transition } from "@uberscene/kit";
 
 // What a person may change without touching the edit.
-export const schema = z.object({ product: z.string(), who: z.string() });
+export const schema = z.object({
+  product: z.string().describe("Product name in the title"),
+  who: z.string().describe("Name on the lower third"),
+});
 export const defaults = { product: "Shed", who: "Maya Chen" };
 
 export default function Video({ product, who }: z.infer<typeof schema>) {
@@ -160,6 +163,9 @@ export default function Video({ product, who }: z.infer<typeof schema>) {
 - The default export returns one `<Composition fps width height>`. There is no duration: the video lasts until its
   last element ends.
 - `schema` and `defaults` are optional. `defaults` is a plain JSON object literal, because the editor rewrites it.
+  Describe each schema value by what it means on screen (`.describe("Name on the lower third")`): that is the
+  editor's label. Mark a colour, font or image with `knob.color()`, `knob.font()` or `knob.image()`, so it gets a
+  picker; a choice is `z.enum([...])`. `uberscene inspect` lists them first.
 - A file may import only `react`, `zod`, `@uberscene/kit` and its own `.ts`/`.tsx` modules inside the project
   (`./blocks/chat-reveal`); three.js and Motion come through `<Three>` and `<Motion>`. Put a component shared by
   several videos in a module of its own and use it in a `<Layer>`.
@@ -263,7 +269,8 @@ What each element and prop actually draws, and the few it does not:
    take of a line.
 5. Pauses live inside clips, not as gaps: 0.3 to 0.5 s between sentences (`out="word:N.end"` already lands after the
    word), at most 0.8 s of tail.
-6. Put what someone will want to change (a name, a colour, a call to action) in `schema` and read it from props.
+6. Put what someone will want to change (a name, a colour, a call to action) in `schema`, described, and read it
+   from props.
 
 ## Before you hand it over
 
