@@ -3,7 +3,7 @@ import { createRequire } from "node:module";
 import { dirname, isAbsolute, join, resolve as resolvePath } from "node:path";
 import { pathToFileURL } from "node:url";
 
-import { type AssetManifest, collectModule, type ResolvedState, resolve } from "@cutcraft/kit";
+import { type AssetManifest, collectModule, type Knob, knobsOf, type ResolvedState, resolve } from "@cutcraft/kit";
 import { loadModule } from "@cutcraft/kit/source";
 
 import { findManifest, MANIFEST_FILE } from "./manifest-file";
@@ -31,6 +31,8 @@ export interface LoadedVideo {
   readonly manifestPath?: string;
   /** The file's text, manifest and props, for `renderVideo`: the export page loads the file itself. */
   readonly source: ExportSource;
+  /** The file's `schema` values, with the value each has once `--props` are applied. */
+  readonly knobs: readonly Knob[];
 }
 
 /**
@@ -52,6 +54,7 @@ export async function loadVideo(file: string, options: LoadOptions = {}): Promis
   const state = resolve(collectModule(mod as never, options.props ?? {}), manifest);
   return {
     state,
+    knobs: knobsOf(mod.schema, { ...mod.defaults, ...options.props }),
     manifest,
     ...(manifestPath ? { manifestPath } : {}),
     source: { text, manifest, ...(options.props ? { props: options.props } : {}) },

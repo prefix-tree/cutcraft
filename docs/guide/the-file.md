@@ -63,6 +63,36 @@ line doesn't run it yet. [Lint](./editing#lint) lists every rule.
 inspector shows a control for each field, using its description as the label. Changing one renders the video with the
 new value, and saving rewrites the `defaults` literal and nothing else.
 
+```tsx
+import { z } from "zod";
+import { knob } from "@cutcraft/kit";
+
+export const schema = z.object({
+  product: z.string().describe("Product name in the title"),
+  accent: knob.color().describe("Colour of the title and the rule under it"),
+  heading: knob.font().describe("Font of the title"),
+  logo: knob.image().describe("Logo on the closing card"),
+  look: z.enum(["dark", "light"]).describe("Background of the closing card"),
+  cards: z.number().int().min(1).max(6).describe("How many feature cards"),
+});
+export const defaults = {
+  product: "Shed", accent: "#ff5a1f", heading: "Inter", logo: "asset:logo", look: "dark", cards: 3,
+};
+```
+
+The control follows the kind. Strings, numbers and booleans get a text field, a number field (bounded by `min` and
+`max`) and a switch; a `z.enum` gets a menu. Three strings want more than a text field, and the kit marks them:
+
+| Helper | Holds | Control |
+|---|---|---|
+| `knob.color()` | Any CSS colour, or a theme token such as `$primary` | A colour picker |
+| `knob.font()` | A family the file can use: bundled, or declared with `font()` or `googleFont()` | A font menu |
+| `knob.image()` | An asset reference (`asset:logo`) or a URL | An image picker |
+
+Describe each value by what it means in the video, not by its type: "Colour of the title", not "accent colour".
+`cutcraft inspect` lists the knobs before the timeline, and `knobsOf(schema, defaults)` returns them to an app that
+builds its own controls.
+
 How an editor treats a prop depends on what it is written as:
 
 | Written as | In the editor |

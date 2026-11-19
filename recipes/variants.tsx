@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { Captions, Clip, Composition, THEME_NAMES, Title, Track } from "@cutcraft/kit";
+import { Captions, Clip, Composition, knob, THEME_NAMES, Title, Track } from "@cutcraft/kit";
 
 /**
  * One cut, many variants. Everything that changes between a brand, a market
@@ -17,8 +17,8 @@ export const schema = z.object({
   headline: z.string().describe("Headline over the opening shot"),
   cta: z.string().describe("Closing line"),
   theme: z.enum(THEME_NAMES).describe("The look: a built-in theme"),
-  accent: z.string().describe("Brand colour (the theme's primary)"),
-  logo: z.string().describe("Logo asset reference"),
+  accent: knob.color().describe("Brand colour (the theme's primary)"),
+  logo: knob.image().describe("Logo asset reference"),
 });
 
 export const defaults = {

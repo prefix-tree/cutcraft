@@ -354,6 +354,8 @@ From `@cutcraft/kit`:
 | `Executor` | `new Executor({ tree, manifest, log?, history? })` | Runs actions: `execute(input)`, `undo()`, `redo()`, `state()`, `log()`, `history()`, `beginGroup()`, `endGroup()`, `replaceTree(tree)`. |
 | `useT` | `() => number` | Progress through the enclosing `<Layer>`, 0 to 1. Needs a mounted player. |
 | `useLayer` | `() => LayerClock` | The layer's clock: `t`, `elapsed`, `remaining`, `duration`, `time`, `fps`. Needs a mounted player. |
+| `knob` | `{ color(), font(), image() }` | Schema helpers: a string that wants a colour picker, a font menu or an image picker ([The file](/guide/the-file#schema-and-defaults-are-the-knobs)). |
+| `knobsOf` | `(schema, values?) => Knob[]` | A file's schema values in order, each with `key`, `kind`, `description`, `optional`, its `value`, and `options`, `min` and `max` where it has them. |
 | `interpolate` | `(input, inputRange, outputRange, options?: { easing?, extrapolateLeft?, extrapolateRight? }) => number` | Piecewise map from one range onto another. Extends past the ends unless `"clamp"`. |
 | `spring` | `({ time, from?, to?, mass?, damping?, stiffness?, overshootClamping? }) => number` | A physical spring at `time` seconds. Defaults: `from` 0, `to` 1, mass 1, damping 10, stiffness 100. |
 | `DrawnLine`, `Label`, `CountUp`, `Cells` | React components | Parts for drawing a diagram inside a `<Layer>`: a line that draws itself, a word with a line to what it names, a number that counts, a row of cells. Each renders SVG and happens `at` a second of the video, or `after` so many seconds of its layer, taking `over` seconds ([Diagram parts](/guide/free-code#diagram-parts)). |

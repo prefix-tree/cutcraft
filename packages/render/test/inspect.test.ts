@@ -123,6 +123,7 @@ cuts: 3.40 hook→broll (x1)
     const { state } = await loadVideo(file);
     const rows = JSON.parse(inspect("video.tsx", state, { json: true }).output);
     expect(Object.keys(rows)).toEqual([
+      "knobs",
       "composition",
       "tracks",
       "elements",
@@ -225,6 +226,51 @@ export default function Video() {
     expect(errors).toEqual([]);
     expect(output).toMatch(/1\.00–1\.60\s+transition\s+pin\s+wipe \(in of pip\)/);
     expect(output).toMatch(/2\.50–3\.00\s+transition\s+pout\s+crossfade \(out of pip\)/);
+  });
+});
+
+describe("inspect, a file's knobs", () => {
+  it("lists each schema value with its kind, value and meaning, before the timeline and in the JSON", async () => {
+    const knobs = join(dir, "knobs.tsx");
+    writeFileSync(
+      knobs,
+      `import { z } from "zod";
+import { Composition, knob, Title, Track } from "@cutcraft/kit";
+export const manifest = { assets: {} };
+export const schema = z.object({
+  title: z.string().describe("Headline over the first shot"),
+  accent: knob.color().describe("Colour of the headline"),
+  look: z.enum(["dark", "light"]),
+  cards: z.number().min(1).max(6).optional(),
+});
+export const defaults = { title: "Hello", accent: "#ff5a1f", look: "dark" };
+export default function Video({ title, accent }: z.infer<typeof schema>) {
+  return (
+    <Composition fps={30} width={640} height={360}>
+      <Track id="text" layout="free">
+        <Title id="t" start={0} duration={2} color={accent}>{title}</Title>
+      </Track>
+    </Composition>
+  );
+}
+`,
+    );
+    const video = await loadVideo(knobs, { props: { title: "Changed" } });
+    const { output } = inspect("knobs.tsx", video.state, { knobs: video.knobs });
+    expect(output.split("\n").slice(1, 5)).toEqual([
+      'knob title  text  = Changed  "Headline over the first shot"',
+      'knob accent  color  = #ff5a1f  "Colour of the headline"',
+      "knob look  choice of dark | light  = dark",
+      "knob cards  number 1..6, optional",
+    ]);
+    const rows = JSON.parse(inspect("knobs.tsx", video.state, { json: true, knobs: video.knobs }).output);
+    expect(rows.knobs[1]).toEqual({
+      key: "accent",
+      description: "Colour of the headline",
+      kind: "color",
+      optional: false,
+      value: "#ff5a1f",
+    });
   });
 });
 

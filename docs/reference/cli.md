@@ -80,11 +80,14 @@ whether it is in the frame and in each safe zone, and what it overlaps.
 ## Inspect
 
 `cutcraft inspect video.tsx` prints the timeline the way an editor reads it: each track and its elements with their
-seconds, the words each clip plays, effects, keyframes and cuts. It runs the resolver only, so it starts no browser,
+seconds, the words each clip plays, effects, keyframes and cuts. The file's `schema` values come first, one `knob`
+line each with its kind, its value and its description. It runs the resolver only, so it starts no browser,
 needs no media files and answers at once. It is how an agent, or a script, reads a cut back.
 
 ```
 video.tsx  1920x1080  30 fps  25.60 s (768 frames)  0 errors
+knob title  text  = Shed  "Product name in the title"
+knob accent  color  = #ff5a1f  "Colour of the title"
 track main (sequence)
      0.00–5.20     clip        hook  asset:founder 5.60–10.80  words 12–23 "Small software still deserves a real cloud It s…"
      4.80–5.20     transition  x1  crossfade (hook → broll)
@@ -112,7 +115,7 @@ word:14  1.00 s  frame 30  (word 14 "still" in hook)
 | Option | |
 |---|---|
 | `--at <moments>` | The moments to describe, comma-separated. Without it, the whole timeline. |
-| `--json` | Flat rows instead of text: `composition`, `tracks`, `elements`, `effects`, `keyframes`, `words`, `cuts` and `errors`, each row with its seconds and its frames; with `--at`, an `at` array too. Made for `jq` or a short script: `cutcraft inspect video.tsx --json \| jq '.cuts'`. |
+| `--json` | Flat rows instead of text: `knobs` (each with `key`, `kind`, `description`, `value`, and `options`, `min` and `max` where it has them), `composition`, `tracks`, `elements`, `effects`, `keyframes`, `words`, `cuts` and `errors`, each row with its seconds and its frames; with `--at`, an `at` array too. Made for `jq` or a short script: `cutcraft inspect video.tsx --json \| jq '.cuts'`. |
 | `--manifest`, `--props`, `--import` | As for an export. |
 
 A moment is written the way the file is written, or as plain time:

@@ -3,6 +3,7 @@
 import {
   capabilitiesOf,
   type ElementRow,
+  type Knob,
   lookupAsset,
   type Moment,
   parseMoments,
@@ -220,6 +221,20 @@ export function formatTimeline(file: string, rows: TimelineRows): string {
   return `${lines.join("\n")}\n`;
 }
 
+/** The file's knobs as text, one line each: key, kind, value, and what it means. */
+function formatKnobs(knobs: readonly Knob[]): string {
+  return knobs
+    .map((k) => {
+      const kind = k.kind === "choice" && k.options ? `choice of ${k.options.join(" | ")}` : k.kind;
+      const range = k.min !== undefined || k.max !== undefined ? ` ${k.min ?? ""}..${k.max ?? ""}` : "";
+      const parts = [`knob ${k.key}`, `${kind}${range}${k.optional ? ", optional" : ""}`];
+      if (k.value !== undefined) parts.push(`= ${value(k.value)}`);
+      if (k.description) parts.push(quote(k.description, 96));
+      return `${parts.join("  ")}\n`;
+    })
+    .join("");
+}
+
 /** Each moment as text: where it is, what is drawn from the top down, what is heard and said. */
 export function formatAt(views: readonly MomentView[]): string {
   const blocks = views.map((v) => {
@@ -261,6 +276,8 @@ export interface InspectOptions {
   readonly at?: string;
   /** Flat rows as JSON instead of text. */
   readonly json?: boolean;
+  /** The file's `schema` values, listed before the timeline (and as `knobs` in the JSON). */
+  readonly knobs?: readonly Knob[];
 }
 
 export interface InspectResult {
@@ -273,8 +290,14 @@ export interface InspectResult {
 /** The timeline of a resolved file, or its moments, as text or JSON. `file` is the name printed. */
 export function inspect(file: string, state: ResolvedState, options: InspectOptions = {}): InspectResult {
   const rows = timelineRows(state);
+  const knobs = options.knobs ?? [];
   if (options.at === undefined)
-    return { output: options.json ? `${JSON.stringify(rows, null, 2)}\n` : formatTimeline(file, rows), errors: [] };
+    return {
+      output: options.json
+        ? `${JSON.stringify({ knobs, ...rows }, null, 2)}\n`
+        : formatTimeline(file, rows).replace(/\n/, `\n${formatKnobs(knobs)}`),
+      errors: [],
+    };
   const { moments, errors } = resolveMoments(state, parseMoments(options.at));
   const views = moments.map((m) => describeAt(state, m));
   return {

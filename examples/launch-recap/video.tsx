@@ -7,6 +7,7 @@ import {
   Clip,
   Composition,
   Keyframe,
+  knob,
   Layer,
   Marker,
   Shape,
@@ -19,7 +20,7 @@ import {
 export const schema = z.object({
   product: z.string().describe("Product name on the title card"),
   tagline: z.string().describe("One line under the title"),
-  accent: z.string().describe("Accent colour for the lower third and the call to action"),
+  accent: knob.color().describe("Accent colour for the lower third and the call to action"),
   cta: z.string().describe("Call to action on the closing card"),
 });
 

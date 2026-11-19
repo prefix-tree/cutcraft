@@ -213,6 +213,7 @@ async function main(): Promise<number> {
     }
     const video = await loadVideo(target, loadOptions);
     const result = inspect(target, video.state, {
+      knobs: video.knobs,
       ...(values.at !== undefined ? { at: values.at } : {}),
       ...(values.json ? { json: true } : {}),
     });

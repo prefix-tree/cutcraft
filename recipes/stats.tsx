@@ -1,9 +1,9 @@
 import { z } from "zod";
 
-import { Clip, Composition, Layer, Title, Track, useLayer } from "@cutcraft/kit";
+import { Clip, Composition, knob, Layer, Title, Track, useLayer } from "@cutcraft/kit";
 
 export const schema = z.object({
-  accent: z.string().describe("Number colour"),
+  accent: knob.color().describe("Number colour"),
 });
 
 export const defaults = { accent: "#7cff8a" };
