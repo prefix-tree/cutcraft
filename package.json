@@ -7,10 +7,10 @@
   "homepage": "https://cutcraft.prefixtree.xyz/",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/prefix-tree/cutcraft.git"
+    "url": "git+https://github.com/prefix-tree/uberscene.git"
   },
   "bugs": {
-    "url": "https://github.com/prefix-tree/cutcraft/issues"
+    "url": "https://github.com/prefix-tree/uberscene/issues"
   },
   "packageManager": "pnpm@10.28.0",
   "engines": {

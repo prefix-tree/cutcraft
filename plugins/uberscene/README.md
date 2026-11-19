@@ -7,7 +7,7 @@ the `uberscene` command line.
 ## Claude Code
 
 ```
-/plugin marketplace add prefix-tree/cutcraft
+/plugin marketplace add prefix-tree/uberscene
 /plugin install uberscene@prefix-tree
 ```
 

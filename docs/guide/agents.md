@@ -9,12 +9,12 @@ of your coding agent, so you can ask for a video in plain words and get a file, 
 **In Claude Code**, add the repository as a plugin marketplace, then install the plugin:
 
 ```
-/plugin marketplace add prefix-tree/cutcraft
+/plugin marketplace add prefix-tree/uberscene
 /plugin install uberscene@prefix-tree
 ```
 
 **In another agent**, or in Claude Code without the plugin, copy the skill's folder,
-[`plugins/uberscene/skills/uberscene`](https://github.com/prefix-tree/cutcraft/tree/main/plugins/uberscene/skills/uberscene),
+[`plugins/uberscene/skills/uberscene`](https://github.com/prefix-tree/uberscene/tree/main/plugins/uberscene/skills/uberscene),
 to where the agent reads skills: for Claude Code that is `.claude/skills/uberscene/` in a project, or
 `~/.claude/skills/uberscene/` for all of them. It follows the open [Agent Skills](https://agentskills.io) format: one
 `SKILL.md` and the reference files it links.

@@ -175,13 +175,13 @@ export default defineConfig({
         items: [
           { text: "Core principles", link: "/guide/principles" },
           { text: "Decision records", link: "/decisions/", collapsed: true, items: decisions },
-          { text: "Changelog", link: "https://github.com/prefix-tree/cutcraft/blob/main/packages/kit/CHANGELOG.md" },
+          { text: "Changelog", link: "https://github.com/prefix-tree/uberscene/blob/main/packages/kit/CHANGELOG.md" },
         ],
       },
     ],
-    socialLinks: [{ icon: "github", link: "https://github.com/prefix-tree/cutcraft" }],
+    socialLinks: [{ icon: "github", link: "https://github.com/prefix-tree/uberscene" }],
     search: { provider: "local" },
-    editLink: { pattern: "https://github.com/prefix-tree/cutcraft/edit/main/docs/:path" },
+    editLink: { pattern: "https://github.com/prefix-tree/uberscene/edit/main/docs/:path" },
     footer: { message: "MIT licensed." },
   },
 });

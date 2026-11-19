@@ -17,11 +17,11 @@
   "homepage": "https://cutcraft.prefixtree.xyz/",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/prefix-tree/cutcraft.git",
+    "url": "git+https://github.com/prefix-tree/uberscene.git",
     "directory": "packages/cli"
   },
   "bugs": {
-    "url": "https://github.com/prefix-tree/cutcraft/issues"
+    "url": "https://github.com/prefix-tree/uberscene/issues"
   },
   "type": "module",
   "engines": {

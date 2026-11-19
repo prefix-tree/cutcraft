@@ -7,10 +7,10 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/prefix-tree/cutcraft/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/prefix-tree/cutcraft/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="https://github.com/prefix-tree/uberscene/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/prefix-tree/uberscene/actions/workflows/ci.yml/badge.svg"></a>
   <a href="https://www.npmjs.com/package/uberscene"><img alt="npm" src="https://img.shields.io/npm/v/uberscene?color=black"></a>
-  <a href="https://cutcraft.prefixtree.xyz/"><img alt="Docs" src="https://github.com/prefix-tree/cutcraft/actions/workflows/docs.yml/badge.svg"></a>
-  <a href="https://github.com/prefix-tree/cutcraft/actions/workflows/codeql.yml"><img alt="CodeQL" src="https://github.com/prefix-tree/cutcraft/actions/workflows/codeql.yml/badge.svg"></a>
+  <a href="https://cutcraft.prefixtree.xyz/"><img alt="Docs" src="https://github.com/prefix-tree/uberscene/actions/workflows/docs.yml/badge.svg"></a>
+  <a href="https://github.com/prefix-tree/uberscene/actions/workflows/codeql.yml"><img alt="CodeQL" src="https://github.com/prefix-tree/uberscene/actions/workflows/codeql.yml/badge.svg"></a>
   <a href="LICENSE"><img alt="MIT License" src="https://img.shields.io/badge/license-MIT-black"></a>
   <img alt="Node 22.19 or later" src="https://img.shields.io/badge/node-%E2%89%A522.19-black">
 </p>
@@ -131,7 +131,7 @@ npx uberscene hello.tsx --out hello.mp4
 ```
 
 The [guide](https://cutcraft.prefixtree.xyz/guide/getting-started) starts with a video that needs no footage. For
-coding agents there is an [Agent Skill](plugins/uberscene): `/plugin marketplace add prefix-tree/cutcraft`.
+coding agents there is an [Agent Skill](plugins/uberscene): `/plugin marketplace add prefix-tree/uberscene`.
 
 ## Packages
 
@@ -146,7 +146,7 @@ coding agents there is an [Agent Skill](plugins/uberscene): `/plugin marketplace
 ## Feedback
 
 I'd like to hear what you think of the format and what's missing. Open an
-[issue](https://github.com/prefix-tree/cutcraft/issues). See [CONTRIBUTING.md](CONTRIBUTING.md) to contribute.
+[issue](https://github.com/prefix-tree/uberscene/issues). See [CONTRIBUTING.md](CONTRIBUTING.md) to contribute.
 
 ## License
 

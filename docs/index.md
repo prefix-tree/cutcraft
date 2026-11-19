@@ -24,7 +24,7 @@ import { withBase } from "vitepress";
 <div class="home-actions">
 <a class="home-button primary" :href="withBase('/guide/getting-started')">Get started</a>
 <a class="home-button" :href="withBase('/examples/')">Examples</a>
-<a class="home-button" href="https://github.com/prefix-tree/cutcraft">GitHub</a>
+<a class="home-button" href="https://github.com/prefix-tree/uberscene">GitHub</a>
 </div>
 
 <CopyCommand command="npm install uberscene @uberscene/kit react zod" />
@@ -116,7 +116,7 @@ import { withBase } from "vitepress";
 **Free and open source under the MIT licence.**
 
 [Quick start](./guide/getting-started) · [Principles](./guide/principles) · [Elements](./reference/elements/) · [CLI](./reference/cli) ·
-[API](./reference/api) · [GitHub](https://github.com/prefix-tree/cutcraft) ·
+[API](./reference/api) · [GitHub](https://github.com/prefix-tree/uberscene) ·
 [npm](https://www.npmjs.com/package/uberscene)
 
 </section>

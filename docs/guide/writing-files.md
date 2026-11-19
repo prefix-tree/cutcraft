@@ -1,7 +1,7 @@
 # A launch video, line by line
 
 This page follows one file from a brief to a finished video: the launch recap in
-[`examples/launch-recap`](https://github.com/prefix-tree/cutcraft/tree/main/examples/launch-recap), which a model
+[`examples/launch-recap`](https://github.com/prefix-tree/uberscene/tree/main/examples/launch-recap), which a model
 wrote. It shows what each part of the file does and links to the guide page that covers it in full.
 
 ## The brief

@@ -55,9 +55,9 @@ what its key parts do. For starting points by kind of video, see the [recipes](/
 ## Rendering them yourself
 
 Each showcase video is one file in
-[`examples/showcase`](https://github.com/prefix-tree/cutcraft/tree/main/examples/showcase), rendered with
+[`examples/showcase`](https://github.com/prefix-tree/uberscene/tree/main/examples/showcase), rendered with
 `pnpm --filter @uberscene/example-showcase render`. The guide's feature examples are in
-[`examples/showcase/guide`](https://github.com/prefix-tree/cutcraft/tree/main/examples/showcase/guide), rendered with
+[`examples/showcase/guide`](https://github.com/prefix-tree/uberscene/tree/main/examples/showcase/guide), rendered with
 `pnpm --filter @uberscene/example-showcase docs`. Every file renders through the player in
 [headless Chrome](/guide/exporting#the-browser-it-runs-in).
 
@@ -67,7 +67,7 @@ two coffee shots in the effect and transition demos, close and wide: Pixabay vid
 Content License. They are not committed; `gen` reads them from `examples/showcase/media/stock/` and checks their
 hashes.
 
-The shorts are in [`examples/shorts`](https://github.com/prefix-tree/cutcraft/tree/main/examples/shorts),
+The shorts are in [`examples/shorts`](https://github.com/prefix-tree/uberscene/tree/main/examples/shorts),
 rendered with `pnpm --filter @uberscene/example-shorts render`. The two lighting explainers and the snake use no media at all. The
 talking head is real footage: 79 seconds of a NASA interview, in the public domain, committed with its transcript and
 credit in `examples/shorts/media`. The interview that changes layout is a 44 second excerpt of a podcast, which is
