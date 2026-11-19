@@ -15,7 +15,7 @@ import { withBase } from "vitepress";
 
 <section class="home-hero">
 
-<h1 class="home-title">Make videos with code.</h1>
+<h1 class="home-title">Make videos <mark>with code.</mark></h1>
 
 <p class="home-lead">Write a video as a React file. Play it in the browser, fine-tune it on a timeline, export it to MP4.</p>
 
@@ -30,6 +30,8 @@ import { withBase } from "vitepress";
 <p class="home-meta">Free and open source · MIT licence</p>
 
 </section>
+
+<div class="home-ticker" aria-hidden="true"><div><span>Timeline ■ Captions ■ 45 effects ■ Transitions ■ Motion graphics ■ Three.js ■ 115 undoable actions ■ MP4 export ■ </span><span>Timeline ■ Captions ■ 45 effects ■ Transitions ■ Motion graphics ■ Three.js ■ 115 undoable actions ■ MP4 export ■ </span></div></div>
 
 <section class="home-live" aria-label="Try it">
 
