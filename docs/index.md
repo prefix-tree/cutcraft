@@ -122,11 +122,19 @@ const { text: next } = foldToSource(text, exec.log(), exec.state());
 
 </section>
 
-<section class="home-chapter">
+<section class="home-elements">
 
-## Cuts and transitions
+## Every element
 
-<p class="home-chapter-lead">Clips play one after another on a track. A transition between two of them overlaps them: wipe, iris, film burn, blinds and more. <a :href="withBase('/guide/transitions')">Transitions →</a></p>
+<p class="home-chapter-lead">Each one a few lines of TSX, rendered by the same player you embed. <a :href="withBase('/examples/')">All examples →</a></p>
+
+<div class="home-element-grid">
+
+<article class="home-element">
+
+### Cuts and transitions
+
+<p class="home-element-lead">Clips play one after another on a track. A transition between two of them overlaps them: wipe, iris, film burn, blinds and more. <a :href="withBase('/guide/transitions')">Transitions →</a></p>
 
 <Example src="previews/elements/transition" alt="A wipe from one coffee shot to another">
 
@@ -134,13 +142,13 @@ const { text: next } = foldToSource(text, exec.log(), exec.state());
 
 </Example>
 
-</section>
+</article>
 
-<section class="home-chapter">
+<article class="home-element">
 
-## Titles
+### Titles
 
-<p class="home-chapter-lead">Text over the picture, timed to a clip, animated by letter, word or line. <a :href="withBase('/guide/titles-and-graphics')">Titles and graphics →</a></p>
+<p class="home-element-lead">Text over the picture, timed to a clip, animated by letter, word or line. <a :href="withBase('/guide/titles-and-graphics')">Titles and graphics →</a></p>
 
 <Example src="previews/elements/title" alt="A title appearing word by word over a coffee shot">
 
@@ -148,13 +156,13 @@ const { text: next } = foldToSource(text, exec.log(), exec.state());
 
 </Example>
 
-</section>
+</article>
 
-<section class="home-chapter">
+<article class="home-element">
 
-## Captions
+### Captions
 
-<p class="home-chapter-lead">Captions from the clip's transcript, or from SRT, VTT and Whisper. Karaoke, word by word or typewriter. <a :href="withBase('/guide/captions-and-sound')">Captions and sound →</a></p>
+<p class="home-element-lead">Captions from the clip's transcript, or from SRT, VTT and Whisper. Karaoke, word by word or typewriter. <a :href="withBase('/guide/captions-and-sound')">Captions and sound →</a></p>
 
 <Example src="previews/elements/captions" alt="Karaoke captions over a speaker">
 
@@ -162,13 +170,13 @@ const { text: next } = foldToSource(text, exec.log(), exec.state());
 
 </Example>
 
-</section>
+</article>
 
-<section class="home-chapter">
+<article class="home-element">
 
-## Colour and effects
+### Colour and effects
 
-<p class="home-chapter-lead">Exposure, white balance, curves, LUTs, keying, glow and more, written in the order a colourist works. Shaders in the preview and the export. <a :href="withBase('/reference/effects/')">All 45 effects and transitions →</a></p>
+<p class="home-element-lead">Exposure, white balance, curves, LUTs, keying, glow and more, written in the order a colourist works. Shaders in the preview and the export. <a :href="withBase('/reference/effects/')">All 45 effects and transitions →</a></p>
 
 <Example src="previews/guide/colour-grade" alt="A coffee shot, then the same shot graded">
 
@@ -176,13 +184,13 @@ const { text: next } = foldToSource(text, exec.log(), exec.state());
 
 </Example>
 
-</section>
+</article>
 
-<section class="home-chapter">
+<article class="home-element">
 
-## Motion graphics
+### Motion graphics
 
-<p class="home-chapter-lead">Ready-made lower thirds, callouts, counters and cards, timed like any title. <a :href="withBase('/reference/components/')">Components →</a></p>
+<p class="home-element-lead">Ready-made lower thirds, callouts, counters and cards, timed like any title. <a :href="withBase('/reference/components/')">Components →</a></p>
 
 <Example src="previews/components/lower-third" alt="A lower third sliding up over a coffee shot">
 
@@ -190,19 +198,23 @@ const { text: next } = foldToSource(text, exec.log(), exec.state());
 
 </Example>
 
-</section>
+</article>
 
-<section class="home-chapter">
+<article class="home-element">
 
-## Three.js and any React
+### Three.js and any React
 
-<p class="home-chapter-lead">Any component on the video's clock: three.js, Motion, SVG or canvas, frame-exact when you scrub or export. <a :href="withBase('/guide/free-code')">Free code →</a></p>
+<p class="home-element-lead">Any component on the video's clock: three.js, Motion, SVG or canvas, frame-exact when you scrub or export. <a :href="withBase('/guide/free-code')">Free code →</a></p>
 
 <Example src="previews/elements/three" alt="A spinning cube over a coffee shot">
 
 <<< @/../examples/showcase/docs/three.tsx
 
 </Example>
+
+</article>
+
+</div>
 
 </section>
 
