@@ -75,7 +75,7 @@ export interface ExportSource {
   readonly files?: Readonly<Record<string, string>>;
   readonly manifest: AssetManifest;
   readonly props?: Readonly<Record<string, unknown>>;
-  /** A Chrome or Chromium 153+ binary; default `UBERSCENE_CHROMIUM`, then Chrome for Testing from the cache. */
+  /** A Chrome 157 binary (`CHROME_MILESTONE`, checked when it starts); default `UBERSCENE_CHROMIUM`, then Chrome for Testing from the cache. */
   readonly executablePath?: string;
 }
 

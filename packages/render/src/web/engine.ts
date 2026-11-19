@@ -5,7 +5,7 @@ import type { AssetManifest } from "@uberscene/kit";
 import type { MediaResolver } from "@uberscene/player/engine";
 
 import type { FontFile } from "../fonts";
-import { findChrome } from "./chrome";
+import { CHROME_MILESTONE, findChrome, wrongChrome } from "./chrome";
 import type {
   AudioRequest,
   BoundsOptions,
@@ -42,7 +42,7 @@ export interface BrowserEngineOptions {
   readonly media: MediaResolver;
   /** Every face to set text in: the file's, read in Node, and any passed beside it (`--font`). */
   readonly fonts?: readonly FontFile[];
-  /** A Chrome or Chromium binary; default `UBERSCENE_CHROMIUM`, then Chrome for Testing from the cache (see `findChrome`). */
+  /** A Chrome 157 binary; default `UBERSCENE_CHROMIUM`, then Chrome for Testing from the cache (see `findChrome`). */
   readonly executablePath?: string;
   /** Pages that render pieces at the same time; default 1. */
   readonly tabs?: number;
@@ -57,6 +57,7 @@ export interface BrowserEngineOptions {
 }
 
 interface Browser {
+  version(): string;
   newPage(options: object): Promise<Page>;
   close(): Promise<void>;
 }
@@ -117,9 +118,11 @@ export class BrowserEngine {
     try {
       browser = await chromium.launch({ headless: true, args: FLAGS, executablePath }).catch((error: unknown) => {
         throw new Error(
-          `the export could not start Chrome at ${executablePath} (${error instanceof Error ? error.message.split("\n")[0] : String(error)}); set UBERSCENE_CHROMIUM to a Chrome or Chromium 153+ binary`,
+          `the export could not start Chrome at ${executablePath} (${error instanceof Error ? error.message.split("\n")[0] : String(error)}); set UBERSCENE_CHROMIUM to a Chrome ${CHROME_MILESTONE} binary`,
         );
       });
+      const wrong = wrongChrome(browser.version(), executablePath);
+      if (wrong) throw new Error(wrong);
       const pages: Page[] = [];
       const tabs = Math.max(1, Math.floor(options.tabs ?? 1));
       for (let i = 0; i < tabs; i++)

@@ -5,7 +5,7 @@
 // This covers the one-pass built-ins. The others reduce to these in their last pass: glow and longShadow composite at
 // alpha 0, bevel mixes by 0, shadowsHighlights at 0 stops is exposure's round trip, and regionBlur at radius 0 sums one
 // tap. lut and curves are exact by construction (a mix by 0, a table of the identity read at its entries' centres).
-// Needs a Chrome or Chromium 153+ in UBERSCENE_CHROMIUM.
+// Needs Chrome 157: the cached Chrome for Testing, or UBERSCENE_CHROMIUM.
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 

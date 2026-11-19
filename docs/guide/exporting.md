@@ -45,13 +45,15 @@ The export runs the real player in headless Chrome. It steps the file frame by f
 three.js scene and Motion sequence to draw the frame, then captures and encodes it in the page with the browser's own
 encoders.
 
-The first export downloads Chrome for Testing into `~/.cache/uberscene/browsers` once and reuses it after that.
+The first export downloads Chrome for Testing 157 into `~/.cache/uberscene/browsers` once and reuses it after that.
+The export runs on Chrome 157 only: it is the version the tests draw on, and another one draws text a little
+differently. A binary of any other version is refused before the export starts.
 
 | To | Use |
 |---|---|
 | Download it ahead of time, for a Docker image or a CI cache | `npx uberscene browser install` |
 | Keep the cache somewhere else | `UBERSCENE_BROWSER_CACHE` |
-| Use your own Chrome or Chromium 153 or later instead of downloading one | `UBERSCENE_CHROMIUM` |
+| Use your own Chrome 157 instead of downloading one | `UBERSCENE_CHROMIUM` |
 
 The capture uses HTML-in-Canvas (`drawElementImage`), which Chrome ships behind a flag the export turns on.
 

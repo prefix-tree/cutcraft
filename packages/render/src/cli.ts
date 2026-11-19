@@ -44,7 +44,8 @@ const USAGE = `Usage: uberscene <file.tsx> --out <video.mp4|.webm|.mp3|.wav> [--
        uberscene skills install [--dir <folder>] [--force]
 
   Every export draws its frames in Chrome. The first one downloads Chrome for Testing ${CHROME_MILESTONE} into
-  ~/.cache/uberscene/browsers (or UBERSCENE_BROWSER_CACHE); UBERSCENE_CHROMIUM names a Chrome 153+ to use instead.
+  ~/.cache/uberscene/browsers (or UBERSCENE_BROWSER_CACHE); UBERSCENE_CHROMIUM names a Chrome ${CHROME_MILESTONE} to use
+  instead. The export runs on Chrome ${CHROME_MILESTONE} only.
 
   inspect               print the timeline as text, without a browser: each track and element with its seconds,
                         the words each clip plays, effects, keyframes and cuts; --json prints flat rows instead

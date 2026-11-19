@@ -2,6 +2,8 @@
 
 > Supersedes [0002](./0002-fixed-vocabulary-and-literal-ids.md) and [0009](./0009-helpers-layers-and-editability.md) where they
 > limit what is visual, and the export half of [0015](./0015-a-headless-engine-renders-the-export.md) for free code.
+>
+> The Chrome version below is superseded by [0030](./0030-one-chrome-version.md): the export runs on Chrome 157 only.
 
 ## Context
 

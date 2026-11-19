@@ -5,7 +5,7 @@
 Exports a [UberScene](https://cutcraft.prefixtree.xyz/) video file: MP4 or WebM, an MP3 or WAV soundtrack, or a
 PNG or JPEG still. It runs the real player in headless Chrome, so the exported file matches the preview frame for
 frame. The first export downloads Chrome for Testing into `~/.cache/uberscene/browsers`; `UBERSCENE_CHROMIUM` names a
-Chrome 153+ to use instead.
+Chrome 157 to use instead. The export runs on Chrome 157 only and refuses another version.
 
 For the command line, install [`uberscene`](https://www.npmjs.com/package/uberscene). This package is the library behind
 it.

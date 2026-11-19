@@ -26,7 +26,7 @@ npx uberscene skills install [--dir <folder>] [--force]
 
 Every export draws its frames in headless Chrome. The first one downloads Chrome for Testing into
 `~/.cache/uberscene/browsers` (`UBERSCENE_BROWSER_CACHE` moves it); `uberscene browser install` downloads it ahead of
-time. `UBERSCENE_CHROMIUM` names a Chrome or Chromium 153 or later to use instead
+time. `UBERSCENE_CHROMIUM` names a Chrome 157, the only version the export runs on, to use instead
 ([The browser it runs in](/guide/exporting#the-browser-it-runs-in)).
 
 ## Export

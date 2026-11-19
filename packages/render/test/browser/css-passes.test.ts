@@ -1,7 +1,7 @@
 // The CSS-type effects drawn as shader passes (RFC 0001: one pipeline in file order) against the same effects drawn
 // by Chrome's own canvas filter. Each effect is drawn twice on the same picture: alone, which takes the CSS filter,
 // and followed by an effect that changes nothing, which puts every effect on the element into the shader pipeline.
-// They must match within the golden tolerance. Needs a Chrome or Chromium 153+ in UBERSCENE_CHROMIUM.
+// They must match within the golden tolerance. Needs Chrome 157: the cached Chrome for Testing, or UBERSCENE_CHROMIUM.
 import { execFileSync } from "node:child_process";
 import { copyFileSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";

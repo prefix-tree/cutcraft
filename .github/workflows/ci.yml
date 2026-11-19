@@ -84,7 +84,7 @@ jobs:
           key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
       - run: pnpm --filter @uberscene/player exec playwright install --with-deps chromium
       - run: pnpm --filter @uberscene/player test:e2e
-      # The export needs drawElementImage (Chrome 153+); Playwright's pinned Chromium (141) predates it. The export
+      # The export runs on Chrome 157 only (CHROME_MILESTONE); Playwright's pinned Chromium (141) is refused. The export
       # downloads the Chrome for Testing it is tested against, as on a user's machine, once per CHROME_MILESTONE: the
       # key follows chrome.ts, and `browser install` keeps a cached Chrome without asking the network.
       - uses: actions/cache@v6

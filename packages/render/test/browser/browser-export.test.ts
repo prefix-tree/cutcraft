@@ -1,6 +1,5 @@
 // The export engine: <Three> and <Motion> export as the player shows them, frame by frame, and pieces rendered on
-// several pages join into the same file as one page writes. Needs a Chrome or Chromium 153+ in UBERSCENE_CHROMIUM (Playwright's pinned Chromium is too old for
-// drawElementImage).
+// several pages join into the same file as one page writes. Needs Chrome 157: the cached Chrome for Testing, or UBERSCENE_CHROMIUM.
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 

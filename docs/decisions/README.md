@@ -37,3 +37,4 @@ use that name.
 | [0027](./0027-what-we-adopt-from-hyperframes.md) | What we adopt from HyperFrames (proposed) |
 | [0028](./0028-tools-for-narrated-explainers.md) | Tools for narrated explainers: a narration helper, motion and placement in the CLI, pinned labels, diagram parts, `study` (proposed) |
 | [0029](./0029-one-hook-for-libraries-that-seek.md) | One hook for libraries that seek: `useSeekable` |
+| [0030](./0030-one-chrome-version.md) | One Chrome version: the export runs on Chrome 157 only |
