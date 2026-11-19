@@ -14,22 +14,22 @@ export function overlay(tree: CollectedTree, log: PatchLog | undefined): Collect
   const byId = new Map<string, CollectedNode>();
 
   // Children added or moved under a parent, keyed by parent id.
-  const additions = new Map<string, { after: string | null; node: CollectedNode }[]>();
+  const additions = new Map<string, { after: string | null; node: CollectedNode; seq: number }[]>();
   const movedAway = new Set<string>();
   for (const [id, n] of net) {
     if (n.presence === "inserted" && n.node && n.place) {
       // A remove followed by an insert of a different node under the same id replaces the original.
       if (tree.byId.has(id)) movedAway.add(id);
-      push(additions, n.place.parent, { after: n.place.after, node: n.node });
+      push(additions, n.place.parent, { after: n.place.after, node: n.node, seq: n.place.seq });
     } else if (n.presence === "present" && n.place) {
       const original = tree.byId.get(id);
       if (original && original.parent !== n.place.parent) {
         movedAway.add(id);
-        push(additions, n.place.parent, { after: n.place.after, node: original });
+        push(additions, n.place.parent, { after: n.place.after, node: original, seq: n.place.seq });
       } else if (original) {
         // Reorder within the same parent: treat as remove-then-add at the new spot.
         movedAway.add(id);
-        push(additions, n.place.parent, { after: n.place.after, node: original });
+        push(additions, n.place.parent, { after: n.place.after, node: original, seq: n.place.seq });
       }
     }
   }
@@ -110,13 +110,14 @@ function push<T>(map: Map<string, T[]>, key: string, value: T): void {
 
 function insertAdditions(
   children: CollectedNode[],
-  additions: { after: string | null; node: CollectedNode }[],
+  additions: { after: string | null; node: CollectedNode; seq: number }[],
   parent: string,
   rebuild: (node: CollectedNode, parent: string | null) => CollectedNode | null,
 ): CollectedNode[] {
   if (additions.length === 0) return children;
   const result = [...children];
-  for (const { after, node } of additions) {
+  // In the order they were written: each `after` names a sibling as it stood when that insert or move was made.
+  for (const { after, node } of [...additions].sort((a, b) => a.seq - b.seq)) {
     const built = rebuild({ ...node, parent }, parent);
     if (!built) continue;
     const index = after === null ? -1 : result.findIndex((c) => c.id === after);

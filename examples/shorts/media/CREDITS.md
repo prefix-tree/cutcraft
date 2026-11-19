@@ -1,4 +1,4 @@
-# Footage
+# Footage and sound
 
 ## eclipse.webm
 
@@ -31,3 +31,14 @@ MrBeast (Jimmy Donaldson) and Lex Fridman, talking about how to get better at ma
 `hundred-videos.json` is the transcript of those 44 seconds with a time for every word, made with the open-source
 Whisper model (`small.en`) and corrected by hand in four places. `uberscene add media/hundred-videos.webm` reads it
 into `uberscene.json`.
+
+## Sound cues
+
+`tick.wav`, `click.wav`, `pop.wav`, `whoosh.wav`, `swish.wav`, `riser.wav`, `thud.wav` and `chime.wav`.
+
+- Source: made in this repository by `sounds.ts`, a small synth of sine partials and seeded noise. Nothing was
+  recorded or downloaded.
+- Licence: the repository's MIT licence, like the code that makes them.
+- What they are: 48 kHz mono 16-bit WAV, each peaking at -3 dBFS. `pnpm --filter @uberscene/example-shorts sounds`
+  writes any that are missing, and `--force` writes them all again; the shorts test fails if a committed file is not
+  what the script makes. `uberscene add media/<name>.wav` put each in `uberscene.json`.

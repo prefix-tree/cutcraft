@@ -12,5 +12,8 @@ pnpm-lock.yaml linguist-generated
 *.jpg binary
 *.webm binary
 *.mp4 binary
+*.wav binary
+*.ogg binary
+*.mp3 binary
 *.woff binary
 *.woff2 binary

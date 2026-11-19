@@ -1,4 +1,12 @@
 export { type AddOptions, type AddResult, addAsset } from "./add";
+export {
+  type BlockFilter,
+  type BlockInfo,
+  type BlockSheetResult,
+  blockSheet,
+  formatBlocks,
+  listBlocks,
+} from "./blocks";
 export { type Container, containerOf, QUALITIES, type QualityName, type VideoCodec } from "./encoding";
 export { type FontFile, type FontWeight, loadFonts } from "./fonts";
 export {

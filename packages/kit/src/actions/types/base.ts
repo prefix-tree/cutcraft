@@ -1,5 +1,5 @@
 import type { Json } from "../../patches/types";
-import type { CollectedNode } from "../../resolve/tree";
+import type { CollectedNode, LayerInterior } from "../../resolve/tree";
 
 export type ActionErrorCode =
   | "ELEMENT_NOT_FOUND"
@@ -15,7 +15,9 @@ export type ActionErrorCode =
   | "DUPLICATE_ID"
   | "UNSUPPORTED_ON_LAYOUT"
   | "UNKNOWN_ACTION"
-  | "NOT_IMPLEMENTED";
+  | "NOT_IMPLEMENTED"
+  /** The action would leave the file with resolve errors it did not have; nothing was applied. */
+  | "BREAKS_FILE";
 
 export interface ActionError {
   readonly code: ActionErrorCode;
@@ -47,6 +49,8 @@ export interface NodeSpec {
   readonly props: Readonly<Record<string, Json | undefined>>;
   readonly text?: string;
   readonly children?: readonly NodeSpec[];
+  /** A Layer's handles: the component inside it and its props, kept so a Layer put back has them again. */
+  readonly interior?: LayerInterior;
 }
 
 export function nodeSpecOf(node: CollectedNode): NodeSpec {
@@ -66,6 +70,7 @@ export function nodeSpecOf(node: CollectedNode): NodeSpec {
     props,
     ...(node.text !== undefined ? { text: node.text } : {}),
     children: node.children.map(nodeSpecOf),
+    ...(node.interior ? { interior: { component: node.interior.component, props: { ...node.interior.props } } } : {}),
   };
 }
 
@@ -80,5 +85,6 @@ export function nodeOfSpec(spec: NodeSpec, parent: string | null): CollectedNode
     lockedProps: [],
     ...(spec.text !== undefined ? { text: spec.text } : {}),
     children: (spec.children ?? []).map((c) => nodeOfSpec(c, spec.id)),
+    ...(spec.interior ? { interior: spec.interior } : {}),
   };
 }

@@ -96,4 +96,69 @@ describe("Executor", () => {
     expect(bad.ok).toBe(false);
     expect(exec.log().entries.filter((p) => p.id === "c2")).toHaveLength(0);
   });
+
+  describe("refuses an action that leaves the file with new errors", () => {
+    registerHandler({
+      type: "test/setSrc",
+      validate: () => ok,
+      apply: (a: { params: { id: string; src: string } }, log: PatchLog) =>
+        log.append({ op: "set", id: a.params.id, prop: "src", value: a.params.src }),
+      invert: (a: ActionInput) => a,
+      fold: () => [],
+    } as never);
+    const setSrc = (src: string) => ({ type: "test/setSrc", params: { id: "c2", src } }) as never as ActionInput;
+
+    it("with BREAKS_FILE naming the error, and leaves log, state and history as they were", () => {
+      const exec = fixtureExecutor();
+      const before = serialize(exec.state());
+      const r = exec.execute(setSrc("asset:nope"));
+      expect(r.ok).toBe(false);
+      expect(r.errors?.map((e) => e.code)).toEqual(["BREAKS_FILE"]);
+      expect(r.errors?.[0]?.message).toContain("MISSING_ASSET on c2");
+      expect(exec.log().entries).toHaveLength(0);
+      expect(exec.history().canUndo()).toBe(false);
+      expect(serialize(exec.state())).toEqual(before);
+      expect(exec.state().errors).toEqual([]);
+    });
+
+    it("but not for errors the file already had", () => {
+      const assets = { ...manifest.assets };
+      delete (assets as Record<string, unknown>).city;
+      const exec = new Executor({ tree: fixtureTree(), manifest: { ...manifest, assets }, now: () => 0 });
+      expect(exec.state().errors.map((e) => e.code)).toContain("MISSING_ASSET");
+      const r = exec.execute({ type: "audio/setVolume", params: { id: "a1", volume: 0.5 } });
+      expect(r.errors ?? []).toEqual([]);
+      expect(r.ok).toBe(true);
+    });
+
+    it("checking a batch as a whole: a broken middle is fine, a broken end is not", () => {
+      const exec = fixtureExecutor();
+      const fine = exec.execute({
+        type: "batch/apply",
+        params: { actions: [setSrc("asset:nope"), setSrc("asset:city")] },
+      });
+      expect(fine.errors ?? []).toEqual([]);
+      expect(fine.ok).toBe(true);
+      const broken = exec.execute({ type: "batch/apply", params: { actions: [setSrc("asset:nope")] } });
+      expect(broken.errors?.map((e) => e.code)).toEqual(["BREAKS_FILE"]);
+      expect(exec.state().errors).toEqual([]);
+    });
+
+    it("undo is not checked: it returns to a state the file had", () => {
+      const exec = fixtureExecutor();
+      expect(exec.execute({ type: "audio/setVolume", params: { id: "a1", volume: 0.5 } }).ok).toBe(true);
+      expect(exec.undo()?.ok).toBe(true);
+      expect(exec.redo()?.ok).toBe(true);
+    });
+  });
+
+  it("mask/create refuses a clip on a locked track, as the other handlers do", () => {
+    const exec = fixtureExecutor();
+    expect(exec.execute({ type: "track/setFlag", params: { trackId: "main", flag: "locked", value: true } }).ok).toBe(
+      true,
+    );
+    const r = exec.execute({ type: "mask/create", params: { id: "m9", parentId: "c2", props: { shape: "rect" } } });
+    expect(r.ok).toBe(false);
+    expect(r.errors?.map((e) => e.code)).toEqual(["TRACK_LOCKED"]);
+  });
 });

@@ -1,19 +1,27 @@
 // Every short loads the way the editor loads it, resolves without errors and lints clean.
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
 import { type AssetManifest, collectModule, narrate, resolve } from "@uberscene/kit";
-import { lint, loadModule } from "@uberscene/kit/source";
+import { gatherLocalFiles, lint, loadModule } from "@uberscene/kit/source";
 
 const root = join(import.meta.dirname, "..");
 const manifest = JSON.parse(readFileSync(join(root, "uberscene.json"), "utf8")) as AssetManifest;
 const FILES = readdirSync(root).filter((f) => f.endsWith(".tsx"));
 
+/** A short evaluated as the CLI evaluates it: with its own modules (its blocks) read from the project. */
+function load(source: string): { defaults?: Record<string, unknown> } {
+  const files = gatherLocalFiles(source, (path) =>
+    existsSync(join(root, path)) ? readFileSync(join(root, path), "utf8") : undefined,
+  );
+  return loadModule(source, { files }) as { defaults?: Record<string, unknown> };
+}
+
 describe.each(FILES)("%s", (name) => {
   const source = readFileSync(join(root, name), "utf8");
-  const mod = loadModule(source) as { defaults?: Record<string, unknown> };
+  const mod = load(source);
   const state = resolve(collectModule(mod as never, mod.defaults ?? {}), manifest);
 
   it("resolves without errors and lints clean", () => {
@@ -28,9 +36,17 @@ describe.each(FILES)("%s", (name) => {
   });
 });
 
+describe("blocks", () => {
+  // The shorts use the repository's blocks as a project would after copying them in: the copy is the block, unedited.
+  it.each(readdirSync(join(root, "blocks")))("%s is the block as it ships", (file) => {
+    const shipped = join(root, "..", "..", "blocks", file.replace(/\.tsx$/, ""), "block.tsx");
+    expect(readFileSync(join(root, "blocks", file), "utf8")).toBe(readFileSync(shipped, "utf8"));
+  });
+});
+
 describe("lunar-eclipse.tsx", () => {
   const source = readFileSync(join(root, "lunar-eclipse.tsx"), "utf8");
-  const mod = loadModule(source) as { defaults?: Record<string, unknown> };
+  const mod = load(source);
   const state = resolve(collectModule(mod as never, mod.defaults ?? {}), manifest);
 
   it("times nothing by a typed second: every cut is on a word and every graphic hangs off a clip", () => {
@@ -108,7 +124,7 @@ describe("one-pixel.tsx", () => {
   });
 
   it("shows the script as subtitles, a phrase at a time", () => {
-    const mod = loadModule(source) as { defaults?: Record<string, unknown> };
+    const mod = load(source);
     const state = resolve(collectModule(mod as never, mod.defaults ?? {}), manifest);
     const cues = [...state.items.values()].filter((p) => p.kind === "caption").sort((a, b) => a.start - b.start);
     expect(cues).toHaveLength(61);

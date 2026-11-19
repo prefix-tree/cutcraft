@@ -1,6 +1,6 @@
 import type { Json } from "../../patches/types";
 import { INTERIOR_PREFIX } from "../../resolve/tree";
-import { define, makePropHandler, rawNode, rawProp, validateTarget } from "../handler-kit";
+import { define, makePropHandler, onElement, rawNode, rawProp, validateTarget } from "../handler-kit";
 import { invalid, type NodeSpec, nodeSpecOf, ok } from "../types";
 import { replaceAll, stackPosition } from "./effect";
 
@@ -66,6 +66,7 @@ define(makePropHandler({
 define(makePropHandler({
   type: "layer/setProps",
   kinds: ["layer"],
+  targets: { when: (item, state) => rawNode(state, item.id)?.interior !== undefined },
   write: (p) => Object.fromEntries(Object.entries(p.props).map(([k, v]) => [`${INTERIOR_PREFIX}${k}`, v])),
   validate: (a, state) =>
     rawNode(state, a.params.id)?.interior
@@ -137,6 +138,7 @@ function replaceChildren(
 ) {
   define({
     type,
+    targets: onElement(),
     validate: (a, state) => validateTarget(state, a.params.id, []),
     apply: (a, log, ctx) =>
       replaceAll(log, ctx.before, a.params.id, childKind, pick(a.params as never), a.params.after),

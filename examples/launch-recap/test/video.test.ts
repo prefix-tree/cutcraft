@@ -57,15 +57,27 @@ describe("the launch recap file", () => {
     expect(folded.text).toContain("<CallToAction text={cta} accent={accent} />");
   });
 
-  it("folds a trim gesture into one changed token", () => {
+  it("folds a trim gesture into one changed line", () => {
     const exec = new Executor({ tree, manifest, now: () => 0 });
-    const r = exec.execute({ type: "clip/trim", params: { id: "hook", edge: "out", value: "word:22.end" } });
+    const before = exec.state().items.get("close")!.start;
+    const r = exec.execute({ type: "clip/trim", params: { id: "demo", edge: "out", value: 8 } });
     expect(r.ok).toBe(true);
-    expect(exec.state().items.get("broll")!.start).toBeCloseTo(4.2);
+    // The demo plays a second less, and the clips after it on the sequence move up by that second.
+    expect(exec.state().items.get("close")!.start).toBeCloseTo(before - 1);
     const folded = foldToSource(text, exec.log(), exec.state());
-    expect(folded.edits).toHaveLength(1);
-    expect(folded.text).toContain('out="word:22.end"');
+    // The clip's length was given as a duration; the trim says where it ends instead, on the same line.
+    expect(folded.edits.every((e) => e.id === "demo")).toBe(true);
     const changed = folded.text.split("\n").filter((line, i) => line !== text.split("\n")[i]);
-    expect(changed).toHaveLength(1);
+    expect(changed).toEqual(['        <Clip id="demo" src="asset:screen" in={2} out={8} />']);
+  });
+
+  it("refuses a trim that would cut a word a caption ends on", () => {
+    const exec = new Executor({ tree, manifest, now: () => 0 });
+    // cap-2 ends on word 23, the hook's last word: trimming it away would leave the caption on a word nothing plays.
+    const r = exec.execute({ type: "clip/trim", params: { id: "hook", edge: "out", value: "word:22.end" } });
+    expect(r.ok).toBe(false);
+    expect(r.errors?.[0]?.code).toBe("BREAKS_FILE");
+    expect(r.errors?.[0]?.message).toContain("cap-2");
+    expect(exec.log().entries).toHaveLength(0);
   });
 });

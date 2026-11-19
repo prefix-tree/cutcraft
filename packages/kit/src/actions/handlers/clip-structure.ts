@@ -1,7 +1,9 @@
 import { capabilitiesOf } from "../../jsx/capabilities";
+import { carry, carryRemoval } from "../carry";
 import {
   define,
   isError,
+  onElement,
   placementOf,
   placementProps,
   placeNode,
@@ -27,7 +29,7 @@ function placementErrors(
     return { code: "UNSUPPORTED_ON_LAYOUT", message: "after placement needs a sequence track; use start" };
   if ("after" in place && place.after !== null && !track.items.includes(place.after))
     return { code: "ELEMENT_NOT_FOUND", message: `"${place.after}" is not on track "${trackId}"`, path: "place.after" };
-  if ("anchor" in place && place.anchor !== "start" && !state.items.has(place.anchor))
+  if ("anchor" in place && place.anchor !== "start" && !state.items.has(place.anchor.replace(/\.end$/, "")))
     return { code: "ELEMENT_NOT_FOUND", message: `anchor "${place.anchor}" does not exist`, path: "place.anchor" };
   return null;
 }
@@ -60,32 +62,37 @@ function addMedia<T extends "clip/add" | "audio/add">(type: T, kind: "clip" | "a
 addMedia("clip/add", "clip");
 addMedia("audio/add", "audio");
 
-define({
-  type: "clip/remove",
-  validate: (a, state) => {
-    const item = requireElement(state, a.params.id);
-    if (isError(item)) return invalid(item);
-    const locked = requireUnlocked(state, item);
-    if (locked) return invalid(locked);
-    return capabilitiesOf(item.kind).placementScope === "track"
-      ? ok
-      : invalid({ code: "INVALID_PARAMS", message: `"${a.params.id}" is not a track item` });
+define(carry(
+  {
+    type: "clip/remove",
+    targets: onElement({ onOpaque: true, when: (item) => capabilitiesOf(item.kind).placementScope === "track" }),
+    validate: (a, state) => {
+      const item = requireElement(state, a.params.id);
+      if (isError(item)) return invalid(item);
+      const locked = requireUnlocked(state, item);
+      if (locked) return invalid(locked);
+      return capabilitiesOf(item.kind).placementScope === "track"
+        ? ok
+        : invalid({ code: "INVALID_PARAMS", message: `"${a.params.id}" is not a track item` });
+    },
+    apply: (a, log) => log.append({ op: "remove", id: a.params.id }),
+    invert: (a, before) => {
+      const node = rawNode(before, a.params.id)!;
+      return {
+        type: "clip/restore",
+        params: {
+          id: a.params.id,
+          node: nodeSpecOf(node),
+          trackId: node.parent as string,
+          place: placementOf(before, a.params.id),
+          after: siblingAfter(before, a.params.id),
+        },
+      };
+    },
+    fold: () => [],
   },
-  apply: (a, log) => log.append({ op: "remove", id: a.params.id }),
-  invert: (a, before) => {
-    const node = rawNode(before, a.params.id)!;
-    return {
-      type: "clip/restore",
-      params: {
-        id: a.params.id,
-        node: nodeSpecOf(node),
-        trackId: node.parent as string,
-        place: placementOf(before, a.params.id),
-      },
-    };
-  },
-  fold: () => [],
-});
+  (a, before) => carryRemoval(a.params.id, before),
+));
 
 define({
   type: "clip/restore",
@@ -94,7 +101,7 @@ define({
     const e = placementErrors(state, a.params.trackId, a.params.place);
     return e ? invalid(e) : ok;
   },
-  apply: (a, log, ctx) => placeNode(log, ctx.before, a.params.trackId, a.params.place, a.params.node),
+  apply: (a, log, ctx) => placeNode(log, ctx.before, a.params.trackId, a.params.place, a.params.node, a.params.after),
   invert: (a) => ({ type: "clip/remove", params: { id: a.params.id } }),
   fold: () => [],
 });
@@ -102,6 +109,7 @@ define({
 /** Reorder within a sequence, change start on a free track, or re-anchor; optionally to another track. */
 define({
   type: "clip/move",
+  targets: onElement({ onOpaque: true, literalOnly: true, when: (item) => item.track !== null }),
   validate: (a, state) => {
     const item = requireElement(state, a.params.id);
     if (isError(item)) return invalid(item);

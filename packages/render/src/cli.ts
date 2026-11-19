@@ -1,10 +1,12 @@
 import { readFileSync, writeFileSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+import { dirname, join, relative, resolve, sep } from "node:path";
 import { parseArgs } from "node:util";
 
 import { MOMENT_FORMS, subtitles } from "@uberscene/kit";
 
 import { addAsset, describeAdded } from "./add";
+import { blockSheet, formatBlocks, listBlocks } from "./blocks";
+import { addBlock, placeBlock, updateBlocks } from "./blocks-add";
 import { QUALITIES, type QualityName, type VideoCodec } from "./encoding";
 import type { FontFile, FontWeight } from "./fonts";
 import { fontSheet, formatFonts, listFonts } from "./fonts-list";
@@ -33,6 +35,10 @@ const USAGE = `Usage: uberscene <file.tsx> --out <video.mp4|.webm|.mp3|.wav> [--
        uberscene look <file.tsx> --motion <stretch> [--step <s>] [--listen <stretch>] [--out look.png] [options]
        uberscene where <file.tsx> --at <moments> [--safe-zone <zone>] [--json] [options]
        uberscene fonts [--for <role>] [--category <category>] [--sheet fonts.png [--text <words>]] [--json]
+       uberscene blocks [--for <job>] [--aspect <shape>] [--sheet blocks.png] [--json]
+       uberscene blocks add <name> [--into <video.tsx> --track <id> --at <moment> [--id <id>] [--duration <s>]]
+                    [--dir <folder>] [--force]
+       uberscene blocks update [<name>...] [--dir <folder>] [--force]
        uberscene add <media file>... [--manifest <file>] [--id <id>] [--transcript <file>]
        uberscene browser install
        uberscene skills install [--dir <folder>] [--force]
@@ -74,6 +80,22 @@ const USAGE = `Usage: uberscene <file.tsx> --out <video.mp4|.webm|.mp3|.wav> [--
                         heaviest weight and its regular one. The first time, Google's are downloaded into the
                         font cache
   --text <words>        (fonts --sheet) the words to set; default "Make It Move 2026"
+  blocks                list the blocks that ship with this CLI: scene-sized pieces of motion design (a grid that
+                        counts, a wall of characters, a row of points) to copy into the project and place in a
+                        <Layer>, each with what it shows, when to use it and when not, its props and what times it
+  --for <job>           (blocks) only blocks whose title, description, uses or tags mention every word given
+  --aspect <shape>      (blocks) only blocks laid out for a frame shape: 9:16, 16:9, 1:1 or 4:5
+  --sheet <image>       (blocks) also paste the listed blocks' previews into one image, numbered as listed; no
+                        browser needed
+  blocks add <name>     copy a block into the project as blocks/<name>.tsx beside uberscene.json (or --dir
+                        <folder>), recorded in the manifest with this version and the copy's hash, and print the
+                        line that imports it. A different file already there wants --force
+  --into <video.tsx>    (blocks add) also place it: import it in the video and add <Layer> holding it at the end of
+                        --track <id>, starting --at a moment (4.5, hook, hook.end or hook@word:14), lasting
+                        --duration <s> (default the block's length), named --id (default the block's name). The
+                        video is read back; if it has new errors it is left as it was
+  blocks update         replace each recorded copy (or the ones named) with this version's block when nobody has
+                        edited it; an edited copy is left alone and what differs is printed, unless --force
   skills install        write the agent skill that ships with this CLI into .claude/skills/uberscene (or --dir
                         <folder>), so the agent learns this version's commands. Again after an upgrade, it replaces
                         the folder it wrote; a folder with edits, or one it did not write, wants --force
@@ -130,6 +152,7 @@ async function main(): Promise<number> {
     options: {
       out: { type: "string" },
       for: { type: "string" },
+      aspect: { type: "string" },
       category: { type: "string" },
       sheet: { type: "string" },
       text: { type: "string" },
@@ -174,6 +197,9 @@ async function main(): Promise<number> {
       listen: { type: "string" },
       dir: { type: "string" },
       force: { type: "boolean" },
+      into: { type: "string" },
+      track: { type: "string" },
+      duration: { type: "string" },
     },
   });
   if (positionals[0] === "add") return add(positionals.slice(1), values);
@@ -225,6 +251,26 @@ async function main(): Promise<number> {
       );
     }
     process.stdout.write(values.json ? `${JSON.stringify(fonts, null, 2)}\n` : formatFonts(fonts));
+    return 0;
+  }
+  if (positionals[0] === "blocks" && positionals[1] === "add") return blocksAdd(positionals.slice(2), values);
+  if (positionals[0] === "blocks" && positionals[1] === "update") return blocksUpdate(positionals.slice(2), values);
+  if (positionals[0] === "blocks") {
+    if (positionals.length > 1) {
+      process.stderr.write(USAGE);
+      return 2;
+    }
+    const blocks = listBlocks({
+      ...(values.for === undefined ? {} : { for: values.for }),
+      ...(values.aspect === undefined ? {} : { aspect: values.aspect }),
+    });
+    if (values.sheet !== undefined) {
+      const drawn = await blockSheet(blocks, resolve(values.sheet));
+      process.stderr.write(
+        `${values.sheet}: ${drawn.names.length} blocks, ${drawn.columns} to a row, ${drawn.width}x${drawn.height}\n`,
+      );
+    }
+    process.stdout.write(values.json ? `${JSON.stringify(blocks, null, 2)}\n` : formatBlocks(blocks));
     return 0;
   }
   if (positionals[0] === "inspect") {
@@ -467,6 +513,84 @@ async function add(
     process.stderr.write(`${describeAdded(result)} → ${result.manifest}\n`);
   }
   return 0;
+}
+
+async function blocksAdd(
+  names: readonly string[],
+  values: {
+    dir?: string | undefined;
+    force?: boolean | undefined;
+    into?: string | undefined;
+    track?: string | undefined;
+    at?: string | undefined;
+    id?: string | undefined;
+    duration?: string | undefined;
+  },
+): Promise<number> {
+  const name = names[0];
+  if (!name || names.length > 1) {
+    process.stderr.write(USAGE);
+    return 2;
+  }
+  if (values.into !== undefined && (values.track === undefined || values.at === undefined))
+    throw new Error("--into wants --track <id> and --at <moment>: the track the block goes on and when it starts");
+  if (values.into === undefined && (values.track ?? values.at ?? values.duration) !== undefined)
+    throw new Error("--track, --at and --duration place a block in a video, so they go with --into <video.tsx>");
+  const duration = values.duration === undefined ? undefined : Number(values.duration);
+  if (duration !== undefined && !(duration > 0))
+    throw new Error(`--duration wants seconds above 0, got "${values.duration}"`);
+  const added = addBlock(name, {
+    ...(values.dir === undefined ? {} : { dir: values.dir }),
+    ...(values.force ? { force: true } : {}),
+  });
+  const where = relative(process.cwd(), added.file) || added.file;
+  process.stderr.write(
+    `${name}: ${added.status === "copied" ? "copied to" : "already in"} ${where}, recorded in ${relative(process.cwd(), added.manifest) || added.manifest}\n`,
+  );
+  if (values.into === undefined) {
+    process.stdout.write(
+      `import { ${added.component} } from "./${where
+        .replace(/\.tsx$/, "")
+        .split(sep)
+        .join("/")}";\n\n` +
+        `<Layer id="${name}" start={0} duration={…}>\n  <${added.component} />\n</Layer>\n\n` +
+        "The import is written from the project's folder; from a video elsewhere, make the path relative to it. Set the\n" +
+        "block's props on the tag where it is placed; `uberscene blocks` lists them.\n",
+    );
+    return 0;
+  }
+  const placed = await placeBlock(added, {
+    video: values.into,
+    track: values.track as string,
+    at: values.at as string,
+    ...(values.id === undefined ? {} : { id: values.id }),
+    ...(duration === undefined ? {} : { duration }),
+  });
+  process.stderr.write(`${name}: placed in ${values.into} as <Layer id="${placed.id}">\n`);
+  process.stdout.write(`${placed.layer}\n`);
+  return 0;
+}
+
+function blocksUpdate(
+  names: readonly string[],
+  values: { dir?: string | undefined; force?: boolean | undefined },
+): number {
+  const results = updateBlocks(names, {
+    ...(values.dir === undefined ? {} : { dir: values.dir }),
+    ...(values.force ? { force: true } : {}),
+  });
+  const said = {
+    updated: "updated to this version",
+    current: "already this version",
+    replaced: "edited, replaced by this version (--force)",
+    edited: "edited since it was added: left alone; --force replaces it",
+    missing: "recorded but its file is gone: add it again",
+  } as const;
+  for (const r of results) {
+    process.stderr.write(`${r.name}: ${said[r.status]} (${relative(process.cwd(), r.file) || r.file})\n`);
+    if (r.diff) process.stdout.write(r.diff);
+  }
+  return results.some((r) => r.status === "edited" || r.status === "missing") ? 1 : 0;
 }
 
 /** Where a file's frames are kept: `.uberscene/cache` beside it. */

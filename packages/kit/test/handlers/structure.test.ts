@@ -50,14 +50,25 @@ describe("structure on free and sequence tracks", () => {
   it("moves a clip to another track and back", () => {
     const exec = fixtureExecutor();
     const before = serialize(exec.state());
-    expect(exec.execute({ type: "clip/move", params: { id: "c2", trackId: "music", place: { start: 1 } } }).ok).toBe(
+    const c3 = exec.state().items.get("c3")!;
+    expect(exec.execute({ type: "clip/move", params: { id: "c3", trackId: "music", place: { start: 1 } } }).ok).toBe(
       true,
     );
     const s = exec.state();
-    expect(s.items.get("c2")).toMatchObject({ track: "music", start: 1 });
-    expect(s.items.get("c3")?.start).toBe(6.5);
-    expect(s.items.get("x1")?.errors.map((e) => e.code)).toEqual(["NOT_ADJACENT"]);
+    expect(s.items.get("c3")).toMatchObject({ track: "music", start: 1 });
+    expect(s.items.get("n1")?.start).toBe(c3.start);
+    expect(s.errors).toEqual([]);
     expect(exec.undo()?.ok).toBe(true);
+    expect(serialize(exec.state())).toEqual(before);
+  });
+
+  it("refuses a move that leaves a transition with a gap on one side", () => {
+    const exec = fixtureExecutor();
+    const before = serialize(exec.state());
+    const r = exec.execute({ type: "clip/move", params: { id: "c2", trackId: "music", place: { start: 1 } } });
+    expect(r.ok).toBe(false);
+    expect(r.errors?.[0]?.code).toBe("BREAKS_FILE");
+    expect(r.errors?.[0]?.message).toContain("NOT_ADJACENT on x1");
     expect(serialize(exec.state())).toEqual(before);
   });
 

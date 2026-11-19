@@ -1,17 +1,19 @@
 import { z } from "zod";
 
 import {
+  Audio,
   Composition,
   fontFamily,
   googleFont,
   grid,
   Layer,
   progress,
-  random,
   stepAt,
   Track,
   useLayer,
 } from "@uberscene/kit";
+
+import { CharacterWall } from "./blocks/character-wall";
 
 // "Snake heart": a game of snake played on a wall of Chinese characters. The snake eats the characters of one
 // phrase, over and over, and each one joins its body. Every character of the wall changes on its own, each at its
@@ -111,7 +113,7 @@ const CLOSED_AT = GAME.times[GAME.closed] as number;
 const LENGTH = Math.ceil((CLOSED_AT + HOLD) * 30) / 30;
 
 // What the wall is made of: seasons, sky, and the things of a room and a street.
-const WALL_SET = [..."春夏秋冬日月星光年梦声歌诗画书茶酒灯窗桥路城门钟船信纸笔琴棋伞镜糖盐米面"];
+const WALL_SET = "春夏秋冬日月星光年梦声歌诗画书茶酒灯窗桥路城门钟船信纸笔琴棋伞镜糖盐米面";
 const LETTER = {
   position: "absolute",
   display: "flex",
@@ -121,42 +123,11 @@ const LETTER = {
   fontSize: 122,
   lineHeight: 1,
 } as const;
-/** The wall of characters the game is played on. It changes each time the snake eats, and fades back at the heart. */
-function Wall() {
-  const clock = useLayer();
-  const eaten = (GAME.length[Math.max(0, stepAt(GAME.times, clock.elapsed))] as number) - 1;
-  // It fades back once the heart is closed.
-  const faded = progress(clock, { after: CLOSED_AT, over: 0.6, easing: "ease-out" });
-  return (
-    <div
-      style={{
-        position: "absolute",
-        left: 0,
-        top: 0,
-        width: 1080,
-        height: 1920,
-        background: BG,
-        opacity: 1 - 0.55 * faded,
-      }}
-    >
-      {BOARD.cells.map((cell) => {
-        // Each cell keeps its own time: how long it holds a character, and how far into that it starts. So the
-        // wall never changes all at once on its own; it does when the snake eats.
-        const every = 0.28 + 2.2 * random("pace", cell.index) ** 2;
-        const turn = Math.floor((clock.elapsed + 2.5 * random("late", cell.index)) / every);
-        const char = WALL_SET[Math.floor(random("char", cell.index, turn, eaten) * WALL_SET.length)];
-        return (
-          <div
-            key={cell.index}
-            style={{ ...LETTER, ...BOARD.rect(cell.column, cell.row), color: WALL, fontWeight: 400 }}
-          >
-            {char}
-          </div>
-        );
-      })}
-    </div>
-  );
-}
+/**
+ * The seconds the snake eats: the wall changes all at once on each, and each has a pop (media/sounds.ts). A riser
+ * leads into the moment the heart closes, and a chime plays as it does.
+ */
+const EATS = GAME.food.map((f) => GAME.times[f.eaten] as number);
 
 function Board({ word, heart }: z.infer<typeof schema>) {
   const clock = useLayer();
@@ -234,14 +205,33 @@ export default function Video(props: z.infer<typeof schema>) {
   return (
     <Composition fps={30} width={1080} height={1920} background={{ mode: "color", color: BG }}>
       <Track id="wall" layout="free">
+        {/* The wall of characters the game is played on. It changes each time the snake eats, and fades back at the
+            heart. */}
         <Layer id="letters" start={0} duration={LENGTH} ground>
-          <Wall />
+          <CharacterWall
+            chars={WALL_SET}
+            columns={COLS}
+            rows={ROWS}
+            color={WALL}
+            background={BG}
+            font={FACE}
+            scale={122 / 135}
+            changeAt={EATS}
+            dim={{ after: CLOSED_AT, over: 0.6, to: 0.45 }}
+          />
         </Layer>
       </Track>
       <Track id="game" layout="free">
         <Layer id="board" start={0} duration={LENGTH}>
           <Board {...props} />
         </Layer>
+      </Track>
+      <Track id="sounds" role="effects" layout="free">
+        {EATS.map((time, i) => (
+          <Audio key={time} id={`eat-${i + 1}`} src="asset:pop" start={time} volume={0.55} />
+        ))}
+        <Audio id="build" src="asset:riser" start={CLOSED_AT - 2} volume={0.4} />
+        <Audio id="closed" src="asset:chime" start={CLOSED_AT} volume={0.7} />
       </Track>
     </Composition>
   );

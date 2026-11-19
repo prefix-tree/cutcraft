@@ -119,6 +119,14 @@ const ITEMS: readonly (Omit<GalleryItem, "lines"> & { readonly file: string })[]
     link: "/examples/snake-heart",
     file: "shorts/snake-heart.tsx",
   },
+  {
+    title: "From notes to a cut",
+    kind: "Built from blocks",
+    src: "shorts/notes-to-cut",
+    aspect: 9 / 16,
+    link: "/examples/notes-to-cut",
+    file: "shorts/notes-to-cut.tsx",
+  },
 ];
 
 const examples = new URL("../examples/", import.meta.url);

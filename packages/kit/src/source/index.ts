@@ -159,7 +159,12 @@ export function buildSourceIndex(text: string): SourceIndex {
   };
 
   const helperNames = new Set<string>();
+  // Components the file imports from its own modules (`./blocks/hundred-cells`): placed alone in a Layer, their props
+  // are the Layer's handles, as a component declared in the file is.
+  const localComponents = new Set<string>();
   for (const node of ast.program.body) {
+    if (t.isImportDeclaration(node) && node.source.value.startsWith("."))
+      for (const s of node.specifiers) if (/^[A-Z]/.test(s.local.name)) localComponents.add(s.local.name);
     if (t.isFunctionDeclaration(node) && node.id) helperNames.add(node.id.name);
     if (t.isVariableDeclaration(node)) {
       for (const d of node.declarations) {
@@ -328,7 +333,7 @@ export function buildSourceIndex(text: string): SourceIndex {
     const only = elements.length === 1 ? elements[0] : null;
     if (!only || !t.isJSXElement(only)) return null;
     const name = jsxName(only.openingElement.name);
-    if (name === null || !helperNames.has(name) || KIND_BY_NAME.has(name)) return null;
+    if (name === null || !(helperNames.has(name) || localComponents.has(name)) || KIND_BY_NAME.has(name)) return null;
     const { props, locked, bound } = attributesOf(only.openingElement, inSchemaFn);
     return {
       component: name,

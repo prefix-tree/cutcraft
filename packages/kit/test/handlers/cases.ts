@@ -91,9 +91,15 @@ export const CASES: Partial<Record<ActionType, ActionInput>> = {
   "clip/rippleDelete": { type: "clip/rippleDelete", params: { id: "a1" } },
   "clip/rippleRestore": {
     type: "clip/rippleRestore",
-    params: { id: "new1", node: clipSpec, trackId: "music", place: { start: 3 }, affected: [] },
+    params: {
+      id: "new1",
+      node: { ...clipSpec, props: { ...clipSpec.props, start: 3 } },
+      trackId: "music",
+      place: { start: 3 },
+      affected: [],
+    },
   },
-  "clip/move": { type: "clip/move", params: { id: "c2", place: { after: "c3" } } },
+  "clip/move": { type: "clip/move", params: { id: "c3", place: { after: "n1" } } },
   "clip/trim": { type: "clip/trim", params: { id: "c2", edge: "out", value: 4.4 } },
   "clip/split": { type: "clip/split", params: { id: "c3", at: 11, newId: "c3_b" } },
   "clip/merge": {
@@ -177,7 +183,7 @@ export const CASES: Partial<Record<ActionType, ActionInput>> = {
       transitionId: "x8",
       node: { id: "x8", kind: "transition", props: { id: "x8", type: "dipToBlack", duration: 0.3, params: {} } },
       trackId: "main",
-      after: "c2",
+      after: "c3",
     },
   },
   "transition/update": { type: "transition/update", params: { transitionId: "x1", type: "push", duration: 0.8 } },

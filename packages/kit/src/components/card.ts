@@ -3,6 +3,7 @@
 // at a word; every one lays out the whole card and shows only its own part, so the parts line up exactly.
 import { z } from "zod";
 
+import { themeCss } from "../theme/css";
 import { type Timing, timing } from "./shared";
 
 /** Where a card sits: its centre from the frame's centre, and its size. */
@@ -26,9 +27,7 @@ export interface Cue {
 }
 
 /** A colour for CSS inside a Layer: `$accent` reads the theme there, anything else is used as written. */
-export function css(color: string): string {
-  return /^\$[A-Za-z][\w-]*$/.test(color) ? `var(--cc-${color.slice(1)})` : color;
-}
+export const css = themeCss;
 
 /**
  * The timing of one part of a card: it starts at its own cue and lasts until the card ends, so every part leaves

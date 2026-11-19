@@ -7,6 +7,7 @@ import {
   define,
   insertNode,
   isError,
+  onElement,
   rawNode,
   rawProp,
   requireElement,
@@ -107,6 +108,7 @@ define({
 
 define({
   type: "transition/remove",
+  targets: onElement({ param: "transitionId", kinds: ["transition"], onLocked: true, onOpaque: true }),
   validate: (a, state) => {
     const e = requireTransition(state, a.params.transitionId);
     return e ? invalid(e) : ok;
@@ -140,6 +142,7 @@ define({
 
 define({
   type: "transition/update",
+  targets: onElement({ param: "transitionId", kinds: ["transition"], onLocked: true, onOpaque: true }),
   validate: (a, state) => {
     const e = requireTransition(state, a.params.transitionId);
     if (e) return invalid(e);

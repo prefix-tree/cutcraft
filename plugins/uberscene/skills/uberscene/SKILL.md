@@ -39,6 +39,7 @@ references.
 | Captions | `<Captions>` from the transcript, or `<Caption>` cues; `animation`: `word-highlight`, `word-by-word`, `karaoke`, `typewriter`; `style.highlightBox` boxes the word being said; `x`, `y`, `width` place them |
 | Shapes and images | `<Shape>` (rectangle, circle, ellipse, triangle, arrow and more), `<Svg>` (inline markup or an SVG asset), `<Sticker>` (a PNG, SVG, WebP or GIF asset) |
 | Ready-made graphics | `LowerThird`, `Callout`, `Badge`, `Counter`, `ProgressBar`, `Arrow`, `Highlight`, `Background`, `TypeCard`, `QuoteCard`, `Frame` |
+| Ready-made scenes | Blocks: `uberscene blocks --for "<job>"` lists them with when to use each (`--sheet blocks.png` to look); `uberscene blocks add <name> --into video.tsx --track <id> --at hook@word:N` copies one to `blocks/<name>.tsx` and places its component in a `<Layer>`, its props set there; `blocks update` after an upgrade |
 | Sound | `<Audio>` for music and voice; `volume`, `fade={{ in, out }}`, `automation` for volume and pan over time, `duck={{ under, to }}` under a track or a role (`dialogue`) |
 | Anything else | `<Layer>` (any React), `<Three>` (three.js), `<Motion>` (Motion), all on the video's clock; see "Free code" under Look and graphics |
 | Variants | `schema` and `defaults`, then `--props '{"product":"Pixel"}'` at render |
@@ -232,6 +233,12 @@ Give the video one look and say it once.
 - **Colour and effects** are `<Effect type params>` children of a clip, a title, a shape, a layer or an
   `<Adjustment>` (which affects everything beneath it for its time). They run in the order written: correct, then
   shape the tones, then the look. See [references/effects.md](references/effects.md).
+- **Check the blocks before hand-building a scene.** A chat, a terminal, a ranking that reorders, bars that race, a
+  quote that builds, a grid that counts: run `uberscene blocks --for "<job>"`, then `--sheet blocks.png` and read the
+  image. Place one with `uberscene blocks add <name> --into video.tsx --track <id> --at <moment>`, then set what this
+  video needs as props on the tag it wrote, not by editing the copy in `blocks/`, so `blocks update` can still bring
+  it forward. Two placements of one block differ by their props. Every block and its props:
+  [references/blocks.md](references/blocks.md).
 - **Free code where nothing fits.** A `<Layer>` holds any React, CSS, canvas or WebGL. Inside it, `useLayer()` gives
   `elapsed`, `t` (0 to 1), `remaining`, `duration`, `time` and `fps`. Draw everything as a function of that time,
   never from timers or `Date`. The kit's helpers are pure functions: `interpolate()` and `spring()` shape a value,
@@ -286,6 +293,7 @@ What each element and prop actually draws, and the few it does not:
 - [references/elements.md](references/elements.md): every element and its props.
 - [references/effects.md](references/effects.md): every effect and transition, its params, and the units.
 - [references/components.md](references/components.md): the ready-made components.
+- [references/blocks.md](references/blocks.md): the blocks, what each is for, and their props.
 - [references/rendering.md](references/rendering.md): what renders.
 - [references/cli.md](references/cli.md): every command and option.
 - The documentation: https://uberscene.prefixtree.xyz/

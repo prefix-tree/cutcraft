@@ -36,6 +36,12 @@ try {
         failed = true;
         console.log(`FAIL  skill   ${dir}: dist/skill/uberscene/SKILL.md is not in the package`);
       }
+      // `uberscene blocks` lists the blocks it carries the same way.
+      if (listed.includes("package/dist/blocks/hundred-cells/block.tsx")) console.log(`ok    blocks  ${dir}`);
+      else {
+        failed = true;
+        console.log(`FAIL  blocks  ${dir}: dist/blocks/hundred-cells/block.tsx is not in the package`);
+      }
     }
     for (const [tool, args] of [
       ["publint", [tarball, "--strict"]],

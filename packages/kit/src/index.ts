@@ -1,3 +1,4 @@
+export * from "./actions/affordances";
 export * from "./actions/executor";
 export * from "./actions/handler-kit";
 export * from "./actions/history";
@@ -29,6 +30,7 @@ export {
 export { type ColourFunction, fusedColourSource } from "./effects/shapes";
 export * from "./inspect/index";
 export * from "./jsx/animate";
+export * from "./jsx/block-meta";
 export * from "./jsx/capabilities";
 export * from "./jsx/curves";
 export * from "./jsx/define";
@@ -53,6 +55,7 @@ export * from "./patches/log";
 export * from "./patches/types";
 export * from "./resolve/captions";
 export * from "./resolve/collect";
+export * from "./resolve/dependents";
 export * from "./resolve/errors";
 export * from "./resolve/resolve";
 export * from "./resolve/scene";

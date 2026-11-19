@@ -166,14 +166,13 @@ describe("captions from the transcript", () => {
     expect(state.items.get("cp2")).toMatchObject({ start: 4, end: 6 });
   });
 
-  it("reports a word that no clip plays", () => {
+  it("refuses a cue on a word that no clip plays, naming the error it would leave", () => {
     const exec = fixtureExecutor();
-    expect(exec.execute({ type: "caption/update", params: { captionId: "cp1", start: "word:0" } }).ok).toBe(true);
-    const errors = exec
-      .state()
-      .items.get("cp1")
-      ?.errors.map((e) => `${e.code}:${e.prop}`);
-    expect(errors).toEqual(["UNKNOWN_REF:start"]);
+    const r = exec.execute({ type: "caption/update", params: { captionId: "cp1", start: "word:0" } });
+    expect(r.ok).toBe(false);
+    expect(r.errors?.[0]?.code).toBe("BREAKS_FILE");
+    expect(r.errors?.[0]?.message).toContain("UNKNOWN_REF on cp1.start");
+    expect(exec.state().items.get("cp1")?.errors).toEqual([]);
   });
 
   it("generates cues along the timeline when there are no literal ones", () => {

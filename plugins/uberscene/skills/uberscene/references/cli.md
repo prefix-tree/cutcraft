@@ -14,6 +14,9 @@ npx uberscene look <file.tsx> [--at <moments> | --around <id>] [--without <id>] 
 npx uberscene look <file.tsx> --motion <stretch> [--step <s>] [--listen <stretch>] [--out look.png] [options]
 npx uberscene where <file.tsx> --at <moments> [--safe-zone <zone>] [--json] [options]
 npx uberscene fonts [--for <role>] [--category <category>] [--sheet fonts.png [--text <words>]] [--json]
+npx uberscene blocks [--for <job>] [--aspect <shape>] [--sheet blocks.png] [--json]
+npx uberscene blocks add <name> [--into <video.tsx> --track <id> --at <moment> [--id <id>] [--duration <s>]] [--dir <folder>] [--force]
+npx uberscene blocks update [<name>...] [--dir <folder>] [--force]
 npx uberscene add <media file>... [--manifest <file>] [--id <id>] [--transcript <file>]
 npx uberscene browser install
 npx uberscene skills install [--dir <folder>] [--force]
@@ -320,6 +323,80 @@ how it looks.
 
 The sheet is drawn in Chrome like any frame. The first time, Google's faces are downloaded into the font cache
 (`~/.cache/uberscene/fonts`), so it needs the network once. See [Choosing a font](https://uberscene.prefixtree.xyz/guide/themes#choosing-a-font).
+
+## Blocks
+
+```sh
+uberscene blocks [--for <job>] [--aspect <shape>] [--sheet blocks.png] [--json]
+```
+
+Lists the blocks that ship with this version of the CLI, without a file. A block is a scene-sized piece of motion
+design: a grid of cells that fills and counts, a wall of characters, a row of points lit in turn, a ranking that
+reorders, a bar race, a chat reply that types in, a terminal, a phone being tapped, a quote built word by word. Each
+entry says what it shows, when to use it and when not, what it pairs with, its props, the props that time it, the
+file to copy and the line that places it.
+
+| Option | Does |
+|---|---|
+| `--for <job>` | Only blocks whose title, description, uses or tags mention every word given: `--for count`, `--for "background letters"` |
+| `--aspect <shape>` | Only blocks laid out for a frame shape: `9:16`, `16:9`, `1:1` or `4:5` |
+| `--sheet <image>` | Also pastes the listed blocks' previews into one PNG, four to a row, in the order listed. No browser is started |
+| `--json` | Prints the entries as JSON: `name`, `title`, `what`, `useWhen`, `avoidWhen`, `pairsWith`, `tags`, `aspects`, `length`, `beats`, `component`, `props`, `dir`, `preview` |
+
+To use one, `blocks add` copies it into the project, or copy its `block.tsx` as `blocks/<name>.tsx` beside
+`uberscene.json` yourself; then import its component and place it in a `<Layer>`:
+
+```tsx
+import { HundredCells } from "./blocks/hundred-cells";
+
+<Layer id="hundred" anchor="hook" at="word:21" duration={4}>
+  <HundredCells label="DAYS" accent="$primary" />
+</Layer>
+```
+
+Its props are set where it is placed, so two placements of one block differ without two copies, and the editor's
+handles for a Layer's component edit them. Its colours default to theme tokens (`$accent`), so it takes the video's
+look. The copy is yours to edit. See [Blocks](https://uberscene.prefixtree.xyz/guide/free-code#blocks).
+
+### Adding a block
+
+```sh
+uberscene blocks add hundred-cells
+uberscene blocks add hundred-cells --into video.tsx --track graphics --at hook@word:21
+```
+
+Copies the block into the project as `blocks/<name>.tsx`, beside the nearest `uberscene.json` (or in the folder
+`--dir` names, from there), and records it in the manifest under `blocks`, with this CLI's version and the hash of
+the text it copied. Without a manifest it starts one. It prints the line that imports the component. A file of that
+name already there with other text is left alone, unless `--force`.
+
+With `--into`, it also places the block in the video: the import, and a `<Layer>` holding the component at the end of
+the track. The component's props are left to its defaults, to set on the tag afterwards, by hand or with the editor's
+handles for the Layer's component.
+
+| Option | Does |
+|---|---|
+| `--into <video.tsx>` | The video to place it in |
+| `--track <id>` | The track it goes on, as its last element |
+| `--at <moment>` | Where it starts: seconds (`4.5`), an element's start or end (`hook`, `hook.end`), or a word of a clip (`hook@word:21`), which becomes `anchor` and `at` |
+| `--duration <s>` | How long it lasts; default the block's natural length |
+| `--id <id>` | The Layer's id; default the block's name, numbered when that is taken |
+| `--dir <folder>` | Where the copy goes, from the manifest's folder; default `blocks` |
+| `--force` | Replace a different file of the same name |
+
+The video is read back the way an export reads it. If it does not load, or has errors it did not have before (an
+anchor that is not there, say), it is left exactly as it was and the errors are printed.
+
+### Updating blocks
+
+```sh
+uberscene blocks update [<name>...]
+```
+
+After an upgrade, brings each block the manifest records (or the ones named) up to this version's. A copy whose text
+still has the hash it was added with is replaced, and its record updated. A copy someone edited is left alone, and
+what differs from this version's block is printed as a diff; the command then exits with 1, so a script notices.
+`--force` replaces edited copies too. A recorded copy whose file is gone is reported, and also exits with 1.
 
 ## Exit codes
 

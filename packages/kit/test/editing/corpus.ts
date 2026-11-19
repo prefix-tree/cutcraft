@@ -1,8 +1,8 @@
 // The files the editing tests run on: every example and recipe in the repository, each with the manifest beside it.
 // They are real videos, written by hand and by agents, so they hold the shapes an editor meets: anchored titles,
 // free code in layers, helpers, schema props, narration, generated captions.
-import { readdirSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
 
 import {
   type AssetManifest,
@@ -12,7 +12,7 @@ import {
   type ResolvedState,
   resolve,
 } from "@uberscene/kit";
-import { buildSourceIndex, loadModule } from "@uberscene/kit/source";
+import { buildSourceIndex, gatherLocalFiles, loadModule } from "@uberscene/kit/source";
 
 const root = join(import.meta.dirname, "..", "..", "..", "..");
 
@@ -21,6 +21,8 @@ export interface CorpusFile {
   readonly name: string;
   readonly text: string;
   readonly manifest: AssetManifest;
+  /** The file's own modules (a short's blocks), as the CLI reads them, keyed by path from its folder. */
+  readonly files: Readonly<Record<string, string>>;
 }
 
 /** The video files of a folder (and of the subfolders named), with the folder's manifest. */
@@ -32,7 +34,12 @@ function folder(dir: string, subfolders: readonly string[] = []): CorpusFile[] {
       .sort()
       .map((f) => {
         const name = join(dir, sub, f);
-        return { name, text: readFileSync(join(root, name), "utf8"), manifest };
+        const text = readFileSync(join(root, name), "utf8");
+        const folder = join(root, dirname(name));
+        const files = gatherLocalFiles(text, (path) =>
+          existsSync(join(folder, path)) ? readFileSync(join(folder, path), "utf8") : undefined,
+        );
+        return { name, text, manifest, files };
       }),
   );
 }
@@ -45,15 +52,24 @@ export const CORPUS: readonly CorpusFile[] = [
 ];
 
 /** The file evaluated and collected as the editor does, with a source index so edits can be written back. */
-export function treeOf(text: string): CollectedTree {
-  return collectModule(loadModule(text) as never, {}, { index: buildSourceIndex(text) });
+export function treeOf(text: string, files: Readonly<Record<string, string>> = {}): CollectedTree {
+  return collectModule(loadModule(text, { files }) as never, {}, { index: buildSourceIndex(text) });
 }
 
-export function resolveText(text: string, manifest: AssetManifest): ResolvedState {
-  return resolve(treeOf(text), manifest);
+export function resolveText(
+  text: string,
+  manifest: AssetManifest,
+  files: Readonly<Record<string, string>> = {},
+): ResolvedState {
+  return resolve(treeOf(text, files), manifest);
 }
 
 export function executorFor(file: CorpusFile): Executor {
   let n = 0;
-  return new Executor({ tree: treeOf(file.text), manifest: file.manifest, now: () => 0, newActionId: () => `e${++n}` });
+  return new Executor({
+    tree: treeOf(file.text, file.files),
+    manifest: file.manifest,
+    now: () => 0,
+    newActionId: () => `e${++n}`,
+  });
 }

@@ -127,6 +127,12 @@ A sound can also anchor to a transition, and then starts when the transition doe
 A track with `role="effects"` keeps sound effects apart from dialogue and music in the mix
 ([Track roles](./captions-and-sound#track-roles)).
 
+The shorts in `examples/shorts` come with eight cues to start from: `tick`, `click`, `pop`, `whoosh`, `swish`,
+`riser`, `thud` and `chime`. They are made by a small synth in `examples/shorts/media/sounds.ts`, so they carry the
+repository's MIT licence. Copy the `.wav` files into your project and add each with `uberscene add`. A riser climbs
+to a stop at its end, so start it its length before the moment it builds to. `snake-heart.tsx` pops on every
+character the snake eats and rises into the heart; `one-pixel.tsx` times its cues from the narration's names.
+
 ## Next
 
 - [Effects and transitions](/reference/effects/#transitions): every built-in transition, playing, with its params.

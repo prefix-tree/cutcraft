@@ -423,6 +423,15 @@ function compute(
 }
 
 /**
+ * The composition's props without the values the editor holds for the fold to write (`$fonts`, `$defaults`): they
+ * are not props of `<Composition>`, so its schema must not see them.
+ */
+function withoutPending(props: Record<string, unknown>): Record<string, unknown> {
+  if (!Object.keys(props).some((k) => k.startsWith("$"))) return props;
+  return Object.fromEntries(Object.entries(props).filter(([k]) => !k.startsWith("$")));
+}
+
+/**
  * The file's faces, and the Google faces an editor's font picker asked for (`font/use` keeps them on the composition
  * as `$fonts`, family to weights) until the fold writes their declaration: the preview loads them at once.
  */
@@ -525,7 +534,7 @@ function parseProps(node: CollectedNode, errors: ResolveError[], theme: Resolved
   let data: Record<string, unknown>;
   if (!schema) data = { ...themed.props };
   else {
-    const result = schema.safeParse(themed.props);
+    const result = schema.safeParse(node.kind === "composition" ? withoutPending(themed.props) : themed.props);
     if (result.success) {
       data = result.data as Record<string, unknown>;
       const declared = declaredShader(node, data, own);
