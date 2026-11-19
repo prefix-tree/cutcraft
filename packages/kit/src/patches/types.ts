@@ -29,6 +29,11 @@ export interface NetPatch {
   place?: { parent: string; after: string | null; seq: number };
   node?: CollectedNode;
   bake: boolean;
+  /**
+   * The inserted node that holds it again: a node the log removed and a later insert brought back inside its own
+   * subtree (an undo puts a split clip back whole, keyframes and all). It is present there and not at its old place.
+   */
+  within?: string;
 }
 
 export interface PatchLog {

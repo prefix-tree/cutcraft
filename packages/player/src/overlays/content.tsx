@@ -63,7 +63,15 @@ export function titleContent(p: ElementProps & { readonly text: string }): React
   };
   const shown = visibleChars === null ? text : text.slice(0, visibleChars);
   return (
-    <div style={inner}>{anim?.preset === "word-by-word" ? words(text, rel, anim, p.placement.duration) : shown}</div>
+    <div style={inner}>
+      {anim?.preset === "word-by-word" ? (
+        // One flex item for the whole text: the words then flow and wrap inside it as ordinary text does, instead of
+        // each word being an item of a line that never wraps, with the spaces between them lost.
+        <span>{words(text, rel, anim, p.placement.duration)}</span>
+      ) : (
+        shown
+      )}
+    </div>
   );
 }
 

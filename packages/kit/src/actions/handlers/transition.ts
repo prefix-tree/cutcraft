@@ -3,6 +3,7 @@ import { defaultTransitionParams, isBuiltInTransition, TRANSITION_PARAMS } from 
 import { shaderFor } from "../../jsx/shaders";
 import type { Json } from "../../patches/types";
 import type { ResolvedState } from "../../resolve/resolve";
+import { carry, carryTransitionRemoval } from "../carry";
 import {
   define,
   insertNode,
@@ -106,28 +107,31 @@ define({
   fold: () => [],
 });
 
-define({
-  type: "transition/remove",
-  targets: onElement({ param: "transitionId", kinds: ["transition"], onLocked: true, onOpaque: true }),
-  validate: (a, state) => {
-    const e = requireTransition(state, a.params.transitionId);
-    return e ? invalid(e) : ok;
+define(carry(
+  {
+    type: "transition/remove",
+    targets: onElement({ param: "transitionId", kinds: ["transition"], onLocked: true, onOpaque: true }),
+    validate: (a, state) => {
+      const e = requireTransition(state, a.params.transitionId);
+      return e ? invalid(e) : ok;
+    },
+    apply: (a, log) => log.append({ op: "remove", id: a.params.transitionId }),
+    invert: (a, before) => {
+      const node = rawNode(before, a.params.transitionId)!;
+      return {
+        type: "transition/restore",
+        params: {
+          transitionId: a.params.transitionId,
+          node: nodeSpecOf(node),
+          trackId: node.parent as string,
+          after: siblingAfter(before, a.params.transitionId),
+        },
+      };
+    },
+    fold: () => [],
   },
-  apply: (a, log) => log.append({ op: "remove", id: a.params.transitionId }),
-  invert: (a, before) => {
-    const node = rawNode(before, a.params.transitionId)!;
-    return {
-      type: "transition/restore",
-      params: {
-        transitionId: a.params.transitionId,
-        node: nodeSpecOf(node),
-        trackId: node.parent as string,
-        after: siblingAfter(before, a.params.transitionId),
-      },
-    };
-  },
-  fold: () => [],
-});
+  (a, before) => carryTransitionRemoval(a.params.transitionId, before),
+));
 
 define({
   type: "transition/restore",

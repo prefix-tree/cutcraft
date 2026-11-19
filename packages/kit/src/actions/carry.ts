@@ -36,7 +36,10 @@ export function carry<T extends ActionType>(
       const repairs = plan(action, before);
       if (!repairs) return handler.invert(action, before);
       // The inverses are taken on a scratch run of the same steps, each against the state the step before left.
-      const log = createPatchLog({ isSource: (id) => before.tree.byId.has(id) });
+      const log = createPatchLog({
+        isSource: (id) => before.tree.byId.has(id),
+        sourceParent: (id) => before.tree.byId.get(id)?.parent ?? null,
+      });
       const current = () => resolve(before.tree, before.manifest, log);
       const ctx: ApplyContext = { before, manifest: before.manifest, current };
       const inverses: ActionInput[] = [];
@@ -120,6 +123,38 @@ export function carryRemoval(id: string, before: ResolvedState): Carry | null {
   for (const d of deps) {
     if (d.kind === "on" || (d.kind === "beside" && d !== kept))
       pre.push({ type: "transition/remove", params: { transitionId: d.id } });
+  }
+  return pre.length > 0 ? { pre } : null;
+}
+
+/** The clip a transition leads into on its track, else the one it leaves; transitions and gaps are skipped. */
+function clipBeside(state: ResolvedState, id: string): Placement | undefined {
+  const track = state.tracks.find((t) => t.items.includes(id));
+  const siblings = track ? (state.tree.byId.get(track.id)?.children ?? []) : [];
+  const at = siblings.findIndex((c) => c.id === id);
+  const isClip = (kind: string | undefined) => kind !== undefined && kind !== "transition" && kind !== "gap";
+  const next = siblings.slice(at + 1).find((c) => c.kind !== "transition");
+  if (next && isClip(next.kind)) return state.items.get(next.id);
+  return clipBefore(state, id);
+}
+
+/**
+ * Removing a transition: what starts from it (a whoosh on the cut) moves to the clip the transition led into, or with
+ * none the clip it left, keeping its distance from that clip's start; with no clip beside it, it is removed too. A
+ * length that follows the transition becomes the seconds it was. Removing a clip removes the transitions it leaves
+ * with one side, and so carries what hangs off them as well.
+ */
+export function carryTransitionRemoval(id: string, before: ResolvedState): Carry | null {
+  const deps = dependentsOf(before, id).filter((d) => d.kind === "anchor" || d.kind === "match" || d.kind === "until");
+  if (deps.length === 0) return null;
+  const pre: ActionInput[] = [];
+  const target = clipBeside(before, id);
+  for (const d of deps) {
+    const p = before.items.get(d.id);
+    if (!p) continue;
+    if (d.kind === "match" || d.kind === "until") pre.push(setProps(d.id, { duration: round3(p.duration) }));
+    else if (!target) pre.push({ type: "clip/remove", params: { id: d.id } });
+    else pre.push(setProps(d.id, { anchor: target.id, at: undefined, offset: round3(p.start - target.start) }));
   }
   return pre.length > 0 ? { pre } : null;
 }

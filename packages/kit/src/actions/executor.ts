@@ -61,7 +61,12 @@ export class Executor {
   constructor(options: ExecutorOptions) {
     this.tree = options.tree;
     this.manifest = options.manifest;
-    this.patchLog = options.log ?? createPatchLog({ isSource: (id) => this.tree.byId.has(id) });
+    this.patchLog =
+      options.log ??
+      createPatchLog({
+        isSource: (id) => this.tree.byId.has(id),
+        sourceParent: (id) => this.tree.byId.get(id)?.parent ?? null,
+      });
     this.hist = options.history ?? new ActionHistory();
     this.now = options.now ?? (() => Date.now());
     this.newActionId = options.newActionId ?? (() => `a${++this.counter}`);
