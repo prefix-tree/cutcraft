@@ -31,3 +31,10 @@ Footage: [Lex Fridman Podcast #351](https://www.youtube.com/watch?v=Z3_PwvvfxIU)
 ## The code
 
 <<< @/../examples/shorts/hundred-videos.tsx
+
+The grid that counts and the row of points are [blocks](/guide/free-code#blocks), copied into the project from
+`uberscene blocks` and placed with this short's times and colours:
+
+<<< @/../examples/shorts/blocks/hundred-cells.tsx
+
+<<< @/../examples/shorts/blocks/point-list.tsx

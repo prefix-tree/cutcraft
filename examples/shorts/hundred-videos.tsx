@@ -7,7 +7,6 @@ import { z } from "zod";
 
 import {
   Captions,
-  Cells,
   Clip,
   Composition,
   fontFamily,
@@ -18,6 +17,9 @@ import {
   useLayer,
   useProgress,
 } from "@uberscene/kit";
+
+import { HundredCells } from "./blocks/hundred-cells";
+import { PointList } from "./blocks/point-list";
 
 export const schema = z.object({
   /** The one colour that is not navy or white. */
@@ -107,67 +109,6 @@ function mix(a: string, b: string, k: number): string {
   return `rgb(${at(0)}, ${at(1)}, ${at(2)})`;
 }
 
-/**
- * "Make a hundred videos, improve something each time": a hundred cells fill as he says it, each a shade nearer the
- * accent than the last, with the count beside them. On "your hundred-first video" one more arrives.
- */
-function Hundred({ accent }: { accent: string }) {
-  const COLUMNS = 20;
-  const SIZE = 26;
-  const GAP = 6;
-  const filled = Math.round(100 * useProgress({ at: T(6.86), over: 2, easing: "ease-in-out" }));
-  const next = useProgress({ at: T(9.96), over: 0.3 });
-  const top = BAND.y + 30;
-  const right = BAND.x + COLUMNS * (SIZE + GAP) - GAP;
-  return (
-    <Board>
-      {[0, 1, 2, 3, 4].map((row) => (
-        <Cells
-          key={row}
-          {...(row === 0 ? { name: "grid" } : {})}
-          count={COLUMNS}
-          x={BAND.x}
-          y={top + row * (SIZE + GAP)}
-          size={SIZE}
-          gap={GAP}
-          radius={6}
-          fill={(i) => (row * COLUMNS + i < filled ? mix("#8fa0d0", accent, (row * COLUMNS + i) / 99) : DIM)}
-        />
-      ))}
-      {/* The hundred-and-first: the next row's first cell, ringed. */}
-      <g data-name="next" opacity={next}>
-        <rect x={BAND.x + 8} y={top + 5 * (SIZE + GAP)} width={SIZE} height={SIZE} rx={6} fill={accent} />
-        <rect
-          x={BAND.x + 3}
-          y={top + 5 * (SIZE + GAP) - 5}
-          width={SIZE + 10}
-          height={SIZE + 10}
-          rx={10}
-          fill="none"
-          stroke={WHITE}
-          strokeWidth={3}
-        />
-      </g>
-      <g data-name="count">
-        <text {...TYPE} x={right + 64} y={top + 62} fontSize={60} textAnchor="middle" dominantBaseline="central">
-          {filled + Math.round(next)}
-        </text>
-        <text
-          {...TYPE}
-          x={right + 64}
-          y={top + 128}
-          fontSize={24}
-          fill={accent}
-          textAnchor="middle"
-          dominantBaseline="central"
-        >
-          VIDEOS
-        </text>
-      </g>
-    </Board>
-  );
-}
-
 // The five things he lists, each with the video he names it for and the excerpt second he says so.
 const POINTS = [
   { key: "script", label: "SCRIPT", video: 2, at: 15.6 },
@@ -176,109 +117,15 @@ const POINTS = [
   { key: "thumbnail", label: "THUMBNAIL", video: 5, at: 24.54 },
   { key: "title", label: "TITLE", video: 6, at: 28.1 },
 ] as const;
-const TILE = { width: 140, height: 170, gap: 17 };
-
-/** A small drawing of each point, in a box 100 by 80 whose top left is the origin. */
-function Icon({ kind, ink, accent }: { kind: (typeof POINTS)[number]["key"]; ink: string; accent: string }) {
-  if (kind === "script")
-    return (
-      <g>
-        {[0, 1, 2, 3].map((row) => (
-          <rect
-            key={row}
-            x={0}
-            y={row * 22}
-            width={[100, 78, 100, 56][row]}
-            height={10}
-            rx={5}
-            fill={row === 1 ? accent : ink}
-          />
-        ))}
-      </g>
-    );
-  if (kind === "edit")
-    return (
-      <g>
-        <rect x={0} y={18} width={40} height={36} rx={8} fill={ink} />
-        <rect x={50} y={18} width={50} height={36} rx={8} fill={ink} />
-        <rect x={42} y={4} width={6} height={72} rx={3} fill={accent} />
-      </g>
-    );
-  if (kind === "voice")
-    return (
-      <g>
-        {[26, 54, 78, 40, 66, 30, 48].map((h, i) => (
-          <rect key={i} x={i * 15} y={40 - h / 2} width={9} height={h} rx={4.5} fill={i === 2 ? accent : ink} />
-        ))}
-      </g>
-    );
-  if (kind === "thumbnail")
-    return (
-      <g>
-        <rect x={0} y={8} width={100} height={62} rx={10} fill="none" stroke={ink} strokeWidth={6} />
-        <path d="M 40 24 L 66 39 L 40 54 Z" fill={accent} />
-      </g>
-    );
-  return (
-    <g>
-      <text {...TYPE} x={0} y={30} fontSize={54} fill={ink} dominantBaseline="central">
-        Aa
-      </text>
-      <rect x={0} y={66} width={100} height={8} rx={4} fill={accent} />
-    </g>
-  );
-}
-
-/** One of the five: it arrives on its word, is bright while it is the one being named, and dims when the next comes. */
-function Point({ index, accent }: { index: number; accent: string }) {
-  const point = POINTS[index] as (typeof POINTS)[number];
-  const later = POINTS[index + 1];
-  const here = useProgress({ at: T(point.at), over: 0.3 });
-  const passed = useProgress({ at: T(later?.at ?? 1e6), over: 0.3 });
-  const x = BAND.x + index * (TILE.width + TILE.gap);
-  const y = BAND.y + 20 + (1 - here) * 24 - (here - passed) * 8;
-  const ink = mix(WHITE, "#7f8bb3", passed);
-  return (
-    <g data-name={point.key} opacity={here * (1 - passed * 0.35)} transform={`translate(${x} ${y})`}>
-      <rect
-        width={TILE.width}
-        height={TILE.height}
-        rx={20}
-        fill="#16234a"
-        stroke={accent}
-        strokeOpacity={here - passed}
-        strokeWidth={4}
-      />
-      <text {...TYPE} x={16} y={26} fontSize={20} fill={accent} dominantBaseline="central">
-        #{point.video}
-      </text>
-      <g transform="translate(20 62)">
-        <Icon kind={point.key} ink={ink} accent={accent} />
-      </g>
-      <text
-        {...TYPE}
-        x={TILE.width / 2}
-        y={TILE.height + 30}
-        fontSize={20}
-        fill={ink}
-        textAnchor="middle"
-        dominantBaseline="central"
-      >
-        {point.label}
-      </text>
-    </g>
-  );
-}
-
-function Points({ accent }: { accent: string }) {
-  return (
-    <Board>
-      {POINTS.map((point, index) => (
-        <Point key={point.key} index={index} accent={accent} />
-      ))}
-    </Board>
-  );
-}
+/** The five as the point list draws them: the drawing for each, and the second of the short it arrives. */
+const ICON = { script: "lines", edit: "cuts", voice: "wave", thumbnail: "frame", title: "type" } as const;
+const POINT_LIST = POINTS.map((p) => ({
+  name: p.key,
+  label: p.label,
+  tag: `#${p.video}`,
+  icon: ICON[p.key],
+  at: T(p.at),
+}));
 
 // "There's infinite ways": what he lists, with the excerpt second of each, laid out as chips in rows.
 const WAYS = [
@@ -511,11 +358,31 @@ export default function Video({ accent }: z.infer<typeof schema>) {
       </Track>
 
       <Track id="graphics" layout="free">
+        {/* "Make a hundred videos, improve something each time": a hundred cells fill as he says it, each a shade
+            nearer the accent than the last, with the count beside them. On "your hundred-first video" one more arrives. */}
         <Layer id="hundred-grid" anchor="hundred" duration={{ until: "hundred" }}>
-          <Hundred accent={accent} />
+          <HundredCells
+            accent={accent}
+            dim={DIM}
+            ink={WHITE}
+            font={TYPE.fontFamily}
+            x={BAND.x}
+            y={BAND.y + 30}
+            fill={{ at: T(6.86), over: 2 }}
+            next={{ at: T(9.96), over: 0.3 }}
+          />
         </Layer>
+        {/* Each of the five arrives on its word, is bright while it is the one being named, and dims when the next comes. */}
         <Layer id="points" anchor="list" duration={{ until: "list" }}>
-          <Points accent={accent} />
+          <PointList
+            points={POINT_LIST}
+            accent={accent}
+            ink={WHITE}
+            tile="#16234a"
+            font={TYPE.fontFamily}
+            x={BAND.x}
+            y={BAND.y + 20}
+          />
         </Layer>
         <Layer id="ways" anchor="infinite" duration={{ until: "infinite" }}>
           <Infinite accent={accent} />

@@ -2,6 +2,7 @@ packages:
   - packages/*
   - examples/*
   - recipes
+  - blocks
 
 catalog:
   '@fontsource/dm-sans': ^5.3.0
