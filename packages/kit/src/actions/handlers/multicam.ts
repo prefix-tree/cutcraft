@@ -7,6 +7,7 @@ import {
   isError,
   lastChildId,
   makePropHandler,
+  onElement,
   placementOf,
   placeNode,
   rawNode,
@@ -50,6 +51,7 @@ define({
 
 define({
   type: "multicam/remove",
+  targets: onElement({ onOpaque: true, kinds: ["multicam"] }),
   validate: (a, state) => {
     const item = requireElement(state, a.params.id);
     if (isError(item)) return invalid(item);
@@ -91,6 +93,7 @@ define({
 
 define({
   type: "multicam/addCut",
+  targets: onElement({ kinds: ["multicam"] }),
   validate: (a, state) => {
     const base = validateTarget(state, a.params.id, []);
     if (!base.valid) return base;
@@ -167,6 +170,7 @@ define({
 /** Replace the multicam by one literal <Clip> per cut, each at the time and source range the cut resolved to. */
 define({
   type: "multicam/flatten",
+  targets: onElement({ kinds: ["multicam"], when: (item, state) => requireLayout(state, item, "free") === null }),
   validate: (a, state) => {
     const base = validateTarget(state, a.params.id, []);
     if (!base.valid) return base;

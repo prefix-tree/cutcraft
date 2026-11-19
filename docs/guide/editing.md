@@ -62,6 +62,25 @@ with `BREAKS_FILE`, its message names each new error, and nothing is kept: no pa
 file already had do not count. A `batch/apply` is checked once, as a whole, so its middle may pass through a broken
 state. Undo and redo are not checked, since each returns to, or repeats, a state an accepted action reached.
 
+**Ask before you act.** An editor greys out what it cannot do, and an agent plans before it writes. Two calls answer
+without changing anything:
+
+```ts
+exec.can({ type: "clip/split", params: { id: "hook", at: 3.2, newId: "hook-2" } });
+// { ok: true }, or { ok: false, errors } with exactly the errors execute() would give
+affordances(exec.state(), "hook");
+// { kind: "clip", editable: "literal", track: { id: "main", locked: false }, capabilities,
+//   props: { in: "literal", out: "bound", … }, actions: ["clip/move", "clip/split", "clip/trim", …] }
+```
+
+`can()` runs the same steps as `execute()`, the check for new errors included, then takes back what it appended:
+no patch, no history entry, and `state()` is the same object it was. `affordances()` says how each prop can be
+written (in the element, into the file's `defaults` when it is bound to the schema, or not at all when it is an
+expression) and which actions are about this element and accept it: the right kind, a track that is not locked,
+code written in the file. An action listed there can still be refused for its other params (a split outside the
+clip, a speed out of range); `can()` gives the definite answer. Actions that create something or act on the whole
+file, such as `track/add` or `transition/add`, are about no single element and are not listed.
+
 ::: details What each action is made of
 Every handler has four faces:
 
@@ -71,6 +90,9 @@ Every handler has four faces:
 | `apply` | action, patch log | appends `set`, `text`, `insert`, `remove`, `move`, `bake` patches |
 | `invert` | action, state before | the inverse action, never null |
 | `fold` | action, source index | source edits, when the generic fold is not enough |
+
+An action that is about one element also has `targets`: the param that names it, and the part of `validate` that
+depends on the element alone. `affordances()` reads it.
 :::
 
 ## The patch log

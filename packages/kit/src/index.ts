@@ -1,3 +1,4 @@
+export * from "./actions/affordances";
 export * from "./actions/executor";
 export * from "./actions/handler-kit";
 export * from "./actions/history";

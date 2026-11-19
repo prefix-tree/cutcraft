@@ -8,6 +8,7 @@ import {
   define,
   insertNode,
   isError,
+  onElement,
   placementOf,
   rawNode,
   rawProp,
@@ -49,6 +50,7 @@ function sourceLimit(state: ResolvedState, item: ResolvedPlacement): number {
 define(carry(
   {
     type: "clip/trim",
+    targets: onElement({ when: (item) => capabilitiesOf(item.kind).timed && item.kind !== "transition" }),
     validate: (a, state) => {
       const base = validateTarget(
         state,
@@ -128,6 +130,7 @@ define(carry(
 
 define({
   type: "clip/trimToPlayhead",
+  targets: onElement(),
   validate: (a, state) => {
     const base = validateTarget(state, a.params.id, ["in", "out", "duration"]);
     if (!base.valid) return base;
@@ -188,6 +191,7 @@ define({
 /** Move the source window without moving the element. */
 define({
   type: "clip/slip",
+  targets: onElement({ when: (item) => item.source !== undefined }),
   validate: (a, state) => {
     const base = validateTarget(state, a.params.id, ["in", "out"]);
     if (!base.valid) return base;
@@ -230,6 +234,12 @@ function neighbours(
 /** The clip keeps its content and moves by delta; the previous clip's tail and the next clip's head absorb it. */
 define({
   type: "clip/slide",
+  targets: onElement({
+    when: (item, state) => {
+      const { prev, next } = neighbours(state, item);
+      return prev?.source !== undefined && next?.source !== undefined;
+    },
+  }),
   validate: (a, state) => {
     const base = validateTarget(state, a.params.id, []);
     if (!base.valid) return base;
@@ -272,6 +282,17 @@ define({
 /** Move the cut between two adjacent source clips; the sequence length does not change. */
 define({
   type: "clip/roll",
+  targets: onElement({
+    param: "leftId",
+    // A cut to roll: the clip after it, on a sequence, or one that starts where it ends, on a free track.
+    when: (item, state) =>
+      item.source !== undefined &&
+      (layoutOf(state, item) === "sequence"
+        ? neighbours(state, item).next?.source !== undefined
+        : [...state.items.values()].some(
+            (p) => p.track === item.track && p.source !== undefined && Math.abs(item.end - p.start) <= 0.001,
+          )),
+  }),
   validate: (a, state) => {
     const left = requireElement(state, a.params.leftId, "leftId");
     const right = requireElement(state, a.params.rightId, "rightId");
@@ -356,6 +377,9 @@ function splitChildren(
 define(carry(
   {
     type: "clip/split",
+    targets: onElement({
+      when: (item) => capabilitiesOf(item.kind).timed && item.kind !== "transition" && item.kind !== "gap",
+    }),
     validate: (a, state) => {
       const base = validateTarget(state, a.params.id, ["in", "out", "duration"]);
       if (!base.valid) return base;
@@ -449,6 +473,7 @@ function siblingBefore(state: ResolvedState, id: string): string | null {
 define(carry(
   {
     type: "clip/rippleDelete",
+    targets: onElement(),
     validate: (a, state) => validateTarget(state, a.params.id, []),
     apply: (a, log, ctx) => {
       const state = ctx.before;
@@ -508,6 +533,15 @@ function laterOnTrack(state: ResolvedState, item: ResolvedPlacement): ResolvedPl
 /** Free layout: shift this element and every later one left until it meets the previous element. Sequence: remove the Gap before it. */
 define({
   type: "clip/closeGapBefore",
+  targets: onElement({
+    when: (item, state) => {
+      const layout = layoutOf(state, item);
+      if (layout === "anchored") return false;
+      if (layout !== "sequence") return true;
+      const before = siblingBefore(state, item.id);
+      return before !== null && rawNode(state, before)?.kind === "gap";
+    },
+  }),
   validate: (a, state) => {
     const base = validateTarget(state, a.params.id, []);
     if (!base.valid) return base;

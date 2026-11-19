@@ -4,6 +4,7 @@ import {
   define,
   insertNode,
   makePropHandler,
+  onElement,
   rawNode,
   rawProp,
   setProps,
@@ -159,6 +160,7 @@ const updateWrites = (p: {
 
 define({
   type: "caption/update",
+  targets: onElement({ param: "captionId", kinds: ["caption"] }),
   validate: (a, state) => {
     const base = validateTarget(state, a.params.captionId, Object.keys(updateWrites(a.params)));
     if (!base.valid) return base;
@@ -183,6 +185,7 @@ define({
 
 define({
   type: "caption/remove",
+  targets: onElement({ param: "captionId", kinds: ["caption"] }),
   validate: (a, state) => {
     const e = requireCaption(state, a.params.captionId);
     return e ? invalid(e) : validateTarget(state, a.params.captionId, []);
@@ -231,12 +234,14 @@ define({
 define(makePropHandler({
   type: "caption/setStyle",
   target: (p) => p.captionsId,
+  targets: { param: "captionsId", kinds: ["captions"] },
   kinds: ["captions"],
   write: (p) => ({ style: p.style as Json | undefined }),
 }));
 define(makePropHandler({
   type: "caption/setAnimation",
   target: (p) => p.captionsId,
+  targets: { param: "captionsId", kinds: ["captions"] },
   kinds: ["captions"],
   write: (p) => ({ animation: p.animation }),
 }));

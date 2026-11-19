@@ -9,9 +9,12 @@
 //
 // Edits the editor must refuse are refused with a reason and change nothing. A last case applies every edit in a row
 // to the same file and folds them once, as a session in the editor does.
+//
+// Before each edit and refusal runs, `can()` is asked and must give the answer `execute()` then gives, and an edit
+// that is about one element is among that element's `affordances()`.
 import { describe, expect, it } from "vitest";
 
-import type { ActionInput, ResolvedState } from "@uberscene/kit";
+import { type ActionInput, actionTarget, affordances, type ResolvedState } from "@uberscene/kit";
 import { foldToSource, lint } from "@uberscene/kit/source";
 
 import { serialize } from "../helpers";
@@ -48,6 +51,9 @@ describe.each(CORPUS.map((file) => [file.name, file] as const))("%s", (name, fil
   it.each(picked.map((p) => [p.edit.name, p.input] as const))("%s", (_edit, input) => {
     const exec = executorFor(file);
     const before = serialize(exec.state());
+    const target = actionTarget(input);
+    if (target !== undefined) expect(affordances(exec.state(), target)?.actions).toContain(input.type);
+    expect(exec.can(input)).toEqual({ ok: true });
     const result = exec.execute(input);
     expect(result.errors ?? []).toEqual([]);
     expect(result.ok).toBe(true);
@@ -69,7 +75,9 @@ describe.each(CORPUS.map((file) => [file.name, file] as const))("%s", (name, fil
     (_name, code, input) => {
       const exec = executorFor(file);
       const before = serialize(exec.state());
+      const asked = exec.can(input);
       const result = exec.execute(input);
+      expect(asked).toEqual({ ok: false, errors: result.errors });
       expect(result.ok).toBe(false);
       expect(result.errors?.map((e) => e.code)).toContain(code);
       expect(serialize(exec.state())).toEqual(before);

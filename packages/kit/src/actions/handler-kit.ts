@@ -2,7 +2,7 @@ import { asJson } from "../patches/log";
 import type { Json, PatchLog } from "../patches/types";
 import type { Placement as ResolvedPlacement, ResolvedState } from "../resolve/resolve";
 import { type CollectedNode, INTERIOR_PREFIX } from "../resolve/tree";
-import { type ActionHandler, type ApplyContext, registerHandler } from "./registry";
+import { type ActionHandler, type ApplyContext, type ElementTarget, registerHandler } from "./registry";
 import {
   type Action,
   type ActionError,
@@ -81,6 +81,34 @@ export function validateTarget(state: ResolvedState, id: unknown, props: readonl
     if (e) errors.push(e);
   }
   return invalid(...errors);
+}
+
+/** The element-level checks an action makes, for its `targets` face. Each default matches `validateTarget`. */
+export interface TargetSpec {
+  /** The param that names the element. Default `id`. */
+  readonly param?: string;
+  /** The kinds it applies to; any when left out. */
+  readonly kinds?: readonly string[];
+  /** It does not check the track's lock. */
+  readonly onLocked?: boolean;
+  /** It does not refuse model-only code. */
+  readonly onOpaque?: boolean;
+  /** It refuses generated elements (bake first). */
+  readonly literalOnly?: boolean;
+  /** Any further check on the element alone. */
+  readonly when?: (item: ResolvedPlacement, state: ResolvedState) => boolean;
+}
+
+export function onElement(spec: TargetSpec = {}): ElementTarget {
+  return {
+    param: spec.param ?? "id",
+    accepts: (item, state) =>
+      (spec.onLocked === true || requireUnlocked(state, item) === null) &&
+      (spec.onOpaque === true || requireNotOpaque(item) === null) &&
+      (spec.literalOnly !== true || item.editable !== "generated") &&
+      (spec.kinds === undefined || spec.kinds.includes(item.kind)) &&
+      (spec.when?.(item, state) ?? true),
+  };
 }
 
 // ── raw access ──────────────────────────────────────────────────────────────
@@ -181,13 +209,23 @@ export interface PropHandlerSpec<T extends ActionType> {
   readonly target?: (params: Params<T>) => string;
   readonly validate?: (action: Action<T>, state: ResolvedState) => ValidationResult;
   readonly kinds?: readonly string[];
+  /**
+   * The element it is about, for `affordances()`. Left out, an action that targets `id` gets one from `kinds`; one with
+   * its own `target` gets none unless it names the param here.
+   */
+  readonly targets?: TargetSpec;
 }
 
 /** An action that sets literal props on one element; the inverse sets the prior values. */
 export function makePropHandler<T extends ActionType>(spec: PropHandlerSpec<T>): ActionHandler<T> {
   const target = spec.target ?? ((params: Params<T>) => (params as { id: string }).id);
+  const targets =
+    spec.targets !== undefined || spec.target === undefined
+      ? onElement({ ...(spec.kinds ? { kinds: spec.kinds } : {}), ...spec.targets })
+      : undefined;
   const handler: ActionHandler<T> = {
     type: spec.type,
+    ...(targets ? { targets } : {}),
     validate(action, state) {
       const id = target(action.params);
       const props = Object.keys(spec.write(action.params, state));
