@@ -46,8 +46,12 @@ function describe(table: string, prop: string): string {
   if (!doc) undocumented.push(`${table} ${prop}`);
   return cell(doc ?? "");
 }
-/** Text for a Markdown table cell: one line, with its pipes escaped. */
-const cell = (text: string): string => text.replace(/\s*\n\s*/g, " ").replace(/\|/g, "\\|");
+/** Text for a Markdown table cell: one line, with its backslashes and pipes escaped. */
+const cell = (text: string): string =>
+  text
+    .replace(/\s*\n\s*/g, " ")
+    .replace(/\\/g, "\\\\")
+    .replace(/\|/g, "\\|");
 
 type JsonSchema = {
   type?: string | string[];
