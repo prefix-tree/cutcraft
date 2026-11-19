@@ -9,7 +9,7 @@ import {
   Three,
   Track,
   useLayer,
-} from "@cutcraft/kit";
+} from "@uberscene/kit";
 
 // "One pixel": how a game lights a room, told by following one dot of the screen. A narrator's words lead; the
 // subtitles show a phrase at a time with a box on the word being said, and each thing on screen arrives on the

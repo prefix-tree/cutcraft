@@ -1,4 +1,4 @@
-import { Clip, Composition, Effect, Keyframe, Track } from "@cutcraft/kit";
+import { Clip, Composition, Effect, Keyframe, Track } from "@uberscene/kit";
 
 // grain: Adds moving film grain to a clip, a nested sequence, or everything beneath an adjustment.
 export default function Video() {

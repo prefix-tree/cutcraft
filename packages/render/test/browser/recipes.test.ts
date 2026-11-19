@@ -2,7 +2,7 @@ import { spawnSync } from "node:child_process";
 import { mkdirSync, readFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
 
-import type { AssetManifest } from "@cutcraft/kit";
+import type { AssetManifest } from "@uberscene/kit";
 
 import { decodeFrames, decodesClean, pixel, probe } from "../helpers/output";
 import { makePlaceholders } from "../helpers/placeholders";
@@ -10,7 +10,7 @@ import { makePlaceholders } from "../helpers/placeholders";
 const root = join(import.meta.dirname, "..", "..");
 const recipes = join(root, "..", "..", "recipes");
 const scratch = join(root, "test", ".tmp", "recipes");
-const manifest = JSON.parse(readFileSync(join(recipes, "cutcraft.json"), "utf8")) as AssetManifest;
+const manifest = JSON.parse(readFileSync(join(recipes, "uberscene.json"), "utf8")) as AssetManifest;
 
 const files = ["talking-head", "product-demo", "vertical-podcast", "slideshow", "stats", "variants", "highlights"];
 
@@ -32,7 +32,7 @@ describe("recipes", () => {
           join(root, "src", "cli.ts"),
           join(recipes, `${name}.tsx`),
           "--manifest",
-          join(recipes, "cutcraft.json"),
+          join(recipes, "uberscene.json"),
           "--media",
           join(scratch, "media"),
           "--out",

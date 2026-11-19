@@ -1,4 +1,4 @@
-// `cutcraft look video.tsx`: many frames from one browser start, as one contact sheet with a legend that says what
+// `uberscene look video.tsx`: many frames from one browser start, as one contact sheet with a legend that says what
 // each cell is. The frames are the export's own, so what a sheet shows is what the file renders.
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
@@ -14,8 +14,8 @@ import {
   resolveMoments,
   skimMoments,
   spokenWords,
-} from "@cutcraft/kit";
-import type { MediaResolver } from "@cutcraft/player/engine";
+} from "@uberscene/kit";
+import type { MediaResolver } from "@uberscene/player/engine";
 
 import type { FontFile } from "./fonts";
 import { FrameKeys, readCached, wholeKey, writeCached } from "./frame-cache";

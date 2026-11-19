@@ -1,7 +1,7 @@
 import { createElement as h } from "react";
 import { describe, expect, it } from "vitest";
 
-import { Clip, Composition, collect, Executor, Gap, resolve, SpeedKey, Title, Track } from "@cutcraft/kit";
+import { Clip, Composition, collect, Executor, Gap, resolve, SpeedKey, Title, Track } from "@uberscene/kit";
 
 import { manifest } from "./helpers";
 

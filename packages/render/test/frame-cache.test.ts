@@ -24,7 +24,7 @@ const MANIFEST = `export const manifest = { assets: {
 
 /** A two-clip cut: a title over the first clip, an effect on the second, and whatever `more` adds to the text track. */
 const video = (o: { title?: string; out?: number; stops?: number; more?: string; top?: string; fps?: number } = {}) => `
-import { Clip, Composition, Effect, Layer, Title, Track, useLayer } from "@cutcraft/kit";
+import { Clip, Composition, Effect, Layer, Title, Track, useLayer } from "@uberscene/kit";
 ${MANIFEST}
 ${o.top ?? ""}
 export default function Video() {

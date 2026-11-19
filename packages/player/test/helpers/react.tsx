@@ -1,8 +1,8 @@
 import { act, createRef, type ReactNode } from "react";
 import { createRoot, type Root } from "react-dom/client";
 
-import type { ResolvedState } from "@cutcraft/kit";
-import { ManualClock, Player, type PlayerOptions, type PlayerRef } from "@cutcraft/player";
+import type { ResolvedState } from "@uberscene/kit";
+import { ManualClock, Player, type PlayerOptions, type PlayerRef } from "@uberscene/player";
 
 import {
   FakeAudioOutput,

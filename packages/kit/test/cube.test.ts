@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { collectModule, parseCube, resolve } from "@cutcraft/kit";
-import { loadModule } from "@cutcraft/kit/source";
+import { collectModule, parseCube, resolve } from "@uberscene/kit";
+import { loadModule } from "@uberscene/kit/source";
 
 /** A size-2 table whose output is (b, g, r): red and blue swapped. */
 const SWAP_CUBE = [
@@ -58,7 +58,7 @@ describe("the lut effect", () => {
     resolve(
       collectModule(
         loadModule(`import { z } from "zod";
-import { Clip, Composition, effect, Effect, Track } from "@cutcraft/kit";
+import { Clip, Composition, effect, Effect, Track } from "@uberscene/kit";
 ${declarations}
 export default function V() { return <Composition fps={30} width={640} height={360}><Track id="t">${body}</Track></Composition>; }`) as never,
       ),

@@ -16,8 +16,8 @@ import {
   Title,
   Track,
   Transition,
-} from "@cutcraft/kit";
-import { foldToSource, lint } from "@cutcraft/kit/source";
+} from "@uberscene/kit";
+import { foldToSource, lint } from "@uberscene/kit/source";
 
 import { fixtureExecutor, fixtureText, manifest } from "./helpers";
 
@@ -206,7 +206,7 @@ describe("theme", () => {
   });
 
   it("lints unknown tokens and styles, literal colours and fonts under a theme, and fonts no renderer ships", () => {
-    const text = `import { Composition, Shape, Title, Track } from "@cutcraft/kit";
+    const text = `import { Composition, Shape, Title, Track } from "@uberscene/kit";
 export default function Video() {
   return (
     <Composition fps={30} width={1920} height={1080} theme={{ extends: "paper", fonts: { mono: "Comic Mono" } }}>
@@ -237,7 +237,7 @@ export default function Video() {
   });
 
   it("takes a font the file declares as available, and wants declarations at the top with literal arguments", () => {
-    const text = `import { Composition, font as face, googleFont, Title, Track } from "@cutcraft/kit";
+    const text = `import { Composition, font as face, googleFont, Title, Track } from "@uberscene/kit";
 export const brand = face({ family: "Brand", src: "asset:brand" });
 export const titan = googleFont("Titan One", { weights: [400, 700] });
 const name = "Computed";

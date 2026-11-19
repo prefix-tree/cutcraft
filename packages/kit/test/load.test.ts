@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { collectModule, resolve } from "@cutcraft/kit";
-import { loadModule } from "@cutcraft/kit/source";
+import { collectModule, resolve } from "@uberscene/kit";
+import { loadModule } from "@uberscene/kit/source";
 
 import { fixtureText, manifest } from "./helpers";
 

@@ -13,7 +13,7 @@ behind the word being said), [One pixel](/examples/one-pixel) (narration timed f
 Add the media with its transcript beside it, then add one `<Captions>`:
 
 ```sh
-npx cutcraft add founder.mp4     # reads founder.json, founder.vtt or founder.srt from the same folder
+npx uberscene add founder.mp4     # reads founder.json, founder.vtt or founder.srt from the same folder
 ```
 
 ```tsx
@@ -24,7 +24,7 @@ npx cutcraft add founder.mp4     # reads founder.json, founder.vtt or founder.sr
 
 Captions, [word cuts and anchors](./time) read their words from the asset's transcript in the manifest. Put the
 transcript next to the media under the same name, then add the media with
-[`cutcraft add`](/reference/cli#adding-media).
+[`uberscene add`](/reference/cli#adding-media).
 
 | File | Written by | Word times |
 | --- | --- | --- |
@@ -39,15 +39,15 @@ Subtitle files time whole lines, not words. Each word gets a share of its line's
 `estimated`, so a cut on that word lands near it rather than exactly on it.
 :::
 
-If more than one transcript sits next to the media, `cutcraft add` takes the JSON first, then the VTT, then the SRT.
-`--transcript other.vtt` names a different file. Running `cutcraft add` again refreshes the entry and keeps the fields
+If more than one transcript sits next to the media, `uberscene add` takes the JSON first, then the VTT, then the SRT.
+`--transcript other.vtt` names a different file. Running `uberscene add` again refreshes the entry and keeps the fields
 it does not write, such as shots and silences.
 
 ::: details From code: parseTranscript()
-App code that already has the text can use the same parser, [`parseTranscript()`](/reference/api#cutcraft-kit):
+App code that already has the text can use the same parser, [`parseTranscript()`](/reference/api#uberscene-kit):
 
 ```ts
-import { parseTranscript } from "@cutcraft/kit";
+import { parseTranscript } from "@uberscene/kit";
 
 const { words } = parseTranscript(await (await fetch("/founder.vtt")).text());
 manifest.assets.founder = { ...manifest.assets.founder, transcript: { words } };
@@ -128,7 +128,7 @@ Add `<Caption>` children to write a line yourself. A caption timed with words me
 </Captions>
 ```
 
-CutCraft finds the clip that plays word 12 and puts the caption there, so moving or trimming the clip moves the
+UberScene finds the clip that plays word 12 and puts the caption there, so moving or trimming the clip moves the
 caption. A word no clip plays is an error. Numbers still mean seconds in the video, and `marker:` references name
 markers.
 
@@ -143,7 +143,7 @@ A film with no speaker in it, such as an explainer told by a voice, starts from 
 into times: when each word is said, the subtitles a phrase at a time, and the moments the picture listens for.
 
 ```tsx
-import { Caption, Captions, Composition, Layer, narrate, Track } from "@cutcraft/kit";
+import { Caption, Captions, Composition, Layer, narrate, Track } from "@uberscene/kit";
 
 const story = narrate(`
 A game has no real [light]. (0.5)
@@ -234,14 +234,14 @@ after the word before it by the pause written between them, and never later than
 `--srt` and `--vtt` write the captions the cut plays as a subtitle file, timed like the export.
 
 ```sh
-npx cutcraft video.tsx --out video.mp4 --srt video.srt
-npx cutcraft video.tsx --vtt video.vtt            # only the subtitles, no video
+npx uberscene video.tsx --out video.mp4 --srt video.srt
+npx uberscene video.tsx --vtt video.vtt            # only the subtitles, no video
 ```
 
 With `--from`, the times count from that point, so they line up with a partial export ([CLI](/reference/cli#export)).
 
 ::: details From code: subtitles()
-[`subtitles(state, { format: "srt" })`](/reference/api#cutcraft-kit) from `@cutcraft/kit` returns the same text,
+[`subtitles(state, { format: "srt" })`](/reference/api#uberscene-kit) from `@uberscene/kit` returns the same text,
 for example behind an editor's download button.
 :::
 

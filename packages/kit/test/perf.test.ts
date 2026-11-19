@@ -1,6 +1,6 @@
 import { performance } from "node:perf_hooks";
 
-import { collectModule, createPatchLog, Executor, resolve, samePlacement } from "@cutcraft/kit";
+import { collectModule, createPatchLog, Executor, resolve, samePlacement } from "@uberscene/kit";
 
 import { buildLarge } from "../fixtures/large";
 import { manifest as sampleManifest } from "./helpers";

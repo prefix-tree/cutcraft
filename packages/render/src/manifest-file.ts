@@ -1,13 +1,15 @@
-// Where a project's asset manifest is: `cutcraft.json`, found from a folder upward the way a formatter finds its
+// Where a project's asset manifest is: `uberscene.json`, found from a folder upward the way a formatter finds its
 // settings, so a command needs no `--manifest` and videos in subfolders share one. `manifest.json` is the older
 // name; it is read only in the folder asked about, because other tools keep a file of that name too.
 import { existsSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 
 /** The manifest's file name. */
-export const MANIFEST_FILE = "cutcraft.json";
+export const MANIFEST_FILE = "uberscene.json";
 /** The older name, still read beside a video and still written where one exists. */
 export const OLD_MANIFEST_FILE = "manifest.json";
+/** The name before the rename to UberScene, still found the same way. */
+export const LEGACY_MANIFEST_FILE = "cutcraft.json";
 
 export interface FoundManifest {
   /** The manifest file, when one was found. */
@@ -16,14 +18,16 @@ export interface FoundManifest {
   readonly checked: readonly string[];
 }
 
-/** The nearest `cutcraft.json` from `from` upward; failing that, a `manifest.json` in `from` itself. */
+/** The nearest `uberscene.json` from `from` upward; failing that, a `manifest.json` in `from` itself. */
 export function findManifest(from: string): FoundManifest {
   const start = resolve(from);
   const checked: string[] = [];
   for (let dir = start; ; dir = dirname(dir)) {
     checked.push(dir);
-    const candidate = join(dir, MANIFEST_FILE);
-    if (existsSync(candidate)) return { path: candidate, checked };
+    for (const name of [MANIFEST_FILE, LEGACY_MANIFEST_FILE]) {
+      const candidate = join(dir, name);
+      if (existsSync(candidate)) return { path: candidate, checked };
+    }
     if (dirname(dir) === dir) break;
   }
   const old = join(start, OLD_MANIFEST_FILE);

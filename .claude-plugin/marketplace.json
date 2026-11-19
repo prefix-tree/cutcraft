@@ -5,9 +5,9 @@
   },
   "plugins": [
     {
-      "name": "cutcraft",
-      "source": "./plugins/cutcraft",
-      "description": "Make and edit videos as code with CutCraft: cut on words, add titles, captions, effects and motion graphics, check and render from the command line."
+      "name": "uberscene",
+      "source": "./plugins/uberscene",
+      "description": "Make and edit videos as code with UberScene: cut on words, add titles, captions, effects and motion graphics, check and render from the command line."
     }
   ]
 }

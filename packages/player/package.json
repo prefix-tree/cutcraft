@@ -1,5 +1,5 @@
 {
-  "name": "@cutcraft/player",
+  "name": "@uberscene/player",
   "version": "0.4.0",
   "description": "Browser player for the cut video DSL: WebCodecs decode through mediabunny, canvas compositing, DOM overlays, Web Audio clock.",
   "keywords": [
@@ -18,11 +18,11 @@
   "homepage": "https://cutcraft.prefixtree.xyz/",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/prefix-tree/cutcraft.git",
+    "url": "git+https://github.com/prefix-tree/uberscene.git",
     "directory": "packages/player"
   },
   "bugs": {
-    "url": "https://github.com/prefix-tree/cutcraft/issues"
+    "url": "https://github.com/prefix-tree/uberscene/issues"
   },
   "type": "module",
   "exports": {
@@ -55,7 +55,7 @@
     "react-dom": "^19.0.0"
   },
   "dependencies": {
-    "@cutcraft/kit": "workspace:*",
+    "@uberscene/kit": "workspace:*",
     "@fontsource/dm-sans": "catalog:",
     "@fontsource/inter": "catalog:",
     "@fontsource/jetbrains-mono": "catalog:",

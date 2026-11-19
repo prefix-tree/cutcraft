@@ -14,7 +14,7 @@ import {
   Track,
   Transition,
   transition,
-} from "@cutcraft/kit";
+} from "@uberscene/kit";
 
 import { manifest } from "./helpers";
 

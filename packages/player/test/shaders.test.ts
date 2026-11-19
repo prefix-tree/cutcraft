@@ -1,6 +1,6 @@
-import { collectModule, resolve } from "@cutcraft/kit";
-import { loadModule } from "@cutcraft/kit/source";
-import { buildFramePlan } from "@cutcraft/player";
+import { collectModule, resolve } from "@uberscene/kit";
+import { loadModule } from "@uberscene/kit/source";
+import { buildFramePlan } from "@uberscene/player";
 
 import { declare, fragmentSource, uniformValue } from "../src/render/shaders";
 
@@ -11,7 +11,7 @@ const stateOf = (body: string, declarations: string) =>
   resolve(
     collectModule(
       loadModule(`import { z } from "zod";
-import { Adjustment, Clip, Composition, effect, transition, Effect, Keyframe, Track, Transition } from "@cutcraft/kit";
+import { Adjustment, Clip, Composition, effect, transition, Effect, Keyframe, Track, Transition } from "@uberscene/kit";
 ${declarations}
 export default function V() { return <Composition fps={30} width={640} height={360}>${body}</Composition>; }`) as never,
     ),
@@ -340,7 +340,7 @@ describe("the shader runner's program", () => {
     // An enum's option is its index; a vec's swizzle is left alone.
     expect(effect).toContain("cc_param_dir == 1 ? texture(image, uv) * cc_param_amount : vec4(cc_param_tint.r)");
     expect(effect).not.toContain("bad name");
-    expect(effect).toContain("cutcraft_out = vec4(c.rgb * c.a, c.a);");
+    expect(effect).toContain("uberscene_out = vec4(c.rgb * c.a, c.a);");
     // The text depends on how the uniforms are declared, never on their values.
     expect(fragmentSource("effect", "vec4 effect(vec2 uv) { return vec4(params.amount); }", declared)).toBe(
       fragmentSource("effect", "vec4 effect(vec2 uv) { return vec4(params.amount); }", [...declared]),
@@ -352,9 +352,9 @@ describe("the shader runner's program", () => {
     expect(curve).toContain("uniform highp sampler2D curve;");
     expect(curve).not.toContain("uniform highp sampler2D image;");
     const between = fragmentSource("effect", "vec4 effect(vec2 uv) { return texture(image, uv); }", [], false);
-    expect(between).toContain("cutcraft_out = c;");
+    expect(between).toContain("uberscene_out = c;");
     const transition = fragmentSource("transition", "vec4 transition(vec2 uv) { return texture(to, uv); }", []);
     expect(transition).toContain("uniform sampler2D from;\nuniform sampler2D to;\nuniform float progress;");
-    expect(transition).toContain("vec4 c = transition(cutcraft_uv);");
+    expect(transition).toContain("vec4 c = transition(uberscene_uv);");
   });
 });

@@ -3,8 +3,8 @@ import { join } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
-import { type AssetManifest, collectModule, type ResolvedState, resolve, THEMES } from "@cutcraft/kit";
-import { buildSourceIndex, lint } from "@cutcraft/kit/source";
+import { type AssetManifest, collectModule, type ResolvedState, resolve, THEMES } from "@uberscene/kit";
+import { buildSourceIndex, lint } from "@uberscene/kit/source";
 
 import * as brandSpot from "../brand-spot";
 import * as highlights from "../highlights";
@@ -16,7 +16,7 @@ import * as variants from "../variants";
 import * as verticalPodcast from "../vertical-podcast";
 
 const root = join(import.meta.dirname, "..");
-const manifest = JSON.parse(readFileSync(join(root, "cutcraft.json"), "utf8")) as AssetManifest;
+const manifest = JSON.parse(readFileSync(join(root, "uberscene.json"), "utf8")) as AssetManifest;
 
 type Module = Parameters<typeof collectModule>[0];
 const recipes: { name: string; file: string; mod: Module; check: (state: ResolvedState) => void }[] = [

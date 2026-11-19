@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { Angle, Clip, Composition, Cut, Multicam, Title, Track } from "@cutcraft/kit";
+import { Angle, Clip, Composition, Cut, Multicam, Title, Track } from "@uberscene/kit";
 
 export const schema = z.object({
   title: z.string().describe("Lower-third title"),

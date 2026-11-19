@@ -1,4 +1,4 @@
-// `cutcraft add talk.mp4`: one manifest entry per media file, probed from the file itself, with the words of the
+// `uberscene add talk.mp4`: one manifest entry per media file, probed from the file itself, with the words of the
 // transcript beside it (`talk.json`, `talk.vtt` or `talk.srt`) found by convention. The manifest stays the one place
 // words live, so the preview and the export always agree on `word:N`. A `.cube` file is a LUT, checked and listed.
 import { existsSync, readFileSync } from "node:fs";
@@ -7,7 +7,7 @@ import { basename, dirname, extname, join, resolve } from "node:path";
 
 import { ALL_FORMATS, FilePathSource, Input } from "mediabunny";
 
-import { type AssetEntry, type AssetManifest, parseCube, parseTranscript } from "@cutcraft/kit";
+import { type AssetEntry, type AssetManifest, parseCube, parseTranscript } from "@uberscene/kit";
 
 import { imageSize } from "./image-size";
 import { findManifest, MANIFEST_FILE, OLD_MANIFEST_FILE } from "./manifest-file";
@@ -18,8 +18,8 @@ const TRANSCRIPTS = [".json", ".vtt", ".srt"] as const;
 
 export interface AddOptions {
   /**
-   * The manifest to write. Default: the nearest `cutcraft.json` from `cwd` upward; a `manifest.json` already in
-   * `cwd` or beside the media; otherwise a new `cutcraft.json` in `cwd`.
+   * The manifest to write. Default: the nearest `uberscene.json` from `cwd` upward; a `manifest.json` already in
+   * `cwd` or beside the media; otherwise a new `uberscene.json` in `cwd`.
    */
   readonly manifest?: string;
   /** The folder the lookup starts in; default the process's. */

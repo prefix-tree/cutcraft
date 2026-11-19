@@ -1,4 +1,4 @@
-import { Badge, Clip, Composition, Track } from "@cutcraft/kit";
+import { Badge, Clip, Composition, Track } from "@uberscene/kit";
 
 // Badge: a short word on a pill that pops in.
 export default function Video() {

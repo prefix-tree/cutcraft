@@ -24,4 +24,4 @@ Two cameras of one scene switched at camera B's shot boundaries, with the dense 
 ## What to check
 
 - No lint warnings expected.
-- `npx cutcraft look highlights.tsx --at 2,12,27`: camera A, camera B, camera A again.
+- `npx uberscene look highlights.tsx --at 2,12,27`: camera A, camera B, camera A again.

@@ -4,8 +4,8 @@
 // browser's filter does. The input is a CSS filter string of the forms the player writes (model/effects.ts), so the
 // shader and the no-WebGL fallback share one mapping from params to CSS.
 
-import type { ColourFunction, ShaderStep, ShaderUniform } from "@cutcraft/kit";
-import { gaussSteps } from "@cutcraft/kit";
+import type { ColourFunction, ShaderStep, ShaderUniform } from "@uberscene/kit";
+import { gaussSteps } from "@uberscene/kit";
 
 import type { ShaderPass } from "./shaders";
 

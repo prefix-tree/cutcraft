@@ -1,4 +1,4 @@
-import { EASING_FN, type Easing, type Placement } from "@cutcraft/kit";
+import { EASING_FN, type Easing, type Placement } from "@uberscene/kit";
 
 import { devWarn } from "../warn";
 

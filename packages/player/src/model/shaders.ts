@@ -11,7 +11,7 @@ import {
   type ShaderStep,
   type ShaderUniform,
   shaderFor,
-} from "@cutcraft/kit";
+} from "@uberscene/kit";
 
 import { cssPasses } from "./css-passes";
 import { childFilter, paramsAt } from "./effects";

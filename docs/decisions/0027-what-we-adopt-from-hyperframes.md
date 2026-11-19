@@ -23,7 +23,7 @@ Reading it against our code found defects of our own:
 - The mixer clamps each summed sample to ±1 (`render/src/mixer.ts`), a hard clip with no limiter, in the player and
   the export alike. `measureSound` reads the clamped mix, so `--listen` never shows a peak above 0 dB and a clipped
   soundtrack passes every check.
-- The export page waits on nothing with a deadline. A stuck decoder hangs `cutcraft render` with no message, and
+- The export page waits on nothing with a deadline. A stuck decoder hangs `uberscene render` with no message, and
   `painted()` falls back to two animation frames after a second without saying so, which can capture a stale frame.
 - The page waits for fonts, `<img>` and layer holds, but not for an inline CSS `background-image` or a three.js
   texture loaded outside Suspense, so the first frames can draw without them.
@@ -104,7 +104,7 @@ Backgrounds set in a stylesheet, and loaders with a manager of their own, are no
 
 ### 7. `beat:N` in the manifest
 
-`cutcraft add` detects the beats of music (spectral flux onsets, an autocorrelation tempo, dynamic-programming beat
+`uberscene add` detects the beats of music (spectral flux onsets, an autocorrelation tempo, dynamic-programming beat
 tracking, ported from HyperFrames' `audioRhythm.ts`) and writes `beats` beside an asset's words and shots. `beat:N`
 and `beat:N.end` resolve like `silence:N`. Music without a steady beat (below a confidence threshold) gets no beats,
 and `beat:N` on it is a resolve error that says why.

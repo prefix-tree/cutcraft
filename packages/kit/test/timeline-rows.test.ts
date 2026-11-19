@@ -3,13 +3,13 @@ import { join } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
-import { collectModule, resolve, timelineRows } from "@cutcraft/kit";
-import { loadModule } from "@cutcraft/kit/source";
+import { collectModule, resolve, timelineRows } from "@uberscene/kit";
+import { loadModule } from "@uberscene/kit/source";
 
 const dir = join(import.meta.dirname, "..", "..", "..", "examples", "launch-recap");
 const state = resolve(
   collectModule(loadModule(readFileSync(join(dir, "video.tsx"), "utf8")) as never),
-  JSON.parse(readFileSync(join(dir, "cutcraft.json"), "utf8")),
+  JSON.parse(readFileSync(join(dir, "uberscene.json"), "utf8")),
 );
 const rows = timelineRows(state);
 
@@ -89,7 +89,7 @@ describe("the timeline as rows", () => {
   it("lists effects in the order they run", () => {
     const graded = resolve(
       collectModule(
-        loadModule(`import { Clip, Composition, Effect, Track } from "@cutcraft/kit";
+        loadModule(`import { Clip, Composition, Effect, Track } from "@uberscene/kit";
 export default function V() { return <Composition fps={30} width={640} height={360}><Track id="t"><Clip id="c" src="asset:founder" in={0} out={2}>
   <Effect id="expose" type="exposure" params={{ stops: 0.5 }} /><Effect id="warm" type="whiteBalance" params={{ temperature: 0.3 }} />
 </Clip></Track></Composition>; }`) as never,

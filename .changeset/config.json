@@ -3,7 +3,7 @@
   "baseBranch": "main",
   "access": "public",
   "changelog": "@changesets/cli/changelog",
-  "fixed": [["@cutcraft/kit", "@cutcraft/graphics", "@cutcraft/player", "@cutcraft/render", "cutcraft"]],
+  "fixed": [["@uberscene/kit", "@uberscene/graphics", "@uberscene/player", "@uberscene/render", "uberscene"]],
   "updateInternalDependencies": "patch",
   "privatePackages": {
     "version": false,

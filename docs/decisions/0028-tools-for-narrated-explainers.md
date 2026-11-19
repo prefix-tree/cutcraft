@@ -16,7 +16,7 @@ this kind will need again:
 - **The narration.** The film holds its own small format: a script where `[word]` names a cue and `(1.5)` is a
   pause, a model of speaking pace that gives every word a time, and a rule for breaking the words into subtitle
   lines. Every animation reads the cue times. Nothing in the kit does this.
-- **Motion was never seen.** `cutcraft look` shows still frames in seconds. The only way to see movement is the full
+- **Motion was never seen.** `uberscene look` shows still frames in seconds. The only way to see movement is the full
   render, which ran at 3 to 6 frames a second: about twelve minutes for the film. Timing, easing and transitions were
   judged from stills.
 - **Labels over a 3D scene.** The labels are drawn over the three.js scene, so the film works out by hand where the
@@ -54,9 +54,9 @@ no new rule.
 
 Two forms, both one-shot commands like `look`:
 
-- `cutcraft look --motion <range>`: the frames of a short range at a fixed step, in a row, so a move, an entrance or
+- `uberscene look --motion <range>`: the frames of a short range at a fixed step, in a row, so a move, an entrance or
   a transition is read left to right. `--step` sets the spacing.
-- `cutcraft <file> --draft`: a render at a fraction of the size and half the frame rate, for watching. It is marked
+- `uberscene <file> --draft`: a render at a fraction of the size and half the frame rate, for watching. It is marked
   as a draft in its file name and is never what `--out` writes by default.
 
 ### 3. A label pinned to a point in a 3D scene
@@ -79,14 +79,14 @@ The first to build. Two parts:
 - **A report.** A command that prints, for a moment, where each named thing is on the frame: its box in pixels,
   whether it is inside the frame and inside each safe zone, and what it overlaps. It covers what a layer's own code
   draws, for elements that carry a name (a `data-name` attribute), not only the kit's overlays.
-- **A picture.** `cutcraft look --zones <zone>` draws the safe zone and those boxes over each cell.
+- **A picture.** `uberscene look --zones <zone>` draws the safe zone and those boxes over each cell.
 
 An author then reads "the label is 40 px outside the TikTok zone on the right" in place of guessing from a frame.
 
-### 6. `cutcraft study`: take a reference apart
+### 6. `uberscene study`: take a reference apart
 
 Given a video file, it writes a contact sheet of the opening at short steps, a contact sheet of the whole video, and
-the cuts it finds. Given a transcript beside the file (the forms `cutcraft add` reads), it adds the words with their
+the cuts it finds. Given a transcript beside the file (the forms `uberscene add` reads), it adds the words with their
 times and the speaking rate.
 
 It works on a file. Fetching a video from a site and turning speech into text stay with the tools people already
@@ -124,12 +124,12 @@ glow on the scene blooms white text. Labels over the scene stay sharp and take t
 **A full diagram language.** Too much, too early. A few parts that fall out of one film are enough to see what a
 second film needs.
 
-**Fetching and transcribing inside `study`.** It would tie CutCraft to sites and models that change, and to network
+**Fetching and transcribing inside `study`.** It would tie UberScene to sites and models that change, and to network
 access an environment may not give. Working on a file keeps the command small and always runnable.
 
 ## Work plan
 
-1. **Where things landed** (decision 5): the report, then `--zones` on `look`. Landed: `cutcraft where` and named
+1. **Where things landed** (decision 5): the report, then `--zones` on `look`. Landed: `uberscene where` and named
    parts in #100, `look --zones` in #105.
 2. **The narration helper** (decision 1), with `one-pixel.tsx` moved onto it. Landed as `narrate` in the kit.
 3. **Motion** (decision 2): `look --motion`, then `--draft`. Landed in #98 and #99. The draft draws every frame at
@@ -137,6 +137,6 @@ access an environment may not give. Working on a file keeps the command small an
 4. **The pinned label** (decision 3).
 5. **Diagram parts** (decision 4), with `one-pixel.tsx`'s diagram rewritten on them. Landed: `DrawnLine`, `Label`,
    `CountUp` and `Cells` in the kit, used by the eclipse short. `one-pixel.tsx` is not moved onto them yet.
-6. **`cutcraft study`** (decision 6).
+6. **`uberscene study`** (decision 6).
 
 Each is its own pull request with tests and docs. This record changes no code.

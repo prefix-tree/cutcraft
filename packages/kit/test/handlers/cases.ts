@@ -1,4 +1,4 @@
-import type { ActionInput, ActionType } from "@cutcraft/kit";
+import type { ActionInput, ActionType } from "@uberscene/kit";
 
 /** Stubs: specified, validated, not yet applied. */
 export const STUBS: readonly ActionType[] = [];

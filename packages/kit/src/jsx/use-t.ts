@@ -23,7 +23,7 @@ export interface LayerClock {
  * copy of the kit (a private module graph, a second install), and its `useT()` must still find the player's clock.
  */
 const slot = ((globalThis as Record<symbol, { impl: (() => LayerClock) | null }>)[
-  Symbol.for("@cutcraft/kit/layer-clock")
+  Symbol.for("@uberscene/kit/layer-clock")
 ] ??= { impl: null });
 
 /** The layer's clock: progress, seconds elapsed and remaining, its duration, the composition time. */

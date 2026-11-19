@@ -1,4 +1,4 @@
-import { Clip, Composition, Effect, Track } from "@cutcraft/kit";
+import { Clip, Composition, Effect, Track } from "@uberscene/kit";
 
 // One shot cooled toward blue, then warmed toward amber, by white balance.
 export default function Video() {

@@ -1,7 +1,7 @@
 // The CSS-type effects drawn as shader passes (RFC 0001: one pipeline in file order) against the same effects drawn
 // by Chrome's own canvas filter. Each effect is drawn twice on the same picture: alone, which takes the CSS filter,
 // and followed by an effect that changes nothing, which puts every effect on the element into the shader pipeline.
-// They must match within the golden tolerance. Needs a Chrome or Chromium 153+ in CUTCRAFT_CHROMIUM.
+// They must match within the golden tolerance. Needs a Chrome or Chromium 153+ in UBERSCENE_CHROMIUM.
 import { execFileSync } from "node:child_process";
 import { copyFileSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -49,7 +49,7 @@ async function still(name: string, body: string, declarations: string, backgroun
   writeFileSync(
     file,
     `import { z } from "zod";
-import { Clip, Composition, effect, Effect, Track } from "@cutcraft/kit";
+import { Clip, Composition, effect, Effect, Track } from "@uberscene/kit";
 export const manifest = ${JSON.stringify(manifest)};
 ${declarations}
 export default function Video() {
@@ -92,8 +92,8 @@ beforeAll(async () => {
   writeShapes(join(dir, "shape.png"));
 });
 afterAll(() => {
-  // CUTCRAFT_KEEP_STILLS=1 keeps the stills, to look at.
-  if (process.env.CUTCRAFT_KEEP_STILLS !== "1") rmSync(dir, { recursive: true, force: true });
+  // UBERSCENE_KEEP_STILLS=1 keeps the stills, to look at.
+  if (process.env.UBERSCENE_KEEP_STILLS !== "1") rmSync(dir, { recursive: true, force: true });
 });
 
 /** A rounded orange box and a blue disc on transparency, antialiased over one pixel, as a 320 × 180 PNG. */

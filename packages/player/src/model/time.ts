@@ -1,4 +1,4 @@
-import { freezeHoldsOf, freezeShift, type LayerClock, type Placement, rampAdvance, speedKeysOf } from "@cutcraft/kit";
+import { freezeHoldsOf, freezeShift, type LayerClock, type Placement, rampAdvance, speedKeysOf } from "@uberscene/kit";
 
 import { FRAME_EPS } from "../constants";
 

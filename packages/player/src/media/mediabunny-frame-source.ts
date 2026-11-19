@@ -1,6 +1,6 @@
 import { CanvasSink, type Input, type InputVideoTrack, type VideoSample, VideoSampleSink } from "mediabunny";
 
-import type { AssetEntry } from "@cutcraft/kit";
+import type { AssetEntry } from "@uberscene/kit";
 
 import { PICK_EPS } from "../constants";
 import type {

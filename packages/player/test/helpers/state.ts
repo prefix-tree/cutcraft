@@ -10,7 +10,7 @@ import {
   type ResolvedTrack,
   resolve,
   resolveTheme,
-} from "@cutcraft/kit";
+} from "@uberscene/kit";
 
 import * as sample from "../../../kit/fixtures/sample";
 

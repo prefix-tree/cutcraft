@@ -21,8 +21,8 @@ import {
   Title,
   Track,
   Transition,
-} from "@cutcraft/kit";
-import { lint } from "@cutcraft/kit/source";
+} from "@uberscene/kit";
+import { lint } from "@uberscene/kit/source";
 
 import { fixturesDir, fixtureText, fixtureTree, manifest, round, serialize } from "./helpers";
 

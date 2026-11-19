@@ -8,8 +8,8 @@ import { createRef, useEffect, useRef } from "react";
 import { createRoot } from "react-dom/client";
 import type { Mesh, MeshBasicMaterial } from "three";
 
-import { Composition, collect, Layer, Motion, resolve, Three, Track, useLayer, useSeekable } from "@cutcraft/kit";
-import { Player, type PlayerRef } from "@cutcraft/player";
+import { Composition, collect, Layer, Motion, resolve, Three, Track, useLayer, useSeekable } from "@uberscene/kit";
+import { Player, type PlayerRef } from "@uberscene/player";
 
 import { installFreeCodeLibraries } from "../../../src/libraries";
 import { useLayerTime, useTimeline } from "../../../src/libraries/motion";

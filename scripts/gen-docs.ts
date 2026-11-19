@@ -46,8 +46,12 @@ function describe(table: string, prop: string): string {
   if (!doc) undocumented.push(`${table} ${prop}`);
   return cell(doc ?? "");
 }
-/** Text for a Markdown table cell: one line, with its pipes escaped. */
-const cell = (text: string): string => text.replace(/\s*\n\s*/g, " ").replace(/\|/g, "\\|");
+/** Text for a Markdown table cell: one line, with its backslashes and pipes escaped. */
+const cell = (text: string): string =>
+  text
+    .replace(/\s*\n\s*/g, " ")
+    .replace(/\\/g, "\\\\")
+    .replace(/\|/g, "\\|");
 
 type JsonSchema = {
   type?: string | string[];
@@ -346,7 +350,7 @@ function componentsIndex(): string {
   const lines = [
     "# Components",
     "",
-    "Ready-made pieces: lower thirds, callouts, counters, cards and the like. Import them from `@cutcraft/kit` and write them on a track like any element. Generated from `packages/kit/src/components` by `pnpm docs:gen`.",
+    "Ready-made pieces: lower thirds, callouts, counters, cards and the like. Import them from `@uberscene/kit` and write them on a track like any element. Generated from `packages/kit/src/components` by `pnpm docs:gen`.",
     "",
     '<div class="cc-cards">',
   ];
@@ -708,7 +712,7 @@ for (const name of Object.keys(TRANSITIONS) as (keyof typeof TRANSITIONS)[]) {
 // The agent skill's references: the same pages, for a model reading files. What only the site can show (the
 // rendered examples, where an element is used) is left out, and the site's links become absolute.
 const SITE = "https://cutcraft.prefixtree.xyz";
-const skillRefs = join(root, "plugins", "cutcraft", "skills", "cutcraft", "references");
+const skillRefs = join(root, "plugins", "uberscene", "skills", "uberscene", "references");
 function forAgent(page: string, demote = true): string {
   const text = page
     .replace(/\n<Example[^\n]*>\n[\s\S]*?\n<\/Example>\n/g, "\n")
@@ -741,7 +745,7 @@ write(
   join(skillRefs, "components.md"),
   reference(
     "Components",
-    "The ready-made components, imported from `@cutcraft/kit`. Positions are pixels from the frame's centre; colours default to theme tokens; each takes the timing props any element takes.",
+    "The ready-made components, imported from `@uberscene/kit`. Positions are pixels from the frame's centre; colours default to theme tokens; each takes the timing props any element takes.",
     (Object.keys(COMPONENTS) as (keyof typeof COMPONENTS)[]).map((name) => forAgent(componentPage(name))),
   ),
 );
@@ -760,7 +764,7 @@ const synopsis = usage
   .split("\n")
   .map((line) => `npx ${line.trim()}`);
 const cliText = readFileSync(cliPage, "utf8").replace(
-  /(```sh\nnpm install cutcraft\n)[\s\S]*?(\n```)/,
+  /(```sh\nnpm install uberscene\n)[\s\S]*?(\n```)/,
   (_, open: string, close: string) => `${open}${synopsis.join("\n")}${close}`,
 );
 for (const flag of new Set(usage.match(/--[a-z][a-z-]*/g)))
@@ -777,7 +781,7 @@ const problems: string[] = syncGeneratedFiles(root, generated, {
     "docs/reference/transitions",
     "examples/showcase/effects",
     "examples/showcase/transitions",
-    "plugins/cutcraft/skills/cutcraft/references",
+    "plugins/uberscene/skills/uberscene/references",
   ],
   obsolete: ["docs/reference/elements.md", "docs/reference/effects.md", "docs/reference/graphics"],
 });

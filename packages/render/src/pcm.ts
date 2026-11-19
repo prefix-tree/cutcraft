@@ -1,7 +1,7 @@
 import { AudioSampleSink, type InputAudioTrack } from "mediabunny";
 
-import type { MediaResolver } from "@cutcraft/player/engine";
-import { MediabunnyInputs } from "@cutcraft/player/engine";
+import type { MediaResolver } from "@uberscene/player/engine";
+import { MediabunnyInputs } from "@uberscene/player/engine";
 
 import type { PcmBuffer, PcmProvider } from "./mixer";
 

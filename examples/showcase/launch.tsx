@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { Clip, Composition, Motion, Three, Track, Transition } from "@cutcraft/kit";
+import { Clip, Composition, Motion, Three, Track, Transition } from "@uberscene/kit";
 
 export const schema = z.object({ product: z.string(), founder: z.string(), accent: z.string() });
 export const defaults = { product: "Shed", founder: "Maya Chen", accent: "#e8a33d" };

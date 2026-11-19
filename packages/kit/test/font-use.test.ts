@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { collectModule, Executor, resolve } from "@cutcraft/kit";
-import { foldToSource, lint, loadModule } from "@cutcraft/kit/source";
+import { collectModule, Executor, resolve } from "@uberscene/kit";
+import { foldToSource, lint, loadModule } from "@uberscene/kit/source";
 
-const FILE = `import { Caption, Captions, Composition, googleFont, Title, Track } from "@cutcraft/kit";
+const FILE = `import { Caption, Captions, Composition, googleFont, Title, Track } from "@uberscene/kit";
 
 const oswald = googleFont("Oswald", { weights: [400] });
 
@@ -24,7 +24,7 @@ export default function Video() {
   );
 }
 `;
-const PLAIN = `import { Composition, Title, Track } from "@cutcraft/kit";
+const PLAIN = `import { Composition, Title, Track } from "@uberscene/kit";
 const bebasNeue = 1;
 export default function Video() {
   return (
@@ -97,7 +97,7 @@ describe("font/use", () => {
     const exec = open(PLAIN);
     expect(exec.execute({ type: "font/use", params: { id: "h", family: "Bebas Neue" } }).ok).toBe(true);
     const text = folded(PLAIN, exec);
-    expect(text).toContain('import { Composition, Title, Track, googleFont } from "@cutcraft/kit";');
+    expect(text).toContain('import { Composition, Title, Track, googleFont } from "@uberscene/kit";');
     expect(text).toContain('const bebasNeueFont = googleFont("Bebas Neue");');
     expect(text).toContain("font={bebasNeueFont}");
     expect(reload(text).errors).toEqual([]);

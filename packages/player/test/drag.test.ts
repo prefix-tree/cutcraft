@@ -1,4 +1,4 @@
-import { ManualClock, PlayerCore } from "@cutcraft/player";
+import { ManualClock, PlayerCore } from "@uberscene/player";
 
 import {
   FakeAudioOutput,

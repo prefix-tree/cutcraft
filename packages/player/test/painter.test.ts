@@ -5,7 +5,7 @@ import {
   type DrawOp,
   type Frame,
   type FramePlan,
-} from "@cutcraft/player";
+} from "@uberscene/player";
 
 import { FakeFrame, FakeFrameSource, recorderCanvas, recorderContext } from "./helpers/fakes";
 import { type ItemSpec, makeState } from "./helpers/state";

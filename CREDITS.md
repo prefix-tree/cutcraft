@@ -1,6 +1,6 @@
 # Credits
 
-Code in CutCraft that comes from other projects. Each file that holds some names its source in its header.
+Code in UberScene that comes from other projects. Each file that holds some names its source in its header.
 
 | From | Licence | What | Where |
 |---|---|---|---|

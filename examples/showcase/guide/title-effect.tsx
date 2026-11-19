@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { Clip, Composition, Effect, effect, Motion, Title, Track } from "@cutcraft/kit";
+import { Clip, Composition, Effect, effect, Motion, Title, Track } from "@uberscene/kit";
 
 // The same kind of effect a clip takes, on a title and on a Motion layer: the overlay's pixels only.
 const split = effect({

@@ -1,4 +1,4 @@
-import { Arrow, Clip, Composition, Track } from "@cutcraft/kit";
+import { Arrow, Clip, Composition, Track } from "@uberscene/kit";
 
 // Arrow: drawn from one point to another, bowed by `curve`.
 export default function Video() {

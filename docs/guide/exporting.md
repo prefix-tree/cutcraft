@@ -1,12 +1,12 @@
 # Exporting
 
-`@cutcraft/render` turns a file into a video (MP4 or WebM), a soundtrack (MP3 or WAV) or a still (PNG or JPEG). The
+`@uberscene/render` turns a file into a video (MP4 or WebM), a soundtrack (MP3 or WAV) or a still (PNG or JPEG). The
 export runs the same player as the preview, so what the preview shows is what the file holds. This page covers the
 formats, exporting on a server, motion blur, and making an export faster.
 
 ```sh
-npm install cutcraft
-npx cutcraft video.tsx --out video.mp4
+npm install uberscene
+npx uberscene video.tsx --out video.mp4
 ```
 
 To check the file before or after you export it, see [Checking a cut](./checking).
@@ -19,12 +19,12 @@ leave them out:
 | Option | Gives | When left out |
 |---|---|---|
 | `--out` | The file to write; its extension picks the format. | Required. |
-| `--manifest` | The manifest. | The file's own `manifest` export, or else the nearest `cutcraft.json` from the file's folder upward. |
+| `--manifest` | The manifest. | The file's own `manifest` export, or else the nearest `uberscene.json` from the file's folder upward. |
 | `--media` | A folder with one file per asset id. | The file's folder, the manifest's folder, or `media/` beside the manifest. |
 
 [Where the manifest and the media are found](/reference/cli#where-the-manifest-and-the-media-are-found) has the details, and the [CLI reference](/reference/cli) lists every option.
 
-The export loads a file the way the editor does: it may import `react`, `zod` and `@cutcraft/kit`, plus what
+The export loads a file the way the editor does: it may import `react`, `zod` and `@uberscene/kit`, plus what
 `--import` offers. A file that imports anything else fails with the same message in both, so a file that exports
 also opens in the editor.
 
@@ -45,13 +45,13 @@ The export runs the real player in headless Chrome. It steps the file frame by f
 three.js scene and Motion sequence to draw the frame, then captures and encodes it in the page with the browser's own
 encoders.
 
-The first export downloads Chrome for Testing into `~/.cache/cutcraft/browsers` once and reuses it after that.
+The first export downloads Chrome for Testing into `~/.cache/uberscene/browsers` once and reuses it after that.
 
 | To | Use |
 |---|---|
-| Download it ahead of time, for a Docker image or a CI cache | `npx cutcraft browser install` |
-| Keep the cache somewhere else | `CUTCRAFT_BROWSER_CACHE` |
-| Use your own Chrome or Chromium 153 or later instead of downloading one | `CUTCRAFT_CHROMIUM` |
+| Download it ahead of time, for a Docker image or a CI cache | `npx uberscene browser install` |
+| Keep the cache somewhere else | `UBERSCENE_BROWSER_CACHE` |
+| Use your own Chrome or Chromium 153 or later instead of downloading one | `UBERSCENE_CHROMIUM` |
 
 The capture uses HTML-in-Canvas (`drawElementImage`), which Chrome ships behind a flag the export turns on.
 
@@ -61,7 +61,7 @@ plus a few seconds to start the browser. With a GPU it is much faster.
 ## On a server
 
 A slim Linux image lacks a few system libraries Chrome needs that a desktop has. On Debian or Ubuntu,
-`playwright-core` (installed with the export) lists and installs them, and `cutcraft browser install` puts Chrome in
+`playwright-core` (installed with the export) lists and installs them, and `uberscene browser install` puts Chrome in
 the image, so no export downloads it at run time:
 
 ```dockerfile
@@ -69,24 +69,24 @@ FROM node:22-bookworm-slim
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
-RUN npx --yes playwright-core install-deps chromium && npx cutcraft browser install
+RUN npx --yes playwright-core install-deps chromium && npx uberscene browser install
 COPY . .
-CMD ["npx", "cutcraft", "video.tsx", "--out", "out/video.mp4"]
+CMD ["npx", "uberscene", "video.tsx", "--out", "out/video.mp4"]
 ```
 
 For an image built another way, `npx playwright-core install-deps --dry-run chromium` prints the packages instead of
 installing them.
 
-In GitHub Actions the runners already have the libraries. Cache the browser so it downloads once per CutCraft
+In GitHub Actions the runners already have the libraries. Cache the browser so it downloads once per UberScene
 version:
 
 ```yaml
 - uses: actions/cache@v4
   with:
-    path: ~/.cache/cutcraft/browsers
-    key: cutcraft-chrome-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-- run: npx cutcraft browser install   # keeps a cached Chrome, downloads one otherwise
-- run: npx cutcraft video.tsx --out video.mp4
+    path: ~/.cache/uberscene/browsers
+    key: uberscene-chrome-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+- run: npx uberscene browser install   # keeps a cached Chrome, downloads one otherwise
+- run: npx uberscene video.tsx --out video.mp4
 ```
 
 Most servers have no GPU, so Chrome draws on the CPU. `--tabs` spreads the work over more cores ([Faster](#faster)).
@@ -108,7 +108,7 @@ Motion blur smears whatever moves, the way a film camera does while its shutter 
 | `samples` | How many pictures are averaged per frame, 2 to 64, default 8. More is smoother and slower: 8 samples take about eight times as long. |
 
 The export draws each frame `samples` times across the open shutter and averages the pictures. Every frame in
-CutCraft is a function of time, so footage, titles, `<Motion>`, three.js and free code all blur the same way.
+UberScene is a function of time, so footage, titles, `<Motion>`, three.js and free code all blur the same way.
 
 ::: tip
 The blur shows in exported videos and stills. The preview stays sharp.
@@ -123,7 +123,7 @@ Start with a draft to watch while you work. For the real export, try `--tabs`, t
 `--draft` renders the video for watching, not for keeping:
 
 ```sh
-npx cutcraft video.tsx --out video.mp4 --draft
+npx uberscene video.tsx --out video.mp4 --draft
 ```
 
 - It draws every second frame and shows each twice as long, so the draft is as long as the video and its sound is
@@ -192,7 +192,7 @@ frame 412 (13.73 s) did not finish within 60 s: stuck in settle
 | `draw` | The painted page, to be copied into the frame. |
 | `encode` | The video encoder, to take the frame. |
 
-`cutcraft look video.tsx --at 13.73` draws that one moment, the quick way to see what is on screen there. A very slow
+`uberscene look video.tsx --at 13.73` draws that one moment, the quick way to see what is on screen there. A very slow
 machine can need a longer deadline for heavy frames; raise it only once you know the frame does finish.
 
 ::: details "Captured without the browser confirming the paint"
@@ -200,7 +200,7 @@ An export can end with a warning that some frames `were captured without the bro
 asks the browser to say when a frame is painted, and waits a second for the answer. Without one it goes on after two
 animation frames, and such a frame may show the moment before.
 
-It should not happen in the Chrome CutCraft installs. If it does, look at those frames before you publish.
+It should not happen in the Chrome UberScene installs. If it does, look at those frames before you publish.
 :::
 
 ## What it draws
@@ -229,7 +229,7 @@ Testing has none.
 `renderVideo` and `renderStill` do from a script what the command line does.
 
 ```ts
-import { directoryResolver, loadVideo, renderStill, renderVideo } from "@cutcraft/render";
+import { directoryResolver, loadVideo, renderStill, renderVideo } from "@uberscene/render";
 
 const video = await loadVideo("video.tsx");
 const media = directoryResolver("media", video.manifest);
@@ -252,7 +252,7 @@ video you will publish. `onAssetError: "continue"` changes that. `result.warning
 
 ## Requirements
 
-Node 22.19 or later, and the Chrome the first export downloads (or `CUTCRAFT_CHROMIUM`). There is no FFmpeg and no
+Node 22.19 or later, and the Chrome the first export downloads (or `UBERSCENE_CHROMIUM`). There is no FFmpeg and no
 native module to install.
 
 ## Next

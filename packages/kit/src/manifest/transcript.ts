@@ -150,7 +150,7 @@ const num = (v: unknown): number => (typeof v === "number" ? v : Number.NaN);
 const str = (v: unknown): string | undefined => (typeof v === "string" ? v : undefined);
 
 const SHAPES =
-  "{ words: [{ word | text, start, end }] } (OpenAI, ElevenLabs, CutCraft), { segments: [{ words | text, start, end }] } (openai-whisper, faster-whisper, WhisperX) or { transcription: [{ tokens, offsets }] } (whisper.cpp)";
+  "{ words: [{ word | text, start, end }] } (OpenAI, ElevenLabs, UberScene), { segments: [{ words | text, start, end }] } (openai-whisper, faster-whisper, WhisperX) or { transcription: [{ tokens, offsets }] } (whisper.cpp)";
 
 function fromJson(text: string): Raw[] {
   let data: unknown;
@@ -167,7 +167,7 @@ function fromJson(text: string): Raw[] {
   throw new Error(`not a transcript: expected ${SHAPES}`);
 }
 
-/** Word objects in seconds: `word` (OpenAI, whisper) or `text` (ElevenLabs, CutCraft); ElevenLabs' spacing dropped. */
+/** Word objects in seconds: `word` (OpenAI, whisper) or `text` (ElevenLabs, UberScene); ElevenLabs' spacing dropped. */
 function words(list: readonly unknown[], segmentSpeaker?: string): Raw[] {
   const out: Raw[] = [];
   for (const w of list) {

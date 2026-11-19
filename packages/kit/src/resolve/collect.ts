@@ -262,8 +262,8 @@ function collectChildren(
         message: grade
           ? '<ColorGrade> is now a whiteBalance effect: <Effect type="whiteBalance" params={{ temperature, tint }} />'
           : graphic
-            ? `<Graphic kind="${String(element.props.kind)}"> was removed: use LowerThird, Callout, Badge, Counter, ProgressBar, Arrow, Highlight or Background from @cutcraft/kit, or free code (<Layer>, <Motion>, <Svg>)`
-            : "an element whose component is undefined: check its import from @cutcraft/kit",
+            ? `<Graphic kind="${String(element.props.kind)}"> was removed: use LowerThird, Callout, Badge, Counter, ProgressBar, Arrow, Highlight or Background from @uberscene/kit, or free code (<Layer>, <Motion>, <Svg>)`
+            : "an element whose component is undefined: check its import from @uberscene/kit",
       });
       return;
     }

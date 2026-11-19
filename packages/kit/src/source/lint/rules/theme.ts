@@ -125,7 +125,7 @@ function fix(family: string): string {
     return near.source === "bundled"
       ? `Did you mean "${near.family}", which is bundled?`
       : `Did you mean "${near.family}"? Declare it: const ${identifier(near.family)} = googleFont("${near.family}")`;
-  return "If it is on Google Fonts, declare it with googleFont(); `cutcraft fonts` lists families to choose from";
+  return "If it is on Google Fonts, declare it with googleFont(); `uberscene fonts` lists families to choose from";
 }
 
 /** A variable name for a family: "Bebas Neue" is `bebasNeue`, "Source Serif 4" is `sourceSerif4`. */

@@ -3,8 +3,8 @@ import { join } from "node:path";
 
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import { collectModule, resolve, subtitles } from "@cutcraft/kit";
-import { loadModule } from "@cutcraft/kit/source";
+import { collectModule, resolve, subtitles } from "@uberscene/kit";
+import { loadModule } from "@uberscene/kit/source";
 
 import generateMedia, { mediaDir } from "../../player/e2e/gen-media";
 import { addAsset } from "../src";
@@ -40,7 +40,7 @@ const manifestAt = (path: string) => JSON.parse(readFileSync(path, "utf8"));
 describe("addAsset", () => {
   it("probes a video and writes its entry into a new manifest in the current folder", async () => {
     const result = await addAsset(join(dir, "bars.webm"), { cwd: dir });
-    expect(result.manifest).toBe(join(dir, "cutcraft.json"));
+    expect(result.manifest).toBe(join(dir, "uberscene.json"));
     expect(manifestAt(result.manifest).assets.bars).toEqual({
       id: "bars",
       kind: "video",
@@ -133,7 +133,7 @@ describe("addAsset", () => {
     };
     const state = resolve(
       collectModule(
-        loadModule(`import { Captions, Clip, Composition, Track } from "@cutcraft/kit";
+        loadModule(`import { Captions, Clip, Composition, Track } from "@uberscene/kit";
 export default function Video() {
   return (
     <Composition fps={30} width={640} height={360}>
@@ -156,14 +156,14 @@ export default function Video() {
       expect(cues.some((c) => w.start >= c.start - 0.001 && w.end <= c.end + 0.001)).toBe(true);
   });
 
-  it("writes the nearest cutcraft.json above the current folder", async () => {
+  it("writes the nearest uberscene.json above the current folder", async () => {
     const project = mkdtempSync(join(scratch, "p-"));
     const media = join(project, "media");
     mkdirSync(media);
     copyFileSync(join(mediaDir, "solid.webm"), join(media, "solid.webm"));
-    writeFileSync(join(project, "cutcraft.json"), JSON.stringify({ assets: {} }));
+    writeFileSync(join(project, "uberscene.json"), JSON.stringify({ assets: {} }));
     const result = await addAsset(join(media, "solid.webm"), { cwd: media });
-    expect(result.manifest).toBe(join(project, "cutcraft.json"));
+    expect(result.manifest).toBe(join(project, "uberscene.json"));
     expect(manifestAt(result.manifest).assets.solid.kind).toBe("video");
   });
 

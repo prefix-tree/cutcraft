@@ -1,4 +1,4 @@
-import type { ResolvedState } from "@cutcraft/kit";
+import type { ResolvedState } from "@uberscene/kit";
 
 import type { AssetSources } from "../media/asset-sources";
 import { DecoderPool } from "../media/decoder-pool";

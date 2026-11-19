@@ -1,4 +1,4 @@
-import type { AudioOccurrence } from "@cutcraft/player/engine";
+import type { AudioOccurrence } from "@uberscene/player/engine";
 
 import { envelopeAt, type MixSource, mixBlock, mixPlan, type PcmBuffer, type PcmProvider } from "../src/mixer";
 

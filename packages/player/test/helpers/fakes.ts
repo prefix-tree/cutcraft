@@ -8,7 +8,7 @@ import type {
   FrameSourceInfo,
   MediaResolver,
   ScheduledSource,
-} from "@cutcraft/player";
+} from "@uberscene/player";
 
 export class FakeFrame implements Frame {
   closed = false;

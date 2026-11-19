@@ -1,4 +1,4 @@
-import { Composition, collectModule, Executor, Layer, Track, useLayer, useT } from "@cutcraft/kit";
+import { Composition, collectModule, Executor, Layer, Track, useLayer, useT } from "@uberscene/kit";
 
 import * as sample from "../../kit/fixtures/sample";
 import { mountPlayer } from "./helpers/react";

@@ -1,6 +1,6 @@
 import { memo, type ReactNode } from "react";
 
-import { effectEntry, type Placement, type ResolvedState } from "@cutcraft/kit";
+import { effectEntry, type Placement, type ResolvedState } from "@uberscene/kit";
 
 import { backdropTracks } from "../model/backdrop";
 import { effectPipeline } from "../model/shaders";

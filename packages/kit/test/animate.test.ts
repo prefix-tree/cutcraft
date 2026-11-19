@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { EASING_FN, interpolate, random, spring, stepAt } from "@cutcraft/kit";
+import { EASING_FN, interpolate, random, spring, stepAt } from "@uberscene/kit";
 
 describe("interpolate", () => {
   it("maps across a range, piecewise", () => {

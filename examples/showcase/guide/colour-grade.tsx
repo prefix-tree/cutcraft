@@ -1,4 +1,4 @@
-import { Adjustment, Clip, Composition, Effect, Track } from "@cutcraft/kit";
+import { Adjustment, Clip, Composition, Effect, Track } from "@uberscene/kit";
 
 // The shot as it came from the camera, then, from 1.5 s, a grade over it: exposure, white balance, curves and
 // vibrance, written in the order a colourist works. An <Adjustment> grades everything beneath it for its own time.

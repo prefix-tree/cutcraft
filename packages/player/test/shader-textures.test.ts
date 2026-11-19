@@ -1,4 +1,4 @@
-import { parseCube } from "@cutcraft/kit";
+import { parseCube } from "@uberscene/kit";
 
 import { lutTexture, ShaderTextures, textureRefs } from "../src/media/shader-textures";
 

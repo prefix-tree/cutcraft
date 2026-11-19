@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { collectModule, Executor, resolve } from "@cutcraft/kit";
-import { applyEdits, buildSourceIndex, foldToSource, lint, printElement, printProp } from "@cutcraft/kit/source";
+import { collectModule, Executor, resolve } from "@uberscene/kit";
+import { applyEdits, buildSourceIndex, foldToSource, lint, printElement, printProp } from "@uberscene/kit/source";
 
 import { fixtureExecutor, fixturesDir, fixtureText, manifest, serialize } from "./helpers";
 
@@ -14,12 +14,12 @@ function changedLines(a: string, b: string): number {
 }
 
 describe("fold", () => {
-  it.each(["@cutcraft/kit", "@cut/kit"])("imports newly materialized captions from %s", (moduleName) => {
+  it.each(["@uberscene/kit", "@cut/kit"])("imports newly materialized captions from %s", (moduleName) => {
     const initial = fixtureExecutor();
     initial.execute({ type: "caption/setAll", params: { captionsId: "cap", nodes: [] } });
     const generated = foldToSource(fixtureText, initial.log(), initial.state())
       .text.replace(/\bCaption,\s*/, "")
-      .replaceAll("@cutcraft/kit", moduleName);
+      .replaceAll("@uberscene/kit", moduleName);
     const exec = new Executor({ tree: initial.state().tree, manifest });
     expect(exec.execute({ type: "caption/update", params: { captionId: "cap-1", text: "Edited caption" } }).ok).toBe(
       true,

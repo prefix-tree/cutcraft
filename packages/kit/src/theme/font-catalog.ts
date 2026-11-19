@@ -16,7 +16,7 @@ export interface CatalogFont extends FontPick {
 
 /**
  * The fonts to choose from: the five bundled families and a short list from Google Fonts, each with its category, the
- * roles it suits, a line on how it looks and the families it pairs with. What an agent reads (`cutcraft fonts`) and what
+ * roles it suits, a line on how it looks and the families it pairs with. What an agent reads (`uberscene fonts`) and what
  * an editor's font picker lists. Any other Google family still works with `googleFont()`; it is only not described here.
  */
 export const FONT_CATALOG: readonly CatalogFont[] = Object.freeze([

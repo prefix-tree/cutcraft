@@ -1,4 +1,4 @@
-import { Clip, Composition, Effect, Keyframe, Title, Track } from "@cutcraft/kit";
+import { Clip, Composition, Effect, Keyframe, Title, Track } from "@uberscene/kit";
 
 // shadow: Casts a soft drop shadow behind the element's own shape.
 export default function Video() {

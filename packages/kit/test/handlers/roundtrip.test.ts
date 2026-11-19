@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { type ActionType, listHandlers } from "@cutcraft/kit";
+import { type ActionType, listHandlers } from "@uberscene/kit";
 
 import { fixtureExecutor, serialize } from "../helpers";
 import { CASES, NO_STATE_CHANGE, SETUP, STUBS } from "./cases";

@@ -5,10 +5,10 @@
     "types": ["node", "vitest/globals"],
     "baseUrl": ".",
     "paths": {
-      "@cutcraft/kit": ["../kit/src/index.ts"],
-      "@cutcraft/kit/source": ["../kit/src/source/index-public.ts"],
-      "@cutcraft/player/engine": ["../player/src/engine.ts"],
-      "@cutcraft/player/overlays": ["../player/src/overlays.ts"]
+      "@uberscene/kit": ["../kit/src/index.ts"],
+      "@uberscene/kit/source": ["../kit/src/source/index-public.ts"],
+      "@uberscene/player/engine": ["../player/src/engine.ts"],
+      "@uberscene/player/overlays": ["../player/src/overlays.ts"]
     }
   },
   "include": ["src", "test", "bench", "scripts", "vitest.config.ts", "vitest.browser.config.ts", "eslint.config.js"]

@@ -1,4 +1,4 @@
-# @cutcraft/graphics
+# @uberscene/graphics
 
 ## 0.4.0
 

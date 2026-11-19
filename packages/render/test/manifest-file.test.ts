@@ -12,7 +12,7 @@ let root = "";
 const manifest = (id: string) =>
   JSON.stringify({ assets: { [id]: { id, kind: "video", duration: 10, fps: 30, width: 640, height: 360 } } });
 
-const CUT = (id: string) => `import { Clip, Composition, Track } from "@cutcraft/kit";
+const CUT = (id: string) => `import { Clip, Composition, Track } from "@uberscene/kit";
 export default function Video() {
   return (
     <Composition fps={30} width={640} height={360}>
@@ -35,14 +35,21 @@ beforeAll(() => {
 afterAll(() => rmSync(scratch, { recursive: true, force: true }));
 
 describe("findManifest", () => {
-  it("finds cutcraft.json in a parent folder, and the nearest one first", () => {
+  it("still finds a cutcraft.json from before the rename", () => {
+    const top = folder("legacy");
+    const deep = folder("legacy", "videos");
+    writeFileSync(join(top, "cutcraft.json"), manifest("a"));
+    expect(findManifest(deep).path).toBe(join(top, "cutcraft.json"));
+  });
+
+  it("finds uberscene.json in a parent folder, and the nearest one first", () => {
     const top = folder("near");
     const deep = folder("near", "videos", "launch");
-    writeFileSync(join(top, "cutcraft.json"), manifest("far"));
-    expect(findManifest(deep).path).toBe(join(top, "cutcraft.json"));
-    writeFileSync(join(top, "videos", "cutcraft.json"), manifest("near"));
+    writeFileSync(join(top, "uberscene.json"), manifest("far"));
+    expect(findManifest(deep).path).toBe(join(top, "uberscene.json"));
+    writeFileSync(join(top, "videos", "uberscene.json"), manifest("near"));
     const found = findManifest(deep);
-    expect(found.path).toBe(join(top, "videos", "cutcraft.json"));
+    expect(found.path).toBe(join(top, "videos", "uberscene.json"));
     expect(found.checked).toEqual([deep, join(top, "videos")]);
   });
 
@@ -58,13 +65,13 @@ describe("findManifest", () => {
 });
 
 describe("loadVideo without a manifest option", () => {
-  it("uses the project's cutcraft.json from a video in a subfolder", async () => {
+  it("uses the project's uberscene.json from a video in a subfolder", async () => {
     const top = folder("project");
     const deep = folder("project", "videos");
-    writeFileSync(join(top, "cutcraft.json"), manifest("bars"));
+    writeFileSync(join(top, "uberscene.json"), manifest("bars"));
     writeFileSync(join(deep, "video.tsx"), CUT("bars"));
     const video = await loadVideo(join(deep, "video.tsx"));
-    expect(video.manifestPath).toBe(join(top, "cutcraft.json"));
+    expect(video.manifestPath).toBe(join(top, "uberscene.json"));
     expect(video.state.errors).toEqual([]);
     expect(video.state.items.get("c")?.end).toBe(1);
   });
@@ -73,9 +80,9 @@ describe("loadVideo without a manifest option", () => {
     const deep = folder("empty", "videos");
     writeFileSync(join(deep, "video.tsx"), CUT("bars"));
     const failure = loadVideo(join(deep, "video.tsx"));
-    await expect(failure).rejects.toThrow("no cutcraft.json in");
+    await expect(failure).rejects.toThrow("no uberscene.json in");
     await expect(failure).rejects.toThrow(`  ${deep}\n  ${join(root, "empty")}\n`);
-    await expect(failure).rejects.toThrow("cutcraft add");
+    await expect(failure).rejects.toThrow("uberscene add");
   });
 
   it("says so when the file it found is not a manifest", async () => {
@@ -92,7 +99,7 @@ describe("media folders", () => {
     const deep = folder("shared", "videos");
     const media = folder("shared", "media");
     writeFileSync(join(media, "bars.webm"), "");
-    const folders = mediaFolders(deep, join(top, "cutcraft.json"));
+    const folders = mediaFolders(deep, join(top, "uberscene.json"));
     expect(folders).toEqual([deep, top, media]);
     const resolver = directoryResolver(folders, JSON.parse(manifest("bars")));
     await expect(resolver.resolve("bars")).resolves.toEqual({ kind: "path", path: join(media, "bars.webm") });
@@ -101,6 +108,6 @@ describe("media folders", () => {
 
   it("is the video's folder alone when the manifest is not a file", () => {
     expect(mediaFolders("/a/b", undefined)).toEqual(["/a/b"]);
-    expect(mediaFolders("/a/b", "/a/b/cutcraft.json")).toEqual(["/a/b", "/a/b/media"]);
+    expect(mediaFolders("/a/b", "/a/b/uberscene.json")).toEqual(["/a/b", "/a/b/media"]);
   });
 });

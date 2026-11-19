@@ -8,8 +8,8 @@ import {
   fontsFor,
   type ResolvedState,
   resolve,
-} from "@cutcraft/kit";
-import { loadModule } from "@cutcraft/kit/source";
+} from "@uberscene/kit";
+import { loadModule } from "@uberscene/kit/source";
 
 import { directoryResolver } from "./media";
 import type { ExportSource } from "./renderer";
@@ -72,7 +72,7 @@ export function formatFonts(fonts: readonly CatalogFont[]): string {
 
 * bundled: use it by name, font="Inter". Any other: declare it at the top of the file,
   const bebasNeue = googleFont("Bebas Neue"), and pass the value, font={bebasNeue}.
-  cutcraft fonts --sheet fonts.png --text "YOUR WORDS" draws them, to look at before choosing.
+  uberscene fonts --sheet fonts.png --text "YOUR WORDS" draws them, to look at before choosing.
 `;
 }
 
@@ -115,7 +115,7 @@ export function sheetSource(
   return {
     width,
     height,
-    text: `import { Composition, googleFont, Layer, Track } from "@cutcraft/kit";
+    text: `import { Composition, googleFont, Layer, Track } from "@uberscene/kit";
 ${declarations}
 const CELLS = ${JSON.stringify(cells)};
 const TEXT = ${JSON.stringify(text)};

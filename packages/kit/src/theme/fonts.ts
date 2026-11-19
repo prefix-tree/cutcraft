@@ -2,7 +2,7 @@ import { GOOGLE_FACES } from "./font-faces.generated";
 
 /**
  * The font families the player ships: the preview and the export load them
- * from `@cutcraft/player/fonts.css`. All are under the SIL
+ * from `@uberscene/player/fonts.css`. All are under the SIL
  * Open Font License, from the `@fontsource` packages named here. Each comes in
  * regular and bold, and italic where the family has one.
  */
@@ -44,7 +44,7 @@ export interface DeclaredFont {
   readonly source: FontSource;
 }
 
-const DECLARED = Symbol.for("cutcraft.declared");
+const DECLARED = Symbol.for("uberscene.declared");
 
 /**
  * A family a file declares, as `font()` and `googleFont()` return it: a value with no side effect, which carries its
@@ -117,7 +117,7 @@ export function font(options: {
 
 /**
  * Declares a Google Fonts family, in each weight and style given (default 400, normal), and returns it (a `FontRef`). The
- * export downloads the files once into `~/.cache/cutcraft/fonts` (`CUTCRAFT_FONT_CACHE` moves it) and reads them from
+ * export downloads the files once into `~/.cache/uberscene/fonts` (`UBERSCENE_FONT_CACHE` moves it) and reads them from
  * there; the player loads them from Google.
  *
  *   const titan = googleFont("Titan One");

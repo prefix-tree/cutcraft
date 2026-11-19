@@ -1,4 +1,4 @@
-import { Clip, Composition, Effect, Keyframe, Track } from "@cutcraft/kit";
+import { Clip, Composition, Effect, Keyframe, Track } from "@uberscene/kit";
 
 // regionBlur: Blurs a box of the frame, to hide a face, a person, a plate or a screen.
 export default function Video() {

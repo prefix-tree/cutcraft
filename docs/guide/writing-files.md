@@ -1,7 +1,7 @@
 # A launch video, line by line
 
 This page follows one file from a brief to a finished video: the launch recap in
-[`examples/launch-recap`](https://github.com/prefix-tree/cutcraft/tree/main/examples/launch-recap), which a model
+[`examples/launch-recap`](https://github.com/prefix-tree/uberscene/tree/main/examples/launch-recap), which a model
 wrote. It shows what each part of the file does and links to the guide page that covers it in full.
 
 ## The brief
@@ -15,7 +15,7 @@ wrote. It shows what each part of the file does and links to the guide page that
 > The product name, the tagline, the accent colour and the call to action must
 > be tweakable afterwards without touching the edit.
 
-With it came `cutcraft.json`: five assets. The founder interview has sixty timed words, three shots and four silences;
+With it came `uberscene.json`: five assets. The founder interview has sixty timed words, three shots and four silences;
 the product b-roll has three shots; then a screen recording, a music track and the logo.
 
 ## The file
@@ -81,7 +81,7 @@ The four values the brief wanted tweakable are the `schema`. An inspector shows 
 rewrites `defaults` and nothing else ([The file](./the-file#schema-and-defaults-are-the-knobs)).
 
 `in="word:12" out="word:23.end"` is the sentence "Small software still deserves a real cloud. It should take one
-file." CutCraft turns it into 5.6 to 10.8 seconds of the interview. `in="shot:1"` is the b-roll's second shot. The
+file." UberScene turns it into 5.6 to 10.8 seconds of the interview. `in="shot:1"` is the b-roll's second shot. The
 screen recording has no transcript, so `demo` uses seconds ([Timing](./time#time-references)).
 
 `main` is a sequence track. `hook`, `broll`, `demo`, `close` and `outro` play back to back, and the two crossfades

@@ -3,8 +3,8 @@ import { join, parse } from "node:path";
 
 import { EncodedVideoPacketSource, FilePathTarget, Output } from "mediabunny";
 
-import type { AssetManifest, ResolvedState } from "@cutcraft/kit";
-import { FRAME_EPS, type MediaResolver } from "@cutcraft/player/engine";
+import type { AssetManifest, ResolvedState } from "@uberscene/kit";
+import { FRAME_EPS, type MediaResolver } from "@uberscene/player/engine";
 
 import { feedCopy, planCopy, type Run } from "./copy";
 import {
@@ -73,7 +73,7 @@ export interface ExportSource {
   readonly text: string;
   readonly manifest: AssetManifest;
   readonly props?: Readonly<Record<string, unknown>>;
-  /** A Chrome or Chromium 153+ binary; default `CUTCRAFT_CHROMIUM`, then Chrome for Testing from the cache. */
+  /** A Chrome or Chromium 153+ binary; default `UBERSCENE_CHROMIUM`, then Chrome for Testing from the cache. */
   readonly executablePath?: string;
 }
 

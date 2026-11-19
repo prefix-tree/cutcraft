@@ -6,16 +6,16 @@
 ## Context
 
 An editor at a timeline looks all the time: parks the playhead on a cut, steps through a title's entrance, toggles a
-grade off and on, watches the meters. An agent editing a CutCraft file needs the same, and today it has little.
+grade off and on, watches the meters. An agent editing a UberScene file needs the same, and today it has little.
 
-- `cutcraft --still <seconds>` starts Chrome for every frame. One look costs a few seconds, so an agent looks rarely.
+- `uberscene --still <seconds>` starts Chrome for every frame. One look costs a few seconds, so an agent looks rarely.
 - The player's `captureSheet()` is quick but holds only the canvas: titles, layers and captions are DOM and are
   missing from it, and it needs a page the agent does not have.
 - Nothing answers in words what is at a moment: which clips play, which word is spoken, what an effect's value is
   after its keyframes.
 - An agent cannot hear, so sound is invisible to it.
 
-Other tools leave this to the person: a preview app to watch, and one cold still per call for the agent. CutCraft can
+Other tools leave this to the person: a preview app to watch, and one cold still per call for the agent. UberScene can
 do better because its resolver already knows every element's seconds, words and values. A timeline here is data, not
 the side effect of running a component.
 
@@ -26,7 +26,7 @@ language of our own.
 
 Three things, all one-shot commands: each call starts, answers and exits.
 
-### 1. `cutcraft inspect`: the timeline as text, with no browser
+### 1. `uberscene inspect`: the timeline as text, with no browser
 
 It runs the resolver in Node and prints, in well under a second:
 
@@ -39,7 +39,7 @@ It runs the resolver in Node and prints, in well under a second:
 row carrying its id, its seconds and its frames. Flat rows are what `jq`, a ten-line script against the kit's
 `resolve()` or a SQL table take as they are.
 
-### 2. `cutcraft look`: many frames from one browser start
+### 2. `uberscene look`: many frames from one browser start
 
 The cost of a look is the browser, so one call takes every moment the agent wants and returns one image:
 
@@ -75,9 +75,9 @@ file, and anything beyond an address is a query over the JSON rows in a language
 
 ### 4. A frame cache on disk
 
-`look` and `--still` keep each frame in `.cutcraft/cache`, keyed by a hash of what draws it: the resolved props of
+`look` and `--still` keep each frame in `.uberscene/cache`, keyed by a hash of what draws it: the resolved props of
 every element active at that time, the media files' sizes and modified times, the composition's settings, the frame
-size and the CutCraft version. A frame an edit did not touch is read from disk without starting a browser; when every
+size and the UberScene version. A frame an edit did not touch is read from disk without starting a browser; when every
 frame asked for is cached, the call answers in milliseconds. Trimming the fifth clip leaves the frames of the first
 four valid. A `<Layer>`'s key includes its component's source text, so changing free code invalidates only the frames
 it draws. `--no-cache` skips it, and the cache is safe to delete.
@@ -102,7 +102,7 @@ after each stage of the edit, and `look --around` or `--without` for the thing j
 
 ## Alternatives
 
-**A browser session kept warm** (`cutcraft view` with a control port, or an MCP server). A frame in a fraction of a
+**A browser session kept warm** (`uberscene view` with a control port, or an MCP server). A frame in a fraction of a
 second, and one playhead a person and an agent could share. Set aside: it is a process to start, find, keep alive and
 clean up, which is fragile in the sandboxes and one-shot shells agents run in, and it makes results depend on state.
 The disk cache gets most of its speed with none of that. An editor's own preview will hold a page open anyway; that
