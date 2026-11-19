@@ -514,7 +514,7 @@ html {
   background: var(--cc-paper);
 }
 .home-install-card.primary {
-  background: var(--cc-accent);
+  background-color: var(--cc-accent);
   color: #0a0a0a;
   border-color: var(--cc-ink);
 }
@@ -574,13 +574,9 @@ html {
 }
 .vp-doc .home-install-card div[class*="language-"] {
   margin: 0 0 0 34px !important;
-  box-shadow: var(--cc-hard-sm) !important;
 }
 .home-install-card.primary div[class*="language-"] {
   border-color: #0a0a0a !important;
-  box-shadow:
-    4px 4px 0 #0a0a0a,
-    0 4px 0 #0a0a0a !important;
 }
 .vp-doc .home-install-card div[class*="language-"] code {
   padding: 0 16px !important;
@@ -652,7 +648,6 @@ html {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 40px 28px;
-  margin-right: 8px;
 }
 .home-element {
   display: flex;
@@ -693,8 +688,6 @@ html {
 }
 .vp-doc .home-element .cc-example {
   margin: 0;
-  box-shadow: var(--cc-hard-sm) !important;
-  margin-right: 4px;
 }
 .vp-doc .home-element .cc-example-code {
   max-height: 200px;
@@ -1293,7 +1286,8 @@ html {
   border: var(--cc-line) !important;
 }
 
-/* Boxes: code, examples, the playground, the install command, notes. */
+/* Boxes: code, examples, the playground, the install command and notes are flat steel panels: a heavy edge and no
+   shadow, so they sit square in the page's gutter. Notes keep the hard shadow. */
 .vp-doc div[class*="language-"],
 .vp-doc .cc-example,
 .cc-playground,
@@ -1301,16 +1295,15 @@ html {
 .vp-doc .custom-block {
   border: var(--cc-line-heavy) !important;
   border-radius: 0 !important;
+  box-shadow: none !important;
+}
+.vp-doc .custom-block {
   box-shadow: var(--cc-hard) !important;
 }
 /* A code block inside an example is part of its box. */
 .vp-doc .cc-example div[class*="language-"] {
   border: 0 !important;
   box-shadow: none !important;
-}
-.vp-doc .cc-example,
-.cc-playground {
-  margin-right: 8px;
 }
 .vp-doc a.cc-gallery-tile {
   border: var(--cc-line-heavy);
@@ -1493,10 +1486,10 @@ body {
     radial-gradient(circle, var(--cc-ink) 3px, transparent 3.5px);
   background-size: 14px 14px;
   background-position:
-    6px 6px,
-    calc(100% - 6px) 6px,
-    6px calc(100% - 6px),
-    calc(100% - 6px) calc(100% - 6px);
+    5px 5px,
+    calc(100% - 5px) 5px,
+    5px calc(100% - 5px),
+    calc(100% - 5px) calc(100% - 5px);
   background-repeat: no-repeat;
 }
 .home-install-card.primary {
@@ -1661,4 +1654,16 @@ body {
   font-weight: 900;
   letter-spacing: 0.02em;
   line-height: 0.8;
+}
+
+/* On a phone the hard shadows halve, so a plate sits evenly between the page's 16px gutters. */
+@media (max-width: 640px) {
+  :root {
+    --cc-hard: 4px 4px 0 var(--cc-ink), 0 4px 0 var(--cc-ink);
+  }
+  .home-install-grid,
+  .vp-doc ul.home-feature-list,
+  .home-spec {
+    margin-right: 4px;
+  }
 }
