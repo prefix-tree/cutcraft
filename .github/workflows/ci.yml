@@ -15,6 +15,30 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  changes:
+    # What changed, so the Rust toolchain and the native build run only when the native codecs did: a few minutes
+    # saved on every other pull request.
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      rust: ${{ steps.filter.outputs.rust }}
+      native: ${{ steps.filter.outputs.native }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            rust:
+              - 'native/**'
+            native:
+              - 'native/**'
+              - 'packages/render/src/native/**'
+              - 'packages/render/src/web/page/native-frames.ts'
+              - 'packages/render/test/browser/native-codecs.test.ts'
+
   check:
     # The oldest Node the packages support and the current LTS.
     strategy:
@@ -50,7 +74,10 @@ jobs:
       - run: pnpm check:packages
 
   native:
-    # The native codecs (native/, UBERSCENE_CODECS): formatted, linted and tested against clips ffmpeg makes.
+    # The native codecs (native/, UBERSCENE_CODECS): formatted, linted and tested against clips ffmpeg makes. Only when
+    # native/ changed.
+    needs: changes
+    if: needs.changes.outputs.rust == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -84,6 +111,7 @@ jobs:
 
   e2e:
     # Pinned: Playwright 1.56 cannot install Chromium's system dependencies on ubuntu-latest (26.04).
+    needs: changes
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
@@ -109,11 +137,15 @@ jobs:
           key: uberscene-chrome-${{ runner.os }}-${{ hashFiles('packages/render/src/web/chrome.ts') }}
       - run: pnpm --filter @uberscene/render exec tsx src/cli.ts browser install
       # The native codecs, so the export tests that run with UBERSCENE_CODECS run too (they skip without the binary).
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
+      # Built only when the native codecs or the code that drives them changed.
+      - if: needs.changes.outputs.native == 'true'
+        uses: dtolnay/rust-toolchain@stable
+      - if: needs.changes.outputs.native == 'true'
+        uses: Swatinem/rust-cache@v2
         with:
           workspaces: native
-      - run: pnpm native:build
+      - if: needs.changes.outputs.native == 'true'
+        run: pnpm native:build
       # The export: video, sound, stills, smart copy, the layout check, the CLI and the recipes.
       - run: pnpm --filter @uberscene/render test:browser
       # Free code on the video's clock: three.js, Motion and CSS animations in the real Player.
