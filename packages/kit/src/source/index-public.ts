@@ -13,5 +13,6 @@ export {
 } from "./index";
 export { type Diagnostic, type LintOptions, type LintRule, lint, rules } from "./lint/index";
 export { ALLOWED_IMPORTS, type CutModule, type LoadOptions, loadModule } from "./load";
+export { type GatherOptions, gatherLocalFiles } from "./local-files";
 export { parseSource, type Range, rangeOf } from "./parse";
 export { elementName, printElement, printLiteral, printProp } from "./print";

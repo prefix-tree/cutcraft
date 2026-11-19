@@ -132,8 +132,17 @@ export class FrameKeys {
       },
       flags,
     );
-    // For a frame that free code draws: the file's text and props, and every element, since code can read them all.
-    this.whole = stable({ text: source.text, props: source.props ?? {}, items: [...state.items.values()] }, flags);
+    // For a frame that free code draws: the file's text, its own modules and props, and every element, since code can
+    // read them all.
+    this.whole = stable(
+      {
+        text: source.text,
+        ...(source.files ? { files: source.files } : {}),
+        props: source.props ?? {},
+        items: [...state.items.values()],
+      },
+      flags,
+    );
   }
 
   /** The size and modified time of an asset's file: a re-encoded or replaced file is another picture. */

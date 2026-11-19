@@ -51,6 +51,23 @@ A file may import `react`, `zod` and `@cutcraft/kit`. The app that loads it can 
 [Free code](./free-code#libraries)). An import the app doesn't offer fails with a message that lists what it does
 offer.
 
+It may also import modules of its own, by a path that starts with `./` or `../`: a component it uses in several
+videos, a scene kept in a file of its own, a list of data.
+
+```tsx
+import { ChatReveal } from "./blocks/chat-reveal";
+import { STATS } from "../data/stats";
+```
+
+Each is a `.ts` or `.tsx` file inside the project (the folder of the nearest `cutcraft.json`, or the file's folder
+without one), and the path may leave out the extension or name a folder with an `index.tsx`. It may import the same
+things the file may, its own modules included. The command line reads them from disk, the export takes them with the
+file, and a cached frame drawn by their code is drawn again when one of them changes. An app that loads files itself
+gathers them with `gatherLocalFiles` and passes them to `loadModule` as `files`.
+
+To an editor, a component from one of these modules is like any component in a `<Layer>`: its props where the file
+uses it are the handles, and its inside is code.
+
 ## The lint
 
 The rules on this page are checked by the **lint**: `lint()` from `@cutcraft/kit/source`. An editor runs it on the

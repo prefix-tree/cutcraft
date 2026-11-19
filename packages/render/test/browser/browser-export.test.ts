@@ -281,6 +281,46 @@ it("writes a still of a three.js frame", async () => {
   expect(readFileSync(out).subarray(1, 4).toString()).toBe("PNG");
 });
 
+it("writes a still of a layer the file's own module draws", async () => {
+  mkdirSync(join(dir, "blocks"), { recursive: true });
+  writeFileSync(
+    join(dir, "blocks", "panel.tsx"),
+    `import { useLayer } from "@cutcraft/kit";
+export function Panel({ color }: { color: string }) {
+  const { t } = useLayer();
+  return <div style={{ position: "absolute", left: 0, top: 0, width: 640 * t, height: 360, background: color }} />;
+}`,
+  );
+  const loaded = await loadVideo(
+    cut(
+      "own-module.tsx",
+      `import { Composition, Layer, Track } from "@cutcraft/kit";
+import { Panel } from "./blocks/panel";
+export const manifest = { assets: {} };
+export default function Video() {
+  return (
+    <Composition fps={30} width={640} height={360} background={{ mode: "color", color: "#000000" }}>
+      <Track id="fx" layout="free"><Layer id="panel" start={0} duration={2}><Panel color="#ff6600" /></Layer></Track>
+    </Composition>
+  );
+}
+`,
+    ),
+  );
+  const out = join(dir, "own-module.png");
+  // Half way through the layer, the panel covers the left half.
+  await renderStill({
+    state: loaded.state,
+    media: directoryResolver(dir, loaded.manifest),
+    out,
+    time: 1,
+    source: loaded.source,
+  });
+  const img = readImage(out);
+  expect(isOrange(pixel(img, 160, 180))).toBe(true);
+  expect(isOrange(pixel(img, 480, 180))).toBe(false);
+});
+
 it("writes the same sound and pictures on several pages as on one", async () => {
   const file = cut(
     "plain.tsx",

@@ -71,6 +71,8 @@ export interface RenderOptions {
 export interface ExportSource {
   /** The cut file's source text. */
   readonly text: string;
+  /** The file's own modules, by path from its folder (`gatherLocalFiles`). */
+  readonly files?: Readonly<Record<string, string>>;
   readonly manifest: AssetManifest;
   readonly props?: Readonly<Record<string, unknown>>;
   /** A Chrome or Chromium 153+ binary; default `CUTCRAFT_CHROMIUM`, then Chrome for Testing from the cache. */
@@ -120,6 +122,7 @@ export async function openEngine(options: {
   const fonts = [...(await loadFonts(options.state.fonts, options.media)), ...(options.fonts ?? [])];
   return BrowserEngine.open({
     source: options.source.text,
+    ...(options.source.files ? { files: options.source.files } : {}),
     manifest: options.source.manifest,
     media: options.media,
     ...(fonts.length ? { fonts } : {}),

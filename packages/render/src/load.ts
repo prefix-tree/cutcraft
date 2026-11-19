@@ -1,10 +1,10 @@
 import { existsSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
-import { dirname, isAbsolute, join, resolve as resolvePath } from "node:path";
+import { dirname, isAbsolute, join, relative, resolve as resolvePath, sep } from "node:path";
 import { pathToFileURL } from "node:url";
 
 import { type AssetManifest, collectModule, type ResolvedState, resolve } from "@cutcraft/kit";
-import { loadModule } from "@cutcraft/kit/source";
+import { gatherLocalFiles, loadModule } from "@cutcraft/kit/source";
 
 import { findManifest, MANIFEST_FILE } from "./manifest-file";
 import type { ExportSource } from "./renderer";
@@ -42,7 +42,8 @@ export async function loadVideo(file: string, options: LoadOptions = {}): Promis
   if (!existsSync(path)) throw new Error(`${file} does not exist`);
   const imports = await importAll(options.imports ?? {}, dirname(path));
   const text = readFileSync(path, "utf8");
-  const mod = loadModule(text, { imports });
+  const files = readLocalFiles(text, path, imports);
+  const mod = loadModule(text, { imports, files });
   const { manifest, manifestPath } = readManifest(
     options.manifest,
     mod as unknown as Record<string, unknown>,
@@ -54,7 +55,12 @@ export async function loadVideo(file: string, options: LoadOptions = {}): Promis
     state,
     manifest,
     ...(manifestPath ? { manifestPath } : {}),
-    source: { text, manifest, ...(options.props ? { props: options.props } : {}) },
+    source: {
+      text,
+      manifest,
+      ...(Object.keys(files).length ? { files } : {}),
+      ...(options.props ? { props: options.props } : {}),
+    },
   };
 }
 
@@ -83,6 +89,27 @@ function packageUrl(require: NodeJS.Require, specifier: string): string {
   } catch {
     return specifier;
   }
+}
+
+/**
+ * The file's own modules (`./blocks/chat-reveal`), read from disk. The project is the folder of the nearest
+ * cutcraft.json, or the file's folder without one; a module outside it is refused.
+ */
+function readLocalFiles(text: string, path: string, imports: Record<string, unknown>): Record<string, string> {
+  const folder = dirname(path);
+  const found = findManifest(folder).path;
+  const project = found ? dirname(found) : folder;
+  return gatherLocalFiles(
+    text,
+    (p) => {
+      const full = resolvePath(folder, p);
+      const fromProject = relative(project, full);
+      if (fromProject.startsWith(`..${sep}`) || isAbsolute(fromProject))
+        throw new Error(`${p} is outside the project (${project}); a video's own modules live inside it`);
+      return existsSync(full) ? readFileSync(full, "utf8") : undefined;
+    },
+    { name: relative(process.cwd(), path) || path, imports },
+  );
 }
 
 function readManifest(

@@ -379,7 +379,8 @@ From `@cutcraft/kit/source`:
 
 | Export | Signature | |
 |---|---|---|
-| `loadModule` | `(source: string, options?: { imports?: Record<string, unknown> }) => CutModule` | Evaluates a file's text. It may import `react`, `zod` and `@cutcraft/kit`, plus `imports`. |
+| `loadModule` | `(source: string, options?: { imports?, scope?, files? }) => CutModule` | Evaluates a file's text. It may import `react`, `zod` and `@cutcraft/kit`, plus `imports`, and its own modules from `files` (path from the file's folder to text). |
+| `gatherLocalFiles` | `(source: string, read: (path) => string \| undefined, options?: { name?, imports? }) => Record<string, string>` | The texts of the modules a file imports by `./` or `../`, and of the ones they import, read through `read` (which may throw to refuse a path). Pass the result to `loadModule` as `files`. |
 | `lint` | `(text: string, options?: { manifest?, rules? }) => Diagnostic[]` | Static checks that keep a file editable. Each `Diagnostic` has `rule`, `severity`, `message`, `range`, and `id` and `prop` when known. |
 | `foldToSource` | `(text: string, log: PatchLog, state: ResolvedState, maxRounds?: number) => FoldResult` | Writes the patch log's net effect back into the text. `FoldResult` has `text`, `edits`, `baked` and `skipped`. |
 | `buildSourceIndex` | `(text: string) => SourceIndex` | Where each element, prop and helper sits in the text. |

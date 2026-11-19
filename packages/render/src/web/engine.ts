@@ -35,6 +35,8 @@ const FLAGS = [
 export interface BrowserEngineOptions {
   /** The cut file's source text, its props and manifest: the page loads and resolves the file itself. */
   readonly source: string;
+  /** The file's own modules, by path from its folder. */
+  readonly files?: Readonly<Record<string, string>>;
   readonly props?: Readonly<Record<string, unknown>>;
   readonly manifest: AssetManifest;
   readonly media: MediaResolver;
@@ -101,6 +103,7 @@ export class BrowserEngine {
     const server = await servePage(
       {
         source: options.source,
+        ...(options.files ? { files: options.files } : {}),
         props: options.props ?? {},
         manifest: options.manifest,
         startedAt: Date.now(),

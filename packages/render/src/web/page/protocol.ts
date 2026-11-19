@@ -6,6 +6,8 @@ import type { Loudness } from "../../loudness";
 export interface PageJob {
   /** The cut file's source text, evaluated with the kit's `loadModule` as the editor does. */
   readonly source: string;
+  /** The file's own modules (`./blocks/chat-reveal`), by path from its folder, read in Node. */
+  readonly files?: Readonly<Record<string, string>>;
   readonly props: Readonly<Record<string, unknown>>;
   readonly manifest: unknown;
   /** Every face the page sets text in, each served at its `url`: the file's own, read in Node, and `--font`. */
