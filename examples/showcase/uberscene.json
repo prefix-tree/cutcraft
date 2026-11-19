@@ -1,29 +1,5 @@
 {
   "assets": {
-    "aurora": {
-      "id": "aurora",
-      "kind": "video",
-      "duration": 8,
-      "fps": 30,
-      "width": 960,
-      "height": 540
-    },
-    "spiral": {
-      "id": "spiral",
-      "kind": "video",
-      "duration": 8,
-      "fps": 30,
-      "width": 960,
-      "height": 540
-    },
-    "cells": {
-      "id": "cells",
-      "kind": "video",
-      "duration": 8,
-      "fps": 30,
-      "width": 960,
-      "height": 540
-    },
     "speaker": {
       "id": "speaker",
       "kind": "video",

@@ -12,6 +12,8 @@ A blend between the two clips it sits between on a sequence track.
 
 </Example>
 
+The coffee footage is Pixabay videos [209419](https://pixabay.com/videos/id-209419/), [209424](https://pixabay.com/videos/id-209424/), [46989](https://pixabay.com/videos/id-46989/) and [251](https://pixabay.com/videos/id-251/), under the Pixabay Content License. The maker of the machine in the red cup shot has nothing to do with this project.
+
 **Used in:** [Product launch](/examples/launch) · [An edit](/examples/edit) · [the walkthrough](/guide/writing-files) · [Slideshow with motion](/recipes/slideshow)
 
 ## Props

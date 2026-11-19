@@ -62,11 +62,13 @@ Each showcase video is one file in
 `pnpm --filter @uberscene/example-showcase docs`. Every file renders through the player in
 [headless Chrome](/guide/exporting#the-browser-it-runs-in).
 
-The showcase footage is made by `ffmpeg`'s own sources (`pnpm --filter @uberscene/example-showcase gen`), except the
-two coffee shots in the effect and transition demos, close and wide: Pixabay videos
-[209419](https://pixabay.com/videos/id-209419/) and [209424](https://pixabay.com/videos/id-209424/), under the Pixabay
-Content License. They are not committed; `gen` reads them from `examples/showcase/media/stock/` and checks their
-hashes.
+Every picture in the showcase comes from four stock coffee clips: a pour-over close and wide, an espresso machine
+filling three glasses, and espresso running into a red paper cup. They are Pixabay videos
+[209419](https://pixabay.com/videos/id-209419/), [209424](https://pixabay.com/videos/id-209424/),
+[46989](https://pixabay.com/videos/id-46989/) and [251](https://pixabay.com/videos/id-251/), under the Pixabay Content
+License. The maker of the machine in the red cup shot has nothing to do with this project. The clips are not
+committed: `pnpm --filter @uberscene/example-showcase gen` reads them from `examples/showcase/media/stock/`, checks
+their hashes, and cuts from them the founder, analyst, speaker and product shots the demos name, and the green screen.
 
 The shorts are in [`examples/shorts`](https://github.com/prefix-tree/uberscene/tree/main/examples/shorts),
 rendered with `pnpm --filter @uberscene/example-shorts render`. The two lighting explainers and the snake use no media at all. The

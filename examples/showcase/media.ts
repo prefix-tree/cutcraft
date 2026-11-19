@@ -1,7 +1,8 @@
-// Footage for the showcase. Most is made by ffmpeg's own sources (no text, so any build will do): moving gradients, a
-// slow spiral, a game of life and a green screen, in the site's colours. The effect demos also use real stock footage,
-// which is not committed: each clip is read from media/stock/ (fetched from its URL when one is known), checked
-// against its hash, and trimmed. Skips files that exist.
+// Footage for the showcase. Every moving picture comes from four stock coffee clips, which are not committed: each is
+// read from media/stock/ (fetched from its URL when one is known), checked against its hash, and trimmed. The
+// stand-ins that carry words in the manifest (a founder, an analyst, a speaker on a phone) and the product b-roll are
+// cut from those clips, so their ids, lengths and transcripts stay as the demos expect. The green screen is a coffee
+// shot over studio green, for the colour key demo. Skips files that exist.
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -9,26 +10,6 @@ import { join } from "node:path";
 
 const dir = join(import.meta.dirname, "media");
 mkdirSync(dir, { recursive: true });
-
-const clips: Record<string, string> = {
-  aurora:
-    "gradients=s=960x540:r=30:d=8:c0=0x101421:c1=0x23395b:c2=0xc8402a:c3=0x3d5a80:nb_colors=4:speed=0.02:type=radial:seed=7",
-  spiral:
-    "gradients=s=960x540:r=30:d=8:c0=0x1b2a4a:c1=0xc8402a:c2=0x101421:nb_colors=3:speed=0.015:type=spiral:seed=11",
-  cells:
-    "life=s=240x135:r=30:mold=10:ratio=0.12:seed=3:life_color=0x3d5a80:death_color=0x101421:mold_color=0x23395b,scale=960:540:flags=neighbor,trim=duration=8",
-  // Stand-ins for a founder and an analyst on camera (the manifest holds the words they would say), and product b-roll.
-  founder:
-    "gradients=s=960x540:r=30:d=14:c0=0x2a1c1a:c1=0x6b3a2a:c2=0x1b2a4a:nb_colors=3:speed=0.008:type=radial:seed=5",
-  analyst:
-    "gradients=s=960x540:r=30:d=14:c0=0x101421:c1=0x23395b:c2=0x1b4a4a:nb_colors=3:speed=0.008:type=radial:seed=9",
-  product: "mandelbrot=s=960x540:r=30:maxiter=200:end_scale=0.6:inner=period,trim=duration=6",
-  speaker:
-    "gradients=s=540x960:r=30:d=12:c0=0x23395b:c1=0x3d5a80:c2=0xc8402a:nb_colors=3:speed=0.01:type=spiral:seed=2",
-  // A card of fractal drifting over studio green, for the colour key demo.
-  greenscreen:
-    "color=c=0x00b140:s=960x540:r=30:d=4[bg];mandelbrot=s=420x280:r=30:maxiter=200:end_scale=0.6:inner=period[fg];[bg][fg]overlay=x='120+300*(0.5-0.5*cos(t*1.2))':y='130+40*sin(t*1.6)':shortest=1",
-};
 
 /** Stock footage the demos use: where it comes from, who made it, and the part of it they show. */
 const stock: readonly {
@@ -83,39 +64,6 @@ const stock: readonly {
   },
 ];
 
-for (const [name, source] of Object.entries(clips)) {
-  const out = join(dir, `${name}.webm`);
-  if (existsSync(out)) continue;
-  process.stdout.write(`${name}.webm\n`);
-  execFileSync(
-    "ffmpeg",
-    [
-      "-hide_banner",
-      "-loglevel",
-      "error",
-      "-y",
-      "-f",
-      "lavfi",
-      "-i",
-      source,
-      "-c:v",
-      "libvpx-vp9",
-      "-b:v",
-      "2M",
-      "-g",
-      "30",
-      "-deadline",
-      "realtime",
-      "-cpu-used",
-      "8",
-      "-pix_fmt",
-      "yuv420p",
-      out,
-    ],
-    { stdio: "inherit" },
-  );
-}
-
 for (const clip of stock) {
   const out = join(dir, `${clip.id}.webm`);
   if (existsSync(out)) continue;
@@ -160,6 +108,103 @@ for (const clip of stock) {
       "-pix_fmt",
       "yuv420p",
       out,
+    ],
+    { stdio: "inherit" },
+  );
+}
+
+/**
+ * Pictures cut from the stock clips for the ids the demos name: where each comes from, the part of it, and a filter to
+ * crop or frame it. Their lengths and sizes match the manifest.
+ */
+const cuts: Record<
+  string,
+  { readonly from: string; readonly start: number; readonly duration: number; readonly vf?: string }
+> = {
+  // The wide pour has a person at the right edge: the founder on camera.
+  founder: { from: "coffeeWide", start: 0, duration: 14 },
+  // Hands bringing a jug to the red cup: the analyst's shot.
+  analyst: { from: "redCup", start: 38, duration: 14 },
+  // The machine filling its third glass: the product b-roll.
+  product: { from: "espresso", start: 25, duration: 6 },
+  // A tall crop of the red cup filling: the speaker on a phone.
+  speaker: { from: "redCup", start: 15, duration: 12, vf: "crop=304:540:365:0,scale=540:960" },
+};
+
+for (const [id, cut] of Object.entries(cuts)) {
+  const out = join(dir, `${id}.webm`);
+  if (existsSync(out)) continue;
+  process.stdout.write(`${id}.webm\n`);
+  execFileSync(
+    "ffmpeg",
+    [
+      "-hide_banner",
+      "-loglevel",
+      "error",
+      "-y",
+      "-ss",
+      String(cut.start),
+      "-t",
+      String(cut.duration),
+      "-i",
+      join(dir, `${cut.from}.webm`),
+      "-an",
+      ...(cut.vf ? ["-vf", cut.vf] : []),
+      "-c:v",
+      "libvpx-vp9",
+      "-b:v",
+      "2M",
+      "-g",
+      "30",
+      "-deadline",
+      "realtime",
+      "-cpu-used",
+      "8",
+      "-pix_fmt",
+      "yuv420p",
+      out,
+    ],
+    { stdio: "inherit" },
+  );
+}
+
+/** A card of the close pour drifting over studio green, for the colour key demo. */
+const greenscreen = join(dir, "greenscreen.webm");
+if (!existsSync(greenscreen)) {
+  process.stdout.write("greenscreen.webm\n");
+  execFileSync(
+    "ffmpeg",
+    [
+      "-hide_banner",
+      "-loglevel",
+      "error",
+      "-y",
+      "-f",
+      "lavfi",
+      "-i",
+      "color=c=0x00b140:s=960x540:r=30:d=4",
+      "-ss",
+      "12",
+      "-t",
+      "4",
+      "-i",
+      join(dir, "coffee.webm"),
+      "-filter_complex",
+      "[1:v]scale=420:236[fg];[0:v][fg]overlay=x='120+300*(0.5-0.5*cos(t*1.2))':y='150+40*sin(t*1.6)':shortest=1",
+      "-an",
+      "-c:v",
+      "libvpx-vp9",
+      "-b:v",
+      "2M",
+      "-g",
+      "30",
+      "-deadline",
+      "realtime",
+      "-cpu-used",
+      "8",
+      "-pix_fmt",
+      "yuv420p",
+      greenscreen,
     ],
     { stdio: "inherit" },
   );

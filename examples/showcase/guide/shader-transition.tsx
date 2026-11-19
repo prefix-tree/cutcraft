@@ -16,7 +16,7 @@ export default function Video() {
       <Track id="main">
         <Clip id="first" src="asset:coffee" in={0} out={2} fit="cover" />
         <Transition id="open" type={circle} duration={1} />
-        <Clip id="pour" src="asset:coffee" in={15} out={17} fit="cover" />
+        <Clip id="pour" src="asset:espresso" in={14} out={16} fit="cover" />
       </Track>
     </Composition>
   );

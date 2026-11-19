@@ -5,7 +5,7 @@ export default function Video() {
   return (
     <Composition fps={30} width={1920} height={1080}>
       <Track id="main">
-        <Clip id="shot" src="asset:coffee" in={12} out={15} fit="cover" />
+        <Clip id="shot" src="asset:redCup" in={18} out={21} fit="cover" />
       </Track>
       <Track id="over" layout="free">
         <Callout

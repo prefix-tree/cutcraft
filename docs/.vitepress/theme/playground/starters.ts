@@ -1,5 +1,6 @@
 // The playground's starter files. Each uses only the coffee clip in docs/public/playground, so every one plays in the
-// browser with nothing else to download. aurora and product stay for links shared before the starters moved to coffee.
+// browser with nothing else to download. aurora and product stay for links shared before the starters moved to coffee;
+// their files are now cut from the espresso and red cup clips, so every picture here is coffee footage.
 
 export interface Starter {
   readonly name: string;

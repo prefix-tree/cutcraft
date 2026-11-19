@@ -6,7 +6,7 @@ export default function Video() {
   return (
     <Composition fps={30} width={960} height={540}>
       <Track id="main">
-        <Clip id="pour" src="asset:coffee" in={11} out={14} fit="cover" />
+        <Clip id="pour" src="asset:redCup" in={18} out={21} fit="cover" />
       </Track>
       <Track id="looks" layout="free">
         <Adjustment id="grade" start={1.5} duration={1.5}>

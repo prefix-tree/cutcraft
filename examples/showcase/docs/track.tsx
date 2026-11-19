@@ -6,7 +6,7 @@ export default function Video() {
       {/* A sequence track: clips play back to back, in order. */}
       <Track id="main">
         <Clip id="a" src="asset:coffee" in={0} out={2} fit="cover" />
-        <Clip id="b" src="asset:coffee" in={10} out={12} fit="cover" />
+        <Clip id="b" src="asset:redCup" in={18} out={20} fit="cover" />
       </Track>
       {/* A free track: each element sits at its own start. */}
       <Track id="marks" layout="free">

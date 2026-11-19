@@ -8,9 +8,9 @@ export default function Video() {
       <Track id="left">
         <Clip
           id="grey-first"
-          src="asset:coffee"
-          in={12}
-          out={15}
+          src="asset:espresso"
+          in={2}
+          out={5}
           fit="cover"
           transform={{ position: { x: -240, y: 0 }, scale: { x: 0.5, y: 0.5 } }}
         >
@@ -21,9 +21,9 @@ export default function Video() {
       <Track id="right">
         <Clip
           id="tone-first"
-          src="asset:coffee"
-          in={12}
-          out={15}
+          src="asset:espresso"
+          in={2}
+          out={5}
           fit="cover"
           transform={{ position: { x: 240, y: 0 }, scale: { x: 0.5, y: 0.5 } }}
         >
