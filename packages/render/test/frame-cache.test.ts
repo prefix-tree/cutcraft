@@ -103,6 +103,22 @@ describe("frame keys", () => {
     ).toEqual([30]);
   });
 
+  it("a frame free code draws changes with the file's own modules", async () => {
+    mkdirSync(join(dir, "blocks"), { recursive: true });
+    const layer = `<Layer id="count" start={0.9} duration={0.3}><Count /></Layer>`;
+    const top = `import { Count } from "./blocks/count";`;
+    const write = (label: string) =>
+      writeFileSync(
+        join(dir, "blocks", "count.tsx"),
+        `import { useLayer } from "@uberscene/kit";\nexport function Count() { const { elapsed } = useLayer(); return <div>${label} {elapsed}</div>; }`,
+      );
+    write("a");
+    const before = await keysOf(video({ more: layer, top }), FRAMES);
+    write("b");
+    const after = await keysOf(video({ more: layer, top }), FRAMES);
+    expect(FRAMES.filter((_, i) => before[i] !== after[i])).toEqual([30]);
+  });
+
   it("a media file that was replaced changes the frames that read it", async () => {
     const before = await keysOf(video(), FRAMES);
     utimesSync(join(dir, "b.mp4"), new Date(), new Date(Date.now() + 5000));

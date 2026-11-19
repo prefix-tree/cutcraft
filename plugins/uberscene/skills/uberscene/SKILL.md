@@ -160,8 +160,9 @@ export default function Video({ product, who }: z.infer<typeof schema>) {
 - The default export returns one `<Composition fps width height>`. There is no duration: the video lasts until its
   last element ends.
 - `schema` and `defaults` are optional. `defaults` is a plain JSON object literal, because the editor rewrites it.
-- A file may import only `react`, `zod` and `@uberscene/kit` (three.js and Motion come through `<Three>` and
-  `<Motion>`).
+- A file may import only `react`, `zod`, `@uberscene/kit` and its own `.ts`/`.tsx` modules inside the project
+  (`./blocks/chat-reveal`); three.js and Motion come through `<Three>` and `<Motion>`. Put a component shared by
+  several videos in a module of its own and use it in a `<Layer>`.
 - Helpers are plain functions of their props: no state, no effects, and no hooks except `useLayer()` and `useT()`
   inside a `<Layer>`.
 - Add a one-line comment where a choice is not obvious.

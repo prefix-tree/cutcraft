@@ -72,7 +72,7 @@ async function start(): Promise<void> {
   const imports = installFreeCodeLibraries();
   // The file's own requestAnimationFrame, performance, Date and Math.random run on the video's clock, set per frame.
   const clock = createFreeCodeClock(job.startedAt);
-  const mod = loadModule(job.source, { imports, scope: clock.scope });
+  const mod = loadModule(job.source, { imports, scope: clock.scope, ...(job.files ? { files: job.files } : {}) });
   const manifest = job.manifest as AssetManifest;
   const props = { ...(mod.defaults ?? {}), ...job.props };
   const tree = collectModule(mod as never, props);

@@ -291,8 +291,8 @@ no browser and answers in about a second. The legend's `cached` says how many ce
 - Trimming the last clip leaves the frames of the clips before it as they were. Changing a title's words redraws only
   the frames it is on.
 - A frame that free code draws (a `<Layer>`, `<Motion>` or `<Three>`, or an effect the file declares) is keyed by the
-  file's whole text too, since that code can read anything in it. Code brought in with `--import` is not seen: after
-  changing such a module, pass `--no-cache`.
+  file's whole text and the text of its own modules (`./blocks/chat-reveal`), since that code can read anything in
+  them. Code brought in with `--import` is not seen: after changing such a module, pass `--no-cache`.
 - A frame drawn with a placeholder for media that could not be read is not kept.
 
 The folder is safe to delete, and belongs in `.gitignore`.
