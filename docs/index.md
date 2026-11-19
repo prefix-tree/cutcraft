@@ -15,11 +15,11 @@ import { withBase } from "vitepress";
 
 <section class="home-hero">
 
-<h1 class="home-mark">UberScene —</h1>
+<h1 class="home-title">Make videos with code.</h1>
 
-<div class="home-pitch">
+<p class="home-lead">Write a video as a React file. Play it in the browser, fine-tune it on a timeline, export it to MP4.</p>
 
-<p class="home-lead">Video as code. Write a React file, watch it play in the browser, export it to MP4.</p>
+<CopyCommand command="npm install uberscene @uberscene/kit react zod" />
 
 <div class="home-actions">
 <a class="home-button primary" :href="withBase('/guide/getting-started')">Get started</a>
@@ -27,66 +27,134 @@ import { withBase } from "vitepress";
 <a class="home-button" href="https://github.com/prefix-tree/uberscene">GitHub</a>
 </div>
 
-<CopyCommand command="npm install uberscene @uberscene/kit react zod" />
-
-</div>
-
-<div class="home-hero-video"><Preview src="showcase/launch" alt="A product launch rendered by UberScene" /></div>
+<p class="home-meta">Free and open source · MIT licence</p>
 
 </section>
 
-<section class="home-gallery" aria-label="Videos">
-
-## Videos
-
-<Gallery />
-
-<p class="home-links">Hover to play; open one to read the file that made it. <a :href="withBase('/examples/')">All examples →</a></p>
-
-</section>
-
-<section class="home-strip">
-
-## Effects and transitions
-
-<div class="home-strip-row">
-<PreviewCard code hover title="whiteBalance" link="/reference/effects/whiteBalance" src="previews/effects/whiteBalance" />
-<PreviewCard code hover title="duotone" link="/reference/effects/duotone" src="previews/effects/duotone" />
-<PreviewCard code hover title="colorKey" link="/reference/effects/colorKey" src="previews/effects/colorKey" />
-<PreviewCard code hover title="cornerPin" link="/reference/effects/cornerPin" src="previews/effects/cornerPin" />
-<PreviewCard code hover title="regionBlur" link="/reference/effects/regionBlur" src="previews/effects/regionBlur" />
-<PreviewCard code hover title="glow" link="/reference/effects/glow" src="previews/effects/glow" />
-<PreviewCard code hover title="outline" link="/reference/effects/outline" src="previews/effects/outline" />
-<PreviewCard code hover title="longShadow" link="/reference/effects/longShadow" src="previews/effects/longShadow" />
-<PreviewCard code hover title="halftone" link="/reference/effects/halftone" src="previews/effects/halftone" />
-<PreviewCard code hover title="lightLeak" link="/reference/effects/lightLeak" src="previews/effects/lightLeak" />
-<PreviewCard code hover title="pixelate" link="/reference/effects/pixelate" src="previews/effects/pixelate" />
-<PreviewCard code hover title="fractalNoise" link="/reference/effects/fractalNoise" src="previews/effects/fractalNoise" />
-<PreviewCard code hover title="iris" link="/reference/transitions/iris" src="previews/transitions/iris" />
-<PreviewCard code hover title="filmBurn" link="/reference/transitions/filmBurn" src="previews/transitions/filmBurn" />
-<PreviewCard code hover title="pixelDissolve" link="/reference/transitions/pixelDissolve" src="previews/transitions/pixelDissolve" />
-<PreviewCard code hover title="blinds" link="/reference/transitions/blinds" src="previews/transitions/blinds" />
-</div>
-
-<p class="home-links"><a :href="withBase('/reference/effects/')">All 45 effects and transitions →</a></p>
-
-</section>
-
-<section class="home-try">
-
-## Build one here
-
-<p class="home-strip-lead">Edit the file; the video follows.</p>
+<section class="home-live" aria-label="Try it">
 
 <Playground compact />
 
-<p class="home-links"><a :href="withBase('/playground')">Open the playground →</a></p>
+</section>
+
+<section class="home-chapter">
+
+## Edit the file from code
+
+<p class="home-chapter-lead">115 actions edit the file itself: each one checked, undoable, and written back to its text as a one-value change. Wire them to any editor: a timeline, a form, an agent's tool call. <a :href="withBase('/guide/editing')">Editing →</a></p>
+
+<Example src="showcase/edit" alt="Three shots cut back to back, with transitions, a push-in and titles">
+
+```ts
+import { collectModule, Executor } from "@uberscene/kit";
+import { foldToSource, loadModule } from "@uberscene/kit/source";
+
+const tree = collectModule(loadModule(text));
+const exec = new Executor({ tree, manifest });
+
+// A drag on your timeline, a field in your form, a tool call:
+exec.execute({ type: "clip/trim",
+  params: { id: "hook", edge: "out", value: "word:22.end" } });
+exec.execute({ type: "text/setContent",
+  params: { id: "title", text: "Ships on Friday" } });
+exec.undo();
+exec.redo();
+
+// The file again, changed by exactly those edits.
+const { text: next } = foldToSource(text, exec.log(), exec.state());
+```
+
+</Example>
+
+</section>
+
+<section class="home-chapter">
+
+## Cuts and transitions
+
+<p class="home-chapter-lead">Clips play one after another on a track. A transition between two of them overlaps them: wipe, iris, film burn, blinds and more. <a :href="withBase('/guide/transitions')">Transitions →</a></p>
+
+<Example src="previews/elements/transition" alt="A wipe from aurora footage to cells">
+
+<<< @/../examples/showcase/docs/transition.tsx
+
+</Example>
+
+</section>
+
+<section class="home-chapter">
+
+## Titles
+
+<p class="home-chapter-lead">Text over the picture, timed to a clip, animated by letter, word or line. <a :href="withBase('/guide/titles-and-graphics')">Titles and graphics →</a></p>
+
+<Example src="previews/elements/title" alt="A title appearing word by word over a spiral">
+
+<<< @/../examples/showcase/docs/title.tsx
+
+</Example>
+
+</section>
+
+<section class="home-chapter">
+
+## Captions
+
+<p class="home-chapter-lead">Captions from the clip's transcript, or from SRT, VTT and Whisper. Karaoke, word by word or typewriter. <a :href="withBase('/guide/captions-and-sound')">Captions and sound →</a></p>
+
+<Example src="previews/elements/captions" alt="Karaoke captions over a speaker">
+
+<<< @/../examples/showcase/docs/captions.tsx
+
+</Example>
+
+</section>
+
+<section class="home-chapter">
+
+## Colour and effects
+
+<p class="home-chapter-lead">Exposure, white balance, curves, LUTs, keying, glow and more, written in the order a colourist works. Shaders in the preview and the export. <a :href="withBase('/reference/effects/')">All 45 effects and transitions →</a></p>
+
+<Example src="previews/guide/colour-grade" alt="A coffee shot, then the same shot graded">
+
+<<< @/../examples/showcase/guide/colour-grade.tsx
+
+</Example>
+
+</section>
+
+<section class="home-chapter">
+
+## Motion graphics
+
+<p class="home-chapter-lead">Ready-made lower thirds, callouts, counters and cards, timed like any title. <a :href="withBase('/reference/components/')">Components →</a></p>
+
+<Example src="previews/components/lower-third" alt="A lower third sliding up over a coffee shot">
+
+<<< @/../examples/showcase/components/lower-third.tsx
+
+</Example>
+
+</section>
+
+<section class="home-chapter">
+
+## Three.js and any React
+
+<p class="home-chapter-lead">Any component on the video's clock: three.js, Motion, SVG or canvas, frame-exact when you scrub or export. <a :href="withBase('/guide/free-code')">Free code →</a></p>
+
+<Example src="previews/elements/three" alt="A spinning cube over aurora footage">
+
+<<< @/../examples/showcase/docs/three.tsx
+
+</Example>
 
 </section>
 
 <section class="home-foot">
 
-**Free and open source under the MIT licence.**
+**Free and open source under the MIT licence.** <a :href="withBase('/examples/')">More examples →</a>
 
 [Quick start](./guide/getting-started) · [Principles](./guide/principles) · [Elements](./reference/elements/) · [CLI](./reference/cli) ·
 [API](./reference/api) · [GitHub](https://github.com/prefix-tree/uberscene) ·

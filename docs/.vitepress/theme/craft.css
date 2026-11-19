@@ -86,14 +86,14 @@
   color: var(--cc-accent) !important;
 }
 .VPNavBarTitle .title {
-  font-family: var(--cc-pixel);
-  font-weight: 900;
-  font-size: 18px;
-  letter-spacing: 0.02em;
+  font-family: var(--cc-display);
+  font-weight: 800;
+  font-size: 22px;
+  letter-spacing: 0.01em;
   text-transform: uppercase;
 }
 .VPNavBarTitle .logo {
-  border-radius: 8px;
+  border-radius: 0;
 }
 
 /* Docs pages: condensed capitals for headings, hairline rules, mono table heads. */
@@ -165,97 +165,116 @@
   border-top: 0;
   padding-top: 0;
 }
-/* Hero: a black poster the width of the window, whatever the colour scheme: the wordmark in dot matrix across the top,
-   the pitch and the install command under it, and a rendered example playing at the right. */
-/* The band is wider than the page's column: the page clips them, never scrolling sideways. */
-.VPPage:has(.home) {
-  overflow-x: clip;
-}
+/* Hero, after remotion.dev: one centred sentence on the page's own background, the install command and the buttons
+   under it, and the live playground below. */
 .home-hero {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
-  gap: 32px 48px;
-  align-items: end;
-  margin: -56px calc(50% - 50vw) 0;
-  padding: 64px max(24px, calc(50vw - 576px)) 72px;
-  background: #000000;
-  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 8px 0 0;
 }
-.vp-doc .home-mark {
-  grid-column: 1 / -1;
+.vp-doc .home-title {
+  max-width: 900px;
   margin: 0;
-  font-family: var(--cc-pixel);
-  font-size: clamp(52px, 11.5vw, 184px);
-  font-weight: 900;
-  line-height: 0.92;
-  letter-spacing: 0;
-  text-transform: uppercase;
-  color: #ffffff;
-}
-.home-pitch {
-  min-width: 0;
+  font-family: var(--vp-font-family-base);
+  font-size: clamp(40px, 6vw, 72px);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--cc-ink);
 }
 .home-lead {
-  max-width: 560px;
-  font-size: 22px !important;
-  line-height: 1.4 !important;
-  font-weight: 600;
-  color: #ffffff;
-  margin: 0 0 4px !important;
+  max-width: 640px;
+  margin: 16px 0 20px !important;
+  font-size: 19px !important;
+  line-height: 1.5 !important;
+  color: var(--cc-ink-2);
 }
 .home-hero .cc-command {
+  width: 100%;
   max-width: 520px;
-  margin-bottom: 14px;
-  border-color: #2a2a2a;
-}
-.home-hero-video {
-  aspect-ratio: 16 / 9;
-  background: #111111;
-}
-.vp-doc .home-hero-video .cc-preview {
-  margin: 0;
-  object-fit: cover;
-  border-radius: 0;
+  text-align: left;
 }
 .home-actions {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 10px;
-  margin: 22px 0 18px;
+  margin: 14px 0 10px;
 }
 .vp-doc a.home-button {
   display: inline-block;
-  padding: 11px 20px;
-  border: 1px solid currentColor;
-  font-family: var(--cc-mono);
-  font-size: 12.5px;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  padding: 10px 20px;
+  border: 1px solid var(--cc-rule);
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 600;
   text-decoration: none;
-  color: #ffffff;
+  color: var(--cc-ink);
   transition:
-    background 0.15s,
-    color 0.15s;
+    border-color 0.15s,
+    background 0.15s;
 }
 .vp-doc a.home-button:hover {
-  background: #ffffff;
-  color: #000000;
+  border-color: var(--cc-ink);
 }
 .vp-doc a.home-button.primary {
-  background: var(--cc-accent);
-  border-color: var(--cc-accent);
-  color: #000000;
+  background: var(--cc-ink);
+  border-color: var(--cc-ink);
+  color: var(--cc-paper);
 }
 .vp-doc a.home-button.primary:hover {
-  background: #ffffff;
-  border-color: #ffffff;
+  background: var(--cc-accent);
+  border-color: var(--cc-accent);
+}
+
+/* The landing page's headings are sentence case in Inter, not the docs' condensed capitals. */
+.home.vp-doc h1,
+.home.vp-doc h2,
+.home.vp-doc h3 {
+  font-family: var(--vp-font-family-base);
+  text-transform: none;
+}
+.home.vp-doc h2 {
+  font-size: 36px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.home-meta {
+  margin: 0 0 -40px !important;
+  font-size: 14px;
+  color: var(--cc-grey);
+}
+
+/* Chapters: one feature each, its rendered video beside the file that made it. */
+.home-chapter-lead {
+  max-width: 720px;
+  color: var(--cc-ink-2);
+}
+.home-chapter-lead a {
+  font-weight: 600;
+  text-decoration: none !important;
+  white-space: nowrap;
+}
+.vp-doc .home-chapter .cc-example {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  border-radius: 12px;
+}
+.vp-doc .home-chapter .cc-example-code {
+  align-self: stretch;
+  max-height: 460px;
+  overflow: auto;
 }
 @media (max-width: 860px) {
   .home-hero {
+    padding-top: 16px;
+  }
+  .vp-doc .home-chapter .cc-example {
     grid-template-columns: minmax(0, 1fr);
-    margin-top: -28px;
-    padding: 40px 16px 48px;
   }
 }
 .cc-command button:focus-visible {

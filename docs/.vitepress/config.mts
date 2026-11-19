@@ -39,9 +39,15 @@ export default defineConfig({
   // The playground (theme/playground) is React: JSX compiles to the automatic runtime, as in the packages.
   // Its player, editor and the in-browser compiler are one lazy chunk (about 700 KB gzipped), fetched only where a
   // playground is on screen, so Vite's size warning is raised past it.
-  vite: { esbuild: { jsx: "automatic" }, build: { chunkSizeWarningLimit: 3000 } },
+  vite: {
+    esbuild: { jsx: "automatic" },
+    build: { chunkSizeWarningLimit: 3000 },
+    // The dev server's pre-bundled @babel/types reads this env var, and the browser has no `process`; the build
+    // replaces it already.
+    optimizeDeps: { esbuildOptions: { define: { "process.env.BABEL_TYPES_8_BREAKING": "false" } } },
+  },
   themeConfig: {
-    logo: "/logo.svg",
+    logo: { light: "/logo.svg", dark: "/logo-dark.svg" },
     // The top bar names three ways in, as short as a poster (on every page, the landing one included); the sidebar is the map of the docs.
     nav: [
       { text: "Docs", link: "/guide/introduction", activeMatch: "^/(guide|decisions|reference)/" },

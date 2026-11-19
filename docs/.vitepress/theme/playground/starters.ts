@@ -10,22 +10,28 @@ export interface Starter {
 
 export const STARTERS: readonly Starter[] = [
   {
-    name: "Cut and title",
-    preview: "previews/elements/title",
-    code: `import { Clip, Composition, Title, Track } from "@uberscene/kit";
+    name: "Launch",
+    preview: "previews/transitions/iris",
+    code: `import { Clip, Composition, LowerThird, Title, Track, Transition } from "@uberscene/kit";
 
+// Change a word, a colour or a number: the video follows.
 export default function Video() {
   return (
-    <Composition fps={30} width={640} height={360}>
+    <Composition fps={30} width={960} height={540}>
       <Track id="main">
-        <Clip id="open" src="asset:aurora" in={0} out={2} fit="cover" />
-        <Clip id="fractal" src="asset:product" in={0} out={2} fit="cover" />
+        <Clip id="open" src="asset:aurora" in={0} out={3} fit="cover" />
+        <Transition id="change" type="iris" duration={0.8} params={{ sides: 5, star: 0.5 }} />
+        <Clip id="product" src="asset:product" in={0} out={3} fit="cover" />
       </Track>
       <Track id="text">
-        <Title id="title" anchor="open" offset={0.2} duration={3.6} size={44}
+        <Title id="title" anchor="open" offset={0.3} duration={2.2} size={72}
           animation={{ preset: "word-by-word" }}>
-          Edit me: the video follows
+          Make videos with code
         </Title>
+      </Track>
+      <Track id="over" layout="free">
+        <LowerThird id="name" anchor="product" offset={0.3} duration={2.2}
+          name="Shed" role="Ships on Friday" x={-250} y={170} width={400} />
       </Track>
     </Composition>
   );

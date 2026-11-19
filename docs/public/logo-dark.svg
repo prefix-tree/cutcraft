@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="UberScene">
+  <!-- The logo for a dark page: the outline and the hard offset shadow in white instead of ink. -->
+  <rect x="72" y="72" width="416" height="416" fill="#ffffff"/>
+  <rect x="36" y="36" width="404" height="404" fill="#ff5a1f" stroke="#ffffff" stroke-width="24"/>
+  <path d="M128 112H204V276H272V112H348V364H128Z" fill="#0a0a0a"/>
+</svg>
