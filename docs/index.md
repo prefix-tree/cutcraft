@@ -72,20 +72,22 @@ the others changed.
 
 <section class="home-features">
 
-## Features
+## What's in it
 
-<ul class="home-feature-list">
-<li><strong>Timeline elements</strong> Clips, tracks, transitions, titles, shapes, masks, keyframes, speed ramps, freeze frames and multicam.</li>
-<li><strong>Captions</strong> From the clip's transcript, SRT, VTT or Whisper; karaoke, word by word or typewriter.</li>
-<li><strong>Effects and transitions</strong> 45 built in, run as shaders in the preview and the export, or your own in GLSL.</li>
-<li><strong>Motion graphics</strong> Lower thirds, callouts, counters, quote cards and themes.</li>
-<li><strong>Free code</strong> Any React, CSS, SVG, canvas, three.js or Motion, on the video's clock.</li>
-<li><strong>Editing API</strong> 115 undoable actions that write each change back into the file.</li>
-<li><strong>Player</strong> A React component that plays the file in the browser, frame-exact.</li>
-<li><strong>Export</strong> MP4, WebM and stills from the command line, rendered in headless Chrome.</li>
-<li><strong>Checks</strong> Lint, contact sheets and layout checks, to review a cut without watching it.</li>
-<li><strong>Agent skill</strong> Teaches Claude Code and other agents to write, check and render videos.</li>
-</ul>
+<div class="home-feature-grid">
+<PreviewCard hover title="Timeline" text="Clips, tracks, gaps, keyframes, speed ramps and freeze frames." link="/reference/elements/" src="previews/elements/track" />
+<PreviewCard hover title="Captions" text="From a transcript, SRT, VTT or Whisper, word by word or karaoke." link="/guide/captions-and-sound" src="previews/elements/captions" />
+<PreviewCard hover title="Effects" text="45 effects run as shaders, or your own in GLSL." link="/reference/effects/" src="previews/effects/halftone" />
+<PreviewCard hover title="Transitions" text="Wipes, irises, film burns and blinds between clips." link="/guide/transitions" src="previews/transitions/iris" />
+<PreviewCard hover title="Motion graphics" text="Lower thirds, callouts, counters and quote cards." link="/reference/components/" src="previews/components/lower-third" />
+<PreviewCard hover title="Themes and fonts" text="One look for the whole video, and any Google font." link="/guide/themes" src="previews/guide/fonts" />
+<PreviewCard hover title="Free code" text="React, three.js and Motion on the video's clock." link="/guide/free-code" src="previews/elements/three" />
+<PreviewCard hover title="Editing API" text="115 undoable actions, written back into the file." link="/guide/editing" src="previews/elements/nested" />
+<PreviewCard hover title="Player" text="Embed the live video in your React app." link="/guide/player" src="previews/elements/composition" />
+<PreviewCard hover title="Export" text="MP4, WebM and stills from the command line." link="/guide/exporting" src="showcase/launch" />
+<a class="cc-card" :href="withBase('/guide/checking')"><img class="cc-preview" :src="withBase('/reference/look.jpg')" alt="" loading="lazy"><span class="cc-card-title">Checks</span><span class="cc-card-text">Review a cut without watching it: timelines, contact sheets, layout.</span></a>
+<a class="cc-card" :href="withBase('/guide/agents')"><img class="cc-preview" :src="withBase('/reference/look-zones.jpg')" alt="" loading="lazy"><span class="cc-card-title">Agent skill</span><span class="cc-card-text">Claude Code and other agents write, check and render videos.</span></a>
+</div>
 
 </section>
 

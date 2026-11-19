@@ -1,6 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="UberScene">
-  <!-- Brutalist: a square U in ink on an orange tile with a heavy outline and a hard, unblurred offset shadow. -->
-  <rect x="72" y="72" width="416" height="416" fill="#0a0a0a"/>
-  <rect x="36" y="36" width="404" height="404" fill="#ff5a1f" stroke="#0a0a0a" stroke-width="24"/>
-  <path d="M128 112H204V276H272V112H348V364H128Z" fill="#0a0a0a"/>
+  <!-- A brutalist U drawn in lines: two stems as bevelled panels, orange inside, over a bowl with a black band. -->
+  <g stroke="#0a0a0a" stroke-linejoin="miter" stroke-linecap="square">
+    <path d="M112 56H216V300A40 40 0 0 0 296 300V56H400V300A144 144 0 0 1 112 300Z" fill="#ffffff" stroke-width="16"/>
+    <path d="M112 300H216M296 300H400" stroke-width="12"/>
+    <rect x="138" y="82" width="52" height="192" fill="#ff5a1f" stroke-width="10"/>
+    <rect x="322" y="82" width="52" height="192" fill="#ff5a1f" stroke-width="10"/>
+    <path d="M112 56L138 82M216 56L190 82M112 300L138 274M216 300L190 274M296 56L322 82M400 56L374 82M296 300L322 274M400 300L374 274" stroke-width="8"/>
+    <path d="M136 300A120 120 0 0 0 376 300H324A68 68 0 0 1 188 300Z" fill="#0a0a0a" stroke-width="0"/>
+  </g>
 </svg>

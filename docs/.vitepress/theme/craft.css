@@ -252,7 +252,7 @@
   color: var(--cc-grey);
 }
 
-/* Why: three reasons side by side. Features: a list in columns, each a name and a line. */
+/* Why: three reasons side by side. */
 .home-why-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -266,26 +266,48 @@
   margin: 0;
   color: var(--cc-ink-2);
 }
-.vp-doc ul.home-feature-list {
+/* Feature cards, after remotion.dev: a picture, a name and a line; the picture is grey until hovered, then plays in colour. */
+.home-feature-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0 32px;
-  padding: 0;
-  list-style: none;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 32px 20px;
+  margin-top: 24px;
 }
-.vp-doc ul.home-feature-list li {
-  margin: 0;
-  padding: 14px 0;
-  border-top: var(--cc-line);
-  color: var(--cc-ink-2);
+.vp-doc .home-feature-grid .cc-card .cc-preview {
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  filter: grayscale(1) contrast(1.1);
+  transition:
+    filter 0.2s,
+    transform 0.1s,
+    box-shadow 0.1s;
 }
-.vp-doc ul.home-feature-list strong {
-  display: block;
-  color: var(--cc-ink);
+/* The captions demo is vertical: show the part with the words. */
+.vp-doc .home-feature-grid .cc-card[href$="captions-and-sound"] .cc-preview {
+  object-position: center 78%;
+}
+.vp-doc .home-feature-grid .cc-card:hover .cc-preview,
+.vp-doc .home-feature-grid .cc-card:focus-visible .cc-preview {
+  filter: none;
+}
+.vp-doc .home-feature-grid .cc-card-title {
+  margin-top: 8px;
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.vp-doc .home-feature-grid .cc-card-text {
+  color: var(--cc-grey);
+  font-size: 15px;
+  line-height: 1.45;
+}
+@media (max-width: 1000px) {
+  .home-feature-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 @media (max-width: 860px) {
-  .home-why-grid,
-  .vp-doc ul.home-feature-list {
+  .home-why-grid {
     grid-template-columns: minmax(0, 1fr);
   }
 }
