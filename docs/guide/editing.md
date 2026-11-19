@@ -56,6 +56,12 @@ The [action reference](../reference/actions.md) lists all 115.
 **Undo.** History auto-groups rapid same-type, same-target updates (a slider drag) within 100 ms, and keeps explicit
 groups (`beginGroup`, `endGroup`) for gestures.
 
+**No edit breaks the file.** After an action applies, the executor resolves the result. If it has an error the file
+did not have before (a title anchored to a word no clip plays, a cue on a word trimmed away), the action is refused
+with `BREAKS_FILE`, its message names each new error, and nothing is kept: no patch, no history entry. Errors the
+file already had do not count. A `batch/apply` is checked once, as a whole, so its middle may pass through a broken
+state. Undo and redo are not checked, since each returns to, or repeats, a state an accepted action reached.
+
 ::: details What each action is made of
 Every handler has four faces:
 

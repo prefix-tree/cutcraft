@@ -247,7 +247,20 @@ export interface Refusal {
   readonly pick: (state: ResolvedState) => ActionInput | undefined;
   /** The error code the refusal carries. */
   readonly code: string;
+  /** The files it applies to; every file when left out. */
+  readonly on?: readonly string[];
+  /** An edit of `EDITS` that these files refuse rather than take. */
+  readonly replaces?: string;
 }
+
+/** An edit of `EDITS`, refused on the files given with `BREAKS_FILE`: what it would leave behind is an error. */
+const breaks = (edit: string, files: readonly string[], name: string): Refusal => ({
+  name,
+  pick: (s) => EDITS.find((e) => e.name === edit)?.pick(s),
+  code: "BREAKS_FILE",
+  on: files,
+  replaces: edit,
+});
 
 /** Edits the editor must refuse, with a reason, and leave the file as it was. */
 export const REFUSALS: readonly Refusal[] = [
@@ -256,4 +269,17 @@ export const REFUSALS: readonly Refusal[] = [
     pick: (s) => (themeLocked(s) ? setPrimary : undefined),
     code: "LOCKED_PROP",
   },
+  // A caption cue there starts or ends on a word these edits take away. Decision 0014 makes a word no clip plays an
+  // error, and nothing moves a cue's words, so the editor refuses rather than leave the file broken.
+  breaks("trims the end of a clip", ["examples/launch-recap/video.tsx"], "refuses a trim that cuts a caption's word"),
+  breaks(
+    "trims the start of a clip",
+    ["examples/launch-recap/video.tsx"],
+    "refuses a trim from the start that cuts a caption's word",
+  ),
+  breaks(
+    "deletes a clip from a sequence",
+    ["examples/launch-recap/video.tsx"],
+    "refuses to delete a clip a caption's words play in",
+  ),
 ];

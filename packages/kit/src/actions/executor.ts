@@ -26,8 +26,12 @@ export interface ExecutorOptions {
 /**
  * Runs actions against `{ tree, patches }`: validate on the state before,
  * compute the inverse from that state, append patches, record history.
+ * An action whose result has errors the state before did not have is
+ * refused with `BREAKS_FILE` and leaves nothing behind.
  * Undo and redo re-run inverses and originals through the same path, so
  * the patch log is an append-only record until a fold replaces the tree.
+ * They are not checked for new errors: each returns to, or repeats, a
+ * state an accepted action already reached.
  */
 export class Executor {
   private tree: CollectedTree;
@@ -118,6 +122,18 @@ export class Executor {
         errors: [{ code: "INVALID_PARAMS", message: error instanceof Error ? error.message : String(error) }],
       };
     }
+    if (record) {
+      // resolve() memoises on the log's version, so the state after is the one the next state() returns.
+      const broken = newErrors(before, this.state());
+      if (broken.length > 0) {
+        this.patchLog.truncate(from);
+        return {
+          ok: false,
+          action,
+          errors: [{ code: "BREAKS_FILE", message: `${action.type} would leave the file with ${broken.join("; ")}` }],
+        };
+      }
+    }
     const to = this.patchLog.mark();
     if (record) this.hist.push(action, inverse, [from, to]);
     return { ok: true, action, inverse };
@@ -126,4 +142,21 @@ export class Executor {
   entries(): readonly HistoryEntry[] {
     return this.hist.entries();
   }
+}
+
+/** The errors of `after` that `before` did not have, compared by code, element and prop, as `CODE id.prop: message`. */
+function newErrors(before: ResolvedState, after: ResolvedState): string[] {
+  const keyOf = (e: ResolvedState["errors"][number]): string =>
+    `${e.code} ${e.id ?? ""} ${"prop" in e ? (e.prop ?? "") : ""}`;
+  const had = new Set(before.errors.map(keyOf));
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const e of after.errors) {
+    const key = keyOf(e);
+    if (had.has(key) || seen.has(key)) continue;
+    seen.add(key);
+    const prop = "prop" in e && e.prop ? `.${e.prop}` : "";
+    out.push(`${e.code} on ${e.id ?? "the file"}${prop}: ${e.message}`);
+  }
+  return out;
 }

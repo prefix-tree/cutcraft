@@ -6,6 +6,8 @@ import {
   rawNode,
   rawProp,
   requireElement,
+  requireNotOpaque,
+  requireUnlocked,
   setProps,
   siblingAfter,
   validateTarget,
@@ -19,6 +21,10 @@ define({
     if (state.tree.byId.has(a.params.id)) return invalid({ code: "DUPLICATE_ID", message: `"${a.params.id}" exists` });
     const parent = requireElement(state, a.params.parentId, "parentId");
     if (isError(parent)) return invalid(parent);
+    const refused = requireUnlocked(state, parent) ?? requireNotOpaque(parent);
+    if (refused) return invalid(refused);
+    if (parent.editable === "generated")
+      return invalid({ code: "OPAQUE_TARGET", message: `"${parent.id}" is generated; bake it first` });
     return capabilitiesOf(parent.kind).visual
       ? ok
       : invalid({ code: "INVALID_PARAMS", message: `<${parent.kind}> cannot carry a mask` });
