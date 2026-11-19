@@ -37,7 +37,8 @@ also opens in the editor.
 | `sound.mp3`, `sound.wav` | The soundtrack alone. |
 | `poster.png`, `poster.jpg` with `--still 2` | One frame, at 2 seconds. |
 
-`--codec av1` writes AV1 video in either container.
+`--codec av1` writes AV1 video in either container. With the [native codecs](#native-codecs-experimental) on,
+`--codec prores` writes ProRes to a `.mov`.
 
 ## The browser it runs in
 
@@ -177,6 +178,39 @@ instead of falling back.
 
 [How the export works](./export-architecture) explains what runs where: the page, the pieces and the sound.
 
+## Native codecs (experimental)
+
+By default Chrome decodes the footage and encodes the export. `UBERSCENE_CODECS` hands either job to UberScene's
+native codec process instead. It is a small Rust program on [craft-video](https://github.com/storytold/craft-libs),
+FilmCraft's pure-Rust codecs, with no FFmpeg.
+
+```sh
+pnpm native:build                                               # once, in the UberScene workspace
+UBERSCENE_CODECS=native-decode npx uberscene video.tsx --out video.mp4
+UBERSCENE_CODECS=native npx uberscene video.tsx --out master.mov --codec prores --quality high
+```
+
+| `UBERSCENE_CODECS` | Footage decoded by | Pictures encoded by |
+|---|---|---|
+| unset or `browser` | Chrome | Chrome |
+| `native-decode` | the native codecs | Chrome |
+| `native-encode` | Chrome | the native codecs |
+| `native` | the native codecs | the native codecs |
+
+What it is for:
+
+- Footage Chrome cannot decode on a machine without a GPU: HEVC (phone video), ProRes and DNxHR.
+- A ProRes master: `.mov` with `--codec prores`. `--quality` picks the profile: `very-low` Proxy, `low` LT, `medium`
+  422, `high` 422 HQ (the default), `very-high` 4444.
+
+How it behaves:
+
+- It is built from source for now. `UBERSCENE_CODEC_BIN` names a binary built elsewhere.
+- An asset the native decoder cannot read is decoded by Chrome, with a warning.
+- The native encoder writes H.264 and ProRes, not VP9 or AV1, and does not combine with `--copy`.
+- The sound is always mixed and encoded in the page.
+- On a CPU it is not faster than Chrome's codecs yet. Decision 0031 in the repository has the numbers.
+
 ## When a frame never finishes
 
 Each frame has a deadline: 60 seconds unless `--frame-timeout` (or `frameTimeout` from code) says otherwise. A frame
@@ -255,7 +289,7 @@ video you will publish. `onAssetError: "continue"` changes that. `result.warning
 ## Requirements
 
 Node 22.19 or later, and the Chrome the first export downloads (or `UBERSCENE_CHROMIUM`). There is no FFmpeg and no
-native module to install.
+native module to install; the optional [native codecs](#native-codecs-experimental) need Rust to build.
 
 ## Next
 

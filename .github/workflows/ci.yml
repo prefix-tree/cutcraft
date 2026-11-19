@@ -49,6 +49,22 @@ jobs:
       - run: pnpm build
       - run: pnpm check:packages
 
+  native:
+    # The native codecs (native/, UBERSCENE_CODECS): formatted, linted and tested against clips ffmpeg makes.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: native
+      - uses: ./.github/actions/ffmpeg
+      - run: cargo fmt --manifest-path native/Cargo.toml --check
+      - run: cargo clippy --release --all-targets --manifest-path native/Cargo.toml -- -D warnings
+      - run: cargo test --release --manifest-path native/Cargo.toml
+
   changeset:
     # A pull request that changes a published package says how in a changeset (.changeset/README.md). The version pull
     # request (`pnpm changeset version`, branch chore/version-packages) consumes them, so it has none by design.
@@ -92,6 +108,12 @@ jobs:
           path: ~/.cache/uberscene/browsers
           key: uberscene-chrome-${{ runner.os }}-${{ hashFiles('packages/render/src/web/chrome.ts') }}
       - run: pnpm --filter @uberscene/render exec tsx src/cli.ts browser install
+      # The native codecs, so the export tests that run with UBERSCENE_CODECS run too (they skip without the binary).
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: native
+      - run: pnpm native:build
       # The export: video, sound, stills, smart copy, the layout check, the CLI and the recipes.
       - run: pnpm --filter @uberscene/render test:browser
       # Free code on the video's clock: three.js, Motion and CSS animations in the real Player.
@@ -145,10 +167,22 @@ jobs:
       - run: pnpm --filter @uberscene/render exec tsx src/cli.ts browser install
       - run: pnpm --filter @uberscene/render bench --json bench-results.json | tee bench.md
       - run: pnpm --filter @uberscene/render bench --tabs 4 --json bench-results-4.json | tee -a bench.md
+      # The browser's codecs against the native ones (UBERSCENE_CODECS), on H.264 so both encoders write the same codec.
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: native
+      - run: pnpm native:build
+      - run: |
+          for codecs in browser native-decode native-encode native; do
+            UBERSCENE_CODECS=$codecs pnpm --filter @uberscene/render bench --only "cuts only" --codec avc --tabs 4 \
+              --json "bench-results-$codecs.json" | tee -a bench.md
+          done
       - uses: actions/upload-artifact@v4
         with:
           name: render-bench
           path: |
             packages/render/bench-results.json
             packages/render/bench-results-4.json
+            packages/render/bench-results-*.json
             bench.md

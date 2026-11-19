@@ -5,6 +5,8 @@ import type { AssetManifest } from "@uberscene/kit";
 import type { MediaResolver } from "@uberscene/player/engine";
 
 import type { FontFile } from "../fonts";
+import { BROWSER_CODECS, type CodecModes, codecBinary, usesNative } from "../native/codecs";
+import type { NativeEncoded } from "../native/wire";
 import { CHROME_MILESTONE, findChrome, wrongChrome } from "./chrome";
 import type {
   AudioRequest,
@@ -50,6 +52,8 @@ export interface BrowserEngineOptions {
   readonly disabled?: readonly string[];
   /** Seconds one frame may take before the export fails; default 60. */
   readonly frameTimeout?: number;
+  /** Who decodes and encodes: the browser (default) or the native codec process (`UBERSCENE_CODECS`). */
+  readonly codecs?: CodecModes;
   /** Messages the page warns with (an asset it cannot read, an engine that is missing). */
   readonly warn?: (message: string) => void;
   /** Progress while Chrome is being downloaded. */
@@ -101,6 +105,8 @@ export class BrowserEngine {
       executablePath: options.executablePath,
       ...(options.log ? { log: options.log } : {}),
     });
+    const codecs = options.codecs ?? BROWSER_CODECS;
+    const native = usesNative(codecs) ? { binary: codecBinary(), modes: codecs } : undefined;
     const server = await servePage(
       {
         source: options.source,
@@ -110,9 +116,11 @@ export class BrowserEngine {
         startedAt: Date.now(),
         frameTimeout: (options.frameTimeout ?? 60) * 1000,
         ...(options.disabled?.length ? { disabled: options.disabled } : {}),
+        ...(codecs.decode === "native" ? { decoder: "native" as const } : {}),
       },
       options.media,
       options.fonts ?? [],
+      native,
     );
     let browser: Browser | null = null;
     try {
@@ -140,7 +148,18 @@ export class BrowserEngine {
   async segment(request: SegmentRequest): Promise<Uint8Array> {
     return this.on(async (page) => {
       const length = await page.evaluate((r: SegmentRequest) => window.__uberscene!.segment(r), request);
+      if (typeof length !== "number") throw new Error("the export page encoded natively without being asked to");
       return read(page, length);
+    });
+  }
+
+  /** Frames [first, last) encoded by the native codec process, on the next free page: its packets, from 0. */
+  async segmentNative(request: SegmentRequest): Promise<NativeEncoded> {
+    if (!request.native) throw new Error("segmentNative wants the request's native options");
+    return this.on(async (page) => {
+      const result = await page.evaluate((r: SegmentRequest) => window.__uberscene!.segment(r), request);
+      if (typeof result === "number") throw new Error("the export page encoded in the browser instead of natively");
+      return this.server.takeEncoded(result.session);
     });
   }
 
