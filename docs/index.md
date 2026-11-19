@@ -49,6 +49,10 @@ import { withBase } from "vitepress";
 <p class="home-spec-stamp">MIT · Open source</p>
 </aside>
 </div>
+<figure class="home-sheet">
+<a :href="withBase('/examples/coffee')"><img :src="withBase('/showcase/coffee-look.webp')" width="2600" height="972" loading="eager" alt="Eight frames of the coffee film in two rows: a pour-over titled SLOW POUR, a lower third over the bloom, a callout on a held frame, an espresso machine titled FAST SHOT, a Warm LUT badge, three glasses under EVERY GLASS, A LINE OF CODE, and a red cup as a quote builds word by word; under them, a strip of the film's sound with a peak on every cue" /></a>
+<figcaption><code>uberscene look coffee.tsx --at 2.5,7.2,9.9,16,19.5,24.5,30.5,34.5 --listen all</code><span>One command draws a whole cut and its sound on one sheet: this is how an agent reviews a video without watching it. <a :href="withBase('/reference/cli#look')">look →</a></span></figcaption>
+</figure>
 </section>
 
 <div class="home-ticker" aria-hidden="true"><div class="home-ticker-track"><span>TSX in, MP4 out</span><span>45 effects and transitions</span><span>115 undoable actions</span><span>Frame-exact player</span><span>Captions from the transcript</span><span>Three.js on the clock</span><span>Diff it, review it, ship it</span><span>TSX in, MP4 out</span><span>45 effects and transitions</span><span>115 undoable actions</span><span>Frame-exact player</span><span>Captions from the transcript</span><span>Three.js on the clock</span><span>Diff it, review it, ship it</span></div></div>
