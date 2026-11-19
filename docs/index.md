@@ -1,7 +1,7 @@
 ---
 layout: page
 title: UberScene
-titleTemplate: Video editor as code
+titleTemplate: Multimedia pipeline as code
 footer: false
 sidebar: false
 aside: false
@@ -17,9 +17,9 @@ import { withBase } from "vitepress";
 <div class="home-hero-grid">
 <div class="home-hero-main">
 
-<p class="home-tags"><span>Unit 01</span><span>Multimedia pipeline as code</span></p>
+<p class="home-tags"><span>Unit 01</span><span>Make videos with code</span></p>
 
-<h1 class="home-title"><span class="home-title-line">Make videos</span> <span class="home-title-line"><span class="home-title-mark">with code.</span></span></h1>
+<h1 class="home-title"><span class="home-title-line">Multimedia pipeline</span> <span class="home-title-line"><span class="home-title-mark">as code.</span></span></h1>
 
 <p class="home-lead">Write a video as a React file. Play it in the browser, fine-tune it on a timeline, export it to MP4. Next: 3D scenes in the same file that guide generative video models. <a href="#aim">Where it's going ↓</a></p>
 
