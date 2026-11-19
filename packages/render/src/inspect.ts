@@ -221,6 +221,12 @@ export function formatTimeline(file: string, rows: TimelineRows): string {
   return `${lines.join("\n")}\n`;
 }
 
+/** The timeline's text with the knob lines after its first line, the one that names the file. */
+function withKnobs(timeline: string, knobs: readonly Knob[]): string {
+  const header = timeline.indexOf("\n") + 1;
+  return `${timeline.slice(0, header)}${formatKnobs(knobs)}${timeline.slice(header)}`;
+}
+
 /** The file's knobs as text, one line each: key, kind, value, and what it means. */
 function formatKnobs(knobs: readonly Knob[]): string {
   return knobs
@@ -295,7 +301,7 @@ export function inspect(file: string, state: ResolvedState, options: InspectOpti
     return {
       output: options.json
         ? `${JSON.stringify({ knobs, ...rows }, null, 2)}\n`
-        : formatTimeline(file, rows).replace(/\n/, `\n${formatKnobs(knobs)}`),
+        : withKnobs(formatTimeline(file, rows), knobs),
       errors: [],
     };
   const { moments, errors } = resolveMoments(state, parseMoments(options.at));
