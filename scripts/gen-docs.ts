@@ -374,7 +374,7 @@ function componentsIndex(): string {
     "A component is an ordinary function that returns the kit's own elements: titles, shapes, SVG, and a layer where something moves every frame. So it behaves like the elements it is made of.",
     "",
     "```tsx",
-    '<LowerThird id="name" start={0.5} duration={4} name="Maya Chen" role="Founder, Shed" />',
+    '<LowerThird id="name" start={0.5} duration={4} name="Maya Chen" role="Head roaster, Halvard" />',
     "```",
     "",
     "| Part | How it works |",
