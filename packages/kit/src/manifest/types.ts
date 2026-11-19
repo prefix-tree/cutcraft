@@ -5,6 +5,15 @@
  */
 export interface AssetManifest {
   readonly assets: Readonly<Record<string, AssetEntry>>;
+  /** The blocks `uberscene blocks add` copied into the project, so `blocks update` can tell an edited copy. */
+  readonly blocks?: Readonly<Record<string, InstalledBlock>>;
+}
+
+/** A block copied into the project: the CLI version it came from and the hash of the text that was copied. */
+export interface InstalledBlock {
+  readonly version: string;
+  /** SHA-256 of the copied file, hex. */
+  readonly hash: string;
 }
 
 export interface AssetEntry {
