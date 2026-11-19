@@ -53,6 +53,33 @@ import { withBase } from "vitepress";
 
 <div class="home-ticker" aria-hidden="true"><div class="home-ticker-track"><span>TSX in, MP4 out</span><span>45 effects and transitions</span><span>115 undoable actions</span><span>Frame-exact player</span><span>Captions from the transcript</span><span>Three.js on the clock</span><span>Diff it, review it, ship it</span><span>TSX in, MP4 out</span><span>45 effects and transitions</span><span>115 undoable actions</span><span>Frame-exact player</span><span>Captions from the transcript</span><span>Three.js on the clock</span><span>Diff it, review it, ship it</span></div></div>
 
+<section class="home-chapter">
+
+## One file, one coffee
+
+<p class="home-chapter-lead">Four stock shots of coffee, cut in one file: shader transitions, a speed ramp and a held frame, a LUT that comes in while you watch, titles, components, a block and a sound on every beat. <a :href="withBase('/examples/coffee')">The coffee film →</a></p>
+
+<Example src="showcase/coffee" alt="A pour-over and an espresso cut together with transitions, titles, a warm grade and a closing quote">
+
+```tsx
+<Clip id="pour" src="asset:coffee" in={10} out={14} fit="cover">
+  <SpeedKey id="pour-s0" at={0} speed={1} />
+  <SpeedKey id="pour-s1" at={1.6} speed={0.4} easing="easeInOutQuad" />
+  <Freeze id="pour-hold" at={12.4} start={4.2} duration={1.4} />
+</Clip>
+<Transition id="x2" type="iris" duration={0.9} />
+<Clip id="shot" src="asset:espresso" in={1} out={9} fit="cover">
+  <Effect id="shot-warm" type="lut" params={{ src: "asset:warm" }}>
+    <Keyframe id="shot-warm-0" param="amount" at={3.2} value={0} />
+    <Keyframe id="shot-warm-1" param="amount" at={4.4} value={1} />
+  </Effect>
+</Clip>
+```
+
+</Example>
+
+</section>
+
 <section class="home-live" aria-label="Try it">
 
 <Playground compact />

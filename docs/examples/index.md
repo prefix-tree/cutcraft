@@ -15,6 +15,7 @@ what its key parts do. For starting points by kind of video, see the [recipes](/
 | You're making | Start from |
 |---|---|
 | A product launch or promo | [Product launch](/examples/launch), the [walkthrough](/guide/writing-files), [Brand spot](/recipes/brand-spot) |
+| A montage of footage with transitions, a grade and sound | [A coffee film](/examples/coffee) |
 | An interview or podcast cut | [A talking head with a diagram](/examples/lunar-eclipse), [An interview that changes layout](/examples/hundred-videos), [Talking-head cut](/recipes/talking-head), [Multicam highlights](/recipes/highlights) |
 | A vertical short | [A talking head with a diagram](/examples/lunar-eclipse), [Kinetic type](/examples/kinetic), [Captions and key points](/examples/captions), [Vertical clip from a podcast](/recipes/vertical-podcast) |
 | An explainer with no footage | [One pixel](/examples/one-pixel), [How game lighting fakes it](/examples/game-lighting) |
@@ -39,9 +40,10 @@ what its key parts do. For starting points by kind of video, see the [recipes](/
 | Ready-made cards and frames (`TypeCard`, `QuoteCard`, `Frame`) | [A talking head with a diagram](/examples/lunar-eclipse) (`Frame`), one demo each in [Components](/reference/components/) | [Cards for a talking head](/guide/titles-and-graphics#cards-for-a-talking-head) |
 | three.js (`<Three>`) | [Product launch](/examples/launch), [Logo reveal](/examples/logo), [How game lighting fakes it](/examples/game-lighting), [One pixel](/examples/one-pixel), [Brand spot](/recipes/brand-spot) | [Free code](/guide/free-code#three-js-and-motion) |
 | Motion (`<Motion>`) | [Kinetic type](/examples/kinetic), [Data story](/examples/data), [An edit](/examples/edit) | [Free code](/guide/free-code#three-js-and-motion) |
-| Scenes from blocks, with their props set where they are placed | [From notes to a cut](/examples/notes-to-cut), [An interview that changes layout](/examples/hundred-videos) | [Blocks](/guide/blocks) |
+| Scenes from blocks, with their props set where they are placed | [From notes to a cut](/examples/notes-to-cut), [A coffee film](/examples/coffee), [An interview that changes layout](/examples/hundred-videos) | [Blocks](/guide/blocks) |
 | Any React in a `<Layer>` | [Data story](/examples/data) (counters), [Stats with handles](/recipes/stats) | [Free code](/guide/free-code) |
-| Transitions and keyframes | [An edit](/examples/edit), [Slideshow](/recipes/slideshow) | [Elements](/reference/elements/) |
+| Transitions and keyframes | [A coffee film](/examples/coffee), [An edit](/examples/edit), [Slideshow](/recipes/slideshow) | [Elements](/reference/elements/) |
+| Speed ramps, a held frame, a LUT that comes in and sound cues on each beat | [A coffee film](/examples/coffee) | [Colour and grading](/guide/colour), [Sound effects at a cut](/guide/transitions#sound-effects-at-a-cut) |
 | Every built-in effect and transition, one demo each | [Effects and transitions](/reference/effects/) | [Colour](/guide/colour), [Keying, blurs and pins](/guide/footage-tools), [Timing](/guide/time) |
 | A grade built from several effects, in order | [Colour grade](/guide/colour) | [Colour and grading](/guide/colour) |
 | Effect order changing the picture | [Grayscale then duotone, and the reverse](/guide/custom-effects) | [Free code](/guide/free-code) |
