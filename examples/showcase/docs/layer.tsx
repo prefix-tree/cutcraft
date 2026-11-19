@@ -4,7 +4,7 @@ export default function Video() {
   return (
     <Composition fps={30} width={960} height={540}>
       <Track id="main">
-        <Clip id="shot" src="asset:aurora" in={0} out={3} fit="cover" />
+        <Clip id="shot" src="asset:coffee" in={0} out={3} fit="cover" />
       </Track>
       <Track id="layers">
         <Layer id="clock" anchor="shot" duration={3}>

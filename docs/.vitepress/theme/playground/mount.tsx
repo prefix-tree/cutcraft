@@ -65,6 +65,7 @@ const colours = HighlightStyle.define([
 
 export function mountPlayground(options: PlaygroundOptions): Playground {
   const media = {
+    coffee: `${options.base}playground/coffee.webm`,
     aurora: `${options.base}playground/aurora.webm`,
     product: `${options.base}playground/product.webm`,
   };

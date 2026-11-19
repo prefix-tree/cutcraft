@@ -4,7 +4,7 @@ export default function Video() {
   return (
     <Composition fps={30} width={960} height={540}>
       <Track id="main">
-        <Clip id="shot" src="asset:spiral" in={0} out={4} fit="cover" />
+        <Clip id="shot" src="asset:coffee" in={5} out={9} fit="cover" />
       </Track>
       <Track id="text">
         <Title

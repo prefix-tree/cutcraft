@@ -14,8 +14,9 @@
   --cc-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
   /* Brutalism, as the logo: a heavy ink line and a hard shadow with no blur. In dark mode the ink is white. */
   --cc-line: 2px solid var(--cc-ink);
-  --cc-hard: 6px 6px 0 var(--cc-ink);
-  --cc-hard-sm: 4px 4px 0 var(--cc-ink);
+  /* The second shadow fills the bottom-left corner, so the shadow sits flush under the box's left edge. */
+  --cc-hard: 6px 6px 0 var(--cc-ink), 0 6px 0 var(--cc-ink);
+  --cc-hard-sm: 4px 4px 0 var(--cc-ink), 0 4px 0 var(--cc-ink);
 
   --vp-font-family-base: "Inter", system-ui, sans-serif;
   --vp-font-family-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -249,6 +250,44 @@
   margin: 0 0 -40px !important;
   font-size: 14px;
   color: var(--cc-grey);
+}
+
+/* Why: three reasons side by side. Features: a list in columns, each a name and a line. */
+.home-why-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 32px;
+}
+.vp-doc .home-why-grid h3 {
+  margin: 0 0 8px;
+  font-size: 20px;
+}
+.vp-doc .home-why-grid p {
+  margin: 0;
+  color: var(--cc-ink-2);
+}
+.vp-doc ul.home-feature-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 32px;
+  padding: 0;
+  list-style: none;
+}
+.vp-doc ul.home-feature-list li {
+  margin: 0;
+  padding: 14px 0;
+  border-top: var(--cc-line);
+  color: var(--cc-ink-2);
+}
+.vp-doc ul.home-feature-list strong {
+  display: block;
+  color: var(--cc-ink);
+}
+@media (max-width: 860px) {
+  .home-why-grid,
+  .vp-doc ul.home-feature-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 /* Chapters: one feature each, its rendered video beside the file that made it. */
@@ -837,7 +876,9 @@
 .vp-doc a.home-button:hover {
   border-color: var(--cc-ink);
   transform: translate(2px, 2px);
-  box-shadow: 2px 2px 0 var(--cc-ink);
+  box-shadow:
+    2px 2px 0 var(--cc-ink),
+    0 2px 0 var(--cc-ink);
 }
 .vp-doc a.home-button:active {
   transform: translate(4px, 4px);

@@ -6,7 +6,7 @@ export default function Video() {
   return (
     <Composition fps={30} width={960} height={540} motionBlur={{ shutterAngle: 180, samples: 8 }}>
       <Track id="main">
-        <Clip id="bg" src="asset:cells" in={0} out={3} fit="cover" />
+        <Clip id="bg" src="asset:coffee" in={10} out={13} fit="cover" />
       </Track>
       <Track id="fx" layout="free">
         <Motion

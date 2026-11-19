@@ -1,5 +1,5 @@
-// The playground's starter files. Each uses only the two clips in docs/public/playground (aurora, product), so every
-// one plays in the browser with nothing else to download.
+// The playground's starter files. Each uses only the coffee clip in docs/public/playground, so every one plays in the
+// browser with nothing else to download. aurora and product stay for links shared before the starters moved to coffee.
 
 export interface Starter {
   readonly name: string;
@@ -19,9 +19,9 @@ export default function Video() {
   return (
     <Composition fps={30} width={960} height={540}>
       <Track id="main">
-        <Clip id="open" src="asset:aurora" in={0} out={3} fit="cover" />
+        <Clip id="open" src="asset:coffee" in={0} out={3} fit="cover" />
         <Transition id="change" type="iris" duration={0.8} params={{ sides: 5, star: 0.5 }} />
-        <Clip id="product" src="asset:product" in={0} out={3} fit="cover" />
+        <Clip id="product" src="asset:coffee" in={6} out={9} fit="cover" />
       </Track>
       <Track id="text">
         <Title id="title" anchor="open" offset={0.3} duration={2.2} size={72}
@@ -31,7 +31,7 @@ export default function Video() {
       </Track>
       <Track id="over" layout="free">
         <LowerThird id="name" anchor="product" offset={0.3} duration={2.2}
-          name="Shed" role="Ships on Friday" x={-250} y={170} width={400} />
+          name="Shed Coffee" role="Roasted on Friday" x={-250} y={170} width={400} />
       </Track>
     </Composition>
   );
@@ -48,10 +48,10 @@ export default function Video() {
   return (
     <Composition fps={30} width={1280} height={720}>
       <Track id="main">
-        <Clip id="shot" src="asset:aurora" in={0} out={4} fit="cover" />
+        <Clip id="shot" src="asset:coffee" in={0} out={4} fit="cover" />
       </Track>
       <Track id="over" layout="free">
-        <LowerThird id="lt" start={0.3} duration={3.7} name="Maya Chen" role="Founder, Shed" x={-330} y={220} width={540} />
+        <LowerThird id="lt" start={0.3} duration={3.7} name="Maya Chen" role="Head roaster, Shed Coffee" x={-330} y={220} width={540} />
         <Badge id="new" start={1} duration={3} text="Live" x={480} y={-260} />
       </Track>
     </Composition>
@@ -69,9 +69,9 @@ export default function Video() {
   return (
     <Composition fps={30} width={640} height={360}>
       <Track id="main">
-        <Clip id="first" src="asset:aurora" in={0} out={2.5} fit="cover" />
+        <Clip id="first" src="asset:coffee" in={0} out={2.5} fit="cover" />
         <Transition id="change" type="iris" duration={1} params={{ sides: 5, star: 0.5 }} />
-        <Clip id="next" src="asset:product" in={0} out={2.5} fit="cover" />
+        <Clip id="next" src="asset:coffee" in={6} out={8.5} fit="cover" />
       </Track>
     </Composition>
   );
@@ -88,7 +88,7 @@ export default function Video() {
   return (
     <Composition fps={30} width={640} height={360}>
       <Track id="main">
-        <Clip id="fractal" src="asset:product" in={0} out={4} fit="cover">
+        <Clip id="pour" src="asset:coffee" in={6} out={10} fit="cover">
           <Effect id="expose" type="exposure" params={{ stops: -0.3 }} />
           <Effect id="balance" type="whiteBalance">
             <Keyframe id="k1" param="temperature" at={0} value={-0.6} />
@@ -129,7 +129,7 @@ export default function Video() {
   return (
     <Composition fps={30} width={640} height={360}>
       <Track id="main">
-        <Clip id="fractal" src="asset:product" in={0} out={4} fit="cover">
+        <Clip id="pour" src="asset:coffee" in={6} out={10} fit="cover">
           <Effect id="look" type={tone}>
             <Keyframe id="k1" param="strength" at={0} value={0} />
             <Keyframe id="k2" param="strength" at={2} value={1} />
@@ -146,6 +146,7 @@ export default function Video() {
 /** The footage the starters use, as the manifest describes it. */
 export const MANIFEST = {
   assets: {
+    coffee: { id: "coffee", kind: "video", duration: 12, fps: 30, width: 640, height: 360 },
     aurora: { id: "aurora", kind: "video", duration: 4, fps: 30, width: 640, height: 360 },
     product: { id: "product", kind: "video", duration: 4, fps: 30, width: 640, height: 360 },
   },

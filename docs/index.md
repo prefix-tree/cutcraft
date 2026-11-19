@@ -37,6 +37,58 @@ import { withBase } from "vitepress";
 
 </section>
 
+<section class="home-why">
+
+## Why UberScene
+
+<div class="home-why-grid">
+<div>
+
+### Models write code, not math
+
+An agent writes good code and bad arithmetic. So the file says what it means (this clip, then that one; a title on
+this shot) and UberScene works out every time, position and frame.
+
+</div>
+<div>
+
+### A video should be a file
+
+Not a project locked inside an app. A file you can diff, review in a pull request, generate a hundred of, and fix by
+changing one value.
+
+</div>
+<div>
+
+### One file, every editor
+
+You on a timeline, your agent in text, your app through the API: all of them edit the same TSX, and each sees what
+the others changed.
+
+</div>
+</div>
+
+</section>
+
+<section class="home-features">
+
+## Features
+
+<ul class="home-feature-list">
+<li><strong>Timeline elements</strong> Clips, tracks, transitions, titles, shapes, masks, keyframes, speed ramps, freeze frames and multicam.</li>
+<li><strong>Captions</strong> From the clip's transcript, SRT, VTT or Whisper; karaoke, word by word or typewriter.</li>
+<li><strong>Effects and transitions</strong> 45 built in, run as shaders in the preview and the export, or your own in GLSL.</li>
+<li><strong>Motion graphics</strong> Lower thirds, callouts, counters, quote cards and themes.</li>
+<li><strong>Free code</strong> Any React, CSS, SVG, canvas, three.js or Motion, on the video's clock.</li>
+<li><strong>Editing API</strong> 115 undoable actions that write each change back into the file.</li>
+<li><strong>Player</strong> A React component that plays the file in the browser, frame-exact.</li>
+<li><strong>Export</strong> MP4, WebM and stills from the command line, rendered in headless Chrome.</li>
+<li><strong>Checks</strong> Lint, contact sheets and layout checks, to review a cut without watching it.</li>
+<li><strong>Agent skill</strong> Teaches Claude Code and other agents to write, check and render videos.</li>
+</ul>
+
+</section>
+
 <section class="home-chapter">
 
 ## Edit the file from code
@@ -74,7 +126,7 @@ const { text: next } = foldToSource(text, exec.log(), exec.state());
 
 <p class="home-chapter-lead">Clips play one after another on a track. A transition between two of them overlaps them: wipe, iris, film burn, blinds and more. <a :href="withBase('/guide/transitions')">Transitions →</a></p>
 
-<Example src="previews/elements/transition" alt="A wipe from aurora footage to cells">
+<Example src="previews/elements/transition" alt="A wipe from one coffee shot to another">
 
 <<< @/../examples/showcase/docs/transition.tsx
 
@@ -88,7 +140,7 @@ const { text: next } = foldToSource(text, exec.log(), exec.state());
 
 <p class="home-chapter-lead">Text over the picture, timed to a clip, animated by letter, word or line. <a :href="withBase('/guide/titles-and-graphics')">Titles and graphics →</a></p>
 
-<Example src="previews/elements/title" alt="A title appearing word by word over a spiral">
+<Example src="previews/elements/title" alt="A title appearing word by word over a coffee shot">
 
 <<< @/../examples/showcase/docs/title.tsx
 
@@ -144,7 +196,7 @@ const { text: next } = foldToSource(text, exec.log(), exec.state());
 
 <p class="home-chapter-lead">Any component on the video's clock: three.js, Motion, SVG or canvas, frame-exact when you scrub or export. <a :href="withBase('/guide/free-code')">Free code →</a></p>
 
-<Example src="previews/elements/three" alt="A spinning cube over aurora footage">
+<Example src="previews/elements/three" alt="A spinning cube over a coffee shot">
 
 <<< @/../examples/showcase/docs/three.tsx
 

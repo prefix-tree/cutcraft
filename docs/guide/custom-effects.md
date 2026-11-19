@@ -4,7 +4,7 @@ The built-in [effects and transitions](/reference/effects/) cover the usual look
 GLSL in the file itself: declare it at the top with `effect()` or `transition()`, and pass what it returns as an
 `<Effect>` or `<Transition>` type.
 
-<Example src="previews/guide/shader-effect" alt="Fractal footage turned navy and gold by a duotone effect">
+<Example src="previews/guide/shader-effect" alt="A coffee shot turned navy and gold by a duotone effect">
 
 <<< @/../examples/showcase/guide/shader-effect.tsx
 
@@ -147,7 +147,7 @@ Overlays take the same effects: titles, shapes, SVG, stickers and any `<Layer>`,
 Write the `<Effect>` inside the element, next to its text or its free code. Here one colour-split effect runs on a
 title and, more gently, on a Motion badge, while the footage under them stays as it is:
 
-<Example src="previews/guide/title-effect" alt="A white title and an orange badge with red and blue fringes over fractal footage">
+<Example src="previews/guide/title-effect" alt="A white title and an orange badge with red and blue fringes over a coffee shot">
 
 <<< @/../examples/showcase/guide/title-effect.tsx
 

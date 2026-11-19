@@ -14,9 +14,9 @@ export default function Video() {
   return (
     <Composition fps={30} width={960} height={540}>
       <Track id="main">
-        <Clip id="aurora" src="asset:aurora" in={0} out={2} fit="cover" />
+        <Clip id="first" src="asset:coffee" in={0} out={2} fit="cover" />
         <Transition id="open" type={circle} duration={1} />
-        <Clip id="fractal" src="asset:product" in={0} out={2} fit="cover" />
+        <Clip id="pour" src="asset:coffee" in={15} out={17} fit="cover" />
       </Track>
     </Composition>
   );

@@ -8,7 +8,7 @@ export default function Video() {
   return (
     <Composition fps={30} width={960} height={540} theme={{ extends: "midnight", fonts: { heading: display, body } }}>
       <Track id="main">
-        <Clip id="bg" src="asset:aurora" in={0} out={3} fit="cover" />
+        <Clip id="bg" src="asset:coffee" in={0} out={3} fit="cover" />
       </Track>
       <Track id="text" layout="free">
         <Title id="name" start={0.2} duration={2.8} style="h1" size={120}>
