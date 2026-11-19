@@ -76,7 +76,7 @@ export function knobsOf(schema: ZodType | undefined, values: Readonly<Record<str
     return {
       key,
       ...(description ? { description } : {}),
-      kind: kindOf({ ...branch, [KIND]: field[KIND] ?? branch[KIND] }),
+      kind: field[KIND] ?? kindOf(branch),
       optional: !required.has(key),
       ...(branch.enum ? { options: branch.enum } : {}),
       ...(min !== undefined ? { min } : {}),
