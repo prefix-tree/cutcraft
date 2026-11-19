@@ -2,7 +2,7 @@
 
 # @uberscene/render
 
-Exports a [UberScene](https://cutcraft.prefixtree.xyz/) video file: MP4 or WebM, an MP3 or WAV soundtrack, or a
+Exports a [UberScene](https://uberscene.prefixtree.xyz/) video file: MP4 or WebM, an MP3 or WAV soundtrack, or a
 PNG or JPEG still. It runs the real player in headless Chrome, so the exported file matches the preview frame for
 frame. The first export downloads Chrome for Testing into `~/.cache/uberscene/browsers`; `UBERSCENE_CHROMIUM` names a
 Chrome 153+ to use instead.
@@ -43,7 +43,7 @@ you list in `imports`. `directoryResolver` finds one file per asset id in a fold
 
 ## Docs
 
-- [Exporting](https://cutcraft.prefixtree.xyz/guide/exporting): every option, the browser, smart copy, and
+- [Exporting](https://uberscene.prefixtree.xyz/guide/exporting): every option, the browser, smart copy, and
   what each format holds
 
 MIT licensed.

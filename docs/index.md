@@ -1,7 +1,7 @@
 ---
 layout: page
 title: UberScene
-titleTemplate: Video editor as code
+titleTemplate: Multimedia pipeline as code
 footer: false
 sidebar: false
 aside: false
@@ -17,11 +17,11 @@ import { withBase } from "vitepress";
 <div class="home-hero-grid">
 <div class="home-hero-main">
 
-<p class="home-tags"><span>Unit 01</span><span>Video editor as code</span></p>
+<p class="home-tags"><span>Unit 01</span><span>Make videos with code</span></p>
 
-<h1 class="home-title"><span class="home-title-line">Make videos</span> <span class="home-title-line"><span class="home-title-mark">with code.</span></span></h1>
+<h1 class="home-title"><span class="home-title-line">Multimedia pipeline</span> <span class="home-title-line"><span class="home-title-mark">as code.</span></span></h1>
 
-<p class="home-lead">Write a video as a React file. Play it in the browser, fine-tune it on a timeline, export it to MP4.</p>
+<p class="home-lead">Write a video as a React file. Play it in the browser, fine-tune it on a timeline, export it to MP4. Next: 3D scenes in the same file that guide generative video models. <a href="#aim">Where it's going ↓</a></p>
 
 <CopyCommand command="npm install uberscene @uberscene/kit react zod" />
 
@@ -45,6 +45,7 @@ import { withBase } from "vitepress";
 <div><dt>Render</dt><dd>Headless Chrome</dd></div>
 <div><dt>Runtime</dt><dd>Node ≥ 22.19</dd></div>
 <div><dt>Operator</dt><dd>You or your agent</dd></div>
+<div><dt>Next</dt><dd>3D + model guidance</dd></div>
 </dl>
 <p class="home-spec-stamp">MIT · Open source</p>
 </aside>
@@ -55,7 +56,7 @@ import { withBase } from "vitepress";
 </figure>
 </section>
 
-<div class="home-ticker" aria-hidden="true"><div class="home-ticker-track"><span>TSX in, MP4 out</span><span>45 effects and transitions</span><span>115 undoable actions</span><span>Frame-exact player</span><span>Captions from the transcript</span><span>Three.js on the clock</span><span>Diff it, review it, ship it</span><span>TSX in, MP4 out</span><span>45 effects and transitions</span><span>115 undoable actions</span><span>Frame-exact player</span><span>Captions from the transcript</span><span>Three.js on the clock</span><span>Diff it, review it, ship it</span></div></div>
+<div class="home-ticker" aria-hidden="true"><div class="home-ticker-track"><span>TSX in, MP4 out</span><span>45 effects and transitions</span><span>115 undoable actions</span><span>Frame-exact player</span><span>Captions from the transcript</span><span>Three.js on the clock</span><span>Diff it, review it, ship it</span><span>Next: 3D that guides video models</span><span>TSX in, MP4 out</span><span>45 effects and transitions</span><span>115 undoable actions</span><span>Frame-exact player</span><span>Captions from the transcript</span><span>Three.js on the clock</span><span>Diff it, review it, ship it</span><span>Next: 3D that guides video models</span></div></div>
 
 <section class="home-chapter">
 
@@ -191,6 +192,32 @@ the others changed.
 
 </section>
 
+<section class="home-aim" id="aim">
+
+## Where it's going
+
+<p class="home-aim-lead"><strong>A whole multimedia pipeline written as code.</strong> Agents work better with code than with ffmpeg flags or a mouse, so the edit, its graphics and its 3D scenes belong in one file.</p>
+
+<div class="home-aim-flow" role="img" aria-label="One video.tsx file renders the edit to MP4, and a 3D scene to guidance passes for generative video models">
+<div class="home-aim-node home-aim-source">video.tsx</div>
+<div class="home-aim-rows">
+<div class="home-aim-row"><span class="home-aim-arrow" aria-hidden="true">→</span><div class="home-aim-node"><b>The edit</b><small>clips · captions · effects</small></div><span class="home-aim-arrow" aria-hidden="true">→</span><div class="home-aim-node home-aim-out"><b>MP4</b><small>today</small></div></div>
+<div class="home-aim-row home-aim-next"><span class="home-aim-arrow" aria-hidden="true">→</span><div class="home-aim-node"><b>3D scene</b><small>three.js + camera path</small></div><span class="home-aim-arrow" aria-hidden="true">→</span><div class="home-aim-node"><b>Guidance passes</b><small>preview · depth · masks · pose · camera</small></div><span class="home-aim-arrow" aria-hidden="true">→</span><div class="home-aim-node home-aim-out"><b>Video models</b><small>next</small></div></div>
+</div>
+</div>
+
+<p class="home-aim-text">A rough 3D render is one of the most precise ways to pin down camera and layout for generative video models. So the file that cuts your video should also render what those models take, frame for frame, on the same timeline. A glTF export keeps the scene open in Blender.</p>
+
+<ol class="home-roadmap">
+<li class="is-done"><span>Done</span><strong>Editing as code</strong> Tracks, captions, audio, transitions, effects, and React, Motion and three.js layers.</li>
+<li class="is-done"><span>Done</span><strong>One file, every editor</strong> Agent edits and timeline edits write back to the same source, with undo.</li>
+<li class="is-now"><span>Now</span><strong>3D scenes</strong> A three.js scene with a camera path on the video's clock.</li>
+<li class="is-next"><span>Next</span><strong>Guidance passes</strong> Shaded preview, depth, masks, pose skeletons and the camera for every frame, at the model's frame rate.</li>
+<li class="is-next"><span>Next</span><strong>glTF export</strong> The same scene, opened in Blender.</li>
+</ol>
+
+</section>
+
 <section class="home-features">
 
 ## Features
@@ -323,7 +350,7 @@ const { text: next } = foldToSource(text, exec.log(), exec.state());
 
 ### Three.js and any React
 
-<p class="home-element-lead">Any component on the video's clock: three.js, Motion, SVG or canvas, frame-exact when you scrub or export. <a :href="withBase('/guide/free-code')">Free code →</a></p>
+<p class="home-element-lead">Any component on the video's clock: three.js, Motion, SVG or canvas, frame-exact when you scrub or export. Next: a 3D scene with a camera path that also renders guidance for video models. <a :href="withBase('/guide/free-code')">Free code →</a> · <a href="#aim">Where it's going →</a></p>
 
 <Example src="previews/elements/three" alt="A spinning cube over a coffee shot">
 

@@ -2,7 +2,7 @@
 
 # @uberscene/player
 
-Plays a [UberScene](https://cutcraft.prefixtree.xyz/) video file in the browser. Footage is decoded with
+Plays a [UberScene](https://uberscene.prefixtree.xyz/) video file in the browser. Footage is decoded with
 WebCodecs through [mediabunny](https://mediabunny.dev) and drawn on one canvas, overlays are React DOM on top of it,
 and Web Audio mixes the sound and keeps the time.
 
@@ -51,12 +51,12 @@ decoders) can be swapped out, which is how its tests run in jsdom.
 ## What it draws
 
 Every transition, effect and animation preset the kit accepts: a type the player does not draw is not offered. The few
-remaining limits are in [What renders](https://cutcraft.prefixtree.xyz/reference/rendering), and the kit's lint
+remaining limits are in [What renders](https://uberscene.prefixtree.xyz/reference/rendering), and the kit's lint
 flags them in the file.
 
 ## Docs
 
-- [Player](https://cutcraft.prefixtree.xyz/guide/player) and the [API reference](https://cutcraft.prefixtree.xyz/reference/api)
-- [Free code](https://cutcraft.prefixtree.xyz/guide/free-code)
+- [Player](https://uberscene.prefixtree.xyz/guide/player) and the [API reference](https://uberscene.prefixtree.xyz/reference/api)
+- [Free code](https://uberscene.prefixtree.xyz/guide/free-code)
 
 MIT licensed.

@@ -4,6 +4,8 @@ import type { Json, NetPatch, Patch, PatchLog } from "./types";
 export interface PatchLogOptions {
   /** Whether an id exists in the source tree the log sits on. Removing an inserted id that the source also has marks it removed instead of forgetting it. */
   readonly isSource?: (id: string) => boolean;
+  /** The parent of a source node, so removing a node also drops what the log inserted deeper inside it. */
+  readonly sourceParent?: (id: string) => string | null;
 }
 
 class Log implements PatchLog {
@@ -11,9 +13,11 @@ class Log implements PatchLog {
   private readonly reduced = new Map<string, NetPatch>();
   private v = 0;
   private readonly isSource: (id: string) => boolean;
+  private readonly sourceParent: (id: string) => string | null;
 
   constructor(options: PatchLogOptions) {
     this.isSource = options.isSource ?? (() => false);
+    this.sourceParent = options.sourceParent ?? (() => null);
   }
 
   get entries(): readonly Patch[] {
@@ -28,7 +32,7 @@ class Log implements PatchLog {
 
   append(patch: Patch): void {
     this.list.push(patch);
-    reduceInto(this.reduced, patch, this.isSource);
+    reduceInto(this.reduced, patch, this.isSource, this.sourceParent);
     this.v += 1;
   }
 
@@ -40,7 +44,7 @@ class Log implements PatchLog {
     if (mark >= this.list.length) return;
     this.list.length = Math.max(0, mark);
     this.reduced.clear();
-    for (const p of this.list) reduceInto(this.reduced, p, this.isSource);
+    for (const p of this.list) reduceInto(this.reduced, p, this.isSource, this.sourceParent);
     this.v += 1;
   }
 
@@ -72,6 +76,7 @@ export function reduceInto(
   net: Map<string, NetPatch>,
   patch: Patch,
   isSource: (id: string) => boolean = () => false,
+  sourceParent: (id: string) => string | null = () => null,
 ): void {
   switch (patch.op) {
     case "set": {
@@ -93,6 +98,7 @@ export function reduceInto(
       return;
     }
     case "remove": {
+      dropPlacedWithin(net, patch.id, isSource, sourceParent);
       const e = net.get(patch.id);
       if (e?.presence === "inserted" && !isSource(patch.id)) {
         net.delete(patch.id);
@@ -104,6 +110,7 @@ export function reduceInto(
       delete r.text;
       delete r.place;
       delete r.node;
+      delete r.within;
       return;
     }
     case "insert": {
@@ -111,14 +118,78 @@ export function reduceInto(
       const sameAsSource = e.presence === "removed" && e.node !== undefined && nodesEqual(e.node, patch.node);
       e.presence = sameAsSource ? "present" : "inserted";
       e.props.clear();
+      delete e.within;
       e.node = patch.node;
       e.place = { parent: patch.parent, after: patch.after, seq: placed++ };
+      revive(net, patch.node, patch.id, isSource);
       return;
     }
     case "bake": {
       entry(net, patch.id).bake = true;
       return;
     }
+  }
+}
+
+/**
+ * What the log put inside a node goes when the node goes: a key inserted into a clip, then the clip removed and put
+ * back as it was (the undo of a split), must not come back with it. Inserted nodes are forgotten; source nodes moved in
+ * are removed.
+ */
+function dropPlacedWithin(
+  net: Map<string, NetPatch>,
+  removed: string,
+  isSource: (id: string) => boolean,
+  sourceParent: (id: string) => string | null,
+): void {
+  /** Whether `parent` is the removed node or inside it, through the log's places and the source tree. */
+  const inside = (parent: string): boolean => {
+    const seen = new Set<string>();
+    for (let at: string | null = parent; at !== null && !seen.has(at); ) {
+      if (at === removed) return true;
+      seen.add(at);
+      const e = net.get(at);
+      at = e?.place ? e.place.parent : e?.presence === "inserted" ? null : sourceParent(at);
+    }
+    return false;
+  };
+  for (const [id, e] of [...net]) {
+    if (id === removed || !e.place || !inside(e.place.parent)) continue;
+    if (e.presence === "inserted" && !isSource(id)) net.delete(id);
+    else {
+      e.presence = "removed";
+      e.props.clear();
+      delete e.text;
+      delete e.place;
+      delete e.node;
+      delete e.within;
+    }
+  }
+}
+
+/**
+ * Descendants of an inserted node that the log had removed are back, as the insert writes them: an undo of a split
+ * removes the second half and puts the original clip back with the keyframes the split had moved out of it.
+ */
+function revive(
+  net: Map<string, NetPatch>,
+  node: CollectedNode,
+  holder: string,
+  isSource: (id: string) => boolean,
+): void {
+  for (const child of node.children) {
+    const e = net.get(child.id);
+    if (e?.presence === "removed") {
+      if (isSource(child.id)) {
+        e.presence = "present";
+        e.props.clear();
+        delete e.text;
+        delete e.place;
+        delete e.node;
+        e.within = holder;
+      } else net.delete(child.id);
+    }
+    revive(net, child, holder, isSource);
   }
 }
 

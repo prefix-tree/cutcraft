@@ -1,8 +1,10 @@
 import { capabilitiesOf } from "../../jsx/capabilities";
+import type { Easing } from "../../jsx/enums";
 import { parseTimeRef } from "../../manifest/timeref";
 import { lookupAsset } from "../../manifest/types";
 import type { Json } from "../../patches/types";
 import type { Placement as ResolvedPlacement, ResolvedState } from "../../resolve/resolve";
+import { EASING_FN } from "../../resolve/speed";
 import { carry, carryRemoval, carrySplit, carryTrim } from "../carry";
 import {
   define,
@@ -337,40 +339,157 @@ function suffixId(id: string, suffix: string): string {
   return `${id}_${suffix}`;
 }
 
-function splitChildren(
-  children: readonly NodeSpec[],
-  atRel: number,
-  newId: string,
-): { left: NodeSpec[]; right: NodeSpec[] } {
-  const left: NodeSpec[] = [];
+interface SplitPlan {
+  /** The children the second half starts with: what falls at or after the cut, moved to its time, and a key at 0. */
+  readonly right: NodeSpec[];
+  /** Children of the first half, at any depth, that move to the second. */
+  readonly removes: string[];
+  /** Keys the first half gains at the cut, so it ends on the value the clip had there. */
+  readonly inserts: { readonly parent: string; readonly after: string | null; readonly spec: NodeSpec }[];
+}
+
+/** What a key animates: one property, one effect param, or the clip's speed. Keys of one channel make one curve. */
+function channelOf(child: NodeSpec): string | undefined {
+  if (child.kind === "speedKey") return "speed";
+  if (child.kind !== "keyframe") return undefined;
+  if (typeof child.props.param === "string") return `param:${child.props.param}`;
+  if (typeof child.props.property === "string") return `property:${child.props.property}`;
+  return undefined;
+}
+
+interface CurveKey {
+  readonly at: number;
+  readonly value: unknown;
+  readonly easing: string | undefined;
+}
+
+/**
+ * The value of a curve at `rel`, as the player draws it (packages/player/src/model/keyframes.ts and `rampSpeed`):
+ * held before the first key and after the last, and between two keys eased by the key it leaves. Numbers and lists
+ * of numbers of one length move; anything else steps.
+ */
+function curveValue(keys: readonly CurveKey[], rel: number): unknown {
+  const first = keys[0]!;
+  const last = keys[keys.length - 1]!;
+  if (rel <= first.at) return first.value;
+  if (rel >= last.at) return last.value;
+  for (let i = 0; i < keys.length - 1; i++) {
+    const a = keys[i]!;
+    const b = keys[i + 1]!;
+    if (rel < a.at || rel >= b.at) continue;
+    const span = b.at - a.at;
+    const fn = EASING_FN[a.easing as Easing] ?? EASING_FN.linear;
+    const u = span <= 0 ? 1 : fn(Math.min(1, Math.max(0, (rel - a.at) / span)));
+    if (typeof a.value === "number" && typeof b.value === "number") return round(a.value + (b.value - a.value) * u);
+    if (Array.isArray(a.value) && Array.isArray(b.value) && a.value.length === b.value.length) {
+      const to = b.value as unknown[];
+      if (a.value.every((v) => typeof v === "number") && to.every((v) => typeof v === "number"))
+        return (a.value as number[]).map((v, j) => round(v + ((to[j] as number) - v) * u));
+    }
+    return a.value;
+  }
+  return last.value;
+}
+
+const round = (v: number): number => Math.round(v * 1e6) / 1e6;
+
+/**
+ * Splits a clip's children at `atRel` seconds into it. Keys and holds before the cut stay; those at or after it move
+ * to the second half, shifted to its time; anything else (an effect, a mask) is on both halves, and its own keys are
+ * split the same way. Where a curve crosses the cut, the first half gains a key at the cut and the second a key at 0,
+ * both with the value the clip had there, so neither half jumps or holds a value it never had. Between those keys the
+ * second half eases as the curve did where it was cut.
+ */
+function splitChildren(parent: string, children: readonly NodeSpec[], atRel: number, taken: Set<string>): SplitPlan {
   const right: NodeSpec[] = [];
+  const removes: string[] = [];
+  const inserts: SplitPlan["inserts"][number][] = [];
+  const unique = (id: string): string => {
+    let candidate = id;
+    for (let n = 2; taken.has(candidate); n++) candidate = `${id}${n}`;
+    taken.add(candidate);
+    return candidate;
+  };
+  const renamed = (child: NodeSpec, props: Record<string, Json | undefined> = {}): NodeSpec => {
+    const id = unique(suffixId(child.id, "b"));
+    return { ...child, id, props: { ...child.props, ...props, id } };
+  };
   for (const child of children) {
-    const dup = (): NodeSpec => ({
-      ...child,
-      id: suffixId(child.id, "b"),
-      props: { ...child.props, id: suffixId(child.id, "b") },
-    });
     switch (child.kind) {
       case "keyframe":
       case "speedKey": {
         const at = Number(child.props.at ?? 0);
-        if (at < atRel) left.push(child);
-        else right.push({ ...dup(), props: { ...dup().props, at: at - atRel } });
+        if (at < atRel) break;
+        removes.push(child.id);
+        right.push(renamed(child, { at: round(at - atRel) }));
         break;
       }
       case "freeze": {
         const start = Number(child.props.start ?? 0);
-        if (start < atRel) left.push(child);
-        else right.push({ ...dup(), props: { ...dup().props, start: start - atRel } });
+        if (start < atRel) break;
+        removes.push(child.id);
+        right.push(renamed(child, { start: round(start - atRel) }));
         break;
       }
-      default:
-        left.push(child);
-        right.push(dup());
+      default: {
+        const inner = splitChildren(child.id, child.children ?? [], atRel, taken);
+        removes.push(...inner.removes);
+        inserts.push(...inner.inserts);
+        right.push({ ...renamed(child), children: inner.right });
+      }
     }
   }
-  void newId;
-  return { left, right };
+  // The keys of each curve, in time order, with where its key at the cut goes.
+  const channels = new Map<string, NodeSpec[]>();
+  for (const child of children) {
+    const channel = channelOf(child);
+    if (channel) channels.set(channel, [...(channels.get(channel) ?? []), child]);
+  }
+  for (const nodes of channels.values()) {
+    const sorted = [...nodes].sort((a, b) => Number(a.props.at ?? 0) - Number(b.props.at ?? 0));
+    const keys: CurveKey[] = sorted.map((k) => ({
+      at: Number(k.props.at ?? 0),
+      value: k.kind === "speedKey" ? Number(k.props.speed ?? 1) : k.props.value,
+      easing: k.props.easing as string | undefined,
+    }));
+    const before = sorted.filter((k) => Number(k.props.at ?? 0) < atRel);
+    const after = sorted.filter((k) => Number(k.props.at ?? 0) >= atRel);
+    const value = curveValue(keys, atRel) as Json;
+    const valueProp = sorted[0]!.kind === "speedKey" ? "speed" : "value";
+    const { easing: _easing, ...shape } = sorted[0]!.props;
+    const reference = (after[0] ?? before[before.length - 1])!;
+    // The first half lost keys to the second: it ends on the value at the cut, where it used to pass through it.
+    if (after.length > 0) {
+      const id = unique(`${reference.id}_cut`);
+      const last = before[before.length - 1];
+      inserts.push({
+        parent,
+        after: last ? last.id : null,
+        spec: { id, kind: sorted[0]!.kind, props: { ...shape, id, at: round(atRel), [valueProp]: value } },
+      });
+    }
+    // The second half starts mid-curve: a key at 0 with the value there, easing on as the cut segment did.
+    const atCut = after.some((k) => Number(k.props.at ?? 0) === atRel);
+    if (before.length > 0 && !atCut) {
+      const id = unique(suffixId(`${reference.id}_cut`, "b"));
+      const leaving = before[before.length - 1]!.props.easing;
+      const firstMoved = after[0] ? right.findIndex((r) => r.id.startsWith(`${after[0]!.id}_b`)) : -1;
+      const spec: NodeSpec = {
+        id,
+        kind: sorted[0]!.kind,
+        props: {
+          ...shape,
+          id,
+          at: 0,
+          [valueProp]: value,
+          ...(after.length > 0 && leaving !== undefined ? { easing: leaving } : {}),
+        },
+      };
+      if (firstMoved >= 0) right.splice(firstMoved, 0, spec);
+      else right.push(spec);
+    }
+  }
+  return { right, removes, inserts };
 }
 
 /** Replace one element by two at a timeline time strictly inside it. */
@@ -399,7 +518,8 @@ define(carry(
       const spec = nodeSpecOf(node);
       const atRel = a.params.at - item.start;
       const layout = layoutOf(state, item);
-      const { left, right } = splitChildren(spec.children ?? [], atRel, a.params.newId);
+      const taken = new Set<string>([...state.tree.byId.keys(), a.params.newId]);
+      const { right, removes, inserts } = splitChildren(item.id, spec.children ?? [], atRel, taken);
       const rightProps: Record<string, Json | undefined> = { ...spec.props, id: a.params.newId };
       const leftProps: Record<string, Json | undefined> = {};
       if (item.source) {
@@ -416,8 +536,8 @@ define(carry(
       if (layout === "free") rightProps.start = a.params.at;
       if (layout === "anchored") rightProps.offset = Number(rawProp(state, item.id, "offset") ?? 0) + atRel;
       setProps(log, item.id, leftProps);
-      for (const child of spec.children ?? [])
-        if (!left.some((l) => l.id === child.id)) log.append({ op: "remove", id: child.id });
+      for (const id of removes) log.append({ op: "remove", id });
+      for (const insert of inserts) insertNode(log, insert.parent, insert.after, insert.spec);
       const cleaned = Object.fromEntries(Object.entries(rightProps).filter(([, v]) => v !== undefined));
       insertNode(log, node.parent as string, item.id, { ...spec, id: a.params.newId, props: cleaned, children: right });
     },

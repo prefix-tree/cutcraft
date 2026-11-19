@@ -23,8 +23,9 @@ export default defineConfig({
   // The decision records' index is the folder's README, so it reads on GitHub too.
   rewrites: { "decisions/README.md": "decisions/index.md" },
   lastUpdated: true,
-  // Code in one dark style in both colour schemes, so it reads as the screen it describes and joins the videos above it.
-  markdown: { theme: { light: "vitesse-dark", dark: "vitesse-dark" } },
+  // GitHub's code colours: light code on a light docs page, dark in the dark. The landing page keeps its code on dark
+  // panels with the dark colours (theme/craft.css).
+  markdown: { theme: { light: "github-light", dark: "github-dark" } },
   head: [
     ["link", { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" }],
     ["link", { rel: "preconnect", href: "https://fonts.gstatic.com", crossorigin: "" }],
@@ -47,7 +48,7 @@ export default defineConfig({
     optimizeDeps: { esbuildOptions: { define: { "process.env.BABEL_TYPES_8_BREAKING": "false" } } },
   },
   themeConfig: {
-    logo: { light: "/logo.svg", dark: "/logo-dark.svg" },
+    logo: "/logo.svg",
     // The top bar names three ways in, as short as a poster (on every page, the landing one included); the sidebar is the map of the docs.
     nav: [
       { text: "Docs", link: "/guide/introduction", activeMatch: "^/(guide|decisions|reference)/" },

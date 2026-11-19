@@ -2,7 +2,7 @@
 
 # uberscene
 
-The [UberScene](https://cutcraft.prefixtree.xyz/) command line. It exports a TSX video file to video, audio or
+The [UberScene](https://uberscene.prefixtree.xyz/) command line. It exports a TSX video file to video, audio or
 a still image, writes its captions as subtitles, checks its layout, and adds media to the manifest. The export runs the real player in headless Chrome,
 which the first export downloads (`npx uberscene browser install` does it ahead of time).
 
@@ -36,7 +36,7 @@ the file's folder, beside the manifest or in `media/` beside it, one per asset i
 | `--font <spec>` | A font beyond the ones the file declares, for this export: `Name=file.ttf`. |
 | `--json` | Print the layout check as JSON. It exits with code 3 when it finds issues. |
 
-`npx uberscene --help` prints them all, and [Exporting](https://cutcraft.prefixtree.xyz/guide/exporting)
+`npx uberscene --help` prints them all, and [Exporting](https://uberscene.prefixtree.xyz/guide/exporting)
 explains each one. To export from your own code, use [`@uberscene/render`](https://www.npmjs.com/package/@uberscene/render).
 
 Needs Node 22.19 or later. MIT licensed.
