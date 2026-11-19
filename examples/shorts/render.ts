@@ -19,6 +19,7 @@ const FILES: Record<string, { poster: number; bitrate: number; sound?: boolean }
   "one-pixel": { poster: 2.6, bitrate: 900_000, sound: true },
   "hundred-videos": { poster: 21, bitrate: 1_600_000, sound: true },
   "snake-heart": { poster: 19.5, bitrate: 1_200_000, sound: true },
+  "notes-to-cut": { poster: 25, bitrate: 900_000, sound: true },
   // The before and after card plays the short rendered just above it, so it comes after it.
   "cards/hundred-videos-compare": { poster: 21, bitrate: 1_400_000, sound: true },
 };
