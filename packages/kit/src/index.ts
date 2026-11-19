@@ -29,6 +29,7 @@ export {
 export { type ColourFunction, fusedColourSource } from "./effects/shapes";
 export * from "./inspect/index";
 export * from "./jsx/animate";
+export * from "./jsx/block-meta";
 export * from "./jsx/capabilities";
 export * from "./jsx/curves";
 export * from "./jsx/define";

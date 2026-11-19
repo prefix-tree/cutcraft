@@ -26,14 +26,14 @@ const errorsOf = (state: ResolvedState): string[] =>
 function expectWrittenBack(file: CorpusFile, exec: ReturnType<typeof executorFor>, clean: boolean): void {
   const folded = foldToSource(file.text, exec.log(), exec.state());
   expect(folded.skipped).toEqual([]);
-  const reloaded = resolveText(folded.text, file.manifest);
+  const reloaded = resolveText(folded.text, file.manifest, file.files);
   expect(errorsOf(reloaded)).toEqual(errorsOf(exec.state()));
   expect(serialize(reloaded)).toEqual(serialize(exec.state()));
   if (clean) expect(lint(folded.text, { manifest: file.manifest }).filter((d) => d.severity === "error")).toEqual([]);
 }
 
 describe.each(CORPUS.map((file) => [file.name, file] as const))("%s", (name, file) => {
-  const start = resolveText(file.text, file.manifest);
+  const start = resolveText(file.text, file.manifest, file.files);
   const applies = (r: (typeof REFUSALS)[number]): boolean => r.on === undefined || r.on.includes(name);
   /** Edits this file refuses instead of taking: they are checked as refusals below. */
   const replaced = new Set(REFUSALS.filter(applies).flatMap((r) => (r.replaces ? [r.replaces] : [])));
@@ -95,9 +95,9 @@ describe("the refusals", () => {
     for (const r of REFUSALS) {
       if (r.replaces) expect(names.has(r.replaces)).toBe(true);
       for (const f of r.on ?? []) {
-        const file = CORPUS.find((c) => c.name === f);
+        const file = CORPUS.find((c) => c.name === f) as CorpusFile;
         expect(file).toBeDefined();
-        expect(r.pick(resolveText((file as CorpusFile).text, (file as CorpusFile).manifest))).toBeDefined();
+        expect(r.pick(resolveText(file.text, file.manifest, file.files))).toBeDefined();
       }
     }
   });

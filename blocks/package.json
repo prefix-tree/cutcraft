@@ -1,0 +1,23 @@
+{
+  "name": "@uberscene/blocks",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Scene-sized pieces of motion design that `uberscene blocks` lists and copies into a project: each a component with its props schema, defaults and meta, and a demo.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@uberscene/kit": "workspace:*",
+    "react": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}
