@@ -14,6 +14,35 @@ The point of the design: you never count seconds. A cut names a transcript word 
 (`in="shot:1"`), a title names the word it belongs to, and UberScene works out the frames through every trim and speed
 change.
 
+## What you can do
+
+Reach for an element or a prop before free code. Each row names what does the job; its props are in the
+references.
+
+| To | Use |
+|---|---|
+| Cut on meaning | `in`/`out` as `word:12`, `word:23.end`, `shot:1`, `silence:2`; `at="marker:intro"` with `<Marker>`; `<Gap duration>` for a hole |
+| Change speed | `speed`, `reverse`; `<SpeedKey at speed easing>` children ramp it; `<Freeze at start duration>` holds a frame. Sound follows |
+| Several cameras | `<Multicam sync>` with `<Angle src offset>` per camera and `<Cut at angle>` to switch |
+| Reuse a sequence | `<Nested>`: a sequence written once as a component and placed like a clip |
+| Place and frame | `fit` (`contain`, `cover`, `stretch`, `none`); `transform` (position, scale, rotation, opacity, crop, `borderRadius`); `frame={{ focus }}` reframes footage to the composition's shape, a landscape interview into a vertical short |
+| Mix layers | `blend` (`multiply`, `screen`, `overlay`…) and `blendOpacity` |
+| Show part of a clip | `<Mask>`: a rect, ellipse, polygon or drawn path, with `feather`, `expansion`, `inverted`; keyframe it to follow something |
+| Animate anything | `<Keyframe property at value easing>` on any transform, effect param (`param`), colour or volume |
+| Join clips | `<Transition type duration>` between two clips of a track: `crossfade`, `dipToBlack`, `dipToWhite`, `wipe`, `slide`, `push`, `iris`, `clockWipe`, `blinds`, `filmBurn`, `pixelDissolve`, `zoom`. With `on="pip" edge="in"` it brings one element in, or takes it out with `edge="out"` |
+| Correct and grade | `<Effect type>`: `exposure`, `whiteBalance`, `brightness`, `contrast`, `saturation`, `vibrance`, `hue`, `levels`, `curves`, `shadowsHighlights`, `lut` (a `.cube` file added with `uberscene add`) |
+| Give a look | `grayscale`, `sepia`, `invert`, `duotone`, `vignette`, `grain`, `lightLeak`, `chromaticAberration`, `halftone`, `pixelate`, `scanlines`, `fractalNoise` |
+| Fix footage | `colorKey` (green screen), `regionBlur` (hide a face or a plate), `cornerPin` (put a picture on a screen), `blur`, `zoomBlur` |
+| Style text and graphics | `glow`, `outline`, `shadow`, `longShadow`, `bevel` on a title, shape or layer |
+| Affect everything below | `<Adjustment>` with `<Effect>` children, for its time, on every track beneath it |
+| Words on screen | `<Title>` with a theme `style` and `animation={{ preset }}`: `typewriter`, `fade`, `slide-up`, `slide-down`, `slide-left`, `slide-right`, `scale`, `word-by-word` |
+| Captions | `<Captions>` from the transcript, or `<Caption>` cues; `animation`: `word-highlight`, `word-by-word`, `karaoke`, `typewriter`; `style.highlightBox` boxes the word being said; `x`, `y`, `width` place them |
+| Shapes and images | `<Shape>` (rectangle, circle, ellipse, triangle, arrow and more), `<Svg>` (inline markup or an SVG asset), `<Sticker>` (a PNG, SVG, WebP or GIF asset) |
+| Ready-made graphics | `LowerThird`, `Callout`, `Badge`, `Counter`, `ProgressBar`, `Arrow`, `Highlight`, `Background`, `TypeCard`, `QuoteCard`, `Frame` |
+| Sound | `<Audio>` for music and voice; `volume`, `fade={{ in, out }}`, `automation` for volume and pan over time, `duck={{ under, to }}` under a track or a role (`dialogue`) |
+| Anything else | `<Layer>` (any React), `<Three>` (three.js), `<Motion>` (Motion), all on the video's clock; see "Free code" under Look and graphics |
+| Variants | `schema` and `defaults`, then `--props '{"product":"Pixel"}'` at render |
+
 ## The loop
 
 Work in this order, and check after each stage.
@@ -154,7 +183,9 @@ export default function Video({ product, who }: z.infer<typeof schema>) {
 6. **Overlays anchor.** `anchor="hook" at="word:12"` starts an element where clip `hook` says word 12;
    `anchor="hook" offset={0.4}` starts it 0.4 s into `hook`. Anchored elements follow their clip when the edit
    changes.
-7. **Transitions sit between two clips** of the same track, and the clips overlap by its duration.
+7. **Transitions sit between two clips** of the same track, and the clips overlap by its duration. To bring one
+   element in or take it out with nothing on the other side, give the transition `on="<id>"` and `edge="in"` or
+   `"out"`; it then plays inside that element's own time.
 8. **Captions follow the clips.** `<Captions src="asset:talk">` with no children makes cues from the words the
    timeline plays (`maxChars`, `maxDuration`, `maxGap` tune them). Or write
    `<Caption start="word:N" end="word:M.end" text="…">` cues. At most one `<Captions>`.
@@ -188,15 +219,18 @@ Give the video one look and say it once.
   `note`. Own props override a preset. `<Shape style="card">`, `<Captions style="boxed">`.
 - **Leave entrances to the motion style.** Write `enter` or `exit` only where one element should differ.
 - **Components** for the common graphics: `LowerThird`, `Callout`, `Badge`, `Counter`, `ProgressBar`, `Arrow`,
-  `Highlight`, `Background`, imported from `@uberscene/kit`. They take the timing props any element takes.
+  `Highlight`, `Background`, `TypeCard`, `QuoteCard` and `Frame`, imported from `@uberscene/kit`. They take the timing props any element takes.
   Positions are pixels from the frame's centre, with defaults set for 1920x1080. See
   [references/components.md](references/components.md).
 - **Colour and effects** are `<Effect type params>` children of a clip, a title, a shape, a layer or an
   `<Adjustment>` (which affects everything beneath it for its time). They run in the order written: correct, then
   shape the tones, then the look. See [references/effects.md](references/effects.md).
 - **Free code where nothing fits.** A `<Layer>` holds any React, CSS, canvas or WebGL. Inside it, `useLayer()` gives
-  `elapsed`, `t` (0 to 1), `remaining`, `duration`, `time` and `fps`. Draw everything as a function of that time
-  (`interpolate()`, `spring()` and `random(seed)` from `@uberscene/kit` help), never from timers or `Date`. Give the
+  `elapsed`, `t` (0 to 1), `remaining`, `duration`, `time` and `fps`. Draw everything as a function of that time,
+  never from timers or `Date`. The kit's helpers are pure functions: `interpolate()` and `spring()` shape a value,
+  `progress(clock, { after, over })` gives 0 to 1 for one item of many (stagger them in a loop), `random("star", i)`
+  is the same number every frame, `stepAt(times, t)` says which step a moment has reached, and `grid({ columns,
+  rows, width, height })` gives the box of every cell of a board. Give the
   layer one component child with literal or schema props: those props are the editor's handles. `<Motion>` and
   `<Three>` put Motion and three.js on the video's clock.
 
@@ -210,7 +244,9 @@ Give the video one look and say it once.
     <Count to={1200} />
   </Layer>
   ```
-- **Backgrounds go on the lowest track**, beneath the footage.
+- **Backgrounds go on the lowest track**, beneath the footage. A layer that other things sit on but that is drawn
+  above footage (a scrim under a title, the wall of a game) takes `ground`: `<Layer id="scrim" ground>`. The layout
+  check then treats it as a background.
 
 What each element and prop actually draws, and the few it does not:
 [references/rendering.md](references/rendering.md).

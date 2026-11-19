@@ -5,7 +5,14 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { test } from "node:test";
 
-import { collectModule, resolve } from "../packages/kit/src/index";
+import {
+  COMPONENTS,
+  collectModule,
+  ELEMENTS,
+  resolve,
+  TRANSITION_TYPES,
+  VIDEO_EFFECT_TYPES,
+} from "../packages/kit/src/index";
 import { loadModule } from "../packages/kit/src/source/index-public";
 
 const root = join(import.meta.dirname, "..");
@@ -89,6 +96,17 @@ test("the skill names no API UberScene has removed", () => {
     for (const gone of ["<Graphic", 'src="icon:', "captureSheet", "<ColorGrade", "--engine"])
       assert.ok(!md.includes(gone), `${file} mentions ${gone}`);
   }
+});
+
+test("SKILL.md names every element, effect, transition and component the kit has", () => {
+  // An agent only reaches for a tool it has heard of. Adding one to the kit without a word in the skill fails here.
+  const missing = [
+    ...Object.keys(ELEMENTS).filter((name) => !text.includes(`<${name}`)),
+    ...[...VIDEO_EFFECT_TYPES, ...TRANSITION_TYPES, ...Object.keys(COMPONENTS)].filter(
+      (name) => !text.includes(`\`${name}\``),
+    ),
+  ];
+  assert.deepEqual(missing, [], `SKILL.md does not name: ${missing.join(", ")}`);
 });
 
 test("the marketplace lists the plugin, and both name it the same", () => {
