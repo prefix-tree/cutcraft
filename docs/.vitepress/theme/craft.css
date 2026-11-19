@@ -1906,3 +1906,148 @@ html:has(.VPContent.has-sidebar) .DocSearch-Button {
   color: #ffffff;
   font-weight: 400;
 }
+
+/* Where it's going: the aim, one file feeding the edit and the 3D guidance, then a roadmap on a ruled plate. */
+.vp-doc p.home-aim-lead {
+  max-width: 820px;
+  font-size: 22px;
+  line-height: 1.4;
+  color: var(--cc-ink-2);
+}
+.home-aim-lead strong {
+  color: var(--cc-ink);
+}
+.vp-doc p.home-aim-text {
+  max-width: 820px;
+  color: var(--cc-ink-2);
+}
+.home-aim-flow {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+  margin: 32px 6px 32px 0;
+  padding: 24px;
+  border: var(--cc-line-heavy);
+  box-shadow: var(--cc-hard);
+  background: var(--cc-paper);
+}
+.home-aim-rows {
+  display: grid;
+  gap: 14px;
+}
+.home-aim-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.home-aim-node {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 14px;
+  border: var(--cc-line);
+  background: var(--cc-paper-2);
+  font-family: var(--cc-display);
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1;
+  text-transform: uppercase;
+  color: var(--cc-ink);
+}
+.home-aim-node small {
+  font-family: var(--cc-mono);
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: none;
+  color: var(--cc-grey);
+}
+.home-aim-source {
+  padding: 18px 20px;
+  background: var(--cc-ink);
+  color: var(--cc-accent);
+  font-size: 30px;
+}
+.home-aim-out {
+  background: var(--cc-accent);
+  color: #121212;
+}
+.home-aim-out small {
+  color: #121212;
+}
+.home-aim-next .home-aim-node:not(.home-aim-out) {
+  border-style: dashed;
+}
+.home-aim-arrow {
+  font-family: var(--cc-mono);
+  font-size: 20px;
+  color: var(--cc-ink);
+}
+.vp-doc ol.home-roadmap {
+  margin: 0 6px 0 0;
+  padding: 0;
+  list-style: none;
+  border: var(--cc-line-heavy);
+  box-shadow: var(--cc-hard);
+  background: var(--cc-paper);
+}
+.vp-doc ol.home-roadmap li {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr);
+  column-gap: 18px;
+  margin: 0;
+  padding: 16px 22px;
+  color: var(--cc-ink-2);
+}
+.vp-doc ol.home-roadmap li + li {
+  border-top: var(--cc-line);
+}
+.home-roadmap li > span {
+  grid-row: span 2;
+  align-self: start;
+  padding: 4px 0 2px;
+  border: var(--cc-line);
+  font-family: var(--cc-mono);
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  text-transform: uppercase;
+}
+.home-roadmap li.is-done > span {
+  background: var(--cc-ink);
+  color: var(--cc-paper);
+}
+.home-roadmap li.is-now > span {
+  background: var(--cc-accent);
+  border-color: var(--cc-accent);
+  color: #121212;
+}
+.home-roadmap li.is-next > span {
+  border-style: dashed;
+  color: var(--cc-ink);
+}
+.vp-doc ol.home-roadmap strong {
+  font-family: var(--cc-display);
+  font-size: 25px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--cc-ink);
+}
+@media (max-width: 860px) {
+  .home-aim-flow {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .home-aim-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  /* Stacked, the two branches would read as one chain; a rule splits them. */
+  .home-aim-row + .home-aim-row {
+    padding-top: 14px;
+    border-top: var(--cc-line);
+  }
+  .home-aim-arrow {
+    transform: rotate(90deg);
+    align-self: center;
+  }
+}
