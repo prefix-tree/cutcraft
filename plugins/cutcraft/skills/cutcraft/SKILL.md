@@ -238,7 +238,8 @@ Give the video one look and say it once.
   is the same number every frame, `stepAt(times, t)` says which step a moment has reached, and `grid({ columns,
   rows, width, height })` gives the box of every cell of a board. Give the
   layer one component child with literal or schema props: those props are the editor's handles. `<Motion>` and
-  `<Three>` put Motion and three.js on the video's clock.
+  `<Three>` put Motion and three.js on the video's clock; `useSeekable((el) => timeline)` does the same for any
+  library that can seek (a paused GSAP timeline as it is; Anime.js and Lottie in a two-line wrapper).
 
   ```tsx
   function Count({ to }: { to: number }) {

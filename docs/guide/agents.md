@@ -13,7 +13,17 @@ of your coding agent, so you can ask for a video in plain words and get a file, 
 /plugin install cutcraft@prefix-tree
 ```
 
-**In another agent**, or in Claude Code without the plugin, copy the skill's folder,
+**From the command line**, in your project, write the skill that comes with the installed CLI:
+
+```sh
+npx cutcraft skills install                          # into .claude/skills/cutcraft
+npx cutcraft skills install --dir .agents/skills/cutcraft
+```
+
+This skill always matches the CLI you have, so it never teaches a command your version lacks. Run it again after
+upgrading CutCraft: it replaces the folder it wrote, and keeps a folder you have edited unless you add `--force`.
+
+**In another agent**, or in Claude Code without the plugin, you can also copy the skill's folder,
 [`plugins/cutcraft/skills/cutcraft`](https://github.com/prefix-tree/cutcraft/tree/main/plugins/cutcraft/skills/cutcraft),
 to where the agent reads skills: for Claude Code that is `.claude/skills/cutcraft/` in a project, or
 `~/.claude/skills/cutcraft/` for all of them. It follows the open [Agent Skills](https://agentskills.io) format: one

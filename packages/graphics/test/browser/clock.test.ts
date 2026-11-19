@@ -113,6 +113,13 @@ describe("free code on the video's clock", () => {
     expect(await opacity(5, "#scripted-box")).toBeCloseTo(0.5, 1);
   });
 
+  it("seeks an Anime.js timeline through useSeekable, both ways", async () => {
+    expect(await opacity(1, "#anime-box")).toBeCloseTo(0.5, 1);
+    expect(await opacity(0.5, "#anime-box")).toBeCloseTo(0.25, 1);
+    expect(await opacity(3, "#anime-box")).toBe(1);
+    expect(await opacity(1, "#anime-box")).toBeCloseTo(0.5, 1);
+  });
+
   it("holds CSS animations at the layer's time, both ways", async () => {
     expect((await at(1)).cssOpacity).toBeCloseTo(0.5, 1);
     expect((await at(0.5)).cssOpacity).toBeCloseTo(0.25, 1);

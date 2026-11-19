@@ -43,6 +43,7 @@ export type { Transform } from "./jsx/schemas/common";
 export type { ThreeFrameArgs, ThreeSetupArgs, ThreeSetupFunction } from "./jsx/schemas/overlays";
 export { defaultTransitionParams, TRANSITION_PARAMS } from "./jsx/schemas/transition";
 export * from "./jsx/shaders";
+export * from "./jsx/use-seekable";
 export * from "./jsx/use-t";
 export * from "./manifest/cube";
 export * from "./manifest/timeref";

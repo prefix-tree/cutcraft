@@ -279,6 +279,9 @@ importers:
       '@vitest/coverage-v8':
         specifier: 'catalog:'
         version: 5.0.5(vitest@5.0.5)
+      animejs:
+        specifier: 4.4.1
+        version: 4.4.1
       jsdom:
         specifier: 'catalog:'
         version: 30.1.3(@noble/hashes@1.8.0)
@@ -2139,6 +2142,9 @@ packages:
   algoliasearch@5.60.0:
     resolution: {integrity: sha512-LKEMSE7DDZ67w/2dp0wIROAMIejT6I+UESIbu+IjPVKHkgxzag08xU3zVvvJhWGWL2T3B+e3Ai8fqYG5UHKTGA==}
     engines: {node: '>= 14.0.0'}
+
+  animejs@4.4.1:
+    resolution: {integrity: sha512-XimhJw4vPb6tAd6Zaoa6BaspJ8UteQMKvL7Pvrt6MW/6u2UvJs0TB/LLqR1sigaiYvpVPC3Tokr9emcCMhWFhw==}
 
   ansi-escapes@7.3.0:
     resolution: {integrity: sha512-BvU8nYgGQBxcmMuEeUEmNTvrMVjJNSH7RgW24vXexN4Ven6qCvy4TntnvlnwnMLTVlcRQQdbRY8NKnaIoeWDNg==}
@@ -4912,6 +4918,8 @@ snapshots:
       '@algolia/requester-browser-xhr': 5.60.0
       '@algolia/requester-fetch': 5.60.0
       '@algolia/requester-node-http': 5.60.0
+
+  animejs@4.4.1: {}
 
   ansi-escapes@7.3.0:
     dependencies:
