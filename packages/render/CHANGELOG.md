@@ -1,5 +1,28 @@
 # @uberscene/render
 
+## 0.5.0
+
+### Minor Changes
+
+- 933fa0c: `<Layer ground>` marks a layer as a ground that other things sit on (a wall behind a game, a scrim under a title), so the layout check, `uberscene where` and `look --zones` treat it like a background. `<Three>` and `<Motion>` take it too. `uberscene inspect` prints `ground` on its line. This replaces the `data-ground` attribute on an element inside the layer, which is no longer read: a file that used it moves the marker to the `<Layer>`.
+- 97d54f4: A video file may import modules of its own: `import { ChatReveal } from "./blocks/chat-reveal"`. Each is a `.ts` or `.tsx` file inside the project (the folder of the nearest `uberscene.json`), compiled and run like the file, once. `gatherLocalFiles(source, read)` collects their texts and `loadModule(source, { files })` runs them; the command line reads them from disk, refuses one outside the project, names a missing one with where it looked, passes them to the export page, and keys cached frames drawn by their code on their text.
+- 24a2570: CutCraft is now UberScene. The packages are `uberscene` (the CLI, run as `npx uberscene`) and `@uberscene/kit`, `@uberscene/player`, `@uberscene/render` and `@uberscene/graphics`; change your imports from `@cutcraft/*`. The manifest is `uberscene.json`, and a `cutcraft.json` is still found. The environment variables are `UBERSCENE_*` instead of `CUTCRAFT_*`, and the caches move to `~/.cache/uberscene`.
+- a8f1cd3: A file's `schema` values are knobs an editor and an agent can read. `knob.color()`, `knob.font()` and `knob.image()` mark a string that wants a colour picker, a font menu or an image picker; `.describe("…")` is the label; `z.enum` is a choice and a number's `.min()`/`.max()` bound it. `knobsOf(schema, values)` returns each with its key, kind, description, value, options and bounds. `uberscene inspect` lists them before the timeline, and `--json` has them as `knobs`. The recipes mark their colours and logos.
+- 4571f15: `uberscene skills install` writes the agent skill that ships with the installed CLI into `.claude/skills/uberscene` (or `--dir`), so the skill always teaches the commands of the version you have. Run again after an upgrade, it replaces the folder it wrote; a folder with edits, or one it did not write, needs `--force`. The `@uberscene/render` package now carries the skill in `dist/skill/uberscene`, and exports `installSkill`.
+
+### Patch Changes
+
+- Updated dependencies [546f81a]
+- Updated dependencies [4fac602]
+- Updated dependencies [933fa0c]
+- Updated dependencies [97d54f4]
+- Updated dependencies [24a2570]
+- Updated dependencies [a8f1cd3]
+- Updated dependencies [34c8b8a]
+  - @uberscene/kit@0.5.0
+  - @uberscene/player@0.5.0
+  - @uberscene/graphics@0.5.0
+
 ## 0.4.0
 
 ### Minor Changes

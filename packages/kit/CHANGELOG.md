@@ -1,5 +1,20 @@
 # @uberscene/kit
 
+## 0.5.0
+
+### Minor Changes
+
+- 4fac602: Three small helpers for free code that draws a board or happens in steps. `grid({ columns, rows, width, height, x, y })` is the geometry of a grid and draws nothing: it returns every cell with its index, column, row and box, and `rect(column, row)`. `stepAt(times, t)` says which step a moment has reached in a list of seconds. `random()` takes several keys, so `random("wall", cell, turn)` names one number among many; with one seed it gives what it always gave.
+- 933fa0c: `<Layer ground>` marks a layer as a ground that other things sit on (a wall behind a game, a scrim under a title), so the layout check, `uberscene where` and `look --zones` treat it like a background. `<Three>` and `<Motion>` take it too. `uberscene inspect` prints `ground` on its line. This replaces the `data-ground` attribute on an element inside the layer, which is no longer read: a file that used it moves the marker to the `<Layer>`.
+- 97d54f4: A video file may import modules of its own: `import { ChatReveal } from "./blocks/chat-reveal"`. Each is a `.ts` or `.tsx` file inside the project (the folder of the nearest `uberscene.json`), compiled and run like the file, once. `gatherLocalFiles(source, read)` collects their texts and `loadModule(source, { files })` runs them; the command line reads them from disk, refuses one outside the project, names a missing one with where it looked, passes them to the export page, and keys cached frames drawn by their code on their text.
+- 24a2570: CutCraft is now UberScene. The packages are `uberscene` (the CLI, run as `npx uberscene`) and `@uberscene/kit`, `@uberscene/player`, `@uberscene/render` and `@uberscene/graphics`; change your imports from `@cutcraft/*`. The manifest is `uberscene.json`, and a `cutcraft.json` is still found. The environment variables are `UBERSCENE_*` instead of `CUTCRAFT_*`, and the caches move to `~/.cache/uberscene`.
+- a8f1cd3: A file's `schema` values are knobs an editor and an agent can read. `knob.color()`, `knob.font()` and `knob.image()` mark a string that wants a colour picker, a font menu or an image picker; `.describe("…")` is the label; `z.enum` is a choice and a number's `.min()`/`.max()` bound it. `knobsOf(schema, values)` returns each with its key, kind, description, value, options and bounds. `uberscene inspect` lists them before the timeline, and `--json` has them as `knobs`. The recipes mark their colours and logos.
+- 34c8b8a: `useSeekable(create, deps?)` plays an animation from another library on the layer's clock: built once, paused, on the element its ref is on, seeked to the layer's seconds before every frame is painted, and reverted (or destroyed, or killed) when the layer ends or `deps` change. A GSAP timeline fits as it is; Anime.js and Lottie take a two-line wrapper. A `seek` that returns a promise holds the export's frame until it settles.
+
+### Patch Changes
+
+- 546f81a: Writing edits back no longer fails when an element is moved and something inside it is also edited, such as reordering a track and changing the volume of a sound on it. The moved element is printed with those edits in it; before, the two edits overlapped and `foldToSource` threw "overlapping edits".
+
 ## 0.4.0
 
 ### Minor Changes

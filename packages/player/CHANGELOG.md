@@ -1,5 +1,22 @@
 # @uberscene/player
 
+## 0.5.0
+
+### Minor Changes
+
+- 24a2570: CutCraft is now UberScene. The packages are `uberscene` (the CLI, run as `npx uberscene`) and `@uberscene/kit`, `@uberscene/player`, `@uberscene/render` and `@uberscene/graphics`; change your imports from `@cutcraft/*`. The manifest is `uberscene.json`, and a `cutcraft.json` is still found. The environment variables are `UBERSCENE_*` instead of `CUTCRAFT_*`, and the caches move to `~/.cache/uberscene`.
+
+### Patch Changes
+
+- Updated dependencies [546f81a]
+- Updated dependencies [4fac602]
+- Updated dependencies [933fa0c]
+- Updated dependencies [97d54f4]
+- Updated dependencies [24a2570]
+- Updated dependencies [a8f1cd3]
+- Updated dependencies [34c8b8a]
+  - @uberscene/kit@0.5.0
+
 ## 0.4.0
 
 ### Minor Changes

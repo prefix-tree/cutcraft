@@ -1,6 +1,6 @@
 {
   "name": "@uberscene/kit",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Vocabulary, resolver, action system and source tools for the cut video DSL.",
   "keywords": [
     "video",

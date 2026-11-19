@@ -1,6 +1,6 @@
 {
   "name": "@uberscene/graphics",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Free-code libraries for UberScene: three.js, React Three Fiber and Motion on the video's clock, for <Three> and <Motion>.",
   "keywords": [
     "video",
