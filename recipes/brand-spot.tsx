@@ -18,9 +18,9 @@ export const schema = z.object({
 
 export const defaults = {
   theme: "midnight",
-  product: "Shed",
-  tagline: "A cloud for small software",
-  cta: "Try it free",
+  product: "Halvard",
+  tagline: "Coffee roasted on Mondays",
+  cta: "Order a bag",
 };
 
 export default function Video({ theme, product, tagline, cta }: z.infer<typeof schema>) {
@@ -172,18 +172,18 @@ export default function Video({ theme, product, tagline, cta }: z.infer<typeof s
         <Motion id="step-1" anchor="demo" offset={0.6} duration={2.4} sequence={[popIn]}>
           <div style={at(340, 420)}>
             <div className="in" style={{ ...bubble }}>
-              Push your code
+              Pick your roast
             </div>
           </div>
         </Motion>
         <Motion id="step-2" anchor="demo" offset={3} duration={2.8} sequence={[popIn]}>
           <div style={at(340, 660)}>
             <div className="in" style={{ ...bubble }}>
-              It is live
+              Roasted and on its way
             </div>
           </div>
         </Motion>
-        {/* Two steps: the first done, the second filling in when the app goes live. */}
+        {/* Two steps: the first done, the second filling in when the roast goes out. */}
         <Motion
           id="steps"
           anchor="demo"
@@ -209,7 +209,7 @@ export default function Video({ theme, product, tagline, cta }: z.infer<typeof s
           <div style={at(1700, 240)}>
             <div className="in" style={{ ...pill }}>
               <div className="blink" style={{ width: 18, height: 18, borderRadius: 9, background: palette.accent }} />
-              Live
+              Roasting
             </div>
           </div>
         </Motion>

@@ -37,14 +37,14 @@
           },
           {
             "i": 3,
-            "text": "started",
+            "text": "opened",
             "start": 1.2,
             "end": 1.6,
             "speaker": "founder"
           },
           {
             "i": 4,
-            "text": "Shed",
+            "text": "Halvard",
             "start": 1.7,
             "end": 2.1,
             "speaker": "founder"
@@ -100,14 +100,14 @@
           },
           {
             "i": 12,
-            "text": "Small",
+            "text": "Good",
             "start": 5.6,
             "end": 5.9,
             "speaker": "founder"
           },
           {
             "i": 13,
-            "text": "software",
+            "text": "coffee",
             "start": 6.0,
             "end": 6.5,
             "speaker": "founder"
@@ -135,14 +135,14 @@
           },
           {
             "i": 17,
-            "text": "real",
+            "text": "slow",
             "start": 7.7,
             "end": 8.0,
             "speaker": "founder"
           },
           {
             "i": 18,
-            "text": "cloud",
+            "text": "morning",
             "start": 8.1,
             "end": 8.6,
             "speaker": "founder"
@@ -177,7 +177,7 @@
           },
           {
             "i": 23,
-            "text": "file",
+            "text": "cup",
             "start": 10.3,
             "end": 10.8,
             "speaker": "founder"
@@ -198,7 +198,7 @@
           },
           {
             "i": 26,
-            "text": "cluster",
+            "text": "menu",
             "start": 11.9,
             "end": 12.4,
             "speaker": "founder"
@@ -219,7 +219,7 @@
           },
           {
             "i": 29,
-            "text": "pipeline",
+            "text": "queue",
             "start": 13.0,
             "end": 13.6,
             "speaker": "founder"
@@ -233,7 +233,7 @@
           },
           {
             "i": 31,
-            "text": "teams",
+            "text": "people",
             "start": 14.7,
             "end": 15.0,
             "speaker": "founder"
@@ -268,7 +268,7 @@
           },
           {
             "i": 36,
-            "text": "weeks",
+            "text": "mornings",
             "start": 16.3,
             "end": 16.7,
             "speaker": "founder"
@@ -282,14 +282,14 @@
           },
           {
             "i": 38,
-            "text": "infrastructure",
+            "text": "drive-through",
             "start": 17.0,
             "end": 17.9,
             "speaker": "founder"
           },
           {
             "i": 39,
-            "text": "first",
+            "text": "coffee",
             "start": 18.0,
             "end": 18.4,
             "speaker": "founder"
@@ -303,7 +303,7 @@
           },
           {
             "i": 41,
-            "text": "write",
+            "text": "grind",
             "start": 24.3,
             "end": 24.6,
             "speaker": "founder"
@@ -317,28 +317,28 @@
           },
           {
             "i": 43,
-            "text": "file",
+            "text": "beans",
             "start": 24.9,
             "end": 25.3,
             "speaker": "founder"
           },
           {
             "i": 44,
-            "text": "your",
+            "text": "the",
             "start": 25.4,
             "end": 25.6,
             "speaker": "founder"
           },
           {
             "i": 45,
-            "text": "agent",
+            "text": "kettle",
             "start": 25.7,
             "end": 26.1,
             "speaker": "founder"
           },
           {
             "i": 46,
-            "text": "writes",
+            "text": "pours",
             "start": 26.2,
             "end": 26.5,
             "speaker": "founder"
@@ -352,7 +352,7 @@
           },
           {
             "i": 48,
-            "text": "file",
+            "text": "water",
             "start": 26.8,
             "end": 27.2,
             "speaker": "founder"
@@ -380,7 +380,7 @@
           },
           {
             "i": 52,
-            "text": "runs",
+            "text": "blooms",
             "start": 28.6,
             "end": 29.2,
             "speaker": "founder"
@@ -415,7 +415,7 @@
           },
           {
             "i": 57,
-            "text": "product",
+            "text": "ritual",
             "start": 31.2,
             "end": 31.7,
             "speaker": "founder"

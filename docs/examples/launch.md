@@ -8,14 +8,14 @@ import { withBase } from "vitepress";
 
 # A product launch
 
-The founder on camera, cut on her words, with b-roll in the middle.
+A roastery's founder at the bench, cut on her words, with b-roll of the espresso machine in the middle.
 
 <div class="cc-pair"><video :src="withBase('/showcase/launch.webm')" :poster="withBase('/showcase/launch.jpg')" controls muted loop playsinline></video></div>
 
 ## Key elements
 
 - **Cuts on words** (`in="word:12"`): each clip is trimmed by the transcript, not by seconds.
-- **`<Three>`** turns a phone in on the word "Shed"; its screen is the product name drawn on a canvas.
+- **`<Three>`** turns a bag of the new roast in on the word "Halvard"; its label is drawn on a canvas.
 - **`<Motion>` lower third** names the speaker.
 - **Pills anchored to words** (`anchor="talk" at="word:8"`): recutting the talk retimes every callout.
 - **A crossfade** into the b-roll, and **`schema` / `defaults`** for the tweakable props.

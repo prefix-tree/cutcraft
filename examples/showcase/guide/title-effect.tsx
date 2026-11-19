@@ -5,13 +5,15 @@ import { Clip, Composition, Effect, effect, Motion, Title, Track } from "@ubersc
 // The same kind of effect a clip takes, on a title and on a Motion layer: the overlay's pixels only.
 const split = effect({
   name: "split",
-  params: z.object({ amount: z.number().min(0).max(0.05).default(0.008) }),
+  params: z.object({ amount: z.number().min(0).max(0.05).default(0.005) }),
   shader: `vec4 effect(vec2 uv) {
     vec2 o = vec2(params.amount * (1.0 + sin(time * 8.0)), 0.0);
     vec4 c = texture(image, uv);
     float r = texture(image, uv + o).a;
     float b = texture(image, uv - o).a;
-    return vec4(max(c.r, r), c.g * c.a, max(c.b, b), max(c.a, max(r, b)));
+    // Red and blue fringes only where the shape is not: its own colour stays as it is.
+    vec3 fringe = vec3(r, 0.0, b) * (1.0 - c.a);
+    return vec4(c.rgb + fringe, max(c.a, max(r, b)));
   }`,
 });
 
@@ -22,9 +24,18 @@ export default function Video() {
         <Clip id="bg" src="asset:espresso" in={8} out={11} fit="cover" />
       </Track>
       <Track id="text" layout="free">
-        <Title id="name" start={0.2} duration={2.8} size={130} color="#ffffff">
+        <Title
+          id="name"
+          start={0.2}
+          duration={2.8}
+          size={96}
+          width={280}
+          align="left"
+          color="#f4efe6"
+          transform={{ position: { x: -320, y: -40 } }}
+        >
           <Effect id="title-split" type={split} />
-          Shed
+          Crema
         </Title>
         <Motion
           id="badge"
@@ -37,8 +48,8 @@ export default function Video() {
             className="badge"
             style={{
               position: "absolute",
-              left: 640,
-              top: 140,
+              left: 40,
+              top: 300,
               padding: "10px 22px",
               borderRadius: 999,
               background: "#e8a33d",
@@ -46,7 +57,7 @@ export default function Video() {
               font: "700 34px 'Space Grotesk', sans-serif",
             }}
           >
-            New
+            Fresh
           </div>
         </Motion>
       </Track>

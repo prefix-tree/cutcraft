@@ -3,7 +3,12 @@ import { Clip, Composition, ProgressBar, Track } from "@uberscene/kit";
 // ProgressBar: a bar that fills from the left to its value.
 export default function Video() {
   return (
-    <Composition fps={30} width={1920} height={1080}>
+    <Composition
+      fps={30}
+      width={1920}
+      height={1080}
+      theme={{ extends: "midnight", palette: { primary: "#e8a33d", accent: "#e8a33d" } }}
+    >
       <Track id="main">
         <Clip id="shot" src="asset:espresso" in={14} out={17} fit="cover" />
       </Track>

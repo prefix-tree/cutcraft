@@ -20,24 +20,23 @@ export default function Video() {
           <h1
             style={{
               position: "absolute",
-              left: 0,
-              right: 0,
-              top: 200,
+              left: 56,
+              top: 360,
               margin: 0,
-              textAlign: "center",
+              textAlign: "left",
               color: "#ffffff",
               font: "700 84px Inter, sans-serif",
             }}
           >
-            Launch
+            Bloom
           </h1>
           <div
             className="rule"
             style={{
               position: "absolute",
-              left: 330,
-              width: 300,
-              top: 310,
+              left: 60,
+              width: 220,
+              top: 466,
               height: 6,
               background: "#e8a33d",
               transformOrigin: "left",

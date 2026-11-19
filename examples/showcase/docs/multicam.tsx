@@ -15,8 +15,17 @@ export default function Video() {
         </Multicam>
       </Track>
       <Track id="text" layout="free">
-        <Title id="live" start={0} duration={3} size={40}>
-          Live
+        <Title
+          id="angles"
+          start={0}
+          duration={3}
+          size={28}
+          width={380}
+          height={60}
+          background="rgba(16, 20, 33, 0.78)"
+          transform={{ position: { x: -250, y: 210 } }}
+        >
+          Three angles, one take
         </Title>
       </Track>
     </Composition>

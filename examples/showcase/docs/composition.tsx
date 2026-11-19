@@ -7,8 +7,17 @@ export default function Video() {
         <Clip id="shot" src="asset:espresso" in={2} out={6} fit="cover" />
       </Track>
       <Track id="text">
-        <Title id="title" anchor="shot" offset={0.4} duration={3.2} size={56}>
-          One file, one video
+        <Title
+          id="title"
+          anchor="shot"
+          offset={0.4}
+          duration={3.2}
+          size={56}
+          width={260}
+          align="left"
+          transform={{ position: { x: -320, y: 0 } }}
+        >
+          Morning shot
         </Title>
       </Track>
     </Composition>
