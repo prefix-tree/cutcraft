@@ -1,4 +1,4 @@
-import { visiblePlacements } from "@cutcraft/player";
+import { visiblePlacements } from "@uberscene/player";
 
 import { fixtureState, makeState } from "./helpers/state";
 

@@ -1,10 +1,10 @@
 # Editing
 
-This page is for building a video editor on CutCraft. In such an editor the user drags, trims and types on a timeline
+This page is for building a video editor on UberScene. In such an editor the user drags, trims and types on a timeline
 and a preview, every gesture can be undone, and each change lands in the file's text. The model that wrote the file
 then reads a file that differs from what it wrote by exactly what the user did.
 
-`@cutcraft/kit` has the pieces, in the order you need them:
+`@uberscene/kit` has the pieces, in the order you need them:
 
 | Piece | Does | Section |
 |---|---|---|
@@ -186,7 +186,7 @@ A Google family the file does not declare yet is added to `state.fonts` at once,
 it. On fold the file gains the declaration and the use site names it:
 
 ```tsx
-import { Composition, Title, Track, googleFont } from "@cutcraft/kit";
+import { Composition, Title, Track, googleFont } from "@uberscene/kit";
 
 const bebasNeue = googleFont("Bebas Neue");
 

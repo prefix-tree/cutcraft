@@ -1,6 +1,6 @@
 # Core principles
 
-CutCraft is built on a handful of choices, made one at a time and written down as
+UberScene is built on a handful of choices, made one at a time and written down as
 [decision records](/decisions/). This page is the short version: what each principle says, what it means for you,
 and the records that decided it. A record is never rewritten; when a later one changes an earlier one, both are
 linked here.

@@ -1,8 +1,8 @@
 {
-  "name": "@cutcraft/example-launch-recap",
+  "name": "@uberscene/example-launch-recap",
   "version": "0.1.0",
   "private": true,
-  "description": "A launch recap written by a model from a brief, played by @cutcraft/player.",
+  "description": "A launch recap written by a model from a brief, played by @uberscene/player.",
   "type": "module",
   "scripts": {
     "gen": "tsx media/gen.ts",
@@ -12,8 +12,8 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@cutcraft/kit": "workspace:*",
-    "@cutcraft/player": "workspace:*",
+    "@uberscene/kit": "workspace:*",
+    "@uberscene/player": "workspace:*",
     "react": "catalog:",
     "react-dom": "catalog:",
     "zod": "catalog:"

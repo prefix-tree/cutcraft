@@ -1,4 +1,4 @@
-import { animatedTransform, cssTransform, fitRect, layoutRect, matrixToCss } from "@cutcraft/player";
+import { animatedTransform, cssTransform, fitRect, layoutRect, matrixToCss } from "@uberscene/player";
 
 import { childrenOf, makeState } from "./helpers/state";
 

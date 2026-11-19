@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
 
-import { builtInTransition, effect, uniformsOf } from "@cutcraft/kit";
+import { builtInTransition, effect, uniformsOf } from "@uberscene/kit";
 
 import { glsl, glslModule } from "../src/effects/glsl";
 

@@ -2,13 +2,14 @@ import type { ComponentType, ReactNode } from "react";
 
 /**
  * What draws an engine Layer (`<Three>`, `<Motion>`): a component given the Layer's resolved props (functions
- * included) and its children. The kit draws nothing; a host installs engines, as `@cutcraft/graphics/libraries` does.
+ * included) and its children. The kit draws nothing; a host installs engines, as `@uberscene/graphics/libraries` does.
  */
 export type LayerEngine = ComponentType<Readonly<Record<string, unknown>> & { readonly children?: ReactNode }>;
 
 /** On `globalThis`, like the layer clock: a file loaded with its own copy of the kit still finds the host's engines. */
-const engines = ((globalThis as Record<symbol, Map<string, LayerEngine>>)[Symbol.for("@cutcraft/kit/layer-engines")] ??=
-  new Map());
+const engines = ((globalThis as Record<symbol, Map<string, LayerEngine>>)[
+  Symbol.for("@uberscene/kit/layer-engines")
+] ??= new Map());
 
 /** Install (or with `null`, remove) the engine that draws `<Layer engine={name}>` tags such as `<Three>`. */
 export function installLayerEngine(name: string, engine: LayerEngine | null): void {
@@ -24,8 +25,9 @@ export function layerEngine(name: string): LayerEngine | null {
  * Frames an engine is still preparing (a three.js renderer being created, say). The browser export waits for none
  * before it captures a frame; the player ignores them. On `globalThis` for the same reason as the engines.
  */
-const pending = ((globalThis as Record<symbol, { count: number }>)[Symbol.for("@cutcraft/kit/layer-frames-pending")] ??=
-  { count: 0 });
+const pending = ((globalThis as Record<symbol, { count: number }>)[
+  Symbol.for("@uberscene/kit/layer-frames-pending")
+] ??= { count: 0 });
 
 /** Hold the frame until the returned release is called (once; later calls do nothing). */
 export function holdLayerFrame(): () => void {

@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
 
-import { builtInShader, collectModule, resolve } from "@cutcraft/kit";
-import { loadModule } from "@cutcraft/kit/source";
+import { builtInShader, collectModule, resolve } from "@uberscene/kit";
+import { loadModule } from "@uberscene/kit/source";
 
 const manifest = { assets: { city: { id: "city", kind: "video" as const, duration: 10 } } };
 const stateOf = (effects: string) =>
   resolve(
     collectModule(
-      loadModule(`import { Clip, Composition, Effect, Track } from "@cutcraft/kit";
+      loadModule(`import { Clip, Composition, Effect, Track } from "@uberscene/kit";
 export default function V() { return <Composition fps={30} width={640} height={360}><Track id="t"><Clip id="c" src="asset:city">${effects}</Clip></Track></Composition>; }`) as never,
     ),
     manifest,

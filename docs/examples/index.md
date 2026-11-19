@@ -4,7 +4,7 @@ title: Examples
 
 # Examples
 
-Every example is one file, rendered by CutCraft's own export. Hover a poster to play it; open it to read the file and
+Every example is one file, rendered by UberScene's own export. Hover a poster to play it; open it to read the file and
 what its key parts do. For starting points by kind of video, see the [recipes](/recipes/) and the
 [walkthrough](/guide/writing-files).
 
@@ -35,7 +35,7 @@ what its key parts do. For starting points by kind of video, see the [recipes](/
 | Narration timed from a script (`narrate()`) | [One pixel](/examples/one-pixel) | [Narration from a script](/guide/captions-and-sound#narration-from-a-script) |
 | Captions from an SRT, VTT or Whisper file | [Captions](/examples/captions) | [Getting a transcript](/guide/captions-and-sound#getting-a-transcript) |
 | Diagram parts (angles, rows, strike-throughs) | [A talking head with a diagram](/examples/lunar-eclipse), [An interview that changes layout](/examples/hundred-videos) | [Diagram parts](/guide/free-code#diagram-parts) |
-| Named parts (`data-name`) for the layout check and `cutcraft where` | [A talking head with a diagram](/examples/lunar-eclipse), [One pixel](/examples/one-pixel), [An interview that changes layout](/examples/hundred-videos) | [Check the layout](/guide/checking#check-the-layout), [Where things are at a moment](/guide/checking#where-things-are-at-a-moment) |
+| Named parts (`data-name`) for the layout check and `uberscene where` | [A talking head with a diagram](/examples/lunar-eclipse), [One pixel](/examples/one-pixel), [An interview that changes layout](/examples/hundred-videos) | [Check the layout](/guide/checking#check-the-layout), [Where things are at a moment](/guide/checking#where-things-are-at-a-moment) |
 | Ready-made cards and frames (`TypeCard`, `QuoteCard`, `Frame`) | [A talking head with a diagram](/examples/lunar-eclipse) (`Frame`), one demo each in [Components](/reference/components/) | [Cards for a talking head](/guide/titles-and-graphics#cards-for-a-talking-head) |
 | three.js (`<Three>`) | [Product launch](/examples/launch), [Logo reveal](/examples/logo), [How game lighting fakes it](/examples/game-lighting), [One pixel](/examples/one-pixel), [Brand spot](/recipes/brand-spot) | [Free code](/guide/free-code#three-js-and-motion) |
 | Motion (`<Motion>`) | [Kinetic type](/examples/kinetic), [Data story](/examples/data), [An edit](/examples/edit) | [Free code](/guide/free-code#three-js-and-motion) |
@@ -56,19 +56,19 @@ what its key parts do. For starting points by kind of video, see the [recipes](/
 
 Each showcase video is one file in
 [`examples/showcase`](https://github.com/prefix-tree/cutcraft/tree/main/examples/showcase), rendered with
-`pnpm --filter @cutcraft/example-showcase render`. The guide's feature examples are in
+`pnpm --filter @uberscene/example-showcase render`. The guide's feature examples are in
 [`examples/showcase/guide`](https://github.com/prefix-tree/cutcraft/tree/main/examples/showcase/guide), rendered with
-`pnpm --filter @cutcraft/example-showcase docs`. Every file renders through the player in
+`pnpm --filter @uberscene/example-showcase docs`. Every file renders through the player in
 [headless Chrome](/guide/exporting#the-browser-it-runs-in).
 
-The showcase footage is made by `ffmpeg`'s own sources (`pnpm --filter @cutcraft/example-showcase gen`), except the
+The showcase footage is made by `ffmpeg`'s own sources (`pnpm --filter @uberscene/example-showcase gen`), except the
 two coffee shots in the effect and transition demos, close and wide: Pixabay videos
 [209419](https://pixabay.com/videos/id-209419/) and [209424](https://pixabay.com/videos/id-209424/), under the Pixabay
 Content License. They are not committed; `gen` reads them from `examples/showcase/media/stock/` and checks their
 hashes.
 
 The shorts are in [`examples/shorts`](https://github.com/prefix-tree/cutcraft/tree/main/examples/shorts),
-rendered with `pnpm --filter @cutcraft/example-shorts render`. The two lighting explainers and the snake use no media at all. The
+rendered with `pnpm --filter @uberscene/example-shorts render`. The two lighting explainers and the snake use no media at all. The
 talking head is real footage: 79 seconds of a NASA interview, in the public domain, committed with its transcript and
 credit in `examples/shorts/media`. The interview that changes layout is a 44 second excerpt of a podcast, which is
 the podcast's copyright and is credited in the same folder.

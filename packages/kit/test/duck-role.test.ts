@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { collectModule, Executor } from "@cutcraft/kit";
-import { foldToSource, loadModule } from "@cutcraft/kit/source";
+import { collectModule, Executor } from "@uberscene/kit";
+import { foldToSource, loadModule } from "@uberscene/kit/source";
 
-const FILE = `import { Audio, Clip, Composition, Track } from "@cutcraft/kit";
+const FILE = `import { Audio, Clip, Composition, Track } from "@uberscene/kit";
 
 export default function Video() {
   return (

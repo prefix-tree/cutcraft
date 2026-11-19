@@ -1,4 +1,4 @@
-import type { DeclaredFont } from "@cutcraft/kit";
+import type { DeclaredFont } from "@uberscene/kit";
 
 import type { MediaResolver } from "../types";
 

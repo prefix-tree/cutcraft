@@ -28,15 +28,15 @@ export const strayHtml: Rule = {
 const ON_THE_CLOCK = new Set(["requestAnimationFrame", "cancelAnimationFrame", "performance", "Date"]);
 /** Libraries with a clock of their own, by module: the imports that run on it, and the adapter that puts them on the video's. */
 const OWN_CLOCK: Readonly<Record<string, { readonly names: readonly string[]; readonly use: string }>> = {
-  "@react-three/fiber": { names: ["Canvas"], use: "<ThreeScene> from @cutcraft/graphics/three" },
-  motion: { names: ["animate"], use: "useTimeline from @cutcraft/graphics/motion" },
+  "@react-three/fiber": { names: ["Canvas"], use: "<ThreeScene> from @uberscene/graphics/three" },
+  motion: { names: ["animate"], use: "useTimeline from @uberscene/graphics/motion" },
   "motion/react": {
     names: ["animate", "useAnimate"],
-    use: "useTimeline or useLayerTime from @cutcraft/graphics/motion",
+    use: "useTimeline or useLayerTime from @uberscene/graphics/motion",
   },
   "framer-motion": {
     names: ["animate", "useAnimate"],
-    use: "useTimeline or useLayerTime from @cutcraft/graphics/motion",
+    use: "useTimeline or useLayerTime from @uberscene/graphics/motion",
   },
 };
 /** Props that start a Motion component's own animation. */
@@ -80,7 +80,7 @@ export const freeCodeClock: Rule = {
         if (name === "random" && t.isMemberExpression(callee) && t.isIdentifier(callee.object, { name: "Math" }))
           warn(
             node,
-            "Math.random() gives each run of the file its own numbers, so pieces of an export rendered side by side can disagree; use random(seed) from @cutcraft/kit",
+            "Math.random() gives each run of the file its own numbers, so pieces of an export rendered side by side can disagree; use random(seed) from @uberscene/kit",
           );
         const own = t.isIdentifier(callee) ? ownClock.get(callee.name) : undefined;
         if (own)
@@ -118,7 +118,7 @@ export const freeCodeClock: Rule = {
           if (plays)
             warn(
               plays,
-              `<${el.object.name}.${el.property.name}> animates on Motion's own clock, so a scrub or an export does not follow it; drive it with useTimeline or useLayerTime from @cutcraft/graphics/motion`,
+              `<${el.object.name}.${el.property.name}> animates on Motion's own clock, so a scrub or an export does not follow it; drive it with useTimeline or useLayerTime from @uberscene/graphics/motion`,
             );
         }
       } else if (

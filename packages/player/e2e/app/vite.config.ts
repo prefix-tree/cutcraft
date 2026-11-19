@@ -11,8 +11,8 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      "@cutcraft/kit": here("../../../kit/src/index.ts"),
-      "@cutcraft/player": here("../../src/index.ts"),
+      "@uberscene/kit": here("../../../kit/src/index.ts"),
+      "@uberscene/player": here("../../src/index.ts"),
     },
   },
   server: { port: 5179, strictPort: true, fs: { allow: [here("../../..")] } },

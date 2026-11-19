@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { type Action, ActionHistory, type ActionInput } from "@cutcraft/kit";
+import { type Action, ActionHistory, type ActionInput } from "@uberscene/kit";
 
 const trim = (id: string, out: number, actionId = "a"): Action => ({
   type: "clip/trim",

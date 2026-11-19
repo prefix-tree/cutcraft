@@ -15,9 +15,9 @@ const decisions = readdirSync(decisionsDir)
   });
 
 export default defineConfig({
-  title: "CutCraft",
+  title: "UberScene",
   description:
-    "Video editor as code: LLMs write code well and math badly, so a model writes a TSX file of words and shots, and CutCraft does the arithmetic, plays it in the browser, edits it and exports it.",
+    "Video editor as code: LLMs write code well and math badly, so a model writes a TSX file of words and shots, and UberScene does the arithmetic, plays it in the browser, edits it and exports it.",
   base: "/",
   cleanUrls: true,
   // The decision records' index is the folder's README, so it reads on GitHub too.

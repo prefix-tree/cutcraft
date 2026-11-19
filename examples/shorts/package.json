@@ -1,5 +1,5 @@
 {
-  "name": "@cutcraft/example-shorts",
+  "name": "@uberscene/example-shorts",
   "version": "0.1.0",
   "private": true,
   "description": "Short vertical explainers, each one file: two of pure animation, one cut from an interview.",
@@ -11,8 +11,8 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@cutcraft/kit": "workspace:*",
-    "@cutcraft/render": "workspace:*",
+    "@uberscene/kit": "workspace:*",
+    "@uberscene/render": "workspace:*",
     "react": "catalog:",
     "zod": "catalog:"
   },

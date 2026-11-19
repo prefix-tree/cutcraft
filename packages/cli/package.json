@@ -1,7 +1,7 @@
 {
-  "name": "cutcraft",
+  "name": "uberscene",
   "version": "0.4.0",
-  "description": "The CutCraft command line: render a TSX video file to MP4, WebM, audio or a still, or check its layout.",
+  "description": "The UberScene command line: render a TSX video file to MP4, WebM, audio or a still, or check its layout.",
   "keywords": [
     "video",
     "video-editing",
@@ -28,12 +28,12 @@
     "node": ">=22.19"
   },
   "bin": {
-    "cutcraft": "./cli.js"
+    "uberscene": "./cli.js"
   },
   "files": [
     "cli.js"
   ],
   "dependencies": {
-    "@cutcraft/render": "workspace:*"
+    "@uberscene/render": "workspace:*"
   }
 }

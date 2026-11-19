@@ -15,7 +15,7 @@ function cut(name: string, imports: string, duration = "1"): string {
   writeFileSync(
     file,
     `${imports}
-import { Clip, Composition, Title, Track } from "@cutcraft/kit";
+import { Clip, Composition, Title, Track } from "@uberscene/kit";
 ${MANIFEST}
 export default function Video() {
   return (

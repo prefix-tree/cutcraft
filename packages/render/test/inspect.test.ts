@@ -4,7 +4,7 @@ import { join } from "node:path";
 
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import { parseMoments, resolveMoments } from "@cutcraft/kit";
+import { parseMoments, resolveMoments } from "@uberscene/kit";
 
 import { describeAt, inspect, loadVideo } from "../src";
 
@@ -13,7 +13,7 @@ let dir = "";
 let file = "";
 
 const words = Array.from({ length: 12 }, (_, i) => ({ i, text: `w${i}`, start: i * 0.5, end: i * 0.5 + 0.4 }));
-const VIDEO = `import { Audio, Clip, Composition, Effect, Keyframe, Title, Track, Transition } from "@cutcraft/kit";
+const VIDEO = `import { Audio, Clip, Composition, Effect, Keyframe, Title, Track, Transition } from "@uberscene/kit";
 export const manifest = { assets: {
   talk: { id: "talk", kind: "video", duration: 10, fps: 30, width: 640, height: 360,
     audio: { sampleRate: 48000, channels: 2, streams: 1 }, transcript: { words: ${JSON.stringify(words)} } },
@@ -152,10 +152,10 @@ cuts: 3.40 hook→broll (x1)
   });
 });
 
-describe("cutcraft inspect", () => {
+describe("uberscene inspect", () => {
   const cli = join(import.meta.dirname, "..", "src", "cli.ts");
   // No browser may start: one that does not exist is named, and the command still answers.
-  const env = { ...process.env, CUTCRAFT_CHROMIUM: "/nonexistent/chrome" };
+  const env = { ...process.env, UBERSCENE_CHROMIUM: "/nonexistent/chrome" };
 
   it("prints the timeline without a browser, and exits 0", () => {
     const out = execFileSync("node", ["--import", "tsx", cli, "inspect", file], { encoding: "utf8", env });
@@ -176,18 +176,18 @@ describe("cutcraft inspect", () => {
   it("exits 2 with the usage when no file is given", () => {
     const run = spawnSync("node", ["--import", "tsx", cli, "inspect"], { encoding: "utf8", env });
     expect(run.status).toBe(2);
-    expect(run.stderr).toContain("cutcraft inspect <file.tsx>");
+    expect(run.stderr).toContain("uberscene inspect <file.tsx>");
   });
 });
 
-describe("cutcraft look", () => {
+describe("uberscene look", () => {
   const cli = join(import.meta.dirname, "..", "src", "cli.ts");
-  const env = { ...process.env, CUTCRAFT_CHROMIUM: "/nonexistent/chrome" };
+  const env = { ...process.env, UBERSCENE_CHROMIUM: "/nonexistent/chrome" };
 
   it("exits 2 with the usage when no file is given", () => {
     const run = spawnSync("node", ["--import", "tsx", cli, "look"], { encoding: "utf8", env });
     expect(run.status).toBe(2);
-    expect(run.stderr).toContain("cutcraft look <file.tsx>");
+    expect(run.stderr).toContain("uberscene look <file.tsx>");
   });
 
   it("refuses what it cannot draw before it starts a browser", () => {
@@ -205,7 +205,7 @@ describe("inspect, a transition at one edge", () => {
     const edge = join(dir, "edge.tsx");
     writeFileSync(
       edge,
-      `import { Clip, Composition, Track, Transition } from "@cutcraft/kit";
+      `import { Clip, Composition, Track, Transition } from "@uberscene/kit";
 export const manifest = { assets: { broll: { id: "broll", kind: "video", duration: 10, fps: 30, width: 640, height: 360 } } };
 export default function Video() {
   return (
@@ -233,7 +233,7 @@ describe("inspect, a layer that is a ground", () => {
     const ground = join(dir, "ground.tsx");
     writeFileSync(
       ground,
-      `import { Composition, Layer, Track } from "@cutcraft/kit";
+      `import { Composition, Layer, Track } from "@uberscene/kit";
 export const manifest = { assets: {} };
 export default function Video() {
   return (

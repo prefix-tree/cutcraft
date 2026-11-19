@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { Clip, Composition, Layer, Motion, THEME_NAMES, THEMES, Three, Title, Track } from "@cutcraft/kit";
+import { Clip, Composition, Layer, Motion, THEME_NAMES, THEMES, Three, Title, Track } from "@uberscene/kit";
 
 /**
  * A twelve-second spot drawn around one screen recording. The look is one prop: titles take the theme's presets, and

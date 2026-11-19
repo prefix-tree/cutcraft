@@ -22,13 +22,13 @@ test("each workspace dependency is staged before the package that needs it", () 
 
 test("versions already on the registry are left out", () => {
   const packages = [
-    { name: "@cutcraft/kit", version: "0.3.0" },
-    { name: "@cutcraft/player", version: "0.3.0" },
-    { name: "cutcraft", version: "0.3.0" },
+    { name: "@uberscene/kit", version: "0.3.0" },
+    { name: "@uberscene/player", version: "0.3.0" },
+    { name: "uberscene", version: "0.3.0" },
   ];
-  const staged = unpublished(packages, (spec) => spec === "@cutcraft/player@0.3.0");
+  const staged = unpublished(packages, (spec) => spec === "@uberscene/player@0.3.0");
   assert.deepEqual(
     staged.map((pkg) => pkg.name),
-    ["@cutcraft/kit", "cutcraft"],
+    ["@uberscene/kit", "uberscene"],
   );
 });

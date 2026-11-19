@@ -17,7 +17,7 @@ import {
   Track,
   useLayer,
   useProgress,
-} from "@cutcraft/kit";
+} from "@uberscene/kit";
 
 export const schema = z.object({
   /** The one colour that is not navy or white. */
@@ -27,7 +27,7 @@ export const defaults: z.infer<typeof schema> = { accent: "#ffd23f" };
 
 const NAVY = "#0b1530";
 
-// The short's own type: a heavy geometric sans, chosen from `cutcraft fonts --for headline --category sans --sheet`
+// The short's own type: a heavy geometric sans, chosen from `uberscene fonts --for headline --category sans --sheet`
 // set in its own words. The other shorts use Space Grotesk and Inter.
 const poppins = googleFont("Poppins", { weights: [800] });
 

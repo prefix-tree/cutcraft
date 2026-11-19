@@ -1,5 +1,5 @@
-// The agent skill in plugins/cutcraft: a valid Agent Skill and Claude Code plugin, links that resolve, examples that
-// resolve with no errors, and nothing that names an API CutCraft no longer has.
+// The agent skill in plugins/uberscene: a valid Agent Skill and Claude Code plugin, links that resolve, examples that
+// resolve with no errors, and nothing that names an API UberScene no longer has.
 import assert from "node:assert/strict";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -9,8 +9,8 @@ import { collectModule, resolve } from "../packages/kit/src/index";
 import { loadModule } from "../packages/kit/src/source/index-public";
 
 const root = join(import.meta.dirname, "..");
-const plugin = join(root, "plugins", "cutcraft");
-const skill = join(plugin, "skills", "cutcraft");
+const plugin = join(root, "plugins", "uberscene");
+const skill = join(plugin, "skills", "uberscene");
 const text = readFileSync(join(skill, "SKILL.md"), "utf8");
 const references = readdirSync(join(skill, "references")).map((f) => join(skill, "references", f));
 
@@ -28,7 +28,7 @@ function frontmatter(md: string): Record<string, string> {
 
 test("SKILL.md has the frontmatter the Agent Skills format asks for, and only its portable keys", () => {
   const fm = frontmatter(text);
-  assert.equal(fm.name, "cutcraft");
+  assert.equal(fm.name, "uberscene");
   assert.match(fm.name ?? "", /^[a-z0-9]+(-[a-z0-9]+)*$/);
   assert.equal(fm.name, skill.split("/").at(-1), "the name is the folder's");
   assert.ok((fm.description ?? "").length > 0 && (fm.description ?? "").length <= 1024);
@@ -83,7 +83,7 @@ test("the whole files in SKILL.md resolve with no errors", () => {
   }
 });
 
-test("the skill names no API CutCraft has removed", () => {
+test("the skill names no API UberScene has removed", () => {
   for (const file of [join(skill, "SKILL.md"), ...references]) {
     const md = readFileSync(file, "utf8");
     for (const gone of ["<Graphic", 'src="icon:', "captureSheet", "<ColorGrade", "--engine"])

@@ -3,8 +3,8 @@ import { createRequire } from "node:module";
 import { dirname, isAbsolute, join, resolve as resolvePath } from "node:path";
 import { pathToFileURL } from "node:url";
 
-import { type AssetManifest, collectModule, type ResolvedState, resolve } from "@cutcraft/kit";
-import { loadModule } from "@cutcraft/kit/source";
+import { type AssetManifest, collectModule, type ResolvedState, resolve } from "@uberscene/kit";
+import { loadModule } from "@uberscene/kit/source";
 
 import { findManifest, MANIFEST_FILE } from "./manifest-file";
 import type { ExportSource } from "./renderer";
@@ -12,7 +12,7 @@ import type { ExportSource } from "./renderer";
 export interface LoadOptions {
   /**
    * A manifest file, or the manifest itself. Default: the file's own `manifest` export, then the nearest
-   * `cutcraft.json` from the file's folder upward, then a `manifest.json` beside the file.
+   * `uberscene.json` from the file's folder upward, then a `manifest.json` beside the file.
    */
   readonly manifest?: string | AssetManifest;
   /** Props for the file's default component, over its `defaults` export. */
@@ -98,7 +98,7 @@ function readManifest(
   const found = findManifest(folder);
   if (found.path) return { manifest: readFile(found.path), manifestPath: found.path };
   throw new Error(
-    `no manifest for ${file}: no ${MANIFEST_FILE} in\n${found.checked.map((d) => `  ${d}`).join("\n")}\nRun \`cutcraft add <media file>\` to make one, pass --manifest <file>, or export \`manifest\` from ${file}`,
+    `no manifest for ${file}: no ${MANIFEST_FILE} in\n${found.checked.map((d) => `  ${d}`).join("\n")}\nRun \`uberscene add <media file>\` to make one, pass --manifest <file>, or export \`manifest\` from ${file}`,
   );
 }
 

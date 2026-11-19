@@ -1,4 +1,4 @@
-import { Clip, Composition, LowerThird, Track } from "@cutcraft/kit";
+import { Clip, Composition, LowerThird, Track } from "@uberscene/kit";
 
 // LowerThird: a name and a role, on a card that slides up, timed like any title.
 export default function Video() {

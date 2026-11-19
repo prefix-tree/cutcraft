@@ -14,7 +14,7 @@ import {
   Title,
   Track,
   TypeCard,
-} from "@cutcraft/kit";
+} from "@uberscene/kit";
 
 import { manifest } from "../../../player/e2e/app/composition";
 import { mediaDir } from "../../../player/e2e/gen-media";
@@ -139,7 +139,7 @@ describe("checkLayout", () => {
 
   it("points each issue at its place in the JSX, as a compiler does", async () => {
     const text = [
-      'import { Composition, Shape, Track } from "@cutcraft/kit";',
+      'import { Composition, Shape, Track } from "@uberscene/kit";',
       "",
       "function Dot({ id }: { id: string }) {",
       '  return <Shape id={id} shape="circle" width={60} height={60} fill="#f00" start={0} duration={1} transform={{ position: { x: 300, y: 0 } }} />;',
@@ -199,7 +199,7 @@ describe("checkLayout", () => {
 
   it("points an element a loop made at the JSX in the loop, and lists issues by line", async () => {
     const text = [
-      'import { Composition, Shape, Track } from "@cutcraft/kit";',
+      'import { Composition, Shape, Track } from "@uberscene/kit";',
       "export default function Video() {",
       "  return (",
       '    <Composition id="v" fps={10} width={640} height={360}>',

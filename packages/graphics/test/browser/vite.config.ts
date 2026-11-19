@@ -9,8 +9,8 @@ export default defineConfig({
   logLevel: "error",
   resolve: {
     alias: {
-      "@cutcraft/kit": src("../../../kit/src/index.ts"),
-      "@cutcraft/player": src("../../../player/src/index.ts"),
+      "@uberscene/kit": src("../../../kit/src/index.ts"),
+      "@uberscene/player": src("../../../player/src/index.ts"),
     },
     dedupe: ["react", "react-dom", "three"],
   },

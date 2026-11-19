@@ -1,7 +1,7 @@
 // A run of colour effects drawn as one pass must look like the same effects drawn one pass each. The separate version
 // puts an effect of the file's own that changes nothing between each pair, which breaks every run. Both are drawn on
 // the goldens' chart and compared within the golden tolerance; fusing only removes the 8-bit rounding between passes.
-// Needs a Chrome or Chromium 153+ in CUTCRAFT_CHROMIUM.
+// Needs a Chrome or Chromium 153+ in UBERSCENE_CHROMIUM.
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -59,7 +59,7 @@ async function still(name: string, effects: string): Promise<string> {
   const manifest = { assets: { ...mediaManifest.assets, warm: { id: "warm", kind: "lut" as const, duration: 0 } } };
   writeFileSync(
     file,
-    `import { Clip, Composition, effect, Effect, Track } from "@cutcraft/kit";
+    `import { Clip, Composition, effect, Effect, Track } from "@uberscene/kit";
 export const manifest = ${JSON.stringify(manifest)};
 ${CHART}
 export default function Video() {

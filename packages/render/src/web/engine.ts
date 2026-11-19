@@ -1,8 +1,8 @@
 // The export engine: headless Chrome runs the real Player and draws each frame (footage, titles, three.js, Motion, CSS,
 // any React), captures it with drawElementImage and encodes it with WebCodecs. It also mixes and encodes the soundtrack
 // and measures the overlays for the layout check. Node serves the page, asks for pieces, and joins what comes back.
-import type { AssetManifest } from "@cutcraft/kit";
-import type { MediaResolver } from "@cutcraft/player/engine";
+import type { AssetManifest } from "@uberscene/kit";
+import type { MediaResolver } from "@uberscene/player/engine";
 
 import type { FontFile } from "../fonts";
 import { findChrome } from "./chrome";
@@ -40,7 +40,7 @@ export interface BrowserEngineOptions {
   readonly media: MediaResolver;
   /** Every face to set text in: the file's, read in Node, and any passed beside it (`--font`). */
   readonly fonts?: readonly FontFile[];
-  /** A Chrome or Chromium binary; default `CUTCRAFT_CHROMIUM`, then Chrome for Testing from the cache (see `findChrome`). */
+  /** A Chrome or Chromium binary; default `UBERSCENE_CHROMIUM`, then Chrome for Testing from the cache (see `findChrome`). */
   readonly executablePath?: string;
   /** Pages that render pieces at the same time; default 1. */
   readonly tabs?: number;
@@ -114,14 +114,14 @@ export class BrowserEngine {
     try {
       browser = await chromium.launch({ headless: true, args: FLAGS, executablePath }).catch((error: unknown) => {
         throw new Error(
-          `the export could not start Chrome at ${executablePath} (${error instanceof Error ? error.message.split("\n")[0] : String(error)}); set CUTCRAFT_CHROMIUM to a Chrome or Chromium 153+ binary`,
+          `the export could not start Chrome at ${executablePath} (${error instanceof Error ? error.message.split("\n")[0] : String(error)}); set UBERSCENE_CHROMIUM to a Chrome or Chromium 153+ binary`,
         );
       });
       const pages: Page[] = [];
       const tabs = Math.max(1, Math.floor(options.tabs ?? 1));
       for (let i = 0; i < tabs; i++)
         pages.push(await openPage(browser, server.url, i === 0 ? options.warn : undefined));
-      const composition = await (pages[0] as Page).evaluate<PageApi["composition"]>("window.__cutcraft.composition");
+      const composition = await (pages[0] as Page).evaluate<PageApi["composition"]>("window.__uberscene.composition");
       return new BrowserEngine(browser, pages, server, composition, options.warn);
     } catch (error) {
       await browser?.close();
@@ -133,7 +133,7 @@ export class BrowserEngine {
   /** Frames [first, last) encoded into a small container with timestamps from 0, on the next free page. */
   async segment(request: SegmentRequest): Promise<Uint8Array> {
     return this.on(async (page) => {
-      const length = await page.evaluate((r: SegmentRequest) => window.__cutcraft!.segment(r), request);
+      const length = await page.evaluate((r: SegmentRequest) => window.__uberscene!.segment(r), request);
       return read(page, length);
     });
   }
@@ -143,7 +143,7 @@ export class BrowserEngine {
     return this.on(async (page) => {
       const length = await page.evaluate(
         ({ t, type, quality }: { t: number; type: "image/png" | "image/jpeg"; quality: number | undefined }) =>
-          window.__cutcraft!.still(t, type, quality),
+          window.__uberscene!.still(t, type, quality),
         { t, type, quality },
       );
       return read(page, length);
@@ -155,15 +155,15 @@ export class BrowserEngine {
     request: TilesRequest,
   ): Promise<{ tiles: Uint8Array[]; frames: Uint8Array[]; bounds: (readonly InkBounds[])[] }> {
     return this.on(async (page) => {
-      const count = await page.evaluate((r: TilesRequest) => window.__cutcraft!.tiles(r), request);
+      const count = await page.evaluate((r: TilesRequest) => window.__uberscene!.tiles(r), request);
       const tiles: Uint8Array[] = [];
       const frames: Uint8Array[] = [];
       const bounds: (readonly InkBounds[])[] = [];
       for (let i = 0; i < count; i++) {
-        tiles.push(await read(page, await page.evaluate((n: number) => window.__cutcraft!.tile(n), i)));
-        if (request.zone) bounds.push(await page.evaluate((n: number) => window.__cutcraft!.tileBounds(n), i));
+        tiles.push(await read(page, await page.evaluate((n: number) => window.__uberscene!.tile(n), i)));
+        if (request.zone) bounds.push(await page.evaluate((n: number) => window.__uberscene!.tileBounds(n), i));
         if (request.keepFrames)
-          frames.push(await read(page, await page.evaluate((n: number) => window.__cutcraft!.frame(n), i)));
+          frames.push(await read(page, await page.evaluate((n: number) => window.__uberscene!.frame(n), i)));
       }
       return { tiles, frames, bounds };
     });
@@ -172,7 +172,7 @@ export class BrowserEngine {
   /** A picture of the sound of a stretch, with what was measured of it. */
   async listen(request: ListenRequest): Promise<Omit<ListenResult, "length"> & { bytes: Uint8Array }> {
     return this.on(async (page) => {
-      const { length, ...measured } = await page.evaluate((r: ListenRequest) => window.__cutcraft!.listen(r), request);
+      const { length, ...measured } = await page.evaluate((r: ListenRequest) => window.__uberscene!.listen(r), request);
       return { ...measured, bytes: await read(page, length) };
     });
   }
@@ -180,7 +180,7 @@ export class BrowserEngine {
   /** The soundtrack of [from, to), mixed and encoded in the page; null bytes when there is no sound. */
   async audio(request: AudioRequest): Promise<Soundtrack> {
     return this.on(async (page) => {
-      const r = await page.evaluate((req: AudioRequest) => window.__cutcraft!.audio(req), request);
+      const r = await page.evaluate((req: AudioRequest) => window.__uberscene!.audio(req), request);
       return { bytes: r.length > 0 ? await read(page, r.length) : null, codec: r.codec, warnings: r.warnings };
     });
   }
@@ -188,7 +188,7 @@ export class BrowserEngine {
   /** The ink of each overlay and of the captions at `t`, for the layout check. */
   async bounds(t: number, options?: BoundsOptions): Promise<readonly InkBounds[]> {
     return this.on((page) =>
-      page.evaluate((r: { t: number; options?: BoundsOptions }) => window.__cutcraft!.bounds(r.t, r.options), {
+      page.evaluate((r: { t: number; options?: BoundsOptions }) => window.__uberscene!.bounds(r.t, r.options), {
         t,
         ...(options ? { options } : {}),
       }),
@@ -198,7 +198,7 @@ export class BrowserEngine {
   /** Asset errors the pages' players have reported so far, with the resolver's reason for media it could not serve. */
   async errors(): Promise<readonly string[]> {
     const all = await Promise.all(
-      this.pages.map((p) => p.evaluate<readonly string[]>("[...window.__cutcraft.errors]")),
+      this.pages.map((p) => p.evaluate<readonly string[]>("[...window.__uberscene.errors]")),
     );
     return [...new Set([...this.server.mediaErrors, ...all.flat()])];
   }
@@ -206,7 +206,7 @@ export class BrowserEngine {
   async close(): Promise<void> {
     // Said once, here, so every command that drew frames reports it.
     const counts = await Promise.all(
-      this.pages.map((p) => p.evaluate<number>("window.__cutcraft.paintFallbacks").catch(() => 0)),
+      this.pages.map((p) => p.evaluate<number>("window.__uberscene.paintFallbacks").catch(() => 0)),
     );
     const fallbacks = counts.reduce((a, b) => a + b, 0);
     if (fallbacks > 0)
@@ -245,13 +245,13 @@ async function openPage(browser: Browser, url: string, warn: ((m: string) => voi
   });
   await page.goto(url);
   await page
-    .waitForFunction("window.__cutcraft !== undefined || window.__cutcraftError !== undefined", undefined, {
+    .waitForFunction("window.__uberscene !== undefined || window.__ubersceneError !== undefined", undefined, {
       timeout: 60_000,
     })
     .catch(() => {
       throw new Error(`the export page did not load${pageErrors.length ? `: ${pageErrors.join("; ")}` : ""}`);
     });
-  const failed = await page.evaluate<string | undefined>("window.__cutcraftError");
+  const failed = await page.evaluate<string | undefined>("window.__ubersceneError");
   if (failed) throw new Error(`the export page could not load the file: ${failed.split("\n")[0]}`);
   return page;
 }
@@ -260,7 +260,7 @@ async function read(page: Page, length: number): Promise<Uint8Array> {
   const bytes = new Uint8Array(length);
   for (let offset = 0; offset < length; offset += READ_CHUNK) {
     const part = await page.evaluate(
-      ({ offset, size }: { offset: number; size: number }) => window.__cutcraft!.read(offset, size),
+      ({ offset, size }: { offset: number; size: number }) => window.__uberscene!.read(offset, size),
       { offset, size: READ_CHUNK },
     );
     bytes.set(Buffer.from(part, "base64"), offset);
@@ -279,6 +279,6 @@ async function loadChromium(): Promise<Chromium> {
 
 declare global {
   interface Window {
-    __cutcraft?: PageApi;
+    __uberscene?: PageApi;
   }
 }

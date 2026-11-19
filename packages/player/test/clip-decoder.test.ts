@@ -1,4 +1,4 @@
-import { ClipDecoder, QUEUE_MAX, QUEUE_TARGET } from "@cutcraft/player";
+import { ClipDecoder, QUEUE_MAX, QUEUE_TARGET } from "@uberscene/player";
 
 import { FakeFrameSource, flush } from "./helpers/fakes";
 import { childrenOf, makeState } from "./helpers/state";

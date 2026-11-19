@@ -1,5 +1,5 @@
 // The Chrome the export runs in. Every export draws its frames in a real browser: a binary you name, or else a Chrome
-// for Testing that CutCraft downloads once into a cache and reuses.
+// for Testing that UberScene downloads once into a cache and reuses.
 import { homedir } from "node:os";
 import { join } from "node:path";
 
@@ -13,14 +13,14 @@ import {
 } from "@puppeteer/browsers";
 
 /**
- * The Chrome milestone CutCraft downloads: the one CI tests against. The export needs HTML-in-Canvas
+ * The Chrome milestone UberScene downloads: the one CI tests against. The export needs HTML-in-Canvas
  * (`drawElementImage`, with `content="drawable"`), which Chrome 157 ships behind the CanvasDrawElement feature.
  */
 export const CHROME_MILESTONE = "157";
 
-/** Where downloaded browsers live: `CUTCRAFT_BROWSER_CACHE`, else `~/.cache/cutcraft/browsers`. */
+/** Where downloaded browsers live: `UBERSCENE_BROWSER_CACHE`, else `~/.cache/uberscene/browsers`. */
 export function browserCacheDir(): string {
-  return process.env.CUTCRAFT_BROWSER_CACHE ?? join(homedir(), ".cache", "cutcraft", "browsers");
+  return process.env.UBERSCENE_BROWSER_CACHE ?? join(homedir(), ".cache", "uberscene", "browsers");
 }
 
 export interface FindChromeOptions {
@@ -33,17 +33,17 @@ export interface FindChromeOptions {
 }
 
 /**
- * The binary the export launches: `executablePath`, else `CUTCRAFT_CHROMIUM`, else a Chrome for Testing of
+ * The binary the export launches: `executablePath`, else `UBERSCENE_CHROMIUM`, else a Chrome for Testing of
  * `CHROME_MILESTONE` already in the cache, else that Chrome downloaded into the cache now.
  */
 export async function findChrome(options: FindChromeOptions = {}): Promise<string> {
-  const named = options.executablePath ?? process.env.CUTCRAFT_CHROMIUM;
+  const named = options.executablePath ?? process.env.UBERSCENE_CHROMIUM;
   if (named) return named;
   const cached = await cachedChrome();
   if (cached) return cached;
   if (options.download === false)
     throw new Error(
-      `no Chrome ${CHROME_MILESTONE} in ${browserCacheDir()}; run \`cutcraft browser install\`, or set CUTCRAFT_CHROMIUM to a Chrome or Chromium 153+ binary`,
+      `no Chrome ${CHROME_MILESTONE} in ${browserCacheDir()}; run \`uberscene browser install\`, or set UBERSCENE_CHROMIUM to a Chrome or Chromium 153+ binary`,
     );
   return installChrome(options.log);
 }
@@ -61,7 +61,7 @@ export async function installChrome(log: (message: string) => void = () => undef
   const platform = detectBrowserPlatform();
   if (!platform)
     throw new Error(
-      "Chrome for Testing has no build for this platform; set CUTCRAFT_CHROMIUM to a Chrome or Chromium 153+ binary",
+      "Chrome for Testing has no build for this platform; set UBERSCENE_CHROMIUM to a Chrome or Chromium 153+ binary",
     );
   const cacheDir = browserCacheDir();
   let buildId: string;
@@ -69,7 +69,7 @@ export async function installChrome(log: (message: string) => void = () => undef
     buildId = await resolveBuildId(Browser.CHROME, platform, CHROME_MILESTONE);
   } catch (error) {
     throw new Error(
-      `could not look up Chrome ${CHROME_MILESTONE} (${error instanceof Error ? error.message : String(error)}); set CUTCRAFT_CHROMIUM to a Chrome or Chromium 153+ binary`,
+      `could not look up Chrome ${CHROME_MILESTONE} (${error instanceof Error ? error.message : String(error)}); set UBERSCENE_CHROMIUM to a Chrome or Chromium 153+ binary`,
     );
   }
   log(`downloading Chrome ${buildId} into ${cacheDir} (once)`);

@@ -1,12 +1,12 @@
-import { type AssetManifest, collectModule, type ResolvedState, resolve } from "@cutcraft/kit";
-import { lint } from "@cutcraft/kit/source";
-import { Player } from "@cutcraft/player";
-import "@cutcraft/player/fonts.css";
+import { type AssetManifest, collectModule, type ResolvedState, resolve } from "@uberscene/kit";
+import { lint } from "@uberscene/kit/source";
+import { Player } from "@uberscene/player";
+import "@uberscene/player/fonts.css";
 
 import { useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 
-import manifestJson from "../cutcraft.json";
+import manifestJson from "../uberscene.json";
 import * as file from "../video";
 import text from "../video.tsx?raw";
 

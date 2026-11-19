@@ -1,7 +1,7 @@
 # Free code
 
 When the ready-made elements don't draw what you want, draw it yourself. The timeline part of a file uses
-CutCraft's elements, so an editor can trim and move things, but what you draw is up to you. A `<Layer>` holds any
+UberScene's elements, so an editor can trim and move things, but what you draw is up to you. A `<Layer>` holds any
 React component: hooks, CSS 3D transforms, filters and blend modes, a canvas, WebGL, a chart library. `<Three>` and
 `<Motion>` bring three.js and Motion onto the timeline.
 
@@ -88,14 +88,14 @@ video's. The live preview runs these on the browser's clock, which agrees with t
 The lint warns about what goes off the video's clock:
 
 - timers (`setTimeout`, `setInterval`);
-- `Math.random()`: use `random(seed)` from `@cutcraft/kit`, which is the same number in the preview too;
+- `Math.random()`: use `random(seed)` from `@uberscene/kit`, which is the same number in the preview too;
 - clock globals reached through `window`;
 - `<video>` and `<audio>` elements: use `<Clip>` and `<Audio>`;
 - canvases created with `willReadFrequently`.
 
 ## Animation helpers
 
-`@cutcraft/kit` exports four pure functions for shaping time:
+`@uberscene/kit` exports four pure functions for shaping time:
 
 | Function | Does |
 |---|---|
@@ -122,7 +122,7 @@ a number that counts, a row of cells. The kit has each as a part. They are React
 read the layer's clock; they go inside an `<svg>` and take the SVG props of what they draw.
 
 ```tsx
-import { Cells, CountUp, DrawnLine, Label, Layer } from "@cutcraft/kit";
+import { Cells, CountUp, DrawnLine, Label, Layer } from "@uberscene/kit";
 
 <Layer id="lamp" anchor="hook" at="word:14" duration={{ until: "hook" }}>
   <svg width={1080} height={1920} style={{ position: "absolute", inset: 0, color: "white" }}>
@@ -153,7 +153,7 @@ Each part says when it happens one of two ways, and how long it takes. These pro
 
 A label's line leaves from the edge of the word that faces the point, so it never runs through the letters; `side`
 picks the edge when the guess is wrong. A label names itself for the layout check (its text in lower case, or
-`name`), and `Cells` takes a `name`, so `cutcraft where` and `--check-layout` see them as parts of the layer.
+`name`), and `Cells` takes a `name`, so `uberscene where` and `--check-layout` see them as parts of the layer.
 
 `useProgress({ at, after, over, easing })` is the arithmetic the parts share, for your own drawing: 0 before, 1
 after, eased between. `progress(clock, when)` is the same for a clock you already hold.
@@ -165,7 +165,7 @@ every cell with its `index`, `column`, `row` and box, and `rect(column, row)` fo
 yours, in a `div`, an SVG or a canvas:
 
 ```tsx
-import { grid, random, useT } from "@cutcraft/kit";
+import { grid, random, useT } from "@uberscene/kit";
 
 const board = grid({ columns: 8, rows: 15, width: 1080, height: 2025, y: -52 });
 const LETTERS = [..."ABCDEFGHJKLMNPRSTUVWXYZ"];
@@ -194,7 +194,7 @@ for which step the game has reached, and `random` for its wall.
 ## Naming what you draw
 
 Give an element a `data-name` and the tools can tell it from the rest of the layer: the layout check reports it by
-that name, and `cutcraft where` lists it with its place on the frame
+that name, and `uberscene where` lists it with its place on the frame
 ([Where things are](/guide/checking#where-things-are-at-a-moment)).
 
 ```tsx
@@ -273,8 +273,8 @@ and options such as `duration`, `at`, `ease` and `delay`:
 ### Inside a plain Layer
 
 Inside a plain `<Layer>`, use the same libraries through adapters that follow the layer's clock: `<ThreeScene>` from
-`@cutcraft/graphics/three` (a React Three Fiber canvas), and `useTimeline(sequence)` and `useLayerTime()` from
-`@cutcraft/graphics/motion`. A bare `<Canvas>`, Motion's `animate()`, or a `motion` element with `animate` or
+`@uberscene/graphics/three` (a React Three Fiber canvas), and `useTimeline(sequence)` and `useLayerTime()` from
+`@uberscene/graphics/motion`. A bare `<Canvas>`, Motion's `animate()`, or a `motion` element with `animate` or
 `whileInView` runs on its library's own clock, and the lint points you to the adapter.
 
 ## Effects and transitions of your own
@@ -285,13 +285,13 @@ shows how.
 
 ## Libraries
 
-What a file may import is up to the app that loads it. By default that is `react`, `zod` and `@cutcraft/kit`. To
+What a file may import is up to the app that loads it. By default that is `react`, `zod` and `@uberscene/kit`. To
 offer three.js and Motion, call `installFreeCodeLibraries()` once, before the player mounts, and pass what it returns
 to `loadModule`:
 
 ```ts
-import { installFreeCodeLibraries } from "@cutcraft/graphics/libraries";
-import { loadModule } from "@cutcraft/kit/source";
+import { installFreeCodeLibraries } from "@uberscene/graphics/libraries";
+import { loadModule } from "@uberscene/kit/source";
 
 const imports = installFreeCodeLibraries();
 const video = loadModule(source, { imports });

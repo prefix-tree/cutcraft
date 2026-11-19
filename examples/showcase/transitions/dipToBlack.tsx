@@ -1,4 +1,4 @@
-import { Clip, Composition, Track, Transition } from "@cutcraft/kit";
+import { Clip, Composition, Track, Transition } from "@uberscene/kit";
 
 // dipToBlack: Fades out to black, then in to the next clip.
 export default function Video() {

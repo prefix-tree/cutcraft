@@ -1,7 +1,7 @@
 // The pictures shaders read besides the element's own: an effect param that names an asset (`"asset:ID"`). A LUT
 // (`.cube`) becomes a 3D table of colours, an image a 2D picture. Each is fetched through the media resolver once and
 // kept; the compositor waits for the ones a frame needs before it paints.
-import { type AssetManifest, assetIdOf, type CubeLut, lookupAsset, parseCube } from "@cutcraft/kit";
+import { type AssetManifest, assetIdOf, type CubeLut, lookupAsset, parseCube } from "@uberscene/kit";
 
 import type { ShaderPass } from "../model/shaders";
 import type { MediaResolver } from "../types";

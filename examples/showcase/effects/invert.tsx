@@ -1,4 +1,4 @@
-import { Clip, Composition, Effect, Keyframe, Track } from "@cutcraft/kit";
+import { Clip, Composition, Effect, Keyframe, Track } from "@uberscene/kit";
 
 // invert: Turns the picture into its negative.
 export default function Video() {

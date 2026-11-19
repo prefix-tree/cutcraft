@@ -1,5 +1,5 @@
 // `whereThings`: where each overlay, the captions and each part a layer's code named are at a moment.
-// Needs a Chrome or Chromium 153+ in CUTCRAFT_CHROMIUM.
+// Needs a Chrome or Chromium 153+ in UBERSCENE_CHROMIUM.
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -23,7 +23,7 @@ afterAll(() => rmSync(scratch, { recursive: true, force: true }));
 
 // A portrait frame with a layer that draws three named parts (a block, an SVG group, an SVG label), a plain layer,
 // and captions the SVG label sits on.
-const VIDEO = `import { Caption, Captions, Composition, Layer, Track } from "@cutcraft/kit";
+const VIDEO = `import { Caption, Captions, Composition, Layer, Track } from "@uberscene/kit";
 export const manifest = { assets: {} };
 export default function Video() {
   return (
@@ -132,7 +132,7 @@ describe("where things are", () => {
     const file = join(dir, "effect.tsx");
     writeFileSync(
       file,
-      `import { Composition, Effect, Layer, Track } from "@cutcraft/kit";
+      `import { Composition, Effect, Layer, Track } from "@uberscene/kit";
 export const manifest = { assets: {} };
 export default function Video() {
   return (
@@ -197,7 +197,7 @@ export default function Video() {
 
   it("leaves out a part the code itself has hidden, and finds each layer's own part of a shared name", async () => {
     const file = join(dir, "twins.tsx");
-    const text = `import { Composition, Layer, Track } from "@cutcraft/kit";
+    const text = `import { Composition, Layer, Track } from "@uberscene/kit";
 export const manifest = { assets: {} };
 export default function Video() {
   return (
@@ -238,7 +238,7 @@ export default function Video() {
     const file = join(dir, "parts.tsx");
     writeFileSync(
       file,
-      `import { Cells, Composition, DrawnLine, Label, Layer, Track } from "@cutcraft/kit";
+      `import { Cells, Composition, DrawnLine, Label, Layer, Track } from "@uberscene/kit";
 export const manifest = { assets: {} };
 export default function Video() {
   return (
@@ -277,7 +277,7 @@ export default function Video() {
   });
 
   it("takes a layer that calls itself a ground for one: it covers nothing and leaves no zone", async () => {
-    const scrim = (ground: boolean) => `import { Caption, Captions, Composition, Layer, Track } from "@cutcraft/kit";
+    const scrim = (ground: boolean) => `import { Caption, Captions, Composition, Layer, Track } from "@uberscene/kit";
 export const manifest = { assets: {} };
 export default function Video() {
   return (

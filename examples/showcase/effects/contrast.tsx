@@ -1,4 +1,4 @@
-import { Clip, Composition, Effect, Keyframe, Track } from "@cutcraft/kit";
+import { Clip, Composition, Effect, Keyframe, Track } from "@uberscene/kit";
 
 // contrast: Pushes lights and darks apart, or pulls them together.
 export default function Video() {

@@ -1,4 +1,4 @@
-# @cutcraft/kit
+# @uberscene/kit
 
 ## 0.4.0
 

@@ -8,7 +8,7 @@ import {
   type InputVideoTrack,
 } from "mediabunny";
 
-import { motionBlurOf, type ResolvedState } from "@cutcraft/kit";
+import { motionBlurOf, type ResolvedState } from "@uberscene/kit";
 import {
   buildFramePlan,
   coversCanvas,
@@ -18,7 +18,7 @@ import {
   OVERLAY_KINDS,
   PICK_EPS,
   visiblePlacements,
-} from "@cutcraft/player/engine";
+} from "@uberscene/player/engine";
 
 import type { VideoCodec } from "./encoding";
 import { compatibleConfig } from "./join";

@@ -10,13 +10,13 @@ import {
   TRANSITION_TYPES,
   TRANSITIONS,
   VIDEO_EFFECT_TYPES,
-} from "@cutcraft/kit";
-import { loadModule } from "@cutcraft/kit/source";
+} from "@uberscene/kit";
+import { loadModule } from "@uberscene/kit/source";
 
 const errorsOf = (body: string) =>
   resolve(
     collectModule(
-      loadModule(`import { Clip, Composition, Effect, Title, Track, Transition } from "@cutcraft/kit";
+      loadModule(`import { Clip, Composition, Effect, Title, Track, Transition } from "@uberscene/kit";
 export default function V() {
   return <Composition fps={30} width={640} height={360}><Track id="t">${body}</Track></Composition>;
 }`) as never,

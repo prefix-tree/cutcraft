@@ -9,12 +9,12 @@ import {
   resolve,
   Three,
   Track,
-} from "@cutcraft/kit";
-import { buildSourceIndex, foldToSource, lint, loadModule } from "@cutcraft/kit/source";
+} from "@uberscene/kit";
+import { buildSourceIndex, foldToSource, lint, loadModule } from "@uberscene/kit/source";
 
 const manifest = { assets: {} };
 
-const text = `import { Composition, Motion, Three, Track } from "@cutcraft/kit";
+const text = `import { Composition, Motion, Three, Track } from "@uberscene/kit";
 
 export const manifest = { assets: {} };
 

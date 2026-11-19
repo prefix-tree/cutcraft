@@ -1,20 +1,20 @@
-<p align="center"><img src="https://raw.githubusercontent.com/prefix-tree/cutcraft/main/docs/public/logo.svg" width="64" alt="CutCraft"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/prefix-tree/cutcraft/main/docs/public/logo.svg" width="64" alt="UberScene"></p>
 
-# @cutcraft/kit
+# @uberscene/kit
 
-The core of [CutCraft](https://cutcraft.prefixtree.xyz/): the elements a video file is written in, the resolver
+The core of [UberScene](https://cutcraft.prefixtree.xyz/): the elements a video file is written in, the resolver
 that turns a file into exact placements, the actions an editor runs on it, and the tools that write those edits back
 into the file's text. It has no DOM and runs anywhere.
 
 ```sh
-npm install @cutcraft/kit react zod
+npm install @uberscene/kit react zod
 ```
 
 ## A file
 
 ```tsx
 import { z } from "zod";
-import { Clip, Composition, Title, Track, Transition } from "@cutcraft/kit";
+import { Clip, Composition, Title, Track, Transition } from "@uberscene/kit";
 
 export const schema = z.object({ title: z.string(), accent: z.string() });
 export const defaults = { title: "Why we built it", accent: "#ff5a1f" };
@@ -42,8 +42,8 @@ its word when the clip moves. Each timeline element has a literal `id`. A track 
 ## Using it
 
 ```ts
-import { collectModule, resolve, Executor } from "@cutcraft/kit";
-import { lint, foldToSource } from "@cutcraft/kit/source";
+import { collectModule, resolve, Executor } from "@uberscene/kit";
+import { lint, foldToSource } from "@uberscene/kit/source";
 import * as file from "./video";
 
 const state = resolve(collectModule(file), manifest);      // every element placed in time, by id
@@ -59,11 +59,11 @@ const { text: edited } = foldToSource(text, exec.log(), exec.state());   // the 
 |---|---|
 | `collectModule(mod)`, `resolve(tree, manifest, log?)` | Read a file and place everything in it: sequences, gaps, transitions, anchors, `fill` and `match` durations, transcript references and multicam cuts. Errors are typed and point at the element that caused them. A change costs about 2 µs per element, and placements that did not change keep their identity, so a UI can memoise on them. |
 | `Executor` | Runs 131 editor actions (trim, split, move, ripple, keyframes, captions and more). Each one validates, applies and undoes; history groups a drag into one step. |
-| `@cutcraft/kit/source` | `loadModule(source, { imports })` evaluates a file's text in the browser or in Node; the file may import `react`, `zod` and the kit, plus the modules you pass in `imports`. `buildSourceIndex` maps ids to their place in the text, `foldToSource` writes edits back as small token changes, and `lint` checks the file. |
+| `@uberscene/kit/source` | `loadModule(source, { imports })` evaluates a file's text in the browser or in Node; the file may import `react`, `zod` and the kit, plus the modules you pass in `imports`. `buildSourceIndex` maps ids to their place in the text, `foldToSource` writes edits back as small token changes, and `lint` checks the file. |
 | `interpolate`, `spring`, `random` | Pure animation helpers for free code. `useT()` and `useLayer()` give the current time once a player is mounted. |
 
-The kit doesn't draw anything. [`@cutcraft/player`](https://www.npmjs.com/package/@cutcraft/player) plays a resolved
-file in the browser, and [`cutcraft`](https://www.npmjs.com/package/cutcraft) exports it.
+The kit doesn't draw anything. [`@uberscene/player`](https://www.npmjs.com/package/@uberscene/player) plays a resolved
+file in the browser, and [`uberscene`](https://www.npmjs.com/package/uberscene) exports it.
 
 ## Docs
 

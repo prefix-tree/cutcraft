@@ -19,7 +19,7 @@ export {
 } from "./shader-definition";
 
 /** What every value a file declares (an effect, a transition, a font) carries, so collection can recognise it. */
-export const DECLARED = Symbol.for("cutcraft.declared");
+export const DECLARED = Symbol.for("uberscene.declared");
 
 /**
  * An effect a file declares, as `effect()` returns it: the definition itself, a value with no side effect. Passed as

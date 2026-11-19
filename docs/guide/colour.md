@@ -95,7 +95,7 @@ A look made in a grading tool usually leaves it as a 3D LUT in a `.cube` file. A
 grade with the built-in [`lut`](/reference/effects/lut) effect:
 
 ```bash
-npx cutcraft add teal-orange.cube
+npx uberscene add teal-orange.cube
 ```
 
 ```tsx

@@ -2,8 +2,8 @@
 // to every part, rejects props its schema does not take, and can be written out into the file when a part is edited.
 import { describe, expect, it } from "vitest";
 
-import { type AssetManifest, COMPONENTS, collectModule, Executor, resolve } from "@cutcraft/kit";
-import { bake, buildSourceIndex, foldToSource, lint, loadModule } from "@cutcraft/kit/source";
+import { type AssetManifest, COMPONENTS, collectModule, Executor, resolve } from "@uberscene/kit";
+import { bake, buildSourceIndex, foldToSource, lint, loadModule } from "@uberscene/kit/source";
 
 const manifest: AssetManifest = {
   assets: {
@@ -27,7 +27,7 @@ const manifest: AssetManifest = {
 
 const file = (
   body: string,
-) => `import { Arrow, Background, Badge, Callout, Clip, Composition, Counter, Frame, Highlight, LowerThird, ProgressBar, QuoteCard, Sticker, Track, TypeCard } from "@cutcraft/kit";
+) => `import { Arrow, Background, Badge, Callout, Clip, Composition, Counter, Frame, Highlight, LowerThird, ProgressBar, QuoteCard, Sticker, Track, TypeCard } from "@uberscene/kit";
 
 export default function Video() {
   return (
@@ -179,7 +179,7 @@ describe("components", () => {
     expect(edited).not.toContain("<Badge");
     expect(edited).toMatch(/<Title id="b-text"[^>]*color="#ff0000"/s);
     expect(edited).toContain('<Shape id="b-pill"');
-    expect(edited).toMatch(/import \{[^}]*Shape[^}]*Title[^}]*\} from "@cutcraft\/kit"/);
+    expect(edited).toMatch(/import \{[^}]*Shape[^}]*Title[^}]*\} from "@uberscene\/kit"/);
     // The written-out file resolves to the same parts, now literals the editor can change directly.
     const again = resolve(
       collectModule(loadModule(edited) as never, {}, { index: buildSourceIndex(edited) }),
@@ -192,7 +192,7 @@ describe("components", () => {
 
 describe("what they replace", () => {
   it("say what replaced a <Graphic> a file still uses", () => {
-    const text = `import { Composition, Graphic, Track } from "@cutcraft/kit";
+    const text = `import { Composition, Graphic, Track } from "@uberscene/kit";
 export default function Video() {
   return (
     <Composition fps={30} width={1920} height={1080}>

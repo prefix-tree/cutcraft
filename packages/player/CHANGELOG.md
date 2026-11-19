@@ -1,4 +1,4 @@
-# @cutcraft/player
+# @uberscene/player
 
 ## 0.4.0
 

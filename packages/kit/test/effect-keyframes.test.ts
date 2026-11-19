@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { collectModule, Executor, resolve } from "@cutcraft/kit";
-import { buildSourceIndex, foldToSource, loadModule } from "@cutcraft/kit/source";
+import { collectModule, Executor, resolve } from "@uberscene/kit";
+import { buildSourceIndex, foldToSource, loadModule } from "@uberscene/kit/source";
 
 const manifest = { assets: { city: { id: "city", kind: "video" as const, duration: 10 } } };
 const file = (children: string) => `import { z } from "zod";
-import { Clip, Composition, effect, Effect, Keyframe, Track } from "@cutcraft/kit";
+import { Clip, Composition, effect, Effect, Keyframe, Track } from "@uberscene/kit";
 const own = effect({ name: "own", params: z.object({ amount: z.number().min(0).max(1).default(0.5) }), shader: "vec4 effect(vec2 uv) { return texture(image, uv); }" });
 export default function V() {
   return (

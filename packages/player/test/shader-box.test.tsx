@@ -2,7 +2,7 @@ import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, describe, expect, it } from "vitest";
 
-import { captureWarnings } from "@cutcraft/player";
+import { captureWarnings } from "@uberscene/player";
 
 import { htmlInCanvas } from "../src/react/html-in-canvas";
 import { ShaderBox } from "../src/react/ShaderBox";

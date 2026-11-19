@@ -1,4 +1,4 @@
-import { Clip, Composition, Effect, Keyframe, Track } from "@cutcraft/kit";
+import { Clip, Composition, Effect, Keyframe, Track } from "@uberscene/kit";
 
 // levels: Sets the black point, the white point and the gamma between them.
 export default function Video() {

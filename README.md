@@ -1,6 +1,6 @@
-<p align="center"><img src="docs/public/logo.svg" width="88" alt="CutCraft"></p>
+<p align="center"><img src="docs/public/logo.svg" width="88" alt="UberScene"></p>
 
-<h1 align="center">CutCraft</h1>
+<h1 align="center">UberScene</h1>
 
 <p align="center">
   <b>A React library for making videos and building editors around them.</b>
@@ -8,7 +8,7 @@
 
 <p align="center">
   <a href="https://github.com/prefix-tree/cutcraft/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/prefix-tree/cutcraft/actions/workflows/ci.yml/badge.svg"></a>
-  <a href="https://www.npmjs.com/package/cutcraft"><img alt="npm" src="https://img.shields.io/npm/v/cutcraft?color=black"></a>
+  <a href="https://www.npmjs.com/package/uberscene"><img alt="npm" src="https://img.shields.io/npm/v/uberscene?color=black"></a>
   <a href="https://cutcraft.prefixtree.xyz/"><img alt="Docs" src="https://github.com/prefix-tree/cutcraft/actions/workflows/docs.yml/badge.svg"></a>
   <a href="https://github.com/prefix-tree/cutcraft/actions/workflows/codeql.yml"><img alt="CodeQL" src="https://github.com/prefix-tree/cutcraft/actions/workflows/codeql.yml/badge.svg"></a>
   <a href="LICENSE"><img alt="MIT License" src="https://img.shields.io/badge/license-MIT-black"></a>
@@ -25,7 +25,7 @@
 
 ---
 
-**TL;DR** CutCraft is a React library for making videos and building editors around them.
+**TL;DR** UberScene is a React library for making videos and building editors around them.
 
 It covers multitrack composition, captions, audio, transitions, effects, and your own Motion or three.js graphics,
 plus a browser player and a CLI export. MIT, no paid tier, no watermark.
@@ -37,7 +37,7 @@ Both are good at turning code into video.
 1. Remotion is React, but it isn't MIT: companies need a paid licence.
 2. HyperFrames is open source, but it's built around HeyGen's CLI and Studio app.
 
-CutCraft is a library you can build an editor on. An agent writes the TSX, and a person previews and adjusts the same
+UberScene is a library you can build an editor on. An agent writes the TSX, and a person previews and adjusts the same
 video visually. Edits have undo/redo and are written back to the source as the smallest text change.
 
 It also times things by words and shots instead of seconds, and lets a model check a cut without watching it:
@@ -113,35 +113,35 @@ Everything runs on the video's clock, so scrubbing, seeking and export show the 
 ### Check a cut without watching it
 
 ```
-$ npx cutcraft inspect video.tsx
+$ npx uberscene inspect video.tsx
 video.tsx  1920x1080  30 fps  25.60 s (768 frames)  0 errors
 track main (sequence)
      0.00–5.20     clip        hook  asset:founder 5.60–10.80  words 12–23 "Small software still deserves a real cloud It s…"
      4.80–5.20     transition  x1  crossfade (hook → broll)
      4.80–10.80    clip        broll  asset:product 6.00–12.00
 
-$ npx cutcraft look video.tsx --out look.png     # a contact sheet of the frames worth seeing
+$ npx uberscene look video.tsx --out look.png     # a contact sheet of the frames worth seeing
 ```
 
 ## Quick start
 
 ```sh
-npm install cutcraft @cutcraft/kit react zod
-npx cutcraft hello.tsx --out hello.mp4
+npm install uberscene @uberscene/kit react zod
+npx uberscene hello.tsx --out hello.mp4
 ```
 
 The [guide](https://cutcraft.prefixtree.xyz/guide/getting-started) starts with a video that needs no footage. For
-coding agents there is an [Agent Skill](plugins/cutcraft): `/plugin marketplace add prefix-tree/cutcraft`.
+coding agents there is an [Agent Skill](plugins/uberscene): `/plugin marketplace add prefix-tree/cutcraft`.
 
 ## Packages
 
 | Package | What it is |
 |---|---|
-| [`cutcraft`](packages/cli) | CLI: export, inspect, contact sheets, layout checks. |
-| [`@cutcraft/kit`](packages/kit) | Elements, timing, editor actions with undo, write-back to source. |
-| [`@cutcraft/player`](packages/player) | Browser player and React `<Player>`. |
-| [`@cutcraft/render`](packages/render) | Export as a library. |
-| [`@cutcraft/graphics`](packages/graphics) | three.js and Motion on the video's clock. |
+| [`uberscene`](packages/cli) | CLI: export, inspect, contact sheets, layout checks. |
+| [`@uberscene/kit`](packages/kit) | Elements, timing, editor actions with undo, write-back to source. |
+| [`@uberscene/player`](packages/player) | Browser player and React `<Player>`. |
+| [`@uberscene/render`](packages/render) | Export as a library. |
+| [`@uberscene/graphics`](packages/graphics) | three.js and Motion on the video's clock. |
 
 ## Feedback
 

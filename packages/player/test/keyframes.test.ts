@@ -1,4 +1,4 @@
-import { captureWarnings, EASING_FN, ease, keyframedValue } from "@cutcraft/player";
+import { captureWarnings, EASING_FN, ease, keyframedValue } from "@uberscene/player";
 
 import { childrenOf, makeState } from "./helpers/state";
 

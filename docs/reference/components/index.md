@@ -4,7 +4,7 @@ editLink: false
 
 # Components
 
-Ready-made pieces: lower thirds, callouts, counters, cards and the like. Import them from `@cutcraft/kit` and write them on a track like any element. Generated from `packages/kit/src/components` by `pnpm docs:gen`.
+Ready-made pieces: lower thirds, callouts, counters, cards and the like. Import them from `@uberscene/kit` and write them on a track like any element. Generated from `packages/kit/src/components` by `pnpm docs:gen`.
 
 <div class="cc-cards">
 <PreviewCard code hover title="LowerThird" link="/reference/components/lower-third" src="previews/components/lower-third" text="A name and a role in the lower third, on a card or beside an accent bar." />

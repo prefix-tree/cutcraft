@@ -1,4 +1,4 @@
-import { Clip, Composition, Effect, Keyframe, Track } from "@cutcraft/kit";
+import { Clip, Composition, Effect, Keyframe, Track } from "@uberscene/kit";
 
 // exposure: Brightens or darkens in stops, as a camera would.
 export default function Video() {

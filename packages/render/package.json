@@ -1,5 +1,5 @@
 {
-  "name": "@cutcraft/render",
+  "name": "@uberscene/render",
   "version": "0.4.0",
   "description": "The export: a cut file to MP4, WebM, MP3 or WAV, drawn by the real player in headless Chrome.",
   "keywords": [
@@ -51,9 +51,9 @@
     "test:browser": "vitest run -c vitest.browser.config.ts"
   },
   "dependencies": {
-    "@cutcraft/graphics": "workspace:*",
-    "@cutcraft/kit": "workspace:*",
-    "@cutcraft/player": "workspace:*",
+    "@uberscene/graphics": "workspace:*",
+    "@uberscene/kit": "workspace:*",
+    "@uberscene/player": "workspace:*",
     "@mediabunny/aac-encoder": "1.65.2",
     "@mediabunny/mp3-encoder": "1.65.2",
     "@puppeteer/browsers": "^3.2.6",

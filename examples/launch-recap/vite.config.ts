@@ -9,10 +9,10 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      "@cutcraft/kit/source": here("../../packages/kit/src/source/index-public.ts"),
-      "@cutcraft/kit": here("../../packages/kit/src/index.ts"),
-      "@cutcraft/player/fonts.css": here("../../packages/player/fonts.css"),
-      "@cutcraft/player": here("../../packages/player/src/index.ts"),
+      "@uberscene/kit/source": here("../../packages/kit/src/source/index-public.ts"),
+      "@uberscene/kit": here("../../packages/kit/src/index.ts"),
+      "@uberscene/player/fonts.css": here("../../packages/player/fonts.css"),
+      "@uberscene/player": here("../../packages/player/src/index.ts"),
     },
   },
   // The lint runs in the page through the kit's source tools, which pull Babel; Babel reads process.env.

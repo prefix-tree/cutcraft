@@ -12,7 +12,7 @@ import {
   Track,
   useLayer,
   useProgress,
-} from "@cutcraft/kit";
+} from "@uberscene/kit";
 
 // A talking head cut into a short: NASA's Ernie Wright on why there is no lunar eclipse every month, and why the
 // Moon turns red when there is one. Five cuts out of an eight minute interview, each made on a word of the

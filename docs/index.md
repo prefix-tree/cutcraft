@@ -1,6 +1,6 @@
 ---
 layout: page
-title: CutCraft
+title: UberScene
 titleTemplate: Video editor as code
 footer: false
 sidebar: false
@@ -27,17 +27,17 @@ you fine-tune it on a timeline, and it exports to MP4.</p>
 <a class="home-button" href="https://github.com/prefix-tree/cutcraft">GitHub</a>
 </div>
 
-<CopyCommand command="npm install cutcraft @cutcraft/kit react zod" />
+<CopyCommand command="npm install uberscene @uberscene/kit react zod" />
 
 <p class="home-meta">Free and open source · MIT · no watermark · exports MP4, WebM and stills<span class="cc-seal" aria-hidden="true">切</span></p>
 
 </section>
 
-<section class="home-gallery" aria-label="Made with CutCraft">
+<section class="home-gallery" aria-label="Made with UberScene">
 
 <Gallery />
 
-<p class="home-links">Each one is a file rendered by CutCraft's own export. Hover to play; open one to read the file. Also as recipes: <a :href="withBase('/recipes/talking-head')">interviews</a> · <a :href="withBase('/recipes/product-demo')">product demos</a> · <a :href="withBase('/recipes/vertical-podcast')">podcast clips</a> · <a :href="withBase('/recipes/variants')">variants</a> · <a :href="withBase('/examples/')">all examples →</a></p>
+<p class="home-links">Each one is a file rendered by UberScene's own export. Hover to play; open one to read the file. Also as recipes: <a :href="withBase('/recipes/talking-head')">interviews</a> · <a :href="withBase('/recipes/product-demo')">product demos</a> · <a :href="withBase('/recipes/vertical-podcast')">podcast clips</a> · <a :href="withBase('/recipes/variants')">variants</a> · <a :href="withBase('/examples/')">all examples →</a></p>
 
 </section>
 
@@ -115,7 +115,7 @@ CSS or WebGL.</p>
 
 [Quick start](./guide/getting-started) · [Principles](./guide/principles) · [Elements](./reference/elements/) · [CLI](./reference/cli) ·
 [API](./reference/api) · [GitHub](https://github.com/prefix-tree/cutcraft) ·
-[npm](https://www.npmjs.com/package/cutcraft)
+[npm](https://www.npmjs.com/package/uberscene)
 
 </section>
 

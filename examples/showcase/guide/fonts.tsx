@@ -1,4 +1,4 @@
-import { Clip, Composition, googleFont, Title, Track } from "@cutcraft/kit";
+import { Clip, Composition, googleFont, Title, Track } from "@uberscene/kit";
 
 // Two Google Fonts families, downloaded once by the export and loaded from Google by the player.
 const display = googleFont("Titan One");

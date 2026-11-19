@@ -17,7 +17,7 @@ const PACKAGES = [
 ];
 
 const bin = (name) => join(root, "node_modules", ".bin", name);
-const out = mkdtempSync(join(tmpdir(), "cutcraft-packs-"));
+const out = mkdtempSync(join(tmpdir(), "uberscene-packs-"));
 let failed = false;
 try {
   for (const { dir, attw = [] } of PACKAGES) {

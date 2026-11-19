@@ -7,7 +7,7 @@ import {
   type ResolvedState,
   TRANSITION_TYPES,
   type Transform,
-} from "@cutcraft/kit";
+} from "@uberscene/kit";
 
 import { devWarn } from "../warn";
 import { backdropTracks } from "./backdrop";

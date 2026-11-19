@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { Caption, Captions, Composition, Layer, Three, type ThreeSetupFunction, Track, useLayer } from "@cutcraft/kit";
+import { Caption, Captions, Composition, Layer, Three, type ThreeSetupFunction, Track, useLayer } from "@uberscene/kit";
 
 // Every lighting trick a game uses, one at a time. Each trick gets the same small stage twice: on top without the
 // trick, underneath with it. This file holds the opening and the first three; the rest follow the same pattern.

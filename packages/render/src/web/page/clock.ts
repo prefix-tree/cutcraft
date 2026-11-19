@@ -1,8 +1,8 @@
 // The video's clock for the file's own code in an export: `performance.now()`, `Date`, `requestAnimationFrame` and
 // `Math.random()` as names that shadow the page's (the kit's `loadModule` takes them as `scope`). Only the file sees
 // them. React, the player, the capture's own waits and the libraries keep the browser's clock; three.js and Motion are
-// put on the video's by their adapters in @cutcraft/graphics.
-import { random } from "@cutcraft/kit";
+// put on the video's by their adapters in @uberscene/graphics.
+import { random } from "@uberscene/kit";
 
 export interface FreeCodeClock {
   /** What the file's code sees in place of the globals of these names. */

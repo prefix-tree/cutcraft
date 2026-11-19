@@ -1,4 +1,4 @@
-import { Clip, Composition, Effect, Keyframe, Track } from "@cutcraft/kit";
+import { Clip, Composition, Effect, Keyframe, Track } from "@uberscene/kit";
 
 // zoomBlur: Streaks the picture out from a centre.
 export default function Video() {

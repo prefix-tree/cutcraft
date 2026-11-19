@@ -1,5 +1,5 @@
 // Motion blur in the browser export: each frame averages the moments its shutter sees, so a bar moving fast smears
-// into grey where a sharp frame has only black and white. Needs a Chrome or Chromium 153+ in CUTCRAFT_CHROMIUM.
+// into grey where a sharp frame has only black and white. Needs a Chrome or Chromium 153+ in UBERSCENE_CHROMIUM.
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -20,7 +20,7 @@ async function still(name: string, blur: string): Promise<{ grey: number; white:
   const file = join(dir, `${name}.tsx`);
   writeFileSync(
     file,
-    `import { Composition, Motion, Track } from "@cutcraft/kit";
+    `import { Composition, Motion, Track } from "@uberscene/kit";
 export const manifest = { assets: {} };
 export default function Video() {
   return (

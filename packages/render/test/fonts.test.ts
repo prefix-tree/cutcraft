@@ -4,7 +4,7 @@ import { join } from "node:path";
 
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import type { DeclaredFont } from "@cutcraft/kit";
+import type { DeclaredFont } from "@uberscene/kit";
 
 import { directoryResolver } from "../src";
 import { googleCssUrl, loadFonts } from "../src/fonts";

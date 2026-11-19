@@ -29,8 +29,8 @@ in the browser, and runs it under Puppeteer on a server. Neither keeps a second 
 - **The layout check draws each overlay alone** in the page (the others hidden), captures it and reads its ink, so it
   measures what the export draws.
 - **The export downloads its browser.** The first export downloads Chrome for Testing (milestone 157, the one CI
-  tests) into `~/.cache/cutcraft/browsers` with `@puppeteer/browsers`; `cutcraft browser install` does it ahead of
-  time and `CUTCRAFT_CHROMIUM` names another binary. `playwright-core` is a dependency, not an optional peer.
+  tests) into `~/.cache/uberscene/browsers` with `@puppeteer/browsers`; `uberscene browser install` does it ahead of
+  time and `UBERSCENE_CHROMIUM` names another binary. `playwright-core` is a dependency, not an optional peer.
 - **Smart copy stays**, for VP9 into VP9, with the overlay check now in the kit and player rather than in the Node
   overlay plane.
 

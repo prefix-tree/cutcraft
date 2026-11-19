@@ -1,4 +1,4 @@
-import { Background, Composition, Counter, Track } from "@cutcraft/kit";
+import { Background, Composition, Counter, Track } from "@uberscene/kit";
 
 // Counter: a number that counts to its value, then holds, with a label under it.
 export default function Video() {

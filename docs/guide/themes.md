@@ -115,7 +115,7 @@ DM Sans and JetBrains Mono. Each comes in regular and bold, and italic except Sp
 
 ::: details Where the bundled fonts load from
 The export reads them from the `@fontsource` packages. The preview loads them once the app imports
-`@cutcraft/player/fonts.css`.
+`@uberscene/player/fonts.css`.
 :::
 
 ### Use any other family
@@ -157,8 +157,8 @@ Keep the calls at the top of the file with literal arguments, where the editor a
 `brand.otf`, `brand.woff` or `brand.woff2` next to the file (or in the `--media` folder), and the player asks its
 [`media`](./player) for `brand`, which you map to a URL such as `/fonts/brand.woff2`. Both read all four formats.
 
-`googleFont()` works like `next/font`. The first export downloads each face into `~/.cache/cutcraft/fonts` (set
-`CUTCRAFT_FONT_CACHE` to put it elsewhere), and later exports read the copy, so they need no network. The player loads
+`googleFont()` works like `next/font`. The first export downloads each face into `~/.cache/uberscene/fonts` (set
+`UBERSCENE_FONT_CACHE` to put it elsewhere), and later exports read the copy, so they need no network. The player loads
 the face from Google.
 :::
 
@@ -205,8 +205,8 @@ for video. Each entry says:
 Browse it from the command line:
 
 ```sh
-cutcraft fonts --for headline --category condensed
-cutcraft fonts --category condensed --sheet fonts.png --text "ROASTED THIS WEEK"
+uberscene fonts --for headline --category condensed
+uberscene fonts --category condensed --sheet fonts.png --text "ROASTED THIS WEEK"
 ```
 
 The first prints the families as a table. The second also draws them, each setting your words in its heaviest weight

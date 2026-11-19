@@ -2,7 +2,7 @@ import { Canvas, type CanvasProps, useFrame, useThree } from "@react-three/fiber
 import { type CSSProperties, type ReactNode, useCallback, useLayoutEffect, useRef } from "react";
 import * as THREE from "three";
 
-import { holdLayerFrame, useLayer } from "@cutcraft/kit";
+import { holdLayerFrame, useLayer } from "@uberscene/kit";
 
 export type ThreeSceneProps = Omit<CanvasProps, "frameloop">;
 

@@ -1,4 +1,4 @@
-import { Callout, Clip, Composition, Track } from "@cutcraft/kit";
+import { Callout, Clip, Composition, Track } from "@uberscene/kit";
 
 // Callout: a note in a box, with a line drawn to what it is about.
 export default function Video() {

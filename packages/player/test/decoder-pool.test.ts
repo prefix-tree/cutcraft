@@ -5,7 +5,7 @@ import {
   INPUT_IDLE_CLOSE_S,
   ManualClock,
   type PlayerErrorEvent,
-} from "@cutcraft/player";
+} from "@uberscene/player";
 
 import { FakeFrameSource, fakeResolver, flush } from "./helpers/fakes";
 import { DEFAULT_MANIFEST, makeState } from "./helpers/state";

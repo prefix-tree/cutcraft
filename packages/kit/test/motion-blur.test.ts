@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { collectModule, motionBlurOf, resolve, shutterTimes } from "@cutcraft/kit";
-import { loadModule } from "@cutcraft/kit/source";
+import { collectModule, motionBlurOf, resolve, shutterTimes } from "@uberscene/kit";
+import { loadModule } from "@uberscene/kit/source";
 
 const stateOf = (props: string) =>
   resolve(
     collectModule(
-      loadModule(`import { Composition, Track } from "@cutcraft/kit";
+      loadModule(`import { Composition, Track } from "@uberscene/kit";
 export default function Video() {
   return <Composition fps={30} width={640} height={360} ${props}><Track id="t" /></Composition>;
 }`) as never,

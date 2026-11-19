@@ -1,6 +1,6 @@
 # Components
 
-The ready-made components, imported from `@cutcraft/kit`. Positions are pixels from the frame's centre; colours default to theme tokens; each takes the timing props any element takes. Generated from the code by `scripts/gen-docs.ts`; do not edit.
+The ready-made components, imported from `@uberscene/kit`. Positions are pixels from the frame's centre; colours default to theme tokens; each takes the timing props any element takes. Generated from the code by `scripts/gen-docs.ts`; do not edit.
 
 ## `LowerThird`
 

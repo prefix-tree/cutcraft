@@ -16,8 +16,8 @@ import {
   WebMOutputFormat,
 } from "mediabunny";
 
-import type { ResolvedState } from "@cutcraft/kit";
-import { buildAudioPlan, type MediaResolver, makeNestedResolver } from "@cutcraft/player/engine";
+import type { ResolvedState } from "@uberscene/kit";
+import { buildAudioPlan, type MediaResolver, makeNestedResolver } from "@uberscene/player/engine";
 
 import { clippingWarning, createLoudnessMeter, type Loudness } from "../../loudness";
 import { mixPlan } from "../../mixer";
