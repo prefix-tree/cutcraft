@@ -43,7 +43,7 @@
     }
   },
   "scripts": {
-    "build": "tsdown src/index.ts src/cli.ts --dts && vite build -c src/web/vite.config.ts",
+    "build": "tsdown src/index.ts src/cli.ts --dts && vite build -c src/web/vite.config.ts && node scripts/copy-skill.mjs",
     "prepack": "pnpm run build",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run",

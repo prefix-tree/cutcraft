@@ -277,6 +277,47 @@ Inside a plain `<Layer>`, use the same libraries through adapters that follow th
 `@uberscene/graphics/motion`. A bare `<Canvas>`, Motion's `animate()`, or a `motion` element with `animate` or
 `whileInView` runs on its library's own clock, and the lint points you to the adapter.
 
+### Any library that can seek
+
+A GSAP timeline, an Anime.js timeline, a Lottie animation: anything that can be set to a moment plays on the video's
+clock through the kit's `useSeekable`. Build it once, paused, on the element the returned ref is on; the hook seeks it
+to the layer's time (in seconds) on every frame, before the frame is painted, so it scrubs both ways and exports as
+previewed:
+
+```tsx
+import { useSeekable } from "@uberscene/kit";
+import gsap from "gsap";
+
+function Dot() {
+  const ref = useSeekable((el) =>
+    gsap.timeline({ paused: true }).to(el.querySelector(".dot"), { x: 300, duration: 1.5 }),
+  );
+  return <div ref={ref}><div className="dot" /></div>;
+}
+```
+
+When the layer ends, or the object is rebuilt because the `deps` given as the second argument changed, the hook
+calls its `revert`, `destroy` or `kill`, the first it has. A GSAP timeline fits as it is. Other libraries take a few
+lines, because they count in milliseconds or frames:
+
+```tsx
+// Anime.js
+const ref = useSeekable((el) => {
+  const tl = createTimeline({ autoplay: false }).add(el.querySelector(".dot"), { x: 300, duration: 1500 });
+  return { seek: (s) => tl.seek(s * 1000), revert: () => tl.revert() };
+});
+
+// Lottie (lottie-web)
+const ref = useSeekable((el) => {
+  const anim = lottie.loadAnimation({ container: el, animationData, autoplay: false, renderer: "svg" });
+  return { seek: (s) => anim.goToAndStop(s * 1000, false), destroy: () => anim.destroy() };
+});
+```
+
+A `seek` that returns a promise holds the export's frame until it settles. The library is imported like any other
+(below, [Libraries](#libraries)), and its licence is yours to check: GSAP is free to use under its own licence, not
+an open source one.
+
 ## Effects and transitions of your own
 
 A look the built-in effects don't have is a few lines of GLSL, declared in the file with `effect()` or

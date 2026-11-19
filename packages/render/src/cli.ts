@@ -15,6 +15,7 @@ import { renderLook } from "./look";
 import { mediaFolders } from "./manifest-file";
 import { directoryResolver } from "./media";
 import { draftPath, renderVideo } from "./renderer";
+import { installSkill } from "./skills";
 import { renderStill } from "./still";
 import { CHROME_MILESTONE, cachedChrome, installChrome } from "./web/chrome";
 import { formatWhere, whereThings } from "./where";
@@ -34,6 +35,7 @@ const USAGE = `Usage: uberscene <file.tsx> --out <video.mp4|.webm|.mp3|.wav> [--
        uberscene fonts [--for <role>] [--category <category>] [--sheet fonts.png [--text <words>]] [--json]
        uberscene add <media file>... [--manifest <file>] [--id <id>] [--transcript <file>]
        uberscene browser install
+       uberscene skills install [--dir <folder>] [--force]
 
   Every export draws its frames in Chrome. The first one downloads Chrome for Testing ${CHROME_MILESTONE} into
   ~/.cache/uberscene/browsers (or UBERSCENE_BROWSER_CACHE); UBERSCENE_CHROMIUM names a Chrome 153+ to use instead.
@@ -72,6 +74,9 @@ const USAGE = `Usage: uberscene <file.tsx> --out <video.mp4|.webm|.mp3|.wav> [--
                         heaviest weight and its regular one. The first time, Google's are downloaded into the
                         font cache
   --text <words>        (fonts --sheet) the words to set; default "Make It Move 2026"
+  skills install        write the agent skill that ships with this CLI into .claude/skills/uberscene (or --dir
+                        <folder>), so the agent learns this version's commands. Again after an upgrade, it replaces
+                        the folder it wrote; a folder with edits, or one it did not write, wants --force
   add                   write each media file's entry into the manifest (default: the nearest uberscene.json): its
                         kind, length, size, frame rate and sound, read from the file, and its words from the
                         transcript beside it (talk.json from Whisper or ElevenLabs, talk.vtt or talk.srt)
@@ -167,9 +172,26 @@ async function main(): Promise<number> {
       frames: { type: "string" },
       "no-cache": { type: "boolean" },
       listen: { type: "string" },
+      dir: { type: "string" },
+      force: { type: "boolean" },
     },
   });
   if (positionals[0] === "add") return add(positionals.slice(1), values);
+  if (positionals[0] === "skills") {
+    if (positionals[1] !== "install" || positionals.length > 2) {
+      process.stderr.write(USAGE);
+      return 2;
+    }
+    const result = installSkill({
+      ...(values.dir === undefined ? {} : { dir: values.dir }),
+      ...(values.force ? { force: true } : {}),
+    });
+    const from = result.previous && result.previous !== result.version ? ` (was ${result.previous})` : "";
+    process.stderr.write(
+      `the UberScene skill ${result.version}${from} → ${result.dir} (${result.files.length} files)\n`,
+    );
+    return 0;
+  }
   const limit = values["frame-timeout"] === undefined ? undefined : Number(values["frame-timeout"]);
   if (limit !== undefined && !(limit > 0))
     throw new Error(`--frame-timeout wants seconds above 0, got "${values["frame-timeout"]}"`);
