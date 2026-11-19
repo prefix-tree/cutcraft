@@ -3,7 +3,16 @@ import { isKeyframeProperty, VIDEO_EFFECT_TYPES } from "../../jsx/enums";
 import { shaderFor } from "../../jsx/shaders";
 import type { Json, PatchLog } from "../../patches/types";
 import type { ResolvedState } from "../../resolve/resolve";
-import { define, makePropHandler, rawNode, rawProp, setProps, siblingAfter, validateTarget } from "../handler-kit";
+import {
+  define,
+  makePropHandler,
+  onElement,
+  rawNode,
+  rawProp,
+  setProps,
+  siblingAfter,
+  validateTarget,
+} from "../handler-kit";
 import { type ActionError, type ActionType, invalid, type NodeSpec, nodeOfSpec, nodeSpecOf, ok } from "../types";
 
 function childrenOfKind(state: ResolvedState, parentId: string, kind: string) {
@@ -49,6 +58,7 @@ function stackHandlers(ns: "effect", kind: string, types: readonly string[]) {
   const t = <N extends string>(n: N) => `${ns}/${n}` as ActionType;
   define({
     type: t("add") as "effect/add",
+    targets: onElement(),
     validate: (a, state) => {
       const base = validateTarget(state, a.params.id, []);
       if (!base.valid) return base;
@@ -84,6 +94,7 @@ function stackHandlers(ns: "effect", kind: string, types: readonly string[]) {
   });
   define({
     type: t("remove") as "effect/remove",
+    targets: onElement({ when: (item, state) => childrenOfKind(state, item.id, kind).length > 0 }),
     validate: (a, state) => {
       const base = validateTarget(state, a.params.id, []);
       if (!base.valid) return base;
@@ -120,6 +131,7 @@ function stackHandlers(ns: "effect", kind: string, types: readonly string[]) {
   });
   define({
     type: t("update") as "effect/update",
+    targets: onElement({ when: (item, state) => childrenOfKind(state, item.id, kind).length > 0 }),
     validate: (a, state) => {
       const e = requireChild(state, a.params.id, a.params.childId, kind);
       return e ? invalid(e) : validateTarget(state, a.params.childId, ["params"]);
@@ -139,6 +151,7 @@ function stackHandlers(ns: "effect", kind: string, types: readonly string[]) {
   });
   define({
     type: t("toggle") as "effect/toggle",
+    targets: onElement({ when: (item, state) => childrenOfKind(state, item.id, kind).length > 0 }),
     validate: (a, state) => {
       const e = requireChild(state, a.params.id, a.params.childId, kind);
       return e ? invalid(e) : validateTarget(state, a.params.childId, ["enabled"]);
@@ -152,6 +165,7 @@ function stackHandlers(ns: "effect", kind: string, types: readonly string[]) {
   });
   define({
     type: t("setOrder") as "effect/setOrder",
+    targets: onElement(),
     validate: (a, state) => {
       const base = validateTarget(state, a.params.id, []);
       if (!base.valid) return base;
@@ -178,6 +192,7 @@ function stackHandlers(ns: "effect", kind: string, types: readonly string[]) {
   });
   define({
     type: t("setStack") as "effect/setStack",
+    targets: onElement(),
     validate: (a, state) => validateTarget(state, a.params.id, []),
     apply: (a, log, ctx) => replaceAll(log, ctx.before, a.params.id, kind, a.params.nodes, a.params.after),
     invert: (a, before) => ({
@@ -206,6 +221,7 @@ stackHandlers("effect", "effect", VIDEO_EFFECT_TYPES);
 
 define({
   type: "keyframe/add",
+  targets: onElement(),
   validate: (a, state) => {
     const base = validateTarget(state, a.params.id, []);
     if (!base.valid) return base;
@@ -248,6 +264,7 @@ define({
 
 define({
   type: "keyframe/remove",
+  targets: onElement({ when: (item, state) => childrenOfKind(state, item.id, "keyframe").length > 0 }),
   validate: (a, state) => {
     const e = requireChild(state, a.params.id, a.params.keyId, "keyframe");
     return e ? invalid(e) : validateTarget(state, a.params.id, []);
@@ -294,6 +311,11 @@ define(makePropHandler({
 
 define(makePropHandler({
   type: "keyframe/move",
+  targets: onElement({
+    onLocked: true,
+    onOpaque: true,
+    when: (item, state) => childrenOfKind(state, item.id, "keyframe").length > 0,
+  }),
   target: (p) => p.keyId,
   kinds: ["keyframe"],
   write: (p) => ({ at: p.at }),
@@ -307,6 +329,7 @@ define(makePropHandler({
 
 define({
   type: "keyframe/setAll",
+  targets: onElement(),
   validate: (a, state) => validateTarget(state, a.params.id, []),
   apply: (a, log, ctx) => replaceAll(log, ctx.before, a.params.id, "keyframe", a.params.nodes, a.params.after),
   invert: (a, before) => ({

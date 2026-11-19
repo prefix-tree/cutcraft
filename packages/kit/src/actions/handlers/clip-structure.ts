@@ -3,6 +3,7 @@ import { carry, carryRemoval } from "../carry";
 import {
   define,
   isError,
+  onElement,
   placementOf,
   placementProps,
   placeNode,
@@ -64,6 +65,7 @@ addMedia("audio/add", "audio");
 define(carry(
   {
     type: "clip/remove",
+    targets: onElement({ onOpaque: true, when: (item) => capabilitiesOf(item.kind).placementScope === "track" }),
     validate: (a, state) => {
       const item = requireElement(state, a.params.id);
       if (isError(item)) return invalid(item);
@@ -107,6 +109,7 @@ define({
 /** Reorder within a sequence, change start on a free track, or re-anchor; optionally to another track. */
 define({
   type: "clip/move",
+  targets: onElement({ onOpaque: true, literalOnly: true, when: (item) => item.track !== null }),
   validate: (a, state) => {
     const item = requireElement(state, a.params.id);
     if (isError(item)) return invalid(item);

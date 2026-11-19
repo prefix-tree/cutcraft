@@ -351,7 +351,9 @@ From `@uberscene/kit`:
 |---|---|---|
 | `collectModule` | `(mod: VideoModule, overrides?: Record<string, unknown>, options?: CollectOptions) => CollectedTree` | Calls the file's default component with `defaults` and `overrides` and collects the element tree. |
 | `resolve` | `(tree: CollectedTree, manifest: AssetManifest, log?: PatchLog) => ResolvedState` | Absolute placements by id, with the patch log applied. |
-| `Executor` | `new Executor({ tree, manifest, log?, history? })` | Runs actions: `execute(input)`, `undo()`, `redo()`, `state()`, `log()`, `history()`, `beginGroup()`, `endGroup()`, `replaceTree(tree)`. |
+| `Executor` | `new Executor({ tree, manifest, log?, history? })` | Runs actions: `execute(input)`, `can(input)`, `undo()`, `redo()`, `state()`, `log()`, `history()`, `beginGroup()`, `endGroup()`, `replaceTree(tree)`. `can` answers what `execute` would, without changing anything ([Editing](/guide/editing#run-a-gesture)). |
+| `affordances` | `(state: ResolvedState, id: string) => Affordances \| undefined` | What can be done to one element: its kind, whether it is written in the file, its track and lock, how each prop can be written (`literal`, `bound`, `locked`), and the actions about it that accept it. |
+| `actionTarget` | `(input: ActionInput) => string \| undefined` | The element an action is about, or undefined for one that creates something or acts on the whole file. |
 | `useT` | `() => number` | Progress through the enclosing `<Layer>`, 0 to 1. Needs a mounted player. |
 | `useLayer` | `() => LayerClock` | The layer's clock: `t`, `elapsed`, `remaining`, `duration`, `time`, `fps`. Needs a mounted player. |
 | `useSeekable` | `(create: (scope) => Seekable, deps?) => RefObject` | Plays an animation from another library (GSAP, Anime.js, Lottie) on the layer's clock: built once on the ref's element, seeked to the layer's seconds every frame, reverted when the layer ends. Needs a mounted player. |
