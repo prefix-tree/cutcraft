@@ -215,6 +215,15 @@ export const EDITS: readonly Edit[] = [
     }),
   },
   {
+    name: "moves the top track to the bottom",
+    pick: (s) => {
+      // Paint order is file order, so this moves the track's whole block to the top of the file.
+      const tracks = [...s.tracks].sort((a, b) => a.order - b.order);
+      const top = tracks.at(-1);
+      return tracks.length > 1 && top ? { type: "track/reorder", params: { trackId: top.id, position: 0 } } : undefined;
+    },
+  },
+  {
     name: "renames a track",
     pick: (s) => {
       const t = s.tracks.find((track) => track.items.some((id) => s.items.get(id)?.editable === "literal"));

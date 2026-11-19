@@ -56,6 +56,23 @@ describe("fold", () => {
     expect(result.text).toBe(fixtureText);
   });
 
+  it("moves a track and keeps the edits made inside it", async () => {
+    // The moved block is printed anew; an edit inside it must land in that text, not overlap the removed original.
+    const exec = fixtureExecutor();
+    expect(exec.execute({ type: "track/reorder", params: { trackId: "music", position: 0 } }).ok).toBe(true);
+    expect(exec.execute({ type: "audio/setFade", params: { id: "a1", out: 0.5 } }).ok).toBe(true);
+    expect(exec.execute({ type: "audio/setVolume", params: { id: "a1", volume: 0.4 } }).ok).toBe(true);
+    const result = foldToSource(fixtureText, exec.log(), exec.state());
+    expect(result.skipped).toEqual([]);
+    expect(result.text.indexOf('<Track id="music"')).toBeLessThan(result.text.indexOf('<Track id="main"'));
+    expect(result.text.match(/<Audio id="a1"/g)).toHaveLength(1);
+    expect(result.text).toMatch(/<Audio id="a1"[^>]*volume=\{0\.4\}[^>]*fade=\{\{ out: 0\.5 \}\}/);
+    const mod = await evaluate(result.text);
+    const reresolved = resolve(collectModule(mod, {}, { index: buildSourceIndex(result.text) }), manifest);
+    expect(reresolved.errors).toEqual([]);
+    expect(serialize(reresolved)).toEqual(serialize(exec.state()));
+  });
+
   it("re-resolving the folded text equals the patched state", async () => {
     const exec = fixtureExecutor();
     exec.execute({ type: "clip/trim", params: { id: "c2", edge: "out", value: 4.4 } });

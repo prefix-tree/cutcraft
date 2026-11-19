@@ -68,6 +68,10 @@ export function fold(
   const skipped: { id: string; reason: string }[] = [];
   const text = index.text;
   const groups = new Map<string, PlacedGroup>();
+  // A moved element is printed anew at its destination. Edits to it or inside it are made to that text, not to the
+  // original, which is removed: their ranges, by id, and the text they give once applied.
+  const movedSites = new Map<string, Range>();
+  const movedTexts = new Map<string, string>();
   // An effect, transition or font the file declares is written as its identifier (`type={glitch}`), not as its name.
   const idents = declaredIdentifiers(index);
   // Catalogue families this fold writes that the file does not declare yet: `foldToSource` declares them.
@@ -141,7 +145,7 @@ export function fold(
       group = { point, ids: [], texts: new Map(), moved: new Map() };
       groups.set(key, group);
     }
-    group.texts.set(id, print(point.indent));
+    group.texts.set(id, () => print(point.indent));
     if (from) group.moved.set(id, from);
     const behind = at.after === anchor ? -1 : group.ids.indexOf(at.after as string);
     group.ids.splice(behind + 1, 0, id);
@@ -211,8 +215,9 @@ export function fold(
         }
         if (net.place) {
           const original = text.slice(site.range[0], site.range[1]);
-          if (!place(id, net.place, (indent) => reindent(original, site.indent, indent), lineRange(text, site.range)))
-            needsBake.push(net.place.parent);
+          movedSites.set(id, site.range);
+          const printMoved = (indent: string) => reindent(movedTexts.get(id) ?? original, site.indent, indent);
+          if (!place(id, net.place, printMoved, lineRange(text, site.range))) needsBake.push(net.place.parent);
         }
         let newAttrs = -1;
         for (const [prop, value] of net.props) {
@@ -253,11 +258,25 @@ export function fold(
       }
     }
   }
-  for (const group of groups.values()) {
-    const printed = group.ids.map((id) => group.texts.get(id) as string).join("\n");
+  const writeGroup = (group: PlacedGroup): void => {
+    const printed = group.ids.map((id) => (group.texts.get(id) as () => string)()).join("\n");
     edits.push(insertEdit(index, group.ids[0] as string, group.point, printed));
     for (const [id, from] of group.moved) edits.push({ kind: "remove", id, range: from, text: "" });
+  };
+  // Groups that move nothing first: an element inserted into a moved element is then one of its inner edits.
+  for (const group of groups.values()) if (group.moved.size === 0) writeGroup(group);
+  for (const [id, range] of movedSites) {
+    const inner: SourceEdit[] = [];
+    for (let i = edits.length - 1; i >= 0; i--) {
+      const e = edits[i] as SourceEdit;
+      if (e.kind !== "move" && e.range[0] >= range[0] && e.range[1] <= range[1]) {
+        inner.push({ ...e, range: [e.range[0] - range[0], e.range[1] - range[0]] } as SourceEdit);
+        edits.splice(i, 1);
+      }
+    }
+    if (inner.length > 0) movedTexts.set(id, applyEdits(text.slice(range[0], range[1]), inner));
   }
+  for (const group of groups.values()) if (group.moved.size > 0) writeGroup(group);
   // A weight the picker asked for of a family the file already declares: the declaration gains it.
   if (isRecord(picked))
     for (const [family, weights] of Object.entries(picked)) {
@@ -389,7 +408,8 @@ interface PlacedGroup {
   readonly point: InsertionPoint;
   /** In the order the elements will appear. */
   readonly ids: string[];
-  readonly texts: Map<string, string>;
+  /** Each element's text, printed when the group is written, after the edits inside a moved element are known. */
+  readonly texts: Map<string, () => string>;
   /** Moved elements: the line range of their original. */
   readonly moved: Map<string, Range>;
 }
