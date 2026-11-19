@@ -124,10 +124,12 @@ export function carryRemoval(id: string, before: ResolvedState): Carry | null {
   return pre.length > 0 ? { pre } : null;
 }
 
+/** Whether what follows `id` on its track, past any transitions, is a clip a transition can join (not a gap). */
 function hasClipAfter(state: ResolvedState, id: string): boolean {
   const track = state.tracks.find((t) => t.items.includes(id));
   const siblings = track ? (state.tree.byId.get(track.id)?.children ?? []) : [];
-  return siblings.slice(siblings.findIndex((c) => c.id === id) + 1).some((c) => c.kind !== "transition");
+  const next = siblings.slice(siblings.findIndex((c) => c.id === id) + 1).find((c) => c.kind !== "transition");
+  return next !== undefined && next.kind !== "gap";
 }
 
 /**

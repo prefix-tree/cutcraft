@@ -5,6 +5,7 @@ import {
   define,
   insertNode,
   isError,
+  lastChildId,
   makePropHandler,
   placementOf,
   placeNode,
@@ -16,7 +17,7 @@ import {
   uniqueId,
   validateTarget,
 } from "../handler-kit";
-import { type ActionInput, invalid, type NodeSpec, nodeOfSpec, nodeSpecOf, ok } from "../types";
+import { type ActionInput, invalid, type NodeSpec, nodeOfSpec, nodeSpecOf, ok, type PlacementSpec } from "../types";
 
 define({
   type: "multicam/create",
@@ -36,7 +37,7 @@ define({
   apply: (a, log, ctx) => {
     const props: Record<string, Json> = { id: a.params.id };
     if (a.params.sync !== undefined) props.sync = a.params.sync;
-    placeNode(log, ctx.before, a.params.trackId, a.params.place, {
+    placeNode(log, ctx.before, a.params.trackId, byPosition(ctx.before, a.params.trackId, a.params.place), {
       id: a.params.id,
       kind: "multicam",
       props,
@@ -76,7 +77,14 @@ define({
   type: "multicam/restore",
   validate: (a, state) =>
     state.tree.byId.has(a.params.id) ? invalid({ code: "DUPLICATE_ID", message: `"${a.params.id}" exists` }) : ok,
-  apply: (a, log, ctx) => placeNode(log, ctx.before, a.params.trackId, a.params.place, a.params.node),
+  apply: (a, log, ctx) =>
+    placeNode(
+      log,
+      ctx.before,
+      a.params.trackId,
+      byPosition(ctx.before, a.params.trackId, a.params.place),
+      a.params.node,
+    ),
   invert: (a) => ({ type: "multicam/remove", params: { id: a.params.id } }),
   fold: () => [],
 });
@@ -242,4 +250,12 @@ function flattenedClips(state: ResolvedState, id: string): NodeSpec[] {
 function sourceLeft(state: ResolvedState, p: Placement): number {
   const asset = lookupAsset(state.manifest, String(p.props.src));
   return asset && asset.kind !== "image" ? asset.duration - (p.source?.in ?? 0) : Number.POSITIVE_INFINITY;
+}
+
+/**
+ * A multicam has no time props (its angles align at `sync`), so it is placed by position only: a placement by `start`
+ * goes last on its track rather than writing a `start` the element does not take.
+ */
+function byPosition(state: ResolvedState, trackId: string, place: PlacementSpec): PlacementSpec {
+  return { after: "after" in place ? place.after : lastChildId(state, trackId) };
 }

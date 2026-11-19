@@ -15,7 +15,9 @@ export type ActionErrorCode =
   | "DUPLICATE_ID"
   | "UNSUPPORTED_ON_LAYOUT"
   | "UNKNOWN_ACTION"
-  | "NOT_IMPLEMENTED";
+  | "NOT_IMPLEMENTED"
+  /** The action would leave the file with resolve errors it did not have; nothing was applied. */
+  | "BREAKS_FILE";
 
 export interface ActionError {
   readonly code: ActionErrorCode;

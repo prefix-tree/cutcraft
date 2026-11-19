@@ -143,10 +143,10 @@ describe("fold, structural cases", () => {
   it("deletes a prop and converts a string prop to an expression", () => {
     const exec = fixtureExecutor();
     exec.execute({ type: "source/setProps", params: { id: "c2", props: { fit: undefined, transform: undefined } } });
-    exec.execute({ type: "clip/setSource", params: { id: "c3", src: 'asset:we"ird' } });
+    expect(exec.execute({ type: "source/setProps", params: { id: "m1", props: { label: 'we"ird' } } }).ok).toBe(true);
     const { text } = foldToSource(fixtureText, exec.log(), exec.state());
     expect(text).toContain('<Clip id="c2" src="asset:city" duration={3.5}>');
-    expect(text).toContain('src={"asset:we\\"ird"}');
+    expect(text).toContain('label={"we\\"ird"}');
   });
 
   it("bakes multicam cuts into literal clips after the generator", () => {
