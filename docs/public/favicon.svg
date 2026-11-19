@@ -1,7 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="UberScene">
-  <!-- Industrial: a black U cut from a bare slab of safety orange, its stems run off the top edge like girders, one
-       stencil bridge in the base. No outline, no shadow. -->
-  <rect width="512" height="512" fill="#ff5a1f"/>
-  <path d="M96 0H216V312H296V0H416V424H96Z" fill="#0a0a0a"/>
-  <rect x="296" y="312" width="24" height="112" fill="#ff5a1f"/>
+  <!-- The U, black in a light browser theme and off-white in a dark one. -->
+  <style>path{fill:#0a0a0a}@media (prefers-color-scheme:dark){path{fill:#e6e1d6}}</style>
+  <path d="M56 40H164L200 76V340H312V76L348 40H456V380L364 472H148L56 380Z"/>
 </svg>
