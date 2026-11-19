@@ -318,7 +318,10 @@ function replay(
   before: ResolvedState,
 ): { inverses: ActionInput[]; error?: ValidationResult } {
   const inverses: ActionInput[] = [];
-  const log = createPatchLog({ isSource: (id) => before.tree.byId.has(id) });
+  const log = createPatchLog({
+    isSource: (id) => before.tree.byId.has(id),
+    sourceParent: (id) => before.tree.byId.get(id)?.parent ?? null,
+  });
   const tree = before.tree;
   const current = () => resolve(tree, before.manifest, log);
   let state = before;

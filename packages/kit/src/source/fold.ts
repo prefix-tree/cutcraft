@@ -284,7 +284,22 @@ export function fold(
       if (ident && !fonts.has(family) && Array.isArray(weights))
         fonts.set(family, { identifier: ident, weights: weights as number[] });
     }
-  return { edits: lastWriteWins(edits), needsBake: [...new Set(needsBake)], skipped, fonts };
+  return { edits: lastWriteWins(withinRemovals(edits)), needsBake: [...new Set(needsBake)], skipped, fonts };
+}
+
+/**
+ * Edits inside an element that is removed go with it: a keyframe a split moved to the second half, then the first half
+ * deleted, is removed once, as part of its clip.
+ */
+function withinRemovals(edits: SourceEdit[]): SourceEdit[] {
+  const removed = edits.filter((e) => e.kind === "remove" && e.range[0] < e.range[1]);
+  if (removed.length < 2) return edits;
+  const inside = (e: SourceEdit, r: SourceEdit): boolean =>
+    r !== e &&
+    r.range[0] <= e.range[0] &&
+    e.range[1] <= r.range[1] &&
+    (r.range[0] < e.range[0] || e.range[1] < r.range[1]);
+  return edits.filter((e) => e.kind !== "remove" || !removed.some((r) => inside(e, r)));
 }
 
 /** Catalogue families to declare (or whose declaration gains weights), by family. */
