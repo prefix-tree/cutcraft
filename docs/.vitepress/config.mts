@@ -48,7 +48,7 @@ export default defineConfig({
     optimizeDeps: { esbuildOptions: { define: { "process.env.BABEL_TYPES_8_BREAKING": "false" } } },
   },
   themeConfig: {
-    logo: { light: "/logo.svg", dark: "/logo-dark.svg" },
+    logo: "/logo.svg",
     // The top bar names three ways in, as short as a poster (on every page, the landing one included); the sidebar is the map of the docs.
     nav: [
       { text: "Docs", link: "/guide/introduction", activeMatch: "^/(guide|decisions|reference)/" },

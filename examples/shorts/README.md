@@ -17,15 +17,15 @@ head cut out of a real interview, with captions and cards timed by the words of 
 
 ## On the documentation site
 
-`game-lighting.tsx` is on the [examples page](https://cutcraft.prefixtree.xyz/examples#how-game-lighting-fakes-it).
+`game-lighting.tsx` is on the [examples page](https://uberscene.prefixtree.xyz/examples#how-game-lighting-fakes-it).
 Its video and poster in `docs/public/shorts` are made by:
 
 ```sh
 pnpm --filter @uberscene/example-shorts render
 ```
 
-`one-pixel.tsx` is there as well, [under its own heading](https://cutcraft.prefixtree.xyz/examples#one-pixel).
-`lunar-eclipse.tsx` is there too, [with its sound](https://cutcraft.prefixtree.xyz/examples#a-talking-head-with-cards).
+`one-pixel.tsx` is there as well, [under its own heading](https://uberscene.prefixtree.xyz/examples#one-pixel).
+`lunar-eclipse.tsx` is there too, [with its sound](https://uberscene.prefixtree.xyz/examples#a-talking-head-with-cards).
 
 ## Render one
 
