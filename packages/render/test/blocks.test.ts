@@ -14,7 +14,17 @@ afterAll(() => rmSync(scratch, { recursive: true, force: true }));
 describe("listBlocks", () => {
   it("lists the blocks that ship, in name order, each with what it is for, its props and its preview", () => {
     const blocks = listBlocks();
-    expect(blocks.map((b) => b.name)).toEqual(["character-wall", "hundred-cells", "point-list"]);
+    expect(blocks.map((b) => b.name)).toEqual([
+      "bar-race",
+      "character-wall",
+      "chat-reveal",
+      "hundred-cells",
+      "phone-tap",
+      "point-list",
+      "quote-build",
+      "ranked-list",
+      "terminal-typing",
+    ]);
     const cells = blocks.find((b) => b.name === "hundred-cells");
     expect(cells?.component).toBe("HundredCells");
     expect(cells?.useWhen.length).toBeGreaterThan(0);
@@ -27,12 +37,13 @@ describe("listBlocks", () => {
   it("keeps the blocks whose words mention every word of --for", () => {
     expect(listBlocks({ for: "count" }).map((b) => b.name)).toEqual(["hundred-cells"]);
     expect(listBlocks({ for: "Background letters" }).map((b) => b.name)).toEqual(["character-wall"]);
-    expect(listBlocks({ for: "steps" }).map((b) => b.name)).toEqual(["point-list"]);
+    expect(listBlocks({ for: "steps" }).map((b) => b.name)).toEqual(["point-list", "terminal-typing"]);
+    expect(listBlocks({ for: "ranking" }).map((b) => b.name)).toEqual(["bar-race", "ranked-list"]);
     expect(listBlocks({ for: "a word no block has" })).toEqual([]);
   });
 
   it("keeps the blocks laid out for --aspect, and names the shapes it takes", () => {
-    expect(listBlocks({ aspect: "9:16" })).toHaveLength(3);
+    expect(listBlocks({ aspect: "9:16" })).toHaveLength(listBlocks().length);
     expect(listBlocks({ aspect: "16:9" })).toEqual([]);
     expect(() => listBlocks({ aspect: "2:1" })).toThrow(/--aspect wants one of 9:16, 16:9, 1:1, 4:5/);
   });
@@ -50,15 +61,17 @@ describe("formatBlocks", () => {
 });
 
 describe("blockSheet", () => {
-  it("pastes the previews into one image, a row of them, numbered in the listing's order", async () => {
+  it("pastes the previews into one image, four to a row, numbered in the listing's order", async () => {
     const out = join(scratch, "blocks.png");
     const blocks = listBlocks();
     const drawn = await blockSheet(blocks, out);
     const sheet = decodePng(readFileSync(out));
     const cell = decodePng(readFileSync(blocks[0]?.preview as string));
     expect(drawn.names).toEqual(blocks.map((b) => b.name));
-    expect(drawn.columns).toBe(3);
-    expect([sheet.width, sheet.height]).toEqual([3 * cell.width + 4 * 8, cell.height + 2 * 8]);
+    // Four to a row, as many rows as it takes.
+    const rows = Math.ceil(blocks.length / 4);
+    expect(drawn.columns).toBe(4);
+    expect([sheet.width, sheet.height]).toEqual([4 * cell.width + 5 * 8, rows * cell.height + (rows + 1) * 8]);
   });
 
   it("draws nothing for a filter that keeps nothing", async () => {
@@ -81,7 +94,8 @@ describe("uberscene blocks", () => {
   it("writes a sheet with --sheet and lists the blocks drawn on it", () => {
     const out = join(scratch, "cli.png");
     const text = cli("blocks", "--sheet", out);
-    expect(text).toContain("3. point-list");
+    expect(text).toContain("6. point-list");
+    expect(text).toContain("9. terminal-typing");
     expect(decodePng(readFileSync(out)).width).toBeGreaterThan(0);
   });
 });

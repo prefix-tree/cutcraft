@@ -331,9 +331,10 @@ uberscene blocks [--for <job>] [--aspect <shape>] [--sheet blocks.png] [--json]
 ```
 
 Lists the blocks that ship with this version of the CLI, without a file. A block is a scene-sized piece of motion
-design: a grid of cells that fills and counts, a wall of characters, a row of points lit in turn. Each entry says what
-it shows, when to use it and when not, what it pairs with, its props, the props that time it, the file to copy and
-the line that places it.
+design: a grid of cells that fills and counts, a wall of characters, a row of points lit in turn, a ranking that
+reorders, a bar race, a chat reply that types in, a terminal, a phone being tapped, a quote built word by word. Each
+entry says what it shows, when to use it and when not, what it pairs with, its props, the props that time it, the
+file to copy and the line that places it.
 
 | Option | Does |
 |---|---|

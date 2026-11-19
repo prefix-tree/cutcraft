@@ -219,8 +219,9 @@ editable this way, though the Layer itself can still be moved and trimmed.
 ## Blocks
 
 A block is a scene-sized piece of free code made to be placed and tuned: a grid of cells that fills and counts, a
-wall of characters that changes on the beat, a row of points lit in turn. Smaller than a video, bigger than a kit
-component. `uberscene blocks` lists the ones that ship with the CLI, by the job each does, and `--sheet` draws their
+wall of characters that changes on the beat, a row of points lit in turn, a ranking that reorders, bars that race
+over the years, a chat reply that types in, a terminal running commands, a phone being tapped, a quote that builds
+word by word. Smaller than a video, bigger than a kit component. `uberscene blocks` lists the ones that ship with the CLI, by the job each does, and `--sheet` draws their
 previews to choose by looking ([Blocks](/reference/cli#blocks)).
 
 A block is one file: its component, its props `schema` with a label for each, its `defaults`, and a `meta` that says
