@@ -166,8 +166,9 @@ export default function Video({ product, who }: z.infer<typeof schema>) {
   Describe each schema value by what it means on screen (`.describe("Name on the lower third")`): that is the
   editor's label. Mark a colour, font or image with `knob.color()`, `knob.font()` or `knob.image()`, so it gets a
   picker; a choice is `z.enum([...])`. `uberscene inspect` lists them first.
-- A file may import only `react`, `zod` and `@uberscene/kit` (three.js and Motion come through `<Three>` and
-  `<Motion>`).
+- A file may import only `react`, `zod`, `@uberscene/kit` and its own `.ts`/`.tsx` modules inside the project
+  (`./blocks/chat-reveal`); three.js and Motion come through `<Three>` and `<Motion>`. Put a component shared by
+  several videos in a module of its own and use it in a `<Layer>`.
 - Helpers are plain functions of their props: no state, no effects, and no hooks except `useLayer()` and `useT()`
   inside a `<Layer>`.
 - Add a one-line comment where a choice is not obvious.

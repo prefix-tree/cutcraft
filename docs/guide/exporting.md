@@ -24,8 +24,8 @@ leave them out:
 
 [Where the manifest and the media are found](/reference/cli#where-the-manifest-and-the-media-are-found) has the details, and the [CLI reference](/reference/cli) lists every option.
 
-The export loads a file the way the editor does: it may import `react`, `zod` and `@uberscene/kit`, plus what
-`--import` offers. A file that imports anything else fails with the same message in both, so a file that exports
+The export loads a file the way the editor does: it may import `react`, `zod` and `@uberscene/kit`, its own `.ts` and
+`.tsx` modules inside the project, plus what `--import` offers. A file that imports anything else fails with the same message in both, so a file that exports
 also opens in the editor.
 
 ## Formats
