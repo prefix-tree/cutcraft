@@ -288,4 +288,4 @@ What each element and prop actually draws, and the few it does not:
 - [references/components.md](references/components.md): the ready-made components.
 - [references/rendering.md](references/rendering.md): what renders.
 - [references/cli.md](references/cli.md): every command and option.
-- The documentation: https://cutcraft.prefixtree.xyz/
+- The documentation: https://uberscene.prefixtree.xyz/

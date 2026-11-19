@@ -24,7 +24,7 @@ npx uberscene skills install [--dir <folder>] [--force]
 Every export draws its frames in headless Chrome. The first one downloads Chrome for Testing into
 `~/.cache/uberscene/browsers` (`UBERSCENE_BROWSER_CACHE` moves it); `uberscene browser install` downloads it ahead of
 time. `UBERSCENE_CHROMIUM` names a Chrome or Chromium 153 or later to use instead
-([The browser it runs in](https://cutcraft.prefixtree.xyz/guide/exporting#the-browser-it-runs-in)).
+([The browser it runs in](https://uberscene.prefixtree.xyz/guide/exporting#the-browser-it-runs-in)).
 
 ## Export
 
@@ -32,21 +32,21 @@ time. `UBERSCENE_CHROMIUM` names a Chrome or Chromium 153 or later to use instea
 |---|---|
 | `--out <file>` | Where to write. `.mp4` gives H.264 and AAC, `.webm` VP9 and Opus. `.mp3` and `.wav` hold the soundtrack alone. |
 | `--still <s>` | Write the frame at this time instead, to a `.png` or `.jpg` `--out`. It is kept in [the frame cache](#the-frame-cache); `--no-cache` draws it again. |
-| `--srt <file>` `--vtt <file>` | Also write the captions the cut plays as SRT or WebVTT, timed like the export. Without `--out`, write only them ([Subtitle files](https://cutcraft.prefixtree.xyz/guide/captions-and-sound#subtitle-files)). |
+| `--srt <file>` `--vtt <file>` | Also write the captions the cut plays as SRT or WebVTT, timed like the export. Without `--out`, write only them ([Subtitle files](https://uberscene.prefixtree.xyz/guide/captions-and-sound#subtitle-files)). |
 | `--manifest <file>` | The asset manifest. Without it, see [Where the manifest and the media are found](#where-the-manifest-and-the-media-are-found). |
 | `--media <dir>` | One file per asset id, with or without an extension (`podcast.webm`, `podcast`). Without it, the same section says where they are looked for. |
 | `--props <json>` | Props for the file's component, over its `defaults`. |
 | `--from <s>` `--to <s>` | Render only this part of the composition. |
-| `--draft` | A render for watching, not keeping: every second frame, each shown twice as long, at half the width and height and the `low` quality preset. Written beside `--out` as `<name>.draft.<ext>` ([A draft](https://cutcraft.prefixtree.xyz/guide/exporting#a-draft)). Not with `--still`, `--check-layout`, `--copy` or `look`. |
-| `--tabs <n>` | Pages of the browser that render pieces at once. Default 1 ([Faster](https://cutcraft.prefixtree.xyz/guide/exporting#faster)). |
-| `--copy` | Copy untouched stretches of a VP9 source into a VP9 export without re-encoding them ([Faster](https://cutcraft.prefixtree.xyz/guide/exporting#faster)). |
+| `--draft` | A render for watching, not keeping: every second frame, each shown twice as long, at half the width and height and the `low` quality preset. Written beside `--out` as `<name>.draft.<ext>` ([A draft](https://uberscene.prefixtree.xyz/guide/exporting#a-draft)). Not with `--still`, `--check-layout`, `--copy` or `look`. |
+| `--tabs <n>` | Pages of the browser that render pieces at once. Default 1 ([Faster](https://uberscene.prefixtree.xyz/guide/exporting#faster)). |
+| `--copy` | Copy untouched stretches of a VP9 source into a VP9 export without re-encoding them ([Faster](https://uberscene.prefixtree.xyz/guide/exporting#faster)). |
 | `--codec <name>` | `avc` (the default in MP4), `vp9` (the default in WebM), or `av1` in either. A codec the container cannot hold (VP9 in MP4) is an error. |
 | `--bitrate <bps>` | Video bits per second. Default: about 0.1 per pixel per frame. |
 | `--quality <preset>` | `very-low`, `low`, `medium`, `high` or `very-high`: the encoder picks the bitrate for the size and codec. In place of `--bitrate`. |
 | `--keyframe <s>` | Seconds between keyframes. Default 2. |
-| `--frame-timeout <s>` | Seconds one frame may take before the command fails, naming the frame and the step it was in. Default 60 ([When a frame never finishes](https://cutcraft.prefixtree.xyz/guide/exporting#when-a-frame-never-finishes)). |
+| `--frame-timeout <s>` | Seconds one frame may take before the command fails, naming the frame and the step it was in. Default 60 ([When a frame never finishes](https://uberscene.prefixtree.xyz/guide/exporting#when-a-frame-never-finishes)). |
 | `--silent` | No soundtrack. |
-| `--font Name[:weight[:style]]=file` | A font for this export beyond the ones the file declares ([Fonts](https://cutcraft.prefixtree.xyz/guide/themes#fonts)), repeatable. TTF, OTF, WOFF or WOFF2. |
+| `--font Name[:weight[:style]]=file` | A font for this export beyond the ones the file declares ([Fonts](https://uberscene.prefixtree.xyz/guide/themes#fonts)), repeatable. TTF, OTF, WOFF or WOFF2. |
 | `--continue` | Draw the grey placeholder for an asset that cannot be read, instead of stopping. |
 | `--import <spec>` | A module the file may import beyond `react`, `zod` and `@uberscene/kit`, repeatable: `three`, or `name=specifier` for a package or a path relative to the file. |
 | `--quiet` | No progress output. |
@@ -61,7 +61,7 @@ time. `UBERSCENE_CHROMIUM` names a Chrome or Chromium 153 or later to use instea
 | `--step <s>` | Seconds between samples. Default: every frame. |
 | `--json` | Print the report as JSON. |
 
-[Checking the layout](https://cutcraft.prefixtree.xyz/guide/checking#check-the-layout) explains the rules and the output.
+[Checking the layout](https://uberscene.prefixtree.xyz/guide/checking#check-the-layout) explains the rules and the output.
 
 ## Where
 
@@ -76,7 +76,7 @@ whether it is in the frame and in each safe zone, and what it overlaps.
 | `--json` | Print the report as JSON: per moment, each thing's `id`, `kind`, `box`, `inFrame`, `zones` and `over`. |
 | `--manifest`, `--media`, `--props`, `--font`, `--import`, `--frame-timeout` | As for an export. |
 
-[Where things are](https://cutcraft.prefixtree.xyz/guide/checking#where-things-are-at-a-moment) shows the output.
+[Where things are](https://uberscene.prefixtree.xyz/guide/checking#where-things-are-at-a-moment) shows the output.
 
 ## Inspect
 
@@ -142,7 +142,7 @@ still printed.
 labelled with its seconds, its frame and what it shows. One look costs about what one `--still` does, however many
 frames it holds, so it is the way to check a cut by eye: an agent reads the one image.
 
-[![A contact sheet of ten frames of a cut: each clip's first frame, both sides and the middle of two transitions, and each title, with its time, frame and name under it](https://cutcraft.prefixtree.xyz/reference/look.jpg)](https://cutcraft.prefixtree.xyz/reference/look.jpg)
+[![A contact sheet of ten frames of a cut: each clip's first frame, both sides and the middle of two transitions, and each title, with its time, frame and name under it](https://uberscene.prefixtree.xyz/reference/look.jpg)](https://uberscene.prefixtree.xyz/reference/look.jpg)
 
 With no moments named, it picks the ones an editor skims: the first frame of each clip, both sides and the middle of
 every transition (or the two frames either side of a hard cut), and each overlay once. The frames are drawn by the
@@ -188,7 +188,7 @@ With `--without title` each moment is drawn twice, so the title's exit can be ju
 npx uberscene look edit.tsx --around x1 --without title --columns 6
 ```
 
-[![Ten frames across a wipe between two clips, in pairs: each moment with the title "Cut by words" and without it](https://cutcraft.prefixtree.xyz/reference/look-around.jpg)](https://cutcraft.prefixtree.xyz/reference/look-around.jpg)
+[![Ten frames across a wipe between two clips, in pairs: each moment with the title "Cut by words" and without it](https://uberscene.prefixtree.xyz/reference/look-around.jpg)](https://uberscene.prefixtree.xyz/reference/look-around.jpg)
 
 **With and without.** Naming an effect or an `<Adjustment>` shows what it does to the same frame. Here a grade that
 starts half way through the shot: at 1 s it changes nothing, at 2.5 s the graded frame is warmer and brighter.
@@ -197,7 +197,7 @@ starts half way through the shot: at 1 s it changes nothing, at 2.5 s the graded
 npx uberscene look colour-grade.tsx --at 1,2.5 --without grade
 ```
 
-[![Four frames of coffee being poured: at 1 second the two are the same; at 2.5 seconds the one with the grade is warmer and brighter than the one without](https://cutcraft.prefixtree.xyz/reference/look-without.jpg)](https://cutcraft.prefixtree.xyz/reference/look-without.jpg)
+[![Four frames of coffee being poured: at 1 second the two are the same; at 2.5 seconds the one with the grade is warmer and brighter than the one without](https://uberscene.prefixtree.xyz/reference/look-without.jpg)](https://uberscene.prefixtree.xyz/reference/look-without.jpg)
 
 ### Motion
 
@@ -209,7 +209,7 @@ at even steps, read left to right, each labelled with its time in seconds. The s
 npx uberscene look one-pixel.tsx --motion 0.3..1.3
 ```
 
-[![Twelve small frames in a row, from 0.30 s to 1.30 s: a ball rolls in from the right of a diagram and stops, then four rays of light thicken across it](https://cutcraft.prefixtree.xyz/reference/look-motion.png)](https://cutcraft.prefixtree.xyz/reference/look-motion.png)
+[![Twelve small frames in a row, from 0.30 s to 1.30 s: a ball rolls in from the right of a diagram and stops, then four rays of light thicken across it](https://uberscene.prefixtree.xyz/reference/look-motion.png)](https://uberscene.prefixtree.xyz/reference/look-motion.png)
 
 Without `--step` the strip has twelve frames, fewer when the stretch is shorter than twelve frames: no frame is
 shown twice. `--step 0.05` sets the seconds between frames, and `--columns` wraps a long strip into rows. A strip
@@ -229,7 +229,7 @@ the zones `--safe-zone` takes. A layer with named parts is drawn as its parts; w
 npx uberscene look one-pixel.tsx --at 2.6,22,53,84 --zones tiktok
 ```
 
-[![Four frames of a film with TikTok's safe zone marked by a dashed line and the area outside it shaded. The captions at the top, a label and a clock at the bottom and a stamp are outlined in red; two labels inside the zone are outlined in lime](https://cutcraft.prefixtree.xyz/reference/look-zones.jpg)](https://cutcraft.prefixtree.xyz/reference/look-zones.jpg)
+[![Four frames of a film with TikTok's safe zone marked by a dashed line and the area outside it shaded. The captions at the top, a label and a clock at the bottom and a stamp are outlined in red; two labels inside the zone are outlined in lime](https://uberscene.prefixtree.xyz/reference/look-zones.jpg)](https://uberscene.prefixtree.xyz/reference/look-zones.jpg)
 
 The legend's cells gain `things`, the rows [`uberscene where`](#where) prints for that moment, so the picture and
 the numbers come from one command. In a `--motion` strip the outlines are drawn without their names, as the cells
@@ -246,7 +246,7 @@ the loudest sample and the bright bar is the average level. Silent stretches are
 npx uberscene look video.tsx --at 1,3,5 --listen all
 ```
 
-[![Three frames of a cut above a strip of its sound: a steady tone for two seconds with three words marked on it, two seconds of shaded silence, then a louder tone to the end](https://cutcraft.prefixtree.xyz/reference/look-listen.png)](https://cutcraft.prefixtree.xyz/reference/look-listen.png)
+[![Three frames of a cut above a strip of its sound: a steady tone for two seconds with three words marked on it, two seconds of shaded silence, then a louder tone to the end](https://uberscene.prefixtree.xyz/reference/look-listen.png)](https://uberscene.prefixtree.xyz/reference/look-listen.png)
 
 The legend carries the same as numbers, so a check needs no picture:
 
@@ -319,7 +319,7 @@ how it looks.
 | `--json` | Prints the entries as JSON: `family`, `source`, `category`, `weights`, `italics`, `roles`, `feel`, `pairs` |
 
 The sheet is drawn in Chrome like any frame. The first time, Google's faces are downloaded into the font cache
-(`~/.cache/uberscene/fonts`), so it needs the network once. See [Choosing a font](https://cutcraft.prefixtree.xyz/guide/themes#choosing-a-font).
+(`~/.cache/uberscene/fonts`), so it needs the network once. See [Choosing a font](https://uberscene.prefixtree.xyz/guide/themes#choosing-a-font).
 
 ## Exit codes
 
@@ -362,8 +362,8 @@ npx uberscene videos/launch.tsx --out launch.mp4
 `uberscene add talk.mp4` writes the media file's entry into the manifest. It reads the kind, length, size, frame rate
 and sound from the file itself, and the words from a transcript with the same name in the same folder: `talk.json`
 from Whisper or ElevenLabs first, then `talk.vtt`, then `talk.srt`. Running it again refreshes the entry and keeps the
-fields it does not write. See [Getting a transcript](https://cutcraft.prefixtree.xyz/guide/captions-and-sound#getting-a-transcript). A `.cube` file
-is added as a LUT (kind `lut`) after it is checked, for [`<Effect type="lut">`](https://cutcraft.prefixtree.xyz/guide/colour#a-look-from-a-lut).
+fields it does not write. See [Getting a transcript](https://uberscene.prefixtree.xyz/guide/captions-and-sound#getting-a-transcript). A `.cube` file
+is added as a LUT (kind `lut`) after it is checked, for [`<Effect type="lut">`](https://uberscene.prefixtree.xyz/guide/colour#a-look-from-a-lut).
 
 | Option | |
 |---|---|

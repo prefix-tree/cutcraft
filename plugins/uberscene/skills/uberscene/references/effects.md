@@ -37,7 +37,7 @@ Drawn as a CSS filter; no WebGL needed.
 |---|---|---|---|
 | `amount` | number (-1..1) | `0` | How much lighter or darker: -1 is black, 0 leaves the picture as it was, 1 doubles its brightness. |
 
-[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
+[All effects and transitions](https://uberscene.prefixtree.xyz/reference/effects/) · [Units](https://uberscene.prefixtree.xyz/reference/effects/#units)
 
 ## `contrast`
 
@@ -51,7 +51,7 @@ Drawn as a CSS filter; no WebGL needed.
 |---|---|---|---|
 | `amount` | number (-1..1) | `0` | How far lights and darks move apart: -1 is flat grey, 0 leaves the picture as it was, 1 doubles the contrast. |
 
-[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
+[All effects and transitions](https://uberscene.prefixtree.xyz/reference/effects/) · [Units](https://uberscene.prefixtree.xyz/reference/effects/#units)
 
 ## `saturation`
 
@@ -65,7 +65,7 @@ Drawn as a CSS filter; no WebGL needed.
 |---|---|---|---|
 | `amount` | number (-1..1) | `0` | How much richer or greyer the colours get: -1 is grey, 0 leaves the picture as it was, 1 doubles the saturation. |
 
-[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
+[All effects and transitions](https://uberscene.prefixtree.xyz/reference/effects/) · [Units](https://uberscene.prefixtree.xyz/reference/effects/#units)
 
 ## `hue`
 
@@ -79,7 +79,7 @@ Drawn as a CSS filter; no WebGL needed.
 |---|---|---|---|
 | `angle` | number | `0` | How far every colour turns around the colour wheel, in degrees. |
 
-[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
+[All effects and transitions](https://uberscene.prefixtree.xyz/reference/effects/) · [Units](https://uberscene.prefixtree.xyz/reference/effects/#units)
 
 ## `blur`
 
@@ -93,7 +93,7 @@ Drawn as a CSS filter; no WebGL needed.
 |---|---|---|---|
 | `radius` | number (0..200) | `4` | How soft the picture gets, in pixels: the Gaussian's standard deviation, as CSS `blur()` reads it. |
 
-[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
+[All effects and transitions](https://uberscene.prefixtree.xyz/reference/effects/) · [Units](https://uberscene.prefixtree.xyz/reference/effects/#units)
 
 ## `vignette`
 
@@ -107,7 +107,7 @@ Drawn as painting on the element's pixels; no WebGL needed.
 |---|---|---|---|
 | `amount` | number (0..1) | `0.5` | How dark the edges get: 0 leaves them as they were, 1 fades the corners to black. |
 
-[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
+[All effects and transitions](https://uberscene.prefixtree.xyz/reference/effects/) · [Units](https://uberscene.prefixtree.xyz/reference/effects/#units)
 
 ## `grain`
 
@@ -121,7 +121,7 @@ Drawn as painting on the element's pixels; no WebGL needed.
 |---|---|---|---|
 | `amount` | number (0..1) | `0.2` | How strong the grain is: 0 is none, 1 is specks of solid black and white. |
 
-[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
+[All effects and transitions](https://uberscene.prefixtree.xyz/reference/effects/) · [Units](https://uberscene.prefixtree.xyz/reference/effects/#units)
 
 ## `shadow`
 
@@ -139,7 +139,7 @@ Drawn as a CSS filter; no WebGL needed.
 | `color` | string | `"#000000"` | The shadow's colour. |
 | `opacity` | number (0..1) | `0.5` | How dark the shadow is: 0 is invisible, 1 is solid colour. |
 
-[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
+[All effects and transitions](https://uberscene.prefixtree.xyz/reference/effects/) · [Units](https://uberscene.prefixtree.xyz/reference/effects/#units)
 
 ## `grayscale`
 
@@ -153,7 +153,7 @@ Drawn as a CSS filter; no WebGL needed.
 |---|---|---|---|
 | `amount` | number (0..1) | `1` | How much colour to take out: 0 leaves the picture as it was, 1 is fully grey. |
 
-[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
+[All effects and transitions](https://uberscene.prefixtree.xyz/reference/effects/) · [Units](https://uberscene.prefixtree.xyz/reference/effects/#units)
 
 ## `sepia`
 
@@ -167,7 +167,7 @@ Drawn as a CSS filter; no WebGL needed.
 |---|---|---|---|
 | `amount` | number (0..1) | `1` | How much to tone the picture brown: 0 leaves it as it was, 1 is full sepia. |
 
-[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
+[All effects and transitions](https://uberscene.prefixtree.xyz/reference/effects/) · [Units](https://uberscene.prefixtree.xyz/reference/effects/#units)
 
 ## `invert`
 
@@ -181,7 +181,7 @@ Drawn as a CSS filter; no WebGL needed.
 |---|---|---|---|
 | `amount` | number (0..1) | `1` | How far to turn the picture into its negative: 0 leaves it as it was, 0.5 is flat grey, 1 is the full negative. |
 
-[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
+[All effects and transitions](https://uberscene.prefixtree.xyz/reference/effects/) · [Units](https://uberscene.prefixtree.xyz/reference/effects/#units)
 
 ## `levels`
 
@@ -197,7 +197,7 @@ Drawn as a shader, with a CSS filter where WebGL is missing.
 | `white` | number (0..1) | `1` | The input level that becomes white: tones at or above it go to white. |
 | `gamma` | number (0.01..10) | `1` | The curve on the midtones: above 1 lifts them, below 1 deepens them. |
 
-[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
+[All effects and transitions](https://uberscene.prefixtree.xyz/reference/effects/) · [Units](https://uberscene.prefixtree.xyz/reference/effects/#units)
 
 ## `lut`
 
@@ -212,7 +212,7 @@ Drawn as a shader.
 | `src` | string |  | The lookup table, as `"asset:<id>"`: a `.cube` file in the manifest. |
 | `amount` | number (0..1) | `1` | How much of the graded picture to mix in: 0 leaves the picture as it was, 1 is the full grade. |
 
-[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
+[All effects and transitions](https://uberscene.prefixtree.xyz/reference/effects/) · [Units](https://uberscene.prefixtree.xyz/reference/effects/#units)
 
 ## `exposure`
 
@@ -226,7 +226,7 @@ Drawn as a shader, with a CSS filter where WebGL is missing.
 |---|---|---|---|
 | `stops` | number (-5..5) | `0` | How much brighter or darker, in stops: +1 doubles the light, -1 halves it. |
 
-[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
+[All effects and transitions](https://uberscene.prefixtree.xyz/reference/effects/) · [Units](https://uberscene.prefixtree.xyz/reference/effects/#units)
 
 ## `vibrance`
 
@@ -240,7 +240,7 @@ Drawn as a shader, with a CSS filter where WebGL is missing.
 |---|---|---|---|
 | `amount` | number (-1..1) | `0` | How much to saturate the muted colours, leaving strong ones nearly alone; negative takes colour out of all of them evenly. |
 
-[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
+[All effects and transitions](https://uberscene.prefixtree.xyz/reference/effects/) · [Units](https://uberscene.prefixtree.xyz/reference/effects/#units)
 
 ## `whiteBalance`
 
@@ -255,7 +255,7 @@ Drawn as a shader, with a CSS filter where WebGL is missing.
 | `temperature` | number (-1..1) | `0` | Warms the picture when positive and cools it when negative. |
 | `tint` | number (-1..1) | `0` | Tints the picture toward magenta when positive and toward green when negative. |
 
-[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
+[All effects and transitions](https://uberscene.prefixtree.xyz/reference/effects/) · [Units](https://uberscene.prefixtree.xyz/reference/effects/#units)
 
 ## `shadowsHighlights`
 
@@ -271,7 +271,7 @@ Drawn as a shader.
 | `highlights` | number (-1..1) | `0` | How much to brighten the highlights, or darken them when negative: up to 2 stops at 1. |
 | `radius` | number (0.5..200) | `10` | How far around each pixel it looks to tell shadow from highlight, in pixels: the blur's standard deviation. |
 
-[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
+[All effects and transitions](https://uberscene.prefixtree.xyz/reference/effects/) · [Units](https://uberscene.prefixtree.xyz/reference/effects/#units)
 
 ## `duotone`
 
@@ -287,7 +287,7 @@ Drawn as a shader.
 | `light` | string | `"#ffd27f"` | The colour the picture's whites become. |
 | `amount` | number (0..1) | `1` | How much of the effect to mix in: 0 leaves the picture as it was, 1 is the full effect. |
 
-[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
+[All effects and transitions](https://uberscene.prefixtree.xyz/reference/effects/) · [Units](https://uberscene.prefixtree.xyz/reference/effects/#units)
 
 ## `curves`
 
@@ -304,7 +304,7 @@ Drawn as a shader.
 | `green` | [number (0..1), number (0..1)][] | `[[0,0],[1,1]]` | The tone curve for the green channel, applied after `rgb`. |
 | `blue` | [number (0..1), number (0..1)][] | `[[0,0],[1,1]]` | The tone curve for the blue channel, applied after `rgb`. |
 
-[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
+[All effects and transitions](https://uberscene.prefixtree.xyz/reference/effects/) · [Units](https://uberscene.prefixtree.xyz/reference/effects/#units)
 
 ## `colorKey`
 
@@ -321,7 +321,7 @@ Drawn as a shader.
 | `softness` | number (0..1) | `0.1` | How wide the fade is between removed and kept colours, past `tolerance`. |
 | `spill` | number (0..1) | `0.5` | How much of the screen's light bounced onto the subject to take out: 0 keeps it, 1 removes it fully. |
 
-[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
+[All effects and transitions](https://uberscene.prefixtree.xyz/reference/effects/) · [Units](https://uberscene.prefixtree.xyz/reference/effects/#units)
 
 ## `regionBlur`
 
@@ -339,7 +339,7 @@ Drawn as a shader.
 | `roundness` | number (0..1) | `0` | How round the box's corners are: 0 is square, 1 rounds the short side fully. |
 | `inverted` | boolean | `false` | Blur everything outside the box instead of inside it. |
 
-[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
+[All effects and transitions](https://uberscene.prefixtree.xyz/reference/effects/) · [Units](https://uberscene.prefixtree.xyz/reference/effects/#units)
 
 ## `cornerPin`
 
@@ -356,7 +356,7 @@ Drawn as a shader.
 | `bottomRight` | [number, number] | `[1,1]` | Where the picture's bottom-right corner goes, as `[x, y]` fractions of the frame from the top left. |
 | `bottomLeft` | [number, number] | `[0,1]` | Where the picture's bottom-left corner goes, as `[x, y]` fractions of the frame from the top left. |
 
-[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
+[All effects and transitions](https://uberscene.prefixtree.xyz/reference/effects/) · [Units](https://uberscene.prefixtree.xyz/reference/effects/#units)
 
 ## `zoomBlur`
 
@@ -372,7 +372,7 @@ Drawn as a shader.
 | `center` | [number, number] | `[0.5,0.5]` | The point the streaks run toward, as `[x, y]` fractions of the frame from the top left. |
 | `samples` | integer (1..64) | `24` | The most reads along each streak: more is smoother and slower. |
 
-[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
+[All effects and transitions](https://uberscene.prefixtree.xyz/reference/effects/) · [Units](https://uberscene.prefixtree.xyz/reference/effects/#units)
 
 ## `chromaticAberration`
 
@@ -389,7 +389,7 @@ Drawn as a shader.
 | `radial` | boolean | `false` | Split outward from `center`, growing toward the edges as a lens does, instead of along `angle`. |
 | `center` | [number, number] | `[0.5,0.5]` | Where a radial split points out from, as `[x, y]` fractions of the frame from the top left. |
 
-[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
+[All effects and transitions](https://uberscene.prefixtree.xyz/reference/effects/) · [Units](https://uberscene.prefixtree.xyz/reference/effects/#units)
 
 ## `glow`
 
@@ -407,7 +407,7 @@ Drawn as a shader, with a CSS filter where WebGL is missing.
 | `color` | string | `"#ffffff"` | The colour the glow is tinted toward. |
 | `tint` | number (0..1) | `1` | How far the glow is coloured toward `color`: 0 keeps the element's own colours, 1 is all `color`. |
 
-[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
+[All effects and transitions](https://uberscene.prefixtree.xyz/reference/effects/) · [Units](https://uberscene.prefixtree.xyz/reference/effects/#units)
 
 ## `outline`
 
@@ -424,7 +424,7 @@ Drawn as a shader.
 | `opacity` | number (0..1) | `1` | How opaque the outline is: 0 is invisible, 1 is solid. |
 | `outlineOnly` | boolean | `false` | Draw only the outline, filled in, without the element over it. |
 
-[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
+[All effects and transitions](https://uberscene.prefixtree.xyz/reference/effects/) · [Units](https://uberscene.prefixtree.xyz/reference/effects/#units)
 
 ## `longShadow`
 
@@ -442,7 +442,7 @@ Drawn as a shader.
 | `opacity` | number (0..1) | `1` | How opaque the shadow is: 0 is invisible, 1 is solid. |
 | `fade` | boolean | `false` | Thin the shadow out toward its far end. |
 
-[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
+[All effects and transitions](https://uberscene.prefixtree.xyz/reference/effects/) · [Units](https://uberscene.prefixtree.xyz/reference/effects/#units)
 
 ## `bevel`
 
@@ -460,7 +460,7 @@ Drawn as a shader.
 | `highlight` | string | `"#ffffff"` | The colour of the edges facing the light. |
 | `shade` | string | `"#000000"` | The colour of the edges facing away from the light. |
 
-[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
+[All effects and transitions](https://uberscene.prefixtree.xyz/reference/effects/) · [Units](https://uberscene.prefixtree.xyz/reference/effects/#units)
 
 ## `halftone`
 
@@ -479,7 +479,7 @@ Drawn as a shader.
 | `paper` | string | `"#ffffff"` | The colour under the dots. |
 | `amount` | number (0..1) | `1` | How much of the effect to mix in: 0 leaves the picture as it was, 1 is the full effect. |
 
-[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
+[All effects and transitions](https://uberscene.prefixtree.xyz/reference/effects/) · [Units](https://uberscene.prefixtree.xyz/reference/effects/#units)
 
 ## `pixelate`
 
@@ -495,7 +495,7 @@ Drawn as a shader.
 | `box` | [number, number, number (> 0), number (> 0)] | `[0,0,1,1]` | The part of the frame to pixelate, as `[x, y, width, height]` fractions of the frame from the top left. |
 | `feather` | number (0..500) | `0` | How far in from the box's edge the mosaic fades in, in pixels. |
 
-[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
+[All effects and transitions](https://uberscene.prefixtree.xyz/reference/effects/) · [Units](https://uberscene.prefixtree.xyz/reference/effects/#units)
 
 ## `scanlines`
 
@@ -513,7 +513,7 @@ Drawn as a shader.
 | `speed` | number (-2000..2000) | `0` | How fast the lines roll across the picture, in pixels per second. |
 | `angle` | number | `0` | How far the lines are turned, in degrees: 0 is horizontal, 90 vertical. |
 
-[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
+[All effects and transitions](https://uberscene.prefixtree.xyz/reference/effects/) · [Units](https://uberscene.prefixtree.xyz/reference/effects/#units)
 
 ## `lightLeak`
 
@@ -531,7 +531,7 @@ Drawn as a shader.
 | `evolution` | number (0..10) | `0.15` | How fast the light wanders and pulses, in changes per second. |
 | `seed` | integer (0..∞) | `0` | Picks the pattern; the same seed draws the same light. |
 
-[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
+[All effects and transitions](https://uberscene.prefixtree.xyz/reference/effects/) · [Units](https://uberscene.prefixtree.xyz/reference/effects/#units)
 
 ## `fractalNoise`
 
@@ -552,7 +552,7 @@ Drawn as a shader.
 | `opacity` | number (0..1) | `0.5` | How much of the blended noise to mix in: 0 leaves the picture as it was, 1 is the full blend. |
 | `seed` | integer (0..∞) | `0` | Picks the pattern; the same seed draws the same noise. |
 
-[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
+[All effects and transitions](https://uberscene.prefixtree.xyz/reference/effects/) · [Units](https://uberscene.prefixtree.xyz/reference/effects/#units)
 
 ## `crossfade`
 
@@ -566,7 +566,7 @@ Drawn without a shader.
 |---|---|---|---|
 | `curve` | "linear" \| "ease" \| "ease-in" \| "ease-out" \| "ease-in-out" | `"ease"` | How the fade eases over its duration. |
 
-[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
+[All effects and transitions](https://uberscene.prefixtree.xyz/reference/effects/) · [Units](https://uberscene.prefixtree.xyz/reference/effects/#units)
 
 ## `dipToBlack`
 
@@ -580,7 +580,7 @@ Drawn without a shader.
 |---|---|---|---|
 | `holdDuration` | number (0..30) | `0.1` | How long the picture holds at full black around the middle, in seconds. |
 
-[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
+[All effects and transitions](https://uberscene.prefixtree.xyz/reference/effects/) · [Units](https://uberscene.prefixtree.xyz/reference/effects/#units)
 
 ## `dipToWhite`
 
@@ -594,7 +594,7 @@ Drawn without a shader.
 |---|---|---|---|
 | `holdDuration` | number (0..30) | `0.1` | How long the picture holds at full white around the middle, in seconds. |
 
-[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
+[All effects and transitions](https://uberscene.prefixtree.xyz/reference/effects/) · [Units](https://uberscene.prefixtree.xyz/reference/effects/#units)
 
 ## `wipe`
 
@@ -608,7 +608,7 @@ Drawn without a shader.
 |---|---|---|---|
 | `direction` | "left" \| "right" \| "up" \| "down" | `"left"` | The way the wipe's edge travels: `left` reveals the next clip from the right edge. |
 
-[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
+[All effects and transitions](https://uberscene.prefixtree.xyz/reference/effects/) · [Units](https://uberscene.prefixtree.xyz/reference/effects/#units)
 
 ## `slide`
 
@@ -623,7 +623,7 @@ Drawn without a shader.
 | `direction` | "left" \| "right" \| "up" \| "down" | `"left"` | The way the next clip moves in: `left` brings it in from the right. |
 | `pushOut` | boolean | `false` | Push the outgoing clip out the same way, instead of leaving it in place under the next one. |
 
-[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
+[All effects and transitions](https://uberscene.prefixtree.xyz/reference/effects/) · [Units](https://uberscene.prefixtree.xyz/reference/effects/#units)
 
 ## `push`
 
@@ -637,7 +637,7 @@ Drawn without a shader.
 |---|---|---|---|
 | `direction` | "left" \| "right" \| "up" \| "down" | `"left"` | The way both clips move: `left` brings the next one in from the right and pushes the outgoing one out to the left. |
 
-[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
+[All effects and transitions](https://uberscene.prefixtree.xyz/reference/effects/) · [Units](https://uberscene.prefixtree.xyz/reference/effects/#units)
 
 ## `iris`
 
@@ -655,7 +655,7 @@ Drawn by a shader, as a crossfade where WebGL is missing.
 | `center` | [number, number] | `[0.5,0.5]` | Where the shape opens from, as `[x, y]` fractions of the frame from the top left. |
 | `feather` | number (0..200) | `2` | How soft the shape's edge is, in pixels. |
 
-[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
+[All effects and transitions](https://uberscene.prefixtree.xyz/reference/effects/) · [Units](https://uberscene.prefixtree.xyz/reference/effects/#units)
 
 ## `clockWipe`
 
@@ -672,7 +672,7 @@ Drawn by a shader, as a crossfade where WebGL is missing.
 | `center` | [number, number] | `[0.5,0.5]` | The point it sweeps around, as `[x, y]` fractions of the frame from the top left. |
 | `softness` | number (0..1) | `0.002778` | How soft the moving edge is, as a share of a full turn. |
 
-[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
+[All effects and transitions](https://uberscene.prefixtree.xyz/reference/effects/) · [Units](https://uberscene.prefixtree.xyz/reference/effects/#units)
 
 ## `blinds`
 
@@ -688,7 +688,7 @@ Drawn by a shader, as a crossfade where WebGL is missing.
 | `angle` | number | `90` | The direction the slats open in, in degrees clockwise from up: 90 opens them sideways, as vertical slats. |
 | `softness` | number (0..1) | `0.1` | How soft each opening edge is, as a share of a slat. |
 
-[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
+[All effects and transitions](https://uberscene.prefixtree.xyz/reference/effects/) · [Units](https://uberscene.prefixtree.xyz/reference/effects/#units)
 
 ## `filmBurn`
 
@@ -706,7 +706,7 @@ Drawn by a shader, as a crossfade where WebGL is missing.
 | `edge` | number (0..500) | `24` | How wide the glowing band ahead of the hole is, in pixels. |
 | `color` | string | `"#ff7a1a"` | The colour of the glowing band. |
 
-[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
+[All effects and transitions](https://uberscene.prefixtree.xyz/reference/effects/) · [Units](https://uberscene.prefixtree.xyz/reference/effects/#units)
 
 ## `pixelDissolve`
 
@@ -723,7 +723,7 @@ Drawn by a shader, as a crossfade where WebGL is missing.
 | `seed` | integer (0..4294967295) | `0` | Picks the order the blocks switch in; the same seed switches them the same way. |
 | `softness` | number (0..1) | `0.15` | How long each block takes to switch, as a share of the transition: 0 switches each at once. |
 
-[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
+[All effects and transitions](https://uberscene.prefixtree.xyz/reference/effects/) · [Units](https://uberscene.prefixtree.xyz/reference/effects/#units)
 
 ## `zoom`
 
@@ -739,4 +739,4 @@ Drawn by a shader, as a crossfade where WebGL is missing.
 | `scale` | number (1..4) | `1.6` | How far the clips zoom, as a multiplier: the outgoing clip grows to it and the next one shrinks from it. |
 | `blur` | number (0..1) | `0.5` | How much the clips smear along the zoom, most at the middle: 0 is none. |
 
-[All effects and transitions](https://cutcraft.prefixtree.xyz/reference/effects/) · [Units](https://cutcraft.prefixtree.xyz/reference/effects/#units)
+[All effects and transitions](https://uberscene.prefixtree.xyz/reference/effects/) · [Units](https://uberscene.prefixtree.xyz/reference/effects/#units)

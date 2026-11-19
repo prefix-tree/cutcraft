@@ -21,7 +21,7 @@ Besides the timing props (`start`, `anchor`, `at`, `offset`, `duration`):
 | `width` | number (> 0) | `640` | The card's width in pixels; the words wrap inside it. |
 | `accent` | string | `"$primary"` | The colour of the bar beside the words. |
 
-[All components](https://cutcraft.prefixtree.xyz/reference/components/)
+[All components](https://uberscene.prefixtree.xyz/reference/components/)
 
 ## `Callout`
 
@@ -41,7 +41,7 @@ Besides the timing props (`start`, `anchor`, `at`, `offset`, `duration`):
 | `to` | { x, y } |  | What it points at; without it, the box stands alone. |
 | `color` | string | `"$accent"` | The colour of the box's border, the line and its dot. |
 
-[All components](https://cutcraft.prefixtree.xyz/reference/components/)
+[All components](https://uberscene.prefixtree.xyz/reference/components/)
 
 ## `Badge`
 
@@ -61,7 +61,7 @@ Besides the timing props (`start`, `anchor`, `at`, `offset`, `duration`):
 | `color` | string | `"$accent"` | The pill's colour. |
 | `textColor` | string | `"$background"` | The letters' colour. |
 
-[All components](https://cutcraft.prefixtree.xyz/reference/components/)
+[All components](https://uberscene.prefixtree.xyz/reference/components/)
 
 ## `Counter`
 
@@ -85,7 +85,7 @@ Besides the timing props (`start`, `anchor`, `at`, `offset`, `duration`):
 | `size` | number (> 0) | `140` | The number's letter height in pixels; the label is about a fifth of it. |
 | `countFor` | number (> 0) | `1.5` | Seconds the count takes; it then holds. |
 
-[All components](https://cutcraft.prefixtree.xyz/reference/components/)
+[All components](https://uberscene.prefixtree.xyz/reference/components/)
 
 ## `ProgressBar`
 
@@ -106,7 +106,7 @@ Besides the timing props (`start`, `anchor`, `at`, `offset`, `duration`):
 | `color` | string | `"$primary"` | The fill's colour; the track under it is a faint `$muted`. |
 | `fillFor` | number (> 0) | `1.2` | Seconds it takes to fill. |
 
-[All components](https://cutcraft.prefixtree.xyz/reference/components/)
+[All components](https://uberscene.prefixtree.xyz/reference/components/)
 
 ## `Arrow`
 
@@ -125,7 +125,7 @@ Besides the timing props (`start`, `anchor`, `at`, `offset`, `duration`):
 | `color` | string | `"$accent"` | The colour of the line and its head. |
 | `width` | number (> 0) | `6` | The line's thickness in pixels; the head scales with it. |
 
-[All components](https://cutcraft.prefixtree.xyz/reference/components/)
+[All components](https://uberscene.prefixtree.xyz/reference/components/)
 
 ## `Highlight`
 
@@ -145,7 +145,7 @@ Besides the timing props (`start`, `anchor`, `at`, `offset`, `duration`):
 | `height` | number (> 0) |  | The marked box's height in pixels; a marker stroke is about as thick. |
 | `color` | string | `"$accent"` | The mark's colour; a marker stroke is drawn see-through. |
 
-[All components](https://cutcraft.prefixtree.xyz/reference/components/)
+[All components](https://uberscene.prefixtree.xyz/reference/components/)
 
 ## `Background`
 
@@ -164,7 +164,7 @@ Besides the timing props (`start`, `anchor`, `at`, `offset`, `duration`):
 | `colors` | [string, string] | `["$background","$primary"]` | The base colour and a second: the gradient's two ends, or the dots or grid drawn over the base. |
 | `spacing` | number (> 0) | `48` | The dots' or the grid's spacing, in pixels. |
 
-[All components](https://cutcraft.prefixtree.xyz/reference/components/)
+[All components](https://uberscene.prefixtree.xyz/reference/components/)
 
 ## `TypeCard`
 
@@ -187,7 +187,7 @@ Besides the timing props (`start`, `anchor`, `at`, `offset`, `duration`):
 | `align` | "left" \| "center" | `"center"` | The lines sit centred, or flush left. |
 | `lines` | { text, size, tone, pill, color, at, offset, struck }[] |  | The lines, top to bottom; each comes in at its own cue. |
 
-[All components](https://cutcraft.prefixtree.xyz/reference/components/)
+[All components](https://uberscene.prefixtree.xyz/reference/components/)
 
 ## `QuoteCard`
 
@@ -211,7 +211,7 @@ Besides the timing props (`start`, `anchor`, `at`, `offset`, `duration`):
 | `accent` | string | `"$accent"` | The marker's colour, for highlights that do not name their own. |
 | `highlights` | { text, color, at, offset }[] | `[]` | The phrases to mark, each at its own cue; each must appear in `text` as written. |
 
-[All components](https://cutcraft.prefixtree.xyz/reference/components/)
+[All components](https://uberscene.prefixtree.xyz/reference/components/)
 
 ## `Frame`
 
@@ -232,4 +232,4 @@ Besides the timing props (`start`, `anchor`, `at`, `offset`, `duration`):
 | `thickness` | number (> 0) | `8` | The border's line thickness in pixels. |
 | `cornerRadius` | number (0..∞) | `28` | How round the corners are, in pixels. |
 
-[All components](https://cutcraft.prefixtree.xyz/reference/components/)
+[All components](https://uberscene.prefixtree.xyz/reference/components/)
