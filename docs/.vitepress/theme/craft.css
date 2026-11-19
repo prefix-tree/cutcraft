@@ -1474,7 +1474,9 @@ body {
 .home.vp-doc h1.home-title {
   font-family: var(--cc-display);
   font-weight: 900;
-  font-size: clamp(64px, 11vw, 168px);
+  /* Beside the spec sheet the title has about 0.6 of the width, so it scales with that, not the window: the longest
+     word must fit on one line. */
+  font-size: clamp(64px, 8.5vw, 150px);
   line-height: 0.82;
   letter-spacing: 0;
 }
@@ -1579,6 +1581,10 @@ body {
   transform: rotate(-6deg);
 }
 @media (max-width: 960px) {
+  .vp-doc .home-title,
+  .home.vp-doc h1.home-title {
+    font-size: clamp(64px, 11vw, 168px);
+  }
   .home-hero-grid {
     grid-template-columns: minmax(0, 1fr);
   }
