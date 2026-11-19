@@ -108,6 +108,16 @@ export default function Video() {
           />
           <Effect id="grade-pop" type="vibrance" params={{ amount: 0.4 }} />
         </Adjustment>
+        {/* A dark fall-off from the top over the three glasses, so the line above them reads on the bright machine. */}
+        <Layer id="top-scrim" anchor="three" duration={{ until: "three" }} ground>
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              background: "linear-gradient(180deg, #000000d8 0%, #000000a0 22%, #00000000 44%)",
+            }}
+          />
+        </Layer>
         {/* A dark fall-off from the left, under the closing line and clear of the cup. */}
         <Layer id="scrim" anchor="close" duration={{ until: "close" }} ground>
           <div
@@ -151,14 +161,14 @@ export default function Video() {
           offset={1.2}
           duration={3.8}
           font={mono}
-          size={34}
+          size={44}
           weight={500}
           color={ACCENT}
           align="left"
           valign="bottom"
           width={1600}
           height={760}
-          transform={{ position: { x: 0, y: 30 } }}
+          transform={{ position: { x: 0, y: 40 } }}
           shadow={LIFT}
           animation={{ preset: "fade" }}
         >
@@ -171,7 +181,10 @@ export default function Video() {
           duration={3.4}
           name="Bloom, then circles"
           role="Speed keys ease the pour into slow motion"
-          x={-460}
+          size={60}
+          width={900}
+          x={-330}
+          y={300}
         />
         <Callout
           id="held"
@@ -179,6 +192,8 @@ export default function Video() {
           offset={4.3}
           duration={1.6}
           text="One frame, held"
+          size={46}
+          width={520}
           x={420}
           y={-300}
           to={{ x: 40, y: -40 }}
@@ -202,7 +217,7 @@ export default function Video() {
         >
           FAST SHOT.
         </Title>
-        <Badge id="look" anchor="shot" offset={3.4} duration={4} text="Warm LUT" x={640} y={-380} size={44} />
+        <Badge id="look" anchor="shot" offset={3.4} duration={4} text="Warm LUT" x={600} y={-370} size={58} />
         <Title
           id="every"
           anchor="three"
