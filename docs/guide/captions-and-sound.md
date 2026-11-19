@@ -124,7 +124,7 @@ Add `<Caption>` children to write a line yourself. A caption timed with words me
 
 ```tsx
 <Captions id="captions" src="asset:founder">
-  <Caption id="cap-1" start="word:12" end="word:18.end" text="Small software still deserves a real cloud." />
+  <Caption id="cap-1" start="word:12" end="word:18.end" text="Good coffee still deserves a slow morning." />
 </Captions>
 ```
 

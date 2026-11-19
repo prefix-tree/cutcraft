@@ -5,7 +5,7 @@ export default function Video() {
     <Composition fps={30} width={960} height={540}>
       <Track id="main">
         {/* A slow push-in: two keys on each scale axis. */}
-        <Clip id="shot" src="asset:coffee" in={5} out={8} fit="cover">
+        <Clip id="shot" src="asset:espresso" in={2} out={5} fit="cover">
           <Keyframe id="sx0" property="transform.scale.x" at={0} value={1} />
           <Keyframe id="sx1" property="transform.scale.x" at={3} value={1.4} easing="easeInOutSine" />
           <Keyframe id="sy0" property="transform.scale.y" at={0} value={1} />

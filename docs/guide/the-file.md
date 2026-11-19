@@ -15,7 +15,7 @@ export const schema = z.object({
   product: z.string().describe("Product name on the title card"),
   accent: z.string().describe("Accent colour"),
 });
-export const defaults = { product: "Shed", accent: "#ff5a1f" };
+export const defaults = { product: "Halvard", accent: "#ff5a1f" };
 
 export default function Video({ product, accent }: z.infer<typeof schema>) {
   return (
@@ -93,7 +93,7 @@ export const schema = z.object({
   cards: z.number().int().min(1).max(6).describe("How many feature cards"),
 });
 export const defaults = {
-  product: "Shed", accent: "#ff5a1f", heading: "Inter", logo: "asset:logo", look: "dark", cards: 3,
+  product: "Halvard", accent: "#ff5a1f", heading: "Inter", logo: "asset:logo", look: "dark", cards: 3,
 };
 ```
 

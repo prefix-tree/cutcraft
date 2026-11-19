@@ -4,7 +4,7 @@ export default function Video() {
   return (
     <Composition fps={30} width={960} height={540}>
       <Track id="main">
-        <Clip id="shot" src="asset:coffee" in={0} out={3} fit="cover" />
+        <Clip id="shot" src="asset:coffeeWide" in={4} out={7} fit="cover" />
       </Track>
       <Track id="stickers">
         <Sticker
@@ -13,7 +13,7 @@ export default function Video() {
           offset={0.3}
           duration={2.5}
           src="asset:star"
-          transform={{ scale: 2 }}
+          transform={{ scale: 0.8, position: { x: 300, y: -140 } }}
           enter={{ type: "scale", duration: 0.4 }}
         />
       </Track>

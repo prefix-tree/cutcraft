@@ -14,7 +14,7 @@ sentences), [Multicam highlights](/recipes/highlights) (shots and silences).
   <Clip id="demo" src="asset:demo" in={2} out={9} />
 </Track>
 <Track id="text" layout="free">
-  <Title id="name" start={1} duration={3}>Shed</Title>
+  <Title id="name" start={1} duration={3}>Halvard</Title>
 </Track>
 ```
 
@@ -67,7 +67,7 @@ An overlay usually says what it belongs to rather than when it starts. `anchor` 
 overlay starts when that element starts, plus `offset` seconds:
 
 ```tsx
-<Title id="title" anchor="start" offset={0.4} duration={2.8}>Shed</Title>
+<Title id="title" anchor="start" offset={0.4} duration={2.8}>Halvard</Title>
 <Title id="tagline" anchor="title" offset={0.5} duration={2.3}>A cloud for small software</Title>
 <Layer id="cta" anchor="outro" offset={0.3} duration={2.5}>…</Layer>
 ```

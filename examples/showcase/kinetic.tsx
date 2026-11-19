@@ -39,15 +39,15 @@ export default function Video({ accent }: z.infer<typeof schema>) {
         </Layer>
       </Track>
       <Track id="type" name="Type" layout="free">
-        <Motion id="every-cut" anchor="talk" at="word:0" duration={1.5} sequence={[slam]}>
+        <Motion id="every-shot" anchor="talk" at="word:0" duration={1.5} sequence={[slam]}>
           <div className="k" style={{ ...big, top: 300 }}>
             Every
             <br />
-            <span style={{ color: accent }}>cut</span>
+            <span style={{ color: accent }}>shot</span>
           </div>
         </Motion>
         <Motion
-          id="line-of-code"
+          id="fresh-grind"
           anchor="talk"
           at="word:4"
           duration={1.5}
@@ -63,19 +63,19 @@ export default function Video({ accent }: z.infer<typeof schema>) {
         >
           <div style={{ ...big, top: 320, fontSize: 80 }}>
             <span className="a" style={word}>
-              a line
+              a
             </span>
             <span className="b" style={word}>
-              of
+              fresh
             </span>
             <br />
             <span className="c" style={word}>
-              code.
+              grind.
             </span>
           </div>
         </Motion>
         <Motion
-          id="move-a-clip"
+          id="tamp"
           anchor="talk"
           at="word:7"
           duration={1.6}
@@ -85,11 +85,11 @@ export default function Video({ accent }: z.infer<typeof schema>) {
           ]}
         >
           <div className="k" style={{ ...big, top: 340, fontSize: 84 }}>
-            Move a clip
+            Tamp it level
           </div>
         </Motion>
         <Motion
-          id="words-move"
+          id="water-finds"
           anchor="talk"
           at="word:11"
           duration={1.9}
@@ -101,27 +101,27 @@ export default function Video({ accent }: z.infer<typeof schema>) {
         >
           <div style={{ ...big, top: 300, fontSize: 80 }}>
             <span className="a" style={word}>
-              the words
+              the water
             </span>
             <br />
             <span className="b" style={{ ...word, color: accent }}>
-              move
+              finds
             </span>
             <br />
             <span className="c" style={word}>
-              with it.
+              its way.
             </span>
           </div>
         </Motion>
-        <Motion id="point-lands" anchor="talk" at="word:16" duration={2.1} sequence={[slam]}>
+        <Motion id="crema-lands" anchor="talk" at="word:16" duration={2.1} sequence={[slam]}>
           <div className="k" style={{ ...big, top: 320, fontSize: 84 }}>
-            The point
+            The crema
             <br />
             lands
           </div>
         </Motion>
         <Motion
-          id="names-it"
+          id="on-top"
           anchor="talk"
           at="word:21"
           duration={1.6}
@@ -131,7 +131,7 @@ export default function Video({ accent }: z.infer<typeof schema>) {
           ]}
         >
           <div className="k" style={{ ...big, top: 330, fontSize: 84 }}>
-            on the word.
+            on top.
           </div>
           <div
             className="u"

@@ -17,9 +17,9 @@ export const defaults = { accent: "#ffd400" };
 export default function Video({ accent }: z.infer<typeof schema>) {
   return (
     <Composition fps={30} width={1920} height={1080} background={{ mode: "color", color: "#101418" }}>
-      <Marker id="click-new" at={3} label="new project" />
-      <Marker id="click-template" at={9} label="template" />
-      <Marker id="click-deploy" at={15} label="deploy" />
+      <Marker id="click-menu" at={3} label="menu" />
+      <Marker id="click-roast" at={9} label="roast" />
+      <Marker id="click-order" at={15} label="order" />
 
       <Track id="screen" name="Screen">
         {/* The recording has no transcript, so a numeric trim. The crop keyframes are element-relative seconds. */}
@@ -46,7 +46,7 @@ export default function Video({ accent }: z.infer<typeof schema>) {
       <Track id="callouts" name="Callouts">
         {/* A ring on the button for each click; anchored to the recording so a retrim moves them with it. */}
         <Shape
-          id="ring-new"
+          id="ring-menu"
           anchor="rec"
           offset={3}
           duration={1.5}
@@ -58,7 +58,7 @@ export default function Video({ accent }: z.infer<typeof schema>) {
           transform={{ position: { x: 520, y: -280 } }}
         />
         <Shape
-          id="ring-template"
+          id="ring-roast"
           anchor="rec"
           offset={9}
           duration={1.5}
@@ -70,7 +70,7 @@ export default function Video({ accent }: z.infer<typeof schema>) {
           transform={{ position: { x: -300, y: 40 } }}
         />
         <Shape
-          id="ring-deploy"
+          id="ring-order"
           anchor="rec"
           offset={15}
           duration={1.5}

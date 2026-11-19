@@ -12,6 +12,8 @@ A three.js scene on the timeline: plain three.js in `setup`, or React Three Fibe
 
 </Example>
 
+The coffee footage is Pixabay videos [209419](https://pixabay.com/videos/id-209419/), [209424](https://pixabay.com/videos/id-209424/), [46989](https://pixabay.com/videos/id-46989/) and [251](https://pixabay.com/videos/id-251/), under the Pixabay Content License. The maker of the machine in the red cup shot has nothing to do with this project.
+
 The player draws it once the host calls `installFreeCodeLibraries()` ([Free code](/guide/free-code#three-js-and-motion)); the export draws it the same way, in headless Chrome ([Exporting](/guide/exporting)).
 
 **Used in:** [Product launch](/examples/launch) · [Logo reveal](/examples/logo) · [Brand spot in any theme](/recipes/brand-spot)

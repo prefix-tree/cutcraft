@@ -33,15 +33,15 @@ const recipes: { name: string; file: string; mod: Module; check: (state: Resolve
       expect(cues(s).map((c) => c.props.text)).toEqual([
         "Welcome back to the show.",
         "Thanks for having me.",
-        "So what is cutcut, in one sentence?",
-        "It is a video file a model can write",
-        "and a person can still edit.",
-        "Why a file?",
-        "Because the model is good at code and bad",
-        "at documents.",
-        "And the editor?",
-        "The editor writes back into the same file,",
-        "one token at a time.",
+        "So what is cold brew, in short?",
+        "It is coffee steeped in cold water",
+        "and simply left alone for a whole day.",
+        "Why so long?",
+        "Because cold water pulls the flavour out",
+        "slowly and very gently.",
+        "And the taste?",
+        "The taste is sweeter and rounder,",
+        "with almost none of the usual bitterness.",
         "That is the whole idea.",
       ]);
       expect(cues(s)[0]).toMatchObject({ start: 0, editable: "generated" });
@@ -53,14 +53,14 @@ const recipes: { name: string; file: string; mod: Module; check: (state: Resolve
     mod: productDemo as Module,
     check: (s) => {
       expect(s.items.get("rec")).toMatchObject({ start: 0, end: 20 });
-      expect(s.items.get("ring-template")).toMatchObject({ start: 9, end: 10.5 });
-      expect(s.items.get("click-deploy")).toMatchObject({ start: 15 });
+      expect(s.items.get("ring-roast")).toMatchObject({ start: 9, end: 10.5 });
+      expect(s.items.get("click-order")).toMatchObject({ start: 15 });
       expect(s.items.get("z1-x1")).toMatchObject({ start: 3 });
       expect(cues(s).map((c) => c.props.text)).toEqual([
-        "Open the dashboard.",
-        "Click new project.",
-        "Pick a template and name it.",
-        "Then deploy.",
+        "Open the menu.",
+        "Choose a roast.",
+        "Pick a grind and a size.",
+        "Then order.",
       ]);
       expect(cues(s)[0]!.start).toBeCloseTo(0.5);
     },
@@ -98,11 +98,11 @@ const recipes: { name: string; file: string; mod: Module; check: (state: Resolve
     mod: stats as Module,
     check: (s) => {
       expect(s.items.get("bg")).toMatchObject({ start: 0, end: 6 });
-      expect(s.items.get("stat-deploys")?.interior).toEqual({
+      expect(s.items.get("stat-cups")?.interior).toEqual({
         component: "Counter",
-        props: { value: 12800, label: "deployments", accent: "#7cff8a" },
+        props: { value: 12800, label: "cups poured", accent: "#7cff8a" },
       });
-      expect(s.items.get("stat-uptime")?.start).toBeCloseTo(6.4);
+      expect(s.items.get("stat-on-time")?.start).toBeCloseTo(6.4);
     },
   },
   {
@@ -110,7 +110,7 @@ const recipes: { name: string; file: string; mod: Module; check: (state: Resolve
     file: "variants.tsx",
     mod: variants as Module,
     check: (s) => {
-      expect(s.tree.byId.get("headline")?.text).toBe("Small software, real cloud");
+      expect(s.tree.byId.get("headline")?.text).toBe("Fresh coffee, slow mornings");
       expect(s.items.get("card")?.props).toMatchObject({ src: "asset:logo" });
       expect(s.items.get("headline")?.props).toMatchObject({
         color: "#ff5a1f",
@@ -119,14 +119,14 @@ const recipes: { name: string; file: string; mod: Module; check: (state: Resolve
       });
       const es = resolve(
         collectModule(variants as Module, {
-          headline: "Software pequeño, nube real",
+          headline: "Café fresco, mañanas lentas",
           theme: "paper",
           accent: "#ffcc00",
         }),
         manifest,
       );
       expect(es.errors).toEqual([]);
-      expect(es.tree.byId.get("headline")?.text).toBe("Software pequeño, nube real");
+      expect(es.tree.byId.get("headline")?.text).toBe("Café fresco, mañanas lentas");
       expect(es.items.get("headline")?.props).toMatchObject({ color: "#ffcc00", font: THEMES.paper.fonts.heading });
       expect(es.items.get("captions")?.props.style).toMatchObject({
         highlight: "#ffcc00",

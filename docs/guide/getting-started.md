@@ -43,7 +43,7 @@ export default function Video() {
         <Clip id="talk" src="asset:talk" in={2} out={12} fit="cover" />
       </Track>
       <Track id="over" layout="free">
-        <LowerThird id="name" start={0.5} duration={4} name="Maya Chen" role="Founder, Shed" />
+        <LowerThird id="name" start={0.5} duration={4} name="Maya Chen" role="Head roaster, Halvard" />
       </Track>
       <Captions id="captions" src="asset:talk" animation="karaoke" />
     </Composition>

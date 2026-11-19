@@ -20,6 +20,8 @@ export const lowerThirdSchema = timingSchema.extend({
   width: z.number().positive().default(640),
   /** The colour of the bar beside the words. */
   accent: z.string().default("$primary"),
+  /** The name's size in pixels; the role, the card and the bar scale with it. */
+  size: z.number().positive().default(44),
 });
 
 /**
@@ -29,10 +31,12 @@ export const lowerThirdSchema = timingSchema.extend({
 export function LowerThird(props: z.input<typeof lowerThirdSchema>) {
   const p = parse("LowerThird", lowerThirdSchema, props);
   const t = timingOf(p);
-  const height = p.role ? 132 : 96;
+  // Every measure below was drawn for a 44 px name; `k` keeps them in proportion at any size.
+  const k = p.size / 44;
+  const height = (p.role ? 132 : 96) * k;
   const left = p.x - p.width / 2;
-  const textX = p.x + 18;
-  const textWidth = p.width - 72;
+  const textX = p.x + 18 * k;
+  const textWidth = p.width - 72 * k;
   return [
     p.variant === "card" &&
       h(Shape, {
@@ -51,10 +55,10 @@ export function LowerThird(props: z.input<typeof lowerThirdSchema>) {
       id: `${p.id}-bar`,
       ...timing(t, 0.1),
       shape: "rectangle",
-      width: 8,
-      height: height - 36,
+      width: 8 * k,
+      height: height - 36 * k,
       fill: p.accent,
-      transform: { position: { x: left + 28, y: p.y } },
+      transform: { position: { x: left + 28 * k, y: p.y } },
       enter: { type: "wipe-down", duration: 0.35 },
       exit: { type: "fade", duration: 0.3 },
     }),
@@ -64,12 +68,12 @@ export function LowerThird(props: z.input<typeof lowerThirdSchema>) {
         id: `${p.id}-name`,
         ...timing(t, 0.15),
         font: "$heading",
-        size: 44,
+        size: p.size,
         weight: 700,
         color: "$text",
         align: "left",
         width: textWidth,
-        transform: { position: { x: textX, y: p.y - (p.role ? 20 : 0) } },
+        transform: { position: { x: textX, y: p.y - (p.role ? 20 * k : 0) } },
         enter: { type: "slide-right", duration: 0.45, easing: "easeOutCubic" },
         exit: { type: "fade", duration: 0.3 },
       },
@@ -82,12 +86,12 @@ export function LowerThird(props: z.input<typeof lowerThirdSchema>) {
           id: `${p.id}-role`,
           ...timing(t, 0.3),
           font: "$body",
-          size: 26,
+          size: Math.round(26 * k),
           weight: 500,
           color: "$muted",
           align: "left",
           width: textWidth,
-          transform: { position: { x: textX, y: p.y + 30 } },
+          transform: { position: { x: textX, y: p.y + 30 * k } },
           enter: { type: "fade", duration: 0.4 },
           exit: { type: "fade", duration: 0.3 },
         },

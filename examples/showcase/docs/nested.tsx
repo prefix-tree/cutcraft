@@ -16,7 +16,7 @@ function EndCard() {
   return (
     <>
       <Track id="card-bg">
-        <Clip id="card-shot" src="asset:coffee" in={10} out={12} fit="cover" />
+        <Clip id="card-shot" src="asset:redCup" in={18} out={20} fit="cover" />
       </Track>
       <Track id="card-text">
         <Title id="card-title" anchor="card-shot" duration={2} size={56}>
