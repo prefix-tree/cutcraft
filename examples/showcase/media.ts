@@ -70,6 +70,17 @@ const stock: readonly {
     start: 0,
     duration: 34,
   },
+  {
+    // The download's name (251-135872129_medium.mp4) gives the Pixabay video's id. The machine's maker has nothing to
+    // do with this project; its badge is in the shot as it was filmed.
+    id: "redCup",
+    file: "red-cup.mp4",
+    sha256: "032a519f45df31d1a2339be8cb9796350826138555549755a678a29bd4d8df86",
+    page: "https://pixabay.com/videos/id-251/",
+    credit: "Espresso into a red paper cup, with steam, Pixabay video 251, Pixabay Content License",
+    start: 0,
+    duration: 60,
+  },
 ];
 
 for (const [name, source] of Object.entries(clips)) {

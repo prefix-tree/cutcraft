@@ -561,6 +561,14 @@
       "width": 960,
       "height": 540,
       "id": "espresso"
+    },
+    "redCup": {
+      "kind": "video",
+      "duration": 60.033,
+      "fps": 30,
+      "width": 960,
+      "height": 540,
+      "id": "redCup"
     }
   }
 }
