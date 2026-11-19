@@ -16,9 +16,9 @@ mkdirSync(out, { recursive: true });
 const FILES: Record<string, { poster: number; bitrate: number; sound?: boolean }> = {
   "game-lighting": { poster: 28, bitrate: 1_100_000 },
   "lunar-eclipse": { poster: 9.9, bitrate: 1_400_000, sound: true },
-  "one-pixel": { poster: 2.6, bitrate: 900_000 },
+  "one-pixel": { poster: 2.6, bitrate: 900_000, sound: true },
   "hundred-videos": { poster: 21, bitrate: 1_600_000, sound: true },
-  "snake-heart": { poster: 19.5, bitrate: 1_200_000 },
+  "snake-heart": { poster: 19.5, bitrate: 1_200_000, sound: true },
   // The before and after card plays the short rendered just above it, so it comes after it.
   "cards/hundred-videos-compare": { poster: 21, bitrate: 1_400_000, sound: true },
 };

@@ -1,4 +1,5 @@
 import {
+  Audio,
   Caption,
   Captions,
   Composition,
@@ -68,6 +69,18 @@ const story = narrate(SCRIPT);
 /** The time of a cue, in seconds. A name the script does not have stops the file from loading. */
 const at = story.at;
 const LENGTH = Math.ceil(story.duration * 10) / 10;
+
+// The sound: no voice yet, so the cues carry the picture's beats. The files are made by media/sounds.ts.
+const CUES: readonly { id: string; sound: string; at: number; volume: number; out?: number }[] = [
+  { id: "cue-dots", sound: "pop", at: at("dots"), volume: 0.7 },
+  { id: "cue-one", sound: "tick", at: at("one"), volume: 0.8 },
+  { id: "cue-cheats", sound: "riser", at: at("cheats") - 2, volume: 0.45 },
+  ...[1, 2, 3, 4].map((n) => ({ id: `cue-room${n}`, sound: "whoosh", at: at(`room${n}`) - 0.45, volume: 0.6 })),
+  ...[1, 2, 3].map((n) => ({ id: `cue-back${n}`, sound: "swish", at: at(`back${n}`) - 0.2, volume: 0.5 })),
+  { id: "cue-shadow", sound: "thud", at: at("hidden"), volume: 0.6 },
+  // The chime is cut to the second of pause left after the last word, and faded there.
+  { id: "cue-end", sound: "chime", at: at("end") - 1, volume: 0.6, out: 1 },
+];
 
 /** 0 before `a`, 1 after `b`, eased between: how far along something is. */
 // Where the diagram goes. TikTok, Reels and Shorts each cover the top of the frame, its bottom third and a strip at
@@ -1036,6 +1049,19 @@ export default function Video() {
         <Layer id="intro" start={0} duration={LENGTH}>
           <Intro />
         </Layer>
+      </Track>
+
+      <Track id="sounds" role="effects" layout="free">
+        {CUES.map((cue) => (
+          <Audio
+            key={cue.id}
+            id={cue.id}
+            src={`asset:${cue.sound}`}
+            start={cue.at}
+            volume={cue.volume}
+            {...(cue.out ? { out: cue.out, fade: { out: 0.4 } } : {})}
+          />
+        ))}
       </Track>
 
       <Captions

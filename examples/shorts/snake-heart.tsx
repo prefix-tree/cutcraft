@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import {
+  Audio,
   Composition,
   fontFamily,
   googleFont,
@@ -109,6 +110,9 @@ const HOLD = 3.4;
 /** The second the head closes the heart. */
 const CLOSED_AT = GAME.times[GAME.closed] as number;
 const LENGTH = Math.ceil((CLOSED_AT + HOLD) * 30) / 30;
+// The sound, made by media/sounds.ts: a pop for every character eaten, a riser into the moment the heart closes,
+// and a chime as it does.
+const EATS = GAME.food.map((food) => GAME.times[food.eaten] as number);
 
 // What the wall is made of: seasons, sky, and the things of a room and a street.
 const WALL_SET = [..."春夏秋冬日月星光年梦声歌诗画书茶酒灯窗桥路城门钟船信纸笔琴棋伞镜糖盐米面"];
@@ -242,6 +246,13 @@ export default function Video(props: z.infer<typeof schema>) {
         <Layer id="board" start={0} duration={LENGTH}>
           <Board {...props} />
         </Layer>
+      </Track>
+      <Track id="sounds" role="effects" layout="free">
+        {EATS.map((time, i) => (
+          <Audio key={time} id={`eat-${i + 1}`} src="asset:pop" start={time} volume={0.55} />
+        ))}
+        <Audio id="build" src="asset:riser" start={CLOSED_AT - 2} volume={0.4} />
+        <Audio id="closed" src="asset:chime" start={CLOSED_AT} volume={0.7} />
       </Track>
     </Composition>
   );
