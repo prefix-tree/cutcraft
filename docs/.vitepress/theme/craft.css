@@ -955,6 +955,24 @@ html {
 .vp-doc a.cc-card:hover .cc-preview {
   outline-color: var(--cc-accent);
 }
+/* The blocks catalogue: each block's preview is a card of its own, drawn taller than wide. */
+.cc-block-preview {
+  display: block;
+  width: 100%;
+  aspect-ratio: 360 / 400;
+  object-fit: cover;
+  border-radius: 6px;
+  background: #0b1120;
+  outline: 1px solid transparent;
+  outline-offset: 2px;
+  transition: outline-color 0.15s;
+}
+.vp-doc .cc-blocks img.cc-block-preview {
+  margin: 0 0 4px;
+}
+.vp-doc a.cc-card:hover .cc-block-preview {
+  outline-color: var(--cc-accent);
+}
 .cc-card-title {
   font-weight: 600;
   font-size: 14.5px;

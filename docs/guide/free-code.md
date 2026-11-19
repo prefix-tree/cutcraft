@@ -222,7 +222,7 @@ A block is a scene-sized piece of free code made to be placed and tuned: a grid 
 wall of characters that changes on the beat, a row of points lit in turn, a ranking that reorders, bars that race
 over the years, a chat reply that types in, a terminal running commands, a phone being tapped, a quote that builds
 word by word. Smaller than a video, bigger than a kit component. `uberscene blocks` lists the ones that ship with the CLI, by the job each does, and `--sheet` draws their
-previews to choose by looking ([Blocks](/reference/cli#blocks)).
+previews to choose by looking. [Blocks](/guide/blocks) walks through finding, adding, tuning and updating one, with the catalogue.
 
 A block is one file: its component, its props `schema` with a label for each, its `defaults`, and a `meta` that says
 what it is for. `uberscene blocks add <name>` copies the file into the project as `blocks/<name>.tsx` and records it,
