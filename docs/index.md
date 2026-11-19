@@ -52,8 +52,6 @@ import { withBase } from "vitepress";
 </div>
 </section>
 
-<div class="home-ticker" aria-hidden="true"><div class="home-ticker-track"><span>TSX in, MP4 out</span><span>45 effects and transitions</span><span>115 undoable actions</span><span>Frame-exact player</span><span>Captions from the transcript</span><span>Three.js on the clock</span><span>Diff it, review it, ship it</span><span>Next: 3D that guides video models</span><span>TSX in, MP4 out</span><span>45 effects and transitions</span><span>115 undoable actions</span><span>Frame-exact player</span><span>Captions from the transcript</span><span>Three.js on the clock</span><span>Diff it, review it, ship it</span><span>Next: 3D that guides video models</span></div></div>
-
 <section class="home-live" aria-label="Try it">
 
 <Playground compact />

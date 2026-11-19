@@ -157,7 +157,7 @@
   color: var(--cc-accent);
 }
 
-/* ── The landing page, brutalist: a poster-sized headline, a ticker, numbered sections, ruled grids ─────── */
+/* ── The landing page, brutalist: a poster-sized headline, numbered sections, ruled grids ─────── */
 
 html {
   overflow-x: clip;
@@ -261,45 +261,6 @@ html {
   text-transform: uppercase;
   text-decoration: none;
   color: var(--cc-ink);
-}
-
-/* The ticker: a full-width ink band of claims that scrolls sideways. */
-.home-ticker {
-  width: 100vw;
-  margin: 96px 0 0 calc(50% - 50vw);
-  overflow: hidden;
-  border-block: var(--cc-line-heavy);
-  background: var(--cc-ink);
-  color: var(--cc-paper);
-}
-.home-ticker-track {
-  display: flex;
-  width: max-content;
-  animation: home-ticker 40s linear infinite;
-}
-.home-ticker span {
-  padding: 14px 0;
-  font-family: var(--cc-display);
-  font-size: 30px;
-  font-weight: 700;
-  line-height: 1;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-.home-ticker span::after {
-  content: "■";
-  margin: 0 28px;
-  font-size: 0.6em;
-  vertical-align: 0.2em;
-  color: var(--cc-accent);
-}
-@keyframes home-ticker {
-  to {
-    transform: translateX(-50%);
-  }
-}
-.home-ticker + section {
-  margin-top: 96px !important;
 }
 
 /* Section heads: a number in dot matrix over a condensed capital headline and a heavy rule. */
@@ -844,12 +805,6 @@ html {
   .home section + section {
     margin-top: 80px;
   }
-  .home-ticker {
-    margin-top: 64px;
-  }
-  .home-ticker span {
-    font-size: 22px;
-  }
   .home section.home-foot {
     padding: 40px 16px 48px;
   }
@@ -860,9 +815,6 @@ html {
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .home-ticker-track {
-    animation: none;
-  }
   .vp-doc ul.home-feature-list li {
     transition: none;
   }
@@ -1585,23 +1537,6 @@ body {
   .home-spec {
     max-width: 520px;
   }
-}
-
-/* Ticker: a hazard stripe above and below the ink band. */
-.home-ticker {
-  border-block: 0;
-  padding-block: 8px;
-  background:
-    var(--cc-hazard) top / 100% 8px no-repeat,
-    var(--cc-hazard) bottom / 100% 8px no-repeat,
-    #121212;
-  color: #e6e1d6;
-}
-.home-ticker span {
-  font-family: var(--cc-display);
-  font-weight: 800;
-  font-size: 34px;
-  letter-spacing: 0.02em;
 }
 
 /* Section heads: a stencil plate number, then the headline. */
