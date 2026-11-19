@@ -23,15 +23,15 @@ import { withBase } from "vitepress";
 
 <p class="home-lead">Write a video as a React file. Play it in the browser, fine-tune it on a timeline, export it to MP4. Next: 3D scenes in the same file that guide generative video models. <a href="#aim">Where it's going ↓</a></p>
 
-<CopyCommand command="npm install uberscene @uberscene/kit react zod" />
+<AgentPicker />
+
+<div class="home-byhand"><span>Or install the packages:</span><CopyCommand command="npm install uberscene @uberscene/kit react zod" /></div>
 
 <div class="home-actions">
 <a class="home-button primary" :href="withBase('/guide/getting-started')">Get started</a>
 <a class="home-button" :href="withBase('/examples/')">Examples</a>
 <a class="home-button" href="https://github.com/prefix-tree/uberscene">GitHub</a>
 </div>
-
-<p class="home-agent-note">Using a coding agent? <a href="#install">Install the skill ↓</a></p>
 
 </div>
 <aside class="home-spec" aria-label="Specification">
