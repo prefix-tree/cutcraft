@@ -20,7 +20,7 @@ it("plays a file with copied pieces through to the end without an error, and see
   // Source frames 66-182 of bars.webm, whose keyframes are at 90 and 180: the pieces join at output frames 24 and 114.
   writeFileSync(
     file,
-    `import { Clip, Composition, Track } from "@cutcraft/kit";
+    `import { Clip, Composition, Track } from "@uberscene/kit";
 export const manifest = ${JSON.stringify(manifest)};
 export default function Video() {
   return <Composition fps={30} width={640} height={360}><Track id="m"><Clip id="c" src="asset:bars" in={2.2} out={6.1} /></Track></Composition>;

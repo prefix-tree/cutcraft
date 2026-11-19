@@ -1,4 +1,4 @@
-import { Clip, Composition, Motion, Track } from "@cutcraft/kit";
+import { Clip, Composition, Motion, Track } from "@uberscene/kit";
 
 // A warm flare over the cut from the founder to the product shot. It sits on a free track, anchored to the clip that
 // comes in, starting 0.4 s before it: the cut does not move and the video stays as long as its clips. Trim "talk"

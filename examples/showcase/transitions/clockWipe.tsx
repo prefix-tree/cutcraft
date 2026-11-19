@@ -1,4 +1,4 @@
-import { Clip, Composition, Track, Transition } from "@cutcraft/kit";
+import { Clip, Composition, Track, Transition } from "@uberscene/kit";
 
 // clockWipe: Sweeps the next clip in around a centre, like a clock hand.
 export default function Video() {

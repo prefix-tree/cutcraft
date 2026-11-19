@@ -5,7 +5,7 @@
 
 ## Context
 
-0020 deprecated `<Graphic kind>`: 34 kinds drawn by code in `@cutcraft/graphics` and the player, a second, narrower
+0020 deprecated `<Graphic kind>`: 34 kinds drawn by code in `@uberscene/graphics` and the player, a second, narrower
 way to do what free code does. It left the kinds in place until a later release, with nothing to move to but free
 code, which is more than a lower third needs.
 
@@ -19,7 +19,7 @@ host carried about 0.7 MB of icon data, the docs playground included, through bo
 ## Decision
 
 - **Components, not kinds.** `LowerThird`, `Callout`, `Badge`, `Counter`, `ProgressBar`, `Arrow`, `Highlight` and
-  `Background` are ordinary functions in `@cutcraft/kit` that return the kit's own elements (titles, shapes, SVG, and a
+  `Background` are ordinary functions in `@uberscene/kit` that return the kit's own elements (titles, shapes, SVG, and a
   `<Layer>` for the counter's number). Their parts get ids from their own (`lt-name`), take the component's timing,
   and default to theme tokens. `COMPONENTS` lists them with zod props schemas for the docs and the playground. The
   source index records their call sites, so editing a part writes that use into the file as plain elements, imports
@@ -28,8 +28,8 @@ host carried about 0.7 MB of icon data, the docs playground included, through bo
   lint rules and `graphicControls`. A file that still uses it gets an error naming the components and free code.
 - **Stickers are images.** `<Sticker src>` takes an image asset; `icon:` stickers are removed and Lucide with them.
   An icon is an `<Svg>` (paste its markup) or an image asset.
-- **`@cutcraft/graphics` keeps its name** and holds only the free-code libraries (`installFreeCodeLibraries`,
-  `@cutcraft/graphics/three` and `/motion`). The kit no longer depends on it, which also removes a dependency cycle.
+- **`@uberscene/graphics` keeps its name** and holds only the free-code libraries (`installFreeCodeLibraries`,
+  `@uberscene/graphics/three` and `/motion`). The kit no longer depends on it, which also removes a dependency cycle.
 - The kinds without a component (waves and blobs backgrounds, confetti, sparkles, frames, steps, unit grid,
   comparison, sample size, countdown, divider, burst) are not carried over. Each can become a component later, built
   the same way, or a recipe in free code.

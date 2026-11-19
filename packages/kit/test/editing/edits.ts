@@ -1,6 +1,6 @@
 // The edits a person makes in an editor, written so each finds its own target in any file: the first clip that has
 // room to trim, the first title, the first transition. An edit that finds nothing in a file is not run on it.
-import type { ActionInput, Placement, ResolvedState } from "@cutcraft/kit";
+import type { ActionInput, Placement, ResolvedState } from "@uberscene/kit";
 
 export interface Edit {
   /** What the edit is, as a person would say it. */

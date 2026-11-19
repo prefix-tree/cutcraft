@@ -11,7 +11,7 @@ import {
   rampInverse,
   rampSpeed,
   speedKeysOf,
-} from "@cutcraft/kit";
+} from "@uberscene/kit";
 
 import { AUDIO_CHUNK_S, DUCK_ATTACK_S, DUCK_RELEASE_S, ENVELOPE_STEP_S } from "../constants";
 import type { ResolveNested } from "./frame-plan";

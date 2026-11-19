@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { Audio, Captions, Clip, Composition, Keyframe, knob, Marker, Shape, Title, Track } from "@cutcraft/kit";
+import { Audio, Captions, Clip, Composition, Keyframe, knob, Marker, Shape, Title, Track } from "@uberscene/kit";
 
 export const schema = z.object({
   accent: knob.color().describe("Highlight ring colour"),

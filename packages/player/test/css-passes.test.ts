@@ -1,5 +1,5 @@
-import { collectModule, resolve } from "@cutcraft/kit";
-import { loadModule } from "@cutcraft/kit/source";
+import { collectModule, resolve } from "@uberscene/kit";
+import { loadModule } from "@uberscene/kit/source";
 
 import { cssColour, cssFunctions, cssPasses } from "../src/model/css-passes";
 import { effectPipeline } from "../src/model/shaders";
@@ -11,7 +11,7 @@ const stateOf = (children: string, declarations = "") =>
   resolve(
     collectModule(
       loadModule(`import { z } from "zod";
-import { Clip, Composition, effect, Effect, Track } from "@cutcraft/kit";
+import { Clip, Composition, effect, Effect, Track } from "@uberscene/kit";
 ${declarations}
 export default function V() { return <Composition fps={30} width={640} height={360}><Track id="t"><Clip id="c" src="asset:city" in={0} out={4}>${children}</Clip></Track></Composition>; }`) as never,
     ),

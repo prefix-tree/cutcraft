@@ -1,4 +1,4 @@
-import { Composition, Track, TypeCard } from "@cutcraft/kit";
+import { Composition, Track, TypeCard } from "@uberscene/kit";
 
 // TypeCard: big type that builds line by line. A line can sit on a pill, and a line can be struck out.
 export default function Video() {

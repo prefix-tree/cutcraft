@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { buildSourceIndex, lint } from "@cutcraft/kit/source";
+import { buildSourceIndex, lint } from "@uberscene/kit/source";
 
 import { fixtureText, manifest } from "./helpers";
 
 const wrap = (body: string, extra = "") => `
-import { Composition, Track, Clip, Layer, Title, Transition, Effect, Adjustment, SpeedKey, Freeze, Mask, Keyframe } from "@cutcraft/kit";
+import { Composition, Track, Clip, Layer, Title, Transition, Effect, Adjustment, SpeedKey, Freeze, Mask, Keyframe } from "@uberscene/kit";
 ${extra}
 export default function V() {
   return (<Composition fps={30} width={1920} height={1080}>${body}</Composition>);
@@ -49,7 +49,7 @@ describe("lint", () => {
   it("lets free code in a Layer use any hook, HTML ids and libraries", () => {
     const extra = [
       'import { useEffect, useRef } from "react";',
-      'import { useT } from "@cutcraft/kit";',
+      'import { useT } from "@uberscene/kit";',
       'function Scene() { const t = useT(); const ref = useRef(null); useEffect(() => {}, [t]); return <div id="stage"><canvas ref={ref} id="stage-2" /><Spark /></div>; }',
       'function Spark() { const [x] = useState(0); return <div id="stage">{x}</div>; }',
       'import { useState } from "react";',
@@ -80,7 +80,7 @@ describe("lint", () => {
 
   it("warns about Math.random and about clock globals reached through window", () => {
     const extra = [
-      'import { random } from "@cutcraft/kit";',
+      'import { random } from "@uberscene/kit";',
       "function Bad() { const x = Math.random(); window.requestAnimationFrame(() => {}); const t = globalThis.performance.now(); return <div>{x + t}</div>; }",
       "function Good() { const x = random(7); requestAnimationFrame(() => {}); return <div>{x + performance.now() + Math.floor(1.5)}</div>; }",
     ].join("\n");
@@ -100,16 +100,16 @@ describe("lint", () => {
     ].join("\n");
     const d = lint(wrap('<Track id="t"><Layer id="l" duration={3}><Bad /></Layer></Track>', extra));
     expect(d.filter((x) => x.rule === "free-code-clock").map((x) => x.message.split(";")[1]?.trim())).toEqual([
-      "use useTimeline or useLayerTime from @cutcraft/graphics/motion",
-      "use <ThreeScene> from @cutcraft/graphics/three",
-      "drive it with useTimeline or useLayerTime from @cutcraft/graphics/motion",
+      "use useTimeline or useLayerTime from @uberscene/graphics/motion",
+      "use <ThreeScene> from @uberscene/graphics/three",
+      "drive it with useTimeline or useLayerTime from @uberscene/graphics/motion",
     ]);
   });
 
   it("lets three.js and Motion run through the adapters", () => {
     const extra = [
-      'import { ThreeScene } from "@cutcraft/graphics/three";',
-      'import { useTimeline, useLayerTime } from "@cutcraft/graphics/motion";',
+      'import { ThreeScene } from "@uberscene/graphics/three";',
+      'import { useTimeline, useLayerTime } from "@uberscene/graphics/motion";',
       'import { motion, useTransform } from "motion/react";',
       "function Good() { const scope = useTimeline([]); const x = useTransform(useLayerTime(), [0, 1], [0, 9]); return <div ref={scope}><ThreeScene /><motion.div style={{ x }} /></div>; }",
     ].join("\n");

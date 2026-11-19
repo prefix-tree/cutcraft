@@ -32,9 +32,9 @@ function elementImports(text: string): SourceEdit[] {
   });
   if (!missing.size) return [];
   const imports = ast.program.body.filter(t.isImportDeclaration);
-  const kitImport = imports.find((node) => node.source.value === "@cutcraft/kit" || node.source.value === "@cut/kit");
+  const kitImport = imports.find((node) => node.source.value === "@uberscene/kit" || node.source.value === "@cut/kit");
   const pos = imports.at(-1)?.end ?? ast.program.directives.at(-1)?.end ?? 0;
-  const moduleName = kitImport?.source.value ?? "@cutcraft/kit";
+  const moduleName = kitImport?.source.value ?? "@uberscene/kit";
   return [
     {
       kind: "insert",
@@ -296,7 +296,7 @@ function fontDeclarations(text: string, fonts: FontsToDeclare): SourceEdit[] {
   const { ast } = parseSource(text);
   const edits: SourceEdit[] = [];
   const imports = ast.program.body.filter(t.isImportDeclaration);
-  const kitImport = imports.find((node) => node.source.value === "@cutcraft/kit" || node.source.value === "@cut/kit");
+  const kitImport = imports.find((node) => node.source.value === "@uberscene/kit" || node.source.value === "@cut/kit");
   const local =
     kitImport?.specifiers.find(
       (s): s is t.ImportSpecifier => t.isImportSpecifier(s) && t.isIdentifier(s.imported, { name: "googleFont" }),
@@ -377,7 +377,7 @@ function fontDeclarations(text: string, fonts: FontsToDeclare): SourceEdit[] {
           kind: "insert",
           id: "composition",
           range: [top, top],
-          text: `import { googleFont } from "@cutcraft/kit";\n`,
+          text: `import { googleFont } from "@uberscene/kit";\n`,
         });
       }
     }

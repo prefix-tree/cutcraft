@@ -129,7 +129,7 @@ Three kinds of thing go in a file. They mix freely on the same tracks.
 
 | | What it is | Edit in an inspector | Example |
 |---|---|---|---|
-| **Element** | A building block CutCraft knows. | Every prop | `<Clip>`, `<Title>`, `<Shape>` |
+| **Element** | A building block UberScene knows. | Every prop | `<Clip>`, `<Title>`, `<Shape>` |
 | **Component** | A function that returns elements. | Its props; editing a part writes it out as elements | `LowerThird`, `Callout`, `Counter` |
 | **Free code** | Your own React inside a `<Layer>`. | Its props, when it holds one component | A chart, a 3D scene |
 

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { Audio, Clip, Composition, Keyframe, Title, Track, Transition } from "@cutcraft/kit";
+import { Audio, Clip, Composition, Keyframe, Title, Track, Transition } from "@uberscene/kit";
 
 export const schema = z.object({
   title: z.string().describe("Opening title"),

@@ -3,7 +3,7 @@ import * as motion from "motion";
 import * as motionReact from "motion/react";
 import * as three from "three";
 
-import { installLayerEngine, type LayerEngine } from "@cutcraft/kit";
+import { installLayerEngine, type LayerEngine } from "@uberscene/kit";
 
 import * as cutMotion from "./motion";
 import * as cutThree from "./three";
@@ -15,8 +15,8 @@ import * as cutThree from "./three";
  * loadModule(source, { imports: FREE_CODE_LIBRARIES });
  * ```
  *
- * three.js comes with React Three Fiber and `@cutcraft/graphics/three`, whose `<ThreeScene>` puts a scene on the
- * video's clock; Motion with `@cutcraft/graphics/motion`, whose `useTimeline` and `useLayerTime` do the same for
+ * three.js comes with React Three Fiber and `@uberscene/graphics/three`, whose `<ThreeScene>` puts a scene on the
+ * video's clock; Motion with `@uberscene/graphics/motion`, whose `useTimeline` and `useLayerTime` do the same for
  * animations. A host that wants fewer builds its own map from these entries.
  */
 export const FREE_CODE_LIBRARIES: Readonly<Record<string, unknown>> = {
@@ -24,8 +24,8 @@ export const FREE_CODE_LIBRARIES: Readonly<Record<string, unknown>> = {
   "@react-three/fiber": fiber,
   motion,
   "motion/react": motionReact,
-  "@cutcraft/graphics/three": cutThree,
-  "@cutcraft/graphics/motion": cutMotion,
+  "@uberscene/graphics/three": cutThree,
+  "@uberscene/graphics/motion": cutMotion,
 };
 
 /**

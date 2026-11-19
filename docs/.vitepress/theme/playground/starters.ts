@@ -12,7 +12,7 @@ export const STARTERS: readonly Starter[] = [
   {
     name: "Cut and title",
     preview: "previews/elements/title",
-    code: `import { Clip, Composition, Title, Track } from "@cutcraft/kit";
+    code: `import { Clip, Composition, Title, Track } from "@uberscene/kit";
 
 export default function Video() {
   return (
@@ -35,7 +35,7 @@ export default function Video() {
   {
     name: "Lower third",
     preview: "previews/components/lower-third",
-    code: `import { Badge, Clip, Composition, LowerThird, Track } from "@cutcraft/kit";
+    code: `import { Badge, Clip, Composition, LowerThird, Track } from "@uberscene/kit";
 
 // Ready-made components, made of the kit's own titles and shapes. Change the name, or try variant="bar".
 export default function Video() {
@@ -56,7 +56,7 @@ export default function Video() {
   {
     name: "Transition",
     preview: "previews/transitions/iris",
-    code: `import { Clip, Composition, Track, Transition } from "@cutcraft/kit";
+    code: `import { Clip, Composition, Track, Transition } from "@uberscene/kit";
 
 // Try type="clockWipe", "blinds", "filmBurn" or "pixelDissolve".
 export default function Video() {
@@ -75,7 +75,7 @@ export default function Video() {
   {
     name: "Grade",
     preview: "previews/guide/colour-grade",
-    code: `import { Clip, Composition, Effect, Keyframe, Track } from "@cutcraft/kit";
+    code: `import { Clip, Composition, Effect, Keyframe, Track } from "@uberscene/kit";
 
 // Effects run in the order they are written. Change a value, or swap two lines.
 export default function Video() {
@@ -102,7 +102,7 @@ export default function Video() {
     preview: "previews/guide/shader-effect",
     code: `import { z } from "zod";
 
-import { Clip, Composition, Effect, effect, Keyframe, Track } from "@cutcraft/kit";
+import { Clip, Composition, Effect, effect, Keyframe, Track } from "@uberscene/kit";
 
 // A shader of your own: each pixel's brightness picks a colour between dark and light.
 const tone = effect({

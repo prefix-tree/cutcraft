@@ -1,12 +1,12 @@
 // Golden stills: every built-in shader effect, drawn by the export on a fixed test chart, against a PNG checked in
 // under test/goldens. They guard the effects' refactors: a change that moves a pixel by more than the tolerance fails.
-// Needs a Chrome or Chromium 153+ in CUTCRAFT_CHROMIUM. CUTCRAFT_UPDATE_GOLDENS=1 writes the stills as the new goldens;
+// Needs a Chrome or Chromium 153+ in UBERSCENE_CHROMIUM. UBERSCENE_UPDATE_GOLDENS=1 writes the stills as the new goldens;
 // a failing still is kept beside the test output (test/.tmp/goldens-actual) to compare or adopt. The goldens are drawn
 // on CI's Linux, and a Mac draws text and WebGL a little differently: scripts/goldens-linux.sh runs them as CI does.
 import { copyFileSync, existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
-import { BUILT_IN_SHADERS } from "@cutcraft/kit";
+import { BUILT_IN_SHADERS } from "@uberscene/kit";
 
 import { manifest as mediaManifest } from "../../../player/e2e/app/composition";
 import generateMedia, { mediaDir } from "../../../player/e2e/gen-media";
@@ -16,7 +16,7 @@ import { readImage } from "../helpers/output";
 const goldens = join(import.meta.dirname, "..", "goldens");
 const scratch = join(import.meta.dirname, "..", ".tmp", "goldens");
 const actual = join(import.meta.dirname, "..", ".tmp", "goldens-actual");
-const update = process.env.CUTCRAFT_UPDATE_GOLDENS === "1";
+const update = process.env.UBERSCENE_UPDATE_GOLDENS === "1";
 let dir = "";
 
 /** A size-5 LUT that warms: red up, blue down, by a curve on each. */
@@ -165,7 +165,7 @@ async function still(c: Case): Promise<string> {
   writeFileSync(
     file,
     `import { z } from "zod";
-import { Clip, Composition, effect, Effect, Layer, Track } from "@cutcraft/kit";
+import { Clip, Composition, effect, Effect, Layer, Track } from "@uberscene/kit";
 export const manifest = ${JSON.stringify(manifest)};
 ${CHART}
 export default function Video() {
@@ -227,7 +227,7 @@ it("has a golden case for every built-in shader effect", () => {
   expect(BUILT_IN_SHADERS.map((s) => s.name).filter((name) => !covered.has(name))).toEqual([]);
 });
 
-/** Compares a still with the golden of that name, or writes it as the golden under CUTCRAFT_UPDATE_GOLDENS=1. */
+/** Compares a still with the golden of that name, or writes it as the golden under UBERSCENE_UPDATE_GOLDENS=1. */
 function matchesGolden(name: string, out: string): void {
   const golden = join(goldens, `${name}.png`);
   if (update) {
@@ -239,7 +239,7 @@ function matchesGolden(name: string, out: string): void {
     mkdirSync(actual, { recursive: true });
     copyFileSync(out, join(actual, `${name}.png`));
   }
-  expect(existsSync(golden), `no golden for ${name}: run with CUTCRAFT_UPDATE_GOLDENS=1`).toBe(true);
+  expect(existsSync(golden), `no golden for ${name}: run with UBERSCENE_UPDATE_GOLDENS=1`).toBe(true);
   const { off, max } = difference(out, golden);
   if (off > 0.002 || max > 32) {
     mkdirSync(actual, { recursive: true });
@@ -258,7 +258,7 @@ describe.each(CASES)("golden: $name", (c) => {
 // layer, so a change to the resolver, the compositor, text layout or caption timing that moves a pixel shows. Only
 // the solid and the logo: the bars carry a counter drawn only by an ffmpeg with drawtext, so they differ by machine.
 // solid 0–2, wipe 1.4–2, logo 1.4–3.4; the title 0.2–3; the dot slides right over 0.5–2.5.
-const COMPOSED = `import { Caption, Captions, Clip, Composition, Effect, Motion, Title, Track, Transition } from "@cutcraft/kit";
+const COMPOSED = `import { Caption, Captions, Clip, Composition, Effect, Motion, Title, Track, Transition } from "@uberscene/kit";
 export const manifest = ${JSON.stringify(mediaManifest)};
 export default function Video() {
   return (

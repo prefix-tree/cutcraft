@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
 
-import { Audio, Clip, Composition, Effect, Keyframe, Title, Track } from "@cutcraft/kit";
+import { Audio, Clip, Composition, Effect, Keyframe, Title, Track } from "@uberscene/kit";
 
 /**
  * A synthetic project of `n` clips for benchmarks: three sequence tracks of

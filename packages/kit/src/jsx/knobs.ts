@@ -21,7 +21,7 @@ export interface Knob {
 }
 
 /** The meta key the helpers below set. Plain JSON Schema has no word for a colour or a font. */
-const KIND = "cutcraftKind";
+const KIND = "uberSceneKind";
 
 /**
  * Schema helpers for values that are strings to zod but want their own control: a colour picker, a font menu, an

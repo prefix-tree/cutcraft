@@ -25,7 +25,7 @@ object is replaced or the layer unmounts, the hook calls its `revert`, `destroy`
 
 No adapter per library. A GSAP timeline fits as it is; Anime.js and Lottie take a two-line wrapper, shown in the
 free code guide. The published packages depend on none of them: the browser test uses Anime.js as a dev dependency of
-`@cutcraft/graphics`.
+`@uberscene/graphics`.
 
 GSAP is not brought into the repository, its examples or its tests. Since 3.13 it is free to use under its own
 "standard no charge" licence, which is not an open source licence and restricts some uses. The guide shows it as the

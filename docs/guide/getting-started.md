@@ -10,10 +10,10 @@ first time.
 
 ```sh
 mkdir my-video && cd my-video
-npm install cutcraft @cutcraft/kit react zod
+npm install uberscene @uberscene/kit react zod
 ```
 
-`cutcraft` is the command line. `@cutcraft/kit` holds the elements the video is written in; `react` and `zod` give
+`uberscene` is the command line. `@uberscene/kit` holds the elements the video is written in; `react` and `zod` give
 your editor the types.
 
 ## 2. Add your footage
@@ -22,11 +22,11 @@ Put a clip in the folder, `talk.mp4` say. If you have its transcript, put it bes
 from Whisper or ElevenLabs, or a `talk.srt` or `talk.vtt`. Then add it:
 
 ```sh
-npx cutcraft add talk.mp4
-# talk: video, 32.0 s, 1920x1080 at 30 fps, with sound, 96 words from talk.json → cutcraft.json
+npx uberscene add talk.mp4
+# talk: video, 32.0 s, 1920x1080 at 30 fps, with sound, 96 words from talk.json → uberscene.json
 ```
 
-`cutcraft.json` is the manifest. It lists the media the video may use, each by an id (`talk`), with what CutCraft reads from the file
+`uberscene.json` is the manifest. It lists the media the video may use, each by an id (`talk`), with what UberScene reads from the file
 once: its length, size, frame rate, sound and the words of its transcript. The video refers to it as `asset:talk`.
 
 ## 3. Write the video
@@ -34,7 +34,7 @@ once: its length, size, frame rate, sound and the words of its transcript. The v
 Save this as `video.tsx`:
 
 ```tsx [video.tsx]
-import { Captions, Clip, Composition, LowerThird, Track } from "@cutcraft/kit";
+import { Captions, Clip, Composition, LowerThird, Track } from "@uberscene/kit";
 
 export default function Video() {
   return (
@@ -58,22 +58,22 @@ transcript, leave out `<Captions>`. [Anatomy of a video](./anatomy) explains eac
 ## 4. Look at it
 
 ```sh
-npx cutcraft look video.tsx
+npx uberscene look video.tsx
 ```
 
 This writes `look.png`, a sheet of frames from the video: the first frame of each clip, each title and the edges of
 every cut, each labelled with its time. It takes a few seconds and needs no player.
 
-`npx cutcraft inspect video.tsx` prints the timeline as text instead: each element with its
+`npx uberscene inspect video.tsx` prints the timeline as text instead: each element with its
 start and end, and the words each clip plays.
 
 ## 5. Export it
 
 ```sh
-npx cutcraft video.tsx --out video.mp4
+npx uberscene video.tsx --out video.mp4
 ```
 
-Each command finds `cutcraft.json` in the file's folder or a folder above it, and finds `talk.mp4` beside the file,
+Each command finds `uberscene.json` in the file's folder or a folder above it, and finds `talk.mp4` beside the file,
 beside the manifest or in `media/` next to it. `--manifest` and `--media` point elsewhere.
 
 The first export downloads Chrome for Testing, which takes a minute; later ones start in seconds. `--draft` renders
@@ -100,7 +100,7 @@ cut becomes:
 </Track>
 ```
 
-Add `music.mp3` to the manifest first with `npx cutcraft add music.mp3`.
+Add `music.mp3` to the manifest first with `npx uberscene add music.mp3`.
 
 **Draw something of your own.** A `<Layer>` holds any React, and `useLayer()` tells it the time, so it can animate:
 
@@ -114,19 +114,19 @@ function Badge() {
 <Layer id="badge" start={0} duration={3}><Badge /></Layer>
 ```
 
-Import `Audio`, `Layer` and `useLayer` from `@cutcraft/kit` as you use them. Run `look` again after each change.
+Import `Audio`, `Layer` and `useLayer` from `@uberscene/kit` as you use them. Run `look` again after each change.
 
 ## Play it in a page
 
-The same file plays in the browser with `@cutcraft/player`, in a React app built with Vite or any bundler that
+The same file plays in the browser with `@uberscene/player`, in a React app built with Vite or any bundler that
 imports `.tsx` and JSON ([Player](./player) has the details):
 
 ```tsx
-import { collectModule, resolve } from "@cutcraft/kit";
-import { Player } from "@cutcraft/player";
-import "@cutcraft/player/fonts.css";
+import { collectModule, resolve } from "@uberscene/kit";
+import { Player } from "@uberscene/player";
+import "@uberscene/player/fonts.css";
 
-import manifest from "./cutcraft.json";
+import manifest from "./uberscene.json";
 import * as file from "./video";
 
 const state = resolve(collectModule(file), manifest);
@@ -140,6 +140,6 @@ const state = resolve(collectModule(file), manifest);
 ## Next
 
 - [Anatomy of a video](./anatomy): the composition, tracks, clips, layers and the rest, one at a time.
-- [With your agent](./agents): install the CutCraft skill and ask for a video in plain words.
+- [With your agent](./agents): install the UberScene skill and ask for a video in plain words.
 - [Examples](/examples/): finished videos next to the files that made them.
 - [Exporting](./exporting) and the [CLI reference](/reference/cli) for every option.

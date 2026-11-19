@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { Captions, Clip, Composition, knob, Title, Track } from "@cutcraft/kit";
+import { Captions, Clip, Composition, knob, Title, Track } from "@uberscene/kit";
 
 export const schema = z.object({
   accent: knob.color().describe("Name-tag and karaoke colour"),

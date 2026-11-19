@@ -1,4 +1,4 @@
-import { Clip, Composition, ProgressBar, Track } from "@cutcraft/kit";
+import { Clip, Composition, ProgressBar, Track } from "@uberscene/kit";
 
 // ProgressBar: a bar that fills from the left to its value.
 export default function Video() {

@@ -1,19 +1,19 @@
-<p align="center"><img src="https://raw.githubusercontent.com/prefix-tree/cutcraft/main/docs/public/logo.svg" width="64" alt="CutCraft"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/prefix-tree/uberscene/main/docs/public/logo.svg" width="64" alt="UberScene"></p>
 
-# @cutcraft/player
+# @uberscene/player
 
-Plays a [CutCraft](https://cutcraft.prefixtree.xyz/) video file in the browser. Footage is decoded with
+Plays a [UberScene](https://cutcraft.prefixtree.xyz/) video file in the browser. Footage is decoded with
 WebCodecs through [mediabunny](https://mediabunny.dev) and drawn on one canvas, overlays are React DOM on top of it,
 and Web Audio mixes the sound and keeps the time.
 
 ```sh
-npm install @cutcraft/player @cutcraft/kit react react-dom
+npm install @uberscene/player @uberscene/kit react react-dom
 ```
 
 ```tsx
-import { collectModule, resolve } from "@cutcraft/kit";
-import { Player } from "@cutcraft/player";
-import "@cutcraft/player/fonts.css";
+import { collectModule, resolve } from "@uberscene/kit";
+import { Player } from "@uberscene/player";
+import "@uberscene/player/fonts.css";
 import * as file from "./video";
 
 const state = resolve(collectModule(file), manifest);

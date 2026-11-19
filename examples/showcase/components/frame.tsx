@@ -1,4 +1,4 @@
-import { Clip, Composition, Frame, Track, TypeCard } from "@cutcraft/kit";
+import { Clip, Composition, Frame, Track, TypeCard } from "@uberscene/kit";
 
 // Frame: a rounded border around part of the picture. Here the footage sits in a box under a card: the clip is
 // cropped to the box's shape, scaled to its width and moved to its centre, and the frame is drawn at the same place.

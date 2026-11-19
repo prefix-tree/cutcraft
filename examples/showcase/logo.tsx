@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { Composition, Motion, Three, Track } from "@cutcraft/kit";
+import { Composition, Motion, Three, Track } from "@uberscene/kit";
 
 export const schema = z.object({ name: z.string(), tagline: z.string(), accent: z.string() });
 export const defaults = { name: "Shed", tagline: "A cloud for small software", accent: "#e8a33d" };

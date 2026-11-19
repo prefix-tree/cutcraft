@@ -15,7 +15,7 @@ import {
   Track,
   Transition,
   useT,
-} from "@cutcraft/kit";
+} from "@uberscene/kit";
 
 export const schema = z.object({
   product: z.string().describe("Product name on the title card"),

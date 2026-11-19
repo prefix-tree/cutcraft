@@ -1,4 +1,4 @@
-import { type ResolvedState, rampAdvance, rampSpeed } from "@cutcraft/kit";
+import { type ResolvedState, rampAdvance, rampSpeed } from "@uberscene/kit";
 
 import type { Transport } from "../clock/transport";
 import { AUDIO_CACHE_S, AUDIO_PRIME_S, LOOKAHEAD_S, PLAY_PRIME_TIMEOUT_MS, SCHEDULER_MS } from "../constants";

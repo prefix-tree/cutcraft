@@ -29,7 +29,7 @@ function reachable(entry: string): string[] {
   return [...seen];
 }
 
-describe("@cutcraft/player/engine", () => {
+describe("@uberscene/player/engine", () => {
   it("reaches no React layer, react-dom, Web Audio output or PlayerCore", () => {
     const files = reachable(join(src, "engine.ts"));
     expect(files.length).toBeGreaterThan(20);

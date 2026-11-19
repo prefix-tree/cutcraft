@@ -8,7 +8,7 @@ name: Release
 # All packages share one version, so one tag names the release; it must match that version and point at a commit on
 # main.
 #
-# npm trusted publishing: each package on npm trusts this workflow file (release.yml in prefix-tree/cutcraft), so
+# npm trusted publishing: each package on npm trusts this workflow file (release.yml in prefix-tree/uberscene), so
 # GitHub's OIDC token stands in for an npm token. There is no secret to leak, and npm attaches provenance when a
 # maintainer approves the staged version. Renaming this file breaks publishing until the packages' trusted publisher
 # settings are updated too. Leave "npm publish" unchecked on those publishers; this workflow only runs

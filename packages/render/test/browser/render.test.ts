@@ -27,7 +27,7 @@ let dir = "";
 
 beforeAll(async () => {
   generateMedia();
-  dir = mkdtempSync(join(tmpdir(), "cutcraft-"));
+  dir = mkdtempSync(join(tmpdir(), "uberscene-"));
   loaded = await loadVideo(composition);
   base = { state: loaded.state, source: loaded.source, media: directoryResolver(mediaDir, loaded.manifest) };
 });

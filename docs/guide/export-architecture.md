@@ -3,7 +3,7 @@
 This page follows one export from the command to the file, for when you want to know what runs where or why an export
 behaves as it does. To export a video, [Exporting](./exporting) has the options.
 
-The export is the player. `cutcraft video.tsx --out video.mp4` runs the same `<Player>` the preview runs, in headless
+The export is the player. `uberscene video.tsx --out video.mp4` runs the same `<Player>` the preview runs, in headless
 Chrome, steps it one frame at a time, and encodes what it draws. Node starts the browser, serves it the file and the
 media, and writes the result to disk.
 
@@ -37,8 +37,8 @@ Node does four things before any frame is drawn.
 
 | `findChrome` tries | |
 |---|---|
-| 1. `CUTCRAFT_CHROMIUM` | The Chrome or Chromium you name. |
-| 2. `~/.cache/cutcraft/browsers` | Chrome for Testing of the tested milestone, if already downloaded. |
+| 1. `UBERSCENE_CHROMIUM` | The Chrome or Chromium you name. |
+| 2. `~/.cache/uberscene/browsers` | Chrome for Testing of the tested milestone, if already downloaded. |
 | 3. A download | That Chrome, downloaded there now. |
 
 Chrome runs headless with `CanvasDrawElement` on (for `drawElementImage`), no frame-rate limit, and SwiftShader

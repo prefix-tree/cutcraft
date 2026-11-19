@@ -1,6 +1,6 @@
 // Vignette and grain on an <Adjustment> darken and speckle everything beneath it, in the export as in the preview:
 // the goldens' chart under an adjustment with a vignette has darker corners than the chart alone, and the same centre.
-// Needs a Chrome or Chromium 153+ in CUTCRAFT_CHROMIUM.
+// Needs a Chrome or Chromium 153+ in UBERSCENE_CHROMIUM.
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -28,7 +28,7 @@ async function still(name: string, looks: string): Promise<string> {
   const file = join(dir, `${name}.tsx`);
   writeFileSync(
     file,
-    `import { Adjustment, Clip, Composition, effect, Effect, Track } from "@cutcraft/kit";
+    `import { Adjustment, Clip, Composition, effect, Effect, Track } from "@uberscene/kit";
 export const manifest = ${JSON.stringify({ assets: mediaManifest.assets })};
 ${CHART}
 export default function Video() {

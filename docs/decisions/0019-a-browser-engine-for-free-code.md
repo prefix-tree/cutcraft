@@ -16,7 +16,7 @@ page at the composition's time, which is wrong for a layer that does not start a
 
 ## Decision
 
-- **`@cutcraft/render` gets a second picture engine** (`src/web/`): a local server serves an export page, the cut
+- **`@uberscene/render` gets a second picture engine** (`src/web/`): a local server serves an export page, the cut
   file's text, its manifest and its media (with byte ranges); headless Chromium loads the file with the kit's
   `loadModule` and the three.js and Motion libraries, mounts the real `<Player>` inside a `<canvas layoutsubtree>`,
   and for each frame steps the compositor, waits for React and for every engine layer to have drawn it, then captures
@@ -28,12 +28,12 @@ page at the composition's time, which is wrong for a layer that does not start a
   exactly as it joins render workers' pieces, beside copied runs from smart copy.
 - **The sound stays offline, in Node.** The browser draws pictures only; Node mixes the soundtrack with `mixPlan`, as
   0015 decided, so both engines write the same sound (the test compares them sample by sample).
-- **Chosen per file.** `engine: "auto"` (the default, `cutcraft --engine`) takes the browser for a file with an engine
+- **Chosen per file.** `engine: "auto"` (the default, `uberscene --engine`) takes the browser for a file with an engine
   layer (`<Three>`, `<Motion>`) and Node for every other file, so existing files export exactly as before. `browser`
   forces it, for a `<Layer>` that needs more CSS than Satori draws; `node` refuses it.
 - **H.264 and VP9.** WebCodecs encodes AVC for `.mp4` and VP9 for `.webm`; ProRes, HEVC and AV1 stay with Node.
 - **The browser is the user's.** `playwright-core` is an optional peer dependency; the binary is
-  `CUTCRAFT_CHROMIUM` or Playwright's own. `drawElementImage` needs Chrome 153 or later with
+  `UBERSCENE_CHROMIUM` or Playwright's own. `drawElementImage` needs Chrome 153 or later with
   `--enable-features=CanvasDrawElement` (on by default from 157), which the engine passes. The page opts in both ways the API has asked:
   `layoutsubtree` on the canvas (Chrome 153), and `content="drawable"` on the canvas with `drawable` on the captured
   element (Chrome 157). Without a GPU, WebGL runs on

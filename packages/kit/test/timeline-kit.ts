@@ -2,8 +2,8 @@
 // and the properties every resolved timeline has, whatever was written.
 import { expect } from "vitest";
 
-import { type AssetManifest, collectModule, type Placement, type ResolvedState, resolve } from "@cutcraft/kit";
-import { loadModule } from "@cutcraft/kit/source";
+import { type AssetManifest, collectModule, type Placement, type ResolvedState, resolve } from "@uberscene/kit";
+import { loadModule } from "@uberscene/kit/source";
 
 const words = Array.from({ length: 40 }, (_, i) => ({ i, text: `w${i}`, start: i * 0.5, end: i * 0.5 + 0.4 }));
 
@@ -35,7 +35,7 @@ const IMPORTS =
 export function resolved(tracks: string): ResolvedState {
   return resolve(
     collectModule(
-      loadModule(`import { ${IMPORTS} } from "@cutcraft/kit";
+      loadModule(`import { ${IMPORTS} } from "@uberscene/kit";
 export default function V() { return <Composition fps={30} width={1920} height={1080}>${tracks}</Composition>; }`) as never,
     ),
     manifest,

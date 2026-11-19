@@ -1,7 +1,7 @@
 import { z } from "zod";
 
-import { knob, knobsOf } from "@cutcraft/kit";
-import { loadModule } from "@cutcraft/kit/source";
+import { knob, knobsOf } from "@uberscene/kit";
+import { loadModule } from "@uberscene/kit/source";
 
 describe("knobsOf", () => {
   it("reads each value's description, kind, options and bounds, in the schema's order", () => {
@@ -50,7 +50,7 @@ describe("knobsOf", () => {
   it("reads the knobs of a loaded file, which writes them with the kit's helpers", () => {
     const mod = loadModule(`
       import { z } from "zod";
-      import { Composition, knob } from "@cutcraft/kit";
+      import { Composition, knob } from "@uberscene/kit";
       export const schema = z.object({ accent: knob.color().describe("Accent") });
       export const defaults = { accent: "$primary" };
       export default function Video() { return <Composition fps={30} width={640} height={360} />; }

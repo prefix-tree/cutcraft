@@ -1,17 +1,17 @@
 ---
-name: cutcraft
-description: Make and edit videos with CutCraft, where one TSX file is the video. Use when asked to cut footage on words or shots, add titles, captions, music, transitions, colour, effects or motion graphics, make variants of a video, or render a video, still or subtitles from a CutCraft file.
+name: uberscene
+description: Make and edit videos with UberScene, where one TSX file is the video. Use when asked to cut footage on words or shots, add titles, captions, music, transitions, colour, effects or motion graphics, make variants of a video, or render a video, still or subtitles from a UberScene file.
 license: MIT
 ---
 
-# CutCraft
+# UberScene
 
-CutCraft is a video editor as code. One TSX file is the video: tracks of clips, transitions, titles, captions and
-music, plus any React drawn on top. You write and edit that file with ordinary file tools. The `cutcraft` command line
+UberScene is a video editor as code. One TSX file is the video: tracks of clips, transitions, titles, captions and
+music, plus any React drawn on top. You write and edit that file with ordinary file tools. The `uberscene` command line
 checks it and renders it. An editor with a timeline may edit the same file, so write it for both of you.
 
 The point of the design: you never count seconds. A cut names a transcript word (`in="word:12"`) or a camera shot
-(`in="shot:1"`), a title names the word it belongs to, and CutCraft works out the frames through every trim and speed
+(`in="shot:1"`), a title names the word it belongs to, and UberScene works out the frames through every trim and speed
 change.
 
 ## What you can do
@@ -30,7 +30,7 @@ references.
 | Show part of a clip | `<Mask>`: a rect, ellipse, polygon or drawn path, with `feather`, `expansion`, `inverted`; keyframe it to follow something |
 | Animate anything | `<Keyframe property at value easing>` on any transform, effect param (`param`), colour or volume |
 | Join clips | `<Transition type duration>` between two clips of a track: `crossfade`, `dipToBlack`, `dipToWhite`, `wipe`, `slide`, `push`, `iris`, `clockWipe`, `blinds`, `filmBurn`, `pixelDissolve`, `zoom`. With `on="pip" edge="in"` it brings one element in, or takes it out with `edge="out"` |
-| Correct and grade | `<Effect type>`: `exposure`, `whiteBalance`, `brightness`, `contrast`, `saturation`, `vibrance`, `hue`, `levels`, `curves`, `shadowsHighlights`, `lut` (a `.cube` file added with `cutcraft add`) |
+| Correct and grade | `<Effect type>`: `exposure`, `whiteBalance`, `brightness`, `contrast`, `saturation`, `vibrance`, `hue`, `levels`, `curves`, `shadowsHighlights`, `lut` (a `.cube` file added with `uberscene add`) |
 | Give a look | `grayscale`, `sepia`, `invert`, `duotone`, `vignette`, `grain`, `lightLeak`, `chromaticAberration`, `halftone`, `pixelate`, `scanlines`, `fractalNoise` |
 | Fix footage | `colorKey` (green screen), `regionBlur` (hide a face or a plate), `cornerPin` (put a picture on a screen), `blur`, `zoomBlur` |
 | Style text and graphics | `glow`, `outline`, `shadow`, `longShadow`, `bevel` on a title, shape or layer |
@@ -49,21 +49,21 @@ Work in this order, and check after each stage.
 
 1. **Set up** (Node 22.19 or later), in the project folder:
    ```sh
-   npm install cutcraft @cutcraft/kit react zod
+   npm install uberscene @uberscene/kit react zod
    ```
 2. **Add each media file to the manifest.** Put a transcript next to a recording with the same name (`talk.json` from
    Whisper or ElevenLabs, or `talk.srt`, `talk.vtt`) to get its words:
    ```sh
-   npx cutcraft add talk.mp4 broll.mp4 music.mp3
+   npx uberscene add talk.mp4 broll.mp4 music.mp3
    ```
-   This writes `cutcraft.json` in the current folder, or updates the nearest one above it: each asset's id (the file
+   This writes `uberscene.json` in the current folder, or updates the nearest one above it: each asset's id (the file
    name without its extension), kind, length, size and, for speech, every word with its time. Read it: the word indexes you cut on come from there.
 3. **Write `video.tsx`** (shape and rules below).
 4. **Read it back.** `inspect` prints the timeline as the resolver sees it: every element with its seconds, the words
    each clip plays, effects, keyframes and cuts. It starts no browser, so use it freely, after every edit:
    ```sh
-   npx cutcraft inspect video.tsx
-   npx cutcraft inspect video.tsx --at hook.end,x1,word:14,lt.mid
+   npx uberscene inspect video.tsx
+   npx uberscene inspect video.tsx --at hook.end,x1,word:14,lt.mid
    ```
    `--at` says what is on screen and heard at each moment, with effect values after keyframes and the word being said.
    A moment is an element's id (with `.start`, `.mid` or `.end`), a transition's id (both sides of the cut), `word:14`
@@ -72,7 +72,7 @@ Work in this order, and check after each stage.
 5. **Check it.** Every command prints `warning: <id>: <message>` for each problem in the file; fix them all. The layout
    check also reports overlays that leave the frame or the safe zone, or cover the captions or the subject:
    ```sh
-   npx cutcraft video.tsx --check-layout
+   npx uberscene video.tsx --check-layout
    ```
    Exit code 0 is clean, 3 means it found layout issues (listed with their line), 1 is an error, 2 is a bad argument.
    For a vertical video pass `--safe-zone tiktok`, `reels` or `shorts`.
@@ -80,7 +80,7 @@ Work in this order, and check after each stage.
    each is checked on its own, as `<layer id>/lamp-label`. To read where everything is at a moment, in pixels,
    with what is outside each safe zone and what overlaps what:
    ```sh
-   npx cutcraft where video.tsx --at 2.6,hook.mid
+   npx uberscene where video.tsx --at 2.6,hook.mid
    ```
    For a diagram inside a `<Layer>`, use the kit's parts in an `<svg>`: `DrawnLine` (a line that draws itself),
    `Label` (a word with a line to what it names, which names itself for this check), `CountUp` and `Cells`. Each
@@ -91,9 +91,9 @@ Work in this order, and check after each stage.
    moments it shows what an editor skims: each clip's first frame, both sides of every cut, each overlay. Read the
    image after each stage:
    ```sh
-   npx cutcraft look video.tsx --out look.png
-   npx cutcraft look video.tsx --around lt --out lt.png
-   npx cutcraft look video.tsx --at hook.mid,close.mid --without grade --out grade.png
+   npx uberscene look video.tsx --out look.png
+   npx uberscene look video.tsx --around lt --out lt.png
+   npx uberscene look video.tsx --at hook.mid,close.mid --without grade --out grade.png
    ```
    `--around <id>` follows the thing you just changed: a transition from before to after, or an element coming in, in
    and going out. `--without <id>` shows each frame with and without an effect or an overlay, side by side.
@@ -101,28 +101,28 @@ Work in this order, and check after each stage.
    To show a person the whole video on one sheet, list the moments that matter in seconds, one per beat, and set
    the row length. Each cell is printed with its time and frame, so they can point at one:
    ```sh
-   npx cutcraft look video.tsx --at 1.2,12,20,26.5,31,36,44,52.5 --columns 4 --out sheet.png
+   npx uberscene look video.tsx --at 1.2,12,20,26.5,31,36,44,52.5 --columns 4 --out sheet.png
    ```
    Send that sheet when you report on a video, and before rendering one that takes minutes: it is drawn in seconds.
    To judge a move (an entrance, a transition, easing), read it as a strip of small frames at even steps:
    ```sh
-   npx cutcraft look video.tsx --motion 0.3..1.3 --out move.png
+   npx uberscene look video.tsx --motion 0.3..1.3 --out move.png
    ```
    `--motion` takes a range or an element's id; `--step 0.05` sets the seconds between frames (twelve frames without it).
    `--listen all` (or `2..6`, or an element's id) adds the sound under the frames: the mix's level over time, the
    words where they are said, silences shaded, and `peakDb`, `rmsDb` and `silences` in the printed legend. Use it
    after any change to volume, music or the order of clips.
-   Frames are kept in `.cutcraft/cache` beside the file, so looking again after an edit only draws what changed:
-   look as often as you like. Add `.cutcraft/` to `.gitignore`. The cache does not see code brought in with
+   Frames are kept in `.uberscene/cache` beside the file, so looking again after an edit only draws what changed:
+   look as often as you like. Add `.uberscene/` to `.gitignore`. The cache does not see code brought in with
    `--import`: after changing such a module, pass `--no-cache` once.
 7. **Render.**
    ```sh
-   npx cutcraft video.tsx --out video.mp4
-   npx cutcraft video.tsx --props '{"product":"Pixel"}' --out pixel.mp4
-   npx cutcraft video.tsx --srt captions.srt
+   npx uberscene video.tsx --out video.mp4
+   npx uberscene video.tsx --props '{"product":"Pixel"}' --out pixel.mp4
+   npx uberscene video.tsx --srt captions.srt
    ```
    `.mp4` is H.264 and AAC, `.webm` VP9 and Opus, `.mp3` or `.wav` the sound alone. The first export downloads a
-   Chrome to draw with. Commands find `cutcraft.json` in the file's folder or a folder above it. Media is found in the file's folder,
+   Chrome to draw with. Commands find `uberscene.json` in the file's folder or a folder above it. Media is found in the file's folder,
    beside the manifest, in `media/` beside it, or in `--media <dir>`.
 
 Scale the check to the change: a one-word trim needs no still; new graphics always do.
@@ -131,7 +131,7 @@ Scale the check to the change: a one-word trim needs no still; new graphics alwa
 
 ```tsx
 import { z } from "zod";
-import { Captions, Clip, Composition, LowerThird, Title, Track, Transition } from "@cutcraft/kit";
+import { Captions, Clip, Composition, LowerThird, Title, Track, Transition } from "@uberscene/kit";
 
 // What a person may change without touching the edit.
 export const schema = z.object({
@@ -165,8 +165,8 @@ export default function Video({ product, who }: z.infer<typeof schema>) {
 - `schema` and `defaults` are optional. `defaults` is a plain JSON object literal, because the editor rewrites it.
   Describe each schema value by what it means on screen (`.describe("Name on the lower third")`): that is the
   editor's label. Mark a colour, font or image with `knob.color()`, `knob.font()` or `knob.image()`, so it gets a
-  picker; a choice is `z.enum([...])`. `cutcraft inspect` lists them first.
-- A file may import only `react`, `zod` and `@cutcraft/kit` (three.js and Motion come through `<Three>` and
+  picker; a choice is `z.enum([...])`. `uberscene inspect` lists them first.
+- A file may import only `react`, `zod` and `@uberscene/kit` (three.js and Motion come through `<Three>` and
   `<Motion>`).
 - Helpers are plain functions of their props: no state, no effects, and no hooks except `useLayer()` and `useT()`
   inside a `<Layer>`.
@@ -214,8 +214,8 @@ Give the video one look and say it once.
   `mono`, `bold`) gives a palette, fonts, a radius, a motion style and presets. Brand it with
   `palette: { primary: "#ff5a1f" }`, `fonts: { heading: "Playfair Display" }` and
   `motion: "calm" | "snappy" | "bouncy" | "editorial" | "none"`.
-- **Choose a font by looking.** `cutcraft fonts --for headline` lists families with what each suits and its weights
-  (`--category condensed|serif|display|…` narrows it). `cutcraft fonts --for headline --sheet fonts.png --text "YOUR
+- **Choose a font by looking.** `uberscene fonts --for headline` lists families with what each suits and its weights
+  (`--category condensed|serif|display|…` narrows it). `uberscene fonts --for headline --sheet fonts.png --text "YOUR
   WORDS"` draws them; read the image, then pick. A starred family is bundled: use its name. Any other is declared at
   the top of the file, `const bebasNeue = googleFont("Bebas Neue", { weights: [400] })`, and passed as the value:
   `fonts: { heading: bebasNeue }` or `font={bebasNeue}`. Ask only for weights the list shows.
@@ -225,7 +225,7 @@ Give the video one look and say it once.
   `note`. Own props override a preset. `<Shape style="card">`, `<Captions style="boxed">`.
 - **Leave entrances to the motion style.** Write `enter` or `exit` only where one element should differ.
 - **Components** for the common graphics: `LowerThird`, `Callout`, `Badge`, `Counter`, `ProgressBar`, `Arrow`,
-  `Highlight`, `Background`, `TypeCard`, `QuoteCard` and `Frame`, imported from `@cutcraft/kit`. They take the timing props any element takes.
+  `Highlight`, `Background`, `TypeCard`, `QuoteCard` and `Frame`, imported from `@uberscene/kit`. They take the timing props any element takes.
   Positions are pixels from the frame's centre, with defaults set for 1920x1080. See
   [references/components.md](references/components.md).
 - **Colour and effects** are `<Effect type params>` children of a clip, a title, a shape, a layer or an

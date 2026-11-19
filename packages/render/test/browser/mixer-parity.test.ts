@@ -2,7 +2,7 @@
 // its graph) and with the Node mixer, and compares the two.
 import { type Browser, chromium } from "@playwright/test";
 
-import type { AudioOccurrence } from "@cutcraft/player/engine";
+import type { AudioOccurrence } from "@uberscene/player/engine";
 
 import { findChrome, mixBlock, type PcmBuffer } from "../../src";
 

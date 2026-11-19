@@ -1,4 +1,4 @@
-// `cutcraft inspect video.tsx`: the timeline read back as an editor reads it, in text or as flat JSON rows, and what
+// `uberscene inspect video.tsx`: the timeline read back as an editor reads it, in text or as flat JSON rows, and what
 // is on screen and heard at chosen moments. It runs the resolver and the player's model only: no browser, no media.
 import {
   capabilitiesOf,
@@ -12,14 +12,14 @@ import {
   spokenWords,
   type TimelineRows,
   timelineRows,
-} from "@cutcraft/kit";
+} from "@uberscene/kit";
 import {
   animatedTransform,
   buildGainEnvelope,
   paramsAt,
   placementSourceTime,
   visiblePlacements,
-} from "@cutcraft/player/engine";
+} from "@uberscene/player/engine";
 
 import { envelopeAt } from "./mixer";
 

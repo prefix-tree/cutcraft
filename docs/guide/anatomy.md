@@ -5,7 +5,7 @@ primitives: tracks, clips and layers, and the elements built on them. This page 
 three-second card below to footage, music and code of your own.
 
 ```tsx [video.tsx]
-import { Composition, Shape, Title, Track } from "@cutcraft/kit";
+import { Composition, Shape, Title, Track } from "@uberscene/kit";
 
 export default function Video() {
   return (
@@ -70,7 +70,7 @@ Anything the elements don't cover, you draw yourself. A `<Layer>` is a blank can
 inside it you write ordinary React. `useLayer()` tells it what time it is:
 
 ```tsx [video.tsx]
-import { Composition, Layer, Track, useLayer } from "@cutcraft/kit";
+import { Composition, Layer, Track, useLayer } from "@uberscene/kit";
 
 function Clock() {
   const { elapsed, t } = useLayer();
@@ -111,7 +111,7 @@ moment always draws the same frame. Change what you draw from moment to moment a
   or colour. [The file](./the-file)
 
 Every element has a literal `id`. That is how an editor finds it: drag the end of `demo` on a timeline, and
-CutCraft changes one value in the file, `out={9}` to `out={8}`, and nothing else. There is no project file beside it,
+UberScene changes one value in the file, `out={9}` to `out={8}`, and nothing else. There is no project file beside it,
 so whoever opens the file next, you or a model, reads the edit as code. [Editing](./editing)
 
 ## Next

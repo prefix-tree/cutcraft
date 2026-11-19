@@ -1,7 +1,7 @@
 /**
  * The Google Fonts families the catalogue offers, chosen by hand: what each looks like and what it is for. Which
  * weights and italics each has is not written here; `scripts/gen-font-catalog.ts` reads that from Google and writes
- * `font-faces.generated.ts`. Add a family here, then run `pnpm --filter @cutcraft/kit gen:fonts`.
+ * `font-faces.generated.ts`. Add a family here, then run `pnpm --filter @uberscene/kit gen:fonts`.
  */
 export type FontCategory = "sans" | "serif" | "slab" | "condensed" | "display" | "handwriting" | "mono";
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { parseTimeRef, resolveTimeRef } from "@cutcraft/kit";
+import { parseTimeRef, resolveTimeRef } from "@uberscene/kit";
 
 import { manifest } from "./helpers";
 

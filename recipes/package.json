@@ -1,5 +1,5 @@
 {
-  "name": "@cutcraft/recipes",
+  "name": "@uberscene/recipes",
   "version": "0.1.0",
   "private": true,
   "description": "Complete cut files for the videos cutcut is made for, each linted and resolved in a test.",
@@ -9,7 +9,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@cutcraft/kit": "workspace:*",
+    "@uberscene/kit": "workspace:*",
     "react": "catalog:",
     "zod": "catalog:"
   },

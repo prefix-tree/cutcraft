@@ -9,7 +9,7 @@ import {
   SCHEMAS_BY_KIND,
   TRANSITION_PARAMS,
   TRANSITION_TYPES,
-} from "@cutcraft/kit";
+} from "@uberscene/kit";
 
 import { fixtureTree } from "./helpers";
 

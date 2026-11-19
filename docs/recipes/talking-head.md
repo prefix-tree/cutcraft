@@ -26,4 +26,4 @@ The `podcast` asset has a two-speaker transcript with punctuation and silences. 
 ## What to check
 
 - No lint warnings expected.
-- `npx cutcraft look talking-head.tsx --at 0.2,4,12,20`: the title over the first sentence, a caption on each frame, nothing black.
+- `npx uberscene look talking-head.tsx --at 0.2,4,12,20`: the title over the first sentence, a caption on each frame, nothing black.

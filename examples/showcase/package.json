@@ -1,5 +1,5 @@
 {
-  "name": "@cutcraft/example-showcase",
+  "name": "@uberscene/example-showcase",
   "version": "0.1.0",
   "private": true,
   "description": "Short cut files rendered for the documentation site: each video beside the file that made it.",
@@ -14,8 +14,8 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@cutcraft/kit": "workspace:*",
-    "@cutcraft/render": "workspace:*",
+    "@uberscene/kit": "workspace:*",
+    "@uberscene/render": "workspace:*",
     "react": "catalog:"
   },
   "devDependencies": {

@@ -10,7 +10,7 @@ const root = join(import.meta.dirname, "..");
 const scratch = mkdtempSync(join(tmpdir(), "site-bench-"));
 try {
   const kit = join(scratch, "kit.json");
-  execFileSync("pnpm", ["--filter", "@cutcraft/kit", "bench", "--json", kit], { cwd: root, stdio: "inherit" });
+  execFileSync("pnpm", ["--filter", "@uberscene/kit", "bench", "--json", kit], { cwd: root, stdio: "inherit" });
   const k = JSON.parse(readFileSync(kit, "utf8"));
   const out = {
     measured: new Date().toISOString().slice(0, 10),

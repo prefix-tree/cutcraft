@@ -5,7 +5,7 @@ import type { AddressInfo } from "node:net";
 import { extname, join, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import type { MediaResolver } from "@cutcraft/player/engine";
+import type { MediaResolver } from "@uberscene/player/engine";
 
 import type { FontFile } from "../fonts";
 import type { PageJob } from "./page/protocol";
@@ -43,9 +43,9 @@ export interface PageServer {
 
 /**
  * A published build serves the page built into dist; from source (tests, the workspace) Vite serves it, unless
- * CUTCRAFT_EXPORT_PAGE names a built page to serve instead.
+ * UBERSCENE_EXPORT_PAGE names a built page to serve instead.
  */
-const builtPage = process.env.CUTCRAFT_EXPORT_PAGE;
+const builtPage = process.env.UBERSCENE_EXPORT_PAGE;
 const fromSource = !builtPage && import.meta.url.endsWith(".ts");
 
 export async function servePage(

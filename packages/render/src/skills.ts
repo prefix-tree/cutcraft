@@ -1,4 +1,4 @@
-// `cutcraft skills install`: the agent skill that ships inside this package, written into a project, so an agent is
+// `uberscene skills install`: the agent skill that ships inside this package, written into a project, so an agent is
 // taught the commands of the CLI that is installed and not those of another version. The plugin marketplace stays a
 // way to get the skill too; this one cannot drift from the CLI.
 import { createHash } from "node:crypto";
@@ -7,9 +7,9 @@ import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 /** Where an install records what it wrote, inside the skill's folder. */
-const MARKER = ".cutcraft-skill.json";
+const MARKER = ".uberscene-skill.json";
 /** Claude Code reads a project's skills from here; other agents take `--dir`. */
-export const DEFAULT_SKILL_DIR = join(".claude", "skills", "cutcraft");
+export const DEFAULT_SKILL_DIR = join(".claude", "skills", "uberscene");
 
 interface Marker {
   readonly version: string;
@@ -18,7 +18,7 @@ interface Marker {
 }
 
 export interface SkillInstallOptions {
-  /** The folder to write the skill into; default `.claude/skills/cutcraft` under `cwd`. */
+  /** The folder to write the skill into; default `.claude/skills/uberscene` under `cwd`. */
   readonly dir?: string;
   /** Replace files edited since the last install, or a folder this command did not write. */
   readonly force?: boolean;
@@ -38,21 +38,21 @@ export interface SkillInstallResult {
 /** The skill shipped with this package: copied into `dist/skill` at build, read from the repository when run from source. */
 export function skillSource(): string {
   const here = dirname(fileURLToPath(import.meta.url));
-  const built = join(here, "skill", "cutcraft");
+  const built = join(here, "skill", "uberscene");
   if (existsSync(join(built, "SKILL.md"))) return built;
-  const repo = resolve(here, "..", "..", "..", "plugins", "cutcraft", "skills", "cutcraft");
+  const repo = resolve(here, "..", "..", "..", "plugins", "uberscene", "skills", "uberscene");
   if (existsSync(join(repo, "SKILL.md"))) return repo;
-  throw new Error(`the CutCraft skill is not in this package (looked in ${built} and ${repo})`);
+  throw new Error(`the UberScene skill is not in this package (looked in ${built} and ${repo})`);
 }
 
-/** This package's version, which every CutCraft package shares. */
+/** This package's version, which every UberScene package shares. */
 export function packageVersion(): string {
   const here = dirname(fileURLToPath(import.meta.url));
   for (const dir of [resolve(here, ".."), resolve(here, "..", "..")]) {
     const file = join(dir, "package.json");
     if (existsSync(file)) {
       const pkg = JSON.parse(readFileSync(file, "utf8")) as { name?: string; version?: string };
-      if (pkg.name === "@cutcraft/render" && pkg.version) return pkg.version;
+      if (pkg.name === "@uberscene/render" && pkg.version) return pkg.version;
     }
   }
   return "0.0.0";

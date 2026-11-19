@@ -12,8 +12,8 @@ import {
   resolve,
   resolveMoments,
   skimMoments,
-} from "@cutcraft/kit";
-import { loadModule } from "@cutcraft/kit/source";
+} from "@uberscene/kit";
+import { loadModule } from "@uberscene/kit/source";
 
 const words = Array.from({ length: 40 }, (_, i) => ({ i, text: `w${i}`, start: i * 0.5, end: i * 0.5 + 0.4 }));
 const manifest: AssetManifest = {
@@ -37,7 +37,7 @@ const manifest: AssetManifest = {
 const stateOf = (tracks: string) =>
   resolve(
     collectModule(
-      loadModule(`import { Clip, Composition, Freeze, Marker, SpeedKey, Title, Track, Transition } from "@cutcraft/kit";
+      loadModule(`import { Clip, Composition, Freeze, Marker, SpeedKey, Title, Track, Transition } from "@uberscene/kit";
 export default function V() { return <Composition fps={30} width={1920} height={1080}>${tracks}</Composition>; }`) as never,
     ),
     manifest,

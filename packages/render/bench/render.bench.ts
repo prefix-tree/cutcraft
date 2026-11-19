@@ -1,11 +1,11 @@
 // Renders fixed compositions and reports frames per second and the memory Node holds.
-//   pnpm --filter @cutcraft/render bench [--only <name>] [--tabs <n>] [--copy] [--json <file>]
+//   pnpm --filter @uberscene/render bench [--only <name>] [--tabs <n>] [--copy] [--json <file>]
 import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { parseArgs } from "node:util";
 
-import type { AssetManifest } from "@cutcraft/kit";
+import type { AssetManifest } from "@uberscene/kit";
 
 import { loadVideo } from "../src/load";
 import { directoryResolver } from "../src/media";
@@ -24,7 +24,7 @@ interface Case {
   readonly prepare?: () => void;
 }
 
-const CUTS = `import { Clip, Composition, Track } from "@cutcraft/kit";
+const CUTS = `import { Clip, Composition, Track } from "@uberscene/kit";
 export default function Video() {
   return (
     <Composition fps={30} width={1920} height={1080}>
@@ -41,7 +41,7 @@ export default function Video() {
 `;
 
 /** One source clip for 5 s with these effects on it, for the shader cases. */
-const effectsFile = (effects: string) => `import { Clip, Composition, Effect, effect, Track } from "@cutcraft/kit";
+const effectsFile = (effects: string) => `import { Clip, Composition, Effect, effect, Track } from "@uberscene/kit";
 const same = effect({ name: "same", shader: "vec4 effect(vec2 uv) { return texture(image, uv); }" });
 export default function Video() {
   return (
@@ -139,7 +139,7 @@ const cases: Case[] = [
   {
     name: "cuts only, 20 s 1080p30 (five hard cuts, one source, its own sound)",
     file: join(cache, "cuts.tsx"),
-    manifest: join(cache, "cuts.cutcraft.json"),
+    manifest: join(cache, "cuts.uberscene.json"),
     media: join(cache, "media"),
     seconds: 20,
     prepare: () => {
@@ -176,7 +176,7 @@ const cases: Case[] = [
       }
       writeFileSync(join(cache, "cuts.tsx"), CUTS);
       writeFileSync(
-        join(cache, "cuts.cutcraft.json"),
+        join(cache, "cuts.uberscene.json"),
         JSON.stringify({
           assets: {
             src: {
@@ -197,7 +197,7 @@ const cases: Case[] = [
     (e): Case => ({
       name: `effects: ${e.label}`,
       file: join(cache, `effects-${e.key}.tsx`),
-      manifest: join(cache, "effects.cutcraft.json"),
+      manifest: join(cache, "effects.uberscene.json"),
       media: join(cache, "media"),
       seconds: 5,
       prepare: () => {
@@ -206,7 +206,7 @@ const cases: Case[] = [
         writeFileSync(join(cache, "media", "warm.cube"), warmCube());
         writeFileSync(join(cache, `effects-${e.key}.tsx`), effectsFile(e.effects));
         writeFileSync(
-          join(cache, "effects.cutcraft.json"),
+          join(cache, "effects.uberscene.json"),
           JSON.stringify({
             assets: {
               src: { id: "src", kind: "video", duration: 20, fps: 30, width: 1920, height: 1080 },
@@ -220,13 +220,13 @@ const cases: Case[] = [
   {
     name: "talking head, first 20 s of 1080p30 (generated captions on screen throughout; small stand-in footage)",
     file: join(root, "recipes", "talking-head.tsx"),
-    manifest: join(root, "recipes", "cutcraft.json"),
+    manifest: join(root, "recipes", "uberscene.json"),
     media: join(cache, "recipes-media"),
     seconds: 20,
     prepare: () => {
       if (!existsSync(join(cache, "recipes-media", "podcast.webm")))
         makePlaceholders(
-          JSON.parse(readFileSync(join(root, "recipes", "cutcraft.json"), "utf8")) as AssetManifest,
+          JSON.parse(readFileSync(join(root, "recipes", "uberscene.json"), "utf8")) as AssetManifest,
           join(cache, "recipes-media"),
         );
     },
@@ -234,7 +234,7 @@ const cases: Case[] = [
   {
     name: "launch recap, first 10 s of 1080p30 (titles, captions, three sources)",
     file: join(root, "examples", "launch-recap", "video.tsx"),
-    manifest: join(root, "examples", "launch-recap", "cutcraft.json"),
+    manifest: join(root, "examples", "launch-recap", "uberscene.json"),
     media: join(root, "examples", "launch-recap", "public"),
     seconds: 10,
   },

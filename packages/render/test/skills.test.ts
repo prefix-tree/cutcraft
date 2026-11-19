@@ -15,14 +15,14 @@ beforeAll(() => {
 afterAll(() => rmSync(scratch, { recursive: true, force: true }));
 
 describe("installSkill", () => {
-  it("writes the skill and its references into .claude/skills/cutcraft, with a record of what it wrote", () => {
+  it("writes the skill and its references into .claude/skills/uberscene, with a record of what it wrote", () => {
     const result = installSkill({ cwd: project });
-    expect(result.dir).toBe(join(project, ".claude", "skills", "cutcraft"));
+    expect(result.dir).toBe(join(project, ".claude", "skills", "uberscene"));
     expect(result.files).toContain("SKILL.md");
     expect(result.files).toContain(join("references", "cli.md"));
     const skill = readFileSync(join(result.dir, "SKILL.md"), "utf8");
-    expect(skill).toMatch(/^---\nname: cutcraft\n/);
-    const marker = JSON.parse(readFileSync(join(result.dir, ".cutcraft-skill.json"), "utf8"));
+    expect(skill).toMatch(/^---\nname: uberscene\n/);
+    const marker = JSON.parse(readFileSync(join(result.dir, ".uberscene-skill.json"), "utf8"));
     expect(marker.version).toBe(result.version);
     expect(Object.keys(marker.files)).toEqual(result.files);
   });
@@ -33,7 +33,7 @@ describe("installSkill", () => {
   });
 
   it("keeps edits to the installed skill unless forced", () => {
-    const dir = join(project, ".claude", "skills", "cutcraft");
+    const dir = join(project, ".claude", "skills", "uberscene");
     writeFileSync(join(dir, "SKILL.md"), "my own notes\n");
     writeFileSync(join(dir, "extra.md"), "added by hand\n");
     expect(() => installSkill({ cwd: project })).toThrow(
@@ -41,16 +41,18 @@ describe("installSkill", () => {
     );
     expect(readFileSync(join(dir, "SKILL.md"), "utf8")).toBe("my own notes\n");
     installSkill({ cwd: project, force: true });
-    expect(readFileSync(join(dir, "SKILL.md"), "utf8")).toMatch(/^---\nname: cutcraft/);
+    expect(readFileSync(join(dir, "SKILL.md"), "utf8")).toMatch(/^---\nname: uberscene/);
     expect(existsSync(join(dir, "extra.md"))).toBe(false);
   });
 
   it("does not write over a folder it did not write, and takes another folder with dir", () => {
     const other = mkdtempSync(join(scratch, "o-"));
-    mkdirSync(join(other, "skills", "cutcraft"), { recursive: true });
-    writeFileSync(join(other, "skills", "cutcraft", "SKILL.md"), "someone else's\n");
-    expect(() => installSkill({ cwd: other, dir: "skills/cutcraft" })).toThrow(/did not write; run again with --force/);
-    const fresh = installSkill({ cwd: other, dir: ".agents/skills/cutcraft" });
-    expect(fresh.dir).toBe(join(other, ".agents", "skills", "cutcraft"));
+    mkdirSync(join(other, "skills", "uberscene"), { recursive: true });
+    writeFileSync(join(other, "skills", "uberscene", "SKILL.md"), "someone else's\n");
+    expect(() => installSkill({ cwd: other, dir: "skills/uberscene" })).toThrow(
+      /did not write; run again with --force/,
+    );
+    const fresh = installSkill({ cwd: other, dir: ".agents/skills/uberscene" });
+    expect(fresh.dir).toBe(join(other, ".agents", "skills", "uberscene"));
   });
 });

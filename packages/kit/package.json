@@ -1,5 +1,5 @@
 {
-  "name": "@cutcraft/kit",
+  "name": "@uberscene/kit",
   "version": "0.4.0",
   "description": "Vocabulary, resolver, action system and source tools for the cut video DSL.",
   "keywords": [
@@ -18,11 +18,11 @@
   "homepage": "https://cutcraft.prefixtree.xyz/",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/prefix-tree/cutcraft.git",
+    "url": "git+https://github.com/prefix-tree/uberscene.git",
     "directory": "packages/kit"
   },
   "bugs": {
-    "url": "https://github.com/prefix-tree/cutcraft/issues"
+    "url": "https://github.com/prefix-tree/uberscene/issues"
   },
   "type": "module",
   "sideEffects": [

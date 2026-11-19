@@ -1,4 +1,4 @@
-// The live playground: a CodeMirror editor and the CutCraft player, mounted in the page by Playground.vue. The file is
+// The live playground: a CodeMirror editor and the UberScene player, mounted in the page by Playground.vue. The file is
 // compiled in the browser (loadModule), resolved against the two clips in docs/public/playground, and played. It runs
 // again 400 ms after typing stops; a file that fails keeps the last good picture and says what is wrong.
 import { javascript } from "@codemirror/lang-javascript";
@@ -8,10 +8,10 @@ import { basicSetup, EditorView } from "codemirror";
 import { createRef, type ReactNode } from "react";
 import { createRoot, type Root } from "react-dom/client";
 
-import { type AssetManifest, collectModule, type ResolvedState, resolve } from "@cutcraft/kit";
-import { loadModule } from "@cutcraft/kit/source";
-import { Player, type PlayerRef } from "@cutcraft/player";
-import "@cutcraft/player/fonts.css";
+import { type AssetManifest, collectModule, type ResolvedState, resolve } from "@uberscene/kit";
+import { loadModule } from "@uberscene/kit/source";
+import { Player, type PlayerRef } from "@uberscene/player";
+import "@uberscene/player/fonts.css";
 
 import { MANIFEST } from "./starters";
 

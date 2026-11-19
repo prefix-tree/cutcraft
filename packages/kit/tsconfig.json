@@ -4,8 +4,8 @@
     "types": ["node", "vitest/globals"],
     "baseUrl": ".",
     "paths": {
-      "@cutcraft/kit": ["./src/index.ts"],
-      "@cutcraft/kit/source": ["./src/source/index-public.ts"]
+      "@uberscene/kit": ["./src/index.ts"],
+      "@uberscene/kit/source": ["./src/source/index-public.ts"]
     }
   },
   "include": ["src", "test", "fixtures", "scripts", "vitest.config.ts", "eslint.config.js"]

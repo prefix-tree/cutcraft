@@ -1,15 +1,15 @@
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
 
-import { type AssetManifest, Clip, Composition, collectModule, Executor, resolve, Title, Track } from "@cutcraft/kit";
-import { buildSourceIndex, foldToSource, lint } from "@cutcraft/kit/source";
+import { type AssetManifest, Clip, Composition, collectModule, Executor, resolve, Title, Track } from "@uberscene/kit";
+import { buildSourceIndex, foldToSource, lint } from "@uberscene/kit/source";
 
 import { manifest } from "./helpers";
 
 /** The text and the module must agree: the index reads the text, collect evaluates the module. */
 const text = `
 import { z } from "zod";
-import { Clip, Composition, Title, Track } from "@cutcraft/kit";
+import { Clip, Composition, Title, Track } from "@uberscene/kit";
 
 export const schema = z.object({ closeOut: z.number(), label: z.string() });
 export const defaults = { closeOut: 6, label: "Hi" };

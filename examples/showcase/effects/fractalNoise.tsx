@@ -1,4 +1,4 @@
-import { Clip, Composition, Effect, Keyframe, Track } from "@cutcraft/kit";
+import { Clip, Composition, Effect, Keyframe, Track } from "@uberscene/kit";
 
 // fractalNoise: Blends a moving cloud of noise over the picture: mist, smoke or texture.
 export default function Video() {

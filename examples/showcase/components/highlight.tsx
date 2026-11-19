@@ -1,4 +1,4 @@
-import { Background, Composition, Highlight, Title, Track } from "@cutcraft/kit";
+import { Background, Composition, Highlight, Title, Track } from "@uberscene/kit";
 
 // Highlight: a hand-drawn mark on something already in the frame; here a circle round a word.
 export default function Video() {

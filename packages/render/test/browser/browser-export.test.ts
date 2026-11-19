@@ -1,5 +1,5 @@
 // The export engine: <Three> and <Motion> export as the player shows them, frame by frame, and pieces rendered on
-// several pages join into the same file as one page writes. Needs a Chrome or Chromium 153+ in CUTCRAFT_CHROMIUM (Playwright's pinned Chromium is too old for
+// several pages join into the same file as one page writes. Needs a Chrome or Chromium 153+ in UBERSCENE_CHROMIUM (Playwright's pinned Chromium is too old for
 // drawElementImage).
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -15,7 +15,7 @@ let dir = "";
 
 // A three.js cube from 0 s and a word that Motion fades in, on a layer that starts at 0.5 s: the layer's own clock,
 // not the composition's, decides how far the fade has got.
-const ENGINES = `import { Composition, Motion, Three, Track } from "@cutcraft/kit";
+const ENGINES = `import { Composition, Motion, Three, Track } from "@uberscene/kit";
 export const manifest = { assets: {} };
 export default function Video() {
   return (
@@ -113,7 +113,7 @@ it("runs the file's own requestAnimationFrame, element.animate and Math.random o
     cut(
       "own-clock.tsx",
       `import { useEffect, useRef, useState } from "react";
-import { Composition, Layer, Track, useLayer } from "@cutcraft/kit";
+import { Composition, Layer, Track, useLayer } from "@uberscene/kit";
 export const manifest = { assets: {} };
 const box = (top, background) => ({ position: "absolute", top, left: 0, width: 20, height: 20, background });
 function Boxes() {
@@ -199,7 +199,7 @@ it("redraws a shader on a layer from the layer's content of each frame", async (
   const loaded = await loadVideo(
     cut(
       "layer-shader.tsx",
-      `import { Composition, effect, Effect, Motion, Track } from "@cutcraft/kit";
+      `import { Composition, effect, Effect, Motion, Track } from "@uberscene/kit";
 export const manifest = { assets: {} };
 const swap = effect({
   name: "swap",
@@ -284,7 +284,7 @@ it("writes a still of a three.js frame", async () => {
 it("writes the same sound and pictures on several pages as on one", async () => {
   const file = cut(
     "plain.tsx",
-    `import { Clip, Composition, Title, Track } from "@cutcraft/kit";
+    `import { Clip, Composition, Title, Track } from "@uberscene/kit";
 export const manifest = ${JSON.stringify(mediaManifest)};
 export default function Video() {
   return (
@@ -328,7 +328,7 @@ export default function Video() {
 it("keeps a three.js scene under an effect on screen, set up once and showing each frame's own picture", async () => {
   // The glow is at 0 until 0.5 s, where it has no pass at all, then rises. The scene counts its own setups in the
   // red of its background, so a second setup shows.
-  const source = `import { Composition, Effect, Keyframe, Three, Track } from "@cutcraft/kit";
+  const source = `import { Composition, Effect, Keyframe, Three, Track } from "@uberscene/kit";
 export const manifest = { assets: {} };
 let setups = 0;
 export default function Video() {
@@ -396,7 +396,7 @@ it("draws a box behind the caption word being said, and moves it along the line"
   const loaded = await loadVideo(
     cut(
       "word-box.tsx",
-      `import { Caption, Captions, Composition, Shape, Track } from "@cutcraft/kit";
+      `import { Caption, Captions, Composition, Shape, Track } from "@uberscene/kit";
 export const manifest = { assets: {} };
 export default function Video() {
   return (
@@ -453,7 +453,7 @@ it("builds a type card line by line, strikes a line out, and ends every part wit
   const loaded = await loadVideo(
     cut(
       "type-card.tsx",
-      `import { Composition, Track, TypeCard } from "@cutcraft/kit";
+      `import { Composition, Track, TypeCard } from "@uberscene/kit";
 export const manifest = { assets: {} };
 export default function Video() {
   return (
@@ -513,7 +513,7 @@ describe("a frame that goes wrong", () => {
   const layer = (body: string) =>
     cut(
       "wrong.tsx",
-      `import { Composition, Layer, Track, holdLayerFrame } from "@cutcraft/kit";
+      `import { Composition, Layer, Track, holdLayerFrame } from "@uberscene/kit";
 import { useEffect } from "react";
 export const manifest = { assets: {} };
 function Box() {
@@ -564,7 +564,7 @@ export default function Video() {
 
 describe("a draft", () => {
   // A white square that crosses a black frame in two seconds, with a tone under it.
-  const MOVER = `import { Clip, Composition, Keyframe, Shape, Track } from "@cutcraft/kit";
+  const MOVER = `import { Clip, Composition, Keyframe, Shape, Track } from "@uberscene/kit";
 export const manifest = ${JSON.stringify({ assets: mediaManifest.assets })};
 export default function Video() {
   return (

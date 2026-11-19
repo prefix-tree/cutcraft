@@ -1,4 +1,4 @@
-import { Clip, Composition, Keyframe, Motion, Title, Track, Transition } from "@cutcraft/kit";
+import { Clip, Composition, Keyframe, Motion, Title, Track, Transition } from "@uberscene/kit";
 
 /** An edit: three shots cut back to back, a wipe and a slide between them, a slow push-in, a title and a Motion lower third. */
 export default function Video() {

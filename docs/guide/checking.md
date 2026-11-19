@@ -6,22 +6,22 @@ after every change.
 
 | To know | Run |
 |---|---|
-| What plays when, and which words each clip says | `cutcraft inspect video.tsx` |
-| What it looks like | `cutcraft look video.tsx` |
-| Whether anything leaves the frame, the safe zone, or covers the captions or the speaker | `cutcraft video.tsx --check-layout` |
-| Where each thing sits at a moment | `cutcraft where video.tsx --at 2.6` |
+| What plays when, and which words each clip says | `uberscene inspect video.tsx` |
+| What it looks like | `uberscene look video.tsx` |
+| Whether anything leaves the frame, the safe zone, or covers the captions or the speaker | `uberscene video.tsx --check-layout` |
+| Where each thing sits at a moment | `uberscene where video.tsx --at 2.6` |
 | Whether the exported file is sound | `ffprobe` and `ffmpeg` |
 
-Every command finds the nearest `cutcraft.json` from the file's folder upward; `--manifest` names another.
+Every command finds the nearest `uberscene.json` from the file's folder upward; `--manifest` names another.
 
 ## Read the timeline as text
 
-`cutcraft inspect` prints every track and element with its start and end in seconds, the stretch of source each clip
+`uberscene inspect` prints every track and element with its start and end in seconds, the stretch of source each clip
 plays and the words it says, the effects and keyframes on each element, and where the cuts fall. It needs no browser,
 so it is instant.
 
 ```sh
-npx cutcraft inspect video.tsx
+npx uberscene inspect video.tsx
 ```
 
 ```text
@@ -43,13 +43,13 @@ program.
 
 ## Look at frames
 
-`cutcraft look` draws many frames in one browser start, as one contact sheet (`look.png`). Every cell is labelled
+`uberscene look` draws many frames in one browser start, as one contact sheet (`look.png`). Every cell is labelled
 with its time, its frame and what it is, and a legend printed beside the image says which elements are on screen in
 each. The frames are the export's own, so what a sheet shows is what the file renders.
 
 ### Skim the whole cut
 
- After each stage of an edit, `cutcraft look video.tsx` shows what an editor would scrub through:
+ After each stage of an edit, `uberscene look video.tsx` shows what an editor would scrub through:
 the first frame of each clip, both sides and the middle of every transition, and each title once.
 
 [![A contact sheet of ten frames of a cut: each clip's first frame, both sides and the middle of two transitions, and each title, with its time, frame and name under it](/reference/look.jpg)](/reference/look.jpg)
@@ -103,7 +103,7 @@ covers the captions or the speaker. It reports each problem like a compiler: whe
 happens, and the smallest fix.
 
 ```sh
-npx cutcraft video.tsx --check-layout --safe-zone tiktok
+npx uberscene video.tsx --check-layout --safe-zone tiktok
 ```
 
 ```text
@@ -180,7 +180,7 @@ checked as before, as one layer. A part that is faded out or not displayed is no
 
 A layer that is a ground for other things, such as a scrim that darkens the footage under a title, says so with
 the `ground` prop. The check then treats it like a background beneath the footage: it is not held to the safe zone
-and is not said to cover the captions. `cutcraft inspect` marks it `ground`. `<Three>` and `<Motion>` are layers and
+and is not said to cover the captions. `uberscene inspect` marks it `ground`. `<Three>` and `<Motion>` are layers and
 take the prop too.
 
 ```tsx
@@ -191,11 +191,11 @@ take the prop too.
 
 ## Where things are at a moment
 
-The check speaks only when a rule is broken. `cutcraft where` answers the plainer question, where is everything at
+The check speaks only when a rule is broken. `uberscene where` answers the plainer question, where is everything at
 this moment:
 
 ```sh
-npx cutcraft where video.tsx --at 2.6 --safe-zone tiktok
+npx uberscene where video.tsx --at 2.6 --safe-zone tiktok
 ```
 
 ```

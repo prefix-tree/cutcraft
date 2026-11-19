@@ -1,4 +1,4 @@
-import { buildAudioPlan, buildGainEnvelope, captureWarnings, duckIntervals } from "@cutcraft/player";
+import { buildAudioPlan, buildGainEnvelope, captureWarnings, duckIntervals } from "@uberscene/player";
 
 import { makeState } from "./helpers/state";
 

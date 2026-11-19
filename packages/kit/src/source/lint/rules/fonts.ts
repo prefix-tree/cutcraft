@@ -13,7 +13,7 @@ const SHADERS = new Set(["effect", "transition"]);
 function declarations(index: SourceIndex): { call: t.CallExpression; topLevel: boolean; declarer: string }[] {
   const local = new Map<string, string>();
   for (const node of index.ast.program.body) {
-    if (!t.isImportDeclaration(node) || node.source.value !== "@cutcraft/kit") continue;
+    if (!t.isImportDeclaration(node) || node.source.value !== "@uberscene/kit") continue;
     for (const spec of node.specifiers) {
       if (!t.isImportSpecifier(spec)) continue;
       const imported = t.isIdentifier(spec.imported) ? spec.imported.name : spec.imported.value;

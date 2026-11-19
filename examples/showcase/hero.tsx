@@ -1,4 +1,4 @@
-import { Composition, googleFont, Layer, Title, Track, useLayer } from "@cutcraft/kit";
+import { Composition, googleFont, Layer, Title, Track, useLayer } from "@uberscene/kit";
 
 /**
  * The landing page's hero: the logo told as a woodblock print. Waves roll in, a red sun rises through bands of mist
@@ -44,7 +44,7 @@ export default function Video() {
           enter={{ type: "slide-up", duration: 0.6, easing: "easeOutCubic" }}
           exit={{ type: "fade", duration: 0.5 }}
         >
-          CutCraft
+          UberScene
         </Title>
         {LINES.map((line) => (
           <Title
@@ -204,7 +204,8 @@ function Woodblock() {
   return (
     <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{ display: "block" }}>
       <title>
-        A woodblock sun rising through mist over seigaiha waves, cut in two by a katana, drawing in to the CutCraft logo
+        A woodblock sun rising through mist over seigaiha waves, cut in two by a katana, drawing in to the UberScene
+        logo
       </title>
       <defs>
         <clipPath id="hero-tile">

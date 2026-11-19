@@ -1,4 +1,4 @@
-import { Background, Composition, Title, Track } from "@cutcraft/kit";
+import { Background, Composition, Title, Track } from "@uberscene/kit";
 
 // Background: a full-frame backdrop on the track beneath everything; dots here, or a gradient or a grid.
 export default function Video() {

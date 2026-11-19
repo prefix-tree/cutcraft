@@ -1,0 +1,7 @@
+{
+  "name": "uberscene",
+  "description": "Make and edit videos as code with UberScene: cut on words, add titles, captions, effects and motion graphics, check and render from the command line.",
+  "homepage": "https://cutcraft.prefixtree.xyz/guide/agents",
+  "repository": "https://github.com/prefix-tree/uberscene",
+  "license": "MIT"
+}

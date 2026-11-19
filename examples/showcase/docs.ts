@@ -2,13 +2,13 @@
 // into docs/public/previews/elements, the guide's feature examples (guide/*.tsx) into docs/public/previews/guide, and
 // the demo of each built-in effect and transition (effects/*.tsx, transitions/*.tsx, written by `pnpm docs:gen`) into
 // docs/public/previews/effects and transitions.
-// A looping WebM and a poster each, through the same loader and renderer as `cutcraft`. A file that does not resolve cleanly stops the run; warnings are printed.
+// A looping WebM and a poster each, through the same loader and renderer as `uberscene`. A file that does not resolve cleanly stops the run; warnings are printed.
 // The export runs in headless Chrome, downloaded on the first run.
-//   pnpm --filter @cutcraft/example-showcase docs [name…]
+//   pnpm --filter @uberscene/example-showcase docs [name…]
 import { mkdirSync, readdirSync } from "node:fs";
 import { basename, join } from "node:path";
 
-import { directoryResolver, loadVideo, renderStill, renderVideo } from "@cutcraft/render";
+import { directoryResolver, loadVideo, renderStill, renderVideo } from "@uberscene/render";
 
 const here = import.meta.dirname;
 const previews = join(here, "..", "..", "docs", "public", "previews");
@@ -38,7 +38,7 @@ for (const { dir, file, out } of files.sort((a, b) => a.file.localeCompare(b.fil
   const name = basename(file, ".tsx");
   if (only.length > 0 && !only.includes(name)) continue;
   mkdirSync(out, { recursive: true });
-  const video = await loadVideo(join(here, dir, file), { manifest: join(here, "cutcraft.json") });
+  const video = await loadVideo(join(here, dir, file), { manifest: join(here, "uberscene.json") });
   if (video.state.errors.length > 0)
     throw new Error(`${name}: ${video.state.errors.map((e) => `${e.id}: ${e.message}`).join("; ")}`);
   const media = directoryResolver(join(here, "media"), video.manifest);

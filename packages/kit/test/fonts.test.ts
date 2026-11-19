@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { collectModule, Executor, font, googleFont, resolve } from "@cutcraft/kit";
-import { foldToSource, loadModule } from "@cutcraft/kit/source";
+import { collectModule, Executor, font, googleFont, resolve } from "@uberscene/kit";
+import { foldToSource, loadModule } from "@uberscene/kit/source";
 
-const file = (declarations: string) => `import { Composition, font, googleFont, Track } from "@cutcraft/kit";
+const file = (declarations: string) => `import { Composition, font, googleFont, Track } from "@uberscene/kit";
 ${declarations}
 export default function Video() {
   return <Composition fps={30} width={640} height={360}><Track id="t" /></Composition>;
@@ -51,7 +51,7 @@ export const inter = googleFont("Inter Tight", { weights: [400, 700] });`),
   });
 
   it("find a face on the element that uses it, in a theme, and in a Layer's free code", () => {
-    const fonts = fontsOf(`import { Composition, googleFont, Layer, Title, Track } from "@cutcraft/kit";
+    const fonts = fontsOf(`import { Composition, googleFont, Layer, Title, Track } from "@uberscene/kit";
 const heading = googleFont("Heading Face");
 const label = googleFont("Label Face");
 const free = googleFont("Free Face");
@@ -84,7 +84,7 @@ export const b = font({ family: "Brand", src: "asset:two" });`),
   });
 
   it("are written back by the editor as the identifier that declares them", () => {
-    const text = `import { Composition, googleFont, Title, Track } from "@cutcraft/kit";
+    const text = `import { Composition, googleFont, Title, Track } from "@uberscene/kit";
 export const titan = googleFont("Titan One");
 export default function Video() {
   return (

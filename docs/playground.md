@@ -16,7 +16,7 @@ of the files above the editor; **Copy link** shares what you wrote.
 <Playground share />
 
 The playground offers two clips (`asset:aurora`, `asset:product`) and the imports a file gets by default:
-`@cutcraft/kit`, `react` and `zod`. [Quick start](/guide/getting-started) sets up the same in your own project, with
+`@uberscene/kit`, `react` and `zod`. [Quick start](/guide/getting-started) sets up the same in your own project, with
 your footage, three.js and Motion.
 
 </div>

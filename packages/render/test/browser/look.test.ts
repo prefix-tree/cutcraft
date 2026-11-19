@@ -1,5 +1,5 @@
 // `renderLook`: many frames from one browser start, on one sheet, each cell the frame a still draws at that time.
-// Needs a Chrome or Chromium 153+ in CUTCRAFT_CHROMIUM.
+// Needs a Chrome or Chromium 153+ in UBERSCENE_CHROMIUM.
 import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -34,7 +34,7 @@ const W = 320,
 /** A two-clip cut with a crossfade, a title over the first clip and an effect on it; parts can be left out. */
 const video = (
   options: { effect?: boolean; title?: boolean; words?: string } = {},
-) => `import { Clip, Composition, Effect, Title, Track, Transition } from "@cutcraft/kit";
+) => `import { Clip, Composition, Effect, Title, Track, Transition } from "@uberscene/kit";
 export const manifest = ${JSON.stringify({ assets: mediaManifest.assets })};
 export default function Video() {
   return (
@@ -455,7 +455,7 @@ describe("--listen", () => {
 
 describe("--motion", () => {
   /** A white square that crosses a black frame from left to right in two seconds. */
-  const mover = `import { Composition, Keyframe, Shape, Track } from "@cutcraft/kit";
+  const mover = `import { Composition, Keyframe, Shape, Track } from "@uberscene/kit";
 export const manifest = { assets: {} };
 export default function Video() {
   return (
@@ -557,7 +557,7 @@ export default function Video() {
 describe("--zones", () => {
   // On a grey frame: a square well inside the title-safe zone, one that runs off its right edge, and a layer whose
   // code names one part. The zone is the middle 90%: x 16..304, y 9..171.
-  const zoned = `import { Composition, Layer, Shape, Track } from "@cutcraft/kit";
+  const zoned = `import { Composition, Layer, Shape, Track } from "@uberscene/kit";
 export const manifest = { assets: {} };
 export default function Video() {
   return (

@@ -1,4 +1,4 @@
-import { cssOf, effectEntry, isNeutral, type Placement } from "@cutcraft/kit";
+import { cssOf, effectEntry, isNeutral, type Placement } from "@uberscene/kit";
 
 import { devWarn } from "../warn";
 import { keyframedParam } from "./keyframes";

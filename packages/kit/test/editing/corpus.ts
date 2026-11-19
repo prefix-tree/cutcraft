@@ -11,8 +11,8 @@ import {
   Executor,
   type ResolvedState,
   resolve,
-} from "@cutcraft/kit";
-import { buildSourceIndex, loadModule } from "@cutcraft/kit/source";
+} from "@uberscene/kit";
+import { buildSourceIndex, loadModule } from "@uberscene/kit/source";
 
 const root = join(import.meta.dirname, "..", "..", "..", "..");
 
@@ -25,7 +25,7 @@ export interface CorpusFile {
 
 /** The video files of a folder (and of the subfolders named), with the folder's manifest. */
 function folder(dir: string, subfolders: readonly string[] = []): CorpusFile[] {
-  const manifest = JSON.parse(readFileSync(join(root, dir, "cutcraft.json"), "utf8")) as AssetManifest;
+  const manifest = JSON.parse(readFileSync(join(root, dir, "uberscene.json"), "utf8")) as AssetManifest;
   return ["", ...subfolders].flatMap((sub) =>
     readdirSync(join(root, dir, sub))
       .filter((f) => f.endsWith(".tsx"))

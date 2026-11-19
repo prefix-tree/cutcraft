@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { FONT_CATALOG, findFont, fontFamily, fontsFor, googleFont, nearestFont } from "@cutcraft/kit";
-import { lint } from "@cutcraft/kit/source";
+import { FONT_CATALOG, findFont, fontFamily, fontsFor, googleFont, nearestFont } from "@uberscene/kit";
+import { lint } from "@uberscene/kit/source";
 
 describe("the font catalogue", () => {
   it("lists each family once, with at least one upright weight, a role and a line on how it looks", () => {
@@ -77,7 +77,7 @@ describe("fontFamily()", () => {
 });
 
 describe("font-available", () => {
-  const file = (font: string) => `import { Composition, Title, Track } from "@cutcraft/kit";
+  const file = (font: string) => `import { Composition, Title, Track } from "@uberscene/kit";
 export default function Video() {
   return (
     <Composition fps={30} width={640} height={360}>
@@ -98,6 +98,6 @@ export default function Video() {
   it("suggests the family a misspelt name meant, and points at the list otherwise", () => {
     expect(message("Monserrat")).toContain('Did you mean "Montserrat"?');
     expect(message("Intr")).toContain('Did you mean "Inter", which is bundled?');
-    expect(message("Brand Sans Headline")).toContain("cutcraft fonts");
+    expect(message("Brand Sans Headline")).toContain("uberscene fonts");
   });
 });

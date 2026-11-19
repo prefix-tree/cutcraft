@@ -1,4 +1,4 @@
-import { Background, Composition, QuoteCard, Track } from "@cutcraft/kit";
+import { Background, Composition, QuoteCard, Track } from "@uberscene/kit";
 
 // QuoteCard: a passage with its source, and a marker that sweeps across the phrases that matter.
 export default function Video() {

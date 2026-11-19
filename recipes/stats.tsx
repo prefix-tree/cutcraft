@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { Clip, Composition, knob, Layer, Title, Track, useLayer } from "@cutcraft/kit";
+import { Clip, Composition, knob, Layer, Title, Track, useLayer } from "@uberscene/kit";
 
 export const schema = z.object({
   accent: knob.color().describe("Number colour"),

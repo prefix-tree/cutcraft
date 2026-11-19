@@ -1,5 +1,5 @@
 // Overlays that load a file (a sticker's image, an SVG's markup) are captured once it has loaded, not before: a still
-// taken the moment they appear shows the file. Needs a Chrome or Chromium 153+ in CUTCRAFT_CHROMIUM.
+// taken the moment they appear shows the file. Needs a Chrome or Chromium 153+ in UBERSCENE_CHROMIUM.
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -22,7 +22,7 @@ it("draws a sticker's image in a still of its first moment", async () => {
   const file = join(dir, "sticker.tsx");
   writeFileSync(
     file,
-    `import { Composition, Sticker, Track } from "@cutcraft/kit";
+    `import { Composition, Sticker, Track } from "@uberscene/kit";
 export const manifest = ${JSON.stringify({ assets: mediaManifest.assets })};
 export default function Video() {
   return (

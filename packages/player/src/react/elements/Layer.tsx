@@ -1,6 +1,6 @@
 import { type CSSProperties, type ReactNode, useEffect, useLayoutEffect, useRef } from "react";
 
-import { layerEngine } from "@cutcraft/kit";
+import { layerEngine } from "@uberscene/kit";
 
 import { layerClock } from "../../model/time";
 import { layerContent } from "../../overlays/content";
@@ -69,7 +69,7 @@ function Engine({
   if (!Draw) {
     devWarn(
       `engine:${name}`,
-      `no layer engine "${name}" is installed, so <${name === "three" ? "Three" : name === "motion" ? "Motion" : name}> draws nothing; the host installs it (installFreeCodeLibraries from @cutcraft/graphics/libraries)`,
+      `no layer engine "${name}" is installed, so <${name === "three" ? "Three" : name === "motion" ? "Motion" : name}> draws nothing; the host installs it (installFreeCodeLibraries from @uberscene/graphics/libraries)`,
     );
     return null;
   }

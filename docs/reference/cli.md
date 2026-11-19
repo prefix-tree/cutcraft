@@ -1,29 +1,29 @@
 # CLI
 
-`cutcraft` exports a file to video, audio, a still or subtitles, checks its layout, reads its timeline back as text,
+`uberscene` exports a file to video, audio, a still or subtitles, checks its layout, reads its timeline back as text,
 draws a sheet of its frames to look at, and adds media to the manifest.
 
 ```sh
-npm install cutcraft
-npx cutcraft <file.tsx> --out <video.mp4|.webm|.mp3|.wav> [--draft] [options]
-npx cutcraft <file.tsx> --still <seconds> --out <image.png|.jpg> [options]
-npx cutcraft <file.tsx> --check-layout [--safe-zone <zone>] [--subject <x,y,w,h>] [--json] [options]
-npx cutcraft <file.tsx> --srt <captions.srt> | --vtt <captions.vtt> [--from <s> --to <s>]
-npx cutcraft inspect <file.tsx> [--at <moments>] [--json] [--manifest <file>] [--props <json>]
-npx cutcraft look <file.tsx> [--at <moments> | --around <id>] [--without <id>] [--listen <stretch>] [--zones <zone>] [--out look.png] [options]
-npx cutcraft look <file.tsx> --motion <stretch> [--step <s>] [--listen <stretch>] [--out look.png] [options]
-npx cutcraft where <file.tsx> --at <moments> [--safe-zone <zone>] [--json] [options]
-npx cutcraft fonts [--for <role>] [--category <category>] [--sheet fonts.png [--text <words>]] [--json]
-npx cutcraft add <media file>... [--manifest <file>] [--id <id>] [--transcript <file>]
-npx cutcraft browser install
-npx cutcraft skills install [--dir <folder>] [--force]
+npm install uberscene
+npx uberscene <file.tsx> --out <video.mp4|.webm|.mp3|.wav> [--draft] [options]
+npx uberscene <file.tsx> --still <seconds> --out <image.png|.jpg> [options]
+npx uberscene <file.tsx> --check-layout [--safe-zone <zone>] [--subject <x,y,w,h>] [--json] [options]
+npx uberscene <file.tsx> --srt <captions.srt> | --vtt <captions.vtt> [--from <s> --to <s>]
+npx uberscene inspect <file.tsx> [--at <moments>] [--json] [--manifest <file>] [--props <json>]
+npx uberscene look <file.tsx> [--at <moments> | --around <id>] [--without <id>] [--listen <stretch>] [--zones <zone>] [--out look.png] [options]
+npx uberscene look <file.tsx> --motion <stretch> [--step <s>] [--listen <stretch>] [--out look.png] [options]
+npx uberscene where <file.tsx> --at <moments> [--safe-zone <zone>] [--json] [options]
+npx uberscene fonts [--for <role>] [--category <category>] [--sheet fonts.png [--text <words>]] [--json]
+npx uberscene add <media file>... [--manifest <file>] [--id <id>] [--transcript <file>]
+npx uberscene browser install
+npx uberscene skills install [--dir <folder>] [--force]
 ```
 
-`npx cutcraft --help` prints the same list.
+`npx uberscene --help` prints the same list.
 
 Every export draws its frames in headless Chrome. The first one downloads Chrome for Testing into
-`~/.cache/cutcraft/browsers` (`CUTCRAFT_BROWSER_CACHE` moves it); `cutcraft browser install` downloads it ahead of
-time. `CUTCRAFT_CHROMIUM` names a Chrome or Chromium 153 or later to use instead
+`~/.cache/uberscene/browsers` (`UBERSCENE_BROWSER_CACHE` moves it); `uberscene browser install` downloads it ahead of
+time. `UBERSCENE_CHROMIUM` names a Chrome or Chromium 153 or later to use instead
 ([The browser it runs in](/guide/exporting#the-browser-it-runs-in)).
 
 ## Export
@@ -48,7 +48,7 @@ time. `CUTCRAFT_CHROMIUM` names a Chrome or Chromium 153 or later to use instead
 | `--silent` | No soundtrack. |
 | `--font Name[:weight[:style]]=file` | A font for this export beyond the ones the file declares ([Fonts](/guide/themes#fonts)), repeatable. TTF, OTF, WOFF or WOFF2. |
 | `--continue` | Draw the grey placeholder for an asset that cannot be read, instead of stopping. |
-| `--import <spec>` | A module the file may import beyond `react`, `zod` and `@cutcraft/kit`, repeatable: `three`, or `name=specifier` for a package or a path relative to the file. |
+| `--import <spec>` | A module the file may import beyond `react`, `zod` and `@uberscene/kit`, repeatable: `three`, or `name=specifier` for a package or a path relative to the file. |
 | `--quiet` | No progress output. |
 
 ## Layout check
@@ -65,7 +65,7 @@ time. `CUTCRAFT_CHROMIUM` names a Chrome or Chromium 153 or later to use instead
 
 ## Where
 
-`cutcraft where video.tsx --at <moments>` prints where each thing on screen is at each moment: every overlay, the
+`uberscene where video.tsx --at <moments>` prints where each thing on screen is at each moment: every overlay, the
 captions, and every part a layer's code names with `data-name`. Each row gives the thing's ink as a box in pixels,
 whether it is in the frame and in each safe zone, and what it overlaps.
 
@@ -80,7 +80,7 @@ whether it is in the frame and in each safe zone, and what it overlaps.
 
 ## Inspect
 
-`cutcraft inspect video.tsx` prints the timeline the way an editor reads it: each track and its elements with their
+`uberscene inspect video.tsx` prints the timeline the way an editor reads it: each track and its elements with their
 seconds, the words each clip plays, effects, keyframes and cuts. The file's `schema` values come first, one `knob`
 line each with its kind, its value and its description. It runs the resolver only, so it starts no browser,
 needs no media files and answers at once. It is how an agent, or a script, reads a cut back.
@@ -102,7 +102,7 @@ cuts: 4.80 hook→broll (x1), 10.80 broll→demo
 effect's params and the transform after keyframes, each sound's gain, the word being said and the caption.
 
 ```
-$ npx cutcraft inspect video.tsx --at word:14,x1
+$ npx uberscene inspect video.tsx --at word:14,x1
 word:14  1.00 s  frame 30  (word 14 "still" in hook)
   seen: title tagline  4% through  "A cloud for small software"  transform position.x=0 position.y=300
   seen: title title  21% through  "Shed"  transform position.x=0 position.y=140
@@ -116,7 +116,7 @@ word:14  1.00 s  frame 30  (word 14 "still" in hook)
 | Option | |
 |---|---|
 | `--at <moments>` | The moments to describe, comma-separated. Without it, the whole timeline. |
-| `--json` | Flat rows instead of text: `knobs` (each with `key`, `kind`, `description`, `value`, and `options`, `min` and `max` where it has them), `composition`, `tracks`, `elements`, `effects`, `keyframes`, `words`, `cuts` and `errors`, each row with its seconds and its frames; with `--at`, an `at` array too. Made for `jq` or a short script: `cutcraft inspect video.tsx --json \| jq '.cuts'`. |
+| `--json` | Flat rows instead of text: `knobs` (each with `key`, `kind`, `description`, `value`, and `options`, `min` and `max` where it has them), `composition`, `tracks`, `elements`, `effects`, `keyframes`, `words`, `cuts` and `errors`, each row with its seconds and its frames; with `--at`, an `at` array too. Made for `jq` or a short script: `uberscene inspect video.tsx --json \| jq '.cuts'`. |
 | `--manifest`, `--props`, `--import` | As for an export. |
 
 A moment is written the way the file is written, or as plain time:
@@ -138,7 +138,7 @@ still printed.
 
 ## Look
 
-`cutcraft look video.tsx` draws many frames in one browser start and lays them out on one contact sheet, each cell
+`uberscene look video.tsx` draws many frames in one browser start and lays them out on one contact sheet, each cell
 labelled with its seconds, its frame and what it shows. One look costs about what one `--still` does, however many
 frames it holds, so it is the way to check a cut by eye: an agent reads the one image.
 
@@ -185,7 +185,7 @@ It prints a legend as JSON, one entry per cell, so a frame found by eye leads ba
 With `--without title` each moment is drawn twice, so the title's exit can be judged against the cut beneath it.
 
 ```sh
-npx cutcraft look edit.tsx --around x1 --without title --columns 6
+npx uberscene look edit.tsx --around x1 --without title --columns 6
 ```
 
 [![Ten frames across a wipe between two clips, in pairs: each moment with the title "Cut by words" and without it](/reference/look-around.jpg)](/reference/look-around.jpg)
@@ -194,7 +194,7 @@ npx cutcraft look edit.tsx --around x1 --without title --columns 6
 starts half way through the shot: at 1 s it changes nothing, at 2.5 s the graded frame is warmer and brighter.
 
 ```sh
-npx cutcraft look colour-grade.tsx --at 1,2.5 --without grade
+npx uberscene look colour-grade.tsx --at 1,2.5 --without grade
 ```
 
 [![Four frames of coffee being poured: at 1 second the two are the same; at 2.5 seconds the one with the grade is warmer and brighter than the one without](/reference/look-without.jpg)](/reference/look-without.jpg)
@@ -206,7 +206,7 @@ at even steps, read left to right, each labelled with its time in seconds. The s
 `0.3..1.3` or `9f..39f`, or an element's id for the time it is on.
 
 ```sh
-npx cutcraft look one-pixel.tsx --motion 0.3..1.3
+npx uberscene look one-pixel.tsx --motion 0.3..1.3
 ```
 
 [![Twelve small frames in a row, from 0.30 s to 1.30 s: a ball rolls in from the right of a diagram and stops, then four rays of light thicken across it](/reference/look-motion.png)](/reference/look-motion.png)
@@ -226,12 +226,12 @@ part a layer's code names is outlined, lime inside the zone and red where it lea
 the zones `--safe-zone` takes. A layer with named parts is drawn as its parts; what fills the frame is left out.
 
 ```sh
-npx cutcraft look one-pixel.tsx --at 2.6,22,53,84 --zones tiktok
+npx uberscene look one-pixel.tsx --at 2.6,22,53,84 --zones tiktok
 ```
 
 [![Four frames of a film with TikTok's safe zone marked by a dashed line and the area outside it shaded. The captions at the top, a label and a clock at the bottom and a stamp are outlined in red; two labels inside the zone are outlined in lime](/reference/look-zones.jpg)](/reference/look-zones.jpg)
 
-The legend's cells gain `things`, the rows [`cutcraft where`](#where) prints for that moment, so the picture and
+The legend's cells gain `things`, the rows [`uberscene where`](#where) prints for that moment, so the picture and
 the numbers come from one command. In a `--motion` strip the outlines are drawn without their names, as the cells
 are too small for words. `--zones` is not for use with `--without`.
 
@@ -243,7 +243,7 @@ scale, a time scale beneath it, and each word of the transcript where the cut sa
 the loudest sample and the bright bar is the average level. Silent stretches are shaded.
 
 ```sh
-npx cutcraft look video.tsx --at 1,3,5 --listen all
+npx uberscene look video.tsx --at 1,3,5 --listen all
 ```
 
 [![Three frames of a cut above a strip of its sound: a steady tone for two seconds with three words marked on it, two seconds of shaded silence, then a louder tone to the end](/reference/look-listen.png)](/reference/look-listen.png)
@@ -285,9 +285,9 @@ others.
 
 ### The frame cache
 
-`look` and `--still` keep what they draw in `.cutcraft/cache`, beside the file. Each frame is kept under a key made
+`look` and `--still` keep what they draw in `.uberscene/cache`, beside the file. Each frame is kept under a key made
 from everything that decides its pixels: the elements on screen at that time with their resolved props, the media
-files they read (by size and modified time), the composition's settings, the fonts, and the version of CutCraft and of
+files they read (by size and modified time), the composition's settings, the fonts, and the version of UberScene and of
 Chrome. So after an edit only the frames the edit changed are drawn again, and a look whose cells are all kept starts
 no browser and answers in about a second. The legend's `cached` says how many cells were read back.
 
@@ -303,7 +303,7 @@ The folder is safe to delete, and belongs in `.gitignore`.
 ## Fonts
 
 ```sh
-cutcraft fonts [--for <role>] [--category <category>] [--sheet fonts.png [--text <words>]] [--json]
+uberscene fonts [--for <role>] [--category <category>] [--sheet fonts.png [--text <words>]] [--json]
 ```
 
 Lists the fonts to choose from, without a file: the bundled families (starred, used by name) and a short list from
@@ -319,7 +319,7 @@ how it looks.
 | `--json` | Prints the entries as JSON: `family`, `source`, `category`, `weights`, `italics`, `roles`, `feel`, `pairs` |
 
 The sheet is drawn in Chrome like any frame. The first time, Google's faces are downloaded into the font cache
-(`~/.cache/cutcraft/fonts`), so it needs the network once. See [Choosing a font](/guide/themes#choosing-a-font).
+(`~/.cache/uberscene/fonts`), so it needs the network once. See [Choosing a font](/guide/themes#choosing-a-font).
 
 ## Exit codes
 
@@ -336,11 +336,11 @@ Every command that reads a video file needs its manifest. It takes the first of 
 
 1. The file given to `--manifest`.
 2. The `manifest` the video file exports.
-3. `cutcraft.json` in the video file's folder, or in the nearest folder above it that has one.
+3. `uberscene.json` in the video file's folder, or in the nearest folder above it that has one.
 4. `manifest.json` in the video file's own folder. This is the older name. Folders above are not searched for it,
    because other tools keep a file of that name.
 
-When none is found, the error lists the folders that were searched. One `cutcraft.json` at the top of a project
+When none is found, the error lists the folders that were searched. One `uberscene.json` at the top of a project
 serves every video file in the folders below it.
 
 Without `--media`, each asset's file is looked for in the video file's folder, then in the folder of the manifest
@@ -348,18 +348,18 @@ file, then in `media/` beside the manifest file. With `--media`, only that folde
 
 ```
 project/
-  cutcraft.json
+  uberscene.json
   media/talk.mp4
   videos/launch.tsx
 ```
 
 ```sh
-npx cutcraft videos/launch.tsx --out launch.mp4
+npx uberscene videos/launch.tsx --out launch.mp4
 ```
 
 ## Adding media
 
-`cutcraft add talk.mp4` writes the media file's entry into the manifest. It reads the kind, length, size, frame rate
+`uberscene add talk.mp4` writes the media file's entry into the manifest. It reads the kind, length, size, frame rate
 and sound from the file itself, and the words from a transcript with the same name in the same folder: `talk.json`
 from Whisper or ElevenLabs first, then `talk.vtt`, then `talk.srt`. Running it again refreshes the entry and keeps the
 fields it does not write. See [Getting a transcript](/guide/captions-and-sound#getting-a-transcript). A `.cube` file
@@ -367,19 +367,19 @@ is added as a LUT (kind `lut`) after it is checked, for [`<Effect type="lut">`](
 
 | Option | |
 |---|---|
-| `--manifest <file>` | The manifest to write, created when missing. Without it, the nearest `cutcraft.json` from the current folder upward is updated. If there is none, a `manifest.json` already in the current folder or beside the media is updated, and otherwise `cutcraft.json` is created in the current folder. |
+| `--manifest <file>` | The manifest to write, created when missing. Without it, the nearest `uberscene.json` from the current folder upward is updated. If there is none, a `manifest.json` already in the current folder or beside the media is updated, and otherwise `uberscene.json` is created in the current folder. |
 | `--id <id>` | The asset id. Default: the file name without its extension. One file only. |
 | `--transcript <file>` | A transcript other than the one beside the media. One file only. |
 
 ## The agent skill
 
-`cutcraft skills install` writes the agent skill that ships with this version of the CLI into
-`.claude/skills/cutcraft` in the current folder, where Claude Code reads a project's skills. The skill then teaches the
-commands and options of the CLI you have installed. It records what it wrote in `.cutcraft-skill.json` in that folder;
+`uberscene skills install` writes the agent skill that ships with this version of the CLI into
+`.claude/skills/uberscene` in the current folder, where Claude Code reads a project's skills. The skill then teaches the
+commands and options of the CLI you have installed. It records what it wrote in `.uberscene-skill.json` in that folder;
 run it again after upgrading and it replaces the folder. A folder with files changed or added since then, or one it
 did not write, is left as it is, and the command says which files, unless `--force` is given.
 
 | Option | |
 |---|---|
-| `--dir <folder>` | Where to write the skill, for an agent that reads skills from somewhere else. Default: `.claude/skills/cutcraft`. |
+| `--dir <folder>` | Where to write the skill, for an agent that reads skills from somewhere else. Default: `.claude/skills/uberscene`. |
 | `--force` | Replace the folder even when it has edits, or was not written by this command. |

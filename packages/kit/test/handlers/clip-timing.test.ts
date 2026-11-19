@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { collectModule, Executor } from "@cutcraft/kit";
-import { buildSourceIndex } from "@cutcraft/kit/source";
+import { collectModule, Executor } from "@uberscene/kit";
+import { buildSourceIndex } from "@uberscene/kit/source";
 
 import * as sample from "../../fixtures/sample";
 import { fixtureExecutor, fixtureText, manifest, round, serialize } from "../helpers";

@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
 
-import { collectModule, Executor, effect, resolve, transition } from "@cutcraft/kit";
-import { foldToSource, lint, loadModule } from "@cutcraft/kit/source";
+import { collectModule, Executor, effect, resolve, transition } from "@uberscene/kit";
+import { foldToSource, lint, loadModule } from "@uberscene/kit/source";
 
 const INVERT = "vec4 effect(vec2 uv) { vec4 c = texture(image, uv); return vec4(1.0 - c.rgb, c.a); }";
 
 const file = (body: string, declarations = "") => `import { z } from "zod";
-import { Clip, Composition, effect, transition, Effect, Track, Transition } from "@cutcraft/kit";
+import { Clip, Composition, effect, transition, Effect, Track, Transition } from "@uberscene/kit";
 ${declarations}
 export default function V() {
   return <Composition fps={30} width={640} height={360}><Track id="t">${body}</Track></Composition>;
@@ -216,7 +216,7 @@ export const sweep = transition({ name: "sweep", shader: "vec4 transition(vec2 u
 describe("timeline children inside overlays", () => {
   it("keep a title's text, and collect a Layer's effects apart from its free code", () => {
     const state = stateOf(`import { z } from "zod";
-import { Composition, effect, Effect, Keyframe, Layer, Title, Track } from "@cutcraft/kit";
+import { Composition, effect, Effect, Keyframe, Layer, Title, Track } from "@uberscene/kit";
 const swap = effect({ name: "swap", shader: "vec4 effect(vec2 uv) { return texture(image, uv); }" });
 function Box() { return null; }
 export default function V() {

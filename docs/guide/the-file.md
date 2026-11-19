@@ -1,6 +1,6 @@
 # The file
 
-A CutCraft video is one TSX module. [Anatomy of a video](./anatomy) introduces the elements inside it and
+A UberScene video is one TSX module. [Anatomy of a video](./anatomy) introduces the elements inside it and
 [Anatomy of an element](./elements) the props on each; this page covers the file around them: what it exports, what
 it may import, and the few rules that keep it editable.
 
@@ -9,7 +9,7 @@ it may import, and the few rules that keep it editable.
 
 ```tsx
 import { z } from "zod";
-import { Clip, Composition, Title, Track, Transition } from "@cutcraft/kit";
+import { Clip, Composition, Title, Track, Transition } from "@uberscene/kit";
 
 export const schema = z.object({
   product: z.string().describe("Product name on the title card"),
@@ -43,17 +43,17 @@ model that wrote it can read your changes in it later, because they are in the s
 | `default` | A component that returns a `<Composition>`: the video. |
 | `schema` | Optional. A zod object of the values someone should be able to change. |
 | `defaults` | Optional. The values the video renders with. |
-| `manifest` | Optional. The media the file uses; the command line uses it instead of the nearest `cutcraft.json`, unless given `--manifest`. |
+| `manifest` | Optional. The media the file uses; the command line uses it instead of the nearest `uberscene.json`, unless given `--manifest`. |
 
 ## What a file may import
 
-A file may import `react`, `zod` and `@cutcraft/kit`. The app that loads it can offer more, such as three.js (see
+A file may import `react`, `zod` and `@uberscene/kit`. The app that loads it can offer more, such as three.js (see
 [Free code](./free-code#libraries)). An import the app doesn't offer fails with a message that lists what it does
 offer.
 
 ## The lint
 
-The rules on this page are checked by the **lint**: `lint()` from `@cutcraft/kit/source`. An editor runs it on the
+The rules on this page are checked by the **lint**: `lint()` from `@uberscene/kit/source`. An editor runs it on the
 file as you type and shows its findings like a compiler's warnings, each naming its rule (`literal-ids`). The command
 line doesn't run it yet. [Lint](./editing#lint) lists every rule.
 
@@ -65,7 +65,7 @@ new value, and saving rewrites the `defaults` literal and nothing else.
 
 ```tsx
 import { z } from "zod";
-import { knob } from "@cutcraft/kit";
+import { knob } from "@uberscene/kit";
 
 export const schema = z.object({
   product: z.string().describe("Product name in the title"),
@@ -90,7 +90,7 @@ The control follows the kind. Strings, numbers and booleans get a text field, a 
 | `knob.image()` | An asset reference (`asset:logo`) or a URL | An image picker |
 
 Describe each value by what it means in the video, not by its type: "Colour of the title", not "accent colour".
-`cutcraft inspect` lists the knobs before the timeline, and `knobsOf(schema, defaults)` returns them to an app that
+`uberscene inspect` lists the knobs before the timeline, and `knobsOf(schema, defaults)` returns them to an app that
 builds its own controls.
 
 How an editor treats a prop depends on what it is written as:
@@ -104,7 +104,7 @@ How an editor treats a prop depends on what it is written as:
 ## Timeline elements and free code
 
 `<Composition>`, `<Track>`, `<Clip>`, `<Audio>`, `<Transition>`, `<Captions>` and the other timeline elements render
-nothing themselves. CutCraft reads their props to place footage and sound in time, and an editor edits those props
+nothing themselves. UberScene reads their props to place footage and sound in time, and an editor edits those props
 from its timeline. That only works for elements it knows, so a `<div>` placed straight in a track draws nothing and
 the lint warns about it.
 
@@ -157,7 +157,7 @@ function NameCard({ who, what }: { who: string; what: string }) {
 | Twice or more | Its elements are marked as generated. The first edit to one copy writes that helper's output into the file as literals, then applies the change. |
 
 ::: warning Helpers must be pure
-CutCraft calls a helper like a plain function to find its elements, so a helper that makes timeline elements must be
+UberScene calls a helper like a plain function to find its elements, so a helper that makes timeline elements must be
 pure: no state or effects, and no hooks other than `useT()` and `useLayer()`. The lint checks this (`pure-helpers`).
 Components that only draw, inside a `<Layer>`, can use any hooks they like.
 :::
