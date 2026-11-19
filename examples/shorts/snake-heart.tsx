@@ -1,6 +1,17 @@
 import { z } from "zod";
 
-import { Composition, fontFamily, googleFont, grid, Layer, progress, stepAt, Track, useLayer } from "@uberscene/kit";
+import {
+  Audio,
+  Composition,
+  fontFamily,
+  googleFont,
+  grid,
+  Layer,
+  progress,
+  stepAt,
+  Track,
+  useLayer,
+} from "@uberscene/kit";
 
 import { CharacterWall } from "./blocks/character-wall";
 
@@ -112,7 +123,10 @@ const LETTER = {
   fontSize: 122,
   lineHeight: 1,
 } as const;
-/** The seconds the snake eats: the wall changes all at once on each. */
+/**
+ * The seconds the snake eats: the wall changes all at once on each, and each has a pop (media/sounds.ts). A riser
+ * leads into the moment the heart closes, and a chime plays as it does.
+ */
 const EATS = GAME.food.map((f) => GAME.times[f.eaten] as number);
 
 function Board({ word, heart }: z.infer<typeof schema>) {
@@ -211,6 +225,13 @@ export default function Video(props: z.infer<typeof schema>) {
         <Layer id="board" start={0} duration={LENGTH}>
           <Board {...props} />
         </Layer>
+      </Track>
+      <Track id="sounds" role="effects" layout="free">
+        {EATS.map((time, i) => (
+          <Audio key={time} id={`eat-${i + 1}`} src="asset:pop" start={time} volume={0.55} />
+        ))}
+        <Audio id="build" src="asset:riser" start={CLOSED_AT - 2} volume={0.4} />
+        <Audio id="closed" src="asset:chime" start={CLOSED_AT} volume={0.7} />
       </Track>
     </Composition>
   );

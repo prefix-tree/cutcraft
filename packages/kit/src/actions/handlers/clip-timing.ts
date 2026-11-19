@@ -3,6 +3,7 @@ import { parseTimeRef } from "../../manifest/timeref";
 import { lookupAsset } from "../../manifest/types";
 import type { Json } from "../../patches/types";
 import type { Placement as ResolvedPlacement, ResolvedState } from "../../resolve/resolve";
+import { carry, carryRemoval, carrySplit, carryTrim } from "../carry";
 import {
   define,
   insertNode,
@@ -45,82 +46,85 @@ function sourceLimit(state: ResolvedState, item: ResolvedPlacement): number {
  * (seconds or a transcript/shot reference). For everything else `value` is the
  * new timeline time of that edge.
  */
-define({
-  type: "clip/trim",
-  validate: (a, state) => {
-    const base = validateTarget(
-      state,
-      a.params.id,
-      a.params.edge === "in" ? ["in", "start", "offset"] : ["out", "duration"],
-    );
-    if (!base.valid) return base;
-    const item = state.items.get(a.params.id)!;
-    const caps = capabilitiesOf(item.kind);
-    const errors: ActionError[] = [];
-    if (!caps.timed || item.kind === "transition")
-      errors.push({ code: "INVALID_PARAMS", message: `<${item.kind}> cannot be trimmed` });
-    const parsed = parseTimeRef(a.params.value);
-    if (parsed.kind === "invalid") errors.push({ code: "INVALID_PARAMS", message: parsed.reason, path: "value" });
-    if (!caps.trimSource && typeof a.params.value !== "number")
-      errors.push({ code: "INVALID_PARAMS", message: "only source clips take references", path: "value" });
-    if (caps.trimSource && item.source && typeof a.params.value === "number") {
-      const v = a.params.value;
-      if (a.params.edge === "out" && (v <= item.source.in || v > sourceLimit(state, item) + 0.05))
-        errors.push({
-          code: "OUT_OF_BOUNDS",
-          message: `out must be within (${item.source.in}, ${sourceLimit(state, item)}]`,
-        });
-      if (a.params.edge === "in" && (v < 0 || v >= item.source.out))
-        errors.push({ code: "OUT_OF_BOUNDS", message: `in must be within [0, ${item.source.out})` });
-    }
-    if (!caps.trimSource && typeof a.params.value === "number") {
-      const v = a.params.value;
-      if (a.params.edge === "out" && v <= item.start)
-        errors.push({ code: "INVALID_TIME_RANGE", message: "the out edge must stay after the start" });
-      if (a.params.edge === "in" && (v >= item.end || v < 0))
-        errors.push({ code: "INVALID_TIME_RANGE", message: "the in edge must stay before the end" });
-      if (a.params.edge === "in" && layoutOf(state, item) === "sequence")
-        errors.push({
-          code: "UNSUPPORTED_ON_LAYOUT",
-          message: "an element without a source cannot move its start inside a sequence",
-        });
-    }
-    return invalid(...errors);
-  },
-  apply: (a, log, ctx) => {
-    const state = ctx.before;
-    const item = state.items.get(a.params.id)!;
-    const caps = capabilitiesOf(item.kind);
-    const layout = layoutOf(state, item);
-    if (caps.trimSource && item.source) {
+define(carry(
+  {
+    type: "clip/trim",
+    validate: (a, state) => {
+      const base = validateTarget(
+        state,
+        a.params.id,
+        a.params.edge === "in" ? ["in", "start", "offset"] : ["out", "duration"],
+      );
+      if (!base.valid) return base;
+      const item = state.items.get(a.params.id)!;
+      const caps = capabilitiesOf(item.kind);
+      const errors: ActionError[] = [];
+      if (!caps.timed || item.kind === "transition")
+        errors.push({ code: "INVALID_PARAMS", message: `<${item.kind}> cannot be trimmed` });
+      const parsed = parseTimeRef(a.params.value);
+      if (parsed.kind === "invalid") errors.push({ code: "INVALID_PARAMS", message: parsed.reason, path: "value" });
+      if (!caps.trimSource && typeof a.params.value !== "number")
+        errors.push({ code: "INVALID_PARAMS", message: "only source clips take references", path: "value" });
+      if (caps.trimSource && item.source && typeof a.params.value === "number") {
+        const v = a.params.value;
+        if (a.params.edge === "out" && (v <= item.source.in || v > sourceLimit(state, item) + 0.05))
+          errors.push({
+            code: "OUT_OF_BOUNDS",
+            message: `out must be within (${item.source.in}, ${sourceLimit(state, item)}]`,
+          });
+        if (a.params.edge === "in" && (v < 0 || v >= item.source.out))
+          errors.push({ code: "OUT_OF_BOUNDS", message: `in must be within [0, ${item.source.out})` });
+      }
+      if (!caps.trimSource && typeof a.params.value === "number") {
+        const v = a.params.value;
+        if (a.params.edge === "out" && v <= item.start)
+          errors.push({ code: "INVALID_TIME_RANGE", message: "the out edge must stay after the start" });
+        if (a.params.edge === "in" && (v >= item.end || v < 0))
+          errors.push({ code: "INVALID_TIME_RANGE", message: "the in edge must stay before the end" });
+        if (a.params.edge === "in" && layoutOf(state, item) === "sequence")
+          errors.push({
+            code: "UNSUPPORTED_ON_LAYOUT",
+            message: "an element without a source cannot move its start inside a sequence",
+          });
+      }
+      return invalid(...errors);
+    },
+    apply: (a, log, ctx) => {
+      const state = ctx.before;
+      const item = state.items.get(a.params.id)!;
+      const caps = capabilitiesOf(item.kind);
+      const layout = layoutOf(state, item);
+      if (caps.trimSource && item.source) {
+        if (a.params.edge === "out") {
+          setProps(log, item.id, { out: a.params.value as Json, duration: undefined });
+        } else {
+          const newIn = typeof a.params.value === "number" ? a.params.value : null;
+          const delta = newIn === null ? 0 : (newIn - item.source.in) / item.source.speed;
+          const props: Record<string, Json | undefined> = { in: a.params.value as Json };
+          if (rawProp(state, item.id, "duration") !== undefined) props.out = item.source.out;
+          if (rawProp(state, item.id, "duration") !== undefined) props.duration = undefined;
+          if (layout === "free") props.start = item.start + delta;
+          if (layout === "anchored") props.offset = Number(rawProp(state, item.id, "offset") ?? 0) + delta;
+          setProps(log, item.id, props);
+        }
+        return;
+      }
+      const v = a.params.value as number;
       if (a.params.edge === "out") {
-        setProps(log, item.id, { out: a.params.value as Json, duration: undefined });
+        setProps(log, item.id, { duration: v - item.start });
       } else {
-        const newIn = typeof a.params.value === "number" ? a.params.value : null;
-        const delta = newIn === null ? 0 : (newIn - item.source.in) / item.source.speed;
-        const props: Record<string, Json | undefined> = { in: a.params.value as Json };
-        if (rawProp(state, item.id, "duration") !== undefined) props.out = item.source.out;
-        if (rawProp(state, item.id, "duration") !== undefined) props.duration = undefined;
-        if (layout === "free") props.start = item.start + delta;
+        const delta = v - item.start;
+        const props: Record<string, Json | undefined> = { duration: item.duration - delta };
+        if (layout === "free") props.start = v;
         if (layout === "anchored") props.offset = Number(rawProp(state, item.id, "offset") ?? 0) + delta;
         setProps(log, item.id, props);
       }
-      return;
-    }
-    const v = a.params.value as number;
-    if (a.params.edge === "out") {
-      setProps(log, item.id, { duration: v - item.start });
-    } else {
-      const delta = v - item.start;
-      const props: Record<string, Json | undefined> = { duration: item.duration - delta };
-      if (layout === "free") props.start = v;
-      if (layout === "anchored") props.offset = Number(rawProp(state, item.id, "offset") ?? 0) + delta;
-      setProps(log, item.id, props);
-    }
+    },
+    invert: (a, before) => restoreTiming(before, a.params.id),
+    fold: () => [],
   },
-  invert: (a, before) => restoreTiming(before, a.params.id),
-  fold: () => [],
-});
+  (a, before) => carryTrim(a.params.id, before),
+));
 
 define({
   type: "clip/trimToPlayhead",
@@ -349,55 +353,58 @@ function splitChildren(
 }
 
 /** Replace one element by two at a timeline time strictly inside it. */
-define({
-  type: "clip/split",
-  validate: (a, state) => {
-    const base = validateTarget(state, a.params.id, ["in", "out", "duration"]);
-    if (!base.valid) return base;
-    const item = state.items.get(a.params.id)!;
-    if (state.tree.byId.has(a.params.newId))
-      return invalid({ code: "DUPLICATE_ID", message: `"${a.params.newId}" exists` });
-    if (!capabilitiesOf(item.kind).timed || item.kind === "transition" || item.kind === "gap")
-      return invalid({ code: "INVALID_PARAMS", message: `<${item.kind}> cannot be split` });
-    if (a.params.at <= item.start + 1e-6 || a.params.at >= item.end - 1e-6)
-      return invalid({ code: "OUT_OF_BOUNDS", message: "split must fall strictly inside the element" });
-    return ok;
+define(carry(
+  {
+    type: "clip/split",
+    validate: (a, state) => {
+      const base = validateTarget(state, a.params.id, ["in", "out", "duration"]);
+      if (!base.valid) return base;
+      const item = state.items.get(a.params.id)!;
+      if (state.tree.byId.has(a.params.newId))
+        return invalid({ code: "DUPLICATE_ID", message: `"${a.params.newId}" exists` });
+      if (!capabilitiesOf(item.kind).timed || item.kind === "transition" || item.kind === "gap")
+        return invalid({ code: "INVALID_PARAMS", message: `<${item.kind}> cannot be split` });
+      if (a.params.at <= item.start + 1e-6 || a.params.at >= item.end - 1e-6)
+        return invalid({ code: "OUT_OF_BOUNDS", message: "split must fall strictly inside the element" });
+      return ok;
+    },
+    apply: (a, log, ctx) => {
+      const state = ctx.before;
+      const item = state.items.get(a.params.id)!;
+      const node = rawNode(state, item.id)!;
+      const spec = nodeSpecOf(node);
+      const atRel = a.params.at - item.start;
+      const layout = layoutOf(state, item);
+      const { left, right } = splitChildren(spec.children ?? [], atRel, a.params.newId);
+      const rightProps: Record<string, Json | undefined> = { ...spec.props, id: a.params.newId };
+      const leftProps: Record<string, Json | undefined> = {};
+      if (item.source) {
+        const boundary = item.source.in + atRel * item.source.speed;
+        leftProps.out = boundary;
+        leftProps.duration = undefined;
+        rightProps.in = boundary;
+        rightProps.out = item.source.out;
+        delete rightProps.duration;
+      } else {
+        leftProps.duration = atRel;
+        rightProps.duration = item.duration - atRel;
+      }
+      if (layout === "free") rightProps.start = a.params.at;
+      if (layout === "anchored") rightProps.offset = Number(rawProp(state, item.id, "offset") ?? 0) + atRel;
+      setProps(log, item.id, leftProps);
+      for (const child of spec.children ?? [])
+        if (!left.some((l) => l.id === child.id)) log.append({ op: "remove", id: child.id });
+      const cleaned = Object.fromEntries(Object.entries(rightProps).filter(([, v]) => v !== undefined));
+      insertNode(log, node.parent as string, item.id, { ...spec, id: a.params.newId, props: cleaned, children: right });
+    },
+    invert: (a, before) => ({
+      type: "clip/merge",
+      params: { id: a.params.id, rightId: a.params.newId, original: nodeSpecOf(rawNode(before, a.params.id)!) },
+    }),
+    fold: () => [],
   },
-  apply: (a, log, ctx) => {
-    const state = ctx.before;
-    const item = state.items.get(a.params.id)!;
-    const node = rawNode(state, item.id)!;
-    const spec = nodeSpecOf(node);
-    const atRel = a.params.at - item.start;
-    const layout = layoutOf(state, item);
-    const { left, right } = splitChildren(spec.children ?? [], atRel, a.params.newId);
-    const rightProps: Record<string, Json | undefined> = { ...spec.props, id: a.params.newId };
-    const leftProps: Record<string, Json | undefined> = {};
-    if (item.source) {
-      const boundary = item.source.in + atRel * item.source.speed;
-      leftProps.out = boundary;
-      leftProps.duration = undefined;
-      rightProps.in = boundary;
-      rightProps.out = item.source.out;
-      delete rightProps.duration;
-    } else {
-      leftProps.duration = atRel;
-      rightProps.duration = item.duration - atRel;
-    }
-    if (layout === "free") rightProps.start = a.params.at;
-    if (layout === "anchored") rightProps.offset = Number(rawProp(state, item.id, "offset") ?? 0) + atRel;
-    setProps(log, item.id, leftProps);
-    for (const child of spec.children ?? [])
-      if (!left.some((l) => l.id === child.id)) log.append({ op: "remove", id: child.id });
-    const cleaned = Object.fromEntries(Object.entries(rightProps).filter(([, v]) => v !== undefined));
-    insertNode(log, node.parent as string, item.id, { ...spec, id: a.params.newId, props: cleaned, children: right });
-  },
-  invert: (a, before) => ({
-    type: "clip/merge",
-    params: { id: a.params.id, rightId: a.params.newId, original: nodeSpecOf(rawNode(before, a.params.id)!) },
-  }),
-  fold: () => [],
-});
+  (a, before) => carrySplit(a.params.id, a.params.newId, before),
+));
 
 define({
   type: "clip/merge",
@@ -439,34 +446,37 @@ function siblingBefore(state: ResolvedState, id: string): string | null {
 }
 
 /** Free layout: delete and pull later items on the track left by the deleted length. Sequence: plain remove. */
-define({
-  type: "clip/rippleDelete",
-  validate: (a, state) => validateTarget(state, a.params.id, []),
-  apply: (a, log, ctx) => {
-    const state = ctx.before;
-    const item = state.items.get(a.params.id)!;
-    log.append({ op: "remove", id: item.id });
-    if (layoutOf(state, item) !== "free") return;
-    for (const later of laterOnTrack(state, item)) setProps(log, later.id, { start: later.start - item.duration });
+define(carry(
+  {
+    type: "clip/rippleDelete",
+    validate: (a, state) => validateTarget(state, a.params.id, []),
+    apply: (a, log, ctx) => {
+      const state = ctx.before;
+      const item = state.items.get(a.params.id)!;
+      log.append({ op: "remove", id: item.id });
+      if (layoutOf(state, item) !== "free") return;
+      for (const later of laterOnTrack(state, item)) setProps(log, later.id, { start: later.start - item.duration });
+    },
+    invert: (a, before) => {
+      const item = before.items.get(a.params.id)!;
+      const node = rawNode(before, item.id)!;
+      const affected =
+        layoutOf(before, item) === "free" ? laterOnTrack(before, item).map((l) => ({ id: l.id, start: l.start })) : [];
+      return {
+        type: "clip/rippleRestore",
+        params: {
+          id: item.id,
+          node: nodeSpecOf(node),
+          trackId: node.parent as string,
+          place: placementOf(before, item.id),
+          affected,
+        },
+      };
+    },
+    fold: () => [],
   },
-  invert: (a, before) => {
-    const item = before.items.get(a.params.id)!;
-    const node = rawNode(before, item.id)!;
-    const affected =
-      layoutOf(before, item) === "free" ? laterOnTrack(before, item).map((l) => ({ id: l.id, start: l.start })) : [];
-    return {
-      type: "clip/rippleRestore",
-      params: {
-        id: item.id,
-        node: nodeSpecOf(node),
-        trackId: node.parent as string,
-        place: placementOf(before, item.id),
-        affected,
-      },
-    };
-  },
-  fold: () => [],
-});
+  (a, before) => carryRemoval(a.params.id, before),
+));
 
 define({
   type: "clip/rippleRestore",

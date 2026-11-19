@@ -6,6 +6,7 @@
 import { z } from "zod";
 
 import {
+  Audio,
   Captions,
   Clip,
   Composition,
@@ -387,6 +388,16 @@ export default function Video({ accent }: z.infer<typeof schema>) {
         <Layer id="ways" anchor="infinite" duration={{ until: "infinite" }}>
           <Infinite accent={accent} />
         </Layer>
+      </Track>
+
+      {/* Quiet under the voice: a riser as the hundred cells fill, a pop for the hundred-and-first, a tick per point.
+          The files are made by media/sounds.ts. */}
+      <Track id="sounds" role="effects" layout="free">
+        <Audio id="fill" src="asset:riser" start={T(6.86)} volume={0.3} />
+        <Audio id="next" src="asset:pop" start={T(9.96)} volume={0.5} />
+        {POINTS.map((point) => (
+          <Audio key={point.key} id={`point-${point.key}`} src="asset:tick" start={T(point.at)} volume={0.5} />
+        ))}
       </Track>
 
       <Captions

@@ -53,10 +53,10 @@ Every action has `validate`, `apply`, `invert` and `fold`; the inverse is never 
 | `clip/closeGapBefore` | `{ id }` | Closes the gap before an element: on a free track it and every later element shift left to meet the previous one; on a sequence the &lt;Gap> before it is removed. |
 | `clip/merge` | `{ id, rightId, original }` | The undo of clip/split: removes both halves and puts back the `original` element. |
 | `clip/move` | `{ id, trackId?, place }` | Moves an element: reorders it in a sequence (`after`), sets its start on a free track, or re-anchors it; `trackId` moves it to another track. A generated element must be baked first. |
-| `clip/remove` | `{ id }` | Deletes an element from its track: a clip, gap, title or anything else placed on a track. |
-| `clip/restore` | `{ id, node, trackId, place }` | The undo of clip/remove: puts the element back on its track at its old placement. |
+| `clip/remove` | `{ id }` | Deletes an element from its track: a clip, gap, title or anything else placed on a track. What was placed from it comes along: titles anchored to it move to the clip before it, held inside that clip (removed with it when there is none), a transition left without a clip on one side is removed, and a length that followed it becomes seconds. |
+| `clip/restore` | `{ id, node, trackId, place, after? }` | The undo of clip/remove: puts the element back on its track at its old placement. |
 | `clip/restoreTiming` | `{ id, in?, out?, duration?, start? }` | Writes back the given timing props (`in`, `out`, `duration`, `start`) as they were; used to undo timing edits. |
-| `clip/rippleDelete` | `{ id }` | Deletes the element and, on a free track, pulls every later element left by its length; a sequence closes up by itself. |
+| `clip/rippleDelete` | `{ id }` | Deletes the element and, on a free track, pulls every later element left by its length; a sequence closes up by itself. What was placed from it comes along as with clip/remove. |
 | `clip/rippleRestore` | `{ id, node, trackId, place, affected }` | The undo of clip/rippleDelete: puts the element back and restores the starts it shifted. |
 | `clip/roll` | `{ leftId, rightId, delta }` | Moves the cut between two adjacent source clips by `delta`; the total length stays the same. |
 | `clip/setAnchor` | `{ id, anchor?, offset? }` | Anchors the element to another element (or `"start"`) at `offset` seconds; omit `anchor` to unanchor. A new anchor drops a word `at`. |
@@ -67,8 +67,8 @@ Every action has `validate`, `apply`, `invert` and `fold`; the inverse is never 
 | `clip/setSpeed` | `{ id, speed }` | Sets playback speed, 0.1 to 20; the timeline length follows and `out` stays. |
 | `clip/slide` | `{ id, delta }` | Moves a clip by `delta` between its neighbours, keeping its content; the previous clip's tail and the next clip's head absorb it. Both neighbours must be source clips. |
 | `clip/slip` | `{ id, delta }` | Shifts the source window by `delta` seconds without moving the element on the timeline. |
-| `clip/split` | `{ id, at, newId }` | Cuts an element in two at timeline time `at`; the right half gets `newId`, and keyframes, speed keys and freezes go to the half they fall in. |
-| `clip/trim` | `{ id, edge, value }` | Moves one edge. For a source clip `value` is the new source in or out (seconds, or a transcript or shot reference); for anything else it is the timeline time of that edge. |
+| `clip/split` | `{ id, at, newId }` | Cuts an element in two at timeline time `at`; the right half gets `newId`, and keyframes, speed keys and freezes go to the half they fall in. Titles at a word of the right half, anchors on the element's end, lengths until it ends and a transition on its out edge move to `newId`. |
+| `clip/trim` | `{ id, edge, value }` | Moves one edge. For a source clip `value` is the new source in or out (seconds, or a transcript or shot reference); for anything else it is the timeline time of that edge. A title at a word the trim takes away keeps its time as an offset, held inside the clip. |
 | `clip/trimToPlayhead` | `{ id, at, edge }` | Trims the `in` or `out` edge to timeline time `at`, which must fall inside the element. |
 
 ## `composition/`

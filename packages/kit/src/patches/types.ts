@@ -25,7 +25,8 @@ export interface NetPatch {
   presence: Presence;
   readonly props: Map<string, Json | undefined>;
   text?: string;
-  place?: { parent: string; after: string | null };
+  /** Where it was last inserted or moved to; `seq` orders those writes, so they replay in the order made. */
+  place?: { parent: string; after: string | null; seq: number };
   node?: CollectedNode;
   bake: boolean;
 }
