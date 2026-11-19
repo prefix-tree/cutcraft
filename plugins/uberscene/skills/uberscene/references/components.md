@@ -20,6 +20,7 @@ Besides the timing props (`start`, `anchor`, `at`, `offset`, `duration`):
 | `y` | number | `330` | The card's centre, in pixels below the frame's centre. |
 | `width` | number (> 0) | `640` | The card's width in pixels; the words wrap inside it. |
 | `accent` | string | `"$primary"` | The colour of the bar beside the words. |
+| `size` | number (> 0) | `44` | The name's size in pixels; the role, the card and the bar scale with it. |
 
 [All components](https://cutcraft.prefixtree.xyz/reference/components/)
 
@@ -40,6 +41,7 @@ Besides the timing props (`start`, `anchor`, `at`, `offset`, `duration`):
 | `width` | number (> 0) | `420` | The box's width in pixels. |
 | `to` | { x, y } |  | What it points at; without it, the box stands alone. |
 | `color` | string | `"$accent"` | The colour of the box's border, the line and its dot. |
+| `size` | number (> 0) | `30` | The note's size in pixels; the box's height grows with it. |
 
 [All components](https://cutcraft.prefixtree.xyz/reference/components/)
 
