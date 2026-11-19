@@ -32,7 +32,7 @@ export default defineConfig({
       "link",
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Doto:wght@800;900&family=Geist+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=Big+Shoulders+Stencil+Display:wght@800;900&family=Geist+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap",
       },
     ],
   ],

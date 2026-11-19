@@ -880,7 +880,7 @@ html {
   display: block;
   width: 100%;
   border-radius: 6px;
-  background: #101014;
+  background: #141412;
   margin: 8px 0 18px;
 }
 .cc-pair video.tall {
@@ -989,17 +989,17 @@ html {
 /* Code blocks: ink panels with a mono label, comfortable padding and line height, in both colour schemes. */
 :root,
 .dark {
-  --vp-code-block-bg: #14141a;
+  --vp-code-block-bg: #171715;
   --vp-code-block-color: #e6e3dc;
   --vp-code-line-height: 1.75;
   --vp-code-font-size: 13.5px;
-  --vp-code-copy-code-bg: #1d1d25;
-  --vp-code-copy-code-hover-bg: #26262f;
+  --vp-code-copy-code-bg: #22211e;
+  --vp-code-copy-code-hover-bg: #2e2d29;
   --vp-code-copy-code-active-text: var(--cc-ink-2);
 }
 .vp-doc div[class*="language-"] {
   border-radius: 0 !important;
-  border: 1px solid #23232c;
+  border: 1px solid #2c2b27;
 }
 .vp-doc div[class*="language-"] pre {
   padding: 18px 0 !important;
@@ -1020,12 +1020,12 @@ html {
   border-radius: 4px;
 }
 .vp-doc .cc-example {
-  border-color: #23232c;
-  background: #14141a;
+  border-color: #2c2b27;
+  background: #171715;
 }
 .vp-doc .cc-example-code div[class*="language-"] {
   border: 0;
-  border-top: 1px solid #23232c;
+  border-top: 1px solid #2c2b27;
 }
 /* Inline code stays light: a paper chip with ink text. */
 .vp-doc :not(pre) > code {
@@ -1066,17 +1066,17 @@ html {
 /* ── The live playground: the file beside the player, the starters above ─────────────────────────────── */
 
 .cc-playground {
-  border: 1px solid #23232c;
+  border: 1px solid #2c2b27;
   border-radius: 8px;
   overflow: hidden;
-  background: #14141a;
+  background: #171715;
 }
 .cc-playground-bar {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
   padding: 10px 12px;
-  border-bottom: 1px solid #23232c;
+  border-bottom: 1px solid #2c2b27;
 }
 .cc-playground-bar button {
   padding: 6px 12px;
@@ -1089,7 +1089,7 @@ html {
 }
 .cc-playground-bar button:hover:not(:disabled),
 .cc-playground-bar button.active {
-  background: #26262f;
+  background: #2e2d29;
   color: #f2f1ee;
 }
 .cc-playground-bar button:focus-visible {
@@ -1112,7 +1112,7 @@ html {
   display: flex;
   flex-direction: column;
   min-width: 0;
-  border-right: 1px solid #23232c;
+  border-right: 1px solid #2c2b27;
 }
 .cc-playground-code {
   flex: 1;
@@ -1166,7 +1166,7 @@ html {
   }
   .cc-playground-editor {
     border-right: 0;
-    border-bottom: 1px solid #23232c;
+    border-bottom: 1px solid #2c2b27;
   }
   .cc-playground-code {
     max-height: 320px;
@@ -1210,7 +1210,7 @@ html {
   overflow: hidden;
   border: 1px solid var(--cc-rule);
   border-radius: 8px;
-  background: #101014;
+  background: #141412;
   text-decoration: none;
   color: #ffffff;
 }
@@ -1369,4 +1369,298 @@ html {
   .vp-doc a.cc-card .cc-preview {
     transition: none;
   }
+}
+
+/* ── Industrial: Soviet-era brutalism for a dev tool. Raw concrete, black steel, safety orange; stencil numerals,
+   riveted plates, hazard stripes and spec sheets, set in Big Shoulders, IBM Plex Sans and Geist Mono. ──────────── */
+
+:root {
+  --cc-paper: #dedad1;
+  --cc-paper-2: #cfcabf;
+  --cc-ink: #121212;
+  --cc-ink-2: #34322e;
+  --cc-grey: #6b675f;
+  --cc-rule: #b9b3a6;
+  --cc-display: "Big Shoulders Display", "Barlow Condensed", "Arial Narrow", sans-serif;
+  --cc-pixel: "Big Shoulders Stencil Display", "Big Shoulders Display", "Arial Narrow", sans-serif;
+  --vp-font-family-base: "IBM Plex Sans", "Inter", system-ui, sans-serif;
+  --cc-hazard: repeating-linear-gradient(-45deg, var(--cc-accent) 0 14px, #121212 14px 28px);
+  /* Concrete: a faint grain, and a 24px survey grid under it. */
+  --cc-concrete:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+    linear-gradient(to right, rgba(18, 18, 18, 0.05) 1px, transparent 1px) 0 0 / 24px 24px,
+    linear-gradient(to bottom, rgba(18, 18, 18, 0.05) 1px, transparent 1px) 0 0 / 24px 24px;
+  --vp-code-bg: #cbc5b8;
+}
+.dark {
+  --cc-paper: #161614;
+  --cc-paper-2: #1f1f1c;
+  --cc-ink: #e6e1d6;
+  --cc-ink-2: #c3bdb0;
+  --cc-grey: #8c877c;
+  --cc-rule: #3a3833;
+  --cc-concrete:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+    linear-gradient(to right, rgba(230, 225, 214, 0.04) 1px, transparent 1px) 0 0 / 24px 24px,
+    linear-gradient(to bottom, rgba(230, 225, 214, 0.04) 1px, transparent 1px) 0 0 / 24px 24px;
+  --vp-code-bg: #2a2925;
+}
+body {
+  background: var(--cc-concrete), var(--cc-paper);
+}
+.VPNavBar,
+.VPNavBar .content-body,
+.VPNavBar.has-sidebar .content-body,
+.VPLocalNav {
+  background: var(--cc-paper) !important;
+}
+/* A hazard band runs under the bar. */
+.VPNavBar .divider-line {
+  height: 6px !important;
+  background: var(--cc-hazard) !important;
+  border-bottom: 2px solid #121212;
+}
+.VPNavBarTitle .title {
+  font-family: var(--cc-pixel);
+  font-weight: 900;
+  font-size: 26px;
+  letter-spacing: 0.04em;
+}
+.VPSidebar {
+  background: var(--cc-paper) !important;
+  border-right: var(--cc-line);
+}
+
+/* Docs: headlines tall and condensed, h2 on a black plate number. */
+.vp-doc h1,
+.vp-doc h2,
+.vp-doc h3 {
+  font-family: var(--cc-display);
+  letter-spacing: 0.01em;
+}
+.vp-doc h1 {
+  font-weight: 900;
+  font-size: clamp(48px, 6vw, 80px);
+  line-height: 0.9;
+}
+.vp-doc h2 {
+  font-weight: 900;
+  font-size: 38px;
+}
+
+/* Hero: the headline and its commands on the left, the unit's spec plate on the right. */
+.home-hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) minmax(280px, 1fr);
+  gap: 48px;
+  align-items: end;
+  width: 100%;
+}
+.home-hero-main {
+  min-width: 0;
+}
+.vp-doc .home-title,
+.home.vp-doc h1.home-title {
+  font-family: var(--cc-display);
+  font-weight: 900;
+  font-size: clamp(64px, 11vw, 168px);
+  line-height: 0.82;
+  letter-spacing: 0;
+}
+.home-title-mark {
+  padding: 0.04em 0.1em 0;
+  background: #121212;
+  color: var(--cc-accent);
+  border: 0;
+  box-shadow: 10px 10px 0 var(--cc-accent);
+}
+.home-tags span:first-child {
+  background: var(--cc-accent);
+  color: #121212;
+  border-color: #121212;
+}
+
+/* Plates: black steel edge, a rivet in each corner. */
+.home-spec,
+.home-why-grid,
+.vp-doc ul.home-feature-list,
+.home-install-card {
+  background-color: var(--cc-paper-2);
+  background-image:
+    radial-gradient(circle, var(--cc-ink) 3px, transparent 3.5px),
+    radial-gradient(circle, var(--cc-ink) 3px, transparent 3.5px),
+    radial-gradient(circle, var(--cc-ink) 3px, transparent 3.5px),
+    radial-gradient(circle, var(--cc-ink) 3px, transparent 3.5px);
+  background-size: 14px 14px;
+  background-position:
+    6px 6px,
+    calc(100% - 6px) 6px,
+    6px calc(100% - 6px),
+    calc(100% - 6px) calc(100% - 6px);
+  background-repeat: no-repeat;
+}
+.home-install-card.primary {
+  --cc-ink: #121212;
+  background-color: var(--cc-accent);
+  background-image:
+    radial-gradient(circle, #121212 3px, transparent 3.5px),
+    radial-gradient(circle, #121212 3px, transparent 3.5px),
+    radial-gradient(circle, #121212 3px, transparent 3.5px),
+    radial-gradient(circle, #121212 3px, transparent 3.5px);
+}
+.home-spec {
+  position: relative;
+  border: var(--cc-line-heavy);
+  box-shadow: var(--cc-hard);
+  margin: 0 8px 8px 0;
+  padding: 22px 26px 26px;
+  font-family: var(--cc-mono);
+}
+.vp-doc p.home-spec-head {
+  display: flex;
+  justify-content: space-between;
+  margin: 0 0 12px;
+  padding: 6px 10px;
+  background: var(--cc-ink);
+  color: var(--cc-paper);
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+.home-spec dl {
+  margin: 0;
+}
+.home-spec dl > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px dashed var(--cc-grey);
+  font-size: 13px;
+}
+.home-spec dt {
+  color: var(--cc-grey);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 11.5px;
+}
+.home-spec dd {
+  margin: 0;
+  text-align: right;
+  font-weight: 500;
+  color: var(--cc-ink);
+}
+.vp-doc p.home-spec-stamp {
+  position: absolute;
+  right: 18px;
+  bottom: -22px;
+  margin: 0;
+  padding: 6px 12px;
+  border: 3px solid var(--cc-accent);
+  background: var(--cc-paper);
+  color: var(--cc-accent);
+  font-family: var(--cc-pixel);
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  text-transform: uppercase;
+  transform: rotate(-6deg);
+}
+@media (max-width: 960px) {
+  .home-hero-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .home-spec {
+    max-width: 520px;
+  }
+}
+
+/* Ticker: a hazard stripe above and below the ink band. */
+.home-ticker {
+  border-block: 0;
+  padding-block: 8px;
+  background:
+    var(--cc-hazard) top / 100% 8px no-repeat,
+    var(--cc-hazard) bottom / 100% 8px no-repeat,
+    #121212;
+  color: #e6e1d6;
+}
+.home-ticker span {
+  font-family: var(--cc-display);
+  font-weight: 800;
+  font-size: 34px;
+  letter-spacing: 0.02em;
+}
+
+/* Section heads: a stencil plate number, then the headline. */
+.home.vp-doc h1,
+.home.vp-doc h2,
+.home.vp-doc h3 {
+  font-family: var(--cc-display);
+}
+.home.vp-doc h2 {
+  font-weight: 900;
+  font-size: clamp(52px, 7.5vw, 104px);
+  line-height: 0.86;
+  letter-spacing: 0.005em;
+}
+.home.vp-doc h2::before {
+  content: "No. " counter(home-section, decimal-leading-zero);
+  display: block;
+  width: fit-content;
+  margin-bottom: 14px;
+  padding: 4px 10px 2px;
+  background: var(--cc-ink);
+  color: var(--cc-accent);
+  font-family: var(--cc-pixel);
+  font-size: 26px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+}
+.vp-doc .home-why-grid h3,
+.vp-doc .home-install-card h3,
+.vp-doc .home-element h3 {
+  font-weight: 900;
+}
+.vp-doc ul.home-feature-list strong {
+  font-family: var(--cc-display);
+  font-weight: 800;
+  font-size: 25px;
+  letter-spacing: 0.01em;
+}
+.vp-doc ul.home-feature-list li::before {
+  font-family: var(--cc-pixel);
+  font-size: 22px;
+  font-weight: 900;
+  top: 17px;
+  color: var(--cc-accent);
+}
+
+/* Buttons: steel keys, mono capitals. */
+.vp-doc a.home-button {
+  background: var(--cc-paper-2);
+}
+.vp-doc a.home-button.primary,
+.vp-doc a.home-button.primary:hover {
+  background: var(--cc-accent);
+  color: #121212;
+}
+
+/* Foot: hazard stripe, then the stencil wordmark. */
+.home section.home-foot {
+  border-top: 0;
+  background:
+    var(--cc-hazard) top / 100% 12px no-repeat,
+    #121212;
+  padding-top: 72px;
+}
+.vp-doc p.home-foot-mark {
+  font-family: var(--cc-pixel);
+  font-size: clamp(64px, 16vw, 240px);
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  line-height: 0.8;
 }

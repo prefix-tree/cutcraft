@@ -14,8 +14,10 @@ import { withBase } from "vitepress";
 <div class="home vp-doc">
 
 <section class="home-hero">
+<div class="home-hero-grid">
+<div class="home-hero-main">
 
-<p class="home-tags"><span>Open source</span><span>MIT</span><span>TSX → MP4</span></p>
+<p class="home-tags"><span>Unit 01</span><span>Video editor as code</span></p>
 
 <h1 class="home-title"><span class="home-title-line">Make videos</span> <span class="home-title-line"><span class="home-title-mark">with code.</span></span></h1>
 
@@ -31,6 +33,22 @@ import { withBase } from "vitepress";
 
 <p class="home-agent-note">Using a coding agent? <a href="#install">Install the skill ↓</a></p>
 
+</div>
+<aside class="home-spec" aria-label="Specification">
+<p class="home-spec-head"><span>Spec sheet</span><span>Type US-1</span></p>
+<dl>
+<div><dt>Input</dt><dd>One TSX file</dd></div>
+<div><dt>Output</dt><dd>MP4 · WebM · PNG</dd></div>
+<div><dt>Effects</dt><dd>45 shaders</dd></div>
+<div><dt>Edit actions</dt><dd>115, undoable</dd></div>
+<div><dt>Player</dt><dd>Browser, frame-exact</dd></div>
+<div><dt>Render</dt><dd>Headless Chrome</dd></div>
+<div><dt>Runtime</dt><dd>Node ≥ 22.19</dd></div>
+<div><dt>Operator</dt><dd>You or your agent</dd></div>
+</dl>
+<p class="home-spec-stamp">MIT · Open source</p>
+</aside>
+</div>
 </section>
 
 <div class="home-ticker" aria-hidden="true"><div class="home-ticker-track"><span>TSX in, MP4 out</span><span>45 effects and transitions</span><span>115 undoable actions</span><span>Frame-exact player</span><span>Captions from the transcript</span><span>Three.js on the clock</span><span>Diff it, review it, ship it</span><span>TSX in, MP4 out</span><span>45 effects and transitions</span><span>115 undoable actions</span><span>Frame-exact player</span><span>Captions from the transcript</span><span>Three.js on the clock</span><span>Diff it, review it, ship it</span></div></div>
