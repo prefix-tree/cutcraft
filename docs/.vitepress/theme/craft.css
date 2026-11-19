@@ -485,6 +485,168 @@ html {
     border-top: var(--cc-line-heavy);
   }
 }
+/* Install: two ruled cards side by side, the agent's first and on orange, each a few numbered steps. */
+.vp-doc p.home-agent-note {
+  margin: 22px 0 0;
+  font-family: var(--cc-mono);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: var(--cc-ink-2);
+}
+.vp-doc .home-agent-note a {
+  font-weight: 600;
+}
+.home-install {
+  scroll-margin-top: 96px;
+}
+.home-install-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: 28px;
+  align-items: start;
+  margin-right: 8px;
+}
+.home-install-card {
+  min-width: 0;
+  padding: 24px 24px 22px;
+  border: var(--cc-line-heavy);
+  box-shadow: var(--cc-hard);
+  background: var(--cc-paper);
+}
+.home-install-card.primary {
+  background: var(--cc-accent);
+  color: #0a0a0a;
+  border-color: var(--cc-ink);
+}
+.vp-doc p.home-install-kicker {
+  display: inline-block;
+  margin: 0 0 14px;
+  padding: 3px 8px;
+  background: var(--cc-ink);
+  color: var(--cc-paper);
+  font-family: var(--cc-mono);
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  line-height: 1.5;
+  text-transform: uppercase;
+}
+.vp-doc .home-install-card h3 {
+  margin: 0 0 18px;
+  font-size: 40px;
+  font-weight: 800;
+  line-height: 0.92;
+}
+.home-install-card.primary h3,
+.home-install-card.primary strong {
+  color: #0a0a0a;
+}
+.vp-doc p.home-install-step {
+  position: relative;
+  margin: 18px 0 10px;
+  padding-left: 34px;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.home-install-card.primary p.home-install-step {
+  color: #0a0a0a;
+}
+.home-install-step > span:first-child {
+  position: absolute;
+  left: 0;
+  top: 1px;
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  font-family: var(--cc-mono);
+  font-size: 12px;
+  font-weight: 500;
+  background: var(--cc-ink);
+  color: var(--cc-paper);
+}
+.home-install-card.primary .home-install-step > span:first-child {
+  background: #0a0a0a;
+  color: #ffffff;
+}
+.home-install-step > span:first-child:empty {
+  background: transparent !important;
+}
+.vp-doc .home-install-card div[class*="language-"] {
+  margin: 0 0 0 34px !important;
+  box-shadow: var(--cc-hard-sm) !important;
+}
+.home-install-card.primary div[class*="language-"] {
+  border-color: #0a0a0a !important;
+  box-shadow:
+    4px 4px 0 #0a0a0a,
+    0 4px 0 #0a0a0a !important;
+}
+.vp-doc .home-install-card div[class*="language-"] code {
+  padding: 0 16px !important;
+  font-size: 12.5px;
+}
+.vp-doc .home-install-card div.language-text pre,
+.vp-doc .home-install-card div.language-text code {
+  white-space: pre-wrap;
+}
+.vp-doc .home-install-card div[class*="language-"] > span.lang {
+  display: none;
+}
+.home-install-card.primary :not(pre) > code {
+  background: rgba(10, 10, 10, 0.12) !important;
+  color: #0a0a0a !important;
+}
+.vp-doc p.home-install-more {
+  margin: 22px 0 0;
+}
+.vp-doc .home-install-more a {
+  display: inline-block;
+  padding: 2px 8px;
+  background: var(--cc-ink);
+  color: var(--cc-paper);
+  font-family: var(--cc-mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+.home-install-card.primary .home-install-more a {
+  background: #0a0a0a;
+  color: #ffffff;
+}
+.vp-doc .home-install-more a:hover {
+  background: var(--cc-paper);
+  color: var(--cc-ink);
+  outline: 2px solid var(--cc-ink);
+}
+@media (max-width: 900px) {
+  .home-install-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 560px) {
+  .home-install-card {
+    padding: 20px 16px 18px;
+  }
+  .vp-doc p.home-install-step {
+    padding-left: 0;
+  }
+  .home-install-step > span:first-child {
+    position: static;
+    display: inline-grid;
+    margin-right: 6px;
+    vertical-align: -5px;
+  }
+  .home-install-step > span:first-child:empty {
+    display: none;
+  }
+  .vp-doc .home-install-card div[class*="language-"] {
+    margin-left: 0 !important;
+  }
+}
+
 /* Every element: the element examples as small cards, three across, each a video over a short scroll of its file. */
 .home-element-grid {
   display: grid;

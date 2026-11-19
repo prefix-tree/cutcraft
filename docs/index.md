@@ -29,6 +29,8 @@ import { withBase } from "vitepress";
 <a class="home-button" href="https://github.com/prefix-tree/uberscene">GitHub</a>
 </div>
 
+<p class="home-agent-note">Using a coding agent? <a href="#install">Install the skill ↓</a></p>
+
 </section>
 
 <div class="home-ticker" aria-hidden="true"><div class="home-ticker-track"><span>TSX in, MP4 out</span><span>45 effects and transitions</span><span>115 undoable actions</span><span>Frame-exact player</span><span>Captions from the transcript</span><span>Three.js on the clock</span><span>Diff it, review it, ship it</span><span>TSX in, MP4 out</span><span>45 effects and transitions</span><span>115 undoable actions</span><span>Frame-exact player</span><span>Captions from the transcript</span><span>Three.js on the clock</span><span>Diff it, review it, ship it</span></div></div>
@@ -36,6 +38,74 @@ import { withBase } from "vitepress";
 <section class="home-live" aria-label="Try it">
 
 <Playground compact />
+
+</section>
+
+<section class="home-install" id="install">
+
+## Install
+
+<p class="home-chapter-lead">UberScene is built for a coding agent to drive. Give your agent the skill and ask for a video in plain words, or install the packages and write the file yourself. Either way you need Node 22.19 or later, and no ffmpeg.</p>
+
+<div class="home-install-grid">
+<div class="home-install-card primary">
+
+<p class="home-install-kicker">A · Recommended</p>
+
+### With your agent
+
+<p class="home-install-step"><span>1</span> Install the skill. In <strong>Claude Code</strong>, add the plugin:</p>
+
+```
+/plugin marketplace add prefix-tree/uberscene
+/plugin install uberscene@prefix-tree
+```
+
+<p class="home-install-step"><span></span> In <strong>any other agent</strong> that reads Agent Skills, write the skill into your project. It goes to <code>.claude/skills/uberscene</code>; add <code>--dir</code> for another folder.</p>
+
+```sh
+npx uberscene skills install
+npx uberscene skills install --dir .agents/skills/uberscene
+```
+
+<p class="home-install-step"><span>2</span> Put your footage in the folder, with a transcript beside each recording (<code>talk.json</code> from Whisper, or <code>talk.srt</code>), and brief the agent like an editor:</p>
+
+```text
+Make a 30 second vertical clip from talk.mp4 for Reels. Open on the sentence about shipping on Fridays, add karaoke captions and a lower third with my name, Maya Chen, Founder. Put the name in the schema.
+```
+
+<p class="home-install-step"><span>3</span> The agent installs UberScene, writes <code>video.tsx</code>, checks it with sheets of frames and renders <code>video.mp4</code>. Ask for changes in words; they land in the same file.</p>
+
+<p class="home-install-more"><a :href="withBase('/guide/agents')">With your agent →</a></p>
+
+</div>
+<div class="home-install-card">
+
+<p class="home-install-kicker">B · By hand</p>
+
+### In your project
+
+<p class="home-install-step"><span>1</span> Install the command line and the elements:</p>
+
+```sh
+mkdir my-video && cd my-video
+npm install uberscene @uberscene/kit react zod
+```
+
+<p class="home-install-step"><span>2</span> Add your footage to <code>uberscene.json</code>, write <code>video.tsx</code>, look at a sheet of its frames, then export it:</p>
+
+```sh
+npx uberscene add talk.mp4
+npx uberscene look video.tsx
+npx uberscene video.tsx --out video.mp4
+```
+
+<p class="home-install-step"><span>3</span> The first export downloads Chrome for Testing, which takes a minute; later ones start in seconds.</p>
+
+<p class="home-install-more"><a :href="withBase('/guide/getting-started')">Quick start →</a></p>
+
+</div>
+</div>
 
 </section>
 
