@@ -3,18 +3,14 @@
      `skills install`, which writes the skill that matches the installed version. -->
 <script setup lang="ts">
 import { withBase } from "vitepress";
-import { computed, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 
 interface Agent {
   readonly id: string;
   readonly name: string;
   /** Two letters for its key when it has no logo. */
   readonly mark: string;
-  /**
-   * The agent's logo, served from docs/public (e.g. "/agents/codex.svg"). Use the file from the agent's own press or
-   * brand page and follow its usage rules; leave this out and the key shows the two letters instead.
-   */
-  readonly logo?: string;
+
   /** Where the lines are typed. */
   readonly where: string;
   readonly lines: readonly string[];
@@ -43,6 +39,22 @@ const AGENTS: readonly Agent[] = [
     lines: [SHARED],
   },
 ];
+
+/**
+ * Logos: each agent's key shows docs/public/agents/<id>.svg when that file exists, and its two letters until then.
+ * Use the file from the agent's own brand or press page, and follow its usage rules.
+ */
+const logo = (id: string): string => withBase(`/agents/${id}.svg`);
+const hasLogo = ref(new Set<string>());
+onMounted(() => {
+  for (const a of AGENTS) {
+    const img = new Image();
+    img.onload = () => {
+      hasLogo.value = new Set(hasLogo.value).add(a.id);
+    };
+    img.src = logo(a.id);
+  }
+});
 
 const selected = ref(AGENTS[0]!.id);
 const agent = computed(() => AGENTS.find((a) => a.id === selected.value) ?? AGENTS[0]!);
@@ -80,7 +92,7 @@ function pick(id: string): void {
         @click="pick(a.id)"
       >
         <span class="cc-agents-icon" aria-hidden="true">
-          <img v-if="a.logo" :src="withBase(a.logo)" alt="" width="28" height="28" />
+          <img v-if="hasLogo.has(a.id)" :src="logo(a.id)" alt="" width="28" height="28" />
           <template v-else>{{ a.mark }}</template>
         </span>
         <span class="cc-agents-name">{{ a.name }}</span>

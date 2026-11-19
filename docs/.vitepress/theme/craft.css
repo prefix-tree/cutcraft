@@ -2043,6 +2043,9 @@ html:has(.VPContent.has-sidebar) .DocSearch-Button {
     transform 0.1s,
     box-shadow 0.1s;
 }
+.cc-agents-icon:has(img) {
+  background: #ffffff;
+}
 .cc-agents-icon img {
   display: block;
   width: 28px;
