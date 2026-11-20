@@ -10,8 +10,8 @@ export default function Video() {
       <Track id="keyed">
         <Clip id="greenscreen" src="asset:greenscreen" in={0} out={3} fit="cover">
           <Effect id="look" type="colorKey" params={{ color: "#00b140" }}>
-            <Keyframe id="k1" param="tolerance" at={0.5} value={0} />
-            <Keyframe id="k2" param="tolerance" at={1.5} value={0.3} easing="ease-in-out" />
+            <Keyframe id="k1" param="tolerance" at={0.5} value={0} easing="ease-in-out" />
+            <Keyframe id="k2" param="tolerance" at={1.5} value={0.3} />
           </Effect>
         </Clip>
       </Track>

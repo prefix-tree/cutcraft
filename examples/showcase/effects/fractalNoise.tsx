@@ -7,8 +7,8 @@ export default function Video() {
       <Track id="main">
         <Clip id="shot" src="asset:coffee" in={12} out={15} fit="cover">
           <Effect id="look" type="fractalNoise" params={{ blend: "screen", size: 140, contrast: 1.6, evolution: 0.5 }}>
-            <Keyframe id="k1" param="opacity" at={0.5} value={0} />
-            <Keyframe id="k2" param="opacity" at={1.5} value={0.6} easing="ease-in-out" />
+            <Keyframe id="k1" param="opacity" at={0.5} value={0} easing="ease-in-out" />
+            <Keyframe id="k2" param="opacity" at={1.5} value={0.6} />
           </Effect>
         </Clip>
       </Track>

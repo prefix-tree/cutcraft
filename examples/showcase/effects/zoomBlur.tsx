@@ -7,8 +7,8 @@ export default function Video() {
       <Track id="main">
         <Clip id="shot" src="asset:espresso" in={2} out={5} fit="cover">
           <Effect id="look" type="zoomBlur">
-            <Keyframe id="k1" param="length" at={0.5} value={0} />
-            <Keyframe id="k2" param="length" at={1.5} value={60} easing="ease-in-out" />
+            <Keyframe id="k1" param="length" at={0.5} value={0} easing="ease-in-out" />
+            <Keyframe id="k2" param="length" at={1.5} value={60} />
           </Effect>
         </Clip>
       </Track>

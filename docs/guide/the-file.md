@@ -147,8 +147,8 @@ keyframe or move one caption.
 
 ```tsx
 <Clip id="broll" src="asset:product" in="shot:1" out="shot:1.end" fit="cover">
-  <Keyframe id="broll-s0" property="transform.scale.x" at={0} value={1} />
-  <Keyframe id="broll-s1" property="transform.scale.x" at={6} value={1.08} easing="easeInOutSine" />
+  <Keyframe id="broll-s0" property="transform.scale.x" at={0} value={1} easing="easeInOutSine" />
+  <Keyframe id="broll-s1" property="transform.scale.x" at={6} value={1.08} />
 </Clip>
 ```
 

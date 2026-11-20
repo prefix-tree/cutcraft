@@ -92,8 +92,8 @@ export default function Video() {
         <Clip id="pour" src="asset:coffee" in={6} out={10} fit="cover">
           <Effect id="expose" type="exposure" params={{ stops: -0.3 }} />
           <Effect id="balance" type="whiteBalance">
-            <Keyframe id="k1" param="temperature" at={0} value={-0.6} />
-            <Keyframe id="k2" param="temperature" at={3} value={0.6} easing="ease-in-out" />
+            <Keyframe id="k1" param="temperature" at={0} value={-0.6} easing="ease-in-out" />
+            <Keyframe id="k2" param="temperature" at={3} value={0.6} />
           </Effect>
           <Effect id="pop" type="vibrance" params={{ amount: 0.5 }} />
           <Effect id="edges" type="vignette" params={{ amount: 0.6 }} />
