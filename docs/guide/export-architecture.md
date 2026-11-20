@@ -127,6 +127,9 @@ NativeFrameSource ── /native/frames ─► reads the asset's file ───�
    VideoFrame ◄────── streamed back ── pipes stdout to the page
 capture → RGBA ───── /native/encode ─► writes pictures in order ────────► encode (H.264, ProRes) → packets
                                       keeps the packets for the join ◄──
+                                      mixPlan (with native) ◄────────────── decode-audio → float PCM
+mix as float WAV ─── (native-encode) ─► the mix, interleaved ────────────► encode-audio → M4A, WAV or MP3
+                                      muxed with the pictures ◄─────────
 ```
 
 Decoding plugs into the player's frame-source seam, so the compositor, effects and capture do not change. An asset the

@@ -1,6 +1,6 @@
 // The soundtrack, made in the export page: the player's audio plan, its clips decoded with WebCodecs, mixed sample by
 // sample, and encoded for the file's container (Opus with WebCodecs; AAC and MP3 with Mediabunny's WebAssembly
-// encoders, as Chrome on Linux has neither; WAV as plain PCM).
+// encoders, as Chrome on Linux has neither; WAV as plain PCM), or handed over as float PCM for the native encoder.
 import { registerAacEncoder } from "@mediabunny/aac-encoder";
 import { registerMp3Encoder } from "@mediabunny/mp3-encoder";
 import {
@@ -32,6 +32,7 @@ const CODEC: Readonly<Record<AudioRequest["container"], AudioCodec>> = {
   webm: "opus",
   mp3: "mp3",
   wav: "pcm-s16",
+  pcm: "pcm-f32",
 };
 
 export interface Soundtrack {
