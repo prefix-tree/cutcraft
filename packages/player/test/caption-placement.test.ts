@@ -68,10 +68,12 @@ describe("captionPlacement", () => {
 
 describe("captionPlace", () => {
   it("keeps what is a placement and drops what is not", () => {
-    expect(captionPlace({ box: { x: 10, y: "low", width: Number.NaN, origin: "middle" }, align: "middle" })).toEqual({
+    expect(
+      captionPlace({ box: { x: 10, y: "low", width: Number.NaN, origin: "middle" }, style: { align: "middle" } }),
+    ).toEqual({
       x: 10,
     });
-    expect(captionPlace({ box: { y: 0, origin: "center", width: 400 }, align: "left" })).toEqual({
+    expect(captionPlace({ box: { y: 0, origin: "center", width: 400 }, style: { align: "left" } })).toEqual({
       y: 0,
       width: 400,
       origin: "center",
@@ -79,5 +81,7 @@ describe("captionPlace", () => {
     });
     // The flat x, y and width of old files are not a placement: the lint fix moves them into box.
     expect(captionPlace({ x: 10, y: 20, width: 300 })).toEqual({});
+    // Nor is the flat align: it is the style's since 0.6.
+    expect(captionPlace({ align: "left" })).toEqual({});
   });
 });
