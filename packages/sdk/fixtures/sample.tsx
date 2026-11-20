@@ -37,8 +37,8 @@ export const defaults = { title: "Why we built it", accent: "#ff5a1f" };
 
 export default function Video({ title, accent }: z.infer<typeof schema>) {
   return (
-    <Composition fps={30} width={1920} height={1080} background={{ mode: "color", color: "#000000" }}>
-      <Marker id="m1" at={2} label="hook" color="#ffcc00" />
+    <Composition fps={30} width={1920} height={1080} background={{ type: "color", color: "#000000" }}>
+      <Marker id="m1" start={2} label="hook" color="#ffcc00" />
       <Track id="main" name="Main">
         <Clip id="c1" src="asset:interview" in="word:3" out="word:18">
           <Effect id="fx1" type="blur" params={{ radius: 4 }} />
@@ -64,7 +64,7 @@ export default function Video({ title, accent }: z.infer<typeof schema>) {
           offset={1}
           duration={3}
           style={{ color: accent, size: 64 }}
-          animation={{ preset: "slide-up", in: 0.4, out: 0.3 }}
+          animation={{ type: "slideUp", in: 0.4, out: 0.3 }}
         >
           {title}
         </Title>
@@ -72,7 +72,7 @@ export default function Video({ title, accent }: z.infer<typeof schema>) {
           id="s1"
           anchor="c2"
           duration={2}
-          shape="rectangle"
+          type="rectangle"
           width={400}
           height={80}
           fill="#ffffff"

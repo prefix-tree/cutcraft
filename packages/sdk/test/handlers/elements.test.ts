@@ -17,7 +17,7 @@ const KINDS: readonly { kind: string; id: string; create: ActionInput; update: A
         kind: "shape",
         trackId: "overlays",
         place: { anchor: "start" },
-        props: { duration: 1, shape: "circle", width: 50, height: 50 },
+        props: { duration: 1, type: "circle", width: 50, height: 50 },
       },
     },
     update: { type: "element/update", params: { id: "s1", props: { cornerRadius: 0 } } },

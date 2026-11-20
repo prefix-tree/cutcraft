@@ -40,7 +40,7 @@ define(makePropHandler({
     const prior = (rawProp(state, "composition", "background") ?? {}) as Record<string, unknown>;
     const next = {
       ...prior,
-      ...(p.mode !== undefined ? { mode: p.mode } : {}),
+      ...(p.type !== undefined ? { type: p.type } : {}),
       ...(p.color !== undefined ? { color: p.color } : {}),
     };
     return { background: Object.keys(next).length ? (next as never) : undefined };

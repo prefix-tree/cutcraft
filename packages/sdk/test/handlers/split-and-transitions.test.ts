@@ -18,7 +18,7 @@ export default function Video() {
           <Keyframe id="a-s0" property="transform.scale.x" at={0} value={1} />
           <Keyframe id="a-s1" property="transform.scale.x" at={6} value={1.3} />
           <Effect id="a-blur" type="blur" params={{ radius: 0 }}>
-            <Keyframe id="a-b0" param="radius" at={1} value={0} easing="ease-in-out" />
+            <Keyframe id="a-b0" param="radius" at={1} value={0} easing="easeInOut" />
             <Keyframe id="a-b1" param="radius" at={5} value={8} />
           </Effect>
         </Clip>
@@ -85,7 +85,7 @@ describe("splitting a clip that animates", () => {
       expect(childIds(exec, "a-blur")).toEqual(["a-b0", "a-b1_cut"]);
       expect(props(exec, "a-b1_cut")).toMatchObject({ at: 3, value: 4, param: "radius" });
       expect(childIds(exec, "a-blur_b")).toEqual(["a-b1_cut_b", "a-b1_b"]);
-      expect(props(exec, "a-b1_cut_b")).toMatchObject({ at: 0, value: 4, easing: "ease-in-out" });
+      expect(props(exec, "a-b1_cut_b")).toMatchObject({ at: 0, value: 4, easing: "easeInOut" });
       expect(props(exec, "a-b1_b")).toMatchObject({ at: 2, value: 8 });
     });
   });

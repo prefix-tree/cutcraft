@@ -7,10 +7,10 @@ define({
   validate: (a, state) => {
     if (state.tree.byId.has(a.params.markerId))
       return invalid({ code: "DUPLICATE_ID", message: `"${a.params.markerId}" exists` });
-    return a.params.at >= 0 ? ok : invalid({ code: "INVALID_TIME_RANGE", message: "markers sit at or after 0" });
+    return a.params.start >= 0 ? ok : invalid({ code: "INVALID_TIME_RANGE", message: "markers sit at or after 0" });
   },
   apply: (a, log, ctx) => {
-    const props: Record<string, Json> = { id: a.params.markerId, at: a.params.at };
+    const props: Record<string, Json> = { id: a.params.markerId, start: a.params.start };
     if (a.params.label !== undefined) props.label = a.params.label;
     if (a.params.color !== undefined) props.color = a.params.color;
     const markers = ctx.before.tree.root.children.filter((c) => c.kind === "marker");
@@ -26,7 +26,7 @@ define(makePropHandler({
   target: (p) => p.markerId,
   kinds: ["marker"],
   write: (p) => ({
-    ...(p.at !== undefined ? { at: p.at } : {}),
+    ...(p.start !== undefined ? { start: p.start } : {}),
     ...(p.label !== undefined ? { label: p.label } : {}),
     ...(p.color !== undefined ? { color: p.color } : {}),
   }),

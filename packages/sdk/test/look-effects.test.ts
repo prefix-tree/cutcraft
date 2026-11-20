@@ -22,7 +22,7 @@ describe("the stylizers and generators", () => {
     expect(params("halftone")).toEqual({
       size: 8,
       angle: 45,
-      mode: "mono",
+      type: "mono",
       ink: "#111111",
       paper: "#ffffff",
       amount: 1,
@@ -43,12 +43,12 @@ describe("the stylizers and generators", () => {
   });
 
   it("say what is out of range, unknown or not one of the choices", () => {
-    const state = stateOf(`<Effect id="h" type="halftone" params={{ mode: "rgb" }} />
+    const state = stateOf(`<Effect id="h" type="halftone" params={{ type: "rgb" }} />
       <Effect id="p" type="pixelate" params={{ size: 0 }} />
       <Effect id="n" type="fractalNoise" params={{ octaves: 9 }} />
       <Effect id="l" type="lightLeak" params={{ size: 0.5 }} />`);
     expect(state.errors.map((e) => `${e.id}.${e.prop}`)).toEqual([
-      "h.params.mode",
+      "h.params.type",
       "p.params.size",
       "n.params.octaves",
       "l.params",

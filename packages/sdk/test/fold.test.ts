@@ -96,7 +96,7 @@ describe("fold", () => {
     exec.execute({ type: "text/setContent", params: { id: "t1", text: "Hello there" } });
     exec.execute({ type: "effect/add", params: { id: "c3", childId: "fx9", type: "grain", params: { amount: 0.2 } } });
     exec.execute({ type: "element/remove", params: { id: "g1" } });
-    exec.execute({ type: "marker/add", params: { markerId: "m2", at: 6, label: "beat" } });
+    exec.execute({ type: "marker/add", params: { markerId: "m2", start: 6, label: "beat" } });
     const result = foldToSource(fixtureText, exec.log(), exec.state());
     expect(result.skipped).toEqual([]);
     const mod = await evaluate(result.text);
@@ -270,7 +270,7 @@ describe("fold", () => {
       expect(exec.execute({ type: "element/update", params: { id: "v1", props: { content } } }).ok).toBe(true);
       expect(exec.execute({ type: "track/rename", params: { trackId: "main", name: words } }).ok).toBe(true);
       expect(exec.execute({ type: "track/rename", params: { trackId: "music", name: words } }).ok).toBe(true);
-      expect(exec.execute({ type: "marker/add", params: { markerId: "m2", at: 6, label: words } }).ok).toBe(true);
+      expect(exec.execute({ type: "marker/add", params: { markerId: "m2", start: 6, label: words } }).ok).toBe(true);
       const result = foldToSource(fixtureText, exec.log(), exec.state());
       expect(result.skipped).toEqual([]);
       const mod = await evaluate(result.text);

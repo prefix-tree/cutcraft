@@ -34,7 +34,7 @@ describe("theme", () => {
       collect(
         film(
           undefined,
-          h(Shape, { id: "s", start: 0, shape: "rectangle", fill: "$primary", cornerRadius: "$radius" }),
+          h(Shape, { id: "s", start: 0, type: "rectangle", fill: "$primary", cornerRadius: "$radius" }),
           h(Title, { id: "t", start: 0 }, "Hello"),
         ),
       ),
@@ -91,8 +91,8 @@ describe("theme", () => {
           { motion: "bouncy" },
           h(Title, { id: "t", start: 0 }, "Pop"),
           h(Title, { id: "own", start: 0, enter: { type: "fade" } }, "Own"),
-          h(Title, { id: "text", start: 0, animation: { preset: "typewriter" } }, "Typed"),
-          h(Shape, { id: "s", start: 0, shape: "circle" }),
+          h(Title, { id: "text", start: 0, animation: { type: "typewriter" } }, "Typed"),
+          h(Shape, { id: "s", start: 0, type: "circle" }),
         ),
       ),
       manifest,
@@ -100,7 +100,7 @@ describe("theme", () => {
     expect(state.errors).toEqual([]);
     expect(state.items.get("t")?.props.enter).toMatchObject({ type: "pop", duration: 0.5 });
     expect(state.items.get("t")?.props.exit).toMatchObject({ type: "scale" });
-    expect(state.items.get("own")?.props.enter).toMatchObject({ type: "fade", duration: 0.5, easing: "ease-out" });
+    expect(state.items.get("own")?.props.enter).toMatchObject({ type: "fade", duration: 0.5, easing: "easeOut" });
     expect(state.items.get("own")?.props.exit).toMatchObject({ type: "scale" });
     expect(state.items.get("text")?.props.enter).toBeUndefined();
     expect(state.items.get("s")?.props.enter).toMatchObject({ type: "pop" });
@@ -139,7 +139,7 @@ describe("theme", () => {
     const state = resolve(collect(el), manifest);
     expect(state.errors).toEqual([]);
     expect(state.items.get("composition")?.props.background).toEqual({
-      mode: "color",
+      type: "color",
       color: THEMES.pastel.palette.background,
     });
     expect(state.items.get("caps")?.props.style).toMatchObject({
@@ -202,7 +202,7 @@ describe("theme", () => {
       collect(
         film(
           {},
-          h(Shape, { id: "s", start: 0, shape: "rectangle", fill: "$brand" }),
+          h(Shape, { id: "s", start: 0, type: "rectangle", fill: "$brand" }),
           h(Title, { id: "t", start: 0, style: "giant" }, "?"),
         ),
       ),
@@ -290,7 +290,7 @@ export default function Video() {
         <Title id="a" start={0} style={{ preset: "h1", color: "$brand" }}>A</Title>
         <Title id="b" start={0} style={{ preset: "giant", font: "Helvetica", color: "#1d1b17" }}>B</Title>
         <Title id="c" start={0} style={{ preset: "nope", font: face }}>C</Title>
-        <Shape id="s" start={0} shape="rectangle" fill="$surface" shadow={{ color: "#000000", blur: 10 }} />
+        <Shape id="s" start={0} type="rectangle" fill="$surface" shadow={{ color: "#000000", blur: 10 }} />
       </Track>
     </Composition>
   );

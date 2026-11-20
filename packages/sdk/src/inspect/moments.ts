@@ -186,7 +186,7 @@ function resolveRef(
   const parsed = parseTimeRef(m.ref);
   if (parsed.kind === "marker") {
     const marker = state.items.get(parsed.id);
-    const at = marker?.kind === "marker" ? Number(marker.props.at ?? marker.start) : Number.NaN;
+    const at = marker?.kind === "marker" ? Number(marker.props.start ?? marker.start) : Number.NaN;
     if (Number.isFinite(at)) add(m.text, at, `marker ${parsed.id}`);
     else errors.push(`${m.text}: the file has no marker "${parsed.id}"`);
     return;

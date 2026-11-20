@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   EFFECTS,
   MASK_TYPES,
-  TEXT_ANIMATION_PRESETS,
+  TEXT_ANIMATION_TYPES,
   TRANSITION_PARAMS,
   TRANSITION_TYPES,
   TRANSITIONS,
@@ -45,7 +45,7 @@ describe("what a file can say is what renders", () => {
     expect(VIDEO_EFFECT_TYPES).toEqual(Object.keys(EFFECTS));
     for (const type of VIDEO_EFFECT_TYPES) expect(["css", "shader", "post"]).toContain(EFFECTS[type].draw.kind);
     for (const type of TRANSITION_TYPES) expect(["look", "shader"]).toContain(TRANSITIONS[type].draw.kind);
-    expect(TEXT_ANIMATION_PRESETS).toHaveLength(9);
+    expect(TEXT_ANIMATION_TYPES).toHaveLength(9);
     expect(MASK_TYPES).toEqual(["shape", "drawn"]);
   });
 
@@ -59,8 +59,8 @@ describe("what a file can say is what renders", () => {
       'x.type: unknown transition "glitch": use one of crossfade, dipToBlack, dipToWhite, wipe, slide, push, iris, clockWipe, blinds, filmBurn, pixelDissolve, zoom, or declare it with transition()',
       expect.stringMatching(/^g\.type: unknown effect "sparkle-dust": use one of .*, or declare it with effect\(\)$/),
     ]);
-    expect(errorsOf(`<Title id="h" emphasis="pulse" animation={{ preset: "bounce" }}>Hi</Title>`)).toEqual([
-      expect.stringMatching(/^h\.animation\.preset: Invalid option/),
+    expect(errorsOf(`<Title id="h" emphasis="pulse" animation={{ type: "bounce" }}>Hi</Title>`)).toEqual([
+      expect.stringMatching(/^h\.animation\.type: Invalid option/),
       'h: Unrecognized key: "emphasis"',
     ]);
   });

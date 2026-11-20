@@ -28,7 +28,7 @@ export const SETUP: Partial<Record<ActionType, readonly ActionInput[]>> = {
 /** One sample action per registered type, against fixtures/sample.tsx. */
 export const CASES: Partial<Record<ActionType, ActionInput>> = {
   "composition/updateSettings": { type: "composition/updateSettings", params: { fps: 25 } },
-  "composition/setBackground": { type: "composition/setBackground", params: { mode: "blur" } },
+  "composition/setBackground": { type: "composition/setBackground", params: { type: "blur" } },
   "composition/setProps": { type: "composition/setProps", params: { defaults: { title: "New", accent: "#000000" } } },
   "composition/setTheme": {
     type: "composition/setTheme",
@@ -248,12 +248,12 @@ export const CASES: Partial<Record<ActionType, ActionInput>> = {
   "caption/setAnimation": { type: "caption/setAnimation", params: { captionsId: "cap", animation: "typewriter" } },
   "caption/setAll": { type: "caption/setAll", params: { captionsId: "cap", nodes: [] } },
 
-  "marker/add": { type: "marker/add", params: { markerId: "m9", at: 5, label: "x" } },
-  "marker/update": { type: "marker/update", params: { markerId: "m1", at: 3 } },
+  "marker/add": { type: "marker/add", params: { markerId: "m9", start: 5, label: "x" } },
+  "marker/update": { type: "marker/update", params: { markerId: "m1", start: 3 } },
   "marker/remove": { type: "marker/remove", params: { markerId: "m1" } },
   "marker/restore": {
     type: "marker/restore",
-    params: { node: { id: "m8", kind: "marker", props: { id: "m8", at: 1, label: "r" } }, after: null },
+    params: { node: { id: "m8", kind: "marker", props: { id: "m8", start: 1, label: "r" } }, after: null },
   },
 
   "mask/create": {

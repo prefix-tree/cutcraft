@@ -44,7 +44,7 @@ export default function V() { return <Composition fps={30} width={1920} height={
   );
 
 // hook plays words 4..9 (2 s to 4.9 s of the talk) from 0; x1 overlaps it and the b-roll by 0.5 s.
-const CUT = `<Marker id="intro" at={1.5} />
+const CUT = `<Marker id="intro" start={1.5} />
 <Track id="main">
   <Clip id="hook" src="asset:talk" in="word:4" out="word:9.end" />
   <Transition id="x1" type="crossfade" duration={0.5} />

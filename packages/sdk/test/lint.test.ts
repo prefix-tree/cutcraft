@@ -270,7 +270,7 @@ describe("lint", () => {
         <Clip id="b3" src="asset:city" />
         <Transition id="d" type="dipToWhite" params={{ holdDuration: 0.2 }} />
         <Clip id="b4" src="asset:city" />
-        <Title id="h" animation={{ preset: "fade" }}>Hi</Title>
+        <Title id="h" animation={{ type: "fade" }}>Hi</Title>
       </Track>`),
       ).toEqual([]);
     });

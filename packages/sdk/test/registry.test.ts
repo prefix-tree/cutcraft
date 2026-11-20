@@ -50,7 +50,7 @@ export default function V() { return <Composition fps={30} width={640} height={3
       ),
       manifest,
     );
-    expect(state.items.get("s")?.props.params).toEqual({ x: 0, y: 4, radius: 8, color: "#000000", opacity: 0.5 });
+    expect(state.items.get("s")?.props.params).toEqual({ x: 0, y: 4, blur: 8, color: "#000000", opacity: 0.5 });
   });
 
   it("takes each kind of value on one scale, and refuses the old ones", () => {
@@ -67,7 +67,6 @@ export default function V() { return <Composition fps={30} width={640} height={3
       "v.params.amount: Too big: expected number to be <=1",
       "w.params.temperature: Too big: expected number to be <=1",
       'z.params: Unrecognized key: "amount"',
-      expect.stringContaining("d.params"),
       expect.stringContaining("d.params"),
     ]);
     // `amount` is a strength or share everywhere: never past -1..1.
