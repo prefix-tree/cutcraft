@@ -40,7 +40,7 @@ export default function Video() {
           size={100}
           weight={800}
           color={INK}
-          transform={{ position: { x: 290, y: -22 } }}
+          box={{ x: 930, y: 338, origin: "center" }}
           enter={{ type: "slide-up", duration: 0.6, easing: "easeOutCubic" }}
           exit={{ type: "fade", duration: 0.5 }}
         >
@@ -56,7 +56,7 @@ export default function Video() {
             size={26}
             weight={500}
             color={RED}
-            transform={{ position: { x: 290, y: 62 } }}
+            box={{ x: 930, y: 422, origin: "center" }}
             enter={{ type: "fade", duration: 0.35 }}
             exit={{ type: "fade", duration: 0.35 }}
           >

@@ -66,7 +66,7 @@ export default function Video({ product, tagline, accent, cta }: z.infer<typeof 
           size={120}
           weight={700}
           valign="top"
-          transform={{ position: { x: 0, y: 140 } }}
+          box={{ x: 960, y: 680, origin: "center" }}
           animation={{ preset: "slide-up", in: 0.4, out: 0.3 }}
         >
           {product}
@@ -80,7 +80,7 @@ export default function Video({ product, tagline, accent, cta }: z.infer<typeof 
           weight={400}
           color="#c8ccd6"
           valign="top"
-          transform={{ position: { x: 0, y: 300 } }}
+          box={{ x: 960, y: 840, origin: "center" }}
           animation={{ preset: "fade", in: 0.4, out: 0.3 }}
         >
           {tagline}
@@ -105,7 +105,7 @@ export default function Video({ product, tagline, accent, cta }: z.infer<typeof 
       </Track>
 
       {/* Word references on a caption mean where the word plays: the cues follow hook and close wherever they are trimmed to. */}
-      <Captions id="captions" src="asset:founder" style={{ position: "bottom", size: 44 }}>
+      <Captions id="captions" src="asset:founder" style={{ size: 44 }}>
         <Caption id="cap-1" start="word:12" end="word:18.end" text="Good coffee still deserves a slow morning." />
         <Caption id="cap-2" start="word:19" end="word:23.end" text="It should take one cup." />
         <Caption id="cap-3" start="word:40" end="word:48.end" text="You grind the beans, the kettle pours the water," />
@@ -130,7 +130,7 @@ function NameCard({ who, what, accent }: { who: string; what: string; accent: st
         fill="#0b0d12"
         stroke={{ color: accent, width: 6 }}
         cornerRadius={10}
-        transform={{ position: { x: -560, y: 290 } }}
+        box={{ x: 400, y: 830, origin: "center" }}
       />
       <Title
         id="lt-name"
@@ -141,7 +141,7 @@ function NameCard({ who, what, accent }: { who: string; what: string; accent: st
         weight={700}
         align="left"
         valign="top"
-        transform={{ position: { x: 120, y: 778 } }}
+        box={{ x: 1080, y: 1318, origin: "center" }}
         animation={{ preset: "slide-left", in: 0.3, out: 0.2 }}
       >
         {who}
@@ -156,7 +156,7 @@ function NameCard({ who, what, accent }: { who: string; what: string; accent: st
         color={accent}
         align="left"
         valign="top"
-        transform={{ position: { x: 120, y: 836 } }}
+        box={{ x: 1080, y: 1376, origin: "center" }}
         animation={{ preset: "fade", in: 0.3, out: 0.2 }}
       >
         {what}

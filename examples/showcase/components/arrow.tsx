@@ -17,8 +17,8 @@ export default function Video() {
           id="kettle"
           start={0.4}
           duration={2.6}
-          from={{ x: -620, y: -320 }}
-          to={{ x: -140, y: -260 }}
+          from={{ x: 340, y: 220 }}
+          to={{ x: 820, y: 280 }}
           curve={-120}
           width={10}
         />

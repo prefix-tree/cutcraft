@@ -18,11 +18,11 @@ export default function Video() {
           start={0}
           in={12}
           out={15}
+          box={{ x: 540, y: 1380, origin: "center" }}
           transform={{
             // 920 x 720 of a 960 x 540 picture: its full height and 0.72 of its width.
             crop: { x: 0.14, y: 0, width: 0.72, height: 1 },
             scale: 920 / 1080,
-            position: { x: 0, y: 420 },
             borderRadius: 28,
           }}
         />
@@ -32,7 +32,7 @@ export default function Video() {
           id="card"
           start={0}
           duration={3}
-          y={-470}
+          box={{ x: 540, y: 490 }}
           width={920}
           height={760}
           fill="$surface"
@@ -43,7 +43,7 @@ export default function Video() {
             { text: "SLOWLY", offset: 0.5, pill: "$accent" },
           ]}
         />
-        <Frame id="speaker" start={0} duration={3} y={420} width={920} height={720} />
+        <Frame id="speaker" start={0} duration={3} box={{ x: 540, y: 1380 }} width={920} height={720} />
       </Track>
     </Composition>
   );

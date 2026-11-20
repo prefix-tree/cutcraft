@@ -284,8 +284,9 @@ export default function Video({ hook, stage: colour, accent }: z.infer<typeof sc
 
       {/* What is said, as ordinary subtitles at the top: only how each trick works. */}
       <Captions
+        box={{ y: 153.6, origin: "top" }}
         id="subtitles"
-        style={{ font: "Inter", size: 52, weight: 700, color: "#ffffff", background: "#000000c0", position: "top" }}
+        style={{ font: "Inter", size: 52, weight: 700, color: "#ffffff", background: "#000000c0" }}
       >
         <Caption id="s-hook" start={0.2} end={2.9} text={hook} />
         <Caption id="s-1a" start={3.2} end={6.4} text="A surface that faces the light gets brighter." />

@@ -17,7 +17,8 @@ export default function Video() {
           width={420}
           height={84}
           size={34}
-          transform={{ position: { x: 0, y: 115 }, borderRadius: 18 }}
+          box={{ x: 270, y: 595, origin: "center" }}
+          transform={{ borderRadius: 18 }}
         >
           Crema: the sign of a good shot
         </Title>

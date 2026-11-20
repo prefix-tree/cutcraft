@@ -149,7 +149,7 @@ export default function Video() {
           width={1600}
           height={760}
           lineHeight={0.95}
-          transform={{ position: { x: 0, y: -40 } }}
+          box={{ x: 960, y: 500, origin: "center" }}
           shadow={LIFT}
           animation={{ preset: "word-by-word" }}
         >
@@ -168,7 +168,7 @@ export default function Video() {
           valign="bottom"
           width={1600}
           height={760}
-          transform={{ position: { x: 0, y: 40 } }}
+          box={{ x: 960, y: 580, origin: "center" }}
           shadow={LIFT}
           animation={{ preset: "fade" }}
         >
@@ -183,8 +183,7 @@ export default function Video() {
           role="Speed keys ease the pour into slow motion"
           size={60}
           width={900}
-          x={-330}
-          y={300}
+          box={{ x: 630, y: 840 }}
         />
         <Callout
           id="held"
@@ -194,9 +193,8 @@ export default function Video() {
           text="One frame, held"
           size={46}
           width={520}
-          x={420}
-          y={-300}
-          to={{ x: 40, y: -40 }}
+          box={{ x: 1380, y: 240 }}
+          to={{ x: 1000, y: 500 }}
         />
         <Title
           id="fast"
@@ -211,13 +209,13 @@ export default function Video() {
           width={1600}
           height={760}
           lineHeight={0.95}
-          transform={{ position: { x: 0, y: -40 } }}
+          box={{ x: 960, y: 500, origin: "center" }}
           shadow={LIFT}
           animation={{ preset: "word-by-word" }}
         >
           FAST SHOT.
         </Title>
-        <Badge id="look" anchor="shot" offset={3.4} duration={4} text="Warm LUT" x={600} y={-370} size={58} />
+        <Badge id="look" anchor="shot" offset={3.4} duration={4} text="Warm LUT" box={{ x: 1560, y: 170 }} size={58} />
         <Title
           id="every"
           anchor="three"
@@ -231,7 +229,7 @@ export default function Video() {
           width={1600}
           height={840}
           lineHeight={0.95}
-          transform={{ position: { x: 0, y: 0 } }}
+          box={{ x: 960, y: 540, origin: "center" }}
           shadow={LIFT}
           animation={{ preset: "word-by-word" }}
         >

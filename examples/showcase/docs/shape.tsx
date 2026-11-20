@@ -13,7 +13,7 @@ export default function Video() {
           height={200}
           fill="#f3ead6"
           cornerRadius={24}
-          transform={{ position: { x: -170, y: 0 } }}
+          box={{ x: 310, y: 270, origin: "center" }}
           enter={{ type: "slide-up", duration: 0.6 }}
         />
         <Shape
@@ -25,7 +25,7 @@ export default function Video() {
           height={180}
           fill={{ type: "none" }}
           stroke={{ color: "#e8a33d", width: 14 }}
-          transform={{ position: { x: 220, y: 0 } }}
+          box={{ x: 700, y: 270, origin: "center" }}
           enter={{ type: "scale", duration: 0.5 }}
         />
       </Track>

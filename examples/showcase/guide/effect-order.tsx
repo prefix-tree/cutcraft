@@ -12,7 +12,8 @@ export default function Video() {
           in={2}
           out={5}
           fit="cover"
-          transform={{ position: { x: -240, y: 0 }, scale: { x: 0.5, y: 0.5 } }}
+          box={{ x: 240, y: 270, origin: "center" }}
+          transform={{ scale: { x: 0.5, y: 0.5 } }}
         >
           <Effect id="grey-a" type="grayscale" />
           <Effect id="tone-a" type="duotone" />
@@ -25,7 +26,8 @@ export default function Video() {
           in={2}
           out={5}
           fit="cover"
-          transform={{ position: { x: 240, y: 0 }, scale: { x: 0.5, y: 0.5 } }}
+          box={{ x: 720, y: 270, origin: "center" }}
+          transform={{ scale: { x: 0.5, y: 0.5 } }}
         >
           <Effect id="tone-b" type="duotone" />
           <Effect id="grey-b" type="grayscale" />

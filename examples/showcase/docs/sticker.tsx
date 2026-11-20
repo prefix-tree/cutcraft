@@ -13,7 +13,8 @@ export default function Video() {
           offset={0.3}
           duration={2.5}
           src="asset:star"
-          transform={{ scale: 0.8, position: { x: 300, y: -140 } }}
+          box={{ x: 780, y: 130, origin: "center" }}
+          transform={{ scale: 0.8 }}
           enter={{ type: "scale", duration: 0.4 }}
         />
       </Track>
