@@ -1,3 +1,5 @@
+import { FakeFrameSource, fakeResolver, flush } from "./helpers/fakes";
+import { DEFAULT_MANIFEST, makeState } from "./helpers/state";
 import {
   AssetSources,
   DecoderPool,
@@ -5,10 +7,7 @@ import {
   INPUT_IDLE_CLOSE_S,
   ManualClock,
   type PlayerErrorEvent,
-} from "@uberscene/player";
-
-import { FakeFrameSource, fakeResolver, flush } from "./helpers/fakes";
-import { DEFAULT_MANIFEST, makeState } from "./helpers/state";
+} from "./internal";
 
 function setup(ids = ["a", "b", "silent"]) {
   const clock = new ManualClock();

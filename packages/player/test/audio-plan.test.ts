@@ -1,6 +1,5 @@
-import { buildAudioPlan, buildGainEnvelope, captureWarnings, duckIntervals } from "@uberscene/player";
-
 import { makeState } from "./helpers/state";
+import { buildAudioPlan, buildGainEnvelope, captureWarnings, duckIntervals } from "./internal";
 
 const state = makeState({
   tracks: [

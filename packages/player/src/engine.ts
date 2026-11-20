@@ -1,16 +1,28 @@
 /**
- * The DOM-free part of the player: the pure model, the compositor and painter,
- * the decoder pool and the mediabunny sources. Nothing here imports React or
- * touches `document`, `window` or an AudioContext at load time, so a Node
- * renderer can build on it. `defaultCreateCanvas` is the one browser-only
- * function; pass `createCanvas` instead.
+ * The DOM-free part of the player, for a renderer: the frame and audio plans, the compositor and painter, the
+ * decoder pool and the mediabunny sources. Nothing here imports React or touches `document`, `window` or an
+ * AudioContext at load time.
  */
 
-export { ManualClock, PerformanceClock } from "./clock/clock";
-export * from "./constants";
-export * from "./media";
-export * from "./model";
-export * from "./nested";
-export * from "./render";
-export * from "./types";
+export { ManualClock } from "./clock/clock";
+export { FRAME_EPS, PICK_EPS, SETTLE_MS } from "./constants";
+export { AssetSources } from "./media/asset-sources";
+export { DecoderPool } from "./media/decoder-pool";
+export { MediabunnyInputs } from "./media/mediabunny-input";
+export {
+  type AudioOccurrence,
+  buildAudioPlan,
+  buildGainEnvelope,
+  type GainPoint,
+} from "./model/audio-plan";
+export { OVERLAY_KINDS } from "./model/backdrop";
+export { paramsAt } from "./model/effects";
+export { buildFramePlan, type DrawOp } from "./model/frame-plan";
+export { frameIndex, placementSourceTime } from "./model/time";
+export { animatedTransform, boundsOf, type DrawRect } from "./model/transform";
+export { isVisibleAt, visiblePlacements } from "./model/visible";
+export { makeNestedResolver } from "./nested";
+export { Compositor } from "./render/compositor";
+export { CanvasPainter, coversCanvas } from "./render/painter";
+export type { MediaResolver } from "./types";
 export { captureWarnings, devWarn } from "./warn";

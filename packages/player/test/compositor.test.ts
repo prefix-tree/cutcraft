@@ -1,7 +1,6 @@
-import { AssetSources, Compositor, ManualClock } from "@uberscene/player";
-
 import { FakeFrameSource, fakeResolver, flush, recorderCanvas, recorderContext } from "./helpers/fakes";
 import { DEFAULT_MANIFEST, makeState } from "./helpers/state";
+import { AssetSources, Compositor, ManualClock } from "./internal";
 
 const state = makeState({
   tracks: [

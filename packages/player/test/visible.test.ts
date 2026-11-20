@@ -1,6 +1,5 @@
-import { visiblePlacements } from "@uberscene/player";
-
 import { fixtureState, makeState } from "./helpers/state";
+import { visiblePlacements } from "./internal";
 
 describe("visiblePlacements", () => {
   const state = makeState({

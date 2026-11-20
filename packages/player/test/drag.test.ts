@@ -1,5 +1,3 @@
-import { ManualClock, PlayerCore } from "@uberscene/player";
-
 import {
   FakeAudioOutput,
   FakeAudioSource,
@@ -10,6 +8,7 @@ import {
   recorderContext,
 } from "./helpers/fakes";
 import { makeState } from "./helpers/state";
+import { ManualClock, PlayerCore } from "./internal";
 
 /** A trim drag as the editor produces it: one resolved state per pointer move. */
 function trimmed(out: number, inSec = 0) {

@@ -1,7 +1,6 @@
-import { AudioEngine, ManualClock, Transport } from "@uberscene/player";
-
 import { FakeAudioOutput, FakeAudioSource, flush } from "./helpers/fakes";
 import { makeState } from "./helpers/state";
+import { AudioEngine, ManualClock, Transport } from "./internal";
 
 const state = makeState({
   tracks: [

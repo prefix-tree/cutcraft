@@ -1,9 +1,9 @@
 import { act, createRef, type ReactNode } from "react";
 import { createRoot, type Root } from "react-dom/client";
 
-import { ManualClock, Player, type PlayerOptions, type PlayerRef } from "@uberscene/player";
 import type { ResolvedState } from "@uberscene/sdk";
 
+import { ManualClock, Player, type PlayerOptions, type PlayerRef } from "../internal";
 import {
   FakeAudioOutput,
   FakeAudioSource,

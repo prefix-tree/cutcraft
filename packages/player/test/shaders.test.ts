@@ -1,7 +1,7 @@
-import { buildFramePlan } from "@uberscene/player";
 import { collectModule, loadModule, resolve } from "@uberscene/sdk";
 
 import { declare, fragmentSource, uniformValue } from "../src/render/shaders";
+import { buildFramePlan } from "./internal";
 
 const manifest = {
   assets: { city: { id: "city", kind: "video" as const, duration: 10, fps: 30, width: 640, height: 360 } },

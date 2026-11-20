@@ -1,7 +1,6 @@
-import { ClipDecoder, QUEUE_MAX, QUEUE_TARGET } from "@uberscene/player";
-
 import { FakeFrameSource, flush } from "./helpers/fakes";
 import { childrenOf, makeState } from "./helpers/state";
+import { ClipDecoder, QUEUE_MAX, QUEUE_TARGET } from "./internal";
 
 const state = makeState({
   tracks: [

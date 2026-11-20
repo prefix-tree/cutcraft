@@ -1,14 +1,6 @@
-import {
-  buildFramePlan,
-  CanvasPainter,
-  captureWarnings,
-  type DrawOp,
-  type Frame,
-  type FramePlan,
-} from "@uberscene/player";
-
 import { FakeFrame, FakeFrameSource, recorderCanvas, recorderContext } from "./helpers/fakes";
 import { type ItemSpec, makeState } from "./helpers/state";
+import { buildFramePlan, CanvasPainter, captureWarnings, type DrawOp, type Frame, type FramePlan } from "./internal";
 
 describe("CanvasPainter blur background", () => {
   function paintBlur(transform?: object) {

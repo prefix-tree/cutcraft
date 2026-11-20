@@ -1,6 +1,5 @@
-import { captureWarnings, EASING_FN, ease, keyframedValue } from "@uberscene/player";
-
 import { childrenOf, makeState } from "./helpers/state";
+import { captureWarnings, EASING_FN, ease, keyframedValue } from "./internal";
 
 const state = makeState({
   tracks: [
