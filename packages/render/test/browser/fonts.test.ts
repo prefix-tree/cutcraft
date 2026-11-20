@@ -4,7 +4,8 @@ import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSy
 import { createRequire } from "node:module";
 import { join } from "node:path";
 
-import { directoryResolver, type FontFile, loadVideo, renderStill } from "../../src";
+import { directoryResolver, loadVideo, renderStill } from "../../src";
+import type { FontFile } from "../../src/fonts";
 import { inkWidth } from "../helpers/ink";
 
 const scratch = join(import.meta.dirname, "..", ".tmp", "browser-fonts");

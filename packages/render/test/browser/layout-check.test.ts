@@ -5,7 +5,8 @@ import { type AssetManifest, collect, resolve } from "@uberscene/sdk";
 
 import { manifest } from "../../../player/e2e/app/composition";
 import { mediaDir } from "../../../player/e2e/gen-media";
-import { checkLayout, directoryResolver, formatLayout, type LayoutIssue, subjectRects } from "../../src";
+import { checkLayout, directoryResolver, formatLayout, type LayoutIssue } from "../../src";
+import { subjectRects } from "../../src/layout-check";
 import { toSource } from "../helpers/jsx";
 
 const box = (

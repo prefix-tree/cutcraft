@@ -8,7 +8,6 @@ export {
   listBlocks,
 } from "./blocks";
 export { type Container, containerOf, QUALITIES, type QualityName, type VideoCodec } from "./encoding";
-export { type FontFile, type FontWeight, loadFonts } from "./fonts";
 export {
   type FontFilter,
   type FontSheetOptions,
@@ -39,7 +38,6 @@ export {
   SAFE_ZONES,
   type SafeZoneName,
   type SourceSpot,
-  subjectRects,
 } from "./layout-check";
 export {
   formatLint,
@@ -61,16 +59,6 @@ export {
 export type { Loudness } from "./loudness";
 export { type FoundManifest, findManifest } from "./manifest-file";
 export { directoryResolver } from "./media";
-export {
-  envelopeAt,
-  type MixedBlock,
-  type MixOptions,
-  type MixSource,
-  mixBlock,
-  mixPlan,
-  type PcmBuffer,
-  type PcmProvider,
-} from "./mixer";
 export { draftPath, type ExportSource, type RenderOptions, type RenderResult, renderVideo } from "./renderer";
 export { DEFAULT_SKILL_DIR, installSkill, type SkillInstallOptions, type SkillInstallResult } from "./skills";
 export { renderStill, type StillOptions, type StillResult } from "./still";
