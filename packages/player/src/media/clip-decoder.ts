@@ -14,6 +14,23 @@ import type { Frame, FrameSource } from "../types";
 
 export type DecodeMode = "forward" | "reverse" | "seek";
 
+/** A decoder that could not deliver a frame, naming its clip and asset; the decoder's own error is the `cause`. */
+export class DecodeError extends Error {
+  constructor(
+    readonly id: string,
+    readonly asset: string | undefined,
+    cause: unknown,
+  ) {
+    super(`clip ${id}: ${cause instanceof Error ? cause.message : String(cause)}`, { cause });
+    this.name = "DecodeError";
+  }
+
+  /** `error` from `decoder`, named once: an error that already names its clip is passed on as it is. */
+  static of(decoder: ClipDecoder, error: unknown): DecodeError {
+    return error instanceof DecodeError ? error : new DecodeError(decoder.id, decoder.placement.source?.asset, error);
+  }
+}
+
 /** How far the play head may run past the newest queued frame before the stream is restarted from the head. */
 const BEHIND_RESEEK_S = 1.0;
 
@@ -110,8 +127,7 @@ export class ClipDecoder {
         this.reverseLow = st;
       }
     };
-    this.primed = run();
-    return this.primed;
+    return this.setPrimed(run());
   }
 
   /**
@@ -218,15 +234,30 @@ export class ClipDecoder {
   private primeAtSource(st: number): Promise<void> {
     this.cancelStream();
     const gen = this.generation;
-    this.primed = this.source.frameAt(st).then((frame) => {
-      if (gen !== this.generation || this.disposed) {
-        frame?.close();
-        return;
-      }
-      this.setCurrent(frame);
-      this.startStream(st);
+    return this.setPrimed(
+      this.source.frameAt(st).then((frame) => {
+        if (gen !== this.generation || this.disposed) {
+          frame?.close();
+          return;
+        }
+        this.setCurrent(frame);
+        this.startStream(st);
+      }),
+    );
+  }
+
+  /**
+   * The first frame's fetch becomes `ready`. A failure names this clip; it is marked handled here, because the
+   * decoder is often primed by callers that do not wait (mounting, a tick that does not wait), and reaches whoever
+   * awaits `ready` or the returned promise.
+   */
+  private setPrimed(run: Promise<void>): Promise<void> {
+    const primed = run.catch((error: unknown) => {
+      throw DecodeError.of(this, error);
     });
-    return this.primed;
+    primed.catch(() => undefined);
+    this.primed = primed;
+    return primed;
   }
 
   private startStream(from: number): void {

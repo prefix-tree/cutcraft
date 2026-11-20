@@ -1,6 +1,6 @@
 import { FakeFrameSource, fakeResolver, flush, recorderCanvas, recorderContext } from "./helpers/fakes";
 import { DEFAULT_MANIFEST, makeState } from "./helpers/state";
-import { AssetSources, Compositor, ManualClock } from "./internal";
+import { AssetSources, Compositor, ManualClock, type PlayerErrorEvent } from "./internal";
 
 const state = makeState({
   tracks: [
@@ -105,5 +105,56 @@ describe("Compositor", () => {
     }
     expect(sources.get("a")!.streamsStarted).toBeGreaterThan(started * 10);
     seeked.dispose();
+  });
+  describe("when a decoder's first frame fails", () => {
+    function failing() {
+      const corrupt = new Error("corrupt sample");
+      const sources = new AssetSources({
+        media: fakeResolver(["a", "b"]),
+        manifest: DEFAULT_MANIFEST,
+        clock: new ManualClock(),
+        onError: () => {},
+        frameSourceFactory: (id) => {
+          const f = new FakeFrameSource(id);
+          if (id === "a") f.frameAt = () => Promise.reject(corrupt);
+          return f;
+        },
+      });
+      const errors: PlayerErrorEvent[] = [];
+      const comp = new Compositor(state, { sources, createCanvas: recorderCanvas, onError: (e) => errors.push(e) });
+      comp.attach(recorderContext().ctx);
+      return { comp, errors, corrupt };
+    }
+
+    it("reports the error once from a tick and does not throw", async () => {
+      const { comp, errors, corrupt } = failing();
+      await expect(comp.tick(1, { wait: true })).resolves.toBeUndefined();
+      expect(errors).toHaveLength(1);
+      expect(errors[0]).toMatchObject({ id: "c1", asset: "a", fatal: false });
+      expect(errors[0]!.error.message).toContain("corrupt sample");
+      expect(errors[0]!.error.cause).toBe(corrupt);
+      comp.dispose();
+    });
+
+    it("fails the export's step with that error", async () => {
+      const { comp, errors } = failing();
+      await expect(comp.step(1)).rejects.toThrow(/clip c1: corrupt sample/);
+      expect(errors).toHaveLength(1);
+      expect(errors[0]!.fatal).toBe(true);
+      // The compositor is not left in flight: the next step runs, and fails the same way.
+      await expect(comp.step(1 + 1 / 30)).rejects.toThrow(/corrupt sample/);
+      comp.dispose();
+    });
+
+    it("rejects only the exact callers coalesced behind a failing tick", async () => {
+      const { comp } = failing();
+      const first = comp.tick(1, { wait: true });
+      const preview = comp.tick(1.1, { wait: true });
+      const exported = comp.step(1.2);
+      await expect(first).resolves.toBeUndefined();
+      await expect(preview).resolves.toBeUndefined();
+      await expect(exported).rejects.toThrow(/corrupt sample/);
+      comp.dispose();
+    });
   });
 });
