@@ -3,7 +3,7 @@ import { z } from "zod";
 import { Layer } from "../jsx/elements";
 import { useLayer } from "../jsx/use-t";
 import { arrive, boxProps, css, cueProps, cueTiming } from "./card";
-import { h, parse, timing, timingOf, timingSchema } from "./shared";
+import { centreOf, h, parse, timing, timingOf, timingSchema } from "./shared";
 
 const markSchema = z.object({
   /** The phrase to mark, as it is written in the card's `text`. */
@@ -124,15 +124,8 @@ export function QuoteCard(props: z.input<typeof quoteCardSchema>) {
   const missing = p.highlights.find((m) => !p.text.includes(m.text));
   if (missing) throw new Error(`QuoteCard: highlights "${missing.text}" is not in the text`);
   const t = timingOf(p);
-  const {
-    box: { x, y },
-    width,
-    source,
-    text,
-    size,
-    fill,
-    color,
-  } = p;
+  const { x, y } = centreOf(p.box);
+  const { width, source, text, size, fill, color } = p;
   const look: Look = { x, y, width, source, text, size, fill, color };
   const card = `${p.id}-card`;
   const exit = { exit: { type: "fade", duration: 0.2 } };

@@ -1,15 +1,15 @@
 import { z } from "zod";
 
 import { Keyframe, Shape } from "../jsx/elements";
-import { centre, h, parse, timing, timingOf, timingSchema } from "./shared";
+import { centre, centreOf, h, parse, timing, timingOf, timingSchema } from "./shared";
 
 export const progressBarSchema = timingSchema.extend({
   /** The component's id; each of its parts' ids starts with it. */
   id: z.string(),
   /** How full it ends, 0 to 1. */
   value: z.number().min(0).max(1).default(1),
-  /** Where the bar's centre sits, in pixels from the frame's top left. Left out: `{ x: 960, y: 980 }`, on a 1920 by 1080 frame. */
-  box: centre(960, 980),
+  /** Where the bar's centre sits, in pixels from the frame's top left. Left out: centred across the frame, and at `y: 980`, set for a 1920 by 1080 frame. */
+  box: centre(undefined, 980),
   /** The full bar's length in pixels. */
   width: z.number().positive().default(1200),
   /** The bar's thickness in pixels; its ends are rounded. */
@@ -23,8 +23,9 @@ export const progressBarSchema = timingSchema.extend({
 /** A bar that fills from the left to its value: a track and a fill keyed in width, its left edge held still. */
 export function ProgressBar(props: z.input<typeof progressBarSchema>) {
   const p = parse("ProgressBar", progressBarSchema, props);
+  const c = centreOf(p.box);
   const t = timingOf(p);
-  const left = p.box.x - p.width / 2;
+  const left = c.x - p.width / 2;
   const radius = p.height / 2;
   const easing = "easeInOutCubic";
   return [
@@ -36,7 +37,7 @@ export function ProgressBar(props: z.input<typeof progressBarSchema>) {
       height: p.height,
       cornerRadius: radius,
       fill: { type: "solid", color: "$muted", opacity: 0.35 },
-      box: { x: p.box.x, y: p.box.y, origin: "center" },
+      box: { x: c.x, y: c.y, origin: "center" },
       enter: { type: "fade", duration: 0.3 },
       exit: { type: "fade", duration: 0.3 },
     }),
@@ -51,7 +52,7 @@ export function ProgressBar(props: z.input<typeof progressBarSchema>) {
         height: p.height,
         cornerRadius: radius,
         fill: p.color,
-        box: { x: left, y: p.box.y, origin: "center" },
+        box: { x: left, y: c.y, origin: "center" },
         transform: { scale: { x: 0, y: 1 } },
         exit: { type: "fade", duration: 0.3 },
       },

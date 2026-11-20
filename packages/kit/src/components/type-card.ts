@@ -3,7 +3,7 @@ import { z } from "zod";
 import { Layer } from "../jsx/elements";
 import { useLayer } from "../jsx/use-t";
 import { arrive, boxProps, css, cueProps, cueTiming } from "./card";
-import { h, parse, timing, timingOf, timingSchema } from "./shared";
+import { centreOf, h, parse, timing, timingOf, timingSchema } from "./shared";
 
 const lineSchema = z.object({
   text: z.string(),
@@ -155,16 +155,8 @@ export function TypeCardLine(p: Look & { readonly show: number; readonly part: "
 export function TypeCard(props: z.input<typeof typeCardSchema>) {
   const p = parse("TypeCard", typeCardSchema, props);
   const t = timingOf(p);
-  const {
-    box: { x, y },
-    width,
-    height,
-    fill,
-    cornerRadius,
-    size,
-    align,
-    lines,
-  } = p;
+  const { x, y } = centreOf(p.box);
+  const { width, height, fill, cornerRadius, size, align, lines } = p;
   const look: Look = { x, y, width, height, fill, cornerRadius, size, align, lines };
   const card = `${p.id}-card`;
   const exit = { exit: { type: "fade", duration: 0.2 } };

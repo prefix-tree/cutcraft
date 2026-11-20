@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { Layer, Title } from "../jsx/elements";
 import { useLayer } from "../jsx/use-t";
-import { centre, h, parse, timing, timingOf, timingSchema } from "./shared";
+import { centre, centreOf, h, parse, timing, timingOf, timingSchema } from "./shared";
 
 export const counterSchema = timingSchema.extend({
   /** The component's id; each of its parts' ids starts with it. */
@@ -19,8 +19,8 @@ export const counterSchema = timingSchema.extend({
   suffix: z.string().default(""),
   /** A line under the number, in the body face and the muted colour. Left out: the number alone. */
   label: z.string().optional(),
-  /** Where the number's centre sits, in pixels from the frame's top left. Left out: `{ x: 960, y: 540 }`, on a 1920 by 1080 frame. */
-  box: centre(960, 540),
+  /** Where the number's centre sits, in pixels from the frame's top left. Left out: centred on the frame. */
+  box: centre(),
   /** The number's letter height in pixels; the label is about a fifth of it. */
   size: z.number().positive().default(140),
   /** Seconds the count takes; it then holds. */
@@ -71,7 +71,7 @@ export function Counter(props: z.input<typeof counterSchema>) {
   const p = parse("Counter", counterSchema, props);
   const t = timingOf(p);
   const { from, to, decimals, prefix, suffix, size, countFor } = p;
-  const { x, y } = p.box;
+  const { x, y } = centreOf(p.box);
   return [
     h(
       Layer,

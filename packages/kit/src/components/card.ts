@@ -8,8 +8,8 @@ import { centre, type Timing, timing } from "./shared";
 
 /** Where a card sits: its centre from the frame's top left. */
 export const boxProps = {
-  /** Where the card's centre sits, in pixels from the frame's top left. Left out: `{ x: 960, y: 540 }`, on a 1920 by 1080 frame. */
-  box: centre(960, 540),
+  /** Where the card's centre sits, in pixels from the frame's top left. Left out: centred on the frame. */
+  box: centre(),
 };
 
 /** When one part of a card comes in: at a word of the card's anchor, or seconds after the card. */

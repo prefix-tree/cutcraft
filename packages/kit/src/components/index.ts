@@ -13,6 +13,7 @@ import { Highlight, highlightSchema } from "./highlight";
 import { LowerThird, lowerThirdSchema } from "./lower-third";
 import { ProgressBar, progressBarSchema } from "./progress-bar";
 import { QuoteCard, QuoteCardPart, quoteCardSchema } from "./quote-card";
+import { withFrame } from "./shared";
 import { TypeCard, TypeCardBack, TypeCardLine, typeCardSchema } from "./type-card";
 
 export {
@@ -31,6 +32,7 @@ export {
   TypeCard,
   TypeCardBack,
   TypeCardLine,
+  withFrame,
 };
 
 export interface ComponentEntry {

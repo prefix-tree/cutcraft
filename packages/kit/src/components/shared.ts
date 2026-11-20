@@ -14,9 +14,43 @@ export const timingSchema = z.object({
 });
 export type Timing = z.infer<typeof timingSchema>;
 
-/** A component's centre, in pixels from the frame's top left: `x` and `y` default to where it sits on a 1920 by 1080 frame. */
-export const centre = (x: number, y: number) =>
-  z.strictObject({ x: z.number().default(x), y: z.number().default(y) }).default({ x, y });
+/** The frame components are placed on while they expand: the composition's, set by the resolver. */
+let frame: { readonly width: number; readonly height: number } = { width: 1920, height: 1080 };
+
+/**
+ * Runs `fn` with components placed on a frame of `size`: an axis of a component's `box` left out is centred on it.
+ * The resolver does this for each composition's children; call it yourself when you call a component as a function
+ * for a frame that is not 1920 by 1080.
+ */
+export function withFrame<T>(size: { readonly width: number; readonly height: number }, fn: () => T): T {
+  const before = frame;
+  frame = size;
+  try {
+    return fn();
+  } finally {
+    frame = before;
+  }
+}
+
+/**
+ * A component's `box`: its centre, in pixels from the frame's top left. An axis given a default sits there (set for a
+ * 1920 by 1080 frame); an axis with none, left out, is centred on the frame.
+ */
+export const centre = (x?: number, y?: number) =>
+  z
+    .strictObject({
+      x: x === undefined ? z.number().optional() : z.number().default(x),
+      y: y === undefined ? z.number().optional() : z.number().default(y),
+    })
+    .default({ ...(x === undefined ? {} : { x }), ...(y === undefined ? {} : { y }) } as never);
+
+/** A component's centre in pixels: its box, an axis left out centred on the frame it is placed on. */
+export function centreOf(box: { readonly x?: number | undefined; readonly y?: number | undefined }): {
+  x: number;
+  y: number;
+} {
+  return { x: box.x ?? frame.width / 2, y: box.y ?? frame.height / 2 };
+}
 
 /** A point in pixels from the frame's top left, as every element's `box`. */
 export const pointSchema = z.object({ x: z.number(), y: z.number() });

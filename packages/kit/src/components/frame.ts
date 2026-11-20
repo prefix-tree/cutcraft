@@ -1,13 +1,13 @@
 import { z } from "zod";
 
 import { Shape } from "../jsx/elements";
-import { centre, h, parse, timing, timingOf, timingSchema } from "./shared";
+import { centre, centreOf, h, parse, timing, timingOf, timingSchema } from "./shared";
 
 export const frameSchema = timingSchema.extend({
   /** The id of the element it draws. */
   id: z.string(),
-  /** Where the border's centre sits, in pixels from the frame's top left. Left out: `{ x: 960, y: 540 }`, on a 1920 by 1080 frame. */
-  box: centre(960, 540),
+  /** Where the border's centre sits, in pixels from the frame's top left. Left out: centred on the frame. */
+  box: centre(),
   /** The border's width in pixels. */
   width: z.number().positive(),
   /** The border's height in pixels. */
@@ -23,6 +23,7 @@ export const frameSchema = timingSchema.extend({
 /** A rounded border around part of the picture: the speaker under a card, a screen, a detail. */
 export function Frame(props: z.input<typeof frameSchema>) {
   const p = parse("Frame", frameSchema, props);
+  const c = centreOf(p.box);
   return [
     h(Shape, {
       id: p.id,
@@ -33,7 +34,7 @@ export function Frame(props: z.input<typeof frameSchema>) {
       cornerRadius: p.cornerRadius,
       fill: { type: "none" },
       stroke: { color: p.color, width: p.thickness },
-      box: { x: p.box.x, y: p.box.y, origin: "center" },
+      box: { x: c.x, y: c.y, origin: "center" },
       enter: { type: "fade", duration: 0.25 },
       exit: { type: "fade", duration: 0.2 },
     }),
