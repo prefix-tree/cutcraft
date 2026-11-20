@@ -131,6 +131,18 @@ describe("renderVideo", () => {
     expect(probe(av1)).toMatchObject({ codec: "av1", frames: 15 });
   });
 
+  it("exports NTSC 29.97 with the exact frame count, at 30000/1001", async () => {
+    const ntsc = { num: 30000, den: 1001 };
+    const state = { ...loaded.state, composition: { ...loaded.state.composition, fps: 30000 / 1001, rate: ntsc } };
+    const out = join(dir, "ntsc.webm");
+    // 100 frames end at 100 * 1001 / 30000 s, which is a whole number of ticks; the file must hold exactly those.
+    const to = (100 * 1001) / 30000;
+    expect(await renderVideo({ ...base, state, out, to, silent: true })).toMatchObject({ frames: 100 });
+    const info = probe(out);
+    expect(info.frames).toBe(100);
+    expect(info.fps).toBeCloseTo(30000 / 1001, 2);
+  });
+
   it("writes the soundtrack alone to MP3 and WAV", async () => {
     for (const ext of ["mp3", "wav"]) {
       const out = join(dir, `sound.${ext}`);

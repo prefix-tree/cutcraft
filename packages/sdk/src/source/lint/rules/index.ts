@@ -3,6 +3,7 @@ import type { ElementSite, SourceIndex } from "../../index";
 import type { Diagnostic, LintOptions } from "../index";
 import { deprecatedProps, oldThemeVariables } from "./deprecated";
 import { declaration } from "./fonts";
+import { ntscFrameRate } from "./frame-rate";
 import { freeCodeClock, strayHtml } from "./free-code";
 import { notRendered } from "./not-rendered";
 import { cutNearShot, repeatedSource, shotChangeInsideCrop } from "./shots";
@@ -273,6 +274,7 @@ export const rules: readonly Rule[] = [
   notRendered,
   deprecatedProps,
   oldThemeVariables,
+  ntscFrameRate,
 ];
 
 /** The composition's first track in document order that lays out as a sequence and is not hidden: the one under everything else. */

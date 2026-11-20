@@ -88,15 +88,31 @@ export const frameAt = (ticks: number, rate: Rate): number => Math.floor(ticks /
 /** The first tick of a frame. */
 export const frameStart = (frame: number, rate: Rate): number => frame * ticksPerFrame(rate);
 
+/**
+ * Seconds as ticks, put on a frame boundary when they are as close to one as a double can say. A time in seconds is
+ * a double, which at t seconds is good to about t·2^-52: under one tick below about 2.5 hours, two at 9.85 hours. So
+ * `frameStartSeconds(n)` read back may land a tick either side of frame n's start, and is put back on it. This is
+ * not a nudge: no time a file can hold lies that close to a boundary without meaning it.
+ */
+function onBoundary(seconds: number, per: number): number {
+  const ticks = secondsToTicks(seconds);
+  const slack = Math.ceil(Math.abs(seconds) * Number.EPSILON * TICKS_PER_SECOND);
+  const into = ((ticks % per) + per) % per;
+  if (into !== 0 && into <= slack) return ticks - into;
+  if (into !== 0 && per - into <= slack) return ticks + per - into;
+  return ticks;
+}
+
 /** The frame a time in seconds falls in, never below 0. */
-export const frameAtSeconds = (seconds: number, rate: Rate): number =>
-  Math.max(0, frameAt(secondsToTicks(seconds), rate));
+export const frameAtSeconds = (seconds: number, rate: Rate): number => {
+  const per = ticksPerFrame(rate);
+  return Math.max(0, Math.floor(onBoundary(seconds, per) / per));
+};
 
 /** The first frame that starts at or after a time: the frame count of a stretch that ends there. */
 export const framesUntil = (seconds: number, rate: Rate): number => {
-  const ticks = secondsToTicks(seconds);
   const per = ticksPerFrame(rate);
-  return Math.max(0, Math.ceil(ticks / per));
+  return Math.max(0, Math.ceil(onBoundary(seconds, per) / per));
 };
 
 /** The frame nearest a time, for times given by a person (`--at 2.5`) rather than computed. */
@@ -123,12 +139,16 @@ function ticksPerSample(sampleRate: number): number {
 export const sampleAt = (ticks: number, sampleRate: number): number => Math.floor(ticks / ticksPerSample(sampleRate));
 
 /** The audio sample a time in seconds falls in. */
-export const sampleAtSeconds = (seconds: number, sampleRate: number): number =>
-  sampleAt(secondsToTicks(seconds), sampleRate);
+export const sampleAtSeconds = (seconds: number, sampleRate: number): number => {
+  const per = ticksPerSample(sampleRate);
+  return Math.floor(onBoundary(seconds, per) / per);
+};
 
 /** The first sample that starts at or after a time: the sample count of a stretch that ends there. */
-export const samplesUntil = (seconds: number, sampleRate: number): number =>
-  Math.max(0, Math.ceil(secondsToTicks(seconds) / ticksPerSample(sampleRate)));
+export const samplesUntil = (seconds: number, sampleRate: number): number => {
+  const per = ticksPerSample(sampleRate);
+  return Math.max(0, Math.ceil(onBoundary(seconds, per) / per));
+};
 
 /** Whether a rate is shown in drop-frame timecode: 29.97 and 59.94. */
 export const isDropFrame = (rate: Rate): boolean => rate.den === 1001 && (rate.num === 30000 || rate.num === 60000);
