@@ -29,7 +29,7 @@ const box = (
       fill: "#ff0000",
       start,
       duration,
-      transform: { position: { x, y } },
+      box: { x, y, origin: "center" },
     },
     ...(children as []),
   );
@@ -66,15 +66,15 @@ describe("checkLayout", () => {
         h(
           Track,
           { id: "t", layout: "free" },
-          box("fine", 0, -60, 60, 60),
-          box("edge", 300, -60, 100, 100),
-          box("margin", 290, -60, 40, 40),
-          box("low", 0, 130, 400, 30, 0.5, 0.5),
+          box("fine", 320, 120, 60, 60),
+          box("edge", 620, 120, 100, 100),
+          box("margin", 610, 120, 40, 40),
+          box("low", 320, 310, 400, 30, 0.5, 0.5),
           h(Title, { id: "hi", start: 0, duration: 1, size: 40 }, "Hi"),
         ),
         h(
           Captions,
-          { id: "caps", style: { position: "bottom", size: 30 } },
+          { id: "caps", style: { size: 30 } },
           h(Caption, { id: "c1", start: 0, end: 1, text: "Hello world" }),
         ),
       ),
@@ -96,13 +96,13 @@ describe("checkLayout", () => {
         h(
           Track,
           { id: "t", layout: "free" },
-          box("edge", 300, -60, 100, 100),
-          box("wide", 0, 0, 700, 40),
-          box("low", 0, 130, 400, 30),
+          box("edge", 620, 120, 100, 100),
+          box("wide", 320, 180, 700, 40),
+          box("low", 320, 310, 400, 30),
         ),
         h(
           Captions,
-          { id: "caps", style: { position: "bottom", size: 30 } },
+          { id: "caps", style: { size: 30 } },
           h(Caption, { id: "c1", start: 0, end: 1, text: "Hello world" }),
         ),
       ),
@@ -115,14 +115,14 @@ describe("checkLayout", () => {
       area: { x: 0, y: 0, w: 640, h: 360 },
     });
     expect(edge.message).toBe('shape "edge" runs off the frame on the right by 30 px, from 0.00 s to 0.90 s.');
-    expect(edge.fix).toBe("move it left 30 px (transform.position.x -30)");
+    expect(edge.fix).toBe("move it left 30 px (box.x 590)");
     expect(issues.find((i) => i.id === "wide")!.fix).toMatch(
       /^it is 700×40 px but the frame is 640×360: scale it to 0\.91 or less \(transform\.scale\)/,
     );
     const low = issues.find((i) => i.rule === "captions")!;
     expect(low.message).toBe('shape "low" covers captions "caps" from 0.00 s to 0.90 s.');
     expect(low.box.y).toBe(295);
-    expect(low.fix).toMatch(/^move it (up|down) \d+ px \(transform\.position\.y [+-]\d+\), then check again/);
+    expect(low.fix).toMatch(/^move it (up|down) \d+ px \(box\.y \d+\), then check again/);
   });
 
   it("points each issue at its place in the JSX, as a compiler does", async () => {
@@ -130,14 +130,14 @@ describe("checkLayout", () => {
       'import { Composition, Shape, Track } from "@uberscene/kit";',
       "",
       "function Dot({ id }: { id: string }) {",
-      '  return <Shape id={id} shape="circle" width={60} height={60} fill="#f00" start={0} duration={1} transform={{ position: { x: 300, y: 0 } }} />;',
+      '  return <Shape id={id} shape="circle" width={60} height={60} fill="#f00" start={0} duration={1} box={{ x: 620, y: 180, origin: "center" }} />;',
       "}",
       "",
       "export default function Video() {",
       "  return (",
       '    <Composition id="v" fps={10} width={640} height={360}>',
       '      <Track id="t" layout="free">',
-      '        <Shape id="edge" shape="rectangle" width={100} height={100} fill="#f00" start={0} duration={1} transform={{ position: { x: 300, y: -60 } }} />',
+      '        <Shape id="edge" shape="rectangle" width={100} height={100} fill="#f00" start={0} duration={1} box={{ x: 620, y: 120, origin: "center" }} />',
       '        <Dot id="d1" />',
       '        <Dot id="d2" />',
       "      </Track>",
@@ -154,7 +154,7 @@ describe("checkLayout", () => {
         fill: "#f00",
         start: 0,
         duration: 1,
-        transform: { position: { x: 300, y: 0 } },
+        box: { x: 620, y: 180, origin: "center" },
       });
     const el = h(
       Composition,
@@ -162,7 +162,7 @@ describe("checkLayout", () => {
       h(
         Track,
         { id: "t", layout: "free" },
-        box("edge", 300, -60, 100, 100),
+        box("edge", 620, 120, 100, 100),
         h(Dot, { id: "d1" }),
         h(Dot, { id: "d2" }),
       ),
@@ -179,7 +179,7 @@ describe("checkLayout", () => {
     expect(d2.source).toMatchObject({ line: 13, column: 9, helper: "Dot" });
     const printed = formatLayout(result);
     expect(printed).toContain(
-      `video.tsx:11:${edge.source!.column}: frame-edge: shape "edge" runs off the frame on the right by 30 px, from 0.00 s to 0.90 s.\n  11 | ${text.split("\n")[10]}\n     | ${" ".repeat(edge.source!.column - 1)}^\n  fix: move it left 30 px (transform.position.x -30)`,
+      `video.tsx:11:${edge.source!.column}: frame-edge: shape "edge" runs off the frame on the right by 30 px, from 0.00 s to 0.90 s.\n  11 | ${text.split("\n")[10]}\n     | ${" ".repeat(edge.source!.column - 1)}^\n  fix: move it left 30 px (box.x 590)`,
     );
     expect(printed).toContain("^ made by Dot()");
     expect(printed.trimEnd().endsWith(result.summary)).toBe(true);
@@ -192,12 +192,12 @@ describe("checkLayout", () => {
       "  return (",
       '    <Composition id="v" fps={10} width={640} height={360}>',
       '      <Track id="t" layout="free">',
-      '        <Shape id="late" shape="rectangle" width={40} height={40} fill="#f00" start={0.5} duration={0.5} transform={{ position: { x: 330, y: 0 } }} />',
+      '        <Shape id="late" shape="rectangle" width={40} height={40} fill="#f00" start={0.5} duration={0.5} box={{ x: 650, y: 180, origin: "center" }} />',
       "        {[0, 1].map((i) => (",
-      '          <Shape key={i} id={`dot-${i}`} shape="circle" width={40} height={40} fill="#f00" start={0} duration={1} transform={{ position: { x: 200 + 130 * i, y: -60 } }} />',
+      '          <Shape key={i} id={`dot-${i}`} shape="circle" width={40} height={40} fill="#f00" start={0} duration={1} box={{ x: 520 + 130 * i, y: 120, origin: "center" }} />',
       "        ))}",
       "        {[0, 1].map((i) => (",
-      '          <Shape key={i} id={`bar-${i}`} shape="rectangle" width={40} height={10} fill="#00f" start={0} duration={1} transform={{ position: { x: -100 * i, y: 100 } }} />',
+      '          <Shape key={i} id={`bar-${i}`} shape="rectangle" width={40} height={10} fill="#00f" start={0} duration={1} box={{ x: 320 - 100 * i, y: 280, origin: "center" }} />',
       "        ))}",
       "      </Track>",
       "    </Composition>",
@@ -210,7 +210,7 @@ describe("checkLayout", () => {
       h(
         Track,
         { id: "t", layout: "free" },
-        box("late", 330, 0, 40, 40, 0.5, 0.5),
+        box("late", 650, 180, 40, 40, 0.5, 0.5),
         ...[0, 1].map((i) =>
           h(Shape, {
             key: `d${i}`,
@@ -221,7 +221,7 @@ describe("checkLayout", () => {
             fill: "#f00",
             start: 0,
             duration: 1,
-            transform: { position: { x: 200 + 130 * i, y: -60 } },
+            box: { x: 520 + 130 * i, y: 120, origin: "center" },
           }),
         ),
         ...[0, 1].map((i) =>
@@ -234,7 +234,7 @@ describe("checkLayout", () => {
             fill: "#00f",
             start: 0,
             duration: 1,
-            transform: { position: { x: -100 * i, y: 100 } },
+            box: { x: 320 - 100 * i, y: 280, origin: "center" },
           }),
         ),
       ),
@@ -250,7 +250,7 @@ describe("checkLayout", () => {
     const el = h(
       Composition,
       { fps: 10, width: 640, height: 360 },
-      h(Track, { id: "t", layout: "free" }, box("a", 0, 0, 10, 10)),
+      h(Track, { id: "t", layout: "free" }, box("a", 320, 180, 10, 10)),
     );
     await expect(check(el, manifest, { step: Number("0,5") })).rejects.toThrow(/step must be above 0 seconds, got NaN/);
     await expect(check(el, manifest, { from: Number("abc") })).rejects.toThrow(/from must be 0 or more/);
@@ -265,9 +265,9 @@ describe("checkLayout", () => {
         h(
           Track,
           { id: "t", layout: "free" },
-          box("slide", 0, 0, 60, 60, 0, 2, [
-            h(Keyframe, { id: "k1", property: "transform.position.x", at: 1, value: 0 }),
-            h(Keyframe, { id: "k2", property: "transform.position.x", at: 2, value: 400 }),
+          box("slide", 320, 180, 60, 60, 0, 2, [
+            h(Keyframe, { id: "k1", property: "box.x", at: 1, value: 320 }),
+            h(Keyframe, { id: "k2", property: "box.x", at: 2, value: 720 }),
           ]),
         ),
       ),
@@ -276,7 +276,7 @@ describe("checkLayout", () => {
     );
     const [edge] = result.issues;
     expect(result.issues).toHaveLength(1);
-    // The right side (320 + x + 30) passes 640 once x > 290: 1.725 s into the ramp.
+    // The right side (x + 30) passes 640 once x > 610: 1.725 s into the ramp.
     expect(edge).toMatchObject({ rule: "frame-edge", id: "slide" });
     expect(edge!.from).toBeGreaterThan(1.68);
     expect(edge!.from).toBeLessThan(1.78);
@@ -289,7 +289,7 @@ describe("checkLayout", () => {
       h(
         Composition,
         { fps: 10, width: 360, height: 640 },
-        h(Track, { id: "t", layout: "free" }, box("bg", 0, 0, 360, 640), box("cta", 0, 200, 200, 60)),
+        h(Track, { id: "t", layout: "free" }, box("bg", 180, 320, 360, 640), box("cta", 180, 520, 200, 60)),
       ),
       manifest,
       { safeZone: "tiktok" },
@@ -314,7 +314,7 @@ describe("checkLayout", () => {
       Composition,
       { fps: 10, width: 640, height: 360 },
       h(Track, { id: "v" }, h(Clip, { id: "c", src: "asset:bars", in: 0, out: 2 })),
-      h(Track, { id: "t", layout: "free" }, box("face", 0, 0, 40, 40), box("aside", -200, 0, 40, 40)),
+      h(Track, { id: "t", layout: "free" }, box("face", 320, 180, 40, 40), box("aside", 120, 180, 40, 40)),
     );
     const result = await check(el, m);
     // The second box (t 2) is nearer from 1 s on and sits in the top-left corner, clear of "face".
@@ -354,7 +354,7 @@ describe("checkLayout", () => {
           content:
             "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 260'><path d='M3 43V3H43M257 3H297V43M297 217V257H257M43 257H3V217' stroke='#ffffff' stroke-width='6' fill='none'/></svg>",
         }),
-        box("solid", 0, 0, 40, 40),
+        box("solid", 320, 180, 40, 40),
       ),
     );
     // The subject fills the middle of the brackets, clear of their corner marks.
@@ -367,7 +367,7 @@ describe("checkLayout", () => {
       Composition,
       { fps: 10, width: 640, height: 360 },
       h(Track, { id: "v" }, h(Clip, { id: "c", src: "asset:bars", in: 0, out: 1 })),
-      h(Track, { id: "t", layout: "free" }, box("face", 0, 0, 40, 40, 0, 2)),
+      h(Track, { id: "t", layout: "free" }, box("face", 320, 180, 40, 40, 0, 2)),
     );
     const result = await check(el, manifest, { subject: { x: 0.3, y: 0.1, w: 0.4, h: 0.6 } });
     // The clip ends at 1 s; after it there is no footage, so no subject.
@@ -387,7 +387,7 @@ describe("checkLayout", () => {
             id: "tc",
             start: 0,
             duration: 1,
-            y: -80,
+            box: { x: 320, y: 100 },
             width: 400,
             height: 140,
             size: 36,
@@ -399,7 +399,7 @@ describe("checkLayout", () => {
         ),
         h(
           Captions,
-          { id: "caps", style: { position: "bottom", size: 30 } },
+          { id: "caps", style: { size: 30 } },
           h(Caption, { id: "c1", start: 0, end: 1, text: "Hello world" }),
         ),
       ),
@@ -413,12 +413,8 @@ describe("checkLayout", () => {
       h(
         Composition,
         { fps: 10, width: 640, height: 360 },
-        h(Track, { id: "t", layout: "free" }, box("edge", 300, -60, 100, 100, 0, 1)),
-        h(
-          Captions,
-          { id: "caps", style: { position: "bottom", size: 30 } },
-          h(Caption, { id: "c1", start: 0, end: 0.5, text: "Hello" }),
-        ),
+        h(Track, { id: "t", layout: "free" }, box("edge", 620, 120, 100, 100, 0, 1)),
+        h(Captions, { id: "caps", style: { size: 30 } }, h(Caption, { id: "c1", start: 0, end: 0.5, text: "Hello" })),
       ),
     );
     expect(result.samples).toBe(10);
