@@ -3,7 +3,9 @@
   "baseBranch": "main",
   "access": "public",
   "changelog": "@changesets/cli/changelog",
-  "fixed": [["@uberscene/kit", "@uberscene/graphics", "@uberscene/player", "@uberscene/render", "uberscene"]],
+  "fixed": [
+    ["@uberscene/kit", "@uberscene/sdk", "@uberscene/graphics", "@uberscene/player", "@uberscene/render", "uberscene"]
+  ],
   "updateInternalDependencies": "patch",
   "privatePackages": {
     "version": false,
