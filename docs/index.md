@@ -103,32 +103,13 @@ import { withBase } from "vitepress";
 
 ## Why UberScene
 
-<div class="home-why-grid">
-<div>
+<p class="home-why-lead">An agent writes code better than it drives a timeline. The picture, the 3D and the music are one file, so the model can change all three.</p>
 
-### Models write code, not math
-
-An agent writes good code and bad arithmetic. So the file says what it means (this clip, then that one; a title on
-this shot) and UberScene works out every time, position and frame.
-
-</div>
-<div>
-
-### A video should be a file
-
-Not a project locked inside an app. A file you can diff, review in a pull request, generate a hundred of, and fix by
-changing one value.
-
-</div>
-<div>
-
-### One file, every editor
-
-You on a timeline, your agent in text, your app through the API: all of them edit the same TSX, and each sees what
-the others changed.
-
-</div>
-</div>
+<ul class="home-why-list">
+<li><span><strong>Edit the video in code</strong> The cut, the titles and the effects are the file. Change one value and the picture changes.</span></li>
+<li><span><strong>Build the 3D in code</strong> A three.js scene and its camera sit on the same clock as the edit, and render from that file.</span></li>
+<li><span><strong>Write the music in code</strong> The score is a track in the file, so the sound stays aligned with the picture.</span></li>
+</ul>
 
 </section>
 
