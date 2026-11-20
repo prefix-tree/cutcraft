@@ -283,7 +283,7 @@ describe("lint", () => {
     expect(c1.props.get("in")?.literal).toBe("word:3");
     expect(c1.parent).toBe("main");
     expect(index.elements.get("t1")?.lockedProps).toEqual([]);
-    expect(index.elements.get("t1")?.boundProps).toEqual({ color: "accent" });
+    expect(index.elements.get("t1")?.boundProps).toEqual({ "style.color": "accent" });
     expect(index.defaults?.props.get("title")?.literal).toBe("Why we built it");
     expect(index.helpers.get("Badge")?.pure).toBe(true);
     expect(index.helpers.get("Counter")?.hooks).toEqual(["useT"]);

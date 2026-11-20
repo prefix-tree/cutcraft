@@ -48,7 +48,18 @@ describe("element schemas", () => {
 
   it("applies defaults", () => {
     const parsed = ELEMENTS.Title.schema.parse({ id: "t" });
-    expect(parsed).toMatchObject({ font: "Inter", size: 48, weight: "bold", align: "center" });
+    expect(parsed.style).toEqual({
+      font: "Inter",
+      size: 48,
+      weight: "bold",
+      italic: false,
+      color: "#ffffff",
+      align: "center",
+      valign: "middle",
+      lineHeight: 1.2,
+      letterSpacing: 0,
+    });
+    expect(ELEMENTS.Title.schema.parse({ id: "t", style: "h1" }).style).toMatchObject({ preset: "h1", size: 48 });
     expect(ELEMENTS.Track.schema.parse({ id: "t" })).toMatchObject({
       layout: "sequence",
       role: "general",

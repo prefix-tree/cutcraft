@@ -15,7 +15,7 @@ import {
   renameValue,
 } from "@uberscene/sdk";
 
-const wrap = (body: string, extra = "") => `import { Composition, Track, Title, Layer } from "@uberscene/kit";
+const wrap = (body: string, extra = "") => `import { Captions, Composition, Track, Title, Layer } from "@uberscene/kit";
 ${extra}
 export default function V() {
   return (
@@ -157,13 +157,13 @@ describe("movePropInto", () => {
 
 describe("deprecated-props", () => {
   const deprecations: Deprecation[] = [
-    { element: "Title", prop: "size", to: { into: "style", wrap: "preset" }, since: "0.6.0" },
-    { element: "Title", prop: "weight", to: { into: "style", wrap: "preset" }, since: "0.6.0" },
-    { element: "Title", prop: "align", to: { into: "style", wrap: "preset" }, since: "0.6.0" },
-    { element: "Title", prop: "align", to: { value: { from: "flush-left", to: "flushLeft" } }, since: "0.6.0" },
-    { element: "Title", prop: "animation.preset", to: { rename: "type" }, since: "0.6.0", note: "a kind is a type" },
+    { element: "Shape", prop: "size", to: { into: "style", wrap: "preset" }, since: "0.6.0" },
+    { element: "Shape", prop: "weight", to: { into: "style", wrap: "preset" }, since: "0.6.0" },
+    { element: "Shape", prop: "align", to: { into: "style", wrap: "preset" }, since: "0.6.0" },
+    { element: "Shape", prop: "align", to: { value: { from: "flush-left", to: "flushLeft" } }, since: "0.6.0" },
+    { element: "Shape", prop: "animation.preset", to: { rename: "type" }, since: "0.6.0", note: "a kind is a type" },
     {
-      element: "Title",
+      element: "Shape",
       prop: "animation.preset",
       to: { value: { from: "word-by-word", to: "wordByWord" } },
       since: "0.6.0",
@@ -172,26 +172,26 @@ describe("deprecated-props", () => {
   ];
   const only = { deprecations, rules: ["deprecated-props"] };
 
-  it("is silent with an empty table and on files that use none of it", () => {
-    const text = wrap('<Title id="a" size={64} duration={2}>Hi</Title>');
+  it("is silent with no row for the tag and on files that use none of it", () => {
+    const text = wrap('<Shape id="a" size={64} duration={2}>Hi</Shape>');
     expect(lint(text, { rules: ["deprecated-props"] })).toEqual([]);
-    expect(lint(wrap('<Title id="a" duration={2}>Hi</Title>'), only)).toEqual([]);
+    expect(lint(wrap('<Shape id="a" duration={2}>Hi</Shape>'), only)).toEqual([]);
   });
 
   it("reports each old spelling as an error that names the new one", () => {
     const text = wrap(
-      '<Title id="a" size={64} animation={{ preset: "word-by-word" }} duration={2}>Hi</Title>\n        <Layer id="l" ground duration={2}><div /></Layer>',
+      '<Shape id="a" size={64} animation={{ preset: "word-by-word" }} duration={2}>Hi</Shape>\n        <Layer id="l" ground duration={2}><div /></Layer>',
     );
     const found = lint(text, only);
     expect(found.map((d) => [d.severity, d.id, d.prop, d.message])).toEqual([
-      ["error", "a", "size", '<Title id="a">: `size` is `style.size` since 0.6.0'],
+      ["error", "a", "size", '<Shape id="a">: `size` is `style.size` since 0.6.0'],
       [
         "error",
         "a",
         "animation",
-        '<Title id="a">: `animation.preset` is `animation.type` since 0.6.0; a kind is a type',
+        '<Shape id="a">: `animation.preset` is `animation.type` since 0.6.0; a kind is a type',
       ],
-      ["error", "a", "animation", '<Title id="a">: `animation.preset="word-by-word"` is "wordByWord" since 0.6.0'],
+      ["error", "a", "animation", '<Shape id="a">: `animation.preset="word-by-word"` is "wordByWord" since 0.6.0'],
       ["error", "l", "ground", '<Layer id="l">: `ground` is `backdrop` since 0.6.0'],
     ]);
     expect(found.every((d) => d.fix && d.fix.length > 0)).toBe(true);
@@ -204,12 +204,12 @@ describe("deprecated-props", () => {
 
   it("mends a whole tag in one fix: props moved, the moved value respelled, a key renamed and respelled", () => {
     const text = wrap(
-      '<Title id="a" style="h1" size={64} weight={700} align="flush-left" animation={{ preset: "word-by-word", in: 0.3 }} duration={2}>Hi</Title>',
+      '<Shape id="a" style="h1" size={64} weight={700} align="flush-left" animation={{ preset: "word-by-word", in: 0.3 }} duration={2}>Hi</Shape>',
     );
     const fixed = fixSource(text, only);
     expect(fixed.text).toBe(
       wrap(
-        '<Title id="a" style={{ preset: "h1", size: 64, weight: 700, align: "flushLeft" }} animation={{ type: "wordByWord", in: 0.3 }} duration={2}>Hi</Title>',
+        '<Shape id="a" style={{ preset: "h1", size: 64, weight: 700, align: "flushLeft" }} animation={{ type: "wordByWord", in: 0.3 }} duration={2}>Hi</Shape>',
       ),
     );
     expect(fixed.remaining).toEqual([]);
@@ -219,19 +219,19 @@ describe("deprecated-props", () => {
   });
 
   it("makes the object when there is none, and extends one that is there", () => {
-    const none = wrap('<Title id="a" size={64} weight={700} duration={2}>Hi</Title>');
+    const none = wrap('<Shape id="a" size={64} weight={700} duration={2}>Hi</Shape>');
     expect(fixSource(none, only).text).toBe(
-      wrap('<Title id="a" style={{ size: 64, weight: 700 }} duration={2}>Hi</Title>'),
+      wrap('<Shape id="a" style={{ size: 64, weight: 700 }} duration={2}>Hi</Shape>'),
     );
-    const there = wrap('<Title id="a" size={64} style={{ color: "#fff" }} duration={2}>Hi</Title>');
+    const there = wrap('<Shape id="a" size={64} style={{ color: "#fff" }} duration={2}>Hi</Shape>');
     expect(fixSource(there, only).text).toBe(
-      wrap('<Title id="a" style={{ color: "#fff", size: 64 }} duration={2}>Hi</Title>'),
+      wrap('<Shape id="a" style={{ color: "#fff", size: 64 }} duration={2}>Hi</Shape>'),
     );
   });
 
   it("reports without a fix what it cannot write for certain, and still fixes the rest of the tag", () => {
     const text = wrap(
-      '<Title id="a" style={LOOK} size={64} animation={{ preset: "fade" }} duration={2}>Hi</Title>',
+      '<Shape id="a" style={LOOK} size={64} animation={{ preset: "fade" }} duration={2}>Hi</Shape>',
       "const LOOK = {};",
     );
     const found = lint(text, only);
@@ -246,13 +246,100 @@ describe("deprecated-props", () => {
 
   it("fixes every tag of a file, each with its own edits", () => {
     const text = wrap(
-      '<Title id="a" size={64} duration={2}>Hi</Title>\n        <Title id="b" size={32} duration={2}>Ho</Title>',
+      '<Shape id="a" size={64} duration={2}>Hi</Shape>\n        <Shape id="b" size={32} duration={2}>Ho</Shape>',
     );
     const fixed = fixSource(text, only);
     expect(fixed.text).toBe(
       text.replace("size={64}", "style={{ size: 64 }}").replace("size={32}", "style={{ size: 32 }}"),
     );
     expect(fixed.applied.map((d) => d.id)).toEqual(["a", "b"]);
+  });
+});
+
+describe("one style for text (0.6)", () => {
+  const look: [string, string, string][] = [
+    ["font", 'font="Inter"', 'font: "Inter"'],
+    ["size", "size={64}", "size: 64"],
+    ["weight", "weight={700}", "weight: 700"],
+    ["italic", "italic", "italic: true"],
+    ["color", 'color="$primary"', 'color: "$primary"'],
+    ["background", 'background="#000"', 'background: "#000"'],
+    ["stroke", 'stroke={{ color: "#000", width: 2 }}', 'stroke: { color: "#000", width: 2 }'],
+    ["shadow", "shadow={LIFT}", "shadow: LIFT"],
+    ["align", 'align="left"', 'align: "left"'],
+    ["valign", 'valign="top"', 'valign: "top"'],
+    ["lineHeight", "lineHeight={1.1}", "lineHeight: 1.1"],
+    ["letterSpacing", "letterSpacing={-1}", "letterSpacing: -1"],
+    ["decoration", 'decoration="underline"', 'decoration: "underline"'],
+  ];
+
+  it.each(look)("moves a title's %s into its style", (prop, written, moved) => {
+    const text = wrap(`<Title id="a" ${written} duration={2}>Hi</Title>`, "const LIFT = { color: '#000' };");
+    const found = lint(text, { rules: ["deprecated-props"] });
+    expect(found.map((d) => d.message)).toEqual([`<Title id="a">: \`${prop}\` is \`style.${prop}\` since 0.6.0`]);
+    expect(fixSource(text).text).toBe(text.replace(written, `style={{ ${moved} }}`));
+  });
+
+  it("folds every look prop and a preset name into one style, in the order the file wrote them", () => {
+    const text = wrap('<Title id="a" color="#fff" style="h1" size={64} align="left" duration={2}>Hi</Title>');
+    expect(fixSource(text).text).toBe(
+      wrap(
+        '<Title id="a" color="#fff" style={{ preset: "h1", color: "#fff", size: 64, align: "left" }} duration={2}>Hi</Title>',
+      ).replace(' color="#fff"', ""),
+    );
+  });
+
+  it("moves the captions' align into their style, wrapping a preset name", () => {
+    const text = wrap('<Captions id="c" src="asset:talk" style="boxed" align="left" />');
+    expect(lint(text, { rules: ["deprecated-props"] }).map((d) => d.message)).toEqual([
+      '<Captions id="c">: `align` is `style.align` since 0.6.0',
+    ]);
+    expect(fixSource(text).text).toBe(
+      wrap('<Captions id="c" src="asset:talk" style={{ preset: "boxed", align: "left" }} />'),
+    );
+    const none = wrap('<Captions id="c" src="asset:talk" align="right" />');
+    expect(fixSource(none).text).toBe(wrap('<Captions id="c" src="asset:talk" style={{ align: "right" }} />'));
+  });
+
+  it("moves a title's width and height into its box: a new box, or the one it has, before its origin", () => {
+    const only = { rules: ["box-placement"] };
+    const none = wrap('<Title id="a" width={840} height={160} duration={2}>Hi</Title>');
+    expect(lint(none, only).map((d) => d.message)).toEqual([
+      "<Title>: width and height are now box.width and box.height, the text box's size",
+    ]);
+    expect(fixSource(none, only).text).toBe(
+      wrap('<Title id="a" box={{ width: 840, height: 160 }} duration={2}>Hi</Title>'),
+    );
+    const placed = wrap(
+      '<Title id="a" width={W - 80} box={{ x: 960, y: 200, origin: "center" }} duration={2}>Hi</Title>',
+    );
+    expect(fixSource(placed, only).text).toBe(
+      wrap('<Title id="a" box={{ x: 960, y: 200, width: W - 80, origin: "center" }} duration={2}>Hi</Title>'),
+    );
+    const corner = wrap('<Title id="a" box={{ x: 10 }} height={90} duration={2}>Hi</Title>');
+    expect(fixSource(corner, only).text).toBe(
+      wrap('<Title id="a" box={{ x: 10, height: 90 }} duration={2}>Hi</Title>'),
+    );
+    // A box that sizes itself, or one built in code, has no one right answer.
+    for (const box of ["{{ width: 100 }}", "{BOX}", "{{ ...BOX }}"]) {
+      const text = wrap(`<Title id="a" width={840} box=${box} duration={2}>Hi</Title>`);
+      const found = lint(text, only);
+      expect(found).toHaveLength(1);
+      expect(found[0]?.fix).toBeUndefined();
+    }
+  });
+
+  it("moves a whole old title in one go: its look into style, its text box into box", () => {
+    const text = wrap(
+      '<Title id="a" style="note" width={420} height={84} size={34} box={{ x: 270, y: 595, origin: "center" }} duration={2}>Hi</Title>',
+    );
+    const fixed = fixSource(text);
+    expect(fixed.text).toBe(
+      wrap(
+        '<Title id="a" style={{ preset: "note", size: 34 }} box={{ x: 270, y: 595, width: 420, height: 84, origin: "center" }} duration={2}>Hi</Title>',
+      ),
+    );
+    expect(fixed.remaining.filter((d) => d.severity === "error")).toEqual([]);
   });
 });
 
@@ -266,8 +353,8 @@ describe("fixSource", () => {
 
   it("holds back a fix that overlaps one already taken, and applies it in the next round", () => {
     // The move rewrites the whole attribute; the clock fix sits inside its value, so it waits a round.
-    const deprecations: Deprecation[] = [{ element: "Title", prop: "size", to: { into: "style" }, since: "1" }];
-    const text = wrap('<Title id="t1" size={window.Date.now()} duration={2}>Hi</Title>');
+    const deprecations: Deprecation[] = [{ element: "Shape", prop: "size", to: { into: "style" }, since: "1" }];
+    const text = wrap('<Shape id="t1" size={window.Date.now()} duration={2}>Hi</Shape>');
     const fixed = fixSource(text, { deprecations, rules: ["deprecated-props", "free-code-clock"] });
     expect(fixed.text).toBe(text.replace("size={window.Date.now()}", "style={{ size: Date.now() }}"));
     expect(fixed.applied.map((d) => d.rule)).toEqual(["deprecated-props", "free-code-clock"]);

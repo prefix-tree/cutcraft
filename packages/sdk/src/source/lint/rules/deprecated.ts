@@ -77,7 +77,10 @@ function onTag(text: string, tag: t.JSXOpeningElement, name: string, rows: reado
   const movedRanges: Range[] = [];
   const moves = found.filter((f) => "into" in f.row.to);
   for (const into of new Set(moves.map((f) => (f.row.to as { into: string }).into))) {
-    const group = moves.filter((f) => (f.row.to as { into: string }).into === into);
+    // In the order the file writes them, so the object reads as the props did.
+    const group = moves
+      .filter((f) => (f.row.to as { into: string }).into === into)
+      .sort((a, b) => a.range[0] - b.range[0]);
     const wrap = group.map((f) => (f.row.to as { wrap?: string }).wrap).find((w) => w !== undefined);
     const edits = movePropsInto(
       text,

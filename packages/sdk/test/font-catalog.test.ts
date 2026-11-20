@@ -83,7 +83,7 @@ export default function Video() {
   return (
     <Composition fps={30} width={640} height={360}>
       <Track id="t" free>
-        <Title id="a" start={0} font="${font}">A</Title>
+        <Title id="a" start={0} style={{ font: "${font}" }}>A</Title>
       </Track>
     </Composition>
   );

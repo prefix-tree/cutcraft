@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { collectModule, Executor, foldToSource, lint, loadModule, resolve } from "@uberscene/sdk";
+import { buildSourceIndex, collectModule, Executor, foldToSource, lint, loadModule, resolve } from "@uberscene/sdk";
+
+/** A placement's parsed `style`. */
+const styleOf = (state: { items: ReadonlyMap<string, { props: Record<string, unknown> }> }, id: string) =>
+  (state.items.get(id)?.props.style ?? {}) as Record<string, unknown>;
 
 const FILE = `import { Caption, Captions, Composition, googleFont, Title, Track } from "@uberscene/kit";
 
@@ -10,8 +14,9 @@ export default function Video() {
   return (
     <Composition fps={30} width={640} height={360} theme={{ extends: "midnight" }}>
       <Track id="t" layout="free">
-        <Title id="h" start={0} duration={1} font={oswald}>Hi</Title>
-        <Title id="sub" start={0} duration={1} weight={700}>There</Title>
+        <Title id="h" start={0} duration={1} style={{ font: oswald, size: 64 }}>Hi</Title>
+        <Title id="sub" start={0} duration={1} style={{ weight: 700 }}>There</Title>
+        <Title id="kicker" start={0} duration={1} style="kicker">Why</Title>
       </Track>
       <Captions id="caps" style={{ size: 40 }}>
         <Caption id="c1" start={0} end={1} text="hello" />
@@ -36,7 +41,10 @@ export default function Video() {
 }
 `;
 const open = (text: string) =>
-  new Executor({ tree: collectModule(loadModule(text) as never), manifest: { assets: {} } });
+  new Executor({
+    tree: collectModule(loadModule(text) as never, {}, { index: buildSourceIndex(text) }),
+    manifest: { assets: {} },
+  });
 const folded = (text: string, exec: Executor) => foldToSource(text, exec.log(), exec.state()).text;
 const reload = (text: string) => resolve(collectModule(loadModule(text) as never), { assets: {} });
 const faces = (state: { fonts: readonly { family: string; weight: number }[] }) =>
@@ -46,12 +54,12 @@ describe("font/use", () => {
   it("sets a catalogue family on a title, loads it for the preview at once, and declares it on fold", () => {
     const exec = open(FILE);
     expect(exec.execute({ type: "font/use", params: { id: "sub", family: "Bebas Neue" } }).ok).toBe(true);
-    expect(exec.state().items.get("sub")?.props.font).toBe("Bebas Neue");
+    expect(styleOf(exec.state(), "sub").font).toBe("Bebas Neue");
     // The title is bold, Bebas Neue has one weight: that one is loaded.
     expect(faces(exec.state())).toEqual(["Oswald 400", "Bebas Neue 400"]);
     const text = folded(FILE, exec);
     expect(text).toContain('const bebasNeue = googleFont("Bebas Neue");');
-    expect(text).toContain("font={bebasNeue}");
+    expect(text).toContain("style={{ weight: 700, font: bebasNeue }}");
     expect(text).not.toContain("$fonts");
     const again = reload(text);
     expect(again.errors.map((e) => e.message)).toEqual([]);
@@ -65,7 +73,7 @@ describe("font/use", () => {
     expect(faces(exec.state())).toEqual(["Oswald 400", "Oswald 700"]);
     const text = folded(FILE, exec);
     expect(text).toContain('const oswald = googleFont("Oswald", { weights: [400, 700] });');
-    expect(text).toContain('<Title id="sub" start={0} duration={1} weight={700} font={oswald}>');
+    expect(text).toContain('<Title id="sub" start={0} duration={1} style={{ weight: 700, font: oswald }}>');
     expect(faces(reload(text))).toEqual(["Oswald 400", "Oswald 700"]);
   });
 
@@ -88,7 +96,7 @@ describe("font/use", () => {
     const exec = open(FILE);
     expect(exec.execute({ type: "font/use", params: { id: "sub", family: "Playfair Display" } }).ok).toBe(true);
     const text = folded(FILE, exec);
-    expect(text).toContain('font="Playfair Display"');
+    expect(text).toContain('style={{ weight: 700, font: "Playfair Display" }}');
     expect(text.match(/googleFont\(/g)).toHaveLength(1);
   });
 
@@ -98,7 +106,7 @@ describe("font/use", () => {
     const text = folded(PLAIN, exec);
     expect(text).toContain('import { Composition, Title, Track, googleFont } from "@uberscene/kit";');
     expect(text).toContain('const bebasNeueFont = googleFont("Bebas Neue");');
-    expect(text).toContain("font={bebasNeueFont}");
+    expect(text).toContain("style={{ font: bebasNeueFont }}");
     expect(reload(text).errors).toEqual([]);
   });
 
@@ -106,7 +114,7 @@ describe("font/use", () => {
     const exec = open(FILE);
     exec.execute({ type: "font/use", params: { id: "sub", family: "Bebas Neue" } });
     exec.undo();
-    expect(exec.state().items.get("sub")?.props.font).not.toBe("Bebas Neue");
+    expect(styleOf(exec.state(), "sub").font).not.toBe("Bebas Neue");
     expect(faces(exec.state())).toEqual(["Oswald 400"]);
     expect(folded(FILE, exec)).toBe(FILE);
     exec.redo();
@@ -124,16 +132,55 @@ describe("font/use", () => {
       '"Bebas Neue" has no weight 700; it has 400',
     ]);
     expect(errors({ id: "t", family: "Inter" })).toEqual([expect.stringContaining("takes no font")]);
-    expect(errors({ id: "preset", family: "Inter" })).toEqual([expect.stringContaining("theme preset")]);
+    // A font the file declares is an identifier: that key is locked, the rest of the style is not.
+    expect(errors({ id: "h", family: "Inter" })).toEqual(['"h.style.font" is an expression; bake it first']);
     expect(errors({ family: "Inter" })).toEqual([expect.stringContaining("one of them")]);
     expect(errors({ id: "sub", role: "heading", family: "Inter" })).toEqual([expect.stringContaining("one of them")]);
   });
 
   it("declares a catalogue family any other action sets as a font", () => {
     const exec = open(PLAIN);
-    expect(exec.execute({ type: "element/update", params: { id: "h", props: { font: "Anton" } } }).ok).toBe(true);
+    expect(exec.execute({ type: "element/update", params: { id: "h", props: { style: { font: "Anton" } } } }).ok).toBe(
+      true,
+    );
     const text = folded(PLAIN, exec);
     expect(text).toContain('const anton = googleFont("Anton");');
-    expect(text).toContain("font={anton}");
+    expect(text).toContain("style={{ font: anton }}");
+  });
+
+  it("turns a preset name into { preset, font } on a title and on the captions, so the preset still fills the rest", () => {
+    const exec = open(FILE);
+    expect(exec.execute({ type: "font/use", params: { id: "kicker", family: "Playfair Display" } }).ok).toBe(true);
+    expect(exec.execute({ type: "font/use", params: { id: "preset", family: "DM Sans" } }).ok).toBe(true);
+    const state = exec.state();
+    expect(state.items.get("kicker")?.props.style).toMatchObject({
+      preset: "kicker",
+      font: "Playfair Display",
+      size: 28,
+      letterSpacing: 3,
+    });
+    expect(state.items.get("preset")?.props.style).toMatchObject({ preset: "boxed", font: "DM Sans" });
+    const text = folded(FILE, exec);
+    expect(text).toContain(
+      '<Title id="kicker" start={0} duration={1} style={{ preset: "kicker", font: "Playfair Display" }}>',
+    );
+    expect(text).toContain('<Captions id="preset" style={{ preset: "boxed", font: "DM Sans" }}>');
+    expect(reload(text).errors).toEqual([]);
+  });
+
+  it("locks a style key by key: an identifier locks its key, the other keys stay editable and fold around it", () => {
+    const exec = open(FILE);
+    expect(exec.state().items.get("h")?.lockedProps).toEqual(["style.font"]);
+    const style = { font: "Oswald", size: 80, color: "#ff0000" };
+    expect(exec.execute({ type: "element/update", params: { id: "h", props: { style } } }).ok).toBe(true);
+    const text = folded(FILE, exec);
+    expect(text).toContain('style={{ font: oswald, size: 80, color: "#ff0000" }}');
+    expect(reload(text).items.get("h")?.props.style).toMatchObject(style);
+    const refused = exec.execute({
+      type: "element/update",
+      params: { id: "h", props: { style: { ...style, font: "Inter" } } },
+    });
+    expect(refused.ok).toBe(false);
+    expect(refused.errors?.map((e) => e.code)).toEqual(["LOCKED_PROP"]);
   });
 });

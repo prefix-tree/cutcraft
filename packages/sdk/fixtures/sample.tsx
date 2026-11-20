@@ -63,8 +63,7 @@ export default function Video({ title, accent }: z.infer<typeof schema>) {
           anchor="c1"
           offset={1}
           duration={3}
-          color={accent}
-          size={64}
+          style={{ color: accent, size: 64 }}
           animation={{ preset: "slide-up", in: 0.4, out: 0.3 }}
         >
           {title}
@@ -125,7 +124,7 @@ function Outro() {
 
 function Badge({ id, anchor, label }: { id: string; anchor: string; label: string }) {
   return (
-    <Title id={id} anchor={anchor} offset={0.2} duration={1.5} size={28} color="#ffffff">
+    <Title id={id} anchor={anchor} offset={0.2} duration={1.5} style={{ size: 28, color: "#ffffff" }}>
       {label}
     </Title>
   );

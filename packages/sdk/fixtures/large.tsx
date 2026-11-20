@@ -38,7 +38,14 @@ export function buildLarge(n: number): { default: () => ReactElement; defaults: 
   const titles: ReactElement[] = [];
   for (let k = 0; k * 4 < n; k++) {
     titles.push(
-      <Title key={`t${k}`} id={`t${k}`} anchor={`c${k * 4}`} offset={0.2} duration={1} size={40}>{`Title ${k}`}</Title>,
+      <Title
+        key={`t${k}`}
+        id={`t${k}`}
+        anchor={`c${k * 4}`}
+        offset={0.2}
+        duration={1}
+        style={{ size: 40 }}
+      >{`Title ${k}`}</Title>,
     );
   }
   const element = (

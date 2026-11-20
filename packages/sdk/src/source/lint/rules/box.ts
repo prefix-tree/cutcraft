@@ -1,5 +1,5 @@
 // `transform.position`, the centre-relative x and y of components, and the captions' x, y, width and style.position
-// became `box`, from the frame's top left. A file written for the old spelling is reported here, and moved for certain
+// became `box`, from the frame's top left; a title's `width` and `height`, its text box, became its box's size. A file written for the old spelling is reported here, and moved for certain
 // where the composition's size is written as numbers: the old offset from the centre becomes the same point from the
 // top left, with `origin: "center"` so the element's centre stays where it was.
 import * as t from "@babel/types";
@@ -62,6 +62,19 @@ export const boxPlacement: Rule = {
           const fix = frame ? moveKeyframe(text, id, tag, axis, frame, parentOf(elements, el)) : null;
           report(tag, `<Keyframe>: "transform.position.${axis}" is now "box.${axis}", from the frame's top left`, fix);
         }
+      }
+      // A title's text box: its flat width and height are its box's size since 0.6.
+      if (name === "Title") {
+        const flat = ["width", "height"].filter((k) => attributeOf(tag, k));
+        if (flat.length > 0)
+          out.push({
+            rule: "box-placement",
+            severity: "error",
+            message: `<Title>: ${flat.join(" and ")} ${flat.length > 1 ? "are" : "is"} now box.${flat.join(" and box.")}, the text box's size`,
+            range: [tag.start ?? 0, tag.end ?? 0],
+            id,
+            ...withFix(moveTitleSize(text, id, tag)),
+          });
       }
       // Captions' flat x, y and width, and their style.position.
       if (name === "Captions") {
@@ -406,6 +419,48 @@ function moveComponent(
     edits.push(edit(id, [point.y.start ?? 0, point.y.end ?? 0], shifted(text, point.y, frame.height / 2)));
   }
   return edits;
+}
+
+const withFix = (fix: SourceEdit[] | null): { fix?: SourceEdit[] } => (fix ? { fix } : {});
+
+/**
+ * A title's `width={w} height={h}` → `box={{ width: w, height: h }}`, or those keys added to the box it has (before its
+ * `origin`, when it writes one). Null when the box is not an object literal, spreads another, or sizes itself already.
+ */
+function moveTitleSize(text: string, id: string, tag: t.JSXOpeningElement): SourceEdit[] | null {
+  const flat = ["width", "height"]
+    .map((k) => attributeOf(tag, k))
+    .filter((a): a is t.JSXAttribute => a !== undefined)
+    .sort((a, b) => (a.start ?? 0) - (b.start ?? 0));
+  const entries: string[] = [];
+  for (const key of ["width", "height"]) {
+    const a = attributeOf(tag, key);
+    if (!a) continue;
+    const v = a.value;
+    if (!t.isJSXExpressionContainer(v) || t.isJSXEmptyExpression(v.expression)) return null;
+    entries.push(`${key}: ${src(text, v.expression)}`);
+  }
+  const box = attributeOf(tag, "box");
+  if (!box) {
+    const [first, ...rest] = flat as [t.JSXAttribute, ...t.JSXAttribute[]];
+    return [
+      edit(id, [first.start ?? 0, first.end ?? 0], `box={{ ${entries.join(", ")} }}`),
+      ...rest.map((a) => removeAttribute(text, id, a)),
+    ];
+  }
+  const object = objectOf(box);
+  if (!object || object.properties.some((p) => !t.isObjectProperty(p))) return null;
+  if (objectProperty(object, "width") || objectProperty(object, "height")) return null;
+  const removals = flat.map((a) => removeAttribute(text, id, a));
+  const origin = objectProperty(object, "origin");
+  if (origin) {
+    const at = origin.start ?? 0;
+    return [{ kind: "insert", id, range: [at, at], text: `${entries.join(", ")}, ` }, ...removals];
+  }
+  const last = object.properties.at(-1);
+  if (!last) return [edit(id, [object.start ?? 0, object.end ?? 0], `{ ${entries.join(", ")} }`), ...removals];
+  const at = last.end ?? 0;
+  return [{ kind: "insert", id, range: [at, at], text: `, ${entries.join(", ")}` }, ...removals];
 }
 
 function removeAttribute(text: string, id: string, a: t.JSXAttribute): SourceEdit {

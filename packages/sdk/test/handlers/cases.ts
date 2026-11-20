@@ -215,11 +215,11 @@ export const CASES: Partial<Record<ActionType, ActionInput>> = {
       kind: "title",
       trackId: "overlays",
       place: { anchor: "c2", offset: 1 },
-      props: { duration: 2, size: 40 },
+      props: { duration: 2, style: { size: 40 } },
       text: "New title",
     },
   },
-  "element/update": { type: "element/update", params: { id: "t1", props: { size: 72 } } },
+  "element/update": { type: "element/update", params: { id: "t1", props: { style: { size: 72 } } } },
   "text/setContent": { type: "text/setContent", params: { id: "t1", text: "Changed" } },
   "nested/extract": { type: "nested/extract", params: { id: "n1" } },
 

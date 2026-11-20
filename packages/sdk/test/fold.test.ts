@@ -103,13 +103,28 @@ describe("fold", () => {
 
   it("bakes a generated element before editing it", () => {
     const exec = fixtureExecutor();
-    expect(exec.execute({ type: "element/update", params: { id: "b1", props: { size: 40 } } }).ok).toBe(true);
+    expect(exec.execute({ type: "element/update", params: { id: "b1", props: { style: { size: 40 } } } }).ok).toBe(
+      true,
+    );
     const result = foldToSource(fixtureText, exec.log(), exec.state());
     expect(result.baked).toContain("b1");
     expect(result.text).not.toContain('<Badge id="b1"');
     expect(result.text).toContain('<Title id="b1"');
-    expect(result.text).toContain("size={40}");
-    expect(buildSourceIndex(result.text).elements.get("b1")?.props.get("size")?.literal).toBe(40);
+    expect(result.text).toContain("style={{ size: 40 }}");
+    expect(buildSourceIndex(result.text).elements.get("b1")?.props.get("style")?.literal).toEqual({ size: 40 });
+  });
+
+  it("writes a style key that reads one of the file's props into defaults, and the others in place", () => {
+    const exec = fixtureExecutor();
+    const style = { color: "#00ff00", size: 70 };
+    expect(exec.execute({ type: "element/update", params: { id: "t1", props: { style } } }).ok).toBe(true);
+    const result = foldToSource(fixtureText, exec.log(), exec.state());
+    expect(result.skipped).toEqual([]);
+    expect(result.text).toContain('export const defaults = { title: "Why we built it", accent: "#00ff00" };');
+    expect(result.text).toContain("style={{ color: accent, size: 70 }}");
+    const index = buildSourceIndex(result.text);
+    expect(index.elements.get("t1")?.boundProps).toEqual({ "style.color": "accent" });
+    expect(index.elements.get("t1")?.lockedProps).toEqual([]);
   });
 
   it("writes a Layer's handles into the component tag", () => {

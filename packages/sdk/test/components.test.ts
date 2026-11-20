@@ -163,11 +163,14 @@ describe("components", () => {
     expect(bake(text, "b-text", state)).toHaveLength(1);
     // As the editor does it: an edit to one part, folded into the file, which bakes the call first.
     const exec = new Executor({ tree, manifest, now: () => 0 });
-    exec.execute({ type: "source/setProps", params: { id: "b-text", props: { color: "#ff0000" } } });
+    exec.execute({
+      type: "source/setProps",
+      params: { id: "b-text", props: { style: { font: "$heading", size: 30, weight: 700, color: "#ff0000" } } },
+    });
     const { text: edited, skipped } = foldToSource(text, exec.log(), exec.state());
     expect(skipped).toEqual([]);
     expect(edited).not.toContain("<Badge");
-    expect(edited).toMatch(/<Title id="b-text"[^>]*color="#ff0000"/s);
+    expect(edited).toMatch(/<Title id="b-text"[^>]*color: "#ff0000"/s);
     expect(edited).toContain('<Shape id="b-pill"');
     expect(edited).toMatch(/import \{[^}]*Shape[^}]*Title[^}]*\} from "@uberscene\/kit"/);
     // The written-out file resolves to the same parts, now literals the editor can change directly.

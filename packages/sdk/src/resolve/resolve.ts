@@ -607,6 +607,23 @@ function parseProps(node: CollectedNode, errors: ResolveError[], theme: Resolved
   return data;
 }
 
+/** A title's look, flat props before 0.6 and fields of its `style` since. */
+const TITLE_LOOK_KEYS = [
+  "font",
+  "size",
+  "weight",
+  "italic",
+  "color",
+  "background",
+  "stroke",
+  "shadow",
+  "align",
+  "valign",
+  "lineHeight",
+  "letterSpacing",
+  "decoration",
+];
+
 /** Where a key a file may still write has moved to, said in place of the schema's "Unrecognized key". */
 function movedKey(kind: string, issue: z.core.$ZodIssue): string | undefined {
   if (issue.code !== "unrecognized_keys") return undefined;
@@ -614,7 +631,20 @@ function movedKey(kind: string, issue: z.core.$ZodIssue): string | undefined {
   const fix = "uberscene lint --fix moves the file";
   if (at === "transform" && issue.keys.includes("position"))
     return `transform.position moved to box, in pixels from the frame's top left: box={{ x, y, origin: "center" }} draws what it did with x and y each plus half the frame; ${fix}`;
+  const keys = (names: readonly string[]) => issue.keys.filter((k) => names.includes(k));
+  const listed = (moved: readonly string[], into: string) =>
+    moved.map((k) => `\`${k}\` is now \`${into}.${k}\``).join(", ");
+  if (kind === "title") {
+    const look = keys(TITLE_LOOK_KEYS);
+    const size = keys(["width", "height"]);
+    const said = [
+      ...(at === "" && look.length > 0 ? [listed(look, "style")] : []),
+      ...((at === "" || at === "style") && size.length > 0 ? [listed(size, "box")] : []),
+    ];
+    return said.length > 0 ? `${said.join(", ")}; ${fix}` : undefined;
+  }
   if (kind !== "captions") return undefined;
+  if (at === "" && issue.keys.includes("align")) return `${listed(["align"], "style")}; ${fix}`;
   if (at === "style" && issue.keys.includes("position"))
     return `style.position moved to box: the captions sit in the lower safe area unless their box says otherwise, as box={{ y, origin: "top" | "center" }}; ${fix}`;
   const flat = issue.keys.filter((k) => k === "x" || k === "y" || k === "width");

@@ -104,14 +104,14 @@ describe("props the player never read are refused by name", () => {
     [
       "a spread on a title's shadow",
       "x",
-      `<Title id="x" start={0} duration={2} shadow={{ color: "#000", spread: 4 }}>Hi</Title>`,
-      /^shadow: .*"spread"/,
+      `<Title id="x" start={0} duration={2} style={{ shadow: { color: "#000", spread: 4 } }}>Hi</Title>`,
+      /^style\.shadow: .*"spread"/,
     ],
     [
       "an inner shadow on a title",
       "x",
-      `<Title id="x" start={0} duration={2} shadow={{ color: "#000", inset: true }}>Hi</Title>`,
-      /^shadow: .*"inset"/,
+      `<Title id="x" start={0} duration={2} style={{ shadow: { color: "#000", inset: true } }}>Hi</Title>`,
+      /^style\.shadow: .*"inset"/,
     ],
     [
       "a spread on a caption shadow",
@@ -141,7 +141,7 @@ describe("props the player never read are refused by name", () => {
         <Nested id="n" of={Inner} start={2} duration={2} fit="contain" blendOpacity={0.5} />
         <Svg id="s" start={0} duration={2} content="<svg/>" fit="contain" blend="multiply" />
         <Shape id="sh" start={0} duration={2} shape="rectangle" blend="screen" shadow={{ color: "#000", spread: 4 }} />
-        <Title id="ti" start={0} duration={2} blend="screen" shadow={{ color: "#000", blur: 6, x: 2, y: 2 }} animation={{ preset: "word-by-word", in: 1, stagger: 0.1 }}>Hi</Title>
+        <Title id="ti" start={0} duration={2} blend="screen" style={{ shadow: { color: "#000", blur: 6, x: 2, y: 2 } }} animation={{ preset: "word-by-word", in: 1, stagger: 0.1 }}>Hi</Title>
         <Adjustment id="a" start={0} duration={2} opacity={0.5} blend="screen" />`,
     );
     expect(state.errors).toEqual([]);

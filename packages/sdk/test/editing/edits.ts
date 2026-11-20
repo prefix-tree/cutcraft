@@ -106,8 +106,19 @@ export const EDITS: readonly Edit[] = [
   {
     name: "resizes a title",
     pick: (s) => {
-      const t = first(s, (p) => p.kind === "title");
-      return t && { type: "element/update", params: { id: t.id, props: { size: t.props.size === 64 ? 72 : 64 } } };
+      // Its style's size: a style whose font is a declared identifier locks that key only, so it can still change size.
+      const t = items(s).find(
+        (p) =>
+          p.kind === "title" &&
+          p.editable === "literal" &&
+          !p.lockedProps.some((k) => k === "style" || k === "style.size") &&
+          !("style.size" in p.boundProps),
+      );
+      if (!t) return undefined;
+      const raw = s.tree.byId.get(t.id)?.props.style;
+      const own = typeof raw === "string" ? { preset: raw } : typeof raw === "object" && raw !== null ? raw : {};
+      const size = (t.props.style as { size?: number }).size === 64 ? 72 : 64;
+      return { type: "element/update", params: { id: t.id, props: { style: { ...own, size } } } };
     },
   },
   {
