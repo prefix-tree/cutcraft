@@ -43,5 +43,3 @@ export function isBuiltInTransition(type: string): type is TransitionType {
 export function defaultTransitionParams(type: TransitionType): Record<string, unknown> {
   return TRANSITION_PARAMS[type].parse({}) as Record<string, unknown>;
 }
-
-export const ALL_TRANSITION_TYPES = TRANSITION_TYPES;

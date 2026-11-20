@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { EASING_FN, interpolate, random, spring, stepAt } from "@uberscene/kit";
+import { interpolate, random, spring, stepAt } from "@uberscene/kit";
+import { EASING_FN } from "@uberscene/kit/schema";
 
 describe("interpolate", () => {
   it("maps across a range, piecewise", () => {

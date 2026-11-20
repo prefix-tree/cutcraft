@@ -2,9 +2,9 @@ import { z } from "zod";
 
 import { zBlendMode, zEasing, zEntranceAnimation, zFitMode } from "../enums";
 
-export const ID_PATTERN = /^[A-Za-z_][A-Za-z0-9_-]*$/;
-export const TIME_REF_PATTERN = /^(word|shot|silence):\d+(\.end)?$|^marker:[A-Za-z_][A-Za-z0-9_-]*$/;
-export const ASSET_REF_PATTERN = /^asset:[A-Za-z0-9_.-]+$/;
+const ID_PATTERN = /^[A-Za-z_][A-Za-z0-9_-]*$/;
+const TIME_REF_PATTERN = /^(word|shot|silence):\d+(\.end)?$|^marker:[A-Za-z_][A-Za-z0-9_-]*$/;
+const ASSET_REF_PATTERN = /^asset:[A-Za-z0-9_.-]+$/;
 
 export const idSchema = z.string().regex(ID_PATTERN, "ids are identifiers: letters, digits, _ and -");
 export const assetRefSchema = z.string().regex(ASSET_REF_PATTERN, 'asset references look like "asset:ID"');
@@ -23,7 +23,7 @@ export const timeRefSchema = z.union([
   z.string().regex(TIME_REF_PATTERN, 'time references look like "word:12", "shot:4.end", "silence:2" or "marker:ID"'),
 ]);
 
-export const durationSchema = z.union([
+const durationSchema = z.union([
   z.number().positive(),
   z.literal("fill"),
   z.literal("source"),
@@ -113,7 +113,7 @@ export const visualProps = {
   blendOpacity: z.number().min(0).max(1).optional(),
 };
 
-export const automationPointsSchema = z.array(z.tuple([z.number().nonnegative(), z.number()]));
+const automationPointsSchema = z.array(z.tuple([z.number().nonnegative(), z.number()]));
 
 export const audioProps = {
   /** A gain: 1 plays the source as it is, 0 mutes it, 2 is twice as loud. */

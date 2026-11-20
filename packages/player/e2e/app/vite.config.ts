@@ -11,6 +11,9 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
+      "@uberscene/kit/schema": here("../../../kit/src/schema.ts"),
+      "@uberscene/sdk/resolver": here("../../../sdk/src/resolver.ts"),
+      "@uberscene/sdk": here("../../../sdk/src/index.ts"),
       "@uberscene/kit": here("../../../kit/src/index.ts"),
       "@uberscene/player": here("../../src/index.ts"),
     },

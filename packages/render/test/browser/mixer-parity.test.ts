@@ -4,7 +4,8 @@ import { type Browser, chromium } from "@playwright/test";
 
 import type { AudioOccurrence } from "@uberscene/player/engine";
 
-import { findChrome, mixBlock, type PcmBuffer } from "../../src";
+import { findChrome } from "../../src";
+import { mixBlock, type PcmBuffer } from "../../src/mixer";
 
 const RATE = 48000;
 const SECONDS = 2;

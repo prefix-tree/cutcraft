@@ -4,8 +4,8 @@
 // browser's filter does. The input is a CSS filter string of the forms the player writes (model/effects.ts), so the
 // shader and the no-WebGL fallback share one mapping from params to CSS.
 
-import type { ColourFunction, ShaderStep, ShaderUniform } from "@uberscene/kit";
-import { gaussSteps } from "@uberscene/kit";
+import type { ColourFunction, ShaderStep, ShaderUniform } from "@uberscene/kit/schema";
+import { gaussSteps } from "@uberscene/kit/schema";
 
 import type { ShaderPass } from "./shaders";
 
@@ -51,16 +51,16 @@ const SHADOW_UNIFORMS: ShaderUniform[] = [
 
 /** The linear and matrix passes as colour functions, so a run of colour changes can be drawn as one pass. */
 const LINEAR_COLOUR: ColourFunction = {
-  fn: "cc_css_linear",
+  fn: "us_css_linear",
   uses: [],
   prelude: "",
-  code: "vec3 cc_css_linear(vec3 c) { return clamp(c * params.slope + params.offset, 0.0, 1.0); }\n",
+  code: "vec3 us_css_linear(vec3 c) { return clamp(c * params.slope + params.offset, 0.0, 1.0); }\n",
 };
 const MATRIX_COLOUR: ColourFunction = {
-  fn: "cc_css_matrix",
+  fn: "us_css_matrix",
   uses: [],
   prelude: "",
-  code: "vec3 cc_css_matrix(vec3 c) { return clamp(vec3(dot(params.r0, c), dot(params.r1, c), dot(params.r2, c)), 0.0, 1.0); }\n",
+  code: "vec3 us_css_matrix(vec3 c) { return clamp(vec3(dot(params.r0, c), dot(params.r1, c), dot(params.r2, c)), 0.0, 1.0); }\n",
 };
 
 const pass = (

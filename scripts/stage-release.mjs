@@ -10,7 +10,14 @@ import { pathToFileURL } from "node:url";
 const root = new URL("..", import.meta.url).pathname;
 
 // Dependency order, so approving the stage ids from top to bottom publishes dependencies first.
-export const PACKAGE_DIRS = ["packages/kit", "packages/player", "packages/graphics", "packages/render", "packages/cli"];
+export const PACKAGE_DIRS = [
+  "packages/kit",
+  "packages/sdk",
+  "packages/player",
+  "packages/graphics",
+  "packages/render",
+  "packages/cli",
+];
 
 export function workspaceDependencyNames(manifest) {
   const names = [];

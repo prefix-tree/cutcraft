@@ -1,4 +1,4 @@
-import type { Placement } from "@uberscene/kit";
+import type { Placement } from "@uberscene/sdk";
 
 import { mountPlayer } from "./helpers/react";
 import { fixtureState } from "./helpers/state";

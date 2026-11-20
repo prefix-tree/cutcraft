@@ -21,7 +21,7 @@ In the host, call `installFreeCodeLibraries()` once, before the player mounts, a
 
 ```ts
 import { installFreeCodeLibraries } from "@uberscene/graphics/libraries";
-import { loadModule } from "@uberscene/kit/source";
+import { loadModule } from "@uberscene/sdk";
 
 const imports = installFreeCodeLibraries();
 const video = loadModule(source, { imports });

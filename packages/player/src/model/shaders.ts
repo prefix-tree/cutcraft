@@ -4,14 +4,13 @@ import {
   type ColourFunction,
   fusedColourSource,
   isNeutral,
-  type Placement,
-  type ResolvedState,
   SHADER_ONLY_EFFECTS,
   type ShaderDefinition,
   type ShaderStep,
   type ShaderUniform,
   shaderFor,
-} from "@uberscene/kit";
+} from "@uberscene/kit/schema";
+import type { Placement, ResolvedState } from "@uberscene/sdk/resolver";
 
 import { cssPasses } from "./css-passes";
 import { childFilter, paramsAt } from "./effects";
@@ -158,7 +157,7 @@ function fuse(run: readonly ShaderPass[]): ShaderPass {
  * turn, one write. A run breaks at a pass that is not one, and at a member whose prelude or table is already in it (two
  * white balances would declare the same matrices, two curves the same table). A run of one is left as it is.
  */
-export function fuseColour(passes: readonly ShaderPass[]): ShaderPass[] {
+function fuseColour(passes: readonly ShaderPass[]): ShaderPass[] {
   const out: ShaderPass[] = [];
   let run: ShaderPass[] = [];
   const flush = () => {

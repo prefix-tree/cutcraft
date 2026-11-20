@@ -1,8 +1,8 @@
 import { existsSync, statSync } from "node:fs";
 import { join } from "node:path";
 
-import type { AssetManifest } from "@uberscene/kit";
 import type { MediaResolver } from "@uberscene/player/engine";
+import type { AssetManifest } from "@uberscene/sdk";
 
 const EXTENSIONS = [
   ".webm",

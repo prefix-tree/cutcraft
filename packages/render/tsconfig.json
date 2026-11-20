@@ -6,7 +6,9 @@
     "baseUrl": ".",
     "paths": {
       "@uberscene/kit": ["../kit/src/index.ts"],
-      "@uberscene/kit/source": ["../kit/src/source/index-public.ts"],
+      "@uberscene/kit/schema": ["../kit/src/schema.ts"],
+      "@uberscene/sdk/resolver": ["../sdk/src/resolver.ts"],
+      "@uberscene/sdk": ["../sdk/src/index.ts"],
       "@uberscene/player/engine": ["../player/src/engine.ts"],
       "@uberscene/player/overlays": ["../player/src/overlays.ts"]
     }

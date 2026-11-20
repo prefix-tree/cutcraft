@@ -6,7 +6,7 @@ import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node
 import { join } from "node:path";
 import { parseArgs } from "node:util";
 
-import type { AssetManifest } from "@uberscene/kit";
+import type { AssetManifest } from "@uberscene/sdk";
 
 import { loadVideo } from "../src/load";
 import { directoryResolver } from "../src/media";

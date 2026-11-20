@@ -2,7 +2,8 @@
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 
-import { installLayerClock, type LayerClock, layerFramesPending, type Seekable, useSeekable } from "@uberscene/kit";
+import { type LayerClock, type Seekable, useSeekable } from "@uberscene/kit";
+import { installLayerClock, layerFramesPending } from "@uberscene/kit/schema";
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 

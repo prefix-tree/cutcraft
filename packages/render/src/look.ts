@@ -3,6 +3,7 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
+import type { MediaResolver } from "@uberscene/player/engine";
 import {
   aroundMoments,
   createPatchLog,
@@ -14,8 +15,7 @@ import {
   resolveMoments,
   skimMoments,
   spokenWords,
-} from "@uberscene/kit";
-import type { MediaResolver } from "@uberscene/player/engine";
+} from "@uberscene/sdk";
 
 import type { FontFile } from "./fonts";
 import { FrameKeys, readCached, wholeKey, writeCached } from "./frame-cache";

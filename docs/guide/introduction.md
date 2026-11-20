@@ -70,12 +70,13 @@ In practice:
 4. The [`<Player>`](./player) plays it in your app, and an editor around it changes the file by hand.
 5. `npx uberscene video.tsx --out video.mp4` exports it, through the same player in headless Chrome.
 
-It comes as five npm packages, free under the MIT licence:
+It comes as six npm packages, free under the MIT licence:
 
 | Package | What it does |
 |---|---|
 | [`uberscene`](https://www.npmjs.com/package/uberscene) | The command line: export, check and look at a file, and add media to its manifest. |
-| [`@uberscene/kit`](https://www.npmjs.com/package/@uberscene/kit) | The elements, the resolver that places everything in time, the editor actions, and the tools that write edits back into the file. |
+| [`@uberscene/kit`](https://www.npmjs.com/package/@uberscene/kit) | What a video file imports: the elements, components, hooks, helpers and theme. |
+| [`@uberscene/sdk`](https://www.npmjs.com/package/@uberscene/sdk) | What a tool is built with: the resolver that places everything in time, the editor actions, the lint, and the tools that write edits back into the file. |
 | [`@uberscene/player`](https://www.npmjs.com/package/@uberscene/player) | A React `<Player>` and a framework-free `PlayerCore` for the browser. |
 | [`@uberscene/render`](https://www.npmjs.com/package/@uberscene/render) | The export from your own code: from Node, through the player in headless Chrome. |
 | [`@uberscene/graphics`](https://www.npmjs.com/package/@uberscene/graphics) | three.js and Motion on the video's clock, for `<Three>` and `<Motion>`. |

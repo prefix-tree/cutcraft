@@ -186,8 +186,8 @@ the others changed.
 <Example src="showcase/edit" alt="Three shots cut back to back, with transitions, a push-in and titles">
 
 ```ts
-import { collectModule, Executor } from "@uberscene/kit";
-import { foldToSource, loadModule } from "@uberscene/kit/source";
+import { collectModule, Executor } from "@uberscene/sdk";
+import { foldToSource, loadModule } from "@uberscene/sdk";
 
 const tree = collectModule(loadModule(text));
 const exec = new Executor({ tree, manifest });

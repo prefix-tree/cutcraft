@@ -20,7 +20,7 @@ import {
 } from "./common";
 import { zSvgColorMode, zTextAlign, zTextDecoration, zTextValign } from "./enums-local";
 
-export const textAnimationSchema = z.strictObject({
+const textAnimationSchema = z.strictObject({
   preset: zTextAnimationPreset,
   in: z.number().nonnegative().default(0.5),
   out: z.number().nonnegative().default(0.5),

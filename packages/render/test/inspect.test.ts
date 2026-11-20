@@ -4,7 +4,7 @@ import { join } from "node:path";
 
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import { parseMoments, resolveMoments } from "@uberscene/kit";
+import { parseMoments, resolveMoments } from "@uberscene/sdk";
 
 import { describeAt, inspect, loadVideo } from "../src";
 

@@ -12,7 +12,6 @@ import type { ZodObject } from "zod";
 import { type ColourFunction, type ShaderDefinition, shaderDefinition } from "../jsx/shader-definition";
 import { type GlslModule, glsl } from "./glsl";
 
-export { aroundGauss } from "./gauss";
 export type { ColourFunction };
 
 /** Params at which an effect changes nothing: the player draws nothing for it there. */
@@ -20,7 +19,7 @@ export type Neutral = Readonly<Record<string, unknown>>;
 
 /**
  * An effect that changes each pixel's colour by a function of that colour alone, keeping its alpha. `rgb` is the body
- * of `vec3 cc_<name>(vec3 c)`; it may read `params.*`, `uses`'s modules, anything `prelude` declares, and the
+ * of `vec3 us_<name>(vec3 c)`; it may read `params.*`, `uses`'s modules, anything `prelude` declares, and the
  * effect's tables.
  */
 export function colorTransform<P extends ZodObject>(options: {
@@ -32,10 +31,10 @@ export function colorTransform<P extends ZodObject>(options: {
   readonly neutral?: Neutral;
 }): ShaderDefinition<P> & { readonly colour: ColourFunction; readonly neutral?: Neutral } {
   const colour: ColourFunction = {
-    fn: `cc_${options.name}`,
+    fn: `us_${options.name}`,
     uses: options.uses ?? [],
     prelude: options.prelude ?? "",
-    code: `vec3 cc_${options.name}(vec3 c) {
+    code: `vec3 us_${options.name}(vec3 c) {
 ${options.rgb}
 }
 `,
@@ -53,7 +52,7 @@ ${options.rgb}
 
 /**
  * A transition that shows the next clip where a mask says, blended by it: `mask` is the body of
- * `float cc_mask(vec2 uv)`, 0 for the outgoing clip and 1 for the next, from `progress` and `params.*`.
+ * `float us_mask(vec2 uv)`, 0 for the outgoing clip and 1 for the next, from `progress` and `params.*`.
  */
 export function maskTransition<P extends ZodObject>(options: {
   readonly name: string;
@@ -64,11 +63,11 @@ export function maskTransition<P extends ZodObject>(options: {
   return shaderDefinition("transition", {
     name: options.name,
     params: options.params,
-    shader: glsl`${options.uses ?? []}float cc_mask(vec2 uv) {
+    shader: glsl`${options.uses ?? []}float us_mask(vec2 uv) {
 ${options.mask}
 }
 vec4 transition(vec2 uv) {
-  return mix(texture(from, uv), texture(to, uv), cc_mask(uv));
+  return mix(texture(from, uv), texture(to, uv), us_mask(uv));
 }`,
   });
 }

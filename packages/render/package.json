@@ -53,6 +53,7 @@
   "dependencies": {
     "@uberscene/graphics": "workspace:*",
     "@uberscene/kit": "workspace:*",
+    "@uberscene/sdk": "workspace:*",
     "@uberscene/player": "workspace:*",
     "@mediabunny/aac-encoder": "1.65.2",
     "@mediabunny/mp3-encoder": "1.65.2",

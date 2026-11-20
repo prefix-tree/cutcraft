@@ -3,7 +3,7 @@ import * as motion from "motion";
 import * as motionReact from "motion/react";
 import * as three from "three";
 
-import { installLayerEngine, type LayerEngine } from "@uberscene/kit";
+import { installLayerEngine, type LayerEngine } from "@uberscene/kit/schema";
 
 import * as cutMotion from "./motion";
 import * as cutThree from "./three";

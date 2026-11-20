@@ -20,16 +20,7 @@ import { flushSync } from "react-dom";
 import { createRoot } from "react-dom/client";
 
 import { installFreeCodeLibraries } from "@uberscene/graphics/libraries";
-import {
-  type AssetManifest,
-  collectModule,
-  createPatchLog,
-  layerFramesPending,
-  motionBlurOf,
-  resolve,
-  shutterTimes,
-} from "@uberscene/kit";
-import { loadModule } from "@uberscene/kit/source";
+import { layerFramesPending, motionBlurOf, shutterTimes } from "@uberscene/kit/schema";
 import { addFontFaces, backdropTracks, Player, type PlayerRef } from "@uberscene/player";
 import {
   defaultCreateCanvas,
@@ -37,6 +28,7 @@ import {
   mediabunnyFrameSourceFactory,
   SETTLE_MS,
 } from "@uberscene/player/engine";
+import { type AssetManifest, collectModule, createPatchLog, loadModule, resolve } from "@uberscene/sdk";
 
 import { measureSound, renderSoundtrack } from "./audio";
 import { createFreeCodeClock } from "./clock";

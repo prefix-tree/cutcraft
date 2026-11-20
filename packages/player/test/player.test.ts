@@ -1,5 +1,3 @@
-import { ManualClock, PlayerCore, type PlayerEvents } from "@uberscene/player";
-
 import {
   FakeAudioOutput,
   FakeAudioSource,
@@ -9,6 +7,7 @@ import {
   recorderContext,
 } from "./helpers/fakes";
 import { makeState } from "./helpers/state";
+import { ManualClock, PlayerCore, type PlayerEvents } from "./internal";
 
 const state = makeState({
   tracks: [

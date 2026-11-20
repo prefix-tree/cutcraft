@@ -3,7 +3,7 @@
 // with WebGL 2. Passes between the first and the last draw into textures, not the canvas. Where there is no WebGL 2,
 // `available` is false and the painter draws without them.
 
-import type { ShaderStep, ShaderUniform } from "@uberscene/kit";
+import type { ShaderStep, ShaderUniform } from "@uberscene/kit/schema";
 
 import type { ShaderTexture, ShaderTextures } from "../media/shader-textures";
 import type { ShaderPass, TransitionPass } from "../model/shaders";
@@ -26,14 +26,14 @@ void main() {
 const INPUTS = new Set(["image", "original", "from", "to", "resolution", "time", "progress", "position"]);
 
 /** The uniform a param is declared as: shaders read it as `params.NAME`, which the runner rewrites to this. */
-export const paramUniform = (name: string): string => `cc_param_${name}`;
+const paramUniform = (name: string): string => `us_param_${name}`;
 
 /** A shader's `params.NAME` reads, as the uniforms the runner declares. */
 const PARAM_READ = /(?<![.\w])params\.([A-Za-z_]\w*)/g;
 
 /** A compile or link log with the param uniforms back as the shader wrote them. */
 const asWritten = (log: string | null | undefined): string | undefined =>
-  log?.trim().replace(/cc_param_(\w+)/g, "params.$1");
+  log?.trim().replace(/us_param_(\w+)/g, "params.$1");
 
 /** A param's uniform as a pass declares it: its GLSL type, and an enum's options. */
 export interface Declared {
@@ -184,7 +184,7 @@ interface Target {
 }
 
 /** A pass as the runner draws it: the effect it belongs to, its GLSL, its size and region, and whether it is the first. */
-export interface PlannedStep {
+interface PlannedStep {
   readonly effect: ShaderPass;
   readonly source: string;
   readonly scale: 1 | 0.5 | 0.25;
@@ -198,7 +198,7 @@ const COPY = "vec4 effect(vec2 uv) { return texture(image, uv); }";
  * The passes the runner draws for these effects, in order: each effect's steps, or its sources over the whole frame.
  * The last draws the canvas, full size and whole, so one that is smaller or partial is followed by a copy.
  */
-export function planSteps(effects: readonly ShaderPass[]): PlannedStep[] {
+function planSteps(effects: readonly ShaderPass[]): PlannedStep[] {
   const out: PlannedStep[] = effects.flatMap((effect) =>
     (effect.steps ?? effect.sources.map((source): ShaderStep => ({ source }))).map((step, i) => ({
       effect,

@@ -1,4 +1,4 @@
-import type { DeclaredFont } from "@uberscene/kit";
+import type { DeclaredFont } from "@uberscene/kit/schema";
 
 import type { MediaResolver } from "../types";
 

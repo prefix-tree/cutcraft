@@ -6,7 +6,7 @@
 import { copyFileSync, existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
-import { BUILT_IN_SHADERS } from "@uberscene/kit";
+import { BUILT_IN_SHADERS } from "@uberscene/kit/schema";
 
 import { manifest as mediaManifest } from "../../../player/e2e/app/composition";
 import generateMedia, { mediaDir } from "../../../player/e2e/gen-media";

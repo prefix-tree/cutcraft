@@ -1,0 +1,58 @@
+import type { DeclaredFont, ShaderDefinition } from "@uberscene/kit/schema";
+
+import type { ResolveError } from "./errors";
+
+export type Editable = "literal" | "generated" | "opaque";
+
+/** Prop keys under this prefix address a Layer's handles rather than the Layer's own props. */
+export const INTERIOR_PREFIX = "interior.";
+
+/**
+ * One vocabulary element as collected from the React element tree, before
+ * schema parsing and before placement. `props` are the raw JSX props minus
+ * `children`.
+ */
+export interface CollectedNode {
+  readonly id: string;
+  readonly kind: string;
+  readonly props: Readonly<Record<string, unknown>>;
+  readonly children: readonly CollectedNode[];
+  /** Text content for elements whose children are text (Title). */
+  readonly text?: string;
+  readonly parent: string | null;
+  readonly editable: Editable;
+  /** Props whose source value is an expression the editor cannot write (known only when a SourceIndex was supplied). */
+  readonly lockedProps: readonly string[];
+  /** Prop → `schema` key for props that read the file's props; a write to one rewrites `defaults`. */
+  readonly boundProps: Readonly<Record<string, string>>;
+  /** For helper output: which helper produced the node, under which parent, and the helper's nth use in the file. */
+  readonly origin?: { readonly helper: string; readonly callerId: string | null; readonly callIndex: number };
+  /** A Layer's handles: the one component inside it and its props. The component's body stays opaque. */
+  readonly interior?: LayerInterior;
+}
+
+export interface LayerInterior {
+  readonly component: string;
+  readonly props: Readonly<Record<string, unknown>>;
+}
+
+export interface CollectedTree {
+  readonly root: CollectedNode;
+  readonly byId: ReadonlyMap<string, CollectedNode>;
+  readonly errors: readonly ResolveError[];
+  /** The faces the file declares (`font()`, `googleFont()`); set by `collectModule`. */
+  readonly fonts?: readonly DeclaredFont[];
+  /** The effects and transitions the file declares (`effect()`, `transition()`); set by `collectModule`. */
+  readonly shaders?: readonly ShaderDefinition[];
+}
+
+export function walk(node: CollectedNode, visit: (node: CollectedNode, depth: number) => void, depth = 0): void {
+  visit(node, depth);
+  for (const child of node.children) walk(child, visit, depth + 1);
+}
+
+export function findParentOf(tree: CollectedTree, id: string): CollectedNode | null {
+  const node = tree.byId.get(id);
+  if (!node || node.parent === null) return null;
+  return tree.byId.get(node.parent) ?? null;
+}

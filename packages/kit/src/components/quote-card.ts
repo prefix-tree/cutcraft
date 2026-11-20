@@ -101,7 +101,7 @@ export function QuoteCardPart(p: Look & { readonly mark?: { readonly text: strin
               marginTop: (1 - q) * p.size * 0.4,
             }),
         color: ink,
-        font: `500 ${p.size}px var(--cc-body, Inter), sans-serif`,
+        font: `500 ${p.size}px var(--us-body, Inter), sans-serif`,
         lineHeight: 1.5,
       },
     },

@@ -3,7 +3,9 @@
 
 import { Children, type CSSProperties, cloneElement, isValidElement, type ReactNode } from "react";
 
-import { fontFamily, type Placement, TEXT_ANIMATION_PRESETS } from "@uberscene/kit";
+import { fontFamily } from "@uberscene/kit";
+import { TEXT_ANIMATION_PRESETS } from "@uberscene/kit/schema";
+import type { Placement } from "@uberscene/sdk/resolver";
 
 import { isVisibleAt } from "../model/visible";
 import { devWarn } from "../warn";

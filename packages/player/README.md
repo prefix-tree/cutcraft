@@ -11,7 +11,7 @@ npm install @uberscene/player @uberscene/kit react react-dom
 ```
 
 ```tsx
-import { collectModule, resolve } from "@uberscene/kit";
+import { collectModule, resolve } from "@uberscene/sdk";
 import { Player } from "@uberscene/player";
 import "@uberscene/player/fonts.css";
 import * as file from "./video";

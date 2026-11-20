@@ -1,0 +1,73 @@
+{
+  "name": "@uberscene/sdk",
+  "version": "0.5.0",
+  "description": "Build tools on UberScene files: resolve a file to a timeline, edit it with undoable actions, write the edits back to its source, lint it and inspect it.",
+  "keywords": [
+    "video",
+    "video-editing",
+    "timeline",
+    "resolver",
+    "undo",
+    "editor",
+    "sdk"
+  ],
+  "license": "MIT",
+  "homepage": "https://uberscene.prefixtree.xyz/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/prefix-tree/uberscene.git",
+    "directory": "packages/sdk"
+  },
+  "bugs": {
+    "url": "https://github.com/prefix-tree/uberscene/issues"
+  },
+  "type": "module",
+  "sideEffects": [
+    "./src/actions/handlers/index.ts",
+    "./dist/**"
+  ],
+  "exports": {
+    ".": "./src/index.ts",
+    "./resolver": "./src/resolver.ts"
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "exports": {
+      ".": "./dist/index.mjs",
+      "./resolver": "./dist/resolver.mjs"
+    }
+  },
+  "scripts": {
+    "build": "tsdown src/index.ts src/resolver.ts --dts",
+    "prepack": "pnpm run build",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "bench": "tsx scripts/bench.ts"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0"
+  },
+  "dependencies": {
+    "@uberscene/kit": "workspace:*",
+    "@babel/parser": "^7.29.9",
+    "@babel/traverse": "^7.29.10",
+    "@babel/types": "^7.29.8",
+    "sucrase": "^3.35.1",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/babel__traverse": "^7.28.0",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
+    "jsdom": "catalog:",
+    "react": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

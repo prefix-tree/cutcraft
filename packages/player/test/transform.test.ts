@@ -1,6 +1,5 @@
-import { animatedTransform, cssTransform, fitRect, layoutRect, matrixToCss } from "@uberscene/player";
-
 import { childrenOf, makeState } from "./helpers/state";
+import { animatedTransform, cssTransform, fitRect, layoutRect, matrixToCss } from "./internal";
 
 const comp = { width: 1920, height: 1080 };
 

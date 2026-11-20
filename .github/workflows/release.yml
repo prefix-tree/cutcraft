@@ -14,6 +14,9 @@ name: Release
 # settings are updated too. Leave "npm publish" unchecked on those publishers; this workflow only runs
 # `npm stage publish`.
 #
+# A package new to npm (such as @uberscene/sdk) has no trusted publisher until it exists: a maintainer creates it on
+# npm and adds this workflow as its trusted publisher before the first release that includes it.
+#
 # It can also be run by hand from main (Actions → Release → Run workflow), to retry a release whose tag is already
 # pushed: it then stages the version main holds. A version that is staged and not yet approved cannot be staged
 # again, and the OIDC token cannot list or reject it. Approve it, or reject it from npmjs.com, before retrying.

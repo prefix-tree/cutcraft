@@ -1,24 +1,12 @@
 import { createElement as h } from "react";
 
-import {
-  type AssetManifest,
-  Caption,
-  Captions,
-  Clip,
-  Composition,
-  collect,
-  Keyframe,
-  resolve,
-  Shape,
-  Svg,
-  Title,
-  Track,
-  TypeCard,
-} from "@uberscene/kit";
+import { Caption, Captions, Clip, Composition, Keyframe, Shape, Svg, Title, Track, TypeCard } from "@uberscene/kit";
+import { type AssetManifest, collect, resolve } from "@uberscene/sdk";
 
 import { manifest } from "../../../player/e2e/app/composition";
 import { mediaDir } from "../../../player/e2e/gen-media";
-import { checkLayout, directoryResolver, formatLayout, type LayoutIssue, subjectRects } from "../../src";
+import { checkLayout, directoryResolver, formatLayout, type LayoutIssue } from "../../src";
+import { subjectRects } from "../../src/layout-check";
 import { toSource } from "../helpers/jsx";
 
 const box = (

@@ -1,7 +1,8 @@
 // `uberscene where video.tsx --at 2.6`: where each thing on screen is at a moment, in pixels, against the frame and
 // the safe zones, and what it overlaps. It reports; `--check-layout` is the judge.
-import { type Moment, parseMoments, type ResolvedState, resolveMoments } from "@uberscene/kit";
+
 import type { DrawRect, MediaResolver } from "@uberscene/player/engine";
+import { type Moment, parseMoments, type ResolvedState, resolveMoments } from "@uberscene/sdk";
 
 import type { FontFile } from "./fonts";
 import { collision, type Insets, overflow, rect, rounded, SAFE_ZONES, type SafeZoneName, SLACK } from "./layout-check";

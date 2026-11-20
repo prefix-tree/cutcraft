@@ -3,7 +3,7 @@ import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
 
-import type { DeclaredFont } from "@uberscene/kit";
+import type { DeclaredFont } from "@uberscene/kit/schema";
 import type { MediaResolver } from "@uberscene/player/engine";
 
 export type FontWeight = 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900;

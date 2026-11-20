@@ -1,0 +1,165 @@
+import { describe, expect, it } from "vitest";
+
+import { type ActionInput, Executor, ok, type PatchLog } from "@uberscene/sdk";
+
+import { registerHandler } from "../src/actions/registry";
+import { fixtureExecutor, fixtureTree, manifest, serialize } from "./helpers";
+
+describe("Executor", () => {
+  it("records nothing and leaves no patches when validation fails", () => {
+    const exec = fixtureExecutor();
+    const r = exec.execute({ type: "clip/trim", params: { id: "nope", edge: "out", value: 1 } });
+    expect(r.ok).toBe(false);
+    expect(r.errors?.[0]?.code).toBe("ELEMENT_NOT_FOUND");
+    expect(exec.log().entries).toHaveLength(0);
+    expect(exec.history().canUndo()).toBe(false);
+  });
+
+  it("rolls back patches when apply throws", () => {
+    registerHandler({
+      type: "test/throws",
+      validate: () => ok,
+      apply: (_a: unknown, log: PatchLog) => {
+        log.append({ op: "set", id: "c1", prop: "speed", value: 2 });
+        throw new Error("boom");
+      },
+      invert: (a: ActionInput) => a,
+      fold: () => [],
+    } as never);
+    const exec = fixtureExecutor();
+    const r = exec.execute({ type: "test/throws", params: {} } as never);
+    expect(r.ok).toBe(false);
+    expect(exec.log().entries).toHaveLength(0);
+  });
+
+  it("a group undoes as one history entry", () => {
+    const exec = fixtureExecutor();
+    const before = serialize(exec.state());
+    exec.beginGroup("drag");
+    exec.execute({ type: "clip/trim", params: { id: "c2", edge: "out", value: 4.1 } });
+    exec.execute({ type: "clip/trim", params: { id: "c2", edge: "out", value: 4.2 } });
+    exec.execute({ type: "audio/setVolume", params: { id: "a1", volume: 0.9 } });
+    exec.endGroup();
+    expect(exec.history().entries()).toHaveLength(3);
+    expect(exec.undo()?.ok).toBe(true);
+    expect(serialize(exec.state())).toEqual(before);
+    expect(exec.history().canUndo()).toBe(false);
+  });
+
+  it("undo and redo return null when there is nothing to do", () => {
+    const exec = fixtureExecutor();
+    expect(exec.undo()).toBeNull();
+    expect(exec.redo()).toBeNull();
+  });
+
+  it("replaceTree clears the log and history", () => {
+    const exec = fixtureExecutor();
+    exec.execute({ type: "clip/trim", params: { id: "c2", edge: "out", value: 4.1 } });
+    exec.replaceTree(fixtureTree());
+    expect(exec.log().entries).toHaveLength(0);
+    expect(exec.history().canUndo()).toBe(false);
+    expect(exec.state().items.get("c2")?.end).toBe(9);
+  });
+
+  it("memoises resolve on the log version", () => {
+    const exec = new Executor({ tree: fixtureTree(), manifest });
+    const a = exec.state();
+    expect(exec.state()).toBe(a);
+    exec.execute({ type: "audio/setVolume", params: { id: "a1", volume: 0.9 } });
+    expect(exec.state()).not.toBe(a);
+  });
+
+  it("batch/apply validates each step against the state the previous one produced", () => {
+    const exec = fixtureExecutor();
+    const before = serialize(exec.state());
+    const r = exec.execute({
+      type: "batch/apply",
+      params: {
+        actions: [
+          { type: "clip/split", params: { id: "c3", at: 11, newId: "c3_b" } },
+          { type: "clip/trim", params: { id: "c3_b", edge: "out", value: 24 } },
+        ],
+      },
+    });
+    expect(r.ok).toBe(true);
+    expect(exec.state().items.get("c3_b")?.source?.out).toBe(24);
+    expect(exec.undo()?.ok).toBe(true);
+    expect(serialize(exec.state())).toEqual(before);
+    const bad = exec.execute({
+      type: "batch/apply",
+      params: {
+        actions: [
+          { type: "element/remove", params: { id: "c2" } },
+          { type: "clip/trim", params: { id: "c2", edge: "out", value: 1 } },
+        ],
+      },
+    });
+    expect(bad.ok).toBe(false);
+    expect(exec.log().entries.filter((p) => p.id === "c2")).toHaveLength(0);
+  });
+
+  describe("refuses an action that leaves the file with new errors", () => {
+    registerHandler({
+      type: "test/setSrc",
+      validate: () => ok,
+      apply: (a: { params: { id: string; src: string } }, log: PatchLog) =>
+        log.append({ op: "set", id: a.params.id, prop: "src", value: a.params.src }),
+      invert: (a: ActionInput) => a,
+      fold: () => [],
+    } as never);
+    const setSrc = (src: string) => ({ type: "test/setSrc", params: { id: "c2", src } }) as never as ActionInput;
+
+    it("with BREAKS_FILE naming the error, and leaves log, state and history as they were", () => {
+      const exec = fixtureExecutor();
+      const before = serialize(exec.state());
+      const r = exec.execute(setSrc("asset:nope"));
+      expect(r.ok).toBe(false);
+      expect(r.errors?.map((e) => e.code)).toEqual(["BREAKS_FILE"]);
+      expect(r.errors?.[0]?.message).toContain("MISSING_ASSET on c2");
+      expect(exec.log().entries).toHaveLength(0);
+      expect(exec.history().canUndo()).toBe(false);
+      expect(serialize(exec.state())).toEqual(before);
+      expect(exec.state().errors).toEqual([]);
+    });
+
+    it("but not for errors the file already had", () => {
+      const assets = { ...manifest.assets };
+      delete (assets as Record<string, unknown>).city;
+      const exec = new Executor({ tree: fixtureTree(), manifest: { ...manifest, assets }, now: () => 0 });
+      expect(exec.state().errors.map((e) => e.code)).toContain("MISSING_ASSET");
+      const r = exec.execute({ type: "audio/setVolume", params: { id: "a1", volume: 0.5 } });
+      expect(r.errors ?? []).toEqual([]);
+      expect(r.ok).toBe(true);
+    });
+
+    it("checking a batch as a whole: a broken middle is fine, a broken end is not", () => {
+      const exec = fixtureExecutor();
+      const fine = exec.execute({
+        type: "batch/apply",
+        params: { actions: [setSrc("asset:nope"), setSrc("asset:city")] },
+      });
+      expect(fine.errors ?? []).toEqual([]);
+      expect(fine.ok).toBe(true);
+      const broken = exec.execute({ type: "batch/apply", params: { actions: [setSrc("asset:nope")] } });
+      expect(broken.errors?.map((e) => e.code)).toEqual(["BREAKS_FILE"]);
+      expect(exec.state().errors).toEqual([]);
+    });
+
+    it("undo is not checked: it returns to a state the file had", () => {
+      const exec = fixtureExecutor();
+      expect(exec.execute({ type: "audio/setVolume", params: { id: "a1", volume: 0.5 } }).ok).toBe(true);
+      expect(exec.undo()?.ok).toBe(true);
+      expect(exec.redo()?.ok).toBe(true);
+    });
+  });
+
+  it("mask/create refuses a clip on a locked track, as the other handlers do", () => {
+    const exec = fixtureExecutor();
+    expect(exec.execute({ type: "track/setFlag", params: { trackId: "main", flag: "locked", value: true } }).ok).toBe(
+      true,
+    );
+    const r = exec.execute({ type: "mask/create", params: { id: "m9", parentId: "c2", props: { shape: "rect" } } });
+    expect(r.ok).toBe(false);
+    expect(r.errors?.map((e) => e.code)).toEqual(["TRACK_LOCKED"]);
+  });
+});

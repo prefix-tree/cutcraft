@@ -3,8 +3,7 @@ import { join } from "node:path";
 
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import { collectModule, resolve, subtitles } from "@uberscene/kit";
-import { loadModule } from "@uberscene/kit/source";
+import { collectModule, loadModule, resolve, subtitles } from "@uberscene/sdk";
 
 import generateMedia, { mediaDir } from "../../player/e2e/gen-media";
 import { addAsset } from "../src";

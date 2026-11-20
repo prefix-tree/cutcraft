@@ -1,6 +1,6 @@
 import { renderToStaticMarkup } from "react-dom/server";
 
-import type { Placement, ResolvedState } from "@uberscene/kit";
+import type { Placement, ResolvedState } from "@uberscene/sdk";
 
 import { titleContent } from "../src/overlays/content";
 

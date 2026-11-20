@@ -1,8 +1,9 @@
 // The export engine: headless Chrome runs the real Player and draws each frame (footage, titles, three.js, Motion, CSS,
 // any React), captures it with drawElementImage and encodes it with WebCodecs. It also mixes and encodes the soundtrack
 // and measures the overlays for the layout check. Node serves the page, asks for pieces, and joins what comes back.
-import type { AssetManifest } from "@uberscene/kit";
+
 import type { MediaResolver } from "@uberscene/player/engine";
+import type { AssetManifest } from "@uberscene/sdk";
 
 import type { FontFile } from "../fonts";
 import { BROWSER_CODECS, type CodecModes, codecBinary, usesNative } from "../native/codecs";
@@ -20,7 +21,7 @@ import type {
 } from "./page/protocol";
 import { type PageServer, servePage } from "./server";
 
-const PLAYER_WARNING = "[cutcut/player] ";
+const PLAYER_WARNING = "[uberscene] ";
 /** Bytes read from the page per call: base64 over the DevTools protocol, so kept well under its message limit. */
 const READ_CHUNK = 4 * 1024 * 1024;
 const FLAGS = [

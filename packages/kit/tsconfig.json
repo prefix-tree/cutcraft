@@ -5,8 +5,8 @@
     "baseUrl": ".",
     "paths": {
       "@uberscene/kit": ["./src/index.ts"],
-      "@uberscene/kit/source": ["./src/source/index-public.ts"]
+      "@uberscene/kit/schema": ["./src/schema.ts"]
     }
   },
-  "include": ["src", "test", "fixtures", "scripts", "vitest.config.ts", "eslint.config.js"]
+  "include": ["src", "test", "scripts", "vitest.config.ts", "eslint.config.js"]
 }

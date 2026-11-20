@@ -1,6 +1,7 @@
 import { type ReactNode, useLayoutEffect, useRef } from "react";
 
-import { holdLayerFrame, layerFramesPending } from "@uberscene/kit";
+import { holdLayerFrame } from "@uberscene/kit";
+import { layerFramesPending } from "@uberscene/kit/schema";
 
 import { defaultCreateCanvas } from "../media/frame-source";
 import type { ShaderPass } from "../model/shaders";

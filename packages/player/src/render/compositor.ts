@@ -1,4 +1,4 @@
-import type { ResolvedState } from "@uberscene/kit";
+import type { ResolvedState } from "@uberscene/sdk/resolver";
 
 import type { AssetSources } from "../media/asset-sources";
 import { DecoderPool } from "../media/decoder-pool";

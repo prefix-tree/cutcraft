@@ -8,8 +8,9 @@ import { fileURLToPath } from "node:url";
 
 import type { ZodType } from "zod";
 
-import { BLOCK_ASPECTS, blockMetaSchema, type Knob, knobsOf } from "@uberscene/kit";
-import { gatherLocalFiles, loadModule } from "@uberscene/kit/source";
+import { blockMetaSchema, type Knob } from "@uberscene/kit";
+import { BLOCK_ASPECTS, knobsOf } from "@uberscene/kit/schema";
+import { gatherLocalFiles, loadModule } from "@uberscene/sdk";
 
 import { blankPicture, decodePng, encodePng, paste } from "./png";
 
@@ -49,7 +50,7 @@ export interface BlockFilter {
 }
 
 /** The blocks shipped with this package: copied into `dist/blocks` at build, read from the repository when run from source. */
-export function blocksSource(): string {
+function blocksSource(): string {
   const here = dirname(fileURLToPath(import.meta.url));
   const built = join(here, "blocks");
   if (hasBlocks(built)) return built;

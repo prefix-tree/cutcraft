@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
+import { resolveTheme } from "@uberscene/kit/schema";
 import {
   type AssetManifest,
   type CollectedNode,
@@ -9,12 +10,11 @@ import {
   type ResolvedState,
   type ResolvedTrack,
   resolve,
-  resolveTheme,
-} from "@uberscene/kit";
+} from "@uberscene/sdk";
 
-import * as sample from "../../../kit/fixtures/sample";
+import * as sample from "../../../sdk/fixtures/sample";
 
-export const kitFixturesDir = join(import.meta.dirname, "..", "..", "..", "kit", "fixtures");
+export const kitFixturesDir = join(import.meta.dirname, "..", "..", "..", "sdk", "fixtures");
 export const fixtureManifest = JSON.parse(
   readFileSync(join(kitFixturesDir, "sample.manifest.json"), "utf8"),
 ) as AssetManifest;

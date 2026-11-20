@@ -100,10 +100,10 @@ export function TypeCardLine(p: Look & { readonly show: number; readonly part: "
       const color = line.color
         ? css(line.color)
         : line.pill
-          ? "var(--cc-background, #ffffff)"
+          ? "var(--us-background, #ffffff)"
           : line.tone === "muted"
-            ? "var(--cc-muted, #8a8a93)"
-            : "var(--cc-text, #111114)";
+            ? "var(--us-muted, #8a8a93)"
+            : "var(--us-text, #111114)";
       // Every line keeps its room. The others are hidden, and never forced visible: whatever hides the whole layer
       // (the layout check does, to measure one element at a time) must hide this part with it. Under a strike the
       // line's own letters and pill are left clear, so only the bar shows.
@@ -114,7 +114,7 @@ export function TypeCardLine(p: Look & { readonly show: number; readonly part: "
           key: i,
           style: {
             position: "relative",
-            font: `900 ${size}px var(--cc-heading, Inter), sans-serif`,
+            font: `900 ${size}px var(--us-heading, Inter), sans-serif`,
             lineHeight: 1.04,
             letterSpacing: "-0.01em",
             color: strike ? "transparent" : color,

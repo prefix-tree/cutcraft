@@ -5,15 +5,8 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { test } from "node:test";
 
-import {
-  COMPONENTS,
-  collectModule,
-  ELEMENTS,
-  resolve,
-  TRANSITION_TYPES,
-  VIDEO_EFFECT_TYPES,
-} from "../packages/kit/src/index";
-import { loadModule } from "../packages/kit/src/source/index-public";
+import { COMPONENTS, ELEMENTS, TRANSITION_TYPES, VIDEO_EFFECT_TYPES } from "../packages/kit/src/schema";
+import { collectModule, loadModule, resolve } from "../packages/sdk/src/index";
 
 const root = join(import.meta.dirname, "..");
 const plugin = join(root, "plugins", "uberscene");

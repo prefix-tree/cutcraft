@@ -9,6 +9,9 @@ export default defineConfig({
   logLevel: "error",
   resolve: {
     alias: {
+      "@uberscene/kit/schema": src("../../../kit/src/schema.ts"),
+      "@uberscene/sdk/resolver": src("../../../sdk/src/resolver.ts"),
+      "@uberscene/sdk": src("../../../sdk/src/index.ts"),
       "@uberscene/kit": src("../../../kit/src/index.ts"),
       "@uberscene/player": src("../../../player/src/index.ts"),
     },

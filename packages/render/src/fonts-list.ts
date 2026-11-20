@@ -1,22 +1,14 @@
 import { tmpdir } from "node:os";
 
-import {
-  type CatalogFont,
-  collectModule,
-  type FontCategory,
-  type FontRole,
-  fontsFor,
-  type ResolvedState,
-  resolve,
-} from "@uberscene/kit";
-import { loadModule } from "@uberscene/kit/source";
+import { type CatalogFont, type FontCategory, type FontRole, fontsFor } from "@uberscene/kit/schema";
+import { collectModule, loadModule, type ResolvedState, resolve } from "@uberscene/sdk";
 
 import { directoryResolver } from "./media";
 import type { ExportSource } from "./renderer";
 import { renderStill } from "./still";
 
-export const FONT_ROLES: readonly FontRole[] = ["headline", "body", "captions", "numbers", "accent"];
-export const FONT_CATEGORIES: readonly FontCategory[] = [
+const FONT_ROLES: readonly FontRole[] = ["headline", "body", "captions", "numbers", "accent"];
+const FONT_CATEGORIES: readonly FontCategory[] = [
   "sans",
   "serif",
   "slab",
@@ -168,7 +160,7 @@ export interface FontSheetResult {
   readonly warnings: readonly string[];
 }
 
-export const SHEET_TEXT = "Make It Move 2026";
+const SHEET_TEXT = "Make It Move 2026";
 
 /** Draws the families as one image, each setting the same words: what a font looks like, before one is chosen. */
 export async function fontSheet(options: FontSheetOptions): Promise<FontSheetResult> {

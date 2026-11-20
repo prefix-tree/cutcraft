@@ -4,7 +4,8 @@ import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSy
 import { createRequire } from "node:module";
 import { join } from "node:path";
 
-import { directoryResolver, type FontFile, loadVideo, renderStill } from "../../src";
+import { directoryResolver, loadVideo, renderStill } from "../../src";
+import type { FontFile } from "../../src/fonts";
 import { inkWidth } from "../helpers/ink";
 
 const scratch = join(import.meta.dirname, "..", ".tmp", "browser-fonts");
@@ -93,7 +94,7 @@ it("sets a bundled face in a still of text that appears after the first frame", 
 describe("fontSheet", () => {
   it("draws the bundled families as one image, a cell each, without the network", async () => {
     const { fontSheet } = await import("../../src/fonts-list");
-    const { fontsFor } = await import("@uberscene/kit");
+    const { fontsFor } = await import("@uberscene/kit/schema");
     const { mkdtempSync, readFileSync, rmSync } = await import("node:fs");
     const { tmpdir } = await import("node:os");
     const { join } = await import("node:path");

@@ -1,5 +1,5 @@
 {
-  "name": "cutcut",
+  "name": "uberscene-monorepo",
   "version": "0.0.0",
   "private": true,
   "description": "A video-editing DSL: a model writes a TSX file, the browser renders it, the editor edits the same file.",
@@ -49,7 +49,7 @@
     "@changesets/cli": "^3.0.3",
     "@codemirror/lang-javascript": "^6.2.5",
     "@codemirror/language": "^6.13.1",
-    "@uberscene/kit": "workspace:*",
+    "@uberscene/sdk": "workspace:*",
     "@uberscene/player": "workspace:*",
     "@lezer/highlight": "^1.2.5",
     "codemirror": "^6.0.2",

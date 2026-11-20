@@ -8,7 +8,7 @@ import type {
   FrameSourceInfo,
   MediaResolver,
   ScheduledSource,
-} from "@uberscene/player";
+} from "../internal";
 
 export class FakeFrame implements Frame {
   closed = false;

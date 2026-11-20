@@ -1,5 +1,3 @@
-import { lookupAsset, type ResolvedState, type SubjectBox } from "@uberscene/kit";
-import { buildSourceIndex, type SourceIndex } from "@uberscene/kit/source";
 import {
   boundsOf,
   buildFramePlan,
@@ -9,6 +7,7 @@ import {
   FRAME_EPS,
   type MediaResolver,
 } from "@uberscene/player/engine";
+import { buildSourceIndex, lookupAsset, type ResolvedState, type SourceIndex, type SubjectBox } from "@uberscene/sdk";
 
 import type { FontFile } from "./fonts";
 import { type ExportSource, openEngine } from "./renderer";

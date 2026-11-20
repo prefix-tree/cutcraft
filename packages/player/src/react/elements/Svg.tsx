@@ -66,7 +66,7 @@ export function useMediaUrl(ref: string | null): string | null {
 }
 
 /** Reads an `asset:` reference as text, for markup that is inlined rather than loaded as an image. */
-export function useMediaText(ref: string | null): string | null {
+function useMediaText(ref: string | null): string | null {
   const core = usePlayer();
   const [text, setText] = useState<string | null>(null);
   useEffect(() => {

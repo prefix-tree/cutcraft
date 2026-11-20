@@ -1,4 +1,4 @@
-import { EASING_FN, type SpringConfig, springAt } from "../resolve/speed";
+import { EASING_FN, type SpringConfig, springAt } from "../easing";
 import type { Easing } from "./enums";
 import { random as generator, hash } from "./random";
 

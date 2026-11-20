@@ -4,17 +4,9 @@ editLink: false
 
 # Actions
 
-Generated from the registered handlers (115). Do not edit by hand; run `pnpm docs:gen`.
+Generated from the registered handlers (98). Do not edit by hand; run `pnpm docs:gen`.
 
-Every action has `validate`, `apply`, `invert` and `fold`; the inverse is never null. Each runs as `{ type, params }`; the params and notes here are read from `packages/kit/src/actions/types/index.ts`.
-
-## `adjustment/`
-
-| action | params | what it does |
-|---|---|---|
-| `adjustment/create` | `{ id, kind, trackId, place, props, text?, children?, after? }` | Adds an &lt;Adjustment> layer to a track at `place`, with its props. |
-| `adjustment/remove` | `{ id }` | Deletes an adjustment layer. |
-| `adjustment/update` | `{ id, props }` | Sets literal props on an adjustment layer. |
+Every action has `validate`, `apply`, `invert` and `fold`; the inverse is never null. Each runs as `{ type, params }`; the params and notes here are read from `packages/sdk/src/actions/types/index.ts`.
 
 ## `audio/`
 
@@ -53,10 +45,8 @@ Every action has `validate`, `apply`, `invert` and `fold`; the inverse is never 
 | `clip/closeGapBefore` | `{ id }` | Closes the gap before an element: on a free track it and every later element shift left to meet the previous one; on a sequence the &lt;Gap> before it is removed. |
 | `clip/merge` | `{ id, rightId, original }` | The undo of clip/split: removes both halves and puts back the `original` element. |
 | `clip/move` | `{ id, trackId?, place }` | Moves an element: reorders it in a sequence (`after`), sets its start on a free track, or re-anchors it; `trackId` moves it to another track. A generated element must be baked first. |
-| `clip/remove` | `{ id }` | Deletes an element from its track: a clip, gap, title or anything else placed on a track. What was placed from it comes along: titles anchored to it move to the clip before it, held inside that clip (removed with it when there is none), a transition left without a clip on one side is removed, and a length that followed it becomes seconds. |
-| `clip/restore` | `{ id, node, trackId, place, after? }` | The undo of clip/remove: puts the element back on its track at its old placement. |
 | `clip/restoreTiming` | `{ id, in?, out?, duration?, start? }` | Writes back the given timing props (`in`, `out`, `duration`, `start`) as they were; used to undo timing edits. |
-| `clip/rippleDelete` | `{ id }` | Deletes the element and, on a free track, pulls every later element left by its length; a sequence closes up by itself. What was placed from it comes along as with clip/remove. |
+| `clip/rippleDelete` | `{ id }` | Deletes the element and, on a free track, pulls every later element left by its length; a sequence closes up by itself. What was placed from it comes along as with element/remove. |
 | `clip/rippleRestore` | `{ id, node, trackId, place, affected }` | The undo of clip/rippleDelete: puts the element back and restores the starts it shifted. |
 | `clip/roll` | `{ leftId, rightId, delta }` | Moves the cut between two adjacent source clips by `delta`; the total length stays the same. |
 | `clip/setAnchor` | `{ id, anchor?, offset? }` | Anchors the element to another element (or `"start"`) at `offset` seconds; omit `anchor` to unanchor. A new anchor drops a word `at`. |
@@ -92,6 +82,15 @@ Every action has `validate`, `apply`, `invert` and `fold`; the inverse is never 
 | `effect/toggle` | `{ id, childId, enabled }` | Turns one effect on or off without removing it. |
 | `effect/update` | `{ id, childId, params }` | Merges `params` into one effect's params. |
 
+## `element/`
+
+| action | params | what it does |
+|---|---|---|
+| `element/create` | `{ id, kind, trackId, place, props, text?, children?, after? }` | Adds a title, shape, svg, sticker, adjustment layer, nested scene or layer to a track at `place`, with its props and a title's text. |
+| `element/remove` | `{ id }` | Deletes an element from its track: a clip, gap, title or anything else placed on a track. What was placed from it comes along: titles anchored to it move to the clip before it, held inside that clip (removed with it when there is none), a transition left without a clip on one side is removed, and a length that followed it becomes seconds. |
+| `element/restore` | `{ id, node, trackId, place, after? }` | The undo of element/remove: puts the element back on its track at its old placement. |
+| `element/update` | `{ id, props }` | Sets literal props on a title, shape, svg, sticker, adjustment layer, nested scene or layer. |
+
 ## `font/`
 
 | action | params | what it does |
@@ -115,7 +114,6 @@ Every action has `validate`, `apply`, `invert` and `fold`; the inverse is never 
 |---|---|---|
 | `layer/setProps` | `{ id, props }` | Sets the handles of a Layer: the props of the one component inside it. |
 | `layer/setTiming` | `{ id, duration?, anchor?, offset?, start? }` | Sets a &lt;Layer>'s duration, anchor, offset or start; the escape hatch for timing a Layer. A new anchor drops a word `at`. |
-| `layer/setTransform` | `{ id, transform }` | Deep-merges `transform` into a &lt;Layer>'s transform; the escape hatch for placing a Layer. |
 
 ## `marker/`
 
@@ -153,18 +151,7 @@ Every action has `validate`, `apply`, `invert` and `fold`; the inverse is never 
 
 | action | params | what it does |
 |---|---|---|
-| `nested/create` | `{ id, kind, trackId, place, props, text?, children?, after? }` | Adds a &lt;Nested> scene to a track at `place`, with its props. |
 | `nested/extract` | `{ id }` | Replaces a &lt;Nested> scene by its contents: one free track per inner track, inserted below, every item at the time it played; on a sequence a &lt;Gap> keeps its slot. |
-| `nested/remove` | `{ id }` | Deletes a nested scene. |
-| `nested/update` | `{ id, props }` | Sets literal props on a nested scene. |
-
-## `shape/`
-
-| action | params | what it does |
-|---|---|---|
-| `shape/create` | `{ id, kind, trackId, place, props, text?, children?, after? }` | Adds a &lt;Shape> to a track at `place`, with its props. |
-| `shape/remove` | `{ id }` | Deletes a shape. |
-| `shape/update` | `{ id, props }` | Sets literal props on a shape. |
 
 ## `source/`
 
@@ -181,30 +168,11 @@ Every action has `validate`, `apply`, `invert` and `fold`; the inverse is never 
 | `speed/setFreezes` | `{ id, freezes, after? }` | Replaces the element's freeze frames with `freezes`. |
 | `speed/setKeys` | `{ id, keys, after? }` | Replaces the element's speed-ramp keys with `keys`. |
 
-## `sticker/`
-
-| action | params | what it does |
-|---|---|---|
-| `sticker/create` | `{ id, kind, trackId, place, props, text?, children?, after? }` | Adds a &lt;Sticker> to a track at `place`, with its props. |
-| `sticker/remove` | `{ id }` | Deletes a sticker. |
-| `sticker/update` | `{ id, props }` | Sets literal props on a sticker. |
-
-## `svg/`
-
-| action | params | what it does |
-|---|---|---|
-| `svg/create` | `{ id, kind, trackId, place, props, text?, children?, after? }` | Adds an &lt;Svg> to a track at `place`, with its props. |
-| `svg/remove` | `{ id }` | Deletes an svg. |
-| `svg/update` | `{ id, props }` | Sets literal props on an svg. |
-
 ## `text/`
 
 | action | params | what it does |
 |---|---|---|
-| `text/create` | `{ id, kind, trackId, place, props, text?, children?, after? }` | Adds a &lt;Title> to a track at `place`, with its props and text. |
-| `text/remove` | `{ id }` | Deletes a title. |
 | `text/setContent` | `{ id, text }` | Replaces a title's text. |
-| `text/update` | `{ id, props }` | Sets literal props on a title. |
 
 ## `theme/`
 

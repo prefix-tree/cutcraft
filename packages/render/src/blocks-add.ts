@@ -5,8 +5,15 @@ import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, relative, resolve, sep } from "node:path";
 
-import { type AssetManifest, type InstalledBlock, MOMENT_FORMS, parseMoment, type ResolveError } from "@uberscene/kit";
-import { buildSourceIndex, insertLayer } from "@uberscene/kit/source";
+import {
+  type AssetManifest,
+  buildSourceIndex,
+  type InstalledBlock,
+  insertLayer,
+  MOMENT_FORMS,
+  parseMoment,
+  type ResolveError,
+} from "@uberscene/sdk";
 
 import { findBlock } from "./blocks";
 import { loadVideo } from "./load";

@@ -1,4 +1,5 @@
-import { EASING_FN, type Easing, type Placement } from "@uberscene/kit";
+import { type CurveKey, curveAt, EASING_FN, type Easing } from "@uberscene/kit/schema";
+import type { Placement } from "@uberscene/sdk/resolver";
 
 import { devWarn } from "../warn";
 
@@ -15,14 +16,8 @@ export function ease(name: string | undefined, x: number): number {
   return fn(clamp01(x));
 }
 
-interface Key {
-  at: number;
-  value: unknown;
-  easing: string | undefined;
-}
-
-function keysWhere(children: readonly Placement[], match: (k: Placement) => boolean): Key[] {
-  const keys: Key[] = [];
+function keysWhere(children: readonly Placement[], match: (k: Placement) => boolean): CurveKey[] {
+  const keys: CurveKey[] = [];
   for (const c of children) {
     if (c.kind !== "keyframe" || !match(c)) continue;
     keys.push({ at: Number(c.props.at ?? 0), value: c.props.value, easing: c.props.easing as string | undefined });
@@ -52,33 +47,11 @@ export function keyframedParam<T>(keys: readonly Placement[], param: string, rel
   );
 }
 
-function valueAt<T>(keys: readonly Key[], rel: number, fallback: T): T {
-  const first = keys[0];
-  if (!first) return fallback;
-  const last = keys[keys.length - 1]!;
-  if (rel <= first.at) return first.value as T;
-  if (rel >= last.at) return last.value as T;
-  for (let i = 0; i < keys.length - 1; i++) {
-    const a = keys[i]!,
-      b = keys[i + 1]!;
-    if (rel < a.at || rel >= b.at) continue;
-    const span = b.at - a.at;
-    const u = span <= 0 ? 1 : ease(a.easing, (rel - a.at) / span);
-    if (typeof a.value === "number" && typeof b.value === "number") return (a.value + (b.value - a.value) * u) as T;
-    // Two lists of numbers of one length (a box, a corner) move element by element; anything else steps.
-    if (numberList(a.value) && numberList(b.value) && a.value.length === b.value.length) {
-      const to = b.value;
-      return a.value.map((v, i) => v + ((to[i] as number) - v) * u) as T;
-    }
-    return a.value as T;
-  }
-  return last.value as T;
+/** The kit's curve (`curveAt`), with this player's easing, which warns once on a name it does not know. */
+function valueAt<T>(keys: readonly CurveKey[], rel: number, fallback: T): T {
+  return keys.length === 0 ? fallback : (curveAt(keys, rel, ease) as T);
 }
 
 export function hasKeyframes(children: readonly Placement[], property: string): boolean {
   return children.some((c) => c.kind === "keyframe" && c.props.property === property);
-}
-
-function numberList(v: unknown): v is readonly number[] {
-  return Array.isArray(v) && v.every((x) => typeof x === "number");
 }

@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@uberscene/kit": "workspace:*",
+    "@uberscene/sdk": "workspace:*",
     "@uberscene/player": "workspace:*",
     "react": "catalog:",
     "react-dom": "catalog:",

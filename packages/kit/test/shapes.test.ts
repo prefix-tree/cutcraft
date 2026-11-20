@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
 
-import { builtInShader, builtInTransition, EFFECTS, fusedColourSource, isNeutral } from "@uberscene/kit";
+import { builtInShader, builtInTransition, EFFECTS, fusedColourSource, isNeutral } from "@uberscene/kit/schema";
 
 import { colorTransform, maskTransition } from "../src/effects/shapes";
 
@@ -13,9 +13,9 @@ describe("the shapes built-ins share", () => {
       rgb: "  return c + vec3(params.amount, 0.0, 0.0);",
       neutral: { amount: 0 },
     });
-    expect(def.colour.fn).toBe("cc_warm");
-    expect(def.colour.code).toContain("vec3 cc_warm(vec3 c) {");
-    expect(def.passes[0]).toContain("return vec4(cc_warm(c.rgb), c.a);");
+    expect(def.colour.fn).toBe("us_warm");
+    expect(def.colour.code).toContain("vec3 us_warm(vec3 c) {");
+    expect(def.passes[0]).toContain("return vec4(us_warm(c.rgb), c.a);");
     expect(def.neutral).toEqual({ amount: 0 });
   });
 
@@ -27,10 +27,10 @@ describe("the shapes built-ins share", () => {
 
   it("maskTransition blends the two clips by its mask", () => {
     const def = maskTransition({ name: "half", params: z.object({}), mask: "  return step(0.5, uv.x);" });
-    expect(def.passes[0]).toContain("float cc_mask(vec2 uv) {");
-    expect(def.passes[0]).toContain("return mix(texture(from, uv), texture(to, uv), cc_mask(uv));");
+    expect(def.passes[0]).toContain("float us_mask(vec2 uv) {");
+    expect(def.passes[0]).toContain("return mix(texture(from, uv), texture(to, uv), us_mask(uv));");
     for (const type of ["iris", "clockWipe", "blinds", "pixelDissolve"])
-      expect([type, builtInTransition(type)?.passes[0]?.includes("cc_mask(uv)")]).toEqual([type, true]);
+      expect([type, builtInTransition(type)?.passes[0]?.includes("us_mask(uv)")]).toEqual([type, true]);
   });
 });
 
@@ -84,23 +84,23 @@ describe("fusedColourSource", () => {
       { colour: colour("whiteBalance"), prefix: "e1_" },
       { colour: colour("vibrance"), prefix: "e2_" },
     ]);
-    expect(source.match(/vec3 cc_linear\(/g)).toHaveLength(1);
+    expect(source.match(/vec3 us_linear\(/g)).toHaveLength(1);
     expect(source.match(/const mat3 BRADFORD =/g)).toHaveLength(1);
-    expect(source).toContain("vec3 cc_exposure_0(vec3 c)");
+    expect(source).toContain("vec3 us_exposure_0(vec3 c)");
     expect(source).toContain("exp2(params.e0_stops)");
     expect(source).toContain("params.e1_temperature");
     expect(source).not.toMatch(/params\.stops|params\.amount/);
-    const order = ["cc_exposure_0(v)", "cc_whiteBalance_1(v)", "cc_vibrance_2(v)"].map((c) => source.indexOf(c));
+    const order = ["us_exposure_0(v)", "us_whiteBalance_1(v)", "us_vibrance_2(v)"].map((c) => source.indexOf(c));
     expect(order).toEqual([...order].sort((a, b) => a - b));
     expect(source).toContain("return vec4(v, c.a);");
   });
 
   it("renames an enum's params with their options", () => {
     const enumColour = {
-      fn: "cc_pick",
+      fn: "us_pick",
       uses: [],
       prelude: "",
-      code: "vec3 cc_pick(vec3 c) { return params.mode == params.mode.dark ? c * 0.5 : c; }\n",
+      code: "vec3 us_pick(vec3 c) { return params.mode == params.mode.dark ? c * 0.5 : c; }\n",
     };
     const source = fusedColourSource([{ colour: enumColour, prefix: "e3_" }]);
     expect(source).toContain("params.e3_mode == params.e3_mode.dark");

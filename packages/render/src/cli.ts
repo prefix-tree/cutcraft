@@ -2,7 +2,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, relative, resolve, sep } from "node:path";
 import { parseArgs } from "node:util";
 
-import { MOMENT_FORMS, subtitles } from "@uberscene/kit";
+import { MOMENT_FORMS, subtitles } from "@uberscene/sdk";
 
 import { addAsset, describeAdded } from "./add";
 import { blockSheet, formatBlocks, listBlocks } from "./blocks";

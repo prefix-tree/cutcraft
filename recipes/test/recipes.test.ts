@@ -3,8 +3,8 @@ import { join } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
-import { type AssetManifest, collectModule, type ResolvedState, resolve, THEMES } from "@uberscene/kit";
-import { buildSourceIndex, lint } from "@uberscene/kit/source";
+import { THEMES } from "@uberscene/kit";
+import { type AssetManifest, buildSourceIndex, collectModule, lint, type ResolvedState, resolve } from "@uberscene/sdk";
 
 import * as brandSpot from "../brand-spot";
 import * as highlights from "../highlights";

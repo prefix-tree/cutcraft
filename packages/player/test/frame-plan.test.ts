@@ -1,8 +1,8 @@
-import type { ResolvedState } from "@uberscene/kit";
-import { buildFramePlan, captureWarnings, visiblePlacements } from "@uberscene/player";
+import type { ResolvedState } from "@uberscene/sdk";
 
 import { overlayLayout } from "../src/overlays/layout";
 import { fixtureState, makeState } from "./helpers/state";
+import { buildFramePlan, captureWarnings, visiblePlacements } from "./internal";
 
 const state = makeState({
   width: 1920,

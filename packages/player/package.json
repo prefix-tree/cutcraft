@@ -56,6 +56,7 @@
   },
   "dependencies": {
     "@uberscene/kit": "workspace:*",
+    "@uberscene/sdk": "workspace:*",
     "@fontsource/dm-sans": "catalog:",
     "@fontsource/inter": "catalog:",
     "@fontsource/jetbrains-mono": "catalog:",

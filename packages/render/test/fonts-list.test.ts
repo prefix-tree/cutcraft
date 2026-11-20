@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { collectModule, FONT_CATALOG, findFont, resolve } from "@uberscene/kit";
-import { loadModule } from "@uberscene/kit/source";
+import { FONT_CATALOG, findFont } from "@uberscene/kit/schema";
+import { collectModule, loadModule, resolve } from "@uberscene/sdk";
 
 import { formatFonts, listFonts, sheetSource } from "../src/fonts-list";
 

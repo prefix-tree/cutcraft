@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
 
-import type { FitMode, Placement, ResolvedState, Transform } from "@uberscene/kit";
+import type { FitMode, Transform } from "@uberscene/kit/schema";
+import type { Placement, ResolvedState } from "@uberscene/sdk/resolver";
 
 import { blendOf } from "../model/frame-plan";
 import { type ClipRect, combine, type GraphicAnimation, type Motion, motionAt, STILL } from "../model/motion";

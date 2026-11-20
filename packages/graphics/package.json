@@ -74,6 +74,7 @@
   },
   "devDependencies": {
     "@uberscene/kit": "workspace:*",
+    "@uberscene/sdk": "workspace:*",
     "@uberscene/player": "workspace:*",
     "@playwright/test": "catalog:",
     "@types/node": "catalog:",

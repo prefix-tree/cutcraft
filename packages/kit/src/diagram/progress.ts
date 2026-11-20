@@ -1,6 +1,6 @@
+import { EASING_FN } from "../easing";
 import type { Easing } from "../jsx/enums";
 import { type LayerClock, useLayer } from "../jsx/use-t";
-import { EASING_FN } from "../resolve/speed";
 
 /**
  * When a part of a diagram happens. Give `at`, seconds of the video (what a narration's cue gives), or `after`,

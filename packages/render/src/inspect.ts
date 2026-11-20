@@ -1,9 +1,16 @@
 // `uberscene inspect video.tsx`: the timeline read back as an editor reads it, in text or as flat JSON rows, and what
 // is on screen and heard at chosen moments. It runs the resolver and the player's model only: no browser, no media.
+import type { Knob } from "@uberscene/kit";
+import { capabilitiesOf } from "@uberscene/kit/schema";
 import {
-  capabilitiesOf,
+  animatedTransform,
+  buildGainEnvelope,
+  paramsAt,
+  placementSourceTime,
+  visiblePlacements,
+} from "@uberscene/player/engine";
+import {
   type ElementRow,
-  type Knob,
   lookupAsset,
   type Moment,
   parseMoments,
@@ -12,14 +19,7 @@ import {
   spokenWords,
   type TimelineRows,
   timelineRows,
-} from "@uberscene/kit";
-import {
-  animatedTransform,
-  buildGainEnvelope,
-  paramsAt,
-  placementSourceTime,
-  visiblePlacements,
-} from "@uberscene/player/engine";
+} from "@uberscene/sdk";
 
 import { envelopeAt } from "./mixer";
 

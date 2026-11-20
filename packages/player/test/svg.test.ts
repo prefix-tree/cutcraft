@@ -52,7 +52,7 @@ describe("prepareSvg", () => {
 
   it("puts theme tokens in attributes and styles, never in text", () => {
     const { markup, warnings } = prepareSvg(
-      '<svg viewBox="0 0 10 10"><rect fill="$primary" stroke="var(--cc-accent)"/><circle style="fill: var(--cc-missing, #123456)"/><path fill="$nope"/><text>$5 off</text></svg>',
+      '<svg viewBox="0 0 10 10"><rect fill="$primary" stroke="var(--us-accent)"/><circle style="fill: var(--us-missing, #123456)"/><path fill="$nope"/><text>$5 off</text></svg>',
       { box, tokens: { primary: "#ff5a1f", accent: "#00ff00" } },
     );
     expect(markup).toContain('<rect fill="#ff5a1f" stroke="#00ff00"/>');

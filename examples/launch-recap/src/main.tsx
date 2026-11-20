@@ -1,6 +1,5 @@
-import { type AssetManifest, collectModule, type ResolvedState, resolve } from "@uberscene/kit";
-import { lint } from "@uberscene/kit/source";
 import { Player } from "@uberscene/player";
+import { type AssetManifest, collectModule, lint, type ResolvedState, resolve } from "@uberscene/sdk";
 import "@uberscene/player/fonts.css";
 
 import { useMemo, useState } from "react";

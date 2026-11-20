@@ -3,8 +3,16 @@ import { createRequire } from "node:module";
 import { dirname, isAbsolute, join, relative, resolve as resolvePath, sep } from "node:path";
 import { pathToFileURL } from "node:url";
 
-import { type AssetManifest, collectModule, type Knob, knobsOf, type ResolvedState, resolve } from "@uberscene/kit";
-import { gatherLocalFiles, loadModule } from "@uberscene/kit/source";
+import type { Knob } from "@uberscene/kit";
+import { knobsOf } from "@uberscene/kit/schema";
+import {
+  type AssetManifest,
+  collectModule,
+  gatherLocalFiles,
+  loadModule,
+  type ResolvedState,
+  resolve,
+} from "@uberscene/sdk";
 
 import { findManifest, MANIFEST_FILE } from "./manifest-file";
 import type { ExportSource } from "./renderer";

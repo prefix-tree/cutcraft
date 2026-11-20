@@ -2,8 +2,7 @@
   "$schema": "https://unpkg.com/knip@5/schema-jsonc.json",
   // Binaries the tests and scripts run from the system, not from node_modules.
   "ignoreBinaries": ["ffmpeg", "ffprobe"],
-  // Unused exports are reported, not failed on, until the first cleanup removes them.
-  "rules": { "exports": "warn", "types": "warn", "enumMembers": "warn" },
+  "rules": { "exports": "error", "types": "error", "enumMembers": "error" },
   "workspaces": {
     ".": {
       // The playground's modules are imported from Playground.vue, and the gallery's data from Gallery.vue; knip does
@@ -13,30 +12,41 @@
         "docs/gallery.data.ts",
         "docs/.vitepress/config.mts",
         "docs/.vitepress/theme/index.ts",
-        "docs/.vitepress/theme/playground/mount.tsx"
+        "docs/.vitepress/theme/playground/mount.tsx",
+        "docs/.vitepress/theme/playground/starters.ts"
       ],
       // Run through its binary by scripts/check-packages.mjs.
       "ignoreDependencies": ["@arethetypeswrong/cli"]
     },
     "packages/kit": {
-      "entry": ["src/index.ts", "src/source/index-public.ts", "scripts/*.ts", "fixtures/*.tsx"]
+      "entry": ["scripts/*.ts"]
+    },
+    "packages/sdk": {
+      "entry": ["scripts/*.ts", "fixtures/*.tsx"]
     },
     "packages/player": {
-      "entry": ["src/index.ts", "src/engine.ts", "e2e/**/*.{ts,tsx}"],
+      "entry": ["e2e/**/*.{ts,tsx}"],
       // Loaded by fonts.css, which the package exports for the page to import.
       "ignoreDependencies": ["@fontsource/.+"]
     },
     "packages/render": {
-      "entry": ["bench/**/*.{ts,tsx}", "scripts/*.{ts,mjs}"],
-      // Vite pre-bundles zod for the export page (src/web/server.ts), which loads cut files that import it.
-      "ignoreDependencies": ["zod"]
+      "entry": ["bench/**/*.{ts,tsx}", "scripts/*.{ts,mjs}"]
     },
     "packages/graphics": {
       "entry": ["test/**/*.{ts,tsx}"]
     },
     "examples/showcase": {
       // Cut files, loaded by path with loadVideo.
-      "entry": ["*.ts", "*.tsx", "docs/*.tsx", "guide/*.tsx", "effects/*.tsx", "transitions/*.tsx", "components/*.tsx"]
+      "entry": [
+        "*.ts",
+        "*.tsx",
+        "docs/*.tsx",
+        "guide/*.tsx",
+        "effects/*.tsx",
+        "transitions/*.tsx",
+        "components/*.tsx",
+        "blocks/*.tsx"
+      ]
     },
     "examples/shorts": {
       // Cut files, loaded by path with loadVideo; the blocks are copies whose meta and schema the CLI reads.

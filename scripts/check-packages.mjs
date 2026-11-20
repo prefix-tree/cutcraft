@@ -9,6 +9,7 @@ import { join } from "node:path";
 const root = new URL("..", import.meta.url).pathname;
 const PACKAGES = [
   { dir: "packages/kit" },
+  { dir: "packages/sdk" },
   { dir: "packages/graphics" },
   // A stylesheet, not a module: attw would try to resolve it as one.
   { dir: "packages/player", attw: ["--exclude-entrypoints", "fonts.css"] },

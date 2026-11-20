@@ -2,9 +2,9 @@
 
 # @uberscene/kit
 
-The core of [UberScene](https://uberscene.prefixtree.xyz/): the elements a video file is written in, the resolver
-that turns a file into exact placements, the actions an editor runs on it, and the tools that write those edits back
-into the file's text. It has no DOM and runs anywhere.
+What an [UberScene](https://uberscene.prefixtree.xyz/) video file imports: the elements it is written in, the
+ready-made components, the hooks and helpers for free code, the diagram parts and the theme. It has no DOM and runs
+anywhere.
 
 ```sh
 npm install @uberscene/kit react zod
@@ -39,36 +39,24 @@ export default function Video({ title, accent }: z.infer<typeof schema>) {
 its word when the clip moves. Each timeline element has a literal `id`. A track is a magnetic sequence unless it says
 `layout="free"`. A `<Layer>` holds any React you like.
 
-## Using it
-
-```ts
-import { collectModule, resolve, Executor } from "@uberscene/kit";
-import { lint, foldToSource } from "@uberscene/kit/source";
-import * as file from "./video";
-
-const state = resolve(collectModule(file), manifest);      // every element placed in time, by id
-const diagnostics = lint(text, { manifest });              // problems in the file, at their line
-
-const exec = new Executor({ tree: collectModule(file), manifest });
-exec.execute({ type: "clip/trim", params: { id: "c1", edge: "out", value: 9.5 } });
-exec.undo();
-const { text: edited } = foldToSource(text, exec.log(), exec.state());   // the edit as a text change
-```
+## What else is in it
 
 | | |
 |---|---|
-| `collectModule(mod)`, `resolve(tree, manifest, log?)` | Read a file and place everything in it: sequences, gaps, transitions, anchors, `fill` and `match` durations, transcript references and multicam cuts. Errors are typed and point at the element that caused them. A change costs about 2 µs per element, and placements that did not change keep their identity, so a UI can memoise on them. |
-| `Executor` | Runs 131 editor actions (trim, split, move, ripple, keyframes, captions and more). Each one validates, applies and undoes; history groups a drag into one step. |
-| `@uberscene/kit/source` | `loadModule(source, { imports })` evaluates a file's text in the browser or in Node; the file may import `react`, `zod` and the kit, plus the modules you pass in `imports`. `buildSourceIndex` maps ids to their place in the text, `foldToSource` writes edits back as small token changes, and `lint` checks the file. |
-| `interpolate`, `spring`, `random` | Pure animation helpers for free code. `useT()` and `useLayer()` give the current time once a player is mounted. |
+| `interpolate`, `spring`, `random`, `stepAt` | Pure animation helpers for free code. `useT()` and `useLayer()` give the layer's clock once a player is mounted, and `useSeekable` plays a GSAP, Anime.js or Lottie animation on it. |
+| `LowerThird`, `Callout`, `Counter`, … | Ready-made components that return the kit's own titles, shapes and SVG. |
+| `DrawnLine`, `Label`, `CountUp`, `Cells` | Parts for drawing a diagram inside a `<Layer>`. |
+| `narrate`, `knob`, `font`, `googleFont`, `themeCss` | A narration timed from its script, schema helpers for an editor's pickers, fonts, and the theme as CSS. |
+| `@uberscene/kit/schema` | The vocabulary as data, for tools: element schemas and capabilities, the effect and transition registries, enums, fonts and themes. |
 
-The kit doesn't draw anything. [`@uberscene/player`](https://www.npmjs.com/package/@uberscene/player) plays a resolved
-file in the browser, and [`uberscene`](https://www.npmjs.com/package/uberscene) exports it.
+The kit doesn't place, edit or draw anything. [`@uberscene/sdk`](https://www.npmjs.com/package/@uberscene/sdk) reads a
+file, places everything in time and edits it; [`@uberscene/player`](https://www.npmjs.com/package/@uberscene/player)
+plays it in the browser, and [`uberscene`](https://www.npmjs.com/package/uberscene) exports it.
 
 ## Docs
 
 - [The file](https://uberscene.prefixtree.xyz/guide/the-file) and [Time by meaning](https://uberscene.prefixtree.xyz/guide/time)
-- [Editing](https://uberscene.prefixtree.xyz/guide/editing)
-- [Elements](https://uberscene.prefixtree.xyz/reference/elements/) and [actions](https://uberscene.prefixtree.xyz/reference/actions)
+- [Free code](https://uberscene.prefixtree.xyz/guide/free-code)
+- [Elements](https://uberscene.prefixtree.xyz/reference/elements/) and [components](https://uberscene.prefixtree.xyz/reference/components/)
 
 MIT licensed.
