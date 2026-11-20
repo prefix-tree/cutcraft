@@ -1,6 +1,6 @@
 // The resolved timeline as flat rows: one array per kind of thing, each row with its id, its seconds and its frames.
 // Flat rows are what jq, a short script or a SQL table take as they are.
-import { framesUntil, nearestFrame } from "@uberscene/kit/schema";
+import { framesUntil, nearestFrame, type Rate } from "@uberscene/kit/schema";
 
 import type { ResolveError } from "../resolve/errors";
 import type { Placement, ResolvedState } from "../resolve/resolve";
@@ -86,6 +86,8 @@ export interface TimelineRows {
   readonly composition: {
     readonly id: string;
     readonly fps: number;
+    /** The exact rate `fps` rounds: 30000/1001 for 29.97. */
+    readonly rate: Rate;
     readonly width: number;
     readonly height: number;
     readonly duration: number;

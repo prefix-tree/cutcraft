@@ -74,6 +74,12 @@ export function parseRate(fps: FrameRate): Rate {
 /** The rate as frames per second, for display and for code that only needs an approximate number. */
 export const rateValue = (rate: Rate): number => rate.num / rate.den;
 
+/** The rate as people write it: `30`, `12.5`, `"29.97"` for 30000/1001. */
+export function rateLabel(rate: Rate): string {
+  const ntsc = Object.entries(NTSC_RATES).find(([, r]) => r.num === rate.num && r.den === rate.den);
+  return ntsc ? ntsc[0] : String(Math.round(rateValue(rate) * 1000) / 1000);
+}
+
 /** Ticks in one frame: an exact integer for every usable rate. */
 export const ticksPerFrame = (rate: Rate): number => (TICKS_PER_SECOND * rate.den) / rate.num;
 
