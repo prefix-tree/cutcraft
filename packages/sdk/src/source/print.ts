@@ -26,13 +26,21 @@ export function printLiteral(value: Json | undefined): string {
   return `{ ${entries.map(([k, v]) => `${IDENT.test(k) ? k : JSON.stringify(k)}: ${printLiteral(v)}`).join(", ")} }`;
 }
 
+/**
+ * Whether a string can be written as a JSX attribute string (`name="…"`) and read back the same. Such a string takes
+ * no escapes and JSX decodes HTML entities in it (`&amp;` reads as `&`), so anything it cannot hold goes in braces.
+ */
+export function isPlainAttribute(value: string): boolean {
+  return /^[^"\\\n&{}<>]*$/.test(value);
+}
+
 /** One JSX attribute. Strings as `name="…"`, everything else as `name={…}`, `true` as a bare attribute. */
 export function printProp(name: string, value: Json | undefined): string {
   if (value === undefined) return "";
   if (value === true) return name;
   if (typeof value === "function" || (value as unknown) instanceof Identifier)
     return `${name}={${printLiteral(value)}}`;
-  if (typeof value === "string" && !value.includes('"') && !value.includes("\n")) return `${name}="${value}"`;
+  if (typeof value === "string" && isPlainAttribute(value)) return `${name}="${value}"`;
   return `${name}={${printLiteral(value)}}`;
 }
 
@@ -56,6 +64,7 @@ export function printElement(spec: NodeSpec, indent = "", step = "  "): string {
   return `${open}>${text}\n${inner}\n${indent}</${name}>`;
 }
 
-function escapeText(text: string): string {
+/** Text as JSX children: as it is, or as a string expression (`{"50%}"}`) when it holds a brace or an angle bracket. */
+export function escapeText(text: string): string {
   return /[{}<>]/.test(text) ? `{${JSON.stringify(text)}}` : text;
 }

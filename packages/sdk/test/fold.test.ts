@@ -1,3 +1,4 @@
+import ts from "typescript";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -7,6 +8,7 @@ import {
   Executor,
   foldToSource,
   lint,
+  loadModule,
   printElement,
   printProp,
   resolve,
@@ -21,6 +23,12 @@ function changedLines(a: string, b: string): number {
   for (let i = 0; i < Math.max(x.length, y.length); i++) if (x[i] !== y[i]) n++;
   return n;
 }
+
+/**
+ * A timeline without each element's `editable`. Undoing a delete of c3 writes back the anchor of b2, which a helper
+ * generates on c3, so a save bakes b2 into a literal Title: the same element at the same place, now written out.
+ */
+const timeline = (items: ReturnType<typeof serialize>) => items.map(({ editable: _, ...item }) => item);
 
 describe("fold", () => {
   it.each(["@uberscene/kit", "@cut/kit"])("imports newly materialized captions from %s", (moduleName) => {
@@ -145,6 +153,145 @@ describe("fold", () => {
     const result = foldToSource(fixtureText, exec.log(), exec.state());
     expect(result.text).toContain('export const defaults = { title: "Changed", accent: "#123456" };');
   });
+
+  it("writes a deleted clip back once when the delete is undone", async () => {
+    const exec = fixtureExecutor();
+    const before = serialize(exec.state());
+    expect(exec.execute({ type: "element/remove", params: { id: "c3" } }).ok).toBe(true);
+    expect(exec.undo()?.ok).toBe(true);
+    const result = foldToSource(fixtureText, exec.log(), exec.state());
+    expect(result.skipped).toEqual([]);
+    expect(result.text.match(/<Clip id="c3"/g)).toHaveLength(1);
+    const mod = await evaluate(result.text);
+    const reresolved = resolve(collectModule(mod, {}, { index: buildSourceIndex(result.text) }), manifest);
+    expect(reresolved.errors).toEqual([]);
+    expect(timeline(serialize(reresolved))).toEqual(timeline(before));
+    expect(result.baked).toEqual(["b2"]);
+  });
+
+  it("writes an edit to a clip whose delete was undone, on the one clip", async () => {
+    const exec = fixtureExecutor();
+    expect(exec.execute({ type: "element/remove", params: { id: "c3" } }).ok).toBe(true);
+    expect(exec.undo()?.ok).toBe(true);
+    expect(exec.execute({ type: "clip/setSpeed", params: { id: "c3", speed: 1.5 } }).ok).toBe(true);
+    const result = foldToSource(fixtureText, exec.log(), exec.state());
+    expect(result.skipped).toEqual([]);
+    expect(result.text.match(/<Clip id="c3"/g)).toHaveLength(1);
+    expect(result.text).toMatch(/<Clip id="c3"[^>]*speed=\{1\.5\}/);
+    const mod = await evaluate(result.text);
+    const reresolved = resolve(collectModule(mod, {}, { index: buildSourceIndex(result.text) }), manifest);
+    expect(reresolved.errors).toEqual([]);
+    expect(timeline(serialize(reresolved))).toEqual(timeline(serialize(exec.state())));
+  });
+
+  it("writes a clip back once, with the trim it had, when its delete is undone", async () => {
+    const exec = fixtureExecutor();
+    expect(exec.execute({ type: "clip/trim", params: { id: "c3", edge: "out", value: 25 } }).ok).toBe(true);
+    expect(exec.execute({ type: "element/remove", params: { id: "c3" } }).ok).toBe(true);
+    expect(exec.undo()?.ok).toBe(true);
+    const result = foldToSource(fixtureText, exec.log(), exec.state());
+    expect(result.skipped).toEqual([]);
+    expect(result.text.match(/<Clip id="c3"/g)).toHaveLength(1);
+    expect(result.text).toContain('<Clip id="c3" src="asset:interview" in="shot:2" out={25} speed={1.2} />');
+    const mod = await evaluate(result.text);
+    const reresolved = resolve(collectModule(mod, {}, { index: buildSourceIndex(result.text) }), manifest);
+    expect(reresolved.errors).toEqual([]);
+    expect(timeline(serialize(reresolved))).toEqual(timeline(serialize(exec.state())));
+  });
+
+  it("writes a clip back once when a delete is undone after an element was added inside it", async () => {
+    // The clip put back is not the file's clip (it has a keyframe the file lacks): it is printed anew, the old one goes.
+    const exec = fixtureExecutor();
+    const add = { id: "c3", keyId: "kz", property: "transform.opacity", at: 0, value: 0 };
+    expect(exec.execute({ type: "keyframe/add", params: add }).ok).toBe(true);
+    expect(exec.execute({ type: "element/remove", params: { id: "c3" } }).ok).toBe(true);
+    expect(exec.undo()?.ok).toBe(true);
+    const result = foldToSource(fixtureText, exec.log(), exec.state());
+    expect(result.skipped).toEqual([]);
+    expect(result.text.match(/<Clip id="c3"/g)).toHaveLength(1);
+    expect(result.text.match(/<Keyframe id="kz"/g)).toHaveLength(1);
+    const mod = await evaluate(result.text);
+    const reresolved = resolve(collectModule(mod, {}, { index: buildSourceIndex(result.text) }), manifest);
+    expect(reresolved.errors).toEqual([]);
+    expect(timeline(serialize(reresolved))).toEqual(timeline(serialize(exec.state())));
+  });
+
+  it("leaves the log as it was, so a second save writes the defaults again", () => {
+    const exec = fixtureExecutor();
+    exec.execute({ type: "composition/setProps", params: { defaults: { title: "Changed", accent: "#123456" } } });
+    const line = 'export const defaults = { title: "Changed", accent: "#123456" };';
+    expect(foldToSource(fixtureText, exec.log(), exec.state()).text).toContain(line);
+    expect(foldToSource(fixtureText, exec.log(), exec.state()).text).toContain(line);
+    expect(exec.log().net.get("composition")?.props.has("$defaults")).toBe(true);
+  });
+
+  it("writes the defaults when the save bakes an element first", () => {
+    // The round after the bake folds the log again and must still find the defaults in it.
+    const exec = fixtureExecutor();
+    exec.execute({ type: "composition/setProps", params: { defaults: { title: "Changed", accent: "#123456" } } });
+    expect(exec.execute({ type: "element/update", params: { id: "b1", props: { style: { size: 40 } } } }).ok).toBe(
+      true,
+    );
+    const result = foldToSource(fixtureText, exec.log(), exec.state());
+    expect(result.baked).toContain("b1");
+    expect(result.text).toContain('export const defaults = { title: "Changed", accent: "#123456" };');
+  });
+
+  it.each(["A &amp; B", "1 &lt; 2", "salt & pepper", "&#169; &copy;"])(
+    "writes string props with %s so the file reads them back unchanged",
+    async (words) => {
+      const exec = fixtureExecutor();
+      const content = `<svg viewBox='0 0 10 10'><text>${words}</text></svg>`;
+      expect(exec.execute({ type: "element/update", params: { id: "v1", props: { content } } }).ok).toBe(true);
+      expect(exec.execute({ type: "track/rename", params: { trackId: "main", name: words } }).ok).toBe(true);
+      expect(exec.execute({ type: "track/rename", params: { trackId: "music", name: words } }).ok).toBe(true);
+      expect(exec.execute({ type: "marker/add", params: { markerId: "m2", at: 6, label: words } }).ok).toBe(true);
+      const result = foldToSource(fixtureText, exec.log(), exec.state());
+      expect(result.skipped).toEqual([]);
+      const mod = await evaluate(result.text);
+      const reresolved = resolve(collectModule(mod, {}, { index: buildSourceIndex(result.text) }), manifest);
+      expect(reresolved.tree.byId.get("v1")?.props.content).toBe(content);
+      expect(reresolved.tree.byId.get("main")?.props.name).toBe(words);
+      expect(reresolved.tree.byId.get("music")?.props.name).toBe(words);
+      expect(reresolved.tree.byId.get("m2")?.props.label).toBe(words);
+    },
+  );
+
+  it.each(["{50%}", "a } b", "x > y", "<b>", '"quoted" {x}'])(
+    "writes title text %s so the file reads it back unchanged",
+    (words) => {
+      const file = `import { Composition, Title, Track } from "@uberscene/kit";
+
+export default function Video() {
+  return (
+    <Composition fps={30} width={640} height={360}>
+      <Track id="t" layout="free">
+        <Title id="full" start={0} duration={1}>Hi</Title>
+        <Title id="empty" start={0} duration={1} />
+      </Track>
+    </Composition>
+  );
+}
+`;
+      const exec = new Executor({ tree: collectModule(loadModule(file) as never), manifest: { assets: {} } });
+      expect(exec.execute({ type: "text/setContent", params: { id: "full", text: words } }).ok).toBe(true);
+      expect(exec.execute({ type: "text/setContent", params: { id: "empty", text: words } }).ok).toBe(true);
+      const result = foldToSource(file, exec.log(), exec.state());
+      expect(result.skipped).toEqual([]);
+      expect(lint(result.text).filter((d) => d.severity === "error")).toEqual([]);
+      // Babel reads a bare `}` or `>` in JSX text; TypeScript, which compiles the file, does not.
+      const compiled = ts.transpileModule(result.text, {
+        fileName: "video.tsx",
+        reportDiagnostics: true,
+        compilerOptions: { jsx: ts.JsxEmit.Preserve },
+      });
+      expect(compiled.diagnostics?.map((d) => ts.flattenDiagnosticMessageText(d.messageText, "\n"))).toEqual([]);
+      const reloaded = resolve(collectModule(loadModule(result.text) as never), { assets: {} });
+      expect(reloaded.errors).toEqual([]);
+      expect(reloaded.tree.byId.get("full")?.text).toBe(words);
+      expect(reloaded.tree.byId.get("empty")?.text).toBe(words);
+    },
+  );
 
   it("prints props and elements", () => {
     expect(printProp("src", "asset:a")).toBe('src="asset:a"');

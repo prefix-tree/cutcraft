@@ -18,6 +18,7 @@ import {
   spokenWords,
 } from "@uberscene/sdk";
 
+import { writeAtomically } from "./atomic";
 import type { FontFile } from "./fonts";
 import { FrameKeys, readCached, wholeKey, writeCached } from "./frame-cache";
 import { describeAt } from "./inspect";
@@ -405,7 +406,7 @@ export async function renderLook(options: LookOptions): Promise<LookResult> {
       SHEET_GAP + (i % perRow) * (first.width + SHEET_GAP),
       SHEET_GAP + Math.floor(i / perRow) * (first.height + SHEET_GAP),
     );
-  await writeFile(options.out, encodePng(sheet));
+  await writeAtomically(options.out, encodePng(sheet));
   const files: string[] = [];
   if (options.frames) {
     await mkdir(options.frames, { recursive: true });

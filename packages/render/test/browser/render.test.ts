@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, rmSync, statSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -102,6 +102,45 @@ describe("renderVideo", () => {
     await expect(
       renderVideo({ ...base, media: directoryResolver(join(dir, "nowhere"), loaded.manifest), out }),
     ).rejects.toThrow(/no media file for asset "bars"/);
+  });
+
+  describe("a failed export keeps the last good file", () => {
+    const known = Buffer.from("the last good export");
+    const missing = () => directoryResolver(join(dir, "nowhere"), loaded.manifest);
+
+    it("keeps the video when an asset fails after every frame is written", async () => {
+      // Silent, so the missing asset is found by the frames, after every frame has been written, not by the soundtrack.
+      const out = join(dir, "kept.webm");
+      writeFileSync(out, known);
+      await expect(renderVideo({ ...base, media: missing(), out, to: 1, silent: true })).rejects.toThrow(
+        /no media file for asset "bars"/,
+      );
+      expect(readFileSync(out).equals(known)).toBe(true);
+      expect(existsSync(`${out}.partial`)).toBe(false);
+    });
+
+    it("keeps the still when its frame draws with failed media", async () => {
+      const out = join(dir, "kept.png");
+      writeFileSync(out, known);
+      await expect(renderStill({ ...base, media: missing(), out, time: 1.5 })).rejects.toThrow(
+        /no media file for asset "bars"/,
+      );
+      expect(readFileSync(out).equals(known)).toBe(true);
+      expect(existsSync(`${out}.partial`)).toBe(false);
+    });
+
+    it("replaces the file on a good export and leaves nothing beside it", async () => {
+      const video = join(dir, "replaced.webm");
+      writeFileSync(video, known);
+      await renderVideo({ ...base, out: video, to: 1, silent: true });
+      expect(probe(video)).toMatchObject({ codec: "vp9", frames: 30 });
+      expect(existsSync(`${video}.partial`)).toBe(false);
+      const still = join(dir, "replaced.png");
+      writeFileSync(still, known);
+      await renderStill({ ...base, out: still, time: 1.5 });
+      expect(readStrip(readImage(still))).toBe(45);
+      expect(existsSync(`${still}.partial`)).toBe(false);
+    });
   });
 
   it("mixes the soundtrack from the plan: clip audio, speed-shifted pitch, a bed that ducks under it", async () => {

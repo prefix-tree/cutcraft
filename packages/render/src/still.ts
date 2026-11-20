@@ -1,9 +1,8 @@
-import { writeFile } from "node:fs/promises";
-
 import { frameAtSeconds, frameStartSeconds } from "@uberscene/kit/schema";
 import type { MediaResolver } from "@uberscene/player/engine";
 import type { ResolvedState } from "@uberscene/sdk";
 
+import { writeAtomically } from "./atomic";
 import type { FontFile } from "./fonts";
 import { FrameKeys, readCached, writeCached } from "./frame-cache";
 import { type ExportSource, openEngine } from "./renderer";
@@ -53,18 +52,19 @@ export async function renderStill(options: StillOptions): Promise<StillResult> {
     : null;
   const kept = options.cacheDir && name ? readCached(options.cacheDir, name) : null;
   if (kept) {
-    await writeFile(options.out, kept);
+    await writeAtomically(options.out, kept);
     return { frame, width, height, warnings, cached: true };
   }
   const engine = await openEngine({ ...options, warnings });
   try {
     const bytes = await engine.still(frameStartSeconds(frame, rate), jpeg ? "image/jpeg" : "image/png", 0.92);
-    await writeFile(options.out, bytes);
+    // Checked before the image is written, so a frame drawn with failed media does not replace the last good one.
     const failed = await engine.errors();
     if (failed.length > 0) {
       if (options.onAssetError !== "continue") throw new Error(`cannot render: ${failed.join("; ")}`);
       for (const f of failed) warnings.push(`asset error: ${f}`);
     }
+    await writeAtomically(options.out, bytes);
     // A frame drawn with a placeholder for media that could not be read is not kept.
     if (options.cacheDir && name && failed.length === 0) writeCached(options.cacheDir, name, bytes);
     return { frame, width, height, warnings, cached: false };

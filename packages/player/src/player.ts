@@ -155,6 +155,7 @@ export class PlayerCore {
       ),
       resolveNested,
       onFrame: (time, frame) => this.publish(time, frame),
+      onError: (e) => this.emit("error", e),
     });
     this.compositor.setRate(this.transport.rate);
     const output = options.audioOutput ?? (this.audioContext ? new WebAudioOutput(this.audioContext) : null);
