@@ -48,7 +48,7 @@ export default function Video({ product, tagline, accent, cta }: z.infer<typeof 
         <Clip id="outro" src="asset:logo" duration={3} fit="contain" transform={{ scale: 0.35 }} />
       </Track>
       <Track id="overlays" name="Overlays">
-        <Title id="title" anchor="start" offset={0.4} duration={2.8} size={120} …>{product}</Title>
+        <Title id="title" anchor="start" offset={0.4} duration={2.8} style={{ size: 120, … }} …>{product}</Title>
         <Title id="tagline" anchor="title" offset={0.5} duration={2.3} …>{tagline}</Title>
         <NameCard who="Ines Moreau" what="Head barista, Halvard" accent={accent} />
         <Layer id="cta" anchor="outro" offset={0.3} duration={2.5}>

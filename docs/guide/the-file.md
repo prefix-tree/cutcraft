@@ -26,7 +26,7 @@ export default function Video({ product, accent }: z.infer<typeof schema>) {
         <Clip id="broll" src="asset:product" in="shot:1" out="shot:1.end" fit="cover" />
       </Track>
       <Track id="overlays">
-        <Title id="title" anchor="hook" at="word:14" duration={2.8} color={accent}>{product}</Title>
+        <Title id="title" anchor="hook" at="word:14" duration={2.8} style={{ color: accent }}>{product}</Title>
       </Track>
     </Composition>
   );
