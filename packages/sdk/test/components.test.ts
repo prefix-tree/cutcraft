@@ -224,3 +224,39 @@ export default function Video() {
     expect(icon.state.errors.map((e) => e.message).join(" ")).toMatch(/icon stickers were removed/);
   });
 });
+
+describe("where a component sits when its box leaves an axis out", () => {
+  const vertical = (body: string) => file(body).replace("width={1920} height={1080}", "width={1080} height={1920}");
+  const boxOf = (text: string, id: string) =>
+    resolve(collectModule(loadModule(text) as never, {}, { index: buildSourceIndex(text) }), manifest).items.get(id)
+      ?.props.box;
+
+  it("is centred on the composition's frame, whatever its size", () => {
+    expect(boxOf(file('<Badge id="b" start={0} duration={2} text="New" />'), "b-pill")).toMatchObject({
+      x: 960,
+      y: 540,
+    });
+    expect(boxOf(vertical('<Badge id="b" start={0} duration={2} text="New" />'), "b-pill")).toMatchObject({
+      x: 540,
+      y: 960,
+    });
+    expect(
+      boxOf(vertical('<Badge id="b" start={0} duration={2} text="New" box={{ y: 300 }} />'), "b-pill"),
+    ).toMatchObject({ x: 540, y: 300 });
+  });
+
+  it("keeps a default set for 1920 by 1080 where the component has one", () => {
+    expect(boxOf(vertical('<ProgressBar id="p" start={0} duration={2} />'), "p-track")).toMatchObject({
+      x: 540,
+      y: 980,
+    });
+  });
+
+  it("takes its frame from withFrame when the component is called as a function", async () => {
+    const { Badge, withFrame } = await import("@uberscene/kit");
+    const parts = withFrame({ width: 640, height: 360 }, () => Badge({ id: "b", text: "New" })) as {
+      props: { box?: unknown };
+    }[];
+    expect(parts[0]?.props.box).toMatchObject({ x: 320, y: 180 });
+  });
+});

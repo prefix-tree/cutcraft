@@ -94,13 +94,14 @@ export const boxPlacement: Rule = {
               ? moveComponent(text, id, tag, frame, defaults, POINT_PROPS[kit.get(name) ?? ""] ?? [])
               : null;
           report(tag, `<${name}>: x and y are now box, the component's centre from the frame's top left`, fix);
-        } else if (frame && (frame.width !== 1920 || frame.height !== 1080)) {
+        } else if (frame && (frame.width !== 1920 || frame.height !== 1080) && (defaults.x !== 0 || defaults.y !== 0)) {
+          // Only an axis whose default is off the centre: one left out is centred on any frame.
           const fix = spread
             ? null
             : moveComponent(text, id, tag, frame, defaults, POINT_PROPS[kit.get(name) ?? ""] ?? []);
           report(
             tag,
-            `<${name}>: with no box it sits where it would on a 1920 by 1080 frame, and this one is ${frame.width} by ${frame.height}; give it a box`,
+            `<${name}>: with no box it sits where its default puts it on a 1920 by 1080 frame, and this one is ${frame.width} by ${frame.height}; give it a box`,
             fix,
             "warning",
           );
@@ -381,9 +382,14 @@ function moveComponent(
   const xn = value(xa);
   const yn = value(ya);
   if (xn === null || yn === null) return null;
-  const sx = xn ? shifted(text, xn, frame.width / 2) : String(round(frame.width / 2 + defaults.x));
-  const sy = yn ? shifted(text, yn, frame.height / 2) : String(round(frame.height / 2 + defaults.y));
-  const box = `box={{ x: ${sx}, y: ${sy} }}`;
+  // An axis left out keeps its old place: centred stays left out, an offset from the centre becomes its number.
+  const sx = xn ? shifted(text, xn, frame.width / 2) : defaults.x ? String(round(frame.width / 2 + defaults.x)) : null;
+  const sy = yn
+    ? shifted(text, yn, frame.height / 2)
+    : defaults.y
+      ? String(round(frame.height / 2 + defaults.y))
+      : null;
+  const box = `box={{ ${[sx !== null ? `x: ${sx}` : "", sy !== null ? `y: ${sy}` : ""].filter(Boolean).join(", ")} }}`;
   const flat = [xa, ya]
     .filter((a): a is t.JSXAttribute => a !== undefined)
     .sort((a, b) => (a.start ?? 0) - (b.start ?? 0));

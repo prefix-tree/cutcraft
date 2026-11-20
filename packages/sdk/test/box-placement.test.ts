@@ -8,7 +8,7 @@ const only = { rules: ["box-placement"] };
 const wrap = (
   body: string,
   size = "width={1920} height={1080}",
-) => `import { Captions, Composition, Keyframe, LowerThird, Shape, Title, Track } from "@uberscene/kit";
+) => `import { Badge, Captions, Composition, Keyframe, LowerThird, Shape, Title, Track } from "@uberscene/kit";
 
 export default function V() {
   return (
@@ -70,8 +70,14 @@ describe("box-placement", () => {
     const out = fixed('<LowerThird id="l" name="Ada" />', "width={1080} height={1920}");
     expect(out.text).toContain('<LowerThird box={{ x: -20, y: 1290 }} id="l" name="Ada" />');
     expect(out.applied[0]?.severity).toBe("warning");
-    // On the frame its default is measured on, a component with no box is the new spelling.
+    // On the frame its default is measured on, a component with no box is the new spelling; so is one whose default
+    // is the centre, on any frame.
     expect(lint(wrap('<LowerThird id="l" name="Ada" />'), only)).toEqual([]);
+    expect(lint(wrap('<Badge id="b" text="New" />', "width={1080} height={1920}"), only)).toEqual([]);
+    // An axis that was centred stays left out.
+    expect(fixed('<Badge id="b" text="New" y={-300} />').text).toContain(
+      '<Badge id="b" text="New" box={{ y: 240 }} />',
+    );
   });
 
   it("moves the captions' style.position to the box their default lower area becomes", () => {
