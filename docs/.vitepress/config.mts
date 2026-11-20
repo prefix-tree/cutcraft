@@ -1,18 +1,6 @@
-import { readdirSync, readFileSync } from "node:fs";
-
 import { defineConfig } from "vitepress";
 
 import generated from "./sidebar.generated.json";
-
-/** The decision records, read from the folder, so the sidebar lists each one as it is added: "0001 The file is the video". */
-const decisionsDir = new URL("../decisions/", import.meta.url);
-const decisions = readdirSync(decisionsDir)
-  .filter((f) => /^\d{4}-.*\.md$/.test(f))
-  .sort()
-  .map((f) => {
-    const heading = /^# (\d{4})\. (.+)$/m.exec(readFileSync(new URL(f, decisionsDir), "utf8"));
-    return { text: heading ? `${heading[1]} ${heading[2]}` : f, link: `/decisions/${f.replace(/\.md$/, "")}` };
-  });
 
 export default defineConfig({
   title: "UberScene",
@@ -20,8 +8,8 @@ export default defineConfig({
     "Video editor as code: LLMs write code well and math badly, so a model writes a TSX file of words and shots, and UberScene does the arithmetic, plays it in the browser, edits it and exports it.",
   base: "/",
   cleanUrls: true,
-  // The decision records' index is the folder's README, so it reads on GitHub too.
-  rewrites: { "decisions/README.md": "decisions/index.md" },
+  // The decision records are for the repository, not the site.
+  srcExclude: ["decisions/**"],
   lastUpdated: true,
   // GitHub's code colours: light code on a light docs page, dark in the dark. The landing page keeps its code on dark
   // panels with the dark colours (theme/craft.css).
@@ -51,7 +39,7 @@ export default defineConfig({
     logo: "/logo.svg",
     // The top bar names three ways in, as short as a poster (on every page, the landing one included); the sidebar is the map of the docs.
     nav: [
-      { text: "Docs", link: "/guide/introduction", activeMatch: "^/(guide|decisions|reference)/" },
+      { text: "Docs", link: "/guide/introduction", activeMatch: "^/(guide|reference)/" },
       { text: "Examples", link: "/examples/", activeMatch: "^/(examples|recipes)" },
       { text: "Playground", link: "/playground", activeMatch: "^/playground" },
     ],
@@ -192,7 +180,6 @@ export default defineConfig({
         text: "Project",
         items: [
           { text: "Core principles", link: "/guide/principles" },
-          { text: "Decision records", link: "/decisions/", collapsed: true, items: decisions },
           { text: "Changelog", link: "https://github.com/prefix-tree/uberscene/blob/main/packages/kit/CHANGELOG.md" },
         ],
       },

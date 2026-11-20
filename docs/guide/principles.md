@@ -1,9 +1,6 @@
 # Core principles
 
-UberScene is built on a handful of choices, made one at a time and written down as
-[decision records](/decisions/). This page is the short version: what each principle says, what it means for you,
-and the records that decided it. A record is never rewritten; when a later one changes an earlier one, both are
-linked here.
+UberScene is built on a handful of choices. This page says what each one is and what it means for you.
 
 ## 1. The file is the video
 
@@ -12,17 +9,12 @@ document beside it. A model works on it the way it works on any code: it reads t
 back, and the lint tells it what it got wrong. Editor actions exist for a person's gestures, not as a tool catalog for
 the model.
 
-Decided in [0001](/decisions/0001-the-file-is-the-video) and [0004](/decisions/0004-the-model-edits-text).
-
 ## 2. A fixed vocabulary with literal ids
 
 The timeline is written in a fixed set of elements whose props are Zod schemas, and every element carries a literal
 `id`, unique in the file. That is how an editor, a lint or a model finds the element a change belongs to. A
 collection the inspector edits one by one (keyframes, effects, captions) is child elements, not a prop array. Pure
 helper functions, such as the ready-made components, expand into the same elements.
-
-Decided in [0002](/decisions/0002-fixed-vocabulary-and-literal-ids) and
-[0009](/decisions/0009-helpers-layers-and-editability).
 
 ## 3. Time by meaning
 
@@ -31,9 +23,6 @@ Seconds work everywhere, and a cut can also say what it belongs to: `in="word:12
 back to back by default, and an overlay anchors to the clip it belongs to. Captions follow the clips that play their words, so a trim never leaves a caption
 behind.
 
-Decided in [0005](/decisions/0005-sequence-tracks-and-anchors) and
-[0014](/decisions/0014-captions-follow-the-clips).
-
 ## 4. Every edit is an action written back
 
 An editor's state is the file plus a log of patches. Each gesture is an action that validates, applies, inverts for
@@ -41,23 +30,16 @@ undo, and folds into the file as one changed value. Whoever opens the file next,
 as ordinary code. It stays fast because the resolver keeps every unchanged object identical, and consumers skip
 what is identical instead of diffing.
 
-Decided in [0003](/decisions/0003-patch-log-and-four-faced-actions).
-
 ## 5. The browser renders, and the export is the preview
 
 The player draws the file in the browser, frame-exact for any time. The export runs that same player in headless
 Chrome and captures each frame, so what you preview is what the file holds. An earlier engine drew the export in
 Node; it was removed so that there is one way to draw a frame.
 
-Decided in [0007](/decisions/0007-the-browser-renders), [0015](/decisions/0015-a-headless-engine-renders-the-export),
-[0019](/decisions/0019-a-browser-engine-for-free-code) and [0021](/decisions/0021-one-export-engine).
-
 ## 6. Document order composites
 
 The first track in the file is the bottom of the picture, and later tracks draw on top. A file reads as main
 footage, then overlays, then music, which is how a brief is written.
-
-Decided in [0008](/decisions/0008-tracks-composite-in-document-order).
 
 ## 7. Free code where the timeline stops
 
@@ -66,17 +48,11 @@ Time keeps a strict skeleton: compositions, tracks, clips, transitions, captions
 editor can change. Ready-made pieces are plain functions built from the kit's own elements, not a second drawing
 engine, so editing one turns it into elements you own.
 
-Decided in [0013](/decisions/0013-remotion-has-an-editor-and-layer-handles); `<Graphic>` was retired by
-[0020](/decisions/0020-graphic-is-deprecated-for-free-code) and
-[0024](/decisions/0024-graphic-kinds-become-components).
-
 ## 8. The look lives in the file
 
 A theme is a prop of the composition: palette, fonts, radius, motion and presets, validated like any other prop.
 Tokens such as `$primary` resolve before the schema reads the props, an element's own props always win, and nothing
 is written into the file by resolving.
-
-Decided in [0016](/decisions/0016-a-theme-lives-in-the-file).
 
 ## 9. A cut can be checked without watching it
 
@@ -85,12 +61,7 @@ reads the timeline back as text (`inspect`), draws many frames from one browser 
 by what draws it, so looking again after an edit is nearly free. A narrated film's words, lines and cues come from its
 script with a helper, `narrate()`, not a new element.
 
-Decided in [0026](/decisions/0026-an-agent-looks-at-the-timeline) and
-[0028](/decisions/0028-tools-for-narrated-explainers).
-
 ## Free to use
 
 The player, the editor actions, the export and the checks are all MIT: no paid tier, no licence key, no watermark
 on the frames. Every effect is written from published techniques, so nothing in it carries another licence.
-
-The full list, in the order the decisions were made, is in [Decision records](/decisions/).

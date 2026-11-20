@@ -123,8 +123,8 @@ pieces stay as they are. [Native codecs](./native-codecs) shows how it plugs in.
 ## Why it is built this way
 
 **One renderer.** The preview already draws everything: footage, titles, Layers with any CSS, three.js, Motion, GLSL
-effects. Any second renderer would have to match it feature by feature, and an earlier Node renderer did not (see
-decision 0021 in the repository). Running the player itself makes the export exact by construction.
+effects. Any second renderer would have to match it feature by feature, and an earlier Node renderer did not. Running
+the player itself makes the export exact by construction.
 
 **Frames stay in the browser.** Capturing in the page with `drawElementImage` and encoding with WebCodecs keeps every
 frame inside the browser. Taking screenshots and piping them to FFmpeg would send each 1080p frame, about 8 MB raw,
