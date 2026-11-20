@@ -245,7 +245,7 @@ export class PlayerCore {
     return this.transport.time();
   }
   getCurrentFrame(): number {
-    return frameIndex(this.transport.time(), this._state.composition.fps);
+    return frameIndex(this.transport.time(), this._state.composition.rate);
   }
   isPlaying(): boolean {
     return this.transport.playing;
@@ -297,12 +297,12 @@ export class PlayerCore {
     if (this.disposed || generation !== this.seekGeneration) return;
     await this.compositor.tick(t, { wait: true });
     if (this.disposed || generation !== this.seekGeneration) return;
-    this.publish(t, frameIndex(t, this._state.composition.fps));
+    this.publish(t, frameIndex(t, this._state.composition.rate));
     this.emit("seeked", { time: t });
   }
 
   seekToFrame(frame: number): Promise<void> {
-    return this.seekTo(frameTime(frame, this._state.composition.fps));
+    return this.seekTo(frameTime(frame, this._state.composition.rate));
   }
 
   /** Draw `time` without moving the transport; decoders return to the play head afterwards. */
@@ -342,7 +342,7 @@ export class PlayerCore {
         const y = Math.floor(i / columns) * cellHeight;
         ctx.drawImage(scratch, x, y, cellWidth, cellHeight);
         if (options.labels !== false)
-          drawLabel(ctx, timecode(Math.min(this.duration, Math.max(0, t)), comp.fps), x, y, cellWidth, cellHeight);
+          drawLabel(ctx, timecode(Math.min(this.duration, Math.max(0, t)), comp.rate), x, y, cellWidth, cellHeight);
       }
     } finally {
       this.compositor.attach(previous);

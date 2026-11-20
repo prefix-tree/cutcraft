@@ -10,7 +10,7 @@ type Id = string;
 type Props = Readonly<Record<string, Json | undefined>>;
 
 export interface CompositionActions {
-  /** Sets the composition's fps, size, sample rate or channel count; only the fields given change. */
+  /** Sets the composition's fps, size, sample rate or channel count; only the fields given change. `fps` is a whole number of frames per second. An NTSC rate is a string in the file (`fps="29.97"`), which this action does not write. `sampleRate` must divide into whole ticks (44100, 48000, 96000). */
   "composition/updateSettings": {
     fps?: number;
     width?: number;

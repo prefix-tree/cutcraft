@@ -16,6 +16,7 @@ import {
   WebMOutputFormat,
 } from "mediabunny";
 
+import { sampleAtSeconds, samplesUntil } from "@uberscene/kit/schema";
 import { buildAudioPlan, type MediaResolver, makeNestedResolver } from "@uberscene/player/engine";
 import type { ResolvedState } from "@uberscene/sdk";
 
@@ -147,7 +148,7 @@ export async function measureSound(
     makeNestedResolver(() => state),
   );
   const sampleRate = Number(state.items.get(state.composition.id)?.props.sampleRate ?? 48000);
-  const total = Math.max(1, Math.ceil((to - from) * sampleRate));
+  const total = Math.max(1, samplesUntil(to, sampleRate) - sampleAtSeconds(from, sampleRate));
   const windowFrames = Math.max(1, Math.round(WINDOW_S * sampleRate));
   const windows = new Array<number>(Math.ceil(total / windowFrames)).fill(0);
   let peak = 0,

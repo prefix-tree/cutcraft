@@ -3,6 +3,7 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
+import { framesUntil, nearestFrame } from "@uberscene/kit/schema";
 import type { MediaResolver } from "@uberscene/player/engine";
 import {
   aroundMoments,
@@ -169,8 +170,8 @@ function motionMoments(
   const stretch = listenRange(state, text, "show as a strip");
   if ("error" in stretch) throw new Error(`--motion ${stretch.error}`);
   if (step !== undefined && !(step > 0)) throw new Error("--step must be more than 0");
-  const { fps, duration } = state.composition;
-  const frames = Math.max(1, Math.round(duration * fps));
+  const { fps, rate, duration } = state.composition;
+  const frames = Math.max(1, framesUntil(duration, rate));
   // Never finer than a frame: two cells of the same frame say nothing.
   const every = Math.max(1 / fps, step ?? (stretch.to - stretch.from) / (MOTION_CELLS - 1));
   const count = Math.floor((stretch.to - stretch.from) / every + 1e-9) + 1;
@@ -181,7 +182,7 @@ function motionMoments(
   const moments: Moment[] = [];
   for (let i = 0; i < count; i++) {
     const time = stretch.from + i * every;
-    const frame = Math.min(frames - 1, Math.max(0, Math.round(time * fps + 1e-6)));
+    const frame = Math.min(frames - 1, nearestFrame(time, rate));
     if (moments.some((m) => m.frame === frame)) continue;
     const at = Math.round(time * 1000) / 1000;
     moments.push({ label: at.toFixed(2), time: at, frame, about: `in ${text}` });

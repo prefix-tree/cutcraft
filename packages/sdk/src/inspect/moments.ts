@@ -1,5 +1,7 @@
 // Moments: the places on a timeline a person or an agent asks to look at, written the way the file is written (an
 // element's id, a word, a shot, a marker) or as plain time (seconds, a frame, a range).
+import { frameStartSeconds, framesUntil, nearestFrame } from "@uberscene/kit/schema";
+
 import { parseTimeRef } from "../manifest/timeref";
 import { type AssetEntry, lookupAsset } from "../manifest/types";
 import { type AssetPlay, onTimeline } from "../resolve/captions";
@@ -110,17 +112,18 @@ export function resolveMoments(
   state: ResolvedState,
   parsed: readonly ParsedMoment[],
 ): { readonly moments: Moment[]; readonly errors: string[] } {
-  const { fps, duration } = state.composition;
-  const frames = Math.max(1, Math.round(duration * fps));
+  const { rate, duration } = state.composition;
+  const frames = Math.max(1, framesUntil(duration, rate));
   const moments: Moment[] = [];
   const errors: string[] = [];
-  const seconds = (t: ParsedMoment & { kind: "time" }): number => t.seconds ?? (t.frame as number) / fps;
+  const seconds = (t: ParsedMoment & { kind: "time" }): number =>
+    t.seconds ?? frameStartSeconds(t.frame as number, rate);
   const add = (label: string, time: number, about: string): void => {
     if (time < -1e-9 || time > duration + 1e-9) {
       errors.push(`${label}: ${round(time)} s is outside the video, which is ${round(duration)} s long`);
       return;
     }
-    const frame = Math.min(frames - 1, Math.max(0, Math.round(time * fps + 1e-6)));
+    const frame = Math.min(frames - 1, nearestFrame(time, rate));
     moments.push({ label, time: round(Math.min(Math.max(0, time), duration)), frame, about });
   };
 
@@ -153,13 +156,17 @@ export function resolveMoments(
         errors.push(`${m.text}: ${p.kind} "${m.id}" has no time of its own on the timeline`);
       } else if (p.kind === "transition" && !m.point) {
         const [a, b] = p.between ?? ["the clip before", "the clip after"];
-        add(`${m.id}.before`, Math.max(0, p.start - 1 / fps), `last frame of ${a} before ${m.id}`);
+        add(`${m.id}.before`, Math.max(0, p.start - frameStartSeconds(1, rate)), `last frame of ${a} before ${m.id}`);
         add(`${m.id}.after`, Math.min(p.end, duration), `first frame of ${b} after ${m.id}`);
       } else {
         const point = m.point ?? "mid";
         // The end is the last frame the element is on, not the first frame after it.
         const time =
-          point === "start" ? p.start : point === "end" ? Math.max(p.start, p.end - 1 / fps) : (p.start + p.end) / 2;
+          point === "start"
+            ? p.start
+            : point === "end"
+              ? Math.max(p.start, p.end - frameStartSeconds(1, rate))
+              : (p.start + p.end) / 2;
         const name = point === "mid" ? "middle" : point;
         add(m.text, time, `${name} of ${p.kind} ${m.id}`);
       }
@@ -244,13 +251,13 @@ export function aroundMoments(
   if (!p) return { moments: [], errors: [`${id}: the file has no element with the id "${id}"`] };
   if (!(p.end > p.start))
     return { moments: [], errors: [`${id}: ${p.kind} "${id}" has no time of its own on the timeline`] };
-  const { fps, duration } = state.composition;
-  const frames = Math.max(1, Math.round(duration * fps));
-  const f = 1 / fps;
+  const { rate, duration } = state.composition;
+  const frames = Math.max(1, framesUntil(duration, rate));
+  const f = frameStartSeconds(1, rate);
   const last = Math.max(p.start, p.end - f);
   const moment = (label: string, time: number, about: string): Moment => {
     const t = Math.min(Math.max(0, time), duration);
-    return { label, time: round(t), frame: Math.min(frames - 1, Math.max(0, Math.round(t * fps + 1e-6))), about };
+    return { label, time: round(t), frame: Math.min(frames - 1, nearestFrame(t, rate)), about };
   };
   if (p.kind === "transition") {
     const [a, b] = p.between ?? ["the clip before", "the clip after"];
@@ -290,13 +297,13 @@ export function aroundMoments(
  * of every overlay; one per frame, in time order.
  */
 export function skimMoments(state: ResolvedState): Moment[] {
-  const { fps, duration } = state.composition;
-  const frames = Math.max(1, Math.round(duration * fps));
-  const f = 1 / fps;
+  const { rate, duration } = state.composition;
+  const frames = Math.max(1, framesUntil(duration, rate));
+  const f = frameStartSeconds(1, rate);
   const found: Moment[] = [];
   const add = (label: string, time: number, about: string): void => {
     const t = Math.min(Math.max(0, time), duration);
-    found.push({ label, time: round(t), frame: Math.min(frames - 1, Math.max(0, Math.round(t * fps + 1e-6))), about });
+    found.push({ label, time: round(t), frame: Math.min(frames - 1, nearestFrame(t, rate)), about });
   };
   const overlayMids = new Set<string>();
   const transitions = [...state.items.values()].filter((p) => p.kind === "transition");
@@ -340,11 +347,12 @@ export function listenRange(
   /** What the stretch is for, as the error says it: "listen to" by default. */
   purpose = "listen to",
 ): { readonly from: number; readonly to: number } | { readonly error: string } {
-  const { fps, duration } = state.composition;
+  const { rate, duration } = state.composition;
   const input = text.trim();
   if (input === "all") return { from: 0, to: round(duration) };
   const parsed = parseMoment(input);
-  const seconds = (t: ParsedMoment & { kind: "time" }): number => t.seconds ?? (t.frame as number) / fps;
+  const seconds = (t: ParsedMoment & { kind: "time" }): number =>
+    t.seconds ?? frameStartSeconds(t.frame as number, rate);
   let from: number, to: number;
   if (parsed.kind === "range" && !parsed.step) {
     from = seconds(parsed.from);

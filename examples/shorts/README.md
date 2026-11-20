@@ -73,6 +73,6 @@ npx uberscene game-lighting.tsx \
 - The captions come from the transcript (`<Captions src="asset:eclipse">`), with a box behind the word being said.
 - Each card line, badge and highlight names the word it comes in on (`at="word:15"`) and lasts until its clip ends
   (`duration={{ until: "why" }}`). No time is typed as seconds, so trimming a clip moves everything said over it.
-- The speaker is shown two ways from one square source: filling the frame, and in a box under a card with a `Frame`
+- The speaker is shown two ways from one square source: filling the frame, and in a box under a card with a `Shape` border
   drawn round it. Both are a `transform` on the clip.
 - The accent colour and the opening lines are props.

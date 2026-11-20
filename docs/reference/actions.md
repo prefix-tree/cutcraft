@@ -68,7 +68,7 @@ Every action has `validate`, `apply`, `invert` and `fold`; the inverse is never 
 | `composition/setBackground` | `{ mode?, color? }` | Sets what shows behind every track: a `color`, or a `blur` of the picture; merges into the current `background`. |
 | `composition/setProps` | `{ defaults }` | The tweaks panel: rewrites the file's `defaults` literal. |
 | `composition/setTheme` | `{ theme, merge? }` | Swap the theme (or remove it with null); with `merge`, lay the given parts over the current theme instead. |
-| `composition/updateSettings` | `{ fps?, width?, height?, sampleRate?, channels? }` | Sets the composition's fps, size, sample rate or channel count; only the fields given change. |
+| `composition/updateSettings` | `{ fps?, width?, height?, sampleRate?, channels? }` | Sets the composition's fps, size, sample rate or channel count; only the fields given change. `fps` is a whole number of frames per second. An NTSC rate is a string in the file (`fps="29.97"`), which this action does not write. `sampleRate` must divide into whole ticks (44100, 48000, 96000). |
 
 ## `effect/`
 

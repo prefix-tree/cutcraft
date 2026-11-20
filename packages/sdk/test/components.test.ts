@@ -37,7 +37,7 @@ const manifest: AssetManifest = {
 
 const file = (
   body: string,
-) => `import { Arrow, Background, Badge, Callout, Clip, Composition, Counter, Frame, Highlight, LowerThird, ProgressBar, QuoteCard, Sticker, Track, TypeCard } from "@uberscene/kit";
+) => `import { Badge, Callout, Clip, Composition, Counter, LowerThird, Sticker, Track, TypeCard } from "@uberscene/kit";
 
 export default function Video() {
   return (
@@ -73,28 +73,10 @@ const USES: Record<keyof typeof COMPONENTS, { use: string; parts: string[] }> = 
     use: '<Counter id="n" start={1} duration={3} to={1200} suffix="+" label="teams" />',
     parts: ["n-value:layer", "n-label:title"],
   },
-  ProgressBar: {
-    use: '<ProgressBar id="pb" start={1} duration={3} value={0.7} />',
-    parts: ["pb-track:shape", "pb-fill:shape"],
-  },
-  Arrow: {
-    use: '<Arrow id="ar" start={1} duration={3} from={{ x: -200, y: 0 }} to={{ x: 200, y: -80 }} curve={60} />',
-    parts: ["ar:svg"],
-  },
-  Highlight: {
-    use: '<Highlight id="hl" start={1} duration={3} variant="circle" width={300} height={80} />',
-    parts: ["hl:svg"],
-  },
-  Background: { use: '<Background id="bg" start={0} duration={6} variant="dots" />', parts: ["bg:svg"] },
   TypeCard: {
     use: '<TypeCard id="tc" start={1} duration={3} lines={[{ text: "STRESS", struck: true }, { text: "ENERGY", offset: 1, pill: "$accent" }]} />',
     parts: ["tc-card:layer", "tc-line-1:layer", "tc-strike-1:layer", "tc-line-2:layer"],
   },
-  QuoteCard: {
-    use: '<QuoteCard id="qc" start={1} duration={3} source="A handbook" text="It plays many other important roles." highlights={[{ text: "many other", offset: 0.5 }]} />',
-    parts: ["qc-card:layer", "qc-mark-1:layer"],
-  },
-  Frame: { use: '<Frame id="fr" start={1} duration={3} width={800} height={600} />', parts: ["fr:shape"] },
 };
 
 describe.each(Object.entries(USES))("%s", (name, { use, parts }) => {
@@ -150,11 +132,9 @@ describe("components", () => {
     expect(span("tc-line-3")).toEqual([4.5, 5.5]);
   });
 
-  it("say when a card's word has no clip to be a word of, or a highlight is not in the text", () => {
+  it("say when a card's word has no clip to be a word of", () => {
     const word = resolved('<TypeCard id="tc" start={0} duration={2} lines={[{ text: "A", at: "word:1" }]} />');
     expect(word.state.errors.map((e) => e.message).join(" ")).toMatch(/TypeCard: at="word:1" needs the card's anchor/);
-    const mark = resolved('<QuoteCard id="qc" start={0} duration={2} text="Short." highlights={[{ text: "long" }]} />');
-    expect(mark.state.errors.map((e) => e.message).join(" ")).toMatch(/QuoteCard: .*"long" is not in the text/);
   });
 
   it("last until another element ends, every part of them, however late a part comes in", () => {
@@ -173,8 +153,8 @@ describe("components", () => {
   });
 
   it("say which prop is wrong", () => {
-    const { state } = resolved('<ProgressBar id="pb" start={0} duration={2} value={2} />');
-    expect(state.errors.map((e) => e.message).join(" ")).toMatch(/ProgressBar: value/);
+    const { state } = resolved('<Badge id="b" start={0} duration={2} text="New" size={-1} />');
+    expect(state.errors.map((e) => e.message).join(" ")).toMatch(/Badge: size/);
   });
 
   it("write their output into the file when a part is edited, imports included", () => {

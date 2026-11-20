@@ -7,8 +7,8 @@ import {
   Composition,
   CountUp,
   DrawnLine,
-  Frame,
   Layer,
+  Shape,
   Track,
   useLayer,
   useProgress,
@@ -50,7 +50,17 @@ const BOXED = {
   borderRadius: 28,
 };
 // The border round the box is drawn under the footage, a little larger than it, so only its outer edge shows.
-const RING = { y: BOX.y, width: BOX.width + 16, height: BOX.height + 16, thickness: 16, cornerRadius: 36 };
+const RING = {
+  shape: "rectangle",
+  width: BOX.width + 16,
+  height: BOX.height + 16,
+  cornerRadius: 36,
+  fill: { type: "none" },
+  stroke: { color: "$accent", width: 16 },
+  transform: { position: { x: 0, y: BOX.y } },
+  enter: { type: "fade", duration: 0.25 },
+  exit: { type: "fade", duration: 0.2 },
+} as const;
 // The interview was recorded quietly; each clip is raised to a normal speaking level.
 const VOICE = 2.2;
 
@@ -64,11 +74,11 @@ export default function Video({ accent, question, wrong }: z.infer<typeof schema
       theme={{ extends: "midnight", palette: { accent, primary: accent } }}
     >
       <Track id="rings" layout="free">
-        <Frame id="why-ring" anchor="why" duration={{ until: "why" }} {...RING} />
-        <Frame id="miss-ring" anchor="miss" duration={{ until: "miss" }} {...RING} />
-        <Frame id="hit-ring" anchor="hit" duration={{ until: "hit" }} {...RING} />
-        <Frame id="red-ring" anchor="red" duration={{ until: "red" }} {...RING} />
-        <Frame id="sunsets-ring" anchor="sunsets" duration={{ until: "sunsets" }} {...RING} />
+        <Shape id="why-ring" anchor="why" duration={{ until: "why" }} {...RING} />
+        <Shape id="miss-ring" anchor="miss" duration={{ until: "miss" }} {...RING} />
+        <Shape id="hit-ring" anchor="hit" duration={{ until: "hit" }} {...RING} />
+        <Shape id="red-ring" anchor="red" duration={{ until: "red" }} {...RING} />
+        <Shape id="sunsets-ring" anchor="sunsets" duration={{ until: "sunsets" }} {...RING} />
       </Track>
 
       <Track id="talk">

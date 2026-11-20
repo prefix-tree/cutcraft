@@ -6,7 +6,7 @@ import { createHash } from "node:crypto";
 import { mkdirSync, readFileSync, renameSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
-import { motionBlurOf, shutterTimes } from "@uberscene/kit/schema";
+import { frameStartSeconds, motionBlurOf, shutterTimes } from "@uberscene/kit/schema";
 import type { MediaResolver } from "@uberscene/player/engine";
 import type { Placement, ResolvedState } from "@uberscene/sdk";
 
@@ -181,9 +181,10 @@ export class FrameKeys {
    * the kind of picture, its size, its label.
    */
   async key(frame: number, extra: unknown = null, state: ResolvedState = this.input.state): Promise<string> {
-    const { fps, duration } = state.composition;
+    const { fps, rate, duration } = state.composition;
     const blur = motionBlurOf(state);
-    const times = blur ? shutterTimes(frame / fps, fps, blur, duration) : [frame / fps];
+    const start = frameStartSeconds(frame, rate);
+    const times = blur ? shutterTimes(start, fps, blur, duration) : [start];
     const flags = { free: false };
     const tree = state.tree;
     const drawn = times.map((t) =>
