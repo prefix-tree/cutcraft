@@ -3,6 +3,7 @@
 // a file use `@uberscene/kit/schema` for the vocabulary as data and `@uberscene/sdk` for the rest.
 export * from "./components/index";
 export * from "./diagram/index";
+export { builtInShader } from "./effects/registry";
 export {
   type Extrapolate,
   type InterpolateOptions,

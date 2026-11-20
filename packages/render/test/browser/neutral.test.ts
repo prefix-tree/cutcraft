@@ -52,8 +52,7 @@ const probe = effect({ name: "probe", params: def.params, shader: def.passes[0] 
   writeFileSync(
     file,
     `import { z } from "zod";
-import { Clip, Composition, effect, Effect, Track } from "@uberscene/kit";
-import { builtInShader } from "@uberscene/kit/schema";
+import { builtInShader, Clip, Composition, effect, Effect, Track } from "@uberscene/kit";
 export const manifest = ${JSON.stringify({ assets: mediaManifest.assets })};
 ${CHART}
 ${probe}
@@ -71,8 +70,7 @@ export default function Video() {
 }
 `,
   );
-  // The probe reads a built-in shader, which a video file is not offered by default.
-  const loaded = await loadVideo(file, { imports: { "@uberscene/kit/schema": "@uberscene/kit/schema" } });
+  const loaded = await loadVideo(file);
   expect(loaded.state.errors).toEqual([]);
   const out = join(dir, `${name}.png`);
   await renderStill({

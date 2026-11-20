@@ -415,7 +415,7 @@ Every name each entry exports, read from the code. The sections above explain th
 
 ### `@uberscene/kit`
 
-105 exports.
+106 exports.
 
 | Export | Kind | |
 |---|---|---|
@@ -427,6 +427,7 @@ Every name each entry exports, read from the code. The sections above explain th
 | `Badge` | function | A short word on a pill that pops in. |
 | `BlockMeta` | type |  |
 | `blockMetaSchema` | const | What a block says about itself, so an agent or a person can choose it without opening it. |
+| `builtInShader` | function | The built-in shader of an effect type, if it has one. |
 | `Callout` | function | A note on a surface box, with a line drawn from it to the thing it is about. |
 | `Caption` | const | The `<Caption>` element ([reference](/reference/elements/caption)). |
 | `Captions` | const | The `<Captions>` element ([reference](/reference/elements/captions)). |

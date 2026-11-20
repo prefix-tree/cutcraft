@@ -122,6 +122,19 @@ const soften = effect({
 });
 ```
 
+## Start from a built-in effect
+
+`builtInShader(type)` gives the shader definition of a built-in effect drawn by a shader, such as `halftone` or
+`pixelate`: its params and its passes. Effects drawn another way (`vignette`, `grain`) have none. Declare your own
+effect from it to change a pass and keep the params:
+
+```tsx
+import { builtInShader, effect } from "@uberscene/kit";
+
+const base = builtInShader("halftone");
+const dots = effect({ name: "dots", params: base.params, shader: base.passes[0] });
+```
+
 ## Declare a transition
 
 A transition is declared the same way with `transition()`. Here the incoming clip opens as a circle from the centre:
