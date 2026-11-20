@@ -490,7 +490,7 @@ async function main(): Promise<number> {
   for (const w of result.warnings) process.stderr.write(`warning: ${w}\n`);
   const seconds = (result.wallMs / 1000).toFixed(1);
   process.stderr.write(
-    `${written}: ${values.draft ? "a draft, every second frame at half size: " : ""}${result.frames} frames, ${result.width}x${result.height} at ${result.fps} fps${result.audio ? ", with sound" : ""}, in ${seconds}s${result.tabs > 1 ? ` on ${result.tabs} tabs` : ""}${result.copiedFrames > 0 ? `, ${result.copiedFrames} frames copied` : ""}${nativeNote(result.codecs)} (${(result.frames / (result.wallMs / 1000)).toFixed(1)} fps)\n`,
+    `${written}: ${values.draft ? "a draft, every second frame at half size: " : ""}${result.frames} frames, ${result.width}x${result.height} at ${Number(result.fps.toFixed(3))} fps${result.audio ? ", with sound" : ""}, in ${seconds}s${result.tabs > 1 ? ` on ${result.tabs} tabs` : ""}${result.copiedFrames > 0 ? `, ${result.copiedFrames} frames copied` : ""}${nativeNote(result.codecs)} (${(result.frames / (result.wallMs / 1000)).toFixed(1)} fps)\n`,
   );
   return 0;
 }

@@ -144,7 +144,7 @@ export class Compositor {
   }
 
   private async run(t: number, opts: TickOptions): Promise<void> {
-    const frame = frameIndex(t, this.state.composition.fps);
+    const frame = frameIndex(t, this.state.composition.rate);
     this.pool.sync(this.state, t);
     if (frame === this.lastFrame && !opts.wait) return;
     const plan = this.plan(t);

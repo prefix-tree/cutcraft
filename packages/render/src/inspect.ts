@@ -1,7 +1,7 @@
 // `uberscene inspect video.tsx`: the timeline read back as an editor reads it, in text or as flat JSON rows, and what
 // is on screen and heard at chosen moments. It runs the resolver and the player's model only: no browser, no media.
 import type { Knob } from "@uberscene/kit";
-import { capabilitiesOf } from "@uberscene/kit/schema";
+import { capabilitiesOf, rateLabel } from "@uberscene/kit/schema";
 import {
   animatedTransform,
   buildGainEnvelope,
@@ -158,7 +158,7 @@ const paramList = (params: Readonly<Record<string, unknown>>): string =>
 export function formatTimeline(file: string, rows: TimelineRows): string {
   const c = rows.composition;
   const lines = [
-    `${file}  ${c.width}x${c.height}  ${c.fps} fps  ${seconds(c.duration)} s (${c.frames} frames)  ${rows.errors.length} error${rows.errors.length === 1 ? "" : "s"}`,
+    `${file}  ${c.width}x${c.height}  ${rateLabel(c.rate)} fps  ${seconds(c.duration)} s (${c.frames} frames)  ${rows.errors.length} error${rows.errors.length === 1 ? "" : "s"}`,
   ];
   for (const e of rows.errors) lines.push(`  error: ${e.id ?? "?"}: ${e.message}`);
   const effects = new Map<string, string[]>();

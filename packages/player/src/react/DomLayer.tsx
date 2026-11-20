@@ -196,12 +196,13 @@ export function sameElement(a: ElementCellProps, b: ElementCellProps): boolean {
     return false;
   const ca = a.state.composition,
     cb = b.state.composition;
-  if (ca.width !== cb.width || ca.height !== cb.height || ca.fps !== cb.fps) return false;
+  if (ca.width !== cb.width || ca.height !== cb.height || ca.rate.num !== cb.rate.num || ca.rate.den !== cb.rate.den)
+    return false;
   if (p.kind === "title" && a.state.tree.byId.get(p.id)?.text !== b.state.tree.byId.get(p.id)?.text) return false;
   if (
     a.exact || b.exact
       ? a.time - p.start !== b.time - q.start
-      : frameIndex(a.time - p.start, ca.fps) !== frameIndex(b.time - q.start, cb.fps)
+      : frameIndex(a.time - p.start, ca.rate) !== frameIndex(b.time - q.start, cb.rate)
   )
     return false;
   return (a.item.transition?.progress ?? -1) === (b.item.transition?.progress ?? -1);

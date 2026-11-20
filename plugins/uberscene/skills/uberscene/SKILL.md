@@ -166,6 +166,8 @@ export default function Video({ product, who }: z.infer<typeof schema>) {
 
 - The default export returns one `<Composition fps width height>`. There is no duration: the video lasts until its
   last element ends.
+- NTSC frame rates are strings: `fps="29.97"` (also `"23.976"`, `"59.94"`). The number `fps={29.97}` is not NTSC and
+  is an error; `uberscene lint --fix` rewrites it.
 - `schema` and `defaults` are optional. `defaults` is a plain JSON object literal, because the editor rewrites it.
   Describe each schema value by what it means on screen (`.describe("Name on the lower third")`): that is the
   editor's label. Mark a colour, font or image with `knob.color()`, `knob.font()` or `knob.image()`, so it gets a

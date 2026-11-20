@@ -522,7 +522,7 @@ Every name each entry exports, read from the code. The sections above explain th
 
 ### `@uberscene/kit/schema`
 
-210 exports.
+234 exports.
 
 | Export | Kind | |
 |---|---|---|
@@ -602,6 +602,12 @@ Every name each entry exports, read from the code. The sections above explain th
 | `fontsFor` | function | The catalogue, narrowed to a role, a category, or both. |
 | `FontSource` | type | Where a declared face's file comes from. |
 | `FontStyle` | type |  |
+| `frameAt` | const | The frame a tick falls in. |
+| `frameAtSeconds` | const | The frame a time in seconds falls in, never below 0. |
+| `FrameRate` | type | What `fps` may be. |
+| `frameStart` | const | The first tick of a frame. |
+| `frameStartSeconds` | const | When a frame starts, in seconds. |
+| `framesUntil` | const | The first frame that starts at or after a time. |
 | `Freeze` | const | The `<Freeze>` element ([reference](/reference/elements/freeze)). |
 | `fusedColourSource` | function | One effect pass that draws a run of colour transforms in order. |
 | `Gap` | const | The `<Gap>` element ([reference](/reference/elements/gap)). |
@@ -616,6 +622,7 @@ Every name each entry exports, read from the code. The sections above explain th
 | `installLayerEngine` | function | Install (or with `null`, remove) the engine that draws `<Layer engine={name}>` tags such as `<Three>`. |
 | `isBuiltInTransition` | function |  |
 | `isBundledFont` | function |  |
+| `isDropFrame` | const | Whether a rate is shown in drop-frame timecode. |
 | `isKeyframeProperty` | function | A property of the keyframe's parent element. |
 | `isNeutral` | function | Whether a built-in effect changes nothing with these params. |
 | `isShaderRef` | function | Whether a value is an effect or transition a file declared. |
@@ -634,6 +641,7 @@ Every name each entry exports, read from the code. The sections above explain th
 | `MASK_NOT_RENDERED` | const |  |
 | `MASK_TYPES` | const |  |
 | `MASKED_KINDS` | const | Masks render on these kinds, one per element. |
+| `MAX_SECONDS` | const | The longest time ticks hold exactly as a JavaScript number. |
 | `monotoneCurve` | function | The curve through `points` (x strictly increasing) as a function on 0..1, clamped to 0..1. |
 | `Motion` | const | Children animated by a Motion `sequence` on the video's clock. |
 | `MOTION_NAMES` | const |  |
@@ -646,19 +654,31 @@ Every name each entry exports, read from the code. The sections above explain th
 | `motionStyleSchema` | const |  |
 | `Multicam` | const | The `<Multicam>` element ([reference](/reference/elements/multicam)). |
 | `nearestFont` | function | The listed family whose name is nearest a misspelt one, when one is near enough to be what was meant. |
+| `nearestFrame` | const | The frame nearest a time, for times given by a person (`--at 2.5`) rather than computed. |
 | `Nested` | const | The `<Nested>` element ([reference](/reference/elements/nested)). |
 | `NoParams` | type | The params of a shader that declares none. |
 | `NOT_RENDERED` | const |  |
 | `NotRendered` | interface | Accepted but not rendered. |
+| `NTSC_RATES` | const | The NTSC rates, written as the strings people say them as. |
 | `PALETTE_KEYS` | const | The palette names every built-in theme fills. |
+| `parseRate` | function | A frame rate as an exact fraction. |
 | `PlacementScope` | type |  |
 | `POST_EFFECTS` | const | Effects the painter draws over the element after it. |
 | `Presets` | type |  |
+| `Rate` | interface | A frame rate as an exact fraction. |
+| `rateLabel` | function | The rate as people write it. |
+| `rateProblem` | function | Why a rate cannot be used, or null. |
+| `rateValue` | const | The rate as frames per second, for display and for code that only needs an approximate number. |
 | `RENDERED_VALUES` | const |  |
 | `RenderedValues` | interface | An enum prop where only some values render. |
 | `ResolvedTheme` | interface | A file's theme with its base theme merged in. |
 | `resolveTheme` | function | The theme a composition's raw `theme` prop describes. |
+| `sampleAt` | const | The audio sample a tick falls in. |
+| `sampleAtSeconds` | const | The audio sample a time in seconds falls in. |
+| `sampleRateProblem` | function | Why a sample rate cannot be used, or null. |
+| `samplesUntil` | const | The first sample that starts at or after a time. |
 | `SCHEMAS_BY_KIND` | const |  |
+| `secondsToTicks` | const | Seconds as the nearest tick. |
 | `SHADER_ONLY_EFFECTS` | const | Built-in shader effects with no CSS filter to fall back on. |
 | `shaderDefinition` | function | Checks a declaration and makes its definition; throws what is wrong with it. |
 | `ShaderDefinition` | interface |  |
@@ -694,6 +714,10 @@ Every name each entry exports, read from the code. The sections above explain th
 | `themeSchema` | const |  |
 | `themeToken` | function | The value of `$name`, or undefined. |
 | `Three` | const | A three.js scene on the timeline. |
+| `TICKS_PER_SECOND` | const | Ticks in one second. |
+| `ticksPerFrame` | const | Ticks in one frame. |
+| `ticksToSeconds` | const |  |
+| `timecode` | function | SMPTE timecode of a frame, `HH:MM:SS:FF`. |
 | `Title` | const | The `<Title>` element ([reference](/reference/elements/title)). |
 | `TOKEN_PATTERN` | const | A whole prop value naming a theme value. |
 | `tokenSchema` | const |  |
@@ -1055,7 +1079,7 @@ Every name each entry exports, read from the code. The sections above explain th
 
 ### `@uberscene/player/engine`
 
-39 exports.
+38 exports.
 
 | Export | Kind | |
 |---|---|---|
@@ -1079,8 +1103,7 @@ Every name each entry exports, read from the code. The sections above explain th
 | `DrawOp` | interface |  |
 | `DrawRect` | interface |  |
 | `Frame` | interface | One decoded picture. |
-| `FRAME_EPS` | const | Tolerance when rounding a time to a frame index. |
-| `frameIndex` | function |  |
+| `frameIndex` | function | The frame a composition time falls in, counted in exact ticks. |
 | `FrameSource` | interface |  |
 | `FrameSourceFactory` | type |  |
 | `FrameSourceInfo` | interface |  |

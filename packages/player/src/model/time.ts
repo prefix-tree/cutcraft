@@ -1,23 +1,34 @@
 import type { LayerClock } from "@uberscene/kit";
+import {
+  frameAtSeconds,
+  frameStartSeconds,
+  isDropFrame,
+  type Rate,
+  timecode as smpteTimecode,
+} from "@uberscene/kit/schema";
 import { freezeHoldsOf, freezeShift, type Placement, rampAdvance, speedKeysOf } from "@uberscene/sdk/resolver";
 
-import { FRAME_EPS } from "../constants";
-
-export function frameIndex(t: number, fps: number): number {
-  return Math.max(0, Math.floor(t * fps + FRAME_EPS));
+/** The frame a composition time falls in, counted in exact ticks. */
+export function frameIndex(t: number, rate: Rate): number {
+  return frameAtSeconds(t, rate);
 }
 
-export function frameTime(frame: number, fps: number): number {
-  return frame / fps;
+/** When a frame starts, in seconds. */
+export function frameTime(frame: number, rate: Rate): number {
+  return frameStartSeconds(frame, rate);
 }
 
-/** `mm:ss.ff` for a composition time, what the controls show and the contact sheet labels. */
-export function timecode(t: number, fps: number): string {
-  const total = Math.max(0, t);
-  const m = Math.floor(total / 60),
-    s = Math.floor(total % 60),
-    f = Math.floor((total - Math.floor(total)) * fps + 1e-6);
-  return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}.${String(f).padStart(2, "0")}`;
+/**
+ * What the controls show and the contact sheet labels: `mm:ss.ff`, the frame within its second; at 29.97 and 59.94 the
+ * drop-frame timecode editors show, `HH:MM:SS;FF`.
+ */
+export function timecode(t: number, rate: Rate): string {
+  const frame = frameIndex(Math.max(0, t), rate);
+  if (isDropFrame(rate)) return smpteTimecode(frame, rate);
+  const nominal = Math.round(rate.num / rate.den);
+  const s = Math.floor(frame / nominal);
+  const f = frame % nominal;
+  return `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}.${String(f).padStart(2, "0")}`;
 }
 
 /** 0..1 progress through a placement, what `useT()` returns inside a Layer. */

@@ -20,7 +20,13 @@ import { flushSync } from "react-dom";
 import { createRoot } from "react-dom/client";
 
 import { installFreeCodeLibraries } from "@uberscene/graphics/libraries";
-import { layerFramesPending, motionBlurOf, shutterTimes } from "@uberscene/kit/schema";
+import {
+  frameAtSeconds,
+  frameStartSeconds,
+  layerFramesPending,
+  motionBlurOf,
+  shutterTimes,
+} from "@uberscene/kit/schema";
 import { addFontFaces, backdropTracks, Player, type PlayerRef } from "@uberscene/player";
 import {
   defaultCreateCanvas,
@@ -176,7 +182,7 @@ async function start(): Promise<void> {
     } catch (error) {
       const said = error instanceof Error ? error.message : String(error);
       throw new Error(
-        `frame ${Math.round(t * fps)} (${t.toFixed(2)} s) ${said.startsWith("did not finish") ? "" : "failed: "}${said}`,
+        `frame ${frameAtSeconds(t, state.composition.rate)} (${t.toFixed(2)} s) ${said.startsWith("did not finish") ? "" : "failed: "}${said}`,
       );
     } finally {
       clearTimeout(timer);
@@ -241,6 +247,7 @@ async function start(): Promise<void> {
   const encodeNatively = async (
     r: SegmentRequest,
     rate: number,
+    exact: { readonly num: number; readonly den: number },
     drawn: (n: number) => Promise<HTMLCanvasElement>,
   ): Promise<string> => {
     const native = r.native as NonNullable<SegmentRequest["native"]>;
@@ -252,8 +259,8 @@ async function start(): Promise<void> {
         ...native,
         width: outW,
         height: outH,
-        fpsNum: Math.round(rate * 1000),
-        fpsDen: 1000,
+        fpsNum: exact.num,
+        fpsDen: exact.den,
         keyint: Math.max(1, Math.round(r.keyFrameInterval * rate)),
       }),
     });
@@ -287,13 +294,14 @@ async function start(): Promise<void> {
   };
 
   const api: PageApi = {
-    composition: { width, height, fps, duration: state.composition.duration },
+    composition: { width, height, fps, rate: state.composition.rate, duration: state.composition.duration },
     errors,
     get paintFallbacks() {
       return paintFallbacks;
     },
     async segment(r: SegmentRequest) {
       const rate = r.fps ?? fps;
+      const exact = r.rate ?? state.composition.rate;
       // A smaller picture is the captured frame drawn down into a second canvas, with even sides for the encoder.
       const scale = r.scale ?? 1;
       const small = scale < 1 ? document.createElement("canvas") : null;
@@ -303,14 +311,14 @@ async function start(): Promise<void> {
       }
       const smallCtx = small?.getContext("2d") ?? null;
       const drawn = async (n: number): Promise<HTMLCanvasElement> => {
-        await frame(n / rate);
+        await frame(frameStartSeconds(n, exact));
         if (small && smallCtx) {
           smallCtx.clearRect(0, 0, small.width, small.height);
           smallCtx.drawImage(cap, 0, 0, small.width, small.height);
         }
         return small ?? cap;
       };
-      if (r.native) return { session: await encodeNatively(r, rate, drawn) };
+      if (r.native) return { session: await encodeNatively(r, rate, exact, drawn) };
       const target = new BufferTarget();
       const output = new Output({
         format: r.container === "mp4" ? new Mp4OutputFormat() : new WebMOutputFormat(),

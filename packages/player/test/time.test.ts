@@ -92,13 +92,19 @@ describe("placementSourceTime", () => {
 });
 
 describe("frames", () => {
-  it("rounds frame boundaries", () => {
-    expect(frameIndex(0, 30)).toBe(0);
-    expect(frameIndex(1 / 30, 30)).toBe(1);
-    expect(frameIndex(29 / 30 - 1e-9, 30)).toBe(29);
-    expect(frameIndex(0.1 + 0.2, 10)).toBe(3);
-    expect(frameTime(45, 30)).toBe(1.5);
-    expect(frameIndex(-1, 30)).toBe(0);
+  const r30 = { num: 30, den: 1 };
+  const r10 = { num: 10, den: 1 };
+  const ntsc = { num: 30000, den: 1001 };
+
+  it("counts frames in exact ticks", () => {
+    expect(frameIndex(0, r30)).toBe(0);
+    expect(frameIndex(1 / 30, r30)).toBe(1);
+    // A nanosecond before a frame starts is still the frame before: no nudge moves it.
+    expect(frameIndex(29 / 30 - 1e-9, r30)).toBe(28);
+    expect(frameIndex(0.1 + 0.2, r10)).toBe(3);
+    expect(frameTime(45, r30)).toBe(1.5);
+    expect(frameIndex(-1, r30)).toBe(0);
+    expect(frameIndex(frameTime(107892, ntsc), ntsc)).toBe(107892);
   });
 
   it("localT clamps to 0..1", () => {
@@ -109,11 +115,17 @@ describe("frames", () => {
   });
 
   it("formats timecode as mm:ss.ff", () => {
-    expect(timecode(0, 30)).toBe("00:00.00");
-    expect(timecode(0.5, 30)).toBe("00:00.15");
-    expect(timecode(65.9, 30)).toBe("01:05.27");
-    expect(timecode(-1, 30)).toBe("00:00.00");
-    expect(timecode(1, 29.97)).toBe("00:01.00");
+    const r30 = { num: 30, den: 1 };
+    expect(timecode(0, r30)).toBe("00:00.00");
+    expect(timecode(0.5, r30)).toBe("00:00.15");
+    expect(timecode(65.9, r30)).toBe("01:05.27");
+    expect(timecode(-1, r30)).toBe("00:00.00");
+  });
+
+  it("formats NTSC 29.97 as drop-frame timecode", () => {
+    const ntsc = { num: 30000, den: 1001 };
+    expect(timecode(1, ntsc)).toBe("00:00:00;29");
+    expect(timecode(60.06, ntsc)).toBe("00:01:00;02");
   });
 
   it("layerClock gives progress and real seconds, clamped to the layer", () => {
