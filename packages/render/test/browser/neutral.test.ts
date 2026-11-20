@@ -71,7 +71,8 @@ export default function Video() {
 }
 `,
   );
-  const loaded = await loadVideo(file);
+  // The probe reads a built-in shader, which a video file is not offered by default.
+  const loaded = await loadVideo(file, { imports: { "@uberscene/kit/schema": "@uberscene/kit/schema" } });
   expect(loaded.state.errors).toEqual([]);
   const out = join(dir, `${name}.png`);
   await renderStill({
