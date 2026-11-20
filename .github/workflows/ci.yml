@@ -23,7 +23,6 @@ jobs:
       contents: read
       pull-requests: read
     outputs:
-      rust: ${{ steps.filter.outputs.rust }}
       native: ${{ steps.filter.outputs.native }}
     steps:
       - uses: actions/checkout@v7
@@ -31,12 +30,12 @@ jobs:
         id: filter
         with:
           filters: |
-            rust:
-              - 'native/**'
             native:
               - 'native/**'
               - 'packages/render/src/native/**'
               - 'packages/render/src/web/page/native-frames.ts'
+              - 'packages/render/src/mixer.ts'
+              - 'packages/render/test/native*.test.ts'
               - 'packages/render/test/browser/native-codecs.test.ts'
 
   check:
@@ -74,10 +73,10 @@ jobs:
       - run: pnpm check:packages
 
   native:
-    # The native codecs (native/, UBERSCENE_CODECS): formatted, linted and tested against clips ffmpeg makes. Only when
-    # native/ changed.
+    # The native codecs (native/, UBERSCENE_CODECS): formatted, linted and tested against clips ffmpeg makes, then the
+    # export server's side of them (routes, the native soundtrack) against the binary. Only when they changed.
     needs: changes
-    if: needs.changes.outputs.rust == 'true'
+    if: needs.changes.outputs.native == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -91,6 +90,15 @@ jobs:
       - run: cargo fmt --manifest-path native/Cargo.toml --check
       - run: cargo clippy --release --all-targets --manifest-path native/Cargo.toml -- -D warnings
       - run: cargo test --release --manifest-path native/Cargo.toml
+      # The Node tests that need the binary skip without it in the check job; here they run.
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm native:build
+      - run: pnpm --filter @uberscene/render exec vitest run test/native.test.ts test/native-audio.test.ts
 
   changeset:
     # A pull request that changes a published package says how in a changeset (.changeset/README.md). The version pull
