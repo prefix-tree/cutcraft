@@ -1,3 +1,4 @@
+import { sampleAtSeconds, samplesUntil } from "@uberscene/kit/schema";
 import type { AudioOccurrence, GainPoint } from "@uberscene/player/engine";
 
 /** Planar PCM of one decoded source range, at the source's own sample rate. */
@@ -96,8 +97,8 @@ export function mixBlock(
   const t1 = (startFrame + frames) / sampleRate;
   for (const { occurrence: o, pcm } of sources) {
     if (o.compEnd <= t0 || o.compStart >= t1) continue;
-    const first = Math.max(0, Math.ceil(o.compStart * sampleRate - startFrame - 1e-9));
-    const last = Math.min(frames, Math.ceil(o.compEnd * sampleRate - startFrame - 1e-9));
+    const first = Math.max(0, samplesUntil(o.compStart, sampleRate) - startFrame);
+    const last = Math.min(frames, samplesUntil(o.compEnd, sampleRate) - startFrame);
     const chs = pcm.channels;
     const nCh = chs.length;
     if (nCh === 0 || last <= first) continue;
@@ -186,8 +187,8 @@ export async function* mixPlan(
 ): AsyncGenerator<MixedBlock, void, unknown> {
   const sr = options.sampleRate;
   const block = options.blockFrames ?? 4096;
-  const startFrame = Math.round((options.from ?? 0) * sr);
-  const endFrame = Math.ceil(options.to * sr - 1e-9);
+  const startFrame = sampleAtSeconds(options.from ?? 0, sr);
+  const endFrame = samplesUntil(options.to, sr);
   const sorted = [...plan].sort((a, b) => a.compStart - b.compStart);
   const loading = new Map<string, Promise<MixSource>>();
   const key = (o: AudioOccurrence): string => `${o.id}#${o.chunk}`;

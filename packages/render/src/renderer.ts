@@ -3,7 +3,8 @@ import { join, parse } from "node:path";
 
 import { EncodedVideoPacketSource, FilePathTarget, Output } from "mediabunny";
 
-import { FRAME_EPS, type MediaResolver } from "@uberscene/player/engine";
+import { framesUntil, nearestFrame, rateValue } from "@uberscene/kit/schema";
+import type { MediaResolver } from "@uberscene/player/engine";
 import type { AssetManifest, ResolvedState } from "@uberscene/sdk";
 
 import { feedCopy, planCopy, type Run } from "./copy";
@@ -159,7 +160,9 @@ export async function renderVideo(options: RenderOptions): Promise<RenderResult>
   if (draft && options.smartCopy) throw new Error("a draft renders every frame it shows: leave out the copy option");
   // What the file is written at. A draft counts in its own frames, half as many a second, and writes pictures half
   // as wide and as high; everything below counts frames at this rate.
-  const outFps = draft ? state.composition.fps / DRAFT_FRAME_STEP : state.composition.fps;
+  const baseRate = state.composition.rate;
+  const outRate = draft ? { num: baseRate.num, den: baseRate.den * DRAFT_FRAME_STEP } : baseRate;
+  const outFps = rateValue(outRate);
   const even = (n: number): number => Math.max(2, Math.round((n * DRAFT_SCALE) / 2) * 2);
   const outWidth = draft ? even(state.composition.width) : state.composition.width;
   const outHeight = draft ? even(state.composition.height) : state.composition.height;
@@ -185,8 +188,8 @@ export async function renderVideo(options: RenderOptions): Promise<RenderResult>
     throw new Error("the copy option copies VP9 and the native encoder writes H.264 and ProRes: leave one out");
   const from = Math.max(0, options.from ?? 0);
   const to = Math.min(state.composition.duration, options.to ?? state.composition.duration);
-  const first = Math.round(from * outFps);
-  const last = Math.ceil(to * outFps - FRAME_EPS);
+  const first = nearestFrame(from, outRate);
+  const last = framesUntil(to, outRate);
   const total = Math.max(0, last - first);
   if (total === 0) throw new Error("nothing to render: the range holds no frames");
   const keyFrameInterval = options.keyFrameInterval ?? 2;
@@ -248,7 +251,7 @@ export async function renderVideo(options: RenderOptions): Promise<RenderResult>
       bitrate,
       ...(quality ? { quality } : {}),
       keyFrameInterval,
-      ...(draft ? { fps: outFps, scale: DRAFT_SCALE } : {}),
+      ...(draft ? { fps: outFps, rate: outRate, scale: DRAFT_SCALE } : {}),
       ...(native ? { native } : {}),
     });
     const rendered = pieces.map((piece) =>

@@ -223,6 +223,7 @@ line, `uberscene lint video.tsx --fix` does the same to a file ([CLI](/reference
 |---|---|
 | `deprecated-props` | A prop or a value spelled the way an earlier version took it, as an error that names the new spelling. It reads the SDK's `DEPRECATIONS` table, and any rows passed as `lint(text, { deprecations })`. Where the new spelling can be written for certain, the fix renames the prop, respells the value, or moves the prop into its object prop. |
 | `old-theme-variables` | A theme CSS variable written as `--cc-name`, in any string, template or JSX text. They are `--us-name` since 0.6, and the fix respells each. |
+| `ntsc-frame-rate` | `fps={29.97}`, `{23.976}`, `{59.94}`, `{47.952}` or `{119.88}` as a number, which is a decimal and not NTSC. The fix writes the string, `fps="29.97"`, which is 30000/1001 ([Frame rates](./time#frame-rates)). |
 
 A rule of your own can build its fix with the helpers the SDK's rules use: `renameProp`, `renameValue`,
 `movePropInto` and `movePropsInto`, given a tag found with `jsxTags`.

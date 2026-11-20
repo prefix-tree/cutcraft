@@ -5,7 +5,7 @@
  */
 
 export { ManualClock } from "./clock/clock";
-export { FRAME_EPS, PICK_EPS, SETTLE_MS } from "./constants";
+export { PICK_EPS, SETTLE_MS } from "./constants";
 export { AssetSources } from "./media/asset-sources";
 export { DecoderPool } from "./media/decoder-pool";
 export { copyFrame, defaultCreateCanvas } from "./media/frame-source";

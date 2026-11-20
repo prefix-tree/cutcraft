@@ -33,8 +33,8 @@ are listed under [Lint](./editing#lint), and the options in the [CLI reference](
 ## Read the timeline as text
 
 `uberscene inspect` prints every track and element with its start and end in seconds, the stretch of source each clip
-plays and the words it says, the effects and keyframes on each element, and where the cuts fall. It needs no browser,
-so it is instant.
+plays and the words it says, the effects and keyframes on each element, and where the cuts fall. The first line gives
+the frame rate as the file writes it, `29.97 fps` for `fps="29.97"`. It needs no browser, so it is instant.
 
 ```sh
 npx uberscene inspect video.tsx

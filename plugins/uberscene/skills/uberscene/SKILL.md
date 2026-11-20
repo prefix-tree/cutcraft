@@ -38,7 +38,7 @@ references.
 | Words on screen | `<Title>` with a theme `style` and `animation={{ preset }}`: `typewriter`, `fade`, `slide-up`, `slide-down`, `slide-left`, `slide-right`, `scale`, `word-by-word` |
 | Captions | `<Captions>` from the transcript, or `<Caption>` cues; `animation`: `word-highlight`, `word-by-word`, `karaoke`, `typewriter`; `style.highlightBox` boxes the word being said; `box` places them (the lower safe area when left out; each field written replaces that one) |
 | Shapes and images | `<Shape>` (rectangle, circle, ellipse, triangle, arrow and more), `<Svg>` (inline markup or an SVG asset), `<Sticker>` (a PNG, SVG, WebP or GIF asset) |
-| Ready-made graphics | `LowerThird`, `Callout`, `Badge`, `Counter`, `ProgressBar`, `Arrow`, `Highlight`, `Background`, `TypeCard`, `QuoteCard`, `Frame` |
+| Ready-made graphics | `LowerThird`, `Callout`, `Badge`, `Counter`, `TypeCard` |
 | Ready-made scenes | Blocks: `uberscene blocks --for "<job>"` lists them with when to use each (`--sheet blocks.png` to look); `uberscene blocks add <name> --into video.tsx --track <id> --at hook@word:N` copies one to `blocks/<name>.tsx` and places its component in a `<Layer>`, its props set there; `blocks update` after an upgrade |
 | Sound | `<Audio>` for music and voice; `volume`, `fade={{ in, out }}`, `automation` for volume and pan over time, `duck={{ under, to }}` under a track or a role (`dialogue`) |
 | Anything else | `<Layer>` (any React), `<Three>` (three.js), `<Motion>` (Motion), all on the video's clock; see "Free code" under Look and graphics |
@@ -166,6 +166,8 @@ export default function Video({ product, who }: z.infer<typeof schema>) {
 
 - The default export returns one `<Composition fps width height>`. There is no duration: the video lasts until its
   last element ends.
+- NTSC frame rates are strings: `fps="29.97"` (also `"23.976"`, `"59.94"`). The number `fps={29.97}` is not NTSC and
+  is an error; `uberscene lint --fix` rewrites it.
 - `schema` and `defaults` are optional. `defaults` is a plain JSON object literal, because the editor rewrites it.
   Describe each schema value by what it means on screen (`.describe("Name on the lower third")`): that is the
   editor's label. Mark a colour, font or image with `knob.color()`, `knob.font()` or `knob.image()`, so it gets a
@@ -229,10 +231,10 @@ Give the video one look and say it once.
 - **Presets for text.** `<Title style="h1">`, also `h2`, `kicker`, `body`, `caption`, `quote`, `label`, `code`,
   `note`. Own props override a preset. `<Shape style="card">`, `<Captions style="boxed">`.
 - **Leave entrances to the motion style.** Write `enter` or `exit` only where one element should differ.
-- **Components** for the common graphics: `LowerThird`, `Callout`, `Badge`, `Counter`, `ProgressBar`, `Arrow`,
-  `Highlight`, `Background`, `TypeCard`, `QuoteCard` and `Frame`, imported from `@uberscene/kit`. They take the timing props any element takes.
+- **Components** for the common graphics: `LowerThird`, `Callout`, `Badge`, `Counter` and
+  `TypeCard`, imported from `@uberscene/kit`. They take the timing props any element takes.
   `box`, with `x` and `y`, is the component's centre in pixels from the frame's top left; an axis left out is
-  centred on the frame, except the defaults of `LowerThird`, `Callout` and `ProgressBar`'s `y`, set for 1920x1080. See
+  centred on the frame, except the defaults of `LowerThird` and `Callout`, set for 1920x1080. See
   [references/components.md](references/components.md).
 - **Colour and effects** are `<Effect type params>` children of a clip, a title, a shape, a layer or an
   `<Adjustment>` (which affects everything beneath it for its time). They run in the order written: correct, then

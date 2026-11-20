@@ -387,7 +387,7 @@ function componentsIndex(): string {
     "|---|---|",
     "| `id` | Names the component. Each element it makes has an id that starts with it: `name-card`, `name-bar`, `name-name`, `name-role`. |",
     "| Timing | The same props as any element: `start`, or `anchor` with `at` and `offset`, and `duration`, including `{ until: id }`. Its parts come in and go out inside that time. |",
-    "| Position | `box`, with `x` and `y`, is the component's centre in pixels from the frame's top left, as every element's `box` measures. An axis left out is centred on the frame, whatever its size, except where a component sets a default (`LowerThird`, `Callout`, and `ProgressBar` down the frame), which suits a 1920x1080 frame: on another size, give those a box. |",
+    "| Position | `box`, with `x` and `y`, is the component's centre in pixels from the frame's top left, as every element's `box` measures. An axis left out is centred on the frame, whatever its size, except where a component sets a default (`LowerThird` and `Callout`), which suits a 1920x1080 frame: on another size, give those a box. |",
     "| Look | Colours default to theme tokens (`$primary`, `$surface`, `$text`) and text to the theme's fonts, so a theme restyles every component. |",
     "| Its own props | The words and options it draws, listed on its page: `name` and `role` for a lower third, `to` and `format` for a counter. |",
     "| In an editor | Its props are editable in an inspector. Editing one of its parts writes that use out into the file as plain elements, and the edit applies to them. |",
@@ -421,7 +421,7 @@ function componentPage(name: keyof typeof COMPONENTS): string {
     "Besides the timing props (`start`, `anchor`, `at`, `offset`, `duration`):",
     "",
     ...paramsTable(
-      c.props.omit({ start: true, anchor: true, at: true, offset: true, duration: true }),
+      (c.props as z.ZodObject).omit({ start: true, anchor: true, at: true, offset: true, duration: true }),
       `component:${name}`,
     ),
     "[All components](/reference/components/)",

@@ -301,7 +301,7 @@ export function makeState(spec: StateSpec): ResolvedState {
     errors: [],
   });
   return {
-    composition: { id: "composition", fps, width, height, duration },
+    composition: { id: "composition", fps, rate: { num: fps, den: 1 }, width, height, duration },
     tracks,
     items,
     errors: [],

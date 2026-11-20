@@ -36,8 +36,6 @@ export const MIN_RATE = 0.25;
 export const MAX_RATE = 4;
 /** Quiet time after the last setState before a paused preview fetches its exact frame. */
 export const SETTLE_MS = 120;
-/** Tolerance when rounding a time to a frame index. */
-export const FRAME_EPS = 1e-6;
 /**
  * Container timestamps are often rounded to the millisecond, so the frame for
  * the exact time n/fps can sit a fraction of a millisecond after it. A frame

@@ -1,3 +1,4 @@
+import { frameStartSeconds, framesUntil, nearestFrame } from "@uberscene/kit/schema";
 import {
   boundsOf,
   buildFramePlan,
@@ -5,7 +6,6 @@ import {
   captureWarnings,
   type DrawOp,
   type DrawRect,
-  FRAME_EPS,
   type MediaResolver,
 } from "@uberscene/player/engine";
 import { buildSourceIndex, lookupAsset, type ResolvedState, type SourceIndex, type SubjectBox } from "@uberscene/sdk";
@@ -137,8 +137,9 @@ export async function checkLayout(options: LayoutCheckOptions): Promise<LayoutCh
   const frame: DrawRect = { x: 0, y: 0, w: W, h: H };
   const safe: DrawRect = { x: z.left * W, y: z.top * H, w: W - (z.left + z.right) * W, h: H - (z.top + z.bottom) * H };
   const step = Math.max(1, Math.round((options.step ?? 1 / fps) * fps));
-  const first = Math.round((options.from ?? 0) * fps);
-  const last = Math.ceil(Math.min(duration, options.to ?? duration) * fps - FRAME_EPS);
+  const rate = state.composition.rate;
+  const first = nearestFrame(options.from ?? 0, rate);
+  const last = framesUntil(Math.min(duration, options.to ?? duration), rate);
 
   const warnings: string[] = [];
   captureWarnings((m) => {
@@ -171,9 +172,9 @@ export async function checkLayout(options: LayoutCheckOptions): Promise<LayoutCh
         id: b.id,
         kind: b.kind,
         ...(other !== undefined ? { with: other } : {}),
-        from: n / fps,
-        to: n / fps,
-        at: n / fps,
+        from: frameStartSeconds(n, rate),
+        to: frameStartSeconds(n, rate),
+        at: frameStartSeconds(n, rate),
         box,
         area,
         message: "",
@@ -184,16 +185,16 @@ export async function checkLayout(options: LayoutCheckOptions): Promise<LayoutCh
       issues.push(run);
       open.set(key, run);
     }
-    run.to = n / fps;
+    run.to = frameStartSeconds(n, rate);
     run.n = n;
-    if (worst > run.worst) Object.assign(run, { worst, at: n / fps, box, area });
+    if (worst > run.worst) Object.assign(run, { worst, at: frameStartSeconds(n, rate), box, area });
   };
 
   let samples = 0;
   try {
     for (let n = first; n < last; n += step) {
       samples++;
-      const t = n / fps;
+      const t = frameStartSeconds(n, rate);
       const all = (await engine.bounds(t, { parts: true })).filter((b) => !b.backdrop && !covers(b.rect, frame));
       // Parts first: where a part a layer's code named breaks a rule, the layer is not reported for it as well.
       const shown = [...all.filter((b) => b.kind === "part"), ...all.filter((b) => b.kind !== "part")];

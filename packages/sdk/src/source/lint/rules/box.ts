@@ -14,11 +14,7 @@ const COMPONENT_DEFAULTS: Readonly<Record<string, { readonly x: number; readonly
   Badge: { x: 0, y: 0 },
   Callout: { x: 320, y: -220 },
   Counter: { x: 0, y: 0 },
-  Frame: { x: 0, y: 0 },
-  Highlight: { x: 0, y: 0 },
   LowerThird: { x: -560, y: 330 },
-  ProgressBar: { x: 0, y: 440 },
-  QuoteCard: { x: 0, y: 0 },
   TypeCard: { x: 0, y: 0 },
 };
 /** Points from the frame's centre that move with a component's old `x` and `y`. */

@@ -16,7 +16,7 @@ layers all take `box`, and keyframes move it with the paths `box.x` and `box.y`.
 flat `x`, `y` and `width`: they sit in their default box, the lower safe area, unless their `box` changes a field of
 it, and `style` on captions is look only. Components take `box`, with `x` and `y`, for their centre from the frame's
 top left in place of their flat `x` and `y`. An axis left out is centred on the composition's frame, whatever its
-size, as before; `LowerThird`, `Callout` and `ProgressBar`'s `y` keep defaults set for a 1920 by 1080 frame. A
+size, as before; `LowerThird` and `Callout` keep defaults set for a 1920 by 1080 frame. A
 component called as a function takes its frame from `withFrame(size, fn)`. A new `box/update`
 action places an element or the captions, the layout check's fixes name the `box` values to write, and
 `uberscene inspect --at` prints each element's box.
@@ -24,9 +24,9 @@ action places an element or the captions, the layout check's fixes name the `box
 To move a file, run `uberscene lint --fix video.tsx`. It turns `transform.position` into a box with
 `origin: "center"` at the same point (each coordinate plus half the frame), keyframes of `transform.position.x` and
 `.y` into `box.x` and `box.y`, the captions' `style.position`, `x`, `y` and `width` into the box that draws them where
-they were, and components' `x` and `y` into `box`. It also gives a box to a `LowerThird`, `Callout` or `ProgressBar` placed by its
+they were, and components' `x` and `y` into `box`. It also gives a box to a `LowerThird` or `Callout` placed by its
 default on a frame that is not 1920 by 1080, where that default was an offset from the centre. It needs the composition's width and
-height written as numbers or as top-level constants. Two things it cannot move: an `Arrow`'s `from` and `to` and a
-`Callout`'s `to` written without the callout's `x` and `y` (now points from the top left; add half the frame to each),
+height written as numbers or as top-level constants. Two things it cannot move: a
+`Callout`'s `to` written without the callout's `x` and `y` (now a point from the top left; add half the frame to it),
 and placements built in code (a transform object in a constant, a spread). The theme's `note` title preset no
 longer carries a position: a title that used it alone now sits centred, so give it a box.
