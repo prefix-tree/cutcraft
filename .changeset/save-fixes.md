@@ -7,3 +7,5 @@ Undoing a delete and then saving no longer writes the element into the file twic
 Saving no longer changes the edit history it saves. A save used to take a settings change (`defaults`) and the fonts a picker asked for out of the history, so a second save, or a save that first had to write out a generated element, left them out.
 
 Title text is written so the file reads it back as typed. Text with a brace or an angle bracket, such as `{50%}`, `a } b` or `x > y`, used to make the save fail or leave a file that did not compile; it is now written as a string in braces.
+
+A save with new settings and an edit to a prop bound to them, such as the colour of a title written `color={accent}`, no longer fails with overlapping edits. The edited value goes into the one rewrite of `export const defaults`.

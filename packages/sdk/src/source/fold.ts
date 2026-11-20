@@ -78,6 +78,10 @@ export function fold(
   const fonts: FontsToDeclare = new Map();
   // The weights a font picker asked for (`font/use`), kept on the composition until now.
   const picked = log.net.get("composition")?.props.get("$fonts");
+  // New settings rewrite the whole `defaults` literal. A prop bound to one of its keys, edited in the same log, goes
+  // into that one edit (written after the loop) rather than a second edit inside the same range.
+  const newDefaults = log.net.get("composition")?.props.get("$defaults");
+  const settings = index.defaults && isRecord(newDefaults) ? { ...newDefaults } : null;
   const taken = topLevelNames(index);
   const fontValue = (family: Json | undefined): Json | undefined => {
     if (typeof family !== "string") return family;
@@ -170,8 +174,8 @@ export function fold(
     }
     if (id === "composition" && props.has("$defaults")) {
       const value = props.get("$defaults");
-      if (value === undefined) {
-        /* the panel change was undone; nothing to write */
+      if (value === undefined || settings) {
+        /* undone, nothing to write; or written whole after the loop */
       } else if (index.defaults)
         edits.push({ kind: "defaults", id, range: index.defaults.range, text: printLiteral(value) });
       else skipped.push({ id, reason: "no `export const defaults` literal to rewrite" });
@@ -234,6 +238,10 @@ export function fold(
             continue;
           }
           const target = handle ? { id, props: site.interior!.props, openingTag: site.interior!.openingTag } : site;
+          if (key !== undefined && settings && value !== undefined) {
+            settings[key] = value;
+            continue;
+          }
           const e =
             key !== undefined
               ? bindingEdit(index, id, prop, key, value, skipped)
@@ -268,6 +276,8 @@ export function fold(
   // latest first, whatever order the net holds them in.
   for (const p of placements.sort((a, b) => a.at.seq - b.at.seq))
     if (!place(p.id, p.at, p.print, p.from)) needsBake.push(p.at.parent);
+  if (settings && index.defaults)
+    edits.push({ kind: "defaults", id: "composition", range: index.defaults.range, text: printLiteral(settings) });
   const writeGroup = (group: PlacedGroup): void => {
     const printed = group.ids.map((id) => (group.texts.get(id) as () => string)()).join("\n");
     edits.push(insertEdit(index, group.ids[0] as string, group.point, printed));

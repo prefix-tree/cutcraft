@@ -220,6 +220,16 @@ describe("fold", () => {
     expect(result.text).toContain('export const defaults = { title: "Changed", accent: "#123456" };');
   });
 
+  it("writes a settings change and an edit to a prop bound to the settings into one defaults literal", () => {
+    const exec = fixtureExecutor();
+    exec.execute({ type: "composition/setProps", params: { defaults: { title: "Changed", accent: "#123456" } } });
+    expect(exec.execute({ type: "element/update", params: { id: "t1", props: { color: "#abcdef" } } }).ok).toBe(true);
+    const result = foldToSource(fixtureText, exec.log(), exec.state());
+    expect(result.skipped).toEqual([]);
+    expect(result.text).toContain('export const defaults = { title: "Changed", accent: "#abcdef" };');
+    expect(result.text).toContain("color={accent}");
+  });
+
   it.each(["{50%}", "a } b", "x > y", "<b>", '"quoted" {x}'])(
     "writes title text %s so the file reads it back unchanged",
     (words) => {
