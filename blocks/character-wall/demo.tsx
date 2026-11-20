@@ -11,7 +11,7 @@ export default function Demo() {
       fps={30}
       width={1080}
       height={1920}
-      background={{ mode: "color", color: "$background" }}
+      background={{ type: "color", color: "$background" }}
       theme={{ extends: "mono", palette: { background: "#000000", muted: "#4a4a4a" } }}
     >
       <Track id="wall" layout="free">

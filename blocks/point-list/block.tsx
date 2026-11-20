@@ -16,7 +16,7 @@ const point = z.object({
   label: z.string().describe("The word under the tile"),
   tag: z.string().optional().describe("The small text at the tile's top left, such as #2"),
   icon: z.enum(ICONS).describe("The drawing: lines of a script, cuts, a sound wave, a frame, type, or none"),
-  at: z.number().optional().describe("When it arrives, in seconds of the video"),
+  start: z.number().optional().describe("When it arrives, in seconds of the video"),
   after: z.number().optional().describe("When it arrives, in seconds since the layer started"),
   name: z.string().optional().describe("What the layout check calls it; default its label in lower case"),
 });
@@ -139,7 +139,7 @@ function Icon({ kind, ink, accent, type }: { kind: IconKind; ink: string; accent
   return null;
 }
 
-const arrival = (p: Point | undefined) => (p?.at !== undefined ? { at: p.at } : { after: p?.after ?? 1e6 });
+const arrival = (p: Point | undefined) => (p?.start !== undefined ? { start: p.start } : { after: p?.after ?? 1e6 });
 
 function Tile({ index, p }: { index: number; p: PointListProps }) {
   const point = p.points[index] as Point;
