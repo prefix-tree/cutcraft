@@ -362,7 +362,7 @@ nothing a tool needs to edit a file.
 | `font` | `({ family, src: "asset:<id>", weight?, style? }) => FontRef` | Declares a face from a font file and returns it as a value that stands for its family wherever a string goes ([Fonts](/guide/themes#fonts)). The faces a file uses or exports are on `state.fonts`. |
 | `googleFont` | `(family, { weights?, styles? }?) => FontRef` | Declares a Google Fonts family, one face per weight and style, and returns it as a value that stands for its family. The export downloads it once into a local cache. |
 | `THEMES`, `THEME_NAMES`, `MOTIONS`, `MOTION_NAMES` | registries | The built-in themes (`midnight`, `paper`, `neon`, `pastel`, `mono`, `bold`) and motion styles a file's `theme` can name or extend ([Themes](/guide/themes)). |
-| `LowerThird`, `Callout`, `Counter`, `TypeCard`, `QuoteCard`, `Frame`, … and `COMPONENTS` | `(props) => element` | The ready-made components, and the registry the [components reference](/reference/components/) is generated from. |
+| `LowerThird`, `Callout`, `Badge`, `Counter`, `TypeCard` and `COMPONENTS` | `(props) => element` | The ready-made components, and the registry the [components reference](/reference/components/) is generated from. |
 
 From `@uberscene/kit/schema`, the vocabulary as data: the element schemas and capabilities, the effect and
 transition registries, the enums, the fonts and the themes. Tools and the reference pages read it.
@@ -416,15 +416,13 @@ Every name each entry exports, read from the code. The sections above explain th
 
 ### `@uberscene/kit`
 
-106 exports.
+99 exports.
 
 | Export | Kind | |
 |---|---|---|
 | `Adjustment` | const | The `<Adjustment>` element ([reference](/reference/elements/adjustment)). |
 | `Angle` | const | The `<Angle>` element ([reference](/reference/elements/angle)). |
-| `Arrow` | function | An arrow drawn from one point to another, straight or bowed, its head at the end. |
 | `Audio` | const | The `<Audio>` element ([reference](/reference/elements/audio)). |
-| `Background` | function | A full-frame backdrop to put on a track beneath everything. |
 | `Badge` | function | A short word on a pill that pops in. |
 | `BlockMeta` | type |  |
 | `blockMetaSchema` | const | What a block says about itself, so an agent or a person can choose it without opening it. |
@@ -455,7 +453,6 @@ Every name each entry exports, read from the code. The sections above explain th
 | `font` | function | Declares a face from a font file and returns it (a `FontRef`, standing for its family), to pass as a `font` prop, a theme font or a CSS `fontFamily`. |
 | `fontFamily` | function | A CSS `font-family` value for free code. |
 | `FontRef` | type | A family a file declares, as `font()` and `googleFont()` return it. |
-| `Frame` | function | A rounded border around part of the picture. |
 | `Freeze` | const | The `<Freeze>` element ([reference](/reference/elements/freeze)). |
 | `Gap` | const | The `<Gap>` element ([reference](/reference/elements/gap)). |
 | `googleFont` | function | Declares a Google Fonts family, in each weight and style given (default 400, normal), and returns it (a `FontRef`). |
@@ -463,7 +460,6 @@ Every name each entry exports, read from the code. The sections above explain th
 | `Grid` | interface |  |
 | `GridCell` | interface | One cell of a grid. |
 | `GridOptions` | interface |  |
-| `Highlight` | function | A hand-drawn mark on something already in the frame. |
 | `holdLayerFrame` | function | Hold the frame until the returned release is called (once; later calls do nothing). |
 | `interpolate` | function | Maps `input` from `inputRange` onto `outputRange`, piecewise. |
 | `InterpolateOptions` | interface |  |
@@ -490,9 +486,6 @@ Every name each entry exports, read from the code. The sections above explain th
 | `Nested` | const | The `<Nested>` element ([reference](/reference/elements/nested)). |
 | `Point` | type |  |
 | `progress` | function | How far along something is on a layer's clock. |
-| `ProgressBar` | function | A bar that fills from the left to its value. |
-| `QuoteCard` | function | A passage on a paper card with its source above it, and a marker that sweeps across the phrases that matter, each at its own moment. |
-| `QuoteCardPart` | function | The card, laid out as a whole. |
 | `random` | function | A number in [0, 1) fixed by its keys. |
 | `Seekable` | interface | Anything that can be set to a moment. |
 | `Shape` | const | The `<Shape>` element ([reference](/reference/elements/shape)). |

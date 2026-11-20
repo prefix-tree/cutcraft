@@ -158,32 +158,8 @@
       "link": "/reference/components/counter"
     },
     {
-      "text": "ProgressBar",
-      "link": "/reference/components/progress-bar"
-    },
-    {
-      "text": "Arrow",
-      "link": "/reference/components/arrow"
-    },
-    {
-      "text": "Highlight",
-      "link": "/reference/components/highlight"
-    },
-    {
-      "text": "Background",
-      "link": "/reference/components/background"
-    },
-    {
       "text": "TypeCard",
       "link": "/reference/components/type-card"
-    },
-    {
-      "text": "QuoteCard",
-      "link": "/reference/components/quote-card"
-    },
-    {
-      "text": "Frame",
-      "link": "/reference/components/frame"
     }
   ],
   "effects": [

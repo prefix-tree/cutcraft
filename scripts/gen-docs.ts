@@ -421,7 +421,7 @@ function componentPage(name: keyof typeof COMPONENTS): string {
     "Besides the timing props (`start`, `anchor`, `at`, `offset`, `duration`):",
     "",
     ...paramsTable(
-      c.props.omit({ start: true, anchor: true, at: true, offset: true, duration: true }),
+      (c.props as z.ZodObject).omit({ start: true, anchor: true, at: true, offset: true, duration: true }),
       `component:${name}`,
     ),
     "[All components](/reference/components/)",

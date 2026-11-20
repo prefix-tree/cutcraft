@@ -72,7 +72,7 @@ take them, each as `{ type, duration, easing }`.
 
 ## Ready-made components
 
-Lower thirds, callouts, badges, counters, progress bars, arrows, highlights, backgrounds and cards come ready-made.
+Lower thirds, callouts, badges, counters and type cards come ready-made.
 Each is an ordinary function, imported from `@uberscene/kit`, that returns the kit's own titles, shapes and SVG. So a
 lower third is timed by a word like any title, the theme styles it, and the layout check sees its text.
 
@@ -88,15 +88,11 @@ all, each with its props.
 
 ### Cards for a talking head
 
-Three components are made for a talking head cut into a short:
+`TypeCard` is made for a talking head cut into a short: a card of big type that builds line by line, with a pill
+behind a line or a strike through it. For a border round the speaker under it, draw a `<Shape>` with no fill and a
+`stroke`.
 
-| Component | Is |
-|---|---|
-| `TypeCard` | A card of big type that builds line by line, with a pill behind a line or a strike through it. |
-| `QuoteCard` | A passage with its source, and a marker that sweeps across the phrases that matter. |
-| `Frame` | A rounded border for the speaker under a card. |
-
-A card's lines and marks each take `at="word:N"`, a word of the card's `anchor`. So they come in as the word is said,
+A card's lines each take `at="word:N"`, a word of the card's `anchor`. So they come in as the word is said,
 and stay in step when the cut changes.
 
 <Example src="previews/components/type-card" alt="Big type building line by line: a struck-out word, then its replacement on a pill">

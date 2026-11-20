@@ -96,11 +96,14 @@ To keep one element still, give it an `enter` of type `none`.
 
 Overlays draw above the footage, so a background graphic on top of a clip would hide it. Put a background on a track
 **below every track that holds footage**: overlays there draw beneath the footage, in the preview and the export
-alike, and the composition background goes under them.
+alike, and the composition background goes under them. A plain gradient needs no track at all:
+`<Composition background={{ mode: "gradient", gradient }}>`.
 
 ```tsx
 <Track id="backdrop" layout="free">
-  <Background id="dots" variant="dots" start={0} duration={12} />
+  <Layer id="dots" start={0} duration={12}>
+    <div style={{ position: "absolute", inset: 0, backgroundImage: "radial-gradient(var(--us-primary) 2px, transparent 2px)", backgroundSize: "48px 48px" }} />
+  </Layer>
 </Track>
 <Track id="main">…clips…</Track>
 <Track id="notes" layout="free">…callouts above the footage…</Track>
