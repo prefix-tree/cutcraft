@@ -1,0 +1,62 @@
+{
+  "name": "@uberscene/editor",
+  "version": "0.5.0",
+  "description": "Embeddable editor parts for the cut video DSL: preview, layers, timeline, selection and undoable edits around one player.",
+  "keywords": [
+    "video",
+    "video-editing",
+    "react",
+    "tsx",
+    "editor",
+    "timeline"
+  ],
+  "license": "MIT",
+  "homepage": "https://uberscene.prefixtree.xyz/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/prefix-tree/uberscene.git",
+    "directory": "packages/editor"
+  },
+  "bugs": {
+    "url": "https://github.com/prefix-tree/uberscene/issues"
+  },
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "exports": {
+      ".": "./dist/index.mjs"
+    }
+  },
+  "scripts": {
+    "build": "tsdown src/index.ts --dts",
+    "prepack": "pnpm run build",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "dependencies": {
+    "@uberscene/player": "workspace:*",
+    "@uberscene/sdk": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
+    "jsdom": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}
