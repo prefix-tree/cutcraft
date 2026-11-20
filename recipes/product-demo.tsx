@@ -55,7 +55,7 @@ export default function Video({ accent }: z.infer<typeof schema>) {
           height={140}
           fill={{ type: "none" }}
           stroke={{ color: accent, width: 8 }}
-          transform={{ position: { x: 520, y: -280 } }}
+          box={{ x: 1480, y: 260, origin: "center" }}
         />
         <Shape
           id="ring-roast"
@@ -67,7 +67,7 @@ export default function Video({ accent }: z.infer<typeof schema>) {
           height={140}
           fill={{ type: "none" }}
           stroke={{ color: accent, width: 8 }}
-          transform={{ position: { x: -300, y: 40 } }}
+          box={{ x: 660, y: 580, origin: "center" }}
         />
         <Shape
           id="ring-order"
@@ -79,7 +79,7 @@ export default function Video({ accent }: z.infer<typeof schema>) {
           height={140}
           fill={{ type: "none" }}
           stroke={{ color: accent, width: 8 }}
-          transform={{ position: { x: 640, y: 380 } }}
+          box={{ x: 1600, y: 920, origin: "center" }}
         />
         <Title
           id="step-1"
@@ -89,7 +89,7 @@ export default function Video({ accent }: z.infer<typeof schema>) {
           size={56}
           weight={700}
           valign="top"
-          transform={{ position: { x: 0, y: 80 } }}
+          box={{ x: 960, y: 620, origin: "center" }}
           animation={{ preset: "fade", in: 0.3, out: 0.3 }}
         >
           1. Open the dashboard
@@ -112,7 +112,7 @@ export default function Video({ accent }: z.infer<typeof schema>) {
         />
       </Track>
 
-      <Captions id="captions" src="asset:voice" style={{ position: "bottom", size: 40 }} />
+      <Captions id="captions" src="asset:voice" style={{ size: 40 }} />
     </Composition>
   );
 }

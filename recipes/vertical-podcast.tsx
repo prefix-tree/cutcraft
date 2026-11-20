@@ -104,7 +104,7 @@ export default function Video({ accent }: z.infer<typeof schema>) {
           color={accent}
           align="left"
           valign="bottom"
-          transform={{ position: { x: 60, y: -360 } }}
+          box={{ x: 600, y: 600, origin: "center" }}
           animation={{ preset: "slide-left", in: 0.3, out: 0.2 }}
         >
           Ana
@@ -119,7 +119,7 @@ export default function Video({ accent }: z.infer<typeof schema>) {
           color={accent}
           align="left"
           valign="bottom"
-          transform={{ position: { x: 60, y: -360 } }}
+          box={{ x: 600, y: 600, origin: "center" }}
           animation={{ preset: "slide-left", in: 0.3, out: 0.2 }}
         >
           Ben
@@ -134,7 +134,7 @@ export default function Video({ accent }: z.infer<typeof schema>) {
           color={accent}
           align="left"
           valign="bottom"
-          transform={{ position: { x: 60, y: -360 } }}
+          box={{ x: 600, y: 600, origin: "center" }}
           animation={{ preset: "slide-left", in: 0.3, out: 0.2 }}
         >
           Ana
@@ -149,7 +149,7 @@ export default function Video({ accent }: z.infer<typeof schema>) {
           color={accent}
           align="left"
           valign="bottom"
-          transform={{ position: { x: 60, y: -360 } }}
+          box={{ x: 600, y: 600, origin: "center" }}
           animation={{ preset: "slide-left", in: 0.3, out: 0.2 }}
         >
           Ben
@@ -164,7 +164,7 @@ export default function Video({ accent }: z.infer<typeof schema>) {
           color={accent}
           align="left"
           valign="bottom"
-          transform={{ position: { x: 60, y: -360 } }}
+          box={{ x: 600, y: 600, origin: "center" }}
           animation={{ preset: "slide-left", in: 0.3, out: 0.2 }}
         >
           Ana
@@ -179,7 +179,7 @@ export default function Video({ accent }: z.infer<typeof schema>) {
           color={accent}
           align="left"
           valign="bottom"
-          transform={{ position: { x: 60, y: -360 } }}
+          box={{ x: 600, y: 600, origin: "center" }}
           animation={{ preset: "slide-left", in: 0.3, out: 0.2 }}
         >
           Ben
@@ -194,7 +194,7 @@ export default function Video({ accent }: z.infer<typeof schema>) {
           color={accent}
           align="left"
           valign="bottom"
-          transform={{ position: { x: 60, y: -360 } }}
+          box={{ x: 600, y: 600, origin: "center" }}
           animation={{ preset: "slide-left", in: 0.3, out: 0.2 }}
         >
           Ana
@@ -209,7 +209,7 @@ export default function Video({ accent }: z.infer<typeof schema>) {
           color={accent}
           align="left"
           valign="bottom"
-          transform={{ position: { x: 60, y: -360 } }}
+          box={{ x: 600, y: 600, origin: "center" }}
           animation={{ preset: "slide-left", in: 0.3, out: 0.2 }}
         >
           Ben
@@ -224,7 +224,7 @@ export default function Video({ accent }: z.infer<typeof schema>) {
           color={accent}
           align="left"
           valign="bottom"
-          transform={{ position: { x: 60, y: -360 } }}
+          box={{ x: 600, y: 600, origin: "center" }}
           animation={{ preset: "slide-left", in: 0.3, out: 0.2 }}
         >
           Ana
@@ -234,7 +234,7 @@ export default function Video({ accent }: z.infer<typeof schema>) {
       <Captions
         id="captions"
         src="asset:podcast"
-        style={{ position: "bottom", size: 56, highlight: accent }}
+        style={{ size: 56, highlight: accent }}
         animation="karaoke"
         maxChars={28}
       />

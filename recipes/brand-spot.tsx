@@ -103,7 +103,8 @@ export default function Video({ theme, product, tagline, cta }: z.infer<typeof s
           out={8}
           start={4}
           fit="contain"
-          transform={{ scale: 0.62, position: { x: 260, y: 40 } }}
+          box={{ x: 1220, y: 580, origin: "center" }}
+          transform={{ scale: 0.62 }}
         />
         {/* A browser window around the scaled recording (1190 x 670) with a 51 px title bar, anchored to it. */}
         <Layer id="window" anchor="demo" duration={6}>
@@ -139,7 +140,7 @@ export default function Video({ theme, product, tagline, cta }: z.infer<typeof s
       </Track>
 
       <Track id="open" layout="free" name="Opening">
-        <Title id="kicker" start={0.3} duration={3.5} style="kicker" transform={{ position: { x: 0, y: -170 } }}>
+        <Title id="kicker" start={0.3} duration={3.5} style="kicker" box={{ x: 960, y: 370, origin: "center" }}>
           INTRODUCING
         </Title>
         <Title id="name" start={0.5} duration={3.3} style="h1" size={180}>
@@ -163,7 +164,7 @@ export default function Video({ theme, product, tagline, cta }: z.infer<typeof s
             />
           </svg>
         </Motion>
-        <Title id="tagline" start={1.4} duration={2.4} style="body" transform={{ position: { x: 0, y: 200 } }}>
+        <Title id="tagline" start={1.4} duration={2.4} style="body" box={{ x: 960, y: 740, origin: "center" }}>
           {tagline}
         </Title>
       </Track>
@@ -216,7 +217,7 @@ export default function Video({ theme, product, tagline, cta }: z.infer<typeof s
       </Track>
 
       <Track id="close" layout="free" name="Closing">
-        <Title id="end-name" start={10} duration={2} style="h2" transform={{ position: { x: 0, y: -120 } }}>
+        <Title id="end-name" start={10} duration={2} style="h2" box={{ x: 960, y: 420, origin: "center" }}>
           {product}
         </Title>
         <Motion id="end-cta" start={10.3} duration={1.7} sequence={[popIn]}>
