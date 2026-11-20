@@ -1,4 +1,4 @@
-import type { Placement } from "@uberscene/sdk";
+import type { Placement } from "@uberscene/sdk/resolver";
 
 import {
   FRAME_WAIT_MS,

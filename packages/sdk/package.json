@@ -27,7 +27,8 @@
     "./dist/**"
   ],
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./resolver": "./src/resolver.ts"
   },
   "files": [
     "dist"
@@ -35,11 +36,12 @@
   "publishConfig": {
     "access": "public",
     "exports": {
-      ".": "./dist/index.mjs"
+      ".": "./dist/index.mjs",
+      "./resolver": "./dist/resolver.mjs"
     }
   },
   "scripts": {
-    "build": "tsdown src/index.ts --dts",
+    "build": "tsdown src/index.ts src/resolver.ts --dts",
     "prepack": "pnpm run build",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run",

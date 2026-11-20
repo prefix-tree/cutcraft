@@ -381,6 +381,9 @@ What a tool is built with: the resolver, the actions and executor, the patch log
 and the inspection rows. See [Editing](/guide/editing) for how these fit together and [Actions](/reference/actions)
 for every action. The player and the renderer build on it too.
 
+`@uberscene/sdk/resolver` has the resolver and the manifest types alone, without the parser, the actions or the
+lint. It is what the player imports, so an app that plays files and never edits them loads no Babel.
+
 | Export | Signature | |
 |---|---|---|
 | `collectModule` | `(mod: VideoModule, overrides?: Record<string, unknown>, options?: CollectOptions) => CollectedTree` | Calls the file's default component with `defaults` and `overrides` and collects the element tree. |
@@ -942,6 +945,89 @@ Every name each entry exports, read from the code. The sections above explain th
 | `walk` | function |  |
 | `WaveformSummary` | interface |  |
 | `WordRow` | interface |  |
+
+### `@uberscene/sdk/resolver`
+
+76 exports.
+
+| Export | Kind | |
+|---|---|---|
+| `AssetEntry` | interface |  |
+| `assetIdOf` | function |  |
+| `AssetManifest` | interface | What the ingest service knows about an asset. |
+| `assetPlay` | function | The play of one clip or audio placement. |
+| `AssetPlay` | interface | Where an asset plays on the timeline. |
+| `collect` | function | Walk the element tree the file's default export returned and index every vocabulary element by id. |
+| `CollectedNode` | interface | One vocabulary element as collected from the React element tree, before schema parsing and before placement. |
+| `CollectedTree` | interface |  |
+| `collectModule` | function |  |
+| `CollectOptions` | interface |  |
+| `CubeLut` | interface |  |
+| `Cue` | interface |  |
+| `cueNodes` | function | Generated `<Caption>` nodes for the cues, as children of the captions node. |
+| `CueOptions` | interface |  |
+| `DEFAULT_CUE_OPTIONS` | const |  |
+| `Dependent` | type | Something whose place or length is given by another element. |
+| `dependentsOf` | function | The elements that depend on `id`, in timeline order of the file, each once per way it depends. |
+| `Editable` | type |  |
+| `EMPTY_MANIFEST` | const |  |
+| `findParentOf` | function |  |
+| `FreezeHold` | interface | A `<Freeze>`. |
+| `freezeHoldsOf` | function | A clip's `<Freeze>` children, sorted by `start`. |
+| `freezeShift` | function | Element-relative `rel` with the holds before it taken out, or the held source second when `rel` is inside a hold. |
+| `freezeUnshift` | function | Element-relative time of clip time `u`. |
+| `heldWithin` | function | Seconds of holds inside the first `length` seconds of a clip. |
+| `holdTotal` | function | Total seconds the holds add to a clip. |
+| `InstalledBlock` | interface | A block copied into the project. |
+| `INTERIOR_PREFIX` | const | Prop keys under this prefix address a Layer's handles rather than the Layer's own props. |
+| `isResolveError` | function |  |
+| `isTimeRefString` | function |  |
+| `Json` | type |  |
+| `LayerInterior` | interface |  |
+| `lookupAsset` | function |  |
+| `NetPatch` | interface | The reduced effect of every patch on one element. |
+| `onTimeline` | function | Composition time of an asset second, through the first play that covers it; null when it is not on the timeline. |
+| `parseCube` | function | Parses a `.cube` file's text; throws a message naming the line where it is wrong. |
+| `ParsedTimeRef` | type |  |
+| `ParsedTranscript` | interface |  |
+| `parseTimeRef` | function |  |
+| `parseTranscript` | function | Reads a transcript into the manifest's word list (`assets.<id>.transcript.words`), sniffing the format when it is not given. |
+| `Patch` | type | One change recorded by an action. |
+| `PatchLog` | interface |  |
+| `Placement` | interface |  |
+| `planCues` | function | Group timeline words into cues. |
+| `playsKey` | function | A stable key for the plays of one asset, so an unchanged timeline reuses the generated nodes. |
+| `Presence` | type |  |
+| `rampAdvance` | function | Source seconds played in `rel` clip seconds. |
+| `rampInverse` | function | Clip seconds that play `advance` source seconds. |
+| `RampKey` | interface | A `<SpeedKey>`. |
+| `rampSpeed` | function | Speed at clip time `u` under keys sorted by `at`. |
+| `reachedHolds` | function | The holds a clip reaches when, without any hold, it would last `played` seconds. |
+| `resolve` | function | Absolute placements for every element, computed from the tree, the manifests and the patch log. |
+| `ResolvedState` | interface |  |
+| `ResolvedTrack` | interface |  |
+| `ResolveError` | interface |  |
+| `ResolveErrorCode` | type |  |
+| `resolveScene` | function | Resolve a `<Nested of={Scene}>` interior. |
+| `resolveTimeRef` | function | Turn a reference into seconds. |
+| `sameAsset` | function |  |
+| `samePlacement` | function | Whether two placements would render and edit the same; used to hand back the previous object. |
+| `SceneFn` | type |  |
+| `Shot` | interface |  |
+| `Silence` | interface |  |
+| `SourceIndexLike` | interface |  |
+| `speedKeysOf` | function | A clip's `<SpeedKey>` children, sorted by `at`. |
+| `SubjectBox` | interface | A subject's box at source second `t`, as fractions of the source picture (0..1 from its top left). |
+| `SubtitleOptions` | interface |  |
+| `subtitles` | function | The captions the cut plays, as an SRT or WebVTT file. |
+| `TimelineWord` | interface | A transcript word at the composition time it plays. |
+| `timelineWords` | function | The asset's words at the times they play, in timeline order; words outside every play are left out. |
+| `TimeRef` | type |  |
+| `TranscriptFormat` | type |  |
+| `TranscriptWord` | interface |  |
+| `VideoModule` | interface |  |
+| `walk` | function |  |
+| `WaveformSummary` | interface |  |
 
 ### `@uberscene/player`
 

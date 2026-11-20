@@ -1,5 +1,5 @@
 import { Audio, Clip, Composition, Layer, Title, Track, Transition, useT } from "@uberscene/kit";
-import type { AssetManifest } from "@uberscene/sdk";
+import type { AssetManifest } from "@uberscene/sdk/resolver";
 
 export const manifest: AssetManifest = {
   assets: {

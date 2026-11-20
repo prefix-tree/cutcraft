@@ -2,7 +2,7 @@ import { createRef } from "react";
 import { createRoot } from "react-dom/client";
 
 import { Player, type PlayerRef } from "@uberscene/player";
-import { collectModule, resolve } from "@uberscene/sdk";
+import { collectModule, resolve } from "@uberscene/sdk/resolver";
 
 import * as bars from "./composition";
 import * as overlays from "./overlays";

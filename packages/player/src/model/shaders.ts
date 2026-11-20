@@ -10,7 +10,7 @@ import {
   type ShaderUniform,
   shaderFor,
 } from "@uberscene/kit/schema";
-import type { Placement, ResolvedState } from "@uberscene/sdk";
+import type { Placement, ResolvedState } from "@uberscene/sdk/resolver";
 
 import { cssPasses } from "./css-passes";
 import { childFilter, paramsAt } from "./effects";

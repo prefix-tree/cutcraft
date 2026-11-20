@@ -34,6 +34,7 @@ const { text: edited } = foldToSource(text, exec.log(), exec.state());   // the 
 | `Executor` | Runs 98 editor actions (trim, split, move, ripple, keyframes, captions and more). Each one validates, applies and undoes; history groups a drag into one step. `element/create`, `element/update` and `element/remove` work on every overlay kind, and a remove takes what depends on the element with it. |
 | `loadModule`, `buildSourceIndex`, `foldToSource` | `loadModule(source, { imports })` evaluates a file's text; the file may import `react`, `zod` and the kit, plus the modules you pass. `buildSourceIndex` maps ids to their place in the text, and `foldToSource` writes edits back as small token changes. |
 | `lint`, `fixSource` | Check the file follows the conventions an editor relies on, and apply the fixes that have one right answer. |
+| `@uberscene/sdk/resolver` | The resolver and the manifest types alone, without the parser, the actions or the lint: what a player needs. |
 | `affordances`, `timelineRows` | What can be done to one element, and the rows a timeline view shows. |
 
 ## Docs

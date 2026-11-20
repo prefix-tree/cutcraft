@@ -1,5 +1,5 @@
 import type { LayerClock } from "@uberscene/kit";
-import { freezeHoldsOf, freezeShift, type Placement, rampAdvance, speedKeysOf } from "@uberscene/sdk";
+import { freezeHoldsOf, freezeShift, type Placement, rampAdvance, speedKeysOf } from "@uberscene/sdk/resolver";
 
 import { FRAME_EPS } from "../constants";
 

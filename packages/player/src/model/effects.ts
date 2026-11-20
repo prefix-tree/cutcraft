@@ -1,5 +1,5 @@
 import { cssOf, effectEntry, isNeutral } from "@uberscene/kit/schema";
-import type { Placement } from "@uberscene/sdk";
+import type { Placement } from "@uberscene/sdk/resolver";
 
 import { devWarn } from "../warn";
 import { keyframedParam } from "./keyframes";

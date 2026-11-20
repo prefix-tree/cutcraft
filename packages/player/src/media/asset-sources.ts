@@ -1,4 +1,4 @@
-import { type AssetManifest, lookupAsset } from "@uberscene/sdk";
+import { type AssetManifest, lookupAsset } from "@uberscene/sdk/resolver";
 
 import { INPUT_IDLE_CLOSE_S, MAX_OPEN_INPUTS } from "../constants";
 import type {

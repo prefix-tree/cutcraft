@@ -8,6 +8,7 @@ const shared = {
   alias: {
     "@uberscene/kit/schema": new URL("../kit/src/schema.ts", import.meta.url).pathname,
     "@uberscene/kit": new URL("../kit/src/index.ts", import.meta.url).pathname,
+    "@uberscene/sdk/resolver": new URL("./src/resolver.ts", import.meta.url).pathname,
     "@uberscene/sdk": new URL("./src/index.ts", import.meta.url).pathname,
   },
 };

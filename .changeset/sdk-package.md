@@ -7,7 +7,7 @@ The kit is split in two. `@uberscene/kit` keeps what a video file imports, and t
 
 - **`@uberscene/kit`** exports the elements, components, hooks, helpers, diagram parts, knobs and theme, 105 names where it had 450. Video files need no change.
 - **`@uberscene/kit/schema`** is new: the vocabulary as data, for tools. It has the element schemas and capabilities, the effect and transition registries, enums, easings, fonts and themes.
-- **`@uberscene/sdk`** is new: the resolver, the actions and executor, the patch log, the write-back to source, the lint, the inspection rows and the manifest types. Install it next to the kit and import `collectModule`, `resolve`, `Executor`, `foldToSource`, `lint`, `loadModule` and the rest from it.
+- **`@uberscene/sdk`** is new: the resolver, the actions and executor, the patch log, the write-back to source, the lint, the inspection rows and the manifest types. Install it next to the kit and import `collectModule`, `resolve`, `Executor`, `foldToSource`, `lint`, `loadModule` and the rest from it. `@uberscene/sdk/resolver` has the resolver and the manifest types alone, without the parser, for an app that only plays files.
 - **`@uberscene/kit/source` is removed.** Everything it exported is exported by `@uberscene/sdk`.
 - Handler-authoring helpers (`define`, `makePropHandler`, `registerHandler` and the validators) are no longer exported.
 

@@ -23,6 +23,7 @@ const ENTRIES: readonly { readonly pkg: string; readonly name: string }[] = [
   { pkg: "kit", name: "." },
   { pkg: "kit", name: "./schema" },
   { pkg: "sdk", name: "." },
+  { pkg: "sdk", name: "./resolver" },
   { pkg: "player", name: "." },
   { pkg: "player", name: "./engine" },
   { pkg: "render", name: "." },

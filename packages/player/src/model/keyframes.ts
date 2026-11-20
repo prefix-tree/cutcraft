@@ -1,5 +1,5 @@
 import { type CurveKey, curveAt, EASING_FN, type Easing } from "@uberscene/kit/schema";
-import type { Placement } from "@uberscene/sdk";
+import type { Placement } from "@uberscene/sdk/resolver";
 
 import { devWarn } from "../warn";
 

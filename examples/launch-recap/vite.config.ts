@@ -10,6 +10,7 @@ export default defineConfig({
   resolve: {
     alias: {
       "@uberscene/kit/schema": here("../../packages/kit/src/schema.ts"),
+      "@uberscene/sdk/resolver": here("../../packages/sdk/src/resolver.ts"),
       "@uberscene/sdk": here("../../packages/sdk/src/index.ts"),
       "@uberscene/kit": here("../../packages/kit/src/index.ts"),
       "@uberscene/player/fonts.css": here("../../packages/player/fonts.css"),

@@ -1,4 +1,4 @@
-import type { ResolvedState } from "@uberscene/sdk";
+import type { ResolvedState } from "@uberscene/sdk/resolver";
 
 import { AudioEngine } from "./audio/audio-engine";
 import { WebAudioOutput } from "./audio/web-audio-output";

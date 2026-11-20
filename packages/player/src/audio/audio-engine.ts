@@ -1,4 +1,4 @@
-import { type ResolvedState, rampAdvance, rampSpeed } from "@uberscene/sdk";
+import { type ResolvedState, rampAdvance, rampSpeed } from "@uberscene/sdk/resolver";
 
 import type { Transport } from "../clock/transport";
 import { AUDIO_CACHE_S, AUDIO_PRIME_S, LOOKAHEAD_S, PLAY_PRIME_TIMEOUT_MS, SCHEDULER_MS } from "../constants";

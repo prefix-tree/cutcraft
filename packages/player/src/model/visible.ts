@@ -1,5 +1,5 @@
 import { capabilitiesOf } from "@uberscene/kit/schema";
-import type { Placement, ResolvedState, ResolvedTrack } from "@uberscene/sdk";
+import type { Placement, ResolvedState, ResolvedTrack } from "@uberscene/sdk/resolver";
 
 import { ease } from "./keyframes";
 

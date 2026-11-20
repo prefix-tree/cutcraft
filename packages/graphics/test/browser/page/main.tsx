@@ -10,7 +10,7 @@ import type { Mesh, MeshBasicMaterial } from "three";
 
 import { Composition, Layer, Motion, Three, Track, useLayer, useSeekable } from "@uberscene/kit";
 import { Player, type PlayerRef } from "@uberscene/player";
-import { collect, resolve } from "@uberscene/sdk";
+import { collect, resolve } from "@uberscene/sdk/resolver";
 
 import { installFreeCodeLibraries } from "../../../src/libraries";
 import { useLayerTime, useTimeline } from "../../../src/libraries/motion";

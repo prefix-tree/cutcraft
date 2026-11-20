@@ -1,4 +1,4 @@
-import { lookupAsset, type Placement, type ResolvedState } from "@uberscene/sdk";
+import { lookupAsset, type Placement, type ResolvedState } from "@uberscene/sdk/resolver";
 
 import { MOUNT_AHEAD_S, UNMOUNT_BEHIND_S } from "../constants";
 import { trackItems } from "../model/visible";

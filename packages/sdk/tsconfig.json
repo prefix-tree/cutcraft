@@ -4,6 +4,7 @@
     "types": ["node", "vitest/globals"],
     "baseUrl": ".",
     "paths": {
+      "@uberscene/sdk/resolver": ["./src/resolver.ts"],
       "@uberscene/sdk": ["./src/index.ts"],
       "@uberscene/kit": ["../kit/src/index.ts"],
       "@uberscene/kit/schema": ["../kit/src/schema.ts"]

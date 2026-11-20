@@ -1,4 +1,4 @@
-import type { Placement, ResolvedState } from "@uberscene/sdk";
+import type { Placement, ResolvedState } from "@uberscene/sdk/resolver";
 
 import { captionsContent } from "../../overlays/content";
 
