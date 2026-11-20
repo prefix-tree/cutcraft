@@ -23,15 +23,15 @@ import { withBase } from "vitepress";
 
 <p class="home-lead">Write a video as a React file. Play it in the browser, fine-tune it on a timeline, export it to MP4. Next: 3D scenes in the same file that guide generative video models. <a href="#aim">Where it's going ↓</a></p>
 
-<CopyCommand command="npm install uberscene @uberscene/kit react zod" />
+<AgentPicker />
+
+<div class="home-byhand"><span>Or install the packages:</span><CopyCommand command="npm install uberscene @uberscene/kit react zod" /></div>
 
 <div class="home-actions">
 <a class="home-button primary" :href="withBase('/guide/getting-started')">Get started</a>
 <a class="home-button" :href="withBase('/examples/')">Examples</a>
 <a class="home-button" href="https://github.com/prefix-tree/uberscene">GitHub</a>
 </div>
-
-<p class="home-agent-note">Using a coding agent? <a href="#install">Install the skill ↓</a></p>
 
 </div>
 <aside class="home-spec" aria-label="Specification">
@@ -55,8 +55,6 @@ import { withBase } from "vitepress";
 <figcaption><code>uberscene look coffee.tsx --at 2.5,7.2,9.9,16,19.5,24.5,30.5,34.5 --listen all</code><span>One command draws a whole cut and its sound on one sheet: this is how an agent reviews a video without watching it. <a :href="withBase('/reference/cli#look')">look →</a></span></figcaption>
 </figure>
 </section>
-
-<div class="home-ticker" aria-hidden="true"><div class="home-ticker-track"><span>TSX in, MP4 out</span><span>45 effects and transitions</span><span>115 undoable actions</span><span>Frame-exact player</span><span>Captions from the transcript</span><span>Three.js on the clock</span><span>Diff it, review it, ship it</span><span>Next: 3D that guides video models</span><span>TSX in, MP4 out</span><span>45 effects and transitions</span><span>115 undoable actions</span><span>Frame-exact player</span><span>Captions from the transcript</span><span>Three.js on the clock</span><span>Diff it, review it, ship it</span><span>Next: 3D that guides video models</span></div></div>
 
 <section class="home-chapter">
 
