@@ -27,7 +27,7 @@ const VIDEO = `import { Caption, Captions, Composition, Layer, Track } from "@ub
 export const manifest = { assets: {} };
 export default function Video() {
   return (
-    <Composition fps={30} width={540} height={960} background={{ mode: "color", color: "#000000" }}>
+    <Composition fps={30} width={540} height={960} background={{ type: "color", color: "#000000" }}>
       <Track id="t" layout="free">
         <Layer id="diagram" start={0} duration={2}>
           <div data-name="block" style={{ position: "absolute", left: 100, top: 300, width: 120, height: 60, background: "#ffffff" }} />
@@ -136,7 +136,7 @@ describe("where things are", () => {
 export const manifest = { assets: {} };
 export default function Video() {
   return (
-    <Composition fps={30} width={540} height={960} background={{ mode: "color", color: "#000000" }}>
+    <Composition fps={30} width={540} height={960} background={{ type: "color", color: "#000000" }}>
       <Track id="t" layout="free">
         <Layer id="fx" start={0} duration={2}>
           <Effect id="inv" type="invert" params={{ amount: 1 }} />
@@ -201,7 +201,7 @@ export default function Video() {
 export const manifest = { assets: {} };
 export default function Video() {
   return (
-    <Composition fps={30} width={540} height={960} background={{ mode: "color", color: "#000000" }}>
+    <Composition fps={30} width={540} height={960} background={{ type: "color", color: "#000000" }}>
       <Track id="t" layout="free">
         <Layer id="one" start={0} duration={2}>
           <div data-name="tag" style={{ position: "absolute", left: 500, top: 300, width: 30, height: 30, background: "#ffffff" }} />
@@ -242,13 +242,13 @@ export default function Video() {
 export const manifest = { assets: {} };
 export default function Video() {
   return (
-    <Composition fps={30} width={540} height={960} background={{ mode: "color", color: "#000000" }}>
+    <Composition fps={30} width={540} height={960} background={{ type: "color", color: "#000000" }}>
       <Track id="t" layout="free">
         <Layer id="drawn" start={0} duration={2}>
           <svg width={540} height={960} style={{ position: "absolute", left: 0, top: 0 }}>
             <Label text="LAMP" x={300} y={200} fontSize={40} fill="#ffffff" to={[120, 260]} after={0.2} over={0.3} />
             <Cells name="dots" count={4} x={100} y={500} size={40} gap={10} fill="#888888" />
-            <DrawnLine from={[100, 700]} to={[400, 700]} at={0.5} over={1} easing="linear" stroke="#ffffff" strokeWidth={6} data-name="ray" />
+            <DrawnLine from={[100, 700]} to={[400, 700]} start={0.5} over={1} easing="linear" stroke="#ffffff" strokeWidth={6} data-name="ray" />
           </svg>
         </Layer>
       </Track>
@@ -281,7 +281,7 @@ export default function Video() {
 export const manifest = { assets: {} };
 export default function Video() {
   return (
-    <Composition fps={30} width={540} height={960} background={{ mode: "color", color: "#000000" }}>
+    <Composition fps={30} width={540} height={960} background={{ type: "color", color: "#000000" }}>
       <Track id="t" layout="free">
         <Layer id="scrim" start={0} duration={2}${ground ? " ground" : ""}>
           <div style={{ position: "absolute", left: 0, right: 0, top: 480, bottom: 0, background: "#102040" }} />

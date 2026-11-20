@@ -115,7 +115,7 @@ const line = { whiteSpace: "nowrap", overflow: "hidden" };
 
 export default function Sheet() {
   return (
-    <Composition fps={1} width={${width}} height={${height}} background={{ mode: "color", color: "#111318" }}>
+    <Composition fps={1} width={${width}} height={${height}} background={{ type: "color", color: "#111318" }}>
       <Track id="sheet" layout="free">
         <Layer id="fonts" start={0} duration={1}>
           <div style={{ position: "absolute", inset: 0, display: "grid", gridTemplateColumns: "repeat(${columns}, ${CELL.width}px)", gridAutoRows: "${CELL.height}px", color: "#f4f1ea" }}>
