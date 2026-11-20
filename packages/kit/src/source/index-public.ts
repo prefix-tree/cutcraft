@@ -12,7 +12,19 @@ export {
   type SourceIndex,
 } from "./index";
 export { insertLayer, type LayerPlacement } from "./insert-layer";
-export { type Diagnostic, type LintOptions, type LintRule, lint, rules } from "./lint/index";
+export { DEPRECATIONS, type Deprecation } from "./lint/deprecations";
+export {
+  attributeOf,
+  jsxTags,
+  type MoveOptions,
+  movePropInto,
+  movePropsInto,
+  propAt,
+  renameProp,
+  renameValue,
+  tagName,
+} from "./lint/fixes";
+export { type Diagnostic, type FixResult, fixSource, type LintOptions, type LintRule, lint, rules } from "./lint/index";
 export { ALLOWED_IMPORTS, type CutModule, type LoadOptions, loadModule } from "./load";
 export { type GatherOptions, gatherLocalFiles } from "./local-files";
 export { parseSource, type Range, rangeOf } from "./parse";

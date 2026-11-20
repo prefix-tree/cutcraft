@@ -12,6 +12,7 @@ import type { FontFile, FontWeight } from "./fonts";
 import { fontSheet, formatFonts, listFonts } from "./fonts-list";
 import { inspect } from "./inspect";
 import { checkLayout, formatLayout, type Insets, SAFE_ZONES, type SafeZoneName } from "./layout-check";
+import { formatLint, lintErrors, lintFiles } from "./lint-files";
 import { loadVideo } from "./load";
 import { renderLook } from "./look";
 import { mediaFolders } from "./manifest-file";
@@ -30,6 +31,7 @@ const USAGE = `Usage: uberscene <file.tsx> --out <video.mp4|.webm|.mp3|.wav> [--
        uberscene <file.tsx> --check-layout [--safe-zone <zone>] [--subject <x,y,w,h>] [--json] [options]
        uberscene <file.tsx> --srt <captions.srt> | --vtt <captions.vtt> [--from <s> --to <s>]
        uberscene inspect <file.tsx> [--at <moments>] [--json] [--manifest <file>] [--props <json>]
+       uberscene lint <file.tsx>... [--fix] [--json] [--manifest <file>]
        uberscene look <file.tsx> [--at <moments> | --around <id>] [--without <id>] [--listen <stretch>]
                     [--zones <zone>] [--out look.png] [options]
        uberscene look <file.tsx> --motion <stretch> [--step <s>] [--listen <stretch>] [--out look.png] [options]
@@ -104,6 +106,11 @@ const USAGE = `Usage: uberscene <file.tsx> --out <video.mp4|.webm|.mp3|.wav> [--
                         transcript beside it (talk.json from Whisper or ElevenLabs, talk.vtt or talk.srt)
   --id <id>             (add) the asset id; default the file name without its extension
   --transcript <file>   (add) a transcript other than the one beside the media
+  lint                  check each file's text against the conventions that keep it editable: literal ids, timing
+                        the timeline can show, free code on the video's clock, assets in the manifest, and props
+                        spelled the way an earlier version took them. One line per finding, as a compiler prints
+                        them; it exits 1 when an error is left. The file is read, never run
+  --fix                 (lint) write each file with the fixes its findings carry, then report what is left
   browser install       download Chrome for Testing now, rather than on the first export
   --srt <file>          also write the captions the cut plays as SRT, timed like the export (alone: only that)
   --vtt <file>          the same as WebVTT
@@ -169,6 +176,7 @@ async function main(): Promise<number> {
       quality: { type: "string" },
       still: { type: "string" },
       "check-layout": { type: "boolean" },
+      fix: { type: "boolean" },
       json: { type: "boolean" },
       "safe-zone": { type: "string" },
       subject: { type: "string" },
@@ -288,6 +296,20 @@ async function main(): Promise<number> {
     process.stdout.write(result.output);
     for (const e of result.errors) process.stderr.write(`error: ${e}\n`);
     return result.errors.length > 0 ? 1 : 0;
+  }
+  if (positionals[0] === "lint") {
+    const files = positionals.slice(1);
+    if (files.length === 0) {
+      process.stderr.write(USAGE);
+      return 2;
+    }
+    const results = lintFiles(files, {
+      ...(values.manifest ? { manifest: values.manifest } : {}),
+      ...(values.fix ? { fix: true } : {}),
+    });
+    for (const r of results) if (r.fixed.length > 0) process.stderr.write(`${r.file}: fixed ${r.fixed.length}\n`);
+    process.stdout.write(values.json ? `${JSON.stringify(results, null, 2)}\n` : formatLint(results));
+    return lintErrors(results) > 0 ? 1 : 0;
   }
   if (positionals[0] === "browser") {
     if (positionals[1] !== "install") {

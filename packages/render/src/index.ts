@@ -41,6 +41,14 @@ export {
   type SourceSpot,
   subjectRects,
 } from "./layout-check";
+export {
+  formatLint,
+  type LintedFile,
+  type LintFilesOptions,
+  lintErrors,
+  lintFiles,
+  type PlacedDiagnostic,
+} from "./lint-files";
 export { type LoadedVideo, type LoadOptions, loadVideo } from "./load";
 export {
   type LookCell,
