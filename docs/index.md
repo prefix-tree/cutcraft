@@ -21,7 +21,7 @@ import { withBase } from "vitepress";
 
 <h1 class="home-title"><span class="home-title-line">Multimedia pipeline</span> <span class="home-title-line"><span class="home-title-mark">as code.</span></span></h1>
 
-<p class="home-lead">Write a video as a React file. Play it in the browser, fine-tune it on a timeline, export it to MP4. Next: 3D scenes in the same file that guide generative video models. <a href="#aim">Where it's going ↓</a></p>
+<p class="home-lead">Write a video as a React file. Play it in the browser, fine-tune it on a timeline, export it to MP4. Next: 3D scenes in the same file that guide generative video models.</p>
 
 <AgentPicker />
 
@@ -113,32 +113,6 @@ import { withBase } from "vitepress";
 
 </section>
 
-<section class="home-aim" id="aim">
-
-## Where it's going
-
-<p class="home-aim-lead"><strong>A whole multimedia pipeline written as code.</strong> Agents work better with code than with ffmpeg flags or a mouse, so the edit, its graphics and its 3D scenes belong in one file.</p>
-
-<div class="home-aim-flow" role="img" aria-label="One video.tsx file renders the edit to MP4, and a 3D scene to guidance passes for generative video models">
-<div class="home-aim-node home-aim-source">video.tsx</div>
-<div class="home-aim-rows">
-<div class="home-aim-row"><span class="home-aim-arrow" aria-hidden="true">→</span><div class="home-aim-node"><b>The edit</b><small>clips · captions · effects</small></div><span class="home-aim-arrow" aria-hidden="true">→</span><div class="home-aim-node home-aim-out"><b>MP4</b><small>today</small></div></div>
-<div class="home-aim-row home-aim-next"><span class="home-aim-arrow" aria-hidden="true">→</span><div class="home-aim-node"><b>3D scene</b><small>three.js + camera path</small></div><span class="home-aim-arrow" aria-hidden="true">→</span><div class="home-aim-node"><b>Guidance passes</b><small>preview · depth · masks · pose · camera</small></div><span class="home-aim-arrow" aria-hidden="true">→</span><div class="home-aim-node home-aim-out"><b>Video models</b><small>next</small></div></div>
-</div>
-</div>
-
-<p class="home-aim-text">A rough 3D render is one of the most precise ways to pin down camera and layout for generative video models. So the file that cuts your video should also render what those models take, frame for frame, on the same timeline. A glTF export keeps the scene open in Blender.</p>
-
-<ol class="home-roadmap">
-<li class="is-done"><span>Done</span><strong>Editing as code</strong> Tracks, captions, audio, transitions, effects, and React, Motion and three.js layers.</li>
-<li class="is-done"><span>Done</span><strong>One file, every editor</strong> Agent edits and timeline edits write back to the same source, with undo.</li>
-<li class="is-now"><span>Now</span><strong>3D scenes</strong> A three.js scene with a camera path on the video's clock.</li>
-<li class="is-next"><span>Next</span><strong>Guidance passes</strong> Shaded preview, depth, masks, pose skeletons and the camera for every frame, at the model's frame rate.</li>
-<li class="is-next"><span>Next</span><strong>glTF export</strong> The same scene, opened in Blender.</li>
-</ol>
-
-</section>
-
 <section class="home-features">
 
 ## Features
@@ -155,37 +129,6 @@ import { withBase } from "vitepress";
 <li><strong>Checks</strong> Lint, contact sheets and layout checks, to review a cut without watching it.</li>
 <li><strong>Agent skill</strong> Teaches Claude Code and other agents to write, check and render videos.</li>
 </ul>
-
-</section>
-
-<section class="home-chapter">
-
-## Edit the file from code
-
-<p class="home-chapter-lead">98 actions edit the file itself: each one checked, undoable, and written back to its text as a one-value change. Wire them to any editor: a timeline, a form, an agent's tool call. <a :href="withBase('/guide/editing')">Editing →</a></p>
-
-<Example src="showcase/edit" alt="Three shots cut back to back, with transitions, a push-in and titles">
-
-```ts
-import { collectModule, Executor } from "@uberscene/sdk";
-import { foldToSource, loadModule } from "@uberscene/sdk";
-
-const tree = collectModule(loadModule(text));
-const exec = new Executor({ tree, manifest });
-
-// A drag on your timeline, a field in your form, a tool call:
-exec.execute({ type: "clip/trim",
-  params: { id: "open", edge: "out", value: 6.5 } });
-exec.execute({ type: "text/setContent",
-  params: { id: "title", text: "Bloom first" } });
-exec.undo();
-exec.redo();
-
-// The file again, changed by exactly those edits.
-const { text: next } = foldToSource(text, exec.log(), exec.state());
-```
-
-</Example>
 
 </section>
 
@@ -271,7 +214,7 @@ const { text: next } = foldToSource(text, exec.log(), exec.state());
 
 ### Three.js and any React
 
-<p class="home-element-lead">Any component on the video's clock: three.js, Motion, SVG or canvas, frame-exact when you scrub or export. Next: a 3D scene with a camera path that also renders guidance for video models. <a :href="withBase('/guide/free-code')">Free code →</a> · <a href="#aim">Where it's going →</a></p>
+<p class="home-element-lead">Any component on the video's clock: three.js, Motion, SVG or canvas, frame-exact when you scrub or export. Next: a 3D scene with a camera path that also renders guidance for video models. <a :href="withBase('/guide/free-code')">Free code →</a></p>
 
 <Example src="previews/elements/three" alt="A spinning cube over a coffee shot">
 

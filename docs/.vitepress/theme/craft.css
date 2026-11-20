@@ -301,7 +301,7 @@ html {
   color: var(--cc-grey);
 }
 
-/* Why: a lead and three checks. Features: a ruled grid of cells that invert under the pointer. */
+/* Why: three cells in one ruled box. Features: a ruled grid of cells that invert under the pointer. */
 .vp-doc ul.home-feature-list {
   display: grid;
   border: var(--cc-line-heavy);
@@ -1512,14 +1512,6 @@ body {
   line-height: 1.02;
   letter-spacing: -0.025em;
 }
-/* A sentence with an apostrophe. Big Shoulders draws that mark as a speck, so this heading uses the text face. */
-.home.vp-doc .home-aim h2 {
-  font-family: var(--vp-font-family-base);
-  font-weight: 600;
-  font-size: clamp(36px, 4vw, 52px);
-  line-height: 1.15;
-  letter-spacing: -0.02em;
-}
 .home.vp-doc h2::before {
   content: "No. " counter(home-section, decimal-leading-zero);
   display: block;
@@ -1803,156 +1795,6 @@ html:has(.VPContent.has-sidebar) .DocSearch-Button {
 .VPDoc .vp-doc a.cc-gallery-tile:hover {
   color: #ffffff;
   font-weight: 400;
-}
-
-/* Where it's going: the aim, one file feeding the edit and the 3D guidance, then a roadmap on a ruled plate. */
-.vp-doc p.home-aim-lead {
-  max-width: 820px;
-  font-size: 22px;
-  line-height: 1.4;
-  color: var(--cc-ink-2);
-}
-.home-aim-lead strong {
-  color: var(--cc-ink);
-}
-.vp-doc p.home-aim-text {
-  max-width: 820px;
-  color: var(--cc-ink-2);
-}
-.home-aim-flow {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: 14px;
-  align-items: center;
-  margin: 32px 6px 32px 0;
-  padding: 24px;
-  border: var(--cc-line-heavy);
-  box-shadow: var(--cc-hard);
-  background: var(--cc-paper);
-}
-.home-aim-rows {
-  display: grid;
-  gap: 14px;
-}
-.home-aim-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.home-aim-node {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 12px 14px;
-  border: var(--cc-line);
-  background: var(--cc-paper-2);
-  font-family: var(--vp-font-family-base);
-  font-size: 18px;
-  font-weight: 600;
-  line-height: 1.2;
-  letter-spacing: -0.01em;
-  color: var(--cc-ink);
-}
-.home-aim-node small {
-  font-family: var(--vp-font-family-base);
-  font-size: 13px;
-  font-weight: 500;
-  line-height: 1.35;
-  letter-spacing: 0;
-  color: var(--cc-ink-2);
-}
-.home-aim-source {
-  padding: 18px 20px;
-  background: var(--cc-ink);
-  color: var(--cc-paper-2);
-  font-family: var(--cc-mono);
-  font-size: 18px;
-  font-weight: 500;
-  letter-spacing: 0;
-}
-.home-aim-out {
-  background: var(--cc-accent);
-  color: #121212;
-}
-.home-aim-out small {
-  color: #121212;
-}
-.home-aim-next .home-aim-node:not(.home-aim-out) {
-  border-style: dashed;
-}
-.home-aim-arrow {
-  font-family: var(--cc-mono);
-  font-size: 20px;
-  color: var(--cc-ink);
-}
-.vp-doc ol.home-roadmap {
-  margin: 0 6px 0 0;
-  padding: 0;
-  list-style: none;
-  border: var(--cc-line-heavy);
-  box-shadow: var(--cc-hard);
-  background: var(--cc-paper);
-}
-.vp-doc ol.home-roadmap li {
-  display: grid;
-  grid-template-columns: 76px minmax(0, 1fr);
-  column-gap: 18px;
-  margin: 0;
-  padding: 16px 22px;
-  color: var(--cc-ink-2);
-}
-.vp-doc ol.home-roadmap li + li {
-  border-top: var(--cc-line);
-}
-.home-roadmap li > span {
-  grid-row: span 2;
-  align-self: start;
-  padding: 4px 0 2px;
-  border: var(--cc-line);
-  font-family: var(--cc-mono);
-  font-size: 12px;
-  font-weight: 600;
-  text-align: center;
-  text-transform: uppercase;
-}
-.home-roadmap li.is-done > span {
-  background: var(--cc-ink);
-  color: var(--cc-paper);
-}
-.home-roadmap li.is-now > span {
-  background: var(--cc-accent);
-  border-color: var(--cc-accent);
-  color: #121212;
-}
-.home-roadmap li.is-next > span {
-  border-style: dashed;
-  color: var(--cc-ink);
-}
-.vp-doc ol.home-roadmap strong {
-  font-family: var(--vp-font-family-base);
-  font-size: 20px;
-  font-weight: 600;
-  line-height: 1.25;
-  letter-spacing: -0.015em;
-  color: var(--cc-ink);
-}
-@media (max-width: 860px) {
-  .home-aim-flow {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .home-aim-row {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  /* Stacked, the two branches would read as one chain; a rule splits them. */
-  .home-aim-row + .home-aim-row {
-    padding-top: 14px;
-    border-top: var(--cc-line);
-  }
-  .home-aim-arrow {
-    transform: rotate(90deg);
-    align-self: center;
-  }
 }
 
 /* ── The agent picker, in the hero: a row of agent keys over a steel panel with the lines to copy ───────────────── */
@@ -2249,16 +2091,9 @@ html:has(.VPContent.has-sidebar) .DocSearch-Button {
 }
 .vp-doc p.home-chapter-lead,
 .vp-doc p.home-element-lead,
-.vp-doc p.home-aim-text,
 .vp-doc ul.home-feature-list li {
   font-size: 16.5px;
   line-height: 1.6;
-  color: var(--cc-ink);
-}
-.vp-doc p.home-aim-lead {
-  max-width: 40rem;
-  font-size: 20px;
-  line-height: 1.5;
   color: var(--cc-ink);
 }
 .vp-doc .home-element h3 {
