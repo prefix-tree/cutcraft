@@ -1,55 +1,48 @@
-import { captionPlace, captionPlacement } from "../src/overlays/caption-placement";
+import { captionBox, captionPlace, captionPlacement } from "../src/overlays/caption-placement";
 
 const PORTRAIT = { width: 1080, height: 1920 };
 const WIDE = { width: 1920, height: 1080 };
 
 describe("captionPlacement", () => {
-  it("with nothing given: across the frame less a margin, above the bottom, centred", () => {
-    expect(captionPlacement({}, PORTRAIT)).toMatchObject({
-      left: 0,
-      right: 0,
-      padding: "0 12%",
-      bottom: 384,
+  it("with no box: the lower safe area, centred, the frame less a margin wide", () => {
+    expect(captionBox(WIDE)).toEqual({ x: 960, y: 993.6, width: 1612.8, origin: "bottom" });
+    expect(captionPlacement({}, WIDE)).toMatchObject({
+      left: 153.6,
+      width: 1612.8,
+      bottom: 86.4,
       alignItems: "center",
       textAlign: "center",
     });
-    expect(captionPlacement({}, PORTRAIT).transform).toBeUndefined();
-    expect(captionPlacement({}, WIDE)).toMatchObject({ padding: "0 8%", bottom: 86.4 });
+    expect(captionPlacement({}, WIDE).transform).toBeUndefined();
+    // A vertical video's platform UI covers its right edge and bottom fifth.
+    expect(captionPlacement({}, PORTRAIT)).toMatchObject({ left: 129.6, width: 820.8, bottom: 384 });
   });
 
-  it("the style's position: an edge, the centre, or a fraction of the height", () => {
-    expect(captionPlacement({ position: "top" }, WIDE)).toMatchObject({ top: 86.4 });
-    expect(captionPlacement({ position: "top" }, WIDE).transform).toBeUndefined();
-    expect(captionPlacement({ position: "center" }, WIDE)).toMatchObject({
-      top: "50%",
+  it("each field written replaces that one of the default box", () => {
+    // What style.position "top" was.
+    const top = captionPlacement({ y: 86.4, origin: "top" }, WIDE);
+    expect(top).toMatchObject({ top: 86.4, left: 153.6, width: 1612.8 });
+    expect(top.transform).toBeUndefined();
+    // What style.position "center", or a fraction of the height, was.
+    expect(captionPlacement({ y: 1152, origin: "center" }, PORTRAIT)).toMatchObject({
+      top: 1152,
       transform: "translate(0, -50%)",
     });
-    expect(captionPlacement({ position: 0.6 }, PORTRAIT)).toMatchObject({
-      top: "60%",
-      transform: "translate(0, -50%)",
-    });
+    // A width, centred where the default puts the block.
+    expect(captionPlacement({ width: 300 }, PORTRAIT)).toMatchObject({ left: 390, width: 300, bottom: 384 });
   });
 
-  it("y is the middle's height from the centre and takes the place of the position", () => {
-    const placed = captionPlacement({ y: 192, position: "top" }, PORTRAIT);
-    expect(placed).toMatchObject({ top: "calc(50% + 192px)", transform: "translate(0, -50%)" });
-    expect(placed.bottom).toBeUndefined();
-    expect(captionPlacement({ y: -40 }, PORTRAIT).top).toBe("calc(50% - 40px)");
-  });
-
-  it("x moves the block sideways, with or without a width, in the one transform", () => {
-    expect(captionPlacement({ x: -80 }, PORTRAIT).transform).toBe("translate(-80px, 0)");
-    expect(captionPlacement({ x: 40, y: 0 }, PORTRAIT).transform).toBe("translate(40px, -50%)");
-    expect(captionPlacement({ width: 300 }, PORTRAIT)).toMatchObject({
-      left: "50%",
-      width: 300,
-      transform: "translate(-50%, 0)",
+  it("places the block's origin at x and y, from the frame's top left", () => {
+    expect(captionPlacement({ x: 40, y: 100, width: 300, origin: "topLeft" }, WIDE)).toMatchObject({
+      left: 40,
+      top: 100,
     });
-    expect(captionPlacement({ width: 300, x: 100, y: 10 }, PORTRAIT).transform).toBe(
-      "translate(calc(-50% + 100px), -50%)",
-    );
-    // A width replaces the frame's margins.
-    expect(captionPlacement({ width: 300 }, PORTRAIT).padding).toBeUndefined();
+    expect(captionPlacement({ x: 1880, y: 1040, width: 300, origin: "bottomRight" }, WIDE)).toMatchObject({
+      left: 1580,
+      bottom: 40,
+    });
+    // A height fixes the block, so its top is known.
+    expect(captionPlacement({ y: 540, height: 200, origin: "center" }, WIDE)).toMatchObject({ top: 440, height: 200 });
   });
 
   it("align is the side the lines sit against", () => {
@@ -60,10 +53,16 @@ describe("captionPlacement", () => {
 
 describe("captionPlace", () => {
   it("keeps what is a placement and drops what is not", () => {
-    expect(captionPlace({ x: 10, y: "low", width: Number.NaN, align: "middle", id: "c" }, { position: 0.6 })).toEqual({
+    expect(captionPlace({ box: { x: 10, y: "low", width: Number.NaN, origin: "middle" }, align: "middle" })).toEqual({
       x: 10,
-      position: 0.6,
     });
-    expect(captionPlace({ y: 0, width: 400, align: "left" }, {})).toEqual({ y: 0, width: 400, align: "left" });
+    expect(captionPlace({ box: { y: 0, origin: "center", width: 400 }, align: "left" })).toEqual({
+      y: 0,
+      width: 400,
+      origin: "center",
+      align: "left",
+    });
+    // The flat x, y and width of old files are not a placement: the lint fix moves them into box.
+    expect(captionPlace({ x: 10, y: 20, width: 300 })).toEqual({});
   });
 });
