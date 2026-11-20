@@ -16,7 +16,7 @@ export const defaults = { accent: "#7cff8a" };
  */
 export default function Video({ accent }: z.infer<typeof schema>) {
   return (
-    <Composition fps={30} width={1920} height={1080} background={{ mode: "color", color: "#0b0d12" }}>
+    <Composition fps={30} width={1920} height={1080} background={{ type: "color", color: "#0b0d12" }}>
       <Track id="main" name="Footage">
         <Clip id="bg" src="asset:product" in="shot:1" out="shot:1.end" fit="cover" transform={{ opacity: 0.5 }} />
         <Clip id="bg2" src="asset:product" in="shot:2" out="shot:2.end" fit="cover" transform={{ opacity: 0.5 }} />

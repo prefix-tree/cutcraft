@@ -177,7 +177,7 @@ const recipes: { name: string; file: string; mod: Module; check: (state: Resolve
         });
         expect(t.items.get("kicker")?.props.style).toMatchObject({ color: THEMES[theme].palette.primary });
         expect(t.items.get("composition")?.props.background).toEqual({
-          mode: "color",
+          type: "color",
           color: THEMES[theme].palette.background,
         });
         // The drawn parts take the theme's palette: the steps fill in with each theme's own colours.
