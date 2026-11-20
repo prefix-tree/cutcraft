@@ -231,7 +231,8 @@ Give the video one look and say it once.
 - **Leave entrances to the motion style.** Write `enter` or `exit` only where one element should differ.
 - **Components** for the common graphics: `LowerThird`, `Callout`, `Badge`, `Counter`, `ProgressBar`, `Arrow`,
   `Highlight`, `Background`, `TypeCard`, `QuoteCard` and `Frame`, imported from `@uberscene/kit`. They take the timing props any element takes.
-  `box`, with `x` and `y`, is the component's centre in pixels from the frame's top left, with defaults set for 1920x1080. See
+  `box`, with `x` and `y`, is the component's centre in pixels from the frame's top left; an axis left out is
+  centred on the frame, except the defaults of `LowerThird`, `Callout` and `ProgressBar`'s `y`, set for 1920x1080. See
   [references/components.md](references/components.md).
 - **Colour and effects** are `<Effect type params>` children of a clip, a title, a shape, a layer or an
   `<Adjustment>` (which affects everything beneath it for its time). They run in the order written: correct, then

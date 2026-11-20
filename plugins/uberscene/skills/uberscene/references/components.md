@@ -16,7 +16,7 @@ Besides the timing props (`start`, `anchor`, `at`, `offset`, `duration`):
 | `name` | string |  | The name, in the heading face. |
 | `role` | string |  | The line under the name, in the body face. Left out: a shorter card with the name alone. |
 | `variant` | "card" \| "bar" | `"card"` | `card`: on a surface card; `bar`: the words beside an accent bar, straight over the picture. |
-| `box` | { x, y } | `{"x":400,"y":870}` | Where the card's centre sits, in pixels from the frame's top left. Left out: `{ x: 400, y: 870 }`, on a 1920 by 1080 frame. |
+| `box` | { x, y } | `{"x":400,"y":870}` | Where the card's centre sits, in pixels from the frame's top left. Left out: `{ x: 400, y: 870 }`, set for a 1920 by 1080 frame (give it a box on another size). |
 | `width` | number (> 0) | `640` | The card's width in pixels; the words wrap inside it. |
 | `accent` | string | `"$primary"` | The colour of the bar beside the words. |
 | `size` | number (> 0) | `44` | The name's size in pixels; the role, the card and the bar scale with it. |
@@ -35,7 +35,7 @@ Besides the timing props (`start`, `anchor`, `at`, `offset`, `duration`):
 |---|---|---|---|
 | `id` | string |  | The component's id; each of its parts' ids starts with it. |
 | `text` | string |  | The note, in the body face; the box grows taller to fit it. |
-| `box` | { x, y } | `{"x":1280,"y":320}` | Where the box's centre sits, in pixels from the frame's top left. Left out: `{ x: 1280, y: 320 }`, on a 1920 by 1080 frame. |
+| `box` | { x, y } | `{"x":1280,"y":320}` | Where the box's centre sits, in pixels from the frame's top left. Left out: `{ x: 1280, y: 320 }`, set for a 1920 by 1080 frame (give it a box on another size). |
 | `width` | number (> 0) | `420` | The box's width in pixels. |
 | `to` | { x, y } |  | What it points at; without it, the box stands alone. |
 | `color` | string | `"$accent"` | The colour of the box's border, the line and its dot. |
@@ -55,7 +55,7 @@ Besides the timing props (`start`, `anchor`, `at`, `offset`, `duration`):
 |---|---|---|---|
 | `id` | string |  | The component's id; each of its parts' ids starts with it. |
 | `text` | string |  | The word on the pill; the pill widens to fit it. |
-| `box` | { x, y } | `{"x":960,"y":540}` | Where the pill's centre sits, in pixels from the frame's top left. Left out: `{ x: 960, y: 540 }`, on a 1920 by 1080 frame. |
+| `box` | { x, y } | `{}` | Where the pill's centre sits, in pixels from the frame's top left. Left out: centred on the frame. |
 | `size` | number (> 0) | `30` | Letter height in pixels; the pill scales with it. |
 | `color` | string | `"$accent"` | The pill's colour. |
 | `textColor` | string | `"$background"` | The letters' colour. |
@@ -79,7 +79,7 @@ Besides the timing props (`start`, `anchor`, `at`, `offset`, `duration`):
 | `prefix` | string | `""` | Text before the number, such as `$`. |
 | `suffix` | string | `""` | Text after the number, such as `%`. |
 | `label` | string |  | A line under the number, in the body face and the muted colour. Left out: the number alone. |
-| `box` | { x, y } | `{"x":960,"y":540}` | Where the number's centre sits, in pixels from the frame's top left. Left out: `{ x: 960, y: 540 }`, on a 1920 by 1080 frame. |
+| `box` | { x, y } | `{}` | Where the number's centre sits, in pixels from the frame's top left. Left out: centred on the frame. |
 | `size` | number (> 0) | `140` | The number's letter height in pixels; the label is about a fifth of it. |
 | `countFor` | number (> 0) | `1.5` | Seconds the count takes; it then holds. |
 
@@ -97,7 +97,7 @@ Besides the timing props (`start`, `anchor`, `at`, `offset`, `duration`):
 |---|---|---|---|
 | `id` | string |  | The component's id; each of its parts' ids starts with it. |
 | `value` | number (0..1) | `1` | How full it ends, 0 to 1. |
-| `box` | { x, y } | `{"x":960,"y":980}` | Where the bar's centre sits, in pixels from the frame's top left. Left out: `{ x: 960, y: 980 }`, on a 1920 by 1080 frame. |
+| `box` | { x, y } | `{"y":980}` | Where the bar's centre sits, in pixels from the frame's top left. Left out: centred across the frame, and at `y: 980`, set for a 1920 by 1080 frame. |
 | `width` | number (> 0) | `1200` | The full bar's length in pixels. |
 | `height` | number (> 0) | `14` | The bar's thickness in pixels; its ends are rounded. |
 | `color` | string | `"$primary"` | The fill's colour; the track under it is a faint `$muted`. |
@@ -136,7 +136,7 @@ Besides the timing props (`start`, `anchor`, `at`, `offset`, `duration`):
 |---|---|---|---|
 | `id` | string |  | The id of the element it draws. |
 | `variant` | "underline" \| "marker" \| "circle" \| "strike" | `"underline"` | `underline` under it, `marker` behind it, `circle` round it, `strike` through it. |
-| `box` | { x, y } | `{"x":960,"y":540}` | Where the marked box's centre sits, in pixels from the frame's top left. Left out: `{ x: 960, y: 540 }`, on a 1920 by 1080 frame. |
+| `box` | { x, y } | `{}` | Where the marked box's centre sits, in pixels from the frame's top left. Left out: centred on the frame. |
 | `width` | number (> 0) |  | The marked box's width in pixels. |
 | `height` | number (> 0) |  | The marked box's height in pixels; a marker stroke is about as thick. |
 | `color` | string | `"$accent"` | The mark's colour; a marker stroke is drawn see-through. |
@@ -173,7 +173,7 @@ Besides the timing props (`start`, `anchor`, `at`, `offset`, `duration`):
 | param | type | default | description |
 |---|---|---|---|
 | `id` | string |  | The component's id; each of its parts' ids starts with it. |
-| `box` | { x, y } | `{"x":960,"y":540}` | Where the card's centre sits, in pixels from the frame's top left. Left out: `{ x: 960, y: 540 }`, on a 1920 by 1080 frame. |
+| `box` | { x, y } | `{}` | Where the card's centre sits, in pixels from the frame's top left. Left out: centred on the frame. |
 | `width` | number (> 0) |  | The card's width in pixels; the whole frame when left out. |
 | `height` | number (> 0) |  | The card's height in pixels. Left out, like `width`: the whole frame. |
 | `fill` | string | `"$surface"` | The card's background colour. |
@@ -195,7 +195,7 @@ Besides the timing props (`start`, `anchor`, `at`, `offset`, `duration`):
 | param | type | default | description |
 |---|---|---|---|
 | `id` | string |  | The component's id; each of its parts' ids starts with it. |
-| `box` | { x, y } | `{"x":960,"y":540}` | Where the card's centre sits, in pixels from the frame's top left. Left out: `{ x: 960, y: 540 }`, on a 1920 by 1080 frame. |
+| `box` | { x, y } | `{}` | Where the card's centre sits, in pixels from the frame's top left. Left out: centred on the frame. |
 | `width` | number (> 0) | `860` | The card's width in pixels; the passage wraps inside it. |
 | `source` | string |  | Where the words come from, in small type above them. |
 | `text` | string |  | The passage; its line breaks are kept. |
@@ -218,7 +218,7 @@ Besides the timing props (`start`, `anchor`, `at`, `offset`, `duration`):
 | param | type | default | description |
 |---|---|---|---|
 | `id` | string |  | The id of the element it draws. |
-| `box` | { x, y } | `{"x":960,"y":540}` | Where the border's centre sits, in pixels from the frame's top left. Left out: `{ x: 960, y: 540 }`, on a 1920 by 1080 frame. |
+| `box` | { x, y } | `{}` | Where the border's centre sits, in pixels from the frame's top left. Left out: centred on the frame. |
 | `width` | number (> 0) |  | The border's width in pixels. |
 | `height` | number (> 0) |  | The border's height in pixels. |
 | `color` | string | `"$accent"` | The border's colour. |

@@ -416,7 +416,7 @@ Every name each entry exports, read from the code. The sections above explain th
 
 ### `@uberscene/kit`
 
-106 exports.
+107 exports.
 
 | Export | Kind | |
 |---|---|---|
@@ -526,6 +526,7 @@ Every name each entry exports, read from the code. The sections above explain th
 | `useSeekable` | function | An animation from another library, played on the video's clock. |
 | `useT` | function | Normalised time (0..1) inside a `<Layer>`; `useLayer().t`. |
 | `When` | interface | When a part of a diagram happens. |
+| `withFrame` | function | Runs `fn` with components placed on a frame of `size`. |
 
 ### `@uberscene/kit/schema`
 

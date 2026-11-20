@@ -22,7 +22,7 @@ Besides the timing props (`start`, `anchor`, `at`, `offset`, `duration`):
 |---|---|---|---|
 | `id` | string |  | The component's id; each of its parts' ids starts with it. |
 | `text` | string |  | The word on the pill; the pill widens to fit it. |
-| `box` | { x, y } | `{"x":960,"y":540}` | Where the pill's centre sits, in pixels from the frame's top left. Left out: `{ x: 960, y: 540 }`, on a 1920 by 1080 frame. |
+| `box` | { x, y } | `{}` | Where the pill's centre sits, in pixels from the frame's top left. Left out: centred on the frame. |
 | `size` | number (> 0) | `30` | Letter height in pixels; the pill scales with it. |
 | `color` | string | `"$accent"` | The pill's colour. |
 | `textColor` | string | `"$background"` | The letters' colour. |

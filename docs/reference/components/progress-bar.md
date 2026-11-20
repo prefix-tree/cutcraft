@@ -22,7 +22,7 @@ Besides the timing props (`start`, `anchor`, `at`, `offset`, `duration`):
 |---|---|---|---|
 | `id` | string |  | The component's id; each of its parts' ids starts with it. |
 | `value` | number (0..1) | `1` | How full it ends, 0 to 1. |
-| `box` | { x, y } | `{"x":960,"y":980}` | Where the bar's centre sits, in pixels from the frame's top left. Left out: `{ x: 960, y: 980 }`, on a 1920 by 1080 frame. |
+| `box` | { x, y } | `{"y":980}` | Where the bar's centre sits, in pixels from the frame's top left. Left out: centred across the frame, and at `y: 980`, set for a 1920 by 1080 frame. |
 | `width` | number (> 0) | `1200` | The full bar's length in pixels. |
 | `height` | number (> 0) | `14` | The bar's thickness in pixels; its ends are rounded. |
 | `color` | string | `"$primary"` | The fill's colour; the track under it is a faint `$muted`. |

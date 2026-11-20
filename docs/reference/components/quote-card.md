@@ -19,7 +19,7 @@ Besides the timing props (`start`, `anchor`, `at`, `offset`, `duration`):
 | param | type | default | description |
 |---|---|---|---|
 | `id` | string |  | The component's id; each of its parts' ids starts with it. |
-| `box` | { x, y } | `{"x":960,"y":540}` | Where the card's centre sits, in pixels from the frame's top left. Left out: `{ x: 960, y: 540 }`, on a 1920 by 1080 frame. |
+| `box` | { x, y } | `{}` | Where the card's centre sits, in pixels from the frame's top left. Left out: centred on the frame. |
 | `width` | number (> 0) | `860` | The card's width in pixels; the passage wraps inside it. |
 | `source` | string |  | Where the words come from, in small type above them. |
 | `text` | string |  | The passage; its line breaks are kept. |

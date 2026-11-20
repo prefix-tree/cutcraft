@@ -20,7 +20,7 @@ Besides the timing props (`start`, `anchor`, `at`, `offset`, `duration`):
 |---|---|---|---|
 | `id` | string |  | The id of the element it draws. |
 | `variant` | "underline" \| "marker" \| "circle" \| "strike" | `"underline"` | `underline` under it, `marker` behind it, `circle` round it, `strike` through it. |
-| `box` | { x, y } | `{"x":960,"y":540}` | Where the marked box's centre sits, in pixels from the frame's top left. Left out: `{ x: 960, y: 540 }`, on a 1920 by 1080 frame. |
+| `box` | { x, y } | `{}` | Where the marked box's centre sits, in pixels from the frame's top left. Left out: centred on the frame. |
 | `width` | number (> 0) |  | The marked box's width in pixels. |
 | `height` | number (> 0) |  | The marked box's height in pixels; a marker stroke is about as thick. |
 | `color` | string | `"$accent"` | The mark's colour; a marker stroke is drawn see-through. |
