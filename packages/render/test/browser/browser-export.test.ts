@@ -620,9 +620,9 @@ export default function Video() {
     <Composition fps={30} width={640} height={360} background={{ mode: "color", color: "#000000" }}>
       <Track id="sound"><Clip id="tone" src="asset:bars" in={0} out={2} transform={{ opacity: 0 }} /></Track>
       <Track id="t" layout="free">
-        <Shape id="box" shape="rectangle" start={0} duration={2} width={80} height={80} fill="#ffffff">
-          <Keyframe id="k1" property="transform.position.x" at={0} value={-240} />
-          <Keyframe id="k2" property="transform.position.x" at={2} value={240} />
+        <Shape id="box" shape="rectangle" start={0} duration={2} width={80} height={80} fill="#ffffff" box={{ origin: "center" }}>
+          <Keyframe id="k1" property="box.x" at={0} value={80} />
+          <Keyframe id="k2" property="box.x" at={2} value={560} />
         </Shape>
       </Track>
     </Composition>

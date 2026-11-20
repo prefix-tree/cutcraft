@@ -70,6 +70,19 @@ define(makePropHandler({
   }),
 }));
 
+define(makePropHandler({
+  type: "box/update",
+  kinds: [...TRANSFORM_KINDS, "captions"],
+  write: (p, state) => {
+    const box: Record<string, Json> = { ...((rawProp(state, p.id, "box") ?? {}) as Record<string, Json>) };
+    for (const [k, v] of Object.entries(p.box)) {
+      if (v === null) delete box[k];
+      else box[k] = v;
+    }
+    return { box: Object.keys(box).length > 0 ? box : undefined };
+  },
+}));
+
 /** The handles of a Layer: the literal or schema-bound props of the one component inside it. */
 define(makePropHandler({
   type: "layer/setProps",

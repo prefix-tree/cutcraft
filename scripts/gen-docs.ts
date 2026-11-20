@@ -387,7 +387,7 @@ function componentsIndex(): string {
     "|---|---|",
     "| `id` | Names the component. Each element it makes has an id that starts with it: `name-card`, `name-bar`, `name-name`, `name-role`. |",
     "| Timing | The same props as any element: `start`, or `anchor` with `at` and `offset`, and `duration`, including `{ until: id }`. Its parts come in and go out inside that time. |",
-    "| Position | `x` and `y` are pixels from the frame's centre, as every element's `transform.position`. The defaults suit a 1920x1080 frame. |",
+    "| Position | `box`, with `x` and `y`, is the component's centre in pixels from the frame's top left, as every element's `box` measures. An axis left out is centred on the frame, whatever its size, except where a component sets a default (`LowerThird` and `Callout`), which suits a 1920x1080 frame: on another size, give those a box. |",
     "| Look | Colours default to theme tokens (`$primary`, `$surface`, `$text`) and text to the theme's fonts, so a theme restyles every component. |",
     "| Its own props | The words and options it draws, listed on its page: `name` and `role` for a lower third, `to` and `format` for a counter. |",
     "| In an editor | Its props are editable in an inspector. Editing one of its parts writes that use out into the file as plain elements, and the edit applies to them. |",
@@ -759,7 +759,7 @@ write(
   join(skillRefs, "components.md"),
   reference(
     "Components",
-    "The ready-made components, imported from `@uberscene/kit`. Positions are pixels from the frame's centre; colours default to theme tokens; each takes the timing props any element takes.",
+    "The ready-made components, imported from `@uberscene/kit`. A component's `box` is its centre in pixels from the frame's top left; colours default to theme tokens; each takes the timing props any element takes.",
     (Object.keys(COMPONENTS) as (keyof typeof COMPONENTS)[]).map((name) => forAgent(componentPage(name))),
   ),
 );

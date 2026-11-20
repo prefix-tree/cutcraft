@@ -106,13 +106,13 @@ cuts: 4.80 hook→broll (x1), 10.80 broll→demo
 ```
 
 `--at` says what is on screen and heard at each moment instead: the elements from the top of the picture down, each
-effect's params and the transform after keyframes, each sound's gain, the word being said and the caption.
+effect's params, the box and the transform after keyframes, each sound's gain, the word being said and the caption.
 
 ```
 $ npx uberscene inspect video.tsx --at word:14,x1
 word:14  1.00 s  frame 30  (word 14 "still" in hook)
-  seen: title tagline  4% through  "Coffee roasted on Mondays"  transform position.x=0 position.y=300
-  seen: title title  21% through  "Halvard"  transform position.x=0 position.y=140
+  seen: title tagline  4% through  "Coffee roasted on Mondays"  box x=960 y=840 origin=center
+  seen: title title  21% through  "Halvard"  box x=960 y=680 origin=center
   seen: clip hook  19% through  source 6.60 s
   heard: hook (asset:founder) gain 1.00
   heard: bed (asset:music) gain 0.05

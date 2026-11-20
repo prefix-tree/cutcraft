@@ -461,9 +461,9 @@ export default function Video() {
   return (
     <Composition fps={30} width={${W}} height={${H}} background={{ mode: "color", color: "#000000" }}>
       <Track id="t" layout="free">
-        <Shape id="box" shape="rectangle" start={0} duration={3} width={40} height={40} fill="#ffffff">
-          <Keyframe id="k1" property="transform.position.x" at={0} value={-120} />
-          <Keyframe id="k2" property="transform.position.x" at={2} value={120} />
+        <Shape id="box" shape="rectangle" start={0} duration={3} width={40} height={40} fill="#ffffff" box={{ origin: "center" }}>
+          <Keyframe id="k1" property="box.x" at={0} value={${W / 2 - 120}} />
+          <Keyframe id="k2" property="box.x" at={2} value={${W / 2 + 120}} />
         </Shape>
       </Track>
     </Composition>
@@ -564,9 +564,9 @@ export default function Video() {
     <Composition fps={30} width={${W}} height={${H}} background={{ mode: "color", color: "#404040" }}>
       <Track id="t" layout="free">
         <Shape id="inside" shape="rectangle" start={0} duration={2} width={40} height={40} fill="#202020"
-          transform={{ position: { x: -60, y: 0 } }} />
+          box={{ x: ${W / 2 - 60}, y: ${H / 2}, origin: "center" }} />
         <Shape id="over" shape="rectangle" start={0} duration={2} width={40} height={40} fill="#202020"
-          transform={{ position: { x: 135, y: 0 } }} />
+          box={{ x: ${W / 2 + 135}, y: ${H / 2}, origin: "center" }} />
         <Layer id="drawn" start={0} duration={2}>
           <div data-name="tag" style={{ position: "absolute", left: 150, top: 120, width: 30, height: 20, background: "#202020" }} />
         </Layer>

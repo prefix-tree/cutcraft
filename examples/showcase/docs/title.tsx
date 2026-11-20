@@ -16,7 +16,7 @@ export default function Video() {
           size={64}
           width={360}
           align="left"
-          transform={{ position: { x: -280, y: 190 } }}
+          box={{ x: 200, y: 460, origin: "center" }}
           animation={{ preset: "word-by-word" }}
         >
           Bloom first

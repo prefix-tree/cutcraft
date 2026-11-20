@@ -1067,9 +1067,7 @@ export default function Video() {
       <Captions
         id="said"
         animation="karaoke"
-        x={-36}
-        y={-587}
-        width={756}
+        box={{ x: 504, y: 373, width: 756, origin: "center" }}
         style={{
           font: "Space Grotesk",
           size: 54,

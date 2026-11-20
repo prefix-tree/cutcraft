@@ -1,8 +1,7 @@
 import { z } from "zod";
 
-import { CAPTION_POSITIONS, MASK_TYPES, SVG_COLOR_MODES, TEXT_ALIGNS, TEXT_DECORATIONS, TEXT_VALIGNS } from "../enums";
+import { MASK_TYPES, SVG_COLOR_MODES, TEXT_ALIGNS, TEXT_DECORATIONS, TEXT_VALIGNS } from "../enums";
 
-export const zCaptionPosition = z.enum(CAPTION_POSITIONS);
 export const zTextAlign = z.enum(TEXT_ALIGNS);
 export const zTextValign = z.enum(TEXT_VALIGNS);
 export const zTextDecoration = z.enum(TEXT_DECORATIONS);

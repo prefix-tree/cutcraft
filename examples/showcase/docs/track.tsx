@@ -18,7 +18,7 @@ export default function Video() {
           width={90}
           height={90}
           fill="#e8a33d"
-          transform={{ position: { x: 360, y: -170 } }}
+          box={{ x: 840, y: 100, origin: "center" }}
         />
       </Track>
     </Composition>

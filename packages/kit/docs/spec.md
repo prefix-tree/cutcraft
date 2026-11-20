@@ -168,7 +168,7 @@ Count: 92 action types, every one with a non-null inverse.
 
 ### B.4 Auto-group set
 
-transform/update, effect/update, audioEffect/update, audio/setVolume, audio/setFade, audio/setDuck, transition/update, clip/setBlend, clip/move, clip/trim, clip/slip, clip/slide, clip/roll, clip/setSpeed, clip/setChromaKey, clip/setStabilization, keyframe/move, keyframe/update, composition/updateSettings, composition/setBackground, text/update, shape/update, svg/update, sticker/update, mask/update, layer/setTiming, layer/setTransform.
+transform/update, box/update, effect/update, audioEffect/update, audio/setVolume, audio/setFade, audio/setDuck, transition/update, clip/setBlend, clip/move, clip/trim, clip/slip, clip/slide, clip/roll, clip/setSpeed, clip/setChromaKey, clip/setStabilization, keyframe/move, keyframe/update, composition/updateSettings, composition/setBackground, text/update, shape/update, svg/update, sticker/update, mask/update, layer/setTiming, layer/setTransform.
 
 ---
 
@@ -194,7 +194,7 @@ Snapping rules copied as is: snap on by default, threshold 40 px, priority clip 
 | Track header menu | Rename, Remove gaps (`track/consolidate`, free layout only), Group/Ungroup (`track/setGroup`, with undo), Delete |
 | Timeline toolbar | Undo, Redo, Split (S), Trim start/end to playhead (Q/W), Delete, Duplicate (⌘D), Ripple delete (⇧Del), Add track (role presets), Track layers popover, zoom, snap (N), track height |
 | Quick edit bar (single media clip, playhead inside) | Split here, Trim start/end (`clip/trimToPlayhead`), Add captions, Clean audio (`audioEffect/add noiseReduction`), Export |
-| Inspector: Transform (position, scale, rotation, anchor, opacity, radius, fit, crop, align, blend, 3D) | `transform/update`, `clip/setFit`, `clip/setBlend` (3D fields through `transform/update`, with undo) |
+| Inspector: Transform (box, scale, rotation, anchor, opacity, radius, fit, crop, align, blend, 3D) | `box/update`, `transform/update`, `clip/setFit`, `clip/setBlend` (3D fields through `transform/update`, with undo) |
 | Inspector: Style (text / shape / svg) | `text/update`, `text/setContent`, `shape/update`, `svg/update` |
 | Inspector: Color grading | `effect/add`, `effect/update` (`whiteBalance`, `exposure`, `curves`…) |
 | Inspector: Effects (stack, chroma key, masking, nested, adjustment, PiP presets, behind-subject) | `effect/*`, `clip/setChromaKey`, `mask/*`, `nested/*`, `adjustment/*`, `transform/update`, `text/update` |
@@ -205,7 +205,7 @@ Snapping rules copied as is: snap on by default, threshold 40 px, priority clip 
 | Multi-clip inspector (align, distribute, nudge, batch effects, delete, duplicate) | `batch/apply` |
 | Caption selected | `caption/update`, `caption/remove` |
 | Tweaks panel (schema props) | `composition/setProps` |
-| Preview canvas: drag/resize element, arrow nudge 1 px / ⇧ 10 px, ⌥ disables snap | `transform/update` on the selected id (via `data-el`) |
+| Preview canvas: drag/resize element, arrow nudge 1 px / ⇧ 10 px, ⌥ disables snap | `box/update` on the selected id (via `data-el`) |
 | Keyboard | OpenReel's default map copied (Space, ←/→ frame, ⇧←/→ second, ↑/↓ 5 s, Home/End, [ ] clip edges, I/O loop, ⌘Z/⌘⇧Z, ⌘X/C/V, ⌘D, Del, ⇧Del, S, Q/W, ⌘A/Esc, N, ⌘=/−/0, ?, T title, M marker) plus the CapCut/Premiere/Final Cut/DaVinci split-key presets |
 
 Behaviours we add beyond OpenReel: magnetic sequence tracks (ripple on move/delete is the layout, not a command), connected-clip lines for anchors, `word:`/`shot:` snapping targets from the manifest, locked-prop and generated-block visuals, bake on gesture, select-and-ask with source range for `<Layer>` interiors.

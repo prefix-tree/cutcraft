@@ -2,6 +2,7 @@ import { frameStartSeconds, framesUntil, nearestFrame } from "@uberscene/kit/sch
 import {
   boundsOf,
   buildFramePlan,
+  captionBox,
   captureWarnings,
   type DrawOp,
   type DrawRect,
@@ -227,14 +228,17 @@ export async function checkLayout(options: LayoutCheckOptions): Promise<LayoutCh
   const ms = (t: number): number => Math.round(t * 1000) / 1000;
   const index = options.source ? buildSourceIndex(options.source.text) : null;
   const result = issues.map(({ n: _n, worst: _w, ...issue }) => {
-    const described = describe({
-      ...issue,
-      from: ms(issue.from),
-      to: ms(issue.to),
-      at: ms(issue.at),
-      box: rounded(issue.box),
-      area: rounded(issue.area),
-    });
+    const described = describe(
+      {
+        ...issue,
+        from: ms(issue.from),
+        to: ms(issue.to),
+        at: ms(issue.at),
+        box: rounded(issue.box),
+        area: rounded(issue.area),
+      },
+      placedOf(state, issue.id),
+    );
     const spot = options.source.file && index ? locate(options.source.file, index, state, issue.id, issue.kind) : null;
     return spot ? { ...described, source: spot } : described;
   });
@@ -316,8 +320,38 @@ export const rect = (r: DrawRect): string => `x ${r.x}..${r.x + r.w}, y ${r.y}..
 const SIDE = { left: "on the left", top: "at the top", right: "on the right", bottom: "at the bottom" } as const;
 const signed = (v: number): string => (v > 0 ? `+${v}` : `${v}`);
 
-/** A move of the element by (dx, dy) pixels in words, with the transform props that make it. */
-function moveText(kind: string, dx: number, dy: number): string {
+/** Where an element is placed now: its `box` as written, which axes keyframes move, and the frame's size. */
+interface Placed {
+  readonly box: { readonly x?: unknown; readonly y?: unknown; readonly origin?: unknown } | undefined;
+  readonly keyed: { readonly x: boolean; readonly y: boolean };
+  readonly W: number;
+  readonly H: number;
+}
+
+/** The `box` values that move an element by (dx, dy): the new number where it has one, else from the centre. */
+function boxMove(at: Placed, dx: number, dy: number): string {
+  const centred = at.box?.origin === undefined || at.box.origin === "center";
+  const props: string[] = [];
+  let centre = false;
+  for (const [axis, d, half] of [
+    ["x", dx, at.W / 2],
+    ["y", dy, at.H / 2],
+  ] as const) {
+    if (!d) continue;
+    const now = at.box?.[axis];
+    if (at.keyed[axis]) props.push(`each box.${axis} key ${signed(d)}`);
+    else if (typeof now === "number") props.push(`box.${axis} ${Math.round(now + d)}`);
+    else if (centred) {
+      props.push(`box.${axis} ${Math.round(half + d)}`);
+      centre = true;
+    } else props.push(`box.${axis} ${signed(d)} from where it is centred now`);
+  }
+  if (centre && at.box?.origin !== "center") props.push(`box.origin "center"`);
+  return props.join(", ");
+}
+
+/** A move of the element by (dx, dy) pixels in words, with the `box` values that make it. */
+function moveText(kind: string, dx: number, dy: number, at?: Placed): string {
   const words = [
     dx && `${dx > 0 ? "right" : "left"} ${Math.abs(dx)} px`,
     dy && `${dy > 0 ? "down" : "up"} ${Math.abs(dy)} px`,
@@ -325,16 +359,27 @@ function moveText(kind: string, dx: number, dy: number): string {
     .filter(Boolean)
     .join(" and ");
   if (kind === "captions")
-    return `move the captions ${words} (their x and y, a narrower width, or a smaller style.size)`;
-  if (kind === "part") return `move it ${words}, in the layer's code where it is drawn`;
-  const props = [dx && `transform.position.x ${signed(dx)}`, dy && `transform.position.y ${signed(dy)}`]
-    .filter(Boolean)
-    .join(", ");
-  return `move it ${words} (${props})`;
+    return `move the captions ${words} (${at ? `${boxMove(at, dx, dy)}, ` : ""}a narrower box.width, or a smaller style.size)`;
+  if (kind === "part" || !at) return `move it ${words}, in the layer's code where it is drawn`;
+  return `move it ${words} (${boxMove(at, dx, dy)})`;
 }
 
-/** Fills in `message` and `fix` from the measurements. */
-function describe(issue: LayoutIssue): LayoutIssue {
+/** Where element `id` is placed now, or undefined for one the file does not place (a part a layer draws). */
+function placedOf(state: ResolvedState, id: string): Placed | undefined {
+  const item = state.items.get(id);
+  if (!item || item.kind === "part") return undefined;
+  const keyed = (axis: "x" | "y"): boolean =>
+    [...state.items.values()].some(
+      (c) => c.parent === id && c.kind === "keyframe" && c.props.property === `box.${axis}`,
+    );
+  const written = item.props.box as Placed["box"];
+  // The captions' box is the lower safe area, each field written replacing that one.
+  const box = item.kind === "captions" ? { ...captionBox(state.composition), ...written } : written;
+  return { box, keyed: { x: keyed("x"), y: keyed("y") }, W: state.composition.width, H: state.composition.height };
+}
+
+/** Fills in `message` and `fix` from the measurements and where the element is placed now. */
+function describe(issue: LayoutIssue, at?: Placed): LayoutIssue {
   const { box, area } = issue;
   const who = `${issue.kind} "${issue.id}"`;
   const when = issue.from === issue.to ? `at ${s2(issue.from)}` : `from ${s2(issue.from)} to ${s2(issue.to)}`;
@@ -370,7 +415,7 @@ function describe(issue: LayoutIssue): LayoutIssue {
         : box.y + box.h > area.y + area.h
           ? -Math.ceil(box.y + box.h - (area.y + area.h))
           : 0;
-    return { ...issue, message, fix: moveText(issue.kind, dx, dy) };
+    return { ...issue, message, fix: moveText(issue.kind, dx, dy, at) };
   }
   const other = issue.rule === "subject" ? "the subject" : `captions "${issue.with}"`;
   const message = `${who} covers ${other} ${when}.`;
@@ -387,12 +432,12 @@ function describe(issue: LayoutIssue): LayoutIssue {
   return {
     ...issue,
     message,
-    fix: `${moveText(issue.kind, Math.round(dx), Math.round(dy))}, then check again: the move may run into something else`,
+    fix: `${moveText(issue.kind, Math.round(dx), Math.round(dy), at)}, then check again: the move may run into something else`,
   };
 }
 
 /**
- * Where to fix an element in the file: its `transform` (its `style` for captions), else its opening tag; for an
+ * Where to fix an element in the file: its `box`, else its `transform` (its `style` for captions), else its opening tag; for an
  * element a helper generated, the call to the helper; for one a loop made, the JSX in the loop. Null when the file
  * shows no single place for it.
  */
@@ -423,7 +468,7 @@ function locate(file: string, index: SourceIndex, state: ResolvedState, id: stri
     helper: string | undefined,
     loop = false;
   if (site) {
-    at = (site.props.get(kind === "captions" ? "style" : "transform") ?? site).range[0];
+    at = (site.props.get("box") ?? site.props.get(kind === "captions" ? "style" : "transform") ?? site).range[0];
   } else if (call) {
     at = call.range[0];
     helper = call.helper;

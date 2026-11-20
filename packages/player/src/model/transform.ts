@@ -1,6 +1,7 @@
-import type { FitMode, Transform } from "@uberscene/kit/schema";
+import type { ElementBox, FitMode, Transform } from "@uberscene/kit/schema";
 import type { Placement } from "@uberscene/sdk/resolver";
 
+import { placeBox } from "./box";
 import { keyframedValue } from "./keyframes";
 
 export interface DrawRect {
@@ -62,26 +63,17 @@ export interface Box {
   readonly height: number;
 }
 
-/** The fitted rectangle of a source inside the composition, centred. */
-export function fitRect(comp: Box, src: Box, fit: FitMode): DrawRect {
-  const W = comp.width,
-    H = comp.height;
-  const w = src.width > 0 ? src.width : W,
-    h = src.height > 0 ? src.height : H;
-  if (fit === "stretch") return { x: 0, y: 0, w: W, h: H };
-  let s = 1;
-  if (fit === "contain") s = Math.min(W / w, H / h);
-  else if (fit === "cover") s = Math.max(W / w, H / h);
-  const dw = w * s,
-    dh = h * s;
-  return { x: (W - dw) / 2, y: (H - dh) / 2, w: dw, h: dh };
-}
-
 /**
- * Lay out a source of `src` pixels in the composition: crop, fit, then the
- * element transform (position offset, scale, rotation about the anchor).
+ * Lay out a source of `src` pixels in the composition: crop, place it by `box` and `fit` (`placeBox`, the one rule
+ * every element is placed by), then the element transform (scale and rotation about the anchor).
  */
-export function layoutRect(comp: Box, src: Box, fit: FitMode, transform?: Transform | undefined): Layout {
+export function layoutRect(
+  comp: Box,
+  src: Box,
+  fit: FitMode,
+  transform?: Transform | undefined,
+  box?: ElementBox | undefined,
+): Layout {
   const t = transform ?? {};
   let crop: DrawRect | undefined;
   let effective: Box = src;
@@ -94,7 +86,18 @@ export function layoutRect(comp: Box, src: Box, fit: FitMode, transform?: Transf
     };
     effective = { width: crop.w, height: crop.h };
   }
-  const rect = fitRect(comp, effective, fit);
+  const placed = placeBox(comp, effective, fit, box);
+  if (placed.crop) {
+    // The box's crop is of what the transform's crop left: in source pixels, one inside the other.
+    const from = crop ?? { x: 0, y: 0, w: src.width, h: src.height };
+    crop = {
+      x: from.x + placed.crop.x * from.w,
+      y: from.y + placed.crop.y * from.h,
+      w: placed.crop.w * from.w,
+      h: placed.crop.h * from.h,
+    };
+  }
+  const rect = placed.rect;
   const matrix = transformMatrix(rect, t);
   return { rect, matrix, ...(crop ? { crop } : {}), opacity: t.opacity ?? 1 };
 }
@@ -107,9 +110,7 @@ export function transformMatrix(rect: DrawRect, t: Transform | undefined): Matri
     oy = rect.y + anchor.y * rect.h;
   const sx = typeof tr.scale === "number" ? tr.scale : (tr.scale?.x ?? 1);
   const sy = typeof tr.scale === "number" ? tr.scale : (tr.scale?.y ?? 1);
-  const px = tr.position?.x ?? 0,
-    py = tr.position?.y ?? 0;
-  let m = translate(px + ox, py + oy);
+  let m = translate(ox, oy);
   if (tr.rotation) m = multiply(m, rotate(tr.rotation));
   if (sx !== 1 || sy !== 1) m = multiply(m, scaleM(sx, sy));
   m = multiply(m, translate(-ox, -oy));
@@ -132,11 +133,9 @@ export function animatedTransform(base: Transform | undefined, children: readonl
   if (!children.some((c) => c.kind === "keyframe")) return base ?? {};
   const t: Record<string, unknown> = { ...(base ?? {}) };
   const num = (prop: string, fallback: number): number => Number(keyframedValue(children, prop, rel, fallback));
-  const pos = base?.position ?? { x: 0, y: 0 };
   const scl = typeof base?.scale === "number" ? { x: base.scale, y: base.scale } : (base?.scale ?? { x: 1, y: 1 });
   const anc = base?.anchor ?? { x: 0.5, y: 0.5 };
   const crop = base?.crop ?? { x: 0, y: 0, width: 1, height: 1 };
-  t.position = { x: num("transform.position.x", pos.x), y: num("transform.position.y", pos.y) };
   t.scale = { x: num("transform.scale.x", scl.x), y: num("transform.scale.y", scl.y) };
   t.rotation = num("transform.rotation", base?.rotation ?? 0);
   t.opacity = num("transform.opacity", base?.opacity ?? 1);
@@ -156,6 +155,28 @@ export function animatedTransform(base: Transform | undefined, children: readonl
     };
   }
   return t as Transform;
+}
+
+/** The box with `box.x` and `box.y` evaluated at element-relative time `rel`; an axis with no value and no keys stays out. */
+export function animatedBox(
+  base: ElementBox | undefined,
+  children: readonly Placement[],
+  rel: number,
+): ElementBox | undefined {
+  const keyed = (axis: "x" | "y"): boolean =>
+    children.some((c) => c.kind === "keyframe" && c.props.property === `box.${axis}`);
+  if (!keyed("x") && !keyed("y")) return base;
+  const value = (axis: "x" | "y"): number | undefined => {
+    const v = Number(keyframedValue(children, `box.${axis}`, rel, base?.[axis] ?? Number.NaN));
+    return Number.isFinite(v) ? v : undefined;
+  };
+  const x = value("x"),
+    y = value("y");
+  return {
+    ...(base?.origin ? { origin: base.origin } : {}),
+    ...(x !== undefined ? { x } : {}),
+    ...(y !== undefined ? { y } : {}),
+  };
 }
 
 /** CSS for a DOM element laid out like `layoutRect` does: it sits at the origin with `transform-origin: 0 0`. */

@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { Layer, Title } from "../jsx/elements";
 import { useLayer } from "../jsx/use-t";
-import { h, parse, timing, timingOf, timingSchema } from "./shared";
+import { centre, centreOf, h, parse, timing, timingOf, timingSchema } from "./shared";
 
 export const counterSchema = timingSchema.extend({
   /** The component's id; each of its parts' ids starts with it. */
@@ -19,10 +19,8 @@ export const counterSchema = timingSchema.extend({
   suffix: z.string().default(""),
   /** A line under the number, in the body face and the muted colour. Left out: the number alone. */
   label: z.string().optional(),
-  /** The number's centre, in pixels from the frame's centre. */
-  x: z.number().default(0),
-  /** The number's centre, in pixels below the frame's centre. */
-  y: z.number().default(0),
+  /** Where the number's centre sits, in pixels from the frame's top left. Left out: centred on the frame. */
+  box: centre(),
   /** The number's letter height in pixels; the label is about a fifth of it. */
   size: z.number().positive().default(140),
   /** Seconds the count takes; it then holds. */
@@ -58,7 +56,7 @@ export function CounterValue(props: {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        transform: `translate(${props.x}px, ${props.y}px)`,
+        transform: `translate(calc(${props.x}px - 50%), calc(${props.y}px - 50%))`,
         font: `800 ${props.size}px var(--us-heading, Inter), sans-serif`,
         color: "var(--us-text, #ffffff)",
         fontVariantNumeric: "tabular-nums",
@@ -72,7 +70,8 @@ export function CounterValue(props: {
 export function Counter(props: z.input<typeof counterSchema>) {
   const p = parse("Counter", counterSchema, props);
   const t = timingOf(p);
-  const { from, to, decimals, prefix, suffix, x, y, size, countFor } = p;
+  const { from, to, decimals, prefix, suffix, size, countFor } = p;
+  const { x, y } = centreOf(p.box);
   return [
     h(
       Layer,
@@ -94,7 +93,7 @@ export function Counter(props: z.input<typeof counterSchema>) {
           size: Math.round(size * 0.22),
           weight: 500,
           color: "$muted",
-          transform: { position: { x, y: y + size * 0.72 } },
+          box: { x, y: y + size * 0.72, origin: "center" },
           enter: { type: "fade", duration: 0.4 },
           exit: { type: "fade", duration: 0.3 },
         },

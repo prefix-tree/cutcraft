@@ -64,14 +64,14 @@ export default function Video({ headline, cta, theme, accent, logo }: z.infer<ty
           style="h2"
           weight={500}
           valign="bottom"
-          transform={{ position: { x: 0, y: -160 } }}
+          box={{ x: 960, y: 380, origin: "center" }}
           animation={{ preset: "fade", in: 0.3, out: 0.3 }}
         >
           {cta}
         </Title>
       </Track>
 
-      <Captions id="captions" style={{ position: "bottom", size: 40, highlight: "$primary" }} />
+      <Captions id="captions" style={{ size: 40, highlight: "$primary" }} />
     </Composition>
   );
 }

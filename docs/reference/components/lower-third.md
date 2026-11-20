@@ -24,8 +24,7 @@ Besides the timing props (`start`, `anchor`, `at`, `offset`, `duration`):
 | `name` | string |  | The name, in the heading face. |
 | `role` | string |  | The line under the name, in the body face. Left out: a shorter card with the name alone. |
 | `variant` | "card" \| "bar" | `"card"` | `card`: on a surface card; `bar`: the words beside an accent bar, straight over the picture. |
-| `x` | number | `-560` | The card's centre, in pixels from the frame's centre. |
-| `y` | number | `330` | The card's centre, in pixels below the frame's centre. |
+| `box` | { x, y } | `{"x":400,"y":870}` | Where the card's centre sits, in pixels from the frame's top left. Left out: `{ x: 400, y: 870 }`, set for a 1920 by 1080 frame (give it a box on another size). |
 | `width` | number (> 0) | `640` | The card's width in pixels; the words wrap inside it. |
 | `accent` | string | `"$primary"` | The colour of the bar beside the words. |
 | `size` | number (> 0) | `44` | The name's size in pixels; the role, the card and the bar scale with it. |

@@ -32,7 +32,7 @@ export default function Video() {
           width={280}
           align="left"
           color="#f4efe6"
-          transform={{ position: { x: -320, y: -40 } }}
+          box={{ x: 160, y: 230, origin: "center" }}
         >
           <Effect id="title-split" type={split} />
           Crema

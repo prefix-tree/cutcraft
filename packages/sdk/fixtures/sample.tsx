@@ -107,7 +107,7 @@ export default function Video({ title, accent }: z.infer<typeof schema>) {
           <Cut id="cu2" at={2} angle="an2" />
         </Multicam>
       </Track>
-      <Captions id="cap" src="asset:interview" animation="karaoke" style={{ position: "bottom", size: 42 }}>
+      <Captions id="cap" src="asset:interview" animation="karaoke" style={{ size: 42 }}>
         <Caption id="cp1" start="word:3" end="word:6.end" text="Hello and welcome back" />
         <Caption id="cp2" start={4} end={6} text="to the show" />
       </Captions>

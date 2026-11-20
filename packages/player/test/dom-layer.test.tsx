@@ -97,36 +97,22 @@ describe("DomLayer", () => {
     await m.unmount();
   });
 
-  it("puts the captions at the height their position names, a word or a fraction of the frame", async () => {
-    const at = async (position: unknown) => {
-      const state = fixtureState();
-      const items = new Map(state.items);
-      const cap = items.get("cap") as Placement;
-      items.set("cap", { ...cap, props: { ...cap.props, style: { position } } });
-      const m = await mountPlayer({ ...state, items });
-      await m.seek(0.5);
-      const box = m.container.querySelector('[data-kind="captions"]') as HTMLElement;
-      const placed = { top: box.style.top, bottom: box.style.bottom, transform: box.style.transform };
-      await m.unmount();
-      return placed;
-    };
-    expect(await at(0.6)).toEqual({ top: "60%", bottom: "", transform: "translate(0, -50%)" });
-    expect(await at("center")).toEqual({ top: "50%", bottom: "", transform: "translate(0, -50%)" });
-    expect((await at("bottom")).top).toBe("");
-  });
-
   it("places the captions by the numbers on the element", async () => {
     // What each number does is tested on captionPlacement; here, that the element's props reach the page.
     const state = fixtureState();
     const items = new Map(state.items);
     const cap = items.get("cap") as Placement;
-    items.set("cap", { ...cap, props: { ...cap.props, x: 40, y: -10, width: 300, align: "left" } });
+    items.set("cap", {
+      ...cap,
+      props: { ...cap.props, box: { x: 40, y: 200, width: 300, origin: "center" }, align: "left" },
+    });
     const m = await mountPlayer({ ...state, items });
     await m.seek(0.5);
     const box = m.container.querySelector('[data-kind="captions"]') as HTMLElement;
-    expect(box.style.top).toBe("calc(50% - 10px)");
+    expect(box.style.left).toBe("-110px");
+    expect(box.style.top).toBe("200px");
     expect(box.style.width).toBe("300px");
-    expect(box.style.transform).toBe("translate(calc(-50% + 40px), -50%)");
+    expect(box.style.transform).toBe("translate(0, -50%)");
     expect(box.style.textAlign).toBe("left");
     await m.unmount();
   });

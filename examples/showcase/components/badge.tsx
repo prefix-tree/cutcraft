@@ -13,7 +13,7 @@ export default function Video() {
         <Clip id="shot" src="asset:espresso" in={2} out={5} fit="cover" />
       </Track>
       <Track id="over" layout="free">
-        <Badge id="new" start={0.4} duration={2.6} text="New roast" x={640} y={-380} size={60} />
+        <Badge id="new" start={0.4} duration={2.6} text="New roast" box={{ x: 1600, y: 160 }} size={60} />
       </Track>
     </Composition>
   );

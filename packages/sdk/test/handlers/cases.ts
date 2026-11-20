@@ -134,8 +134,9 @@ export const CASES: Partial<Record<ActionType, ActionInput>> = {
   "speed/setFreezes": { type: "speed/setFreezes", params: { id: "c2", freezes: [] } },
   "transform/update": {
     type: "transform/update",
-    params: { id: "c2", transform: { position: { x: 10, y: 0 }, scale: 1.2 } },
+    params: { id: "c2", transform: { scale: 1.2 } },
   },
+  "box/update": { type: "box/update", params: { id: "c2", box: { x: 970, y: 540, origin: "center" } } },
 
   "effect/add": {
     type: "effect/add",

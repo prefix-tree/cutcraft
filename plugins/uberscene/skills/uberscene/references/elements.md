@@ -61,7 +61,8 @@ A stretch of a video or image asset, trimmed by seconds, transcript words or cam
 | `out` | number (0..∞) \| string |  |  | Where in the source it ends, as `in`; `word:40.end` ends after the word is said. |
 | `speed` | number (0.1..20) | `1` |  | Playback rate: 2 plays twice as fast and half as long. |
 | `reverse` | boolean | `false` |  | Plays the trimmed source backwards. |
-| `transform` | { position, scale, rotation, anchor, opacity, borderRadius, crop } |  |  | Where it sits and how it is turned: position, scale, rotation, anchor, opacity, rounded corners and crop. |
+| `box` | { x, y, width, height, origin } |  |  | The rectangle it occupies, in pixels from the frame's top left as in CSS: `x` and `y` place the point `origin` names (its top left by default), `width` and `height` size it, and its content fills it as `fit` says. Left out, the whole frame. `transform` applies after. |
+| `transform` | { scale, rotation, anchor, opacity, borderRadius, crop } |  |  | How it is turned and shown: scale, rotation, anchor, opacity, rounded corners and crop. |
 | `fit` | "contain" \| "cover" \| "stretch" \| "none" |  |  | How it fills the frame: `contain` shows all of it, `cover` fills the frame and crops, `stretch` distorts to fill, `none` keeps its own size. |
 | `blend` | "normal" \| "multiply" \| "screen" \| "overlay" \| "darken" \| … 13 more |  |  | How it mixes with what is under it, as CSS `mix-blend-mode` does. |
 | `blendOpacity` | number (0..1) |  |  | How strongly it blends: multiplied into its opacity. |
@@ -136,7 +137,8 @@ Free code in the frame: any React, CSS, canvas or WebGL, placed on the timeline 
 | `duration` | number (> 0) \| "fill" \| "source" \| { match } \| { until } |  |  | How long it plays: seconds; `"source"` for the whole trimmed source; `"fill"` to run to the end of the composition; `{ match: id }` for as long as another element; `{ until: id }` to end when another element ends. |
 | `enter` | { type, duration, easing } |  |  | How it comes in: a fade, slide, scale or wipe over its first seconds, with an easing. |
 | `exit` | { type, duration, easing } |  |  | How it goes out, over its last seconds, as `enter`. |
-| `transform` | { position, scale, rotation, anchor, opacity, borderRadius, crop } |  |  | Moves, scales, turns and fades the whole layer, as on any element; the editor's handles write it. |
+| `box` | { x, y, width, height, origin } |  |  | The rectangle it occupies, in pixels from the frame's top left as in CSS: `x` and `y` place the point `origin` names (its top left by default), `width` and `height` size it, and its content fills it as `fit` says. Left out, the whole frame. `transform` applies after. |
+| `transform` | { scale, rotation, anchor, opacity, borderRadius, crop } |  |  | How it is turned and shown: scale, rotation, anchor, opacity, rounded corners and crop. |
 | `blend` | "normal" \| "multiply" \| "screen" \| "overlay" \| "darken" \| … 13 more |  |  | How the layer mixes with what is under it, as CSS `mix-blend-mode` does. Only `normal` renders ([What renders](https://uberscene.prefixtree.xyz/reference/rendering)). |
 | `ground` | boolean |  |  | The layer is a ground that other things sit on: a wall behind a game, a scrim that darkens footage under a title. The layout check then treats it like a background: it is not held to the safe zone and is not said to cover the captions. |
 
@@ -160,7 +162,8 @@ The player draws it once the host calls `installFreeCodeLibraries()` ([Free code
 | `duration` | number (> 0) \| "fill" \| "source" \| { match } \| { until } |  |  | How long it plays: seconds; `"source"` for the whole trimmed source; `"fill"` to run to the end of the composition; `{ match: id }` for as long as another element; `{ until: id }` to end when another element ends. |
 | `enter` | { type, duration, easing } |  |  | How it comes in: a fade, slide, scale or wipe over its first seconds, with an easing. |
 | `exit` | { type, duration, easing } |  |  | How it goes out, over its last seconds, as `enter`. |
-| `transform` | { position, scale, rotation, anchor, opacity, borderRadius, crop } |  |  | Moves, scales, turns and fades the whole layer, as on any element; the editor's handles write it. |
+| `box` | { x, y, width, height, origin } |  |  | The rectangle it occupies, in pixels from the frame's top left as in CSS: `x` and `y` place the point `origin` names (its top left by default), `width` and `height` size it, and its content fills it as `fit` says. Left out, the whole frame. `transform` applies after. |
+| `transform` | { scale, rotation, anchor, opacity, borderRadius, crop } |  |  | How it is turned and shown: scale, rotation, anchor, opacity, rounded corners and crop. |
 | `blend` | "normal" \| "multiply" \| "screen" \| "overlay" \| "darken" \| … 13 more |  |  | How the layer mixes with what is under it, as CSS `mix-blend-mode` does. Only `normal` renders ([What renders](https://uberscene.prefixtree.xyz/reference/rendering)). |
 | `ground` | boolean |  |  | The layer is a ground that other things sit on: a wall behind a game, a scrim that darkens footage under a title. The layout check then treats it like a background: it is not held to the safe zone and is not said to cover the captions. |
 | `camera` | { position, lookAt, fov, near, far, zoom, orthographic } |  |  | The camera: `position` and `lookAt` as `[x, y, z]`, `fov` in degrees, clipping planes, zoom, or orthographic. |
@@ -187,7 +190,8 @@ The player draws it once the host calls `installFreeCodeLibraries()` ([Free code
 | `duration` | number (> 0) \| "fill" \| "source" \| { match } \| { until } |  |  | How long it plays: seconds; `"source"` for the whole trimmed source; `"fill"` to run to the end of the composition; `{ match: id }` for as long as another element; `{ until: id }` to end when another element ends. |
 | `enter` | { type, duration, easing } |  |  | How it comes in: a fade, slide, scale or wipe over its first seconds, with an easing. |
 | `exit` | { type, duration, easing } |  |  | How it goes out, over its last seconds, as `enter`. |
-| `transform` | { position, scale, rotation, anchor, opacity, borderRadius, crop } |  |  | Moves, scales, turns and fades the whole layer, as on any element; the editor's handles write it. |
+| `box` | { x, y, width, height, origin } |  |  | The rectangle it occupies, in pixels from the frame's top left as in CSS: `x` and `y` place the point `origin` names (its top left by default), `width` and `height` size it, and its content fills it as `fit` says. Left out, the whole frame. `transform` applies after. |
+| `transform` | { scale, rotation, anchor, opacity, borderRadius, crop } |  |  | How it is turned and shown: scale, rotation, anchor, opacity, rounded corners and crop. |
 | `blend` | "normal" \| "multiply" \| "screen" \| "overlay" \| "darken" \| … 13 more |  |  | How the layer mixes with what is under it, as CSS `mix-blend-mode` does. Only `normal` renders ([What renders](https://uberscene.prefixtree.xyz/reference/rendering)). |
 | `ground` | boolean |  |  | The layer is a ground that other things sit on: a wall behind a game, a scrim that darkens footage under a title. The layout check then treats it like a background: it is not held to the safe zone and is not said to cover the captions. |
 | `sequence` | [string, object] \| [string, object, object][] | `[]` |  | Motion steps: `[selector, keyframes, options]`, where `at` in the options is seconds into the layer. |
@@ -208,7 +212,8 @@ Text over the picture in the theme's type, with entrances by letter or by word.
 | `at` | string |  |  | With `anchor`: a word, shot or silence of the anchor's source (`word:14655`); the start is where the anchor plays it, plus `offset`. |
 | `offset` | number |  |  | Seconds added to the start that `anchor` and `at` give; negative starts earlier. |
 | `duration` | number (> 0) \| "fill" \| "source" \| { match } \| { until } |  |  | How long it plays: seconds; `"source"` for the whole trimmed source; `"fill"` to run to the end of the composition; `{ match: id }` for as long as another element; `{ until: id }` to end when another element ends. |
-| `transform` | { position, scale, rotation, anchor, opacity, borderRadius, crop } |  |  | Where it sits and how it is turned: position, scale, rotation, anchor, opacity, rounded corners and crop. |
+| `box` | { x, y, width, height, origin } |  |  | The rectangle it occupies, in pixels from the frame's top left as in CSS: `x` and `y` place the point `origin` names (its top left by default), `width` and `height` size it, and its content fills it as `fit` says. Left out, the whole frame. `transform` applies after. |
+| `transform` | { scale, rotation, anchor, opacity, borderRadius, crop } |  |  | How it is turned and shown: scale, rotation, anchor, opacity, rounded corners and crop. |
 | `blend` | "normal" \| "multiply" \| "screen" \| "overlay" \| "darken" \| … 13 more |  |  | How it mixes with what is under it, as CSS `mix-blend-mode` does. Only `normal` renders ([What renders](https://uberscene.prefixtree.xyz/reference/rendering)). |
 | `enter` | { type, duration, easing } |  |  | How it comes in: a fade, slide, scale or wipe over its first seconds, with an easing. |
 | `exit` | { type, duration, easing } |  |  | How it goes out, over its last seconds, as `enter`. |
@@ -242,11 +247,9 @@ Subtitles from an asset's transcript that follow the clips through every trim.
 |---|---|---|---|---|
 | `id` | string |  | yes | The captions' name. |
 | `src` | string |  |  | Generate children from the asset's transcript. Literal `<Caption>` children override this. |
-| `style` | string \| { font, size, weight, color, background, shadow, stroke, position, highlight, highlightBox, upcoming } |  |  | Caption styling, or the name of a theme captions preset. |
+| `style` | string \| { font, size, weight, color, background, shadow, stroke, highlight, highlightBox, upcoming } |  |  | Caption styling, or the name of a theme captions preset. |
 | `animation` | "none" \| "word-highlight" \| "word-by-word" \| "karaoke" \| "typewriter" | `"none"` |  | How the words appear: all at once, the word being said highlighted, word by word, karaoke or typewriter. |
-| `x` | number |  |  | Where the middle of the captions is, in pixels right of the frame's centre and below it, as on a card or a badge. `y` takes the place of `style.position`; `x` alone keeps the height that names. |
-| `y` | number |  |  | Pixels below the frame's centre for the middle of the captions, as `x`. |
-| `width` | number (> 0) |  |  | The widest a caption line may be, in pixels. Left out: the frame, less a margin at each side. |
+| `box` | { x, y, width, height, origin } |  |  | The rectangle the caption block sits in, from the frame's top left as on any element. Left out, the lower safe area: centred, as wide as the frame less a margin at each side, its bottom a margin above the frame's bottom (`origin: "bottom"`). Each field written replaces that one of the default, so a box with only `y: 1150` and `origin: "center"` puts the block's middle at 1150 and keeps the default width. Without a `height`, the block is as tall as its lines. |
 | `align` | "left" \| "center" \| "right" \| "justify" |  |  | Which side of that width the lines sit against. Left out: `center`. |
 | `maxChars` | integer (> 0) |  |  | The most characters on a generated cue's line. Left out: as many as fit at the caption size on this frame (at most 42). |
 | `maxDuration` | number (> 0) | `5` |  | The longest a generated cue may stay on screen, in seconds. |
@@ -285,7 +288,8 @@ A vector shape (rectangle, circle, star, polygon, path) with fill, stroke and sh
 | `at` | string |  |  | With `anchor`: a word, shot or silence of the anchor's source (`word:14655`); the start is where the anchor plays it, plus `offset`. |
 | `offset` | number |  |  | Seconds added to the start that `anchor` and `at` give; negative starts earlier. |
 | `duration` | number (> 0) \| "fill" \| "source" \| { match } \| { until } |  |  | How long it plays: seconds; `"source"` for the whole trimmed source; `"fill"` to run to the end of the composition; `{ match: id }` for as long as another element; `{ until: id }` to end when another element ends. |
-| `transform` | { position, scale, rotation, anchor, opacity, borderRadius, crop } |  |  | Where it sits and how it is turned: position, scale, rotation, anchor, opacity, rounded corners and crop. |
+| `box` | { x, y, width, height, origin } |  |  | The rectangle it occupies, in pixels from the frame's top left as in CSS: `x` and `y` place the point `origin` names (its top left by default), `width` and `height` size it, and its content fills it as `fit` says. Left out, the whole frame. `transform` applies after. |
+| `transform` | { scale, rotation, anchor, opacity, borderRadius, crop } |  |  | How it is turned and shown: scale, rotation, anchor, opacity, rounded corners and crop. |
 | `blend` | "normal" \| "multiply" \| "screen" \| "overlay" \| "darken" \| … 13 more |  |  | How it mixes with what is under it, as CSS `mix-blend-mode` does. Only `normal` renders ([What renders](https://uberscene.prefixtree.xyz/reference/rendering)). |
 | `enter` | { type, duration, easing } |  |  | How it comes in: a fade, slide, scale or wipe over its first seconds, with an easing. |
 | `exit` | { type, duration, easing } |  |  | How it goes out, over its last seconds, as `enter`. |
@@ -319,7 +323,8 @@ One-off vector art from inline SVG markup or a file.
 | `at` | string |  |  | With `anchor`: a word, shot or silence of the anchor's source (`word:14655`); the start is where the anchor plays it, plus `offset`. |
 | `offset` | number |  |  | Seconds added to the start that `anchor` and `at` give; negative starts earlier. |
 | `duration` | number (> 0) \| "fill" \| "source" \| { match } \| { until } |  |  | How long it plays: seconds; `"source"` for the whole trimmed source; `"fill"` to run to the end of the composition; `{ match: id }` for as long as another element; `{ until: id }` to end when another element ends. |
-| `transform` | { position, scale, rotation, anchor, opacity, borderRadius, crop } |  |  | Where it sits and how it is turned: position, scale, rotation, anchor, opacity, rounded corners and crop. |
+| `box` | { x, y, width, height, origin } |  |  | The rectangle it occupies, in pixels from the frame's top left as in CSS: `x` and `y` place the point `origin` names (its top left by default), `width` and `height` size it, and its content fills it as `fit` says. Left out, the whole frame. `transform` applies after. |
+| `transform` | { scale, rotation, anchor, opacity, borderRadius, crop } |  |  | How it is turned and shown: scale, rotation, anchor, opacity, rounded corners and crop. |
 | `blend` | "normal" \| "multiply" \| "screen" \| "overlay" \| "darken" \| … 13 more |  |  | How it mixes with what is under it, as CSS `mix-blend-mode` does. Only `normal` renders ([What renders](https://uberscene.prefixtree.xyz/reference/rendering)). |
 | `fit` | "contain" \| "cover" \| "stretch" \| "none" |  |  | How it fills the frame: `contain` shows all of it, `cover` fills the frame and crops, `stretch` distorts to fill, `none` keeps its own size. |
 | `style` | string |  |  | A theme preset for svg elements. |
@@ -347,7 +352,8 @@ A ready-made icon or sticker by name.
 | `at` | string |  |  | With `anchor`: a word, shot or silence of the anchor's source (`word:14655`); the start is where the anchor plays it, plus `offset`. |
 | `offset` | number |  |  | Seconds added to the start that `anchor` and `at` give; negative starts earlier. |
 | `duration` | number (> 0) \| "fill" \| "source" \| { match } \| { until } |  |  | How long it plays: seconds; `"source"` for the whole trimmed source; `"fill"` to run to the end of the composition; `{ match: id }` for as long as another element; `{ until: id }` to end when another element ends. |
-| `transform` | { position, scale, rotation, anchor, opacity, borderRadius, crop } |  |  | Where it sits and how it is turned: position, scale, rotation, anchor, opacity, rounded corners and crop. |
+| `box` | { x, y, width, height, origin } |  |  | The rectangle it occupies, in pixels from the frame's top left as in CSS: `x` and `y` place the point `origin` names (its top left by default), `width` and `height` size it, and its content fills it as `fit` says. Left out, the whole frame. `transform` applies after. |
+| `transform` | { scale, rotation, anchor, opacity, borderRadius, crop } |  |  | How it is turned and shown: scale, rotation, anchor, opacity, rounded corners and crop. |
 | `blend` | "normal" \| "multiply" \| "screen" \| "overlay" \| "darken" \| … 13 more |  |  | How it mixes with what is under it, as CSS `mix-blend-mode` does. Only `normal` renders ([What renders](https://uberscene.prefixtree.xyz/reference/rendering)). |
 | `enter` | { type, duration, easing } |  |  | How it comes in: a fade, slide, scale or wipe over its first seconds, with an easing. |
 | `exit` | { type, duration, easing } |  |  | How it goes out, over its last seconds, as `enter`. |
@@ -472,7 +478,8 @@ A sequence written once as a component and placed like a clip.
 | `at` | string |  |  | With `anchor`: a word, shot or silence of the anchor's source (`word:14655`); the start is where the anchor plays it, plus `offset`. |
 | `offset` | number |  |  | Seconds added to the start that `anchor` and `at` give; negative starts earlier. |
 | `duration` | number (> 0) \| "fill" \| "source" \| { match } \| { until } |  |  | How long it plays: seconds; `"source"` for the whole trimmed source; `"fill"` to run to the end of the composition; `{ match: id }` for as long as another element; `{ until: id }` to end when another element ends. |
-| `transform` | { position, scale, rotation, anchor, opacity, borderRadius, crop } |  |  | Where it sits and how it is turned: position, scale, rotation, anchor, opacity, rounded corners and crop. |
+| `box` | { x, y, width, height, origin } |  |  | The rectangle it occupies, in pixels from the frame's top left as in CSS: `x` and `y` place the point `origin` names (its top left by default), `width` and `height` size it, and its content fills it as `fit` says. Left out, the whole frame. `transform` applies after. |
+| `transform` | { scale, rotation, anchor, opacity, borderRadius, crop } |  |  | How it is turned and shown: scale, rotation, anchor, opacity, rounded corners and crop. |
 | `fit` | "contain" \| "cover" \| "stretch" \| "none" |  |  | How it fills the frame: `contain` shows all of it, `cover` fills the frame and crops, `stretch` distorts to fill, `none` keeps its own size. |
 | `blend` | "normal" \| "multiply" \| "screen" \| "overlay" \| "darken" \| … 13 more |  |  | How it mixes with what is under it, as CSS `mix-blend-mode` does. |
 | `blendOpacity` | number (0..1) |  |  | How strongly it blends: multiplied into its opacity. |

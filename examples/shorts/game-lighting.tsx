@@ -265,8 +265,9 @@ export default function Video({ hook, outro, warmWall, coolWall }: z.infer<typeo
 
       {/* What is said, as ordinary subtitles at the top: only how each trick works. */}
       <Captions
+        box={{ y: 153.6, origin: "top" }}
         id="subtitles"
-        style={{ font: "Inter", size: 54, weight: 700, color: "#ffffff", background: "#000000c0", position: "top" }}
+        style={{ font: "Inter", size: 54, weight: 700, color: "#ffffff", background: "#000000c0" }}
       >
         <Caption id="s-hook" start={0.2} end={2.8} text={hook} />
         <Caption id="s-bare" start={3.1} end={4.9} text="Here is the room with no lighting. Just paint." />

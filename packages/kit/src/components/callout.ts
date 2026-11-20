@@ -1,17 +1,15 @@
 import { z } from "zod";
 
 import { Shape, Svg, Title } from "../jsx/elements";
-import { h, parse, pointSchema, svgIn, timing, timingOf, timingSchema } from "./shared";
+import { centre, centreOf, h, parse, pointSchema, svgIn, timing, timingOf, timingSchema } from "./shared";
 
 export const calloutSchema = timingSchema.extend({
   /** The component's id; each of its parts' ids starts with it. */
   id: z.string(),
   /** The note, in the body face; the box grows taller to fit it. */
   text: z.string(),
-  /** The box's centre, in pixels from the frame's centre. */
-  x: z.number().default(320),
-  /** The box's centre, in pixels below the frame's centre. */
-  y: z.number().default(-220),
+  /** Where the box's centre sits, in pixels from the frame's top left. Left out: `{ x: 1280, y: 320 }`, set for a 1920 by 1080 frame (give it a box on another size). */
+  box: centre(1280, 320),
   /** The box's width in pixels. */
   width: z.number().positive().default(420),
   /** What it points at; without it, the box stands alone. */
@@ -25,6 +23,7 @@ export const calloutSchema = timingSchema.extend({
 /** A note on a surface box, with a line drawn from it to the thing it is about. */
 export function Callout(props: z.input<typeof calloutSchema>) {
   const p = parse("Callout", calloutSchema, props);
+  const c = centreOf(p.box);
   const t = timingOf(p);
   // The box was measured for a 30 px note; `k` keeps its padding and line height in proportion at any size.
   const k = p.size / 30;
@@ -40,7 +39,7 @@ export function Callout(props: z.input<typeof calloutSchema>) {
       fill: "$surface",
       cornerRadius: "$radius",
       stroke: { color: p.color, width: 3 },
-      transform: { position: { x: p.x, y: p.y } },
+      box: { x: c.x, y: c.y, origin: "center" },
       enter: { type: "scale", duration: 0.35, easing: "easeOutBack" },
       exit: { type: "fade", duration: 0.3 },
     }),
@@ -54,7 +53,7 @@ export function Callout(props: z.input<typeof calloutSchema>) {
         weight: 600,
         color: "$text",
         width: p.width - 56,
-        transform: { position: { x: p.x, y: p.y } },
+        box: { x: c.x, y: c.y, origin: "center" },
         enter: { type: "fade", duration: 0.35 },
         exit: { type: "fade", duration: 0.3 },
       },
@@ -63,10 +62,10 @@ export function Callout(props: z.input<typeof calloutSchema>) {
   ];
   if (!p.to) return parts;
   // The line leaves the box's edge facing the target and ends on a dot.
-  const dx = p.to.x - p.x;
-  const dy = p.to.y - p.y;
+  const dx = p.to.x - c.x;
+  const dy = p.to.y - c.y;
   const edge = Math.min(Math.abs(p.width / 2 / (dx || 1e-6)), Math.abs(height / 2 / (dy || 1e-6)));
-  const from = { x: p.x + dx * Math.min(1, edge), y: p.y + dy * Math.min(1, edge) };
+  const from = { x: c.x + dx * Math.min(1, edge), y: c.y + dy * Math.min(1, edge) };
   const pad = 16;
   const box = {
     minX: Math.min(from.x, p.to.x) - pad,

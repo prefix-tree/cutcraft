@@ -191,6 +191,11 @@ export interface SpeedActions {
 export interface TransformActions {
   /** Deep-merges `transform` into a visual element's transform; only the fields given change. */
   "transform/update": { id: Id; transform: Readonly<Record<string, Json>> };
+  /**
+   * Places an element or the captions: merges `box` (`x`, `y` in pixels from the frame's top left, `origin`) into its
+   * box; only the fields given change, and a field set to null is removed, so that axis is centred again.
+   */
+  "box/update": { id: Id; box: Readonly<Record<string, Json>> };
 }
 
 interface ChildStack<K extends string> {
@@ -433,6 +438,7 @@ export type Namespace = ActionType extends `${infer N}/${string}` ? N : never;
 /** Rapid repeats of these on the same target collapse into one undo step (OpenReel's rule). */
 export const AUTO_GROUP_TYPES: ReadonlySet<ActionType> = new Set<ActionType>([
   "transform/update",
+  "box/update",
   "effect/update",
   "audio/setVolume",
   "audio/setFade",

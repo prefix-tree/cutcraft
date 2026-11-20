@@ -1,12 +1,13 @@
 import type { CSSProperties } from "react";
 
-import type { FitMode, Transform } from "@uberscene/kit/schema";
+import type { ElementBox, FitMode, Transform } from "@uberscene/kit/schema";
 import type { Placement, ResolvedState } from "@uberscene/sdk/resolver";
 
 import { blendOf } from "../model/frame-plan";
 import { type ClipRect, combine, type GraphicAnimation, type Motion, motionAt, STILL } from "../model/motion";
 import { effectPipeline } from "../model/shaders";
 import {
+  animatedBox,
   animatedTransform,
   type Box,
   layoutRect,
@@ -55,7 +56,8 @@ export interface OverlayLayout {
 export function overlayLayout(p: ElementProps, size: Box, fit: FitMode = "none", drawable = false): OverlayLayout {
   const rel = p.time - p.placement.start;
   const transform = animatedTransform(p.placement.props.transform as Transform | undefined, p.children, rel);
-  const layout = layoutRect(p.state.composition, size, fit, transform);
+  const box = animatedBox(p.placement.props.box as ElementBox | undefined, p.children, rel);
+  const layout = layoutRect(p.state.composition, size, fit, transform, box);
   // With HTML-in-Canvas and a shader effect, every effect runs through the shader box in file order and the DOM
   // carries none; without it, the effects draw as CSS here (react/DomLayer.tsx).
   const { filter } = effectPipeline(p.state, p.children, p.placement.id, rel, { shaders: htmlInCanvas() });

@@ -15,7 +15,7 @@ export default function Video() {
           size={56}
           width={260}
           align="left"
-          transform={{ position: { x: -320, y: 0 } }}
+          box={{ x: 160, y: 270, origin: "center" }}
         >
           Morning shot
         </Title>

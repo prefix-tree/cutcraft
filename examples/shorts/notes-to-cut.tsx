@@ -155,9 +155,7 @@ export default function Video() {
       <Captions
         id="said"
         animation="karaoke"
-        x={-36}
-        y={-587}
-        width={756}
+        box={{ x: 504, y: 373, width: 756, origin: "center" }}
         style={{ font: "$heading", size: 54, weight: 700, color: "$text", upcoming: "$muted", highlight: "$accent" }}
       >
         {SAID.map((line, i) => (

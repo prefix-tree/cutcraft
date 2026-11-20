@@ -1,6 +1,7 @@
 import type { ReactElement, ReactNode } from "react";
 import { Children, Fragment, isValidElement } from "react";
 
+import { withFrame } from "@uberscene/kit";
 import {
   type DeclaredFont,
   engineOf,
@@ -188,6 +189,12 @@ export function collectModule(
   });
 }
 
+/** A composition's frame, from its literal width and height (1920 by 1080, as the schema defaults). */
+function frameOf(props: Record<string, unknown>): { width: number; height: number } {
+  const size = (v: unknown, d: number): number => (typeof v === "number" && v > 0 ? v : d);
+  return { width: size(props.width, 1920), height: size(props.height, 1080) };
+}
+
 function collectChildren(
   node: ReactNode,
   parent: string | null,
@@ -229,7 +236,9 @@ function collectChildren(
         return;
       }
       const placeholder = makeNode(element, type.kind, parent, walker, origin, [], false);
-      const children = collectChildren(element.props.children as ReactNode, placeholder.id, walker, origin);
+      const expand = () => collectChildren(element.props.children as ReactNode, placeholder.id, walker, origin);
+      // Components inside a composition centre an axis of their box left out on its frame.
+      const children = type.kind === "composition" ? withFrame(frameOf(element.props), expand) : expand();
       const node: CollectedNode = { ...placeholder, children };
       walker.byId.set(node.id, node);
       out.push(node);

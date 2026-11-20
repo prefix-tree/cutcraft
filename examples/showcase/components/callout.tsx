@@ -18,10 +18,9 @@ export default function Video() {
           start={0.4}
           duration={2.6}
           text="Double shot, 36 g"
-          x={520}
-          y={-300}
+          box={{ x: 1480, y: 240 }}
           width={520}
-          to={{ x: 60, y: 40 }}
+          to={{ x: 1020, y: 580 }}
         />
       </Track>
     </Composition>
