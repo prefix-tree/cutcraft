@@ -234,7 +234,7 @@ const { text: next } = foldToSource(text, exec.log(), exec.state());
 
 ### Titles
 
-<p class="home-element-lead">Text over the picture, timed to a clip, animated by letter, word or line. <a :href="withBase('/guide/titles-and-graphics')">Titles and graphics →</a></p>
+<p class="home-element-lead">Text over the picture, timed to a clip, animated by letter or by word. <a :href="withBase('/guide/titles-and-graphics')">Titles and graphics →</a></p>
 
 <Example src="previews/elements/title" alt="A title appearing word by word over a coffee shot">
 

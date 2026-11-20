@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { zEasing, zKeyframeProperty, zMaskEasing, zVideoEffectType } from "../enums";
+import { zEasing, zKeyframeProperty, zVideoEffectType } from "../enums";
 import { idSchema, vec2Schema } from "./common";
 import { zMaskType } from "./enums-local";
 
@@ -41,7 +41,7 @@ export const keyframeSchema = z
     at: z.number().nonnegative(),
     /** The value the property or param has at `at`. */
     value: z.unknown(),
-    /** How it moves from the keyframe before to this one. */
+    /** How it moves from this keyframe to the next one. The last keyframe's easing is not used. */
     easing: zEasing.default("linear"),
   })
   .refine((k) => (k.property === undefined) !== (k.param === undefined), {
@@ -56,7 +56,7 @@ export const speedKeySchema = z.strictObject({
   at: z.number().nonnegative(),
   /** The playback rate from here on: 2 is twice as fast. */
   speed: z.number().min(0.1).max(20),
-  /** How the speed changes from the key before to this one. */
+  /** How the speed changes from this key to the next one. The last key's easing is not used. */
   easing: zEasing.default("linear"),
 });
 
@@ -119,10 +119,6 @@ export const maskSchema = z.strictObject({
   feather: z.number().min(0).max(100).default(0),
   /** Shows everything outside the region instead of inside. */
   inverted: z.boolean().default(false),
-  /** Grows the region outwards, or shrinks it when negative, in pixels. */
-  expansion: z.number().min(-100).max(100).default(0),
   /** How much the mask hides: 1 hides fully outside the region, 0 not at all. */
   opacity: z.number().min(0).max(1).default(1),
-  /** How the mask moves between its keyframes. */
-  easing: zMaskEasing.default("linear"),
 });

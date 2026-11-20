@@ -20,7 +20,7 @@ The video: frame rate, size, background and theme. It ends where its content end
 | `theme` | { extends, palette, fonts, radius, motion, styles } |  |  | The video's look: palette, fonts, radius, motion style and element presets. Elements use it through `$tokens` and `style`. |
 | `motionBlur` | { shutterAngle, samples } |  |  | A film camera's blur on everything that moves, in the export: each frame averages `samples` moments across the time its shutter is open, `shutterAngle` degrees of the frame (180 is half the frame, the film default). Drawn by the browser export, which a file with it uses on its own; the preview stays sharp. |
 
-Children: `track`, `marker`, `multicam`, `captions`. [All elements](https://uberscene.prefixtree.xyz/reference/elements/)
+Children: `track`, `marker`, `captions`. [All elements](https://uberscene.prefixtree.xyz/reference/elements/)
 
 ## `<Track>`
 
@@ -196,7 +196,7 @@ Timed, visual, transformable. Children: `effect`, `keyframe`. [All elements](htt
 
 ## `<Title>`
 
-Text over the picture in the theme's type, with entrances by letter, word or line.
+Text over the picture in the theme's type, with entrances by letter or by word.
 
 ### Props
 
@@ -209,9 +209,7 @@ Text over the picture in the theme's type, with entrances by letter, word or lin
 | `offset` | number |  |  | Seconds added to the start that `anchor` and `at` give; negative starts earlier. |
 | `duration` | number (> 0) \| "fill" \| "source" \| { match } \| { until } |  |  | How long it plays: seconds; `"source"` for the whole trimmed source; `"fill"` to run to the end of the composition; `{ match: id }` for as long as another element; `{ until: id }` to end when another element ends. |
 | `transform` | { position, scale, rotation, anchor, opacity, borderRadius, crop } |  |  | Where it sits and how it is turned: position, scale, rotation, anchor, opacity, rounded corners and crop. |
-| `fit` | "contain" \| "cover" \| "stretch" \| "none" |  |  | How it fills the frame: `contain` shows all of it, `cover` fills the frame and crops, `stretch` distorts to fill, `none` keeps its own size. |
 | `blend` | "normal" \| "multiply" \| "screen" \| "overlay" \| "darken" \| … 13 more |  |  | How it mixes with what is under it, as CSS `mix-blend-mode` does. |
-| `blendOpacity` | number (0..1) |  |  | How strongly it blends: multiplied into its opacity. |
 | `enter` | { type, duration, easing } |  |  | How it comes in: a fade, slide, scale or wipe over its first seconds, with an easing. |
 | `exit` | { type, duration, easing } |  |  | How it goes out, over its last seconds, as `enter`. |
 | `style` | string |  |  | A theme preset for titles; without one, the theme's `default` title preset applies. |
@@ -222,7 +220,7 @@ Text over the picture in the theme's type, with entrances by letter, word or lin
 | `color` | string | `"#ffffff"` |  | The letters' colour, or a theme token such as `$text`. |
 | `background` | string |  |  | A colour filling the text box behind the letters. |
 | `stroke` | { color, width } |  |  | An outline around the letters: its colour and width in pixels. |
-| `shadow` | { color, blur, x, y, spread, inset } |  |  | A drop shadow under the letters: colour, blur and offset in pixels. |
+| `shadow` | { color, blur, x, y } |  |  | A drop shadow under the letters: colour, blur and offset in pixels. |
 | `align` | "left" \| "center" \| "right" \| "justify" | `"center"` |  | Which side of the text box the lines sit against. |
 | `valign` | "top" \| "middle" \| "bottom" | `"middle"` |  | Where in the text box's height the text sits. |
 | `width` | number (> 0) |  |  | The text box, in composition pixels; the whole frame when left out, so background, align and valign work inside it. |
@@ -230,7 +228,7 @@ Text over the picture in the theme's type, with entrances by letter, word or lin
 | `lineHeight` | number (0.1..10) | `1.2` |  | The distance between lines, as a multiple of the letters' size. |
 | `letterSpacing` | number (-100..100) | `0` |  | Extra space between letters, in pixels. |
 | `decoration` | "none" \| "underline" \| "line-through" \| "overline" |  |  | A line under, over or through the letters. |
-| `animation` | { preset, in, out, stagger, unit, params } |  |  | An entrance and exit by letter, word or line: a preset, its seconds in and out, and the delay between units. |
+| `animation` | { preset, in, out, stagger } |  |  | An entrance and exit: a preset, its seconds in and out, and for word-by-word the delay between words. |
 
 Timed, visual, transformable. Children: `effect`, `keyframe`, `mask`. [All elements](https://uberscene.prefixtree.xyz/reference/elements/)
 
@@ -288,9 +286,7 @@ A vector shape (rectangle, circle, star, polygon, path) with fill, stroke and sh
 | `offset` | number |  |  | Seconds added to the start that `anchor` and `at` give; negative starts earlier. |
 | `duration` | number (> 0) \| "fill" \| "source" \| { match } \| { until } |  |  | How long it plays: seconds; `"source"` for the whole trimmed source; `"fill"` to run to the end of the composition; `{ match: id }` for as long as another element; `{ until: id }` to end when another element ends. |
 | `transform` | { position, scale, rotation, anchor, opacity, borderRadius, crop } |  |  | Where it sits and how it is turned: position, scale, rotation, anchor, opacity, rounded corners and crop. |
-| `fit` | "contain" \| "cover" \| "stretch" \| "none" |  |  | How it fills the frame: `contain` shows all of it, `cover` fills the frame and crops, `stretch` distorts to fill, `none` keeps its own size. |
 | `blend` | "normal" \| "multiply" \| "screen" \| "overlay" \| "darken" \| … 13 more |  |  | How it mixes with what is under it, as CSS `mix-blend-mode` does. |
-| `blendOpacity` | number (0..1) |  |  | How strongly it blends: multiplied into its opacity. |
 | `enter` | { type, duration, easing } |  |  | How it comes in: a fade, slide, scale or wipe over its first seconds, with an easing. |
 | `exit` | { type, duration, easing } |  |  | How it goes out, over its last seconds, as `enter`. |
 | `style` | string |  |  | A theme preset for shapes. |
@@ -324,9 +320,8 @@ One-off vector art from inline SVG markup or a file.
 | `offset` | number |  |  | Seconds added to the start that `anchor` and `at` give; negative starts earlier. |
 | `duration` | number (> 0) \| "fill" \| "source" \| { match } \| { until } |  |  | How long it plays: seconds; `"source"` for the whole trimmed source; `"fill"` to run to the end of the composition; `{ match: id }` for as long as another element; `{ until: id }` to end when another element ends. |
 | `transform` | { position, scale, rotation, anchor, opacity, borderRadius, crop } |  |  | Where it sits and how it is turned: position, scale, rotation, anchor, opacity, rounded corners and crop. |
-| `fit` | "contain" \| "cover" \| "stretch" \| "none" |  |  | How it fills the frame: `contain` shows all of it, `cover` fills the frame and crops, `stretch` distorts to fill, `none` keeps its own size. |
 | `blend` | "normal" \| "multiply" \| "screen" \| "overlay" \| "darken" \| … 13 more |  |  | How it mixes with what is under it, as CSS `mix-blend-mode` does. |
-| `blendOpacity` | number (0..1) |  |  | How strongly it blends: multiplied into its opacity. |
+| `fit` | "contain" \| "cover" \| "stretch" \| "none" |  |  | How it fills the frame: `contain` shows all of it, `cover` fills the frame and crops, `stretch` distorts to fill, `none` keeps its own size. |
 | `style` | string |  |  | A theme preset for svg elements. |
 | `src` | string |  |  | An SVG file from the manifest, as `asset:<id>`. Give this or `content`. |
 | `content` | string |  |  | Inline SVG markup. Give this or `src`. |
@@ -353,9 +348,7 @@ A ready-made icon or sticker by name.
 | `offset` | number |  |  | Seconds added to the start that `anchor` and `at` give; negative starts earlier. |
 | `duration` | number (> 0) \| "fill" \| "source" \| { match } \| { until } |  |  | How long it plays: seconds; `"source"` for the whole trimmed source; `"fill"` to run to the end of the composition; `{ match: id }` for as long as another element; `{ until: id }` to end when another element ends. |
 | `transform` | { position, scale, rotation, anchor, opacity, borderRadius, crop } |  |  | Where it sits and how it is turned: position, scale, rotation, anchor, opacity, rounded corners and crop. |
-| `fit` | "contain" \| "cover" \| "stretch" \| "none" |  |  | How it fills the frame: `contain` shows all of it, `cover` fills the frame and crops, `stretch` distorts to fill, `none` keeps its own size. |
 | `blend` | "normal" \| "multiply" \| "screen" \| "overlay" \| "darken" \| … 13 more |  |  | How it mixes with what is under it, as CSS `mix-blend-mode` does. |
-| `blendOpacity` | number (0..1) |  |  | How strongly it blends: multiplied into its opacity. |
 | `enter` | { type, duration, easing } |  |  | How it comes in: a fade, slide, scale or wipe over its first seconds, with an easing. |
 | `exit` | { type, duration, easing } |  |  | How it goes out, over its last seconds, as `enter`. |
 | `style` | string |  |  | A theme preset for stickers. |
@@ -397,9 +390,8 @@ Filters everything beneath it for its own stretch of time.
 | `opacity` | number (0..1) | `1` |  | How much of its effects to mix over the picture beneath. |
 | `blend` | "normal" \| "multiply" \| "screen" \| "overlay" \| "darken" \| … 13 more | `"normal"` |  | How the filtered picture mixes with the one beneath, as CSS `mix-blend-mode` does. |
 | `enabled` | boolean | `true` |  | Off, it filters nothing and stays in the file. |
-| `transform` | { position, scale, rotation, anchor, opacity, borderRadius, crop } |  |  | Limits it to a region: position, scale, rotation and crop of the area it filters. |
 
-Timed, visual, trims its source. Children: `effect`, `keyframe`. [All elements](https://uberscene.prefixtree.xyz/reference/elements/)
+Timed, visual. Children: `effect`, `keyframe`. [All elements](https://uberscene.prefixtree.xyz/reference/elements/)
 
 ## `<Mask>`
 
@@ -415,11 +407,9 @@ Shows only a shape of its clip, with a feathered edge or inverted.
 | `path` | { points, closed } |  |  | A drawn mask's outline: bezier points with handles, closed or open. |
 | `feather` | number (0..100) | `0` |  | Softens the mask's edge, in pixels. |
 | `inverted` | boolean | `false` |  | Shows everything outside the region instead of inside. |
-| `expansion` | number (-100..100) | `0` |  | Grows the region outwards, or shrinks it when negative, in pixels. |
 | `opacity` | number (0..1) | `1` |  | How much the mask hides: 1 hides fully outside the region, 0 not at all. |
-| `easing` | "linear" \| "ease-in" \| "ease-out" \| "ease-in-out" | `"linear"` |  | How the mask moves between its keyframes. |
 
-Children: `keyframe`. [All elements](https://uberscene.prefixtree.xyz/reference/elements/)
+No children. [All elements](https://uberscene.prefixtree.xyz/reference/elements/)
 
 ## `<Keyframe>`
 
@@ -434,7 +424,7 @@ Animates one property of its parent between values, with easing.
 | `param` | string |  |  | Inside an `<Effect>`: the effect param it animates. |
 | `at` | number (0..∞) |  | yes | Element-relative seconds. |
 | `value` | any |  | yes | The value the property or param has at `at`. |
-| `easing` | "linear" \| "ease" \| "ease-in" \| "ease-out" \| "ease-in-out" \| … 46 more | `"linear"` |  | How it moves from the keyframe before to this one. |
+| `easing` | "linear" \| "ease" \| "ease-in" \| "ease-out" \| "ease-in-out" \| … 46 more | `"linear"` |  | How it moves from this keyframe to the next one. The last keyframe's easing is not used. |
 
 No children. [All elements](https://uberscene.prefixtree.xyz/reference/elements/)
 
@@ -449,7 +439,7 @@ Changes its clip's speed from a moment on, eased: speed ramps.
 | `id` | string |  | yes | The key's name. |
 | `at` | number (0..∞) |  | yes | Seconds into the clip where the new speed is reached. |
 | `speed` | number (0.1..20) |  | yes | The playback rate from here on: 2 is twice as fast. |
-| `easing` | "linear" \| "ease" \| "ease-in" \| "ease-out" \| "ease-in-out" \| … 46 more | `"linear"` |  | How the speed changes from the key before to this one. |
+| `easing` | "linear" \| "ease" \| "ease-in" \| "ease-out" \| "ease-in-out" \| … 46 more | `"linear"` |  | How the speed changes from this key to the next one. The last key's easing is not used. |
 
 No children. [All elements](https://uberscene.prefixtree.xyz/reference/elements/)
 
@@ -561,4 +551,4 @@ A stretch of a sound asset: volume, fades, ducking under another track, automati
 | `automation` | { volume, pan } |  |  | Volume and pan over time, as `[seconds into the element, value]` points; pan runs from -1 (left) to 1 (right). |
 | `duck` | { under, to, attack, release } |  |  | Turns this sound down while another plays: `under` is a track id or a track role (`dialogue`), `to` the volume it falls to, `attack` and `release` the seconds it takes to fall and recover. |
 
-Timed, audible, trims its source. Children: `keyframe`. [All elements](https://uberscene.prefixtree.xyz/reference/elements/)
+Timed, audible, trims its source. Children: `keyframe`, `speedKey`, `freeze`. [All elements](https://uberscene.prefixtree.xyz/reference/elements/)

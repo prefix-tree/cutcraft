@@ -140,7 +140,7 @@ const ELEMENT_DOCS: Record<string, readonly (readonly [element: string, summary:
     ["Motion", "Children animated by a Motion `sequence` on the video's clock."],
   ],
   "Text and graphics": [
-    ["Title", "Text over the picture in the theme's type, with entrances by letter, word or line."],
+    ["Title", "Text over the picture in the theme's type, with entrances by letter or by word."],
     ["Captions", "Subtitles from an asset's transcript that follow the clips through every trim."],
     ["Caption", "One cue inside `<Captions>`, written by hand: its text, start and end."],
     ["Shape", "A vector shape (rectangle, circle, star, polygon, path) with fill, stroke and shadow."],

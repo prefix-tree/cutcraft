@@ -27,6 +27,5 @@ The coffee footage is Pixabay videos [209419](https://pixabay.com/videos/id-2094
 | `opacity` | number (0..1) | `1` |  | How much of its effects to mix over the picture beneath. |
 | `blend` | "normal" \| "multiply" \| "screen" \| "overlay" \| "darken" \| … 13 more | `"normal"` |  | How the filtered picture mixes with the one beneath, as CSS `mix-blend-mode` does. |
 | `enabled` | boolean | `true` |  | Off, it filters nothing and stays in the file. |
-| `transform` | { position, scale, rotation, anchor, opacity, borderRadius, crop } |  |  | Limits it to a region: position, scale, rotation and crop of the area it filters. |
 
-Timed, visual, trims its source. Children: `effect`, `keyframe`. [All elements](/reference/elements/)
+Timed, visual. Children: `effect`, `keyframe`. [All elements](/reference/elements/)

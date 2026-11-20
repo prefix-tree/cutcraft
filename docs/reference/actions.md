@@ -60,7 +60,7 @@ Every action has `validate`, `apply`, `invert` and `fold`; the inverse is never 
 | `clip/rippleRestore` | `{ id, node, trackId, place, affected }` | The undo of clip/rippleDelete: puts the element back and restores the starts it shifted. |
 | `clip/roll` | `{ leftId, rightId, delta }` | Moves the cut between two adjacent source clips by `delta`; the total length stays the same. |
 | `clip/setAnchor` | `{ id, anchor?, offset? }` | Anchors the element to another element (or `"start"`) at `offset` seconds; omit `anchor` to unanchor. A new anchor drops a word `at`. |
-| `clip/setBlend` | `{ id, mode?, opacity? }` | Sets the blend `mode` and/or blend `opacity` of a visual element. |
+| `clip/setBlend` | `{ id, mode?, opacity? }` | Sets the blend `mode` of anything that draws, and/or the blend `opacity` of a clip or a nested sequence. |
 | `clip/setFit` | `{ id, value? }` | Sets how a clip or nested scene fills the frame (`fit`); omit `value` to reset it. |
 | `clip/setReverse` | `{ id, value }` | Plays the source backwards, or forwards again. |
 | `clip/setSource` | `{ id, src }` | Replaces the media in a slot: swaps `src` on a clip, audio, svg or sticker and keeps its timing and everything else. |

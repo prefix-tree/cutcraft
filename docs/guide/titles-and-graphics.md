@@ -46,7 +46,7 @@ A `<Title>` draws text in the theme's type.
 |---|---|
 | `style` | Picks a preset from the theme: `h1`, `h2`, `kicker`, `note`, and any you define. |
 | `size`, `weight`, `color`… | Override the preset. |
-| `animation` | Builds the text in by letter, word or line. |
+| `animation` | Builds the text in by letter or by word, or fades, slides or scales it in. |
 
 [`<Title>`](/reference/elements/title) lists every prop.
 

@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { zCaptionAnimation } from "../enums";
-import { assetRefSchema, colorSchema, idSchema, shadowSchema, timeRefSchema } from "./common";
+import { assetRefSchema, colorSchema, idSchema, textShadowSchema, timeRefSchema } from "./common";
 import { zCaptionPosition, zTextAlign } from "./enums-local";
 
 export const captionStyleSchema = z.strictObject({
@@ -10,7 +10,7 @@ export const captionStyleSchema = z.strictObject({
   weight: z.union([z.number().int().min(100).max(900).multipleOf(100), z.enum(["normal", "bold"])]).optional(),
   color: colorSchema.optional(),
   background: colorSchema.optional(),
-  shadow: shadowSchema.optional(),
+  shadow: textShadowSchema.optional(),
   /** An outline around the letters, drawn under them. */
   stroke: z.strictObject({ color: colorSchema, width: z.number().min(0).max(40) }).optional(),
   /**

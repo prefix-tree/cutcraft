@@ -24,7 +24,7 @@ const OVERLAY_CHILDREN = ["effect", "keyframe", "mask"] as const;
 export const KIND_CAPABILITIES: Readonly<Record<string, ElementCapabilities>> = {
   composition: with_({
     container: true,
-    childKinds: ["track", "marker", "multicam", "captions"],
+    childKinds: ["track", "marker", "captions"],
     placementScope: "none",
   }),
   track: with_({
@@ -60,7 +60,7 @@ export const KIND_CAPABILITIES: Readonly<Record<string, ElementCapabilities>> = 
     audio: true,
     trimSource: true,
     container: true,
-    childKinds: ["keyframe"],
+    childKinds: ["keyframe", "speedKey", "freeze"],
     placementScope: "track",
   }),
   gap: with_({ timed: true, placementScope: "track" }),
@@ -103,12 +103,11 @@ export const KIND_CAPABILITIES: Readonly<Record<string, ElementCapabilities>> = 
   adjustment: with_({
     timed: true,
     visual: true,
-    trimSource: true,
     container: true,
     childKinds: ["effect", "keyframe"],
     placementScope: "track",
   }),
-  mask: with_({ container: true, childKinds: ["keyframe"], placementScope: "child" }),
+  mask: with_({ placementScope: "child" }),
   nested: with_({
     timed: true,
     visual: true,
@@ -119,7 +118,7 @@ export const KIND_CAPABILITIES: Readonly<Record<string, ElementCapabilities>> = 
     childKinds: CLIP_CHILDREN,
     placementScope: "track",
   }),
-  multicam: with_({ container: true, childKinds: ["angle", "cut"], placementScope: "composition" }),
+  multicam: with_({ container: true, childKinds: ["angle", "cut"], placementScope: "track" }),
   angle: with_({ placementScope: "child" }),
   cut: with_({ placementScope: "child" }),
   layer: with_({

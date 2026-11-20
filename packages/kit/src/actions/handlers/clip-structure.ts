@@ -34,6 +34,9 @@ function placementErrors(
   return null;
 }
 
+/** What `clip/remove` takes: anything placed on a track, except a multicam, which has its own remove and restore. */
+const isTrackItem = (kind: string): boolean => capabilitiesOf(kind).placementScope === "track" && kind !== "multicam";
+
 /** A media element on a track: a <Clip> (picture and sound) or an <Audio> (sound only). */
 function addMedia<T extends "clip/add" | "audio/add">(type: T, kind: "clip" | "audio") {
   define({
@@ -65,13 +68,13 @@ addMedia("audio/add", "audio");
 define(carry(
   {
     type: "clip/remove",
-    targets: onElement({ onOpaque: true, when: (item) => capabilitiesOf(item.kind).placementScope === "track" }),
+    targets: onElement({ onOpaque: true, when: (item) => isTrackItem(item.kind) }),
     validate: (a, state) => {
       const item = requireElement(state, a.params.id);
       if (isError(item)) return invalid(item);
       const locked = requireUnlocked(state, item);
       if (locked) return invalid(locked);
-      return capabilitiesOf(item.kind).placementScope === "track"
+      return isTrackItem(item.kind)
         ? ok
         : invalid({ code: "INVALID_PARAMS", message: `"${a.params.id}" is not a track item` });
     },

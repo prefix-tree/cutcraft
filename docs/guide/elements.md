@@ -102,8 +102,9 @@ Change the theme and every element that uses it follows. A prop written on the e
   draw-on. Each takes a `type`, a `duration` and an `easing`
   ([Entrances and exits](./titles-and-graphics#entrances-and-exits)).
 - **`<Keyframe>`** children animate one property between values over time: position, scale, rotation, opacity, crop,
-  or an effect's param. `at` is seconds into the element.
-- A title's **`animation`** builds the text in by letter, word or line.
+  or an effect's param. `at` is seconds into the element. A keyframe's `easing` shapes the move from that keyframe to
+  the next one, so the easing on the last keyframe of a move is not used.
+- A title's **`animation`** builds the text in letter by letter or word by word, or fades, slides or scales it in.
 
 For anything more, draw it yourself in a `<Layer>` ([Free code](./free-code)).
 

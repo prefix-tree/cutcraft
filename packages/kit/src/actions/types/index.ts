@@ -164,7 +164,7 @@ export interface ClipActions {
   "clip/setSpeed": { id: Id; speed: number };
   /** Plays the source backwards, or forwards again. */
   "clip/setReverse": { id: Id; value: boolean };
-  /** Sets the blend `mode` and/or blend `opacity` of a visual element. */
+  /** Sets the blend `mode` of anything that draws, and/or the blend `opacity` of a clip or a nested sequence. */
   "clip/setBlend": { id: Id; mode?: string; opacity?: number };
   /** Sets how a clip or nested scene fills the frame (`fit`); omit `value` to reset it. */
   "clip/setFit": { id: Id; value?: string };
