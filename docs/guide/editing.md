@@ -4,7 +4,18 @@ This page is for building a video editor on UberScene. In such an editor the use
 and a preview, every gesture can be undone, and each change lands in the file's text. The model that wrote the file
 then reads a file that differs from what it wrote by exactly what the user did.
 
-`@uberscene/kit` has the pieces, in the order you need them:
+## Two packages
+
+UberScene has two packages for two readers. `@uberscene/kit` is what a video file imports: the elements, components,
+hooks, helpers, diagram parts and theme, with `@uberscene/kit/schema` for the vocabulary as data (the schemas, the
+capabilities, the effect registry). `@uberscene/sdk` is what a tool is built with: everything on this page. An editor
+installs both; a video file never imports the SDK.
+
+```sh
+npm install @uberscene/sdk @uberscene/kit react zod
+```
+
+`@uberscene/sdk` has the pieces, in the order you need them:
 
 | Piece | Does | Section |
 |---|---|---|
@@ -201,10 +212,10 @@ line, `uberscene lint video.tsx --fix` does the same to a file ([CLI](/reference
 
 | Rule | Reports |
 |---|---|
-| `deprecated-props` | A prop or a value spelled the way an earlier version took it, as an error that names the new spelling. It reads the kit's `DEPRECATIONS` table, and any rows passed as `lint(text, { deprecations })`. Where the new spelling can be written for certain, the fix renames the prop, respells the value, or moves the prop into its object prop. |
+| `deprecated-props` | A prop or a value spelled the way an earlier version took it, as an error that names the new spelling. It reads the SDK's `DEPRECATIONS` table, and any rows passed as `lint(text, { deprecations })`. Where the new spelling can be written for certain, the fix renames the prop, respells the value, or moves the prop into its object prop. |
 | `old-theme-variables` | A theme CSS variable written as `--cc-name`, in any string, template or JSX text. They are `--us-name` since 0.6, and the fix respells each. |
 
-A rule of your own can build its fix with the helpers the kit's rules use: `renameProp`, `renameValue`,
+A rule of your own can build its fix with the helpers the SDK's rules use: `renameProp`, `renameValue`,
 `movePropInto` and `movePropsInto`, given a tag found with `jsxTags`.
 
 ## A font picker

@@ -70,7 +70,7 @@ uses it are the handles, and its inside is code.
 
 ## The lint
 
-The rules on this page are checked by the **lint**: `lint()` from `@uberscene/kit/source`. An editor runs it on the
+The rules on this page are checked by the **lint**: `lint()` from `@uberscene/sdk`. An editor runs it on the
 file as you type and shows its findings like a compiler's warnings, each naming its rule (`literal-ids`). The command
 line doesn't run it yet. [Lint](./editing#lint) lists every rule.
 

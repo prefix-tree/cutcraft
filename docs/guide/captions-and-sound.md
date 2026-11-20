@@ -44,7 +44,7 @@ If more than one transcript sits next to the media, `uberscene add` takes the JS
 it does not write, such as shots and silences.
 
 ::: details From code: parseTranscript()
-App code that already has the text can use the same parser, [`parseTranscript()`](/reference/api#uberscene-kit):
+App code that already has the text can use the same parser, [`parseTranscript()`](/reference/api#uberscene-sdk):
 
 ```ts
 import { parseTranscript } from "@uberscene/sdk";
@@ -241,7 +241,7 @@ npx uberscene video.tsx --vtt video.vtt            # only the subtitles, no vide
 With `--from`, the times count from that point, so they line up with a partial export ([CLI](/reference/cli#export)).
 
 ::: details From code: subtitles()
-[`subtitles(state, { format: "srt" })`](/reference/api#uberscene-kit) from `@uberscene/kit` returns the same text,
+[`subtitles(state, { format: "srt" })`](/reference/api#uberscene-sdk) from `@uberscene/sdk` returns the same text,
 for example behind an editor's download button.
 :::
 

@@ -5,11 +5,11 @@ on a page too. Read this page when you embed UberScene video in your own app.
 
 ## Play a file
 
-Install the player with the kit and React, then give `<Player>` the resolved file, its rendered component and its
+Install the player with the kit, the SDK and React, then give `<Player>` the resolved file, its rendered component and its
 media:
 
 ```sh
-npm install @uberscene/player @uberscene/kit react react-dom
+npm install @uberscene/player @uberscene/sdk @uberscene/kit react react-dom
 ```
 
 ```tsx
@@ -54,7 +54,7 @@ Without it those layers stay empty, and the console says which engine is missing
 
 ## A file loaded as text
 
-For a file that arrives at run time (one a model just wrote, say), use `loadModule` from `@uberscene/kit/source` in
+For a file that arrives at run time (one a model just wrote, say), use `loadModule` from `@uberscene/sdk` in
 place of the `import`. Pass it what `installFreeCodeLibraries()` returns, so the file may import three.js and Motion
 too:
 
