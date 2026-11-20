@@ -1,4 +1,4 @@
-import type { CollectedNode } from "../resolve/tree";
+import { type CollectedNode, INTERIOR_PREFIX } from "../resolve/tree";
 import type { Json, NetPatch, Patch, PatchLog } from "./types";
 
 export interface PatchLogOptions {
@@ -6,6 +6,8 @@ export interface PatchLogOptions {
   readonly isSource?: (id: string) => boolean;
   /** The parent of a source node, so removing a node also drops what the log inserted deeper inside it. */
   readonly sourceParent?: (id: string) => string | null;
+  /** A node of the source tree, so putting back a removed node as the source has it (an undone delete) keeps its text. */
+  readonly sourceNode?: (id: string) => CollectedNode | undefined;
 }
 
 class Log implements PatchLog {
@@ -14,10 +16,12 @@ class Log implements PatchLog {
   private v = 0;
   private readonly isSource: (id: string) => boolean;
   private readonly sourceParent: (id: string) => string | null;
+  private readonly sourceNode: (id: string) => CollectedNode | undefined;
 
   constructor(options: PatchLogOptions) {
     this.isSource = options.isSource ?? (() => false);
     this.sourceParent = options.sourceParent ?? (() => null);
+    this.sourceNode = options.sourceNode ?? (() => undefined);
   }
 
   get entries(): readonly Patch[] {
@@ -32,7 +36,7 @@ class Log implements PatchLog {
 
   append(patch: Patch): void {
     this.list.push(patch);
-    reduceInto(this.reduced, patch, this.isSource, this.sourceParent);
+    reduceInto(this.reduced, patch, this.isSource, this.sourceParent, this.sourceNode);
     this.v += 1;
   }
 
@@ -44,7 +48,7 @@ class Log implements PatchLog {
     if (mark >= this.list.length) return;
     this.list.length = Math.max(0, mark);
     this.reduced.clear();
-    for (const p of this.list) reduceInto(this.reduced, p, this.isSource, this.sourceParent);
+    for (const p of this.list) reduceInto(this.reduced, p, this.isSource, this.sourceParent, this.sourceNode);
     this.v += 1;
   }
 
@@ -77,6 +81,7 @@ export function reduceInto(
   patch: Patch,
   isSource: (id: string) => boolean = () => false,
   sourceParent: (id: string) => string | null = () => null,
+  sourceNode: (id: string) => CollectedNode | undefined = () => undefined,
 ): void {
   switch (patch.op) {
     case "set": {
@@ -115,8 +120,21 @@ export function reduceInto(
     }
     case "insert": {
       const e = entry(net, patch.id);
-      const sameAsSource = e.presence === "removed" && e.node !== undefined && nodesEqual(e.node, patch.node);
-      e.presence = sameAsSource ? "present" : "inserted";
+      const source = sourceNode(patch.id);
+      if (e.presence === "removed" && source && restores(source, patch.node)) {
+        // The source node put back (an undone delete, the undo of a split): it is the source's element, moved to where
+        // the insert puts it, with the props it had changed when it was removed. Its text in the file is kept.
+        e.presence = "present";
+        e.props.clear();
+        delete e.text;
+        delete e.node;
+        delete e.within;
+        changedProps(e, source, patch.node);
+        e.place = { parent: patch.parent, after: patch.after, seq: placed++ };
+        forgetRemovedWithin(net, source);
+        return;
+      }
+      e.presence = "inserted";
       e.props.clear();
       delete e.within;
       e.node = patch.node;
@@ -190,6 +208,35 @@ function revive(
       } else net.delete(child.id);
     }
     revive(net, child, holder, isSource);
+  }
+}
+
+/** Whether an inserted node is a source node with, at most, its own props and text changed: its children are as the source has them. */
+function restores(source: CollectedNode, node: CollectedNode): boolean {
+  return (
+    source.kind === node.kind &&
+    source.interior?.component === node.interior?.component &&
+    source.children.length === node.children.length &&
+    source.children.every((c, i) => nodesEqual(c, node.children[i] as CollectedNode))
+  );
+}
+
+/** Set on `e` each prop, handle and the text in which `node` differs from `source`. */
+function changedProps(e: NetPatch, source: CollectedNode, node: CollectedNode): void {
+  const differ = (a: Readonly<Record<string, unknown>>, b: Readonly<Record<string, unknown>>, prefix: string) => {
+    for (const k of new Set([...Object.keys(a), ...Object.keys(b)]))
+      if (stableJson(a[k]) !== stableJson(b[k])) e.props.set(prefix + k, asJson(b[k]));
+  };
+  differ(source.props, node.props, "");
+  if (source.interior && node.interior) differ(source.interior.props, node.interior.props, INTERIOR_PREFIX);
+  if (node.text !== source.text && node.text !== undefined) e.text = node.text;
+}
+
+/** The source descendants of a node put back as the source has them are the source's again. */
+function forgetRemovedWithin(net: Map<string, NetPatch>, source: CollectedNode): void {
+  for (const child of source.children) {
+    if (net.get(child.id)?.presence === "removed") net.delete(child.id);
+    forgetRemovedWithin(net, child);
   }
 }
 

@@ -66,6 +66,7 @@ export class Executor {
       createPatchLog({
         isSource: (id) => this.tree.byId.has(id),
         sourceParent: (id) => this.tree.byId.get(id)?.parent ?? null,
+        sourceNode: (id) => this.tree.byId.get(id),
       });
     this.hist = options.history ?? new ActionHistory();
     this.now = options.now ?? (() => Date.now());

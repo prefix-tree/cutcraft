@@ -6,6 +6,7 @@ import * as t from "@babel/types";
 import type { SourceEdit } from "../edits";
 import type { SourceIndex } from "../index";
 import type { Range } from "../parse";
+import { isPlainAttribute } from "../print";
 
 /** Every JSX opening tag in the file, in source order; with `name`, only the tags of that name. */
 export function jsxTags(index: Pick<SourceIndex, "ast">, name?: string): t.JSXOpeningElement[] {
@@ -94,9 +95,7 @@ export function renameValue(
   const top = path.split(".")[0] as string;
   const [start, end] = range(value.node);
   if (value.inJsx) {
-    // A JSX attribute string takes no escapes, so anything it cannot hold goes in braces.
-    const plain = /^[^"\\\n&{}<>]*$/.test(to);
-    return [edit(tag, top, [start, end], plain ? `"${to}"` : `{${JSON.stringify(to)}}`)];
+    return [edit(tag, top, [start, end], isPlainAttribute(to) ? `"${to}"` : `{${JSON.stringify(to)}}`)];
   }
   const quote = text[start] === "'" ? "'" : '"';
   const body = JSON.stringify(to).slice(1, -1);

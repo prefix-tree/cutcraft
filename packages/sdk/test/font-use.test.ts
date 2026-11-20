@@ -69,6 +69,15 @@ describe("font/use", () => {
     expect(faces(reload(text))).toEqual(["Oswald 400", "Oswald 700"]);
   });
 
+  it("leaves the log as it was, so a second save declares the weight again", () => {
+    const exec = open(FILE);
+    expect(exec.execute({ type: "font/use", params: { id: "sub", family: "Oswald", weight: 700 } }).ok).toBe(true);
+    const line = 'const oswald = googleFont("Oswald", { weights: [400, 700] });';
+    expect(folded(FILE, exec)).toContain(line);
+    expect(folded(FILE, exec)).toContain(line);
+    expect(exec.log().net.get("composition")?.props.has("$fonts")).toBe(true);
+  });
+
   it("sets a theme role and the captions' font, each by the identifier it declares", () => {
     const exec = open(FILE);
     expect(exec.execute({ type: "font/use", params: { role: "heading", family: "Anton" } }).ok).toBe(true);
