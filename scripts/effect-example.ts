@@ -103,7 +103,7 @@ export const EFFECT_DEMOS: Readonly<Record<keyof typeof EFFECTS, EffectDemo>> = 
   shadow: {
     text: "Casts a soft drop shadow behind the element's own shape.",
     on: "title",
-    params: { x: 8, y: 8, radius: 3 },
+    params: { x: 8, y: 8, blur: 3 },
     animate: [{ param: "opacity", from: 0, to: 0.9 }],
   },
   vignette: {
@@ -222,7 +222,7 @@ export const EFFECT_DEMOS: Readonly<Record<keyof typeof EFFECTS, EffectDemo>> = 
     text: "Draws a line around the element's shape.",
     on: "title",
     params: { color: "#f4efe6" },
-    animate: [{ param: "width", from: 0, to: 4 }],
+    animate: [{ param: "thickness", from: 0, to: 4 }],
   },
   longShadow: {
     text: "Extrudes a long, hard shadow from the element's shape.",
@@ -307,7 +307,7 @@ function effectElement(name: string, demo: EffectDemo, pad: string): string[] {
   const open = `${pad}<Effect id="look" type="${name}"${params}`;
   if (!demo.animate) return [`${open} />`];
   const keys = demo.animate.flatMap((a, i) => [
-    `${pad}  <Keyframe id="k${2 * i + 1}" param="${a.param}" at={0.5} value=${value(a.from)} easing="ease-in-out" />`,
+    `${pad}  <Keyframe id="k${2 * i + 1}" param="${a.param}" at={0.5} value=${value(a.from)} easing="easeInOut" />`,
     `${pad}  <Keyframe id="k${2 * i + 2}" param="${a.param}" at={1.5} value=${value(a.to)} />`,
   ]);
   return [`${open}>`, ...keys, `${pad}</Effect>`];

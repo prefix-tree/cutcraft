@@ -6,14 +6,14 @@ thirds. Use it when a video needs a headline, a name card or a callout. For anyt
 
 ```tsx
 <Track id="overlays">
-  <Title id="title" anchor="start" offset={0.3} duration={2.2} style="h1" animation={{ preset: "word-by-word" }}>
+  <Title id="title" anchor="start" offset={0.3} duration={2.2} style="h1" animation={{ type: "wordByWord" }}>
     Cut by words
   </Title>
   <Motion id="who" anchor="close" offset={0.4} duration={2.6}
     sequence={[[".name", { opacity: [0, 1], x: [-20, 0] }, { duration: 0.4 }]]}>
     <div className="name" style={{ position: "absolute", left: 64, bottom: 80, font: "700 40px Inter" }}>Bohdan Snisar</div>
   </Motion>
-  <Shape id="card" anchor="close" duration={3} shape="rectangle" width={720} height={180} style="card" />
+  <Shape id="card" anchor="close" duration={3} type="rectangle" width={720} height={180} style="card" />
 </Track>
 ```
 
@@ -39,7 +39,7 @@ A `<Title>` draws text in the theme's type. How it looks is one prop, `style`: t
 of the look's fields.
 
 ```tsx
-<Title id="title" start={0.3} duration={2.2} style="h1" animation={{ preset: "word-by-word" }}>
+<Title id="title" start={0.3} duration={2.2} style="h1" animation={{ type: "wordByWord" }}>
   Cut by words
 </Title>
 <Title id="note" start={2.5} duration={2} box={{ x: 960, y: 820, width: 840, origin: "center" }}
@@ -64,12 +64,12 @@ The look's fields, each with its default when neither the element nor a preset s
 | `italic` | Slanted letters. | `false` |
 | `color` | The letters' colour, or a token such as `"$text"`. | `"#ffffff"` |
 | `background` | A colour filling the text box. | none |
-| `stroke` | An outline: `{ color, width }`. | none |
+| `stroke` | An outline: `{ color, thickness }`. | none |
 | `shadow` | A drop shadow: `{ color, blur, x, y }`. | none |
 | `align`, `valign` | Where the lines sit in the text box, across and down. | `"center"`, `"middle"` |
 | `lineHeight` | The distance between lines, as a multiple of the size. | `1.2` |
 | `letterSpacing` | Extra space between letters, in pixels. | `0` |
-| `decoration` | `"underline"`, `"overline"` or `"line-through"`. | none |
+| `decoration` | `"underline"`, `"overline"` or `"lineThrough"`. | none |
 
 A file written before 0.6, with these fields as flat props (`size={64}`) and the text box as `width` and `height`, is
 moved by `uberscene lint --fix`. [`<Title>`](/reference/elements/title) lists every prop.
@@ -80,7 +80,7 @@ moved by `uberscene lint --fix`. [`<Title>`](/reference/elements/title) lists ev
 take them, each as `{ type, duration, easing }`.
 
 ```tsx
-<Title id="kicker" start={0.5} duration={3} enter={{ type: "slide-up", duration: 0.4 }} exit={{ type: "fade", duration: 0.3 }}>
+<Title id="kicker" start={0.5} duration={3} enter={{ type: "slideUp", duration: 0.4 }} exit={{ type: "fade", duration: 0.3 }}>
   NEW
 </Title>
 ```
@@ -88,10 +88,10 @@ take them, each as `{ type, duration, easing }`.
 | Type | Does |
 |---|---|
 | `fade` | Fades in or out. |
-| `slide-left`, `slide-right`, `slide-up`, `slide-down` | Slides by a quarter of the element's size, at most 160 px. |
+| `slideLeft`, `slideRight`, `slideUp`, `slideDown` | Slides by a quarter of the element's size, at most 160 px. |
 | `scale`, `rotate`, `pop`, `bounce`, `elastic` | Grows, turns or springs into place. |
-| `flip-horizontal`, `flip-vertical` | Flips around an axis. |
-| `wipe-left`, `wipe-right`, `wipe-up`, `wipe-down`, `reveal-center`, `reveal-edges` | Uncovers the element. |
+| `flipHorizontal`, `flipVertical` | Flips around an axis. |
+| `wipeLeft`, `wipeRight`, `wipeUp`, `wipeDown`, `revealCenter`, `revealEdges` | Uncovers the element. |
 | `draw` | Draws a shape's or an SVG's strokes, then fades its fills in. Other elements fade. |
 
 ## Ready-made components
@@ -154,7 +154,7 @@ be a gradient too.
 | Scale it to the frame | `fit="contain"` or `fit="cover"` |
 | Override the file's framing | The element's own `viewBox` and `preserveAspectRatio`, which win over the file's |
 | Use theme colours inside it | `$name` or `var(--us-name)` in attributes and styles |
-| Recolour it | `color`: `mode: "replace"` paints every drawn pixel in its `tint`, `mode: "tint"` keeps the shading and colours it, and `opacity` sets how much |
+| Recolour it | `color`: `type: "replace"` paints every drawn pixel in its `tint`, `type: "tint"` keeps the shading and colours it, and `opacity` sets how much |
 
 Text in an SVG uses one of the bundled fonts or a generic family. Any other family is drawn in sans-serif in the
 export.
@@ -194,7 +194,7 @@ any `<Effect>`; they work on clips too.
 | Effect | Does | Params |
 |---|---|---|
 | [`glow`](/reference/effects/glow) | Lights the area around the element, as a halo under it, so the element keeps its own colours. | `radius` (the blur's standard deviation, in pixels), `intensity` (up to 4), `color`, `tint` (1 is all `color`, 0 keeps the element's own colours), `threshold` |
-| [`outline`](/reference/effects/outline) | Draws a band around the shape, under it, with round corners. | `width` (pixels, up to 64), `color`, `outlineOnly` (draws the grown silhouette alone, filled) |
+| [`outline`](/reference/effects/outline) | Draws a band around the shape, under it, with round corners. | `thickness` (pixels, up to 64), `color`, `outlineOnly` (draws the grown silhouette alone, filled) |
 | [`longShadow`](/reference/effects/longShadow) | Sweeps the shape back in a long shadow. Overlapping parts never stack. | `angle` (degrees clockwise from up; 135 falls down and right), `length` (pixels), `color`, `fade` (thins it toward the far end) |
 | [`bevel`](/reference/effects/bevel) | Lights the shape as if raised. | `size` (softens the slope: the blur's standard deviation, in pixels), `angle` (where the light comes from, degrees clockwise from up), `amount` (0 to 1: how strongly edges take `highlight` or `shade`) |
 

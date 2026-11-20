@@ -16,7 +16,7 @@ The video: frame rate, size, background and theme. It ends where its content end
 | `height` | integer (16..8192) |  | yes | The frame's height in pixels. |
 | `sampleRate` | integer (8000..192000) | `48000` |  | The soundtrack's samples per second. It must divide into whole ticks; 44100, 48000 and 96000 do. |
 | `channels` | integer (1..8) | `2` |  | The soundtrack's channels: 1 is mono, 2 stereo. |
-| `background` | { mode, color, gradient } |  |  | What shows where nothing covers the frame: a colour, a gradient, or (`blur`) the picture itself, blurred to fill. |
+| `background` | { type, color, gradient } |  |  | What shows where nothing covers the frame: a colour, a gradient, or (`blur`) the picture itself, blurred to fill. |
 | `theme` | { extends, palette, fonts, radius, motion, styles } |  |  | The video's look: palette, fonts, radius, motion style and element presets. Elements use it through `$tokens` and `style`. |
 | `motionBlur` | { shutterAngle, samples } |  |  | A film camera's blur on everything that moves, in the export: each frame averages `samples` moments across the time its shutter is open, `shutterAngle` degrees of the frame (180 is half the frame, the film default). Drawn by the browser export, which a file with it uses on its own; the preview stays sharp. |
 
@@ -115,7 +115,7 @@ A named point on the timeline.
 | prop | type | default | required | description |
 |---|---|---|---|---|
 | `id` | string |  | yes | The marker's name: `marker:<id>` refers to it as a time. |
-| `at` | number (0..∞) |  | yes | Seconds from the start of the video. |
+| `start` | number (0..∞) |  | yes | Seconds from the start of the video. |
 | `label` | string | `""` |  | Text shown on the editor's ruler. |
 | `color` | string |  |  | Its colour on the ruler. |
 
@@ -218,7 +218,7 @@ Text over the picture in the theme's type, with entrances by letter or by word.
 | `enter` | { type, duration, easing } |  |  | How it comes in: a fade, slide, scale or wipe over its first seconds, with an easing. |
 | `exit` | { type, duration, easing } |  |  | How it goes out, over its last seconds, as `enter`. |
 | `style` | string \| { preset, font, size, weight, italic, color, background, stroke, shadow, align, valign, lineHeight, letterSpacing, decoration } | `{}` |  | How the letters look: a theme title preset by name (`"h1"`), or an object of `font`, `size`, `weight`, `italic`, `color`, `background`, `stroke`, `shadow`, `align`, `valign`, `lineHeight`, `letterSpacing` and `decoration`, with `preset` naming the preset it starts from. Without a preset, the theme's `default` title preset applies. The text box is the title's `box`: its `width` and `height`, the whole frame when left out, so background, align and valign work inside it. |
-| `animation` | { preset, in, out, stagger } |  |  | An entrance and exit: a preset, its seconds in and out, and for word-by-word the delay between words. |
+| `animation` | { type, in, out, stagger } |  |  | An entrance and exit: its type, its seconds in and out, and for wordByWord the delay between words. |
 
 #### `style`
 
@@ -233,13 +233,13 @@ A theme preset's name, or an object of these fields. `preset` names the preset t
 | `italic` | boolean | `false` | Slanted letters. |
 | `color` | string | `"#ffffff"` | The letters' colour, or a theme token such as `$text`. |
 | `background` | string |  | A colour filling the text box behind the letters. |
-| `stroke` | { color, width } |  | An outline around the letters: its colour and width in pixels. |
+| `stroke` | { color, thickness } |  | An outline around the letters: its colour and thickness in pixels. |
 | `shadow` | { color, blur, x, y } |  | A drop shadow under the letters: colour, blur and offset in pixels. |
 | `align` | "left" \| "center" \| "right" \| "justify" | `"center"` | Which side of the text box the lines sit against. |
 | `valign` | "top" \| "middle" \| "bottom" | `"middle"` | Where in the text box's height the text sits. |
 | `lineHeight` | number (0.1..10) | `1.2` | The distance between lines, as a multiple of the letters' size. |
 | `letterSpacing` | number (-100..100) | `0` | Extra space between letters, in pixels. |
-| `decoration` | "none" \| "underline" \| "line-through" \| "overline" |  | A line under, over or through the letters. |
+| `decoration` | "none" \| "underline" \| "lineThrough" \| "overline" |  | A line under, over or through the letters. |
 
 Timed, visual, transformable. Children: `effect`, `keyframe`, `mask`. [All elements](https://uberscene.prefixtree.xyz/reference/elements/)
 
@@ -254,7 +254,7 @@ Subtitles from an asset's transcript that follow the clips through every trim.
 | `id` | string |  | yes | The captions' name. |
 | `src` | string |  |  | Generate children from the asset's transcript. Literal `<Caption>` children override this. |
 | `style` | string \| { preset, font, size, weight, color, background, shadow, stroke, highlight, highlightBox, upcoming, align } |  |  | How the words look: the name of a theme captions preset, or an object of its fields, with `preset` naming the one it starts from. |
-| `animation` | "none" \| "word-highlight" \| "word-by-word" \| "karaoke" \| "typewriter" | `"none"` |  | How the words appear: all at once, the word being said highlighted, word by word, karaoke or typewriter. |
+| `animation` | "none" \| "wordHighlight" \| "wordByWord" \| "karaoke" \| "typewriter" | `"none"` |  | How the words appear: all at once, the word being said highlighted, word by word, karaoke or typewriter. |
 | `box` | { x, y, width, height, origin } |  |  | The rectangle the caption block sits in, from the frame's top left as on any element. Left out, the lower safe area: centred, as wide as the frame less a margin at each side, its bottom a margin above the frame's bottom (`origin: "bottom"`). Each field written replaces that one of the default, so a box with only `y: 1150` and `origin: "center"` puts the block's middle at 1150 and keeps the default width. Without a `height`, the block is as tall as its lines. |
 | `maxChars` | integer (> 0) |  |  | The most characters on a generated cue's line. Left out: as many as fit at the caption size on this frame (at most 42). |
 | `maxDuration` | number (> 0) | `5` |  | The longest a generated cue may stay on screen, in seconds. |
@@ -274,7 +274,7 @@ A theme preset's name, or an object of these fields. `preset` names the preset t
 | `color` | string |  | The letters' colour, or a theme token. Left out: white. |
 | `background` | string |  | A colour behind each cue. |
 | `shadow` | { color, blur, x, y } |  | A drop shadow under the letters. Left out: a dark halo that reads on light and dark footage. |
-| `stroke` | { color, width } |  | An outline around the letters, drawn under them. |
+| `stroke` | { color, thickness } |  | An outline around the letters, drawn under them: its colour and thickness in pixels. |
 | `highlight` | string |  | The colour of the word being said, for the word animations. |
 | `highlightBox` | string |  | A filled, rounded box behind the word being said. `highlight` stays the colour of its letters. |
 | `upcoming` | string |  | The colour of the words not yet said. |
@@ -318,12 +318,12 @@ A vector shape (rectangle, circle, star, polygon, path) with fill, stroke and sh
 | `enter` | { type, duration, easing } |  |  | How it comes in: a fade, slide, scale or wipe over its first seconds, with an easing. |
 | `exit` | { type, duration, easing } |  |  | How it goes out, over its last seconds, as `enter`. |
 | `style` | string |  |  | A theme preset for shapes. |
-| `shape` | "rectangle" \| "circle" \| "ellipse" \| "triangle" \| "arrow" \| … 4 more |  | yes | Which shape it draws. |
+| `type` | "rectangle" \| "circle" \| "ellipse" \| "triangle" \| "arrow" \| … 4 more |  | yes | Which shape it draws. |
 | `width` | number (> 0) |  |  | The shape's box, in pixels; left out, 200. |
 | `height` | number (> 0) |  |  | The shape's box height, in pixels; left out, 200. |
 | `points` | { x, y }[] |  |  | A polygon's or path's corners, as fractions of the box from its top left. |
 | `fill` | string \| { type, color, gradient, opacity } |  |  | A colour, or `{ type, color, gradient, opacity }` for a gradient or no fill. |
-| `stroke` | { color, width, opacity, dashArray, dashOffset, lineCap, lineJoin, gradient } |  |  | The outline: colour, width in pixels, opacity, dashes, caps and joins. |
+| `stroke` | { color, thickness, opacity, dashArray, dashOffset, lineCap, lineJoin, gradient } |  |  | The outline: colour, thickness in pixels, opacity, dashes, caps and joins. |
 | `shadow` | { color, blur, x, y, spread, inset } |  |  | A drop shadow: colour, blur and offset in pixels. |
 | `shadows` | { color, blur, x, y, spread, inset }[] |  |  | Several shadows, drawn in order, for layered or inner shadows. |
 | `cornerRadius` | number (0..∞) \| string |  |  | A rectangle's rounded corners, in pixels or a theme token such as `$radius`. |
@@ -356,7 +356,7 @@ One-off vector art from inline SVG markup or a file.
 | `content` | string |  |  | Inline SVG markup. Give this or `src`. |
 | `viewBox` | { minX, minY, width, height } |  |  | The part of the drawing to show, in its own units, as the SVG `viewBox` attribute. |
 | `preserveAspectRatio` | string |  |  | How the drawing fits its box, as the SVG attribute of that name (`xMidYMid meet`). |
-| `color` | { mode, tint, opacity } |  |  | Recolours it: `tint` keeps the shading and colours it, `replace` paints every drawn pixel; `opacity` is how much. |
+| `color` | { type, tint, opacity } |  |  | Recolours it: `tint` keeps the shading and colours it, `replace` paints every drawn pixel; `opacity` is how much. |
 | `enter` | { type, duration, easing } |  |  | How it comes in: a fade, slide, scale or wipe over its first seconds, with an easing. |
 | `exit` | { type, duration, easing } |  |  | How it goes out, over its last seconds, as `enter`. |
 
@@ -454,7 +454,7 @@ Animates one property of its parent between values, with easing.
 | `param` | string |  |  | Inside an `<Effect>`: the effect param it animates. |
 | `at` | number (0..∞) |  | yes | Element-relative seconds. |
 | `value` | any |  | yes | The value the property or param has at `at`. |
-| `easing` | "linear" \| "ease" \| "ease-in" \| "ease-out" \| "ease-in-out" \| … 46 more | `"linear"` |  | How it moves from this keyframe to the next one. The last keyframe's easing is not used. |
+| `easing` | "linear" \| "ease" \| "easeIn" \| "easeOut" \| "easeInOut" \| … 46 more | `"linear"` |  | How it moves from this keyframe to the next one. The last keyframe's easing is not used. |
 
 No children. [All elements](https://uberscene.prefixtree.xyz/reference/elements/)
 
@@ -469,7 +469,7 @@ Changes its clip's speed from a moment on, eased: speed ramps.
 | `id` | string |  | yes | The key's name. |
 | `at` | number (0..∞) |  | yes | Seconds into the clip where the new speed is reached. |
 | `speed` | number (0.1..20) |  | yes | The playback rate from here on: 2 is twice as fast. |
-| `easing` | "linear" \| "ease" \| "ease-in" \| "ease-out" \| "ease-in-out" \| … 46 more | `"linear"` |  | How the speed changes from this key to the next one. The last key's easing is not used. |
+| `easing` | "linear" \| "ease" \| "easeIn" \| "easeOut" \| "easeInOut" \| … 46 more | `"linear"` |  | How the speed changes from this key to the next one. The last key's easing is not used. |
 
 No children. [All elements](https://uberscene.prefixtree.xyz/reference/elements/)
 

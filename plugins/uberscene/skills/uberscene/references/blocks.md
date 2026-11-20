@@ -9,13 +9,13 @@ Bars grow and overtake each other period by period, the leaders shown, the perio
 - **Use it for:** how a ranking changed over years or months; a race between options over time; show who rose and who fell.
 - **Not for:** two or three steps only: use ranked-list; values that never cross: a plain bar chart says it.
 - **Goes with:** `ranked-list`, `narrate`.
-- **Length:** 5.5 s with its defaults; given longer, it holds its last state. **Frame:** 9:16. **Timed by:** `start`.
+- **Length:** 5.5 s with its defaults; given longer, it holds its last state. **Frame:** 9:16. **Timed by:** `after`.
 
 | prop | kind | default | what it is |
 |---|---|---|---|
 | `series` | other | 6 items | The series that race |
 | `periods` | other | 6 items | The name of each period, such as a year |
-| `start` | number | `0.5` | Seconds since the layer started at which the race begins |
+| `after` | number | `0.5` | Seconds since the layer started at which the race begins |
 | `every` | number | `0.9` | Seconds each period lasts |
 | `show` | number | `5` | How many bars are shown, the leaders |
 | `suffix` | text | `"%"` | Written after every value |
@@ -188,7 +188,7 @@ A quotation arrives word by word, its key words stressed in the accent, then the
 - **Use it for:** a line worth reading on screen; a testimonial or a quote from an interview; the thesis of a video.
 - **Not for:** more than about thirty words: split it; words that must match a voice exactly: time them with captions.
 - **Goes with:** `narrate`, `chat-reveal`.
-- **Length:** 5 s with its defaults; given longer, it holds its last state. **Frame:** 9:16. **Timed by:** `start`.
+- **Length:** 5 s with its defaults; given longer, it holds its last state. **Frame:** 9:16. **Timed by:** `after`.
 
 | prop | kind | default | what it is |
 |---|---|---|---|
@@ -196,7 +196,7 @@ A quotation arrives word by word, its key words stressed in the accent, then the
 | `stress` | other | 2 items | Words to stress, as written in the quote; punctuation around them is ignored |
 | `author` | text | `"A writer's rule"` | Who said it; empty for none |
 | `role` | text | `"on drafts"` | A line under the name, such as a title or a year; empty for none |
-| `start` | number | `0.6` | Seconds since the layer started at which the first word arrives |
+| `after` | number | `0.6` | Seconds since the layer started at which the first word arrives |
 | `wordsPerSecond` | number | `3.2` | How fast the words arrive |
 | `x` | number | `150` | Left edge of the quote, in pixels |
 | `y` | number | `600` | Top edge of the quote, in pixels |

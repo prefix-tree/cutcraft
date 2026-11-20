@@ -22,7 +22,7 @@ The theme is the `theme` prop of the composition. Elements use it through `$toke
   <Track id="graphics" layout="free">
     <Title id="kicker" start={0.5} style="kicker">NEW</Title>
     <Title id="name" start={0.5} style="hero">Halvard</Title>
-    <Shape id="card" start={0.5} shape="rectangle" width={720} height={180} style="card" />
+    <Shape id="card" start={0.5} type="rectangle" width={720} height={180} style="card" />
     <Svg id="mark" start={1} content={'<svg viewBox="0 0 24 24"><path d="…" fill="$accent"/></svg>'} />
   </Track>
 </Composition>
@@ -105,7 +105,7 @@ To keep one element still, give it an `enter` of type `none`.
 Overlays draw above the footage, so a background graphic on top of a clip would hide it. Put a background on a track
 **below every track that holds footage**: overlays there draw beneath the footage, in the preview and the export
 alike, and the composition background goes under them. A plain gradient needs no track at all:
-<code v-pre>&lt;Composition background={{ mode: "gradient", gradient }}&gt;</code>.
+<code v-pre>&lt;Composition background={{ type: "gradient", gradient }}&gt;</code>.
 
 ```tsx
 <Track id="backdrop" layout="free">

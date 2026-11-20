@@ -9,7 +9,7 @@ parts once and you can read any element in a file, and any page of the [referenc
   anchor="talk" at="word:4" duration={2.5}         // 2. when it plays
   box={{ y: 220, origin: "center" }}               // 3. where it sits
   style={{ preset: "h1", color: "$primary" }}      // 4. how it looks
-  enter={{ type: "slide-up", duration: 0.4 }}      // 5. how it comes and goes
+  enter={{ type: "slideUp", duration: 0.4 }}      // 5. how it comes and goes
   exit={{ type: "fade", duration: 0.3 }}
 >
   Ship small

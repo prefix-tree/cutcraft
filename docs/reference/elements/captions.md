@@ -23,7 +23,7 @@ The coffee footage is Pixabay videos [209419](https://pixabay.com/videos/id-2094
 | `id` | string |  | yes | The captions' name. |
 | `src` | string |  |  | Generate children from the asset's transcript. Literal `<Caption>` children override this. |
 | `style` | string \| { preset, font, size, weight, color, background, shadow, stroke, highlight, highlightBox, upcoming, align } |  |  | How the words look: the name of a theme captions preset, or an object of its fields, with `preset` naming the one it starts from. |
-| `animation` | "none" \| "word-highlight" \| "word-by-word" \| "karaoke" \| "typewriter" | `"none"` |  | How the words appear: all at once, the word being said highlighted, word by word, karaoke or typewriter. |
+| `animation` | "none" \| "wordHighlight" \| "wordByWord" \| "karaoke" \| "typewriter" | `"none"` |  | How the words appear: all at once, the word being said highlighted, word by word, karaoke or typewriter. |
 | `box` | { x, y, width, height, origin } |  |  | The rectangle the caption block sits in, from the frame's top left as on any element. Left out, the lower safe area: centred, as wide as the frame less a margin at each side, its bottom a margin above the frame's bottom (`origin: "bottom"`). Each field written replaces that one of the default, so a box with only `y: 1150` and `origin: "center"` puts the block's middle at 1150 and keeps the default width. Without a `height`, the block is as tall as its lines. |
 | `maxChars` | integer (> 0) |  |  | The most characters on a generated cue's line. Left out: as many as fit at the caption size on this frame (at most 42). |
 | `maxDuration` | number (> 0) | `5` |  | The longest a generated cue may stay on screen, in seconds. |
@@ -43,7 +43,7 @@ A theme preset's name, or an object of these fields. `preset` names the preset t
 | `color` | string |  | The letters' colour, or a theme token. Left out: white. |
 | `background` | string |  | A colour behind each cue. |
 | `shadow` | { color, blur, x, y } |  | A drop shadow under the letters. Left out: a dark halo that reads on light and dark footage. |
-| `stroke` | { color, width } |  | An outline around the letters, drawn under them. |
+| `stroke` | { color, thickness } |  | An outline around the letters, drawn under them: its colour and thickness in pixels. |
 | `highlight` | string |  | The colour of the word being said, for the word animations. |
 | `highlightBox` | string |  | A filled, rounded box behind the word being said. `highlight` stays the colour of its letters. |
 | `upcoming` | string |  | The colour of the words not yet said. |

@@ -35,8 +35,8 @@ references.
 | Fix footage | `colorKey` (green screen), `regionBlur` (hide a face or a plate), `cornerPin` (put a picture on a screen), `blur`, `zoomBlur` |
 | Style text and graphics | `glow`, `outline`, `shadow`, `longShadow`, `bevel` on a title, shape or layer |
 | Affect everything below | `<Adjustment>` with `<Effect>` children, for its time, on every track beneath it |
-| Words on screen | `<Title>` with a theme `style` and `animation={{ preset }}`: `typewriter`, `fade`, `slide-up`, `slide-down`, `slide-left`, `slide-right`, `scale`, `word-by-word` |
-| Captions | `<Captions>` from the transcript, or `<Caption>` cues; `animation`: `word-highlight`, `word-by-word`, `karaoke`, `typewriter`; `style.highlightBox` boxes the word being said; `box` places them (the lower safe area when left out; each field written replaces that one) |
+| Words on screen | `<Title>` with a theme `style` and `animation={{ type }}`: `typewriter`, `fade`, `slideUp`, `slideDown`, `slideLeft`, `slideRight`, `scale`, `wordByWord` |
+| Captions | `<Captions>` from the transcript, or `<Caption>` cues; `animation`: `wordHighlight`, `wordByWord`, `karaoke`, `typewriter`; `style.highlightBox` boxes the word being said; `box` places them (the lower safe area when left out; each field written replaces that one) |
 | Shapes and images | `<Shape>` (rectangle, circle, ellipse, triangle, arrow and more), `<Svg>` (inline markup or an SVG asset), `<Sticker>` (a PNG, SVG, WebP or GIF asset) |
 | Ready-made graphics | `LowerThird`, `Callout`, `Badge`, `Counter`, `TypeCard` |
 | Ready-made scenes | Blocks: `uberscene blocks --for "<job>"` lists them with when to use each (`--sheet blocks.png` to look); `uberscene blocks add <name> --into video.tsx --track <id> --at hook@word:N` copies one to `blocks/<name>.tsx` and places its component in a `<Layer>`, its props set there; `blocks update` after an upgrade |
@@ -88,7 +88,7 @@ Work in this order, and check after each stage.
    ```
    For a diagram inside a `<Layer>`, use the kit's parts in an `<svg>`: `DrawnLine` (a line that draws itself),
    `Label` (a word with a line to what it names, which names itself for this check), `CountUp` and `Cells`. Each
-   takes `at` (seconds of the video) or `after` (seconds since its layer started) and `over`.
+   takes `start` (seconds of the video) or `after` (seconds since its layer started) and `over`.
    Place things from those numbers; do not guess from a picture. To see them on the frames, add `--zones tiktok`
    to a `look`: the zone is drawn on every cell and each thing outlined, red where it leaves the zone.
 6. **Look at it.** `look` draws many frames in one go, on one contact sheet, and prints what each cell is. With no
