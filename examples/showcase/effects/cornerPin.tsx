@@ -10,13 +10,13 @@ export default function Video() {
       <Track id="pinned">
         <Clip id="shot" src="asset:coffee" in={12} out={15} fit="cover">
           <Effect id="look" type="cornerPin">
-            <Keyframe id="k1" param="topLeft" at={0.5} value={[0, 0]} easing="ease-in-out" />
+            <Keyframe id="k1" param="topLeft" at={0.5} value={[0, 0]} easing="easeInOut" />
             <Keyframe id="k2" param="topLeft" at={1.5} value={[0.2, 0.14]} />
-            <Keyframe id="k3" param="topRight" at={0.5} value={[1, 0]} easing="ease-in-out" />
+            <Keyframe id="k3" param="topRight" at={0.5} value={[1, 0]} easing="easeInOut" />
             <Keyframe id="k4" param="topRight" at={1.5} value={[0.84, 0.06]} />
-            <Keyframe id="k5" param="bottomRight" at={0.5} value={[1, 1]} easing="ease-in-out" />
+            <Keyframe id="k5" param="bottomRight" at={0.5} value={[1, 1]} easing="easeInOut" />
             <Keyframe id="k6" param="bottomRight" at={1.5} value={[0.88, 0.9]} />
-            <Keyframe id="k7" param="bottomLeft" at={0.5} value={[0, 1]} easing="ease-in-out" />
+            <Keyframe id="k7" param="bottomLeft" at={0.5} value={[0, 1]} easing="easeInOut" />
             <Keyframe id="k8" param="bottomLeft" at={1.5} value={[0.14, 0.82]} />
           </Effect>
         </Clip>

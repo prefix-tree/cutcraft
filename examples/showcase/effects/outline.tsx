@@ -13,8 +13,8 @@ export default function Video() {
       <Track id="text" layout="free">
         <Title id="word" start={0} duration={3} style={{ size: 128, color: "#e8a33d" }}>
           <Effect id="look" type="outline" params={{ color: "#f4efe6" }}>
-            <Keyframe id="k1" param="width" at={0.5} value={0} easing="ease-in-out" />
-            <Keyframe id="k2" param="width" at={1.5} value={4} />
+            <Keyframe id="k1" param="thickness" at={0.5} value={0} easing="easeInOut" />
+            <Keyframe id="k2" param="thickness" at={1.5} value={4} />
           </Effect>
           Crema
         </Title>

@@ -740,7 +740,7 @@ export const manifest = { assets: {} };
 
 export default function Video() {
   return (
-    <Composition fps={30} width={1080} height={1920} background={{ mode: "color", color: INK }}>
+    <Composition fps={30} width={1080} height={1920} background={{ type: "color", color: INK }}>
       <Track id="stage" layout="free">
         <Three
           id="room"

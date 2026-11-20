@@ -203,7 +203,7 @@ function Board({ word, heart }: z.infer<typeof schema>) {
 
 export default function Video(props: z.infer<typeof schema>) {
   return (
-    <Composition fps={30} width={1080} height={1920} background={{ mode: "color", color: BG }}>
+    <Composition fps={30} width={1080} height={1920} background={{ type: "color", color: BG }}>
       <Track id="wall" layout="free">
         {/* The wall of characters the game is played on. It changes each time the snake eats, and fades back at the
             heart. */}

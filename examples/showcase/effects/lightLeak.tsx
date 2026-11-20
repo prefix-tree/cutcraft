@@ -7,7 +7,7 @@ export default function Video() {
       <Track id="main">
         <Clip id="shot" src="asset:coffeeWide" in={4} out={7} fit="cover">
           <Effect id="look" type="lightLeak" params={{ evolution: 0.4 }}>
-            <Keyframe id="k1" param="intensity" at={0.5} value={0} easing="ease-in-out" />
+            <Keyframe id="k1" param="intensity" at={0.5} value={0} easing="easeInOut" />
             <Keyframe id="k2" param="intensity" at={1.5} value={0.7} />
           </Effect>
         </Clip>

@@ -79,7 +79,7 @@ function Reframe({ id, from, to }: { id: string; from: Framing; to: Framing }) {
   return (
     <>
       {moves.flatMap(([key, property, a, b]) => [
-        <Keyframe key={`${key}0`} id={`${id}-${key}0`} property={property} at={0} value={a} easing="ease-in-out" />,
+        <Keyframe key={`${key}0`} id={`${id}-${key}0`} property={property} at={0} value={a} easing="easeInOut" />,
         <Keyframe key={`${key}1`} id={`${id}-${key}1`} property={property} at={MOVE} value={b} />,
       ])}
     </>
@@ -280,7 +280,7 @@ export default function Video({ accent }: z.infer<typeof schema>) {
       fps={30}
       width={1080}
       height={1920}
-      background={{ mode: "color", color: "$background" }}
+      background={{ type: "color", color: "$background" }}
       theme={{
         extends: "midnight",
         palette: { background: NAVY, surface: "#16234a", accent, primary: accent, text: "#ffffff" },
@@ -377,8 +377,8 @@ export default function Video({ accent }: z.infer<typeof schema>) {
             font={TYPE.fontFamily}
             x={BAND.x}
             y={BAND.y + 30}
-            fill={{ at: T(6.86), over: 2 }}
-            next={{ at: T(9.96), over: 0.3 }}
+            fill={{ start: T(6.86), over: 2 }}
+            next={{ start: T(9.96), over: 0.3 }}
           />
         </Layer>
         {/* Each of the five arrives on its word, is bright while it is the one being named, and dims when the next comes. */}
@@ -411,7 +411,7 @@ export default function Video({ accent }: z.infer<typeof schema>) {
       <Captions
         id="captions"
         src="asset:hundred-videos"
-        animation="word-highlight"
+        animation="wordHighlight"
         maxChars={18}
         breakAfter={["word:39"]}
         box={{ x: 504, y: 1155, width: 756, origin: "center" }}

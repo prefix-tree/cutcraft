@@ -25,7 +25,7 @@ const H = 720;
 
 export default function Video() {
   return (
-    <Composition fps={30} width={W} height={H} background={{ mode: "color", color: PAPER }}>
+    <Composition fps={30} width={W} height={H} background={{ type: "color", color: PAPER }}>
       <Track id="print" layout="free">
         <Layer id="woodblock" start={0} duration={12}>
           <Woodblock />
@@ -38,7 +38,7 @@ export default function Video() {
           duration={6.15}
           style={{ font: display, size: 100, weight: 800, color: INK }}
           box={{ x: 930, y: 338, origin: "center" }}
-          enter={{ type: "slide-up", duration: 0.6, easing: "easeOutCubic" }}
+          enter={{ type: "slideUp", duration: 0.6, easing: "easeOutCubic" }}
           exit={{ type: "fade", duration: 0.5 }}
         >
           UberScene

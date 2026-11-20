@@ -15,7 +15,7 @@ export default function Video() {
                 [0, 0],
                 [1, 1],
               ]}
-              easing="ease-in-out"
+              easing="easeInOut"
             />
             <Keyframe
               id="k2"

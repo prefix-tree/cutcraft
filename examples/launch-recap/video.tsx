@@ -33,9 +33,9 @@ export const defaults = {
 
 export default function Video({ product, tagline, accent, cta }: z.infer<typeof schema>) {
   return (
-    <Composition fps={30} width={1920} height={1080} background={{ mode: "color", color: "#0b0d12" }}>
-      <Marker id="m-hook" at={0} label="hook" />
-      <Marker id="m-close" at={17.4} label="close" />
+    <Composition fps={30} width={1920} height={1080} background={{ type: "color", color: "#0b0d12" }}>
+      <Marker id="m-hook" start={0} label="hook" />
+      <Marker id="m-close" start={17.4} label="close" />
 
       <Track id="main" name="Story">
         {/* The sentence the whole recap hangs on; trimmed by words so a re-transcription keeps it. */}
@@ -65,7 +65,7 @@ export default function Video({ product, tagline, accent, cta }: z.infer<typeof 
           duration={2.8}
           style={{ size: 120, weight: 700, valign: "top" }}
           box={{ x: 960, y: 680, origin: "center" }}
-          animation={{ preset: "slide-up", in: 0.4, out: 0.3 }}
+          animation={{ type: "slideUp", in: 0.4, out: 0.3 }}
         >
           {product}
         </Title>
@@ -76,7 +76,7 @@ export default function Video({ product, tagline, accent, cta }: z.infer<typeof 
           duration={2.3}
           style={{ size: 44, weight: 400, color: "#c8ccd6", valign: "top" }}
           box={{ x: 960, y: 840, origin: "center" }}
-          animation={{ preset: "fade", in: 0.4, out: 0.3 }}
+          animation={{ type: "fade", in: 0.4, out: 0.3 }}
         >
           {tagline}
         </Title>
@@ -119,11 +119,11 @@ function NameCard({ who, what, accent }: { who: string; what: string; accent: st
         anchor="close"
         offset={0.4}
         duration={4}
-        shape="rectangle"
+        type="rectangle"
         width={640}
         height={132}
         fill="#0b0d12"
-        stroke={{ color: accent, width: 6 }}
+        stroke={{ color: accent, thickness: 6 }}
         cornerRadius={10}
         box={{ x: 400, y: 830, origin: "center" }}
       />
@@ -134,7 +134,7 @@ function NameCard({ who, what, accent }: { who: string; what: string; accent: st
         duration={3.9}
         style={{ size: 40, weight: 700, align: "left", valign: "top" }}
         box={{ x: 1080, y: 1318, origin: "center" }}
-        animation={{ preset: "slide-left", in: 0.3, out: 0.2 }}
+        animation={{ type: "slideLeft", in: 0.3, out: 0.2 }}
       >
         {who}
       </Title>
@@ -145,7 +145,7 @@ function NameCard({ who, what, accent }: { who: string; what: string; accent: st
         duration={3.8}
         style={{ size: 28, weight: 400, color: accent, align: "left", valign: "top" }}
         box={{ x: 1080, y: 1376, origin: "center" }}
-        animation={{ preset: "fade", in: 0.3, out: 0.2 }}
+        animation={{ type: "fade", in: 0.3, out: 0.2 }}
       >
         {what}
       </Title>
