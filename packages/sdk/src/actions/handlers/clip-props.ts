@@ -70,13 +70,6 @@ define(makePropHandler({
   }),
 }));
 
-define(makePropHandler({
-  type: "layer/setTransform",
-  kinds: ["layer"],
-  write: (p, state) => ({
-    transform: deepMerge((rawProp(state, p.id, "transform") ?? {}) as Record<string, Json>, p.transform),
-  }),
-}));
 /** The handles of a Layer: the literal or schema-bound props of the one component inside it. */
 define(makePropHandler({
   type: "layer/setProps",

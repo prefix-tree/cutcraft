@@ -87,7 +87,7 @@ describe("fold", () => {
     exec.execute({ type: "clip/trim", params: { id: "c2", edge: "out", value: 4.4 } });
     exec.execute({ type: "text/setContent", params: { id: "t1", text: "Hello there" } });
     exec.execute({ type: "effect/add", params: { id: "c3", childId: "fx9", type: "grain", params: { amount: 0.2 } } });
-    exec.execute({ type: "clip/remove", params: { id: "g1" } });
+    exec.execute({ type: "element/remove", params: { id: "g1" } });
     exec.execute({ type: "marker/add", params: { markerId: "m2", at: 6, label: "beat" } });
     const result = foldToSource(fixtureText, exec.log(), exec.state());
     expect(result.skipped).toEqual([]);
@@ -103,7 +103,7 @@ describe("fold", () => {
 
   it("bakes a generated element before editing it", () => {
     const exec = fixtureExecutor();
-    expect(exec.execute({ type: "text/update", params: { id: "b1", props: { size: 40 } } }).ok).toBe(true);
+    expect(exec.execute({ type: "element/update", params: { id: "b1", props: { size: 40 } } }).ok).toBe(true);
     const result = foldToSource(fixtureText, exec.log(), exec.state());
     expect(result.baked).toContain("b1");
     expect(result.text).not.toContain('<Badge id="b1"');

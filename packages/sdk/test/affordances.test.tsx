@@ -85,7 +85,7 @@ describe("affordances", () => {
     expect(a).toMatchObject({ id: "c2", kind: "clip", editable: "literal", track: { id: "main", locked: false } });
     expect(a?.capabilities.timed).toBe(true);
     expect(a?.props.fit).toBe("literal");
-    for (const type of ["clip/trim", "clip/split", "clip/remove", "clip/move", "transform/update", "mask/create"])
+    for (const type of ["clip/trim", "clip/split", "element/remove", "clip/move", "transform/update", "mask/create"])
       expect(a?.actions).toContain(type);
     // Not a title, a mask or a transition.
     for (const type of ["text/setContent", "mask/update", "transition/update", "layer/setProps"])
@@ -97,7 +97,7 @@ describe("affordances", () => {
     exec.execute({ type: "track/setFlag", params: { trackId: "main", flag: "locked", value: true } });
     const a = affordances(exec.state(), "c2");
     expect(a?.track).toEqual({ id: "main", locked: true });
-    for (const type of ["clip/trim", "clip/split", "clip/remove", "mask/create", "source/setProps"])
+    for (const type of ["clip/trim", "clip/split", "element/remove", "mask/create", "source/setProps"])
       expect(a?.actions).not.toContain(type);
   });
 
@@ -114,7 +114,7 @@ describe("affordances", () => {
     const exec = fixtureExecutor();
     const a = affordances(exec.state(), "l1");
     expect(a?.kind).toBe("layer");
-    expect(a?.actions).toEqual(expect.arrayContaining(["layer/setProps", "layer/setTiming", "layer/setTransform"]));
+    expect(a?.actions).toEqual(expect.arrayContaining(["layer/setProps", "layer/setTiming", "transform/update"]));
   });
 
   it("of an element with a prop bound to the schema, and one that is an expression", () => {

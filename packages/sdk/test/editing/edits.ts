@@ -55,7 +55,7 @@ export const EDITS: readonly Edit[] = [
     name: "deletes a clip from a sequence",
     pick: (s) => {
       const c = first(s, (p) => p.kind === "clip" && p.parent === p.track && onSequence(s, p));
-      return c && { type: "clip/remove", params: { id: c.id } };
+      return c && { type: "element/remove", params: { id: c.id } };
     },
   },
   {
@@ -107,7 +107,7 @@ export const EDITS: readonly Edit[] = [
     name: "resizes a title",
     pick: (s) => {
       const t = first(s, (p) => p.kind === "title");
-      return t && { type: "text/update", params: { id: t.id, props: { size: t.props.size === 64 ? 72 : 64 } } };
+      return t && { type: "element/update", params: { id: t.id, props: { size: t.props.size === 64 ? 72 : 64 } } };
     },
   },
   {
@@ -200,7 +200,7 @@ export const EDITS: readonly Edit[] = [
         actions: [
           { type: "track/add", params: { trackId: "e2e-notes", layout: "free" } },
           {
-            type: "text/create",
+            type: "element/create",
             params: {
               id: "e2e-note",
               kind: "title",

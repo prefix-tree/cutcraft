@@ -109,7 +109,7 @@ export function carryRemoval(id: string, before: ResolvedState): Carry | null {
     const p = before.items.get(d.id);
     if (!p) continue;
     if (!prev) {
-      pre.push({ type: "clip/remove", params: { id: d.id } });
+      pre.push({ type: "element/remove", params: { id: d.id } });
       continue;
     }
     const room = Math.max(0, prev.duration - p.duration);
@@ -153,7 +153,7 @@ export function carryTransitionRemoval(id: string, before: ResolvedState): Carry
     const p = before.items.get(d.id);
     if (!p) continue;
     if (d.kind === "match" || d.kind === "until") pre.push(setProps(d.id, { duration: round3(p.duration) }));
-    else if (!target) pre.push({ type: "clip/remove", params: { id: d.id } });
+    else if (!target) pre.push({ type: "element/remove", params: { id: d.id } });
     else pre.push(setProps(d.id, { anchor: target.id, at: undefined, offset: round3(p.start - target.start) }));
   }
   return pre.length > 0 ? { pre } : null;

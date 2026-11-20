@@ -185,7 +185,7 @@ describe("structure on free and sequence tracks", () => {
     expect(exec.state().items.get("cap-1")?.editable).toBe("literal");
     expect(
       exec.execute({
-        type: "text/create",
+        type: "element/create",
         params: {
           id: "t9",
           kind: "title",
@@ -199,7 +199,7 @@ describe("structure on free and sequence tracks", () => {
     expect(exec.state().items.get("t9")).toMatchObject({ start: 10.5, end: 11.5 });
     expect(
       exec.execute({
-        type: "text/create",
+        type: "element/create",
         params: { id: "t10", kind: "title", trackId: "overlays", place: { anchor: "ghost" }, props: {} },
       }).errors?.[0]?.code,
     ).toBe("ELEMENT_NOT_FOUND");
@@ -371,7 +371,7 @@ describe("structure on free and sequence tracks", () => {
 
   it("refuses to extract a nested that re-times its scene", () => {
     const exec = fixtureExecutor();
-    expect(exec.execute({ type: "nested/update", params: { id: "n1", props: { in: 1 } } }).ok).toBe(true);
+    expect(exec.execute({ type: "element/update", params: { id: "n1", props: { in: 1 } } }).ok).toBe(true);
     const r = exec.execute({ type: "nested/extract", params: { id: "n1" } });
     expect(r.errors?.[0]?.code).toBe("INVALID_PARAMS");
     expect(r.errors?.[0]?.message).toContain("n1.in");

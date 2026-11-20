@@ -68,7 +68,7 @@ describe("clip timing", () => {
 
   it("roll moves the cut between two source clips without changing total length", () => {
     const exec = fixtureExecutor();
-    exec.execute({ type: "clip/remove", params: { id: "g1" } });
+    exec.execute({ type: "element/remove", params: { id: "g1" } });
     exec.execute({ type: "transition/remove", params: { transitionId: "x1" } });
     // Roll moves source edges at the clip's constant speed; take c2's ramp and hold off.
     exec.execute({ type: "speed/setKeys", params: { id: "c2", keys: [] } });
@@ -86,11 +86,11 @@ describe("clip timing", () => {
     exec.execute({ type: "track/setFlag", params: { trackId: "main", flag: "locked", value: true } });
     const r = exec.execute({ type: "clip/trim", params: { id: "c2", edge: "out", value: 4 } });
     expect(r.errors?.[0]?.code).toBe("TRACK_LOCKED");
-    const bound = exec.execute({ type: "text/update", params: { id: "t1", props: { color: "#fff" } } });
+    const bound = exec.execute({ type: "element/update", params: { id: "t1", props: { color: "#fff" } } });
     expect(bound.ok).toBe(true);
     const index = buildSourceIndex(fixtureText.replace("size={64}", "size={32 + 32}"));
     const locked = new Executor({ tree: collectModule(sample, {}, { index }), manifest, now: () => 0 }).execute({
-      type: "text/update",
+      type: "element/update",
       params: { id: "t1", props: { size: 40 } },
     });
     expect(locked.errors?.[0]?.code).toBe("LOCKED_PROP");

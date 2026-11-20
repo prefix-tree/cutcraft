@@ -16,7 +16,7 @@ export interface Case {
 /** Actions that need the fixture prepared first, e.g. a gap removed so two clips meet. */
 export const SETUP: Partial<Record<ActionType, readonly ActionInput[]>> = {
   "clip/slide": [
-    { type: "clip/remove", params: { id: "g1" } },
+    { type: "element/remove", params: { id: "g1" } },
     { type: "transition/remove", params: { transitionId: "x1" } },
   ],
   "clip/roll": [{ type: "transition/remove", params: { transitionId: "x1" } }],
@@ -83,9 +83,9 @@ export const CASES: Partial<Record<ActionType, ActionInput>> = {
     type: "clip/add",
     params: { id: "new1", trackId: "main", src: "asset:city", place: { after: "c2" }, in: 0, out: 2 },
   },
-  "clip/remove": { type: "clip/remove", params: { id: "c2" } },
-  "clip/restore": {
-    type: "clip/restore",
+  "element/remove": { type: "element/remove", params: { id: "c2" } },
+  "element/restore": {
+    type: "element/restore",
     params: { id: "new1", node: clipSpec, trackId: "main", place: { after: null } },
   },
   "clip/rippleDelete": { type: "clip/rippleDelete", params: { id: "a1" } },
@@ -207,8 +207,8 @@ export const CASES: Partial<Record<ActionType, ActionInput>> = {
   },
   "audio/setDuck": { type: "audio/setDuck", params: { id: "a1", duck: { under: "overlays", to: 0.1 } } },
 
-  "text/create": {
-    type: "text/create",
+  "element/create": {
+    type: "element/create",
     params: {
       id: "t9",
       kind: "title",
@@ -218,63 +218,8 @@ export const CASES: Partial<Record<ActionType, ActionInput>> = {
       text: "New title",
     },
   },
-  "text/update": { type: "text/update", params: { id: "t1", props: { size: 72 } } },
-  "text/remove": { type: "text/remove", params: { id: "t1" } },
+  "element/update": { type: "element/update", params: { id: "t1", props: { size: 72 } } },
   "text/setContent": { type: "text/setContent", params: { id: "t1", text: "Changed" } },
-  "shape/create": {
-    type: "shape/create",
-    params: {
-      id: "s9",
-      kind: "shape",
-      trackId: "overlays",
-      place: { anchor: "start" },
-      props: { duration: 1, shape: "circle", width: 50, height: 50 },
-    },
-  },
-  "shape/update": { type: "shape/update", params: { id: "s1", props: { cornerRadius: 0 } } },
-  "shape/remove": { type: "shape/remove", params: { id: "s1" } },
-  "svg/create": {
-    type: "svg/create",
-    params: {
-      id: "v9",
-      kind: "svg",
-      trackId: "overlays",
-      place: { anchor: "start" },
-      props: { duration: 1, content: "<svg/>" },
-    },
-  },
-  "svg/update": { type: "svg/update", params: { id: "v1", props: { duration: 3 } } },
-  "svg/remove": { type: "svg/remove", params: { id: "v1" } },
-  "sticker/create": {
-    type: "sticker/create",
-    params: {
-      id: "st9",
-      kind: "sticker",
-      trackId: "overlays",
-      place: { anchor: "c1" },
-      props: { duration: 1, src: "asset:logo" },
-    },
-  },
-  "sticker/update": { type: "sticker/update", params: { id: "st1", props: { blend: "screen" } } },
-  "sticker/remove": { type: "sticker/remove", params: { id: "st1" } },
-  "adjustment/create": {
-    type: "adjustment/create",
-    params: { id: "adj9", kind: "adjustment", trackId: "overlays", place: { anchor: "start" }, props: { duration: 2 } },
-  },
-  "adjustment/update": { type: "adjustment/update", params: { id: "adj1", props: { opacity: 0.5 } } },
-  "adjustment/remove": { type: "adjustment/remove", params: { id: "adj1" } },
-  "nested/create": {
-    type: "nested/create",
-    params: {
-      id: "n9",
-      kind: "nested",
-      trackId: "main",
-      place: { after: "c3" },
-      props: { of: "file:outro.tsx", duration: 2 },
-    },
-  },
-  "nested/update": { type: "nested/update", params: { id: "n1", props: { volume: 0.5 } } },
-  "nested/remove": { type: "nested/remove", params: { id: "n1" } },
   "nested/extract": { type: "nested/extract", params: { id: "n1" } },
 
   "caption/import": {
@@ -387,7 +332,6 @@ export const CASES: Partial<Record<ActionType, ActionInput>> = {
 
   "layer/setTiming": { type: "layer/setTiming", params: { id: "l1", duration: 2, offset: 0.5 } },
   "layer/setProps": { type: "layer/setProps", params: { id: "l1", props: { to: 900 } } },
-  "layer/setTransform": { type: "layer/setTransform", params: { id: "l1", transform: { opacity: 0.5 } } },
 
   "source/bake": { type: "source/bake", params: { id: "b1" } },
   "source/setProp": { type: "source/setProp", params: { id: "c2", prop: "fit", value: "none" } },

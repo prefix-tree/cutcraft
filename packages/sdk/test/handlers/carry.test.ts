@@ -78,7 +78,7 @@ describe("removing a clip", () => {
   it("moves its titles to the clip before, keeps the transition that still joins two clips, fixes lengths", () => {
     const exec = executor();
     const was = exec.state().items;
-    carried(exec, { type: "clip/remove", params: { id: "b" } }, () => {
+    carried(exec, { type: "element/remove", params: { id: "b" } }, () => {
       const s = exec.state();
       expect(props(exec, "tb")).toMatchObject({ anchor: "a" });
       expect(props(exec, "tbe")).toMatchObject({ anchor: "a" });
@@ -93,7 +93,7 @@ describe("removing a clip", () => {
   it("keeps a title's time when the clip before still plays then", () => {
     const exec = executor([], [h(Title, { id: "early", anchor: "c", offset: -1, duration: 0.5 }, "before c")]);
     const was = exec.state().items.get("early")!.start;
-    carried(exec, { type: "clip/remove", params: { id: "c" } }, () => {
+    carried(exec, { type: "element/remove", params: { id: "c" } }, () => {
       expect(props(exec, "early")).toMatchObject({ anchor: "b" });
       expect(exec.state().items.get("early")!.start).toBeCloseTo(was, 3);
     });
@@ -101,7 +101,7 @@ describe("removing a clip", () => {
 
   it("removes its titles with it when there is no clip before, and a transition left with one side", () => {
     const exec = executor();
-    carried(exec, { type: "clip/remove", params: { id: "a" } }, () => {
+    carried(exec, { type: "element/remove", params: { id: "a" } }, () => {
       const tree = exec.state().tree.byId;
       for (const id of ["ta", "tae", "tua", "x1"]) expect(tree.has(id)).toBe(false);
     });
@@ -109,7 +109,7 @@ describe("removing a clip", () => {
 
   it("keeps one transition when it had one on each side", () => {
     const exec = executor([h(Transition, { id: "x2", type: "crossfade", duration: 0.5 })]);
-    carried(exec, { type: "clip/remove", params: { id: "b" } }, () => {
+    carried(exec, { type: "element/remove", params: { id: "b" } }, () => {
       expect(exec.state().tree.byId.has("x1")).toBe(true);
       expect(exec.state().tree.byId.has("x2")).toBe(false);
     });
@@ -124,8 +124,8 @@ describe("removing a clip", () => {
 
   it("is plain when nothing depends on the clip", () => {
     const exec = executor();
-    const result = exec.execute({ type: "clip/remove", params: { id: "c" } });
-    expect(result.inverse?.type).toBe("clip/restore");
+    const result = exec.execute({ type: "element/remove", params: { id: "c" } });
+    expect(result.inverse?.type).toBe("element/restore");
   });
 });
 

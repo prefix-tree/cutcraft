@@ -6,139 +6,93 @@ import { resolveScene, type SceneFn } from "../../resolve/scene";
 import {
   define,
   insertNode,
-  isError,
   onElement,
   placementOf,
   placeNode,
   rawNode,
   rawProp,
-  requireElement,
-  requireUnlocked,
   setProps,
   siblingAfter,
   uniqueId,
   validateTarget,
 } from "../handler-kit";
-import {
-  type ActionInput,
-  type ActionType,
-  invalid,
-  type NodeSpec,
-  nodeSpecOf,
-  ok,
-  type PlacementSpec,
-} from "../types";
+import { type ActionInput, invalid, type NodeSpec, nodeSpecOf, ok, type PlacementSpec } from "../types";
 
 const EPS = 1e-6;
 /** Nested props that re-time or re-draw the scene as a whole; the extracted elements could not carry them. */
 const EXTRACT_BLOCKERS = ["in", "out", "transform", "fit", "blend", "blendOpacity", "emphasis"] as const;
 
-const KIND_OF_NS: Record<string, string> = {
-  text: "title",
-  shape: "shape",
-  svg: "svg",
-  sticker: "sticker",
-  adjustment: "adjustment",
-  nested: "nested",
-};
+/** The kinds `element/create` and `element/update` take: whatever sits on a track and is not media or a transition. */
+const ELEMENT_KINDS: readonly string[] = ["title", "shape", "svg", "sticker", "adjustment", "nested", "layer"];
 
-function overlayHandlers(ns: keyof typeof KIND_OF_NS) {
-  const kind = KIND_OF_NS[ns] as string;
-  const t = (n: string) => `${ns}/${n}` as ActionType;
-  define({
-    type: t("create") as "text/create",
-    validate: (a, state) => {
-      if (state.tree.byId.has(a.params.id))
-        return invalid({ code: "DUPLICATE_ID", message: `"${a.params.id}" exists` });
-      const track = state.tracks.find((tr) => tr.id === a.params.trackId);
-      if (!track)
-        return invalid({
-          code: "ELEMENT_NOT_FOUND",
-          message: `track "${a.params.trackId}" does not exist`,
-          path: "trackId",
+define({
+  type: "element/create",
+  validate: (a, state) => {
+    if (!ELEMENT_KINDS.includes(a.params.kind))
+      return invalid({
+        code: "INVALID_PARAMS",
+        message: `element/create makes ${ELEMENT_KINDS.join(", ")}; a clip or an audio is added with clip/add or audio/add`,
+        path: "kind",
+      });
+    if (state.tree.byId.has(a.params.id)) return invalid({ code: "DUPLICATE_ID", message: `"${a.params.id}" exists` });
+    const track = state.tracks.find((tr) => tr.id === a.params.trackId);
+    if (!track)
+      return invalid({
+        code: "ELEMENT_NOT_FOUND",
+        message: `track "${a.params.trackId}" does not exist`,
+        path: "trackId",
+      });
+    if (track.locked) return invalid({ code: "TRACK_LOCKED", message: "track is locked" });
+    const place: PlacementSpec = a.params.place;
+    if ("start" in place && track.layout !== "free")
+      return invalid({ code: "UNSUPPORTED_ON_LAYOUT", message: "start needs a free track" });
+    if ("after" in place && track.layout !== "sequence")
+      return invalid({ code: "UNSUPPORTED_ON_LAYOUT", message: "after needs a sequence track" });
+    if ("anchor" in place && place.anchor !== "start" && !state.items.has(place.anchor.replace(/\.end$/, "")))
+      return invalid({ code: "ELEMENT_NOT_FOUND", message: `anchor "${place.anchor}" does not exist` });
+    return ok;
+  },
+  apply: (a, log, ctx) =>
+    placeNode(
+      log,
+      ctx.before,
+      a.params.trackId,
+      a.params.place,
+      {
+        id: a.params.id,
+        kind: a.params.kind,
+        props: { ...a.params.props, id: a.params.id },
+        ...(a.params.text !== undefined ? { text: a.params.text } : {}),
+        children: a.params.children ?? [],
+      },
+      a.params.after,
+    ),
+  invert: (a) => ({ type: "element/remove", params: { id: a.params.id } }),
+  fold: () => [],
+});
+
+define({
+  type: "element/update",
+  targets: onElement({ kinds: ELEMENT_KINDS }),
+  validate: (a, state) => {
+    const base = validateTarget(state, a.params.id, Object.keys(a.params.props));
+    if (!base.valid) return base;
+    const kind = state.items.get(a.params.id)!.kind;
+    return ELEMENT_KINDS.includes(kind)
+      ? ok
+      : invalid({
+          code: "INVALID_PARAMS",
+          message: `"${a.params.id}" is a <${kind}>; element/update sets ${ELEMENT_KINDS.join(", ")}`,
         });
-      if (track.locked) return invalid({ code: "TRACK_LOCKED", message: "track is locked" });
-      const place: PlacementSpec = a.params.place;
-      if ("start" in place && track.layout !== "free")
-        return invalid({ code: "UNSUPPORTED_ON_LAYOUT", message: "start needs a free track" });
-      if ("after" in place && track.layout !== "sequence")
-        return invalid({ code: "UNSUPPORTED_ON_LAYOUT", message: "after needs a sequence track" });
-      if ("anchor" in place && place.anchor !== "start" && !state.items.has(place.anchor.replace(/\.end$/, "")))
-        return invalid({ code: "ELEMENT_NOT_FOUND", message: `anchor "${place.anchor}" does not exist` });
-      return ok;
-    },
-    apply: (a, log, ctx) =>
-      placeNode(
-        log,
-        ctx.before,
-        a.params.trackId,
-        a.params.place,
-        {
-          id: a.params.id,
-          kind,
-          props: { ...a.params.props, id: a.params.id },
-          ...(a.params.text !== undefined ? { text: a.params.text } : {}),
-          children: a.params.children ?? [],
-        },
-        a.params.after,
-      ),
-    invert: (a) => ({ type: t("remove") as "text/remove", params: { id: a.params.id } }),
-    fold: () => [],
-  });
-  define({
-    type: t("update") as "text/update",
-    targets: onElement({ kinds: [kind] }),
-    validate: (a, state) => {
-      const base = validateTarget(state, a.params.id, Object.keys(a.params.props));
-      if (!base.valid) return base;
-      return state.items.get(a.params.id)!.kind === kind
-        ? ok
-        : invalid({ code: "INVALID_PARAMS", message: `"${a.params.id}" is not a <${kind}>` });
-    },
-    apply: (a, log) => setProps(log, a.params.id, a.params.props),
-    invert: (a, before) => {
-      const prior: Record<string, Json | undefined> = {};
-      for (const prop of Object.keys(a.params.props)) prior[prop] = rawProp(before, a.params.id, prop);
-      return { type: "source/setProps", params: { id: a.params.id, props: prior } };
-    },
-    fold: () => [],
-  });
-  define({
-    type: t("remove") as "text/remove",
-    targets: onElement({ onOpaque: true, kinds: [kind] }),
-    validate: (a, state) => {
-      const item = requireElement(state, a.params.id);
-      if (isError(item)) return invalid(item);
-      const locked = requireUnlocked(state, item);
-      if (locked) return invalid(locked);
-      return item.kind === kind
-        ? ok
-        : invalid({ code: "INVALID_PARAMS", message: `"${a.params.id}" is not a <${kind}>` });
-    },
-    apply: (a, log) => log.append({ op: "remove", id: a.params.id }),
-    invert: (a, before) => {
-      const node = rawNode(before, a.params.id)!;
-      const spec = nodeSpecOf(node);
-      const { id: _id, start: _s, anchor: _an, offset: _o, ...rest } = spec.props;
-      return {
-        type: t("create") as "text/create",
-        params: {
-          id: a.params.id,
-          kind,
-          trackId: node.parent as string,
-          place: placementOf(before, a.params.id),
-          props: rest,
-          ...(spec.text !== undefined ? { text: spec.text } : {}),
-          children: spec.children ?? [],
-          after: siblingAfter(before, a.params.id),
-        },
-      };
-    },
-    fold: () => [],
-  });
-}
-
-for (const ns of Object.keys(KIND_OF_NS)) overlayHandlers(ns as keyof typeof KIND_OF_NS);
+  },
+  apply: (a, log) => setProps(log, a.params.id, a.params.props),
+  invert: (a, before) => {
+    const prior: Record<string, Json | undefined> = {};
+    for (const prop of Object.keys(a.params.props)) prior[prop] = rawProp(before, a.params.id, prop);
+    return { type: "source/setProps", params: { id: a.params.id, props: prior } };
+  },
+  fold: () => [],
+});
 
 define({
   type: "text/setContent",
@@ -221,9 +175,9 @@ define({
     const { id: _id, start: _s, anchor: _an, offset: _o, ...rest } = spec.props;
     return [
       ...plan.tracks.map((t): ActionInput => ({ type: "track/remove", params: { trackId: t.id } })),
-      ...(plan.gap ? [{ type: "clip/remove", params: { id: plan.gap.id } } as ActionInput] : []),
+      ...(plan.gap ? [{ type: "element/remove", params: { id: plan.gap.id } } as ActionInput] : []),
       {
-        type: "nested/create",
+        type: "element/create",
         params: {
           id: a.params.id,
           kind: "nested",

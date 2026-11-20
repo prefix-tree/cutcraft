@@ -187,10 +187,10 @@ describe("the actions follow the schemas", () => {
     expect(refused.errors?.[0]?.message).toMatch(/does not apply to <adjustment>/);
   });
 
-  it("clip/remove still leaves a multicam to multicam/remove", () => {
+  it("element/remove still leaves a multicam to multicam/remove", () => {
     const exec = fixtureExecutor();
     expect(exec.state().items.get("mc1")?.kind).toBe("multicam");
-    expect(exec.can({ type: "clip/remove", params: { id: "mc1" } }).ok).toBe(false);
+    expect(exec.can({ type: "element/remove", params: { id: "mc1" } }).ok).toBe(false);
     expect(exec.can({ type: "multicam/remove", params: { id: "mc1" } }).ok).toBe(true);
   });
 });

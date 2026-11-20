@@ -37,8 +37,8 @@ describe("ActionHistory", () => {
     const h = new ActionHistory(1000, 100, () => 0);
     h.push(trim("c1", 1, "a1"), inverse, [0, 1]);
     h.push(trim("c2", 1, "a2"), inverse, [1, 2]);
-    h.push({ type: "clip/remove", actionId: "a3", ts: 0, params: { id: "c2" } }, inverse, [2, 3]);
-    h.push({ type: "clip/remove", actionId: "a4", ts: 0, params: { id: "c2" } }, inverse, [3, 4]);
+    h.push({ type: "element/remove", actionId: "a3", ts: 0, params: { id: "c2" } }, inverse, [2, 3]);
+    h.push({ type: "element/remove", actionId: "a4", ts: 0, params: { id: "c2" } }, inverse, [3, 4]);
     expect(h.entries().every((e) => e.groupId === undefined)).toBe(true);
   });
 
@@ -47,7 +47,7 @@ describe("ActionHistory", () => {
     h.beginGroup("gesture");
     h.push(trim("c1", 1, "a1"), inverse, [0, 1]);
     h.beginGroup("inner");
-    h.push({ type: "clip/remove", actionId: "a2", ts: 0, params: { id: "c2" } }, inverse, [1, 2]);
+    h.push({ type: "element/remove", actionId: "a2", ts: 0, params: { id: "c2" } }, inverse, [1, 2]);
     h.endGroup();
     h.push(trim("c3", 1, "a3"), inverse, [2, 3]);
     h.endGroup();

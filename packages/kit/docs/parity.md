@@ -28,14 +28,14 @@ OpenReel executable action types: 115. Ours: 125.
 | `track/consolidate` | `track/consolidate` |
 | `track/restorePositions` | `track/restorePositions` |
 | `clip/add` | `clip/add` |
-| `clip/remove` | `clip/remove` |
+| `element/remove` | `element/remove` |
 | `clip/move` | `clip/move` |
 | `clip/trim` | `clip/trim` |
 | `clip/split` | `clip/split` |
 | `clip/merge` | `clip/merge` |
 | `clip/rippleDelete` | `clip/rippleDelete` |
 | `clip/rippleRestore` | `clip/rippleRestore` |
-| `clip/restore` | `clip/restore` |
+| `element/restore` | `element/restore` |
 | `clip/setBlendMode` | `clip/setBlend` |
 | `clip/setBlendOpacity` | `clip/setBlend` |
 | `clip/setEmphasisAnimation` | `clip/setEmphasis` |

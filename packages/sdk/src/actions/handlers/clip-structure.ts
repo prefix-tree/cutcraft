@@ -35,7 +35,7 @@ function placementErrors(
   return null;
 }
 
-/** What `clip/remove` takes: anything placed on a track, except a multicam, which has its own remove and restore. */
+/** What `element/remove` takes: anything placed on a track, except a multicam, which has its own remove and restore. */
 const isTrackItem = (kind: string): boolean => capabilitiesOf(kind).placementScope === "track" && kind !== "multicam";
 
 /** A media element on a track: a <Clip> (picture and sound) or an <Audio> (sound only). */
@@ -58,7 +58,7 @@ function addMedia<T extends "clip/add" | "audio/add">(type: T, kind: "clip" | "a
       if (a.params.duration !== undefined) p.duration = a.params.duration;
       placeNode(log, ctx.before, a.params.trackId, a.params.place, { id: a.params.id, kind, props, children: [] });
     },
-    invert: (a) => ({ type: "clip/remove", params: { id: a.params.id } }),
+    invert: (a) => ({ type: "element/remove", params: { id: a.params.id } }),
     fold: () => [],
   });
 }
@@ -68,7 +68,7 @@ addMedia("audio/add", "audio");
 
 define(carry(
   {
-    type: "clip/remove",
+    type: "element/remove",
     targets: onElement({ onOpaque: true, when: (item) => isTrackItem(item.kind) }),
     validate: (a, state) => {
       const item = requireElement(state, a.params.id);
@@ -83,7 +83,7 @@ define(carry(
     invert: (a, before) => {
       const node = rawNode(before, a.params.id)!;
       return {
-        type: "clip/restore",
+        type: "element/restore",
         params: {
           id: a.params.id,
           node: nodeSpecOf(node),
@@ -99,14 +99,14 @@ define(carry(
 ));
 
 define({
-  type: "clip/restore",
+  type: "element/restore",
   validate: (a, state) => {
     if (state.tree.byId.has(a.params.id)) return invalid({ code: "DUPLICATE_ID", message: `"${a.params.id}" exists` });
     const e = placementErrors(state, a.params.trackId, a.params.place);
     return e ? invalid(e) : ok;
   },
   apply: (a, log, ctx) => placeNode(log, ctx.before, a.params.trackId, a.params.place, a.params.node, a.params.after),
-  invert: (a) => ({ type: "clip/remove", params: { id: a.params.id } }),
+  invert: (a) => ({ type: "element/remove", params: { id: a.params.id } }),
   fold: () => [],
 });
 

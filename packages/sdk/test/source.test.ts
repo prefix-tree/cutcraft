@@ -129,7 +129,7 @@ describe("fold, structural cases", () => {
 
   it("removes an element with its line, moves a sibling, and rewrites a bare attribute", () => {
     const exec = fixtureExecutor();
-    exec.execute({ type: "clip/remove", params: { id: "c2" } });
+    exec.execute({ type: "element/remove", params: { id: "c2" } });
     exec.execute({ type: "clip/move", params: { id: "c1", place: { after: "c3" } } });
     exec.execute({ type: "track/setFlag", params: { trackId: "mc", flag: "hidden", value: false } });
     const { text, skipped } = foldToSource(fixtureText, exec.log(), exec.state());

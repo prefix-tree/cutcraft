@@ -108,14 +108,14 @@ describe("splitting a clip that animates", () => {
 
 describe("removing a clip whose transition has a sound on its cut", () => {
   it("moves the sound to the clip the transition led into, keeping its place on the cut", () => {
-    edited({ type: "clip/remove", params: { id: "a" } }, (exec) => {
+    edited({ type: "element/remove", params: { id: "a" } }, (exec) => {
       expect(exec.state().tree.byId.has("x1")).toBe(false);
       expect(props(exec, "cue-x1")).toMatchObject({ anchor: "b", offset: -0.2 });
     });
   });
 
   it("keeps a transition that still joins two clips, and its sound with it", () => {
-    edited({ type: "clip/remove", params: { id: "b" } }, (exec) => {
+    edited({ type: "element/remove", params: { id: "b" } }, (exec) => {
       // x1 now joins a and c; x2 is left with one side and goes, its sound to c, the clip it led into.
       expect(exec.state().tree.byId.has("x1")).toBe(true);
       expect(props(exec, "cue-x1")).toMatchObject({ anchor: "x1" });

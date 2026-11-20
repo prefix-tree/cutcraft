@@ -89,7 +89,7 @@ describe("Executor", () => {
       type: "batch/apply",
       params: {
         actions: [
-          { type: "clip/remove", params: { id: "c2" } },
+          { type: "element/remove", params: { id: "c2" } },
           { type: "clip/trim", params: { id: "c2", edge: "out", value: 1 } },
         ],
       },

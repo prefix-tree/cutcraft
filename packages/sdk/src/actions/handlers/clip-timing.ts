@@ -678,7 +678,7 @@ define({
       const gapId = siblingBefore(before, item.id) as string;
       const gap = rawNode(before, gapId)!;
       return {
-        type: "clip/restore",
+        type: "element/restore",
         params: {
           id: gapId,
           node: nodeSpecOf(gap),

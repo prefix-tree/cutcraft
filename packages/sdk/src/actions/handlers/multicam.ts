@@ -211,7 +211,7 @@ define({
     const node = rawNode(before, a.params.id)!;
     return [
       ...flattenedClips(before, a.params.id).map(
-        (spec): ActionInput => ({ type: "clip/remove", params: { id: spec.id } }),
+        (spec): ActionInput => ({ type: "element/remove", params: { id: spec.id } }),
       ),
       {
         type: "multicam/restore",

@@ -282,7 +282,7 @@ function undoToFree(before: ResolvedState, trackId: string): ActionInput[] {
     { type: "source/setProps", params: { id: trackId, props: { layout: rawProp(before, trackId, "layout") } } },
     ...gapsOf(before, trackId).map(
       (gap): ActionInput => ({
-        type: "clip/restore",
+        type: "element/restore",
         params: { id: gap.id, node: nodeSpecOf(gap), trackId, place: { after: siblingAfter(before, gap.id) } },
       }),
     ),

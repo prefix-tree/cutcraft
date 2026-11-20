@@ -131,7 +131,7 @@ describe("font/use", () => {
 
   it("declares a catalogue family any other action sets as a font", () => {
     const exec = open(PLAIN);
-    expect(exec.execute({ type: "text/update", params: { id: "h", props: { font: "Anton" } } }).ok).toBe(true);
+    expect(exec.execute({ type: "element/update", params: { id: "h", props: { font: "Anton" } } }).ok).toBe(true);
     const text = folded(PLAIN, exec);
     expect(text).toContain('const anton = googleFont("Anton");');
     expect(text).toContain("font={anton}");

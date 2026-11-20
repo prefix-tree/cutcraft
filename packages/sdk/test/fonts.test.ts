@@ -97,7 +97,7 @@ export default function Video() {
 }
 `;
     const exec = new Executor({ tree: collectModule(loadModule(text) as never), manifest: { assets: {} } });
-    expect(exec.execute({ type: "text/update", params: { id: "h", props: { font: "Titan One" } } }).ok).toBe(true);
+    expect(exec.execute({ type: "element/update", params: { id: "h", props: { font: "Titan One" } } }).ok).toBe(true);
     const folded = foldToSource(text, exec.log(), exec.state()).text;
     expect(folded).toContain("font={titan}");
     expect(resolve(collectModule(loadModule(folded) as never), { assets: {} }).errors).toEqual([]);

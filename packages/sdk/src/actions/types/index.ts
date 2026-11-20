@@ -101,9 +101,9 @@ export interface ClipActions {
    * comes along: titles anchored to it move to the clip before it, held inside that clip (removed with it when there is
    * none), a transition left without a clip on one side is removed, and a length that followed it becomes seconds.
    */
-  "clip/remove": { id: Id };
-  /** The undo of clip/remove: puts the element back on its track at its old placement. */
-  "clip/restore": {
+  "element/remove": { id: Id };
+  /** The undo of element/remove: puts the element back on its track at its old placement. */
+  "element/restore": {
     id: Id;
     node: NodeSpec;
     trackId: Id;
@@ -113,7 +113,7 @@ export interface ClipActions {
   };
   /**
    * Deletes the element and, on a free track, pulls every later element left by its length; a sequence closes up by
-   * itself. What was placed from it comes along as with clip/remove.
+   * itself. What was placed from it comes along as with element/remove.
    */
   "clip/rippleDelete": { id: Id };
   /** The undo of clip/rippleDelete: puts the element back and restores the starts it shifted. */
@@ -289,6 +289,7 @@ export interface AudioActions {
 interface Overlay {
   create: {
     id: Id;
+    /** title, shape, svg, sticker, adjustment, nested or layer. */
     kind: string;
     trackId: Id;
     place: PlacementSpec;
@@ -298,48 +299,15 @@ interface Overlay {
     after?: Id | null;
   };
   update: { id: Id; props: Props };
-  remove: { id: Id };
 }
 
 export interface OverlayActions {
-  /** Adds a <Title> to a track at `place`, with its props and text. */
-  "text/create": Overlay["create"];
-  /** Sets literal props on a title. */
-  "text/update": Overlay["update"];
-  /** Deletes a title. */
-  "text/remove": Overlay["remove"];
+  /** Adds a title, shape, svg, sticker, adjustment layer, nested scene or layer to a track at `place`, with its props and a title's text. */
+  "element/create": Overlay["create"];
+  /** Sets literal props on a title, shape, svg, sticker, adjustment layer, nested scene or layer. */
+  "element/update": Overlay["update"];
   /** Replaces a title's text. */
   "text/setContent": { id: Id; text: string };
-  /** Adds a <Shape> to a track at `place`, with its props. */
-  "shape/create": Overlay["create"];
-  /** Sets literal props on a shape. */
-  "shape/update": Overlay["update"];
-  /** Deletes a shape. */
-  "shape/remove": Overlay["remove"];
-  /** Adds an <Svg> to a track at `place`, with its props. */
-  "svg/create": Overlay["create"];
-  /** Sets literal props on an svg. */
-  "svg/update": Overlay["update"];
-  /** Deletes an svg. */
-  "svg/remove": Overlay["remove"];
-  /** Adds a <Sticker> to a track at `place`, with its props. */
-  "sticker/create": Overlay["create"];
-  /** Sets literal props on a sticker. */
-  "sticker/update": Overlay["update"];
-  /** Deletes a sticker. */
-  "sticker/remove": Overlay["remove"];
-  /** Adds an <Adjustment> layer to a track at `place`, with its props. */
-  "adjustment/create": Overlay["create"];
-  /** Sets literal props on an adjustment layer. */
-  "adjustment/update": Overlay["update"];
-  /** Deletes an adjustment layer. */
-  "adjustment/remove": Overlay["remove"];
-  /** Adds a <Nested> scene to a track at `place`, with its props. */
-  "nested/create": Overlay["create"];
-  /** Sets literal props on a nested scene. */
-  "nested/update": Overlay["update"];
-  /** Deletes a nested scene. */
-  "nested/remove": Overlay["remove"];
   /**
    * Replaces a <Nested> scene by its contents: one free track per inner track, inserted below, every item at the time
    * it played; on a sequence a <Gap> keeps its slot.
@@ -421,8 +389,6 @@ export interface LayerActions {
   "layer/setTiming": { id: Id; duration?: Json; anchor?: Id | "start"; offset?: number; start?: number };
   /** Sets the handles of a Layer: the props of the one component inside it. */
   "layer/setProps": { id: Id; props: Readonly<Record<string, Json | undefined>> };
-  /** Deep-merges `transform` into a <Layer>'s transform; the escape hatch for placing a Layer. */
-  "layer/setTransform": { id: Id; transform: Readonly<Record<string, Json>> };
 }
 
 export interface SourceActions {
@@ -485,13 +451,9 @@ export const AUTO_GROUP_TYPES: ReadonlySet<ActionType> = new Set<ActionType>([
   "composition/setBackground",
   "theme/setToken",
   "font/use",
-  "text/update",
-  "shape/update",
-  "svg/update",
-  "sticker/update",
+  "element/update",
   "mask/update",
   "layer/setTiming",
-  "layer/setTransform",
   "layer/setProps",
 ]);
 
