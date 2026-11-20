@@ -169,11 +169,11 @@ describe("checkLayout", () => {
     );
     const result = await check(el, manifest, { source: { file: "video.tsx", text } });
     const edge = result.issues.find((i) => i.id === "edge")!;
-    // The spot is the element's transform, which the fix edits.
+    // The spot is the element's box, which the fix edits.
     expect(edge.source).toMatchObject({
       file: "video.tsx",
       line: 11,
-      column: text.split("\n")[10]!.indexOf("transform=") + 1,
+      column: text.split("\n")[10]!.indexOf("box=") + 1,
     });
     const d2 = result.issues.find((i) => i.id === "d2")!;
     expect(d2.source).toMatchObject({ line: 13, column: 9, helper: "Dot" });
@@ -421,7 +421,7 @@ describe("checkLayout", () => {
     expect(brief(result.issues)).toEqual(["frame-edge:edge@0.00-0.90"]);
   });
 
-  it("measures the captions where their x, y and width put them", async () => {
+  it("measures the captions where their box puts them", async () => {
     const caps = (props: Record<string, unknown>) =>
       check(
         h(
@@ -435,12 +435,14 @@ describe("checkLayout", () => {
         ),
       );
     // In a narrow column at the left, clear of the edges: nothing to report.
-    expect(brief((await caps({ x: -150, y: 0, width: 240, align: "left" })).issues)).toEqual([]);
+    expect(
+      brief((await caps({ box: { x: 170, y: 180, width: 240, origin: "center" }, align: "left" })).issues),
+    ).toEqual([]);
     // Pushed right until the line crosses the frame's edge: reported, with the props that move it back.
-    const { issues } = await caps({ x: 280, y: 0 });
+    const { issues } = await caps({ box: { x: 600, y: 180, origin: "center" } });
     expect(brief(issues)).toEqual(["frame-edge:caps@0.00-0.90"]);
     expect(issues[0]!.fix).toMatch(
-      /^move the captions left \d+ px \(their x and y, a narrower width, or a smaller style\.size\)/,
+      /^move the captions left \d+ px \(box\.x .*a narrower box\.width, or a smaller style\.size\)/,
     );
   });
 });
