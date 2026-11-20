@@ -6,6 +6,14 @@ export { backdropTracks } from "./model/backdrop";
 export { type CaptureSheetOptions, PlayerCore, type PlayerOptions, type TimeSnapshot } from "./player";
 export { Controls } from "./react/Controls";
 export { useCompositionFrame, useCompositionTime, useLayerClock, useLayerT, usePlayer } from "./react/hooks";
-export { Player, type PlayerProps, type PlayerRef } from "./react/Player";
+export {
+  Player,
+  type PlayerProps,
+  PlayerProvider,
+  type PlayerProviderProps,
+  type PlayerRef,
+  PlayerView,
+  type PlayerViewProps,
+} from "./react/Player";
 export type { MediaHandle, MediaResolver, PlayerErrorEvent, PlayerEvents } from "./types";
 export { captureWarnings, devWarn } from "./warn";

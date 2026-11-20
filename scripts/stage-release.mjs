@@ -14,6 +14,7 @@ export const PACKAGE_DIRS = [
   "packages/kit",
   "packages/sdk",
   "packages/player",
+  "packages/editor",
   "packages/graphics",
   "packages/render",
   "packages/cli",

@@ -1,7 +1,9 @@
 import {
   type CSSProperties,
+  createContext,
   forwardRef,
   type ReactNode,
+  useContext,
   useEffect,
   useImperativeHandle,
   useLayoutEffect,
@@ -23,26 +25,32 @@ import { PlayerContext } from "./context";
 import { DomLayer } from "./DomLayer";
 import { retainUseT, usePlayer } from "./hooks";
 
-export interface PlayerProps {
+export interface PlayerProviderProps {
   readonly state: ResolvedState;
   readonly media: MediaResolver | Readonly<Record<string, Blob | string>>;
-  /** The evaluated file element (`mod.default(props)`); needed only to render `<Layer>` interiors. */
-  readonly element?: ReactNode;
-  readonly controls?: boolean;
   readonly loop?: boolean;
   readonly autoPlay?: boolean;
   readonly initiallyMuted?: boolean;
   readonly playbackRate?: number;
-  /** `contain` scales the composition into the box; `none` renders at composition pixels. */
-  readonly fit?: "contain" | "none";
-  readonly style?: CSSProperties;
-  readonly className?: string;
   readonly audioContext?: AudioContext;
   readonly onError?: (e: PlayerEvents["error"]) => void;
   readonly onFrame?: (e: PlayerEvents["frameupdate"]) => void;
   /** Test seams forwarded to PlayerCore. */
   readonly coreOptions?: Partial<PlayerOptions>;
+  readonly children?: ReactNode;
 }
+
+export interface PlayerViewProps {
+  /** The evaluated file element (`mod.default(props)`); needed only to render `<Layer>` interiors. */
+  readonly element?: ReactNode;
+  readonly controls?: boolean;
+  /** `contain` scales the composition into the box; `none` renders at composition pixels. */
+  readonly fit?: "contain" | "none";
+  readonly style?: CSSProperties;
+  readonly className?: string;
+}
+
+export interface PlayerProps extends Omit<PlayerProviderProps, "children">, PlayerViewProps {}
 
 export type PlayerRef = Pick<
   PlayerCore,
@@ -69,33 +77,28 @@ export type PlayerRef = Pick<
   readonly canvas: HTMLCanvasElement | null;
 };
 
+// The state as rendered: children render before the provider's layout effect pushes it into the core.
+const StateContext = createContext<ResolvedState | null>(null);
+
 /**
- * Canvas for media, DOM for overlays, controls below. The root carries
- * `data-time` and `data-frame`; every element carries `data-el`/`data-kind`.
+ * Owns the PlayerCore and shares it with everything inside: a `<PlayerView>`, `<Controls>`, `usePlayer()`.
+ * Lets a page put the picture, the controls and its own panels anywhere under one player.
  */
-export const Player = forwardRef<PlayerRef, PlayerProps>(function Player(props, ref) {
+export function PlayerProvider(props: PlayerProviderProps) {
   const {
     state,
     media,
-    element,
-    controls,
     loop,
     autoPlay,
     initiallyMuted,
     playbackRate,
-    fit = "contain",
-    style,
-    className,
     audioContext,
     onError,
     onFrame,
     coreOptions,
+    children,
   } = props;
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const rootRef = useRef<HTMLDivElement>(null);
   const [core, setCore] = useState<PlayerCore | null>(null);
-  const interiors = useMemo(() => indexLayerInteriors(element ?? null), [element]);
-  const [scale, setScale] = useState(1);
 
   // One core per media/audio context; state updates are pushed into it.
   // biome-ignore lint/correctness/useExhaustiveDependencies: the other props are initial values; the effects below push their changes into the existing core.
@@ -120,10 +123,6 @@ export const Player = forwardRef<PlayerRef, PlayerProps>(function Player(props, 
   useLayoutEffect(() => {
     if (core && core.state !== state) core.setState(state);
   }, [core, state]);
-  useLayoutEffect(() => {
-    core?.attachCanvas(canvasRef.current);
-    return () => core?.attachCanvas(null);
-  }, [core]);
   useEffect(() => {
     if (core && loop !== undefined) core.loop = loop;
   }, [core, loop]);
@@ -136,6 +135,32 @@ export const Player = forwardRef<PlayerRef, PlayerProps>(function Player(props, 
     if (core && autoPlay) void core.play();
   }, [core, autoPlay]);
 
+  if (!core) return null;
+  return (
+    <PlayerContext.Provider value={core}>
+      <StateContext.Provider value={state}>{children}</StateContext.Provider>
+    </PlayerContext.Provider>
+  );
+}
+
+/**
+ * The picture of the enclosing `<PlayerProvider>`: canvas for media, DOM for overlays, controls below.
+ * The root carries `data-time` and `data-frame`; every element carries `data-el`/`data-kind`.
+ */
+export const PlayerView = forwardRef<PlayerRef, PlayerViewProps>(function PlayerView(props, ref) {
+  const { element, controls, fit = "contain", style, className } = props;
+  const core = usePlayer();
+  const state = useContext(StateContext) ?? core.state;
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const interiors = useMemo(() => indexLayerInteriors(element ?? null), [element]);
+  const [scale, setScale] = useState(1);
+
+  useLayoutEffect(() => {
+    core.attachCanvas(canvasRef.current);
+    return () => core.attachCanvas(null);
+  }, [core]);
+
   // Scale the DOM layer with the box the canvas is shown in.
   useEffect(() => {
     const root = rootRef.current;
@@ -147,10 +172,10 @@ export const Player = forwardRef<PlayerRef, PlayerProps>(function Player(props, 
     return () => ro.disconnect();
   }, [fit, state.composition.width]);
 
-  useImperativeHandle(ref, () => (core ? refOf(core, canvasRef.current) : null) as PlayerRef, [core]);
+  useImperativeHandle(ref, () => refOf(core, canvasRef.current), [core]);
 
   const { width, height } = state.composition;
-  const snapshot = core?.getTime() ?? { time: 0, frame: 0 };
+  const snapshot = core.getTime();
   const backdrop = backdropTracks(state).size > 0;
   const layerStyle: CSSProperties = {
     position: "absolute",
@@ -189,12 +214,10 @@ export const Player = forwardRef<PlayerRef, PlayerProps>(function Player(props, 
           style={{ position: "absolute", inset: 0, zIndex: 0, background: backgroundCss(compositionBackground(state)) }}
         />
       )}
-      {backdrop && core && (
-        <PlayerContext.Provider value={core}>
-          <div data-dom-layer="backdrop" style={{ ...layerStyle, zIndex: 0 }}>
-            <DomLayer state={state} interiors={interiors} layer="backdrop" />
-          </div>
-        </PlayerContext.Provider>
+      {backdrop && (
+        <div data-dom-layer="backdrop" style={{ ...layerStyle, zIndex: 0 }}>
+          <DomLayer state={state} interiors={interiors} layer="backdrop" />
+        </div>
       )}
       <canvas
         ref={canvasRef}
@@ -204,16 +227,29 @@ export const Player = forwardRef<PlayerRef, PlayerProps>(function Player(props, 
         height={height}
         style={{ position: "absolute", inset: 0, width: "100%", height: "100%", display: "block", zIndex: 1 }}
       />
-      {core && (
-        <PlayerContext.Provider value={core}>
-          <div data-dom-layer="" style={{ ...layerStyle, zIndex: 2 }}>
-            <TimeAttrs />
-            <DomLayer state={state} interiors={interiors} />
-          </div>
-          {controls && <Controls />}
-        </PlayerContext.Provider>
-      )}
+      <div data-dom-layer="" style={{ ...layerStyle, zIndex: 2 }}>
+        <TimeAttrs />
+        <DomLayer state={state} interiors={interiors} />
+      </div>
+      {controls && <Controls />}
     </div>
+  );
+});
+
+/** A `<PlayerProvider>` with its `<PlayerView>`. */
+export const Player = forwardRef<PlayerRef, PlayerProps>(function Player(props, ref) {
+  const { element, controls, fit, style, className, ...provider } = props;
+  return (
+    <PlayerProvider {...provider}>
+      <PlayerView
+        ref={ref}
+        element={element}
+        {...(controls !== undefined ? { controls } : {})}
+        {...(fit !== undefined ? { fit } : {})}
+        {...(style !== undefined ? { style } : {})}
+        {...(className !== undefined ? { className } : {})}
+      />
+    </PlayerProvider>
   );
 });
 

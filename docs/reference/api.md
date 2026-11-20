@@ -1054,7 +1054,7 @@ Every name each entry exports, read from the code. The sections above explain th
 
 ### `@uberscene/player`
 
-22 exports.
+26 exports.
 
 | Export | Kind | |
 |---|---|---|
@@ -1067,13 +1067,17 @@ Every name each entry exports, read from the code. The sections above explain th
 | `FontFaceSource` | interface | A face to add to the page's fonts, from a URL or the file's bytes. |
 | `MediaHandle` | type | Where an asset's bytes come from. |
 | `MediaResolver` | interface |  |
-| `Player` | const | Canvas for media, DOM for overlays, controls below. |
+| `Player` | const | A `<PlayerProvider>` with its `<PlayerView>`. |
 | `PlayerCore` | class | The framework-free player. |
 | `PlayerErrorEvent` | interface |  |
 | `PlayerEvents` | interface |  |
 | `PlayerOptions` | interface |  |
 | `PlayerProps` | interface |  |
+| `PlayerProvider` | function | Owns the PlayerCore and shares it with everything inside. |
+| `PlayerProviderProps` | interface |  |
 | `PlayerRef` | type |  |
+| `PlayerView` | const | The picture of the enclosing `<PlayerProvider>`. |
+| `PlayerViewProps` | interface |  |
 | `TimeSnapshot` | interface |  |
 | `useCompositionFrame` | function |  |
 | `useCompositionTime` | function |  |
@@ -1131,6 +1135,24 @@ Every name each entry exports, read from the code. The sections above explain th
 | `placementSourceTime` | function | Source seconds a media placement shows at composition time `t`. |
 | `SETTLE_MS` | const | Quiet time after the last setState before a paused preview fetches its exact frame. |
 | `visiblePlacements` | function | Visual, timed placements that show at `t`. |
+
+### `@uberscene/editor`
+
+11 exports.
+
+| Export | Kind | |
+|---|---|---|
+| `EditApi` | interface |  |
+| `Editor` | const | The editor parts as one namespace. |
+| `EditorValue` | interface |  |
+| `Layers` | function | Every element, grouped by track, as buttons that select it. |
+| `Preview` | const | The player's picture. |
+| `Root` | function | One player and one selection for every part inside. |
+| `RootProps` | type |  |
+| `Timeline` | function | One row per track, a bar per element, and the playhead. |
+| `useEdit` | function | Undoable edits through the Root's executor. |
+| `useEditor` | function |  |
+| `useSelection` | function | The selected element id and the setter. |
 
 ### `@uberscene/render`
 
