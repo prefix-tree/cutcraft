@@ -39,6 +39,7 @@ export function carry<T extends ActionType>(
       const log = createPatchLog({
         isSource: (id) => before.tree.byId.has(id),
         sourceParent: (id) => before.tree.byId.get(id)?.parent ?? null,
+        sourceNode: (id) => before.tree.byId.get(id),
       });
       const current = () => resolve(before.tree, before.manifest, log);
       const ctx: ApplyContext = { before, manifest: before.manifest, current };

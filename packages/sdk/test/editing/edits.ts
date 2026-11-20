@@ -7,6 +7,8 @@ export interface Edit {
   readonly name: string;
   /** The action for this file, or nothing when the file has nothing to apply it to. */
   readonly pick: (state: ResolvedState) => ActionInput | undefined;
+  /** Undone before the file is written, as a person takes an edit back: the file read back holds the timeline it started with. */
+  readonly undone?: true;
 }
 
 const items = (state: ResolvedState): Placement[] => [...state.items.values()];
@@ -57,6 +59,11 @@ export const EDITS: readonly Edit[] = [
       const c = first(s, (p) => p.kind === "clip" && p.parent === p.track && onSequence(s, p));
       return c && { type: "element/remove", params: { id: c.id } };
     },
+  },
+  {
+    name: "deletes and undoes",
+    pick: (s) => EDITS.find((e) => e.name === "deletes a clip from a sequence")?.pick(s),
+    undone: true,
   },
   {
     name: "grades a clip with an effect",
@@ -282,4 +289,5 @@ export const REFUSALS: readonly Refusal[] = [
     ["examples/launch-recap/video.tsx"],
     "refuses to delete a clip a caption's words play in",
   ),
+  breaks("deletes and undoes", ["examples/launch-recap/video.tsx"], "refuses to delete, so has nothing to undo"),
 ];

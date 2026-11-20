@@ -22,6 +22,12 @@ function changedLines(a: string, b: string): number {
   return n;
 }
 
+/**
+ * A timeline without each element's `editable`. Undoing a delete of c3 writes back the anchor of b2, which a helper
+ * generates on c3, so a save bakes b2 into a literal Title: the same element at the same place, now written out.
+ */
+const timeline = (items: ReturnType<typeof serialize>) => items.map(({ editable: _, ...item }) => item);
+
 describe("fold", () => {
   it.each(["@uberscene/kit", "@cut/kit"])("imports newly materialized captions from %s", (moduleName) => {
     const initial = fixtureExecutor();
@@ -129,6 +135,68 @@ describe("fold", () => {
     exec.execute({ type: "composition/setProps", params: { defaults: { title: "Changed", accent: "#123456" } } });
     const result = foldToSource(fixtureText, exec.log(), exec.state());
     expect(result.text).toContain('export const defaults = { title: "Changed", accent: "#123456" };');
+  });
+
+  it("writes a deleted clip back once when the delete is undone", async () => {
+    const exec = fixtureExecutor();
+    const before = serialize(exec.state());
+    expect(exec.execute({ type: "element/remove", params: { id: "c3" } }).ok).toBe(true);
+    expect(exec.undo()?.ok).toBe(true);
+    const result = foldToSource(fixtureText, exec.log(), exec.state());
+    expect(result.skipped).toEqual([]);
+    expect(result.text.match(/<Clip id="c3"/g)).toHaveLength(1);
+    const mod = await evaluate(result.text);
+    const reresolved = resolve(collectModule(mod, {}, { index: buildSourceIndex(result.text) }), manifest);
+    expect(reresolved.errors).toEqual([]);
+    expect(timeline(serialize(reresolved))).toEqual(timeline(before));
+    expect(result.baked).toEqual(["b2"]);
+  });
+
+  it("writes an edit to a clip whose delete was undone, on the one clip", async () => {
+    const exec = fixtureExecutor();
+    expect(exec.execute({ type: "element/remove", params: { id: "c3" } }).ok).toBe(true);
+    expect(exec.undo()?.ok).toBe(true);
+    expect(exec.execute({ type: "clip/setSpeed", params: { id: "c3", speed: 1.5 } }).ok).toBe(true);
+    const result = foldToSource(fixtureText, exec.log(), exec.state());
+    expect(result.skipped).toEqual([]);
+    expect(result.text.match(/<Clip id="c3"/g)).toHaveLength(1);
+    expect(result.text).toMatch(/<Clip id="c3"[^>]*speed=\{1\.5\}/);
+    const mod = await evaluate(result.text);
+    const reresolved = resolve(collectModule(mod, {}, { index: buildSourceIndex(result.text) }), manifest);
+    expect(reresolved.errors).toEqual([]);
+    expect(timeline(serialize(reresolved))).toEqual(timeline(serialize(exec.state())));
+  });
+
+  it("writes a clip back once, with the trim it had, when its delete is undone", async () => {
+    const exec = fixtureExecutor();
+    expect(exec.execute({ type: "clip/trim", params: { id: "c3", edge: "out", value: 25 } }).ok).toBe(true);
+    expect(exec.execute({ type: "element/remove", params: { id: "c3" } }).ok).toBe(true);
+    expect(exec.undo()?.ok).toBe(true);
+    const result = foldToSource(fixtureText, exec.log(), exec.state());
+    expect(result.skipped).toEqual([]);
+    expect(result.text.match(/<Clip id="c3"/g)).toHaveLength(1);
+    expect(result.text).toContain('<Clip id="c3" src="asset:interview" in="shot:2" out={25} speed={1.2} />');
+    const mod = await evaluate(result.text);
+    const reresolved = resolve(collectModule(mod, {}, { index: buildSourceIndex(result.text) }), manifest);
+    expect(reresolved.errors).toEqual([]);
+    expect(timeline(serialize(reresolved))).toEqual(timeline(serialize(exec.state())));
+  });
+
+  it("writes a clip back once when a delete is undone after an element was added inside it", async () => {
+    // The clip put back is not the file's clip (it has a keyframe the file lacks): it is printed anew, the old one goes.
+    const exec = fixtureExecutor();
+    const add = { id: "c3", keyId: "kz", property: "transform.opacity", at: 0, value: 0 };
+    expect(exec.execute({ type: "keyframe/add", params: add }).ok).toBe(true);
+    expect(exec.execute({ type: "element/remove", params: { id: "c3" } }).ok).toBe(true);
+    expect(exec.undo()?.ok).toBe(true);
+    const result = foldToSource(fixtureText, exec.log(), exec.state());
+    expect(result.skipped).toEqual([]);
+    expect(result.text.match(/<Clip id="c3"/g)).toHaveLength(1);
+    expect(result.text.match(/<Keyframe id="kz"/g)).toHaveLength(1);
+    const mod = await evaluate(result.text);
+    const reresolved = resolve(collectModule(mod, {}, { index: buildSourceIndex(result.text) }), manifest);
+    expect(reresolved.errors).toEqual([]);
+    expect(timeline(serialize(reresolved))).toEqual(timeline(serialize(exec.state())));
   });
 
   it("prints props and elements", () => {

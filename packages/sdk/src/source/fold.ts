@@ -4,7 +4,7 @@ import * as t from "@babel/types";
 import { ELEMENTS, findFont } from "@uberscene/kit/schema";
 
 import { type NodeSpec, nodeSpecOf } from "../actions/types";
-import type { Json, PatchLog } from "../patches/types";
+import type { Json, NetPatch, PatchLog } from "../patches/types";
 import type { ResolvedState } from "../resolve/resolve";
 import { INTERIOR_PREFIX } from "../resolve/tree";
 import { bake } from "./bake";
@@ -125,12 +125,7 @@ export function fold(
    * group keeps the order the overlay produces: an element placed after that
    * anchor goes first, one placed after a queued sibling goes right behind it.
    */
-  const place = (
-    id: string,
-    at: { parent: string; after: string | null },
-    print: (indent: string) => string,
-    from: Range | null,
-  ): boolean => {
+  const place = (id: string, at: PlacedAt, print: (indent: string) => string, from: Range | null): boolean => {
     let anchor = at.after;
     while (anchor !== null) {
       const sibling = log.net.get(anchor);
@@ -160,6 +155,7 @@ export function fold(
     return null;
   };
 
+  const placements: { id: string; at: PlacedAt; print: (indent: string) => string; from: Range | null }[] = [];
   for (const [id, net] of log.net) {
     if (net.bake) {
       needsBake.push(id);
@@ -195,11 +191,19 @@ export function fold(
           skipped.push({ id, reason: "insert without a node" });
           break;
         }
+        // An id the file still has was removed and put back (an undone delete): its old text goes, the node is printed
+        // where it now stands.
+        const original = index.elements.get(id);
+        if (original) edits.push({ kind: "remove", id, range: lineRange(text, original.range), text: "" });
         if (insertedAncestor(id)) break;
         // The node as it stands now, with the props and children later patches gave it.
         const node = state.tree.byId.get(id) ?? net.node;
-        if (!place(id, net.place, (indent) => printElement(withIdentifiers(nodeSpecOf(node)), indent), null))
-          needsBake.push(net.place.parent);
+        placements.push({
+          id,
+          at: net.place,
+          print: (indent) => printElement(withIdentifiers(nodeSpecOf(node)), indent),
+          from: null,
+        });
         break;
       }
       case "present": {
@@ -217,7 +221,7 @@ export function fold(
           const original = text.slice(site.range[0], site.range[1]);
           movedSites.set(id, site.range);
           const printMoved = (indent: string) => reindent(movedTexts.get(id) ?? original, site.indent, indent);
-          if (!place(id, net.place, printMoved, lineRange(text, site.range))) needsBake.push(net.place.parent);
+          placements.push({ id, at: net.place, print: printMoved, from: lineRange(text, site.range) });
         }
         let newAttrs = -1;
         for (const [prop, value] of net.props) {
@@ -258,6 +262,10 @@ export function fold(
       }
     }
   }
+  // Queued in the order they were made, as the overlay places them: two elements put after the same sibling stand
+  // latest first, whatever order the net holds them in.
+  for (const p of placements.sort((a, b) => a.at.seq - b.at.seq))
+    if (!place(p.id, p.at, p.print, p.from)) needsBake.push(p.at.parent);
   const writeGroup = (group: PlacedGroup): void => {
     const printed = group.ids.map((id) => (group.texts.get(id) as () => string)()).join("\n");
     edits.push(insertEdit(index, group.ids[0] as string, group.point, printed));
@@ -418,6 +426,8 @@ function fontDeclarations(text: string, fonts: FontsToDeclare): SourceEdit[] {
   }
   return edits;
 }
+
+type PlacedAt = NonNullable<NetPatch["place"]>;
 
 interface PlacedGroup {
   readonly point: InsertionPoint;

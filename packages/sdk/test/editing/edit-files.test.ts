@@ -5,7 +5,8 @@
 // - it leaves no errors behind (an edit that would is refused with BREAKS_FILE; those are in REFUSALS);
 // - it folds into the file's text with nothing skipped, and the file read back resolves to the same timeline the
 //   editor holds, errors included: what the editor shows is what the file says;
-// - it undoes, back to the timeline the file started with.
+// - it undoes, back to the timeline the file started with. An edit marked `undone` is undone before it is written,
+//   and the file read back holds the timeline it started with.
 //
 // Edits the editor must refuse are refused with a reason and change nothing. A last case applies every edit in a row
 // to the same file and folds them once, as a session in the editor does.
@@ -47,7 +48,7 @@ describe.each(CORPUS.map((file) => [file.name, file] as const))("%s", (name, fil
     expect(start.errors).toEqual([]);
   });
 
-  it.each(picked.map((p) => [p.edit.name, p.input] as const))("%s", (_edit, input) => {
+  it.each(picked.map((p) => [p.edit.name, p.input, p.edit] as const))("%s", (_edit, input, edit) => {
     const exec = executorFor(file);
     const before = serialize(exec.state());
     const target = actionTarget(input);
@@ -59,6 +60,13 @@ describe.each(CORPUS.map((file) => [file.name, file] as const))("%s", (name, fil
     expect(serialize(exec.state())).not.toEqual(before);
 
     expect(exec.state().errors).toEqual([]);
+
+    if (edit.undone) {
+      expect(exec.undo()?.ok).toBe(true);
+      expect(serialize(exec.state())).toEqual(before);
+      expectWrittenBack(file, exec, true);
+      return;
+    }
 
     expectWrittenBack(file, exec, true);
 
@@ -87,9 +95,11 @@ describe.each(CORPUS.map((file) => [file.name, file] as const))("%s", (name, fil
   it("takes every edit in a row and writes them back at once", () => {
     const exec = executorFor(file);
     let applied = 0;
-    for (const { input } of picked) {
+    for (const { edit, input } of picked) {
       // A later edit may no longer apply (its clip was deleted or split): that is the editor refusing, not a bug.
-      if (exec.execute(input).ok) applied++;
+      if (!exec.execute(input).ok) continue;
+      applied++;
+      if (edit.undone) expect(exec.undo()?.ok).toBe(true);
     }
     expect(applied).toBeGreaterThan(0);
     expectWrittenBack(file, exec, exec.state().errors.length === 0);
