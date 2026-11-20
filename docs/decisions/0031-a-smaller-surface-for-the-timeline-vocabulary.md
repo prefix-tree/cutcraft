@@ -1,109 +1,129 @@
 # 0031. A smaller surface for the timeline vocabulary
 
-> Status: proposed. Revisits how [0002](./0002-fixed-vocabulary-and-literal-ids.md) (a fixed vocabulary with literal
-> ids) is spelled, not what it decides. Each change below is its own pull request, taken only once this record is
-> accepted.
+> Status: accepted, in two stages. Revisits how [0002](./0002-fixed-vocabulary-and-literal-ids.md) (a fixed
+> vocabulary with literal ids) is spelled, not what it decides. Stage 1 is the plan at the end, one pull request per
+> step. Stage 2 is listed and waits for its own decision.
 
 ## Context
 
 A reader who knows React looks at an UberScene file and sees components with a great many props. `<Title>` takes
-29: six for timing, five for placement, fourteen for the look of its text, three for motion, and its id. `<Clip>`
-takes 20. Read next to Remotion, where a scene is a few components and the rest is code, the file looks over
-configured.
+29, `<Clip>` takes 20. Read next to Remotion, where a scene is a few components and the rest is code, the file looks
+over configured.
 
 Part of that is the design. 0002 makes the file a document the editor can change one value at a time and write back:
-a fixed vocabulary, a literal id on every element, collections the inspector edits one by one as child elements. That
-puts UberScene closer to OpenTimelineIO or Final Cut's XML, where many attributes are normal, than to a library of
-React components. Remotion has no editor that writes back into the file, so it pays none of this.
+a fixed vocabulary, a literal id on every element, collections as child elements. That puts UberScene closer to
+OpenTimelineIO or Final Cut's XML, where many attributes are normal, than to a library of React components. Remotion
+has no editor that writes back into the file, so it pays none of this.
 
-Part of it is not the design, only how the vocabulary grew. Reading the examples finds five things that make it
-harder to write and read than it needs to be:
+Part of it is not the design, only how the vocabulary grew. An audit of the code in November 2026 parsed every
+example, recipe and block (145 files) and read the schemas against the player. It found:
 
-1. **It is presented as React.** The landing page and the guide say "a React file". The reader expects components
-   and hooks, and meets a document format.
-2. **Props are grouped by no rule.** Some concerns are objects (`transform`, `animation`, `fade`, `duck`); others are
-   flat (`size`, `width`, `align`, `weight`, `color`). `<Title>`'s fourteen text props sit beside its timing props.
-3. **Two coordinate systems meet in one file.** An element's `transform.position` is pixels from the centre of the
-   frame (`docs/guide/elements.md`); free code inside a `<Layer>` or `<Motion>` is CSS, measured from the top left.
-   `examples/showcase/edit.tsx` places its title at `x: -240, y: -170` and the lower third beside it at
-   `left: 68, top: 402`.
-4. **Keyframes are long.** A slow push-in is four `<Keyframe>` elements, each with its own id and a string path
-   (`property="transform.scale.x"`), one per axis. The examples hold 112 of them.
-5. **Every element needs an id,** keyframes and effects included, though nothing anchors to a keyframe and the editor
-   could name one from its parent.
+- **Props that do nothing.** The schema accepts them and the player never reads them: `fit` on Title, Shape and
+  Sticker; `blendOpacity` on every overlay; `transform` on Adjustment; a mask's `expansion`, `easing` and keyframes;
+  two fields of a title's `animation` and two of its `shadow`. The capability table lets Multicam sit in a
+  Composition, where the resolver rejects it.
+- **Props grouped by no rule.** Some concerns are objects (`transform`, `animation`, `fade`, `duck`); others are flat.
+  Title has fourteen flat text props. Captions keep the same look in a `style` object.
+- **Two coordinate systems.** Elements, captions and components measure from the frame's centre; blocks, diagram
+  parts and free code measure from the top left. `examples/showcase/edit.tsx` places a title at `x: -240, y: -170`
+  and the lower third beside it at `left: 68, top: 402`.
+- **One idea under several names.** A kind is chosen by `type`, `shape`, `preset`, `variant` or `mode`. `at` has
+  seven meanings. `style` is a preset name on Title and a preset name or an object on Captions. Enum values mix
+  `"ease-in-out"` and `"easeInOutSine"` in one list.
+- **Options nobody writes.** 45 of 52 easings, all 18 blend modes, 11 of 20 entrance animations and 7 of 9 shape
+  kinds appear in no file. Svg, Sticker, Mask, Gap and Nested appear only on their own reference pages.
+- **Long keyframes and ids on everything.** A push-in is four `<Keyframe>` elements, each with an id and a string
+  path per axis. Nothing refers to a keyframe's id but the action that edits it.
+- **A public surface with no edges.** The kit exports 450 names, and 299 are used by nothing outside it: handler
+  helpers, patch internals, speed math. There are 115 actions, with a copy of create, update and remove for each of
+  six overlay kinds, and only one of the removes carries what depends on the element
+  ([0003](./0003-patch-log-and-four-faced-actions.md)).
+- **It is presented as React.** The reader expects components and hooks, and meets a document format.
 
 Anchoring to a spoken word (`anchor="hook" at="word:14"`) and the duration forms (`"fill"`, `"source"`, `{ match }`,
-`{ until }`) are not on this list. They are many ways to say when, but each says something no other can, and they are
-the reason the product exists.
+`{ until }`) are not on this list. Each says something no other can, and they are the reason the product exists.
 
 ## Decision
 
-**1. Say what the file is.** The landing page, the introduction and the skill call it a timeline document written in
-JSX: elements that describe a cut, which the editor reads and writes, with free React where a layer needs it. "A
-React file" stays true of `<Layer>` and its children, and is said there.
+**1. The schema says only what is drawn.** A prop the player does not read is removed, and writing it is an error
+that names it. The capability table matches what the resolver accepts. The docs for a keyframe's easing say what the
+player does: the easing on a key shapes the move from that key to the next.
 
-**2. One rule for grouping props.** On every element that draws:
+**2. Every rename comes with its fix.** A lint finding can carry a fix, and `uberscene lint --fix` applies them. Each
+step below that changes a spelling adds the rule that moves an old file, so a file written for the old vocabulary
+moves in one command.
 
-- timing stays flat: `id`, `start`, `anchor`, `at`, `offset`, `duration`, and a clip's `in`, `out`, `speed`;
-- where it sits is one object, `box`: `x`, `y`, `width`, `height`, `align`, `valign`, `origin`;
-- how it is turned stays `transform`: `scale`, `rotation`, `opacity`, `crop`, rounded corners;
-- how text looks is one object, `text`: `font`, `size`, `weight`, `italic`, `color`, `stroke`, `shadow`,
-  `lineHeight`, `letterSpacing`, `decoration`, with `style` naming a preset of it;
-- how it moves stays `enter`, `exit` and `animation`;
-- how it sounds stays `volume`, `fade`, `automation`, `duck`.
+**3. Two packages for two readers.** `@uberscene/kit` holds what a video file imports: the elements, components,
+hooks, helpers, diagram parts and theme, with a `./schema` entry for the vocabulary as data. `@uberscene/sdk` holds
+what a tool is built with: the resolver, the actions and executor, the patch log, the write-back to source, the lint
+and the inspection rows. Internals are not exported, and the unused-export check is an error, not a warning. The
+overlay kinds share one `element/create`, `element/update` and `element/remove`, and every remove carries what
+depends on the element. The API page is generated from the exports.
 
-`<Title>` goes from 29 props to 16: the six timing props, then `box`, `transform`, `text`, `style`, `fit`, `blend`,
-`blendOpacity`, `enter`, `exit` and `animation`. Its text background joins `text`. The inspector's panels follow the
-same groups, so the file and the editor show one structure.
+**4. One coordinate system.** Where an element sits is one object, `box`: `x`, `y`, `width`, `height` in pixels from
+the top left of the frame, as in CSS, and `origin` to say which point of the element sits there (`"top-left"` by
+default, `"center"`, or any of the nine points). Captions and the components measure the same way. An element with
+no `box` is centred and fitted, as now. `transform.position` is removed; `transform` keeps how an element is turned:
+`scale`, `rotation`, `opacity`, `crop`, rounded corners.
 
-**3. One coordinate system.** `box.x` and `box.y` are pixels from the top left of the frame, as in CSS, so a title
-and the free code beside it are measured the same way. `box.origin` (`"top-left"` by default, `"center"`, or any of
-the nine points) says which point of the element sits there. An element with no `box` is still centred and fitted,
-as now. `transform.position` is removed; the editor's move handle writes `box.x` and `box.y`.
+**5. One way to style text.** `style` is a preset name or an object, on Title as on Captions:
+`style={{ preset: "h1", size: 64, color: "$primary", align: "left" }}`. The fourteen flat text props go, and
+Captions' flat `align` joins its `style`. The group is not named `text`: a title's words are its text, and the theme
+and the lint already treat that name as content. Title goes from 29 props to 13.
 
-**4. Keyframes as a value.** An animatable prop takes a list of keys as well as a value:
+**6. One naming rule.** A kind is always `type`. A shadow's blur is always `blur`; a line's thickness is
+`thickness`. Seconds on the video are `start`, so Marker's `at` becomes `start`. Enum values are camelCase
+everywhere, as effect names already are.
+
+**7. Trim to what is standard.** Easings are the five CSS names, `hold` and the ten standard families. Entrance
+animations and blend modes keep their standard sets. Sticker is removed: `<Svg src>` and an image `<Clip>` do its
+job. An unknown value is an error that names the nearest one kept.
+
+**8. Shorter files.** An animatable prop takes a list of keys as well as a value:
 
 ```tsx
 <Clip id="zoom" src="asset:espresso" in={2} out={5.5}
   transform={{ scale: keys([0, 1], [3.5, 1.2, "easeInOutSine"]) }} />
 ```
 
-`keys()` is a kit helper that returns literal key data. A vector property keys as a whole, so a push-in no longer
-needs one key per axis. The editor shows the keys on the timeline. The first gesture on one key turns the list into
-`<Keyframe>` children with literal ids, as [0009](./0009-helpers-layers-and-editability.md) bakes a helper's output
-before an edit, and the fold writes them back. An agent writing a file uses the short form; a file the editor has
-touched may hold the long one, and both read the same.
+The first edit of one key turns the list into `<Keyframe>` children, as editing one caption cue makes its generated
+siblings literal. Timed elements keep a required, literal id. Keyframes, effects and speed keys may leave it out and
+are named from their parent, their kind and their place.
 
-**5. Ids only where something refers to them.** Timed elements keep a required, literal id: anchors, captions, ducking
-and the editor's selection all use it. Children that nothing refers to by name (keyframes, effects, masks, speed keys)
-may leave it out. The resolver names them from their parent, their kind and their place (`zoom.scale.1`,
-`zoom.effect.0`), the same on every load. The editor writes a literal id when it first needs one, as it bakes a key.
+**9. Say what the file is.** The landing page, the introduction and the skill call it a timeline document written in
+JSX, with free React where a layer needs it.
 
 ## Alternatives set aside
 
-- **Plain React components with hooks, as Remotion does.** Fewer props, but the editor could not write a change back as
-  one value, which is what 0002 and [0003](./0003-patch-log-and-four-faced-actions.md) are for.
-- **Every prop flat.** Shorter objects, but 29 names in one list is what the reader finds hard; groups are what the
-  inspector shows anyway.
-- **Centre-relative coordinates everywhere.** It suits a title on a blank frame, but free code is CSS, and CSS starts
-  at the top left. One system has to give way, and the one that is a web standard stays.
+- **Plain React components with hooks, as Remotion does.** Fewer props, but the editor could not write a change back
+  as one value, which is what 0002 and 0003 are for.
+- **Every prop flat.** 29 names in one list is what the reader finds hard; groups are what an inspector shows anyway.
+- **Centre-relative coordinates everywhere.** Free code is CSS, and CSS starts at the top left. One system has to
+  give way, and the one that is a web standard stays.
+- **Deep cuts now.** Merging Audio into Clip, or Motion and Three into Layer, makes the surface smallest, but some
+  files read worse and every example moves twice. They wait for stage 2.
 
 ## Consequences
 
-- Every example, recipe, block and short is rewritten, and the editing suite and the docs generated from the schemas
-  move with them. Breaking changes are allowed before 1.0; the changeset says how to move a file.
-- The lint gets a fix for each old spelling (`transform.position` to `box`, flat text props to `text`), so an old file
-  moves in one command.
-- An agent writes shorter files, and the skill's examples get shorter with them.
-- The inspector, the actions and the fold work on the new groups. The action names stay; their params follow the props.
-- A key list is one more form a value can take. The resolver and the player read both; only the editor bakes.
+- Every example, recipe, block and short is rewritten, with the editing suite and the generated docs. Breaking
+  changes are allowed before 1.0; each changeset says how to move a file, and the lint fix does it.
+- A respelling must not move a pixel: each step compares every example's poster before and after.
+- Tools import from `@uberscene/sdk`. The player and the renderer do too.
+- The actions' names change once, while nothing outside this repository calls them.
 
 ## Plan
 
-1. **Words.** The landing page, introduction and skill say what the file is. No code.
-2. **Coordinates.** `box` with `x`, `y`, `origin`; `transform.position` removed; the move handle, the layout check and
-   `where` in the same pixels; examples moved.
-3. **Groups.** `box` gains `width`, `height`, `align`, `valign`; the `text` object; schemas, inspector panels and
-   actions; the lint fixes; examples moved.
-4. **Keys.** `keys()`, vector keys, the bake on first gesture, the fold.
-5. **Ids.** Derived ids for children nothing refers to; the editor writes one when it needs it.
+Stage 1, one pull request per step:
+
+- **A.** The schema says only what is drawn (decision 1).
+- **B.** Lint fixes and `uberscene lint --fix` (2).
+- **C.** The SDK package, the cut of exports and actions, the generated API page, the old names (3).
+- **D.** `box` and one coordinate system (4).
+- **E.** `style` for text (5).
+- **F.** The naming rule (6).
+- **G.** The trim (7).
+- **H.** Keys as values and derived ids (8), and the words (9).
+
+Stage 2, each needing its own decision: Audio into Clip; Motion and Three into Layer; Shape over Svg; the fate of
+Mask, Nested and Gap; one counter and one text marker across the components, diagram parts and blocks; the remaining
+meanings of `at`; `resolve.ts` split; coverage thresholds.
