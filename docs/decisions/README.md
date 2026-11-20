@@ -37,3 +37,4 @@ use that name.
 | [0030](./0030-one-chrome-version.md) | One Chrome version: the export runs on Chrome 157 only |
 | [0031](./0031-a-smaller-surface-for-the-timeline-vocabulary.md) | A smaller surface for the timeline vocabulary: only what is drawn, `box` and `style`, one naming rule, an SDK package, in two stages |
 | [0032](./0032-native-codecs-behind-a-flag.md) | Native codecs behind a flag: craft-video decodes and encodes with `UBERSCENE_CODECS` (experimental) |
+| [0033](./0033-time-in-ticks.md) | Time in ticks: frame and sample conversions count 1/254,016,000,000 s, NTSC rates are exact, drop-frame timecode |
