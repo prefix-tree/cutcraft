@@ -218,37 +218,9 @@ editable this way, though the Layer itself can still be moved and trimmed.
 
 ## Blocks
 
-A block is a scene-sized piece of free code made to be placed and tuned: a grid of cells that fills and counts, a
-wall of characters that changes on the beat, a row of points lit in turn, a ranking that reorders, bars that race
-over the years, a chat reply that types in, a terminal running commands, a phone being tapped, a quote that builds
-word by word. Smaller than a video, bigger than a kit component. `uberscene blocks` lists the ones that ship with the CLI, by the job each does, and `--sheet` draws their
-previews to choose by looking. [Blocks](/guide/blocks) walks through finding, adding, tuning and updating one, with the catalogue.
-
-A block is one file: its component, its props `schema` with a label for each, its `defaults`, and a `meta` that says
-what it is for. `uberscene blocks add <name>` copies the file into the project as `blocks/<name>.tsx` and records it,
-so `uberscene blocks update` can bring it up to a later version unless you have edited it. With `--into video.tsx
---track <id> --at <moment>` it also writes the import and the Layer ([Adding a block](/reference/cli#adding-a-block)).
-What changes per use, the words, the colours, the numbers, its times, is a prop on the placement:
-
-```tsx
-import { PointList } from "./blocks/point-list";
-
-<Layer id="steps" anchor="list" duration={{ until: "list" }}>
-  <PointList
-    points={[
-      { label: "SCRIPT", icon: "lines", at: story.at("script") },
-      { label: "VOICE", icon: "wave", at: story.at("voice") },
-    ]}
-  />
-</Layer>
-```
-
-A block reads its Layer's clock. A moment takes `after`, seconds since the layer started, or `at`, seconds of the
-video, which is what a narration's cue gives, so its reveals land on the words. Given more time than its natural
-length it holds its last state. Its colours default to theme tokens, `$accent` and `$text`, so it takes the video's
-look; `themeCss("$accent")` gives the same `var(--us-accent)` to your own components. The copy is yours: edit it
-like any of your modules. [An interview that changes layout](/examples/hundred-videos) and
-[Snake heart](/examples/snake-heart) are built on blocks.
+A block is a scene-sized piece of free code made to be placed and tuned, such as a grid that fills and counts or a
+ranking that reorders. `uberscene blocks add <name>` copies one into the project as a file you own.
+[Blocks](./blocks) covers finding, adding, tuning and updating them.
 
 ## three.js and Motion
 

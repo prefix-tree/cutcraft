@@ -111,17 +111,8 @@ a browser.
 
 ## How it draws
 
-Footage is decoded with WebCodecs through [mediabunny](https://mediabunny.dev) and drawn on one canvas. Transitions,
-keyframes, crops, masks, blend modes and filters are applied there.
-
-Tracks draw in the order they are written, so the first track is at the bottom. Titles, shapes, SVG, stickers,
-graphics, layers and captions are DOM elements above the canvas, positioned with the same maths. A track placed below
-every footage track draws beneath it.
-
-Sound is mixed with Web Audio, which is also the clock: the current time comes from `AudioContext.currentTime`, so
-playback doesn't drift.
-
-What isn't drawn yet is in [What renders](/reference/rendering).
+Footage goes on one canvas and everything else is DOM above it. [How the player draws](./how-the-player-draws) goes
+through a frame step by step, and [What renders](/reference/rendering) lists what isn't drawn yet.
 
 ## Next
 

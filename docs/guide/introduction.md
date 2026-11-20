@@ -1,8 +1,6 @@
-# Introduction
+# A video is a file.
 
-The idea of UberScene is that a video is a file: a TSX file of elements on a timeline. The file is the project, the
-edit and the code at once. The player plays it, an editor changes it, the export renders it, and you, your agent and
-your code all work on the same text.
+<p class="doc-lead">One TSX file is the project, the edit and the code. The player plays it, an editor changes it, the export renders it, and you and your agent work on that same text.</p>
 
 ```tsx [video.tsx]
 import { Captions, Clip, Composition, LowerThird, Track } from "@uberscene/kit";

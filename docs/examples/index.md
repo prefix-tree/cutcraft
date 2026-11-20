@@ -34,7 +34,7 @@ what its key parts do. For starting points by kind of video, see the [recipes](/
 | Captions placed with `x`, `y` and `width` | [An interview that changes layout](/examples/hundred-videos), [One pixel](/examples/one-pixel), [A talking head with a diagram](/examples/lunar-eclipse) (`y`) | [Place captions](/guide/captions-and-sound#place-captions) |
 | A box behind the word being said (`highlightBox`) | [A talking head with a diagram](/examples/lunar-eclipse), [One pixel](/examples/one-pixel) | [Highlight the word being said](/guide/captions-and-sound#highlight-the-word-being-said) |
 | Narration timed from a script (`narrate()`) | [One pixel](/examples/one-pixel), [From notes to a cut](/examples/notes-to-cut) | [Narration from a script](/guide/captions-and-sound#narration-from-a-script) |
-| Captions from an SRT, VTT or Whisper file | [Captions](/examples/captions) | [Getting a transcript](/guide/captions-and-sound#getting-a-transcript) |
+| Captions from the words a clip plays (its transcript) | [Captions](/examples/captions) | [Getting a transcript](/guide/captions-and-sound#getting-a-transcript) |
 | Diagram parts (angles, rows, strike-throughs) | [A talking head with a diagram](/examples/lunar-eclipse), [An interview that changes layout](/examples/hundred-videos) | [Diagram parts](/guide/free-code#diagram-parts) |
 | Named parts (`data-name`) for the layout check and `uberscene where` | [A talking head with a diagram](/examples/lunar-eclipse), [One pixel](/examples/one-pixel), [An interview that changes layout](/examples/hundred-videos) | [Check the layout](/guide/checking#check-the-layout), [Where things are at a moment](/guide/checking#where-things-are-at-a-moment) |
 | Ready-made cards and frames (`TypeCard`, `QuoteCard`, `Frame`) | [A talking head with a diagram](/examples/lunar-eclipse) (`Frame`), one demo each in [Components](/reference/components/) | [Cards for a talking head](/guide/titles-and-graphics#cards-for-a-talking-head) |
@@ -48,7 +48,7 @@ what its key parts do. For starting points by kind of video, see the [recipes](/
 | A grade built from several effects, in order | [Colour grade](/guide/colour) | [Colour and grading](/guide/colour) |
 | Effect order changing the picture | [Grayscale then duotone, and the reverse](/guide/custom-effects) | [Free code](/guide/free-code) |
 | One prop that restyles everything (themes) | [Brand spot](/recipes/brand-spot) | [Themes](/guide/themes) |
-| Tweakable values (`schema`, `defaults`) | Every showcase file, [Variants](/recipes/variants) | [The file](/guide/the-file#schema-and-defaults-are-the-knobs) |
+| Tweakable values (`schema`, `defaults`) | [A product launch](/examples/launch), [A data story](/examples/data), [Kinetic type](/examples/kinetic), [Variants](/recipes/variants) | [The file](/guide/the-file#schema-and-defaults-are-the-knobs) |
 | Music that ducks under speech | [Talking-head cut](/recipes/talking-head), the [walkthrough](/guide/writing-files) | [Captions and sound](/guide/captions-and-sound#sound) |
 | Google Fonts or your own font files | [Fonts example](/guide/themes#fonts) | [Themes](/guide/themes#fonts) |
 | Motion blur | [Motion blur example](/guide/exporting#motion-blur) | [Exporting](/guide/exporting#motion-blur) |

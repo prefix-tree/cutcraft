@@ -41,7 +41,7 @@ const AGENTS: readonly Agent[] = [
   { id: "codex", mark: "CX", name: "Codex", where: "In your project's terminal", lines: [SHARED], briefs: true },
   { id: "cursor", mark: "CU", name: "Cursor", where: "In your project's terminal", lines: [SHARED], briefs: true },
   { id: "gemini", mark: "GE", name: "Gemini CLI", where: "In your project's terminal", lines: [SHARED], briefs: true },
-  { id: "copilot", mark: "CP", name: "Copilot", where: "In your project's terminal", lines: [SHARED], briefs: true },
+  { id: "vscode", mark: "VS", name: "VS Code", where: "In your project's terminal", lines: [SHARED], briefs: true },
   { id: "opencode", mark: "OC", name: "OpenCode", where: "In your project's terminal", lines: [SHARED], briefs: true },
   {
     id: "other",

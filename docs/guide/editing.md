@@ -62,7 +62,7 @@ exec.undo(); exec.redo();
 exec.beginGroup("drag"); … exec.endGroup();   // one history entry for a gesture
 ```
 
-The [action reference](../reference/actions.md) lists all 115.
+The [action reference](../reference/actions.md) lists all 98.
 
 **Undo.** History auto-groups rapid same-type, same-target updates (a slider drag) within 100 ms, and keeps explicit
 groups (`beginGroup`, `endGroup`) for gestures.
@@ -208,6 +208,15 @@ line, `uberscene lint video.tsx --fix` does the same to a file ([CLI](/reference
 | `free-code-clock` | Free code off the video's clock ([Free code](./free-code#the-video-s-clock)). |
 | `not-rendered` | One of the few things the renderers draw differently from what the file says, listed in [What renders](/reference/rendering). |
 
+**The theme and fonts.** These check tokens, presets and declarations ([Themes and fonts](./themes)):
+
+| Rule | Severity | Reports |
+|---|---|---|
+| `theme-refs` | error | A `$token` the theme does not define, or a `style` with no preset. |
+| `theme-literals` | warning | With a theme declared, a literal colour or font on a title, shape, SVG, sticker, captions or marker. Shadows are exempt. The message names the token when the colour matches one. |
+| `font-available` | warning | A font no renderer ships and the file does not declare. For a family in the catalogue the message gives the declaration to write; for a name close to one, it asks whether that one was meant. |
+| `declaration` | warning | A `font()`, `googleFont()`, `effect()` or `transition()` call inside a function, or with arguments that are not literal, or one neither exported nor used. |
+
 **Old spellings.** These rules move a file across a release that renamed things:
 
 | Rule | Reports |
@@ -254,6 +263,6 @@ font, such as `text/update`.
 ## Next
 
 - [Player](./player): the preview your editor shows.
-- [Action reference](../reference/actions.md): all 115 actions.
+- [Action reference](../reference/actions.md): all 98 actions.
 - [The file](./the-file): the conventions lint checks.
 - [Themes and fonts](./themes#fonts): bundled fonts and declaring your own.

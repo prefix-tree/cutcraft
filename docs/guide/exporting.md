@@ -151,10 +151,7 @@ the same as one page's, frame for frame; only where the keyframes fall differs.
 Each page holds its own decoders and encoder, so memory grows with the count. On a machine with spare cores, two to
 four pages help most.
 
-::: details How the frames are shared
-The frames are cut into runs of whole keyframe intervals, and each page renders and encodes its runs into small
-containers. Node joins them in order with the soundtrack, copying the encoded packets.
-:::
+[Pieces and pages](./export-architecture#pieces-and-pages) explains how the frames are shared out and joined.
 
 ### `--copy`
 
@@ -209,8 +206,9 @@ How it behaves:
 - An asset the native decoder cannot read is decoded by Chrome, with a warning.
 - The native encoder writes H.264 and ProRes, not VP9 or AV1, and does not combine with `--copy`.
 - The sound is always mixed and encoded in the page.
-- On a CPU it is not faster than Chrome's codecs yet. Decision 0032 in the repository has the numbers.
+- On a CPU it is not faster than Chrome's codecs yet.
 
+[Native codecs](./native-codecs) shows how it plugs into the export.
 ## When a frame never finishes
 
 Each frame has a deadline: 60 seconds unless `--frame-timeout` (or `frameTimeout` from code) says otherwise. A frame
@@ -253,12 +251,7 @@ work.
 
 **Sound.** Volume, fades, ducking, pan and speed are mixed in, and mute and solo apply.
 
-::: details How the sound is mixed and encoded
-Sound is mixed in the page by `mixPlan`, a pure function of the audio plan: volume, fades, automation, ducking, pan,
-speed and speed-key ramps (pitch follows speed, as in the preview), silence through freeze holds, and sample-rate
-conversion. Chrome encodes Opus itself; AAC and MP3 go through Mediabunny's WebAssembly encoders, since Chrome for
-Testing has none.
-:::
+[The sound](./export-architecture#the-sound) explains how it is mixed and encoded.
 
 ## From code
 
