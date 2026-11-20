@@ -1207,39 +1207,45 @@ html {
    riveted plates, hazard stripes and spec sheets, set in Big Shoulders, IBM Plex Sans and Geist Mono. ──────────── */
 
 :root {
-  --cc-paper: #dedad1;
-  --cc-paper-2: #cfcabf;
-  --cc-ink: #121212;
-  --cc-ink-2: #34322e;
-  /* Dark enough for 12px labels on concrete. #6b675f sat under 4.5:1. */
-  --cc-grey: #45423c;
-  --cc-rule: #b9b3a6;
+  /* One ground for the hero and the docs, the concrete from humansmd.dev. Paper is the raised surface
+     (spec sheet, code). Orange stays the signal; it is a fill, not body text, because it fails on this grey. */
+  --cc-paper: #c9cbcc;
+  --cc-paper-2: #eeefef;
+  --cc-ink: #121314;
+  --cc-ink-2: #2e3133;
+  --cc-grey: #45484b;
+  --cc-rule: #a8abad;
+  --cc-accent-text: #121314;
   --cc-display: "Big Shoulders Display", "Barlow Condensed", "Arial Narrow", sans-serif;
   --cc-pixel: "Big Shoulders Stencil Display", "Big Shoulders Display", "Arial Narrow", sans-serif;
   --vp-font-family-base: "IBM Plex Sans", "Inter", system-ui, sans-serif;
-  --cc-hazard: repeating-linear-gradient(-45deg, var(--cc-accent) 0 14px, #121212 14px 28px);
-  /* Concrete: a faint grain. The survey grid stays, drawn lighter so paragraphs are not read through a mesh. */
-  --cc-concrete:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .045 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
-    linear-gradient(to right, rgba(18, 18, 18, 0.028) 1px, transparent 1px) 0 0 / 24px 24px,
-    linear-gradient(to bottom, rgba(18, 18, 18, 0.028) 1px, transparent 1px) 0 0 / 24px 24px;
-  --vp-code-bg: #cbc5b8;
+  --cc-hazard: repeating-linear-gradient(-45deg, var(--cc-accent) 0 14px, #121314 14px 28px);
+  --vp-code-bg: #eeefef;
+  --vp-code-color: #121314;
+  --vp-code-block-bg: #eeefef;
+  --vp-code-block-color: #24292e;
+  --vp-code-line-height: 1.7;
+  --vp-code-font-size: 14px;
+  --vp-code-copy-code-bg: #e4e6e7;
+  --vp-code-copy-code-hover-bg: #d8dadb;
 }
 .dark {
-  --cc-paper: #161614;
-  --cc-paper-2: #1f1f1c;
-  --cc-ink: #e6e1d6;
-  --cc-ink-2: #c3bdb0;
-  --cc-grey: #8c877c;
-  --cc-rule: #3a3833;
-  --cc-concrete:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
-    linear-gradient(to right, rgba(230, 225, 214, 0.04) 1px, transparent 1px) 0 0 / 24px 24px,
-    linear-gradient(to bottom, rgba(230, 225, 214, 0.04) 1px, transparent 1px) 0 0 / 24px 24px;
-  --vp-code-bg: #2a2925;
+  --cc-paper: #1c1e20;
+  --cc-paper-2: #121314;
+  --cc-ink: #eeefef;
+  --cc-ink-2: #c9cbcc;
+  --cc-grey: #a8abad;
+  --cc-rule: #3a3d40;
+  --cc-accent-text: #eeefef;
+  --vp-code-bg: #121314;
+  --vp-code-color: #eeefef;
+  --vp-code-block-bg: #121314;
+  --vp-code-block-color: #e1e4e8;
+  --vp-code-copy-code-bg: #1c1e20;
+  --vp-code-copy-code-hover-bg: #2a2d30;
 }
 body {
-  background: var(--cc-concrete), var(--cc-paper);
+  background: var(--cc-paper);
 }
 .VPNavBar,
 .VPNavBar .content-body,
@@ -1472,6 +1478,14 @@ body {
   line-height: 1.02;
   letter-spacing: -0.025em;
 }
+/* A sentence with an apostrophe. Big Shoulders draws that mark as a speck, so this heading uses the text face. */
+.home.vp-doc .home-aim h2 {
+  font-family: var(--vp-font-family-base);
+  font-weight: 600;
+  font-size: clamp(36px, 4vw, 52px);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
 .home.vp-doc h2::before {
   content: "No. " counter(home-section, decimal-leading-zero);
   display: block;
@@ -1544,60 +1558,12 @@ body {
   }
 }
 
-/* ── Docs pages: a familiar docs layout, set for reading ─────────────────────────────────────────────────────────
-   The landing page keeps the industrial look. A page with a sidebar is for reading, so it is plain: a near-white page
-   (near-black in the dark), text at 10:1 contrast or more and secondary text at 7:1, sentence-case headings in IBM
-   Plex, light code in a light page with GitHub's syntax colours, hairline rules, and a darker orange for links that
-   are text. */
+/* ── Docs pages use the same concrete, ink and orange as the hero. ───────────────────────────────────────────────
+   No second palette. The sidebar keeps sentence-case links; the page ground is the hero's ground. */
 
-html:has(.VPContent.has-sidebar) {
-  --cc-paper: #fbfaf7;
-  --cc-paper-2: #f2f0eb;
-  --cc-ink: #161513;
-  --cc-ink-2: #3a3732;
-  --cc-grey: #55514a;
-  --cc-rule: #e2dfd8;
-  --cc-accent-text: #b23a0c;
-  --vp-c-bg: var(--cc-paper);
-  --vp-c-bg-alt: var(--cc-paper-2);
-  --vp-c-bg-soft: var(--cc-paper-2);
-  --vp-c-divider: var(--cc-rule);
-  --vp-c-gutter: var(--cc-rule);
-  --vp-code-bg: #eeebe4;
-  --vp-code-color: var(--cc-ink);
-  --vp-code-block-bg: #f5f3ee;
-  --vp-code-block-color: #24292e;
-  --vp-code-line-height: 1.7;
-  --vp-code-font-size: 14px;
-  --vp-code-copy-code-bg: #eeebe4;
-  --vp-code-copy-code-hover-bg: #e4e0d7;
-}
-html.dark:has(.VPContent.has-sidebar) {
-  --cc-paper: #121211;
-  --cc-paper-2: #1a1a18;
-  --cc-ink: #eeebe4;
-  --cc-ink-2: #cfcabf;
-  --cc-grey: #a39d91;
-  --cc-rule: #2d2c29;
-  --cc-accent-text: #ff8452;
-  --vp-code-bg: #242320;
-  --vp-code-block-bg: #1a1a18;
-  --vp-code-block-color: #e1e4e8;
-  --vp-code-copy-code-bg: #242320;
-  --vp-code-copy-code-hover-bg: #2d2c29;
-}
-html:has(.VPContent.has-sidebar) body {
-  background: var(--cc-paper);
-}
-
-/* The bar and the sidebar: plain, divided by hairlines. */
-html:has(.VPContent.has-sidebar) .VPNavBar .divider-line {
-  height: 1px !important;
-  background: var(--cc-rule) !important;
-  border-bottom: 0;
-}
 html:has(.VPContent.has-sidebar) .VPSidebar {
-  border-right: 1px solid var(--cc-rule);
+  background: var(--cc-paper) !important;
+  border-right: var(--cc-line);
 }
 .VPSidebarItem.level-0 > .item > .text {
   color: var(--cc-grey);
@@ -1720,8 +1686,9 @@ html:has(.VPContent.has-sidebar) .VPDocAsideOutline .outline-link {
 
 /* Code: a light panel in a light page, a dark one in the dark, framed by a hairline; inline code a quiet chip. */
 .VPDoc .vp-doc div[class*="language-"] {
-  border: 1px solid var(--cc-rule) !important;
+  border: 2px solid var(--cc-ink) !important;
   box-shadow: none !important;
+  background: var(--cc-paper-2);
 }
 .VPDoc .vp-doc div[class*="language-"] > span.lang {
   color: var(--cc-grey);
@@ -1794,15 +1761,10 @@ html:has(.VPContent.has-sidebar) .VPDocAsideOutline .outline-link {
   color: #c9c4b9 !important;
 }
 
-/* Docs pages: the bar's rule and the search box as hairlines; gallery titles stay white on their strip. */
-html:has(.VPContent.has-sidebar) .VPNav .VPNavBar .divider-line,
-html:has(.VPContent.has-sidebar) .VPNav .VPNavBar:not(.home.top) .divider-line {
-  height: 1px !important;
-  background: var(--cc-rule) !important;
-  border-bottom: 0 !important;
-}
+/* Search sits on the same concrete as the bar. Gallery titles stay white on their strip. */
 html:has(.VPContent.has-sidebar) .DocSearch-Button {
-  border: 1px solid var(--cc-rule) !important;
+  border: 2px solid var(--cc-ink) !important;
+  background: var(--cc-paper-2) !important;
 }
 .VPDoc .vp-doc a.cc-gallery-tile,
 .VPDoc .vp-doc a.cc-gallery-tile:hover {
@@ -1851,25 +1813,29 @@ html:has(.VPContent.has-sidebar) .DocSearch-Button {
   padding: 12px 14px;
   border: var(--cc-line);
   background: var(--cc-paper-2);
-  font-family: var(--cc-display);
-  font-size: 22px;
-  font-weight: 800;
-  line-height: 1;
-  text-transform: uppercase;
+  font-family: var(--vp-font-family-base);
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
   color: var(--cc-ink);
 }
 .home-aim-node small {
-  font-family: var(--cc-mono);
-  font-size: 11px;
+  font-family: var(--vp-font-family-base);
+  font-size: 13px;
   font-weight: 500;
-  text-transform: none;
-  color: var(--cc-grey);
+  line-height: 1.35;
+  letter-spacing: 0;
+  color: var(--cc-ink-2);
 }
 .home-aim-source {
   padding: 18px 20px;
   background: var(--cc-ink);
-  color: var(--cc-accent);
-  font-size: 30px;
+  color: var(--cc-paper-2);
+  font-family: var(--cc-mono);
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: 0;
 }
 .home-aim-out {
   background: var(--cc-accent);
@@ -1930,10 +1896,11 @@ html:has(.VPContent.has-sidebar) .DocSearch-Button {
   color: var(--cc-ink);
 }
 .vp-doc ol.home-roadmap strong {
-  font-family: var(--cc-display);
-  font-size: 25px;
-  font-weight: 800;
-  text-transform: uppercase;
+  font-family: var(--vp-font-family-base);
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.015em;
   color: var(--cc-ink);
 }
 @media (max-width: 860px) {
@@ -2222,6 +2189,16 @@ html:has(.VPContent.has-sidebar) .DocSearch-Button {
   letter-spacing: -0.011em !important;
   text-transform: none !important;
   line-height: 1.2;
+}
+
+.vp-doc p.doc-lead {
+  max-width: 34em;
+  margin-top: 0.15em;
+  font-size: 22px !important;
+  font-weight: 500;
+  line-height: 1.45 !important;
+  letter-spacing: -0.015em;
+  color: var(--cc-ink);
 }
 
 .vp-doc p.home-lead {
