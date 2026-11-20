@@ -416,12 +416,14 @@ Every name each entry exports, read from the code. The sections above explain th
 
 ### `@uberscene/kit`
 
-100 exports.
+99 exports.
 
 | Export | Kind | |
 |---|---|---|
 | `Adjustment` | const | The `<Adjustment>` element ([reference](/reference/elements/adjustment)). |
 | `Angle` | const | The `<Angle>` element ([reference](/reference/elements/angle)). |
+| `Animatable` | type | A value written as a constant, or as keys over time. |
+| `AnyEffectSpec` | type | Any effect a file may write. |
 | `Audio` | const | The `<Audio>` element ([reference](/reference/elements/audio)). |
 | `Badge` | function | A short word on a pill that pops in. |
 | `BlockMeta` | type |  |
@@ -445,15 +447,13 @@ Every name each entry exports, read from the code. The sections above explain th
 | `DrawnLine` | function | A line that draws itself from one point to another. |
 | `DrawnLineProps` | interface |  |
 | `effect` | function | Declares an effect drawn by a GLSL function, and returns it for `<Effect type>`. |
-| `Effect` | const | The `<Effect>` element ([reference](/reference/elements/effect)). |
-| `EffectComponent` | interface | `<Effect>`. |
 | `EffectParamsOf` | type | The params of an effect type. |
 | `EffectRef` | interface | An effect a file declares, as `effect()` returns it. |
+| `EffectSpec` | type | One entry of an element's `effects`. |
 | `Extrapolate` | type | Pure animation helpers for `<Layer>` code, beside `useT()` and `useLayer()`. |
 | `font` | function | Declares a face from a font file and returns it (a `FontRef`, standing for its family), to pass as a `font` prop, a theme font or a CSS `fontFamily`. |
 | `fontFamily` | function | A CSS `font-family` value for free code. |
 | `FontRef` | type | A family a file declares, as `font()` and `googleFont()` return it. |
-| `Freeze` | const | The `<Freeze>` element ([reference](/reference/elements/freeze)). |
 | `Gap` | const | The `<Gap>` element ([reference](/reference/elements/gap)). |
 | `googleFont` | function | Declares a Google Fonts family, in each weight and style given (default 400, normal), and returns it (a `FontRef`). |
 | `grid` | function | The geometry of a grid, and nothing drawn. |
@@ -463,7 +463,7 @@ Every name each entry exports, read from the code. The sections above explain th
 | `holdLayerFrame` | function | Hold the frame until the returned release is called (once; later calls do nothing). |
 | `interpolate` | function | Maps `input` from `inputRange` onto `outputRange`, piecewise. |
 | `InterpolateOptions` | interface |  |
-| `Keyframe` | const | The `<Keyframe>` element ([reference](/reference/elements/keyframe)). |
+| `Key` | interface | One key of a value that changes over time. |
 | `knob` | const | Schema helpers for values that are strings to zod but want their own control. |
 | `Knob` | interface | One value of a file's `schema`, as an editor or an agent needs it to offer a control. |
 | `KnobKind` | type | What control a knob wants. |
@@ -489,7 +489,6 @@ Every name each entry exports, read from the code. The sections above explain th
 | `random` | function | A number in [0, 1) fixed by its keys. |
 | `Seekable` | interface | Anything that can be set to a moment. |
 | `Shape` | const | The `<Shape>` element ([reference](/reference/elements/shape)). |
-| `SpeedKey` | const | The `<SpeedKey>` element ([reference](/reference/elements/speedkey)). |
 | `spring` | function | A physical spring from `from` (default 0) to `to` (default 1) at `time` seconds. |
 | `SpringOptions` | interface |  |
 | `stepAt` | function | Which step a moment has reached. |
@@ -523,15 +522,16 @@ Every name each entry exports, read from the code. The sections above explain th
 
 ### `@uberscene/kit/schema`
 
-237 exports.
+240 exports.
 
 | Export | Kind | |
 |---|---|---|
 | `Adjustment` | const | The `<Adjustment>` element ([reference](/reference/elements/adjustment)). |
 | `Angle` | const | The `<Angle>` element ([reference](/reference/elements/angle)). |
+| `Animatable` | type | A value written as a constant, or as keys over time. |
+| `AnyEffectSpec` | type | Any effect a file may write. |
 | `applyTheme` | function | An element's raw props with its theme applied, before the schema parses them. |
 | `Audio` | const | The `<Audio>` element ([reference](/reference/elements/audio)). |
-| `AUTOMATION_LANES` | const |  |
 | `BLEND_MODES` | const |  |
 | `BlendMode` | type |  |
 | `BLOCK_ASPECTS` | const | The frame shapes a block can be laid out for. |
@@ -567,22 +567,26 @@ Every name each entry exports, read from the code. The sections above explain th
 | `defaultTransitionParams` | function |  |
 | `defineElement` | function | A vocabulary element is an ordinary React component that also carries its kind, its Zod prop schema and its editing capabilities, so the resolver and the editor can read the element tree without rendering it. |
 | `DefineOptions` | interface |  |
+| `DERIVED_KINDS` | const |  |
+| `DERIVED_SCHEMAS` | const | The resolver's own item kinds. |
+| `DerivedKind` | type |  |
 | `ease` | function | `name` applied to `x` clamped to 0..1; an unknown or missing name is linear. |
 | `Easing` | type |  |
 | `EASING_FN` | const |  |
 | `EASINGS` | const |  |
 | `effect` | function | Declares an effect drawn by a GLSL function, and returns it for `<Effect type>`. |
-| `Effect` | const | The `<Effect>` element ([reference](/reference/elements/effect)). |
 | `EFFECT_FAMILIES` | const | The effects by family, for the reference and the editor's menus. |
-| `EffectComponent` | interface | `<Effect>`. |
 | `EffectDraw` | type | How a built-in effect draws. |
 | `effectEntry` | function | The built-in effect of a type, if there is one. |
 | `EffectEntry` | interface |  |
+| `EffectNotRendered` | interface | An effect type an element of `kind` takes in its `effects` but does not draw. |
 | `effectParamProblem` | function | Whether `param` is a param of an effect of `type`, and `value` one it takes, by the effect's params schema. |
 | `EffectParams` | type | The params a built-in effect takes, as written in `<Effect params>`. |
 | `EffectParamsOf` | type | The params of an effect type. |
 | `EffectRef` | interface | An effect a file declares, as `effect()` returns it. |
 | `EFFECTS` | const |  |
+| `EFFECTS_NOT_RENDERED` | const |  |
+| `EffectSpec` | type | One entry of an element's `effects`. |
 | `ElementBox` | type |  |
 | `ElementCapabilities` | interface |  |
 | `ElementDefinition` | interface |  |
@@ -612,7 +616,6 @@ Every name each entry exports, read from the code. The sections above explain th
 | `frameStart` | const | The first tick of a frame. |
 | `frameStartSeconds` | const | When a frame starts, in seconds. |
 | `framesUntil` | const | The first frame that starts at or after a time. |
-| `Freeze` | const | The `<Freeze>` element ([reference](/reference/elements/freeze)). |
 | `fusedColourSource` | function | One effect pass that draws a run of colour transforms in order. |
 | `Gap` | const | The `<Gap>` element ([reference](/reference/elements/gap)). |
 | `GaussOutside` | type | Past the frame's edge. |
@@ -627,11 +630,11 @@ Every name each entry exports, read from the code. The sections above explain th
 | `isBuiltInTransition` | function |  |
 | `isBundledFont` | function |  |
 | `isDropFrame` | const | Whether a rate is shown in drop-frame timecode. |
-| `isKeyframeProperty` | function | A property of the keyframe's parent element. |
+| `isKeyframeProperty` | function | A property a key list can animate, as the resolver names it (`transform.opacity` for `transform={{ opacity. |
 | `isNeutral` | function | Whether a built-in effect changes nothing with these params. |
 | `isShaderRef` | function | Whether a value is an effect or transition a file declared. |
 | `isVocabulary` | function |  |
-| `Keyframe` | const | The `<Keyframe>` element ([reference](/reference/elements/keyframe)). |
+| `Key` | interface | One key of a value that changes over time. |
 | `KEYFRAME_PROPERTIES` | const |  |
 | `KIND_CAPABILITIES` | const | What each element kind can do. |
 | `kindOf` | function |  |
@@ -693,7 +696,6 @@ Every name each entry exports, read from the code. The sections above explain th
 | `Shape` | const | The `<Shape>` element ([reference](/reference/elements/shape)). |
 | `SHAPE_TYPES` | const |  |
 | `shutterTimes` | function | The composition seconds a frame at `t` averages. |
-| `SpeedKey` | const | The `<SpeedKey>` element ([reference](/reference/elements/speedkey)). |
 | `springAt` | function | Where a spring released at rest from `from` toward `to` is after `time` seconds. |
 | `SpringConfig` | interface | A spring's physics. |
 | `Sticker` | const | The `<Sticker>` element ([reference](/reference/elements/sticker)). |
@@ -767,7 +769,7 @@ Every name each entry exports, read from the code. The sections above explain th
 
 ### `@uberscene/sdk`
 
-197 exports.
+200 exports.
 
 | Export | Kind | |
 |---|---|---|
@@ -835,6 +837,7 @@ Every name each entry exports, read from the code. The sections above explain th
 | `fold` | function | Turn the patch log's net effect into text edits against the index. |
 | `FoldResult` | interface |  |
 | `foldToSource` | function | Fold with baking. |
+| `FreezeActions` | interface |  |
 | `FreezeHold` | interface | A `<Freeze>`. |
 | `freezeHoldsOf` | function | A clip's `<Freeze>` children, sorted by `start`. |
 | `freezeShift` | function | Element-relative `rel` with the holds before it taken out, or the held source second when `rel` is inside a hold. |
@@ -856,8 +859,9 @@ Every name each entry exports, read from the code. The sections above explain th
 | `isTimeRefString` | function |  |
 | `Json` | type |  |
 | `jsxTags` | function | Every JSX opening tag in the file, in source order; with `name`, only the tags of that name. |
-| `KeyframeActions` | interface |  |
+| `KeyActions` | interface |  |
 | `KeyframeRow` | interface |  |
+| `KeyJson` | interface | One key as a file writes it. |
 | `LayerActions` | interface |  |
 | `LayerInterior` | interface |  |
 | `LayerPlacement` | interface |  |
@@ -911,6 +915,7 @@ Every name each entry exports, read from the code. The sections above explain th
 | `printElement` | function | A whole element as JSX text, indented with `indent`, children on their own lines. |
 | `printLiteral` | function | JavaScript source for a JSON value, compact, double-quoted. |
 | `printProp` | function | One JSX attribute. |
+| `printValue` | function | A JSON value as source that starts `column` characters into a line indented by `indent`. |
 | `PropAccess` | type | How a prop can be written. |
 | `propAt` | function | Follows `path` (`"animation.preset"`) from the tag's attribute into object literals; undefined when it is not written out. |
 | `PropSite` | interface |  |
@@ -922,6 +927,7 @@ Every name each entry exports, read from the code. The sections above explain th
 | `rangeOf` | function |  |
 | `reachedHolds` | function | The holds a clip reaches when, without any hold, it would last `played` seconds. |
 | `reduceInto` | function | Keep `net` reduced. |
+| `removedElement` | function | What became of `<Keyframe>`, `<Effect>`, `<SpeedKey>` and `<Freeze>`, told from the props of an element whose component is undefined. |
 | `renameProp` | function | Gives a prop a new name. |
 | `renameValue` | function | Respells a string value. |
 | `resolve` | function | Absolute placements for every element, computed from the tree, the manifests and the patch log. |
@@ -943,7 +949,6 @@ Every name each entry exports, read from the code. The sections above explain th
 | `SourceEdit` | type |  |
 | `SourceIndex` | interface |  |
 | `SourceIndexLike` | interface |  |
-| `SpeedActions` | interface |  |
 | `speedKeysOf` | function | A clip's `<SpeedKey>` children, sorted by `at`. |
 | `spokenWords` | function | Every transcript word the timeline plays, at the time it plays, in timeline order. |
 | `stableJson` | function |  |
@@ -971,7 +976,7 @@ Every name each entry exports, read from the code. The sections above explain th
 
 ### `@uberscene/sdk/resolver`
 
-76 exports.
+77 exports.
 
 | Export | Kind | |
 |---|---|---|
@@ -1026,6 +1031,7 @@ Every name each entry exports, read from the code. The sections above explain th
 | `RampKey` | interface | A `<SpeedKey>`. |
 | `rampSpeed` | function | Speed at clip time `u` under keys sorted by `at`. |
 | `reachedHolds` | function | The holds a clip reaches when, without any hold, it would last `played` seconds. |
+| `removedElement` | function | What became of `<Keyframe>`, `<Effect>`, `<SpeedKey>` and `<Freeze>`, told from the props of an element whose component is undefined. |
 | `resolve` | function | Absolute placements for every element, computed from the tree, the manifests and the patch log. |
 | `ResolvedState` | interface |  |
 | `ResolvedTrack` | interface |  |

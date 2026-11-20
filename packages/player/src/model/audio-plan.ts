@@ -203,8 +203,8 @@ function nestedOccurrences(
 type Factor = (t: number) => number;
 
 /**
- * Gain over [winFrom, winTo] in composition seconds: volume × keyframed
- * `audio.volume` × fades × automation × ducking. The factors are multiplied
+ * Gain over [winFrom, winTo] in composition seconds: volume (or its keys)
+ * × fades × ducking. The factors are multiplied
  * and sampled at their breakpoints plus a fixed step inside ramps, so the
  * product stays close to piecewise linear.
  */
@@ -245,13 +245,6 @@ export function buildGainEnvelope(
     factors.push((t) => (t <= a ? 1 : t >= b ? 0 : (b - t) / (b - a)));
     breaks.add(a);
     breaks.add(b);
-  }
-
-  const automation = (p.props.automation as { volume?: [number, number][] } | undefined)?.volume;
-  if (automation && automation.length > 0) {
-    const pts = [...automation].sort((x, y) => x[0] - y[0]).map(([rel, v]) => [p.start + rel, v] as const);
-    factors.push((t) => interpolate(pts, t));
-    pts.forEach(([t]) => breaks.add(t));
   }
 
   const duck = p.props.duck as { under: string; to: number; attack?: number; release?: number } | undefined;
@@ -328,7 +321,7 @@ function hasSound(state: ResolvedState, p: Placement): boolean {
   );
 }
 
-/** Pan over the placement: its `audio.pan` keyframes (sampled inside each segment), else `automation.pan`; keyframes win when both are written. */
+/** Pan over the placement: its `audio.pan` keys, sampled inside each segment; a constant pan is one key. */
 function panEnvelope(p: Placement, children: readonly Placement[]): GainPoint[] | undefined {
   const ats = children
     .filter((c) => c.kind === "keyframe" && c.props.property === "audio.pan")
@@ -342,9 +335,7 @@ function panEnvelope(p: Placement, children: readonly Placement[]): GainPoint[] 
       .sort((a, b) => a - b)
       .map((rel) => [round(p.start + rel), round(Number(keyframedValue(children, "audio.pan", rel, 0)))] as const);
   }
-  const automation = (p.props.automation as { pan?: [number, number][] } | undefined)?.pan;
-  if (!automation || automation.length === 0) return undefined;
-  return [...automation].sort((x, y) => x[0] - y[0]).map(([rel, v]) => [round(p.start + rel), v] as const);
+  return undefined;
 }
 
 function interpolate(pts: readonly (readonly [number, number])[], t: number): number {

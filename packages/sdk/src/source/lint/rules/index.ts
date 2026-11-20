@@ -7,6 +7,7 @@ import { declaration } from "./fonts";
 import { ntscFrameRate } from "./frame-rate";
 import { freeCodeClock, strayHtml } from "./free-code";
 import { notRendered } from "./not-rendered";
+import { everythingIsAProp } from "./props";
 import { cutNearShot, repeatedSource, shotChangeInsideCrop } from "./shots";
 import { fontAvailable, themeLiterals, themeRefs } from "./theme";
 
@@ -276,6 +277,7 @@ export const rules: readonly Rule[] = [
   deprecatedProps,
   oldThemeVariables,
   boxPlacement,
+  everythingIsAProp,
   ntscFrameRate,
 ];
 

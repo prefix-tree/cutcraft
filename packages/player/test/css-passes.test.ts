@@ -70,18 +70,15 @@ describe("CSS filters as passes", () => {
 
 describe("the effect pipeline", () => {
   it("keeps one CSS filter when nothing on the element needs a shader", () => {
-    const p = pipelineOf(
-      `<Effect id="a" type="brightness" params={{ amount: 0.1 }} /><Effect id="b" type="grayscale" params={{ amount: 0.5 }} />`,
-      {
-        shaders: true,
-      },
-    );
+    const p = pipelineOf(`{ type: "brightness", amount: 0.1 }, { type: "grayscale", amount: 0.5 }`, {
+      shaders: true,
+    });
     expect(p).toEqual({ filter: "brightness(1.1) grayscale(0.5)" });
   });
 
   it("runs every effect as a pass in file order once one needs a shader, and keeps the CSS look as the fallback", () => {
     const p = pipelineOf(
-      `<Effect id="a" type="brightness" params={{ amount: 0.1 }} /><Effect id="b" type="levels" params={{ gamma: 1.2 }} /><Effect id="g" type="hue" params={{ angle: 5 }} /><Effect id="v" type="vibrance" params={{ amount: 0.5 }} />`,
+      `{ type: "brightness", amount: 0.1 }, { type: "levels", gamma: 1.2 }, { type: "hue", angle: 5 }, { type: "vibrance", amount: 0.5 }`,
       { shaders: true },
     );
     expect(p.filter).toBe("");
@@ -93,14 +90,14 @@ describe("the effect pipeline", () => {
   });
 
   it("runs CSS effects as passes before a shader transition, so they do not reach the other clip", () => {
-    const p = pipelineOf(`<Effect id="a" type="sepia" />`, { shaders: true, transition: true });
+    const p = pipelineOf(`{ type: "sepia" }`, { shaders: true, transition: true });
     expect(p.filter).toBe("");
     expect(p.shaders?.map((s) => s.name)).toEqual(["css:sepia"]);
   });
 
   it("draws as CSS where shaders cannot run, leaving only the passes that have no CSS form", () => {
     const p = pipelineOf(
-      `<Effect id="a" type="brightness" params={{ amount: 0.1 }} /><Effect id="b" type="levels" params={{ black: 0.1 }} /><Effect id="o" type={own} /><Effect id="k" type="curves" params={{ rgb: [[0, 0.1], [1, 1]] }} />`,
+      `{ type: "brightness", amount: 0.1 }, { type: "levels", black: 0.1 }, { type: own }, { type: "curves", rgb: [[0, 0.1], [1, 1]] }`,
       { shaders: false },
       `const own = effect({ name: "own", shader: "vec4 effect(vec2 uv) { return texture(image, uv); }" });`,
     );

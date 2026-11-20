@@ -1367,7 +1367,7 @@ describe("time changes inside a clip", () => {
     expect(
       cut(
         T(
-          `<Clip id="a" src="asset:broll" in={0} out={6}><SpeedKey id="k1" at={0} speed={1} /><SpeedKey id="k2" at={2} speed={2} /></Clip>` +
+          `<Clip id="a" src="asset:broll" in={0} out={6} speed={[{ at: 0, value: 1 }, { at: 2, value: 2 }]} />` +
             C("b", 0, 1),
         ),
       ),
@@ -1375,8 +1375,8 @@ describe("time changes inside a clip", () => {
       "
       duration 4.5
       a clip 0..3.5 plays broll 0..6 x1
-      k1 speedKey 0..0
-      k2 speedKey 2..2
+      a.speed.0 speedKey 0..0
+      a.speed.1 speedKey 2..2
       b clip 3.5..4.5 plays broll 0..1 x1
       "
     `);
@@ -1386,7 +1386,7 @@ describe("time changes inside a clip", () => {
     expect(
       cut(
         T(
-          `<Clip id="a" src="asset:broll" in={0} out={4}><Freeze id="f" at={1} start={1} duration={2} /></Clip>` +
+          `<Clip id="a" src="asset:broll" in={0} out={4} freezes={[{ at: 1, duration: 2, source: 1 }]} />` +
             C("b", 0, 1),
         ),
       ),
@@ -1394,7 +1394,7 @@ describe("time changes inside a clip", () => {
       "
       duration 7
       a clip 0..6 plays broll 0..4 x1
-      f freeze 1..3
+      a.freezes.0 freeze 1..3
       b clip 6..7 plays broll 0..1 x1
       "
     `);
@@ -1404,15 +1404,15 @@ describe("time changes inside a clip", () => {
     expect(
       cut(
         T(
-          `<Clip id="a" src="asset:broll" in={0} out={4}><Freeze id="f" at={1} start={1} duration={2} /><Freeze id="g" at={3} start={3} duration={1} /></Clip>`,
+          `<Clip id="a" src="asset:broll" in={0} out={4} freezes={[{ at: 1, duration: 2, source: 1 }, { at: 3, duration: 1, source: 3 }]} />`,
         ),
       ),
     ).toMatchInlineSnapshot(`
       "
       duration 7
       a clip 0..7 plays broll 0..4 x1
-      f freeze 1..3
-      g freeze 3..4
+      a.freezes.0 freeze 1..3
+      a.freezes.1 freeze 3..4
       "
     `);
   });
@@ -1421,14 +1421,14 @@ describe("time changes inside a clip", () => {
     expect(
       cut(
         T(
-          `<Clip id="hook" src="asset:talk" in="word:4" out="word:9.end"><Freeze id="f" at={1} start={1} duration={2} /></Clip>`,
+          `<Clip id="hook" src="asset:talk" in="word:4" out="word:9.end" freezes={[{ at: 1, duration: 2, source: 1 }]} />`,
         ) + O(Ti("t", `anchor="hook" at="word:6" duration={1}`)),
       ),
     ).toMatchInlineSnapshot(`
       "
       duration 4.9
       hook clip 0..4.9 plays talk 2..4.9 x1
-      f freeze 1..3
+      hook.freezes.0 freeze 1..3
       t title 0..1
       ! UNSUPPORTED_ANCHOR t.at
       "
@@ -1441,7 +1441,7 @@ describe("time changes inside a clip", () => {
         T(
           C("a", 0, 2) +
             X("x", 1) +
-            `<Clip id="b" src="asset:broll" in={0} out={1}><Freeze id="f" at={0.5} start={0.5} duration={2} /></Clip>`,
+            `<Clip id="b" src="asset:broll" in={0} out={1} freezes={[{ at: 0.5, duration: 2, source: 0.5 }]} />`,
         ),
       ),
     ).toMatchInlineSnapshot(`
@@ -1450,7 +1450,7 @@ describe("time changes inside a clip", () => {
       a clip 0..2 plays broll 0..2 x1
       x transition 1..2 joins a>b
       b clip 1..4 plays broll 0..1 x1
-      f freeze 1.5..3.5
+      b.freezes.0 freeze 1.5..3.5
       "
     `);
   });
@@ -1458,7 +1458,7 @@ describe("time changes inside a clip", () => {
     expect(
       cut(
         T(
-          `<Clip id="a" src="asset:broll" in={0} out={4}><Freeze id="f" at={4} start={4} duration={2} /></Clip>` +
+          `<Clip id="a" src="asset:broll" in={0} out={4} freezes={[{ at: 4, duration: 2, source: 4 }]} />` +
             C("b", 0, 1),
         ),
       ),
@@ -1466,7 +1466,7 @@ describe("time changes inside a clip", () => {
       "
       duration 7
       a clip 0..6 plays broll 0..4 x1
-      f freeze 4..6
+      a.freezes.0 freeze 4..6
       b clip 6..7 plays broll 0..1 x1
       "
     `);
@@ -1476,7 +1476,7 @@ describe("time changes inside a clip", () => {
     expect(
       cut(
         T(
-          `<Clip id="a" src="asset:broll" in={0} out={1}><Freeze id="f" at={0.5} start={9} duration={8} /></Clip>` +
+          `<Clip id="a" src="asset:broll" in={0} out={1} freezes={[{ at: 9, duration: 8, source: 0.5 }]} />` +
             C("b", 0, 1),
         ),
       ),
@@ -1484,9 +1484,9 @@ describe("time changes inside a clip", () => {
       "
       duration 2
       a clip 0..1 plays broll 0..1 x1
-      f freeze 9..17
+      a.freezes.0 freeze 9..17
       b clip 1..2 plays broll 0..1 x1
-      ! INVALID_TIME_RANGE f.start
+      ! INVALID_TIME_RANGE a.freezes.0.at
       "
     `);
   });
@@ -1495,63 +1495,55 @@ describe("time changes inside a clip", () => {
     expect(
       cut(
         T(
-          `<Clip id="a" src="asset:broll" in={0} out={2}><Freeze id="f" at={1} start={1} duration={3} /><Freeze id="g" at={2} start={5} duration={1} /></Clip>`,
+          `<Clip id="a" src="asset:broll" in={0} out={2} freezes={[{ at: 1, duration: 3, source: 1 }, { at: 5, duration: 1, source: 2 }]} />`,
         ),
       ),
     ).toMatchInlineSnapshot(`
       "
       duration 6
       a clip 0..6 plays broll 0..2 x1
-      f freeze 1..4
-      g freeze 5..6
+      a.freezes.0 freeze 1..4
+      a.freezes.1 freeze 5..6
       "
     `);
   });
 
   it("a freeze of no length is refused and holds nothing", () => {
     expect(
-      cut(T(`<Clip id="a" src="asset:broll" in={0} out={2}><Freeze id="f" at={1} start={1} duration={0} /></Clip>`)),
+      cut(T(`<Clip id="a" src="asset:broll" in={0} out={2} freezes={[{ at: 1, duration: 0, source: 1 }]} />`)),
     ).toMatchInlineSnapshot(`
       "
       duration 2
       a clip 0..2 plays broll 0..2 x1
-      f freeze 1..1
-      ! SCHEMA f.duration
+      a.freezes.0 freeze 1..1
+      ! SCHEMA a.freezes.0.duration
       "
     `);
   });
 
   it("a speed key the schema refuses takes no part in the ramp", () => {
     expect(
-      cut(
-        T(
-          `<Clip id="a" src="asset:broll" in={0} out={4}><SpeedKey id="k1" at={0} speed={2} /><SpeedKey id="k2" at={1} speed={0} /></Clip>`,
-        ),
-      ),
+      cut(T(`<Clip id="a" src="asset:broll" in={0} out={4} speed={[{ at: 0, value: 2 }, { at: 1, value: 0 }]} />`)),
     ).toMatchInlineSnapshot(`
       "
       duration 2
       a clip 0..2 plays broll 0..4 x1
-      k1 speedKey 0..0
-      k2 speedKey 1..1
-      ! SCHEMA k2.speed
+      a.speed.0 speedKey 0..0
+      a.speed.1 speedKey 1..1
+      ! SCHEMA a.speed.1.value
       "
     `);
   });
 
   it("a speed key written past the clip's end does not lengthen the video", () => {
     expect(
-      cut(
-        T(
-          `<Clip id="a" src="asset:broll" in={0} out={2}><SpeedKey id="k1" at={0} speed={1} /><SpeedKey id="k2" at={30} speed={1} /></Clip>`,
-        ),
-      ),
+      cut(T(`<Clip id="a" src="asset:broll" in={0} out={2} speed={[{ at: 0, value: 1 }, { at: 30, value: 1 }]} />`)),
     ).toMatchInlineSnapshot(`
       "
       duration 2
       a clip 0..2 plays broll 0..2 x1
-      k1 speedKey 0..0
-      k2 speedKey 30..30
+      a.speed.0 speedKey 0..0
+      a.speed.1 speedKey 30..30
       "
     `);
   });

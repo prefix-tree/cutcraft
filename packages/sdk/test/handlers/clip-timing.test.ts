@@ -51,9 +51,18 @@ describe("clip timing", () => {
     const exec = fixtureExecutor();
     expect(exec.execute({ type: "clip/split", params: { id: "c1", at: 0.25, newId: "c1_b" } }).ok).toBe(true);
     const s = exec.state();
-    expect(s.items.get("k1")?.parent).toBe("c1");
-    expect(s.items.get("k2_b")).toMatchObject({ parent: "c1_b", start: 0.5 });
-    expect(s.items.get("k2")).toBeUndefined();
+    // The fade-in's second key, at 0.5 s, is the second half's, 0.25 s into it; the first half ends on the cut.
+    const opacity = (id: string) =>
+      (s.tree.byId.get(id)?.props.transform as { opacity?: unknown } | undefined)?.opacity;
+    expect(opacity("c1")).toEqual([
+      { at: 0, value: 0, easing: "easeOutCubic" },
+      { at: 0.25, value: expect.any(Number) },
+    ]);
+    expect(opacity("c1_b")).toEqual([
+      { at: 0, value: expect.any(Number), easing: "easeOutCubic" },
+      { at: 0.25, value: 1 },
+    ]);
+    expect(s.items.get("c1_b.transform.opacity.1")).toMatchObject({ parent: "c1_b", start: 0.5 });
     expect(s.items.get("mk1_b")?.parent).toBe("c1_b");
   });
 
@@ -71,8 +80,8 @@ describe("clip timing", () => {
     exec.execute({ type: "element/remove", params: { id: "g1" } });
     exec.execute({ type: "transition/remove", params: { transitionId: "x1" } });
     // Roll moves source edges at the clip's constant speed; take c2's ramp and hold off.
-    exec.execute({ type: "speed/setKeys", params: { id: "c2", keys: [] } });
-    exec.execute({ type: "speed/setFreezes", params: { id: "c2", freezes: [] } });
+    exec.execute({ type: "key/setAll", params: { id: "c2", path: "speed", keys: [] } });
+    exec.execute({ type: "freeze/setAll", params: { id: "c2", freezes: [] } });
     const total = exec.state().composition.duration;
     expect(exec.execute({ type: "clip/roll", params: { leftId: "c2", rightId: "c3", delta: 0.5 } }).ok).toBe(true);
     const s = exec.state();

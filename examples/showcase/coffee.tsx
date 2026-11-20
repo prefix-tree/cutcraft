@@ -5,13 +5,9 @@ import {
   Callout,
   Clip,
   Composition,
-  Effect,
-  Freeze,
   googleFont,
-  Keyframe,
   Layer,
   LowerThird,
-  SpeedKey,
   Title,
   Track,
   Transition,
@@ -55,36 +51,68 @@ export default function Video() {
     >
       <Track id="main" name="Story">
         {/* The wide pour-over, pushed in slowly while the title builds. */}
-        <Clip id="open" src="asset:coffeeWide" in={2} out={8} fit="cover">
-          <Keyframe id="open-sx-0" property="transform.scale.x" at={0} value={1} easing="easeInOutSine" />
-          <Keyframe id="open-sx-1" property="transform.scale.x" at={6} value={1.14} />
-          <Keyframe id="open-sy-0" property="transform.scale.y" at={0} value={1} easing="easeInOutSine" />
-          <Keyframe id="open-sy-1" property="transform.scale.y" at={6} value={1.14} />
-        </Clip>
+        <Clip
+          id="open"
+          src="asset:coffeeWide"
+          in={2}
+          out={8}
+          fit="cover"
+          transform={{
+            scale: [
+              { at: 0, value: 1, easing: "easeInOutSine" },
+              { at: 6, value: 1.14 },
+            ],
+          }}
+        />
         <Transition id="x1" type="filmBurn" duration={0.9} />
         {/* The close pour: it eases into slow motion, then one frame is held while the callout points at it. */}
-        <Clip id="pour" src="asset:coffee" in={10} out={14} fit="cover">
-          <SpeedKey id="pour-s0" at={0} speed={1} />
-          <SpeedKey id="pour-s1" at={1.6} speed={0.4} easing="easeInOutQuad" />
-          <Freeze id="pour-hold" at={12.4} start={4.2} duration={1.4} />
-        </Clip>
+        <Clip
+          id="pour"
+          src="asset:coffee"
+          in={10}
+          out={14}
+          fit="cover"
+          speed={[
+            { at: 0, value: 1 },
+            { at: 1.6, value: 0.4, easing: "easeInOutQuad" },
+          ]}
+          freezes={[{ at: 4.2, duration: 1.4, source: 12.4 }]}
+        />
         <Transition id="x2" type="iris" duration={0.9} />
         {/* The espresso machine: the warm LUT comes in halfway, so the shot is seen before and after. */}
-        <Clip id="shot" src="asset:espresso" in={1} out={9} fit="cover">
-          <Effect id="shot-warm" type="lut" params={{ src: "asset:warm" }}>
-            <Keyframe id="shot-warm-0" param="amount" at={3.2} value={0} easing="ease-in-out" />
-            <Keyframe id="shot-warm-1" param="amount" at={4.4} value={1} />
-          </Effect>
-        </Clip>
+        <Clip
+          id="shot"
+          src="asset:espresso"
+          in={1}
+          out={9}
+          fit="cover"
+          effects={[
+            {
+              type: "lut",
+              src: "asset:warm",
+              amount: [
+                { at: 3.2, value: 0, easing: "ease-in-out" },
+                { at: 4.4, value: 1 },
+              ],
+            },
+          ]}
+        />
         <Transition id="x3" type="pixelDissolve" duration={0.8} />
         {/* Three glasses: a push-in that drifts towards the middle one. */}
-        <Clip id="three" src="asset:espresso" in={24} out={31} fit="cover">
-          <Effect id="three-warm" type="lut" params={{ src: "asset:warm" }} />
-          <Keyframe id="three-sx-0" property="transform.scale.x" at={0} value={1.04} easing="easeInOutSine" />
-          <Keyframe id="three-sx-1" property="transform.scale.x" at={7} value={1.22} />
-          <Keyframe id="three-sy-0" property="transform.scale.y" at={0} value={1.04} easing="easeInOutSine" />
-          <Keyframe id="three-sy-1" property="transform.scale.y" at={7} value={1.22} />
-        </Clip>
+        <Clip
+          id="three"
+          src="asset:espresso"
+          in={24}
+          out={31}
+          fit="cover"
+          transform={{
+            scale: [
+              { at: 0, value: 1.04, easing: "easeInOutSine" },
+              { at: 7, value: 1.22 },
+            ],
+          }}
+          effects={[{ type: "lut", src: "asset:warm" }]}
+        />
         <Transition id="x4" type="clockWipe" duration={0.9} />
         {/* The red cup in steam, graded down so the closing line reads over it. */}
         <Clip id="close" src="asset:redCup" in={6} out={14} fit="cover" />
@@ -92,22 +120,24 @@ export default function Video() {
 
       <Track id="looks" name="Looks" layout="free">
         {/* The grade under the closing line: darker, cooler shadows, the red kept. */}
-        <Adjustment id="grade" anchor="close" duration={{ until: "close" }}>
-          <Effect id="grade-expose" type="exposure" params={{ stops: -0.9 }} />
-          <Effect
-            id="grade-tone"
-            type="curves"
-            params={{
+        <Adjustment
+          id="grade"
+          anchor="close"
+          duration={{ until: "close" }}
+          effects={[
+            { type: "exposure", stops: -0.9 },
+            {
+              type: "curves",
               rgb: [
                 [0, 0],
                 [0.3, 0.2],
                 [0.8, 0.82],
                 [1, 1],
               ],
-            }}
-          />
-          <Effect id="grade-pop" type="vibrance" params={{ amount: 0.4 }} />
-        </Adjustment>
+            },
+            { type: "vibrance", amount: 0.4 },
+          ]}
+        />
         {/* A dark fall-off from the top over the three glasses, so the line above them reads on the bright machine. */}
         <Layer id="top-scrim" anchor="three" duration={{ until: "three" }} ground>
           <div
@@ -129,10 +159,15 @@ export default function Video() {
           />
         </Layer>
         {/* A film look over the whole cut. */}
-        <Adjustment id="film" start={0} duration="fill">
-          <Effect id="film-grain" type="grain" params={{ amount: 0.22 }} />
-          <Effect id="film-vignette" type="vignette" params={{ amount: 0.45 }} />
-        </Adjustment>
+        <Adjustment
+          id="film"
+          start={0}
+          duration="fill"
+          effects={[
+            { type: "grain", amount: 0.22 },
+            { type: "vignette", amount: 0.45 },
+          ]}
+        />
       </Track>
 
       <Track id="words" name="Words" layout="free">

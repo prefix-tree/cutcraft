@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { Audio, Captions, Clip, Composition, Keyframe, knob, Marker, Shape, Title, Track } from "@uberscene/kit";
+import { Audio, Captions, Clip, Composition, knob, Marker, Shape, Title, Track } from "@uberscene/kit";
 
 export const schema = z.object({
   accent: knob.color().describe("Highlight ring colour"),
@@ -23,24 +23,41 @@ export default function Video({ accent }: z.infer<typeof schema>) {
 
       <Track id="screen" name="Screen">
         {/* The recording has no transcript, so a numeric trim. The crop keyframes are element-relative seconds. */}
-        <Clip id="rec" src="asset:screen" in={0} duration={20} fit="cover">
-          <Keyframe id="z1-x0" property="transform.crop.x" at={2.6} value={0} easing="easeInOutCubic" />
-          <Keyframe id="z1-x1" property="transform.crop.x" at={3} value={0.55} />
-          <Keyframe id="z1-x2" property="transform.crop.x" at={5.5} value={0.55} easing="easeInOutCubic" />
-          <Keyframe id="z1-x3" property="transform.crop.x" at={6} value={0} />
-          <Keyframe id="z1-y0" property="transform.crop.y" at={2.6} value={0} easing="easeInOutCubic" />
-          <Keyframe id="z1-y1" property="transform.crop.y" at={3} value={0.1} />
-          <Keyframe id="z1-y2" property="transform.crop.y" at={5.5} value={0.1} easing="easeInOutCubic" />
-          <Keyframe id="z1-y3" property="transform.crop.y" at={6} value={0} />
-          <Keyframe id="z1-w0" property="transform.crop.width" at={2.6} value={1} easing="easeInOutCubic" />
-          <Keyframe id="z1-w1" property="transform.crop.width" at={3} value={0.4} />
-          <Keyframe id="z1-w2" property="transform.crop.width" at={5.5} value={0.4} easing="easeInOutCubic" />
-          <Keyframe id="z1-w3" property="transform.crop.width" at={6} value={1} />
-          <Keyframe id="z1-h0" property="transform.crop.height" at={2.6} value={1} easing="easeInOutCubic" />
-          <Keyframe id="z1-h1" property="transform.crop.height" at={3} value={0.4} />
-          <Keyframe id="z1-h2" property="transform.crop.height" at={5.5} value={0.4} easing="easeInOutCubic" />
-          <Keyframe id="z1-h3" property="transform.crop.height" at={6} value={1} />
-        </Clip>
+        <Clip
+          id="rec"
+          src="asset:screen"
+          in={0}
+          duration={20}
+          fit="cover"
+          transform={{
+            crop: {
+              x: [
+                { at: 2.6, value: 0, easing: "easeInOutCubic" },
+                { at: 3, value: 0.55 },
+                { at: 5.5, value: 0.55, easing: "easeInOutCubic" },
+                { at: 6, value: 0 },
+              ],
+              y: [
+                { at: 2.6, value: 0, easing: "easeInOutCubic" },
+                { at: 3, value: 0.1 },
+                { at: 5.5, value: 0.1, easing: "easeInOutCubic" },
+                { at: 6, value: 0 },
+              ],
+              width: [
+                { at: 2.6, value: 1, easing: "easeInOutCubic" },
+                { at: 3, value: 0.4 },
+                { at: 5.5, value: 0.4, easing: "easeInOutCubic" },
+                { at: 6, value: 1 },
+              ],
+              height: [
+                { at: 2.6, value: 1, easing: "easeInOutCubic" },
+                { at: 3, value: 0.4 },
+                { at: 5.5, value: 0.4, easing: "easeInOutCubic" },
+                { at: 6, value: 1 },
+              ],
+            },
+          }}
+        />
       </Track>
 
       <Track id="callouts" name="Callouts">

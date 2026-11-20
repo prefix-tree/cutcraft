@@ -37,16 +37,14 @@ describe("the effect registry", () => {
   });
 
   it("checks and fills a CSS effect's params, which it did not before", () => {
-    expect(errorsOf(`<Effect id="b" type="brightness" params={{ amount: 3 }} />`)).toEqual([
+    expect(errorsOf(`{ type: "brightness", amount: 3 }`)).toEqual([
       "b.params.amount: Too big: expected number to be <=1",
     ]);
-    expect(errorsOf(`<Effect id="b" type="brightness" params={{ value: 10 }} />`)).toEqual([
-      'b.params: Unrecognized key: "value"',
-    ]);
+    expect(errorsOf(`{ type: "brightness", value: 10 }`)).toEqual(['b.params: Unrecognized key: "value"']);
     const state = resolve(
       collectModule(
-        loadModule(`import { Clip, Composition, Effect, Track } from "@uberscene/kit";
-export default function V() { return <Composition fps={30} width={640} height={360}><Track id="t"><Clip id="c" src="asset:city"><Effect id="s" type="shadow" /></Clip></Track></Composition>; }`) as never,
+        loadModule(`import { Clip, Composition, Track } from "@uberscene/kit";
+export default function V() { return <Composition fps={30} width={640} height={360}><Track id="t"><Clip id="c" src="asset:city" effects={[{ type: "shadow" }]} /></Track></Composition>; }`) as never,
       ),
       manifest,
     );
@@ -55,12 +53,12 @@ export default function V() { return <Composition fps={30} width={640} height={3
 
   it("takes each kind of value on one scale, and refuses the old ones", () => {
     expect(
-      errorsOf(`<Effect id="b" type="brightness" params={{ amount: 10 }} />
-          <Effect id="s" type="sepia" params={{ amount: 70 }} />
-          <Effect id="v" type="vignette" params={{ amount: 50 }} />
-          <Effect id="w" type="whiteBalance" params={{ temperature: 35 }} />
-          <Effect id="z" type="zoomBlur" params={{ amount: 60 }} />
-          <Effect id="d" type="shadow" params={{ blur: 4, color: "rgba(0,0,0,0.5)" }} />`),
+      errorsOf(`{ type: "brightness", amount: 10 },
+          { type: "sepia", amount: 70 },
+          { type: "vignette", amount: 50 },
+          { type: "whiteBalance", temperature: 35 },
+          { type: "zoomBlur", amount: 60 },
+          { type: "shadow", blur: 4, color: "rgba(0,0,0,0.5)" }`),
     ).toEqual([
       "b.params.amount: Too big: expected number to be <=1",
       "s.params.amount: Too big: expected number to be <=1",
@@ -79,9 +77,7 @@ export default function V() { return <Composition fps={30} width={640} height={3
   });
 
   it("refuses an unknown param on a shader effect too, where it was dropped before", () => {
-    expect(errorsOf(`<Effect id="e" type="exposure" params={{ stop: 1 }} />`)).toEqual([
-      'e.params: Unrecognized key: "stop"',
-    ]);
+    expect(errorsOf(`{ type: "exposure", stop: 1 }`)).toEqual(['e.params: Unrecognized key: "stop"']);
   });
 
   it("checks a CSS effect's keyframed param by its schema", () => {
@@ -110,7 +106,7 @@ export default function V() { return <Composition fps={30} width={640} height={3
         manifest,
       ).errors.map((e) => e.message);
     expect(errors(`<ColorGrade id="g" temperature={0.2} />`)).toEqual([expect.stringContaining('type="whiteBalance"')]);
-    expect(errors(`<Effect id="tp" type="temperature" params={{ amount: 0.2 }} />`)).toEqual([
+    expect(errors(`{ type: "temperature", amount: 0.2 }`)).toEqual([
       expect.stringContaining('type="whiteBalance" params={{ temperature: … }}'),
     ]);
     expect(errors(`<Keyframe id="k" property="colorGrade.temperature" at={0} value={0} />`)).toEqual([

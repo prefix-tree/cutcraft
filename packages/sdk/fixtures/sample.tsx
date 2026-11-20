@@ -9,17 +9,13 @@ import {
   Clip,
   Composition,
   Cut,
-  Effect,
-  Freeze,
   Gap,
-  Keyframe,
   Layer,
   Marker,
   Mask,
   Multicam,
   Nested,
   Shape,
-  SpeedKey,
   Sticker,
   Svg,
   Title,
@@ -40,19 +36,37 @@ export default function Video({ title, accent }: z.infer<typeof schema>) {
     <Composition fps={30} width={1920} height={1080} background={{ mode: "color", color: "#000000" }}>
       <Marker id="m1" at={2} label="hook" color="#ffcc00" />
       <Track id="main" name="Main">
-        <Clip id="c1" src="asset:interview" in="word:3" out="word:18">
-          <Effect id="fx1" type="blur" params={{ radius: 4 }} />
-          <Effect id="wb1" type="whiteBalance" params={{ temperature: 0.1, tint: -0.05 }} />
-          <Keyframe id="k1" property="transform.opacity" at={0} value={0} easing="easeOutCubic" />
-          <Keyframe id="k2" property="transform.opacity" at={0.5} value={1} />
+        <Clip
+          id="c1"
+          src="asset:interview"
+          in="word:3"
+          out="word:18"
+          transform={{
+            opacity: [
+              { at: 0, value: 0, easing: "easeOutCubic" },
+              { at: 0.5, value: 1 },
+            ],
+          }}
+          effects={[
+            { type: "blur", radius: 4 },
+            { type: "whiteBalance", temperature: 0.1, tint: -0.05 },
+          ]}
+        >
           <Mask id="mk1" shape={{ rect: { x: 0.1, y: 0.1, width: 0.8, height: 0.8 } }} feather={12} />
         </Clip>
         <Transition id="x1" type="crossfade" duration={0.5} />
-        <Clip id="c2" src="asset:city" duration={3.5} fit="cover" transform={{ scale: 1.1 }}>
-          <SpeedKey id="sk1" at={0} speed={1} />
-          <SpeedKey id="sk2" at={2} speed={0.5} easing="easeInOutQuad" />
-          <Freeze id="fr1" at={1.5} start={3} duration={0.5} />
-        </Clip>
+        <Clip
+          id="c2"
+          src="asset:city"
+          duration={3.5}
+          fit="cover"
+          transform={{ scale: 1.1 }}
+          speed={[
+            { at: 0, value: 1 },
+            { at: 2, value: 0.5, easing: "easeInOutQuad" },
+          ]}
+          freezes={[{ at: 3, duration: 0.5, source: 1.5 }]}
+        />
         <Gap id="g1" duration={1} />
         <Clip id="c3" src="asset:interview" in="shot:2" out="shot:2.end" speed={1.2} />
         <Nested id="n1" of={Outro} duration={3} volume={0.8} />
@@ -90,9 +104,7 @@ export default function Video({ title, accent }: z.infer<typeof schema>) {
         <Layer id="l1" anchor="c2" duration={4}>
           <Counter from={0} to={1200} />
         </Layer>
-        <Adjustment id="adj1" anchor="start" duration="fill">
-          <Effect id="fx2" type="vignette" params={{ amount: 0.3 }} />
-        </Adjustment>
+        <Adjustment id="adj1" anchor="start" duration="fill" effects={[{ type: "vignette", amount: 0.3 }]} />
         <Badge id="b1" anchor="c1" label="LIVE" />
         <Badge id="b2" anchor="c3" label="REPLAY" />
       </Track>

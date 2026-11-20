@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { Audio, Clip, Composition, Keyframe, Title, Track, Transition } from "@uberscene/kit";
+import { Audio, Clip, Composition, Title, Track, Transition } from "@uberscene/kit";
 
 export const schema = z.object({
   title: z.string().describe("Opening title"),
@@ -46,11 +46,17 @@ export default function Video({ title }: z.infer<typeof schema>) {
 /** A held photo with a push from `from` to `to`; used four times, so the editor sees generated elements until it bakes one. */
 function Photo({ id, src, from, to }: { id: string; src: string; from: number; to: number }) {
   return (
-    <Clip id={id} src={src} duration={4} fit="cover">
-      <Keyframe id={`${id}-sx0`} property="transform.scale.x" at={0} value={from} easing="easeInOutSine" />
-      <Keyframe id={`${id}-sx1`} property="transform.scale.x" at={4} value={to} />
-      <Keyframe id={`${id}-sy0`} property="transform.scale.y" at={0} value={from} easing="easeInOutSine" />
-      <Keyframe id={`${id}-sy1`} property="transform.scale.y" at={4} value={to} />
-    </Clip>
+    <Clip
+      id={id}
+      src={src}
+      duration={4}
+      fit="cover"
+      transform={{
+        scale: [
+          { at: 0, value: from, easing: "easeInOutSine" },
+          { at: 4, value: to },
+        ],
+      }}
+    />
   );
 }

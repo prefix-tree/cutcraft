@@ -4,20 +4,7 @@ import { join } from "node:path";
 import { createElement } from "react";
 import { describe, expect, it } from "vitest";
 
-import {
-  Angle,
-  Audio,
-  Clip,
-  Composition,
-  Cut,
-  Freeze,
-  Gap,
-  Multicam,
-  SpeedKey,
-  Title,
-  Track,
-  Transition,
-} from "@uberscene/kit";
+import { Angle, Audio, Clip, Composition, Cut, Gap, Multicam, Title, Track, Transition } from "@uberscene/kit";
 import { collect, lint, resolve, resolveScene, type SceneFn } from "@uberscene/sdk";
 
 import { fixturesDir, fixtureText, fixtureTree, manifest, round, serialize } from "./helpers";
@@ -45,9 +32,9 @@ describe("resolve", () => {
   });
 
   it("times a clip by its speed ramp and lengthens it by its freeze holds", () => {
-    const ramp = (id: string) => [
-      h(SpeedKey, { id: `${id}-k1`, at: 0, speed: 1 }),
-      h(SpeedKey, { id: `${id}-k2`, at: 2, speed: 0.5 }),
+    const ramp = [
+      { at: 0, value: 1 },
+      { at: 2, value: 0.5 },
     ];
     const el = h(
       Composition,
@@ -56,13 +43,9 @@ describe("resolve", () => {
         Track,
         { id: "t1" },
         // 1 → 0.5 over 2 s plays 1.5 s of source; the other 2.5 s at half speed take 5 s.
-        h(Clip, { id: "byOut", src: "asset:city", in: 0, out: 4 }, ...ramp("byOut")),
-        h(Clip, { id: "byDuration", src: "asset:city", in: 0, duration: 4 }, ...ramp("byDuration")),
-        h(
-          Clip,
-          { id: "held", src: "asset:city", in: 0, out: 4 },
-          h(Freeze, { id: "f", at: 1, start: 2, duration: 0.5 }),
-        ),
+        h(Clip, { id: "byOut", src: "asset:city", in: 0, out: 4, speed: ramp }),
+        h(Clip, { id: "byDuration", src: "asset:city", in: 0, duration: 4, speed: ramp }),
+        h(Clip, { id: "held", src: "asset:city", in: 0, out: 4, freezes: [{ at: 2, duration: 0.5, source: 1 }] }),
         h(Gap, { id: "after", duration: 1 }),
       ),
     );

@@ -132,14 +132,13 @@ describe("where things are", () => {
     const file = join(dir, "effect.tsx");
     writeFileSync(
       file,
-      `import { Composition, Effect, Layer, Track } from "@uberscene/kit";
+      `import { Composition, Layer, Track } from "@uberscene/kit";
 export const manifest = { assets: {} };
 export default function Video() {
   return (
     <Composition fps={30} width={540} height={960} background={{ mode: "color", color: "#000000" }}>
       <Track id="t" layout="free">
-        <Layer id="fx" start={0} duration={2}>
-          <Effect id="inv" type="invert" params={{ amount: 1 }} />
+        <Layer id="fx" start={0} duration={2} effects={[{ type: "invert", amount: 1 }]}>
           <div data-name="block" style={{ position: "absolute", left: 100, top: 300, width: 120, height: 60, background: "#ffffff" }} />
         </Layer>
       </Track>

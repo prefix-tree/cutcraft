@@ -129,9 +129,9 @@ describe("moments", () => {
       `<Track id="main"><Clip id="a" src="asset:talk" in="word:4" out="word:9.end" speed={2} /></Track>`,
     );
     expect(at(fast, "word:6").moments[0]?.time).toBe(0.5);
-    const held = stateOf(`<Track id="main"><Clip id="a" src="asset:talk" in="word:4" out="word:9.end">
-  <Freeze id="f" at={0.5} start={0.5} duration={2} />
-</Clip></Track>`);
+    const held = stateOf(
+      `<Track id="main"><Clip id="a" src="asset:talk" in="word:4" out="word:9.end" freezes={[{ at: 0.5, duration: 2, source: 0.5 }]} /></Track>`,
+    );
     expect(at(held, "word:6").moments[0]?.time).toBe(3);
   });
 

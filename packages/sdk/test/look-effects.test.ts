@@ -6,8 +6,8 @@ import { collectModule, loadModule, resolve } from "@uberscene/sdk";
 const stateOf = (effects: string) =>
   resolve(
     collectModule(
-      loadModule(`import { Composition, Effect, Title, Track } from "@uberscene/kit";
-export default function V() { return <Composition fps={30} width={640} height={360}><Track id="t" layout="free"><Title id="h0" start={0} duration={2}>Hi${effects}</Title></Track></Composition>; }`) as never,
+      loadModule(`import { Composition, Title, Track } from "@uberscene/kit";
+export default function V() { return <Composition fps={30} width={640} height={360}><Track id="t" layout="free"><Title id="h0" start={0} duration={2} effects={[${effects}]}>Hi</Title></Track></Composition>; }`) as never,
     ),
     { assets: {} },
   );
@@ -16,9 +16,9 @@ const LOOKS = ["halftone", "pixelate", "scanlines", "lightLeak", "fractalNoise"]
 
 describe("the stylizers and generators", () => {
   it("fill their defaults", () => {
-    const state = stateOf(LOOKS.map((t) => `<Effect id="${t}" type="${t}" />`).join("\n"));
+    const state = stateOf(LOOKS.map((t) => `{ type: "${t}" }`).join(", "));
     expect(state.errors).toEqual([]);
-    const params = (id: string) => state.items.get(id)?.props.params;
+    const params = (type: string) => state.items.get(`h0.effects.${LOOKS.indexOf(type as never)}`)?.props.params;
     expect(params("halftone")).toEqual({
       size: 8,
       angle: 45,
@@ -43,15 +43,15 @@ describe("the stylizers and generators", () => {
   });
 
   it("say what is out of range, unknown or not one of the choices", () => {
-    const state = stateOf(`<Effect id="h" type="halftone" params={{ mode: "rgb" }} />
-      <Effect id="p" type="pixelate" params={{ size: 0 }} />
-      <Effect id="n" type="fractalNoise" params={{ octaves: 9 }} />
-      <Effect id="l" type="lightLeak" params={{ size: 0.5 }} />`);
+    const state = stateOf(`{ type: "halftone", mode: "rgb" },
+      { type: "pixelate", size: 0 },
+      { type: "fractalNoise", octaves: 9 },
+      { type: "lightLeak", size: 0.5 }`);
     expect(state.errors.map((e) => `${e.id}.${e.prop}`)).toEqual([
-      "h.params.mode",
-      "p.params.size",
-      "n.params.octaves",
-      "l.params",
+      "h0.effects.0.mode",
+      "h0.effects.1.size",
+      "h0.effects.2.octaves",
+      "h0.effects.3",
     ]);
   });
 

@@ -17,7 +17,5 @@ No value means any value except one that asks for nothing (`false`, `0`, `"none"
 |---|---|---|---|
 | `<Composition>` | `background.mode` | `blur` | draws as the plain colour when an overlay sits beneath the footage |
 | `<Captions>` | `animation` | `typewriter` | types out only cues without word timings; cues with words show as karaoke |
-| `<SpeedKey>` inside `<Nested>` | the element |  | is ignored inside `<Nested>`: the sequence plays at its constant speed |
-| `<Freeze>` inside `<Nested>` | the element |  | is ignored inside `<Nested>`: the sequence plays at its constant speed |
-| `<Effect>` inside `<Title>`, `<Shape>`, `<Svg>`, `<Sticker>`, `<Layer>` | `type` | `vignette` | is not drawn on an overlay yet: put it on the clip, or on an `<Adjustment>` to cover everything beneath |
-| `<Effect>` inside `<Title>`, `<Shape>`, `<Svg>`, `<Sticker>`, `<Layer>` | `type` | `grain` | is not drawn on an overlay yet: put it on the clip, or on an `<Adjustment>` to cover everything beneath |
+| `<Title>`, `<Shape>`, `<Svg>`, `<Sticker>`, `<Layer>` | `effects` | `vignette` | is not drawn on an overlay yet: put it on the clip, or on an `<Adjustment>` to cover everything beneath |
+| `<Title>`, `<Shape>`, `<Svg>`, `<Sticker>`, `<Layer>` | `effects` | `grain` | is not drawn on an overlay yet: put it on the clip, or on an `<Adjustment>` to cover everything beneath |

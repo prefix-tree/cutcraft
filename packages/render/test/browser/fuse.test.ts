@@ -45,13 +45,13 @@ vec4 effect(vec2 uv) {
 const same = effect({ name: "same", shader: "vec4 effect(vec2 uv) { return texture(image, uv); }" });`;
 
 const GRADE = [
-  `<Effect id="s1" type="exposure" params={{ stops: 0.4 }} />`,
-  `<Effect id="s2" type="whiteBalance" params={{ temperature: 0.2, tint: -0.1 }} />`,
-  `<Effect id="s3" type="curves" params={{ rgb: [[0, 0], [0.5, 0.6], [1, 1]] }} />`,
-  `<Effect id="s4" type="vibrance" params={{ amount: 0.4 }} />`,
-  `<Effect id="s5" type="lut" params={{ src: "asset:warm", amount: 0.5 }} />`,
-  `<Effect id="s6" type="brightness" params={{ amount: 0.05 }} />`,
-  `<Effect id="s7" type="saturation" params={{ amount: -0.2 }} />`,
+  `{ type: "exposure", stops: 0.4 }`,
+  `{ type: "whiteBalance", temperature: 0.2, tint: -0.1 }`,
+  `{ type: "curves", rgb: [[0, 0], [0.5, 0.6], [1, 1]] }`,
+  `{ type: "vibrance", amount: 0.4 }`,
+  `{ type: "lut", src: "asset:warm", amount: 0.5 }`,
+  `{ type: "brightness", amount: 0.05 }`,
+  `{ type: "saturation", amount: -0.2 }`,
 ];
 
 async function still(name: string, effects: string): Promise<string> {
@@ -59,15 +59,14 @@ async function still(name: string, effects: string): Promise<string> {
   const manifest = { assets: { ...mediaManifest.assets, warm: { id: "warm", kind: "lut" as const, duration: 0 } } };
   writeFileSync(
     file,
-    `import { Clip, Composition, effect, Effect, Track } from "@uberscene/kit";
+    `import { Clip, Composition, effect, Track } from "@uberscene/kit";
 export const manifest = ${JSON.stringify(manifest)};
 ${CHART}
 export default function Video() {
   return (
     <Composition fps={30} width={320} height={180} background={{ mode: "color", color: "#000000" }}>
       <Track id="t">
-        <Clip id="c" src="asset:solid" fit="cover">
-          <Effect id="chart" type={chart} />
+        <Clip id="c" src="asset:solid" fit="cover" effects={[{ type: chart }]}>
           ${effects}
         </Clip>
       </Track>
@@ -93,7 +92,7 @@ it("draws a run of colour effects as one pass that looks like one pass each", as
   const fused = await still("fused", GRADE.join("\n          "));
   const separate = await still(
     "separate",
-    GRADE.map((e, i) => (i === 0 ? e : `<Effect id="x${i}" type={same} />${e}`)).join("\n          "),
+    GRADE.map((e, i) => (i === 0 ? e : `{ type: same }, ${e}`)).join("\n          "),
   );
   const a = readImage(fused),
     b = readImage(separate);

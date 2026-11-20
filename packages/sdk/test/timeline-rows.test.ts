@@ -88,10 +88,8 @@ describe("the timeline as rows", () => {
   it("lists effects in the order they run", () => {
     const graded = resolve(
       collectModule(
-        loadModule(`import { Clip, Composition, Effect, Track } from "@uberscene/kit";
-export default function V() { return <Composition fps={30} width={640} height={360}><Track id="t"><Clip id="c" src="asset:founder" in={0} out={2}>
-  <Effect id="expose" type="exposure" params={{ stops: 0.5 }} /><Effect id="warm" type="whiteBalance" params={{ temperature: 0.3 }} />
-</Clip></Track></Composition>; }`) as never,
+        loadModule(`import { Clip, Composition, Track } from "@uberscene/kit";
+export default function V() { return <Composition fps={30} width={640} height={360}><Track id="t"><Clip id="c" src="asset:founder" in={0} out={2} effects={[{ type: "exposure", stops: 0.5 }, { type: "whiteBalance", temperature: 0.3 }]} /></Track></Composition>; }`) as never,
       ),
       state.manifest,
     );

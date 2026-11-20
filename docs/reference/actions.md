@@ -4,7 +4,7 @@ editLink: false
 
 # Actions
 
-Generated from the registered handlers (99). Do not edit by hand; run `pnpm docs:gen`.
+Generated from the registered handlers (95). Do not edit by hand; run `pnpm docs:gen`.
 
 Every action has `validate`, `apply`, `invert` and `fold`; the inverse is never null. Each runs as `{ type, params }`; the params and notes here are read from `packages/sdk/src/actions/types/index.ts`.
 
@@ -13,7 +13,6 @@ Every action has `validate`, `apply`, `invert` and `fold`; the inverse is never 
 | action | params | what it does |
 |---|---|---|
 | `audio/add` | `{ id, trackId, src, place, in?, out?, duration? }` | An &lt;Audio> (sound only: music, a voice-over), placed like a clip; `duration: "fill"` runs to the composition's end. |
-| `audio/setAutomation` | `{ id, lane, points }` | Replaces one automation lane, `volume` or `pan`, with `[seconds, value]` points. |
 | `audio/setDuck` | `{ id, duck? }` | Turns this sound down to `to` while the track `under` plays, over `attack` and `release` seconds; omit `duck` to stop ducking. `under` is a track id or a track role, as in a file. |
 | `audio/setFade` | `{ id, in?, out? }` | Sets the fade-in and/or fade-out length in seconds; merges into `fade`. |
 | `audio/setVolume` | `{ id, volume }` | Sets the element's volume, 0 to 4 (1 leaves it as recorded). |
@@ -80,13 +79,12 @@ Every action has `validate`, `apply`, `invert` and `fold`; the inverse is never 
 
 | action | params | what it does |
 |---|---|---|
-| `effect/add` | `{ id, childId, type, params?, index? }` | Adds an effect of `type` (built in, or a shader the file declares) to element `id` at `index` (last by default), turned on. |
-| `effect/remove` | `{ id, childId }` | Removes one effect from an element's stack. |
-| `effect/restore` | `{ id, node, after }` | The undo of effect/remove: puts the effect back at its old place in the stack. |
-| `effect/setOrder` | `{ id, childIds }` | Reorders an element's effect stack; `childIds` must name every effect once. |
-| `effect/setStack` | `{ id, nodes, after? }` | Replaces an element's whole effect stack with `nodes`. |
-| `effect/toggle` | `{ id, childId, enabled }` | Turns one effect on or off without removing it. |
-| `effect/update` | `{ id, childId, params }` | Merges `params` into one effect's params. |
+| `effect/add` | `{ id, effect, index? }` | Adds `effect` (`{ type, ...params }`, a built-in type or a shader the file declares) to element `id`'s effects at `index` (last by default). |
+| `effect/remove` | `{ id, index }` | Removes the effect at `index`. |
+| `effect/setOrder` | `{ id, order }` | Reorders the effects: `order` lists the current indexes in their new order. |
+| `effect/setStack` | `{ id, effects }` | Replaces the element's effects with `effects`. |
+| `effect/toggle` | `{ id, index, enabled }` | Turns the effect at `index` on or off without removing it. |
+| `effect/update` | `{ id, index, params }` | Merges `params` into the effect at `index`; a param set to null is removed. A param may be keys. |
 
 ## `element/`
 
@@ -103,16 +101,21 @@ Every action has `validate`, `apply`, `invert` and `fold`; the inverse is never 
 |---|---|---|
 | `font/use` | `{ id?, role?, family, weight? }` | Set a font from a picker: on a title or the captions (`id`), or as a theme role (`role`: `heading`, `body`, `mono`). The family is bundled, declared in the file, or in the font catalogue; a catalogue family the file does not declare is loaded for the preview at once, and the fold writes its `googleFont()` declaration. |
 
-## `keyframe/`
+## `freeze/`
 
 | action | params | what it does |
 |---|---|---|
-| `keyframe/add` | `{ id, keyId, property?, param?, at, value, easing? }` | `property` animates the element `id`; `param` animates a param of the effect `id`. One of the two. |
-| `keyframe/move` | `{ id, keyId, at }` | Moves a keyframe to `at`, seconds from the element's start; it must stay inside the element. |
-| `keyframe/remove` | `{ id, keyId }` | Deletes one keyframe. |
-| `keyframe/restore` | `{ id, node, after }` | The undo of keyframe/remove: puts the keyframe back in place, with its value and easing. |
-| `keyframe/setAll` | `{ id, nodes, after? }` | Replaces every keyframe on the element with `nodes`. |
-| `keyframe/update` | `{ id, keyId, value?, easing? }` | Changes a keyframe's value and/or easing. |
+| `freeze/setAll` | `{ id, freezes }` | Replaces the element's holds: each keeps the source frame at `source` on screen from `at` for `duration`. |
+
+## `key/`
+
+| action | params | what it does |
+|---|---|---|
+| `key/add` | `{ id, path, at, value, easing? }` | Adds a key at `at` seconds into element `id` on `path`: `transform.opacity`, `transform.scale`, `box.x`, `volume`, `pan`, `speed`, `effects.<n>.<param>`… A constant there becomes keys; a key already at `at` is replaced. |
+| `key/move` | `{ id, path, at, to }` | Moves the key at `at` on `path` to `to`, seconds into the element; it must stay inside the element. |
+| `key/remove` | `{ id, path, at }` | Removes the key at `at` on `path`; the one key left is written as a constant. |
+| `key/setAll` | `{ id, path, keys }` | Replaces the keys on `path` with `keys`: none removes the value, one is written as a constant. |
+| `key/update` | `{ id, path, at, value?, easing? }` | Changes the value and/or easing of the key at `at` on `path`. |
 
 ## `layer/`
 
@@ -166,13 +169,6 @@ Every action has `validate`, `apply`, `invert` and `fold`; the inverse is never 
 | `source/bake` | `{ id }` | Marks a generated element so the next fold writes it and its children as literals; undo is a file revert. |
 | `source/setProp` | `{ id, prop, value }` | Writes one literal prop on any element; the inspector's generic write. |
 | `source/setProps` | `{ id, props }` | Several literal props at once; the inverse of every prop-writing action. |
-
-## `speed/`
-
-| action | params | what it does |
-|---|---|---|
-| `speed/setFreezes` | `{ id, freezes, after? }` | Replaces the element's freeze frames with `freezes`. |
-| `speed/setKeys` | `{ id, keys, after? }` | Replaces the element's speed-ramp keys with `keys`. |
 
 ## `text/`
 

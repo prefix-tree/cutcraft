@@ -39,17 +39,8 @@ The elements a file is written in: the timeline (clips, tracks, transitions, cap
 ## Effects and colour
 
 <div class="cc-cards">
-<PreviewCard code title="<Effect>" link="/reference/elements/effect" src="previews/elements/effect" text="A look on its parent: colour grading, blur, glow, outline, keying, corner pin, vignette, grain and more, or your own shader." />
-<PreviewCard code title="<Adjustment>" link="/reference/elements/adjustment" src="previews/elements/adjustment" text="Filters everything beneath it for its own stretch of time." />
+<PreviewCard code title="<Adjustment>" link="/reference/elements/adjustment" src="previews/elements/adjustment" text="Filters everything beneath it, through its effects, for its own stretch of time." />
 <PreviewCard code title="<Mask>" link="/reference/elements/mask" src="previews/elements/mask" text="Shows only a shape of its clip, with a feathered edge or inverted." />
-</div>
-
-## Motion and time
-
-<div class="cc-cards">
-<PreviewCard code title="<Keyframe>" link="/reference/elements/keyframe" src="previews/elements/keyframe" text="Animates one property of its parent between values, with easing." />
-<PreviewCard code title="<SpeedKey>" link="/reference/elements/speedkey" src="previews/elements/speedkey" text="Changes its clip's speed from a moment on, eased: speed ramps." />
-<PreviewCard code title="<Freeze>" link="/reference/elements/freeze" src="previews/elements/freeze" text="Holds one frame of its clip for a while, then plays on." />
 </div>
 
 ## Structure
@@ -64,7 +55,7 @@ The elements a file is written in: the timeline (clips, tracks, transitions, cap
 ## Sound
 
 <div class="cc-cards">
-<PreviewCard code title="<Audio>" link="/reference/elements/audio" text="A stretch of a sound asset: volume, fades, ducking under another track, automation." />
+<PreviewCard code title="<Audio>" link="/reference/elements/audio" text="A stretch of a sound asset: volume and pan (constant or keys), fades, ducking under another track." />
 </div>
 
 ## Capabilities
@@ -91,7 +82,3 @@ The elements a file is written in: the timeline (clips, tracks, transitions, cap
 | [`<Angle>`](/reference/elements/angle) |  |  |  |  |  |  |
 | [`<Cut>`](/reference/elements/cut) |  |  |  |  |  |  |
 | [`<Layer>`](/reference/elements/layer) | yes | yes |  |  | yes | `effect`, `keyframe` |
-| [`<Effect>`](/reference/elements/effect) |  |  |  |  |  | `keyframe` |
-| [`<Keyframe>`](/reference/elements/keyframe) |  |  |  |  |  |  |
-| [`<SpeedKey>`](/reference/elements/speedkey) |  |  |  |  |  |  |
-| [`<Freeze>`](/reference/elements/freeze) |  |  |  |  |  |  |

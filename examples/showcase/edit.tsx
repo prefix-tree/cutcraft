@@ -1,4 +1,4 @@
-import { Clip, Composition, Keyframe, Motion, Title, Track, Transition } from "@uberscene/kit";
+import { Clip, Composition, Motion, Title, Track, Transition } from "@uberscene/kit";
 
 /** An edit: three shots cut back to back, a wipe and a slide between them, a slow push-in, a title and a Motion lower third. */
 export default function Video() {
@@ -7,13 +7,20 @@ export default function Video() {
       <Track id="main" name="Story">
         <Clip id="open" src="asset:coffeeWide" in={4} out={7} fit="cover" />
         <Transition id="x1" type="wipe" duration={0.6} params={{ direction: "left" }} />
-        <Clip id="zoom" src="asset:espresso" in={2} out={5.5} fit="cover">
-          {/* A slow push-in: two keys on each scale axis. */}
-          <Keyframe id="zoom-sx-0" property="transform.scale.x" at={0} value={1} easing="easeInOutSine" />
-          <Keyframe id="zoom-sx-1" property="transform.scale.x" at={3.5} value={1.2} />
-          <Keyframe id="zoom-sy-0" property="transform.scale.y" at={0} value={1} easing="easeInOutSine" />
-          <Keyframe id="zoom-sy-1" property="transform.scale.y" at={3.5} value={1.2} />
-        </Clip>
+        <Clip
+          id="zoom"
+          src="asset:espresso"
+          in={2}
+          out={5.5}
+          fit="cover"
+          transform={{
+            scale: [
+              // A slow push-in: two keys on each scale axis.
+              { at: 0, value: 1, easing: "easeInOutSine" },
+              { at: 3.5, value: 1.2 },
+            ],
+          }}
+        />
         <Transition id="x2" type="slide" duration={0.6} params={{ direction: "up" }} />
         <Clip id="close" src="asset:redCup" in={18} out={20.6} fit="cover" />
       </Track>

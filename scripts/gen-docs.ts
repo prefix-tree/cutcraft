@@ -8,6 +8,7 @@ import {
   COMPONENTS,
   EFFECT_FAMILIES,
   EFFECTS,
+  EFFECTS_NOT_RENDERED,
   ELEMENTS,
   ENGINE_LAYERS,
   KIND_CAPABILITIES,
@@ -149,17 +150,8 @@ const ELEMENT_DOCS: Record<string, readonly (readonly [element: string, summary:
     ["Sticker", "A ready-made icon or sticker by name."],
   ],
   "Effects and colour": [
-    [
-      "Effect",
-      "A look on its parent: colour grading, blur, glow, outline, keying, corner pin, vignette, grain and more, or your own shader.",
-    ],
-    ["Adjustment", "Filters everything beneath it for its own stretch of time."],
+    ["Adjustment", "Filters everything beneath it, through its `effects`, for its own stretch of time."],
     ["Mask", "Shows only a shape of its clip, with a feathered edge or inverted."],
-  ],
-  "Motion and time": [
-    ["Keyframe", "Animates one property of its parent between values, with easing."],
-    ["SpeedKey", "Changes its clip's speed from a moment on, eased: speed ramps."],
-    ["Freeze", "Holds one frame of its clip for a while, then plays on."],
   ],
   Structure: [
     ["Nested", "A sequence written once as a component and placed like a clip."],
@@ -167,7 +159,9 @@ const ELEMENT_DOCS: Record<string, readonly (readonly [element: string, summary:
     ["Angle", "One camera of a `<Multicam>`: its asset and sync offset."],
     ["Cut", "Switches a `<Multicam>` to an angle at a moment."],
   ],
-  Sound: [["Audio", "A stretch of a sound asset: volume, fades, ducking under another track, automation."]],
+  Sound: [
+    ["Audio", "A stretch of a sound asset: volume and pan (constant or keys), fades, ducking under another track."],
+  ],
 };
 /** Elements with no rendered example (the Node export does not draw them yet): code, and a note. */
 const CODE_ONLY: Record<string, string> = {
@@ -644,15 +638,16 @@ function renderingPage(): string {
     "| element | prop | value | what happens |",
     "|---|---|---|---|",
   );
-  // A row that holds only inside some parents names them: `<Effect>` inside `<Title>`, `<Shape>`.
-  const free = NOT_RENDERED.filter((r) => !r.parent);
-  const inside = NOT_RENDERED.filter((r) => r.parent).map((r) => ({ ...r, kind: r.parent!, child: r.kind }));
-  const rows = [
-    ...merge(free, (r) => `${r.prop}|${r.value}|${r.reason}`).map(([r, kinds]) => [r, on(kinds)] as const),
-    ...merge(inside, (r) => `${r.child}|${r.prop}|${r.value}|${r.reason}`).map(
-      ([r, parents]) => [r, `${on([r.child])} inside ${on(parents)}`] as const,
-    ),
-  ];
+  // An effect type an element takes in its `effects` but does not draw is a row of `effects` with that type.
+  const effectRows = EFFECTS_NOT_RENDERED.map((r) => ({
+    kind: r.kind,
+    prop: "effects",
+    value: r.type,
+    reason: r.reason,
+  }));
+  const rows = merge([...NOT_RENDERED, ...effectRows], (r) => `${r.prop}|${r.value}|${r.reason}`).map(
+    ([r, kinds]) => [r, on(kinds)] as const,
+  );
   for (const [r, element] of rows)
     lines.push(
       `| ${element} | ${r.prop ? code(r.prop) : "the element"} | ${r.value ? code(r.value) : ""} | ${why(r.reason)} |`,

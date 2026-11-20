@@ -55,21 +55,17 @@ describe("effect() and transition()", () => {
   });
 
   it("check a built-in shader effect's params and fill its defaults", () => {
-    const ok = stateOf(
-      file(`<Clip id="c" src="asset:city"><Effect id="l" type="levels" params={{ gamma: 1.5 }} /></Clip>`),
-    );
+    const ok = stateOf(file(`<Clip id="c" src="asset:city" effects={[{ type: "levels", gamma: 1.5 }]} />`));
     expect(ok.errors).toEqual([]);
     expect(ok.items.get("l")?.props.params).toEqual({ black: 0, white: 1, gamma: 1.5 });
-    const bad = stateOf(
-      file(`<Clip id="c" src="asset:city"><Effect id="l" type="levels" params={{ white: 2 }} /></Clip>`),
-    );
+    const bad = stateOf(file(`<Clip id="c" src="asset:city" effects={[{ type: "levels", white: 2 }]} />`));
     expect(bad.errors.map((e) => e.prop)).toEqual(["params.white"]);
   });
 
   it("put a file's effects on its state, with params checked and filled by their schema", () => {
     const state = stateOf(
       file(
-        `<Clip id="c" src="asset:city"><Effect id="g" type={glitch} params={{ amount: 0.5 }} /><Effect id="h" type={glitch} /></Clip>`,
+        `<Clip id="c" src="asset:city" effects={[{ type: glitch, amount: 0.5 }, { type: glitch }]} />`,
         `const glitch = effect({ name: "glitch", params: z.object({ amount: z.number().min(0).max(1).default(0.3) }), shader: \`${INVERT}\` });`,
       ),
     );
@@ -80,7 +76,7 @@ describe("effect() and transition()", () => {
 
     const bad = stateOf(
       file(
-        `<Clip id="c" src="asset:city"><Effect id="g" type="glitch" params={{ amount: 4 }} /></Clip>`,
+        `<Clip id="c" src="asset:city" effects={[{ type: "glitch", amount: 4 }]} />`,
         `export const glitch = effect({ name: "glitch", params: z.object({ amount: z.number().max(1) }), shader: \`${INVERT}\` });`,
       ),
     );
@@ -156,7 +152,7 @@ describe("declarations as values", () => {
   it("are found on the element that uses them, or among the exports; one neither used nor exported is not", () => {
     const state = stateOf(
       file(
-        `<Clip id="a" src="asset:city"><Effect id="u" type={used} /></Clip>`,
+        `<Clip id="a" src="asset:city" effects={[{ type: used }]} />`,
         `const used = effect({ name: "used", shader: \`${INVERT}\` });
 export const offered = effect({ name: "offered", shader: \`${INVERT}\` });
 const hidden = effect({ name: "hidden", shader: \`${INVERT}\` });`,
@@ -170,7 +166,7 @@ const hidden = effect({ name: "hidden", shader: \`${INVERT}\` });`,
   it("refuse two different definitions under one name", () => {
     const state = stateOf(
       file(
-        `<Clip id="a" src="asset:city"><Effect id="u" type={a} /><Effect id="v" type={b} /></Clip>`,
+        `<Clip id="a" src="asset:city" effects={[{ type: a }, { type: b }]} />`,
         `const a = effect({ name: "same", shader: \`${INVERT}\` });
 const b = effect({ name: "same", shader: "vec4 effect(vec2 uv) { return vec4(1.0); }" });`,
       ),
@@ -183,7 +179,7 @@ const b = effect({ name: "same", shader: "vec4 effect(vec2 uv) { return vec4(1.0
   it("want one neither exported nor used to be exported, so the editor can offer it", () => {
     const d = lint(
       file(
-        `<Clip id="a" src="asset:city"><Effect id="u" type={used} /></Clip>`,
+        `<Clip id="a" src="asset:city" effects={[{ type: used }]} />`,
         `const used = effect({ name: "used", shader: \`${INVERT}\` });
 export const offered = effect({ name: "offered", shader: \`${INVERT}\` });
 const hidden = effect({ name: "hidden", shader: \`${INVERT}\` });`,
@@ -216,20 +212,17 @@ export const sweep = transition({ name: "sweep", shader: "vec4 transition(vec2 u
 describe("timeline children inside overlays", () => {
   it("keep a title's text, and collect a Layer's effects apart from its free code", () => {
     const state = stateOf(`import { z } from "zod";
-import { Composition, effect, Effect, Keyframe, Layer, Title, Track } from "@uberscene/kit";
+import { Composition, effect, Layer, Title, Track } from "@uberscene/kit";
 const swap = effect({ name: "swap", shader: "vec4 effect(vec2 uv) { return texture(image, uv); }" });
 function Box() { return null; }
 export default function V() {
   return (
     <Composition fps={30} width={640} height={360}>
       <Track id="t" layout="free">
-        <Title id="h" start={0} duration={2}>
-          <Effect id="e1" type={swap} />
+        <Title id="h" start={0} duration={2} effects={[{ type: swap }]}>
           Hello
         </Title>
-        <Layer id="l" start={0} duration={2}>
-          <Effect id="e2" type={swap} />
-          <Keyframe id="k" property="transform.opacity" at={0} value={1} />
+        <Layer id="l" start={0} duration={2} transform={{ opacity: [{ at: 0, value: 1 }] }} effects={[{ type: swap }]}>
           <Box />
         </Layer>
       </Track>

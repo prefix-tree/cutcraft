@@ -3,6 +3,7 @@
 import { framesUntil, nearestFrame, type Rate } from "@uberscene/kit/schema";
 
 import type { ResolveError } from "../resolve/errors";
+import { derivedOrigin } from "../resolve/expand";
 import type { Placement, ResolvedState } from "../resolve/resolve";
 import { spokenWords } from "./plays";
 
@@ -52,8 +53,9 @@ export interface EffectRow {
 
 export interface KeyframeRow {
   readonly id: string;
-  /** The element or effect it animates. */
+  /** The element it animates. */
   readonly element: string;
+  /** Where its list is written on the element: `transform.opacity`, `box.x`, `volume`, `effects.0.radius`. */
   readonly property: string;
   /** Seconds of the finished video. */
   readonly at: number;
@@ -146,10 +148,11 @@ export function timelineRows(state: ResolvedState): TimelineRows {
         order: n,
       });
     } else if (p.kind === "keyframe") {
+      const origin = derivedOrigin(p.id);
       keyframes.push({
         id: p.id,
-        element: p.parent ?? "",
-        property: String(p.props.property ?? ""),
+        element: origin?.id ?? p.parent ?? "",
+        property: origin ? origin.path.replace(/\.\d+$/, "") : String(p.props.property ?? ""),
         at: ms(p.start),
         frame: frame(p.start),
         value: p.props.value,

@@ -1,16 +1,26 @@
-import { Clip, Composition, Effect, Keyframe, Track } from "@uberscene/kit";
+import { Clip, Composition, Track } from "@uberscene/kit";
 
 // levels: Sets the black point, the white point and the gamma between them.
 export default function Video() {
   return (
     <Composition fps={30} width={640} height={360}>
       <Track id="main">
-        <Clip id="shot" src="asset:redCup" in={18} out={21} fit="cover">
-          <Effect id="look" type="levels">
-            <Keyframe id="k1" param="black" at={0.5} value={0} easing="ease-in-out" />
-            <Keyframe id="k2" param="black" at={1.5} value={0.15} />
-          </Effect>
-        </Clip>
+        <Clip
+          id="shot"
+          src="asset:redCup"
+          in={18}
+          out={21}
+          fit="cover"
+          effects={[
+            {
+              type: "levels",
+              black: [
+                { at: 0.5, value: 0, easing: "ease-in-out" },
+                { at: 1.5, value: 0.15 },
+              ],
+            },
+          ]}
+        />
       </Track>
     </Composition>
   );

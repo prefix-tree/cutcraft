@@ -26,6 +26,33 @@ export function printLiteral(value: Json | undefined): string {
   return `{ ${entries.map(([k, v]) => `${IDENT.test(k) ? k : JSON.stringify(k)}: ${printLiteral(v)}`).join(", ")} }`;
 }
 
+/** The widest line the printers write, as the formatter keeps the files. */
+export const LINE_WIDTH = 120;
+
+/**
+ * A JSON value as source that starts `column` characters into a line indented by `indent`: compact while it fits
+ * the line, else one entry of each list or object per line, each indented one step more. The editor and the lint fixes
+ * print through it, so the same value is always written the same way.
+ */
+export function printValue(value: Json | undefined, indent = "", column = indent.length, step = "  "): string {
+  const compact = printLiteral(value);
+  if (column + compact.length <= LINE_WIDTH || value === null || typeof value !== "object") return compact;
+  if ((value as unknown) instanceof Identifier) return compact;
+  const inner = indent + step;
+  if (Array.isArray(value)) {
+    if (value.length === 0) return compact;
+    return `[\n${value.map((v) => `${inner}${printValue(v, inner)},`).join("\n")}\n${indent}]`;
+  }
+  const entries = Object.entries(value).filter(([, v]) => v !== undefined);
+  if (entries.length === 0) return compact;
+  return `{\n${entries
+    .map(([k, v]) => {
+      const key = `${IDENT.test(k) ? k : JSON.stringify(k)}: `;
+      return `${inner}${key}${printValue(v, inner, inner.length + key.length)},`;
+    })
+    .join("\n")}\n${indent}}`;
+}
+
 /**
  * Whether a string can be written as a JSX attribute string (`name="…"`) and read back the same. Such a string takes
  * no escapes and JSX decodes HTML entities in it (`&amp;` reads as `&`), so anything it cannot hold goes in braces.

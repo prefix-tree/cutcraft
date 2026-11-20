@@ -1,4 +1,10 @@
-import { MASK_NOT_RENDERED, MASKED_KINDS, NOT_RENDERED, RENDERED_VALUES } from "@uberscene/kit/schema";
+import {
+  EFFECTS_NOT_RENDERED,
+  MASK_NOT_RENDERED,
+  MASKED_KINDS,
+  NOT_RENDERED,
+  RENDERED_VALUES,
+} from "@uberscene/kit/schema";
 
 import type { Json } from "../../../patches/types";
 import type { ElementSite } from "../../index";
@@ -47,7 +53,6 @@ export const notRendered: Rule = {
       }
       for (const n of NOT_RENDERED) {
         if (n.kind !== "*" && n.kind !== site.kind) continue;
-        if (n.parent && index.elements.get(site.parent ?? "")?.kind !== n.parent) continue;
         if (!n.prop) {
           warn(site, "", n.reason);
           continue;
@@ -57,6 +62,13 @@ export const notRendered: Rule = {
         if (n.value !== undefined ? at.value !== n.value : OFF.includes(at.value as Json)) continue;
         warn(site, n.value !== undefined ? `${n.prop} "${n.value}"` : n.prop, n.reason, at.range, at.prop);
       }
+      const effects = site.props.get("effects");
+      if (Array.isArray(effects?.literal))
+        effects.literal.forEach((e, i) => {
+          const type = e !== null && typeof e === "object" && !Array.isArray(e) ? e.type : undefined;
+          const n = EFFECTS_NOT_RENDERED.find((x) => x.kind === site.kind && x.type === type);
+          if (n && effects) warn(site, `effect ${i} "${String(type)}"`, n.reason, effects.range, "effects");
+        });
       if (site.kind === "mask" && site.parent) {
         const parent = index.elements.get(site.parent);
         const count = (masks.get(site.parent) ?? 0) + 1;

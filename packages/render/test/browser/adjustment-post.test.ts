@@ -28,16 +28,14 @@ async function still(name: string, looks: string): Promise<string> {
   const file = join(dir, `${name}.tsx`);
   writeFileSync(
     file,
-    `import { Adjustment, Clip, Composition, effect, Effect, Track } from "@uberscene/kit";
+    `import { Adjustment, Clip, Composition, effect, Track } from "@uberscene/kit";
 export const manifest = ${JSON.stringify({ assets: mediaManifest.assets })};
 ${CHART}
 export default function Video() {
   return (
     <Composition fps={30} width={320} height={180} background={{ mode: "color", color: "#000000" }}>
       <Track id="t">
-        <Clip id="c" src="asset:solid" fit="cover">
-          <Effect id="chart" type={chart} />
-        </Clip>
+        <Clip id="c" src="asset:solid" fit="cover" effects={[{ type: chart }]} />
       </Track>
       <Track id="looks" layout="free">
         <Adjustment id="a" start={0} duration={1}>

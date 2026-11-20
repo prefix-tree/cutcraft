@@ -1,4 +1,4 @@
-import { Adjustment, Clip, Composition, Effect, Track } from "@uberscene/kit";
+import { Adjustment, Clip, Composition, Track } from "@uberscene/kit";
 
 export { manifest } from "./composition";
 
@@ -12,9 +12,7 @@ export default function Video() {
         <Clip id="solid" src="asset:solid" in={0} out={1} />
       </Track>
       <Track id="adj" layout="free">
-        <Adjustment id="adj1" start={0} duration={1}>
-          <Effect id="e1" type="brightness" params={{ amount: -0.5 }} />
-        </Adjustment>
+        <Adjustment id="adj1" start={0} duration={1} effects={[{ type: "brightness", amount: -0.5 }]} />
       </Track>
     </Composition>
   );

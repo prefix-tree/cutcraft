@@ -218,9 +218,9 @@ describe("lint", () => {
 
     it("warns on SpeedKey and Freeze inside a Nested only, and on a second mask or one on a title", () => {
       const d = notRendered(`<Track id="t">
-        <Clip id="c" src="asset:city"><SpeedKey id="s" at={1} speed={2} /><Freeze id="f" at={1} start={0} duration={1} /><Mask id="m1" /><Mask id="m2" /></Clip>
+        <Clip id="c" src="asset:city" speed={[{ at: 1, value: 2 }]} freezes={[{ at: 0, duration: 1, source: 1 }]}><Mask id="m1" /><Mask id="m2" /></Clip>
         <Title id="h">Hi<Mask id="m4" /></Title>
-        <Nested id="n" duration={3}><SpeedKey id="ns" at={1} speed={2} /><Freeze id="nf" at={1} start={0} duration={1} /></Nested>
+        <Nested id="n" duration={3} speed={[{ at: 1, value: 2 }]} freezes={[{ at: 0, duration: 1, source: 1 }]} />
       </Track>`);
       expect(d.map((x) => x.split(":")[1])).toEqual(["m2.", "m4.", "ns.", "nf."]);
       expect(d[2]).toContain("is ignored inside <Nested>");
@@ -248,9 +248,9 @@ describe("lint", () => {
     it("warns on vignette and grain on an overlay, and not on a clip or an adjustment", () => {
       expect(
         notRendered(`<Track id="t">
-        <Clip id="c" src="asset:city"><Effect id="cv" type="vignette" /></Clip>
-        <Adjustment id="a" start={0} duration={1}><Effect id="av" type="vignette" /><Effect id="ag" type="grain" /></Adjustment>
-        <Title id="h">Hi<Effect id="hv" type="vignette" /><Effect id="hg" type="grain" /><Effect id="hb" type="blur" /></Title>
+        <Clip id="c" src="asset:city" effects={[{ type: "vignette" }]} />
+        <Adjustment id="a" start={0} duration={1} effects={[{ type: "vignette" }, { type: "grain" }]} />
+        <Title id="h" effects={[{ type: "vignette" }, { type: "grain" }, { type: "blur" }]}>Hi</Title>
       </Track>`),
       ).toEqual([
         'warning:hv.type: "hv" <Effect> type "vignette" is not drawn on an overlay yet: put it on the clip, or on an <Adjustment> to cover everything beneath',
@@ -261,7 +261,13 @@ describe("lint", () => {
     it("says nothing about a file that only uses what renders", () => {
       expect(
         notRendered(`<Track id="t">
-        <Clip id="a" src="asset:city" speed={2}><Effect id="e" type="blur" /><Effect id="wb" type="whiteBalance" params={{ temperature: 0.2, tint: -0.1 }} /><Effect id="lv" type="levels" params={{ black: 0.05, white: 0.95 }} /><Effect id="vg" type="vignette" params={{ amount: 0.4 }} /><Effect id="gr" type="grain" /><Mask id="m" shape={{ rect: { x: 0, y: 0, width: 1, height: 1 } }} /><Keyframe id="k" property="box.x" at={0} value={0} /></Clip>
+        <Clip id="a" src="asset:city" speed={2} box={{ x: [{ at: 0, value: 0 }] }} effects={[
+          { type: "blur" },
+          { type: "whiteBalance", temperature: 0.2, tint: -0.1 },
+          { type: "levels", black: 0.05, white: 0.95 },
+          { type: "vignette", amount: 0.4 },
+          { type: "grain" },
+        ]}><Mask id="m" shape={{ rect: { x: 0, y: 0, width: 1, height: 1 } }} /></Clip>
         <Transition id="x" type="crossfade" />
         <Clip id="b" src="asset:city" />
         <Transition id="w" type="wipe" params={{ direction: "up" }} />

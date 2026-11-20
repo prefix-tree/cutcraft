@@ -1,16 +1,26 @@
-import { Clip, Composition, Effect, Keyframe, Track } from "@uberscene/kit";
+import { Clip, Composition, Track } from "@uberscene/kit";
 
 // brightness: Lightens or darkens the picture.
 export default function Video() {
   return (
     <Composition fps={30} width={640} height={360}>
       <Track id="main">
-        <Clip id="shot" src="asset:espresso" in={2} out={5} fit="cover">
-          <Effect id="look" type="brightness">
-            <Keyframe id="k1" param="amount" at={0.5} value={0} easing="ease-in-out" />
-            <Keyframe id="k2" param="amount" at={1.5} value={0.3} />
-          </Effect>
-        </Clip>
+        <Clip
+          id="shot"
+          src="asset:espresso"
+          in={2}
+          out={5}
+          fit="cover"
+          effects={[
+            {
+              type: "brightness",
+              amount: [
+                { at: 0.5, value: 0, easing: "ease-in-out" },
+                { at: 1.5, value: 0.3 },
+              ],
+            },
+          ]}
+        />
       </Track>
     </Composition>
   );

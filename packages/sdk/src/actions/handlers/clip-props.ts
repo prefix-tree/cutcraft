@@ -1,8 +1,7 @@
 import type { Json } from "../../patches/types";
 import { INTERIOR_PREFIX } from "../../resolve/tree";
-import { define, makePropHandler, onElement, rawNode, rawProp, validateTarget } from "../handler-kit";
-import { invalid, type NodeSpec, nodeSpecOf, ok } from "../types";
-import { replaceAll, stackPosition } from "./effect";
+import { define, makePropHandler, rawNode, rawProp } from "../handler-kit";
+import { invalid, ok } from "../types";
 
 const SOURCE_KINDS = ["clip", "audio", "nested"];
 /** Kinds that take a `transform`. */
@@ -128,14 +127,6 @@ define(makePropHandler({
   },
 }));
 define(makePropHandler({
-  type: "audio/setAutomation",
-  kinds: AUDIO_KINDS,
-  write: (p, state) => {
-    const prior = (rawProp(state, p.id, "automation") ?? {}) as Record<string, Json>;
-    return { automation: { ...prior, [p.lane]: p.points.map((pt) => [pt[0], pt[1]]) } };
-  },
-}));
-define(makePropHandler({
   type: "audio/setDuck",
   kinds: AUDIO_KINDS,
   write: (p) => ({ duck: p.duck as Json | undefined }),
@@ -150,36 +141,6 @@ define(makePropHandler({
           path: "duck.under",
         }),
 }));
-
-/** Replace the whole child collection of one kind. */
-function replaceChildren(
-  type: "speed/setKeys" | "speed/setFreezes",
-  childKind: string,
-  pick: (p: { keys?: readonly NodeSpec[]; freezes?: readonly NodeSpec[] }) => readonly NodeSpec[],
-) {
-  define({
-    type,
-    targets: onElement(),
-    validate: (a, state) => validateTarget(state, a.params.id, []),
-    apply: (a, log, ctx) =>
-      replaceAll(log, ctx.before, a.params.id, childKind, pick(a.params as never), a.params.after),
-    invert: (a, before) => {
-      const node = before.tree.byId.get(a.params.id)!;
-      const prior = node.children.filter((c) => c.kind === childKind).map(nodeSpecOf);
-      const after = stackPosition(before, a.params.id, childKind);
-      return {
-        type,
-        params:
-          type === "speed/setKeys"
-            ? { id: a.params.id, keys: prior, after }
-            : { id: a.params.id, freezes: prior, after },
-      } as never;
-    },
-    fold: () => [],
-  });
-}
-replaceChildren("speed/setKeys", "speedKey", (p) => p.keys ?? []);
-replaceChildren("speed/setFreezes", "freeze", (p) => p.freezes ?? []);
 
 function deepMerge(base: Record<string, Json>, patch: Readonly<Record<string, Json>>): Record<string, Json> {
   const out: Record<string, Json> = { ...base };

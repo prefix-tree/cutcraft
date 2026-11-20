@@ -54,7 +54,9 @@ async function start(): Promise<void> {
   const shared = props.share ? /#code=([\w-]+)/.exec(location.hash)?.[1] : undefined;
   if (shared) code = await unpack(shared).catch(() => code);
   try {
-    const { mountPlayground } = await import("./playground/mount");
+    const { mountPlayground, upgraded } = await import("./playground/mount");
+    // A link shared before a respelling opens in the current spelling, as `uberscene lint --fix` writes it.
+    if (shared) code = upgraded(code);
     playground = mountPlayground({
       editor: editor.value!,
       player: player.value!,

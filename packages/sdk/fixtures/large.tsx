@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
 
-import { Audio, Clip, Composition, Effect, Keyframe, Title, Track } from "@uberscene/kit";
+import { Audio, Clip, Composition, Title, Track } from "@uberscene/kit";
 
 /**
  * A synthetic project of `n` clips for benchmarks: three sequence tracks of
@@ -14,14 +14,18 @@ export function buildLarge(n: number): { default: () => ReactElement; defaults: 
     const city = i % 2 === 1;
     const inSec = city ? (i * 3) % 9 : (i * 7) % 50;
     const length = 1 + (i % 3);
-    const children =
+    const keyed =
       i % 4 === 0
-        ? [
-            <Keyframe key="k1" id={`c${i}k1`} property="transform.opacity" at={0} value={0} easing="easeOutCubic" />,
-            <Keyframe key="k2" id={`c${i}k2`} property="transform.opacity" at={0.5} value={1} />,
-            <Effect key="fx" id={`c${i}fx`} type="blur" params={{ radius: 2 }} />,
-          ]
-        : [];
+        ? {
+            transform: {
+              opacity: [
+                { at: 0, value: 0, easing: "easeOutCubic" as const },
+                { at: 0.5, value: 1 },
+              ],
+            },
+            effects: [{ type: "blur" as const, radius: 2 }],
+          }
+        : {};
     tracks[i % 3]!.push(
       <Clip
         key={`c${i}`}
@@ -30,9 +34,8 @@ export function buildLarge(n: number): { default: () => ReactElement; defaults: 
         in={inSec}
         out={inSec + length}
         fit="cover"
-      >
-        {children}
-      </Clip>,
+        {...keyed}
+      />,
     );
   }
   const titles: ReactElement[] = [];

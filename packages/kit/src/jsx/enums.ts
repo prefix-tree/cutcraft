@@ -154,7 +154,7 @@ export const KEYFRAME_PROPERTIES = [
   "audio.pan",
 ] as const;
 
-/** A property of the keyframe's parent element. An effect's param is keyframed inside the effect, with `param`. */
+/** A property a key list can animate, as the resolver names it (`transform.opacity` for `transform={{ opacity: […] }}`). */
 export function isKeyframeProperty(value: string): boolean {
   return (KEYFRAME_PROPERTIES as readonly string[]).includes(value);
 }
@@ -164,7 +164,6 @@ export const TEXT_VALIGNS = ["top", "middle", "bottom"] as const;
 export const TEXT_DECORATIONS = ["none", "underline", "line-through", "overline"] as const;
 export const MASK_TYPES = ["shape", "drawn"] as const;
 export const SVG_COLOR_MODES = ["none", "tint", "replace"] as const;
-export const AUTOMATION_LANES = ["volume", "pan"] as const;
 export const TRACK_FLAGS = ["locked", "hidden", "muted", "solo"] as const;
 
 export const zTrackLayout = z.enum(TRACK_LAYOUTS);
@@ -178,22 +177,7 @@ export const zTextAnimationPreset = z.enum(TEXT_ANIMATION_PRESETS);
 export const zCaptionAnimation = z.enum(CAPTION_ANIMATIONS);
 export const zEntranceAnimation = z.enum(ENTRANCE_ANIMATIONS);
 export const zShapeType = z.enum(SHAPE_TYPES);
-export const zKeyframeProperty = z.string().superRefine((value, ctx) => {
-  if (isKeyframeProperty(value)) return;
-  const effect = /^effect\.([^.]+)\.([^.]+)$/.exec(value);
-  const grade = /^colorGrade\.(temperature|tint)$/.exec(value);
-  const position = /^transform\.position\.([xy])$/.exec(value);
-  ctx.addIssue({
-    code: "custom",
-    message: effect
-      ? `an effect's param is keyframed inside the effect: <Effect id="${effect[1]}" …><Keyframe param="${effect[2]}" at={…} value={…} /></Effect>`
-      : position
-        ? `transform.position is now box, from the frame's top left: keyframe "box.${position[1]}" (uberscene lint --fix moves a file)`
-        : grade
-          ? `<ColorGrade> is now a whiteBalance effect: <Effect type="whiteBalance" …><Keyframe param="${grade[1]}" at={…} value={…} /></Effect>`
-          : `unknown keyframe property "${value}": use one of ${KEYFRAME_PROPERTIES.join(", ")}, or put the keyframe inside an <Effect> with param`,
-  });
-});
+export const zKeyframeProperty = z.string().refine(isKeyframeProperty, "not a property a key can animate");
 
 export type TrackLayout = (typeof TRACK_LAYOUTS)[number];
 export type TrackRole = (typeof TRACK_ROLES)[number];
