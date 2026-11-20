@@ -1,8 +1,8 @@
 # 0032. Native codecs behind a flag
 
 > Status: experimental. Revisits [0021](./0021-one-export-engine.md), which keeps every frame inside the browser and
-> dropped ProRes and `.mov`. 0021 still decides how the export draws; this changes only who decodes the footage and who
-> encodes the pictures, and only when asked.
+> dropped ProRes and `.mov`. 0021 still decides how the export draws; this changes only who decodes the footage and the
+> sound and who encodes them, and only when asked.
 
 ## Context
 
@@ -15,12 +15,13 @@ The export draws in Chrome and uses Chrome's codecs (0021). Two limits followed 
 
 Remotion moves both jobs out of the browser, to FFmpeg processes. FilmCraft has its own codecs in pure Rust
 (craft-video and craft-media, MIT OR Apache-2.0), with decoders for H.264, HEVC, VP8, VP9, AV1, ProRes and DNxHR and
-encoders for H.264 and ProRes. They are tested bit-exact against ffmpeg and need no FFmpeg, so they keep the
-licence and the "no native FFmpeg" property of the export.
+encoders for H.264 and ProRes, and craft-audio for sound (AAC, Opus, MP3 and more, both ways). They are tested
+bit-exact against ffmpeg and need no FFmpeg, so they keep the licence and the "no native FFmpeg" property of the export.
 
 ## Decision
 
-- **A native codec process, `uberscene-codec`,** in `native/`. It is a Rust binary on craft-video and craft-media,
+- **A native codec process, `uberscene-codec`,** in `native/`. It is a Rust binary on craft-video, craft-audio and
+  craft-media,
   pinned to the commit FilmCraft uses. One short-lived process per stream: Node starts it, writes to its stdin and
   reads its stdout (`native/PROTOCOL.md`). It has no HTTP server and no C code.
 - **Behind `UBERSCENE_CODECS`.** `browser` (or unset) is the default. `native-decode`, `native-encode` and `native`
@@ -31,7 +32,7 @@ licence and the "no native FFmpeg" property of the export.
   - The server runs `uberscene-codec decode` on the asset's file and streams its stdout to the page. The process is
     killed when the page stops reading.
   - An asset the process cannot read, or one served from a URL, falls back to the browser's decoder with one warning.
-  - Images and audio stay in the browser.
+  - Images stay in the browser.
 - **Encode** replaces the page's `CanvasSource` for a piece:
   - The page reads each captured picture back as RGBA (`VideoFrame.copyTo`) and posts it to
     `/native/encode/<session>`, two at most in flight.
@@ -39,6 +40,14 @@ licence and the "no native FFmpeg" property of the export.
     in the same process, so there is no DevTools transfer.
   - Pieces are still whole keyframe intervals. The encoder makes keyframes only every interval and no B-frames, so
     pieces join without re-encoding, as before.
+- **Sound goes with the encoder.** With a native encoder, `uberscene-codec encode-audio` writes the soundtrack: AAC in
+  an M4A for an MP4, 24-bit PCM for a MOV (what a ProRes master carries), a 16-bit WAV. An MP3 stays with the page's
+  encoder, since craft-audio's has no gapless (LAME) header yet. Who mixes depends on who decodes:
+  - `native`: Node runs `mixPlan`, the page's own mixer, on sound `uberscene-codec decode-audio` reads (planar float at
+    each file's rate, starting 120 ms early so a decoder started mid-stream has settled). The page plays no part.
+  - `native-encode`: the page mixes as before and hands the mix over as a float WAV.
+  - An asset whose sound the native decoder cannot read (FLAC, Vorbis, a URL) sends the whole mix back to the page,
+    with one warning. craft-audio's symphonia fallback (MPL-2.0) is left out.
 - **ProRes returns, only behind the flag:** `--codec prores` into `.mov` through Mediabunny's MOV writer. `--quality`
   picks the profile (Proxy, LT, 422, 422 HQ, 4444).
 - **Built from source for now:** `pnpm native:build`, or `UBERSCENE_CODEC_BIN`. Per-platform npm packages, as
@@ -64,13 +73,19 @@ native side by side on the same footage. Those numbers decide whether native bec
 
 **More to keep up:**
 
-- A Rust toolchain in CI: a `native` job, plus the build in e2e and bench.
+- A Rust toolchain in CI: a `native` job (which also runs the Node tests that need the binary), plus the build in e2e
+  and bench.
 - A second implementation of colour handling: BT.709 limited range for what it writes, and the stream's matrix for
   what it reads.
 - Pictures are 8-bit 4:2:0 on their way to the page. 10-bit and 4:2:2 sources are converted, and alpha is dropped.
 
 **The same pictures.** The export tests run the e2e composition with native decoding and check every frame, the same
 check as the browser path.
+
+**The same sound, or closer to the file.** The page's mix encoded natively is the browser's to one 16-bit step. The mix
+made from native decoding matches the same mix made from ffmpeg's decode within 2e-3. It differs from the browser's
+where a clip starts mid-file in a WebM: the browser's Opus decode, read from there, lands 1 ms (48 samples) off the
+file's timeline, which the native decode does not.
 
 ## Alternatives
 

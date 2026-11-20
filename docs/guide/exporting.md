@@ -187,25 +187,27 @@ UBERSCENE_CODECS=native-decode npx uberscene video.tsx --out video.mp4
 UBERSCENE_CODECS=native npx uberscene video.tsx --out master.mov --codec prores --quality high
 ```
 
-| `UBERSCENE_CODECS` | Footage decoded by | Pictures encoded by |
+| `UBERSCENE_CODECS` | Footage decoded by | Pictures and sound encoded by |
 |---|---|---|
 | unset or `browser` | Chrome | Chrome |
 | `native-decode` | the native codecs | Chrome |
 | `native-encode` | Chrome | the native codecs |
-| `native` | the native codecs | the native codecs |
+| `native` | the native codecs (the sound's too) | the native codecs |
 
 What it is for:
 
 - Footage Chrome cannot decode on a machine without a GPU: HEVC (phone video), ProRes and DNxHR.
 - A ProRes master: `.mov` with `--codec prores`. `--quality` picks the profile: `very-low` Proxy, `low` LT, `medium`
-  422, `high` 422 HQ (the default), `very-high` 4444.
+  422, `high` 422 HQ (the default), `very-high` 4444. Its sound is 24-bit PCM.
 
 How it behaves:
 
 - It is built from source for now. `UBERSCENE_CODEC_BIN` names a binary built elsewhere.
 - An asset the native decoder cannot read is decoded by Chrome, with a warning.
 - The native encoder writes H.264 and ProRes, not VP9 or AV1, and does not combine with `--copy`.
-- The sound is always mixed and encoded in the page.
+- With a native encoder, the sound is encoded natively too: AAC in an MP4, PCM in a MOV or WAV (an MP3 is still
+  Chrome's). With `native`, the mix is made outside the browser from sound the native codecs decode; an asset whose
+  sound they cannot read (FLAC, Vorbis, or one served from a URL) sends the mix back to the page, with a warning.
 - On a CPU it is not faster than Chrome's codecs yet.
 
 [Native codecs](./native-codecs) shows how it plugs into the export.

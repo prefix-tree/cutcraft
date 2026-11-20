@@ -4,12 +4,13 @@ version = "0.1.0"
 edition = "2024"
 rust-version = "1.95"
 license = "MIT"
-description = "UberScene's native codecs: decodes footage and encodes exports with craft-video, for the export's UBERSCENE_CODECS flag."
+description = "UberScene's native codecs: decodes footage and encodes exports with craft-video and craft-audio, for the export's UBERSCENE_CODECS flag."
 publish = false
 
 [dependencies]
 craft-media = { version = "0.1.0", git = "https://github.com/storytold/craft-libs", rev = "82062077bba679ba5236e2d1a391f02d1533cbab", default-features = false, features = ["isobmff", "matroska"] }
 craft-video = { version = "0.1.0", git = "https://github.com/storytold/craft-libs", rev = "82062077bba679ba5236e2d1a391f02d1533cbab", features = ["h264-decode", "h264-encode", "hevc-decode", "vp9-decode", "vp8-decode", "av1-decode", "prores", "dnx", "threads"] }
+craft-audio = { version = "0.1.0", git = "https://github.com/storytold/craft-libs", rev = "82062077bba679ba5236e2d1a391f02d1533cbab", default-features = false, features = ["decode-native", "aac-encode", "mp3-encode", "pcm-encode"] }
 serde_json = "1"
 
 [profile.release]
@@ -21,4 +22,7 @@ codegen-units = 1
 opt-level = 3
 
 [profile.dev.package.craft-media]
+opt-level = 3
+
+[profile.dev.package.craft-audio]
 opt-level = 3
