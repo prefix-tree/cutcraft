@@ -16,7 +16,7 @@ no FFmpeg). The export uses it instead of the browser's WebCodecs when `UBERSCEN
 - Footage Chrome cannot decode: HEVC without hardware, ProRes, DNxHR.
 - ProRes export to `.mov` (`--codec prores`, the profile from `--quality`).
 
-It is experimental, and the browser stays the reference. Decision 0031 (`docs/decisions/`) says why and how, and
+It is experimental, and the browser stays the reference. Decision 0032 (`docs/decisions/`) says why and how, and
 `PROTOCOL.md` describes what goes over stdin and stdout.
 
 ## Build and test

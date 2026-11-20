@@ -209,7 +209,7 @@ How it behaves:
 - An asset the native decoder cannot read is decoded by Chrome, with a warning.
 - The native encoder writes H.264 and ProRes, not VP9 or AV1, and does not combine with `--copy`.
 - The sound is always mixed and encoded in the page.
-- On a CPU it is not faster than Chrome's codecs yet. Decision 0031 in the repository has the numbers.
+- On a CPU it is not faster than Chrome's codecs yet. Decision 0032 in the repository has the numbers.
 
 ## When a frame never finishes
 

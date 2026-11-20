@@ -35,4 +35,5 @@ use that name.
 | [0028](./0028-tools-for-narrated-explainers.md) | Tools for narrated explainers: a narration helper, motion and placement in the CLI, pinned labels, diagram parts, `study` (proposed) |
 | [0029](./0029-one-hook-for-libraries-that-seek.md) | One hook for libraries that seek: `useSeekable` |
 | [0030](./0030-one-chrome-version.md) | One Chrome version: the export runs on Chrome 157 only |
-| [0031](./0031-native-codecs-behind-a-flag.md) | Native codecs behind a flag: craft-video decodes and encodes with `UBERSCENE_CODECS` (experimental) |
+| [0031](./0031-a-smaller-surface-for-the-timeline-vocabulary.md) | A smaller surface for the timeline vocabulary: only what is drawn, `box` and `style`, one naming rule, an SDK package, in two stages |
+| [0032](./0032-native-codecs-behind-a-flag.md) | Native codecs behind a flag: craft-video decodes and encodes with `UBERSCENE_CODECS` (experimental) |
