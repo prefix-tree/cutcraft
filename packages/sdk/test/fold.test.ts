@@ -199,6 +199,25 @@ describe("fold", () => {
     expect(timeline(serialize(reresolved))).toEqual(timeline(serialize(exec.state())));
   });
 
+  it("leaves the log as it was, so a second save writes the defaults again", () => {
+    const exec = fixtureExecutor();
+    exec.execute({ type: "composition/setProps", params: { defaults: { title: "Changed", accent: "#123456" } } });
+    const line = 'export const defaults = { title: "Changed", accent: "#123456" };';
+    expect(foldToSource(fixtureText, exec.log(), exec.state()).text).toContain(line);
+    expect(foldToSource(fixtureText, exec.log(), exec.state()).text).toContain(line);
+    expect(exec.log().net.get("composition")?.props.has("$defaults")).toBe(true);
+  });
+
+  it("writes the defaults when the save bakes an element first", () => {
+    // The round after the bake folds the log again and must still find the defaults in it.
+    const exec = fixtureExecutor();
+    exec.execute({ type: "composition/setProps", params: { defaults: { title: "Changed", accent: "#123456" } } });
+    expect(exec.execute({ type: "element/update", params: { id: "b1", props: { size: 40 } } }).ok).toBe(true);
+    const result = foldToSource(fixtureText, exec.log(), exec.state());
+    expect(result.baked).toContain("b1");
+    expect(result.text).toContain('export const defaults = { title: "Changed", accent: "#123456" };');
+  });
+
   it("prints props and elements", () => {
     expect(printProp("src", "asset:a")).toBe('src="asset:a"');
     expect(printProp("reverse", true)).toBe("reverse");

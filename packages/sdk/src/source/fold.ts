@@ -161,20 +161,22 @@ export function fold(
       needsBake.push(id);
       continue;
     }
-    if (id === "composition" && net.props.has("$fonts")) {
+    // A copy: the log keeps "$fonts" and "$defaults", so a second save (or the round after a bake) writes them too.
+    const props = new Map(net.props);
+    if (id === "composition" && props.has("$fonts")) {
       // Not a prop of the file: the faces it names are declared by `foldToSource`, for the families written here.
-      net.props.delete("$fonts");
-      if (net.props.size === 0 && net.presence === "present" && !net.place && net.text === undefined) continue;
+      props.delete("$fonts");
+      if (props.size === 0 && net.presence === "present" && !net.place && net.text === undefined) continue;
     }
-    if (id === "composition" && net.props.has("$defaults")) {
-      const value = net.props.get("$defaults");
+    if (id === "composition" && props.has("$defaults")) {
+      const value = props.get("$defaults");
       if (value === undefined) {
         /* the panel change was undone; nothing to write */
       } else if (index.defaults)
         edits.push({ kind: "defaults", id, range: index.defaults.range, text: printLiteral(value) });
       else skipped.push({ id, reason: "no `export const defaults` literal to rewrite" });
-      net.props.delete("$defaults");
-      if (net.props.size === 0 && net.presence === "present" && !net.place && net.text === undefined) continue;
+      props.delete("$defaults");
+      if (props.size === 0 && net.presence === "present" && !net.place && net.text === undefined) continue;
     }
     switch (net.presence) {
       case "removed": {
@@ -224,7 +226,7 @@ export function fold(
           placements.push({ id, at: net.place, print: printMoved, from: lineRange(text, site.range) });
         }
         let newAttrs = -1;
-        for (const [prop, value] of net.props) {
+        for (const [prop, value] of props) {
           const key = site.boundProps[prop];
           const handle = prop.startsWith(INTERIOR_PREFIX);
           if (handle && !site.interior && key === undefined) {
