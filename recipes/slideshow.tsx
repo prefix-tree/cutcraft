@@ -28,8 +28,7 @@ export default function Video({ title }: z.infer<typeof schema>) {
           anchor="start"
           offset={0.5}
           duration={3}
-          size={110}
-          weight={300}
+          style={{ size: 110, weight: 300 }}
           animation={{ preset: "fade", in: 0.8, out: 0.6 }}
         >
           {title}

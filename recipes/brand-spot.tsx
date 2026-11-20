@@ -143,7 +143,7 @@ export default function Video({ theme, product, tagline, cta }: z.infer<typeof s
         <Title id="kicker" start={0.3} duration={3.5} style="kicker" box={{ x: 960, y: 370, origin: "center" }}>
           INTRODUCING
         </Title>
-        <Title id="name" start={0.5} duration={3.3} style="h1" size={180}>
+        <Title id="name" start={0.5} duration={3.3} style={{ preset: "h1", size: 180 }}>
           {product}
         </Title>
         {/* An underline that draws itself under the name. */}

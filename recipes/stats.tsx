@@ -28,9 +28,7 @@ export default function Video({ accent }: z.infer<typeof schema>) {
           anchor="bg"
           offset={0.3}
           duration={11}
-          size={64}
-          weight={600}
-          valign="top"
+          style={{ size: 64, weight: 600, valign: "top" }}
           box={{ x: 960, y: 680, origin: "center" }}
         >
           Last quarter

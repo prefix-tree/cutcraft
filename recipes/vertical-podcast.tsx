@@ -99,11 +99,7 @@ export default function Video({ accent }: z.infer<typeof schema>) {
           anchor="s0"
           offset={0.2}
           duration={1.8}
-          size={48}
-          weight={700}
-          color={accent}
-          align="left"
-          valign="bottom"
+          style={{ size: 48, weight: 700, color: accent, align: "left", valign: "bottom" }}
           box={{ x: 600, y: 600, origin: "center" }}
           animation={{ preset: "slide-left", in: 0.3, out: 0.2 }}
         >
@@ -114,11 +110,7 @@ export default function Video({ accent }: z.infer<typeof schema>) {
           anchor="s1"
           offset={0.2}
           duration={1.8}
-          size={48}
-          weight={700}
-          color={accent}
-          align="left"
-          valign="bottom"
+          style={{ size: 48, weight: 700, color: accent, align: "left", valign: "bottom" }}
           box={{ x: 600, y: 600, origin: "center" }}
           animation={{ preset: "slide-left", in: 0.3, out: 0.2 }}
         >
@@ -129,11 +121,7 @@ export default function Video({ accent }: z.infer<typeof schema>) {
           anchor="s2"
           offset={0.2}
           duration={1.8}
-          size={48}
-          weight={700}
-          color={accent}
-          align="left"
-          valign="bottom"
+          style={{ size: 48, weight: 700, color: accent, align: "left", valign: "bottom" }}
           box={{ x: 600, y: 600, origin: "center" }}
           animation={{ preset: "slide-left", in: 0.3, out: 0.2 }}
         >
@@ -144,11 +132,7 @@ export default function Video({ accent }: z.infer<typeof schema>) {
           anchor="s5"
           offset={0.2}
           duration={1.8}
-          size={48}
-          weight={700}
-          color={accent}
-          align="left"
-          valign="bottom"
+          style={{ size: 48, weight: 700, color: accent, align: "left", valign: "bottom" }}
           box={{ x: 600, y: 600, origin: "center" }}
           animation={{ preset: "slide-left", in: 0.3, out: 0.2 }}
         >
@@ -159,11 +143,7 @@ export default function Video({ accent }: z.infer<typeof schema>) {
           anchor="s6"
           offset={0.2}
           duration={1.8}
-          size={48}
-          weight={700}
-          color={accent}
-          align="left"
-          valign="bottom"
+          style={{ size: 48, weight: 700, color: accent, align: "left", valign: "bottom" }}
           box={{ x: 600, y: 600, origin: "center" }}
           animation={{ preset: "slide-left", in: 0.3, out: 0.2 }}
         >
@@ -174,11 +154,7 @@ export default function Video({ accent }: z.infer<typeof schema>) {
           anchor="s7"
           offset={0.2}
           duration={1.8}
-          size={48}
-          weight={700}
-          color={accent}
-          align="left"
-          valign="bottom"
+          style={{ size: 48, weight: 700, color: accent, align: "left", valign: "bottom" }}
           box={{ x: 600, y: 600, origin: "center" }}
           animation={{ preset: "slide-left", in: 0.3, out: 0.2 }}
         >
@@ -189,11 +165,7 @@ export default function Video({ accent }: z.infer<typeof schema>) {
           anchor="s8"
           offset={0.2}
           duration={1.8}
-          size={48}
-          weight={700}
-          color={accent}
-          align="left"
-          valign="bottom"
+          style={{ size: 48, weight: 700, color: accent, align: "left", valign: "bottom" }}
           box={{ x: 600, y: 600, origin: "center" }}
           animation={{ preset: "slide-left", in: 0.3, out: 0.2 }}
         >
@@ -204,11 +176,7 @@ export default function Video({ accent }: z.infer<typeof schema>) {
           anchor="s9"
           offset={0.2}
           duration={1.8}
-          size={48}
-          weight={700}
-          color={accent}
-          align="left"
-          valign="bottom"
+          style={{ size: 48, weight: 700, color: accent, align: "left", valign: "bottom" }}
           box={{ x: 600, y: 600, origin: "center" }}
           animation={{ preset: "slide-left", in: 0.3, out: 0.2 }}
         >
@@ -219,11 +187,7 @@ export default function Video({ accent }: z.infer<typeof schema>) {
           anchor="s10"
           offset={0.2}
           duration={1.8}
-          size={48}
-          weight={700}
-          color={accent}
-          align="left"
-          valign="bottom"
+          style={{ size: 48, weight: 700, color: accent, align: "left", valign: "bottom" }}
           box={{ x: 600, y: 600, origin: "center" }}
           animation={{ preset: "slide-left", in: 0.3, out: 0.2 }}
         >

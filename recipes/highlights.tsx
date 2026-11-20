@@ -40,10 +40,7 @@ export default function Video({ title }: z.infer<typeof schema>) {
           anchor="start"
           offset={0.5}
           duration={4}
-          size={72}
-          weight={700}
-          align="left"
-          valign="bottom"
+          style={{ size: 72, weight: 700, align: "left", valign: "bottom" }}
           box={{ x: 1080, y: 400, origin: "center" }}
           animation={{ preset: "slide-left", in: 0.3, out: 0.3 }}
         >
