@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { Shape, Title } from "../jsx/elements";
-import { h, parse, timing, timingOf, timingSchema } from "./shared";
+import { centre, h, parse, timing, timingOf, timingSchema } from "./shared";
 
 export const lowerThirdSchema = timingSchema.extend({
   /** The component's id; each of its parts' ids starts with it. */
@@ -12,10 +12,8 @@ export const lowerThirdSchema = timingSchema.extend({
   role: z.string().optional(),
   /** `card`: on a surface card; `bar`: the words beside an accent bar, straight over the picture. */
   variant: z.enum(["card", "bar"]).default("card"),
-  /** The card's centre, in pixels from the frame's centre. */
-  x: z.number().default(-560),
-  /** The card's centre, in pixels below the frame's centre. */
-  y: z.number().default(330),
+  /** Where the card's centre sits, in pixels from the frame's top left. Left out: `{ x: 400, y: 870 }`, on a 1920 by 1080 frame. */
+  box: centre(400, 870),
   /** The card's width in pixels; the words wrap inside it. */
   width: z.number().positive().default(640),
   /** The colour of the bar beside the words. */
@@ -34,8 +32,8 @@ export function LowerThird(props: z.input<typeof lowerThirdSchema>) {
   // Every measure below was drawn for a 44 px name; `k` keeps them in proportion at any size.
   const k = p.size / 44;
   const height = (p.role ? 132 : 96) * k;
-  const left = p.x - p.width / 2;
-  const textX = p.x + 18 * k;
+  const left = p.box.x - p.width / 2;
+  const textX = p.box.x + 18 * k;
   const textWidth = p.width - 72 * k;
   return [
     p.variant === "card" &&
@@ -47,7 +45,7 @@ export function LowerThird(props: z.input<typeof lowerThirdSchema>) {
         height,
         fill: "$surface",
         cornerRadius: "$radius",
-        transform: { position: { x: p.x, y: p.y } },
+        box: { x: p.box.x, y: p.box.y, origin: "center" },
         enter: { type: "slide-up", duration: 0.45, easing: "easeOutCubic" },
         exit: { type: "fade", duration: 0.3 },
       }),
@@ -58,7 +56,7 @@ export function LowerThird(props: z.input<typeof lowerThirdSchema>) {
       width: 8 * k,
       height: height - 36 * k,
       fill: p.accent,
-      transform: { position: { x: left + 28 * k, y: p.y } },
+      box: { x: left + 28 * k, y: p.box.y, origin: "center" },
       enter: { type: "wipe-down", duration: 0.35 },
       exit: { type: "fade", duration: 0.3 },
     }),
@@ -73,7 +71,7 @@ export function LowerThird(props: z.input<typeof lowerThirdSchema>) {
         color: "$text",
         align: "left",
         width: textWidth,
-        transform: { position: { x: textX, y: p.y - (p.role ? 20 * k : 0) } },
+        box: { x: textX, y: p.box.y - (p.role ? 20 * k : 0), origin: "center" },
         enter: { type: "slide-right", duration: 0.45, easing: "easeOutCubic" },
         exit: { type: "fade", duration: 0.3 },
       },
@@ -91,7 +89,7 @@ export function LowerThird(props: z.input<typeof lowerThirdSchema>) {
           color: "$muted",
           align: "left",
           width: textWidth,
-          transform: { position: { x: textX, y: p.y + 30 * k } },
+          box: { x: textX, y: p.box.y + 30 * k, origin: "center" },
           enter: { type: "fade", duration: 0.4 },
           exit: { type: "fade", duration: 0.3 },
         },

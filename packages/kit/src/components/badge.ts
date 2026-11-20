@@ -1,17 +1,15 @@
 import { z } from "zod";
 
 import { Shape, Title } from "../jsx/elements";
-import { h, parse, timing, timingOf, timingSchema } from "./shared";
+import { centre, h, parse, timing, timingOf, timingSchema } from "./shared";
 
 export const badgeSchema = timingSchema.extend({
   /** The component's id; each of its parts' ids starts with it. */
   id: z.string(),
   /** The word on the pill; the pill widens to fit it. */
   text: z.string(),
-  /** The pill's centre, in pixels from the frame's centre. */
-  x: z.number().default(0),
-  /** The pill's centre, in pixels below the frame's centre. */
-  y: z.number().default(0),
+  /** Where the pill's centre sits, in pixels from the frame's top left. Left out: `{ x: 960, y: 540 }`, on a 1920 by 1080 frame. */
+  box: centre(960, 540),
   /** Letter height in pixels; the pill scales with it. */
   size: z.number().positive().default(30),
   /** The pill's colour. */
@@ -36,7 +34,7 @@ export function Badge(props: z.input<typeof badgeSchema>) {
       height,
       cornerRadius: height / 2,
       fill: p.color,
-      transform: { position: { x: p.x, y: p.y } },
+      box: { x: p.box.x, y: p.box.y, origin: "center" },
       ...motion,
     }),
     h(
@@ -48,7 +46,7 @@ export function Badge(props: z.input<typeof badgeSchema>) {
         size: p.size,
         weight: 700,
         color: p.textColor,
-        transform: { position: { x: p.x, y: p.y } },
+        box: { x: p.box.x, y: p.box.y, origin: "center" },
         ...motion,
       },
       p.text,

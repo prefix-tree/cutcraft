@@ -61,9 +61,60 @@ export const timedProps = {
 
 export const vec2Schema = z.strictObject({ x: z.number(), y: z.number() });
 
+/** Which point of an element's box `box.x` and `box.y` place: a corner, the middle of an edge, or the centre. */
+export const BOX_ORIGINS = [
+  "topLeft",
+  "top",
+  "topRight",
+  "left",
+  "center",
+  "right",
+  "bottomLeft",
+  "bottom",
+  "bottomRight",
+] as const;
+export type BoxOrigin = (typeof BOX_ORIGINS)[number];
+
+/** Each origin as fractions of the element's width and height from its top left. */
+export const BOX_ORIGIN_POINT: Readonly<Record<BoxOrigin, { readonly x: number; readonly y: number }>> = {
+  topLeft: { x: 0, y: 0 },
+  top: { x: 0.5, y: 0 },
+  topRight: { x: 1, y: 0 },
+  left: { x: 0, y: 0.5 },
+  center: { x: 0.5, y: 0.5 },
+  right: { x: 1, y: 0.5 },
+  bottomLeft: { x: 0, y: 1 },
+  bottom: { x: 0.5, y: 1 },
+  bottomRight: { x: 1, y: 1 },
+};
+
+export const boxSchema = z.strictObject({
+  /** Pixels from the frame's left edge to the box's `origin`. Left out: the box is centred across the frame. */
+  x: z.number().optional(),
+  /** Pixels from the frame's top edge to the box's `origin`. Left out: the box is centred down the frame. */
+  y: z.number().optional(),
+  /**
+   * The box's width in pixels; its content fills it as `fit` says. Left out: the width its content takes in the frame
+   * (from `height` and the content's shape when only that is given).
+   */
+  width: z.number().positive().optional(),
+  /** The box's height in pixels, as `width`. */
+  height: z.number().positive().optional(),
+  /** Which point of the box sits at `x`, `y`. Left out: its top left. */
+  origin: z.enum(BOX_ORIGINS).optional(),
+});
+export type ElementBox = z.output<typeof boxSchema>;
+
+const boxProp = {
+  /**
+   * The rectangle it occupies, in pixels from the frame's top left as in CSS: `x` and `y` place the point `origin`
+   * names (its top left by default), `width` and `height` size it, and its content fills it as `fit` says. Left out,
+   * the whole frame. `transform` applies after.
+   */
+  box: boxSchema.optional(),
+};
+
 export const transformSchema = z.strictObject({
-  /** Pixels to move the element by, right and down from where its fit puts it (the frame's centre). */
-  position: vec2Schema.optional(),
   /** A multiplier, the same on both axes or `{ x, y }`. */
   scale: z.union([z.number().min(0).max(10), vec2Schema]).optional(),
   /** Degrees, clockwise. */
@@ -86,7 +137,8 @@ export const transformSchema = z.strictObject({
 });
 
 const transformProp = {
-  /** Where it sits and how it is turned: position, scale, rotation, anchor, opacity, rounded corners and crop. */
+  ...boxProp,
+  /** How it is turned and shown: scale, rotation, anchor, opacity, rounded corners and crop. */
   transform: transformSchema.optional(),
 };
 
@@ -103,6 +155,9 @@ export const fitProp = {
 
 /** What everything drawn over the picture takes: where it sits, and how it mixes with what is under it. */
 export const overlayProps = { ...transformProp, ...blendProp };
+
+/** Where an element sits and how it is turned, without `fit` or blending: a layer's or an adjustment's. */
+export const placedProps = transformProp;
 
 /** Footage and nested sequences: drawn on the canvas, fitted to the frame, with a strength for their blend. */
 export const visualProps = {

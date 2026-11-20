@@ -1,17 +1,15 @@
 import { z } from "zod";
 
 import { Keyframe, Shape } from "../jsx/elements";
-import { h, parse, timing, timingOf, timingSchema } from "./shared";
+import { centre, h, parse, timing, timingOf, timingSchema } from "./shared";
 
 export const progressBarSchema = timingSchema.extend({
   /** The component's id; each of its parts' ids starts with it. */
   id: z.string(),
   /** How full it ends, 0 to 1. */
   value: z.number().min(0).max(1).default(1),
-  /** The bar's centre, in pixels from the frame's centre. */
-  x: z.number().default(0),
-  /** The bar's centre, in pixels below the frame's centre. */
-  y: z.number().default(440),
+  /** Where the bar's centre sits, in pixels from the frame's top left. Left out: `{ x: 960, y: 980 }`, on a 1920 by 1080 frame. */
+  box: centre(960, 980),
   /** The full bar's length in pixels. */
   width: z.number().positive().default(1200),
   /** The bar's thickness in pixels; its ends are rounded. */
@@ -26,7 +24,7 @@ export const progressBarSchema = timingSchema.extend({
 export function ProgressBar(props: z.input<typeof progressBarSchema>) {
   const p = parse("ProgressBar", progressBarSchema, props);
   const t = timingOf(p);
-  const left = p.x - p.width / 2;
+  const left = p.box.x - p.width / 2;
   const radius = p.height / 2;
   const easing = "easeInOutCubic";
   return [
@@ -38,7 +36,7 @@ export function ProgressBar(props: z.input<typeof progressBarSchema>) {
       height: p.height,
       cornerRadius: radius,
       fill: { type: "solid", color: "$muted", opacity: 0.35 },
-      transform: { position: { x: p.x, y: p.y } },
+      box: { x: p.box.x, y: p.box.y, origin: "center" },
       enter: { type: "fade", duration: 0.3 },
       exit: { type: "fade", duration: 0.3 },
     }),
@@ -53,14 +51,15 @@ export function ProgressBar(props: z.input<typeof progressBarSchema>) {
         height: p.height,
         cornerRadius: radius,
         fill: p.color,
-        transform: { position: { x: left, y: p.y }, scale: { x: 0, y: 1 } },
+        box: { x: left, y: p.box.y, origin: "center" },
+        transform: { scale: { x: 0, y: 1 } },
         exit: { type: "fade", duration: 0.3 },
       },
       // A segment eases by the key it leaves, so the easing sits on the first key of each move.
-      h(Keyframe, { id: `${p.id}-fill-x0`, property: "transform.position.x", at: 0, value: left, easing }),
+      h(Keyframe, { id: `${p.id}-fill-x0`, property: "box.x", at: 0, value: left, easing }),
       h(Keyframe, {
         id: `${p.id}-fill-x1`,
-        property: "transform.position.x",
+        property: "box.x",
         at: p.fillFor,
         value: left + (p.width * p.value) / 2,
       }),

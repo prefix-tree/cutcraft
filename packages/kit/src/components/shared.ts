@@ -14,7 +14,11 @@ export const timingSchema = z.object({
 });
 export type Timing = z.infer<typeof timingSchema>;
 
-/** A point in pixels from the frame's centre, as every element's `transform.position`. */
+/** A component's centre, in pixels from the frame's top left: `x` and `y` default to where it sits on a 1920 by 1080 frame. */
+export const centre = (x: number, y: number) =>
+  z.strictObject({ x: z.number().default(x), y: z.number().default(y) }).default({ x, y });
+
+/** A point in pixels from the frame's top left, as every element's `box`. */
 export const pointSchema = z.object({ x: z.number(), y: z.number() });
 
 /** The timing a part gets: the component's own, starting `delay` seconds later and ending with the rest. */
@@ -50,7 +54,7 @@ export function parse<S extends z.ZodTypeAny>(name: string, schema: S, props: un
   return result.data;
 }
 
-/** A box in pixels from the frame's centre: its top-left corner and its size. */
+/** A box in pixels from the frame's top left: its top-left corner and its size. */
 export interface Box {
   readonly minX: number;
   readonly minY: number;
@@ -59,13 +63,13 @@ export interface Box {
 }
 
 /**
- * `<Svg>` props for a drawing whose coordinates are pixels from the frame's centre, like every element's position:
+ * `<Svg>` props for a drawing whose coordinates are pixels from the frame's top left, like every element's `box`:
  * the markup's viewBox is the box, and the element sits at the box's centre.
  */
-export function svgIn(box: Box, body: string): { content: string; transform: { position: { x: number; y: number } } } {
+export function svgIn(box: Box, body: string): { content: string; box: { x: number; y: number; origin: "center" } } {
   const r = (v: number) => Math.round(v * 100) / 100;
   return {
     content: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${r(box.minX)} ${r(box.minY)} ${r(box.width)} ${r(box.height)}">${body}</svg>`,
-    transform: { position: { x: r(box.minX + box.width / 2), y: r(box.minY + box.height / 2) } },
+    box: { x: r(box.minX + box.width / 2), y: r(box.minY + box.height / 2), origin: "center" },
   };
 }

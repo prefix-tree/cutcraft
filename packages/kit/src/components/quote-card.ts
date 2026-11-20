@@ -85,12 +85,12 @@ export function QuoteCardPart(p: Look & { readonly mark?: { readonly text: strin
     {
       style: {
         position: "absolute",
-        left: "50%",
-        top: "50%",
+        left: p.x,
+        top: p.y,
         width: p.width,
         boxSizing: "border-box",
         padding: `${p.size * 0.9}px ${p.size * 1.1}px`,
-        transform: `translate(calc(-50% + ${p.x}px), calc(-50% + ${p.y}px))`,
+        transform: "translate(-50%, -50%)",
         borderRadius: p.size * 0.45,
         ...(p.mark
           ? {}
@@ -124,7 +124,15 @@ export function QuoteCard(props: z.input<typeof quoteCardSchema>) {
   const missing = p.highlights.find((m) => !p.text.includes(m.text));
   if (missing) throw new Error(`QuoteCard: highlights "${missing.text}" is not in the text`);
   const t = timingOf(p);
-  const { x, y, width, source, text, size, fill, color } = p;
+  const {
+    box: { x, y },
+    width,
+    source,
+    text,
+    size,
+    fill,
+    color,
+  } = p;
   const look: Look = { x, y, width, source, text, size, fill, color };
   const card = `${p.id}-card`;
   const exit = { exit: { type: "fade", duration: 0.2 } };

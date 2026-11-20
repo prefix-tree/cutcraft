@@ -34,5 +34,7 @@ export function Background(props: z.input<typeof backgroundSchema>) {
     p.variant === "gradient"
       ? `<defs><linearGradient id="${p.id}-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${a}"/><stop offset="1" stop-color="${b}"/></linearGradient></defs><rect x="${box.minX}" y="${box.minY}" width="${p.width}" height="${p.height}" fill="url(#${p.id}-g)"/>`
       : `<defs>${pattern}</defs><rect x="${box.minX}" y="${box.minY}" width="${p.width}" height="${p.height}" fill="${a}"/><rect x="${box.minX}" y="${box.minY}" width="${p.width}" height="${p.height}" fill="url(#${p.id}-p)"/>`;
-  return [h(Svg, { id: p.id, ...timing(t), ...svgIn(box, fill) })];
+  // The background is centred on the frame, as an element with no box is.
+  const { content } = svgIn(box, fill);
+  return [h(Svg, { id: p.id, ...timing(t), content })];
 }

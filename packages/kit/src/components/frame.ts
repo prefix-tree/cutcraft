@@ -1,15 +1,13 @@
 import { z } from "zod";
 
 import { Shape } from "../jsx/elements";
-import { h, parse, timing, timingOf, timingSchema } from "./shared";
+import { centre, h, parse, timing, timingOf, timingSchema } from "./shared";
 
 export const frameSchema = timingSchema.extend({
   /** The id of the element it draws. */
   id: z.string(),
-  /** The frame's centre from the frame's centre, and its size, in pixels. */
-  x: z.number().default(0),
-  /** The border's centre, in pixels below the frame's centre. */
-  y: z.number().default(0),
+  /** Where the border's centre sits, in pixels from the frame's top left. Left out: `{ x: 960, y: 540 }`, on a 1920 by 1080 frame. */
+  box: centre(960, 540),
   /** The border's width in pixels. */
   width: z.number().positive(),
   /** The border's height in pixels. */
@@ -35,7 +33,7 @@ export function Frame(props: z.input<typeof frameSchema>) {
       cornerRadius: p.cornerRadius,
       fill: { type: "none" },
       stroke: { color: p.color, width: p.thickness },
-      transform: { position: { x: p.x, y: p.y } },
+      box: { x: p.box.x, y: p.box.y, origin: "center" },
       enter: { type: "fade", duration: 0.25 },
       exit: { type: "fade", duration: 0.2 },
     }),

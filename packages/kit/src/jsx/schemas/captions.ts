@@ -1,8 +1,8 @@
 import { z } from "zod";
 
 import { zCaptionAnimation } from "../enums";
-import { assetRefSchema, colorSchema, idSchema, textShadowSchema, timeRefSchema } from "./common";
-import { zCaptionPosition, zTextAlign } from "./enums-local";
+import { assetRefSchema, boxSchema, colorSchema, idSchema, textShadowSchema, timeRefSchema } from "./common";
+import { zTextAlign } from "./enums-local";
 
 const captionStyleSchema = z.strictObject({
   font: z.string().optional(),
@@ -13,11 +13,6 @@ const captionStyleSchema = z.strictObject({
   shadow: textShadowSchema.optional(),
   /** An outline around the letters, drawn under them. */
   stroke: z.strictObject({ color: colorSchema, width: z.number().min(0).max(40) }).optional(),
-  /**
-   * Where the captions sit: `top`, `center` or `bottom`, or a number from 0 (the top of the frame) to 1 (the
-   * bottom) for the height their middle is at. `0.6` puts them under a speaker's chin in a vertical video.
-   */
-  position: z.union([zCaptionPosition, z.number().min(0).max(1)]).optional(),
   highlight: colorSchema.optional(),
   /** A filled, rounded box behind the word being said. `highlight` stays the colour of its letters. */
   highlightBox: colorSchema.optional(),
@@ -34,14 +29,13 @@ export const captionsSchema = z.strictObject({
   /** How the words appear: all at once, the word being said highlighted, word by word, karaoke or typewriter. */
   animation: zCaptionAnimation.default("none"),
   /**
-   * Where the middle of the captions is, in pixels right of the frame's centre and below it, as on a card or a
-   * badge. `y` takes the place of `style.position`; `x` alone keeps the height that names.
+   * The rectangle the caption block sits in, from the frame's top left as on any element. Left out, the lower safe
+   * area: centred, as wide as the frame less a margin at each side, its bottom a margin above the frame's bottom
+   * (`origin: "bottom"`). Each field written replaces that one of the default, so a box with only `y: 1150` and
+   * `origin: "center"` puts the block's middle at 1150 and keeps the default width. Without a `height`, the block is as
+   * tall as its lines.
    */
-  x: z.number().optional(),
-  /** Pixels below the frame's centre for the middle of the captions, as `x`. */
-  y: z.number().optional(),
-  /** The widest a caption line may be, in pixels. Left out: the frame, less a margin at each side. */
-  width: z.number().positive().optional(),
+  box: boxSchema.optional(),
   /** Which side of that width the lines sit against. Left out: `center`. */
   align: zTextAlign.optional(),
   // Generation limits: a cue breaks at a sentence end, a long pause, or when one of these would be exceeded.

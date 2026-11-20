@@ -6,9 +6,9 @@ import { h, parse, pointSchema, svgIn, timing, timingOf, timingSchema } from "./
 export const arrowSchema = timingSchema.extend({
   /** The id of the element it draws. */
   id: z.string(),
-  /** Where the line starts, in pixels from the frame's centre. */
+  /** Where the line starts, in pixels from the frame's left edge. */
   from: pointSchema,
-  /** Where the head points, in pixels from the frame's centre. */
+  /** Where the head points, in pixels from the frame's left edge. */
   to: pointSchema,
   /** How far the line bows to its left, in pixels; 0 is straight. */
   curve: z.number().default(0),

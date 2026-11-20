@@ -9,12 +9,12 @@ import {
   gradientSchema,
   idSchema,
   overlayProps,
+  placedProps,
   shadowSchema,
   textShadowSchema,
   themedLengthSchema,
   timedProps,
   timeRefSchema,
-  transformSchema,
   vec2Schema,
   visualProps,
 } from "./common";
@@ -188,8 +188,7 @@ export const nestedSchema = z.strictObject({
 export const layerSchema = z.strictObject({
   ...timedProps,
   ...entranceProps,
-  /** Moves, scales, turns and fades the whole layer, as on any element; the editor's handles write it. */
-  transform: transformSchema.optional(),
+  ...placedProps,
   /** How the layer mixes with what is under it, as CSS `mix-blend-mode` does. */
   blend: zBlendMode.optional(),
   /**
