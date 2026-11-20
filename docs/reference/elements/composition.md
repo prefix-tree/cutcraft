@@ -30,4 +30,4 @@ The coffee footage is Pixabay videos [209419](https://pixabay.com/videos/id-2094
 | `theme` | { extends, palette, fonts, radius, motion, styles } |  |  | The video's look: palette, fonts, radius, motion style and element presets. Elements use it through `$tokens` and `style`. |
 | `motionBlur` | { shutterAngle, samples } |  |  | A film camera's blur on everything that moves, in the export: each frame averages `samples` moments across the time its shutter is open, `shutterAngle` degrees of the frame (180 is half the frame, the film default). Drawn by the browser export, which a file with it uses on its own; the preview stays sharp. |
 
-Children: `track`, `marker`, `multicam`, `captions`. [All elements](/reference/elements/)
+Children: `track`, `marker`, `captions`. [All elements](/reference/elements/)

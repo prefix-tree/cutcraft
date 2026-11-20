@@ -21,6 +21,6 @@ The coffee footage is Pixabay videos [209419](https://pixabay.com/videos/id-2094
 | `id` | string |  | yes | The key's name. |
 | `at` | number (0..∞) |  | yes | Seconds into the clip where the new speed is reached. |
 | `speed` | number (0.1..20) |  | yes | The playback rate from here on: 2 is twice as fast. |
-| `easing` | "linear" \| "ease" \| "ease-in" \| "ease-out" \| "ease-in-out" \| … 46 more | `"linear"` |  | How the speed changes from the key before to this one. |
+| `easing` | "linear" \| "ease" \| "ease-in" \| "ease-out" \| "ease-in-out" \| … 46 more | `"linear"` |  | How the speed changes from this key to the next one. The last key's easing is not used. |
 
 No children. [All elements](/reference/elements/)

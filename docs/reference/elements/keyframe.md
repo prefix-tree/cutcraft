@@ -25,6 +25,6 @@ The coffee footage is Pixabay videos [209419](https://pixabay.com/videos/id-2094
 | `param` | string |  |  | Inside an `<Effect>`: the effect param it animates. |
 | `at` | number (0..∞) |  | yes | Element-relative seconds. |
 | `value` | any |  | yes | The value the property or param has at `at`. |
-| `easing` | "linear" \| "ease" \| "ease-in" \| "ease-out" \| "ease-in-out" \| … 46 more | `"linear"` |  | How it moves from the keyframe before to this one. |
+| `easing` | "linear" \| "ease" \| "ease-in" \| "ease-out" \| "ease-in-out" \| … 46 more | `"linear"` |  | How it moves from this keyframe to the next one. The last keyframe's easing is not used. |
 
 No children. [All elements](/reference/elements/)

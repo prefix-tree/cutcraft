@@ -26,9 +26,9 @@ references.
 | Several cameras | `<Multicam sync>` with `<Angle src offset>` per camera and `<Cut at angle>` to switch |
 | Reuse a sequence | `<Nested>`: a sequence written once as a component and placed like a clip |
 | Place and frame | `fit` (`contain`, `cover`, `stretch`, `none`); `transform` (position, scale, rotation, opacity, crop, `borderRadius`); `frame={{ focus }}` reframes footage to the composition's shape, a landscape interview into a vertical short |
-| Mix layers | `blend` (`multiply`, `screen`, `overlay`…) and `blendOpacity` |
-| Show part of a clip | `<Mask>`: a rect, ellipse, polygon or drawn path, with `feather`, `expansion`, `inverted`; keyframe it to follow something |
-| Animate anything | `<Keyframe property at value easing>` on any transform, effect param (`param`), colour or volume |
+| Mix layers | `blend` (`multiply`, `screen`, `overlay`…); on a clip, `blendOpacity` for how strongly |
+| Show part of a clip | `<Mask>`: a rect, ellipse, polygon or drawn path, with `feather`, `inverted` and `opacity` |
+| Animate anything | `<Keyframe property at value easing>` on any transform, effect param (`param`), colour or volume; `easing` shapes the move from that key to the next |
 | Join clips | `<Transition type duration>` between two clips of a track: `crossfade`, `dipToBlack`, `dipToWhite`, `wipe`, `slide`, `push`, `iris`, `clockWipe`, `blinds`, `filmBurn`, `pixelDissolve`, `zoom`. With `on="pip" edge="in"` it brings one element in, or takes it out with `edge="out"` |
 | Correct and grade | `<Effect type>`: `exposure`, `whiteBalance`, `brightness`, `contrast`, `saturation`, `vibrance`, `hue`, `levels`, `curves`, `shadowsHighlights`, `lut` (a `.cube` file added with `uberscene add`) |
 | Give a look | `grayscale`, `sepia`, `invert`, `duotone`, `vignette`, `grain`, `lightLeak`, `chromaticAberration`, `halftone`, `pixelate`, `scanlines`, `fractalNoise` |

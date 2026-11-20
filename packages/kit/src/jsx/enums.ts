@@ -84,8 +84,6 @@ export const EASINGS = [
   "easeInOutBounceSmall",
 ] as const;
 
-export const MASK_EASINGS = ["linear", "ease-in", "ease-out", "ease-in-out"] as const;
-
 // The built-in effects and transitions are listed by their registry (effects/registry.ts).
 export { TRANSITION_TYPES, type TransitionType, VIDEO_EFFECT_TYPES, type VideoEffectType } from "../effects/registry";
 
@@ -165,7 +163,6 @@ export const CAPTION_POSITIONS = ["top", "center", "bottom"] as const;
 export const TEXT_ALIGNS = ["left", "center", "right", "justify"] as const;
 export const TEXT_VALIGNS = ["top", "middle", "bottom"] as const;
 export const TEXT_DECORATIONS = ["none", "underline", "line-through", "overline"] as const;
-export const ANIMATION_UNITS = ["character", "word", "line"] as const;
 export const MASK_TYPES = ["shape", "drawn"] as const;
 export const SVG_COLOR_MODES = ["none", "tint", "replace"] as const;
 export const AUTOMATION_LANES = ["volume", "pan"] as const;
@@ -176,7 +173,6 @@ export const zTrackRole = z.enum(TRACK_ROLES);
 export const zFitMode = z.enum(FIT_MODES);
 export const zBlendMode = z.enum(BLEND_MODES);
 export const zEasing = z.enum(EASINGS);
-export const zMaskEasing = z.enum(MASK_EASINGS);
 export const zTransitionType = z.enum(TRANSITION_TYPES);
 export const zVideoEffectType = z.enum(VIDEO_EFFECT_TYPES);
 export const zTextAnimationPreset = z.enum(TEXT_ANIMATION_PRESETS);
