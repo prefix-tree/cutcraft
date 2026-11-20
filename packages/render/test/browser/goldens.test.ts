@@ -271,7 +271,7 @@ export default function Video() {
         <Clip id="logo" src="asset:logo" duration={2} fit="contain" />
       </Track>
       <Track id="overlays" layout="free">
-        <Title id="title" start={0.2} duration={2.8} size={36} color="#ffffff">Golden frame</Title>
+        <Title id="title" start={0.2} duration={2.8} style={{ size: 36, color: "#ffffff" }}>Golden frame</Title>
         <Motion id="dot" start={0.5} duration={2} sequence={[[".dot", { x: [0, 300] }, { duration: 2, ease: "linear" }]]}>
           <div className="dot" style={{ position: "absolute", left: 40, top: 200, width: 30, height: 30, borderRadius: 15, background: "#ffcc00" }} />
         </Motion>

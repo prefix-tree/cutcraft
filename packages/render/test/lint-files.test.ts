@@ -10,7 +10,10 @@ import { describe, expect, it } from "vitest";
 
 import { formatLint, lintErrors, lintFiles } from "../src/index";
 
-const video = (body: string, extra = "") => `import { Clip, Composition, Layer, Title, Track } from "@uberscene/kit";
+const video = (
+  body: string,
+  extra = "",
+) => `import { Clip, Composition, Layer, Shape, Title, Track } from "@uberscene/kit";
 ${extra}
 export default function Video() {
   return (
@@ -89,13 +92,29 @@ describe("lintFiles", () => {
   });
 
   it("with fix, moves old spellings a caller's table names", () => {
-    const dir = project({ "video.tsx": video('<Title id="t" size={64} start={0} duration={2}>Hi</Title>') });
+    const dir = project({ "video.tsx": video('<Shape id="t" shape="circle" size={64} start={0} duration={2} />') });
     const file = join(dir, "video.tsx");
     const results = lintFiles([file], {
       fix: true,
-      lint: { deprecations: [{ element: "Title", prop: "size", to: { into: "style" }, since: "0.6.0" }] },
+      lint: { deprecations: [{ element: "Shape", prop: "size", to: { into: "style" }, since: "0.6.0" }] },
     });
-    expect(readFileSync(file, "utf8")).toContain('<Title id="t" style={{ size: 64 }} start={0} duration={2}>');
+    expect(readFileSync(file, "utf8")).toContain(
+      '<Shape id="t" shape="circle" style={{ size: 64 }} start={0} duration={2} />',
+    );
+    expect(results[0]?.diagnostics.filter((d) => d.rule === "deprecated-props")).toEqual([]);
+  });
+
+  it("with fix, moves a title written before 0.6 to one style and a box", () => {
+    const dir = project({
+      "video.tsx": video(
+        '<Title id="t" style="h1" size={64} width={800} align="left" start={0} duration={2}>Hi</Title>',
+      ),
+    });
+    const file = join(dir, "video.tsx");
+    const results = lintFiles([file], { fix: true });
+    expect(readFileSync(file, "utf8")).toContain(
+      '<Title id="t" style={{ preset: "h1", size: 64, align: "left" }} box={{ width: 800 }} start={0} duration={2}>',
+    );
     expect(results[0]?.diagnostics).toEqual([]);
   });
 

@@ -70,7 +70,7 @@ describe("checkLayout", () => {
           box("edge", 620, 120, 100, 100),
           box("margin", 610, 120, 40, 40),
           box("low", 320, 310, 400, 30, 0.5, 0.5),
-          h(Title, { id: "hi", start: 0, duration: 1, size: 40 }, "Hi"),
+          h(Title, { id: "hi", start: 0, duration: 1, style: { size: 40 } }, "Hi"),
         ),
         h(
           Captions,

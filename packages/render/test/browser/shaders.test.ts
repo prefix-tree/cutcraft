@@ -905,7 +905,7 @@ it("runs a declared effect over overlays: a Layer, a Motion layer and a title, t
         <Effect id="e2" type={swap} />
         <div className="box" style={{ position: "absolute", left: 120, top: 10, width: 80, height: 60, background: "#ff0000" }} />
       </Motion>
-      <Title id="t" start={0} duration={2} color="#ff0000" size={90} box={{ x: 160, y: 130, origin: "center" }}>
+      <Title id="t" start={0} duration={2} style={{ color: "#ff0000", size: 90 }} box={{ x: 160, y: 130, origin: "center" }}>
         <Effect id="e3" type={swap} />
         ███
       </Title>
