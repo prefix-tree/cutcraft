@@ -1211,17 +1211,18 @@ html {
   --cc-paper-2: #cfcabf;
   --cc-ink: #121212;
   --cc-ink-2: #34322e;
-  --cc-grey: #6b675f;
+  /* Dark enough for 12px labels on concrete. #6b675f sat under 4.5:1. */
+  --cc-grey: #45423c;
   --cc-rule: #b9b3a6;
   --cc-display: "Big Shoulders Display", "Barlow Condensed", "Arial Narrow", sans-serif;
   --cc-pixel: "Big Shoulders Stencil Display", "Big Shoulders Display", "Arial Narrow", sans-serif;
   --vp-font-family-base: "IBM Plex Sans", "Inter", system-ui, sans-serif;
   --cc-hazard: repeating-linear-gradient(-45deg, var(--cc-accent) 0 14px, #121212 14px 28px);
-  /* Concrete: a faint grain, and a 24px survey grid under it. */
+  /* Concrete: a faint grain. The survey grid stays, drawn lighter so paragraphs are not read through a mesh. */
   --cc-concrete:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
-    linear-gradient(to right, rgba(18, 18, 18, 0.05) 1px, transparent 1px) 0 0 / 24px 24px,
-    linear-gradient(to bottom, rgba(18, 18, 18, 0.05) 1px, transparent 1px) 0 0 / 24px 24px;
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .045 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+    linear-gradient(to right, rgba(18, 18, 18, 0.028) 1px, transparent 1px) 0 0 / 24px 24px,
+    linear-gradient(to bottom, rgba(18, 18, 18, 0.028) 1px, transparent 1px) 0 0 / 24px 24px;
   --vp-code-bg: #cbc5b8;
 }
 .dark {
@@ -1253,10 +1254,11 @@ body {
   border-bottom: 2px solid #121212;
 }
 .VPNavBarTitle .title {
-  font-family: var(--cc-pixel);
-  font-weight: 900;
+  font-family: var(--cc-display);
+  font-weight: 800;
   font-size: 26px;
-  letter-spacing: 0.04em;
+  letter-spacing: -0.02em;
+  text-transform: none;
 }
 .VPSidebar {
   background: var(--cc-paper) !important;
@@ -1297,9 +1299,11 @@ body {
   font-weight: 900;
   /* Beside the spec sheet the title has about 0.6 of the width, so it scales with that, not the window: the longest
      word must fit on one line. Kept small enough that the agent picker sits on a laptop's first screen. */
-  font-size: clamp(52px, 7vw, 108px);
-  line-height: 0.82;
-  letter-spacing: 0;
+  font-size: clamp(52px, 6.4vw, 96px);
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  text-transform: none;
+  text-wrap: balance;
 }
 .home-title-mark {
   padding: 0.04em 0.1em 0;
@@ -1459,12 +1463,14 @@ body {
 .home.vp-doc h2,
 .home.vp-doc h3 {
   font-family: var(--cc-display);
+  text-transform: none;
+  text-wrap: balance;
 }
 .home.vp-doc h2 {
-  font-weight: 900;
-  font-size: clamp(52px, 7.5vw, 104px);
-  line-height: 0.86;
-  letter-spacing: 0.005em;
+  font-weight: 800;
+  font-size: clamp(40px, 4.8vw, 68px);
+  line-height: 1.02;
+  letter-spacing: -0.025em;
 }
 .home.vp-doc h2::before {
   content: "No. " counter(home-section, decimal-leading-zero);
@@ -1481,13 +1487,17 @@ body {
 }
 .vp-doc .home-why-grid h3,
 .vp-doc .home-element h3 {
-  font-weight: 900;
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
 }
 .vp-doc ul.home-feature-list strong {
   font-family: var(--cc-display);
   font-weight: 800;
-  font-size: 25px;
-  letter-spacing: 0.01em;
+  font-size: 26px;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  text-transform: none;
 }
 .vp-doc ul.home-feature-list li::before {
   font-family: var(--cc-pixel);
@@ -1593,10 +1603,24 @@ html:has(.VPContent.has-sidebar) .VPSidebar {
   color: var(--cc-grey);
 }
 html:has(.VPContent.has-sidebar) .VPSidebarItem .text {
-  color: var(--cc-ink-2);
+  font-family: var(--vp-font-family-base);
+  font-size: 14.5px;
+  font-weight: 500;
+  letter-spacing: -0.011em;
+  line-height: 1.4;
+  text-transform: none;
+  color: var(--cc-ink);
 }
 html:has(.VPContent.has-sidebar) .VPSidebarItem.level-0 > .item > .text {
-  color: var(--cc-grey);
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--cc-ink-2);
+}
+html:has(.VPContent.has-sidebar) .VPDocAsideOutline .outline-link {
+  font-size: 13.5px;
+  line-height: 1.45;
 }
 html:has(.VPContent.has-sidebar) .VPSidebarItem.is-active > .item .link > .text,
 html:has(.VPContent.has-sidebar) .VPNavBarMenuLink.active,
@@ -1607,13 +1631,25 @@ html:has(.VPContent.has-sidebar) .VPDocAsideOutline .outline-link {
   color: var(--cc-ink-2);
 }
 
-/* Text: IBM Plex at 16px on 28px, in sentence case. */
+/* Text: IBM Plex at 17px on a ~66-character measure, in sentence case.
+   The size, leading and measure follow humansmd.dev; the face stays IBM Plex. */
 .VPDoc .vp-doc {
   color: var(--cc-ink);
+  font-size: 17px;
+  line-height: 1.65;
 }
 .VPDoc .vp-doc p,
-.VPDoc .vp-doc li {
+.VPDoc .vp-doc li,
+.VPDoc .vp-doc blockquote {
+  max-width: 66ch;
   color: var(--cc-ink);
+}
+.VPDoc .vp-doc p {
+  margin: 0.9em 0;
+}
+.VPDoc .vp-doc li {
+  margin: 0.35em 0;
+  line-height: 1.6;
 }
 .VPDoc .vp-doc h1,
 .VPDoc .vp-doc h2,
@@ -1621,42 +1657,61 @@ html:has(.VPContent.has-sidebar) .VPDocAsideOutline .outline-link {
 .VPDoc .vp-doc h4 {
   font-family: var(--vp-font-family-base);
   text-transform: none;
+  text-wrap: balance;
   color: var(--cc-ink);
 }
 .VPDoc .vp-doc h1 {
-  margin-bottom: 20px;
-  font-size: clamp(32px, 4vw, 40px);
-  font-weight: 700;
-  line-height: 1.15;
-  letter-spacing: -0.02em;
+  margin-bottom: 0.4em;
+  font-family: var(--cc-display);
+  font-size: clamp(42px, 4.5vw, 56px);
+  font-weight: 800;
+  line-height: 1.02;
+  letter-spacing: -0.025em;
 }
 .VPDoc .vp-doc h2 {
-  margin-top: 48px;
-  padding-top: 24px;
+  margin-top: 2.2em;
+  padding-top: 0.65em;
   border-top: 1px solid var(--cc-rule);
-  font-size: 26px;
-  font-weight: 650;
-  line-height: 1.25;
-  letter-spacing: -0.015em;
+  font-family: var(--cc-display);
+  font-size: 34px;
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
 }
 .VPDoc .vp-doc h3 {
-  margin-top: 32px;
-  font-size: 20px;
-  font-weight: 600;
-  line-height: 1.35;
-  letter-spacing: -0.01em;
+  margin-top: 1.6em;
+  font-size: 22px;
+  font-weight: 650;
+  line-height: 1.3;
+  letter-spacing: -0.015em;
 }
 .VPDoc .vp-doc a {
   color: var(--cc-ink);
   font-weight: 500;
   text-decoration-color: var(--cc-accent);
   text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
 }
 .VPDoc .vp-doc a:hover {
   color: var(--cc-accent-text);
+  text-decoration-thickness: 2px;
 }
 .VPDoc .vp-doc th {
-  color: var(--cc-grey);
+  font-family: var(--vp-font-family-base);
+  font-size: 13.5px;
+  font-weight: 650;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--cc-ink);
+}
+.VPDoc .vp-doc td {
+  font-size: 15.5px;
+  line-height: 1.5;
+}
+.VPDoc .vp-doc th,
+.VPDoc .vp-doc td {
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
 .VPDoc .vp-doc td,
 .VPDoc .vp-doc th {
@@ -2147,4 +2202,81 @@ html:has(.VPContent.has-sidebar) .DocSearch-Button {
   .cc-agents-brief {
     flex-direction: column;
   }
+}
+
+/* ── Reading, after humansmd.dev ─────────────────────────────────────────────────────────────────
+   The poster stays: Big Shoulders, stencil numbers, safety orange, 2px ink, hard shadows.
+   Prose, navigation and captions take humansmd's reading settings: body size, open leading,
+   a short measure, sentence-case navigation, and secondary ink dark enough to read. */
+
+::selection {
+  background: var(--cc-accent);
+  color: #121212;
+}
+
+.VPNavBarMenuLink,
+.VPNavBarMenuGroup .text {
+  font-family: var(--vp-font-family-base) !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.011em !important;
+  text-transform: none !important;
+  line-height: 1.2;
+}
+
+.vp-doc p.home-lead {
+  max-width: 38rem;
+  font-size: 19px !important;
+  font-weight: 400;
+  line-height: 1.55 !important;
+  color: var(--cc-ink);
+}
+.vp-doc .home-why-grid p,
+.vp-doc p.home-chapter-lead,
+.vp-doc p.home-element-lead,
+.vp-doc p.home-aim-text,
+.vp-doc ul.home-feature-list li {
+  font-size: 16.5px;
+  line-height: 1.6;
+  color: var(--cc-ink);
+}
+.vp-doc p.home-aim-lead {
+  max-width: 40rem;
+  font-size: 20px;
+  line-height: 1.5;
+  color: var(--cc-ink);
+}
+.vp-doc .home-why-grid h3,
+.vp-doc .home-element h3 {
+  line-height: 1.05;
+  letter-spacing: 0.005em;
+}
+.cc-card-text,
+.home .home-cards .cc-card-text {
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--cc-ink-2);
+}
+.home-sheet figcaption {
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--cc-ink);
+}
+
+/* The playground is a page of instructions, not a poster. */
+.cc-playground-page.vp-doc {
+  font-size: 17px;
+  line-height: 1.65;
+}
+.cc-playground-page.vp-doc h1 {
+  font-family: var(--vp-font-family-base) !important;
+  font-size: clamp(36px, 4vw, 46px) !important;
+  font-weight: 700;
+  line-height: 1.12 !important;
+  letter-spacing: -0.025em;
+  text-transform: none;
+  text-wrap: balance;
+}
+.cc-playground-page.vp-doc p {
+  max-width: 66ch;
 }

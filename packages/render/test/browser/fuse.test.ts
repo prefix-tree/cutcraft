@@ -1,7 +1,7 @@
 // A run of colour effects drawn as one pass must look like the same effects drawn one pass each. The separate version
 // puts an effect of the file's own that changes nothing between each pair, which breaks every run. Both are drawn on
 // the goldens' chart and compared within the golden tolerance; fusing only removes the 8-bit rounding between passes.
-// Needs a Chrome or Chromium 153+ in UBERSCENE_CHROMIUM.
+// Needs Chrome 157: the cached Chrome for Testing, or UBERSCENE_CHROMIUM.
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 

@@ -1,7 +1,6 @@
 # 0024. Graphic kinds become components; icon stickers are removed
 
-> Supersedes [0020](./0020-graphic-is-deprecated-for-free-code.md). Follows from
-> [0018](./0018-free-code-in-a-timeline-skeleton.md).
+> Supersedes [0020](./0020-graphic-is-deprecated-for-free-code.md).
 
 ## Context
 

@@ -1,5 +1,5 @@
 // `whereThings`: where each overlay, the captions and each part a layer's code named are at a moment.
-// Needs a Chrome or Chromium 153+ in UBERSCENE_CHROMIUM.
+// Needs Chrome 157: the cached Chrome for Testing, or UBERSCENE_CHROMIUM.
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 

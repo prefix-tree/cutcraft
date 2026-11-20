@@ -8,6 +8,9 @@ import { fileURLToPath } from "node:url";
 import type { MediaResolver } from "@uberscene/player/engine";
 
 import type { FontFile } from "../fonts";
+import type { CodecModes } from "../native/codecs";
+import { nativeRoutes } from "../native/routes";
+import type { NativeEncoded } from "../native/wire";
 import type { PageJob } from "./page/protocol";
 
 const TYPES: Readonly<Record<string, string>> = {
@@ -38,7 +41,15 @@ export interface PageServer {
   readonly url: string;
   /** Why media the page asked for could not be served: the resolver's own messages, which the page sees only as a 500. */
   readonly mediaErrors: readonly string[];
+  /** The packets of a native encode the page finished (`UBERSCENE_CODECS`), read here rather than through the page. */
+  takeEncoded(session: string): NativeEncoded;
   close(): Promise<void>;
+}
+
+/** The native codec process, when `UBERSCENE_CODECS` asks for it. */
+export interface NativeCodecs {
+  readonly binary: string;
+  readonly modes: CodecModes;
 }
 
 /**
@@ -52,6 +63,7 @@ export async function servePage(
   job: Omit<PageJob, "fonts">,
   media: MediaResolver,
   fonts: readonly FontFile[] = [],
+  native?: NativeCodecs,
 ): Promise<PageServer> {
   const page: PageJob = {
     ...job,
@@ -63,6 +75,7 @@ export async function servePage(
     })),
   };
   const mediaErrors: string[] = [];
+  const routes = native ? nativeRoutes(native.binary, native.modes, media) : null;
   const vite = fromSource ? await sourcePage.acquire() : null;
   const built = fromSource
     ? null
@@ -93,6 +106,7 @@ export async function servePage(
       res.end(bytes);
       return;
     }
+    if (routes && (await routes.handle(req, res, path))) return;
     if (path.startsWith("/media/")) {
       await sendMedia(req, res, media, path.slice("/media/".length)).catch((error: unknown) => {
         const message = error instanceof Error ? error.message : String(error);
@@ -121,7 +135,12 @@ export async function servePage(
   return {
     url: `http://127.0.0.1:${port}/`,
     mediaErrors,
+    takeEncoded: (session) => {
+      if (!routes) throw new Error("the export page reported a native encode, but the native codecs are off");
+      return routes.takeEncoded(session);
+    },
     close: async () => {
+      routes?.close();
       if (vite) sourcePage.release();
       await closeServer(server);
     },

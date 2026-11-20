@@ -18,13 +18,27 @@ import {
  */
 export const CHROME_MILESTONE = "157";
 
+/** What to do about a Chrome the export cannot use, said in every error that names one. */
+const USE_OURS = `set UBERSCENE_CHROMIUM to a Chrome ${CHROME_MILESTONE} binary`;
+
+/**
+ * Why a browser reporting `version` (as Playwright gives it, "157.0.8080.0") cannot run the export, or null when it
+ * can. The export runs on Chrome `CHROME_MILESTONE` only: text, WebGL and the capture are drawn and tested on that
+ * one, and another milestone draws text a little differently.
+ */
+export function wrongChrome(version: string, executablePath: string): string | null {
+  const major = /(\d+)\./.exec(version)?.[1];
+  if (major === CHROME_MILESTONE) return null;
+  return `the export runs on Chrome ${CHROME_MILESTONE} only, and ${executablePath} is Chrome ${version}; unset UBERSCENE_CHROMIUM to use the Chrome for Testing the export downloads (\`uberscene browser install\`), or ${USE_OURS}`;
+}
+
 /** Where downloaded browsers live: `UBERSCENE_BROWSER_CACHE`, else `~/.cache/uberscene/browsers`. */
 export function browserCacheDir(): string {
   return process.env.UBERSCENE_BROWSER_CACHE ?? join(homedir(), ".cache", "uberscene", "browsers");
 }
 
 export interface FindChromeOptions {
-  /** A Chrome or Chromium binary to use as it is. */
+  /** A Chrome binary to use instead of the downloaded one; the export checks that it is Chrome `CHROME_MILESTONE`. */
   readonly executablePath?: string | undefined;
   /** Download Chrome for Testing when none is found (default true). */
   readonly download?: boolean;
@@ -43,7 +57,7 @@ export async function findChrome(options: FindChromeOptions = {}): Promise<strin
   if (cached) return cached;
   if (options.download === false)
     throw new Error(
-      `no Chrome ${CHROME_MILESTONE} in ${browserCacheDir()}; run \`uberscene browser install\`, or set UBERSCENE_CHROMIUM to a Chrome or Chromium 153+ binary`,
+      `no Chrome ${CHROME_MILESTONE} in ${browserCacheDir()}; run \`uberscene browser install\`, or ${USE_OURS}`,
     );
   return installChrome(options.log);
 }
@@ -59,17 +73,14 @@ export async function cachedChrome(): Promise<string | null> {
 /** Downloads Chrome for Testing of `CHROME_MILESTONE` into the cache and returns its binary. */
 export async function installChrome(log: (message: string) => void = () => undefined): Promise<string> {
   const platform = detectBrowserPlatform();
-  if (!platform)
-    throw new Error(
-      "Chrome for Testing has no build for this platform; set UBERSCENE_CHROMIUM to a Chrome or Chromium 153+ binary",
-    );
+  if (!platform) throw new Error(`Chrome for Testing has no build for this platform; ${USE_OURS}`);
   const cacheDir = browserCacheDir();
   let buildId: string;
   try {
     buildId = await resolveBuildId(Browser.CHROME, platform, CHROME_MILESTONE);
   } catch (error) {
     throw new Error(
-      `could not look up Chrome ${CHROME_MILESTONE} (${error instanceof Error ? error.message : String(error)}); set UBERSCENE_CHROMIUM to a Chrome or Chromium 153+ binary`,
+      `could not look up Chrome ${CHROME_MILESTONE} (${error instanceof Error ? error.message : String(error)}); ${USE_OURS}`,
     );
   }
   log(`downloading Chrome ${buildId} into ${cacheDir} (once)`);

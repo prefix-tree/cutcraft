@@ -71,6 +71,7 @@ export {
   type PcmBuffer,
   type PcmProvider,
 } from "./mixer";
+export { type CodecModes, codecModes } from "./native/codecs";
 export { draftPath, type ExportSource, type RenderOptions, type RenderResult, renderVideo } from "./renderer";
 export { DEFAULT_SKILL_DIR, installSkill, type SkillInstallOptions, type SkillInstallResult } from "./skills";
 export { renderStill, type StillOptions, type StillResult } from "./still";

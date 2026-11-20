@@ -1,5 +1,5 @@
 // Overlays that load a file (a sticker's image, an SVG's markup) are captured once it has loaded, not before: a still
-// taken the moment they appear shows the file. Needs a Chrome or Chromium 153+ in UBERSCENE_CHROMIUM.
+// taken the moment they appear shows the file. Needs Chrome 157: the cached Chrome for Testing, or UBERSCENE_CHROMIUM.
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 

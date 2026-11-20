@@ -18,6 +18,8 @@ export interface PageJob {
   readonly startedAt: number;
   /** Milliseconds one frame may take before the page fails it. */
   readonly frameTimeout: number;
+  /** "native": footage is decoded by the native codec process through `/native/frames` (`UBERSCENE_CODECS`). */
+  readonly decoder?: "browser" | "native";
 }
 
 interface PageFont {
@@ -30,8 +32,8 @@ interface PageFont {
 export interface SegmentRequest {
   readonly first: number;
   readonly last: number;
-  readonly container: "mp4" | "webm";
-  readonly codec: "avc" | "vp9" | "av1";
+  readonly container: "mp4" | "webm" | "mov";
+  readonly codec: "avc" | "vp9" | "av1" | "prores";
   readonly bitrate: number;
   /** A Mediabunny quality preset by name, in place of `bitrate`. */
   readonly quality?: "very-low" | "low" | "medium" | "high" | "very-high";
@@ -44,6 +46,20 @@ export interface SegmentRequest {
   readonly fps?: number;
   /** Encode each frame at this fraction of its width and height; a draft's pictures are smaller. */
   readonly scale?: number;
+  /**
+   * Encode with the native codec process instead of WebCodecs (`UBERSCENE_CODECS`): the page sends each picture to
+   * `/native/encode` and `segment` returns the session whose packets Node reads.
+   */
+  readonly native?: NativeEncodeOptions;
+}
+
+/** What the native encoder is asked for, beside the size, rate and keyframe interval the request already gives. */
+export interface NativeEncodeOptions {
+  readonly codec: "h264" | "prores";
+  readonly kbps?: number;
+  readonly crf?: number;
+  readonly preset?: "speed" | "balanced" | "quality";
+  readonly proresProfile?: "proxy" | "lt" | "standard" | "hq" | "4444";
 }
 
 /** The soundtrack of composition seconds [from, to), encoded for this container. */
@@ -143,8 +159,11 @@ export interface PageApi {
   readonly errors: readonly string[];
   /** Frames captured after the browser never signalled their paint: each waited two animation frames instead. */
   readonly paintFallbacks: number;
-  /** Encodes frames [first, last) into a small container, timestamps from 0; returns its length in bytes. */
-  segment(request: SegmentRequest): Promise<number>;
+  /**
+   * Encodes frames [first, last) into a small container, timestamps from 0; returns its length in bytes. With
+   * `native`, returns the native encode session instead.
+   */
+  segment(request: SegmentRequest): Promise<number | { readonly session: string }>;
   /** Mixes and encodes the soundtrack; its bytes wait for `read`. */
   audio(request: AudioRequest): Promise<AudioResult>;
   /** Steps to `t` and measures the ink of each overlay and of the captions there, and of named parts when asked. */

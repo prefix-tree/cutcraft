@@ -38,7 +38,7 @@ renders it, and the export runs without the host's React tree.
   show what follows the theme and what was set by hand.
 - **Identity survives a theme change** where the theme does not reach. An
   element whose props the theme touches under neither the old nor the new
-  theme keeps its parsed props and its placement (0011).
+  theme keeps its parsed props and its placement.
 - **Fonts ship with the renderers.** A theme is only as good as the faces it
   names, so five OFL families are bundled in both the export (Satori reads the
   `@fontsource` files) and the preview (`@uberscene/player/fonts.css`).

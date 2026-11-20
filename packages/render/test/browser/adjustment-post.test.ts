@@ -1,6 +1,6 @@
 // Vignette and grain on an <Adjustment> darken and speckle everything beneath it, in the export as in the preview:
 // the goldens' chart under an adjustment with a vignette has darker corners than the chart alone, and the same centre.
-// Needs a Chrome or Chromium 153+ in UBERSCENE_CHROMIUM.
+// Needs Chrome 157: the cached Chrome for Testing, or UBERSCENE_CHROMIUM.
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
