@@ -157,8 +157,13 @@ with `in`, `out` or a transform is refused, as are scenes with transitions.
 Lint checks a file's text against the conventions that keep it editable, and flags cuts and code that will look wrong.
 
 ```ts
-lint(text, { manifest })   // Diagnostic[] with rule, severity, message, range, id, prop
+lint(text, { manifest })        // Diagnostic[] with rule, severity, message, range, id, prop, fix
+fixSource(text, { manifest })   // { text, applied, remaining }
 ```
+
+A diagnostic carries a `fix`, a list of source edits, when there is one right answer. `fixSource` applies them and
+lints again until none is left; a fix that overlaps one already taken waits for the next round. From the command
+line, `uberscene lint video.tsx --fix` does the same to a file ([CLI](/reference/cli#lint)).
 
 **The file.** These keep a file editable:
 
@@ -191,6 +196,15 @@ lint(text, { manifest })   // Diagnostic[] with rule, severity, message, range, 
 | `stray-html` | HTML straight in a track, where nothing draws it. |
 | `free-code-clock` | Free code off the video's clock ([Free code](./free-code#the-video-s-clock)). |
 | `not-rendered` | One of the few things the renderers draw differently from what the file says, listed in [What renders](/reference/rendering). |
+
+**Old spellings.** One rule moves a file across a release that renamed things:
+
+| Rule | Reports |
+|---|---|
+| `deprecated-props` | A prop or a value spelled the way an earlier version took it, as an error that names the new spelling. It reads the kit's `DEPRECATIONS` table, and any rows passed as `lint(text, { deprecations })`. Where the new spelling can be written for certain, the fix renames the prop, respells the value, or moves the prop into its object prop. |
+
+A rule of your own can build its fix with the helpers the kit's rules use: `renameProp`, `renameValue`,
+`movePropInto` and `movePropsInto`, given a tag found with `jsxTags`.
 
 ## A font picker
 

@@ -1,6 +1,7 @@
 import * as t from "@babel/types";
 
-import { rangeOf } from "../../parse";
+import type { SourceEdit } from "../../edits";
+import { type Range, rangeOf } from "../../parse";
 import type { Diagnostic } from "../index";
 import type { Rule } from "./index";
 
@@ -46,9 +47,24 @@ export const freeCodeClock: Rule = {
   name: "free-code-clock",
   check: (index) => {
     const out: Diagnostic[] = [];
-    const warn = (node: t.Node, message: string): void => {
-      out.push({ rule: "free-code-clock", severity: "warning", range: rangeOf(node), message });
+    const warn = (node: t.Node, message: string, fix?: readonly SourceEdit[]): void => {
+      out.push({
+        rule: "free-code-clock",
+        severity: "warning",
+        range: rangeOf(node),
+        message,
+        ...(fix ? { fix } : {}),
+      });
     };
+    // Names the file binds itself: writing one bare would reach the file's own, not the browser's.
+    const bound = new Set<string>();
+    t.traverseFast(index.ast.program, (node) => {
+      if (t.isVariableDeclaration(node) || t.isFunctionDeclaration(node) || t.isImportDeclaration(node))
+        for (const name of Object.keys(t.getBindingIdentifiers(node))) bound.add(name);
+      if (t.isFunction(node))
+        for (const param of node.params)
+          for (const name of Object.keys(t.getBindingIdentifiers(param))) bound.add(name);
+    });
     // Local names bound to a library's own-clock export, and to Motion's `motion` / `m` component factories.
     const ownClock = new Map<string, { imported: string; use: string }>();
     const motionFactories = new Set<string>();
@@ -98,6 +114,9 @@ export const freeCodeClock: Rule = {
         warn(
           node,
           `${node.object.name}.${node.property.name} is the browser's own, on the wall clock; write ${node.property.name} without ${node.object.name}. and an export runs it on the video's clock`,
+          bound.has(node.property.name)
+            ? undefined
+            : [{ kind: "text", id: "", range: rangeOf(node), text: node.property.name }],
         );
       } else if (t.isJSXOpeningElement(node)) {
         const el = node.name;
@@ -121,16 +140,30 @@ export const freeCodeClock: Rule = {
               `<${el.object.name}.${el.property.name}> animates on Motion's own clock, so a scrub or an export does not follow it; drive it with useTimeline or useLayerTime from @uberscene/graphics/motion`,
             );
         }
-      } else if (
-        t.isObjectProperty(node) &&
-        t.isIdentifier(node.key) &&
-        node.key.name === "willReadFrequently" &&
-        t.isBooleanLiteral(node.value, { value: true })
-      ) {
-        warn(
-          node,
-          "a canvas with willReadFrequently is kept on the CPU and the export does not capture it; leave the option out",
+      } else if (t.isObjectExpression(node)) {
+        const at = node.properties.findIndex(
+          (p) =>
+            t.isObjectProperty(p) &&
+            t.isIdentifier(p.key) &&
+            p.key.name === "willReadFrequently" &&
+            t.isBooleanLiteral(p.value, { value: true }),
         );
+        const option = node.properties[at];
+        if (option) {
+          // Taken out with the comma that joined it to its neighbour; alone, the braces are left empty.
+          const next = node.properties[at + 1];
+          const before = node.properties[at - 1];
+          const range: Range = next
+            ? [option.start as number, next.start as number]
+            : before
+              ? [before.end as number, option.end as number]
+              : [(node.start as number) + 1, (node.end as number) - 1];
+          warn(
+            option,
+            "a canvas with willReadFrequently is kept on the CPU and the export does not capture it; leave the option out",
+            [{ kind: "text", id: "", range, text: "" }],
+          );
+        }
       }
     });
     return out;

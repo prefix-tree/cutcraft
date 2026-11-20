@@ -1,6 +1,7 @@
 import { lookupAsset } from "../../../manifest/types";
 import type { ElementSite, SourceIndex } from "../../index";
 import type { Diagnostic, LintOptions } from "../index";
+import { deprecatedProps } from "./deprecated";
 import { declaration } from "./fonts";
 import { freeCodeClock, strayHtml } from "./free-code";
 import { notRendered } from "./not-rendered";
@@ -270,6 +271,7 @@ export const rules: readonly Rule[] = [
   fontAvailable,
   declaration,
   notRendered,
+  deprecatedProps,
 ];
 
 /** The composition's first track in document order that lays out as a sequence and is not hidden: the one under everything else. */
