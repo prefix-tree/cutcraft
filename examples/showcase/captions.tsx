@@ -16,6 +16,7 @@ export default function Video() {
           style={{ preset: "note", size: 34 }}
           box={{ x: 270, y: 595, width: 420, height: 84, origin: "center" }}
           transform={{ borderRadius: 18 }}
+          animation={{ preset: "scale", in: 0.2, out: 0.15 }}
         >
           Crema: the sign of a good shot
         </Title>
