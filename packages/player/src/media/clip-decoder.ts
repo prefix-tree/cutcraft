@@ -363,7 +363,11 @@ export class ClipDecoder {
         return;
       }
       this.queue = [...frames, ...this.queue];
-      this.reverseLow = from;
+      // Only the newest REVERSE_WINDOW_FRAMES of the window are kept, so what is covered starts at the oldest kept
+      // frame, not at `from`; the next load then fetches the frames below it. Every kept frame is older than `to`
+      // (at most the old low), so the low only falls; an empty window falls back to `from`, which is below `to` or is
+      // the floor, where loading stops.
+      this.reverseLow = frames[0]?.timestamp ?? from;
     } finally {
       this.reverseLoading = null;
     }

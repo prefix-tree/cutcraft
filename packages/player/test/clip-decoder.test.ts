@@ -100,6 +100,30 @@ describe("ClipDecoder", () => {
     expect(d.mode).toBe("reverse");
   });
 
+  it("steps backward through a reversed clip one frame at a time, every step on its own frame", async () => {
+    const { source, d, p } = decoder("c3");
+    await d.prime(p.start);
+    // Half a frame into each step, so the frame that covers the source time is unambiguous.
+    for (let k = 0; k < 119; k++) {
+      const t = p.start + (k + 0.5) / source.fps;
+      const st = d.sourceTime(t);
+      const f = await d.frameFor(t, true);
+      expect({ k, timestamp: f!.timestamp }).toEqual({ k, timestamp: Math.floor(st * source.fps) / source.fps });
+    }
+  });
+
+  it("stops loading reverse windows at the in point when the windows hold no frames", async () => {
+    const { source, d, p } = decoder("c3");
+    source.stream = async function* () {
+      source.streamsStarted++;
+      yield* [];
+    };
+    await d.prime(p.start);
+    for (let k = 0; k < 20; k++) await d.frameFor(p.start + k * 0.25, true);
+    // Each empty window moves the low a second down: four of them reach the in point of a 4 s clip.
+    expect(source.streamsStarted).toBe(4);
+  });
+
   it("retains exactly one frame per freeze", async () => {
     const { source, d, p } = decoder("c4");
     await d.prime(p.start);
