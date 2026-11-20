@@ -22,7 +22,7 @@ const state = makeState({
   ],
 });
 
-function setup(opts: { loop?: boolean } = {}) {
+function setup(opts: { loop?: boolean; corrupt?: string } = {}) {
   const clock = new ManualClock();
   const output = new FakeAudioOutput();
   const frames = new Map<string, FakeFrameSource>();
@@ -38,6 +38,7 @@ function setup(opts: { loop?: boolean } = {}) {
     toContextTime: (t) => t,
     frameSourceFactory: (id) => {
       const f = new FakeFrameSource(id);
+      if (id === opts.corrupt) f.frameAt = () => Promise.reject(new Error("corrupt sample"));
       frames.set(id, f);
       return f;
     },
@@ -207,6 +208,15 @@ describe("PlayerCore", () => {
     const draws = rec.calls.filter((c) => c.name === "drawImage").map((c) => c.args[0] as { timestamp: number });
     expect(draws[draws.length - 1]!.timestamp).toBe(2.5);
     expect(core.getCurrentTime()).toBe(1);
+  });
+
+  it("reports a clip whose first frame fails as an error event, once", async () => {
+    const { events } = setup({ corrupt: "a" });
+    await flush();
+    const errors = events.filter((x) => x.type === "error").map((x) => x.e as PlayerEvents["error"]);
+    expect(errors).toHaveLength(1);
+    expect(errors[0]).toMatchObject({ id: "c1", asset: "a", fatal: false });
+    expect(errors[0]!.error.message).toBe("clip c1: corrupt sample");
   });
 
   it("disposes everything", async () => {

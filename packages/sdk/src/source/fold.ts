@@ -4,7 +4,7 @@ import * as t from "@babel/types";
 import { ELEMENTS, findFont } from "@uberscene/kit/schema";
 
 import { type NodeSpec, nodeSpecOf } from "../actions/types";
-import type { Json, PatchLog } from "../patches/types";
+import type { Json, NetPatch, PatchLog } from "../patches/types";
 import type { ResolvedState } from "../resolve/resolve";
 import { INTERIOR_PREFIX } from "../resolve/tree";
 import { bake } from "./bake";
@@ -14,7 +14,7 @@ import { declaredIdentifiers } from "./lint/rules/fonts";
 import { identifier } from "./lint/rules/theme";
 import type { Range } from "./parse";
 import { parseSource } from "./parse";
-import { Identifier, printElement, printLiteral, printProp } from "./print";
+import { escapeText, Identifier, isPlainAttribute, printElement, printLiteral, printProp } from "./print";
 
 const traverse = ((traverseModule as unknown as { default?: typeof traverseModule }).default ??
   traverseModule) as typeof traverseModule;
@@ -78,6 +78,10 @@ export function fold(
   const fonts: FontsToDeclare = new Map();
   // The weights a font picker asked for (`font/use`), kept on the composition until now.
   const picked = log.net.get("composition")?.props.get("$fonts");
+  // New settings rewrite the whole `defaults` literal. A prop bound to one of its keys, edited in the same log, goes
+  // into that one edit (written after the loop) rather than a second edit inside the same range.
+  const newDefaults = log.net.get("composition")?.props.get("$defaults");
+  const settings = index.defaults && isRecord(newDefaults) ? { ...newDefaults } : null;
   const taken = topLevelNames(index);
   const fontValue = (family: Json | undefined): Json | undefined => {
     if (typeof family !== "string") return family;
@@ -125,12 +129,7 @@ export function fold(
    * group keeps the order the overlay produces: an element placed after that
    * anchor goes first, one placed after a queued sibling goes right behind it.
    */
-  const place = (
-    id: string,
-    at: { parent: string; after: string | null },
-    print: (indent: string) => string,
-    from: Range | null,
-  ): boolean => {
+  const place = (id: string, at: PlacedAt, print: (indent: string) => string, from: Range | null): boolean => {
     let anchor = at.after;
     while (anchor !== null) {
       const sibling = log.net.get(anchor);
@@ -160,25 +159,28 @@ export function fold(
     return null;
   };
 
+  const placements: { id: string; at: PlacedAt; print: (indent: string) => string; from: Range | null }[] = [];
   for (const [id, net] of log.net) {
     if (net.bake) {
       needsBake.push(id);
       continue;
     }
-    if (id === "composition" && net.props.has("$fonts")) {
+    // A copy: the log keeps "$fonts" and "$defaults", so a second save (or the round after a bake) writes them too.
+    const props = new Map(net.props);
+    if (id === "composition" && props.has("$fonts")) {
       // Not a prop of the file: the faces it names are declared by `foldToSource`, for the families written here.
-      net.props.delete("$fonts");
-      if (net.props.size === 0 && net.presence === "present" && !net.place && net.text === undefined) continue;
+      props.delete("$fonts");
+      if (props.size === 0 && net.presence === "present" && !net.place && net.text === undefined) continue;
     }
-    if (id === "composition" && net.props.has("$defaults")) {
-      const value = net.props.get("$defaults");
-      if (value === undefined) {
-        /* the panel change was undone; nothing to write */
+    if (id === "composition" && props.has("$defaults")) {
+      const value = props.get("$defaults");
+      if (value === undefined || settings) {
+        /* undone, nothing to write; or written whole after the loop */
       } else if (index.defaults)
         edits.push({ kind: "defaults", id, range: index.defaults.range, text: printLiteral(value) });
       else skipped.push({ id, reason: "no `export const defaults` literal to rewrite" });
-      net.props.delete("$defaults");
-      if (net.props.size === 0 && net.presence === "present" && !net.place && net.text === undefined) continue;
+      props.delete("$defaults");
+      if (props.size === 0 && net.presence === "present" && !net.place && net.text === undefined) continue;
     }
     switch (net.presence) {
       case "removed": {
@@ -195,11 +197,19 @@ export function fold(
           skipped.push({ id, reason: "insert without a node" });
           break;
         }
+        // An id the file still has was removed and put back (an undone delete): its old text goes, the node is printed
+        // where it now stands.
+        const original = index.elements.get(id);
+        if (original) edits.push({ kind: "remove", id, range: lineRange(text, original.range), text: "" });
         if (insertedAncestor(id)) break;
         // The node as it stands now, with the props and children later patches gave it.
         const node = state.tree.byId.get(id) ?? net.node;
-        if (!place(id, net.place, (indent) => printElement(withIdentifiers(nodeSpecOf(node)), indent), null))
-          needsBake.push(net.place.parent);
+        placements.push({
+          id,
+          at: net.place,
+          print: (indent) => printElement(withIdentifiers(nodeSpecOf(node)), indent),
+          from: null,
+        });
         break;
       }
       case "present": {
@@ -217,10 +227,10 @@ export function fold(
           const original = text.slice(site.range[0], site.range[1]);
           movedSites.set(id, site.range);
           const printMoved = (indent: string) => reindent(movedTexts.get(id) ?? original, site.indent, indent);
-          if (!place(id, net.place, printMoved, lineRange(text, site.range))) needsBake.push(net.place.parent);
+          placements.push({ id, at: net.place, print: printMoved, from: lineRange(text, site.range) });
         }
         let newAttrs = -1;
-        for (const [prop, value] of net.props) {
+        for (const [prop, value] of props) {
           const key = site.boundProps[prop];
           const handle = prop.startsWith(INTERIOR_PREFIX);
           if (handle && !site.interior && key === undefined) {
@@ -228,6 +238,10 @@ export function fold(
             continue;
           }
           const target = handle ? { id, props: site.interior!.props, openingTag: site.interior!.openingTag } : site;
+          if (key !== undefined && settings && value !== undefined) {
+            settings[key] = value;
+            continue;
+          }
           const e =
             key !== undefined
               ? bindingEdit(index, id, prop, key, value, skipped)
@@ -258,6 +272,12 @@ export function fold(
       }
     }
   }
+  // Queued in the order they were made, as the overlay places them: two elements put after the same sibling stand
+  // latest first, whatever order the net holds them in.
+  for (const p of placements.sort((a, b) => a.at.seq - b.at.seq))
+    if (!place(p.id, p.at, p.print, p.from)) needsBake.push(p.at.parent);
+  if (settings && index.defaults)
+    edits.push({ kind: "defaults", id: "composition", range: index.defaults.range, text: printLiteral(settings) });
   const writeGroup = (group: PlacedGroup): void => {
     const printed = group.ids.map((id) => (group.texts.get(id) as () => string)()).join("\n");
     edits.push(insertEdit(index, group.ids[0] as string, group.point, printed));
@@ -418,6 +438,8 @@ function fontDeclarations(text: string, fonts: FontsToDeclare): SourceEdit[] {
   }
   return edits;
 }
+
+type PlacedAt = NonNullable<NetPatch["place"]>;
 
 interface PlacedGroup {
   readonly point: InsertionPoint;
@@ -593,18 +615,14 @@ function propEdit(
       // Bare attribute (`reverse`): rewrite the whole attribute.
       return { kind: "prop", id: site.id, prop, range: existing.range, text: printProp(prop, value) };
     }
-    const asString =
-      typeof value === "string" &&
-      text[existing.valueRange[0]] === '"' &&
-      !value.includes('"') &&
-      !value.includes("\n");
+    const asString = typeof value === "string" && text[existing.valueRange[0]] === '"' && isPlainAttribute(value);
     const replacement = asString ? `"${value}"` : printLiteral(value);
     if (asString) return { kind: "prop", id: site.id, prop, range: existing.valueRange, text: replacement };
     // Expression container `{...}` or a string literal that must become `{...}`.
     const r = existing.valueRange;
     const wrapped = text[r[0] - 1] === "{" && text[r[1]] === "}";
     // A plain string replacing `{...}` drops the braces: `out={6}` becomes `out="word:2"`, as a person writes it.
-    if (wrapped && typeof value === "string" && !value.includes('"') && !value.includes("\n"))
+    if (wrapped && typeof value === "string" && isPlainAttribute(value))
       return { kind: "prop", id: site.id, prop, range: [r[0] - 1, r[1] + 1], text: `"${value}"` };
     if (wrapped) return { kind: "prop", id: site.id, prop, range: r, text: replacement };
     return { kind: "prop", id: site.id, prop, range: r, text: `{${replacement}}` };
@@ -618,12 +636,10 @@ function propEdit(
 }
 
 function textEdit(site: ElementSite, value: string): SourceEdit | null {
-  if (site.childrenRange) return { kind: "text", id: site.id, range: site.childrenRange, text: value };
-  const open = site.openingTag;
+  const children = escapeText(value);
+  if (site.childrenRange) return { kind: "text", id: site.id, range: site.childrenRange, text: children };
   const slash = site.range[1] - 2;
-  let start = slash;
-  while (start > open[0] && /\s/.test(site.indent) && /\s/.test(value[start - 1] ?? "")) start -= 1;
-  return { kind: "text", id: site.id, range: [slash, site.range[1]], text: `>${value}</${site.name}>` };
+  return { kind: "text", id: site.id, range: [slash, site.range[1]], text: `>${children}</${site.name}>` };
 }
 
 function reindent(source: string, from: string, to: string): string {

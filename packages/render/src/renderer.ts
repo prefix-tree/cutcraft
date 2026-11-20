@@ -1,4 +1,4 @@
-import { writeFile } from "node:fs/promises";
+import { rename, rm } from "node:fs/promises";
 import { join, parse } from "node:path";
 
 import { EncodedVideoPacketSource, FilePathTarget, Output } from "mediabunny";
@@ -7,6 +7,7 @@ import { framesUntil, nearestFrame, rateValue } from "@uberscene/kit/schema";
 import type { MediaResolver } from "@uberscene/player/engine";
 import type { AssetManifest, ResolvedState } from "@uberscene/sdk";
 
+import { partialPath, writeAtomically } from "./atomic";
 import { feedCopy, planCopy, type Run } from "./copy";
 import {
   type Container,
@@ -200,6 +201,7 @@ export async function renderVideo(options: RenderOptions): Promise<RenderResult>
   const warnings: string[] = [];
   const started = performance.now();
   const engine = await openEngine({ ...options, warnings, codecs });
+  const partial = partialPath(options.out);
   let output: Output | null = null;
   let feed: AudioFeed | null = null;
   try {
@@ -227,7 +229,7 @@ export async function renderVideo(options: RenderOptions): Promise<RenderResult>
     for (const w of soundtrack?.warnings ?? []) if (!warnings.includes(w)) warnings.push(w);
     if (audioOnly) {
       if (!soundtrack?.bytes) throw new Error("nothing to render: the composition has no sound in this range");
-      await writeFile(options.out, soundtrack.bytes);
+      await writeAtomically(options.out, soundtrack.bytes);
       return result(0, true, 0);
     }
 
@@ -240,7 +242,9 @@ export async function renderVideo(options: RenderOptions): Promise<RenderResult>
         : planSegments(run.first, run.last, gopFrames, tabs).map((r): Run => ({ kind: "render", ...r })),
     );
 
-    output = new Output({ format: outputFormat(videoContainer), target: new FilePathTarget(options.out) });
+    // Written beside the file and renamed over it once whole, so an export that fails keeps the last good one. The
+    // container was chosen from options.out above, not from this path.
+    output = new Output({ format: outputFormat(videoContainer), target: new FilePathTarget(partial) });
     const video = new EncodedVideoPacketSource(codec);
     output.addVideoTrack(video, { frameRate: outFps });
     if (soundtrack?.bytes) {
@@ -311,9 +315,11 @@ export async function renderVideo(options: RenderOptions): Promise<RenderResult>
     }
     await feed?.until(Number.POSITIVE_INFINITY);
     await output.finalize();
+    await rename(partial, options.out);
     return result(total, feed !== null, copyPlan?.copied ?? 0);
   } catch (error) {
     await output?.cancel().catch(() => undefined);
+    await rm(partial, { force: true }).catch(() => undefined);
     throw error;
   } finally {
     feed?.dispose();
