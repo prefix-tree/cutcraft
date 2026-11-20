@@ -26,7 +26,7 @@ function keysOf(node: Node, text: (n: Node) => string): Key[] | null {
   if (node.type !== "ArrayExpression" || node.elements.length === 0) return null;
   const keys: Key[] = [];
   for (const el of (node as ArrayExpression).elements) {
-    if (!el || el.type !== "ObjectExpression") return null;
+    if (el?.type !== "ObjectExpression") return null;
     const fields = new Map<string, string>();
     for (const p of el.properties) {
       if (p.type !== "ObjectProperty") return null;
@@ -111,7 +111,7 @@ export function toChildren(source: string): string {
         const effects: string[] = [];
         let literal = true;
         value.elements.forEach((e, n) => {
-          if (!e || e.type !== "ObjectExpression") {
+          if (e?.type !== "ObjectExpression") {
             literal = false;
             return;
           }

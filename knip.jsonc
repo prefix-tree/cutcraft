@@ -19,7 +19,8 @@
         "docs/.vitepress/theme/playground/starters.ts"
       ],
       // Run through its binary by scripts/check-packages.mjs.
-      "ignoreDependencies": ["@arethetypeswrong/cli"]
+      // The spelling eval borrows the SDK's own Babel by path.
+      "ignoreDependencies": ["@arethetypeswrong/cli", "@babel/parser", "@babel/types"]
     },
     "packages/kit": {
       "entry": ["scripts/*.ts"]
