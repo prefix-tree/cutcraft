@@ -6,6 +6,7 @@ import { Preview } from "./Preview";
 import { Root } from "./Root";
 import { Timeline } from "./Timeline";
 
+/** The editor parts as one namespace: `<Editor.Root>`, `Preview`, `Controls`, `Layers`, `Timeline`. */
 export const Editor = { Root, Preview, Controls, Layers, Timeline };
 
 export { type EditApi, type EditorValue, useEdit, useEditor, useSelection } from "./context";
