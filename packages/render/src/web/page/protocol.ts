@@ -68,7 +68,8 @@ export interface NativeEncodeOptions {
 export interface AudioRequest {
   readonly from: number;
   readonly to: number;
-  readonly container: "mp4" | "webm" | "mp3" | "wav";
+  /** `pcm` is the mix itself, clamped, as a WAV of 32-bit float stereo: for the native encoder to encode. */
+  readonly container: "mp4" | "webm" | "mp3" | "wav" | "pcm";
   /** Bits per second, for the codecs that take one. */
   readonly bitrate: number;
 }

@@ -7,6 +7,7 @@
 export { ManualClock } from "./clock/clock";
 export { PICK_EPS, SETTLE_MS } from "./constants";
 export { AssetSources } from "./media/asset-sources";
+export { AUDIO_PREROLL_SECONDS, type BlockGrid, blockGrid, blockStart } from "./media/block-grid";
 export { DecoderPool } from "./media/decoder-pool";
 export { copyFrame, defaultCreateCanvas } from "./media/frame-source";
 export { mediabunnyFrameSourceFactory } from "./media/mediabunny-frame-source";

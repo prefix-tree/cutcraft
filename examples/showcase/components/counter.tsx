@@ -7,15 +7,18 @@ export default function Video() {
       fps={30}
       width={1920}
       height={1080}
-      theme={{ extends: "midnight", palette: { primary: "#e8a33d", accent: "#e8a33d" } }}
+      theme={{
+        extends: "midnight",
+        palette: { primary: "#e8a33d", accent: "#e8a33d", background: "#101421", surface: "#3a2a1c" },
+      }}
       background={{
         mode: "gradient",
         gradient: {
           type: "linear",
           angle: 135,
           stops: [
-            { offset: 0, color: "#101421" },
-            { offset: 1, color: "#3a2a1c" },
+            { offset: 0, color: "$background" },
+            { offset: 1, color: "$surface" },
           ],
         },
       }}

@@ -95,7 +95,8 @@ One page mixes the soundtrack for the whole range before any picture is drawn.
 | WAV | PCM | None needed |
 
 Node copies the encoded packets into the file, a little ahead of the pictures so the two stay interleaved. An MP3 or
-WAV export is that soundtrack alone, written as it is.
+WAV export is that soundtrack alone, written as it is. With the [native codecs](./native-codecs#sound), the native
+encoder writes it, and with `native` the same `mixPlan` runs in Node on sound the native decoder reads.
 
 ## Stills and the layout check
 

@@ -1,6 +1,6 @@
 //! `uberscene-codec`: UberScene's native codecs, a background process the export starts when `UBERSCENE_CODECS` asks
-//! for them. It decodes footage for the export page and encodes the pictures the page draws, with craft-video (pure
-//! Rust, no FFmpeg). See `PROTOCOL.md` for what goes over stdin and stdout.
+//! for them. It decodes footage for the export page and encodes the pictures the page draws, with craft-video, and
+//! decodes and encodes the soundtrack with craft-audio (pure Rust, no FFmpeg). See `PROTOCOL.md` for what goes over stdin and stdout.
 #![forbid(unsafe_code)]
 #![deny(
     clippy::unwrap_used,
@@ -10,6 +10,7 @@
     clippy::unimplemented
 )]
 
+mod audio;
 mod convert;
 mod decode;
 mod demux;
@@ -30,6 +31,8 @@ const USAGE: &str = "usage:
   uberscene-codec encode --codec h264|prores --width <w> --height <h> [--fps <n/d>] [--keyint <frames>]
                          [--kbps <n> | --crf <q>] [--preset speed|balanced|quality] [--threads <n>]
                          [--prores-profile proxy|lt|standard|hq|4444]
+  uberscene-codec decode-audio <file> --from <s> --to <s>
+  uberscene-codec encode-audio --format aac|wav|mp3 [--rate <hz>] [--channels <n>] [--kbps <n>] [--bits 16|24]
   uberscene-codec --version";
 
 /// Pictures within this many seconds after a time count as showing at it: container times are rounded to the
@@ -60,6 +63,8 @@ fn run(args: &[String]) -> Result<(), String> {
         "probe" => probe(&file_arg(rest)?),
         "decode" => decode(&file_arg(rest)?, rest),
         "encode" => encode_command(rest),
+        "decode-audio" => decode_audio(&file_arg(rest)?, rest),
+        "encode-audio" => encode_audio(rest),
         "--version" | "-V" => {
             println!("uberscene-codec {}", env!("CARGO_PKG_VERSION"));
             Ok(())
@@ -338,4 +343,49 @@ fn encode_command(rest: &[String]) -> Result<(), String> {
     let mut input = io::BufReader::with_capacity(1 << 22, stdin.lock());
     let mut out = BufWriter::with_capacity(1 << 20, stdout.lock());
     encode::run(width, height, &settings, &mut input, &mut out)
+}
+
+/// The sound of `[from, to)` seconds of a file, for the export's mixer.
+fn decode_audio(path: &Path, rest: &[String]) -> Result<(), String> {
+    let from = number::<f64>(rest, "--from")?.ok_or("decode-audio wants --from")?;
+    let to = number::<f64>(rest, "--to")?.ok_or("decode-audio wants --to")?;
+    let stretch = audio::decode_range(path, from, to)?;
+    let stdout = io::stdout();
+    let mut out = BufWriter::with_capacity(1 << 20, stdout.lock());
+    audio::write_stretch(&mut out, &stretch).map_err(|e| e.to_string())?;
+    out.flush().map_err(|e| e.to_string())
+}
+
+/// Interleaved f32 sound on stdin, a finished file on stdout.
+fn encode_audio(rest: &[String]) -> Result<(), String> {
+    let format = match flag(rest, "--format").unwrap_or("aac") {
+        "aac" => audio::Format::Aac,
+        "wav" => audio::Format::Wav,
+        "mp3" => audio::Format::Mp3,
+        other => return Err(format!("--format wants aac, wav or mp3, got {other:?}")),
+    };
+    let sample_rate = number::<u32>(rest, "--rate")?.unwrap_or(48_000);
+    let channels = number::<u16>(rest, "--channels")?.unwrap_or(2);
+    if sample_rate == 0 || channels == 0 || channels > 8 {
+        return Err(format!(
+            "sound of {channels} channels at {sample_rate} Hz cannot be encoded: 1 to 8 channels at a rate above 0"
+        ));
+    }
+    let bits = number::<u8>(rest, "--bits")?.unwrap_or(16);
+    if bits != 16 && bits != 24 {
+        return Err(format!("--bits wants 16 or 24, got {bits}"));
+    }
+    let kbps = number::<u32>(rest, "--kbps")?.unwrap_or(128);
+    let settings = audio::Settings {
+        format,
+        sample_rate,
+        channels,
+        bitrate: kbps.saturating_mul(1000),
+        bits,
+    };
+    let stdin = io::stdin();
+    let stdout = io::stdout();
+    let mut input = io::BufReader::with_capacity(1 << 20, stdin.lock());
+    let mut out = BufWriter::with_capacity(1 << 20, stdout.lock());
+    audio::encode(&settings, &mut input, &mut out)
 }

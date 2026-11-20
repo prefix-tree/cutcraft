@@ -1079,13 +1079,17 @@ Every name each entry exports, read from the code. The sections above explain th
 
 ### `@uberscene/player/engine`
 
-38 exports.
+42 exports.
 
 | Export | Kind | |
 |---|---|---|
 | `animatedTransform` | function | The transform with its keyframed properties evaluated at element-relative time `rel`. |
 | `AssetSources` | class | One FrameSource per asset, shared by every clip of that asset and by nested compositors. |
+| `AUDIO_PREROLL_SECONDS` | const | How much earlier than a range decoding starts, the start then dropped. |
 | `AudioOccurrence` | interface |  |
+| `blockGrid` | function | The grid of a stream, from its first two blocks decoded from the start, where their times are exact. |
+| `BlockGrid` | interface | The samples where a stream's blocks start. |
+| `blockStart` | function | The sample a decoded block starts at. |
 | `boundsOf` | function | The upright box around `rect` after `m`. |
 | `buildAudioPlan` | function | Every audio-bearing chunk that overlaps [from, to). |
 | `buildFramePlan` | function | Everything the painter needs to draw composition time `t`, in draw order. |
