@@ -157,7 +157,7 @@ function fuse(run: readonly ShaderPass[]): ShaderPass {
  * turn, one write. A run breaks at a pass that is not one, and at a member whose prelude or table is already in it (two
  * white balances would declare the same matrices, two curves the same table). A run of one is left as it is.
  */
-export function fuseColour(passes: readonly ShaderPass[]): ShaderPass[] {
+function fuseColour(passes: readonly ShaderPass[]): ShaderPass[] {
   const out: ShaderPass[] = [];
   let run: ShaderPass[] = [];
   const flush = () => {

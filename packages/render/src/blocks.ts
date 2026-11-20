@@ -50,7 +50,7 @@ export interface BlockFilter {
 }
 
 /** The blocks shipped with this package: copied into `dist/blocks` at build, read from the repository when run from source. */
-export function blocksSource(): string {
+function blocksSource(): string {
   const here = dirname(fileURLToPath(import.meta.url));
   const built = join(here, "blocks");
   if (hasBlocks(built)) return built;

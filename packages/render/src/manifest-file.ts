@@ -9,7 +9,7 @@ export const MANIFEST_FILE = "uberscene.json";
 /** The older name, still read beside a video and still written where one exists. */
 export const OLD_MANIFEST_FILE = "manifest.json";
 /** The name before the rename to UberScene, still found the same way. */
-export const LEGACY_MANIFEST_FILE = "cutcraft.json";
+const LEGACY_MANIFEST_FILE = "cutcraft.json";
 
 export interface FoundManifest {
   /** The manifest file, when one was found. */

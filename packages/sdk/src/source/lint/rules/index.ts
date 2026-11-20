@@ -15,7 +15,7 @@ export interface Rule {
 
 const TIMING_PROPS = ["in", "out", "duration", "start", "offset", "anchor", "at"] as const;
 
-export const literalIds: Rule = {
+const literalIds: Rule = {
   name: "literal-ids",
   check: (index) =>
     index.anonymous.map((a) => ({
@@ -26,7 +26,7 @@ export const literalIds: Rule = {
     })),
 };
 
-export const uniqueIds: Rule = {
+const uniqueIds: Rule = {
   name: "unique-ids",
   check: (index) => {
     // Vocabulary elements only: an HTML `id` in free code is the page's business.
@@ -42,7 +42,7 @@ export const uniqueIds: Rule = {
   },
 };
 
-export const noStartOnSequence: Rule = {
+const noStartOnSequence: Rule = {
   name: "no-start-on-sequence",
   check: (index) => {
     const out: Diagnostic[] = [];
@@ -74,7 +74,7 @@ const LAYER_HOOKS: ReadonlySet<string> = new Set(["useT", "useLayer"]);
  * A helper that makes vocabulary elements is called by the resolver as a plain function, so it cannot use hooks.
  * Free code (a component inside a `<Layer>`, which makes HTML, canvas or WebGL) is mounted by React and may use any.
  */
-export const pureHelpers: Rule = {
+const pureHelpers: Rule = {
   name: "pure-helpers",
   check: (index) =>
     [...index.helpers.values()]
@@ -90,7 +90,7 @@ export const pureHelpers: Rule = {
       ),
 };
 
-export const expressionLocked: Rule = {
+const expressionLocked: Rule = {
   name: "expression-locked",
   check: (index) => {
     const out: Diagnostic[] = [];
@@ -112,7 +112,7 @@ export const expressionLocked: Rule = {
   },
 };
 
-export const oneCaptions: Rule = {
+const oneCaptions: Rule = {
   name: "one-captions",
   check: (index) => {
     const sites = [...index.elements.values()].filter((s) => s.kind === "captions");
@@ -129,7 +129,7 @@ export const oneCaptions: Rule = {
   },
 };
 
-export const ambiguousDuration: Rule = {
+const ambiguousDuration: Rule = {
   name: "ambiguous-duration",
   check: (index) => {
     const out: Diagnostic[] = [];
@@ -150,7 +150,7 @@ export const ambiguousDuration: Rule = {
   },
 };
 
-export const fileShape: Rule = {
+const fileShape: Rule = {
   name: "file-shape",
   check: (index) => {
     const out: Diagnostic[] = [];
@@ -174,7 +174,7 @@ export const fileShape: Rule = {
   },
 };
 
-export const missingAsset: Rule = {
+const missingAsset: Rule = {
   name: "missing-asset",
   check: (index, options) => {
     if (!options.manifest) return [];
@@ -197,7 +197,7 @@ export const missingAsset: Rule = {
   },
 };
 
-export const sequenceGap: Rule = {
+const sequenceGap: Rule = {
   name: "sequence-gap",
   check: (index) => {
     const main = firstSequenceTrack(index);
@@ -217,7 +217,7 @@ export const sequenceGap: Rule = {
   },
 };
 
-export const cutInsideWord: Rule = {
+const cutInsideWord: Rule = {
   name: "cut-inside-word",
   check: (index, options) => {
     if (!options.manifest) return [];

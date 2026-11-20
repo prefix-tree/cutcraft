@@ -4,7 +4,7 @@ import { zCaptionAnimation } from "../enums";
 import { assetRefSchema, colorSchema, idSchema, textShadowSchema, timeRefSchema } from "./common";
 import { zCaptionPosition, zTextAlign } from "./enums-local";
 
-export const captionStyleSchema = z.strictObject({
+const captionStyleSchema = z.strictObject({
   font: z.string().optional(),
   size: z.number().min(1).max(1000).optional(),
   weight: z.union([z.number().int().min(100).max(900).multipleOf(100), z.enum(["normal", "bold"])]).optional(),

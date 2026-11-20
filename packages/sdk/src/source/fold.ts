@@ -4,7 +4,7 @@ import * as t from "@babel/types";
 import { ELEMENTS, findFont } from "@uberscene/kit/schema";
 
 import { type NodeSpec, nodeSpecOf } from "../actions/types";
-import type { Json, NetPatch, PatchLog } from "../patches/types";
+import type { Json, PatchLog } from "../patches/types";
 import type { ResolvedState } from "../resolve/resolve";
 import { INTERIOR_PREFIX } from "../resolve/tree";
 import { bake } from "./bake";
@@ -633,5 +633,3 @@ function reindent(source: string, from: string, to: string): string {
     .map((line, i) => (i === 0 ? line : line.startsWith(from) ? to + line.slice(from.length) : line))
     .join("\n");
 }
-
-export type { NetPatch };

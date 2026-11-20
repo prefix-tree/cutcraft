@@ -6,7 +6,6 @@ import {
   isError,
   makePropHandler,
   onElement,
-  rawNode,
   rawProp,
   requireElement,
   setProps,
@@ -344,5 +343,3 @@ function replay(
   }
   return { inverses };
 }
-
-export { rawNode };

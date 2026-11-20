@@ -92,5 +92,4 @@ function touches(a: Range, b: Range): boolean {
   return a[0] <= b[1] && b[0] <= a[1];
 }
 
-export type { Deprecation } from "./deprecations";
 export { rules };

@@ -29,7 +29,7 @@ export interface PropSite {
 }
 
 /** The one component inside a Layer: its props are the Layer's handles, its body is opaque. */
-export interface InteriorSite {
+interface InteriorSite {
   readonly component: string;
   readonly range: Range;
   readonly openingTag: Range;

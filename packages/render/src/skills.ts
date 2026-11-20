@@ -36,7 +36,7 @@ export interface SkillInstallResult {
 }
 
 /** The skill shipped with this package: copied into `dist/skill` at build, read from the repository when run from source. */
-export function skillSource(): string {
+function skillSource(): string {
   const here = dirname(fileURLToPath(import.meta.url));
   const built = join(here, "skill", "uberscene");
   if (existsSync(join(built, "SKILL.md"))) return built;

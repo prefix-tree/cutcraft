@@ -2,7 +2,7 @@ import { asJson } from "../patches/log";
 import type { Json, PatchLog } from "../patches/types";
 import type { Placement as ResolvedPlacement, ResolvedState } from "../resolve/resolve";
 import { type CollectedNode, INTERIOR_PREFIX } from "../resolve/tree";
-import { type ActionHandler, type ApplyContext, type ElementTarget, registerHandler } from "./registry";
+import { type ActionHandler, type ElementTarget, registerHandler } from "./registry";
 import {
   type Action,
   type ActionError,
@@ -14,13 +14,6 @@ import {
   type PlacementSpec,
   type ValidationResult,
 } from "./types";
-
-export class NotImplemented extends Error {
-  constructor(type: string) {
-    super(`${type} is specified but not implemented yet`);
-    this.name = "NotImplemented";
-  }
-}
 
 // ── validators ──────────────────────────────────────────────────────────────
 
@@ -40,7 +33,7 @@ export function requireNotOpaque(item: ResolvedPlacement): ActionError | null {
   return item.editable === "opaque" ? { code: "OPAQUE_TARGET", message: `"${item.id}" is model-only code` } : null;
 }
 
-export function requireLiteralProp(item: ResolvedPlacement, prop: string): ActionError | null {
+function requireLiteralProp(item: ResolvedPlacement, prop: string): ActionError | null {
   return item.lockedProps.includes(prop)
     ? { code: "LOCKED_PROP", message: `"${item.id}.${prop}" is an expression; bake it first`, path: prop }
     : null;
@@ -54,13 +47,6 @@ export function requireLayout(
   const track = state.tracks.find((t) => t.id === item.track);
   if (!track || track.layout !== layout) return { code: "UNSUPPORTED_ON_LAYOUT", message: `needs a ${layout} track` };
   return null;
-}
-
-export function collectErrors(...errors: (ActionError | null | ResolvedPlacement | undefined)[]): ValidationResult {
-  const list = errors.filter(
-    (e): e is ActionError => Boolean(e) && "code" in (e as object) && "message" in (e as object),
-  );
-  return invalid(...list);
 }
 
 export function isError(value: ActionError | ResolvedPlacement): value is ActionError {
@@ -186,17 +172,6 @@ export function lastChildId(state: ResolvedState, parent: string): string | null
   return last ? last.id : null;
 }
 
-export function childIndex(state: ResolvedState, parent: string, childId: string): number {
-  const node = rawNode(state, parent);
-  return node ? node.children.findIndex((c) => c.id === childId) : -1;
-}
-
-export function childAt(state: ResolvedState, parent: string, index: number): string | null {
-  const node = rawNode(state, parent);
-  const child = node?.children[index];
-  return child ? child.id : null;
-}
-
 // ── factories ───────────────────────────────────────────────────────────────
 
 type Params<T extends ActionType> = Action<T>["params"];
@@ -256,21 +231,3 @@ export function define<T extends ActionType>(handler: ActionHandler<T>): ActionH
   registerHandler(handler);
   return handler;
 }
-
-export function stub<T extends ActionType>(
-  type: T,
-  validate: ActionHandler<T>["validate"],
-  invert: ActionHandler<T>["invert"],
-): ActionHandler<T> {
-  return define<T>({
-    type,
-    validate,
-    apply: () => {
-      throw new NotImplemented(type);
-    },
-    invert,
-    fold: () => [],
-  });
-}
-
-export type { ApplyContext };

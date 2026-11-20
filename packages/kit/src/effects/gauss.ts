@@ -20,8 +20,8 @@ export type GaussWhat = "luma" | "alpha" | "rgba";
 export type GaussOutside = "transparent" | "clamp";
 
 /** The σ, in frame pixels, from which a blur is drawn at half size, and at a quarter. */
-export const GAUSS_HALF = 4;
-export const GAUSS_QUARTER = 8;
+const GAUSS_HALF = 4;
+const GAUSS_QUARTER = 8;
 
 const at = (outside: GaussOutside) =>
   `bool cc_inside(vec2 uv) { return all(greaterThanEqual(uv, vec2(0.0))) && all(lessThanEqual(uv, vec2(1.0))); }

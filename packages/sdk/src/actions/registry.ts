@@ -12,12 +12,12 @@ export interface ApplyContext {
 }
 
 /** Interface the fold step needs from the source index; the real type lives in source/index.ts. */
-export interface FoldIndexLike {
+interface FoldIndexLike {
   readonly text: string;
   readonly elements: ReadonlyMap<string, { readonly generated: boolean }>;
 }
 
-export interface SourceEditLike {
+interface SourceEditLike {
   readonly kind: string;
   readonly id: string;
   readonly range: readonly [number, number];

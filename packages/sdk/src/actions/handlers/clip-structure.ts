@@ -154,5 +154,3 @@ function lastOf(state: Parameters<typeof rawNode>[0], trackId: string, excluding
   const last = children[children.length - 1];
   return last ? last.id : null;
 }
-
-export { siblingAfter };

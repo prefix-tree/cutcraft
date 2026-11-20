@@ -14,7 +14,6 @@ import {
   rawNode,
   rawProp,
   requireElement,
-  requireLayout,
   requireUnlocked,
   setProps,
   validateTarget,
@@ -693,4 +692,4 @@ define({
   fold: () => [],
 });
 
-export { placementOf, requireLayout, restoreTiming, timingOf };
+export { restoreTiming };

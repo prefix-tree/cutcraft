@@ -12,7 +12,6 @@ import type { ZodObject } from "zod";
 import { type ColourFunction, type ShaderDefinition, shaderDefinition } from "../jsx/shader-definition";
 import { type GlslModule, glsl } from "./glsl";
 
-export { aroundGauss } from "./gauss";
 export type { ColourFunction };
 
 /** Params at which an effect changes nothing: the player draws nothing for it there. */

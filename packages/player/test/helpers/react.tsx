@@ -16,7 +16,7 @@ import {
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 /** jsdom has no canvas; hand out a recording context. */
-export function stubCanvas(): void {
+function stubCanvas(): void {
   const rec = recorderContext();
   HTMLCanvasElement.prototype.getContext = (() => rec.ctx) as unknown as HTMLCanvasElement["getContext"];
 }

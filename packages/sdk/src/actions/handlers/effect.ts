@@ -342,4 +342,4 @@ define({
   fold: () => [],
 });
 
-export { childrenOfKind, lastNonStack, replaceAll, requireChild, stackPosition };
+export { childrenOfKind, lastNonStack, replaceAll, stackPosition };

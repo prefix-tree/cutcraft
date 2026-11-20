@@ -168,7 +168,7 @@ function replaceChildren(
 replaceChildren("speed/setKeys", "speedKey", (p) => p.keys ?? []);
 replaceChildren("speed/setFreezes", "freeze", (p) => p.freezes ?? []);
 
-export function deepMerge(base: Record<string, Json>, patch: Readonly<Record<string, Json>>): Record<string, Json> {
+function deepMerge(base: Record<string, Json>, patch: Readonly<Record<string, Json>>): Record<string, Json> {
   const out: Record<string, Json> = { ...base };
   for (const [k, v] of Object.entries(patch)) {
     const prev = out[k];

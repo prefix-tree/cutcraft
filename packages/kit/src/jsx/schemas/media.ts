@@ -39,5 +39,3 @@ export const audioSchema = z.strictObject({
   ...sourceProps,
   ...audioProps,
 });
-
-export type ClipProps = z.input<typeof clipSchema>;

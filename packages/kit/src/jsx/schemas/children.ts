@@ -13,7 +13,7 @@ const paramValue = z.union([
   z.array(z.array(z.number())),
   z.record(z.string(), z.number()),
 ]);
-export const paramsSchema = z.record(z.string(), paramValue);
+const paramsSchema = z.record(z.string(), paramValue);
 
 export const effectSchema = z.strictObject({
   /** The effect's name. */
