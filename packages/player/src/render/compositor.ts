@@ -1,11 +1,12 @@
 import type { ResolvedState } from "@uberscene/sdk/resolver";
 
 import type { AssetSources } from "../media/asset-sources";
+import { DecodeError } from "../media/clip-decoder";
 import { DecoderPool } from "../media/decoder-pool";
 import { type ShaderTextures, textureRefs } from "../media/shader-textures";
 import { buildFramePlan, type FramePlan, type ResolveNested } from "../model/frame-plan";
 import { frameIndex } from "../model/time";
-import type { AnyCanvas, CreateCanvas, Ctx2D, Frame } from "../types";
+import type { AnyCanvas, CreateCanvas, Ctx2D, Frame, PlayerErrorEvent } from "../types";
 import { CanvasPainter } from "./painter";
 
 export interface CompositorDeps {
@@ -16,6 +17,8 @@ export interface CompositorDeps {
   readonly resolveNested?: ResolveNested | undefined;
   /** Called after a frame was painted with a new frame index. */
   readonly onFrame?: ((time: number, frame: number) => void) | undefined;
+  /** Called once for each error that stopped a frame from being drawn (a frame that failed to decode). */
+  readonly onError?: ((e: PlayerErrorEvent) => void) | undefined;
 }
 
 export interface TickOptions {
@@ -23,6 +26,15 @@ export interface TickOptions {
   readonly wait: boolean;
   /** With `wait`: no deadline. An export waits for every frame instead of drawing a stale one. */
   readonly exact?: boolean;
+}
+
+/** Errors already passed to `onError`: a nested compositor's failure fails its parent's tick too, and is told once. */
+const reported = new WeakSet<Error>();
+
+interface Waiter {
+  readonly exact: boolean;
+  readonly resolve: () => void;
+  readonly reject: (error: Error) => void;
 }
 
 /**
@@ -36,7 +48,7 @@ export class Compositor {
   private ctx: Ctx2D | null = null;
   private state: ResolvedState;
   private inFlight: Promise<void> | null = null;
-  private pending: { t: number; opts: TickOptions; done: Promise<void>; resolve: () => void } | null = null;
+  private pending: { t: number; opts: TickOptions; waiters: Waiter[] } | null = null;
   private lastFrame = -1;
   private lastPlan: FramePlan | null = null;
   private readonly nested = new Map<string, { compositor: Compositor; canvas: AnyCanvas }>();
@@ -105,35 +117,54 @@ export class Compositor {
     return this.tick(t, { wait: true, exact: true });
   }
 
+  /**
+   * Paint composition time `t`. A frame that fails is reported through `onError` and the tick still resolves, so
+   * playback carries on; with `exact` (the export's `step`) it rejects with that error instead of drawing a stale
+   * picture.
+   */
   tick(t: number, opts: TickOptions): Promise<void> {
     if (this.disposed) return Promise.resolve();
+    const exact = Boolean(opts.exact);
     if (this.inFlight) {
-      // Coalesce: the newest request replaces the pending one; both callers resolve when it has run.
-      if (this.pending) {
-        this.pending.t = t;
-        this.pending.opts = {
-          wait: opts.wait || this.pending.opts.wait,
-          exact: Boolean(opts.exact || this.pending.opts.exact),
-        };
-        return this.pending.done;
-      }
-      let resolve = (): void => undefined;
-      const done = new Promise<void>((r) => {
-        resolve = r;
+      // Coalesce: the newest request replaces the pending one; every caller settles when it has run, and only a
+      // caller that asked for an exact frame is failed by an error.
+      const done = new Promise<void>((resolve, reject) => {
+        const waiter = { exact, resolve, reject };
+        if (this.pending) {
+          this.pending.t = t;
+          this.pending.opts = {
+            wait: opts.wait || this.pending.opts.wait,
+            exact: exact || Boolean(this.pending.opts.exact),
+          };
+          this.pending.waiters.push(waiter);
+        } else this.pending = { t, opts, waiters: [waiter] };
       });
-      this.pending = { t, opts, done, resolve };
       return done;
     }
-    const run = this.run(t, opts)
-      .catch(() => undefined)
-      .then(() => {
-        this.inFlight = null;
-        const next = this.pending;
-        this.pending = null;
-        if (next) void this.tick(next.t, next.opts).then(next.resolve, next.resolve);
-      });
-    this.inFlight = run;
-    return run;
+    const failure = this.run(t, opts).then(
+      () => null,
+      (error: unknown) => this.report(error, exact),
+    );
+    this.inFlight = failure.then(() => {
+      this.inFlight = null;
+      const next = this.pending;
+      this.pending = null;
+      if (!next) return;
+      void this.tick(next.t, next.opts).then(
+        () => {
+          for (const w of next.waiters) w.resolve();
+        },
+        (error: Error) => {
+          for (const w of next.waiters) {
+            if (w.exact) w.reject(error);
+            else w.resolve();
+          }
+        },
+      );
+    });
+    return failure.then((error) => {
+      if (error && exact) throw error;
+    });
   }
 
   dispose(): void {
@@ -164,7 +195,14 @@ export class Compositor {
         }
         if (op.kind !== "video" && op.kind !== "image" && op.kind !== "error") return;
         const d = this.pool.decoderFor(op.id);
-        frames.set(op.id, d ? await d.frameFor(t, opts.wait, opts.exact) : null);
+        frames.set(
+          op.id,
+          d
+            ? await d.frameFor(t, opts.wait, opts.exact).catch((error: unknown) => {
+                throw DecodeError.of(d, error);
+              })
+            : null,
+        );
       }),
     );
     const refs = plan.ops.flatMap((op) => textureRefs(op.shaders));
@@ -180,6 +218,17 @@ export class Compositor {
     for (const op of plan.ops) this.pool.decoderFor(op.id)?.advance(t);
     this.lastFrame = frame;
     this.deps.onFrame?.(t, frame);
+  }
+
+  /** Tell `onError` about a failed frame, once per error, and return it. */
+  private report(error: unknown, fatal: boolean): Error {
+    const e = error instanceof Error ? error : new Error(String(error));
+    if (!reported.has(e)) {
+      reported.add(e);
+      const where = e instanceof DecodeError ? { id: e.id, ...(e.asset !== undefined ? { asset: e.asset } : {}) } : {};
+      this.deps.onError?.({ ...where, error: e, fatal });
+    }
+    return e;
   }
 
   private syncNested(plan: FramePlan): void {
