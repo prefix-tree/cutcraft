@@ -44,6 +44,8 @@ export interface SegmentRequest {
    * shown for longer.
    */
   readonly fps?: number;
+  /** The same rate as an exact fraction; frame n is drawn at its first tick. */
+  readonly rate?: { readonly num: number; readonly den: number };
   /** Encode each frame at this fraction of its width and height; a draft's pictures are smaller. */
   readonly scale?: number;
   /**
@@ -154,6 +156,7 @@ export interface PageApi {
     readonly width: number;
     readonly height: number;
     readonly fps: number;
+    readonly rate: { readonly num: number; readonly den: number };
     readonly duration: number;
   };
   readonly errors: readonly string[];

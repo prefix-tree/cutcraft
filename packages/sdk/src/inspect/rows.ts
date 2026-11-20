@@ -1,5 +1,7 @@
 // The resolved timeline as flat rows: one array per kind of thing, each row with its id, its seconds and its frames.
 // Flat rows are what jq, a short script or a SQL table take as they are.
+import { framesUntil, nearestFrame } from "@uberscene/kit/schema";
+
 import type { ResolveError } from "../resolve/errors";
 import type { Placement, ResolvedState } from "../resolve/resolve";
 import { spokenWords } from "./plays";
@@ -123,8 +125,8 @@ const ms = (x: number): number => Math.round(x * 1000) / 1000 + 0;
 
 /** The flat rows of a resolved timeline. */
 export function timelineRows(state: ResolvedState): TimelineRows {
-  const { fps } = state.composition;
-  const frame = (t: number): number => Math.round(t * fps + 1e-6);
+  const { rate } = state.composition;
+  const frame = (t: number): number => nearestFrame(t, rate);
   const elements: ElementRow[] = [];
   const effects: EffectRow[] = [];
   const keyframes: KeyframeRow[] = [];
@@ -188,7 +190,7 @@ export function timelineRows(state: ResolvedState): TimelineRows {
     composition: {
       ...state.composition,
       duration: ms(state.composition.duration),
-      frames: Math.round(state.composition.duration * fps),
+      frames: framesUntil(state.composition.duration, rate),
     },
     tracks: state.tracks.map((t) => ({
       id: t.id,

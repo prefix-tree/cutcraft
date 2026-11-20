@@ -131,7 +131,7 @@ export function buildFramePlan(state: ResolvedState, t: number, resolveNested?: 
       const { shaders, ...filters } = effectPipeline(state, item.children, p.id, t - p.start, { shaders: true });
       if (ops.length === 0) continue;
       // Vignette and grain darken and speckle everything beneath, before the adjustment's other effects.
-      const post = postEffects(state.items, item.children, frameIndex(t, comp.fps), t - p.start);
+      const post = postEffects(state.items, item.children, frameIndex(t, comp.rate), t - p.start);
       ops.push({
         id: p.id,
         kind: "adjustment",
@@ -151,7 +151,7 @@ export function buildFramePlan(state: ResolvedState, t: number, resolveNested?: 
     blur && !clear ? ops.find((o) => o.kind === "video" || o.kind === "image" || o.kind === "nested") : undefined;
   return {
     time: t,
-    frame: frameIndex(t, comp.fps),
+    frame: frameIndex(t, comp.rate),
     background,
     ...(gradient ? { backgroundGradient: gradient } : {}),
     ...(clear ? { clear: true as const } : {}),
@@ -211,7 +211,7 @@ function mediaOp(
     transition: shaded !== undefined,
   });
   const mask = maskOf(item.children, warnings);
-  const post = postEffects(state.items, item.children, frameIndex(t, comp.fps), rel);
+  const post = postEffects(state.items, item.children, frameIndex(t, comp.rate), rel);
   const common = {
     id: p.id,
     fit,

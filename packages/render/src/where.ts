@@ -1,6 +1,7 @@
 // `uberscene where video.tsx --at 2.6`: where each thing on screen is at a moment, in pixels, against the frame and
 // the safe zones, and what it overlaps. It reports; `--check-layout` is the judge.
 
+import { frameStartSeconds } from "@uberscene/kit/schema";
 import type { DrawRect, MediaResolver } from "@uberscene/player/engine";
 import { type Moment, parseMoments, type ResolvedState, resolveMoments } from "@uberscene/sdk";
 
@@ -111,7 +112,7 @@ export function zoneRect(zone: SafeZoneName | Insets, width: number, height: num
 /** Measures every overlay, the captions and each named part at the moments asked for. */
 export async function whereThings(options: WhereOptions): Promise<WhereResult> {
   const { state } = options;
-  const { width: W, height: H, fps } = state.composition;
+  const { width: W, height: H } = state.composition;
   const picked = resolveMoments(state, parseMoments(options.at));
   const names: readonly string[] =
     typeof options.safeZone === "string"
@@ -133,7 +134,7 @@ export async function whereThings(options: WhereOptions): Promise<WhereResult> {
   const engine = await openEngine({ ...options, warnings });
   try {
     for (const m of picked.moments) {
-      const found = await engine.bounds(m.frame / fps, { parts: true });
+      const found = await engine.bounds(frameStartSeconds(m.frame, state.composition.rate), { parts: true });
       const seen = new Set<string>();
       for (const b of found) {
         if (seen.has(b.id) && b.kind === "part")

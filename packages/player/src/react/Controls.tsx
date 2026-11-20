@@ -45,7 +45,7 @@ export function Controls() {
     ];
     return () => offs.forEach((off) => off());
   }, [core]);
-  const fps = core.state.composition.fps;
+  const { fps, rate: frameRate } = core.state.composition;
   return (
     <div style={bar} data-controls="">
       <button type="button" style={button} onClick={() => void core.toggle()} aria-label={playing ? "Pause" : "Play"}>
@@ -70,7 +70,7 @@ export function Controls() {
         onChange={(e) => void core.seekTo(Number(e.target.value))}
       />
       <span style={{ fontVariantNumeric: "tabular-nums" }}>
-        {timecode(time, fps)} / {timecode(core.duration, fps)}
+        {timecode(time, frameRate)} / {timecode(core.duration, frameRate)}
       </span>
       <button
         type="button"
