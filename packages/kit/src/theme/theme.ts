@@ -1,4 +1,5 @@
 import { DEFAULT_THEME, MOTIONS, type MotionStyle, type Presets, THEMES } from "./builtins";
+import { lookOnlyPresets } from "./look-presets";
 import { type ThemeProps, TOKEN_PATTERN, themeSchema } from "./schema";
 
 /** A file's theme with its base theme merged in: what tokens, presets and motion defaults resolve against. */
@@ -45,8 +46,11 @@ export function resolveTheme(raw: unknown): ResolvedTheme {
   if (raw === undefined || raw === null || typeof raw !== "object") return (undeclared ??= build(undefined, false));
   const hit = byInput.get(raw);
   if (hit) return hit;
+  // A title or captions preset holding more than a look is reported where the theme is declared (the composition's
+  // `theme`); the rest of the theme still applies, and the extra fields reach no element.
   const parsed = themeSchema.safeParse(raw);
-  const theme = build(parsed.success ? parsed.data : baseOnly(raw), true);
+  const looks = parsed.success ? parsed : themeSchema.safeParse(lookOnlyPresets(raw));
+  const theme = build(looks.success ? looks.data : baseOnly(raw), true);
   byInput.set(raw, theme);
   return theme;
 }

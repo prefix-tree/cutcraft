@@ -15,8 +15,9 @@ takes `id`, its timing, `box`, `transform`, `blend`, `enter`, `exit`, `style`, `
 
 The captions' `style` object takes `preset` too, where a preset's name used to replace the whole object, and their
 flat `align` is now `style.align`. A theme preset for titles or captions is a look only: the built-in `note` preset no
-longer carries a size, rounded corners or an entrance, and a field in a preset of your own that is not a look is an
-error on each element that uses it. An unknown preset name is reported on `style.preset`.
+longer carries a size, rounded corners or an entrance, and a field in a preset of your own that is not a look is
+reported once, on the composition's `theme`, naming the preset and the field; it reaches no element and the rest of
+the theme still applies. An unknown preset name is reported on `style.preset`.
 
 Editing keeps up: `font/use` writes `style.font` (and `style.weight`) on a title as on the captions, turning
 `style="h1"` into `{ preset: "h1", font }`, and no longer refuses captions styled by a preset name; `caption/setStyle`

@@ -39,6 +39,11 @@ const captionStyleSchema = z.strictObject({
   align: zTextAlign.optional(),
 });
 
+/** The fields a theme's captions preset may hold: the look, without `preset` (a preset does not start from another). */
+export const CAPTIONS_LOOK_KEYS: readonly string[] = Object.keys(captionStyleSchema.shape).filter(
+  (k) => k !== "preset",
+);
+
 export const captionsSchema = z.strictObject({
   /** The captions' name. */
   id: idSchema,

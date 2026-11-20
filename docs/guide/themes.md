@@ -69,7 +69,8 @@ sticker, `style="card"` lays the preset under the element's own props, which win
 A title's or the captions' preset is look only: the letters' font, size, weight, colours, outline, shadow, alignment
 and spacing. Where the text sits, how big its box is and how it comes in are written on the element (`box`,
 `transform`, `animation`), so a preset gives the same look wherever it is used. A field that is not a look, in a preset
-of your own, is an error on each element that uses it.
+of your own, is reported once on the composition's `theme`, naming the preset and the field, and reaches no element:
+the rest of the theme still applies.
 
 The built-in themes share one set of presets, written in tokens:
 

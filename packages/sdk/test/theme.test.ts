@@ -216,6 +216,41 @@ describe("theme", () => {
     );
   });
 
+  it("reports a title or captions preset that holds more than a look once, where the theme is declared", () => {
+    const theme = {
+      palette: { brand: "#ff3366" },
+      styles: {
+        title: { card: { size: 80, color: "$brand", width: 600, transform: { borderRadius: 28 } } },
+        captions: { lower: { size: 40, animation: "karaoke" } },
+      },
+    } as unknown as ThemeInput;
+    const state = resolve(
+      collect(
+        film(
+          theme,
+          h(Title, { id: "t1", start: 0, style: "card" }, "One"),
+          h(Title, { id: "t2", start: 0, style: { preset: "card", size: 60 } }, "Two"),
+          h(Captions, { id: "cap", style: "lower" }),
+        ),
+      ),
+      manifest,
+    );
+    const errors = state.errors.map((e) => [e.id, e.prop]);
+    expect(errors).toEqual([
+      ["composition", "theme.styles.title.card.width"],
+      ["composition", "theme.styles.title.card.transform"],
+      ["composition", "theme.styles.captions.lower.animation"],
+    ]);
+    const messages = state.errors.map((e) => e.message).join("\n");
+    expect(messages).toContain('the title preset "card" holds "width", which is not how text looks');
+    expect(messages).toContain("write box.width on the titles that use it");
+    expect(messages).toContain('the captions preset "lower" holds "animation"');
+    // The rest of the theme still applies, the look of the preset included.
+    expect(styleOf(state, "t1")).toMatchObject({ preset: "card", size: 80, color: "#ff3366" });
+    expect(styleOf(state, "t2")).toMatchObject({ preset: "card", size: 60, color: "#ff3366" });
+    expect(styleOf(state, "cap")).toMatchObject({ preset: "lower", size: 40 });
+  });
+
   it("keeps placements the theme does not touch when the theme changes", () => {
     const tree = collect(film({ extends: "midnight" }, h(Title, { id: "t", start: 0 }, "Hi")));
     const exec = new Executor({ tree, manifest, now: () => 0 });

@@ -60,6 +60,9 @@ const titleLookSchema = z.strictObject({
   decoration: zTextDecoration.optional(),
 });
 
+/** The fields a theme's title preset may hold: the look, without `preset` (a preset does not start from another). */
+export const TITLE_LOOK_KEYS: readonly string[] = Object.keys(titleLookSchema.shape).filter((k) => k !== "preset");
+
 export const titleSchema = z.strictObject({
   ...timedProps,
   ...overlayProps,
