@@ -252,12 +252,8 @@ follow the theme.
 
 ### Lint
 
-| Rule | Level | Flags |
-|---|---|---|
-| `theme-refs` | error | A `$token` the theme does not define, or a `style` with no preset. |
-| `theme-literals` | warning | With a theme declared, a literal colour or font on a title, shape, SVG, sticker, captions or marker. Shadows are exempt. The message names the token when the colour matches one. |
-| `font-available` | warning | A font no renderer ships and the file does not declare. For a family in the catalogue the message gives the declaration to write; for a name close to one, it asks whether that one was meant. |
-| `declaration` | warning | A `font()`, `googleFont()`, `effect()` or `transition()` call inside a function, or with arguments that are not literal, or one neither exported nor used. |
+The theme and font rules (`theme-refs`, `theme-literals`, `font-available`, `declaration`) are listed with
+the others under [Lint](./editing#lint).
 
 ## Next
 

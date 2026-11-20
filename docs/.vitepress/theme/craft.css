@@ -1247,6 +1247,13 @@ html {
 body {
   background: var(--cc-paper);
 }
+/* The home page forces the dark syntax colours, so its code panels stay ink. Docs keep the paper block above. */
+.home {
+  --vp-code-block-bg: #121314;
+  --vp-code-block-color: #eeefef;
+  --vp-code-copy-code-bg: #1c1e20;
+  --vp-code-copy-code-hover-bg: #2a2d30;
+}
 .VPNavBar,
 .VPNavBar .content-body,
 .VPNavBar.has-sidebar .content-body,
@@ -2004,6 +2011,12 @@ html:has(.VPContent.has-sidebar) .DocSearch-Button {
 .dark .cc-agents-tabs button.active .cc-agents-icon {
   border-color: var(--cc-ink);
   box-shadow: 3px 3px 0 var(--cc-ink);
+}
+/* A logo keeps its white tile, so a mark in the accent colour (Claude's) stays visible; the accent shadow marks it. */
+.cc-agents-tabs button.active .cc-agents-icon:has(img),
+.dark .cc-agents-tabs button.active .cc-agents-icon:has(img) {
+  background: #ffffff;
+  box-shadow: 3px 3px 0 var(--cc-accent);
 }
 @media (prefers-reduced-motion: reduce) {
   .cc-agents-icon {

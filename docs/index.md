@@ -38,7 +38,7 @@ import { withBase } from "vitepress";
 <div><dt>Input</dt><dd>One TSX file</dd></div>
 <div><dt>Output</dt><dd>MP4 · WebM · PNG</dd></div>
 <div><dt>Effects</dt><dd>45 shaders</dd></div>
-<div><dt>Edit actions</dt><dd>115, undoable</dd></div>
+<div><dt>Edit actions</dt><dd>98, undoable</dd></div>
 <div><dt>Player</dt><dd>Browser, frame-exact</dd></div>
 <div><dt>Render</dt><dd>Headless Chrome</dd></div>
 <div><dt>Runtime</dt><dd>Node ≥ 22.19</dd></div>
@@ -71,7 +71,7 @@ import { withBase } from "vitepress";
 <Transition id="x2" type="iris" duration={0.9} />
 <Clip id="shot" src="asset:espresso" in={1} out={9} fit="cover">
   <Effect id="shot-warm" type="lut" params={{ src: "asset:warm" }}>
-    <Keyframe id="shot-warm-0" param="amount" at={3.2} value={0} />
+    <Keyframe id="shot-warm-0" param="amount" at={3.2} value={0} easing="ease-in-out" />
     <Keyframe id="shot-warm-1" param="amount" at={4.4} value={1} />
   </Effect>
 </Clip>
@@ -168,7 +168,7 @@ the others changed.
 <li><strong>Effects and transitions</strong> 45 built in, run as shaders in the preview and the export, or your own in GLSL.</li>
 <li><strong>Motion graphics</strong> Lower thirds, callouts, counters, quote cards and themes.</li>
 <li><strong>Free code</strong> Any React, CSS, SVG, canvas, three.js or Motion, on the video's clock.</li>
-<li><strong>Editing API</strong> 115 undoable actions that write each change back into the file.</li>
+<li><strong>Editing API</strong> 98 undoable actions that write each change back into the file.</li>
 <li><strong>Player</strong> A React component that plays the file in the browser, frame-exact.</li>
 <li><strong>Export</strong> MP4, WebM and stills from the command line, rendered in headless Chrome.</li>
 <li><strong>Checks</strong> Lint, contact sheets and layout checks, to review a cut without watching it.</li>
@@ -181,7 +181,7 @@ the others changed.
 
 ## Edit the file from code
 
-<p class="home-chapter-lead">115 actions edit the file itself: each one checked, undoable, and written back to its text as a one-value change. Wire them to any editor: a timeline, a form, an agent's tool call. <a :href="withBase('/guide/editing')">Editing →</a></p>
+<p class="home-chapter-lead">98 actions edit the file itself: each one checked, undoable, and written back to its text as a one-value change. Wire them to any editor: a timeline, a form, an agent's tool call. <a :href="withBase('/guide/editing')">Editing →</a></p>
 
 <Example src="showcase/edit" alt="Three shots cut back to back, with transitions, a push-in and titles">
 

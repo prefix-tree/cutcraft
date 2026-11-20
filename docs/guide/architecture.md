@@ -40,11 +40,9 @@ Only drawing needs one, which is why the export brings its own.
 | How the export runs | `packages/render` |
 | The native codecs | `native/` and `native/PROTOCOL.md` |
 
-[Core principles](./principles) lists the choices every package keeps to, with the decision record behind each.
-
 ## Next
 
 - [How the player draws](./how-the-player-draws): from the resolved file to one frame.
 - [How the export works](./export-architecture): the player in headless Chrome, and how the pieces join.
 - [Native codecs](./native-codecs): the experimental Rust decoder and encoder.
-- [Decision records](/decisions/): why each part is built the way it is.
+- [Core principles](./principles): the choices every package keeps to.

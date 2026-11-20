@@ -306,8 +306,13 @@ function elementPage(name: string, summary: string): string {
   const required = new Set(schema.required ?? []);
   for (const [prop, s] of Object.entries(schema.properties ?? {})) {
     const def = defaultOf(s.default);
+    // A value the schema accepts but the player doesn't draw is named on the row, not only in What renders.
+    const rendered = RENDERED_VALUES.find((r) => r.kind === component.kind && r.prop === prop);
+    const only = rendered
+      ? ` Only ${rendered.values.map((v) => `\`${v}\``).join(", ")} renders ([What renders](/reference/rendering)).`
+      : "";
     lines.push(
-      `| \`${prop}\` | ${typeOf(s, 6)} | ${def} | ${required.has(prop) ? "yes" : ""} | ${describe(`element:${name}`, prop)} |`,
+      `| \`${prop}\` | ${typeOf(s, 6)} | ${def} | ${required.has(prop) ? "yes" : ""} | ${describe(`element:${name}`, prop)}${only} |`,
     );
   }
   if (name === "Effect" || name === "Transition")

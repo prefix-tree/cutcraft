@@ -75,10 +75,9 @@ whole number of intervals, so the pieces join without re-encoding, the same as w
 | H.264, High profile, BT.709 limited range | MP4 |
 | ProRes: Proxy, LT, 422, 422 HQ, 4444 | MOV (`--codec prores`; `--quality` picks the profile) |
 
-- Pictures reach the page as 8-bit 4:2:0. Higher bit depths and 4:2:2/4:4:4 are converted, alpha is dropped, and a
-  rotated file is turned upright.
-- The native encoder doesn't write VP9 or AV1, and doesn't work with `--copy`.
-- The sound is always mixed and encoded in the page.
+Pictures reach the page as 8-bit 4:2:0. Higher bit depths and 4:2:2/4:4:4 are converted, alpha is dropped, and a
+rotated file is turned upright. What the native codecs leave to Chrome is listed under
+[Exporting](./exporting#native-codecs-experimental).
 
 ## Next
 

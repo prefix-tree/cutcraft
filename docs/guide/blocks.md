@@ -12,7 +12,8 @@ code. Nine ship with the CLI, so they work offline and match the version you hav
 
 A block is one file: a React component, its props `schema` with a label for every value, its `defaults`, and a `meta`
 that says what it is for, when not to use it and how long it takes. Its colours and fonts default to the video's theme
-tokens (`$accent`, `$heading`), so a block takes on the look of the video it is placed in. It names its parts
+tokens (`$accent`, `$heading`), so a block takes on the look of the video it is placed in; `themeCss("$accent")` gives
+your own components the same `var(--us-accent)`. It names its parts
 (`data-name`), so [the layout check](/guide/checking#check-the-layout) and `uberscene where` report them.
 
 A block reads its Layer's clock. Given more time than its natural length, it holds its last state. The props that time

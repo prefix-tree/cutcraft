@@ -26,6 +26,6 @@ See: [Free code](/guide/free-code)
 
 <<< @/../examples/shorts/snake-heart.tsx
 
-The wall is the character wall [block](/guide/free-code#blocks), told the seconds the snake eats:
+The wall is the character wall [block](/guide/blocks), told the seconds the snake eats:
 
 <<< @/../examples/shorts/blocks/character-wall.tsx
