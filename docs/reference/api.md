@@ -974,7 +974,7 @@ Every name each entry exports, read from the code. The sections above explain th
 
 ### `@uberscene/player/engine`
 
-29 exports.
+39 exports.
 
 | Export | Kind | |
 |---|---|---|
@@ -988,18 +988,28 @@ Every name each entry exports, read from the code. The sections above explain th
 | `CanvasPainter` | class | Executes a FramePlan on a 2D context of composition size. |
 | `captureWarnings` | function |  |
 | `Compositor` | class | One tick. |
+| `copyFrame` | function | Copies any frame into a canvas we own. |
 | `coversCanvas` | function | Whether a draw op puts its picture over the whole canvas as it is. |
+| `CreateCanvas` | type |  |
+| `Ctx2D` | type |  |
 | `DecoderPool` | class | Keeps a ClipDecoder for every media placement near the play head and drops the rest. |
+| `defaultCreateCanvas` | function |  |
 | `devWarn` | function | Warn once per key. |
 | `DrawOp` | interface |  |
 | `DrawRect` | interface |  |
+| `Frame` | interface | One decoded picture. |
 | `FRAME_EPS` | const | Tolerance when rounding a time to a frame index. |
 | `frameIndex` | function |  |
+| `FrameSource` | interface |  |
+| `FrameSourceFactory` | type |  |
+| `FrameSourceInfo` | interface |  |
 | `GainPoint` | type | A gain breakpoint in composition seconds. |
 | `isVisibleAt` | function |  |
 | `makeNestedResolver` | function | Resolves `<Nested of={Helper}>` through the kit's `resolveScene`, once per helper. |
 | `ManualClock` | class |  |
+| `mediabunnyFrameSourceFactory` | function |  |
 | `MediabunnyInputs` | class | One mediabunny `Input` per asset, shared by the video and audio sources of that asset. |
+| `MediaHandle` | type | Where an asset's bytes come from. |
 | `MediaResolver` | interface |  |
 | `OVERLAY_KINDS` | const | Kinds the overlay plane draws (as DOM, in the preview and the export) rather than the canvas. |
 | `paramsAt` | function | An effect's params, with the ones its own `<Keyframe param>` children animate evaluated at element-relative `rel`. |
@@ -1010,7 +1020,7 @@ Every name each entry exports, read from the code. The sections above explain th
 
 ### `@uberscene/render`
 
-82 exports.
+84 exports.
 
 | Export | Kind | |
 |---|---|---|
@@ -1024,7 +1034,9 @@ Every name each entry exports, read from the code. The sections above explain th
 | `browserCacheDir` | function | Where downloaded browsers live. |
 | `checkLayout` | function | Samples the composition and reports every overlay (titles, shapes, SVG, stickers, layers, and captions), and every part a layer's code named with `data-name`, that leaves the frame, leaves the safe zone, covers captions (not captions themselves), or covers the subject, as runs of consecutive offending samples. |
 | `CHROME_MILESTONE` | const | The Chrome milestone UberScene downloads. |
-| `Container` | type | MP4 and WebM hold video and sound; MP3 and WAV the soundtrack alone. |
+| `codecModes` | function | The codecs `UBERSCENE_CODECS` asks for; unset or empty is the browser's. |
+| `CodecModes` | interface |  |
+| `Container` | type | MP4, WebM and MOV hold video and sound; MP3 and WAV the soundtrack alone. |
 | `containerOf` | function | The container a file name asks for. |
 | `DEFAULT_SKILL_DIR` | const | Claude Code reads a project's skills from here; other agents take `--dir`. |
 | `describeAt` | function | What is on screen and heard at one moment. |
