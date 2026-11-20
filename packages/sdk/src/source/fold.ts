@@ -14,7 +14,7 @@ import { declaredIdentifiers } from "./lint/rules/fonts";
 import { identifier } from "./lint/rules/theme";
 import type { Range } from "./parse";
 import { parseSource } from "./parse";
-import { Identifier, printElement, printLiteral, printProp } from "./print";
+import { escapeText, Identifier, printElement, printLiteral, printProp } from "./print";
 
 const traverse = ((traverseModule as unknown as { default?: typeof traverseModule }).default ??
   traverseModule) as typeof traverseModule;
@@ -630,12 +630,10 @@ function propEdit(
 }
 
 function textEdit(site: ElementSite, value: string): SourceEdit | null {
-  if (site.childrenRange) return { kind: "text", id: site.id, range: site.childrenRange, text: value };
-  const open = site.openingTag;
+  const children = escapeText(value);
+  if (site.childrenRange) return { kind: "text", id: site.id, range: site.childrenRange, text: children };
   const slash = site.range[1] - 2;
-  let start = slash;
-  while (start > open[0] && /\s/.test(site.indent) && /\s/.test(value[start - 1] ?? "")) start -= 1;
-  return { kind: "text", id: site.id, range: [slash, site.range[1]], text: `>${value}</${site.name}>` };
+  return { kind: "text", id: site.id, range: [slash, site.range[1]], text: `>${children}</${site.name}>` };
 }
 
 function reindent(source: string, from: string, to: string): string {

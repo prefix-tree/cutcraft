@@ -1,3 +1,4 @@
+import ts from "typescript";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -7,6 +8,7 @@ import {
   Executor,
   foldToSource,
   lint,
+  loadModule,
   printElement,
   printProp,
   resolve,
@@ -217,6 +219,42 @@ describe("fold", () => {
     expect(result.baked).toContain("b1");
     expect(result.text).toContain('export const defaults = { title: "Changed", accent: "#123456" };');
   });
+
+  it.each(["{50%}", "a } b", "x > y", "<b>", '"quoted" {x}'])(
+    "writes title text %s so the file reads it back unchanged",
+    (words) => {
+      const file = `import { Composition, Title, Track } from "@uberscene/kit";
+
+export default function Video() {
+  return (
+    <Composition fps={30} width={640} height={360}>
+      <Track id="t" layout="free">
+        <Title id="full" start={0} duration={1}>Hi</Title>
+        <Title id="empty" start={0} duration={1} />
+      </Track>
+    </Composition>
+  );
+}
+`;
+      const exec = new Executor({ tree: collectModule(loadModule(file) as never), manifest: { assets: {} } });
+      expect(exec.execute({ type: "text/setContent", params: { id: "full", text: words } }).ok).toBe(true);
+      expect(exec.execute({ type: "text/setContent", params: { id: "empty", text: words } }).ok).toBe(true);
+      const result = foldToSource(file, exec.log(), exec.state());
+      expect(result.skipped).toEqual([]);
+      expect(lint(result.text).filter((d) => d.severity === "error")).toEqual([]);
+      // Babel reads a bare `}` or `>` in JSX text; TypeScript, which compiles the file, does not.
+      const compiled = ts.transpileModule(result.text, {
+        fileName: "video.tsx",
+        reportDiagnostics: true,
+        compilerOptions: { jsx: ts.JsxEmit.Preserve },
+      });
+      expect(compiled.diagnostics?.map((d) => ts.flattenDiagnosticMessageText(d.messageText, "\n"))).toEqual([]);
+      const reloaded = resolve(collectModule(loadModule(result.text) as never), { assets: {} });
+      expect(reloaded.errors).toEqual([]);
+      expect(reloaded.tree.byId.get("full")?.text).toBe(words);
+      expect(reloaded.tree.byId.get("empty")?.text).toBe(words);
+    },
+  );
 
   it("prints props and elements", () => {
     expect(printProp("src", "asset:a")).toBe('src="asset:a"');

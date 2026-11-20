@@ -56,6 +56,7 @@ export function printElement(spec: NodeSpec, indent = "", step = "  "): string {
   return `${open}>${text}\n${inner}\n${indent}</${name}>`;
 }
 
-function escapeText(text: string): string {
+/** Text as JSX children: as it is, or as a string expression (`{"50%}"}`) when it holds a brace or an angle bracket. */
+export function escapeText(text: string): string {
   return /[{}<>]/.test(text) ? `{${JSON.stringify(text)}}` : text;
 }
