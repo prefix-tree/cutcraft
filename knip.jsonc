@@ -9,6 +9,9 @@
       // not read .vue files.
       "entry": [
         "scripts/*.{ts,mjs}",
+        // The spelling eval: run.ts is run by hand, and reads the base files as text.
+        "scripts/evals/*/run.ts",
+        "scripts/evals/*/base.*.tsx",
         "docs/gallery.data.ts",
         "docs/.vitepress/config.mts",
         "docs/.vitepress/theme/index.ts",
