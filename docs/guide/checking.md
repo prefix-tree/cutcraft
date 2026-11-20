@@ -6,6 +6,7 @@ after every change.
 
 | To know | Run |
 |---|---|
+| Whether the file keeps to the conventions an editor relies on | `uberscene lint video.tsx` |
 | What plays when, and which words each clip says | `uberscene inspect video.tsx` |
 | What it looks like | `uberscene look video.tsx` |
 | Whether anything leaves the frame, the safe zone, or covers the captions or the speaker | `uberscene video.tsx --check-layout` |
@@ -13,6 +14,21 @@ after every change.
 | Whether the exported file is sound | `ffprobe` and `ffmpeg` |
 
 Every command finds the nearest `uberscene.json` from the file's folder upward; `--manifest` names another.
+
+## Lint the file
+
+`lint` reads the file's text and reports what would make it hard to edit or wrong in an export: an id that is missing
+or used twice, timing written as an expression, an asset the manifest does not have, free code that keeps its own
+clock, a prop spelled the way an earlier version took it. It runs nothing, so it works on a file that does not load.
+
+```sh
+npx uberscene lint video.tsx
+npx uberscene lint video.tsx --fix
+```
+
+Each finding is a line with its place in the file, and the command exits 1 when an error is left. `--fix` writes the
+fixes that have one right answer and reports the rest; after an upgrade that respells props, run it first. The rules
+are listed under [Lint](./editing#lint), and the options in the [CLI reference](/reference/cli#lint).
 
 ## Read the timeline as text
 

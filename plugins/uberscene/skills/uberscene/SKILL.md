@@ -70,9 +70,12 @@ Work in this order, and check after each stage.
    A moment is an element's id (with `.start`, `.mid` or `.end`), a transition's id (both sides of the cut), `word:14`
    (or `hook@word:14`), `shot:1`, `marker:intro`, seconds (`4.5`), a frame (`90f`) or a range (`2..6/0.5`). `--json`
    prints flat rows for `jq`.
-5. **Check it.** Every command prints `warning: <id>: <message>` for each problem in the file; fix them all. The layout
-   check also reports overlays that leave the frame or the safe zone, or cover the captions or the subject:
+5. **Check it.** Every command prints `warning: <id>: <message>` for each problem in the file; fix them all. `lint`
+   reads the file's text for what breaks editing or an export (ids, timing, assets, free code off the clock, props
+   spelled an older way); it exits 1 on an error, and `--fix` writes the fixes that have one right answer. The
+   layout check reports overlays that leave the frame or the safe zone, or cover the captions or the subject:
    ```sh
+   npx uberscene lint video.tsx
    npx uberscene video.tsx --check-layout
    ```
    Exit code 0 is clean, 3 means it found layout issues (listed with their line), 1 is an error, 2 is a bad argument.
@@ -281,8 +284,8 @@ What each element and prop actually draws, and the few it does not:
 
 ## Before you hand it over
 
-- Every command runs with no `warning:` lines, and `--check-layout` exits 0, or 3 only for issues you chose to keep
-  and said so.
+- Every command runs with no `warning:` lines, `lint` exits 0, and `--check-layout` exits 0, or 3 only for issues
+  you chose to keep and said so.
 - Ids are literal and unique, no sequence track has `start`, there is at most one `<Captions>`, and every `src` is in
   the manifest.
 - Each clip has `in`/`out` or `duration`, not both. Every `$token` and `style` exists in the theme.

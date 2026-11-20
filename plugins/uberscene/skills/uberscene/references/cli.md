@@ -10,6 +10,7 @@ npx uberscene <file.tsx> --still <seconds> --out <image.png|.jpg> [options]
 npx uberscene <file.tsx> --check-layout [--safe-zone <zone>] [--subject <x,y,w,h>] [--json] [options]
 npx uberscene <file.tsx> --srt <captions.srt> | --vtt <captions.vtt> [--from <s> --to <s>]
 npx uberscene inspect <file.tsx> [--at <moments>] [--json] [--manifest <file>] [--props <json>]
+npx uberscene lint <file.tsx>... [--fix] [--json] [--manifest <file>]
 npx uberscene look <file.tsx> [--at <moments> | --around <id>] [--without <id>] [--listen <stretch>] [--zones <zone>] [--out look.png] [options]
 npx uberscene look <file.tsx> --motion <stretch> [--step <s>] [--listen <stretch>] [--out look.png] [options]
 npx uberscene where <file.tsx> --at <moments> [--safe-zone <zone>] [--json] [options]
@@ -138,6 +139,33 @@ A moment is written the way the file is written, or as plain time:
 Every answer gives the seconds, the frame and what the moment is, so a moment found by time leads back to the element
 or the word to edit. A moment that cannot be found is an error that says why, and the command exits 1; the others are
 still printed.
+
+## Lint
+
+`uberscene lint video.tsx` checks a file's text against the conventions that keep it editable and on the video's
+clock: literal and unique ids, timing the timeline can show, assets that are in the manifest, free code that an export
+repeats frame for frame, and props spelled the way an earlier version took them. The rules are the kit's own
+([Lint](https://uberscene.prefixtree.xyz/guide/editing#lint)). The file is read and never run, so one that no longer loads can still be checked, and
+several files can be named at once.
+
+```sh
+npx uberscene lint video.tsx
+npx uberscene lint video.tsx recipes/*.tsx --fix
+```
+
+```
+video.tsx:12:16 error unique-ids id "a" is used more than once
+video.tsx:31:18 warning free-code-clock window.performance is the browser's own, on the wall clock; write performance without window. and an export runs it on the video's clock
+```
+
+Each finding is one line: the file, the line and column, `error` or `warning`, the rule and the message. The command
+exits 1 when an error is left and 0 otherwise; warnings alone do not fail it.
+
+| Option | |
+|---|---|
+| `--fix` | Write each file with the fixes its findings carry, then report what is left. A finding has a fix only where there is one right answer: a prop that was renamed or moved, a value that is spelled another way now, the browser's clock reached through `window`. After a release that respells props, this is the command that moves a file across. |
+| `--json` | Print the findings as data: per file, `diagnostics` (each with `rule`, `severity`, `message`, `line`, `column`, `id` and `prop` when known, and `fixable`) and, with `--fix`, `fixed`. |
+| `--manifest <file>` | The manifest for every file. Without it each file uses its nearest `uberscene.json`; with none found, the rules that need one are skipped. |
 
 ## Look
 
@@ -403,7 +431,7 @@ what differs from this version's block is printed as a diff; the command then ex
 | Code | |
 |---|---|
 | 0 | Done. |
-| 1 | An error, such as a missing asset, a file that doesn't load, or a moment `inspect` or `look` cannot find. |
+| 1 | An error, such as a missing asset, a file that doesn't load, a moment `inspect` or `look` cannot find, or an error `lint` found. |
 | 2 | Wrong arguments; the usage text is printed. |
 | 3 | The layout check found issues. |
 
