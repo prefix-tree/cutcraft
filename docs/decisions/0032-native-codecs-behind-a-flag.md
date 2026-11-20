@@ -82,10 +82,11 @@ native side by side on the same footage. Those numbers decide whether native bec
 **The same pictures.** The export tests run the e2e composition with native decoding and check every frame, the same
 check as the browser path.
 
-**The same sound, or closer to the file.** The page's mix encoded natively is the browser's to one 16-bit step. The mix
-made from native decoding matches the same mix made from ffmpeg's decode within 2e-3. It differs from the browser's
-where a clip starts mid-file in a WebM: the browser's Opus decode, read from there, lands 1 ms (48 samples) off the
-file's timeline, which the native decode does not.
+**The same sound.** The page's mix encoded natively is the browser's to one 16-bit step. The mix made from native
+decoding matches the browser's, and the same mix made from ffmpeg's decode, within 2e-3. Comparing them found the
+browser placing a clip read from the middle of a WebM 1 ms (48 samples) late: WebM rounds block times to the
+millisecond, and Mediabunny shifts Opus by its rounded codec delay. Both sides now decode from 120 ms early and put each
+block on its stream's grid (`blockStart` in the player), in the preview too.
 
 ## Alternatives
 

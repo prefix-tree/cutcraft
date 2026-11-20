@@ -178,13 +178,12 @@ export default function Video() {
     for (let i = 0; i < pageMix.length; i++)
       worst = Math.max(worst, Math.abs((pageMix[i] as number) - (reference[i] as number)));
     expect(worst).toBeLessThan(1e-4);
-    // The mix made from the native decoder's sound, up to 3.5 s, where v2 starts 6 s into its file. From there the
-    // browser's decode of Opus in WebM, read from the middle, lands 1 ms off the file's timeline, a sizeable difference
-    // in a tone; the native decode lands where ffmpeg's does (test/native-audio.test.ts checks the whole mix there).
+    // The mix made from the native decoder's sound, the whole of it: v2 starts 6 s into its WebM, where a block's time
+    // is rounded to the millisecond, so this also checks that both place a clip read from the middle where the file has it.
     const nodeMix = decoded(files.native);
     expect(nodeMix.length).toBe(reference.length);
     worst = 0;
-    for (let i = 0; i < 3.5 * 48000 * 2; i++)
+    for (let i = 0; i < nodeMix.length; i++)
       worst = Math.max(worst, Math.abs((nodeMix[i] as number) - (reference[i] as number)));
     // 16-bit PCM, and two decoders of the same Opus.
     expect(worst).toBeLessThan(3e-3);
