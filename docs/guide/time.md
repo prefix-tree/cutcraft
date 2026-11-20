@@ -156,7 +156,7 @@ would flash the other shot, gets one naming the `shot:N` edge (`cut-near-shot`).
 ## Frame rates {#frame-rates}
 
 `fps` on `<Composition>` is a whole number (`24`, `25`, `30`, `60`), an NTSC rate written as a string (`"23.976"`,
-`"29.97"`, `"47.952"`, `"59.94"`, `"119.88"`), or an exact fraction (`fps={{ num: 30000, den: 1001 }}`).
+`"29.97"`, `"47.952"`, `"59.94"`, `"119.88"`), or an exact fraction (<code v-pre>fps={{ num: 30000, den: 1001 }}</code>).
 
 ```tsx
 <Composition fps="29.97" width={1920} height={1080}>
