@@ -32,7 +32,7 @@ export default function Video() {
           id="card"
           start={0}
           duration={3}
-          box={{ x: 540, y: 490 }}
+          box={{ y: 490 }}
           width={920}
           height={760}
           fill="$surface"
@@ -43,7 +43,7 @@ export default function Video() {
             { text: "SLOWLY", offset: 0.5, pill: "$accent" },
           ]}
         />
-        <Frame id="speaker" start={0} duration={3} box={{ x: 540, y: 1380 }} width={920} height={720} />
+        <Frame id="speaker" start={0} duration={3} box={{ y: 1380 }} width={920} height={720} />
       </Track>
     </Composition>
   );
