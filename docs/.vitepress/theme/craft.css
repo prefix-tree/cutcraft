@@ -1247,6 +1247,13 @@ html {
 body {
   background: var(--cc-paper);
 }
+/* The home page forces the dark syntax colours, so its code panels stay ink. Docs keep the paper block above. */
+.home {
+  --vp-code-block-bg: #121314;
+  --vp-code-block-color: #eeefef;
+  --vp-code-copy-code-bg: #1c1e20;
+  --vp-code-copy-code-hover-bg: #2a2d30;
+}
 .VPNavBar,
 .VPNavBar .content-body,
 .VPNavBar.has-sidebar .content-body,
