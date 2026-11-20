@@ -14,7 +14,7 @@ import { declaredIdentifiers } from "./lint/rules/fonts";
 import { identifier } from "./lint/rules/theme";
 import type { Range } from "./parse";
 import { parseSource } from "./parse";
-import { escapeText, Identifier, printElement, printLiteral, printProp } from "./print";
+import { escapeText, Identifier, isPlainAttribute, printElement, printLiteral, printProp } from "./print";
 
 const traverse = ((traverseModule as unknown as { default?: typeof traverseModule }).default ??
   traverseModule) as typeof traverseModule;
@@ -615,18 +615,14 @@ function propEdit(
       // Bare attribute (`reverse`): rewrite the whole attribute.
       return { kind: "prop", id: site.id, prop, range: existing.range, text: printProp(prop, value) };
     }
-    const asString =
-      typeof value === "string" &&
-      text[existing.valueRange[0]] === '"' &&
-      !value.includes('"') &&
-      !value.includes("\n");
+    const asString = typeof value === "string" && text[existing.valueRange[0]] === '"' && isPlainAttribute(value);
     const replacement = asString ? `"${value}"` : printLiteral(value);
     if (asString) return { kind: "prop", id: site.id, prop, range: existing.valueRange, text: replacement };
     // Expression container `{...}` or a string literal that must become `{...}`.
     const r = existing.valueRange;
     const wrapped = text[r[0] - 1] === "{" && text[r[1]] === "}";
     // A plain string replacing `{...}` drops the braces: `out={6}` becomes `out="word:2"`, as a person writes it.
-    if (wrapped && typeof value === "string" && !value.includes('"') && !value.includes("\n"))
+    if (wrapped && typeof value === "string" && isPlainAttribute(value))
       return { kind: "prop", id: site.id, prop, range: [r[0] - 1, r[1] + 1], text: `"${value}"` };
     if (wrapped) return { kind: "prop", id: site.id, prop, range: r, text: replacement };
     return { kind: "prop", id: site.id, prop, range: r, text: `{${replacement}}` };

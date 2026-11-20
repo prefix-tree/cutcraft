@@ -230,6 +230,26 @@ describe("fold", () => {
     expect(result.text).toContain("color={accent}");
   });
 
+  it.each(["A &amp; B", "1 &lt; 2", "salt & pepper", "&#169; &copy;"])(
+    "writes string props with %s so the file reads them back unchanged",
+    async (words) => {
+      const exec = fixtureExecutor();
+      const content = `<svg viewBox='0 0 10 10'><text>${words}</text></svg>`;
+      expect(exec.execute({ type: "element/update", params: { id: "v1", props: { content } } }).ok).toBe(true);
+      expect(exec.execute({ type: "track/rename", params: { trackId: "main", name: words } }).ok).toBe(true);
+      expect(exec.execute({ type: "track/rename", params: { trackId: "music", name: words } }).ok).toBe(true);
+      expect(exec.execute({ type: "marker/add", params: { markerId: "m2", at: 6, label: words } }).ok).toBe(true);
+      const result = foldToSource(fixtureText, exec.log(), exec.state());
+      expect(result.skipped).toEqual([]);
+      const mod = await evaluate(result.text);
+      const reresolved = resolve(collectModule(mod, {}, { index: buildSourceIndex(result.text) }), manifest);
+      expect(reresolved.tree.byId.get("v1")?.props.content).toBe(content);
+      expect(reresolved.tree.byId.get("main")?.props.name).toBe(words);
+      expect(reresolved.tree.byId.get("music")?.props.name).toBe(words);
+      expect(reresolved.tree.byId.get("m2")?.props.label).toBe(words);
+    },
+  );
+
   it.each(["{50%}", "a } b", "x > y", "<b>", '"quoted" {x}'])(
     "writes title text %s so the file reads it back unchanged",
     (words) => {
