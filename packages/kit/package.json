@@ -36,8 +36,7 @@
     "access": "public",
     "exports": {
       ".": "./dist/index.mjs",
-      "./schema": "./dist/schema.mjs",
-      "./jsx-runtime": "react/jsx-runtime"
+      "./schema": "./dist/schema.mjs"
     }
   },
   "scripts": {
