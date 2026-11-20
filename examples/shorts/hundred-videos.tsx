@@ -127,7 +127,7 @@ const POINT_LIST = POINTS.map((p) => ({
   label: p.label,
   tag: `#${p.video}`,
   icon: ICON[p.key],
-  at: T(p.at),
+  start: T(p.at),
 }));
 
 // "There's infinite ways": what he lists, with the excerpt second of each, laid out as chips in rows.
@@ -144,9 +144,9 @@ const EVERY = 38.44;
 
 function Way({ index, accent }: { index: number; accent: string }) {
   const way = WAYS[index] as (typeof WAYS)[number];
-  const here = useProgress({ at: T(way.at), over: 0.25 });
+  const here = useProgress({ start: T(way.at), over: 0.25 });
   // "every little thing can be improved": they all light.
-  const all = useProgress({ at: T(EVERY) + index * 0.06, over: 0.3 });
+  const all = useProgress({ start: T(EVERY) + index * 0.06, over: 0.3 });
   const width = way.label.length * 15.5 + 34;
   const x = BAND.x + 330 + way.x;
   const y = BAND.y + 18 + way.row * 60 + (1 - here) * 14;

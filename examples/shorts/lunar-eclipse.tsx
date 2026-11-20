@@ -50,13 +50,13 @@ const BOXED = {
 };
 // The border round the box is drawn under the footage, a little larger than it, so only its outer edge shows.
 const RING = {
-  shape: "rectangle",
+  type: "rectangle",
   box: AT,
   width: BOX.width + 16,
   height: BOX.height + 16,
   cornerRadius: 36,
   fill: { type: "none" },
-  stroke: { color: "$accent", width: 16 },
+  stroke: { color: "$accent", thickness: 16 },
   enter: { type: "fade", duration: 0.25 },
   exit: { type: "fade", duration: 0.2 },
 } as const;

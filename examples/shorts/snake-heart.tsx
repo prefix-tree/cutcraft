@@ -178,7 +178,7 @@ function Board({ word, heart }: z.infer<typeof schema>) {
       >
         {body.map((cell, j) => {
           // The heart turns its colour character by character, from the tail round to the head.
-          const turned = progress(clock, { after: CLOSED_AT + j * 0.012, over: 0.25, easing: "ease-out" });
+          const turned = progress(clock, { after: CLOSED_AT + j * 0.012, over: 0.25, easing: "easeOut" });
           return (
             <div
               key={key(cell)}
