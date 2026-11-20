@@ -114,7 +114,7 @@ const boxProp = {
   box: boxSchema.optional(),
 };
 
-export const transformSchema = z.strictObject({
+const transformSchema = z.strictObject({
   /** A multiplier, the same on both axes or `{ x, y }`. */
   scale: z.union([z.number().min(0).max(10), vec2Schema]).optional(),
   /** Degrees, clockwise. */
