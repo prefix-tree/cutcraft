@@ -153,6 +153,29 @@ The lint helps when you cut in seconds too. A numeric `in` or `out` that lands i
 naming the `word:N` to use (`cut-inside-word`). A cut within a few frames of the source's own shot change, which
 would flash the other shot, gets one naming the `shot:N` edge (`cut-near-shot`).
 
+## Frame rates {#frame-rates}
+
+`fps` on `<Composition>` is a whole number (`24`, `25`, `30`, `60`), an NTSC rate written as a string (`"23.976"`,
+`"29.97"`, `"47.952"`, `"59.94"`, `"119.88"`), or an exact fraction (<code v-pre>fps={{ num: 30000, den: 1001 }}</code>).
+
+```tsx
+<Composition fps="29.97" width={1920} height={1080}>
+```
+
+Write NTSC rates as strings. `"29.97"` is 30000/1001, the rate broadcast video and phone footage use. The number
+`29.97` is 2997/100, which drifts a tenth of a frame an hour from it, so the resolver refuses it and the lint fixes
+it to the string (`ntsc-frame-rate`).
+
+Times in the file stay in seconds. Turning a time into a frame, a frame back into seconds, or a time into an audio
+sample counts in ticks: 254,016,000,000 to the second, a number every frame rate above and every common sample rate
+divides. So frame 1800 at `"29.97"` starts on its exact tick, a 29.97 export holds exactly the frames its length
+asks for, and the sound lands on the same sample each time. Ticks are exact for videos up to 35,459 seconds, about
+9.85 hours; a longer composition is an error.
+
+At `"29.97"` and `"59.94"` the player shows drop-frame timecode, `HH:MM:SS;FF`: frame numbers 0 and 1 (0 to 3 at
+59.94) are skipped at the start of every minute but each tenth, so the clock keeps to real time. Frame 1800 reads
+`00:01:00;02`, and frame 17982 reads `00:10:00;00`.
+
 ## Speed and freezes
 
 `<SpeedKey>` changes a clip's speed from a moment on, eased into the new speed, and `<Freeze>` holds one frame for a

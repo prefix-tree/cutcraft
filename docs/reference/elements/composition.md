@@ -21,7 +21,7 @@ The coffee footage is Pixabay videos [209419](https://pixabay.com/videos/id-2094
 | prop | type | default | required | description |
 |---|---|---|---|---|
 | `id` | string | `"composition"` |  | The video's name. |
-| `fps` | number (>0..240) |  | yes | Frames per second. |
+| `fps` | number (>0..240) \| "23.976" \| "29.97" \| "47.952" \| "59.94" \| "119.88" \| { num, den } |  | yes | Frames per second: a number (`30`, `25`, `60`), an NTSC rate by name (`"29.97"`, `"23.976"`, `"59.94"`, which are 30000/1001, 24000/1001 and 60000/1001), or an exact fraction `{ num, den }`. A rate must divide into whole ticks. |
 | `width` | integer (16..8192) |  | yes | The frame's width in pixels. |
 | `height` | integer (16..8192) |  | yes | The frame's height in pixels. |
 | `sampleRate` | integer (8000..192000) | `48000` |  | The soundtrack's samples per second. |

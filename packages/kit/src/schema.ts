@@ -41,3 +41,4 @@ export { defaultTransitionParams, isBuiltInTransition, TRANSITION_PARAMS } from 
 export * from "./jsx/shaders";
 export { installLayerClock } from "./jsx/use-t";
 export * from "./theme";
+export * from "./time";

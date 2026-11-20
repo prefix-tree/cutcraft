@@ -1,18 +1,24 @@
 import type { z } from "zod";
 
-import type { DeclaredFont } from "@uberscene/kit/schema";
 import {
   applyTheme,
   capabilitiesOf,
+  type DeclaredFont,
   defaultTransitionParams,
   ENGINE_SCHEMAS,
   effectEntry,
   effectParamProblem,
+  type FrameRate,
   isBuiltInTransition,
+  MAX_SECONDS,
+  parseRate,
+  type Rate,
   type ResolvedTheme,
+  rateValue,
   resolveTheme,
   SCHEMAS_BY_KIND,
   type ShaderDefinition,
+  sampleRateProblem,
   shaderFor,
   type ThemeOrigin,
   TRANSITION_TYPES,
@@ -82,7 +88,10 @@ export interface ResolvedTrack {
 export interface ResolvedState {
   readonly composition: {
     readonly id: string;
+    /** Frames per second as a number, for display. Frame math uses `rate`. */
     readonly fps: number;
+    /** The frame rate as an exact fraction, which frame and timecode math goes through (`@uberscene/kit/schema` time). */
+    readonly rate: Rate;
     readonly width: number;
     readonly height: number;
     readonly duration: number;
@@ -409,10 +418,20 @@ function compute(
   );
   errors.push(...textureErrors(items, manifest));
   errors.push(...keyframeErrors(items));
+  const rate = rateOf(compParsed.fps, root.id, errors);
+  if (duration > MAX_SECONDS)
+    errors.push({
+      code: "INVALID_TIME_RANGE",
+      id: root.id,
+      message: `the video is ${duration.toFixed(0)} s long; times are exact up to ${MAX_SECONDS} s (about 9.85 hours)`,
+    });
+  const sampleProblem = sampleRateProblem(Number(compParsed.sampleRate ?? 48000));
+  if (sampleProblem) errors.push({ code: "SCHEMA", id: root.id, prop: "sampleRate", message: sampleProblem });
   return {
     composition: {
       id: root.id,
-      fps: Number(compParsed.fps ?? 30),
+      fps: rateValue(rate),
+      rate,
       width: Number(compParsed.width ?? 1920),
       height: Number(compParsed.height ?? 1080),
       duration,
@@ -1571,4 +1590,15 @@ function captionTime(
       message: `${String(ref)} of ${ctx.src ?? "the asset"} is not on the timeline`,
     };
   return at;
+}
+
+/** The composition's frame rate as an exact fraction; an unusable rate is an error, and 30 stands in for it. */
+function rateOf(fps: unknown, id: string, errors: ResolveError[]): Rate {
+  if (fps === undefined) return { num: 30, den: 1 };
+  try {
+    return parseRate(fps as FrameRate);
+  } catch (error) {
+    errors.push({ code: "SCHEMA", id, prop: "fps", message: (error as Error).message });
+    return { num: 30, den: 1 };
+  }
 }

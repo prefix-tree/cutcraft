@@ -1,6 +1,7 @@
 import { writeFile } from "node:fs/promises";
 
-import { FRAME_EPS, type MediaResolver } from "@uberscene/player/engine";
+import { frameAtSeconds, frameStartSeconds } from "@uberscene/kit/schema";
+import type { MediaResolver } from "@uberscene/player/engine";
 import type { ResolvedState } from "@uberscene/sdk";
 
 import type { FontFile } from "./fonts";
@@ -41,10 +42,10 @@ export interface StillResult {
 /** Draws one frame of the composition, as the export draws it, to a PNG or JPEG. */
 export async function renderStill(options: StillOptions): Promise<StillResult> {
   const { state } = options;
-  const { fps, width, height, duration } = state.composition;
+  const { rate, width, height, duration } = state.composition;
   if (!(options.time >= 0 && options.time < duration))
     throw new Error(`time ${options.time} is outside the composition (0 to ${duration} s)`);
-  const frame = Math.floor(options.time * fps + FRAME_EPS);
+  const frame = frameAtSeconds(options.time, rate);
   const jpeg = /\.jpe?g$/i.test(options.out);
   const warnings: string[] = [];
   const name = options.cacheDir
@@ -57,7 +58,7 @@ export async function renderStill(options: StillOptions): Promise<StillResult> {
   }
   const engine = await openEngine({ ...options, warnings });
   try {
-    const bytes = await engine.still(frame / fps, jpeg ? "image/jpeg" : "image/png", 0.92);
+    const bytes = await engine.still(frameStartSeconds(frame, rate), jpeg ? "image/jpeg" : "image/png", 0.92);
     await writeFile(options.out, bytes);
     const failed = await engine.errors();
     if (failed.length > 0) {

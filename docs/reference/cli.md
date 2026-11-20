@@ -88,7 +88,9 @@ whether it is in the frame and in each safe zone, and what it overlaps.
 `uberscene inspect video.tsx` prints the timeline the way an editor reads it: each track and its elements with their
 seconds, the words each clip plays, effects, keyframes and cuts. The file's `schema` values come first, one `knob`
 line each with its kind, its value and its description. It runs the resolver only, so it starts no browser,
-needs no media files and answers at once. It is how an agent, or a script, reads a cut back.
+needs no media files and answers at once. The first line gives the frame rate as the file writes it, `29.97 fps` for
+`fps="29.97"`, and the frame count in ticks ([Frame rates](/guide/time#frame-rates)); `--json` gives the exact rate
+as `rate: { num, den }`. It is how an agent, or a script, reads a cut back.
 
 ```
 video.tsx  1920x1080  30 fps  25.60 s (768 frames)  0 errors
