@@ -446,115 +446,14 @@ html {
     border-top: var(--cc-line-heavy);
   }
 }
-/* Install: two ruled cards side by side, the agent's first and on orange, each a few numbered steps. */
-.vp-doc p.home-agent-note {
-  margin: 22px 0 0;
-  font-family: var(--cc-mono);
-  font-size: 13px;
-  letter-spacing: 0.04em;
-  color: var(--cc-ink-2);
-}
-.vp-doc .home-agent-note a {
-  font-weight: 600;
-}
+/* Install: the same agent picker as the hero, with each agent's brief, then links to the guides. */
 .home-install {
   scroll-margin-top: 96px;
 }
-.home-install-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
-  gap: 28px;
-  align-items: start;
-  margin-right: 8px;
-}
-.home-install-card {
-  min-width: 0;
-  padding: 24px 24px 22px;
-  border: var(--cc-line-heavy);
-  box-shadow: var(--cc-hard);
-  background: var(--cc-paper);
-}
-.home-install-card.primary {
-  background-color: var(--cc-accent);
-  color: #0a0a0a;
-  border-color: var(--cc-ink);
-}
-.vp-doc p.home-install-kicker {
-  display: inline-block;
-  margin: 0 0 14px;
-  padding: 3px 8px;
-  background: var(--cc-ink);
-  color: var(--cc-paper);
-  font-family: var(--cc-mono);
-  font-size: 11.5px;
-  font-weight: 500;
-  letter-spacing: 0.12em;
-  line-height: 1.5;
-  text-transform: uppercase;
-}
-.vp-doc .home-install-card h3 {
-  margin: 0 0 18px;
-  font-size: 40px;
-  font-weight: 800;
-  line-height: 0.92;
-}
-.home-install-card.primary h3,
-.home-install-card.primary strong {
-  color: #0a0a0a;
-}
-.vp-doc p.home-install-step {
-  position: relative;
-  margin: 18px 0 10px;
-  padding-left: 34px;
-  font-size: 15px;
-  line-height: 1.5;
-}
-.home-install-card.primary p.home-install-step {
-  color: #0a0a0a;
-}
-.home-install-step > span:first-child {
-  position: absolute;
-  left: 0;
-  top: 1px;
-  width: 22px;
-  height: 22px;
-  display: grid;
-  place-items: center;
-  font-family: var(--cc-mono);
-  font-size: 12px;
-  font-weight: 500;
-  background: var(--cc-ink);
-  color: var(--cc-paper);
-}
-.home-install-card.primary .home-install-step > span:first-child {
-  background: #0a0a0a;
-  color: #ffffff;
-}
-.home-install-step > span:first-child:empty {
-  background: transparent !important;
-}
-.vp-doc .home-install-card div[class*="language-"] {
-  margin: 0 0 0 34px !important;
-}
-.home-install-card.primary div[class*="language-"] {
-  border-color: #0a0a0a !important;
-}
-.vp-doc .home-install-card div[class*="language-"] code {
-  padding: 0 16px !important;
-  font-size: 12.5px;
-}
-.vp-doc .home-install-card div.language-text pre,
-.vp-doc .home-install-card div.language-text code {
-  white-space: pre-wrap;
-}
-.vp-doc .home-install-card div[class*="language-"] > span.lang {
-  display: none;
-}
-.home-install-card.primary :not(pre) > code {
-  background: rgba(10, 10, 10, 0.12) !important;
-  color: #0a0a0a !important;
-}
 .vp-doc p.home-install-more {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
   margin: 22px 0 0;
 }
 .vp-doc .home-install-more a {
@@ -569,39 +468,9 @@ html {
   text-transform: uppercase;
   text-decoration: none;
 }
-.home-install-card.primary .home-install-more a {
-  background: #0a0a0a;
-  color: #ffffff;
-}
 .vp-doc .home-install-more a:hover {
-  background: var(--cc-paper);
-  color: var(--cc-ink);
-  outline: 2px solid var(--cc-ink);
-}
-@media (max-width: 900px) {
-  .home-install-grid {
-    grid-template-columns: minmax(0, 1fr);
-  }
-}
-@media (max-width: 560px) {
-  .home-install-card {
-    padding: 20px 16px 18px;
-  }
-  .vp-doc p.home-install-step {
-    padding-left: 0;
-  }
-  .home-install-step > span:first-child {
-    position: static;
-    display: inline-grid;
-    margin-right: 6px;
-    vertical-align: -5px;
-  }
-  .home-install-step > span:first-child:empty {
-    display: none;
-  }
-  .vp-doc .home-install-card div[class*="language-"] {
-    margin-left: 0 !important;
-  }
+  background: var(--cc-accent);
+  color: #121212;
 }
 
 /* Every element: the element examples as small cards, three across, each a video over a short scroll of its file. */
@@ -1448,8 +1317,7 @@ body {
 /* Plates: black steel edge, a rivet in each corner. */
 .home-spec,
 .home-why-grid,
-.vp-doc ul.home-feature-list,
-.home-install-card {
+.vp-doc ul.home-feature-list {
   background-color: var(--cc-paper-2);
   background-image:
     radial-gradient(circle, var(--cc-ink) 3px, transparent 3.5px),
@@ -1463,13 +1331,6 @@ body {
     5px calc(100% - 5px),
     calc(100% - 5px) calc(100% - 5px);
   background-repeat: no-repeat;
-}
-.home-install-card.primary {
-  --cc-ink: #121212;
-  background-color: var(--cc-accent);
-  background-image:
-    radial-gradient(circle, #121212 3px, transparent 3.5px), radial-gradient(circle, #121212 3px, transparent 3.5px),
-    radial-gradient(circle, #121212 3px, transparent 3.5px), radial-gradient(circle, #121212 3px, transparent 3.5px);
 }
 .home-spec {
   position: relative;
@@ -1619,7 +1480,6 @@ body {
   letter-spacing: 0.06em;
 }
 .vp-doc .home-why-grid h3,
-.vp-doc .home-install-card h3,
 .vp-doc .home-element h3 {
   font-weight: 900;
 }
@@ -1668,7 +1528,6 @@ body {
   :root {
     --cc-hard: 4px 4px 0 var(--cc-ink), 0 4px 0 var(--cc-ink);
   }
-  .home-install-grid,
   .vp-doc ul.home-feature-list,
   .home-spec {
     margin-right: 4px;
@@ -2194,40 +2053,6 @@ html:has(.VPContent.has-sidebar) .DocSearch-Button {
   color: #121212;
 }
 
-/* By hand: the npm line as a small chip beside its label. */
-.home-byhand {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px 12px;
-  width: 100%;
-  max-width: 640px;
-  margin-top: 16px;
-  font-family: var(--cc-mono);
-  font-size: 12.5px;
-  color: var(--cc-ink-2);
-}
-.home-hero .home-byhand .cc-command {
-  flex: 1 1 320px;
-  min-width: 0;
-  width: auto;
-  max-width: none;
-  padding: 6px 6px 6px 12px;
-  border-width: 2px !important;
-  background: transparent;
-}
-.vp-doc .home-byhand .cc-command code {
-  color: var(--cc-ink) !important;
-  font-size: 13px;
-}
-.home-byhand .cc-command button {
-  padding: 4px 10px;
-  border: 2px solid var(--cc-ink);
-  background: transparent;
-  color: var(--cc-ink);
-  font-size: 11px;
-}
-
 /* The landing page's headings carry no hover anchor: inside a card it hangs outside the edge. */
 .home .header-anchor {
   display: none !important;
@@ -2248,15 +2073,12 @@ html:has(.VPContent.has-sidebar) .DocSearch-Button {
     height: 42px;
     font-size: 19px;
   }
-  .home-hero .home-byhand .cc-command {
-    flex-basis: 100%;
-  }
   .vp-doc .cc-agents-line code {
     font-size: 12.5px;
   }
 }
 
-/* The hero, tightened so the agent picker and the npm line sit on the first screen of a laptop. */
+/* The hero, tightened so the agent picker sits on the first screen of a laptop. */
 .vp-doc p.home-tags {
   margin-bottom: 20px;
 }
@@ -2265,4 +2087,64 @@ html:has(.VPContent.has-sidebar) .DocSearch-Button {
 }
 .home-actions {
   margin-top: 20px;
+}
+
+/* The picker's note under By hand's commands, and, in the Install section, the brief to paste for an agent. */
+.cc-agents.full {
+  max-width: 860px;
+}
+.vp-doc p.cc-agents-note {
+  margin: 10px 0 0;
+  font-family: var(--cc-mono);
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: #a39d91;
+}
+.vp-doc p.cc-agents-then {
+  margin: 16px 0 8px;
+  padding-top: 12px;
+  border-top: 1px dashed #3a3833;
+}
+.cc-agents-brief {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.vp-doc .cc-agents-brief p {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  padding: 10px 12px;
+  border-left: 3px solid var(--cc-accent);
+  background: #1d1d1b;
+  font-family: var(--cc-mono);
+  font-size: 13px;
+  line-height: 1.6;
+  color: #f2efe8;
+}
+.cc-agents-brief button {
+  flex: none;
+  padding: 6px 12px;
+  border: 2px solid #f2efe8;
+  background: #121212;
+  color: #f2efe8;
+  font-family: var(--cc-mono);
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.cc-agents-brief button:hover {
+  background: var(--cc-accent);
+  border-color: var(--cc-accent);
+  color: #121212;
+}
+.cc-agents-brief button:focus-visible {
+  outline: 3px solid var(--cc-accent);
+  outline-offset: 2px;
+}
+@media (max-width: 560px) {
+  .cc-agents-brief {
+    flex-direction: column;
+  }
 }
