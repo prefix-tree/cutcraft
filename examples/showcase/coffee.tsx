@@ -141,16 +141,16 @@ export default function Video() {
           anchor="open"
           offset={0.4}
           duration={4.6}
-          font={display}
-          size={168}
-          weight={700}
-          align="left"
-          valign="bottom"
-          width={1600}
-          height={760}
-          lineHeight={0.95}
-          box={{ x: 960, y: 500, origin: "center" }}
-          shadow={LIFT}
+          style={{
+            font: display,
+            size: 168,
+            weight: 700,
+            align: "left",
+            valign: "bottom",
+            lineHeight: 0.95,
+            shadow: LIFT,
+          }}
+          box={{ x: 960, y: 500, width: 1600, height: 760, origin: "center" }}
           animation={{ preset: "word-by-word" }}
         >
           SLOW POUR.
@@ -160,16 +160,8 @@ export default function Video() {
           anchor="open"
           offset={1.2}
           duration={3.8}
-          font={mono}
-          size={44}
-          weight={500}
-          color={ACCENT}
-          align="left"
-          valign="bottom"
-          width={1600}
-          height={760}
-          box={{ x: 960, y: 580, origin: "center" }}
-          shadow={LIFT}
+          style={{ font: mono, size: 44, weight: 500, color: ACCENT, align: "left", valign: "bottom", shadow: LIFT }}
+          box={{ x: 960, y: 580, width: 1600, height: 760, origin: "center" }}
           animation={{ preset: "fade" }}
         >
           POUR-OVER · 92 °C · 4 MIN
@@ -201,16 +193,16 @@ export default function Video() {
           anchor="shot"
           offset={0.3}
           duration={2.8}
-          font={display}
-          size={168}
-          weight={700}
-          align="left"
-          valign="bottom"
-          width={1600}
-          height={760}
-          lineHeight={0.95}
-          box={{ x: 960, y: 500, origin: "center" }}
-          shadow={LIFT}
+          style={{
+            font: display,
+            size: 168,
+            weight: 700,
+            align: "left",
+            valign: "bottom",
+            lineHeight: 0.95,
+            shadow: LIFT,
+          }}
+          box={{ x: 960, y: 500, width: 1600, height: 760, origin: "center" }}
           animation={{ preset: "word-by-word" }}
         >
           FAST SHOT.
@@ -221,16 +213,16 @@ export default function Video() {
           anchor="three"
           offset={0.5}
           duration={5.4}
-          font={display}
-          size={112}
-          weight={700}
-          align="left"
-          valign="top"
-          width={1600}
-          height={840}
-          lineHeight={0.95}
-          box={{ x: 960, y: 540, origin: "center" }}
-          shadow={LIFT}
+          style={{
+            font: display,
+            size: 112,
+            weight: 700,
+            align: "left",
+            valign: "top",
+            lineHeight: 0.95,
+            shadow: LIFT,
+          }}
+          box={{ x: 960, y: 540, width: 1600, height: 840, origin: "center" }}
           animation={{ preset: "word-by-word" }}
         >
           EVERY GLASS, A LINE OF CODE.

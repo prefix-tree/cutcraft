@@ -12,11 +12,8 @@ export default function Video() {
           anchor="shot"
           offset={0.3}
           duration={3.4}
-          style="h1"
-          size={64}
-          width={360}
-          align="left"
-          box={{ x: 200, y: 460, origin: "center" }}
+          style={{ preset: "h1", size: 64, align: "left" }}
+          box={{ x: 200, y: 460, width: 360, origin: "center" }}
           animation={{ preset: "word-by-word" }}
         >
           Bloom first

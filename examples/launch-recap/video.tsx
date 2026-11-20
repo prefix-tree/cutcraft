@@ -63,9 +63,7 @@ export default function Video({ product, tagline, accent, cta }: z.infer<typeof 
           anchor="start"
           offset={0.4}
           duration={2.8}
-          size={120}
-          weight={700}
-          valign="top"
+          style={{ size: 120, weight: 700, valign: "top" }}
           box={{ x: 960, y: 680, origin: "center" }}
           animation={{ preset: "slide-up", in: 0.4, out: 0.3 }}
         >
@@ -76,10 +74,7 @@ export default function Video({ product, tagline, accent, cta }: z.infer<typeof 
           anchor="title"
           offset={0.5}
           duration={2.3}
-          size={44}
-          weight={400}
-          color="#c8ccd6"
-          valign="top"
+          style={{ size: 44, weight: 400, color: "#c8ccd6", valign: "top" }}
           box={{ x: 960, y: 840, origin: "center" }}
           animation={{ preset: "fade", in: 0.4, out: 0.3 }}
         >
@@ -137,10 +132,7 @@ function NameCard({ who, what, accent }: { who: string; what: string; accent: st
         anchor="close"
         offset={0.5}
         duration={3.9}
-        size={40}
-        weight={700}
-        align="left"
-        valign="top"
+        style={{ size: 40, weight: 700, align: "left", valign: "top" }}
         box={{ x: 1080, y: 1318, origin: "center" }}
         animation={{ preset: "slide-left", in: 0.3, out: 0.2 }}
       >
@@ -151,11 +143,7 @@ function NameCard({ who, what, accent }: { who: string; what: string; accent: st
         anchor="close"
         offset={0.6}
         duration={3.8}
-        size={28}
-        weight={400}
-        color={accent}
-        align="left"
-        valign="top"
+        style={{ size: 28, weight: 400, color: accent, align: "left", valign: "top" }}
         box={{ x: 1080, y: 1376, origin: "center" }}
         animation={{ preset: "fade", in: 0.3, out: 0.2 }}
       >
