@@ -6,6 +6,7 @@ import {
   define,
   insertNode,
   isError,
+  onElement,
   placementOf,
   placeNode,
   rawNode,
@@ -85,6 +86,7 @@ function overlayHandlers(ns: keyof typeof KIND_OF_NS) {
   });
   define({
     type: t("update") as "text/update",
+    targets: onElement({ kinds: [kind] }),
     validate: (a, state) => {
       const base = validateTarget(state, a.params.id, Object.keys(a.params.props));
       if (!base.valid) return base;
@@ -102,6 +104,7 @@ function overlayHandlers(ns: keyof typeof KIND_OF_NS) {
   });
   define({
     type: t("remove") as "text/remove",
+    targets: onElement({ onOpaque: true, kinds: [kind] }),
     validate: (a, state) => {
       const item = requireElement(state, a.params.id);
       if (isError(item)) return invalid(item);
@@ -138,6 +141,7 @@ for (const ns of Object.keys(KIND_OF_NS)) overlayHandlers(ns as keyof typeof KIN
 
 define({
   type: "text/setContent",
+  targets: onElement({ kinds: ["title"] }),
   validate: (a, state) => {
     const base = validateTarget(state, a.params.id, []);
     if (!base.valid) return base;
@@ -160,6 +164,10 @@ define({
  */
 define({
   type: "nested/extract",
+  targets: onElement({
+    kinds: ["nested"],
+    when: (item, state) => typeof rawNode(state, item.id)?.props.of === "function",
+  }),
   validate: (a, state) => {
     const base = validateTarget(state, a.params.id, []);
     if (!base.valid) return base;

@@ -15,10 +15,11 @@ what its key parts do. For starting points by kind of video, see the [recipes](/
 | You're making | Start from |
 |---|---|
 | A product launch or promo | [Product launch](/examples/launch), the [walkthrough](/guide/writing-files), [Brand spot](/recipes/brand-spot) |
+| A montage of footage with transitions, a grade and sound | [A coffee film](/examples/coffee) |
 | An interview or podcast cut | [A talking head with a diagram](/examples/lunar-eclipse), [An interview that changes layout](/examples/hundred-videos), [Talking-head cut](/recipes/talking-head), [Multicam highlights](/recipes/highlights) |
 | A vertical short | [A talking head with a diagram](/examples/lunar-eclipse), [Kinetic type](/examples/kinetic), [Captions and key points](/examples/captions), [Vertical clip from a podcast](/recipes/vertical-podcast) |
 | An explainer with no footage | [One pixel](/examples/one-pixel), [How game lighting fakes it](/examples/game-lighting) |
-| A product or screen demo | [Product demo with zoom-ins](/recipes/product-demo) |
+| A product or screen demo | [Product demo with zoom-ins](/recipes/product-demo), [From notes to a cut](/examples/notes-to-cut) |
 | Charts and numbers | [Data story](/examples/data), [Stats with handles](/recipes/stats) |
 | An intro, outro or logo sting | [Logo reveal](/examples/logo) |
 | A slideshow | [Slideshow with motion](/recipes/slideshow) |
@@ -32,15 +33,17 @@ what its key parts do. For starting points by kind of video, see the [recipes](/
 | Captions from the transcript | [A talking head with a diagram](/examples/lunar-eclipse), [Kinetic type](/examples/kinetic), [Captions](/examples/captions), [Vertical clip](/recipes/vertical-podcast) | [Captions and sound](/guide/captions-and-sound) |
 | Captions placed with `x`, `y` and `width` | [An interview that changes layout](/examples/hundred-videos), [One pixel](/examples/one-pixel), [A talking head with a diagram](/examples/lunar-eclipse) (`y`) | [Place captions](/guide/captions-and-sound#place-captions) |
 | A box behind the word being said (`highlightBox`) | [A talking head with a diagram](/examples/lunar-eclipse), [One pixel](/examples/one-pixel) | [Highlight the word being said](/guide/captions-and-sound#highlight-the-word-being-said) |
-| Narration timed from a script (`narrate()`) | [One pixel](/examples/one-pixel) | [Narration from a script](/guide/captions-and-sound#narration-from-a-script) |
+| Narration timed from a script (`narrate()`) | [One pixel](/examples/one-pixel), [From notes to a cut](/examples/notes-to-cut) | [Narration from a script](/guide/captions-and-sound#narration-from-a-script) |
 | Captions from an SRT, VTT or Whisper file | [Captions](/examples/captions) | [Getting a transcript](/guide/captions-and-sound#getting-a-transcript) |
 | Diagram parts (angles, rows, strike-throughs) | [A talking head with a diagram](/examples/lunar-eclipse), [An interview that changes layout](/examples/hundred-videos) | [Diagram parts](/guide/free-code#diagram-parts) |
 | Named parts (`data-name`) for the layout check and `uberscene where` | [A talking head with a diagram](/examples/lunar-eclipse), [One pixel](/examples/one-pixel), [An interview that changes layout](/examples/hundred-videos) | [Check the layout](/guide/checking#check-the-layout), [Where things are at a moment](/guide/checking#where-things-are-at-a-moment) |
 | Ready-made cards and frames (`TypeCard`, `QuoteCard`, `Frame`) | [A talking head with a diagram](/examples/lunar-eclipse) (`Frame`), one demo each in [Components](/reference/components/) | [Cards for a talking head](/guide/titles-and-graphics#cards-for-a-talking-head) |
 | three.js (`<Three>`) | [Product launch](/examples/launch), [Logo reveal](/examples/logo), [How game lighting fakes it](/examples/game-lighting), [One pixel](/examples/one-pixel), [Brand spot](/recipes/brand-spot) | [Free code](/guide/free-code#three-js-and-motion) |
 | Motion (`<Motion>`) | [Kinetic type](/examples/kinetic), [Data story](/examples/data), [An edit](/examples/edit) | [Free code](/guide/free-code#three-js-and-motion) |
+| Scenes from blocks, with their props set where they are placed | [From notes to a cut](/examples/notes-to-cut), [A coffee film](/examples/coffee), [An interview that changes layout](/examples/hundred-videos) | [Blocks](/guide/blocks) |
 | Any React in a `<Layer>` | [Data story](/examples/data) (counters), [Stats with handles](/recipes/stats) | [Free code](/guide/free-code) |
-| Transitions and keyframes | [An edit](/examples/edit), [Slideshow](/recipes/slideshow) | [Elements](/reference/elements/) |
+| Transitions and keyframes | [A coffee film](/examples/coffee), [An edit](/examples/edit), [Slideshow](/recipes/slideshow) | [Elements](/reference/elements/) |
+| Speed ramps, a held frame, a LUT that comes in and sound cues on each beat | [A coffee film](/examples/coffee) | [Colour and grading](/guide/colour), [Sound effects at a cut](/guide/transitions#sound-effects-at-a-cut) |
 | Every built-in effect and transition, one demo each | [Effects and transitions](/reference/effects/) | [Colour](/guide/colour), [Keying, blurs and pins](/guide/footage-tools), [Timing](/guide/time) |
 | A grade built from several effects, in order | [Colour grade](/guide/colour) | [Colour and grading](/guide/colour) |
 | Effect order changing the picture | [Grayscale then duotone, and the reverse](/guide/custom-effects) | [Free code](/guide/free-code) |
@@ -61,11 +64,13 @@ Each showcase video is one file in
 `pnpm --filter @uberscene/example-showcase docs`. Every file renders through the player in
 [headless Chrome](/guide/exporting#the-browser-it-runs-in).
 
-The showcase footage is made by `ffmpeg`'s own sources (`pnpm --filter @uberscene/example-showcase gen`), except the
-two coffee shots in the effect and transition demos, close and wide: Pixabay videos
-[209419](https://pixabay.com/videos/id-209419/) and [209424](https://pixabay.com/videos/id-209424/), under the Pixabay
-Content License. They are not committed; `gen` reads them from `examples/showcase/media/stock/` and checks their
-hashes.
+Every picture in the showcase comes from four stock coffee clips: a pour-over close and wide, an espresso machine
+filling three glasses, and espresso running into a red paper cup. They are Pixabay videos
+[209419](https://pixabay.com/videos/id-209419/), [209424](https://pixabay.com/videos/id-209424/),
+[46989](https://pixabay.com/videos/id-46989/) and [251](https://pixabay.com/videos/id-251/), under the Pixabay Content
+License. The maker of the machine in the red cup shot has nothing to do with this project. The clips are not
+committed: `pnpm --filter @uberscene/example-showcase gen` reads them from `examples/showcase/media/stock/`, checks
+their hashes, and cuts from them the founder, analyst, speaker and product shots the demos name, and the green screen.
 
 The shorts are in [`examples/shorts`](https://github.com/prefix-tree/uberscene/tree/main/examples/shorts),
 rendered with `pnpm --filter @uberscene/example-shorts render`. The two lighting explainers and the snake use no media at all. The

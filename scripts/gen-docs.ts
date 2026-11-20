@@ -19,6 +19,7 @@ import {
   TRANSITION_FAMILIES,
   TRANSITIONS,
 } from "../packages/kit/src/index";
+import { type BlockInfo, listBlocks } from "../packages/render/src/blocks";
 import { EFFECT_DEMOS, effectExample, TRANSITION_TEXT, transitionExample } from "./effect-example";
 import { syncGeneratedFiles } from "./generated-files";
 import { readPropDocs } from "./prop-docs";
@@ -139,7 +140,7 @@ const ELEMENT_DOCS: Record<string, readonly (readonly [element: string, summary:
     ["Motion", "Children animated by a Motion `sequence` on the video's clock."],
   ],
   "Text and graphics": [
-    ["Title", "Text over the picture in the theme's type, with entrances by letter, word or line."],
+    ["Title", "Text over the picture in the theme's type, with entrances by letter or by word."],
     ["Captions", "Subtitles from an asset's transcript that follow the clips through every trim."],
     ["Caption", "One cue inside `<Captions>`, written by hand: its text, start and end."],
     ["Shape", "A vector shape (rectangle, circle, star, polygon, path) with fill, stroke and shadow."],
@@ -283,6 +284,9 @@ function elementPage(name: string, summary: string): string {
       "",
       "</Example>",
       "",
+      ...(showsStock(readFileSync(join(root, "examples", "showcase", "docs", `${ex}.tsx`), "utf8"))
+        ? [STOCK_CREDIT, ""]
+        : []),
     );
   else if (CODE_ONLY[name]) lines.push("```tsx", CODE_ONLY[name], "```", "");
   if (name in ENGINE_LAYERS) lines.push(ENGINE_NOTE, "");
@@ -338,9 +342,13 @@ function paramsTable(schema: z.ZodType, table: string): string[] {
   ];
 }
 
-/** The footage a demo shows that is not ours (the coffee close-up and wide shot), credited under it. */
+/** The footage a demo shows that is not ours (four stock coffee clips and the shots cut from them), credited under it. */
 const STOCK_CREDIT =
-  "The coffee footage is Pixabay videos [209419](https://pixabay.com/videos/id-209419/) and [209424](https://pixabay.com/videos/id-209424/), under the Pixabay Content License.";
+  "The coffee footage is Pixabay videos [209419](https://pixabay.com/videos/id-209419/), [209424](https://pixabay.com/videos/id-209424/), [46989](https://pixabay.com/videos/id-46989/) and [251](https://pixabay.com/videos/id-251/), under the Pixabay Content License. The maker of the machine in the red cup shot has nothing to do with this project.";
+
+/** Whether a demo's file shows footage: one of the stock clips, or a shot the showcase cuts from them. */
+const showsStock = (text: string): boolean =>
+  /asset:(coffee|coffeeWide|espresso|redCup|founder|analyst|product|speaker|greenscreen)"/.test(text);
 
 /** A component's page and file name: `LowerThird` is `lower-third`. */
 const kebab = (name: string): string => name.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase();
@@ -366,7 +374,7 @@ function componentsIndex(): string {
     "A component is an ordinary function that returns the kit's own elements: titles, shapes, SVG, and a layer where something moves every frame. So it behaves like the elements it is made of.",
     "",
     "```tsx",
-    '<LowerThird id="name" start={0.5} duration={4} name="Maya Chen" role="Founder, Shed" />',
+    '<LowerThird id="name" start={0.5} duration={4} name="Maya Chen" role="Head roaster, Halvard" />',
     "```",
     "",
     "| Part | How it works |",
@@ -399,7 +407,7 @@ function componentPage(name: keyof typeof COMPONENTS): string {
     "",
     "</Example>",
     "",
-    ...(readFileSync(join(root, "examples", "showcase", "components", `${file}.tsx`), "utf8").includes("asset:coffee")
+    ...(showsStock(readFileSync(join(root, "examples", "showcase", "components", `${file}.tsx`), "utf8"))
       ? [STOCK_CREDIT, ""]
       : []),
     "## Props",
@@ -509,7 +517,7 @@ function effectPage(name: keyof typeof EFFECTS): string {
     "",
     "</Example>",
     "",
-    ...(/asset:coffee/.test(effectExample(name)) ? [STOCK_CREDIT, ""] : []),
+    ...(showsStock(effectExample(name)) ? [STOCK_CREDIT, ""] : []),
     "## Params",
     "",
     `Drawn as ${DRAWN[e.draw.kind]}${fallback}.`,
@@ -711,7 +719,7 @@ for (const name of Object.keys(TRANSITIONS) as (keyof typeof TRANSITIONS)[]) {
 }
 // The agent skill's references: the same pages, for a model reading files. What only the site can show (the
 // rendered examples, where an element is used) is left out, and the site's links become absolute.
-const SITE = "https://cutcraft.prefixtree.xyz";
+const SITE = "https://uberscene.prefixtree.xyz";
 const skillRefs = join(root, "plugins", "uberscene", "skills", "uberscene", "references");
 function forAgent(page: string, demote = true): string {
   const text = page
@@ -772,6 +780,28 @@ for (const flag of new Set(usage.match(/--[a-z][a-z-]*/g)))
 write(cliPage, cliText);
 write(join(skillRefs, "cli.md"), `${forAgent(cliText, false)}\n`);
 
+// The blocks: the guide page's catalogue is generated from each block's `meta`, schema and preview, between two
+// markers in a page otherwise written by hand, and the skill gets the same catalogue without the pictures.
+const BLOCKS = listBlocks();
+const blocksPage = join(root, "docs", "guide", "blocks.md");
+const blocksText = readFileSync(blocksPage, "utf8");
+const START = "<!-- catalogue: generated by scripts/gen-docs.ts from blocks/; do not edit -->";
+const END = "<!-- end of catalogue -->";
+if (!blocksText.includes(START) || !blocksText.includes(END))
+  throw new Error(`docs/guide/blocks.md has lost its catalogue markers`);
+write(
+  blocksPage,
+  `${blocksText.slice(0, blocksText.indexOf(START) + START.length)}\n\n${blocksCatalogue(BLOCKS, true)}\n${blocksText.slice(blocksText.indexOf(END))}`,
+);
+write(
+  join(skillRefs, "blocks.md"),
+  reference(
+    "Blocks",
+    "The blocks that ship with the CLI, what each is for, and what can be set where it is placed. `uberscene blocks add <name> --into video.tsx --track <id> --at <moment>` copies one into the project and places it; set its props on the tag where it is placed.",
+    [forAgent(blocksCatalogue(BLOCKS, false), false)],
+  ),
+);
+
 const problems: string[] = syncGeneratedFiles(root, generated, {
   check,
   directories: [
@@ -794,4 +824,53 @@ if (problems.length) {
   process.exitCode = 1;
 } else {
   console.log(`${check ? "Checked" : "Generated"} ${generated.size} reference/sidebar files.`);
+}
+
+/** A knob's default for a table cell: short values as they are, lists and long text by what they hold. */
+function blockDefault(value: unknown): string {
+  if (value === undefined) return "";
+  if (Array.isArray(value)) return `${value.length} ${value.length === 1 ? "item" : "items"}`;
+  const text = JSON.stringify(value);
+  return `\`${cell(text.length > 40 ? `${text.slice(0, 37)}…` : text)}\``;
+}
+
+/**
+ * The catalogue of blocks: on the site a grid of their previews, each a link to its section; then a section a block,
+ * with what it is for, its timing and its props.
+ */
+function blocksCatalogue(blocks: readonly BlockInfo[], site: boolean): string {
+  const lines: string[] = [];
+  if (site) {
+    lines.push('<div class="cc-cards cc-blocks">');
+    for (const b of blocks)
+      lines.push(
+        `<div><a class="cc-card" href="#${b.name}"><img class="cc-block-preview" src="../../blocks/${b.name}/preview.png" alt="${attr(b.title)}" /><span class="cc-card-title"><code>${b.name}</code></span><span class="cc-card-text">${attr(b.what)}</span></a></div>`,
+      );
+    lines.push("</div>", "");
+  }
+  for (const b of blocks) {
+    lines.push(
+      site ? `### ${b.title} {#${b.name}}` : `## ${b.title}: \`${b.name}\``,
+      "",
+      escapeTags(b.what),
+      "",
+      `- **Use it for:** ${escapeTags(b.useWhen.join("; "))}.`,
+      ...(b.avoidWhen.length ? [`- **Not for:** ${escapeTags(b.avoidWhen.join("; "))}.`] : []),
+      ...(b.pairsWith.length ? [`- **Goes with:** ${b.pairsWith.map((n) => `\`${n}\``).join(", ")}.`] : []),
+      `- **Length:** ${b.length} s with its defaults; given longer, it holds its last state. **Frame:** ${b.aspects.join(", ")}.${b.beats.length ? ` **Timed by:** ${b.beats.map((n) => `\`${n}\``).join(", ")}.` : ""}`,
+      "",
+      "| prop | kind | default | what it is |",
+      "|---|---|---|---|",
+      ...b.props.map(
+        (p) =>
+          `| \`${p.key}\` | ${p.kind}${p.optional ? ", optional" : ""} | ${blockDefault(p.value)} | ${cell(p.description ?? "")} |`,
+      ),
+      "",
+      "```sh",
+      `npx uberscene blocks add ${b.name} --into video.tsx --track graphics --at 2`,
+      "```",
+      "",
+    );
+  }
+  return lines.join("\n");
 }

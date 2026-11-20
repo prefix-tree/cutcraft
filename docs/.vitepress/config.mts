@@ -23,8 +23,9 @@ export default defineConfig({
   // The decision records' index is the folder's README, so it reads on GitHub too.
   rewrites: { "decisions/README.md": "decisions/index.md" },
   lastUpdated: true,
-  // Code in one dark style in both colour schemes, so it reads as the screen it describes and joins the videos above it.
-  markdown: { theme: { light: "vitesse-dark", dark: "vitesse-dark" } },
+  // GitHub's code colours: light code on a light docs page, dark in the dark. The landing page keeps its code on dark
+  // panels with the dark colours (theme/craft.css).
+  markdown: { theme: { light: "github-light", dark: "github-dark" } },
   head: [
     ["link", { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" }],
     ["link", { rel: "preconnect", href: "https://fonts.gstatic.com", crossorigin: "" }],
@@ -32,7 +33,7 @@ export default defineConfig({
       "link",
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Doto:wght@800;900&family=Geist+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=Big+Shoulders+Stencil+Display:wght@800;900&family=Geist+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap",
       },
     ],
   ],
@@ -47,7 +48,7 @@ export default defineConfig({
     optimizeDeps: { esbuildOptions: { define: { "process.env.BABEL_TYPES_8_BREAKING": "false" } } },
   },
   themeConfig: {
-    logo: { light: "/logo.svg", dark: "/logo-dark.svg" },
+    logo: "/logo.svg",
     // The top bar names three ways in, as short as a poster (on every page, the landing one included); the sidebar is the map of the docs.
     nav: [
       { text: "Docs", link: "/guide/introduction", activeMatch: "^/(guide|decisions|reference)/" },
@@ -83,6 +84,7 @@ export default defineConfig({
           { text: "Keying, blurs and pins", link: "/guide/footage-tools" },
           { text: "Themes and fonts", link: "/guide/themes" },
           { text: "Free code", link: "/guide/free-code" },
+          { text: "Blocks", link: "/guide/blocks" },
           { text: "Your own effects", link: "/guide/custom-effects" },
         ],
       },
@@ -110,6 +112,7 @@ export default defineConfig({
             collapsed: true,
             items: [
               { text: "The logo film", link: "/examples/hero" },
+              { text: "A coffee film", link: "/examples/coffee" },
               { text: "A product launch", link: "/examples/launch" },
               { text: "Kinetic type", link: "/examples/kinetic" },
               { text: "A data story", link: "/examples/data" },
@@ -121,6 +124,7 @@ export default defineConfig({
               { text: "One pixel", link: "/examples/one-pixel" },
               { text: "An interview that changes layout", link: "/examples/hundred-videos" },
               { text: "A game of snake that ends in a heart", link: "/examples/snake-heart" },
+              { text: "From notes to a cut", link: "/examples/notes-to-cut" },
             ],
           },
           { text: "A launch video, line by line", link: "/guide/writing-files" },

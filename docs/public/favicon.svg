@@ -1,6 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="UberScene">
-  <!-- Brutalist: a square U in ink on an orange tile with a heavy outline and a hard, unblurred offset shadow. -->
-  <rect x="72" y="72" width="416" height="416" fill="#0a0a0a"/>
-  <rect x="36" y="36" width="404" height="404" fill="#ff5a1f" stroke="#0a0a0a" stroke-width="24"/>
-  <path d="M128 112H204V276H272V112H348V364H128Z" fill="#0a0a0a"/>
+  <!-- The U, black in a light browser theme and off-white in a dark one. -->
+  <style>path{fill:#0a0a0a}@media (prefers-color-scheme:dark){path{fill:#e6e1d6}}</style>
+  <path d="M56 40H164L200 76V340H312V76L348 40H456V380L364 472H148L56 380Z"/>
 </svg>

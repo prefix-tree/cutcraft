@@ -12,19 +12,20 @@ head cut out of a real interview, with captions and cards timed by the words of 
 | `lunar-eclipse.tsx` | Why there is no lunar eclipse every month, and why the Moon turns red: five cuts from a NASA interview, with word-timed captions, type cards, badges and a quotation. Footage credit in `media/CREDITS.md`. |
 | `one-pixel.tsx` | How a game lights a room, told by following one dot of the screen: why real light is too slow to copy, then five cheats (facing the lamp, the shadow, the bounce, the corners, the glow). Two stages: a 3D room, and the same room cut in half as a diagram with a brightness number on every dot. Subtitles only, timed word by word for a voice to be added, with sound cues on the picture's beats. A first cut. |
 | `snake-heart.tsx` | No explanation, a small film: a game of snake played on a wall of Chinese characters. The snake eats the characters of one phrase (我爱你), every character of the wall changes at its own pace, and it curls up into a heart made of the phrase, with a pop for every character eaten and a chime as the heart closes. The game is written out in the file as a list of steps; the phrase and the colour are props. |
+| `notes-to-cut.tsx` | A product explainer built from blocks: a request for a launch video, the reply that plans it, a terminal that checks and renders it, a ranking of which scene holds people, and a closing quote. Five placements of four blocks (`quote-build` twice), each placed with `uberscene blocks add --into` and given its words as props; timed by `narrate()`, with sound cues. |
 | `lighting-explained.tsx` | Every lighting trick a game uses, one at a time, each on the same small stage shown twice: without the trick on top, with it underneath. The opening and the first three so far: direct light, the shadow map, ambient light. |
 
 ## On the documentation site
 
-`game-lighting.tsx` is on the [examples page](https://cutcraft.prefixtree.xyz/examples#how-game-lighting-fakes-it).
+`game-lighting.tsx` is on the [examples page](https://uberscene.prefixtree.xyz/examples#how-game-lighting-fakes-it).
 Its video and poster in `docs/public/shorts` are made by:
 
 ```sh
 pnpm --filter @uberscene/example-shorts render
 ```
 
-`one-pixel.tsx` is there as well, [under its own heading](https://cutcraft.prefixtree.xyz/examples#one-pixel).
-`lunar-eclipse.tsx` is there too, [with its sound](https://cutcraft.prefixtree.xyz/examples#a-talking-head-with-cards).
+`one-pixel.tsx` is there as well, [under its own heading](https://uberscene.prefixtree.xyz/examples#one-pixel).
+`lunar-eclipse.tsx` is there too, [with its sound](https://uberscene.prefixtree.xyz/examples#a-talking-head-with-cards).
 
 ## Render one
 

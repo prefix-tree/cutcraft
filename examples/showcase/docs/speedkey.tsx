@@ -5,7 +5,7 @@ export default function Video() {
     <Composition fps={30} width={960} height={540}>
       <Track id="main">
         {/* Normal speed, easing into a four-times speed-up. */}
-        <Clip id="ramp" src="asset:coffee" in={10} out={18} fit="cover">
+        <Clip id="ramp" src="asset:redCup" in={15} out={23} fit="cover">
           <SpeedKey id="s0" at={0} speed={1} />
           <SpeedKey id="s1" at={1} speed={4} easing="easeInOutQuad" />
         </Clip>

@@ -28,4 +28,4 @@ A stretch of a sound asset: volume, fades, ducking under another track, automati
 | `automation` | { volume, pan } |  |  | Volume and pan over time, as `[seconds into the element, value]` points; pan runs from -1 (left) to 1 (right). |
 | `duck` | { under, to, attack, release } |  |  | Turns this sound down while another plays: `under` is a track id or a track role (`dialogue`), `to` the volume it falls to, `attack` and `release` the seconds it takes to fall and recover. |
 
-Timed, audible, trims its source. Children: `keyframe`. [All elements](/reference/elements/)
+Timed, audible, trims its source. Children: `keyframe`, `speedKey`, `freeze`. [All elements](/reference/elements/)

@@ -3,10 +3,11 @@
 // the reference page shows the video above the same file, so the code and the video cannot disagree.
 //
 // Every demo looks alike, so the pages read as one gallery:
-// - colour, footage, basic adjustments, vignette and grain: the coffee shot, the effect keyed from where it changes
-//   nothing up to its example value, then held, so the video shows the change;
-// - title looks: one word over moving gradients, the look keyed up the same way;
-// - transitions: the coffee close-up into the same scene wide, the transition in the middle, at its defaults.
+// - colour, footage, basic adjustments, vignette and grain: one of the four coffee shots (colour on the red cup, the
+//   lens and print looks on the espresso machine, the frame-wide looks on the wide pour, the rest on the close pour),
+//   the effect keyed from where it changes nothing up to its example value, then held, so the video shows the change;
+// - title looks: one word over the espresso machine, defocused and darkened like a title card's ground, the look keyed up the same way;
+// - transitions: one coffee shot into another, the pair turning through the four shots, at the transition's defaults.
 import type { EFFECTS, TRANSITIONS } from "../packages/kit/src/effects/registry";
 
 export const EXAMPLE_WIDTH = 640;
@@ -42,6 +43,23 @@ interface Shot {
 const SHOT: Shot = { src: "coffee", in: 12 };
 /** The same scene wide: the kettle pouring, a person at the right edge. */
 const WIDE: Shot = { src: "coffeeWide", in: 4 };
+/** An espresso machine filling a glass, on a dark wall. */
+const ESPRESSO: Shot = { src: "espresso", in: 2 };
+/** Espresso running into a red paper cup: the strongest colour of the four. */
+const RED: Shot = { src: "redCup", in: 18 };
+/** The pairs the transitions turn through, so neighbouring pages do not show the same cut. */
+const PAIRS: readonly (readonly [Shot, Shot])[] = [
+  [SHOT, WIDE],
+  [{ src: "espresso", in: 14 }, RED],
+  [
+    { src: "coffeeWide", in: 12 },
+    { src: "espresso", in: 26 },
+  ],
+  [
+    { src: "redCup", in: 6 },
+    { src: "coffee", in: 4 },
+  ],
+];
 
 const line = [
   [0, 0],
@@ -52,29 +70,34 @@ export const EFFECT_DEMOS: Readonly<Record<keyof typeof EFFECTS, EffectDemo>> = 
   brightness: {
     text: "Lightens or darkens the picture.",
     on: "shot",
+    shot: ESPRESSO,
     animate: [{ param: "amount", from: 0, to: 0.3 }],
   },
   contrast: {
     text: "Pushes lights and darks apart, or pulls them together.",
     on: "shot",
+    shot: ESPRESSO,
     animate: [{ param: "amount", from: 0, to: 0.5 }],
   },
   saturation: { text: "Makes colours richer or greyer.", on: "shot", animate: [{ param: "amount", from: 0, to: 0.8 }] },
   hue: {
     text: "Turns every colour around the colour wheel.",
     on: "shot",
+    shot: RED,
     animate: [{ param: "angle", from: 0, to: 180 }],
   },
   grayscale: { text: "Takes the colour out.", on: "shot", animate: [{ param: "amount", from: 0, to: 1 }] },
   sepia: {
     text: "Tones the picture brown, like an old print.",
     on: "shot",
+    shot: RED,
     animate: [{ param: "amount", from: 0, to: 1 }],
   },
   invert: { text: "Turns the picture into its negative.", on: "shot", animate: [{ param: "amount", from: 0, to: 1 }] },
   blur: {
     text: "Softens the picture; the radius is the Gaussian's standard deviation, in pixels.",
     on: "shot",
+    shot: ESPRESSO,
     animate: [{ param: "radius", from: 0, to: 8 }],
   },
   shadow: {
@@ -86,52 +109,62 @@ export const EFFECT_DEMOS: Readonly<Record<keyof typeof EFFECTS, EffectDemo>> = 
   vignette: {
     text: "Darkens the edges of a clip, a nested sequence, or everything beneath an adjustment.",
     on: "shot",
+    shot: WIDE,
     animate: [{ param: "amount", from: 0, to: 0.9 }],
   },
   grain: {
     text: "Adds moving film grain to a clip, a nested sequence, or everything beneath an adjustment.",
     on: "shot",
+    shot: WIDE,
     animate: [{ param: "amount", from: 0, to: 0.6 }],
   },
   levels: {
     text: "Sets the black point, the white point and the gamma between them.",
     on: "shot",
+    shot: RED,
     animate: [{ param: "black", from: 0, to: 0.15 }],
   },
   lut: {
     text: "Grades through a 3D lookup table from a `.cube` file.",
     on: "shot",
+    shot: RED,
     params: { src: "asset:warm" },
     animate: [{ param: "amount", from: 0, to: 1 }],
   },
   exposure: {
     text: "Brightens or darkens in stops, as a camera would.",
     on: "shot",
+    shot: RED,
     animate: [{ param: "stops", from: 0, to: 1 }],
   },
   vibrance: {
     text: "Lifts the muted colours more than the strong ones.",
     on: "shot",
+    shot: RED,
     animate: [{ param: "amount", from: 0, to: 0.8 }],
   },
   whiteBalance: {
     text: "Warms or cools the picture, and tints it toward green or magenta.",
     on: "shot",
+    shot: RED,
     animate: [{ param: "temperature", from: 0, to: 0.6 }],
   },
   shadowsHighlights: {
     text: "Opens up the shadows or holds back the highlights.",
     on: "shot",
+    shot: WIDE,
     animate: [{ param: "shadows", from: 0, to: 0.7 }],
   },
   duotone: {
     text: "Maps the picture's brightness onto two colours.",
     on: "shot",
+    shot: RED,
     animate: [{ param: "amount", from: 0, to: 1 }],
   },
   curves: {
     text: "Reshapes the tones through curves, for all channels or each one.",
     on: "shot",
+    shot: RED,
     animate: [
       {
         param: "rgb",
@@ -171,11 +204,13 @@ export const EFFECT_DEMOS: Readonly<Record<keyof typeof EFFECTS, EffectDemo>> = 
   zoomBlur: {
     text: "Streaks the picture out from a centre.",
     on: "shot",
+    shot: ESPRESSO,
     animate: [{ param: "length", from: 0, to: 60 }],
   },
   chromaticAberration: {
     text: "Splits red and blue apart, as a cheap lens does.",
     on: "shot",
+    shot: ESPRESSO,
     animate: [{ param: "distance", from: 0, to: 10 }],
   },
   glow: {
@@ -186,12 +221,13 @@ export const EFFECT_DEMOS: Readonly<Record<keyof typeof EFFECTS, EffectDemo>> = 
   outline: {
     text: "Draws a line around the element's shape.",
     on: "title",
-    params: { color: "#c8402a" },
-    animate: [{ param: "width", from: 0, to: 6 }],
+    params: { color: "#f4efe6" },
+    animate: [{ param: "width", from: 0, to: 4 }],
   },
   longShadow: {
     text: "Extrudes a long, hard shadow from the element's shape.",
     on: "title",
+    params: { color: "#5a3a22", length: 160 },
     animate: [{ param: "opacity", from: 0, to: 1 }],
   },
   bevel: {
@@ -202,6 +238,7 @@ export const EFFECT_DEMOS: Readonly<Record<keyof typeof EFFECTS, EffectDemo>> = 
   halftone: {
     text: "Prints the picture as a screen of dots, in one ink or four.",
     on: "shot",
+    shot: ESPRESSO,
     params: { size: 7 },
     animate: [{ param: "amount", from: 0, to: 1 }],
   },
@@ -215,12 +252,14 @@ export const EFFECT_DEMOS: Readonly<Record<keyof typeof EFFECTS, EffectDemo>> = 
   scanlines: {
     text: "Lays the dark lines of an old screen over the picture.",
     on: "shot",
+    shot: ESPRESSO,
     params: { spacing: 4, speed: 8 },
     animate: [{ param: "intensity", from: 0, to: 0.5 }],
   },
   lightLeak: {
     text: "Washes warm light in from the edges, as light leaking into a film camera.",
     on: "shot",
+    shot: WIDE,
     params: { evolution: 0.4 },
     animate: [{ param: "intensity", from: 0, to: 0.7 }],
   },
@@ -312,12 +351,16 @@ export function effectExample(name: keyof typeof EFFECTS): string {
   if (demo.on === "title")
     tracks.push(
       '      <Track id="main">',
-      ...shot("backdrop", "aurora", 0, []),
+      // The shot behind the word is defocused and darkened, as a title card's would be, so the look reads on its own.
+      ...shot("backdrop", ESPRESSO.src, 10, [
+        '          <Effect id="soft" type="blur" params={{ radius: 10 }} />',
+        '          <Effect id="dim" type="brightness" params={{ amount: -0.35 }} />',
+      ]),
       "      </Track>",
       '      <Track id="text" layout="free">',
-      `        <Title id="word" start={0} duration={${EXAMPLE_SECONDS}} size={140} color="#e8a33d">`,
+      `        <Title id="word" start={0} duration={${EXAMPLE_SECONDS}} size={128} color="#e8a33d">`,
       ...look,
-      "          Shed",
+      "          Crema",
       "        </Title>",
       "      </Track>",
     );
@@ -344,8 +387,9 @@ export function effectExample(name: keyof typeof EFFECTS): string {
   ].join("\n");
 }
 
-/** The whole file a built-in transition's demo renders: the close-up into the wide shot, at the transition's defaults. */
+/** The whole file a built-in transition's demo renders: one coffee shot into another, at the transition's defaults. */
 export function transitionExample(name: keyof typeof TRANSITIONS): string {
+  const [first, next] = PAIRS[Object.keys(TRANSITION_TEXT).indexOf(name) % PAIRS.length] as readonly [Shot, Shot];
   return [
     'import { Clip, Composition, Track, Transition } from "@uberscene/kit";',
     "",
@@ -354,9 +398,9 @@ export function transitionExample(name: keyof typeof TRANSITIONS): string {
     "  return (",
     `    <Composition fps={30} width={${EXAMPLE_WIDTH}} height={${EXAMPLE_HEIGHT}}>`,
     '      <Track id="main">',
-    '        <Clip id="first" src="asset:coffee" in={1} out={3} fit="cover" />',
+    `        <Clip id="first" src="asset:${first.src}" in={${first.in}} out={${first.in + 2}} fit="cover" />`,
     `        <Transition id="change" type="${name}" duration={1} />`,
-    `        <Clip id="next" src="asset:${WIDE.src}" in={${WIDE.in}} out={${WIDE.in + 2}} fit="cover" />`,
+    `        <Clip id="next" src="asset:${next.src}" in={${next.in}} out={${next.in + 2}} fit="cover" />`,
     "      </Track>",
     "    </Composition>",
     "  );",

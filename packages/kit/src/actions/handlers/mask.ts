@@ -3,6 +3,7 @@ import type { Json } from "../../patches/types";
 import {
   define,
   isError,
+  onElement,
   rawNode,
   rawProp,
   requireElement,
@@ -17,6 +18,7 @@ import { lastNonStack } from "./effect";
 
 define({
   type: "mask/create",
+  targets: onElement({ param: "parentId", literalOnly: true, when: (item) => capabilitiesOf(item.kind).visual }),
   validate: (a, state) => {
     if (state.tree.byId.has(a.params.id)) return invalid({ code: "DUPLICATE_ID", message: `"${a.params.id}" exists` });
     const parent = requireElement(state, a.params.parentId, "parentId");
@@ -46,6 +48,7 @@ define({
 
 define({
   type: "mask/update",
+  targets: onElement({ kinds: ["mask"] }),
   validate: (a, state) => {
     const base = validateTarget(state, a.params.id, Object.keys(a.params.props));
     if (!base.valid) return base;
@@ -64,6 +67,7 @@ define({
 
 define({
   type: "mask/setPath",
+  targets: onElement({ kinds: ["mask"] }),
   validate: (a, state) => validateTarget(state, a.params.id, ["path"]),
   apply: (a, log) => setProps(log, a.params.id, { path: a.params.path, shape: undefined }),
   invert: (a, before) => ({
@@ -78,6 +82,7 @@ define({
 
 define({
   type: "mask/remove",
+  targets: onElement({ kinds: ["mask"] }),
   validate: (a, state) =>
     rawNode(state, a.params.id)?.kind === "mask"
       ? validateTarget(state, a.params.id, [])

@@ -5,9 +5,12 @@ import {
   assetRefSchema,
   colorSchema,
   entranceProps,
+  fitProp,
   gradientSchema,
   idSchema,
+  overlayProps,
   shadowSchema,
+  textShadowSchema,
   themedLengthSchema,
   timedProps,
   timeRefSchema,
@@ -15,25 +18,18 @@ import {
   vec2Schema,
   visualProps,
 } from "./common";
-import { zAnimationUnit, zSvgColorMode, zTextAlign, zTextDecoration, zTextValign } from "./enums-local";
+import { zSvgColorMode, zTextAlign, zTextDecoration, zTextValign } from "./enums-local";
 
 export const textAnimationSchema = z.strictObject({
   preset: zTextAnimationPreset,
   in: z.number().nonnegative().default(0.5),
   out: z.number().nonnegative().default(0.5),
   stagger: z.number().nonnegative().optional(),
-  unit: zAnimationUnit.optional(),
-  params: z
-    .record(
-      z.string(),
-      z.union([z.number(), z.string(), z.boolean(), z.strictObject({ start: z.number(), end: z.number() })]),
-    )
-    .optional(),
 });
 
 export const titleSchema = z.strictObject({
   ...timedProps,
-  ...visualProps,
+  ...overlayProps,
   ...entranceProps,
   /** A theme preset for titles; without one, the theme's `default` title preset applies. */
   style: idSchema.optional(),
@@ -52,7 +48,7 @@ export const titleSchema = z.strictObject({
   /** An outline around the letters: its colour and width in pixels. */
   stroke: z.strictObject({ color: colorSchema, width: z.number().min(0).max(100) }).optional(),
   /** A drop shadow under the letters: colour, blur and offset in pixels. */
-  shadow: shadowSchema.optional(),
+  shadow: textShadowSchema.optional(),
   /** Which side of the text box the lines sit against. */
   align: zTextAlign.default("center"),
   /** Where in the text box's height the text sits. */
@@ -67,7 +63,7 @@ export const titleSchema = z.strictObject({
   letterSpacing: z.number().min(-100).max(100).default(0),
   /** A line under, over or through the letters. */
   decoration: zTextDecoration.optional(),
-  /** An entrance and exit by letter, word or line: a preset, its seconds in and out, and the delay between units. */
+  /** An entrance and exit: a preset, its seconds in and out, and for word-by-word the delay between words. */
   animation: textAnimationSchema.optional(),
 });
 
@@ -94,7 +90,7 @@ const strokeSchema = z.strictObject({
 
 export const shapeSchema = z.strictObject({
   ...timedProps,
-  ...visualProps,
+  ...overlayProps,
   ...entranceProps,
   /** A theme preset for shapes. */
   style: idSchema.optional(),
@@ -129,7 +125,8 @@ export const shapeSchema = z.strictObject({
 export const svgSchema = z
   .strictObject({
     ...timedProps,
-    ...visualProps,
+    ...overlayProps,
+    ...fitProp,
     /** A theme preset for svg elements. */
     style: idSchema.optional(),
     /** An SVG file from the manifest, as `asset:<id>`. Give this or `content`. */
@@ -152,7 +149,7 @@ export const svgSchema = z
 
 export const stickerSchema = z.strictObject({
   ...timedProps,
-  ...visualProps,
+  ...overlayProps,
   ...entranceProps,
   /** A theme preset for stickers. */
   style: idSchema.optional(),
@@ -170,8 +167,6 @@ export const adjustmentSchema = z.strictObject({
   blend: zBlendMode.default("normal"),
   /** Off, it filters nothing and stays in the file. */
   enabled: z.boolean().default(true),
-  /** Limits it to a region: position, scale, rotation and crop of the area it filters. */
-  transform: transformSchema.optional(),
 });
 
 export const nestedSchema = z.strictObject({

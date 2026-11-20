@@ -6,6 +6,7 @@
 import type { Theme } from "vitepress";
 import DefaultTheme from "vitepress/theme";
 
+import AgentPicker from "./AgentPicker.vue";
 import CopyCommand from "./CopyCommand.vue";
 import Example from "./Example.vue";
 import Gallery from "./Gallery.vue";
@@ -17,6 +18,7 @@ import "./craft.css";
 export default {
   extends: DefaultTheme,
   enhanceApp({ app }) {
+    app.component("AgentPicker", AgentPicker);
     app.component("CopyCommand", CopyCommand);
     app.component("Example", Example);
     app.component("Gallery", Gallery);

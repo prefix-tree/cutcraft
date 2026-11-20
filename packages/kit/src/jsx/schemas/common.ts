@@ -60,7 +60,6 @@ export const timedProps = {
 };
 
 export const vec2Schema = z.strictObject({ x: z.number(), y: z.number() });
-export const vec3Schema = z.strictObject({ x: z.number(), y: z.number(), z: z.number() });
 
 export const transformSchema = z.strictObject({
   /** Pixels to move the element by, right and down from where its fit puts it (the frame's centre). */
@@ -86,13 +85,30 @@ export const transformSchema = z.strictObject({
     .optional(),
 });
 
-export const visualProps = {
+const transformProp = {
   /** Where it sits and how it is turned: position, scale, rotation, anchor, opacity, rounded corners and crop. */
   transform: transformSchema.optional(),
-  /** How it fills the frame: `contain` shows all of it, `cover` fills the frame and crops, `stretch` distorts to fill, `none` keeps its own size. */
-  fit: zFitMode.optional(),
+};
+
+const blendProp = {
   /** How it mixes with what is under it, as CSS `mix-blend-mode` does. */
   blend: zBlendMode.optional(),
+};
+
+/** How a picture with a size of its own fills the frame: footage, a nested sequence, an SVG. */
+export const fitProp = {
+  /** How it fills the frame: `contain` shows all of it, `cover` fills the frame and crops, `stretch` distorts to fill, `none` keeps its own size. */
+  fit: zFitMode.optional(),
+};
+
+/** What everything drawn over the picture takes: where it sits, and how it mixes with what is under it. */
+export const overlayProps = { ...transformProp, ...blendProp };
+
+/** Footage and nested sequences: drawn on the canvas, fitted to the frame, with a strength for their blend. */
+export const visualProps = {
+  ...transformProp,
+  ...fitProp,
+  ...blendProp,
   /** How strongly it blends: multiplied into its opacity. */
   blendOpacity: z.number().min(0).max(1).optional(),
 };
@@ -131,6 +147,14 @@ export const shadowSchema = z.strictObject({
   y: z.number().optional(),
   spread: z.number().optional(),
   inset: z.boolean().optional(),
+});
+
+/** A shadow under letters: text has no spread and no inner shadow. */
+export const textShadowSchema = z.strictObject({
+  color: colorSchema,
+  blur: z.number().nonnegative().optional(),
+  x: z.number().optional(),
+  y: z.number().optional(),
 });
 
 export const gradientSchema = z.strictObject({

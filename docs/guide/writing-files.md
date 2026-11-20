@@ -6,7 +6,7 @@ wrote. It shows what each part of the file does and links to the guide page that
 
 ## The brief
 
-> Make a 25 to 30 second launch recap for Shed, a cloud for small software. Open
+> Make a 25 to 30 second launch recap for Halvard, a small coffee roastery. Open
 > on the founder's key sentence from the interview. Cut to product b-roll with
 > a slow push-in, then the screen demo, then back to the founder for the close.
 > Put the product name and tagline on a title card at the top, a lower third
@@ -27,7 +27,7 @@ export const schema = z.object({
   accent: z.string().describe("Accent colour for the lower third and the call to action"),
   cta: z.string().describe("Call to action on the closing card"),
 });
-export const defaults = { product: "Shed", tagline: "A cloud for small software", accent: "#ff5a1f", cta: "getshard.sh" };
+export const defaults = { product: "Halvard", tagline: "Coffee roasted on Mondays", accent: "#e8a33d", cta: "Visit us this week" };
 
 export default function Video({ product, tagline, accent, cta }: z.infer<typeof schema>) {
   return (
@@ -50,7 +50,7 @@ export default function Video({ product, tagline, accent, cta }: z.infer<typeof 
       <Track id="overlays" name="Overlays">
         <Title id="title" anchor="start" offset={0.4} duration={2.8} size={120} …>{product}</Title>
         <Title id="tagline" anchor="title" offset={0.5} duration={2.3} …>{tagline}</Title>
-        <NameCard who="Bohdan Snisar" what="Founder, Shed" accent={accent} />
+        <NameCard who="Ines Moreau" what="Head barista, Halvard" accent={accent} />
         <Layer id="cta" anchor="outro" offset={0.3} duration={2.5}>
           <CallToAction text={cta} accent={accent} />
         </Layer>
@@ -59,7 +59,7 @@ export default function Video({ product, tagline, accent, cta }: z.infer<typeof 
         <Audio id="bed" src="asset:music" start={0} duration="fill" volume={0.35} fade={{ in: 0.5, out: 1.5 }} duck={{ under: "main", to: 0.15 }} />
       </Track>
       <Captions id="captions" src="asset:founder" style={{ position: "bottom", size: 44 }}>
-        <Caption id="cap-1" start="word:12" end="word:18.end" text="Small software still deserves a real cloud." />
+        <Caption id="cap-1" start="word:12" end="word:18.end" text="Good coffee still deserves a slow morning." />
         …
       </Captions>
     </Composition>
@@ -80,8 +80,8 @@ This is the file with its two helpers left out; it resolves to 29 elements and 2
 The four values the brief wanted tweakable are the `schema`. An inspector shows a field for each, and saving one
 rewrites `defaults` and nothing else ([The file](./the-file#schema-and-defaults-are-the-knobs)).
 
-`in="word:12" out="word:23.end"` is the sentence "Small software still deserves a real cloud. It should take one
-file." UberScene turns it into 5.6 to 10.8 seconds of the interview. `in="shot:1"` is the b-roll's second shot. The
+`in="word:12" out="word:23.end"` is the sentence "Good coffee still deserves a slow morning. It should take one
+cup." UberScene turns it into 5.6 to 10.8 seconds of the interview. `in="shot:1"` is the b-roll's second shot. The
 screen recording has no transcript, so `demo` uses seconds ([Timing](./time#time-references)).
 
 `main` is a sequence track. `hook`, `broll`, `demo`, `close` and `outro` play back to back, and the two crossfades

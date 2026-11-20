@@ -6,17 +6,26 @@ export default function Video() {
       <Track id="main" layout="free">
         {/* Three cameras of one take; the cuts pick which one shows when. */}
         <Multicam id="take" sync={0}>
-          <Angle id="wide" src="asset:aurora" />
-          <Angle id="close" src="asset:spiral" />
-          <Angle id="detail" src="asset:cells" />
+          <Angle id="wide" src="asset:coffeeWide" />
+          <Angle id="close" src="asset:coffee" />
+          <Angle id="detail" src="asset:espresso" />
           <Cut id="c0" at={0} angle="wide" />
           <Cut id="c1" at={1} angle="close" />
           <Cut id="c2" at={2} angle="detail" />
         </Multicam>
       </Track>
       <Track id="text" layout="free">
-        <Title id="live" start={0} duration={3} size={40}>
-          Live
+        <Title
+          id="angles"
+          start={0}
+          duration={3}
+          size={28}
+          width={380}
+          height={60}
+          background="rgba(16, 20, 33, 0.78)"
+          transform={{ position: { x: -250, y: 210 } }}
+        >
+          Three angles, one take
         </Title>
       </Track>
     </Composition>

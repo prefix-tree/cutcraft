@@ -3,7 +3,12 @@ import { Background, Composition, Title, Track } from "@uberscene/kit";
 // Background: a full-frame backdrop on the track beneath everything; dots here, or a gradient or a grid.
 export default function Video() {
   return (
-    <Composition fps={30} width={1920} height={1080}>
+    <Composition
+      fps={30}
+      width={1920}
+      height={1080}
+      theme={{ extends: "midnight", palette: { primary: "#e8a33d", accent: "#e8a33d" } }}
+    >
       <Track id="back" layout="free">
         <Background id="bg" start={0} duration={3} variant="dots" spacing={56} />
       </Track>
@@ -16,7 +21,7 @@ export default function Video() {
           font="$heading"
           enter={{ type: "slide-up", duration: 0.5 }}
         >
-          Shed Coffee
+          Halvard Coffee
         </Title>
       </Track>
     </Composition>

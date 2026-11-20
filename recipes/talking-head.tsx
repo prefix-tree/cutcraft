@@ -25,8 +25,8 @@ export default function Video({ title, accent }: z.infer<typeof schema>) {
         <Clip id="answer" src="asset:podcast" in="word:35" out="word:49.end" />
         <Clip id="why" src="asset:podcast" in="word:50" out="word:52.end" />
         <Clip id="because" src="asset:podcast" in="word:53" out="word:63.end" />
-        <Clip id="editor-q" src="asset:podcast" in="word:64" out="word:66.end" />
-        <Clip id="editor-a" src="asset:podcast" in="word:67" out="word:79.end" />
+        <Clip id="taste-q" src="asset:podcast" in="word:64" out="word:66.end" />
+        <Clip id="taste-a" src="asset:podcast" in="word:67" out="word:79.end" />
         <Clip id="close" src="asset:podcast" in="word:80" out="word:84.end" />
       </Track>
 

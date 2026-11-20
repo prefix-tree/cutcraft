@@ -255,7 +255,7 @@ export const CASES: Partial<Record<ActionType, ActionInput>> = {
       props: { duration: 1, src: "asset:logo" },
     },
   },
-  "sticker/update": { type: "sticker/update", params: { id: "st1", props: { blendOpacity: 0.5 } } },
+  "sticker/update": { type: "sticker/update", params: { id: "st1", props: { blend: "screen" } } },
   "sticker/remove": { type: "sticker/remove", params: { id: "st1" } },
   "adjustment/create": {
     type: "adjustment/create",

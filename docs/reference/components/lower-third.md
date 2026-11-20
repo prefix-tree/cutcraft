@@ -12,7 +12,7 @@ A name and a role in the lower third, on a card or beside an accent bar.
 
 </Example>
 
-The coffee footage is Pixabay videos [209419](https://pixabay.com/videos/id-209419/) and [209424](https://pixabay.com/videos/id-209424/), under the Pixabay Content License.
+The coffee footage is Pixabay videos [209419](https://pixabay.com/videos/id-209419/), [209424](https://pixabay.com/videos/id-209424/), [46989](https://pixabay.com/videos/id-46989/) and [251](https://pixabay.com/videos/id-251/), under the Pixabay Content License. The maker of the machine in the red cup shot has nothing to do with this project.
 
 ## Props
 
@@ -28,5 +28,6 @@ Besides the timing props (`start`, `anchor`, `at`, `offset`, `duration`):
 | `y` | number | `330` | The card's centre, in pixels below the frame's centre. |
 | `width` | number (> 0) | `640` | The card's width in pixels; the words wrap inside it. |
 | `accent` | string | `"$primary"` | The colour of the bar beside the words. |
+| `size` | number (> 0) | `44` | The name's size in pixels; the role, the card and the bar scale with it. |
 
 [All components](/reference/components/)

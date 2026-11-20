@@ -69,7 +69,7 @@ describe("addBlock", () => {
     expect(addBlock("point-list", { cwd: project, force: true }).status).toBe("copied");
     expect(readFileSync(file, "utf8")).toBe(shipped("point-list"));
     expect(() => addBlock("nope", { cwd: project })).toThrow(
-      /no block "nope"; the blocks are character-wall, hundred-cells, point-list/,
+      /no block "nope"; the blocks are bar-race, character-wall, chat-reveal, hundred-cells, phone-tap, point-list, quote-build, ranked-list, terminal-typing/,
     );
   });
 
@@ -143,6 +143,37 @@ describe("placeBlock", () => {
     expect(() => timingOf("word:14")).toThrow(/name the clip the word is in, as hook@word:14/);
     expect(() => timingOf("hook.mid")).toThrow(/not its middle/);
     expect(() => timingOf("2..4")).toThrow(/give seconds/);
+  });
+});
+
+describe("placeBlock on a recipe", () => {
+  it("places one of the newer blocks in a copy of a recipe, and edits its words through the Layer's handles", async () => {
+    const recipes = join(import.meta.dirname, "..", "..", "..", "recipes");
+    writeFileSync(manifestPath, readFileSync(join(recipes, "uberscene.json")));
+    const spot = join(project, "brand-spot.tsx");
+    writeFileSync(spot, readFileSync(join(recipes, "brand-spot.tsx")));
+    const added = addBlock("quote-build", { cwd: project });
+    const placed = await placeBlock(added, { video: spot, track: "notes", at: "2" });
+    expect(placed.id).toBe("quote-build");
+    const text = readFileSync(spot, "utf8");
+    expect(text).toContain('import { QuoteBuild } from "./blocks/quote-build";');
+    const video = await loadVideo(spot);
+    expect(video.state.errors).toEqual([]);
+    expect(video.state.items.get("quote-build")?.start).toBe(2);
+
+    const files = gatherLocalFiles(text, (p) => {
+      const full = join(project, p);
+      return existsSync(full) ? readFileSync(full, "utf8") : undefined;
+    });
+    const tree = collectModule(loadModule(text, { files }) as never, {}, { index: buildSourceIndex(text) });
+    const exec = new Executor({ tree, manifest: video.manifest, now: () => 0 });
+    const props = { text: "Make it once, then make it better.", stress: ["better"] };
+    expect(exec.execute({ type: "layer/setProps", params: { id: "quote-build", props } }).ok).toBe(true);
+    const folded = foldToSource(text, exec.log(), exec.state());
+    expect(folded.skipped).toEqual([]);
+    expect(folded.text).toContain('<QuoteBuild text="Make it once, then make it better." stress={["better"]} />');
+    writeFileSync(spot, folded.text);
+    expect((await loadVideo(spot)).state.errors).toEqual([]);
   });
 });
 

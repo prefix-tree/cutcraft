@@ -27,7 +27,15 @@ function Count({
   const t = Math.min(1, elapsed / 0.9);
   const shown = Math.round(to * (1 - (1 - t) ** 3));
   return (
-    <div style={{ position: "absolute", left: 72, top: 150, opacity: Math.min(1, elapsed / 0.2) }}>
+    <div
+      style={{
+        position: "absolute",
+        left: 72,
+        top: 150,
+        opacity: Math.min(1, elapsed / 0.2),
+        textShadow: "0 2px 24px rgba(16, 20, 33, 0.7)",
+      }}
+    >
       <div style={{ color, font: "700 150px 'Space Grotesk', sans-serif", letterSpacing: "-0.05em", lineHeight: 1 }}>
         {prefix}
         {shown}
@@ -39,7 +47,7 @@ function Count({
 }
 
 /**
- * A data story: each bar grows, and each number lands, on the word that says it. The chart is plain SVG animated by
+ * A roastery's numbers: each bar grows, and each number lands, on the word that says it. The chart is plain SVG animated by
  * Motion; the counters are a few lines of React reading the layer's clock.
  */
 export default function Video({ accent }: z.infer<typeof schema>) {
@@ -63,9 +71,9 @@ export default function Video({ accent }: z.infer<typeof schema>) {
         >
           <div className="panel" style={{ ...card, borderRadius: 18, background: "rgba(16, 20, 33, 0.78)" }} />
           <svg width="960" height="540" style={{ position: "absolute", inset: 0 }}>
-            <title>Release time</title>
+            <title>Roast time</title>
             <text className="title" x="548" y="100" style={{ ...label, font: "600 20px Inter, sans-serif" }}>
-              Hours per release
+              Hours per roast
             </text>
             <path className="axis" d="M 560 290 L 860 290" stroke="#5a6478" strokeWidth="2" fill="none" />
           </svg>
@@ -133,10 +141,10 @@ export default function Video({ accent }: z.infer<typeof schema>) {
       </Track>
       <Track id="numbers" name="Numbers" layout="free">
         <Layer id="four" anchor="talk" at="word:14" duration={2.4}>
-          <Count to={4} suffix="×" label="as many releases" color={accent} />
+          <Count to={4} suffix="×" label="as many roasts" color={accent} />
         </Layer>
         <Layer id="forty" anchor="talk" at="word:22" duration={0.9}>
-          <Count to={40} prefix="−" suffix="%" label="fewer incidents" color="#7fd1b9" />
+          <Count to={40} prefix="−" suffix="%" label="less waste" color="#f4efe6" />
         </Layer>
       </Track>
     </Composition>

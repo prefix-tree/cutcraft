@@ -37,10 +37,10 @@ export default function Video() {
           start={5.2}
           duration={6.15}
           font={display}
-          size={112}
+          size={100}
           weight={800}
           color={INK}
-          transform={{ position: { x: 250, y: -22 } }}
+          transform={{ position: { x: 290, y: -22 } }}
           enter={{ type: "slide-up", duration: 0.6, easing: "easeOutCubic" }}
           exit={{ type: "fade", duration: 0.5 }}
         >
@@ -56,7 +56,7 @@ export default function Video() {
             size={26}
             weight={500}
             color={RED}
-            transform={{ position: { x: 250, y: 62 } }}
+            transform={{ position: { x: 290, y: 62 } }}
             enter={{ type: "fade", duration: 0.35 }}
             exit={{ type: "fade", duration: 0.35 }}
           >

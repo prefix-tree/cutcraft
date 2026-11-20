@@ -21,7 +21,7 @@ The theme is the `theme` prop of the composition. Elements use it through `$toke
   <Track id="main">…</Track>
   <Track id="graphics" layout="free">
     <Title id="kicker" start={0.5} style="kicker">NEW</Title>
-    <Title id="name" start={0.5} style="hero">Shed</Title>
+    <Title id="name" start={0.5} style="hero">Halvard</Title>
     <Shape id="card" start={0.5} shape="rectangle" width={720} height={180} style="card" />
     <Svg id="mark" start={1} content={'<svg viewBox="0 0 24 24"><path d="…" fill="$accent"/></svg>'} />
   </Track>

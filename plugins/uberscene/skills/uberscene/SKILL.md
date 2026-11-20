@@ -26,9 +26,9 @@ references.
 | Several cameras | `<Multicam sync>` with `<Angle src offset>` per camera and `<Cut at angle>` to switch |
 | Reuse a sequence | `<Nested>`: a sequence written once as a component and placed like a clip |
 | Place and frame | `fit` (`contain`, `cover`, `stretch`, `none`); `transform` (position, scale, rotation, opacity, crop, `borderRadius`); `frame={{ focus }}` reframes footage to the composition's shape, a landscape interview into a vertical short |
-| Mix layers | `blend` (`multiply`, `screen`, `overlay`…) and `blendOpacity` |
-| Show part of a clip | `<Mask>`: a rect, ellipse, polygon or drawn path, with `feather`, `expansion`, `inverted`; keyframe it to follow something |
-| Animate anything | `<Keyframe property at value easing>` on any transform, effect param (`param`), colour or volume |
+| Mix layers | `blend` (`multiply`, `screen`, `overlay`…); on a clip, `blendOpacity` for how strongly |
+| Show part of a clip | `<Mask>`: a rect, ellipse, polygon or drawn path, with `feather`, `inverted` and `opacity` |
+| Animate anything | `<Keyframe property at value easing>` on any transform, effect param (`param`), colour or volume; `easing` shapes the move from that key to the next |
 | Join clips | `<Transition type duration>` between two clips of a track: `crossfade`, `dipToBlack`, `dipToWhite`, `wipe`, `slide`, `push`, `iris`, `clockWipe`, `blinds`, `filmBurn`, `pixelDissolve`, `zoom`. With `on="pip" edge="in"` it brings one element in, or takes it out with `edge="out"` |
 | Correct and grade | `<Effect type>`: `exposure`, `whiteBalance`, `brightness`, `contrast`, `saturation`, `vibrance`, `hue`, `levels`, `curves`, `shadowsHighlights`, `lut` (a `.cube` file added with `uberscene add`) |
 | Give a look | `grayscale`, `sepia`, `invert`, `duotone`, `vignette`, `grain`, `lightLeak`, `chromaticAberration`, `halftone`, `pixelate`, `scanlines`, `fractalNoise` |
@@ -139,7 +139,7 @@ export const schema = z.object({
   product: z.string().describe("Product name in the title"),
   who: z.string().describe("Name on the lower third"),
 });
-export const defaults = { product: "Shed", who: "Maya Chen" };
+export const defaults = { product: "Halvard", who: "Maya Chen" };
 
 export default function Video({ product, who }: z.infer<typeof schema>) {
   return (
@@ -233,6 +233,12 @@ Give the video one look and say it once.
 - **Colour and effects** are `<Effect type params>` children of a clip, a title, a shape, a layer or an
   `<Adjustment>` (which affects everything beneath it for its time). They run in the order written: correct, then
   shape the tones, then the look. See [references/effects.md](references/effects.md).
+- **Check the blocks before hand-building a scene.** A chat, a terminal, a ranking that reorders, bars that race, a
+  quote that builds, a grid that counts: run `uberscene blocks --for "<job>"`, then `--sheet blocks.png` and read the
+  image. Place one with `uberscene blocks add <name> --into video.tsx --track <id> --at <moment>`, then set what this
+  video needs as props on the tag it wrote, not by editing the copy in `blocks/`, so `blocks update` can still bring
+  it forward. Two placements of one block differ by their props. Every block and its props:
+  [references/blocks.md](references/blocks.md).
 - **Free code where nothing fits.** A `<Layer>` holds any React, CSS, canvas or WebGL. Inside it, `useLayer()` gives
   `elapsed`, `t` (0 to 1), `remaining`, `duration`, `time` and `fps`. Draw everything as a function of that time,
   never from timers or `Date`. The kit's helpers are pure functions: `interpolate()` and `spring()` shape a value,
@@ -287,6 +293,7 @@ What each element and prop actually draws, and the few it does not:
 - [references/elements.md](references/elements.md): every element and its props.
 - [references/effects.md](references/effects.md): every effect and transition, its params, and the units.
 - [references/components.md](references/components.md): the ready-made components.
+- [references/blocks.md](references/blocks.md): the blocks, what each is for, and their props.
 - [references/rendering.md](references/rendering.md): what renders.
 - [references/cli.md](references/cli.md): every command and option.
-- The documentation: https://cutcraft.prefixtree.xyz/
+- The documentation: https://uberscene.prefixtree.xyz/

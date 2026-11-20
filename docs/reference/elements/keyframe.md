@@ -12,6 +12,8 @@ Animates one property of its parent between values, with easing.
 
 </Example>
 
+The coffee footage is Pixabay videos [209419](https://pixabay.com/videos/id-209419/), [209424](https://pixabay.com/videos/id-209424/), [46989](https://pixabay.com/videos/id-46989/) and [251](https://pixabay.com/videos/id-251/), under the Pixabay Content License. The maker of the machine in the red cup shot has nothing to do with this project.
+
 **Used in:** [An edit](/examples/edit) · [the walkthrough](/guide/writing-files) · [Product demo with zoom-ins](/recipes/product-demo) · [Slideshow with motion](/recipes/slideshow)
 
 ## Props
@@ -23,6 +25,6 @@ Animates one property of its parent between values, with easing.
 | `param` | string |  |  | Inside an `<Effect>`: the effect param it animates. |
 | `at` | number (0..∞) |  | yes | Element-relative seconds. |
 | `value` | any |  | yes | The value the property or param has at `at`. |
-| `easing` | "linear" \| "ease" \| "ease-in" \| "ease-out" \| "ease-in-out" \| … 46 more | `"linear"` |  | How it moves from the keyframe before to this one. |
+| `easing` | "linear" \| "ease" \| "ease-in" \| "ease-out" \| "ease-in-out" \| … 46 more | `"linear"` |  | How it moves from this keyframe to the next one. The last keyframe's easing is not used. |
 
 No children. [All elements](/reference/elements/)

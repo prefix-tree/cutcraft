@@ -3,6 +3,7 @@ import { carry, carryRemoval } from "../carry";
 import {
   define,
   isError,
+  onElement,
   placementOf,
   placementProps,
   placeNode,
@@ -32,6 +33,9 @@ function placementErrors(
     return { code: "ELEMENT_NOT_FOUND", message: `anchor "${place.anchor}" does not exist`, path: "place.anchor" };
   return null;
 }
+
+/** What `clip/remove` takes: anything placed on a track, except a multicam, which has its own remove and restore. */
+const isTrackItem = (kind: string): boolean => capabilitiesOf(kind).placementScope === "track" && kind !== "multicam";
 
 /** A media element on a track: a <Clip> (picture and sound) or an <Audio> (sound only). */
 function addMedia<T extends "clip/add" | "audio/add">(type: T, kind: "clip" | "audio") {
@@ -64,12 +68,13 @@ addMedia("audio/add", "audio");
 define(carry(
   {
     type: "clip/remove",
+    targets: onElement({ onOpaque: true, when: (item) => isTrackItem(item.kind) }),
     validate: (a, state) => {
       const item = requireElement(state, a.params.id);
       if (isError(item)) return invalid(item);
       const locked = requireUnlocked(state, item);
       if (locked) return invalid(locked);
-      return capabilitiesOf(item.kind).placementScope === "track"
+      return isTrackItem(item.kind)
         ? ok
         : invalid({ code: "INVALID_PARAMS", message: `"${a.params.id}" is not a track item` });
     },
@@ -107,6 +112,7 @@ define({
 /** Reorder within a sequence, change start on a free track, or re-anchor; optionally to another track. */
 define({
   type: "clip/move",
+  targets: onElement({ onOpaque: true, literalOnly: true, when: (item) => item.track !== null }),
   validate: (a, state) => {
     const item = requireElement(state, a.params.id);
     if (isError(item)) return invalid(item);

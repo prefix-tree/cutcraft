@@ -8,7 +8,7 @@ export default function Video() {
       fps={30}
       width={1080}
       height={1920}
-      theme={{ extends: "paper" }}
+      theme={{ extends: "paper", palette: { primary: "#e8a33d", accent: "#e8a33d" } }}
       background={{ mode: "color", color: "$background" }}
     >
       <Track id="main" layout="free">

@@ -2359,5 +2359,23 @@
       },
       "id": "chime"
     }
+  },
+  "blocks": {
+    "chat-reveal": {
+      "version": "0.5.0",
+      "hash": "fefc423a34d16130e1ce81c2ea0e930cb614ab5e95e3e53b91bef4911dad05cc"
+    },
+    "quote-build": {
+      "version": "0.5.0",
+      "hash": "7c8a92cd488954baef8f2ae6d6e7b0e834d4ff7e3f1501179e43520741c7ecf9"
+    },
+    "ranked-list": {
+      "version": "0.5.0",
+      "hash": "d9fbf89229644bbccb81c9beb3c481ec0646a4d17159f6676c637dde08708212"
+    },
+    "terminal-typing": {
+      "version": "0.5.0",
+      "hash": "782018cb05cb818677f740f94506e914e16243cc41497d71062948e718f53aee"
+    }
   }
 }

@@ -16,6 +16,14 @@ export interface GalleryItem {
 // CSS columns fill top to bottom, one column after another: ordered so the four columns end at about the same height.
 const ITEMS: readonly (Omit<GalleryItem, "lines"> & { readonly file: string })[] = [
   {
+    title: "A coffee film",
+    kind: "Edit",
+    src: "showcase/coffee",
+    aspect: 16 / 9,
+    link: "/examples/coffee",
+    file: "showcase/coffee.tsx",
+  },
+  {
     title: "The logo film",
     kind: "Logo film",
     src: "showcase/hero",
@@ -118,6 +126,14 @@ const ITEMS: readonly (Omit<GalleryItem, "lines"> & { readonly file: string })[]
     aspect: 9 / 16,
     link: "/examples/snake-heart",
     file: "shorts/snake-heart.tsx",
+  },
+  {
+    title: "From notes to a cut",
+    kind: "Built from blocks",
+    src: "shorts/notes-to-cut",
+    aspect: 9 / 16,
+    link: "/examples/notes-to-cut",
+    file: "shorts/notes-to-cut.tsx",
   },
 ];
 

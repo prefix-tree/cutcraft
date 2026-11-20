@@ -28,7 +28,7 @@ The elements a file is written in: the timeline (clips, tracks, transitions, cap
 ## Text and graphics
 
 <div class="cc-cards">
-<PreviewCard code title="<Title>" link="/reference/elements/title" src="previews/elements/title" text="Text over the picture in the theme's type, with entrances by letter, word or line." />
+<PreviewCard code title="<Title>" link="/reference/elements/title" src="previews/elements/title" text="Text over the picture in the theme's type, with entrances by letter or by word." />
 <PreviewCard code title="<Captions>" link="/reference/elements/captions" src="previews/elements/captions" text="Subtitles from an asset's transcript that follow the clips through every trim." />
 <PreviewCard code title="<Caption>" link="/reference/elements/caption" src="previews/elements/captions" text="One cue inside <Captions>, written by hand: its text, start and end." />
 <PreviewCard code title="<Shape>" link="/reference/elements/shape" src="previews/elements/shape" text="A vector shape (rectangle, circle, star, polygon, path) with fill, stroke and shadow." />
@@ -71,10 +71,10 @@ The elements a file is written in: the timeline (clips, tracks, transitions, cap
 
 | element | timed | visual | audio | trims source | transformable | children allowed |
 |---|---|---|---|---|---|---|
-| [`<Composition>`](/reference/elements/composition) |  |  |  |  |  | `track`, `marker`, `multicam`, `captions` |
+| [`<Composition>`](/reference/elements/composition) |  |  |  |  |  | `track`, `marker`, `captions` |
 | [`<Track>`](/reference/elements/track) |  |  |  |  |  | `clip`, `audio`, `gap`, `transition`, `title`, `shape`, `svg`, `sticker`, `adjustment`, `nested`, `layer`, `multicam` |
 | [`<Clip>`](/reference/elements/clip) | yes | yes | yes | yes | yes | `effect`, `keyframe`, `mask`, `speedKey`, `freeze` |
-| [`<Audio>`](/reference/elements/audio) | yes |  | yes | yes |  | `keyframe` |
+| [`<Audio>`](/reference/elements/audio) | yes |  | yes | yes |  | `keyframe`, `speedKey`, `freeze` |
 | [`<Gap>`](/reference/elements/gap) | yes |  |  |  |  |  |
 | [`<Transition>`](/reference/elements/transition) | yes | yes |  |  |  |  |
 | [`<Title>`](/reference/elements/title) | yes | yes |  |  | yes | `effect`, `keyframe`, `mask` |
@@ -84,8 +84,8 @@ The elements a file is written in: the timeline (clips, tracks, transitions, cap
 | [`<Captions>`](/reference/elements/captions) |  | yes |  |  |  | `caption` |
 | [`<Caption>`](/reference/elements/caption) | yes | yes |  |  |  |  |
 | [`<Marker>`](/reference/elements/marker) |  |  |  |  |  |  |
-| [`<Adjustment>`](/reference/elements/adjustment) | yes | yes |  | yes |  | `effect`, `keyframe` |
-| [`<Mask>`](/reference/elements/mask) |  |  |  |  |  | `keyframe` |
+| [`<Adjustment>`](/reference/elements/adjustment) | yes | yes |  |  |  | `effect`, `keyframe` |
+| [`<Mask>`](/reference/elements/mask) |  |  |  |  |  |  |
 | [`<Nested>`](/reference/elements/nested) | yes | yes | yes | yes | yes | `effect`, `keyframe`, `mask`, `speedKey`, `freeze` |
 | [`<Multicam>`](/reference/elements/multicam) |  |  |  |  |  | `angle`, `cut` |
 | [`<Angle>`](/reference/elements/angle) |  |  |  |  |  |  |

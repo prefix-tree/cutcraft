@@ -3,7 +3,12 @@ import { Composition, Track, TypeCard } from "@uberscene/kit";
 // TypeCard: big type that builds line by line. A line can sit on a pill, and a line can be struck out.
 export default function Video() {
   return (
-    <Composition fps={30} width={1920} height={1080} theme={{ extends: "paper" }}>
+    <Composition
+      fps={30}
+      width={1920}
+      height={1080}
+      theme={{ extends: "paper", palette: { primary: "#e8a33d", accent: "#e8a33d" } }}
+    >
       <Track id="over" layout="free">
         <TypeCard
           id="job"

@@ -26,8 +26,12 @@ export default function Video() {
             scene.add(box);
             return ({ time }) => { box.rotation.set(time, time * 1.3, 0); };
           }} />
-        <Motion id="word" start={0.5} duration={1.5} sequence={[["p", { opacity: [0, 1] }, { duration: 0.5 }]]}>
+        <Motion id="word" start={0.5} duration={1.5} sequence={[
+          ["p", { opacity: [0, 1] }, { duration: 0.5 }],
+          [".late", { opacity: [0, 1] }, { at: 0.3, duration: 0.2 }],
+        ]}>
           <p style={{ position: "absolute", left: 20, top: 20, width: 200, height: 60, margin: 0, background: "#ffffff" }} />
+          <div className="late" style={{ position: "absolute", left: 20, top: 100, width: 200, height: 60, background: "#ffffff" }} />
         </Motion>
       </Track>
     </Composition>
@@ -101,6 +105,7 @@ it("exports three.js and Motion as the player draws them, on each layer's own cl
   // The word's layer starts at 0.5 s: hidden at 0.2 s, fully in by 1.2 s (0.7 s into its 0.5 s fade).
   expect(isWhite(pixel(early, 120, 50))).toBe(false);
   expect(isWhite(pixel(late, 120, 50))).toBe(true);
+  expect(isWhite(pixel(late, 120, 130))).toBe(true);
 });
 
 it("runs the file's own requestAnimationFrame, element.animate and Math.random on the video's clock, in one piece or three", async () => {
@@ -278,6 +283,11 @@ it("writes a still of a three.js frame", async () => {
   });
   expect(still.frame).toBe(36);
   expect(readFileSync(out).subarray(1, 4).toString()).toBe("PNG");
+  // The Motion layer is first drawn here, 0.7 s in: both its steps are in, the second one placed later in the sequence
+  // (`at`) included. The layer's animation hold once seeked Motion's own animations again and left them invisible.
+  const frame = readImage(out);
+  expect(isWhite(pixel(frame, 120, 50))).toBe(true);
+  expect(isWhite(pixel(frame, 120, 130))).toBe(true);
 });
 
 it("writes a still of a layer the file's own module draws", async () => {

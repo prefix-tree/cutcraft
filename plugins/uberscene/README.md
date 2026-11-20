@@ -20,4 +20,4 @@ agent reads skills, for Claude Code without the plugin that is `.claude/skills/u
 `SKILL.md` is written by hand. Everything in `references/` is generated from the code by `pnpm docs:gen`, so it
 matches the code on the main branch; CI fails when it drifts.
 
-See [With your agent](https://cutcraft.prefixtree.xyz/guide/agents) in the docs.
+See [With your agent](https://uberscene.prefixtree.xyz/guide/agents) in the docs.

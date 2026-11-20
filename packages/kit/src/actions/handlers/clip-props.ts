@@ -1,11 +1,16 @@
 import type { Json } from "../../patches/types";
 import { INTERIOR_PREFIX } from "../../resolve/tree";
-import { define, makePropHandler, rawNode, rawProp, validateTarget } from "../handler-kit";
+import { define, makePropHandler, onElement, rawNode, rawProp, validateTarget } from "../handler-kit";
 import { invalid, type NodeSpec, nodeSpecOf, ok } from "../types";
 import { replaceAll, stackPosition } from "./effect";
 
 const SOURCE_KINDS = ["clip", "audio", "nested"];
-const VISUAL_KINDS = ["clip", "title", "shape", "svg", "sticker", "nested", "layer", "adjustment"];
+/** Kinds that take a `transform`. */
+const TRANSFORM_KINDS = ["clip", "title", "shape", "svg", "sticker", "nested", "layer"];
+/** Kinds that take a `blend` mode: everything that draws, and an adjustment for what it filters. */
+const BLEND_KINDS = [...TRANSFORM_KINDS, "adjustment"];
+/** Kinds whose blend has a strength (`blendOpacity`): the ones drawn on the canvas. */
+const BLEND_OPACITY_KINDS = ["clip", "nested"];
 const AUDIO_KINDS = ["clip", "audio", "nested"];
 
 /** Speed always recomputes the timeline length; `out` stays, so nothing else changes in the file. */
@@ -21,11 +26,21 @@ define(makePropHandler({
 define(makePropHandler({ type: "clip/setReverse", kinds: SOURCE_KINDS, write: (p) => ({ reverse: p.value }) }));
 define(makePropHandler({
   type: "clip/setBlend",
-  kinds: VISUAL_KINDS,
+  kinds: BLEND_KINDS,
   write: (p) => ({
     ...(p.mode !== undefined ? { blend: p.mode } : {}),
     ...(p.opacity !== undefined ? { blendOpacity: p.opacity } : {}),
   }),
+  validate: (a, state) => {
+    const kind = state.items.get(a.params.id)?.kind ?? "";
+    return a.params.opacity === undefined || BLEND_OPACITY_KINDS.includes(kind)
+      ? ok
+      : invalid({
+          code: "INVALID_PARAMS",
+          message: `a blend opacity applies to a clip or a nested sequence; on <${kind}> set transform.opacity`,
+          path: "opacity",
+        });
+  },
 }));
 define(makePropHandler({ type: "clip/setFit", kinds: ["clip", "nested"], write: (p) => ({ fit: p.value }) }));
 define(makePropHandler({
@@ -49,7 +64,7 @@ define(makePropHandler({
 
 define(makePropHandler({
   type: "transform/update",
-  kinds: VISUAL_KINDS,
+  kinds: TRANSFORM_KINDS,
   write: (p, state) => ({
     transform: deepMerge((rawProp(state, p.id, "transform") ?? {}) as Record<string, Json>, p.transform),
   }),
@@ -66,6 +81,7 @@ define(makePropHandler({
 define(makePropHandler({
   type: "layer/setProps",
   kinds: ["layer"],
+  targets: { when: (item, state) => rawNode(state, item.id)?.interior !== undefined },
   write: (p) => Object.fromEntries(Object.entries(p.props).map(([k, v]) => [`${INTERIOR_PREFIX}${k}`, v])),
   validate: (a, state) =>
     rawNode(state, a.params.id)?.interior
@@ -137,6 +153,7 @@ function replaceChildren(
 ) {
   define({
     type,
+    targets: onElement(),
     validate: (a, state) => validateTarget(state, a.params.id, []),
     apply: (a, log, ctx) =>
       replaceAll(log, ctx.before, a.params.id, childKind, pick(a.params as never), a.params.after),

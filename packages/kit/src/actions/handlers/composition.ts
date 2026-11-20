@@ -6,6 +6,7 @@ import {
   define,
   isError,
   makePropHandler,
+  onElement,
   rawNode,
   rawProp,
   requireElement,
@@ -242,6 +243,7 @@ define({
 
 define({
   type: "source/setProps",
+  targets: onElement(),
   validate: (a, state) => validateTarget(state, a.params.id, Object.keys(a.params.props)),
   apply: (a, log) => setProps(log, a.params.id, a.params.props),
   invert: (a, before) => {
@@ -255,6 +257,7 @@ define({
 
 define({
   type: "source/setProp",
+  targets: onElement(),
   validate: (a, state) => validateTarget(state, a.params.id, [a.params.prop]),
   apply: (a, log) => log.append({ op: "set", id: a.params.id, prop: a.params.prop, value: a.params.value }),
   invert: (a, before) => ({
@@ -267,6 +270,7 @@ define({
 /** Marks a generated subtree for baking into literals at the next fold. */
 define({
   type: "source/bake",
+  targets: onElement({ onLocked: true, onOpaque: true, when: (item) => item.editable === "generated" }),
   validate: (a, state) => {
     const item = requireElement(state, a.params.id);
     if (isError(item)) return invalid(item);
@@ -314,7 +318,10 @@ function replay(
   before: ResolvedState,
 ): { inverses: ActionInput[]; error?: ValidationResult } {
   const inverses: ActionInput[] = [];
-  const log = createPatchLog({ isSource: (id) => before.tree.byId.has(id) });
+  const log = createPatchLog({
+    isSource: (id) => before.tree.byId.has(id),
+    sourceParent: (id) => before.tree.byId.get(id)?.parent ?? null,
+  });
   const tree = before.tree;
   const current = () => resolve(tree, before.manifest, log);
   let state = before;

@@ -8,7 +8,7 @@ export default function Video() {
     <Composition fps={30} width={960} height={540}>
       <Track id="main">
         <Clip id="talk" src="asset:founder" in="word:0" out="word:5.end" fit="cover" />
-        <Clip id="product" src="asset:coffee" in={15} out={17.5} fit="cover" />
+        <Clip id="product" src="asset:espresso" in={26} out={28.5} fit="cover" />
       </Track>
       <Track id="fx" layout="free">
         <Motion

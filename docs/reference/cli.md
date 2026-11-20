@@ -91,14 +91,14 @@ needs no media files and answers at once. It is how an agent, or a script, reads
 
 ```
 video.tsx  1920x1080  30 fps  25.60 s (768 frames)  0 errors
-knob title  text  = Shed  "Product name in the title"
-knob accent  color  = #ff5a1f  "Colour of the title"
+knob title  text  = Halvard  "Product name in the title"
+knob accent  color  = #e8a33d  "Colour of the title"
 track main (sequence)
-     0.00–5.20     clip        hook  asset:founder 5.60–10.80  words 12–23 "Small software still deserves a real cloud It s…"
+     0.00–5.20     clip        hook  asset:founder 5.60–10.80  words 12–23 "Good coffee still deserves a slow morning It sho…"
      4.80–5.20     transition  x1  crossfade (hook → broll)
      4.80–10.80    clip        broll  asset:product 6.00–12.00  keyframes: transform.scale.x, transform.scale.y
 track overlays (sequence)
-     0.40–3.20     title       title  "Shed"  anchor start +0.4
+     0.40–3.20     title       title  "Halvard"  anchor start +0.4
 cuts: 4.80 hook→broll (x1), 10.80 broll→demo
 ```
 
@@ -108,13 +108,13 @@ effect's params and the transform after keyframes, each sound's gain, the word b
 ```
 $ npx uberscene inspect video.tsx --at word:14,x1
 word:14  1.00 s  frame 30  (word 14 "still" in hook)
-  seen: title tagline  4% through  "A cloud for small software"  transform position.x=0 position.y=300
-  seen: title title  21% through  "Shed"  transform position.x=0 position.y=140
+  seen: title tagline  4% through  "Coffee roasted on Mondays"  transform position.x=0 position.y=300
+  seen: title title  21% through  "Halvard"  transform position.x=0 position.y=140
   seen: clip hook  19% through  source 6.60 s
   heard: hook (asset:founder) gain 1.00
   heard: bed (asset:music) gain 0.05
   said: word 14 "still" in hook
-  caption: "Small software still deserves a real cloud."
+  caption: "Good coffee still deserves a slow morning."
 ```
 
 | Option | |
@@ -332,9 +332,10 @@ uberscene blocks [--for <job>] [--aspect <shape>] [--sheet blocks.png] [--json]
 ```
 
 Lists the blocks that ship with this version of the CLI, without a file. A block is a scene-sized piece of motion
-design: a grid of cells that fills and counts, a wall of characters, a row of points lit in turn. Each entry says what
-it shows, when to use it and when not, what it pairs with, its props, the props that time it, the file to copy and
-the line that places it.
+design: a grid of cells that fills and counts, a wall of characters, a row of points lit in turn, a ranking that
+reorders, a bar race, a chat reply that types in, a terminal, a phone being tapped, a quote built word by word. Each
+entry says what it shows, when to use it and when not, what it pairs with, its props, the props that time it, the
+file to copy and the line that places it.
 
 | Option | Does |
 |---|---|
