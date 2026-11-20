@@ -211,6 +211,8 @@ How it behaves:
 - The sound is always mixed and encoded in the page.
 - On a CPU it is not faster than Chrome's codecs yet. Decision 0032 in the repository has the numbers.
 
+[Native codecs](./native-codecs) shows how it plugs into the export.
+
 ## When a frame never finishes
 
 Each frame has a deadline: 60 seconds unless `--frame-timeout` (or `frameTimeout` from code) says otherwise. A frame

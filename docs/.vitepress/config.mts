@@ -93,7 +93,15 @@ export default defineConfig({
         items: [
           { text: "Checking a cut", link: "/guide/checking" },
           { text: "Exporting", link: "/guide/exporting" },
+        ],
+      },
+      {
+        text: "Architecture",
+        items: [
+          { text: "Overview", link: "/guide/architecture" },
+          { text: "How the player draws", link: "/guide/how-the-player-draws" },
           { text: "How the export works", link: "/guide/export-architecture" },
+          { text: "Native codecs (experimental)", link: "/guide/native-codecs" },
         ],
       },
       {

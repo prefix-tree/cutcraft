@@ -117,24 +117,8 @@ Warnings the player prints in the page come back as `result.warnings`.
 
 ## Native codecs
 
-With `UBERSCENE_CODECS` set, the [native codecs](./exporting#native-codecs-experimental) take over decoding,
-encoding or both. The page and the pieces stay as they are.
-
-```text
-page                                  Node (the export's server)          uberscene-codec (one process per stream)
-────                                  ──────────────────────────          ────────────────────────────────────────
-NativeFrameSource ── /native/frames ─► reads the asset's file ──────────► decode → I420 pictures on stdout
-   VideoFrame ◄────── streamed back ── pipes stdout to the page
-capture → RGBA ───── /native/encode ─► writes pictures in order ────────► encode (H.264, ProRes) → packets
-                                      keeps the packets for the join ◄──
-```
-
-Decoding plugs into the player's frame-source seam, so the compositor, effects and capture do not change. An asset the
-native decoder cannot read falls back to Chrome's decoder.
-
-Encoding reads each captured picture back as RGBA instead of handing the canvas to WebCodecs. Node joins the packets
-like the browser's pieces: whole keyframe intervals, no re-encoding. `native/PROTOCOL.md` in the repository describes
-the bytes.
+With `UBERSCENE_CODECS` set, an experimental Rust process takes over decoding, encoding or both. The page and the
+pieces stay as they are. [Native codecs](./native-codecs) shows how it plugs in.
 
 ## Why it is built this way
 
@@ -153,4 +137,5 @@ when there is no GPU (SwiftShader runs WebGL in software). On a machine with a G
 
 - [Exporting](./exporting): formats, a server, motion blur and faster exports.
 - [Checking a cut](./checking): the layout check, frame sheets and checking an exported file.
-- [Player](./player): the player the export runs.
+- [How the player draws](./how-the-player-draws): what each frame goes through in the page.
+- [Native codecs](./native-codecs): the experimental Rust decoder and encoder.

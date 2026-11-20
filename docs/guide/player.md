@@ -121,7 +121,8 @@ every footage track draws beneath it.
 Sound is mixed with Web Audio, which is also the clock: the current time comes from `AudioContext.currentTime`, so
 playback doesn't drift.
 
-What isn't drawn yet is in [What renders](/reference/rendering).
+What isn't drawn yet is in [What renders](/reference/rendering). [How the player draws](./how-the-player-draws) goes
+through a frame step by step.
 
 ## Next
 
