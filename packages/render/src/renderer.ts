@@ -10,15 +10,22 @@ import { feedCopy, planCopy, type Run } from "./copy";
 import {
   type Container,
   containerOf,
+  NATIVE_CRF,
+  NATIVE_VIDEO_CODECS,
   outputFormat,
+  PRORES_FOURCC,
+  PRORES_PROFILES,
   type QualityName,
   VIDEO_CODECS,
   type VideoCodec,
   type VideoContainer,
 } from "./encoding";
 import { type FontFile, loadFonts } from "./fonts";
-import { AudioFeed, feedSegment, planSegments } from "./join";
+import { AudioFeed, feedPackets, feedSegment, planSegments } from "./join";
+import { type CodecModes, codecModes } from "./native/codecs";
+import { avcCodecString } from "./native/wire";
 import { BrowserEngine } from "./web/engine";
+import type { NativeEncodeOptions } from "./web/page/protocol";
 
 export interface RenderOptions {
   readonly state: ResolvedState;
@@ -58,7 +65,6 @@ export interface RenderOptions {
   /** Audio bits per second; default 128 kbit/s. */
   readonly audioBitrate?: number;
   readonly onProgress?: (progress: { readonly frame: number; readonly frames: number }) => void;
-  /** Progress while Chrome is being downloaded, on the first export. */
   /** Seconds one frame may take before the export fails with the frame and the step it was in; default 60. */
   readonly frameTimeout?: number;
   readonly onLog?: (message: string) => void;
@@ -75,7 +81,7 @@ export interface ExportSource {
   readonly files?: Readonly<Record<string, string>>;
   readonly manifest: AssetManifest;
   readonly props?: Readonly<Record<string, unknown>>;
-  /** A Chrome or Chromium 153+ binary; default `UBERSCENE_CHROMIUM`, then Chrome for Testing from the cache. */
+  /** A Chrome 157 binary (`CHROME_MILESTONE`, checked when it starts); default `UBERSCENE_CHROMIUM`, then Chrome for Testing from the cache. */
   readonly executablePath?: string;
 }
 
@@ -92,6 +98,8 @@ export interface RenderResult {
   readonly tabs: number;
   /** Frames whose encoded pictures were copied from a source instead of rendered. */
   readonly copiedFrames: number;
+  /** Who decoded the footage and encoded the pictures (`UBERSCENE_CODECS`). */
+  readonly codecs: CodecModes;
   readonly warnings: readonly string[];
 }
 
@@ -115,6 +123,8 @@ export async function openEngine(options: {
   /** Effects a contact sheet may draw a frame without. */
   readonly disabled?: readonly string[] | undefined;
   readonly frameTimeout?: number | undefined;
+  /** Who decodes and encodes; default what `UBERSCENE_CODECS` says. */
+  readonly codecs?: CodecModes | undefined;
   readonly warnings: string[];
   readonly onLog?: ((message: string) => void) | undefined;
 }): Promise<BrowserEngine> {
@@ -131,6 +141,7 @@ export async function openEngine(options: {
     ...(options.tabs ? { tabs: options.tabs } : {}),
     ...(options.frameTimeout ? { frameTimeout: options.frameTimeout } : {}),
     ...(options.disabled?.length ? { disabled: options.disabled } : {}),
+    codecs: options.codecs ?? codecModes(),
     ...(options.onLog ? { log: options.onLog } : {}),
     warn: (m) => {
       if (!options.warnings.includes(m)) options.warnings.push(m);
@@ -152,16 +163,26 @@ export async function renderVideo(options: RenderOptions): Promise<RenderResult>
   const even = (n: number): number => Math.max(2, Math.round((n * DRAFT_SCALE) / 2) * 2);
   const outWidth = draft ? even(state.composition.width) : state.composition.width;
   const outHeight = draft ? even(state.composition.height) : state.composition.height;
-  const container = options.container ?? containerOf(options.out);
+  const codecs = codecModes();
+  const nativeEncode = codecs.encode === "native";
+  const container = options.container ?? containerOf(options.out, { nativeEncode });
+  if (container === "mov" && !nativeEncode)
+    throw new Error("a .mov (ProRes) is written only by the native encoder: set UBERSCENE_CODECS=native-encode");
   const audioOnly = container === "mp3" || container === "wav";
   if (audioOnly && draft) throw new Error(`a draft is of the picture: a .${container} file holds only the soundtrack`);
   if (audioOnly && options.silent) throw new Error(`nothing to render: a .${container} file holds only the soundtrack`);
   const videoContainer = (audioOnly ? "webm" : container) as VideoContainer;
-  const codec = options.videoCodec ?? (videoContainer === "mp4" ? "avc" : "vp9");
+  const codec = options.videoCodec ?? (videoContainer === "mp4" ? "avc" : videoContainer === "mov" ? "prores" : "vp9");
   if (!VIDEO_CODECS[videoContainer].includes(codec))
     throw new Error(
       `a .${videoContainer} file cannot hold ${codec} video; use ${VIDEO_CODECS[videoContainer].join(" or ")}`,
     );
+  if (nativeEncode && !audioOnly && !NATIVE_VIDEO_CODECS.includes(codec))
+    throw new Error(
+      `the native encoder writes H.264 (.mp4) and ProRes (.mov), not ${codec}; unset UBERSCENE_CODECS for ${codec}`,
+    );
+  if (nativeEncode && options.smartCopy)
+    throw new Error("the copy option copies VP9 and the native encoder writes H.264 and ProRes: leave one out");
   const from = Math.max(0, options.from ?? 0);
   const to = Math.min(state.composition.duration, options.to ?? state.composition.duration);
   const first = Math.round(from * outFps);
@@ -174,7 +195,7 @@ export async function renderVideo(options: RenderOptions): Promise<RenderResult>
 
   const warnings: string[] = [];
   const started = performance.now();
-  const engine = await openEngine({ ...options, warnings });
+  const engine = await openEngine({ ...options, warnings, codecs });
   let output: Output | null = null;
   let feed: AudioFeed | null = null;
   try {
@@ -183,7 +204,7 @@ export async function renderVideo(options: RenderOptions): Promise<RenderResult>
       : await engine.audio({
           from,
           to,
-          container: audioOnly ? container : videoContainer,
+          container: audioOnly ? container : videoContainer === "mov" ? "mp4" : videoContainer,
           bitrate: options.audioBitrate ?? 128_000,
         });
     for (const w of soundtrack?.warnings ?? []) if (!warnings.includes(w)) warnings.push(w);
@@ -215,25 +236,26 @@ export async function renderVideo(options: RenderOptions): Promise<RenderResult>
     const ahead = async (seconds: number): Promise<void> => {
       await feed?.until(seconds + 0.5);
     };
+    const bitrate = options.bitrate ?? Math.round(outWidth * outHeight * outFps * 0.1);
+    const quality = options.quality ?? (draft && options.bitrate === undefined ? ("low" as const) : undefined);
+    const native = nativeEncode ? nativeOptions(codec, bitrate, quality, options.bitrate !== undefined) : undefined;
     // Every page starts on a piece at once; the pieces are written in order as they finish.
+    const request = (piece: { first: number; last: number }) => ({
+      first: piece.first,
+      last: piece.last,
+      container: videoContainer,
+      codec,
+      bitrate,
+      ...(quality ? { quality } : {}),
+      keyFrameInterval,
+      ...(draft ? { fps: outFps, scale: DRAFT_SCALE } : {}),
+      ...(native ? { native } : {}),
+    });
     const rendered = pieces.map((piece) =>
-      piece.kind === "copy"
-        ? null
-        : engine.segment({
-            first: piece.first,
-            last: piece.last,
-            container: videoContainer,
-            codec,
-            bitrate: options.bitrate ?? Math.round(outWidth * outHeight * outFps * 0.1),
-            ...(options.quality
-              ? { quality: options.quality }
-              : draft && options.bitrate === undefined
-                ? { quality: "low" as const }
-                : {}),
-            keyFrameInterval,
-            ...(draft ? { fps: outFps, scale: DRAFT_SCALE } : {}),
-          }),
+      piece.kind === "copy" ? null : native ? engine.segmentNative(request(piece)) : engine.segment(request(piece)),
     );
+    const nativeCodec = (config: Uint8Array): string =>
+      native?.codec === "prores" ? PRORES_FOURCC[native.proresProfile ?? "hq"] : avcCodecString(config);
     for (const r of rendered) r?.catch(() => undefined);
     const config = { current: null as VideoDecoderConfig | null };
     let done = 0;
@@ -242,8 +264,25 @@ export async function renderVideo(options: RenderOptions): Promise<RenderResult>
       if (piece.kind === "copy") {
         await feedCopy(piece, { source: video, fps: outFps, originFrame: first, config }, ahead);
       } else {
-        const bytes = await (rendered[i] as Promise<Uint8Array>);
-        await feedSegment(bytes, { source: video, fps: outFps, offsetFrames: piece.first - first, config }, ahead);
+        const result = await (rendered[i] as Promise<unknown>);
+        if (result instanceof Uint8Array)
+          await feedSegment(result, { source: video, fps: outFps, offsetFrames: piece.first - first, config }, ahead);
+        else {
+          const encoded = result as Awaited<ReturnType<typeof engine.segmentNative>>;
+          await feedPackets(
+            encoded,
+            {
+              source: video,
+              fps: outFps,
+              offsetFrames: piece.first - first,
+              config,
+              codec: nativeCodec(encoded.config),
+              width: outWidth,
+              height: outHeight,
+            },
+            ahead,
+          );
+        }
       }
       done += piece.last - piece.first;
       options.onProgress?.({ frame: done, frames: total });
@@ -274,7 +313,20 @@ export async function renderVideo(options: RenderOptions): Promise<RenderResult>
       wallMs: performance.now() - started,
       tabs,
       copiedFrames,
+      codecs,
       warnings,
     };
   }
+}
+
+/** What the native encoder is asked for: H.264 at the export's bitrate (or a quality's CRF), or ProRes by quality. */
+function nativeOptions(
+  codec: VideoCodec,
+  bitrate: number,
+  quality: QualityName | undefined,
+  bitrateGiven: boolean,
+): NativeEncodeOptions {
+  if (codec === "prores") return { codec: "prores", proresProfile: PRORES_PROFILES[quality ?? "high"] };
+  if (quality && !bitrateGiven) return { codec: "h264", crf: NATIVE_CRF[quality], preset: "balanced" };
+  return { codec: "h264", kbps: Math.max(1, Math.round(bitrate / 1000)), preset: "balanced" };
 }

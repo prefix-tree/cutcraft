@@ -27,7 +27,8 @@ npx uberscene skills install [--dir <folder>] [--force]
 
 Every export draws its frames in headless Chrome. The first one downloads Chrome for Testing into
 `~/.cache/uberscene/browsers` (`UBERSCENE_BROWSER_CACHE` moves it); `uberscene browser install` downloads it ahead of
-time. `UBERSCENE_CHROMIUM` names a Chrome or Chromium 153 or later to use instead
+time. `UBERSCENE_CHROMIUM` names a Chrome 157, the only version the export runs on, to use instead. `UBERSCENE_CODECS`
+(`native`, `native-decode` or `native-encode`) hands decoding and encoding to the experimental native codecs
 ([The browser it runs in](https://uberscene.prefixtree.xyz/guide/exporting#the-browser-it-runs-in)).
 
 ## Export
@@ -44,7 +45,7 @@ time. `UBERSCENE_CHROMIUM` names a Chrome or Chromium 153 or later to use instea
 | `--draft` | A render for watching, not keeping: every second frame, each shown twice as long, at half the width and height and the `low` quality preset. Written beside `--out` as `<name>.draft.<ext>` ([A draft](https://uberscene.prefixtree.xyz/guide/exporting#a-draft)). Not with `--still`, `--check-layout`, `--copy` or `look`. |
 | `--tabs <n>` | Pages of the browser that render pieces at once. Default 1 ([Faster](https://uberscene.prefixtree.xyz/guide/exporting#faster)). |
 | `--copy` | Copy untouched stretches of a VP9 source into a VP9 export without re-encoding them ([Faster](https://uberscene.prefixtree.xyz/guide/exporting#faster)). |
-| `--codec <name>` | `avc` (the default in MP4), `vp9` (the default in WebM), or `av1` in either. A codec the container cannot hold (VP9 in MP4) is an error. |
+| `--codec <name>` | `avc` (the default in MP4), `vp9` (the default in WebM), or `av1` in either. A codec the container cannot hold (VP9 in MP4) is an error. `prores` writes a `.mov` when `UBERSCENE_CODECS` turns the native encoder on. |
 | `--bitrate <bps>` | Video bits per second. Default: about 0.1 per pixel per frame. |
 | `--quality <preset>` | `very-low`, `low`, `medium`, `high` or `very-high`: the encoder picks the bitrate for the size and codec. In place of `--bitrate`. |
 | `--keyframe <s>` | Seconds between keyframes. Default 2. |

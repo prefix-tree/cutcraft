@@ -115,6 +115,27 @@ instead.
 
 Warnings the player prints in the page come back as `result.warnings`.
 
+## Native codecs
+
+With `UBERSCENE_CODECS` set, the [native codecs](./exporting#native-codecs-experimental) take over decoding,
+encoding or both. The page and the pieces stay as they are.
+
+```text
+page                                  Node (the export's server)          uberscene-codec (one process per stream)
+────                                  ──────────────────────────          ────────────────────────────────────────
+NativeFrameSource ── /native/frames ─► reads the asset's file ──────────► decode → I420 pictures on stdout
+   VideoFrame ◄────── streamed back ── pipes stdout to the page
+capture → RGBA ───── /native/encode ─► writes pictures in order ────────► encode (H.264, ProRes) → packets
+                                      keeps the packets for the join ◄──
+```
+
+Decoding plugs into the player's frame-source seam, so the compositor, effects and capture do not change. An asset the
+native decoder cannot read falls back to Chrome's decoder.
+
+Encoding reads each captured picture back as RGBA instead of handing the canvas to WebCodecs. Node joins the packets
+like the browser's pieces: whole keyframe intervals, no re-encoding. `native/PROTOCOL.md` in the repository describes
+the bytes.
+
 ## Why it is built this way
 
 **One renderer.** The preview already draws everything: footage, titles, Layers with any CSS, three.js, Motion, GLSL

@@ -1,10 +1,12 @@
 # 0019. A browser engine exports what only a browser draws
 
-> Carries out the export half of [0018](./0018-free-code-in-a-timeline-skeleton.md). The Node engine of
+> Exports the free code a `<Layer>` holds. The Node engine of
 > [0015](./0015-a-headless-engine-renders-the-export.md) stays for every file it can draw.
 >
 > Done: [0021](./0021-one-export-engine.md) retired the Node engine, so this engine now draws every file, and mixes
 > the sound in the page.
+>
+> The Chrome versions below are superseded by [0030](./0030-one-chrome-version.md): the export runs on Chrome 157 only.
 
 ## Context
 

@@ -1,7 +1,6 @@
 # 0027. What we adopt from HyperFrames
 
-> Status: proposed. Follows from [0018](./0018-free-code-in-a-timeline-skeleton.md) (free code in a timeline
-> skeleton) and [0021](./0021-one-export-engine.md) (one export engine). The work plan at the end is the order it
+> Status: proposed. Follows from [0021](./0021-one-export-engine.md) (one export engine). The work plan at the end is the order it
 > lands in.
 
 ## Context
@@ -15,7 +14,7 @@ timelines) is not in question.
 
 Reading it against our code found defects of our own:
 
-- 0018 and the free-code lint rule say that `requestAnimationFrame`, `Date` and `performance` follow the video's
+- The free-code lint rule says that `requestAnimationFrame`, `Date` and `performance` follow the video's
   clock. Nothing makes them. In the export a loop driven by `requestAnimationFrame` advances by wall-clock time per
   frame, so its speed depends on the machine. `Math.random()` differs in each tab, so with `tabs > 1` a layer that
   spans two pieces jumps where they meet.
@@ -117,7 +116,7 @@ shadow or a stroke the measure cannot credit.
 
 ## Consequences
 
-- 0018's sentence on the clock becomes true in the export, and free code written the obvious way renders the same on
+- The free-code rule on the clock becomes true in the export, and free code written the obvious way renders the same on
   any machine and in any number of tabs.
 - A clipped or very loud soundtrack is reported. It is still exported as it is.
 - A hung export fails with a reason instead of running forever. A frame slower than the deadline on a very slow

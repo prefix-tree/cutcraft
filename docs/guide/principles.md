@@ -31,8 +31,8 @@ Seconds work everywhere, and a cut can also say what it belongs to: `in="word:12
 back to back by default, and an overlay anchors to the clip it belongs to. Captions follow the clips that play their words, so a trim never leaves a caption
 behind.
 
-Decided in [0005](/decisions/0005-sequence-tracks-and-anchors),
-[0006](/decisions/0006-time-references-against-a-manifest) and [0014](/decisions/0014-captions-follow-the-clips).
+Decided in [0005](/decisions/0005-sequence-tracks-and-anchors) and
+[0014](/decisions/0014-captions-follow-the-clips).
 
 ## 4. Every edit is an action written back
 
@@ -41,8 +41,7 @@ undo, and folds into the file as one changed value. Whoever opens the file next,
 as ordinary code. It stays fast because the resolver keeps every unchanged object identical, and consumers skip
 what is identical instead of diffing.
 
-Decided in [0003](/decisions/0003-patch-log-and-four-faced-actions) and
-[0011](/decisions/0011-performance-contract).
+Decided in [0003](/decisions/0003-patch-log-and-four-faced-actions).
 
 ## 5. The browser renders, and the export is the preview
 
@@ -67,8 +66,7 @@ Time keeps a strict skeleton: compositions, tracks, clips, transitions, captions
 editor can change. Ready-made pieces are plain functions built from the kit's own elements, not a second drawing
 engine, so editing one turns it into elements you own.
 
-Decided in [0018](/decisions/0018-free-code-in-a-timeline-skeleton) and
-[0013](/decisions/0013-remotion-has-an-editor-and-layer-handles); `<Graphic>` was retired by
+Decided in [0013](/decisions/0013-remotion-has-an-editor-and-layer-handles); `<Graphic>` was retired by
 [0020](/decisions/0020-graphic-is-deprecated-for-free-code) and
 [0024](/decisions/0024-graphic-kinds-become-components).
 

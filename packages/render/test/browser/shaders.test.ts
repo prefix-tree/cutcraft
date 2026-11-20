@@ -1,5 +1,5 @@
 // Effects and transitions a file declares (effect, transition), drawn by the browser export with WebGL.
-// Needs a Chrome or Chromium 153+ in UBERSCENE_CHROMIUM.
+// Needs Chrome 157: the cached Chrome for Testing, or UBERSCENE_CHROMIUM.
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 

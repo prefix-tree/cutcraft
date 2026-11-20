@@ -67,7 +67,7 @@ no `box` is centred and fitted, as now. `transform.position` is removed; `transf
 `scale`, `rotation`, `opacity`, `crop`, rounded corners.
 
 **5. One way to style text.** `style` is a preset name or an object, on Title as on Captions:
-`style={{ preset: "h1", size: 64, color: "$primary", align: "left" }}`. The fourteen flat text props go, and
+<code v-pre>style={{ preset: "h1", size: 64, color: "$primary", align: "left" }}</code>. The fourteen flat text props go, and
 Captions' flat `align` joins its `style`. The group is not named `text`: a title's words are its text, and the theme
 and the lint already treat that name as content. Title goes from 29 props to 13.
 

@@ -38,6 +38,9 @@
     "release": "node scripts/stage-release.mjs",
     "check:packages": "node scripts/check-packages.mjs",
     "knip": "knip",
+    "native:build": "cargo build --release --manifest-path native/Cargo.toml",
+    "native:test": "cargo test --release --manifest-path native/Cargo.toml",
+    "native:check": "cargo fmt --manifest-path native/Cargo.toml --check && cargo clippy --release --all-targets --manifest-path native/Cargo.toml -- -D warnings",
     "test:coverage": "pnpm -r test --coverage --coverage.reporter=text-summary --coverage.reporter=json-summary --coverage.reporter=html"
   },
   "devDependencies": {

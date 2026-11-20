@@ -4,11 +4,14 @@ import {
   ALL_FORMATS,
   BufferSource,
   EncodedAudioPacketSource,
+  EncodedPacket,
   EncodedPacketSink,
   type EncodedVideoPacketSource,
   Input,
   type InputAudioTrack,
 } from "mediabunny";
+
+import type { NativeEncoded } from "./native/wire";
 
 /** Splits frames [first, last) into runs of whole keyframe intervals, about three per tab, each starting on a keyframe the encoder would make anyway. */
 export function planSegments(
@@ -73,6 +76,48 @@ export async function feedSegment(
   } finally {
     input.dispose();
   }
+}
+
+/**
+ * Writes the packets the native encoder made for one segment into the final video track, shifted to where the
+ * segment belongs. `codec` is the decoder configuration's codec string (`avc1.…` from the avcC, or a ProRes fourcc).
+ */
+export async function feedPackets(
+  encoded: NativeEncoded,
+  into: {
+    source: EncodedVideoPacketSource;
+    fps: number;
+    offsetFrames: number;
+    config: { current: VideoDecoderConfig | null };
+    codec: string;
+    width: number;
+    height: number;
+  },
+  before: (timestamp: number) => Promise<void>,
+): Promise<Fed> {
+  const config: VideoDecoderConfig = {
+    codec: into.codec,
+    codedWidth: into.width,
+    codedHeight: into.height,
+    ...(encoded.config.length > 0 ? { description: encoded.config } : {}),
+  };
+  const first = into.config.current;
+  if (first && !compatibleConfig(first, config))
+    throw new Error("the native encoder wrote segments with different settings; they cannot be joined");
+  if (encoded.packets[0] && !encoded.packets[0].key)
+    throw new Error("a segment from the native encoder does not start on a keyframe");
+  let end = 0;
+  for (const [i, packet] of encoded.packets.entries()) {
+    const timestamp = (packet.pts + into.offsetFrames) / into.fps;
+    await before(timestamp);
+    await into.source.add(
+      new EncodedPacket(packet.data, packet.key ? "key" : "delta", timestamp, 1 / into.fps),
+      !first && i === 0 ? { decoderConfig: config } : undefined,
+    );
+    end = Math.max(end, timestamp + 1 / into.fps);
+  }
+  into.config.current ??= config;
+  return { end };
 }
 
 /**

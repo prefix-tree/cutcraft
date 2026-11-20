@@ -21,7 +21,7 @@ generated.
 ## Consequences
 
 - The live path never touches text; a drag step costs about a microsecond per
-  element (0011).
+  element.
 - Every action has an inverse, so undo re-runs actions instead of restoring
   snapshots, and the history is a readable list of what the user did.
 - The fold is the only place where "edit the code" is confronted, and it is a

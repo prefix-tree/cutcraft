@@ -15,19 +15,16 @@ use that name.
 | [0003](./0003-patch-log-and-four-faced-actions.md) | Editor state is the file plus a patch log; actions have four faces |
 | [0004](./0004-the-model-edits-text.md) | The model edits text and has no tool catalog |
 | [0005](./0005-sequence-tracks-and-anchors.md) | Sequence tracks by default, anchors for overlays |
-| [0006](./0006-time-references-against-a-manifest.md) | Time references resolve against an asset manifest |
 | [0007](./0007-the-browser-renders.md) | The browser is the renderer |
 | [0008](./0008-tracks-composite-in-document-order.md) | Tracks composite in document order |
 | [0009](./0009-helpers-layers-and-editability.md) | Pure helpers, generated elements and the Layer escape hatch |
 | [0010](./0010-openreel-as-the-ux-reference.md) | OpenReel is the UX reference, with named deviations |
-| [0011](./0011-performance-contract.md) | The performance contract: identity, not diffing |
 | [0012](./0012-what-we-adopt-from-diffusion-studio.md) | What we adopt from Diffusion Studio |
 | [0013](./0013-remotion-has-an-editor-and-layer-handles.md) | Remotion has an editor now; a Layer's component gets handles |
 | [0014](./0014-captions-follow-the-clips.md) | Captions follow the clips |
 | [0015](./0015-a-headless-engine-renders-the-export.md) | A headless engine renders the export |
 | [0016](./0016-a-theme-lives-in-the-file.md) | A theme lives in the file |
 | [0017](./0017-graphics-are-svg-generators.md) | Graphics are SVG generators |
-| [0018](./0018-free-code-in-a-timeline-skeleton.md) | Free code in a timeline skeleton |
 | [0019](./0019-a-browser-engine-for-free-code.md) | A browser engine exports what only a browser draws |
 | [0020](./0020-graphic-is-deprecated-for-free-code.md) | `<Graphic>` is deprecated for free code (superseded by 0024) |
 | [0021](./0021-one-export-engine.md) | One export engine: the player in Chrome |
@@ -37,4 +34,6 @@ use that name.
 | [0027](./0027-what-we-adopt-from-hyperframes.md) | What we adopt from HyperFrames (proposed) |
 | [0028](./0028-tools-for-narrated-explainers.md) | Tools for narrated explainers: a narration helper, motion and placement in the CLI, pinned labels, diagram parts, `study` (proposed) |
 | [0029](./0029-one-hook-for-libraries-that-seek.md) | One hook for libraries that seek: `useSeekable` |
+| [0030](./0030-one-chrome-version.md) | One Chrome version: the export runs on Chrome 157 only |
 | [0031](./0031-a-smaller-surface-for-the-timeline-vocabulary.md) | A smaller surface for the timeline vocabulary: only what is drawn, `box` and `style`, one naming rule, an SDK package, in two stages |
+| [0032](./0032-native-codecs-behind-a-flag.md) | Native codecs behind a flag: craft-video decodes and encodes with `UBERSCENE_CODECS` (experimental) |
