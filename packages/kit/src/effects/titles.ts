@@ -17,7 +17,7 @@ const GLOW = aroundGauss({
   before: [
     glsl`${COLOUR}vec4 effect(vec2 uv) {
   vec4 c = texture(image, uv);
-  float bright = params.threshold <= 0.0 ? 1.0 : smoothstep(params.threshold, min(params.threshold + 0.1, 1.0), cc_luma(c.rgb));
+  float bright = params.threshold <= 0.0 ? 1.0 : smoothstep(params.threshold, min(params.threshold + 0.1, 1.0), us_luma(c.rgb));
   return vec4(mix(c.rgb, params.color, params.tint), c.a * bright);
 }`,
   ],
@@ -27,7 +27,7 @@ const GLOW = aroundGauss({
     glsl`${OVER}vec4 effect(vec2 uv) {
   vec4 o = texture(original, uv);
   vec4 g = texture(image, uv);
-  vec4 c = cc_over(o, vec4(g.rgb, min(g.a * params.intensity, 1.0)));
+  vec4 c = us_over(o, vec4(g.rgb, min(g.a * params.intensity, 1.0)));
   float bloom = clamp(params.threshold / 0.05, 0.0, 1.0);
   return vec4(min(c.rgb + bloom * o.a * g.rgb * g.a * params.intensity, 1.0), c.a);
 }`,
@@ -104,7 +104,7 @@ const outline = shaderDefinition("effect", {
   // fades over the pixel after it.
   float grown = max(o.a, clamp(params.width - sqrt(best) + 1.0, 0.0, 1.0));
   vec4 band = vec4(params.color, grown * params.opacity);
-  return params.outlineOnly ? band : cc_over(o, band);
+  return params.outlineOnly ? band : us_over(o, band);
 }`,
   ],
 });
@@ -140,7 +140,7 @@ const longShadow = shaderDefinition("effect", {
     float s = texture(image, uv - dir * params.length * t).a;
     swept = max(swept, params.fade ? s * (1.0 - t) : s);
   }
-  return cc_over(o, vec4(params.color, swept * params.opacity));
+  return us_over(o, vec4(params.color, swept * params.opacity));
 }`,
 });
 

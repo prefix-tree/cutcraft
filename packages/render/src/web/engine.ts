@@ -19,7 +19,7 @@ import type {
 } from "./page/protocol";
 import { type PageServer, servePage } from "./server";
 
-const PLAYER_WARNING = "[cutcut/player] ";
+const PLAYER_WARNING = "[uberscene] ";
 /** Bytes read from the page per call: base64 over the DevTools protocol, so kept well under its message limit. */
 const READ_CHUNK = 4 * 1024 * 1024;
 const FLAGS = [

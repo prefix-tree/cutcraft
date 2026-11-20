@@ -133,7 +133,7 @@ be a gradient too.
 |---|---|
 | Scale it to the frame | `fit="contain"` or `fit="cover"` |
 | Override the file's framing | The element's own `viewBox` and `preserveAspectRatio`, which win over the file's |
-| Use theme colours inside it | `$name` or `var(--cc-name)` in attributes and styles |
+| Use theme colours inside it | `$name` or `var(--us-name)` in attributes and styles |
 | Recolour it | `color`: `mode: "replace"` paints every drawn pixel in its `tint`, `mode: "tint"` keeps the shading and colours it, and `opacity` sets how much |
 
 Text in an SVG uses one of the bundled fonts or a generic family. Any other family is drawn in sans-serif in the

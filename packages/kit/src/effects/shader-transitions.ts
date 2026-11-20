@@ -30,7 +30,7 @@ const iris = maskTransition({
   float n = params.sides >= 3.0 ? params.sides : 0.0;
   float half_sector = n > 0.0 ? 3.14159265 / n : 0.0;
   float inner = n > 0.0 ? (params.star > 0.0 ? params.star : cos(half_sector)) : 1.0;
-  float full = cc_farthest(params.center) / inner + params.feather;
+  float full = us_farthest(params.center) / inner + params.feather;
   float big = progress * full;
   float edge = big;
   if (n > 0.0) {
@@ -123,8 +123,8 @@ const filmBurn = shaderDefinition("transition", {
   }),
   shader: glsl`${NOISE}${FARTHEST}vec4 transition(vec2 uv) {
   vec2 p = (uv - params.center) * resolution;
-  float near = length(p) / cc_farthest(params.center);
-  float rough = cc_fbm(uv * resolution / params.size, uint(params.seed));
+  float near = length(p) / us_farthest(params.center);
+  float rough = us_fbm(uv * resolution / params.size, uint(params.seed));
   float burn = clamp(0.55 * near + 0.45 * rough, 0.0, 1.0);
   float band = params.edge / length(resolution);
   float front = progress * (1.0 + band) - band;
@@ -155,7 +155,7 @@ const pixelDissolve = maskTransition({
   }),
   uses: [NOISE],
   mask: `  uvec2 block = uvec2(min(floor(uv * vec2(params.columns, params.rows)), vec2(params.columns, params.rows) - 1.0));
-  float at = cc_hash(uvec3(block, uint(params.seed))) * (1.0 - params.softness);
+  float at = us_hash(uvec3(block, uint(params.seed))) * (1.0 - params.softness);
   float m = params.softness > 0.0 ? smoothstep(at, at + params.softness, progress) : step(at, progress);
   return m;`,
 });
@@ -174,7 +174,7 @@ const zoom = shaderDefinition("transition", {
     /** How much the clips smear along the zoom, most at the middle: 0 is none. */
     blur: z.number().min(0).max(1).default(0.5),
   }),
-  shader: `vec4 cc_zoomed(sampler2D picture, vec2 uv, float s, float smear) {
+  shader: `vec4 us_zoomed(sampler2D picture, vec2 uv, float s, float smear) {
   vec4 sum = vec4(0.0);
   for (int i = 0; i < 12; i++) {
     float k = s * (1.0 + smear * float(i) / 11.0);
@@ -186,8 +186,8 @@ const zoom = shaderDefinition("transition", {
 }
 vec4 transition(vec2 uv) {
   float smear = params.blur * 0.25 * sin(3.14159265 * progress);
-  vec4 a = cc_zoomed(from, uv, mix(1.0, params.scale, progress), smear);
-  vec4 b = cc_zoomed(to, uv, mix(params.scale, 1.0, progress), smear);
+  vec4 a = us_zoomed(from, uv, mix(1.0, params.scale, progress), smear);
+  vec4 b = us_zoomed(to, uv, mix(params.scale, 1.0, progress), smear);
   float w = smoothstep(0.3, 0.7, progress);
   vec4 pa = vec4(a.rgb * a.a, a.a) * (1.0 - w) + vec4(b.rgb * b.a, b.a) * w;
   return pa.a > 0.0 ? vec4(pa.rgb / pa.a, pa.a) : vec4(0.0);

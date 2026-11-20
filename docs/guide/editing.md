@@ -197,11 +197,12 @@ line, `uberscene lint video.tsx --fix` does the same to a file ([CLI](/reference
 | `free-code-clock` | Free code off the video's clock ([Free code](./free-code#the-video-s-clock)). |
 | `not-rendered` | One of the few things the renderers draw differently from what the file says, listed in [What renders](/reference/rendering). |
 
-**Old spellings.** One rule moves a file across a release that renamed things:
+**Old spellings.** These rules move a file across a release that renamed things:
 
 | Rule | Reports |
 |---|---|
 | `deprecated-props` | A prop or a value spelled the way an earlier version took it, as an error that names the new spelling. It reads the kit's `DEPRECATIONS` table, and any rows passed as `lint(text, { deprecations })`. Where the new spelling can be written for certain, the fix renames the prop, respells the value, or moves the prop into its object prop. |
+| `old-theme-variables` | A theme CSS variable written as `--cc-name`, in any string, template or JSX text. They are `--us-name` since 0.6, and the fix respells each. |
 
 A rule of your own can build its fix with the helpers the kit's rules use: `renameProp`, `renameValue`,
 `movePropInto` and `movePropsInto`, given a tag found with `jsxTags`.

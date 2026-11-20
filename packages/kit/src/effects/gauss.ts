@@ -24,8 +24,8 @@ const GAUSS_HALF = 4;
 const GAUSS_QUARTER = 8;
 
 const at = (outside: GaussOutside) =>
-  `bool cc_inside(vec2 uv) { return all(greaterThanEqual(uv, vec2(0.0))) && all(lessThanEqual(uv, vec2(1.0))); }
-vec4 cc_at(vec2 uv) {
+  `bool us_inside(vec2 uv) { return all(greaterThanEqual(uv, vec2(0.0))) && all(lessThanEqual(uv, vec2(1.0))); }
+vec4 us_at(vec2 uv) {
   return ${
     outside === "transparent"
       ? "any(lessThan(uv, vec2(0.0))) || any(greaterThan(uv, vec2(1.0))) ? vec4(0.0) : texture(image, uv)"
@@ -39,7 +39,7 @@ const down = (from: "plain" | "premultiplied", outside: GaussOutside) => `${at(o
   vec2 h = 0.5 / vec2(textureSize(image, 0));
   vec4 sum = vec4(0.0);
   for (int i = 0; i < 4; i++) {
-    vec4 s = cc_at(uv + vec2(i % 2 == 0 ? -h.x : h.x, i < 2 ? -h.y : h.y));
+    vec4 s = us_at(uv + vec2(i % 2 == 0 ? -h.x : h.x, i < 2 ? -h.y : h.y));
     sum += ${from === "plain" ? "vec4(s.rgb * s.a, s.a)" : "s"};
   }
   return sum / 4.0;
@@ -53,7 +53,7 @@ function take(what: GaussWhat, input: Input): string {
   if (input === "channel") return "vec4(s.r)";
   if (what === "alpha") return "vec4(s.a)";
   if (what === "luma")
-    return input === "plain" ? "vec4(cc_luma(s.rgb))" : "vec4(cc_luma(s.a > 0.0 ? s.rgb / s.a : vec3(0.0)))";
+    return input === "plain" ? "vec4(us_luma(s.rgb))" : "vec4(us_luma(s.a > 0.0 ? s.rgb / s.a : vec3(0.0)))";
   return input === "plain" ? "vec4(s.rgb * s.a, s.a)" : "s";
 }
 
@@ -67,7 +67,7 @@ function direction(
   outside: GaussOutside,
 ): string {
   const a = axis === "x" ? "x" : "y";
-  const tap = (uv: string) => `cc_take(cc_at(${uv}))`;
+  const tap = (uv: string) => `us_take(us_at(${uv}))`;
   const result =
     output === "premultiplied"
       ? "sum"
@@ -75,7 +75,7 @@ function direction(
         ? "sum.a > 0.0 ? vec4(sum.rgb / sum.a, sum.a) : vec4(0.0)"
         : "vec4(vec3(sum.r), 1.0)";
   const linear = input !== "plain";
-  return glsl`${COLOUR}${at(outside)}vec4 cc_take(vec4 s) { return ${take(what, input)}; }
+  return glsl`${COLOUR}${at(outside)}vec4 us_take(vec4 s) { return ${take(what, input)}; }
 vec4 effect(vec2 uv) {
   vec2 size = vec2(textureSize(image, 0));
   float sigma = max(params.${param}, 1e-3) * size.${a} / resolution.${a};
@@ -98,8 +98,8 @@ vec4 effect(vec2 uv) {
         ? `// A pair whose far pixel is past the frame's edge reads its near pixel alone: one linear read between them would
     // land outside and count both as transparent.
     vec2 far = float(i + 1) * dir;
-    sum += cc_inside(uv + far) ? w * ${tap("uv + o * dir")} : w1 * ${tap("uv + float(i) * dir")};
-    sum += cc_inside(uv - far) ? w * ${tap("uv - o * dir")} : w1 * ${tap("uv - float(i) * dir")};`
+    sum += us_inside(uv + far) ? w * ${tap("uv + o * dir")} : w1 * ${tap("uv + float(i) * dir")};
+    sum += us_inside(uv - far) ? w * ${tap("uv - o * dir")} : w1 * ${tap("uv - float(i) * dir")};`
         : `sum += w * (${tap("uv + o * dir")} + ${tap("uv - o * dir")});`
     }
     weights += 2.0 * w;

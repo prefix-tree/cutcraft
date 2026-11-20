@@ -48,7 +48,7 @@ describe("the title effects", () => {
 
   it("glow is a halo under the element, and a bloom over it only once it has a threshold", () => {
     const last = builtInShader("glow")?.passes.at(-1);
-    expect(last).toContain("cc_over(o,");
+    expect(last).toContain("us_over(o,");
     expect(last).toContain("clamp(params.threshold / 0.05, 0.0, 1.0)");
   });
 });

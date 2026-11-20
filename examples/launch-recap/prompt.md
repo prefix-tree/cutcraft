@@ -136,7 +136,7 @@ Give the video one look, the way a designer would, and say it once.
    draws above it.
 7. **Write `<Svg content>` only for one-off art** no kind covers. Give it a
    `viewBox`, fill it with tokens (`fill="$primary"` or
-   `var(--cc-primary)`), keep it small (a few kilobytes), no scripts, no
+   `var(--us-primary)`), keep it small (a few kilobytes), no scripts, no
    external links. Animate it with SMIL (`<animate>`, `<animateTransform>`,
    `<set>` with `begin`/`dur` in seconds from the element's start); not with
    CSS `@keyframes`, clicks or `<animateMotion>`, which are dropped. Text in

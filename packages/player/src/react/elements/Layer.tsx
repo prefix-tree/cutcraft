@@ -44,12 +44,12 @@ export function Layer(p: ElementProps & { readonly interior: ReactNode }) {
 
 const varsByTokens = new WeakMap<object, CSSProperties>();
 
-/** The theme as CSS variables on the Layer, so free code can write `var(--cc-accent)` or `var(--cc-heading)`. */
+/** The theme as CSS variables on the Layer, so free code can write `var(--us-accent)` or `var(--us-heading)`. */
 function themeVars(theme: ElementProps["state"]["theme"]): CSSProperties {
   const tokens = themeTokens(theme);
   let vars = varsByTokens.get(tokens);
   if (!vars) {
-    vars = Object.fromEntries(Object.entries(tokens).map(([k, v]) => [`--cc-${k}`, v])) as CSSProperties;
+    vars = Object.fromEntries(Object.entries(tokens).map(([k, v]) => [`--us-${k}`, v])) as CSSProperties;
     varsByTokens.set(tokens, vars);
   }
   return vars;

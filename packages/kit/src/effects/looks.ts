@@ -34,7 +34,7 @@ const halftone = shaderDefinition("effect", {
   shader: glsl`${COLOUR}vec2 ht_turn(vec2 p, float a) { float s = sin(a), c = cos(a); return vec2(c * p.x - s * p.y, s * p.x + c * p.y); }
 // The ink share each channel of a colour needs: x for mono (by luminance), or c, m, y, k.
 vec4 ht_inks(vec3 rgb) {
-  if (params.mode == params.mode.mono) return vec4(1.0 - cc_luma(rgb));
+  if (params.mode == params.mode.mono) return vec4(1.0 - us_luma(rgb));
   float k = 1.0 - max(rgb.r, max(rgb.g, rgb.b));
   vec3 cmy = k < 1.0 ? (1.0 - rgb - k) / (1.0 - k) : vec3(0.0);
   return vec4(cmy, k);
@@ -131,7 +131,7 @@ const scanlines = shaderDefinition("effect", {
   float x = pos - params.spacing * floor(pos / params.spacing + 0.5);
   float w = params.thickness * params.spacing;
   float dark = min(clamp(w / 2.0 - abs(x) + 0.5, 0.0, 1.0), w);
-  return vec4(cc_srgb(cc_linear(c.rgb) * (1.0 - params.intensity * dark)), c.a);
+  return vec4(us_srgb(us_linear(c.rgb) * (1.0 - params.intensity * dark)), c.a);
 }`,
 });
 
@@ -163,15 +163,15 @@ const lightLeak = shaderDefinition("effect", {
   vec3 light = vec3(0.0);
   for (int i = 0; i < 3; i++) {
     float k = float(i);
-    vec2 at = vec2(cc_value(vec2(t + k * 7.31, k * 3.17), seed), cc_value(vec2(k * 5.71, t + k * 1.93), seed + 1u));
+    vec2 at = vec2(us_value(vec2(t + k * 7.31, k * 3.17), seed), us_value(vec2(k * 5.71, t + k * 1.93), seed + 1u));
     at = mix(vec2(-0.2), vec2(1.2), at);
     float d = length((uv - at) * resolution) / (params.spread * diag);
     float fall = exp(-3.0 * d * d);
-    float breath = 0.55 + 0.45 * cc_value(vec2(t * 1.7 + k * 9.13, k), seed + 2u);
+    float breath = 0.55 + 0.45 * us_value(vec2(t * 1.7 + k * 9.13, k), seed + 2u);
     light += mix(params.color, vec3(1.0), fall * fall * 0.6) * fall * breath;
   }
   vec3 leak = clamp(light * params.intensity, 0.0, 1.0);
-  return vec4(cc_blend(c.rgb, leak, 2), c.a);
+  return vec4(us_blend(c.rgb, leak, 2), c.a);
 }`,
 });
 
@@ -204,9 +204,9 @@ const fractalNoise = shaderDefinition("effect", {
   }),
   shader: glsl`${NOISE3}${BLEND}vec4 effect(vec2 uv) {
   vec4 c = texture(image, uv);
-  float n = cc_fbm3(vec3(uv * resolution / params.size, time * params.evolution), uint(params.seed), int(params.octaves));
+  float n = us_fbm3(vec3(uv * resolution / params.size, time * params.evolution), uint(params.seed), int(params.octaves));
   n = clamp((n - 0.5) * params.contrast + 0.5, 0.0, 1.0);
-  vec3 blended = cc_blend(c.rgb, params.color * n, params.blend);
+  vec3 blended = us_blend(c.rgb, params.color * n, params.blend);
   return vec4(mix(c.rgb, clamp(blended, 0.0, 1.0), params.opacity), c.a);
 }`,
 });

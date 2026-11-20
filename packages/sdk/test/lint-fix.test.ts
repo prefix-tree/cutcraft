@@ -332,3 +332,29 @@ describe("fixSource", () => {
     expect(fixSource(text, { rules: ["free-code-clock"] }).text).toBe(text);
   });
 });
+
+describe("old-theme-variables", () => {
+  const only = { rules: ["old-theme-variables"] };
+
+  it("reports --cc-* in strings, templates and JSX text, and fixes each to --us-*", () => {
+    const text = wrap(
+      `<Layer id="l" duration={2} component={Card} />`,
+      'const HEAD = "var(--cc-heading)";\nconst Card = () => <div style={{ color: `var(--cc-text, ${"#fff"})` }}><svg><rect fill="var(--cc-accent)" /></svg><style>{"a { color: var(--cc-muted) }"}</style></div>;',
+    );
+    const found = lint(text, only);
+    expect(found.map((d) => d.message)).toEqual([
+      "`--cc-heading` is `--us-heading` since 0.6",
+      "`--cc-text` is `--us-text` since 0.6",
+      "`--cc-accent` is `--us-accent` since 0.6",
+      "`--cc-muted` is `--us-muted` since 0.6",
+    ]);
+    const fixed = fixSource(text, only);
+    expect(fixed.text).toBe(text.replaceAll("--cc-", "--us-"));
+    expect(lint(fixed.text, only)).toEqual([]);
+  });
+
+  it("leaves names and comments alone", () => {
+    const text = wrap('<Title id="a" duration={2}>Hi</Title>', "// var(--cc-old) in a comment\nconst cc_x = 1;");
+    expect(lint(text, only)).toEqual([]);
+  });
+});

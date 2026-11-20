@@ -55,7 +55,7 @@ const exposure = colorTransform({
     stops: z.number().min(-5).max(5).default(0),
   }),
   uses: [COLOUR],
-  rgb: "  return clamp(cc_srgb(cc_linear(c) * exp2(params.stops)), 0.0, 1.0);",
+  rgb: "  return clamp(us_srgb(us_linear(c) * exp2(params.stops)), 0.0, 1.0);",
   neutral: { stops: 0 },
 });
 
@@ -73,7 +73,7 @@ const vibrance = colorTransform({
   uses: [COLOUR],
   rgb: `  float spread = max(c.r, max(c.g, c.b)) - min(c.r, min(c.g, c.b));
   float k = params.amount > 0.0 ? params.amount * (1.0 - spread) : params.amount;
-  return clamp(mix(vec3(cc_luma(c)), c, 1.0 + k), 0.0, 1.0);`,
+  return clamp(mix(vec3(us_luma(c)), c, 1.0 + k), 0.0, 1.0);`,
   neutral: { amount: 0 },
 });
 
@@ -97,17 +97,17 @@ const mat3 RGB_XYZ = mat3(0.4124564, 0.3575761, 0.1804375, 0.2126729, 0.7151522,
 const mat3 XYZ_RGB = mat3(3.2404542, -1.5371385, -0.4985314, -0.9692660, 1.8760108, 0.0415560, 0.0556434, -0.2040259, 1.0572252);
 const mat3 BRADFORD = mat3(0.8951, 0.2664, -0.1614, -0.7502, 1.7135, 0.0367, 0.0389, -0.0685, 1.0296);
 const mat3 BRADFORD_INV = mat3(0.9869929, -0.1470543, 0.1599627, 0.4323053, 0.5183603, 0.0492912, -0.0085287, 0.0400428, 0.9684867);
-vec3 cc_xyz(vec2 xy) { return vec3(xy.x / xy.y, 1.0, (1.0 - xy.x - xy.y) / xy.y); }
+vec3 us_xyz(vec2 xy) { return vec3(xy.x / xy.y, 1.0, (1.0 - xy.x - xy.y) / xy.y); }
 `,
   rgb: `  float t = 6500.0 * exp2(params.temperature);
   float x = t <= 7000.0
     ? -4.6070e9 / (t * t * t) + 2.9678e6 / (t * t) + 0.09911e3 / t + 0.244063
     : -2.0064e9 / (t * t * t) + 1.9018e6 / (t * t) + 0.24748e3 / t + 0.237040;
   float y = -3.0 * x * x + 2.87 * x - 0.275 + params.tint * 0.05;
-  vec3 gain = (cc_xyz(vec2(0.3127, 0.3290)) * BRADFORD) / (cc_xyz(vec2(x, y)) * BRADFORD);
-  vec3 lms = (cc_linear(c) * RGB_XYZ) * BRADFORD;
+  vec3 gain = (us_xyz(vec2(0.3127, 0.3290)) * BRADFORD) / (us_xyz(vec2(x, y)) * BRADFORD);
+  vec3 lms = (us_linear(c) * RGB_XYZ) * BRADFORD;
   vec3 rgb = ((lms * gain) * BRADFORD_INV) * XYZ_RGB;
-  return clamp(cc_srgb(rgb), 0.0, 1.0);`,
+  return clamp(us_srgb(rgb), 0.0, 1.0);`,
   neutral: { temperature: 0, tint: 0 },
 });
 
@@ -126,7 +126,7 @@ const SHADOWS_HIGHLIGHTS = aroundGauss({
   float dark = 1.0 - smoothstep(0.0, 0.5, around);
   float bright = smoothstep(0.5, 1.0, around);
   float stops = 2.0 * (params.shadows * dark + params.highlights * bright);
-  return vec4(clamp(cc_srgb(cc_linear(c.rgb) * exp2(stops)), 0.0, 1.0), c.a);
+  return vec4(clamp(us_srgb(us_linear(c.rgb) * exp2(stops)), 0.0, 1.0), c.a);
 }`,
   ],
 });
@@ -160,7 +160,7 @@ const duotone = colorTransform({
     amount: z.number().min(0).max(1).default(1),
   }),
   uses: [COLOUR],
-  rgb: `  vec3 toned = mix(params.dark, params.light, cc_luma(c));
+  rgb: `  vec3 toned = mix(params.dark, params.light, us_luma(c));
   return mix(c, toned, params.amount);`,
   neutral: { amount: 0 },
 });

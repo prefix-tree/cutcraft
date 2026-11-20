@@ -34,7 +34,7 @@ export interface PrepareSvgOptions {
   readonly viewBox?: SvgViewBox | undefined;
   readonly preserveAspectRatio?: string | undefined;
   readonly color?: SvgColor | undefined;
-  /** Values for `$name` and `var(--cc-name)` in attributes and styles. */
+  /** Values for `$name` and `var(--us-name)` in attributes and styles. */
   readonly tokens?: Readonly<Record<string, string>> | undefined;
   /** Prefixed to every id, so two inline SVGs on one page cannot collide. */
   readonly idPrefix?: string | undefined;
@@ -324,7 +324,7 @@ function prefixUrls(value: string, prefix: string): string {
 }
 
 function withTokens(value: string, ctx: Walk): string {
-  if (!value.includes("$") && !value.includes("--cc-")) return value;
+  if (!value.includes("$") && !value.includes("--us-")) return value;
   const look = (name: string, whole: string): string => {
     const v = ctx.tokens[name];
     if (v !== undefined) return v;
@@ -336,7 +336,7 @@ function withTokens(value: string, ctx: Walk): string {
   };
   return value
     .replace(
-      /var\(\s*--cc-([A-Za-z][\w-]*)\s*(?:,\s*([^)]*))?\)/g,
+      /var\(\s*--us-([A-Za-z][\w-]*)\s*(?:,\s*([^)]*))?\)/g,
       (whole, name: string, fallback: string | undefined) =>
         ctx.tokens[name] ?? (fallback?.trim() || look(name, whole)),
     )

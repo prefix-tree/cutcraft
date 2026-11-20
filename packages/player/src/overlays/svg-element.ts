@@ -14,7 +14,7 @@ export interface SvgDrawing {
 /**
  * How an `<Svg>` element draws its markup: at the size the SVG asks for (or fitted to the
  * composition with `fit`), with its `viewBox`, `preserveAspectRatio` and `color` applied, and
- * `$name` / `var(--cc-name)` filled from `tokens` (by default the composition's theme).
+ * `$name` / `var(--us-name)` filled from `tokens` (by default the composition's theme).
  */
 export function svgDrawing(
   p: ElementProps,

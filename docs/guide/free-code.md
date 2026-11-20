@@ -246,7 +246,7 @@ import { PointList } from "./blocks/point-list";
 A block reads its Layer's clock. A moment takes `after`, seconds since the layer started, or `at`, seconds of the
 video, which is what a narration's cue gives, so its reveals land on the words. Given more time than its natural
 length it holds its last state. Its colours default to theme tokens, `$accent` and `$text`, so it takes the video's
-look; `themeCss("$accent")` gives the same `var(--cc-accent)` to your own components. The copy is yours: edit it
+look; `themeCss("$accent")` gives the same `var(--us-accent)` to your own components. The copy is yours: edit it
 like any of your modules. [An interview that changes layout](/examples/hundred-videos) and
 [Snake heart](/examples/snake-heart) are built on blocks.
 

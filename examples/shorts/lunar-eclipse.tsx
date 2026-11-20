@@ -183,7 +183,7 @@ const DIM = "#5b3a30";
 const ORANGE = "#e2793a";
 const RED = "#b83a2a";
 const BROWN = "#7a4a34";
-const HEAD = "var(--cc-heading)";
+const HEAD = "var(--us-heading)";
 
 const clamp = (v: number): number => Math.min(1, Math.max(0, v));
 /** 0 before `a` seconds, 1 after `b`, eased between. */
@@ -217,7 +217,7 @@ function Panel({ children }: { children: React.ReactNode }) {
       aria-label="Why there is no lunar eclipse every month"
       style={{ position: "absolute", inset: 0 }}
     >
-      <rect {...PANEL} rx="28" fill="var(--cc-surface)" />
+      <rect {...PANEL} rx="28" fill="var(--us-surface)" />
       {children}
     </svg>
   );
@@ -259,7 +259,7 @@ function Diagram(p: DiagramProps) {
           key={dy}
           d={`M218 ${EARTH.y + dy} h34 m-10 -8 l10 8 l-10 8`}
           fill="none"
-          stroke="var(--cc-accent)"
+          stroke="var(--us-accent)"
           strokeWidth="4"
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -269,7 +269,7 @@ function Diagram(p: DiagramProps) {
       <path
         data-name="shadow"
         d={`M${EARTH.x} ${EARTH.y - shadowHalf(EARTH.x)} L${far} ${EARTH.y - shadowHalf(far)} L${far} ${EARTH.y + shadowHalf(far)} L${EARTH.x} ${EARTH.y + shadowHalf(EARTH.x)} Z`}
-        fill="var(--cc-background)"
+        fill="var(--us-background)"
       />
       <text
         x={EARTH.x + 300}
@@ -279,7 +279,7 @@ function Diagram(p: DiagramProps) {
         fontWeight="700"
         fontSize="26"
         letterSpacing="3"
-        fill="var(--cc-muted)"
+        fill="var(--us-muted)"
       >
         SHADOW
       </text>
@@ -289,7 +289,7 @@ function Diagram(p: DiagramProps) {
         y1={EARTH.y}
         x2={end.x}
         y2={end.y}
-        stroke="var(--cc-muted)"
+        stroke="var(--us-muted)"
         strokeWidth="3"
         strokeDasharray="10 9"
       />
@@ -312,14 +312,14 @@ function Diagram(p: DiagramProps) {
             y1={EARTH.y}
             x2={EARTH.x + 290}
             y2={EARTH.y}
-            stroke="var(--cc-accent)"
+            stroke="var(--us-accent)"
             strokeWidth="3"
             opacity="0.5"
           />
           <path
             d={`M${EARTH.x + 220} ${EARTH.y} A220 220 0 0 0 ${EARTH.x + 220 * Math.cos((p.tilt * Math.PI) / 180)} ${EARTH.y - 220 * Math.sin((p.tilt * Math.PI) / 180)}`}
             fill="none"
-            stroke="var(--cc-accent)"
+            stroke="var(--us-accent)"
             strokeWidth="5"
             strokeLinecap="round"
           />
@@ -332,7 +332,7 @@ function Diagram(p: DiagramProps) {
             fontFamily={HEAD}
             fontWeight="800"
             fontSize="46"
-            fill="var(--cc-accent)"
+            fill="var(--us-accent)"
           />
         </g>
       ) : null}
@@ -344,7 +344,7 @@ function Diagram(p: DiagramProps) {
       {p.gap ? (
         <path
           d={`M${end.x} ${EARTH.y - p.gap * (shadowHalf(end.x) + 5)} V${end.y + p.gap * (MOON_R + 5)}`}
-          stroke="var(--cc-accent)"
+          stroke="var(--us-accent)"
           strokeWidth="4"
           strokeDasharray="3 7"
           strokeLinecap="round"
@@ -361,8 +361,8 @@ function Diagram(p: DiagramProps) {
             size={44}
             gap={14}
             radius={9}
-            fill="var(--cc-background)"
-            litFill="var(--cc-accent)"
+            fill="var(--us-background)"
+            litFill="var(--us-accent)"
             lit={lit}
           />
           <text
@@ -373,7 +373,7 @@ function Diagram(p: DiagramProps) {
             fontWeight="700"
             fontSize="24"
             letterSpacing="3"
-            fill="var(--cc-muted)"
+            fill="var(--us-muted)"
           >
             MONTHS
           </text>
@@ -385,7 +385,7 @@ function Diagram(p: DiagramProps) {
         fontFamily={HEAD}
         fontWeight="600"
         fontSize="20"
-        fill="var(--cc-muted)"
+        fill="var(--us-muted)"
         opacity="0.8"
       >
         not to scale
@@ -417,18 +417,18 @@ function Lines({
         fontWeight="700"
         fontSize="50"
         letterSpacing="2"
-        fill="var(--cc-muted)"
+        fill="var(--us-muted)"
       >
         {question}
       </text>
-      <text x="540" y="656" textAnchor="middle" fontFamily={HEAD} fontWeight="800" fontSize="68" fill="var(--cc-text)">
+      <text x="540" y="656" textAnchor="middle" fontFamily={HEAD} fontWeight="800" fontSize="68" fill="var(--us-text)">
         {wrong}
       </text>
       <DrawnLine
         from={[540 - half, 634]}
         to={[540 + half, 634]}
         progress={struck}
-        stroke="var(--cc-accent)"
+        stroke="var(--us-accent)"
         strokeWidth="9"
         strokeLinecap="round"
       />
@@ -563,7 +563,7 @@ function Sunsets({ rim = false, rays = false }: { rim?: boolean; rays?: boolean 
           key={dy}
           d={`M218 ${E.y + dy} h30 m-10 -8 l10 8 l-10 8`}
           fill="none"
-          stroke="var(--cc-accent)"
+          stroke="var(--us-accent)"
           strokeWidth="4"
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -572,7 +572,7 @@ function Sunsets({ rim = false, rays = false }: { rim?: boolean; rays?: boolean 
       ))}
       <path
         d={`M${E.x} ${E.y - half(E.x)} L${far} ${E.y - half(far)} L${far} ${E.y + half(far)} L${E.x} ${E.y + half(E.x)} Z`}
-        fill="var(--cc-background)"
+        fill="var(--us-background)"
       />
       {[-1, 1].map((side) => (
         <path
@@ -606,7 +606,7 @@ function Sunsets({ rim = false, rays = false }: { rim?: boolean; rays?: boolean 
         fontFamily={HEAD}
         fontWeight="600"
         fontSize="26"
-        fill="var(--cc-muted)"
+        fill="var(--us-muted)"
       >
         Ernie Wright, NASA
       </text>

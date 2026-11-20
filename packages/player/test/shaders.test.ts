@@ -208,10 +208,10 @@ describe("a run of colour effects", () => {
     expect(pass?.params).toEqual({ e0_stops: 0.4, e1_temperature: 0.2, e1_tint: 0, e2_amount: 0.4 });
     expect(pass?.uniforms.map((u) => u.name)).toEqual(["e0_stops", "e1_temperature", "e1_tint", "e2_amount"]);
     const source = pass?.sources[0] ?? "";
-    expect(source.indexOf("v = cc_exposure_0(v);")).toBeLessThan(source.indexOf("v = cc_whiteBalance_1(v);"));
+    expect(source.indexOf("v = us_exposure_0(v);")).toBeLessThan(source.indexOf("v = us_whiteBalance_1(v);"));
     expect(source).toContain("params.e0_stops");
     // The colour module both use is placed once.
-    expect(source.match(/vec3 cc_srgb\(/g)).toHaveLength(1);
+    expect(source.match(/vec3 us_srgb\(/g)).toHaveLength(1);
   });
 
   it("breaks at an effect that is not a colour change, and at a second white balance or curves", () => {
@@ -330,14 +330,14 @@ describe("the shader runner's program", () => {
       declared,
     );
     expect(effect).toContain("uniform sampler2D image;\nuniform sampler2D original;");
-    expect(effect).toContain("uniform float cc_param_amount;");
-    expect(effect).toContain("uniform vec3 cc_param_tint;");
-    expect(effect).toContain("uniform int cc_param_dir;");
+    expect(effect).toContain("uniform float us_param_amount;");
+    expect(effect).toContain("uniform vec3 us_param_tint;");
+    expect(effect).toContain("uniform int us_param_dir;");
     // A param may take an input's name: it is read as params.NAME, never as the bare name.
-    expect(effect).toContain("uniform float cc_param_time;");
-    expect(effect).toContain("uniform float cc_param_image;");
+    expect(effect).toContain("uniform float us_param_time;");
+    expect(effect).toContain("uniform float us_param_image;");
     // An enum's option is its index; a vec's swizzle is left alone.
-    expect(effect).toContain("cc_param_dir == 1 ? texture(image, uv) * cc_param_amount : vec4(cc_param_tint.r)");
+    expect(effect).toContain("us_param_dir == 1 ? texture(image, uv) * us_param_amount : vec4(us_param_tint.r)");
     expect(effect).not.toContain("bad name");
     expect(effect).toContain("uberscene_out = vec4(c.rgb * c.a, c.a);");
     // The text depends on how the uniforms are declared, never on their values.

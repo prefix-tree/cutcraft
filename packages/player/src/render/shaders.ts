@@ -26,14 +26,14 @@ void main() {
 const INPUTS = new Set(["image", "original", "from", "to", "resolution", "time", "progress", "position"]);
 
 /** The uniform a param is declared as: shaders read it as `params.NAME`, which the runner rewrites to this. */
-const paramUniform = (name: string): string => `cc_param_${name}`;
+const paramUniform = (name: string): string => `us_param_${name}`;
 
 /** A shader's `params.NAME` reads, as the uniforms the runner declares. */
 const PARAM_READ = /(?<![.\w])params\.([A-Za-z_]\w*)/g;
 
 /** A compile or link log with the param uniforms back as the shader wrote them. */
 const asWritten = (log: string | null | undefined): string | undefined =>
-  log?.trim().replace(/cc_param_(\w+)/g, "params.$1");
+  log?.trim().replace(/us_param_(\w+)/g, "params.$1");
 
 /** A param's uniform as a pass declares it: its GLSL type, and an enum's options. */
 export interface Declared {

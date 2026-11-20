@@ -1,4 +1,5 @@
 import type * as t from "@babel/types";
+import { isJSXText, isStringLiteral, isTemplateElement, traverseFast } from "@babel/types";
 
 import { COMPONENT_NAMES, ELEMENTS, ENGINE_LAYERS } from "@uberscene/kit/schema";
 
@@ -119,3 +120,34 @@ function onTag(text: string, tag: t.JSXOpeningElement, name: string, rows: reado
     } satisfies Diagnostic;
   });
 }
+
+const OLD_THEME_VARIABLE = "--cc-";
+const THEME_VARIABLE = "--us-";
+
+/**
+ * The theme's CSS variables were `--cc-*` before 0.6 and are `--us-*` now. Free code, SVG markup and component styles
+ * write them in strings, so the rule reads every string, template and JSX text in the file and fixes each one.
+ */
+export const oldThemeVariables: Rule = {
+  name: "old-theme-variables",
+  check: (index) => {
+    const out: Diagnostic[] = [];
+    traverseFast(index.ast.program, (node) => {
+      if (!isStringLiteral(node) && !isTemplateElement(node) && !isJSXText(node)) return;
+      const start = node.start as number;
+      const raw = index.text.slice(start, node.end as number);
+      for (let at = raw.indexOf(OLD_THEME_VARIABLE); at >= 0; at = raw.indexOf(OLD_THEME_VARIABLE, at + 1)) {
+        const range: Range = [start + at, start + at + OLD_THEME_VARIABLE.length];
+        const name = /^[\w-]*/.exec(raw.slice(at + OLD_THEME_VARIABLE.length))?.[0] ?? "";
+        out.push({
+          rule: "old-theme-variables",
+          severity: "error",
+          message: `\`${OLD_THEME_VARIABLE}${name}\` is \`${THEME_VARIABLE}${name}\` since 0.6`,
+          range,
+          fix: [{ kind: "text", id: "", range, text: THEME_VARIABLE }],
+        });
+      }
+    });
+    return out;
+  },
+};

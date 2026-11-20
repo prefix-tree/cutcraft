@@ -54,7 +54,7 @@ A token names one theme value. A prop whose whole value is `$name` takes that va
 | Fonts | `font="$heading"` |
 | Lengths | `cornerRadius="$radius"`, `transform.borderRadius` |
 
-Inside SVG markup, write `$name` or `var(--cc-name, fallback)` in attributes and styles.
+Inside SVG markup, write `$name` or `var(--us-name, fallback)` in attributes and styles.
 
 Tokens resolve against the default theme when the file declares none, so `$primary` always means something. An
 unknown token is an error: `UNKNOWN_TOKEN` when the file resolves, and the [`theme-refs` lint](#lint).

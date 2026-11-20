@@ -2,7 +2,7 @@
   "name": "@uberscene/recipes",
   "version": "0.1.0",
   "private": true,
-  "description": "Complete cut files for the videos cutcut is made for, each linted and resolved in a test.",
+  "description": "Complete cut files for the videos UberScene is made for, each linted and resolved in a test.",
   "type": "module",
   "scripts": {
     "typecheck": "tsc --noEmit -p tsconfig.json",
