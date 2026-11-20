@@ -31,22 +31,28 @@ The coffee footage is Pixabay videos [209419](https://pixabay.com/videos/id-2094
 | `blend` | "normal" \| "multiply" \| "screen" \| "overlay" \| "darken" \| … 13 more |  |  | How it mixes with what is under it, as CSS `mix-blend-mode` does. Only `normal` renders ([What renders](/reference/rendering)). |
 | `enter` | { type, duration, easing } |  |  | How it comes in: a fade, slide, scale or wipe over its first seconds, with an easing. |
 | `exit` | { type, duration, easing } |  |  | How it goes out, over its last seconds, as `enter`. |
-| `style` | string |  |  | A theme preset for titles; without one, the theme's `default` title preset applies. |
-| `font` | string | `"Inter"` |  | The font family: a bundled one, one the file declares, or one from the font catalogue. A theme preset may set it instead. |
-| `size` | number (1..1000) | `48` |  | The letters' size, in pixels. |
-| `weight` | integer (100..900) \| "normal" \| "bold" | `"bold"` |  | How heavy the letters are: 100 to 900, or `normal` and `bold`. |
-| `italic` | boolean | `false` |  | Slanted letters. |
-| `color` | string | `"#ffffff"` |  | The letters' colour, or a theme token such as `$text`. |
-| `background` | string |  |  | A colour filling the text box behind the letters. |
-| `stroke` | { color, width } |  |  | An outline around the letters: its colour and width in pixels. |
-| `shadow` | { color, blur, x, y } |  |  | A drop shadow under the letters: colour, blur and offset in pixels. |
-| `align` | "left" \| "center" \| "right" \| "justify" | `"center"` |  | Which side of the text box the lines sit against. |
-| `valign` | "top" \| "middle" \| "bottom" | `"middle"` |  | Where in the text box's height the text sits. |
-| `width` | number (> 0) |  |  | The text box, in composition pixels; the whole frame when left out, so background, align and valign work inside it. |
-| `height` | number (> 0) |  |  | The text box's height, in pixels, as `width`. |
-| `lineHeight` | number (0.1..10) | `1.2` |  | The distance between lines, as a multiple of the letters' size. |
-| `letterSpacing` | number (-100..100) | `0` |  | Extra space between letters, in pixels. |
-| `decoration` | "none" \| "underline" \| "line-through" \| "overline" |  |  | A line under, over or through the letters. |
+| `style` | string \| { preset, font, size, weight, italic, color, background, stroke, shadow, align, valign, lineHeight, letterSpacing, decoration } | `{}` |  | How the letters look: a theme title preset by name (`"h1"`), or an object of `font`, `size`, `weight`, `italic`, `color`, `background`, `stroke`, `shadow`, `align`, `valign`, `lineHeight`, `letterSpacing` and `decoration`, with `preset` naming the preset it starts from. Without a preset, the theme's `default` title preset applies. The text box is the title's `box`: its `width` and `height`, the whole frame when left out, so background, align and valign work inside it. |
 | `animation` | { preset, in, out, stagger } |  |  | An entrance and exit: a preset, its seconds in and out, and for word-by-word the delay between words. |
+
+### `style`
+
+A theme preset's name, or an object of these fields. `preset` names the preset the object starts from; the fields written beside it win.
+
+| field | type | default | description |
+|---|---|---|---|
+| `preset` | string |  | A theme title preset this look starts from; the fields written beside it win. |
+| `font` | string | `"Inter"` | The font family: a bundled one, one the file declares, or one from the font catalogue. A theme preset may set it instead. |
+| `size` | number (1..1000) | `48` | The letters' size, in pixels. |
+| `weight` | integer (100..900) \| "normal" \| "bold" | `"bold"` | How heavy the letters are: 100 to 900, or `normal` and `bold`. |
+| `italic` | boolean | `false` | Slanted letters. |
+| `color` | string | `"#ffffff"` | The letters' colour, or a theme token such as `$text`. |
+| `background` | string |  | A colour filling the text box behind the letters. |
+| `stroke` | { color, width } |  | An outline around the letters: its colour and width in pixels. |
+| `shadow` | { color, blur, x, y } |  | A drop shadow under the letters: colour, blur and offset in pixels. |
+| `align` | "left" \| "center" \| "right" \| "justify" | `"center"` | Which side of the text box the lines sit against. |
+| `valign` | "top" \| "middle" \| "bottom" | `"middle"` | Where in the text box's height the text sits. |
+| `lineHeight` | number (0.1..10) | `1.2` | The distance between lines, as a multiple of the letters' size. |
+| `letterSpacing` | number (-100..100) | `0` | Extra space between letters, in pixels. |
+| `decoration` | "none" \| "underline" \| "line-through" \| "overline" |  | A line under, over or through the letters. |
 
 Timed, visual, transformable. Children: `effect`, `keyframe`, `mask`. [All elements](/reference/elements/)

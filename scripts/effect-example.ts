@@ -358,7 +358,7 @@ export function effectExample(name: keyof typeof EFFECTS): string {
       ]),
       "      </Track>",
       '      <Track id="text" layout="free">',
-      `        <Title id="word" start={0} duration={${EXAMPLE_SECONDS}} size={128} color="#e8a33d">`,
+      `        <Title id="word" start={0} duration={${EXAMPLE_SECONDS}} style={{ size: 128, color: "#e8a33d" }}>`,
       ...look,
       "          Crema",
       "        </Title>",

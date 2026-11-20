@@ -23,7 +23,7 @@ import { listHandlers } from "../packages/sdk/src/index";
 import { readApiExports } from "./api-exports";
 import { EFFECT_DEMOS, effectExample, TRANSITION_TEXT, transitionExample } from "./effect-example";
 import { syncGeneratedFiles } from "./generated-files";
-import { readPropDocs } from "./prop-docs";
+import { readPropDocs, STYLED } from "./prop-docs";
 
 /**
  * Generated reference pages: the element table from the Zod schemas and the
@@ -317,6 +317,24 @@ function elementPage(name: string, summary: string): string {
   }
   if (name === "Effect" || name === "Transition")
     lines.push("", "Every built-in type and its params: [Effects and transitions](/reference/effects/).");
+  // A `style` that is a preset name or an object: the object's fields, each with its default.
+  const style = (STYLED as readonly string[]).includes(name)
+    ? (schema.properties?.style?.anyOf ?? []).find((s) => s.properties)
+    : undefined;
+  if (style)
+    lines.push(
+      "",
+      "### `style`",
+      "",
+      "A theme preset's name, or an object of these fields. `preset` names the preset the object starts from; the fields written beside it win.",
+      "",
+      "| field | type | default | description |",
+      "|---|---|---|---|",
+      ...Object.entries(style.properties ?? {}).map(
+        ([field, s]) =>
+          `| \`${field}\` | ${typeOf(s, 6)} | ${defaultOf(s.default)} | ${describe(`style:${name}`, field)} |`,
+      ),
+    );
   lines.push(
     "",
     `${traits.length ? `${capital(traits.join(", "))}. ` : ""}${c.childKinds.length ? `Children: ${c.childKinds.map((k) => `\`${k}\``).join(", ")}.` : "No children."} [All elements](/reference/elements/)`,

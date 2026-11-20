@@ -217,23 +217,29 @@ Text over the picture in the theme's type, with entrances by letter or by word.
 | `blend` | "normal" \| "multiply" \| "screen" \| "overlay" \| "darken" \| … 13 more |  |  | How it mixes with what is under it, as CSS `mix-blend-mode` does. Only `normal` renders ([What renders](https://uberscene.prefixtree.xyz/reference/rendering)). |
 | `enter` | { type, duration, easing } |  |  | How it comes in: a fade, slide, scale or wipe over its first seconds, with an easing. |
 | `exit` | { type, duration, easing } |  |  | How it goes out, over its last seconds, as `enter`. |
-| `style` | string |  |  | A theme preset for titles; without one, the theme's `default` title preset applies. |
-| `font` | string | `"Inter"` |  | The font family: a bundled one, one the file declares, or one from the font catalogue. A theme preset may set it instead. |
-| `size` | number (1..1000) | `48` |  | The letters' size, in pixels. |
-| `weight` | integer (100..900) \| "normal" \| "bold" | `"bold"` |  | How heavy the letters are: 100 to 900, or `normal` and `bold`. |
-| `italic` | boolean | `false` |  | Slanted letters. |
-| `color` | string | `"#ffffff"` |  | The letters' colour, or a theme token such as `$text`. |
-| `background` | string |  |  | A colour filling the text box behind the letters. |
-| `stroke` | { color, width } |  |  | An outline around the letters: its colour and width in pixels. |
-| `shadow` | { color, blur, x, y } |  |  | A drop shadow under the letters: colour, blur and offset in pixels. |
-| `align` | "left" \| "center" \| "right" \| "justify" | `"center"` |  | Which side of the text box the lines sit against. |
-| `valign` | "top" \| "middle" \| "bottom" | `"middle"` |  | Where in the text box's height the text sits. |
-| `width` | number (> 0) |  |  | The text box, in composition pixels; the whole frame when left out, so background, align and valign work inside it. |
-| `height` | number (> 0) |  |  | The text box's height, in pixels, as `width`. |
-| `lineHeight` | number (0.1..10) | `1.2` |  | The distance between lines, as a multiple of the letters' size. |
-| `letterSpacing` | number (-100..100) | `0` |  | Extra space between letters, in pixels. |
-| `decoration` | "none" \| "underline" \| "line-through" \| "overline" |  |  | A line under, over or through the letters. |
+| `style` | string \| { preset, font, size, weight, italic, color, background, stroke, shadow, align, valign, lineHeight, letterSpacing, decoration } | `{}` |  | How the letters look: a theme title preset by name (`"h1"`), or an object of `font`, `size`, `weight`, `italic`, `color`, `background`, `stroke`, `shadow`, `align`, `valign`, `lineHeight`, `letterSpacing` and `decoration`, with `preset` naming the preset it starts from. Without a preset, the theme's `default` title preset applies. The text box is the title's `box`: its `width` and `height`, the whole frame when left out, so background, align and valign work inside it. |
 | `animation` | { preset, in, out, stagger } |  |  | An entrance and exit: a preset, its seconds in and out, and for word-by-word the delay between words. |
+
+#### `style`
+
+A theme preset's name, or an object of these fields. `preset` names the preset the object starts from; the fields written beside it win.
+
+| field | type | default | description |
+|---|---|---|---|
+| `preset` | string |  | A theme title preset this look starts from; the fields written beside it win. |
+| `font` | string | `"Inter"` | The font family: a bundled one, one the file declares, or one from the font catalogue. A theme preset may set it instead. |
+| `size` | number (1..1000) | `48` | The letters' size, in pixels. |
+| `weight` | integer (100..900) \| "normal" \| "bold" | `"bold"` | How heavy the letters are: 100 to 900, or `normal` and `bold`. |
+| `italic` | boolean | `false` | Slanted letters. |
+| `color` | string | `"#ffffff"` | The letters' colour, or a theme token such as `$text`. |
+| `background` | string |  | A colour filling the text box behind the letters. |
+| `stroke` | { color, width } |  | An outline around the letters: its colour and width in pixels. |
+| `shadow` | { color, blur, x, y } |  | A drop shadow under the letters: colour, blur and offset in pixels. |
+| `align` | "left" \| "center" \| "right" \| "justify" | `"center"` | Which side of the text box the lines sit against. |
+| `valign` | "top" \| "middle" \| "bottom" | `"middle"` | Where in the text box's height the text sits. |
+| `lineHeight` | number (0.1..10) | `1.2` | The distance between lines, as a multiple of the letters' size. |
+| `letterSpacing` | number (-100..100) | `0` | Extra space between letters, in pixels. |
+| `decoration` | "none" \| "underline" \| "line-through" \| "overline" |  | A line under, over or through the letters. |
 
 Timed, visual, transformable. Children: `effect`, `keyframe`, `mask`. [All elements](https://uberscene.prefixtree.xyz/reference/elements/)
 
@@ -247,14 +253,32 @@ Subtitles from an asset's transcript that follow the clips through every trim.
 |---|---|---|---|---|
 | `id` | string |  | yes | The captions' name. |
 | `src` | string |  |  | Generate children from the asset's transcript. Literal `<Caption>` children override this. |
-| `style` | string \| { font, size, weight, color, background, shadow, stroke, highlight, highlightBox, upcoming } |  |  | Caption styling, or the name of a theme captions preset. |
+| `style` | string \| { preset, font, size, weight, color, background, shadow, stroke, highlight, highlightBox, upcoming, align } |  |  | How the words look: the name of a theme captions preset, or an object of its fields, with `preset` naming the one it starts from. |
 | `animation` | "none" \| "word-highlight" \| "word-by-word" \| "karaoke" \| "typewriter" | `"none"` |  | How the words appear: all at once, the word being said highlighted, word by word, karaoke or typewriter. |
 | `box` | { x, y, width, height, origin } |  |  | The rectangle the caption block sits in, from the frame's top left as on any element. Left out, the lower safe area: centred, as wide as the frame less a margin at each side, its bottom a margin above the frame's bottom (`origin: "bottom"`). Each field written replaces that one of the default, so a box with only `y: 1150` and `origin: "center"` puts the block's middle at 1150 and keeps the default width. Without a `height`, the block is as tall as its lines. |
-| `align` | "left" \| "center" \| "right" \| "justify" |  |  | Which side of that width the lines sit against. Left out: `center`. |
 | `maxChars` | integer (> 0) |  |  | The most characters on a generated cue's line. Left out: as many as fit at the caption size on this frame (at most 42). |
 | `maxDuration` | number (> 0) | `5` |  | The longest a generated cue may stay on screen, in seconds. |
 | `maxGap` | number (0..∞) | `0.8` |  | A pause longer than this, in seconds, starts a new cue. |
 | `breakAfter` | string[] |  |  | Words a generated cue always ends after, as `word:N` refs on `src`: `breakAfter={["word:5", "word:12"]}`. |
+
+#### `style`
+
+A theme preset's name, or an object of these fields. `preset` names the preset the object starts from; the fields written beside it win.
+
+| field | type | default | description |
+|---|---|---|---|
+| `preset` | string |  | A theme captions preset this style starts from; the fields written beside it win. |
+| `font` | string |  | The font family, as a title's. Left out: Inter. |
+| `size` | number (1..1000) |  | The letters' size, in pixels. Left out: a 24th of the frame's height. |
+| `weight` | integer (100..900) \| "normal" \| "bold" |  | How heavy the letters are: 100 to 900, or `normal` and `bold`. Left out: 800. |
+| `color` | string |  | The letters' colour, or a theme token. Left out: white. |
+| `background` | string |  | A colour behind each cue. |
+| `shadow` | { color, blur, x, y } |  | A drop shadow under the letters. Left out: a dark halo that reads on light and dark footage. |
+| `stroke` | { color, width } |  | An outline around the letters, drawn under them. |
+| `highlight` | string |  | The colour of the word being said, for the word animations. |
+| `highlightBox` | string |  | A filled, rounded box behind the word being said. `highlight` stays the colour of its letters. |
+| `upcoming` | string |  | The colour of the words not yet said. |
+| `align` | "left" \| "center" \| "right" \| "justify" |  | Which side of the box's width the lines sit against. Left out: `center`. |
 
 Visual. Children: `caption`. [All elements](https://uberscene.prefixtree.xyz/reference/elements/)
 
