@@ -5,7 +5,7 @@ import { join } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
-import type { AssetManifest } from "@uberscene/kit";
+import type { AssetManifest } from "@uberscene/sdk";
 
 import { SOUNDS, wav } from "../media/sounds";
 

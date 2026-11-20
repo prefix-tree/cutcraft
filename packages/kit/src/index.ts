@@ -1,67 +1,58 @@
-export * from "./actions/affordances";
-export * from "./actions/executor";
-export * from "./actions/handler-kit";
-export * from "./actions/history";
-export * from "./actions/registry";
-export * from "./actions/types";
+// What a video file imports: the elements, the ready-made components and diagram parts, the hooks and helpers free
+// code uses on the video's clock, fonts, themes, schema knobs and block descriptions. Tools that read, resolve or edit
+// a file use `@uberscene/kit/schema` for the vocabulary as data and `@uberscene/sdk` for the rest.
 export * from "./components/index";
 export * from "./diagram/index";
-export { type GaussOutside, type GaussWhat, gaussScale, gaussSources, gaussSteps } from "./effects/gauss";
 export {
-  BUILT_IN_SHADERS,
-  BUILT_IN_TRANSITIONS,
-  builtInShader,
-  builtInTransition,
-  cssOf,
-  EFFECT_FAMILIES,
-  EFFECTS,
-  type EffectDraw,
-  type EffectEntry,
-  type EffectParams,
-  effectEntry,
-  isNeutral,
-  POST_EFFECTS,
-  SHADER_ONLY_EFFECTS,
-  TRANSITION_FAMILIES,
-  TRANSITIONS,
-  type TransitionEntry,
-  type TransitionParams,
-} from "./effects/registry";
-export { type ColourFunction, fusedColourSource } from "./effects/shapes";
-export * from "./inspect/index";
-export * from "./jsx/animate";
-export * from "./jsx/block-meta";
-export * from "./jsx/capabilities";
-export * from "./jsx/curves";
-export * from "./jsx/define";
-export * from "./jsx/effect-params";
-export * from "./jsx/elements";
-export * from "./jsx/engines";
-export * from "./jsx/enums";
-export * from "./jsx/knobs";
+  type Extrapolate,
+  type InterpolateOptions,
+  interpolate,
+  random,
+  type SpringOptions,
+  spring,
+  stepAt,
+} from "./jsx/animate";
+export { type BlockMeta, blockMetaSchema } from "./jsx/block-meta";
+export {
+  Adjustment,
+  Angle,
+  Audio,
+  Caption,
+  Captions,
+  Clip,
+  Composition,
+  Cut,
+  Effect,
+  type EffectComponent,
+  type EffectParamsOf,
+  Freeze,
+  Gap,
+  Keyframe,
+  Layer,
+  Marker,
+  Mask,
+  Motion,
+  Multicam,
+  Nested,
+  Shape,
+  SpeedKey,
+  Sticker,
+  Svg,
+  Three,
+  Title,
+  Track,
+  Transition,
+  type TransitionComponent,
+  type TransitionParamsOf,
+} from "./jsx/elements";
+export { holdLayerFrame } from "./jsx/engines";
+export { type Knob, type KnobKind, knob } from "./jsx/knobs";
 export * from "./jsx/narrate";
-export * from "./jsx/rendering";
-export type { Transform } from "./jsx/schemas/common";
 export type { ThreeFrameArgs, ThreeSetupArgs, ThreeSetupFunction } from "./jsx/schemas/overlays";
-export { defaultTransitionParams, TRANSITION_PARAMS } from "./jsx/schemas/transition";
-export * from "./jsx/shaders";
+export { type EffectRef, effect, type TransitionRef, transition } from "./jsx/shaders";
 export * from "./jsx/use-seekable";
-export * from "./jsx/use-t";
-export * from "./manifest/cube";
-export * from "./manifest/timeref";
-export * from "./manifest/transcript";
-export * from "./manifest/types";
-export * from "./patches/log";
-export * from "./patches/types";
-export * from "./resolve/captions";
-export * from "./resolve/collect";
-export * from "./resolve/dependents";
-export * from "./resolve/errors";
-export * from "./resolve/resolve";
-export * from "./resolve/scene";
-export * from "./resolve/speed";
-export * from "./resolve/subtitles";
-export * from "./resolve/tree";
-export * from "./theme";
-
-import "./actions/handlers";
+export { type LayerClock, useLayer, useT } from "./jsx/use-t";
+export { THEME_NAMES, THEMES, type ThemeName } from "./theme/builtins";
+export { themeCss } from "./theme/css";
+export { type FontRef, font, fontFamily, googleFont } from "./theme/fonts";
+export type { ThemeInput } from "./theme/schema";

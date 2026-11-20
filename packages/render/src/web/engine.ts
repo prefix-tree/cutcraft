@@ -1,8 +1,9 @@
 // The export engine: headless Chrome runs the real Player and draws each frame (footage, titles, three.js, Motion, CSS,
 // any React), captures it with drawElementImage and encodes it with WebCodecs. It also mixes and encodes the soundtrack
 // and measures the overlays for the layout check. Node serves the page, asks for pieces, and joins what comes back.
-import type { AssetManifest } from "@uberscene/kit";
+
 import type { MediaResolver } from "@uberscene/player/engine";
+import type { AssetManifest } from "@uberscene/sdk";
 
 import type { FontFile } from "../fonts";
 import { findChrome } from "./chrome";

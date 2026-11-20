@@ -1,4 +1,4 @@
-import type { ResolvedState } from "@uberscene/kit";
+import type { ResolvedState } from "@uberscene/sdk";
 
 /** Kinds the overlay plane draws (as DOM, in the preview and the export) rather than the canvas. */
 export const OVERLAY_KINDS: ReadonlySet<string> = new Set(["title", "shape", "svg", "sticker", "layer", "adjustment"]);

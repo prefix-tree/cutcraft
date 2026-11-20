@@ -1,4 +1,4 @@
-import { type Placement, type ResolvedState, resolveScene, type SceneFn } from "@uberscene/kit";
+import { type Placement, type ResolvedState, resolveScene, type SceneFn } from "@uberscene/sdk";
 
 import type { ResolveNested } from "./model/frame-plan";
 

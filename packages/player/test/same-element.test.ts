@@ -1,7 +1,7 @@
-import { collectModule, createPatchLog, resolve } from "@uberscene/kit";
 import { type ElementCellProps, sameElement, visiblePlacements } from "@uberscene/player";
+import { collectModule, createPatchLog, resolve } from "@uberscene/sdk";
 
-import * as sample from "../../kit/fixtures/sample";
+import * as sample from "../../sdk/fixtures/sample";
 import { fixtureManifest } from "./helpers/state";
 
 function cell(state: ReturnType<typeof resolve>, id: string, time: number): ElementCellProps {

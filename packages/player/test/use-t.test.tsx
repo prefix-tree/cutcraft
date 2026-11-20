@@ -1,6 +1,7 @@
-import { Composition, collectModule, Executor, Layer, Track, useLayer, useT } from "@uberscene/kit";
+import { Composition, Layer, Track, useLayer, useT } from "@uberscene/kit";
+import { collectModule, Executor } from "@uberscene/sdk";
 
-import * as sample from "../../kit/fixtures/sample";
+import * as sample from "../../sdk/fixtures/sample";
 import { mountPlayer } from "./helpers/react";
 import { fixtureElement, fixtureManifest, fixtureState, makeState } from "./helpers/state";
 

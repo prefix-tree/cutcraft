@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { gaussScale, gaussSources, gaussSteps } from "@uberscene/kit";
+import { gaussScale, gaussSources, gaussSteps } from "@uberscene/kit/schema";
 
 describe("the shared Gaussian", () => {
   it("draws a blur of 4 px or more at half size, and of 8 px or more at a quarter", () => {

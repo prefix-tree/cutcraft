@@ -8,7 +8,7 @@ import {
   type InputVideoTrack,
 } from "mediabunny";
 
-import { motionBlurOf, type ResolvedState } from "@uberscene/kit";
+import { motionBlurOf } from "@uberscene/kit/schema";
 import {
   buildFramePlan,
   coversCanvas,
@@ -19,6 +19,7 @@ import {
   PICK_EPS,
   visiblePlacements,
 } from "@uberscene/player/engine";
+import type { ResolvedState } from "@uberscene/sdk";
 
 import type { VideoCodec } from "./encoding";
 import { compatibleConfig } from "./join";

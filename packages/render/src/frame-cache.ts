@@ -6,8 +6,9 @@ import { createHash } from "node:crypto";
 import { mkdirSync, readFileSync, renameSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
-import { motionBlurOf, type Placement, type ResolvedState, shutterTimes } from "@uberscene/kit";
+import { motionBlurOf, shutterTimes } from "@uberscene/kit/schema";
 import type { MediaResolver } from "@uberscene/player/engine";
+import type { Placement, ResolvedState } from "@uberscene/sdk";
 
 import type { FontFile } from "./fonts";
 import type { ExportSource } from "./renderer";

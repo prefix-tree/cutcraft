@@ -11,15 +11,15 @@ import {
   ELEMENTS,
   ENGINE_LAYERS,
   KIND_CAPABILITIES,
-  listHandlers,
   MASK_NOT_RENDERED,
   MASKED_KINDS,
   NOT_RENDERED,
   RENDERED_VALUES,
   TRANSITION_FAMILIES,
   TRANSITIONS,
-} from "../packages/kit/src/index";
+} from "../packages/kit/src/schema";
 import { type BlockInfo, listBlocks } from "../packages/render/src/blocks";
+import { listHandlers } from "../packages/sdk/src/index";
 import { EFFECT_DEMOS, effectExample, TRANSITION_TEXT, transitionExample } from "./effect-example";
 import { syncGeneratedFiles } from "./generated-files";
 import { readPropDocs } from "./prop-docs";
@@ -579,7 +579,7 @@ function actionsPage(): string {
     "",
     `Generated from the registered handlers (${listHandlers().length}). Do not edit by hand; run \`pnpm docs:gen\`.`,
     "",
-    "Every action has `validate`, `apply`, `invert` and `fold`; the inverse is never null. Each runs as `{ type, params }`; the params and notes here are read from `packages/kit/src/actions/types/index.ts`.",
+    "Every action has `validate`, `apply`, `invert` and `fold`; the inverse is never null. Each runs as `{ type, params }`; the params and notes here are read from `packages/sdk/src/actions/types/index.ts`.",
     "",
   ];
   for (const [ns, types] of [...groups].sort()) {

@@ -1,13 +1,5 @@
-import {
-  type BlendMode,
-  type FitMode,
-  lookupAsset,
-  MASK_TYPES,
-  type Placement,
-  type ResolvedState,
-  TRANSITION_TYPES,
-  type Transform,
-} from "@uberscene/kit";
+import { type BlendMode, type FitMode, MASK_TYPES, TRANSITION_TYPES, type Transform } from "@uberscene/kit/schema";
+import { lookupAsset, type Placement, type ResolvedState } from "@uberscene/sdk";
 
 import { devWarn } from "../warn";
 import { backdropTracks } from "./backdrop";

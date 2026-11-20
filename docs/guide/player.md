@@ -13,7 +13,7 @@ npm install @uberscene/player @uberscene/kit react react-dom
 ```
 
 ```tsx
-import { collectModule, resolve } from "@uberscene/kit";
+import { collectModule, resolve } from "@uberscene/sdk";
 import { Player } from "@uberscene/player";
 import "@uberscene/player/fonts.css";
 import * as file from "./video";
@@ -60,8 +60,8 @@ too:
 
 ```tsx
 import { installFreeCodeLibraries } from "@uberscene/graphics/libraries";
-import { collectModule, resolve } from "@uberscene/kit";
-import { loadModule } from "@uberscene/kit/source";
+import { collectModule, resolve } from "@uberscene/sdk";
+import { loadModule } from "@uberscene/sdk";
 
 const imports = installFreeCodeLibraries();
 const file = loadModule(sourceText, { imports });

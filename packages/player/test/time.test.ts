@@ -1,5 +1,5 @@
-import { rampAdvance, rampInverse, speedKeysOf } from "@uberscene/kit";
 import { frameIndex, frameTime, layerClock, localT, placementSourceTime, timecode } from "@uberscene/player";
+import { rampAdvance, rampInverse, speedKeysOf } from "@uberscene/sdk";
 
 import { childrenOf, fixtureState, makeState } from "./helpers/state";
 

@@ -122,7 +122,7 @@ The same file plays in the browser with `@uberscene/player`, in a React app buil
 imports `.tsx` and JSON ([Player](./player) has the details):
 
 ```tsx
-import { collectModule, resolve } from "@uberscene/kit";
+import { collectModule, resolve } from "@uberscene/sdk";
 import { Player } from "@uberscene/player";
 import "@uberscene/player/fonts.css";
 

@@ -3,8 +3,8 @@ import { join, parse } from "node:path";
 
 import { EncodedVideoPacketSource, FilePathTarget, Output } from "mediabunny";
 
-import type { AssetManifest, ResolvedState } from "@uberscene/kit";
 import { FRAME_EPS, type MediaResolver } from "@uberscene/player/engine";
+import type { AssetManifest, ResolvedState } from "@uberscene/sdk";
 
 import { feedCopy, planCopy, type Run } from "./copy";
 import {

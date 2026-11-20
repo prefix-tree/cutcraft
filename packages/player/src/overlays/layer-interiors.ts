@@ -1,6 +1,6 @@
 import { Children, Fragment, isValidElement, type ReactElement, type ReactNode } from "react";
 
-import { isVocabulary } from "@uberscene/kit";
+import { isVocabulary } from "@uberscene/kit/schema";
 
 /**
  * Walk the file's element tree the way the kit's `collect` does (fragments,

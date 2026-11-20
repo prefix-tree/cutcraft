@@ -1,4 +1,4 @@
-import type { AssetEntry } from "@uberscene/kit";
+import type { AssetEntry } from "@uberscene/sdk";
 
 export interface PlayerErrorEvent {
   readonly id?: string;

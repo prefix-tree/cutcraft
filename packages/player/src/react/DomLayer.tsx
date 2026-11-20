@@ -1,6 +1,7 @@
 import { memo, type ReactNode } from "react";
 
-import { effectEntry, type Placement, type ResolvedState } from "@uberscene/kit";
+import { effectEntry } from "@uberscene/kit/schema";
+import type { Placement, ResolvedState } from "@uberscene/sdk";
 
 import { backdropTracks } from "../model/backdrop";
 import { effectPipeline } from "../model/shaders";

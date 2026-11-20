@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
 
-import { builtInShader, builtInTransition, EFFECTS, fusedColourSource, isNeutral } from "@uberscene/kit";
+import { builtInShader, builtInTransition, EFFECTS, fusedColourSource, isNeutral } from "@uberscene/kit/schema";
 
 import { colorTransform, maskTransition } from "../src/effects/shapes";
 

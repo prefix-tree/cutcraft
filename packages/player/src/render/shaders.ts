@@ -3,7 +3,7 @@
 // with WebGL 2. Passes between the first and the last draw into textures, not the canvas. Where there is no WebGL 2,
 // `available` is false and the painter draws without them.
 
-import type { ShaderStep, ShaderUniform } from "@uberscene/kit";
+import type { ShaderStep, ShaderUniform } from "@uberscene/kit/schema";
 
 import type { ShaderTexture, ShaderTextures } from "../media/shader-textures";
 import type { ShaderPass, TransitionPass } from "../model/shaders";

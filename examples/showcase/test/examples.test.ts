@@ -5,8 +5,7 @@ import { join } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
-import { type AssetManifest, collectModule, resolve } from "@uberscene/kit";
-import { gatherLocalFiles, lint, loadModule } from "@uberscene/kit/source";
+import { type AssetManifest, collectModule, gatherLocalFiles, lint, loadModule, resolve } from "@uberscene/sdk";
 
 const root = join(import.meta.dirname, "..");
 const manifest = JSON.parse(readFileSync(join(root, "uberscene.json"), "utf8")) as AssetManifest;

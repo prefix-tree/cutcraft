@@ -8,9 +8,8 @@ import { basicSetup, EditorView } from "codemirror";
 import { createRef, type ReactNode } from "react";
 import { createRoot, type Root } from "react-dom/client";
 
-import { type AssetManifest, collectModule, type ResolvedState, resolve } from "@uberscene/kit";
-import { loadModule } from "@uberscene/kit/source";
 import { Player, type PlayerRef } from "@uberscene/player";
+import { type AssetManifest, collectModule, loadModule, type ResolvedState, resolve } from "@uberscene/sdk";
 import "@uberscene/player/fonts.css";
 
 import { MANIFEST } from "./starters";

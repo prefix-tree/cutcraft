@@ -19,7 +19,10 @@
       "ignoreDependencies": ["@arethetypeswrong/cli"]
     },
     "packages/kit": {
-      "entry": ["src/index.ts", "src/source/index-public.ts", "scripts/*.ts", "fixtures/*.tsx"]
+      "entry": ["src/index.ts", "src/schema.ts", "scripts/*.ts"]
+    },
+    "packages/sdk": {
+      "entry": ["src/index.ts", "scripts/*.ts", "fixtures/*.tsx"]
     },
     "packages/player": {
       "entry": ["src/index.ts", "src/engine.ts", "e2e/**/*.{ts,tsx}"],

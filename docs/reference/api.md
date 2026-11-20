@@ -7,7 +7,7 @@ The functions, components and options you call from code: the player in the brow
 ```tsx
 import { Player, type PlayerRef } from "@uberscene/player";
 import "@uberscene/player/fonts.css";
-import { collectModule, resolve } from "@uberscene/kit";
+import { collectModule, resolve } from "@uberscene/sdk";
 import * as file from "./video";
 
 const state = resolve(collectModule(file), manifest);

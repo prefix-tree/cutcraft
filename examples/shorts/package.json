@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@uberscene/kit": "workspace:*",
+    "@uberscene/sdk": "workspace:*",
     "@uberscene/render": "workspace:*",
     "react": "catalog:",
     "zod": "catalog:"

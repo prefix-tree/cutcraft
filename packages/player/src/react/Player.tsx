@@ -10,7 +10,7 @@ import {
   useState,
 } from "react";
 
-import type { ResolvedState } from "@uberscene/kit";
+import type { ResolvedState } from "@uberscene/sdk";
 
 import { backdropTracks } from "../model/backdrop";
 import { compositionBackground } from "../model/frame-plan";

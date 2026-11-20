@@ -4,14 +4,13 @@ import {
   type ColourFunction,
   fusedColourSource,
   isNeutral,
-  type Placement,
-  type ResolvedState,
   SHADER_ONLY_EFFECTS,
   type ShaderDefinition,
   type ShaderStep,
   type ShaderUniform,
   shaderFor,
-} from "@uberscene/kit";
+} from "@uberscene/kit/schema";
+import type { Placement, ResolvedState } from "@uberscene/sdk";
 
 import { cssPasses } from "./css-passes";
 import { childFilter, paramsAt } from "./effects";

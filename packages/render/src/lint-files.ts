@@ -3,8 +3,8 @@
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 
-import type { AssetManifest } from "@uberscene/kit";
-import { type Diagnostic, fixSource, type LintOptions, lint } from "@uberscene/kit/source";
+import type { AssetManifest } from "@uberscene/sdk";
+import { type Diagnostic, fixSource, type LintOptions, lint } from "@uberscene/sdk";
 
 import { findManifest } from "./manifest-file";
 

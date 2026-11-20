@@ -1,6 +1,5 @@
-import { collectModule, resolve } from "@uberscene/kit";
-import { loadModule } from "@uberscene/kit/source";
 import { buildFramePlan } from "@uberscene/player";
+import { collectModule, loadModule, resolve } from "@uberscene/sdk";
 
 import { declare, fragmentSource, uniformValue } from "../src/render/shaders";
 

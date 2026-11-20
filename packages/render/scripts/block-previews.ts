@@ -5,8 +5,7 @@ import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import { collectModule, resolve } from "@uberscene/kit";
-import { loadModule } from "@uberscene/kit/source";
+import { collectModule, loadModule, resolve } from "@uberscene/sdk";
 
 import { listBlocks } from "../src/blocks";
 import { loadVideo } from "../src/load";

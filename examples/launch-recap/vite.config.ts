@@ -9,13 +9,14 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      "@uberscene/kit/source": here("../../packages/kit/src/source/index-public.ts"),
+      "@uberscene/kit/schema": here("../../packages/kit/src/schema.ts"),
+      "@uberscene/sdk": here("../../packages/sdk/src/index.ts"),
       "@uberscene/kit": here("../../packages/kit/src/index.ts"),
       "@uberscene/player/fonts.css": here("../../packages/player/fonts.css"),
       "@uberscene/player": here("../../packages/player/src/index.ts"),
     },
   },
-  // The lint runs in the page through the kit's source tools, which pull Babel; Babel reads process.env.
+  // The lint runs in the page through the SDK's source tools, which pull Babel; Babel reads process.env.
   define: { "process.env": "{}" },
   server: { fs: { allow: [here("../..")] } },
   optimizeDeps: { include: ["react", "react-dom/client", "mediabunny", "zod"] },

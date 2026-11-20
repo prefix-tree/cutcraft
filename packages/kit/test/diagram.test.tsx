@@ -1,6 +1,7 @@
 import { isValidElement, type ReactElement, type ReactNode } from "react";
 
-import { Cells, CountUp, DrawnLine, grid, installLayerClock, Label, type LayerClock, progress } from "../src";
+import { Cells, CountUp, DrawnLine, grid, Label, type LayerClock, progress } from "@uberscene/kit";
+import { installLayerClock } from "@uberscene/kit/schema";
 
 /** The layer's clock, set by hand: seconds of the video, and seconds since the layer started. */
 let now = { time: 0, elapsed: 0 };

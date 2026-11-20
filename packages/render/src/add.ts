@@ -7,7 +7,7 @@ import { basename, dirname, extname, join, resolve } from "node:path";
 
 import { ALL_FORMATS, FilePathSource, Input } from "mediabunny";
 
-import { type AssetEntry, type AssetManifest, parseCube, parseTranscript } from "@uberscene/kit";
+import { type AssetEntry, type AssetManifest, parseCube, parseTranscript } from "@uberscene/sdk";
 
 import { imageSize } from "./image-size";
 import { findManifest, MANIFEST_FILE, OLD_MANIFEST_FILE } from "./manifest-file";

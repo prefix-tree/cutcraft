@@ -6,7 +6,7 @@ editLink: false
 
 Generated from the registered handlers (115). Do not edit by hand; run `pnpm docs:gen`.
 
-Every action has `validate`, `apply`, `invert` and `fold`; the inverse is never null. Each runs as `{ type, params }`; the params and notes here are read from `packages/kit/src/actions/types/index.ts`.
+Every action has `validate`, `apply`, `invert` and `fold`; the inverse is never null. Each runs as `{ type, params }`; the params and notes here are read from `packages/sdk/src/actions/types/index.ts`.
 
 ## `adjustment/`
 

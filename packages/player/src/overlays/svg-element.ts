@@ -1,4 +1,4 @@
-import type { FitMode, ResolvedTheme } from "@uberscene/kit";
+import type { FitMode, ResolvedTheme } from "@uberscene/kit/schema";
 
 import { type ElementProps, type OverlayLayout, overlayLayout } from "./layout";
 import { type PreparedSvg, prepareSvg, type SvgColor, type SvgViewBox, svgAnimated, svgIntrinsicSize } from "./svg";

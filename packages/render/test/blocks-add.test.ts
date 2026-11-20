@@ -5,8 +5,15 @@ import { join } from "node:path";
 
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import { type AssetManifest, collectModule, Executor } from "@uberscene/kit";
-import { buildSourceIndex, foldToSource, gatherLocalFiles, loadModule } from "@uberscene/kit/source";
+import {
+  type AssetManifest,
+  buildSourceIndex,
+  collectModule,
+  Executor,
+  foldToSource,
+  gatherLocalFiles,
+  loadModule,
+} from "@uberscene/sdk";
 
 import { addBlock, lineDiff, placeBlock, timingOf, updateBlocks } from "../src/blocks-add";
 import { loadVideo } from "../src/load";

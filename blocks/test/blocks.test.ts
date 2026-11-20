@@ -6,8 +6,9 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import type { ZodType } from "zod";
 
-import { blockMetaSchema, collectModule, knobsOf, resolve } from "@uberscene/kit";
-import { gatherLocalFiles, lint, loadModule } from "@uberscene/kit/source";
+import { blockMetaSchema } from "@uberscene/kit";
+import { knobsOf } from "@uberscene/kit/schema";
+import { collectModule, gatherLocalFiles, lint, loadModule, resolve } from "@uberscene/sdk";
 
 const root = join(import.meta.dirname, "..");
 const BLOCKS = readdirSync(root).filter((name) => existsSync(join(root, name, "block.tsx")));

@@ -102,7 +102,7 @@
   },
   "overrides": [
     {
-      "includes": ["packages/kit/src/**", "packages/graphics/src/**"],
+      "includes": ["packages/kit/src/**", "packages/sdk/src/**", "packages/graphics/src/**"],
       "linter": {
         "rules": {
           "style": {

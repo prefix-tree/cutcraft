@@ -8,8 +8,9 @@ import { fileURLToPath } from "node:url";
 
 import type { ZodType } from "zod";
 
-import { BLOCK_ASPECTS, blockMetaSchema, type Knob, knobsOf } from "@uberscene/kit";
-import { gatherLocalFiles, loadModule } from "@uberscene/kit/source";
+import { blockMetaSchema, type Knob } from "@uberscene/kit";
+import { BLOCK_ASPECTS, knobsOf } from "@uberscene/kit/schema";
+import { gatherLocalFiles, loadModule } from "@uberscene/sdk";
 
 import { blankPicture, decodePng, encodePng, paste } from "./png";
 

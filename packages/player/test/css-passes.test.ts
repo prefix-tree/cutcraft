@@ -1,5 +1,4 @@
-import { collectModule, resolve } from "@uberscene/kit";
-import { loadModule } from "@uberscene/kit/source";
+import { collectModule, loadModule, resolve } from "@uberscene/sdk";
 
 import { cssColour, cssFunctions, cssPasses } from "../src/model/css-passes";
 import { effectPipeline } from "../src/model/shaders";

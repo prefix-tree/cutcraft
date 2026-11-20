@@ -1,4 +1,5 @@
-import { EASING_FN, type Easing, type Placement } from "@uberscene/kit";
+import { EASING_FN, type Easing } from "@uberscene/kit/schema";
+import type { Placement } from "@uberscene/sdk";
 
 import { devWarn } from "../warn";
 

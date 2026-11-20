@@ -1,10 +1,11 @@
 import { createRequire } from "node:module";
 import { join } from "node:path";
 
-import { COMPONENTS, EFFECTS, ELEMENTS, ENGINE_LAYERS, TRANSITIONS } from "../packages/kit/src/index";
+import { COMPONENTS, EFFECTS, ELEMENTS, ENGINE_LAYERS, TRANSITIONS } from "../packages/kit/src/schema";
 
-const kit = join(import.meta.dirname, "..", "packages", "kit");
-const ts = createRequire(join(kit, "package.json"))("typescript") as typeof import("typescript");
+// The probe sits in the SDK, which sees both the kit's schemas and the action interfaces.
+const sdk = join(import.meta.dirname, "..", "packages", "sdk");
+const ts = createRequire(join(sdk, "package.json"))("typescript") as typeof import("typescript");
 
 export interface PropDocs {
   /** Each prop's JSDoc, by table: `element:Clip`, `effect:glow`, `transition:iris`, `component:LowerThird`. */
@@ -19,7 +20,7 @@ export interface PropDocs {
  * in a shared schema (`timedProps`) is documented on every element that spreads it.
  */
 export function readPropDocs(): PropDocs {
-  const probe = join(kit, "src", "__docs_probe.ts");
+  const probe = join(sdk, "src", "__docs_probe.ts");
   const tables: [key: string, type: string][] = [
     ...Object.keys(ELEMENTS).map((n) => [`element:${n}`, `(typeof ELEMENTS)["${n}"]["schema"]`] as [string, string]),
     ...Object.keys(ENGINE_LAYERS).map(
@@ -35,16 +36,17 @@ export function readPropDocs(): PropDocs {
   ];
   const source = [
     'import type { z } from "zod";',
-    'import type { COMPONENTS, EFFECTS, ELEMENTS, ENGINE_LAYERS, TRANSITIONS } from "./index";',
+    'import type { COMPONENTS, EFFECTS, ELEMENTS, ENGINE_LAYERS, TRANSITIONS } from "@uberscene/kit/schema";',
+    'export type { ActionType } from "./actions/types/index";',
     ...tables.map(([, type], i) => `export type T${i} = z.input<${type}>;`),
   ].join("\n");
 
   const config = ts.getParsedCommandLineOfConfigFile(
-    join(kit, "tsconfig.json"),
+    join(sdk, "tsconfig.json"),
     {},
     { ...ts.sys, onUnRecoverableConfigFileDiagnostic: (d) => console.error(d.messageText) },
   );
-  if (!config) throw new Error("cannot read packages/kit/tsconfig.json");
+  if (!config) throw new Error("cannot read packages/sdk/tsconfig.json");
   const host = ts.createCompilerHost(config.options);
   const readFile = host.readFile.bind(host);
   const fileExists = host.fileExists.bind(host);
@@ -65,7 +67,7 @@ export function readPropDocs(): PropDocs {
   });
 
   const actions = new Map<string, { note: string; params: string }>();
-  const types = program.getSourceFile(join(kit, "src", "actions", "types", "index.ts"));
+  const types = program.getSourceFile(join(sdk, "src", "actions", "types", "index.ts"));
   if (!types) throw new Error("actions/types/index.ts is not in the program");
   for (const statement of types.statements) {
     if (!ts.isInterfaceDeclaration(statement)) continue;

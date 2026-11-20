@@ -1,6 +1,7 @@
 import { useContext, useSyncExternalStore } from "react";
 
-import { installLayerClock, type LayerClock } from "@uberscene/kit";
+import type { LayerClock } from "@uberscene/kit";
+import { installLayerClock } from "@uberscene/kit/schema";
 
 import type { PlayerCore } from "../player";
 import { LayerContext, PlayerContext } from "./context";

@@ -1,4 +1,5 @@
-import type { FitMode, Placement, Transform } from "@uberscene/kit";
+import type { FitMode, Transform } from "@uberscene/kit/schema";
+import type { Placement } from "@uberscene/sdk";
 
 import { keyframedValue } from "./keyframes";
 

@@ -47,7 +47,7 @@ it does not write, such as shots and silences.
 App code that already has the text can use the same parser, [`parseTranscript()`](/reference/api#uberscene-kit):
 
 ```ts
-import { parseTranscript } from "@uberscene/kit";
+import { parseTranscript } from "@uberscene/sdk";
 
 const { words } = parseTranscript(await (await fetch("/founder.vtt")).text());
 manifest.assets.founder = { ...manifest.assets.founder, transcript: { words } };

@@ -1,6 +1,5 @@
 // @vitest-environment jsdom
-import { collectModule, resolve } from "@uberscene/kit";
-import { loadModule } from "@uberscene/kit/source";
+import { collectModule, loadModule, resolve } from "@uberscene/sdk";
 
 import { FREE_CODE_LIBRARIES } from "../src/libraries";
 

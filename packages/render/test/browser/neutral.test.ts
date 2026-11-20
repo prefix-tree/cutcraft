@@ -52,7 +52,8 @@ const probe = effect({ name: "probe", params: def.params, shader: def.passes[0] 
   writeFileSync(
     file,
     `import { z } from "zod";
-import { builtInShader, Clip, Composition, effect, Effect, Track } from "@uberscene/kit";
+import { Clip, Composition, effect, Effect, Track } from "@uberscene/kit";
+import { builtInShader } from "@uberscene/kit/schema";
 export const manifest = ${JSON.stringify({ assets: mediaManifest.assets })};
 ${CHART}
 ${probe}

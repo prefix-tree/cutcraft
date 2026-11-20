@@ -1,15 +1,7 @@
 import { tmpdir } from "node:os";
 
-import {
-  type CatalogFont,
-  collectModule,
-  type FontCategory,
-  type FontRole,
-  fontsFor,
-  type ResolvedState,
-  resolve,
-} from "@uberscene/kit";
-import { loadModule } from "@uberscene/kit/source";
+import { type CatalogFont, type FontCategory, type FontRole, fontsFor } from "@uberscene/kit/schema";
+import { collectModule, loadModule, type ResolvedState, resolve } from "@uberscene/sdk";
 
 import { directoryResolver } from "./media";
 import type { ExportSource } from "./renderer";

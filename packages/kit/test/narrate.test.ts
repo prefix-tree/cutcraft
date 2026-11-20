@@ -1,4 +1,4 @@
-import { narrate } from "../src";
+import { narrate } from "@uberscene/kit";
 
 describe("narrate: the script", () => {
   it("times every word at a speaking pace, from the start", () => {

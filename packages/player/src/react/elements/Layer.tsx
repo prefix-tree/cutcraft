@@ -1,6 +1,6 @@
 import { type CSSProperties, type ReactNode, useEffect, useLayoutEffect, useRef } from "react";
 
-import { layerEngine } from "@uberscene/kit";
+import { layerEngine } from "@uberscene/kit/schema";
 
 import { layerClock } from "../../model/time";
 import { layerContent } from "../../overlays/content";

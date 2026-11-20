@@ -1,4 +1,5 @@
-import { cssOf, effectEntry, isNeutral, type Placement } from "@uberscene/kit";
+import { cssOf, effectEntry, isNeutral } from "@uberscene/kit/schema";
+import type { Placement } from "@uberscene/sdk";
 
 import { devWarn } from "../warn";
 import { keyframedParam } from "./keyframes";

@@ -1,8 +1,15 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-import { type AssetManifest, collectModule, Executor, resolve } from "@uberscene/kit";
-import { buildSourceIndex, foldToSource, lint } from "@uberscene/kit/source";
+import {
+  type AssetManifest,
+  buildSourceIndex,
+  collectModule,
+  Executor,
+  foldToSource,
+  lint,
+  resolve,
+} from "@uberscene/sdk";
 
 import * as file from "../video";
 

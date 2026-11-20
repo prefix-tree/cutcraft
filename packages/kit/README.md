@@ -42,8 +42,8 @@ its word when the clip moves. Each timeline element has a literal `id`. A track 
 ## Using it
 
 ```ts
-import { collectModule, resolve, Executor } from "@uberscene/kit";
-import { lint, foldToSource } from "@uberscene/kit/source";
+import { collectModule, resolve, Executor } from "@uberscene/sdk";
+import { lint, foldToSource } from "@uberscene/sdk";
 import * as file from "./video";
 
 const state = resolve(collectModule(file), manifest);      // every element placed in time, by id

@@ -6,7 +6,7 @@ const shared = {
   globals: true,
   include: ["test/**/*.test.ts", "test/**/*.test.tsx"],
   alias: {
-    "@uberscene/kit/source": new URL("./src/source/index-public.ts", import.meta.url).pathname,
+    "@uberscene/kit/schema": new URL("./src/schema.ts", import.meta.url).pathname,
     "@uberscene/kit": new URL("./src/index.ts", import.meta.url).pathname,
   },
 };

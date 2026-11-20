@@ -1,4 +1,4 @@
-import { parseCube } from "@uberscene/kit";
+import { parseCube } from "@uberscene/sdk";
 
 import { lutTexture, ShaderTextures, textureRefs } from "../src/media/shader-textures";
 
