@@ -4,7 +4,7 @@ editLink: false
 
 # Actions
 
-Generated from the registered handlers (98). Do not edit by hand; run `pnpm docs:gen`.
+Generated from the registered handlers (99). Do not edit by hand; run `pnpm docs:gen`.
 
 Every action has `validate`, `apply`, `invert` and `fold`; the inverse is never null. Each runs as `{ type, params }`; the params and notes here are read from `packages/sdk/src/actions/types/index.ts`.
 
@@ -23,6 +23,12 @@ Every action has `validate`, `apply`, `invert` and `fold`; the inverse is never 
 | action | params | what it does |
 |---|---|---|
 | `batch/apply` | `{ actions }` | Runs several actions as one history entry, each checked against the state the one before left; its undo is their inverses in reverse. Multi-action gestures and compound inverses use it. |
+
+## `box/`
+
+| action | params | what it does |
+|---|---|---|
+| `box/update` | `{ id, box }` | Places an element or the captions: merges `box` (`x`, `y` in pixels from the frame's top left, `origin`) into its box; only the fields given change, and a field set to null is removed, so that axis is centred again. |
 
 ## `caption/`
 

@@ -31,14 +31,14 @@ export default function Video({ accent }: z.infer<typeof schema>) {
           size={64}
           weight={600}
           valign="top"
-          transform={{ position: { x: 0, y: 140 } }}
+          box={{ x: 960, y: 680, origin: "center" }}
         >
           Last quarter
         </Title>
-        <Layer id="stat-cups" anchor="bg" offset={0.8} duration={5} transform={{ position: { x: -360, y: 0 } }}>
+        <Layer id="stat-cups" anchor="bg" offset={0.8} duration={5} box={{ x: 600, y: 540, origin: "center" }}>
           <Counter value={12800} label="cups poured" accent={accent} />
         </Layer>
-        <Layer id="stat-on-time" anchor="bg2" offset={0.4} duration={5} transform={{ position: { x: 360, y: 0 } }}>
+        <Layer id="stat-on-time" anchor="bg2" offset={0.4} duration={5} box={{ x: 1320, y: 540, origin: "center" }}>
           <Counter value={99.97} label="% of orders on time" accent={accent} />
         </Layer>
       </Track>

@@ -36,28 +36,27 @@ export const defaults = {
 
 // Where things go. TikTok, Reels and Shorts cover the top of the frame, its bottom third and a strip down the
 // right with their own controls, so everything drawn sits in the area between: the diagram's panel at the top of
-// it, the captions lowest. The captions' y, counted from the frame's centre, puts them under the speaker's chin,
-// never across his mouth.
+// it, the captions lowest. The captions' box puts the middle of their lines under the speaker's chin, never across
+// his mouth.
 // The speaker goes where the diagram is not: the whole frame, or a box in the bottom half under the panel.
 //
-// The speaker in the 1080 x 1080 source: a 920 x 580 window on him, scaled to the box's width and moved to its
-// centre.
-const BOX = { y: 545, width: 920, height: 580 };
+// The speaker in the 1080 x 1080 source: a 920 x 580 window on him, scaled to the box's width and centred on it.
+const BOX = { x: 540, y: 1505, width: 920, height: 580 };
+const AT = { x: BOX.x, y: BOX.y, origin: "center" } as const;
 const BOXED = {
   crop: { x: 0.04, y: 0.05, width: 0.92, height: 0.58 },
   scale: BOX.width / 1080,
-  position: { x: 0, y: BOX.y },
   borderRadius: 28,
 };
 // The border round the box is drawn under the footage, a little larger than it, so only its outer edge shows.
 const RING = {
   shape: "rectangle",
+  box: AT,
   width: BOX.width + 16,
   height: BOX.height + 16,
   cornerRadius: 36,
   fill: { type: "none" },
   stroke: { color: "$accent", width: 16 },
-  transform: { position: { x: 0, y: BOX.y } },
   enter: { type: "fade", duration: 0.25 },
   exit: { type: "fade", duration: 0.2 },
 } as const;
@@ -83,15 +82,23 @@ export default function Video({ accent, question, wrong }: z.infer<typeof schema
 
       <Track id="talk">
         {/* "Eclipses don't happen every month because the Moon's orbit is tilted by about five degrees" */}
-        <Clip id="why" src="asset:eclipse" volume={VOICE} in="word:5" out="word:19.end" transform={BOXED} />
+        <Clip id="why" src="asset:eclipse" volume={VOICE} in="word:5" out="word:19.end" box={AT} transform={BOXED} />
         {/* "some months … it's going to pass a little bit above the Earth's shadow, and some months … below" */}
-        <Clip id="miss" src="asset:eclipse" volume={VOICE} in="word:22" out="word:49.end" transform={BOXED} />
+        <Clip id="miss" src="asset:eclipse" volume={VOICE} in="word:22" out="word:49.end" box={AT} transform={BOXED} />
         {/* "but about once every six months it actually passes through the Earth's shadow." */}
-        <Clip id="hit" src="asset:eclipse" volume={VOICE} in="word:50" out="word:62.end" transform={BOXED} />
+        <Clip id="hit" src="asset:eclipse" volume={VOICE} in="word:50" out="word:62.end" box={AT} transform={BOXED} />
         {/* "The best thing about a lunar eclipse is that it's beautiful … shades of orange and red and brown." */}
-        <Clip id="red" src="asset:eclipse" volume={VOICE} in="word:128" out="word:152.end" transform={BOXED} />
+        <Clip id="red" src="asset:eclipse" volume={VOICE} in="word:128" out="word:152.end" box={AT} transform={BOXED} />
         {/* "It's being hit by all of the sunrises and sunsets projected from the Earth" */}
-        <Clip id="sunsets" src="asset:eclipse" volume={VOICE} in="word:153" out="word:166.end" transform={BOXED} />
+        <Clip
+          id="sunsets"
+          src="asset:eclipse"
+          volume={VOICE}
+          in="word:153"
+          out="word:166.end"
+          box={AT}
+          transform={BOXED}
+        />
       </Track>
 
       {/* The diagram. Each layer starts on a word and draws the whole panel from there on, over the one before. */}
@@ -167,7 +174,7 @@ export default function Video({ accent, question, wrong }: z.infer<typeof schema
         src="asset:eclipse"
         animation="word-highlight"
         maxChars={22}
-        y={192}
+        box={{ y: 1152, origin: "center" }}
         style={{ size: 60, weight: 800, highlight: "#14141c", highlightBox: "$accent" }}
       />
     </Composition>

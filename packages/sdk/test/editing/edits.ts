@@ -114,7 +114,7 @@ export const EDITS: readonly Edit[] = [
     name: "nudges an element on screen",
     pick: (s) => {
       const t = first(s, (p) => ["title", "shape", "layer", "sticker", "svg"].includes(p.kind));
-      return t && { type: "transform/update", params: { id: t.id, transform: { position: { x: 40, y: -30 } } } };
+      return t && { type: "box/update", params: { id: t.id, box: { x: 40, y: 30 } } };
     },
   },
   {

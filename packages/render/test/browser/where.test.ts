@@ -44,7 +44,7 @@ export default function Video() {
           <div style={{ position: "absolute", left: 40, top: 100, width: 50, height: 50, background: "#ffff00" }} />
         </Layer>
       </Track>
-      <Captions id="said" style={{ size: 40, background: "#222222", position: 0.73 }}>
+      <Captions id="said" box={{ y: 700.8, origin: "center" }} style={{ size: 40, background: "#222222" }}>
         <Caption id="c1" start={0} end={2} text="Hello there world" />
       </Captions>
     </Composition>
@@ -287,7 +287,7 @@ export default function Video() {
           <div style={{ position: "absolute", left: 0, right: 0, top: 480, bottom: 0, background: "#102040" }} />
         </Layer>
       </Track>
-      <Captions id="caps" style={{ position: 0.6 }}>
+      <Captions id="caps" box={{ y: 576, origin: "center" }}>
         <Caption id="c1" start={0} end={2} text="hello there" />
       </Captions>
     </Composition>

@@ -1,8 +1,9 @@
 // `uberscene inspect video.tsx`: the timeline read back as an editor reads it, in text or as flat JSON rows, and what
 // is on screen and heard at chosen moments. It runs the resolver and the player's model only: no browser, no media.
 import type { Knob } from "@uberscene/kit";
-import { capabilitiesOf, rateLabel } from "@uberscene/kit/schema";
+import { capabilitiesOf, type ElementBox, rateLabel } from "@uberscene/kit/schema";
 import {
+  animatedBox,
   animatedTransform,
   buildGainEnvelope,
   paramsAt,
@@ -33,6 +34,8 @@ export interface SeenElement {
   /** The second of its asset on screen, for footage. */
   readonly sourceTime?: number;
   readonly text?: string;
+  /** Where it is placed (`box`), keyframes applied and rounded, in pixels from the frame's top left; absent when it is centred. */
+  readonly box?: Readonly<Record<string, unknown>>;
   /** The transform where it differs from the resting one, keyframes applied. */
   readonly transform?: Readonly<Record<string, unknown>>;
   /** Each effect in the order it runs, with its params at this moment. */
@@ -77,6 +80,7 @@ export function describeAt(state: ResolvedState, moment: Moment): MomentView {
     if (transition?.role === "out" && transition.progress >= 1) continue;
     const rel = t - p.start;
     const transform = restless(animatedTransform(p.props.transform as never, children, rel) as Record<string, unknown>);
+    const box = placed(animatedBox(p.props.box as never, children, rel));
     const text = p.kind === "title" ? state.tree.byId.get(p.id)?.text : undefined;
     seen.push({
       id: p.id,
@@ -85,6 +89,7 @@ export function describeAt(state: ResolvedState, moment: Moment): MomentView {
       progress: ms(p.duration > 0 ? Math.min(1, Math.max(0, rel / p.duration)) : 0),
       ...(p.source ? { sourceTime: ms(placementSourceTime(p, children, t)) } : {}),
       ...(text ? { text } : {}),
+      ...(box ? { box } : {}),
       ...(transform ? { transform } : {}),
       effects: children
         .filter((c) => c.kind === "effect" && c.props.enabled !== false)
@@ -125,6 +130,17 @@ export function describeAt(state: ResolvedState, moment: Moment): MomentView {
   };
 }
 
+/** A box's numbers, rounded; undefined when it places nothing (the element is centred). */
+function placed(box: ElementBox | undefined): Record<string, unknown> | undefined {
+  if (!box) return undefined;
+  const out: Record<string, unknown> = {};
+  if (typeof box.x === "number" && Number.isFinite(box.x)) out.x = ms(box.x);
+  if (typeof box.y === "number" && Number.isFinite(box.y)) out.y = ms(box.y);
+  if (Object.keys(out).length === 0) return undefined;
+  if (box.origin) out.origin = box.origin;
+  return out;
+}
+
 /** The parts of a transform that differ from one at rest, rounded; undefined when none do. */
 function restless(t: Record<string, unknown>): Record<string, unknown> | undefined {
   const out: Record<string, unknown> = {};
@@ -135,8 +151,6 @@ function restless(t: Record<string, unknown>): Record<string, unknown> | undefin
       y = ms(p.y ?? rest);
     return x === rest && y === rest ? undefined : { x, y };
   };
-  const position = pair(t.position, 0);
-  if (position) out.position = position;
   const scale = pair(t.scale, 1);
   if (scale) out.scale = scale;
   if (typeof t.rotation === "number" && ms(t.rotation) !== 0) out.rotation = ms(t.rotation);
@@ -254,6 +268,7 @@ export function formatAt(views: readonly MomentView[]): string {
         parts.push(
           `${s.transition.role === "in" ? "coming in" : "going out"} through ${s.transition.id} at ${Math.round(s.transition.progress * 100)}%`,
         );
+      if (s.box) parts.push(`box ${paramList(s.box)}`);
       if (s.transform) parts.push(`transform ${paramList(flat(s.transform))}`);
       for (const fx of s.effects)
         parts.push(`${fx.id}(${fx.type}${Object.keys(fx.params).length ? ` ${paramList(fx.params)}` : ""})`);
@@ -267,7 +282,7 @@ export function formatAt(views: readonly MomentView[]): string {
   return `${blocks.join("\n\n")}\n`;
 }
 
-/** `{ position: { x, y } }` as `position.x`, `position.y`, for one line of text. */
+/** `{ scale: { x, y } }` as `scale.x`, `scale.y`, for one line of text. */
 function flat(t: Readonly<Record<string, unknown>>): Record<string, unknown> {
   const out: Record<string, unknown> = {};
   for (const [name, v] of Object.entries(t)) {

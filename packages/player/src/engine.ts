@@ -22,9 +22,10 @@ export { OVERLAY_KINDS } from "./model/backdrop";
 export { paramsAt } from "./model/effects";
 export { buildFramePlan, type DrawOp } from "./model/frame-plan";
 export { frameIndex, placementSourceTime } from "./model/time";
-export { animatedTransform, boundsOf, type DrawRect } from "./model/transform";
+export { animatedBox, animatedTransform, boundsOf, type DrawRect } from "./model/transform";
 export { isVisibleAt, visiblePlacements } from "./model/visible";
 export { makeNestedResolver } from "./nested";
+export { captionBox } from "./overlays/caption-placement";
 export { Compositor } from "./render/compositor";
 export { CanvasPainter, coversCanvas } from "./render/painter";
 export type {

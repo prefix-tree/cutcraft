@@ -30,10 +30,11 @@ const BEFORE = { x: 44, y: 612, width: 480, height: 270, radius: 24 };
 const FROM = 0.44;
 const TO = 44;
 
-/** A clip's transform that puts it in a box: the clip is fitted to the frame, then scaled and moved. */
+/** Where a clip goes: its middle on the box's middle. */
+const at = (box: typeof AFTER) => ({ x: box.x + box.width / 2, y: box.y + box.height / 2, origin: "center" }) as const;
+/** A clip's transform that sizes it to a box: the clip is fitted to the frame, then scaled to the box's width. */
 const boxed = (box: typeof AFTER, fitted: { width: number; height: number }) => ({
   scale: box.width / fitted.width,
-  position: { x: box.x + box.width / 2 - FRAME.width / 2, y: box.y + box.height / 2 - FRAME.height / 2 },
   borderRadius: box.radius / (box.width / fitted.width),
 });
 // What each picture measures once fitted inside the frame: the source by its width, the short by its height.
@@ -103,12 +104,19 @@ export default function Video(props: z.infer<typeof schema>) {
           in={FROM}
           out={TO}
           volume={0.9}
+          box={at(BEFORE)}
           transform={boxed(BEFORE, SOURCE_FITTED)}
         />
       </Track>
       {/* The short, silent here: it carries the same sound. */}
       <Track id="after">
-        <Clip id="edit" src="asset:hundred-videos-short" volume={0} transform={boxed(AFTER, SHORT_FITTED)} />
+        <Clip
+          id="edit"
+          src="asset:hundred-videos-short"
+          volume={0}
+          box={at(AFTER)}
+          transform={boxed(AFTER, SHORT_FITTED)}
+        />
       </Track>
     </Composition>
   );

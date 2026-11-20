@@ -23,7 +23,7 @@ export default function Video() {
           width={380}
           height={60}
           background="rgba(16, 20, 33, 0.78)"
-          transform={{ position: { x: -250, y: 210 } }}
+          box={{ x: 230, y: 480, origin: "center" }}
         >
           Three angles, one take
         </Title>

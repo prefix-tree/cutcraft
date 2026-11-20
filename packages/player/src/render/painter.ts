@@ -1,7 +1,8 @@
 import type { ShaderTextures } from "../media/shader-textures";
+import { fitRect } from "../model/box";
 import type { BackgroundGradient, DrawOp, FramePlan } from "../model/frame-plan";
 import { hasCssFallback } from "../model/shaders";
-import { fitRect, type Matrix2D } from "../model/transform";
+import type { Matrix2D } from "../model/transform";
 import type { AnyCanvas, CreateCanvas, Ctx2D, Frame } from "../types";
 import { devWarn } from "../warn";
 import { roundedRect, traceMask } from "./masks";

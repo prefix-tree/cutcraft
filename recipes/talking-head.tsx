@@ -40,7 +40,7 @@ export default function Video({ title, accent }: z.infer<typeof schema>) {
           weight={700}
           color={accent}
           valign="top"
-          transform={{ position: { x: 0, y: 120 } }}
+          box={{ x: 960, y: 660, origin: "center" }}
           animation={{ preset: "slide-up", in: 0.4, out: 0.3 }}
         >
           {title}
@@ -60,7 +60,7 @@ export default function Video({ title, accent }: z.infer<typeof schema>) {
       </Track>
 
       {/* Cues come from the words the timeline plays, one per sentence, and follow every trim. */}
-      <Captions id="captions" src="asset:podcast" style={{ position: "bottom", size: 44 }} animation="word-highlight" />
+      <Captions id="captions" src="asset:podcast" style={{ size: 44 }} animation="word-highlight" />
     </Composition>
   );
 }

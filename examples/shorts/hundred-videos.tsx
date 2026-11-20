@@ -42,25 +42,27 @@ const END = 44;
 const VOICE = 0.9;
 
 // A framing is the part of the source that is shown and where it sits. The part is fitted to the frame's width, so
-// a 9:16 part fills the frame and a wider one makes a panel; `y` moves it down from the frame's centre.
+// a 9:16 part fills the frame and a wider one makes a panel; `y` is the height of its middle, from the frame's top.
 interface Framing {
   readonly crop: { readonly x: number; readonly y: number; readonly width: number; readonly height: number };
   readonly y: number;
 }
 // MrBeast sits right of centre. Full screen: a 9:16 column round him, the full height of the source.
-const BEAST_FULL: Framing = { crop: { x: 0.52, y: 0, width: 0.316, height: 1 }, y: 0 };
+const BEAST_FULL: Framing = { crop: { x: 0.52, y: 0, width: 0.316, height: 1 }, y: 960 };
 // Explain: the same shot wider (831 px of the source, shown 1.3 times) and pinned to the top of the frame, so the
 // face sits in the upper part of what a phone leaves clear and there is room under it for a graphic. The footage
 // is then 1404 px tall; the scrim below hides where it ends.
 const EXPLAIN_HEIGHT = 1404;
 const BEAST_EXPLAIN: Framing = {
   crop: { x: 0.471, y: 0, width: 0.433, height: 1 },
-  y: EXPLAIN_HEIGHT / 2 - 960,
+  y: EXPLAIN_HEIGHT / 2,
 };
 // Lex sits left of centre: a 9:16 column round him.
-const LEX_FULL: Framing = { crop: { x: 0.206, y: 0, width: 0.316, height: 1 }, y: 0 };
+const LEX_FULL: Framing = { crop: { x: 0.206, y: 0, width: 0.316, height: 1 }, y: 960 };
 
-const framed = (f: Framing) => ({ crop: f.crop, position: { x: 0, y: f.y } });
+/** Where a framing puts the clip: its middle at the framing's height, centred across. */
+const placed = (f: Framing) => ({ y: f.y, origin: "center" }) as const;
+const framed = (f: Framing) => ({ crop: f.crop });
 
 /** How long a move between the two layouts takes. */
 const MOVE = 0.5;
@@ -72,7 +74,7 @@ function Reframe({ id, from, to }: { id: string; from: Framing; to: Framing }) {
     ["t", "transform.crop.y", from.crop.y, to.crop.y],
     ["w", "transform.crop.width", from.crop.width, to.crop.width],
     ["h", "transform.crop.height", from.crop.height, to.crop.height],
-    ["y", "transform.position.y", from.y, to.y],
+    ["y", "box.y", from.y, to.y],
   ] as const;
   return (
     <>
@@ -293,6 +295,7 @@ export default function Video({ accent }: z.infer<typeof schema>) {
           volume={VOICE}
           in="word:1"
           out="word:20.end"
+          box={placed(BEAST_FULL)}
           transform={framed(BEAST_FULL)}
         />
         {/* "just make a hundred videos, improve something each time, and then talk to me on your hundred-first video" */}
@@ -302,6 +305,7 @@ export default function Video({ accent }: z.infer<typeof schema>) {
           volume={VOICE}
           in="word:21"
           out={TO_LEX}
+          box={placed(BEAST_EXPLAIN)}
           transform={framed(BEAST_EXPLAIN)}
         >
           <Reframe id="hundred" from={BEAST_FULL} to={BEAST_EXPLAIN} />
@@ -313,6 +317,7 @@ export default function Video({ accent }: z.infer<typeof schema>) {
           volume={VOICE}
           in={TO_LEX}
           out={TO_BEAST}
+          box={placed(LEX_FULL)}
           transform={framed(LEX_FULL)}
         />
         {/* "the second one, put more effort into the script. The third one … the sixth one, a new title" */}
@@ -322,6 +327,7 @@ export default function Video({ accent }: z.infer<typeof schema>) {
           volume={VOICE}
           in={TO_BEAST}
           out="word:122.end"
+          box={placed(BEAST_EXPLAIN)}
           transform={framed(BEAST_EXPLAIN)}
         />
         {/* "there's infinite ways … every little thing can be improved, and they can never not be improved" */}
@@ -331,6 +337,7 @@ export default function Video({ accent }: z.infer<typeof schema>) {
           volume={VOICE}
           in="word:123"
           out="word:172.end"
+          box={placed(BEAST_EXPLAIN)}
           transform={framed(BEAST_EXPLAIN)}
         />
         {/* "there's literally no such thing as a perfect video" */}
@@ -340,6 +347,7 @@ export default function Video({ accent }: z.infer<typeof schema>) {
           volume={VOICE}
           in="word:173"
           out={END}
+          box={placed(BEAST_FULL)}
           transform={framed(BEAST_FULL)}
         >
           <Reframe id="perfect" from={BEAST_EXPLAIN} to={BEAST_FULL} />
@@ -406,9 +414,7 @@ export default function Video({ accent }: z.infer<typeof schema>) {
         animation="word-highlight"
         maxChars={18}
         breakAfter={["word:39"]}
-        x={-36}
-        y={195}
-        width={756}
+        box={{ x: 504, y: 1155, width: 756, origin: "center" }}
         style={{ font: poppins, size: 60, weight: 800, color: "$text", highlight: "$accent" }}
       />
     </Composition>

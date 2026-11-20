@@ -27,7 +27,7 @@ export default function Video() {
           size={64}
           width={420}
           align="left"
-          transform={{ position: { x: -240, y: -170 } }}
+          box={{ x: 240, y: 100, origin: "center" }}
           animation={{ preset: "word-by-word" }}
         >
           Slow pour
@@ -82,7 +82,7 @@ export default function Video() {
           style="h2"
           width={420}
           align="left"
-          transform={{ position: { x: 240, y: -170 } }}
+          box={{ x: 720, y: 100, origin: "center" }}
           animation={{ preset: "slide-up" }}
         >
           Ready in four minutes.

@@ -9,7 +9,7 @@ export default function Video() {
       height={1080}
       theme={{
         extends: "midnight",
-        palette: { primary: "#e8a33d", accent: "#e8a33d", background: "#101421", surface: "#3a2a1c" },
+        palette: { primary: "#e8a33d", accent: "#e8a33d", background: "#101421", glow: "#3a2a1c" },
       }}
       background={{
         mode: "gradient",
@@ -18,7 +18,7 @@ export default function Video() {
           angle: 135,
           stops: [
             { offset: 0, color: "$background" },
-            { offset: 1, color: "$surface" },
+            { offset: 1, color: "$glow" },
           ],
         },
       }}

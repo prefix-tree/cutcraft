@@ -1,4 +1,11 @@
-import { type BlendMode, type FitMode, MASK_TYPES, TRANSITION_TYPES, type Transform } from "@uberscene/kit/schema";
+import {
+  type BlendMode,
+  type ElementBox,
+  type FitMode,
+  MASK_TYPES,
+  TRANSITION_TYPES,
+  type Transform,
+} from "@uberscene/kit/schema";
 import { lookupAsset, type Placement, type ResolvedState } from "@uberscene/sdk/resolver";
 
 import { devWarn } from "../warn";
@@ -7,7 +14,15 @@ import { type PostEffect, postEffects } from "./effects";
 import type { ClipRect } from "./motion";
 import { effectPipeline, type ShaderPass, type TransitionPass, transitionPass } from "./shaders";
 import { frameIndex, nestedSourceTime, placementSourceTime } from "./time";
-import { animatedTransform, type DrawRect, layoutRect, type Matrix2D, multiply, translate } from "./transform";
+import {
+  animatedBox,
+  animatedTransform,
+  type DrawRect,
+  layoutRect,
+  type Matrix2D,
+  multiply,
+  translate,
+} from "./transform";
 import { transitionLook } from "./transition";
 import { type VisibleItem, visiblePlacements } from "./visible";
 
@@ -189,6 +204,7 @@ function mediaOp(
   const comp = state.composition;
   const rel = t - p.start;
   const transform = animatedTransform(p.props.transform as Transform | undefined, item.children, rel);
+  const box = animatedBox(p.props.box as ElementBox | undefined, item.children, rel);
   const fit = (p.props.fit as FitMode | undefined) ?? "contain";
   let opacity = (transform.opacity ?? 1) * (typeof p.props.blendOpacity === "number" ? p.props.blendOpacity : 1);
   let look: ReturnType<typeof transitionLook> | undefined;
@@ -235,10 +251,10 @@ function mediaOp(
     const nested = resolveNested?.(p) ?? null;
     if (!nested) {
       warnings.push(`nested ${p.id}: no resolver`);
-      const layout = layoutRect(comp, comp, fit, transform);
+      const layout = layoutRect(comp, comp, fit, transform, box);
       return { ...common, kind: "error", rect: layout.rect, matrix: shift(layout.matrix) };
     }
-    const layout = layoutRect(comp, nested.composition, fit, transform);
+    const layout = layoutRect(comp, nested.composition, fit, transform, box);
     return {
       ...common,
       kind: "nested",
@@ -251,7 +267,7 @@ function mediaOp(
   const src = p.source;
   const asset = src ? lookupAsset(state.manifest, src.asset) : null;
   if (!src || !asset) {
-    const layout = layoutRect(comp, comp, "contain", transform);
+    const layout = layoutRect(comp, comp, "contain", transform, box);
     return {
       ...common,
       kind: "error",
@@ -261,7 +277,7 @@ function mediaOp(
     };
   }
   const size = { width: asset.width ?? comp.width, height: asset.height ?? comp.height };
-  const layout = layoutRect(comp, size, fit, transform);
+  const layout = layoutRect(comp, size, fit, transform, box);
   return {
     ...common,
     kind: asset.kind === "image" ? "image" : "video",

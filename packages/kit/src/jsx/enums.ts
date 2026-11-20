@@ -137,8 +137,8 @@ export const SHAPE_TYPES = [
 ] as const;
 
 export const KEYFRAME_PROPERTIES = [
-  "transform.position.x",
-  "transform.position.y",
+  "box.x",
+  "box.y",
   "transform.scale.x",
   "transform.scale.y",
   "transform.rotation",
@@ -159,7 +159,6 @@ export function isKeyframeProperty(value: string): boolean {
   return (KEYFRAME_PROPERTIES as readonly string[]).includes(value);
 }
 
-export const CAPTION_POSITIONS = ["top", "center", "bottom"] as const;
 export const TEXT_ALIGNS = ["left", "center", "right", "justify"] as const;
 export const TEXT_VALIGNS = ["top", "middle", "bottom"] as const;
 export const TEXT_DECORATIONS = ["none", "underline", "line-through", "overline"] as const;
@@ -183,13 +182,16 @@ export const zKeyframeProperty = z.string().superRefine((value, ctx) => {
   if (isKeyframeProperty(value)) return;
   const effect = /^effect\.([^.]+)\.([^.]+)$/.exec(value);
   const grade = /^colorGrade\.(temperature|tint)$/.exec(value);
+  const position = /^transform\.position\.([xy])$/.exec(value);
   ctx.addIssue({
     code: "custom",
     message: effect
       ? `an effect's param is keyframed inside the effect: <Effect id="${effect[1]}" …><Keyframe param="${effect[2]}" at={…} value={…} /></Effect>`
-      : grade
-        ? `<ColorGrade> is now a whiteBalance effect: <Effect type="whiteBalance" …><Keyframe param="${grade[1]}" at={…} value={…} /></Effect>`
-        : `unknown keyframe property "${value}": use one of ${KEYFRAME_PROPERTIES.join(", ")}, or put the keyframe inside an <Effect> with param`,
+      : position
+        ? `transform.position is now box, from the frame's top left: keyframe "box.${position[1]}" (uberscene lint --fix moves a file)`
+        : grade
+          ? `<ColorGrade> is now a whiteBalance effect: <Effect type="whiteBalance" …><Keyframe param="${grade[1]}" at={…} value={…} /></Effect>`
+          : `unknown keyframe property "${value}": use one of ${KEYFRAME_PROPERTIES.join(", ")}, or put the keyframe inside an <Effect> with param`,
   });
 });
 

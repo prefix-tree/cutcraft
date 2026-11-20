@@ -25,7 +25,7 @@ references.
 | Change speed | `speed`, `reverse`; `<SpeedKey at speed easing>` children ramp it; `<Freeze at start duration>` holds a frame. Sound follows |
 | Several cameras | `<Multicam sync>` with `<Angle src offset>` per camera and `<Cut at angle>` to switch |
 | Reuse a sequence | `<Nested>`: a sequence written once as a component and placed like a clip |
-| Place and frame | `fit` (`contain`, `cover`, `stretch`, `none`); `transform` (position, scale, rotation, opacity, crop, `borderRadius`); `frame={{ focus }}` reframes footage to the composition's shape, a landscape interview into a vertical short |
+| Place and frame | `box` (`x`, `y`, `width`, `height` in pixels from the frame's top left, `origin`: which point sits at `x`, `y`; left out, the whole frame); `fit` (`contain`, `cover`, `stretch`, `none`) fills the box; `transform` (scale, rotation, opacity, crop, `borderRadius`) after it; `frame={{ focus }}` reframes footage to the composition's shape, a landscape interview into a vertical short |
 | Mix layers | `blend` (`multiply`, `screen`, `overlay`…); on a clip, `blendOpacity` for how strongly |
 | Show part of a clip | `<Mask>`: a rect, ellipse, polygon or drawn path, with `feather`, `inverted` and `opacity` |
 | Animate anything | `<Keyframe property at value easing>` on any transform, effect param (`param`), colour or volume; `easing` shapes the move from that key to the next |
@@ -36,7 +36,7 @@ references.
 | Style text and graphics | `glow`, `outline`, `shadow`, `longShadow`, `bevel` on a title, shape or layer |
 | Affect everything below | `<Adjustment>` with `<Effect>` children, for its time, on every track beneath it |
 | Words on screen | `<Title>` with a theme `style` and `animation={{ preset }}`: `typewriter`, `fade`, `slide-up`, `slide-down`, `slide-left`, `slide-right`, `scale`, `word-by-word` |
-| Captions | `<Captions>` from the transcript, or `<Caption>` cues; `animation`: `word-highlight`, `word-by-word`, `karaoke`, `typewriter`; `style.highlightBox` boxes the word being said; `x`, `y`, `width` place them |
+| Captions | `<Captions>` from the transcript, or `<Caption>` cues; `animation`: `word-highlight`, `word-by-word`, `karaoke`, `typewriter`; `style.highlightBox` boxes the word being said; `box` places them (the lower safe area when left out; each field written replaces that one) |
 | Shapes and images | `<Shape>` (rectangle, circle, ellipse, triangle, arrow and more), `<Svg>` (inline markup or an SVG asset), `<Sticker>` (a PNG, SVG, WebP or GIF asset) |
 | Ready-made graphics | `LowerThird`, `Callout`, `Badge`, `Counter`, `TypeCard` |
 | Ready-made scenes | Blocks: `uberscene blocks --for "<job>"` lists them with when to use each (`--sheet blocks.png` to look); `uberscene blocks add <name> --into video.tsx --track <id> --at hook@word:N` copies one to `blocks/<name>.tsx` and places its component in a `<Layer>`, its props set there; `blocks update` after an upgrade |
@@ -233,7 +233,8 @@ Give the video one look and say it once.
 - **Leave entrances to the motion style.** Write `enter` or `exit` only where one element should differ.
 - **Components** for the common graphics: `LowerThird`, `Callout`, `Badge`, `Counter` and
   `TypeCard`, imported from `@uberscene/kit`. They take the timing props any element takes.
-  Positions are pixels from the frame's centre, with defaults set for 1920x1080. See
+  `box`, with `x` and `y`, is the component's centre in pixels from the frame's top left; an axis left out is
+  centred on the frame, except the defaults of `LowerThird` and `Callout`, set for 1920x1080. See
   [references/components.md](references/components.md).
 - **Colour and effects** are `<Effect type params>` children of a clip, a title, a shape, a layer or an
   `<Adjustment>` (which affects everything beneath it for its time). They run in the order written: correct, then

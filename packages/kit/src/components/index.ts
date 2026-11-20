@@ -7,9 +7,10 @@ import { Badge, badgeSchema } from "./badge";
 import { Callout, calloutSchema } from "./callout";
 import { Counter, CounterValue, counterSchema } from "./counter";
 import { LowerThird, lowerThirdSchema } from "./lower-third";
+import { withFrame } from "./shared";
 import { TypeCard, TypeCardBack, TypeCardLine, typeCardSchema } from "./type-card";
 
-export { Badge, Callout, Counter, CounterValue, LowerThird, TypeCard, TypeCardBack, TypeCardLine };
+export { Badge, Callout, Counter, CounterValue, LowerThird, TypeCard, TypeCardBack, TypeCardLine, withFrame };
 
 export interface ComponentEntry {
   /** One line on what it is. */

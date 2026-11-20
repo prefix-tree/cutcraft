@@ -149,7 +149,6 @@ export function captionsContent(p: {
     background?: string;
     shadow?: { color: string; blur?: number; x?: number; y?: number };
     stroke?: { color: string; width: number };
-    position?: string | number;
     highlight?: string;
     highlightBox?: string;
     upcoming?: string;
@@ -168,7 +167,7 @@ export function captionsContent(p: {
     ? `${style.shadow.x ?? 0}px ${style.shadow.y ?? 0}px ${style.shadow.blur ?? 0}px ${style.shadow.color}`
     : "0 0 3px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.55), 0 2px 14px rgba(0,0,0,0.75)";
   const container: CSSProperties = {
-    ...captionPlacement(captionPlace(props, style), comp),
+    ...captionPlacement(captionPlace(props), comp),
     gap: 8,
     pointerEvents: "none",
     fontFamily: fontFamily(style.font ?? "Inter"),

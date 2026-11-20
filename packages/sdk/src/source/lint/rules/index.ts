@@ -1,6 +1,7 @@
 import { lookupAsset } from "../../../manifest/types";
 import type { ElementSite, SourceIndex } from "../../index";
 import type { Diagnostic, LintOptions } from "../index";
+import { boxPlacement } from "./box";
 import { deprecatedProps, oldThemeVariables } from "./deprecated";
 import { declaration } from "./fonts";
 import { ntscFrameRate } from "./frame-rate";
@@ -274,6 +275,7 @@ export const rules: readonly Rule[] = [
   notRendered,
   deprecatedProps,
   oldThemeVariables,
+  boxPlacement,
   ntscFrameRate,
 ];
 

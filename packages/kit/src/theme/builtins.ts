@@ -94,7 +94,7 @@ const STYLES: Presets = {
       lineHeight: 1.1,
       width: 840,
       height: 160,
-      transform: { position: { x: 0, y: 230 }, borderRadius: 28 },
+      transform: { borderRadius: 28 },
       animation: { preset: "scale", in: 0.2, out: 0.15 },
     },
   },

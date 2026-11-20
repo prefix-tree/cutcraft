@@ -48,11 +48,11 @@ function report(name: string, tree: CollectedTree, trimId: string, transformId: 
   ]);
   const mover = new Executor({ tree, manifest, now: () => 0 });
   rows.push([
-    "transform/update (position drag)",
+    "box/update (drag)",
     bench(240, (i) => {
       const r = mover.execute({
-        type: "transform/update",
-        params: { id: transformId, transform: { position: { x: i % 50, y: 0 } } },
+        type: "box/update",
+        params: { id: transformId, box: { x: i % 50, y: 0 } },
       });
       if (!r.ok) throw new Error(JSON.stringify(r.errors));
     }),

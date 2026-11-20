@@ -19,7 +19,7 @@ export default function Video() {
           size={104}
           width={720}
           align="left"
-          transform={{ position: { x: -100, y: 150 } }}
+          box={{ x: 380, y: 420, origin: "center" }}
         >
           Night Shift
         </Title>
@@ -30,7 +30,7 @@ export default function Video() {
           style="body"
           width={720}
           align="left"
-          transform={{ position: { x: -100, y: 222 } }}
+          box={{ x: 380, y: 492, origin: "center" }}
         >
           Set in Titan One and Inter Tight
         </Title>

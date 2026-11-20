@@ -44,7 +44,7 @@ export default function Video({ title }: z.infer<typeof schema>) {
           weight={700}
           align="left"
           valign="bottom"
-          transform={{ position: { x: 120, y: -140 } }}
+          box={{ x: 1080, y: 400, origin: "center" }}
           animation={{ preset: "slide-left", in: 0.3, out: 0.3 }}
         >
           {title}
