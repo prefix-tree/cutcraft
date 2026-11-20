@@ -33,8 +33,8 @@ export default function Video({ product, accent }: z.infer<typeof schema>) {
 }
 ```
 
-There is no project file next to it. The editor edits this file, the player plays it, and the export renders it. A
-model that wrote it can read your changes in it later, because they are in the same text.
+The file is the whole project ([Introduction](./introduction)): the editor edits it, the player plays it and the
+export renders it.
 
 ## What a file exports
 

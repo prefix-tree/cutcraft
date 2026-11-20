@@ -385,7 +385,7 @@ import { HundredCells } from "./blocks/hundred-cells";
 
 Its props are set where it is placed, so two placements of one block differ without two copies, and the editor's
 handles for a Layer's component edit them. Its colours default to theme tokens (`$accent`), so it takes the video's
-look. The copy is yours to edit. See [Blocks](/guide/free-code#blocks).
+look. The copy is yours to edit. See [Blocks](/guide/blocks).
 
 ### Adding a block
 

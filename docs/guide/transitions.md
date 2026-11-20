@@ -124,8 +124,7 @@ A sound can also anchor to a transition, and then starts when the transition doe
 <Audio id="swish" src="asset:swish" anchor="x1" />
 ```
 
-A track with `role="effects"` keeps sound effects apart from dialogue and music in the mix
-([Track roles](./captions-and-sound#track-roles)).
+[Track roles](./captions-and-sound#track-roles) covers how an effects track sits in the mix.
 
 The shorts in `examples/shorts` come with eight cues to start from: `tick`, `click`, `pop`, `whoosh`, `swish`,
 `riser`, `thud` and `chime`. They are made by a small synth in `examples/shorts/media/sounds.ts`, so they carry the

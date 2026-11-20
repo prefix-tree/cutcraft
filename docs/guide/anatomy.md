@@ -110,9 +110,8 @@ moment always draws the same frame. Change what you draw from moment to moment a
 - **Values to change later:** a file can export a `schema` and `defaults`, so the same cut renders with another name
   or colour. [The file](./the-file)
 
-Every element has a literal `id`. That is how an editor finds it: drag the end of `demo` on a timeline, and
-UberScene changes one value in the file, `out={9}` to `out={8}`, and nothing else. There is no project file beside it,
-so whoever opens the file next, you or a model, reads the edit as code. [Editing](./editing)
+- **Ids:** every element has a literal `id`, which is how an editor finds it to change one value
+  ([Introduction](./introduction)). [Editing](./editing)
 
 ## Next
 
