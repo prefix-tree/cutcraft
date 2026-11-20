@@ -2,7 +2,6 @@
 // job it does, and drawn as one sheet of their previews to choose by looking. Each block is a folder: `block.tsx`
 // (the component, its `schema`, `defaults` and `meta`), `demo.tsx` (a video that places it) and `preview.png`.
 import { existsSync, readdirSync, readFileSync } from "node:fs";
-import { writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -12,6 +11,7 @@ import { blockMetaSchema, type Knob } from "@uberscene/kit";
 import { BLOCK_ASPECTS, knobsOf } from "@uberscene/kit/schema";
 import { gatherLocalFiles, loadModule } from "@uberscene/sdk";
 
+import { writeAtomically } from "./atomic";
 import { blankPicture, decodePng, encodePng, paste } from "./png";
 
 /** One block, as `uberscene blocks` lists it. */
@@ -187,6 +187,6 @@ export async function blockSheet(blocks: readonly BlockInfo[], out: string): Pro
       SHEET_GAP + (i % columns) * (width + SHEET_GAP) + Math.floor((width - picture.width) / 2),
       SHEET_GAP + Math.floor(i / columns) * (height + SHEET_GAP) + Math.floor((height - picture.height) / 2),
     );
-  await writeFile(out, encodePng(sheet));
+  await writeAtomically(out, encodePng(sheet));
   return { width: sheet.width, height: sheet.height, names: blocks.map((b) => b.name), columns };
 }
