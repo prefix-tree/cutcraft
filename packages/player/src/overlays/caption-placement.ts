@@ -51,7 +51,7 @@ export function captionBox(comp: {
 
 /**
  * The CSS that puts the caption block in its box, in a frame of the given size: each field the file writes replaces
- * that one of the default box (`captionBox`). Across, the block starts where `placeAxis` puts a box that wide. Down,
+ * that one of the default box (`captionBox`). Across, the block is padded in to where `placeAxis` puts a box that wide. Down,
  * with no `height` the block is as tall as its lines, so its origin line is pinned by the edge it names: `top` for a
  * top origin, `bottom` for a bottom one, and a pull of its own height between.
  */
@@ -74,10 +74,17 @@ export function captionPlacement(
           ? { bottom: n(comp.height - y) }
           : { top: n(y), transform: `translate(0, ${n(-o.y * 100)}%)` };
   const align = place.align ?? "center";
+  // Across: a block the width of the frame, padded in to the box, while the box is inside the frame. The text is then
+  // laid out and drawn as it always was (a block at a fractional left draws its glyphs a little differently).
+  const left = placeAxis(comp.width, width, x, o.x);
+  const right = comp.width - left - width;
+  const across: CSSProperties =
+    left >= 0 && right >= 0
+      ? { left: 0, right: 0, paddingLeft: n(left), paddingRight: n(right) }
+      : { left: n(left), width: n(width) };
   return {
     position: "absolute",
-    left: n(placeAxis(comp.width, width, x, o.x)),
-    width: n(width),
+    ...across,
     ...down,
     display: "flex",
     flexDirection: "column",
