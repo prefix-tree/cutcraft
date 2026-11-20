@@ -1,4 +1,4 @@
-import { EASING_FN, type SpringConfig, springAt } from "../easing";
+import { easingCurve, type OldEasing, type SpringConfig, springAt } from "../easing";
 import type { Easing } from "./enums";
 import { random as generator, hash } from "./random";
 
@@ -10,8 +10,8 @@ import { random as generator, hash } from "./random";
 export type Extrapolate = "extend" | "clamp";
 
 export interface InterpolateOptions {
-  /** The curve inside each segment of the ranges; default linear. */
-  readonly easing?: Easing;
+  /** The curve inside each segment of the ranges; default linear. An old name (`"ease-in-out"`) still works, with a warning. */
+  readonly easing?: Easing | OldEasing;
   /** Past the first or last input: keep the line going (default) or hold the end value. */
   readonly extrapolateLeft?: Extrapolate;
   readonly extrapolateRight?: Extrapolate;
@@ -40,7 +40,8 @@ export function interpolate(
   let x = (input - a) / (b - a);
   if (x < 0 && options.extrapolateLeft === "clamp") x = 0;
   if (x > 1 && options.extrapolateRight === "clamp") x = 1;
-  const k = x >= 0 && x <= 1 && options.easing ? EASING_FN[options.easing](x) : x;
+  const curve = easingCurve(options.easing);
+  const k = x >= 0 && x <= 1 && curve ? curve(x) : x;
   const lo = outputRange[i - 1]!,
     hi = outputRange[i]!;
   return lo + (hi - lo) * k;

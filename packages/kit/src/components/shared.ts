@@ -78,8 +78,21 @@ export function timingOf(props: Record<string, unknown>): Timing {
 export const h = (type: any, props: Record<string, unknown>, ...children: unknown[]): ReactElement =>
   createElement(type, props, ...(children as never[]));
 
-/** A component's own props parsed against its schema, so defaults apply and a wrong value says which. */
-export function parse<S extends z.ZodTypeAny>(name: string, schema: S, props: unknown): z.infer<S> {
+/**
+ * A component's own props parsed against its schema, so defaults apply and a wrong value says which. `moved` names
+ * props an earlier version took under another name (old to new): one written the old way is an error naming the new.
+ */
+export function parse<S extends z.ZodTypeAny>(
+  name: string,
+  schema: S,
+  props: unknown,
+  moved: Readonly<Record<string, string>> = {},
+): z.infer<S> {
+  const old = Object.keys(moved).filter((k) => typeof props === "object" && props !== null && k in props);
+  if (old.length > 0)
+    throw new Error(
+      `${name}: ${old.map((k) => `\`${k}\` is now \`${moved[k]}\``).join("; ")}; uberscene lint --fix moves the file`,
+    );
   const result = schema.safeParse(props);
   if (!result.success)
     throw new Error(

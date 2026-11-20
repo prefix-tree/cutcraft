@@ -238,7 +238,7 @@ export type Transform = z.output<typeof transformSchema>;
 export const graphicAnimationSchema = z.strictObject({
   type: zEntranceAnimation,
   duration: z.number().positive().default(0.5),
-  easing: zEasing.default("ease-out"),
+  easing: zEasing.default("easeOut"),
 });
 
 export const entranceProps = {

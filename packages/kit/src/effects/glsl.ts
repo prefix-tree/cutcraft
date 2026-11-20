@@ -3,6 +3,8 @@
 // names, and the modules those depend on, once each and in order, before its own code.
 import { z } from "zod";
 
+import type { BlendMode } from "../jsx/enums";
+
 /** A piece of GLSL other sources use, with the modules it needs. */
 export interface GlslModule {
   readonly name: string;
@@ -140,11 +142,18 @@ float us_fbm3(vec3 p, uint seed, int octaves) {
 );
 
 /** The blend modes `us_blend` knows, in the order of its `mode` index. */
-export const BLEND_MODES = ["normal", "multiply", "screen", "overlay", "softLight"] as const;
+/** The blend modes a shader blends with: the first five of the elements' `BLEND_MODES`, spelled the same. */
+export const SHADER_BLEND_MODES = [
+  "normal",
+  "multiply",
+  "screen",
+  "overlay",
+  "softLight",
+] as const satisfies readonly BlendMode[];
 
 /**
  * `top` blended onto `base`, both sRGB colour: the separable blend modes of the W3C "Compositing and Blending Level 1"
- * recommendation, `mode` an index into `BLEND_MODES`.
+ * recommendation, `mode` an index into `SHADER_BLEND_MODES`.
  */
 export const BLEND = glslModule(
   "blend",

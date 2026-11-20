@@ -126,9 +126,9 @@ const bounce = bounceOut(1),
 export const EASING_FN: Readonly<Record<Easing, Fn>> = {
   linear: (x) => x,
   ease: bezier(0.25, 0.1, 0.25, 1),
-  "ease-in": bezier(0.42, 0, 1, 1),
-  "ease-out": bezier(0, 0, 0.58, 1),
-  "ease-in-out": bezier(0.42, 0, 0.58, 1),
+  easeIn: bezier(0.42, 0, 1, 1),
+  easeOut: bezier(0, 0, 0.58, 1),
+  easeInOut: bezier(0.42, 0, 0.58, 1),
   hold: (x) => (x >= 1 ? 1 : 0),
   bezier: bezier(0.25, 0.1, 0.25, 1),
   smoothstep: (x) => x * x * (3 - 2 * x),
@@ -177,11 +177,40 @@ export const EASING_FN: Readonly<Record<Easing, Fn>> = {
   easeInOutBounceSmall: inOut(out(bounceSmall)),
 };
 
+/** An easing name spelled the way it was before 0.6, which free code still takes: `"easeIn"` and the like now. */
+export type OldEasing = "ease-in" | "ease-out" | "ease-in-out";
+
+/** The easing names spelled in kebab-case before 0.6, and their spelling since. */
+const OLD_EASINGS: Readonly<Record<OldEasing, Easing>> = {
+  "ease-in": "easeIn",
+  "ease-out": "easeOut",
+  "ease-in-out": "easeInOut",
+};
+const warned = new Set<string>();
+
+/**
+ * The curve an easing name names, for free code (`interpolate`, `progress`, `ease`): an old spelling such as
+ * `"ease-in-out"` still works, with one warning per name that says the new one. A JSX prop takes only the new spelling.
+ * Undefined for a name that is no easing.
+ */
+export function easingCurve(name: string | undefined): Fn | undefined {
+  if (name === undefined) return undefined;
+  const fn = EASING_FN[name as Easing];
+  if (fn) return fn;
+  const now = Object.hasOwn(OLD_EASINGS, name) ? OLD_EASINGS[name as OldEasing] : undefined;
+  if (now === undefined) return undefined;
+  if (!warned.has(name)) {
+    warned.add(name);
+    console.warn(`easing "${name}" is now "${now}"; the old name still works in code, but not in a prop`);
+  }
+  return EASING_FN[now];
+}
+
 const clamp01 = (x: number): number => (x < 0 ? 0 : x > 1 ? 1 : x);
 
 /** `name` applied to `x` clamped to 0..1; an unknown or missing name is linear. */
 export function ease(name: string | undefined, x: number): number {
-  const fn = EASING_FN[name as Easing] ?? EASING_FN.linear;
+  const fn = easingCurve(name) ?? EASING_FN.linear;
   return fn(clamp01(x));
 }
 

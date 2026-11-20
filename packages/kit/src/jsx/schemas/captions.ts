@@ -27,8 +27,8 @@ const captionStyleSchema = z.strictObject({
   background: colorSchema.optional(),
   /** A drop shadow under the letters. Left out: a dark halo that reads on light and dark footage. */
   shadow: textShadowSchema.optional(),
-  /** An outline around the letters, drawn under them. */
-  stroke: z.strictObject({ color: colorSchema, width: z.number().min(0).max(40) }).optional(),
+  /** An outline around the letters, drawn under them: its colour and thickness in pixels. */
+  stroke: z.strictObject({ color: colorSchema, thickness: z.number().min(0).max(40) }).optional(),
   /** The colour of the word being said, for the word animations. */
   highlight: colorSchema.optional(),
   /** A filled, rounded box behind the word being said. `highlight` stays the colour of its letters. */

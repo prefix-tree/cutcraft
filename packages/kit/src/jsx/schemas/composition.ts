@@ -27,7 +27,7 @@ export const compositionSchema = z.strictObject({
   /** What shows where nothing covers the frame: a colour, a gradient, or (`blur`) the picture itself, blurred to fill. */
   background: z
     .strictObject({
-      mode: z.enum(["color", "blur", "gradient"]),
+      type: z.enum(["color", "blur", "gradient"]),
       color: colorSchema.optional(),
       gradient: gradientSchema.optional(),
     })
@@ -72,7 +72,7 @@ export const markerSchema = z.strictObject({
   /** The marker's name: `marker:<id>` refers to it as a time. */
   id: idSchema,
   /** Seconds from the start of the video. */
-  at: z.number().nonnegative(),
+  start: z.number().nonnegative(),
   /** Text shown on the editor's ruler. */
   label: z.string().default(""),
   /** Its colour on the ruler. */

@@ -16,10 +16,10 @@ export const BLEND_MODES = [
   "overlay",
   "darken",
   "lighten",
-  "color-dodge",
-  "color-burn",
-  "hard-light",
-  "soft-light",
+  "colorDodge",
+  "colorBurn",
+  "hardLight",
+  "softLight",
   "difference",
   "exclusion",
   "hue",
@@ -27,15 +27,15 @@ export const BLEND_MODES = [
   "color",
   "luminosity",
   "add",
-  "linear-dodge",
+  "linearDodge",
 ] as const;
 
 export const EASINGS = [
   "linear",
   "ease",
-  "ease-in",
-  "ease-out",
-  "ease-in-out",
+  "easeIn",
+  "easeOut",
+  "easeInOut",
   "hold",
   "bezier",
   "smoothstep",
@@ -87,41 +87,41 @@ export const EASINGS = [
 // The built-in effects and transitions are listed by their registry (effects/registry.ts).
 export { TRANSITION_TYPES, type TransitionType, VIDEO_EFFECT_TYPES, type VideoEffectType } from "../effects/registry";
 
-export const TEXT_ANIMATION_PRESETS = [
+export const TEXT_ANIMATION_TYPES = [
   "none",
   "typewriter",
   "fade",
-  "slide-up",
-  "slide-down",
-  "slide-left",
-  "slide-right",
+  "slideUp",
+  "slideDown",
+  "slideLeft",
+  "slideRight",
   "scale",
-  "word-by-word",
+  "wordByWord",
 ] as const;
 
-export const CAPTION_ANIMATIONS = ["none", "word-highlight", "word-by-word", "karaoke", "typewriter"] as const;
+export const CAPTION_ANIMATIONS = ["none", "wordHighlight", "wordByWord", "karaoke", "typewriter"] as const;
 
 export const ENTRANCE_ANIMATIONS = [
   "none",
   "fade",
-  "slide-left",
-  "slide-right",
-  "slide-up",
-  "slide-down",
+  "slideLeft",
+  "slideRight",
+  "slideUp",
+  "slideDown",
   "scale",
   "rotate",
   "bounce",
   "pop",
   "draw",
-  "wipe-left",
-  "wipe-right",
-  "wipe-up",
-  "wipe-down",
-  "reveal-center",
-  "reveal-edges",
+  "wipeLeft",
+  "wipeRight",
+  "wipeUp",
+  "wipeDown",
+  "revealCenter",
+  "revealEdges",
   "elastic",
-  "flip-horizontal",
-  "flip-vertical",
+  "flipHorizontal",
+  "flipVertical",
 ] as const;
 
 export const SHAPE_TYPES = [
@@ -161,11 +161,42 @@ export function isKeyframeProperty(value: string): boolean {
 
 export const TEXT_ALIGNS = ["left", "center", "right", "justify"] as const;
 export const TEXT_VALIGNS = ["top", "middle", "bottom"] as const;
-export const TEXT_DECORATIONS = ["none", "underline", "line-through", "overline"] as const;
+export const TEXT_DECORATIONS = ["none", "underline", "lineThrough", "overline"] as const;
 export const MASK_TYPES = ["shape", "drawn"] as const;
-export const SVG_COLOR_MODES = ["none", "tint", "replace"] as const;
+export const SVG_COLOR_TYPES = ["none", "tint", "replace"] as const;
 export const AUTOMATION_LANES = ["volume", "pan"] as const;
 export const TRACK_FLAGS = ["locked", "hidden", "muted", "solo"] as const;
+
+/**
+ * Values spelled in kebab-case before 0.6 and in camelCase since, old to new: blend modes, easings, entrances, text
+ * and caption animations, and the line-through decoration. A JSX prop rejects the old spelling with an error naming the
+ * new one; the free-code easing helpers still take an old easing name, with a warning.
+ */
+export const RESPELLED_VALUES: Readonly<Record<string, string>> = {
+  "color-dodge": "colorDodge",
+  "color-burn": "colorBurn",
+  "hard-light": "hardLight",
+  "soft-light": "softLight",
+  "linear-dodge": "linearDodge",
+  "ease-in": "easeIn",
+  "ease-out": "easeOut",
+  "ease-in-out": "easeInOut",
+  "slide-up": "slideUp",
+  "slide-down": "slideDown",
+  "slide-left": "slideLeft",
+  "slide-right": "slideRight",
+  "word-by-word": "wordByWord",
+  "word-highlight": "wordHighlight",
+  "wipe-left": "wipeLeft",
+  "wipe-right": "wipeRight",
+  "wipe-up": "wipeUp",
+  "wipe-down": "wipeDown",
+  "reveal-center": "revealCenter",
+  "reveal-edges": "revealEdges",
+  "flip-horizontal": "flipHorizontal",
+  "flip-vertical": "flipVertical",
+  "line-through": "lineThrough",
+};
 
 export const zTrackLayout = z.enum(TRACK_LAYOUTS);
 export const zTrackRole = z.enum(TRACK_ROLES);
@@ -174,7 +205,7 @@ export const zBlendMode = z.enum(BLEND_MODES);
 export const zEasing = z.enum(EASINGS);
 export const zTransitionType = z.enum(TRANSITION_TYPES);
 export const zVideoEffectType = z.enum(VIDEO_EFFECT_TYPES);
-export const zTextAnimationPreset = z.enum(TEXT_ANIMATION_PRESETS);
+export const zTextAnimationType = z.enum(TEXT_ANIMATION_TYPES);
 export const zCaptionAnimation = z.enum(CAPTION_ANIMATIONS);
 export const zEntranceAnimation = z.enum(ENTRANCE_ANIMATIONS);
 export const zShapeType = z.enum(SHAPE_TYPES);
