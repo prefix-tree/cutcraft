@@ -2012,6 +2012,12 @@ html:has(.VPContent.has-sidebar) .DocSearch-Button {
   border-color: var(--cc-ink);
   box-shadow: 3px 3px 0 var(--cc-ink);
 }
+/* A logo keeps its white tile, so a mark in the accent colour (Claude's) stays visible; the accent shadow marks it. */
+.cc-agents-tabs button.active .cc-agents-icon:has(img),
+.dark .cc-agents-tabs button.active .cc-agents-icon:has(img) {
+  background: #ffffff;
+  box-shadow: 3px 3px 0 var(--cc-accent);
+}
 @media (prefers-reduced-motion: reduce) {
   .cc-agents-icon {
     transition: none;
