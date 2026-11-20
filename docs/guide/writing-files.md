@@ -58,7 +58,7 @@ export default function Video({ product, tagline, accent, cta }: z.infer<typeof 
       <Track id="music" layout="free" role="music">
         <Audio id="bed" src="asset:music" start={0} duration="fill" volume={0.35} fade={{ in: 0.5, out: 1.5 }} duck={{ under: "main", to: 0.15 }} />
       </Track>
-      <Captions id="captions" src="asset:founder" style={{ position: "bottom", size: 44 }}>
+      <Captions id="captions" src="asset:founder" style={{ size: 44 }}>
         <Caption id="cap-1" start="word:12" end="word:18.end" text="Good coffee still deserves a slow morning." />
         …
       </Captions>

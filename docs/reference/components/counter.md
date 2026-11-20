@@ -25,8 +25,7 @@ Besides the timing props (`start`, `anchor`, `at`, `offset`, `duration`):
 | `prefix` | string | `""` | Text before the number, such as `$`. |
 | `suffix` | string | `""` | Text after the number, such as `%`. |
 | `label` | string |  | A line under the number, in the body face and the muted colour. Left out: the number alone. |
-| `x` | number | `0` | The number's centre, in pixels from the frame's centre. |
-| `y` | number | `0` | The number's centre, in pixels below the frame's centre. |
+| `box` | { x, y } | `{"x":960,"y":540}` | Where the number's centre sits, in pixels from the frame's top left. Left out: `{ x: 960, y: 540 }`, on a 1920 by 1080 frame. |
 | `size` | number (> 0) | `140` | The number's letter height in pixels; the label is about a fifth of it. |
 | `countFor` | number (> 0) | `1.5` | Seconds the count takes; it then holds. |
 

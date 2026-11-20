@@ -7,7 +7,7 @@ parts once and you can read any element in a file, and any page of the [referenc
 <Title
   id="headline"                                    // 1. who it is
   anchor="talk" at="word:4" duration={2.5}         // 2. when it plays
-  transform={{ position: { x: 0, y: -320 } }}      // 3. where it sits
+  box={{ y: 220, origin: "center" }}               // 3. where it sits
   style="h1" color="$primary"                      // 4. how it looks
   enter={{ type: "slide-up", duration: 0.4 }}      // 5. how it comes and goes
   exit={{ type: "fade", duration: 0.3 }}
@@ -24,7 +24,7 @@ parts once and you can read any element in a file, and any page of the [referenc
 |---|---|---|
 | 1. Who it is | `id` | All |
 | 2. When it plays | `start`, `anchor`, `at`, `offset`, `duration` | Everything placed in time |
-| 3. Where it sits | `transform`, `fit`, `blend` | Everything that draws |
+| 3. Where it sits | `box`, `fit`, `transform`, `blend` | Everything that draws |
 | 4. How it looks | its own props, `style`, `$tokens` | Each element has its own |
 | 5. How it comes and goes | `enter`, `exit`, `<Keyframe>` | Titles, shapes, SVG, stickers, layers |
 | 6. What it holds | text, `<Effect>`, `<Keyframe>`, `<Mask>`… | Depends on the element |
@@ -66,20 +66,29 @@ Five props place an element in time. You rarely need more than two of them.
 On a sequence track an element needs none of these: it starts where the one before it ends, and a clip lasts as
 long as its trim. [Timing](./time) covers each prop in depth.
 
-## 3. Where it sits: `transform`, `fit`, `blend`
+## 3. Where it sits: `box`, `fit`, `transform`, `blend`
 
-An element that draws is centred in the frame and fitted to it. Three props change that.
+Every element that draws is placed by one rule. `box` is the rectangle it occupies, the whole frame when it is left
+out. `fit` says how its content fills that rectangle, as CSS `object-fit` does. `transform` turns it after that.
 
-- **`transform`** moves and turns it. `position` is pixels right and down from the centre; `scale`, `rotation` (in
-  degrees), `opacity` (0 to 1), `crop` and `borderRadius` do what they say. `anchor` is the point it scales and
-  turns around, as fractions of its own box.
-- **`fit`** says how footage fills the frame: `contain` shows all of it, `cover` fills the frame and crops,
-  `stretch` distorts, `none` keeps its own size.
+- **`box`** is in pixels from the frame's top left, as in CSS. `x` and `y` place the point `origin` names: its top
+  left by default, or `center`, `top`, `bottomRight` and the other points of the nine. `width` and `height` size it.
+  Leave out `x` or `y` and it is centred on that axis; leave out the size and it is as big as its content is when
+  fitted to the frame.
+- **`fit`** says how footage fills its box: `contain` shows all of it, `cover` fills the box and crops, `stretch`
+  distorts, `none` keeps its own size.
+- **`transform`** turns it: `scale`, `rotation` (in degrees), `opacity` (0 to 1), `crop` and `borderRadius` do what
+  they say. `anchor` is the point it scales and turns around, as fractions of its own box.
 - **`blend`** mixes it with what is underneath, as CSS blend modes do (`screen`, `multiply`, `overlay`…).
 
+A picture in picture: a box 672 pixels wide whose top right corner sits 40 pixels in from the frame's top right.
+
 ```tsx
-<Clip id="pip" src="asset:screen" transform={{ position: { x: 560, y: -300 }, scale: 0.35, borderRadius: 24 }} />
+<Clip id="pip" src="asset:screen" box={{ x: 1880, y: 40, width: 672, origin: "topRight" }} transform={{ borderRadius: 24 }} />
 ```
+
+A keyframe moves a box with the paths `box.x` and `box.y`. Files written for the older `transform.position`, which
+measured from the frame's centre, move with `uberscene lint --fix`.
 
 The track order sets what is on top: the first track is the bottom of the picture
 ([Anatomy of a video](./anatomy#tracks)).

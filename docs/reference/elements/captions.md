@@ -22,11 +22,9 @@ The coffee footage is Pixabay videos [209419](https://pixabay.com/videos/id-2094
 |---|---|---|---|---|
 | `id` | string |  | yes | The captions' name. |
 | `src` | string |  |  | Generate children from the asset's transcript. Literal `<Caption>` children override this. |
-| `style` | string \| { font, size, weight, color, background, shadow, stroke, position, highlight, highlightBox, upcoming } |  |  | Caption styling, or the name of a theme captions preset. |
+| `style` | string \| { font, size, weight, color, background, shadow, stroke, highlight, highlightBox, upcoming } |  |  | Caption styling, or the name of a theme captions preset. |
 | `animation` | "none" \| "word-highlight" \| "word-by-word" \| "karaoke" \| "typewriter" | `"none"` |  | How the words appear: all at once, the word being said highlighted, word by word, karaoke or typewriter. |
-| `x` | number |  |  | Where the middle of the captions is, in pixels right of the frame's centre and below it, as on a card or a badge. `y` takes the place of `style.position`; `x` alone keeps the height that names. |
-| `y` | number |  |  | Pixels below the frame's centre for the middle of the captions, as `x`. |
-| `width` | number (> 0) |  |  | The widest a caption line may be, in pixels. Left out: the frame, less a margin at each side. |
+| `box` | { x, y, width, height, origin } |  |  | The rectangle the caption block sits in, from the frame's top left as on any element. Left out, the lower safe area: centred, as wide as the frame less a margin at each side, its bottom a margin above the frame's bottom (`origin: "bottom"`). Each field written replaces that one of the default, so a box with only `y: 1150` and `origin: "center"` puts the block's middle at 1150 and keeps the default width. Without a `height`, the block is as tall as its lines. |
 | `align` | "left" \| "center" \| "right" \| "justify" |  |  | Which side of that width the lines sit against. Left out: `center`. |
 | `maxChars` | integer (> 0) |  |  | The most characters on a generated cue's line. Left out: as many as fit at the caption size on this frame (at most 42). |
 | `maxDuration` | number (> 0) | `5` |  | The longest a generated cue may stay on screen, in seconds. |

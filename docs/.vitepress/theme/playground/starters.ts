@@ -32,7 +32,7 @@ export default function Video() {
       </Track>
       <Track id="over" layout="free">
         <LowerThird id="name" anchor="product" offset={0.3} duration={2.2}
-          name="Halvard Coffee" role="Roasted on Monday" x={-250} y={170} width={400} />
+          name="Halvard Coffee" role="Roasted on Monday" box={{ x: 230, y: 440 }} width={400} />
       </Track>
     </Composition>
   );
@@ -52,8 +52,8 @@ export default function Video() {
         <Clip id="shot" src="asset:coffee" in={0} out={4} fit="cover" />
       </Track>
       <Track id="over" layout="free">
-        <LowerThird id="lt" start={0.3} duration={3.7} name="Maya Chen" role="Head roaster, Halvard" x={-330} y={220} width={540} />
-        <Badge id="new" start={1} duration={3} text="Live" x={480} y={-260} />
+        <LowerThird id="lt" start={0.3} duration={3.7} name="Maya Chen" role="Head roaster, Halvard" box={{ x: 310, y: 580 }} width={540} />
+        <Badge id="new" start={1} duration={3} text="Live" box={{ x: 1120, y: 100 }} />
       </Track>
     </Composition>
   );

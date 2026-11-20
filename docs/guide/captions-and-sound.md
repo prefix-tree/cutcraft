@@ -17,7 +17,7 @@ npx uberscene add founder.mp4     # reads founder.json, founder.vtt or founder.s
 ```
 
 ```tsx
-<Captions id="captions" src="asset:founder" style={{ position: "bottom", size: 44 }} animation="karaoke" />
+<Captions id="captions" src="asset:founder" style={{ size: 44 }} animation="karaoke" />
 ```
 
 ## Getting a transcript
@@ -62,17 +62,14 @@ Either way the words end up in the manifest, so the preview and the export agree
 grouped into lines. Trim a clip and its captions change with it.
 
 ```tsx
-<Captions id="captions" src="asset:founder" style={{ position: "bottom", size: 44 }} animation="karaoke" />
+<Captions id="captions" src="asset:founder" style={{ size: 44 }} animation="karaoke" />
 ```
 
 | Prop | Does |
 |---|---|
 | `animation` | Colours the words as they are said: `word-highlight`, `word-by-word`, `karaoke` or `typewriter`. |
-| `style` | Sets the font, size, colours, background, stroke and position. |
-| `style.position` | `top`, `center` or `bottom`, or a number from 0 to 1 for the height the captions' middle sits at. |
-
-Over a talking head in a vertical video, `position: 0.6` puts them under the chin, clear of the mouth and above the
-part of the frame the platforms cover.
+| `style` | Sets the font, size, colours, background and stroke: how they look, not where. |
+| `box` | Where they sit; [Place captions](#place-captions). Left out, the lower safe area. |
 
 ::: details How lines are made
 A line breaks at the end of a sentence, at a pause longer than `maxGap` (0.8 s), at a clip boundary, or when it would
@@ -81,20 +78,34 @@ pass `maxChars` (42 characters) or `maxDuration` (5 s).
 
 ## Place captions
 
-For an exact place, give the captions numbers, as you would a card or a badge.
+With no `box`, the captions sit in the lower safe area: centred, as wide as the frame less a margin at each side, the
+bottom of the block a margin above the bottom of the frame. On a vertical video the margins are wider, clear of the
+controls the platforms draw over the right edge and the bottom fifth.
+
+`box` places them as it places any element, in pixels from the frame's top left. Each field you write replaces that
+one of the default box, so a box with only a height keeps the default width. Over a talking head in a vertical video,
+the middle of the lines at 1152 pixels down puts them under the chin, clear of the mouth:
 
 ```tsx
-<Captions id="captions" src="asset:founder" x={-200} y={192} width={520} align="left" />
+<Captions id="captions" src="asset:founder" box={{ y: 1152, origin: "center" }} />
+```
+
+A narrow block to the left of a diagram:
+
+```tsx
+<Captions id="captions" src="asset:founder" box={{ x: 340, y: 1152, width: 520, origin: "center" }} align="left" />
 ```
 
 | Prop | Does |
 |---|---|
-| `x`, `y` | The middle of the captions, in pixels right of the frame's centre and below it. |
-| `width` | The widest a line may be. |
+| `box.x`, `box.y` | Where the block's `origin` point sits, in pixels from the frame's left edge and top edge. |
+| `box.width` | The widest a line may be. |
+| `box.height` | A fixed height for the block; left out, it is as tall as its lines. |
+| `box.origin` | Which point of the block sits at `x` and `y`: `bottom` by default, `top`, `center` or any of the nine. |
 | `align` | The side of that width the lines sit against: `left`, `center`, `right` or `justify`. |
 
-`y` takes the place of `style.position`. `x`, `width` and `align` work with either. The layout check measures the
-captions where these put them.
+The layout check measures the captions where the box puts them. Files written with `style.position` or with `x`, `y`
+and `width` from the frame's centre move with `uberscene lint --fix`.
 
 ## Highlight the word being said
 

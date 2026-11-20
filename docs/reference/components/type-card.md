@@ -19,8 +19,7 @@ Besides the timing props (`start`, `anchor`, `at`, `offset`, `duration`):
 | param | type | default | description |
 |---|---|---|---|
 | `id` | string |  | The component's id; each of its parts' ids starts with it. |
-| `x` | number | `0` | The card's centre, in pixels from the frame's centre. |
-| `y` | number | `0` | The card's centre, in pixels below the frame's centre. |
+| `box` | { x, y } | `{"x":960,"y":540}` | Where the card's centre sits, in pixels from the frame's top left. Left out: `{ x: 960, y: 540 }`, on a 1920 by 1080 frame. |
 | `width` | number (> 0) |  | The card's width in pixels; the whole frame when left out. |
 | `height` | number (> 0) |  | The card's height in pixels. Left out, like `width`: the whole frame. |
 | `fill` | string | `"$surface"` | The card's background colour. |

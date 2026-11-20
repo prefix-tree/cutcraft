@@ -528,7 +528,7 @@ Every name each entry exports, read from the code. The sections above explain th
 
 ### `@uberscene/kit/schema`
 
-210 exports.
+213 exports.
 
 | Export | Kind | |
 |---|---|---|
@@ -540,6 +540,9 @@ Every name each entry exports, read from the code. The sections above explain th
 | `BLEND_MODES` | const |  |
 | `BlendMode` | type |  |
 | `BLOCK_ASPECTS` | const | The frame shapes a block can be laid out for. |
+| `BOX_ORIGIN_POINT` | const | Each origin as fractions of the element's width and height from its top left. |
+| `BOX_ORIGINS` | const | Which point of an element's box `box.x` and `box.y` place. |
+| `BoxOrigin` | type |  |
 | `BUILT_IN_SHADERS` | const | The built-in effects drawn by a shader. |
 | `BUILT_IN_TRANSITIONS` | const | The built-in transitions drawn by a shader. |
 | `builtInShader` | function | The built-in shader of an effect type, if it has one. |
@@ -550,7 +553,6 @@ Every name each entry exports, read from the code. The sections above explain th
 | `capabilitiesOf` | function |  |
 | `Caption` | const | The `<Caption>` element ([reference](/reference/elements/caption)). |
 | `CAPTION_ANIMATIONS` | const |  |
-| `CAPTION_POSITIONS` | const |  |
 | `Captions` | const | The `<Captions>` element ([reference](/reference/elements/captions)). |
 | `CatalogFont` | interface | One family to choose from. |
 | `Clip` | const | The `<Clip>` element ([reference](/reference/elements/clip)). |
@@ -586,6 +588,7 @@ Every name each entry exports, read from the code. The sections above explain th
 | `EffectParamsOf` | type | The params of an effect type. |
 | `EffectRef` | interface | An effect a file declares, as `effect()` returns it. |
 | `EFFECTS` | const |  |
+| `ElementBox` | type |  |
 | `ElementCapabilities` | interface |  |
 | `ElementDefinition` | interface |  |
 | `ElementKind` | type |  |
@@ -1061,10 +1064,11 @@ Every name each entry exports, read from the code. The sections above explain th
 
 ### `@uberscene/player/engine`
 
-39 exports.
+41 exports.
 
 | Export | Kind | |
 |---|---|---|
+| `animatedBox` | function | The box with `box.x` and `box.y` evaluated at element-relative time `rel`; an axis with no value and no keys stays out. |
 | `animatedTransform` | function | The transform with its keyframed properties evaluated at element-relative time `rel`. |
 | `AssetSources` | class | One FrameSource per asset, shared by every clip of that asset and by nested compositors. |
 | `AudioOccurrence` | interface |  |
@@ -1073,6 +1077,7 @@ Every name each entry exports, read from the code. The sections above explain th
 | `buildFramePlan` | function | Everything the painter needs to draw composition time `t`, in draw order. |
 | `buildGainEnvelope` | function | Gain over [winFrom, winTo] in composition seconds. |
 | `CanvasPainter` | class | Executes a FramePlan on a 2D context of composition size. |
+| `captionBox` | function | The captions' default box in a frame. |
 | `captureWarnings` | function |  |
 | `Compositor` | class | One tick. |
 | `copyFrame` | function | Copies any frame into a canvas we own. |

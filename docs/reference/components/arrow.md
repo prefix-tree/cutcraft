@@ -21,8 +21,8 @@ Besides the timing props (`start`, `anchor`, `at`, `offset`, `duration`):
 | param | type | default | description |
 |---|---|---|---|
 | `id` | string |  | The id of the element it draws. |
-| `from` | { x, y } |  | Where the line starts, in pixels from the frame's centre. |
-| `to` | { x, y } |  | Where the head points, in pixels from the frame's centre. |
+| `from` | { x, y } |  | Where the line starts, in pixels from the frame's left edge. |
+| `to` | { x, y } |  | Where the head points, in pixels from the frame's left edge. |
 | `curve` | number | `0` | How far the line bows to its left, in pixels; 0 is straight. |
 | `color` | string | `"$accent"` | The colour of the line and its head. |
 | `width` | number (> 0) | `6` | The line's thickness in pixels; the head scales with it. |

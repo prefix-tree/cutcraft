@@ -21,8 +21,7 @@ Besides the timing props (`start`, `anchor`, `at`, `offset`, `duration`):
 | param | type | default | description |
 |---|---|---|---|
 | `id` | string |  | The id of the element it draws. |
-| `x` | number | `0` | The frame's centre from the frame's centre, and its size, in pixels. |
-| `y` | number | `0` | The border's centre, in pixels below the frame's centre. |
+| `box` | { x, y } | `{"x":960,"y":540}` | Where the border's centre sits, in pixels from the frame's top left. Left out: `{ x: 960, y: 540 }`, on a 1920 by 1080 frame. |
 | `width` | number (> 0) |  | The border's width in pixels. |
 | `height` | number (> 0) |  | The border's height in pixels. |
 | `color` | string | `"$accent"` | The border's colour. |
