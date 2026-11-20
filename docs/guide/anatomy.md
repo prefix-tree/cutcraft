@@ -24,10 +24,10 @@ export default function Video() {
 A video has three properties, set on `<Composition>`:
 
 - `width` and `height` in pixels;
-- `fps`, frames per second.
+- `fps`, the frame rate: a whole number (`30`), an NTSC rate as a string (`"29.97"`), or `{ num, den }`. The number `29.97` is not that rate. [Frame rates](/guide/time#frame-rates).
 
 There is no duration to set. A video lasts until its last element ends, so it grows and shrinks as you edit. Its
-first frame is at 0 seconds.
+first frame is at 0 seconds. A video longer than 35,459 seconds, about 9.85 hours, is an error.
 
 ## Tracks
 

@@ -167,10 +167,10 @@ Write NTSC rates as strings. `"29.97"` is 30000/1001, the rate broadcast video a
 it to the string (`ntsc-frame-rate`).
 
 Times in the file stay in seconds. Turning a time into a frame, a frame back into seconds, or a time into an audio
-sample counts in ticks: 254,016,000,000 to the second, a number every frame rate above and every common sample rate
-divides. So frame 1800 at `"29.97"` starts on its exact tick, a 29.97 export holds exactly the frames its length
-asks for, and the sound lands on the same sample each time. Ticks are exact for videos up to 35,459 seconds, about
-9.85 hours; a longer composition is an error.
+sample counts in ticks: 254,016,000,000 to the second. Every frame rate above divides it, and so do the sample rates
+44100, 48000 and 96000. A sample rate that does not is an error naming those three. So frame 1800 at `"29.97"` starts
+on its exact tick, a 29.97 export holds exactly the frames its length asks for, and the sound lands on the same
+sample each time. Ticks are exact for videos up to 35,459 seconds, about 9.85 hours; a longer composition is an error.
 
 At `"29.97"` and `"59.94"` the player shows drop-frame timecode, `HH:MM:SS;FF`: frame numbers 0 and 1 (0 to 3 at
 59.94) are skipped at the start of every minute but each tenth, so the clock keeps to real time. Frame 1800 reads

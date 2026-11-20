@@ -24,7 +24,7 @@ The coffee footage is Pixabay videos [209419](https://pixabay.com/videos/id-2094
 | `fps` | number (>0..240) \| "23.976" \| "29.97" \| "47.952" \| "59.94" \| "119.88" \| { num, den } |  | yes | Frames per second: a number (`30`, `25`, `60`), an NTSC rate by name (`"29.97"`, `"23.976"`, `"59.94"`, which are 30000/1001, 24000/1001 and 60000/1001), or an exact fraction `{ num, den }`. A rate must divide into whole ticks. |
 | `width` | integer (16..8192) |  | yes | The frame's width in pixels. |
 | `height` | integer (16..8192) |  | yes | The frame's height in pixels. |
-| `sampleRate` | integer (8000..192000) | `48000` |  | The soundtrack's samples per second. |
+| `sampleRate` | integer (8000..192000) | `48000` |  | The soundtrack's samples per second. It must divide into whole ticks; 44100, 48000 and 96000 do. |
 | `channels` | integer (1..8) | `2` |  | The soundtrack's channels: 1 is mono, 2 stereo. |
 | `background` | { mode, color, gradient } |  |  | What shows where nothing covers the frame: a colour, a gradient, or (`blur`) the picture itself, blurred to fill. |
 | `theme` | { extends, palette, fonts, radius, motion, styles } |  |  | The video's look: palette, fonts, radius, motion style and element presets. Elements use it through `$tokens` and `style`. |

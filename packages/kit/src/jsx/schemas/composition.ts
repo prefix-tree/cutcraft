@@ -20,7 +20,7 @@ export const compositionSchema = z.strictObject({
   width: z.number().int().min(16).max(8192),
   /** The frame's height in pixels. */
   height: z.number().int().min(16).max(8192),
-  /** The soundtrack's samples per second. */
+  /** The soundtrack's samples per second. It must divide into whole ticks; 44100, 48000 and 96000 do. */
   sampleRate: z.number().int().min(8000).max(192000).default(48000),
   /** The soundtrack's channels: 1 is mono, 2 stereo. */
   channels: z.number().int().min(1).max(8).default(2),
