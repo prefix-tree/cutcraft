@@ -1,6 +1,7 @@
 import { lookupAsset } from "../../../manifest/types";
 import type { ElementSite, SourceIndex } from "../../index";
 import type { Diagnostic, LintOptions } from "../index";
+import { boxPlacement } from "./box";
 import { deprecatedProps, oldThemeVariables } from "./deprecated";
 import { declaration } from "./fonts";
 import { freeCodeClock, strayHtml } from "./free-code";
@@ -273,6 +274,7 @@ export const rules: readonly Rule[] = [
   notRendered,
   deprecatedProps,
   oldThemeVariables,
+  boxPlacement,
 ];
 
 /** The composition's first track in document order that lays out as a sequence and is not hidden: the one under everything else. */

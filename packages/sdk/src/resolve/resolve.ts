@@ -575,7 +575,7 @@ function parseProps(node: CollectedNode, errors: ResolveError[], theme: Resolved
               code: "SCHEMA",
               id: node.id,
               prop: issue.path.map(String).join(".") || undefined,
-              message: issue.message,
+              message: movedKey(node.kind, issue) ?? issue.message,
             }) as ResolveError,
         ),
       );
@@ -586,6 +586,22 @@ function parseProps(node: CollectedNode, errors: ResolveError[], theme: Resolved
   parsedByProps.set(node.props, parsed);
   errors.push(...own);
   return data;
+}
+
+/** Where a key a file may still write has moved to, said in place of the schema's "Unrecognized key". */
+function movedKey(kind: string, issue: z.core.$ZodIssue): string | undefined {
+  if (issue.code !== "unrecognized_keys") return undefined;
+  const at = issue.path.map(String).join(".");
+  const fix = "uberscene lint --fix moves the file";
+  if (at === "transform" && issue.keys.includes("position"))
+    return `transform.position moved to box, in pixels from the frame's top left: box={{ x, y, origin: "center" }} draws what it did with x and y each plus half the frame; ${fix}`;
+  if (kind !== "captions") return undefined;
+  if (at === "style" && issue.keys.includes("position"))
+    return `style.position moved to box: the captions sit in the lower safe area unless their box says otherwise, as box={{ y, origin: "top" | "center" }}; ${fix}`;
+  const flat = issue.keys.filter((k) => k === "x" || k === "y" || k === "width");
+  if (at === "" && flat.length > 0)
+    return `${flat.join(", ")} moved to box, in pixels from the frame's top left; ${fix}`;
+  return undefined;
 }
 
 function themedField(props: Record<string, unknown>): { themed?: Readonly<Record<string, ThemeOrigin>> } {
