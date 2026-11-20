@@ -265,6 +265,11 @@ export function fold(
               // Against the value the file's `defaults` gives it: only a key the write changed is written back.
               const was = index.defaults?.props.get(entry.binding)?.literal;
               if (was === undefined || JSON.stringify(now) === JSON.stringify(was)) continue;
+              // With new settings in the same log, into their one edit of the literal, as a bound prop goes.
+              if (settings && now !== undefined) {
+                settings[entry.binding] = now;
+                continue;
+              }
               const bound = bindingEdit(index, id, `${prop}.${entry.key}`, entry.binding, now, skipped);
               if (bound) edits.push(bound);
             }

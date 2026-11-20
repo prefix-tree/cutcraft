@@ -237,6 +237,31 @@ describe("fold", () => {
     expect(result.text).toContain('export const defaults = { title: "Changed", accent: "#123456" };');
   });
 
+  it("writes a settings change and an edit to a style key bound to the settings into one defaults literal", () => {
+    const exec = fixtureExecutor();
+    exec.execute({ type: "composition/setProps", params: { defaults: { title: "Changed", accent: "#123456" } } });
+    const style = { color: "#abcdef", size: 64 };
+    expect(exec.execute({ type: "element/update", params: { id: "t1", props: { style } } }).ok).toBe(true);
+    const result = foldToSource(fixtureText, exec.log(), exec.state());
+    expect(result.skipped).toEqual([]);
+    expect(result.text).toContain('export const defaults = { title: "Changed", accent: "#abcdef" };');
+    expect(result.text).toContain("style={{ color: accent, size: 64 }}");
+  });
+
+  it("writes a style key bound to the settings and then a settings change into one defaults literal", () => {
+    const exec = fixtureExecutor();
+    const style = { color: "#abcdef", size: 70 };
+    expect(exec.execute({ type: "element/update", params: { id: "t1", props: { style } } }).ok).toBe(true);
+    exec.execute({ type: "composition/setProps", params: { defaults: { title: "Changed", accent: "#123456" } } });
+    const result = foldToSource(fixtureText, exec.log(), exec.state());
+    expect(result.skipped).toEqual([]);
+    // The title's colour is what the editor shows: the edit, not the settings' accent.
+    expect(exec.state().tree.byId.get("t1")?.props.style).toMatchObject({ color: "#abcdef" });
+    expect(result.text).toContain('export const defaults = { title: "Changed", accent: "#abcdef" };');
+    expect(result.text).toContain("style={{ color: accent, size: 70 }}");
+    expect(lint(result.text, { manifest }).filter((d) => d.severity === "error")).toEqual([]);
+  });
+
   it.each(["A &amp; B", "1 &lt; 2", "salt & pepper", "&#169; &copy;"])(
     "writes string props with %s so the file reads them back unchanged",
     async (words) => {
