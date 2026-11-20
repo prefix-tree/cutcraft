@@ -47,7 +47,9 @@ export function transitionLook(t: TransitionRole, W: number, H: number): Transit
     case "wipe": {
       if (role === "out" && between) return { opacity: 1 };
       // shortcut: a diagonal wipe draws as a left wipe and softness is ignored (the not-rendered lint says so); a path clip would do both.
-      const name = `wipe-${params.direction === "diagonal" || params.direction === undefined ? "left" : String(params.direction)}`;
+      const direction =
+        params.direction === "diagonal" || params.direction === undefined ? "left" : String(params.direction);
+      const name = `wipe${direction.charAt(0).toUpperCase()}${direction.slice(1)}`;
       return {
         opacity: 1,
         clip: effect({ type: name, easing: "linear" }, role === "in" ? p : 1 - p, W, H).clip ?? [

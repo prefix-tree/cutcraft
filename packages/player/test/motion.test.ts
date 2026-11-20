@@ -21,24 +21,24 @@ describe("motionAt", () => {
     expect(motionAt(fade, fade, 0.5, 1, W, H).opacity).toBeCloseTo(0.25);
   });
 
-  it("follows the animation's easing, ease-out by default", () => {
+  it("follows the animation's easing, easeOut by default", () => {
     expect(motionAt({ type: "fade", duration: 1 }, undefined, 0.5, 5, W, H).opacity).toBeGreaterThan(0.6);
-    expect(motionAt({ type: "fade", duration: 1, easing: "ease-in" }, undefined, 0.5, 5, W, H).opacity).toBeLessThan(
+    expect(motionAt({ type: "fade", duration: 1, easing: "easeIn" }, undefined, 0.5, 5, W, H).opacity).toBeLessThan(
       0.4,
     );
   });
 
   it("slides a quarter of the element's size, capped, toward its place", () => {
-    const m = motionAt({ type: "slide-left", duration: 1, easing: "linear" }, undefined, 0.5, 5, W, H).matrix;
+    const m = motionAt({ type: "slideLeft", duration: 1, easing: "linear" }, undefined, 0.5, 5, W, H).matrix;
     expect(at(m, 0, 0)[0]).toBeCloseTo(W * 0.25 * 0.5);
-    const up = motionAt({ type: "slide-up", duration: 1, easing: "linear" }, undefined, 0, 5, W, H).matrix;
+    const up = motionAt({ type: "slideUp", duration: 1, easing: "linear" }, undefined, 0, 5, W, H).matrix;
     expect(at(up, 0, 0)[1]).toBeCloseTo(H * 0.25);
-    const wide = motionAt({ type: "slide-right", duration: 1, easing: "linear" }, undefined, 0, 5, 1920, 1080).matrix;
+    const wide = motionAt({ type: "slideRight", duration: 1, easing: "linear" }, undefined, 0, 5, 1920, 1080).matrix;
     expect(at(wide, 0, 0)[0]).toBeCloseTo(-160);
   });
 
   it("scales, rotates, pops and flips about the element's centre", () => {
-    for (const type of ["scale", "rotate", "pop", "bounce", "elastic", "flip-horizontal", "flip-vertical"]) {
+    for (const type of ["scale", "rotate", "pop", "bounce", "elastic", "flipHorizontal", "flipVertical"]) {
       const m = motionAt({ type, duration: 1 }, undefined, 0.3, 5, W, H).matrix;
       const [x, y] = at(m, W / 2, H / 2);
       expect(x, type).toBeCloseTo(W / 2);
@@ -46,26 +46,26 @@ describe("motionAt", () => {
     }
     const pop = motionAt({ type: "pop", duration: 1 }, undefined, 0.6, 5, W, H).matrix;
     expect(pop.a).toBeGreaterThan(1); // overshoots
-    const flip = motionAt({ type: "flip-horizontal", duration: 1, easing: "linear" }, undefined, 0.5, 5, W, H).matrix;
+    const flip = motionAt({ type: "flipHorizontal", duration: 1, easing: "linear" }, undefined, 0.5, 5, W, H).matrix;
     expect(flip.a).toBeCloseTo(Math.SQRT1_2);
     expect(flip.d).toBeCloseTo(1);
   });
 
   it("wipes and reveals with clip rectangles in the element's pixels", () => {
     const clip = (type: string) => motionAt({ type, duration: 1, easing: "linear" }, undefined, 0.25, 5, W, H).clip;
-    expect(clip("wipe-right")).toEqual([{ x: 0, y: 0, w: 50, h: 100 }]);
-    expect(clip("wipe-left")).toEqual([{ x: 150, y: 0, w: 50, h: 100 }]);
-    expect(clip("wipe-down")).toEqual([{ x: 0, y: 0, w: 200, h: 25 }]);
-    expect(clip("wipe-up")).toEqual([{ x: 0, y: 75, w: 200, h: 25 }]);
-    expect(clip("reveal-center")).toEqual([{ x: 75, y: 37.5, w: 50, h: 25 }]);
-    expect(clip("reveal-edges")).toEqual([
+    expect(clip("wipeRight")).toEqual([{ x: 0, y: 0, w: 50, h: 100 }]);
+    expect(clip("wipeLeft")).toEqual([{ x: 150, y: 0, w: 50, h: 100 }]);
+    expect(clip("wipeDown")).toEqual([{ x: 0, y: 0, w: 200, h: 25 }]);
+    expect(clip("wipeUp")).toEqual([{ x: 0, y: 75, w: 200, h: 25 }]);
+    expect(clip("revealCenter")).toEqual([{ x: 75, y: 37.5, w: 50, h: 25 }]);
+    expect(clip("revealEdges")).toEqual([
       { x: 0, y: 0, w: 25, h: 100 },
       { x: 175, y: 0, w: 25, h: 100 },
     ]);
     // A wipe in and a wipe out at once show only what both show.
     const both = motionAt(
-      { type: "wipe-right", duration: 1, easing: "linear" },
-      { type: "wipe-left", duration: 1, easing: "linear" },
+      { type: "wipeRight", duration: 1, easing: "linear" },
+      { type: "wipeLeft", duration: 1, easing: "linear" },
       0.5,
       1,
       W,
