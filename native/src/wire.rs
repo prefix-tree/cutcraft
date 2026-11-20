@@ -52,12 +52,11 @@ impl Color {
         full_range: false,
     };
 
-    /// The stream's matrix when it names one the page knows (BT.709, BT.601, BT.2020), else by size: BT.601 below
-    /// 720 lines, BT.709 from there, as players assume.
-    pub fn resolve(matrix: u8, full_range: bool, height: u32) -> Color {
+    /// The stream's matrix when it names one the page knows (BT.709, BT.601, BT.2020), else BT.709 at any size:
+    /// Chrome's own decoder labels untagged footage BT.709, and the native decoder must draw what it draws.
+    pub fn resolve(matrix: u8, full_range: bool) -> Color {
         let matrix = match matrix {
             1 | 5 | 6 | 9 => matrix,
-            _ if height < 720 => 6,
             _ => 1,
         };
         Color { matrix, full_range }
@@ -223,11 +222,12 @@ mod tests {
     }
 
     #[test]
-    fn colour_falls_back_by_size() {
-        assert_eq!(Color::resolve(2, false, 480).matrix, 6);
-        assert_eq!(Color::resolve(2, false, 1080).matrix, 1);
+    fn untagged_colour_is_bt709_like_chromes_decoder() {
+        assert_eq!(Color::resolve(2, false).matrix, 1);
+        assert_eq!(Color::resolve(0, false).matrix, 1);
+        assert_eq!(Color::resolve(6, false).matrix, 6);
         assert_eq!(
-            Color::resolve(9, true, 2160),
+            Color::resolve(9, true),
             Color {
                 matrix: 9,
                 full_range: true

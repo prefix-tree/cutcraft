@@ -57,7 +57,7 @@ impl H264 {
         let y = tight(p.y, p.y_stride, w as usize, h as usize)?;
         let u = tight(p.u, p.uv_stride, cw as usize, ch as usize)?;
         let v = tight(p.v, p.uv_stride, cw as usize, ch as usize)?;
-        let color = Color::resolve(p.color.matrix, p.color.full_range, h);
+        let color = Color::resolve(p.color.matrix, p.color.full_range);
         Ok(Picture {
             pts: p.pts,
             image: i420_from_u8(w, h, y, &u, &v, cw, ch)?,
@@ -85,7 +85,7 @@ impl Hevc {
     fn picture(p: hevc::decode::Picture) -> Result<Picture, String> {
         use hevc::decode::Plane;
         let (w, h, cw, ch) = (p.width, p.height, p.chroma_width, p.chroma_height);
-        let color = Color::resolve(p.color.matrix, p.color.full_range, h);
+        let color = Color::resolve(p.color.matrix, p.color.full_range);
         let image = match (p.y, p.u, p.v) {
             (Plane::U8(y), Plane::U8(u), Plane::U8(v)) => {
                 let y = tight(y, p.y_stride, w as usize, h as usize)?;
@@ -147,7 +147,7 @@ impl Vp9 {
             5 => 9,
             _ => 2,
         };
-        let color = Color::resolve(matrix, p.color.full_range, h);
+        let color = Color::resolve(matrix, p.color.full_range);
         let image = match (p.y, p.u, p.v) {
             (Plane::U8(y), Plane::U8(u), Plane::U8(v)) => {
                 let y = tight(y, p.y_stride, w as usize, h as usize)?;
@@ -225,7 +225,7 @@ impl Av1 {
     fn picture(p: av1::decode::Picture) -> Result<Picture, String> {
         let (w, h) = (p.width, p.height);
         let (cw, ch) = (p.plane_width(1), p.plane_height(1));
-        let color = Color::resolve(p.matrix_coefficients, p.full_range, h);
+        let color = Color::resolve(p.matrix_coefficients, p.full_range);
         let [y, u, v] = p.planes;
         let (u, v) = if p.mono_chrome {
             let grey = vec![
@@ -280,7 +280,7 @@ impl Decoder for ProRes {
             prores::ChromaFormat::Yuv422 => f.width.div_ceil(2),
             prores::ChromaFormat::Yuv444 => f.width,
         };
-        let color = Color::resolve(f.color.matrix, false, f.height);
+        let color = Color::resolve(f.color.matrix, false);
         let image = i420_from_u16(
             f.width,
             f.height,
