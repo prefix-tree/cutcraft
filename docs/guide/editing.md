@@ -62,7 +62,7 @@ exec.undo(); exec.redo();
 exec.beginGroup("drag"); … exec.endGroup();   // one history entry for a gesture
 ```
 
-The [action reference](../reference/actions.md) lists all 115.
+The [action reference](../reference/actions.md) lists all 98.
 
 **Undo.** History auto-groups rapid same-type, same-target updates (a slider drag) within 100 ms, and keeps explicit
 groups (`beginGroup`, `endGroup`) for gestures.
@@ -254,6 +254,6 @@ font, such as `text/update`.
 ## Next
 
 - [Player](./player): the preview your editor shows.
-- [Action reference](../reference/actions.md): all 115 actions.
+- [Action reference](../reference/actions.md): all 98 actions.
 - [The file](./the-file): the conventions lint checks.
 - [Themes and fonts](./themes#fonts): bundled fonts and declaring your own.

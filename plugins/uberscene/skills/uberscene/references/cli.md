@@ -35,7 +35,7 @@ time. `UBERSCENE_CHROMIUM` names a Chrome 157, the only version the export runs 
 
 | Option | |
 |---|---|
-| `--out <file>` | Where to write. `.mp4` gives H.264 and AAC, `.webm` VP9 and Opus. `.mp3` and `.wav` hold the soundtrack alone. |
+| `--out <file>` | Where to write. `.mp4` gives H.264 and AAC, `.webm` VP9 and Opus. `.mp3` and `.wav` hold the soundtrack alone. `.mov` gives ProRes, with the [native encoder](https://uberscene.prefixtree.xyz/guide/native-codecs) on. |
 | `--still <s>` | Write the frame at this time instead, to a `.png` or `.jpg` `--out`. It is kept in [the frame cache](#the-frame-cache); `--no-cache` draws it again. |
 | `--srt <file>` `--vtt <file>` | Also write the captions the cut plays as SRT or WebVTT, timed like the export. Without `--out`, write only them ([Subtitle files](https://uberscene.prefixtree.xyz/guide/captions-and-sound#subtitle-files)). |
 | `--manifest <file>` | The asset manifest. Without it, see [Where the manifest and the media are found](#where-the-manifest-and-the-media-are-found). |
@@ -60,7 +60,7 @@ time. `UBERSCENE_CHROMIUM` names a Chrome 157, the only version the export runs 
 
 | Option | |
 |---|---|
-| `--check-layout` | Report every overlay, and every part a layer's code names with `data-name`, that leaves the frame or the safe zone, or covers the captions or the subject, at its line in the file. Writes no file. |
+| `--check-layout` | Report every overlay, and every part a layer's code names with `data-name`, that leaves the frame or the safe zone, or covers the captions or the subject, at its line in the file. Writes no file, and exits with code 3 when it finds issues. |
 | `--safe-zone <zone>` | `tiktok`, `reels`, `shorts`, `title-safe` (the default) or `action-safe`, or `top,right,bottom,left` fractions. |
 | `--subject <x,y,w,h>` | Where the subject is, as fractions of the frame, for footage whose manifest has no subjects. |
 | `--step <s>` | Seconds between samples. Default: every frame. |

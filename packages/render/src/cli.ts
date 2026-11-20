@@ -119,11 +119,12 @@ const USAGE = `Usage: uberscene <file.tsx> --out <video.mp4|.webm|.mp3|.wav> [--
   --vtt <file>          the same as WebVTT
 
   --out <file>          where to write; the extension picks the container: .mp4 (H.264 and AAC), .webm (VP9 and
-                        Opus), or .mp3/.wav for the soundtrack alone
+                        Opus), .mov (ProRes, native encoder only), or .mp3/.wav for the soundtrack alone
   --still <s>           write the frame at this time as a PNG or JPEG instead of a video
   --check-layout        print every overlay that leaves the frame or the safe zone, or covers captions or the
-                        subject: where it is in the file, when, and how to fix it, as a compiler does; writes no file
-  --json                print the layout check as JSON instead; it exits 3 when it finds issues
+                        subject: where it is in the file, when, and how to fix it, as a compiler does; writes no
+                        file, and exits 3 when it finds issues
+  --json                print the layout check as JSON instead
   where                 print where each thing on screen is at each moment of --at: its box in pixels, whether it
                         is in the frame and in each safe zone (tiktok, reels and shorts for a portrait video,
                         or the one --safe-zone names), and what it overlaps. A part a layer's code names with

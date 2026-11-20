@@ -62,7 +62,8 @@ npx uberscene look video.tsx
 ```
 
 This writes `look.png`, a sheet of frames from the video: the first frame of each clip, each title and the edges of
-every cut, each labelled with its time. It takes a few seconds and needs no player.
+every cut, each labelled with its time. It draws the frames with the real player in Chrome for Testing, which the
+first run downloads (about a minute); after that it takes a few seconds.
 
 `npx uberscene inspect video.tsx` prints the timeline as text instead: each element with its
 start and end, and the words each clip plays.
@@ -76,7 +77,7 @@ npx uberscene video.tsx --out video.mp4
 Each command finds `uberscene.json` in the file's folder or a folder above it, and finds `talk.mp4` beside the file,
 beside the manifest or in `media/` next to it. `--manifest` and `--media` point elsewhere.
 
-The first export downloads Chrome for Testing, which takes a minute; later ones start in seconds. `--draft` renders
+The export uses the same Chrome as `look`. `--draft` renders
 a quick half-size copy beside it (`video.draft.mp4`) to watch while you work, and `--still 3 --out poster.png` writes
 one frame.
 

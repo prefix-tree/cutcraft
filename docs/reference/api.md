@@ -225,8 +225,8 @@ one is cached or `UBERSCENE_CHROMIUM` names one (`findChrome`, `installChrome`).
 | `source` | `ExportSource` | | From `loadVideo`: `{ text, manifest, props?, executablePath? }`. `executablePath` names the Chrome to run. |
 | `media` | `MediaResolver` | | Where each asset's file is. Usually `directoryResolver`. |
 | `out` | `string` | | The file to write. Its extension picks the container unless `container` is given. |
-| `container` | `"mp4" \| "webm" \| "mp3" \| "wav"` | from `out` | By extension. MP3 and WAV hold only the soundtrack. Any other extension is an error. |
-| `videoCodec` | `"avc" \| "vp9" \| "av1"` | AVC in MP4, VP9 in WebM | The video codec. It must fit the container: AVC or AV1 in MP4, VP9 or AV1 in WebM. |
+| `container` | `"mp4" \| "webm" \| "mov" \| "mp3" \| "wav"` | from `out` | By extension. MP3 and WAV hold only the soundtrack. MOV needs the native encoder ([Native codecs](/guide/native-codecs)). Any other extension is an error. |
+| `videoCodec` | `"avc" \| "vp9" \| "av1" \| "prores"` | AVC in MP4, VP9 in WebM, ProRes in MOV | The video codec. It must fit the container: AVC or AV1 in MP4, VP9 or AV1 in WebM, ProRes in MOV. |
 | `bitrate` | `number` | about 0.1 bits per pixel per frame | Video bits per second. |
 | `quality` | `"very-low" \| "low" \| "medium" \| "high" \| "very-high"` | | An encoder quality preset, in place of `bitrate`. |
 | `keyFrameInterval` | `number` | `2` | Seconds between keyframes. |
@@ -234,6 +234,7 @@ one is cached or `UBERSCENE_CHROMIUM` names one (`findChrome`, `installChrome`).
 | `to` | `number` | the composition's duration | End of the part to render, in composition seconds. |
 | `fonts` | `FontFile[]` | | Fonts beyond the bundled ones and those the file declares, picked by a title's `font` prop. `{ name, data: Buffer \| ArrayBuffer, weight?, style?: "normal" \| "italic" }`. |
 | `tabs` | `number` | `1` | Pages of the browser that render pieces at once. |
+| `draft` | `boolean` | | A render for watching, not keeping: every second frame, each shown twice as long, at half the width and height, at the `low` preset unless `bitrate` or `quality` is given ([A draft](/guide/exporting#a-draft)). |
 | `smartCopy` | `boolean` | | Copy encoded pictures from the source where a stretch shows only one file (VP9, at the composition's size and frame rate, no overlay or effect), and render only the ends. |
 | `silent` | `boolean` | | Skip the soundtrack. |
 | `audioBitrate` | `number` | `128000` | Audio bits per second. |
@@ -369,7 +370,7 @@ transition registries, the enums, the fonts and the themes. Tools and the refere
 | Export | Signature | |
 |---|---|---|
 | `knobsOf` | `(schema, values?) => Knob[]` | A file's schema values in order, each with `key`, `kind`, `description`, `optional`, its `value`, and `options`, `min` and `max` where it has them. |
-| `BUILT_IN_SHADERS`, `builtInShader` | `readonly ShaderDefinition[]`, `(type) => ShaderDefinition \| undefined` | The built-in effects drawn by a shader (the colour, footage and title effects; 17 of them), with the schema of their params. |
+| `BUILT_IN_SHADERS`, `builtInShader` | `readonly ShaderDefinition[]`, `(type) => ShaderDefinition \| undefined` | The built-in effects drawn by a shader (the colour, footage and title effects), with the schema of their params. |
 | `EFFECTS`, `TRANSITIONS`, `EFFECT_FAMILIES`, `TRANSITION_FAMILIES` | registries | Every built-in effect and transition: its name, strict params schema and how it draws, and the families the reference groups them in. The generated [effects reference](/reference/effects/) is read from these. |
 | `EffectParams<K>`, `TransitionParams<K>` | types | The params a built-in effect or transition takes, as `<Effect params>` and `<Transition params>` check them. |
 | `isNeutral` | `(type, params) => boolean` | Whether a built-in effect changes nothing with these params (an amount at 0): the player does not draw it then. |
