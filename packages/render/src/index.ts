@@ -59,6 +59,7 @@ export {
 export type { Loudness } from "./loudness";
 export { type FoundManifest, findManifest } from "./manifest-file";
 export { directoryResolver } from "./media";
+export { type CodecModes, codecModes } from "./native/codecs";
 export { draftPath, type ExportSource, type RenderOptions, type RenderResult, renderVideo } from "./renderer";
 export { DEFAULT_SKILL_DIR, installSkill, type SkillInstallOptions, type SkillInstallResult } from "./skills";
 export { renderStill, type StillOptions, type StillResult } from "./still";

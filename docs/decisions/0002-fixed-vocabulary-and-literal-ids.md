@@ -1,6 +1,6 @@
 # 0002. A fixed vocabulary with literal ids
 
-> Superseded in part by [0018](./0018-free-code-in-a-timeline-skeleton.md): the vocabulary is a skeleton for footage and time; anything visual may be free code in a `<Layer>`.
+> Superseded in part: the vocabulary is a skeleton for footage and time; anything visual may be free code in a `<Layer>`.
 
 ## Context
 

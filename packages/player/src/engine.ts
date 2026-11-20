@@ -8,6 +8,8 @@ export { ManualClock } from "./clock/clock";
 export { FRAME_EPS, PICK_EPS, SETTLE_MS } from "./constants";
 export { AssetSources } from "./media/asset-sources";
 export { DecoderPool } from "./media/decoder-pool";
+export { copyFrame, defaultCreateCanvas } from "./media/frame-source";
+export { mediabunnyFrameSourceFactory } from "./media/mediabunny-frame-source";
 export { MediabunnyInputs } from "./media/mediabunny-input";
 export {
   type AudioOccurrence,
@@ -24,5 +26,14 @@ export { isVisibleAt, visiblePlacements } from "./model/visible";
 export { makeNestedResolver } from "./nested";
 export { Compositor } from "./render/compositor";
 export { CanvasPainter, coversCanvas } from "./render/painter";
-export type { MediaResolver } from "./types";
+export type {
+  CreateCanvas,
+  Ctx2D,
+  Frame,
+  FrameSource,
+  FrameSourceFactory,
+  FrameSourceInfo,
+  MediaHandle,
+  MediaResolver,
+} from "./types";
 export { captureWarnings, devWarn } from "./warn";

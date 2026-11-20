@@ -1,5 +1,6 @@
 // Renders fixed compositions and reports frames per second and the memory Node holds.
-//   pnpm --filter @uberscene/render bench [--only <name>] [--tabs <n>] [--copy] [--json <file>]
+//   pnpm --filter @uberscene/render bench [--only <name>] [--tabs <n>] [--copy] [--codec avc] [--json <file>]
+// VP9 to WebM by default; --codec avc writes H.264 to MP4. UBERSCENE_CODECS picks the browser's or the native codecs.
 import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -9,6 +10,7 @@ import type { AssetManifest } from "@uberscene/sdk";
 
 import { loadVideo } from "../src/load";
 import { directoryResolver } from "../src/media";
+import { codecModes } from "../src/native/codecs";
 import { type RenderResult, renderVideo } from "../src/renderer";
 import { makePlaceholders } from "../test/helpers/placeholders";
 
@@ -247,10 +249,12 @@ async function main(): Promise<void> {
       json: { type: "string" },
       tabs: { type: "string" },
       copy: { type: "boolean" },
+      codec: { type: "string" },
     },
   });
+  const codecs = codecModes();
   const rows: { name: string; result: RenderResult; rssMb: number; cpuMs: number }[] = [];
-  const out = join(cache, "out.webm");
+  const out = join(cache, values.codec === "avc" ? "out.mp4" : "out.webm");
   mkdirSync(cache, { recursive: true });
   for (const c of cases) {
     if (values.only && !c.name.includes(values.only)) continue;
@@ -280,7 +284,8 @@ async function main(): Promise<void> {
   }
   rmSync(out, { force: true });
   console.log(
-    "\n| case | tabs | fps | Node cpu | Node peak RSS |  (cpu = core-ms per frame; Chrome's own is not counted)\n|---|---|---|---|---|",
+    `\nCodecs: decode ${codecs.decode}, encode ${codecs.encode}, ${values.codec === "avc" ? "H.264 in MP4" : "VP9 in WebM"}.\n` +
+      "\n| case | tabs | fps | Node cpu | Node peak RSS |  (cpu = core-ms per frame; Chrome's and the native codecs' own are not counted)\n|---|---|---|---|---|",
   );
   for (const { name, result: r, rssMb, cpuMs } of rows)
     console.log(
@@ -296,6 +301,7 @@ async function main(): Promise<void> {
           frames: result.frames,
           wallMs: result.wallMs,
           tabs: result.tabs,
+          codecs: result.codecs,
           rssMb,
           cpuMs,
         })),

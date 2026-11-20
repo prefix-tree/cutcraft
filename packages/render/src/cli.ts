@@ -46,7 +46,10 @@ const USAGE = `Usage: uberscene <file.tsx> --out <video.mp4|.webm|.mp3|.wav> [--
        uberscene skills install [--dir <folder>] [--force]
 
   Every export draws its frames in Chrome. The first one downloads Chrome for Testing ${CHROME_MILESTONE} into
-  ~/.cache/uberscene/browsers (or UBERSCENE_BROWSER_CACHE); UBERSCENE_CHROMIUM names a Chrome 153+ to use instead.
+  ~/.cache/uberscene/browsers (or UBERSCENE_BROWSER_CACHE); UBERSCENE_CHROMIUM names a Chrome ${CHROME_MILESTONE} to use
+  instead. The export runs on Chrome ${CHROME_MILESTONE} only.
+  UBERSCENE_CODECS=native (or native-decode, native-encode) decodes footage and encodes the export with UberScene's
+  native codecs instead of the browser's (experimental; build them with \`pnpm native:build\` in the workspace).
 
   inspect               print the timeline as text, without a browser: each track and element with its seconds,
                         the words each clip plays, effects, keyframes and cuts; --json prints flat rows instead
@@ -135,7 +138,8 @@ const USAGE = `Usage: uberscene <file.tsx> --out <video.mp4|.webm|.mp3|.wav> [--
                         then media/ beside the manifest)
   --props <json>        props for the file's component
   --from <s> --to <s>   render only this part of the composition
-  --codec <name>        avc (default for .mp4), vp9 (default for .webm), or av1 in either
+  --codec <name>        avc (default for .mp4), vp9 (default for .webm), or av1 in either; prores (.mov) with
+                        UBERSCENE_CODECS=native-encode
   --bitrate <bps>       video bits per second (default: about 0.1 per pixel per frame)
   --quality <preset>    very-low, low, medium, high or very-high, in place of --bitrate
   --draft               a render for watching, not keeping: every second frame, each shown twice as long, at half
@@ -458,8 +462,8 @@ async function main(): Promise<number> {
     throw new Error(`--quality wants ${Object.keys(QUALITIES).join(", ")}, got "${values.quality}"`);
   if (values.quality !== undefined && values.bitrate !== undefined)
     throw new Error("--quality and --bitrate both set the size; pass one");
-  if (values.codec !== undefined && !["avc", "vp9", "av1"].includes(values.codec))
-    throw new Error(`--codec wants avc, vp9 or av1, got "${values.codec}"`);
+  if (values.codec !== undefined && !["avc", "vp9", "av1", "prores"].includes(values.codec))
+    throw new Error(`--codec wants avc, vp9, av1 or prores, got "${values.codec}"`);
   const tabs = values.tabs === undefined ? 1 : Math.floor(Number(values.tabs));
   if (!(tabs >= 1)) throw new Error(`--tabs wants a number of pages, got "${values.tabs}"`);
   const tty = process.stderr.isTTY && !values.quiet;
@@ -485,7 +489,7 @@ async function main(): Promise<number> {
   for (const w of result.warnings) process.stderr.write(`warning: ${w}\n`);
   const seconds = (result.wallMs / 1000).toFixed(1);
   process.stderr.write(
-    `${written}: ${values.draft ? "a draft, every second frame at half size: " : ""}${result.frames} frames, ${result.width}x${result.height} at ${result.fps} fps${result.audio ? ", with sound" : ""}, in ${seconds}s${result.tabs > 1 ? ` on ${result.tabs} tabs` : ""}${result.copiedFrames > 0 ? `, ${result.copiedFrames} frames copied` : ""} (${(result.frames / (result.wallMs / 1000)).toFixed(1)} fps)\n`,
+    `${written}: ${values.draft ? "a draft, every second frame at half size: " : ""}${result.frames} frames, ${result.width}x${result.height} at ${result.fps} fps${result.audio ? ", with sound" : ""}, in ${seconds}s${result.tabs > 1 ? ` on ${result.tabs} tabs` : ""}${result.copiedFrames > 0 ? `, ${result.copiedFrames} frames copied` : ""}${nativeNote(result.codecs)} (${(result.frames / (result.wallMs / 1000)).toFixed(1)} fps)\n`,
   );
   return 0;
 }
@@ -651,3 +655,10 @@ main().then(
     process.exit(1);
   },
 );
+
+/** ", native decode and encode" when UBERSCENE_CODECS turned the native codecs on. */
+function nativeNote(codecs: { readonly decode: string; readonly encode: string }): string {
+  const sides = [codecs.decode === "native" ? "decode" : null, codecs.encode === "native" ? "encode" : null];
+  const on = sides.filter((s): s is string => s !== null);
+  return on.length ? `, native ${on.join(" and ")}` : "";
+}

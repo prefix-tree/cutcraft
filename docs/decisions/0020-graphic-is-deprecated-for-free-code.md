@@ -4,13 +4,13 @@
 > removed.
 
 > Supersedes [0017](./0017-graphics-are-svg-generators.md). Follows from
-> [0018](./0018-free-code-in-a-timeline-skeleton.md) and [0019](./0019-a-browser-engine-for-free-code.md).
+> [0019](./0019-a-browser-engine-for-free-code.md).
 
 ## Context
 
 0017 made graphics a catalog: 34 kinds (arrows, callouts, lower thirds, counters, backgrounds, confetti…), each a pure
 function from props and the theme to SVG, so the Node export could draw them and the inspector could edit their props.
-Then 0018 let a `<Layer>` hold any React, `<Three>` and `<Motion>` brought three.js and Motion onto the video's clock,
+Then a `<Layer>` came to hold any React, `<Three>` and `<Motion>` brought three.js and Motion onto the video's clock,
 and 0019 made the export draw them. A model writes a lower third or a chart in a few lines of Motion or SVG as well as
 it picks a kind, and is not limited to the 34 we thought of. The catalog had become a second, narrower way to do what
 free code does, with its own schemas, editor controls, previews and docs to keep up.

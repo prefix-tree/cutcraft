@@ -1,6 +1,6 @@
 // Golden stills: every built-in shader effect, drawn by the export on a fixed test chart, against a PNG checked in
 // under test/goldens. They guard the effects' refactors: a change that moves a pixel by more than the tolerance fails.
-// Needs a Chrome or Chromium 153+ in UBERSCENE_CHROMIUM. UBERSCENE_UPDATE_GOLDENS=1 writes the stills as the new goldens;
+// Needs Chrome 157: the cached Chrome for Testing, or UBERSCENE_CHROMIUM. UBERSCENE_UPDATE_GOLDENS=1 writes the stills as the new goldens;
 // a failing still is kept beside the test output (test/.tmp/goldens-actual) to compare or adopt. The goldens are drawn
 // on CI's Linux, and a Mac draws text and WebGL a little differently: scripts/goldens-linux.sh runs them as CI does.
 import { copyFileSync, existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";

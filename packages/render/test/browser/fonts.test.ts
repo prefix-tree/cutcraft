@@ -1,5 +1,5 @@
 // Fonts in the browser export: the faces the file declares and the ones passed beside it (`--font`) are read in Node
-// and set in the page before it draws a frame. Needs a Chrome or Chromium 153+ in UBERSCENE_CHROMIUM.
+// and set in the page before it draws a frame. Needs Chrome 157: the cached Chrome for Testing, or UBERSCENE_CHROMIUM.
 import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { join } from "node:path";

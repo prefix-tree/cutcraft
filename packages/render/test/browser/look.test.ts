@@ -1,5 +1,5 @@
 // `renderLook`: many frames from one browser start, on one sheet, each cell the frame a still draws at that time.
-// Needs a Chrome or Chromium 153+ in UBERSCENE_CHROMIUM.
+// Needs Chrome 157: the cached Chrome for Testing, or UBERSCENE_CHROMIUM.
 import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 

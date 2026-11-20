@@ -22,12 +22,18 @@ import { createRoot } from "react-dom/client";
 import { installFreeCodeLibraries } from "@uberscene/graphics/libraries";
 import { layerFramesPending, motionBlurOf, shutterTimes } from "@uberscene/kit/schema";
 import { addFontFaces, backdropTracks, Player, type PlayerRef } from "@uberscene/player";
-import { SETTLE_MS } from "@uberscene/player/engine";
+import {
+  defaultCreateCanvas,
+  MediabunnyInputs,
+  mediabunnyFrameSourceFactory,
+  SETTLE_MS,
+} from "@uberscene/player/engine";
 import { type AssetManifest, collectModule, createPatchLog, loadModule, resolve } from "@uberscene/sdk";
 
 import { measureSound, renderSoundtrack } from "./audio";
 import { createFreeCodeClock } from "./clock";
 import { inkOf, offFrame, pastEdges } from "./ink";
+import { nativeFrameSourceFactory } from "./native-frames";
 import type {
   AudioRequest,
   BoundsOptions,
@@ -79,6 +85,15 @@ async function start(): Promise<void> {
   const element = mod.default(props);
   const { width, height, fps } = state.composition;
   const media = { resolve: async (id: string) => ({ kind: "url" as const, url: `/media/${encodeURIComponent(id)}` }) };
+  // With UBERSCENE_CODECS=native (or native-decode), footage comes from the native codec process; the browser's
+  // decoder stays for images and for whatever the native one cannot read.
+  const frameSourceFactory =
+    job.decoder === "native"
+      ? nativeFrameSourceFactory(
+          defaultCreateCanvas,
+          mediabunnyFrameSourceFactory(new MediabunnyInputs(), defaultCreateCanvas),
+        )
+      : undefined;
 
   const cap = document.getElementById("cap") as HTMLCanvasElement;
   cap.width = width;
@@ -99,7 +114,7 @@ async function start(): Promise<void> {
         media={media}
         fit="none"
         controls={false}
-        coreOptions={{ loadFonts: false, exactTime: true }}
+        coreOptions={{ loadFonts: false, exactTime: true, ...(frameSourceFactory ? { frameSourceFactory } : {}) }}
         onError={(e) => errors.push(`${e.asset ?? e.id ?? "?"}: ${e.error.message}`)}
       />,
     );
@@ -123,7 +138,7 @@ async function start(): Promise<void> {
   };
   if (typeof ctx.drawElementImage !== "function")
     throw new Error(
-      "this browser has no drawElementImage: Chrome 153 or later with --enable-features=CanvasDrawElement",
+      "this browser has no drawElementImage: the export runs on Chrome 157 with --enable-features=CanvasDrawElement",
     );
 
   const blur = motionBlurOf(state);
@@ -218,6 +233,59 @@ async function start(): Promise<void> {
     );
     return new Uint8Array(await blob.arrayBuffer());
   };
+  /**
+   * Frames [first, last) encoded by the native codec process: each picture read back as RGBA and sent to Node, which
+   * writes it to `uberscene-codec encode` in order. Two pictures may be on their way while the next is drawn.
+   * Returns the session whose packets Node keeps.
+   */
+  const encodeNatively = async (
+    r: SegmentRequest,
+    rate: number,
+    drawn: (n: number) => Promise<HTMLCanvasElement>,
+  ): Promise<string> => {
+    const native = r.native as NonNullable<SegmentRequest["native"]>;
+    const outW = r.scale && r.scale < 1 ? Math.max(2, Math.round((width * r.scale) / 2) * 2) : width;
+    const outH = r.scale && r.scale < 1 ? Math.max(2, Math.round((height * r.scale) / 2) * 2) : height;
+    const opened = await fetch("/native/encode", {
+      method: "POST",
+      body: JSON.stringify({
+        ...native,
+        width: outW,
+        height: outH,
+        fpsNum: Math.round(rate * 1000),
+        fpsDen: 1000,
+        keyint: Math.max(1, Math.round(r.keyFrameInterval * rate)),
+      }),
+    });
+    if (!opened.ok) throw new Error(`the native encoder did not start: ${await opened.text()}`);
+    const { session } = (await opened.json()) as { session: string };
+    const inFlight: Promise<void>[] = [];
+    const send = async (index: number, pixels: Uint8Array<ArrayBuffer>): Promise<void> => {
+      const res = await fetch(`/native/encode/${session}?n=${index}`, { method: "POST", body: pixels });
+      if (!res.ok) throw new Error(`the native encoder failed: ${await res.text()}`);
+    };
+    for (let n = r.first; n < r.last; n++) {
+      const canvas = await drawn(n);
+      const pixels = await withinDeadline(n / rate, async (): Promise<Uint8Array<ArrayBuffer>> => {
+        stage = "encode";
+        const picture = new VideoFrame(canvas, { timestamp: 0 });
+        try {
+          const buffer = new Uint8Array(outW * outH * 4);
+          await picture.copyTo(buffer, { format: "RGBA" });
+          return buffer;
+        } finally {
+          picture.close();
+        }
+      });
+      inFlight.push(send(n - r.first, pixels));
+      if (inFlight.length >= 2) await withinDeadline(n / rate, () => inFlight.shift() as Promise<void>);
+    }
+    await Promise.all(inFlight);
+    const ended = await fetch(`/native/encode/${session}/end`, { method: "POST" });
+    if (!ended.ok) throw new Error(`the native encoder failed: ${await ended.text()}`);
+    return session;
+  };
+
   const api: PageApi = {
     composition: { width, height, fps, duration: state.composition.duration },
     errors,
@@ -225,11 +293,6 @@ async function start(): Promise<void> {
       return paintFallbacks;
     },
     async segment(r: SegmentRequest) {
-      const target = new BufferTarget();
-      const output = new Output({
-        format: r.container === "mp4" ? new Mp4OutputFormat() : new WebMOutputFormat(),
-        target,
-      });
       const rate = r.fps ?? fps;
       // A smaller picture is the captured frame drawn down into a second canvas, with even sides for the encoder.
       const scale = r.scale ?? 1;
@@ -239,6 +302,20 @@ async function start(): Promise<void> {
         small.height = Math.max(2, Math.round((height * scale) / 2) * 2);
       }
       const smallCtx = small?.getContext("2d") ?? null;
+      const drawn = async (n: number): Promise<HTMLCanvasElement> => {
+        await frame(n / rate);
+        if (small && smallCtx) {
+          smallCtx.clearRect(0, 0, small.width, small.height);
+          smallCtx.drawImage(cap, 0, 0, small.width, small.height);
+        }
+        return small ?? cap;
+      };
+      if (r.native) return { session: await encodeNatively(r, rate, drawn) };
+      const target = new BufferTarget();
+      const output = new Output({
+        format: r.container === "mp4" ? new Mp4OutputFormat() : new WebMOutputFormat(),
+        target,
+      });
       const source = new CanvasSource(small ?? cap, {
         codec: r.codec,
         bitrate: r.quality ? QUALITY[r.quality] : r.bitrate,
@@ -248,11 +325,7 @@ async function start(): Promise<void> {
       output.addVideoTrack(source, { frameRate: rate });
       await output.start();
       for (let n = r.first; n < r.last; n++) {
-        await frame(n / rate);
-        if (small && smallCtx) {
-          smallCtx.clearRect(0, 0, small.width, small.height);
-          smallCtx.drawImage(cap, 0, 0, small.width, small.height);
-        }
+        await drawn(n);
         await withinDeadline(n / rate, () => {
           stage = "encode";
           return source.add((n - r.first) / rate, 1 / rate);

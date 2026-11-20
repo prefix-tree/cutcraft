@@ -15,6 +15,30 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  changes:
+    # What changed, so the Rust toolchain and the native build run only when the native codecs did: a few minutes
+    # saved on every other pull request.
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      rust: ${{ steps.filter.outputs.rust }}
+      native: ${{ steps.filter.outputs.native }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            rust:
+              - 'native/**'
+            native:
+              - 'native/**'
+              - 'packages/render/src/native/**'
+              - 'packages/render/src/web/page/native-frames.ts'
+              - 'packages/render/test/browser/native-codecs.test.ts'
+
   check:
     # The oldest Node the packages support and the current LTS.
     strategy:
@@ -49,6 +73,25 @@ jobs:
       - run: pnpm build
       - run: pnpm check:packages
 
+  native:
+    # The native codecs (native/, UBERSCENE_CODECS): formatted, linted and tested against clips ffmpeg makes. Only when
+    # native/ changed.
+    needs: changes
+    if: needs.changes.outputs.rust == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: native
+      - uses: ./.github/actions/ffmpeg
+      - run: cargo fmt --manifest-path native/Cargo.toml --check
+      - run: cargo clippy --release --all-targets --manifest-path native/Cargo.toml -- -D warnings
+      - run: cargo test --release --manifest-path native/Cargo.toml
+
   changeset:
     # A pull request that changes a published package says how in a changeset (.changeset/README.md). The version pull
     # request (`pnpm changeset version`, branch chore/version-packages) consumes them, so it has none by design.
@@ -68,6 +111,7 @@ jobs:
 
   e2e:
     # Pinned: Playwright 1.56 cannot install Chromium's system dependencies on ubuntu-latest (26.04).
+    needs: changes
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
@@ -84,7 +128,7 @@ jobs:
           key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
       - run: pnpm --filter @uberscene/player exec playwright install --with-deps chromium
       - run: pnpm --filter @uberscene/player test:e2e
-      # The export needs drawElementImage (Chrome 153+); Playwright's pinned Chromium (141) predates it. The export
+      # The export runs on Chrome 157 only (CHROME_MILESTONE); Playwright's pinned Chromium (141) is refused. The export
       # downloads the Chrome for Testing it is tested against, as on a user's machine, once per CHROME_MILESTONE: the
       # key follows chrome.ts, and `browser install` keeps a cached Chrome without asking the network.
       - uses: actions/cache@v6
@@ -92,6 +136,16 @@ jobs:
           path: ~/.cache/uberscene/browsers
           key: uberscene-chrome-${{ runner.os }}-${{ hashFiles('packages/render/src/web/chrome.ts') }}
       - run: pnpm --filter @uberscene/render exec tsx src/cli.ts browser install
+      # The native codecs, so the export tests that run with UBERSCENE_CODECS run too (they skip without the binary).
+      # Built only when the native codecs or the code that drives them changed.
+      - if: needs.changes.outputs.native == 'true'
+        uses: dtolnay/rust-toolchain@stable
+      - if: needs.changes.outputs.native == 'true'
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: native
+      - if: needs.changes.outputs.native == 'true'
+        run: pnpm native:build
       # The export: video, sound, stills, smart copy, the layout check, the CLI and the recipes.
       - run: pnpm --filter @uberscene/render test:browser
       # Free code on the video's clock: three.js, Motion and CSS animations in the real Player.
@@ -145,10 +199,22 @@ jobs:
       - run: pnpm --filter @uberscene/render exec tsx src/cli.ts browser install
       - run: pnpm --filter @uberscene/render bench --json bench-results.json | tee bench.md
       - run: pnpm --filter @uberscene/render bench --tabs 4 --json bench-results-4.json | tee -a bench.md
+      # The browser's codecs against the native ones (UBERSCENE_CODECS), on H.264 so both encoders write the same codec.
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: native
+      - run: pnpm native:build
+      - run: |
+          for codecs in browser native-decode native-encode native; do
+            UBERSCENE_CODECS=$codecs pnpm --filter @uberscene/render bench --only "cuts only" --codec avc --tabs 4 \
+              --json "bench-results-$codecs.json" | tee -a bench.md
+          done
       - uses: actions/upload-artifact@v4
         with:
           name: render-bench
           path: |
             packages/render/bench-results.json
             packages/render/bench-results-4.json
+            packages/render/bench-results-*.json
             bench.md
