@@ -15,6 +15,7 @@ export default function Video() {
                 [0, 0],
                 [1, 1],
               ]}
+              easing="ease-in-out"
             />
             <Keyframe
               id="k2"
@@ -26,7 +27,6 @@ export default function Video() {
                 [0.75, 0.88],
                 [1, 1],
               ]}
-              easing="ease-in-out"
             />
           </Effect>
         </Clip>

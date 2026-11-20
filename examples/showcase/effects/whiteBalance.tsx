@@ -7,8 +7,8 @@ export default function Video() {
       <Track id="main">
         <Clip id="shot" src="asset:redCup" in={18} out={21} fit="cover">
           <Effect id="look" type="whiteBalance">
-            <Keyframe id="k1" param="temperature" at={0.5} value={0} />
-            <Keyframe id="k2" param="temperature" at={1.5} value={0.6} easing="ease-in-out" />
+            <Keyframe id="k1" param="temperature" at={0.5} value={0} easing="ease-in-out" />
+            <Keyframe id="k2" param="temperature" at={1.5} value={0.6} />
           </Effect>
         </Clip>
       </Track>

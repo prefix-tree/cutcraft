@@ -77,8 +77,8 @@ function Reframe({ id, from, to }: { id: string; from: Framing; to: Framing }) {
   return (
     <>
       {moves.flatMap(([key, property, a, b]) => [
-        <Keyframe key={`${key}0`} id={`${id}-${key}0`} property={property} at={0} value={a} />,
-        <Keyframe key={`${key}1`} id={`${id}-${key}1`} property={property} at={MOVE} value={b} easing="ease-in-out" />,
+        <Keyframe key={`${key}0`} id={`${id}-${key}0`} property={property} at={0} value={a} easing="ease-in-out" />,
+        <Keyframe key={`${key}1`} id={`${id}-${key}1`} property={property} at={MOVE} value={b} />,
       ])}
     </>
   );

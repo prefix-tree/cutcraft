@@ -7,8 +7,8 @@ export default function Video() {
       <Track id="main">
         <Clip id="shot" src="asset:coffee" in={12} out={15} fit="cover">
           <Effect id="look" type="grayscale">
-            <Keyframe id="k1" param="amount" at={0.5} value={0} />
-            <Keyframe id="k2" param="amount" at={1.5} value={1} easing="ease-in-out" />
+            <Keyframe id="k1" param="amount" at={0.5} value={0} easing="ease-in-out" />
+            <Keyframe id="k2" param="amount" at={1.5} value={1} />
           </Effect>
         </Clip>
       </Track>

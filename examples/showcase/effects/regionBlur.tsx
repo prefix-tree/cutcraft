@@ -7,8 +7,8 @@ export default function Video() {
       <Track id="main">
         <Clip id="shot" src="asset:coffeeWide" in={4} out={7} fit="cover">
           <Effect id="look" type="regionBlur" params={{ box: [0.66, 0, 0.34, 1], roundness: 0.3, feather: 16 }}>
-            <Keyframe id="k1" param="radius" at={0.5} value={0} />
-            <Keyframe id="k2" param="radius" at={1.5} value={18} easing="ease-in-out" />
+            <Keyframe id="k1" param="radius" at={0.5} value={0} easing="ease-in-out" />
+            <Keyframe id="k2" param="radius" at={1.5} value={18} />
           </Effect>
         </Clip>
       </Track>

@@ -56,16 +56,16 @@ export function ProgressBar(props: z.input<typeof progressBarSchema>) {
         transform: { position: { x: left, y: p.y }, scale: { x: 0, y: 1 } },
         exit: { type: "fade", duration: 0.3 },
       },
-      h(Keyframe, { id: `${p.id}-fill-x0`, property: "transform.position.x", at: 0, value: left }),
+      // A segment eases by the key it leaves, so the easing sits on the first key of each move.
+      h(Keyframe, { id: `${p.id}-fill-x0`, property: "transform.position.x", at: 0, value: left, easing }),
       h(Keyframe, {
         id: `${p.id}-fill-x1`,
         property: "transform.position.x",
         at: p.fillFor,
         value: left + (p.width * p.value) / 2,
-        easing,
       }),
-      h(Keyframe, { id: `${p.id}-fill-s0`, property: "transform.scale.x", at: 0, value: 0 }),
-      h(Keyframe, { id: `${p.id}-fill-s1`, property: "transform.scale.x", at: p.fillFor, value: p.value, easing }),
+      h(Keyframe, { id: `${p.id}-fill-s0`, property: "transform.scale.x", at: 0, value: 0, easing }),
+      h(Keyframe, { id: `${p.id}-fill-s1`, property: "transform.scale.x", at: p.fillFor, value: p.value }),
     ),
   ];
 }

@@ -56,10 +56,10 @@ export default function Video() {
       <Track id="main" name="Story">
         {/* The wide pour-over, pushed in slowly while the title builds. */}
         <Clip id="open" src="asset:coffeeWide" in={2} out={8} fit="cover">
-          <Keyframe id="open-sx-0" property="transform.scale.x" at={0} value={1} />
-          <Keyframe id="open-sx-1" property="transform.scale.x" at={6} value={1.14} easing="easeInOutSine" />
-          <Keyframe id="open-sy-0" property="transform.scale.y" at={0} value={1} />
-          <Keyframe id="open-sy-1" property="transform.scale.y" at={6} value={1.14} easing="easeInOutSine" />
+          <Keyframe id="open-sx-0" property="transform.scale.x" at={0} value={1} easing="easeInOutSine" />
+          <Keyframe id="open-sx-1" property="transform.scale.x" at={6} value={1.14} />
+          <Keyframe id="open-sy-0" property="transform.scale.y" at={0} value={1} easing="easeInOutSine" />
+          <Keyframe id="open-sy-1" property="transform.scale.y" at={6} value={1.14} />
         </Clip>
         <Transition id="x1" type="filmBurn" duration={0.9} />
         {/* The close pour: it eases into slow motion, then one frame is held while the callout points at it. */}
@@ -72,18 +72,18 @@ export default function Video() {
         {/* The espresso machine: the warm LUT comes in halfway, so the shot is seen before and after. */}
         <Clip id="shot" src="asset:espresso" in={1} out={9} fit="cover">
           <Effect id="shot-warm" type="lut" params={{ src: "asset:warm" }}>
-            <Keyframe id="shot-warm-0" param="amount" at={3.2} value={0} />
-            <Keyframe id="shot-warm-1" param="amount" at={4.4} value={1} easing="ease-in-out" />
+            <Keyframe id="shot-warm-0" param="amount" at={3.2} value={0} easing="ease-in-out" />
+            <Keyframe id="shot-warm-1" param="amount" at={4.4} value={1} />
           </Effect>
         </Clip>
         <Transition id="x3" type="pixelDissolve" duration={0.8} />
         {/* Three glasses: a push-in that drifts towards the middle one. */}
         <Clip id="three" src="asset:espresso" in={24} out={31} fit="cover">
           <Effect id="three-warm" type="lut" params={{ src: "asset:warm" }} />
-          <Keyframe id="three-sx-0" property="transform.scale.x" at={0} value={1.04} />
-          <Keyframe id="three-sx-1" property="transform.scale.x" at={7} value={1.22} easing="easeInOutSine" />
-          <Keyframe id="three-sy-0" property="transform.scale.y" at={0} value={1.04} />
-          <Keyframe id="three-sy-1" property="transform.scale.y" at={7} value={1.22} easing="easeInOutSine" />
+          <Keyframe id="three-sx-0" property="transform.scale.x" at={0} value={1.04} easing="easeInOutSine" />
+          <Keyframe id="three-sx-1" property="transform.scale.x" at={7} value={1.22} />
+          <Keyframe id="three-sy-0" property="transform.scale.y" at={0} value={1.04} easing="easeInOutSine" />
+          <Keyframe id="three-sy-1" property="transform.scale.y" at={7} value={1.22} />
         </Clip>
         <Transition id="x4" type="clockWipe" duration={0.9} />
         {/* The red cup in steam, graded down so the closing line reads over it. */}

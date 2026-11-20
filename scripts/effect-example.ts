@@ -307,8 +307,8 @@ function effectElement(name: string, demo: EffectDemo, pad: string): string[] {
   const open = `${pad}<Effect id="look" type="${name}"${params}`;
   if (!demo.animate) return [`${open} />`];
   const keys = demo.animate.flatMap((a, i) => [
-    `${pad}  <Keyframe id="k${2 * i + 1}" param="${a.param}" at={0.5} value=${value(a.from)} />`,
-    `${pad}  <Keyframe id="k${2 * i + 2}" param="${a.param}" at={1.5} value=${value(a.to)} easing="ease-in-out" />`,
+    `${pad}  <Keyframe id="k${2 * i + 1}" param="${a.param}" at={0.5} value=${value(a.from)} easing="ease-in-out" />`,
+    `${pad}  <Keyframe id="k${2 * i + 2}" param="${a.param}" at={1.5} value=${value(a.to)} />`,
   ]);
   return [`${open}>`, ...keys, `${pad}</Effect>`];
 }
