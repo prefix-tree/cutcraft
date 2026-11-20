@@ -97,7 +97,7 @@ To keep one element still, give it an `enter` of type `none`.
 Overlays draw above the footage, so a background graphic on top of a clip would hide it. Put a background on a track
 **below every track that holds footage**: overlays there draw beneath the footage, in the preview and the export
 alike, and the composition background goes under them. A plain gradient needs no track at all:
-`<Composition background={{ mode: "gradient", gradient }}>`.
+<code v-pre>&lt;Composition background={{ mode: "gradient", gradient }}&gt;</code>.
 
 ```tsx
 <Track id="backdrop" layout="free">
