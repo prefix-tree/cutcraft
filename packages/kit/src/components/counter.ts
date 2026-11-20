@@ -89,10 +89,7 @@ export function Counter(props: z.input<typeof counterSchema>) {
         {
           id: `${p.id}-label`,
           ...timing(t, 0.2),
-          font: "$body",
-          size: Math.round(size * 0.22),
-          weight: 500,
-          color: "$muted",
+          style: { font: "$body", size: Math.round(size * 0.22), weight: 500, color: "$muted" },
           box: { x, y: y + size * 0.72, origin: "center" },
           enter: { type: "fade", duration: 0.4 },
           exit: { type: "fade", duration: 0.3 },

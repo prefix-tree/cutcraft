@@ -56,15 +56,35 @@ export function themeToken(theme: ResolvedTheme, name: string): string | number 
   return Object.hasOwn(theme.tokens, name) ? theme.tokens[name] : undefined;
 }
 
+/** Kinds whose `style` is a look: a preset name, or an object of fields with `preset` naming the one it starts from. */
+const LOOK_KINDS = new Set(["title", "captions"]);
+
 /**
  * An element's raw props with its theme applied, before the schema parses them:
  * the preset its `style` names (or the kind's `default` preset) fills the props
  * the element leaves out, the motion style fills `enter`/`exit` (a transition's
  * type and duration), and whole-string `$token` values become theme values. The
- * element's own props always win. Returns the input object when nothing was themed.
+ * element's own props always win. A title's or captions' preset fills the fields
+ * of its `style` object; a preset name alone is `{ preset }`. Returns the input
+ * object when nothing was themed.
  */
 export function applyTheme(kind: string, raw: Readonly<Record<string, unknown>>, theme: ResolvedTheme): Themed {
-  const named = typeof raw.style === "string" ? raw.style : null;
+  const look = LOOK_KINDS.has(kind);
+  const own: Record<string, unknown> | null =
+    typeof raw.style === "string"
+      ? look
+        ? { preset: raw.style }
+        : null
+      : look && isPlainObject(raw.style)
+        ? raw.style
+        : null;
+  const named = look
+    ? typeof own?.preset === "string"
+      ? own.preset
+      : null
+    : typeof raw.style === "string"
+      ? raw.style
+      : null;
   if (!theme.declared && named === null && !hasToken(raw))
     return { props: raw as Record<string, unknown>, from: EMPTY, issues: [] };
   const out: Record<string, unknown> = { ...raw };
@@ -76,11 +96,16 @@ export function applyTheme(kind: string, raw: Readonly<Record<string, unknown>>,
   if (presetName !== null && kind !== "composition") {
     const preset = presets?.[presetName];
     if (preset) {
-      if (kind === "captions") {
-        // A captions preset is a caption style; `style` is the name or an object of overrides.
-        const own = typeof raw.style === "object" && raw.style !== null ? (raw.style as Record<string, unknown>) : {};
-        out.style = { ...preset, ...own };
-        from.style = `style:${presetName}`;
+      if (look) {
+        // The preset fills the style's fields the element leaves out; `preset` itself stays as written.
+        const style: Record<string, unknown> = { ...own };
+        for (const [key, value] of Object.entries(preset)) {
+          if (style[key] === undefined) {
+            style[key] = value;
+            from[`style.${key}`] = `style:${presetName}`;
+          }
+        }
+        out.style = style;
       } else {
         for (const [key, value] of Object.entries(preset)) {
           if (raw[key] === undefined) {
@@ -93,12 +118,13 @@ export function applyTheme(kind: string, raw: Readonly<Record<string, unknown>>,
       const known = Object.keys(presets ?? {});
       issues.push({
         code: "UNKNOWN_STYLE",
-        prop: "style",
+        prop: look ? "style.preset" : "style",
         message: `no ${kind} style "${named}" in the theme${known.length ? ` (${known.join(", ")})` : ""}`,
       });
-      if (kind === "captions") delete out.style;
     }
   }
+  // A preset name alone is the object `{ preset }`, whether or not the theme has it.
+  if (look && typeof out.style === "string") out.style = own;
 
   const motion = theme.declared ? theme.motion : null;
   if (motion && MOTION_KINDS.has(kind) && !(kind === "title" && out.animation !== undefined)) {
@@ -174,6 +200,10 @@ function substitute(
     return changed ?? value;
   }
   return value;
+}
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && Object.getPrototypeOf(value) === Object.prototype;
 }
 
 function hasToken(value: unknown): boolean {
