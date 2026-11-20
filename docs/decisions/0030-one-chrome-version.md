@@ -1,7 +1,6 @@
 # 0030. One Chrome version: the export runs on Chrome 157 only
 
-> Status: accepted. Supersedes the Chrome versions in [0018](./0018-free-code-in-a-timeline-skeleton.md) ("157 or
-> later, or 156 with `CanvasDrawElement` enabled") and [0019](./0019-a-browser-engine-for-free-code.md) ("Chrome 153
+> Status: accepted. Supersedes the Chrome versions in [0019](./0019-a-browser-engine-for-free-code.md) ("Chrome 153
 > or later", "on by default from 157"), and the "Chrome or Chromium 153+" that `UBERSCENE_CHROMIUM` took after
 > [0021](./0021-one-export-engine.md).
 

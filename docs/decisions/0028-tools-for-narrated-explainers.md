@@ -1,7 +1,6 @@
 # 0028. Tools for narrated explainers
 
-> Status: proposed. Follows from [0018](./0018-free-code-in-a-timeline-skeleton.md) (free code in a timeline
-> skeleton) and [0026](./0026-an-agent-looks-at-the-timeline.md) (an agent looks at the timeline). The work plan at
+> Status: proposed. Follows from [0026](./0026-an-agent-looks-at-the-timeline.md) (an agent looks at the timeline). The work plan at
 > the end is the order it lands in.
 
 ## Context
