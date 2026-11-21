@@ -3,6 +3,12 @@
 Make a short video from a clip of someone talking: the clip trimmed, a name card over it and captions under it. Then
 look at it, export it to MP4, and change it.
 
+::: warning Work in progress
+UberScene is early. The API is still being shaped and changes between releases, often in breaking
+ways, and will keep changing until 1.0. Each release's changelog says how to move a file, and `uberscene lint --fix`
+moves most of it for you.
+:::
+
 You need Node 22.19 or later. You don't need ffmpeg: the export draws its frames in Chrome, which it downloads the
 first time.
 

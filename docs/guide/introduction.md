@@ -1,6 +1,12 @@
-# A video is a file.
+# A whole multimedia pipeline written as code.
 
-<p class="doc-lead">One TSX file is the project, the edit and the code. The player plays it, an editor changes it, the export renders it, and you and your agent work on that same text.</p>
+::: warning Work in progress
+UberScene is early. The API is still being shaped and changes between releases, often in breaking
+ways, and will keep changing until 1.0. Each release's changelog says how to move a file, and `uberscene lint --fix`
+moves most of it for you.
+:::
+
+<p class="doc-lead">A video is a file. One TSX file is the project, the edit and the code. The player plays it, an editor changes it, the export renders it, and you and your agent work on that same text.</p>
 
 ```tsx [video.tsx]
 import { Captions, Clip, Composition, LowerThird, Track } from "@uberscene/kit";
@@ -35,7 +41,7 @@ as code. Where the elements stop, a `<Layer>` holds any React, CSS, canvas or We
   karaoke, and narration timed from a script.
 - [Effects and transitions](/reference/effects/), from exposure, curves and LUTs to keying, glow and film burn, run
   as shaders in the preview and the export. Or write your own in GLSL.
-- [Components](/reference/components/) such as lower thirds, callouts, counters and quote cards, and parts for
+- [Components](/reference/components/) such as lower thirds, callouts, counters and badges, and parts for
   drawing diagrams in a layer.
 - [Themes and fonts](./themes): a palette, type and motion style set once in the file.
 - [Free code](./free-code): any React in a `<Layer>`, and three.js and Motion on the timeline.

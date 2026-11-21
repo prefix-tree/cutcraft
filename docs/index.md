@@ -17,11 +17,11 @@ import { withBase } from "vitepress";
 <div class="home-hero-grid">
 <div class="home-hero-main">
 
-<p class="home-tags"><span>Unit 01</span><span>Make videos with code</span></p>
+<p class="home-tags"><span>Unit 01</span><span>Make videos with code</span><span>Work in progress</span></p>
 
 <h1 class="home-title"><span class="home-title-line">Multimedia pipeline</span> <span class="home-title-line"><span class="home-title-mark">as code.</span></span></h1>
 
-<p class="home-lead">Write a video as a React file. Play it in the browser, fine-tune it on a timeline, export it to MP4. Next: 3D scenes in the same file that guide generative video models.</p>
+<p class="home-lead">Write a video as a React file. Play it in the browser, fine-tune it on a timeline, export it to MP4. Next: 3D scenes in the same file that guide generative video models. Early: the API changes until 1.0.</p>
 
 <AgentPicker />
 
@@ -121,7 +121,7 @@ import { withBase } from "vitepress";
 <li><strong>Timeline elements</strong> Clips, tracks, transitions, titles, shapes, masks, keyframes, speed ramps, freeze frames and multicam.</li>
 <li><strong>Captions</strong> From the clip's transcript, SRT, VTT or Whisper; karaoke, word by word or typewriter.</li>
 <li><strong>Effects and transitions</strong> 45 built in, run as shaders in the preview and the export, or your own in GLSL.</li>
-<li><strong>Motion graphics</strong> Lower thirds, callouts, counters, quote cards and themes.</li>
+<li><strong>Motion graphics</strong> Lower thirds, callouts, counters, badges and themes.</li>
 <li><strong>Free code</strong> Any React, CSS, SVG, canvas, three.js or Motion, on the video's clock.</li>
 <li><strong>Editing API</strong> 98 undoable actions that write each change back into the file.</li>
 <li><strong>Player</strong> A React component that plays the file in the browser, frame-exact.</li>
