@@ -71,7 +71,7 @@ test("a click selects without editing", async ({ page }) => {
 
 test("the inspector writes a number, a choice and the text", async ({ page }) => {
   await bar(page, "file").click();
-  const size = field(page, "size").locator("input");
+  const size = field(page, "Size").locator("input");
   await size.fill("72");
   await size.press("Enter");
   await field(page, "blend").getByRole("combobox").click();
@@ -86,10 +86,33 @@ test("the inspector writes a number, a choice and the text", async ({ page }) =>
   await agrees(page);
 });
 
+test("the typography panel writes each property into the title's style, the preset kept", async ({ page }) => {
+  await bar(page, "file").click();
+  const panel = page.locator("[data-editor-typography]");
+  // Every property shows, set in the file or not: the defaults the title has now.
+  await expect(field(page, "Line height").locator("input")).toHaveValue(/\d/);
+  await panel.getByRole("combobox", { name: "Weight" }).click();
+  await page.getByRole("option", { name: /Regular/ }).click();
+  await panel.getByRole("radio", { name: "Align left" }).click();
+  await panel.getByRole("button", { name: "Italic" }).click();
+  await panel.getByRole("radio", { name: "Underline" }).click();
+  const spacing = field(page, "Letter spacing").locator("input");
+  await spacing.fill("4");
+  await spacing.press("Enter");
+  const color = panel.getByRole("textbox", { name: "Color", exact: true });
+  await color.fill("$primary");
+  await color.press("Enter");
+  const line = (await changed(page))[0] ?? "";
+  for (const part of ['preset: "h1"', "size: 96", "weight: 400", 'align: "left"', "italic: true"])
+    expect(line).toContain(part);
+  for (const part of ['decoration: "underline"', "letterSpacing: 4", 'color: "$primary"']) expect(line).toContain(part);
+  await agrees(page);
+});
+
 test("a prop written as a name is shown locked", async ({ page }) => {
   await bar(page, "credit").click();
-  await expect(field(page, "size").locator("input")).toBeDisabled();
-  await expect(field(page, "size").getByLabel("Written as code in the file")).toBeVisible();
+  await expect(field(page, "Size").locator("input")).toBeDisabled();
+  await expect(field(page, "Size").getByLabel("Written as code in the file")).toBeVisible();
 });
 
 test("delete with the key, then undo: the element is in the file once", async ({ page }) => {

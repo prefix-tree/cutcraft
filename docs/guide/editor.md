@@ -29,8 +29,10 @@ resizable, tabs, select and a few more), and installs `@uberscene/editor`, `@ube
 | `timeline.tsx` | `editor-timeline` | A row per track and a bar per element. Click to select, drag to move, drag an end to trim. Each drag is one undoable edit. |
 | `layers.tsx` | `editor-layers` | Every element, grouped by track. A click selects it. |
 | `transport.tsx` | `editor-transport` | Play and pause, a scrubber, the time, the speed and mute. |
-| `inspector.tsx` | `editor-inspector` | The selected element's timing, text and every prop its schema lists, as fields. A prop written as code in the file shows locked. |
+| `inspector.tsx`, `typography.tsx`, `fields.tsx` | `editor-inspector` | The selected element's timing, text and every prop its schema lists, as fields. Titles and captions get a typography panel laid out as a design tool's: preset, font, weight, size, line height, letter spacing, alignment, italic and decoration, colour, background, stroke and shadow, each showing the value the text has now. A prop written as code in the file shows locked. |
 | `source.tsx` | `editor-source` | The file with every edit written in, the changed lines marked, to copy or download. |
+
+<img src="/readme/editor-typography.webp" width="360" alt="The typography panel: preset h1, Space Grotesk, Bold 700 at 96, line height 1.05, letter spacing 6, centred, italic, colour #ffcf5a">
 
 Each part is its own item, so you can take one: `npx shadcn add https://uberscene.prefixtree.xyz/r/editor-timeline.json`
 gives you the timeline alone.

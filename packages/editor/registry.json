@@ -19,7 +19,11 @@
         "{{registry}}/editor-source.json"
       ],
       "files": [
-        { "path": "registry/editor/editor.tsx", "type": "registry:component", "target": "components/editor/editor.tsx" }
+        {
+          "path": "registry/editor/editor.tsx",
+          "type": "registry:component",
+          "target": "components/editor/editor.tsx"
+        }
       ]
     },
     {
@@ -35,7 +39,11 @@
           "type": "registry:component",
           "target": "components/editor/timeline.tsx"
         },
-        { "path": "registry/editor/use-rows.ts", "type": "registry:hook", "target": "components/editor/use-rows.ts" }
+        {
+          "path": "registry/editor/use-rows.ts",
+          "type": "registry:hook",
+          "target": "components/editor/use-rows.ts"
+        }
       ]
     },
     {
@@ -51,7 +59,11 @@
           "type": "registry:component",
           "target": "components/editor/layers.tsx"
         },
-        { "path": "registry/editor/use-rows.ts", "type": "registry:hook", "target": "components/editor/use-rows.ts" }
+        {
+          "path": "registry/editor/use-rows.ts",
+          "type": "registry:hook",
+          "target": "components/editor/use-rows.ts"
+        }
       ]
     },
     {
@@ -73,7 +85,7 @@
       "name": "editor-inspector",
       "type": "registry:component",
       "title": "Inspector",
-      "description": "The selected element's timing, text and every prop its schema lists, as fields. Props written as code show locked.",
+      "description": "The selected element's timing, text and props as fields, with a typography panel for titles and captions as a design tool shows it: font, weight, size, line height, letter spacing, alignment, decoration, colour, stroke and shadow. Props written as code show locked.",
       "dependencies": ["@uberscene/editor", "@uberscene/kit", "@uberscene/sdk", "lucide-react"],
       "registryDependencies": [
         "badge",
@@ -84,13 +96,25 @@
         "select",
         "separator",
         "switch",
-        "textarea"
+        "textarea",
+        "toggle",
+        "toggle-group"
       ],
       "files": [
         {
           "path": "registry/editor/inspector.tsx",
           "type": "registry:component",
           "target": "components/editor/inspector.tsx"
+        },
+        {
+          "path": "registry/editor/typography.tsx",
+          "type": "registry:component",
+          "target": "components/editor/typography.tsx"
+        },
+        {
+          "path": "registry/editor/fields.tsx",
+          "type": "registry:component",
+          "target": "components/editor/fields.tsx"
         }
       ]
     },

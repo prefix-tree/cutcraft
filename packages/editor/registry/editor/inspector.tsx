@@ -1,19 +1,17 @@
-import { Lock, Redo2, Trash2, Undo2 } from "lucide-react";
-import { type ReactNode, useEffect, useState } from "react";
+import { Redo2, Trash2, Undo2 } from "lucide-react";
+import { useState } from "react";
 
 import { useEdit, useEditor, useSelection } from "@uberscene/editor";
 import { knobsOf, SCHEMAS_BY_KIND } from "@uberscene/kit/schema";
-import type { ActionInput, ActionResult } from "@uberscene/sdk";
+import type { ActionInput } from "@uberscene/sdk";
 
+import { type Access, fail, Group, NumberField, Row, TextField } from "./fields";
+import { Typography } from "./typography";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
-import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 
 /** Props the inspector leaves to other controls: timing (the timeline and the fields at the top), ids, children. */
@@ -36,7 +34,6 @@ const UPDATABLE = new Set(["title", "shape", "svg", "sticker", "adjustment", "ne
 
 type Knob = ReturnType<typeof knobsOf>[number];
 type Scalar = string | number | boolean;
-type Access = "literal" | "bound" | "locked";
 
 const isScalar = (v: unknown): v is Scalar => ["string", "number", "boolean"].includes(typeof v);
 const isObject = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null && !Array.isArray(v);
@@ -138,6 +135,9 @@ export function Inspector({ className }: { className?: string }) {
             {knobsOf(SCHEMAS_BY_KIND[item.kind], raw)
               .filter((k) => !SKIP.has(k.key))
               .map((k) => {
+                // How text looks has a panel of its own, every property shown whether the file sets it or not.
+                if (k.key === "style" && (item.kind === "title" || item.kind === "captions"))
+                  return <Typography key={k.key} id={item.id} onError={setError} />;
                 const value = raw[k.key] ?? k.value;
                 // An object prop (style, box) is shown one level down, a field per key it holds.
                 if (isObject(value))
@@ -189,37 +189,6 @@ export function Inspector({ className }: { className?: string }) {
 }
 
 const round = (n: number) => Math.round(n * 1000) / 1000;
-const fail = (r: ActionResult | null) =>
-  r && !r.ok ? (r.errors?.map((e) => e.message).join("; ") ?? "Refused") : null;
-
-function Group({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <section className="flex flex-col gap-2">
-      <Separator />
-      <h4 className="text-xs font-medium text-muted-foreground capitalize">{title}</h4>
-      {children}
-    </section>
-  );
-}
-
-function Row({ label, access, children }: { label: string; access: Access; children: ReactNode }) {
-  return (
-    <div className="grid grid-cols-[6.5rem_1fr] items-center gap-2" data-editor-field={label}>
-      <Label className="flex items-center gap-1 truncate text-xs font-normal text-muted-foreground">
-        {label}
-        {access !== "literal" && (
-          <Lock
-            className="size-3 shrink-0"
-            aria-label={access === "locked" ? "Written as code in the file" : "Bound to a value the file declares"}
-          >
-            <title>{access === "locked" ? "Written as code in the file" : "Bound to a value the file declares"}</title>
-          </Lock>
-        )}
-      </Label>
-      {children}
-    </div>
-  );
-}
 
 function KnobField({
   knob,
@@ -298,109 +267,4 @@ function ScalarField({
     return <Switch aria-label={name} checked={value} disabled={disabled} onCheckedChange={onCommit} />;
   const swatch = color || /colou?r|background|fill/i.test(name);
   return <TextField label={name} value={value} swatch={swatch} disabled={disabled} onCommit={onCommit} />;
-}
-
-/** A number written on Enter or when the field loses focus; Escape puts the value back. */
-function NumberField({
-  name,
-  value,
-  step,
-  min,
-  max,
-  disabled,
-  onCommit,
-}: {
-  name?: string | undefined;
-  value: number | undefined;
-  step?: number | undefined;
-  min?: number | undefined;
-  max?: number | undefined;
-  disabled?: boolean | undefined;
-  onCommit: (v: number) => void;
-}) {
-  const [draft, setDraft] = useState(value === undefined ? "" : String(value));
-  useEffect(() => setDraft(value === undefined ? "" : String(value)), [value]);
-  const commit = () => {
-    const n = Number(draft);
-    if (draft.trim() === "" || !Number.isFinite(n) || n === value)
-      return setDraft(value === undefined ? "" : String(value));
-    onCommit(n);
-  };
-  return (
-    <Input
-      type="number"
-      aria-label={name}
-      className="h-8 font-mono text-xs"
-      value={draft}
-      step={step ?? "any"}
-      min={min}
-      max={max}
-      disabled={disabled}
-      onChange={(e) => setDraft(e.target.value)}
-      onBlur={commit}
-      onKeyDown={(e) => {
-        if (e.key === "Enter") commit();
-        if (e.key === "Escape") setDraft(value === undefined ? "" : String(value));
-      }}
-    />
-  );
-}
-
-/** Text written on Enter (Cmd/Ctrl+Enter when multiline) or when the field loses focus. */
-function TextField({
-  label,
-  value,
-  multiline,
-  swatch,
-  disabled,
-  onCommit,
-}: {
-  label: string;
-  value: string;
-  multiline?: boolean;
-  swatch?: boolean;
-  disabled?: boolean;
-  onCommit: (v: string) => void;
-}) {
-  const [draft, setDraft] = useState(value);
-  useEffect(() => setDraft(value), [value]);
-  const commit = () => {
-    if (draft !== value) onCommit(draft);
-  };
-  if (multiline)
-    return (
-      <Textarea
-        aria-label={label}
-        value={draft}
-        disabled={disabled}
-        onChange={(e) => setDraft(e.target.value)}
-        onBlur={commit}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) commit();
-        }}
-      />
-    );
-  return (
-    <div className="flex items-center gap-2">
-      {swatch && (
-        <span
-          aria-hidden
-          className="size-5 shrink-0 rounded border"
-          style={{ background: draft.startsWith("$") ? undefined : draft }}
-        />
-      )}
-      <Input
-        aria-label={label}
-        className="h-8 text-xs"
-        value={draft}
-        disabled={disabled}
-        onChange={(e) => setDraft(e.target.value)}
-        onBlur={commit}
-        onKeyDown={(e) => {
-          if (e.key === "Enter") commit();
-          if (e.key === "Escape") setDraft(value);
-        }}
-      />
-    </div>
-  );
 }
