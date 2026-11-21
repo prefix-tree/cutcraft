@@ -37,7 +37,10 @@ export class NativePcm implements PcmProvider {
   ) {}
 
   async range(asset: string, from: number, to: number): Promise<PcmBuffer> {
-    const handle = await this.media.resolve(asset);
+    // An asset that cannot be found goes back to the page's mix, which fails it or makes it silent as the export asks.
+    const handle = await this.media.resolve(asset).catch((error: unknown) => {
+      throw new NativeSoundUnavailable(`${asset} cannot be opened: ${message(error)}`);
+    });
     if (handle.kind !== "path")
       throw new NativeSoundUnavailable(`${asset} is served from a URL, and the native decoder reads files`);
     let bytes: Buffer;
