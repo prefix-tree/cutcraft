@@ -49,6 +49,12 @@ function sourceLimit(state: ResolvedState, item: ResolvedPlacement): number {
  * (seconds or a transcript/shot reference). For everything else `value` is the
  * new timeline time of that edge.
  */
+/**
+ * A time the trim works out (an edge minus a start) without the noise floating point leaves: 6.267 - 3 is
+ * 3.2670000000000003, which is written into the file as it is. Twelve significant digits keep every frame exact.
+ */
+const tidy = (n: number): number => Number(n.toPrecision(12));
+
 define(carry(
   {
     type: "clip/trim",
@@ -107,20 +113,20 @@ define(carry(
           const props: Record<string, Json | undefined> = { in: a.params.value as Json };
           if (rawProp(state, item.id, "duration") !== undefined) props.out = item.source.out;
           if (rawProp(state, item.id, "duration") !== undefined) props.duration = undefined;
-          if (layout === "free") props.start = item.start + delta;
-          if (layout === "anchored") props.offset = Number(rawProp(state, item.id, "offset") ?? 0) + delta;
+          if (layout === "free") props.start = tidy(item.start + delta);
+          if (layout === "anchored") props.offset = tidy(Number(rawProp(state, item.id, "offset") ?? 0) + delta);
           setProps(log, item.id, props);
         }
         return;
       }
       const v = a.params.value as number;
       if (a.params.edge === "out") {
-        setProps(log, item.id, { duration: v - item.start });
+        setProps(log, item.id, { duration: tidy(v - item.start) });
       } else {
-        const delta = v - item.start;
-        const props: Record<string, Json | undefined> = { duration: item.duration - delta };
+        const delta = tidy(v - item.start);
+        const props: Record<string, Json | undefined> = { duration: tidy(item.duration - delta) };
         if (layout === "free") props.start = v;
-        if (layout === "anchored") props.offset = Number(rawProp(state, item.id, "offset") ?? 0) + delta;
+        if (layout === "anchored") props.offset = tidy(Number(rawProp(state, item.id, "offset") ?? 0) + delta);
         setProps(log, item.id, props);
       }
     },

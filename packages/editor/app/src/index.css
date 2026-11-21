@@ -3,6 +3,9 @@
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/geist";
 
+/* The editor parts live in ../registry, outside this app: Tailwind reads their classes from there. */
+@source "../../registry";
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {

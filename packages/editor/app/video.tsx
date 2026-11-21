@@ -1,6 +1,9 @@
 import { Composition, Title, Track } from "@uberscene/kit";
 
-/** A titles-only video, so the example needs no media files. */
+/** The notes' size, shared by name: the editor shows it locked, since an edit cannot rewrite a name. */
+const NOTE = 28;
+
+/** A titles-only video, so the demo needs no media files. */
 export default function Video() {
   return (
     <Composition fps={30} width={1280} height={720} theme={{ extends: "midnight" }}>
@@ -17,10 +20,10 @@ export default function Video() {
       </Track>
       <Track id="notes" name="Notes" layout="free">
         <Title id="hint" start={1} duration={4} style={{ size: 36 }} box={{ x: 640, y: 560, origin: "center" }}>
-          Select a layer, nudge it, undo it
+          Drag a bar, then open Source
         </Title>
-        <Title id="credit" start={6.5} duration={2} style={{ size: 28 }} box={{ x: 640, y: 620, origin: "center" }}>
-          @uberscene/editor + shadcn/ui
+        <Title id="credit" start={6.5} duration={2} style={{ size: NOTE }} box={{ x: 640, y: 620, origin: "center" }}>
+          Every part is a shadcn component
         </Title>
       </Track>
     </Composition>

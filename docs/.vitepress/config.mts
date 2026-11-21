@@ -98,6 +98,7 @@ export default defineConfig({
         items: [
           { text: "Player", link: "/guide/player" },
           { text: "Editing", link: "/guide/editing" },
+          { text: "The shadcn editor", link: "/guide/editor" },
         ],
       },
       {

@@ -1,0 +1,19 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": ["node", "vite/client"],
+    "baseUrl": ".",
+    "paths": {
+      "@/registry/*": ["../registry/*"],
+      "@/*": ["./src/*"],
+      "@uberscene/kit": ["../../kit/src/index.ts"],
+      "@uberscene/kit/schema": ["../../kit/src/schema.ts"],
+      "@uberscene/sdk/resolver": ["../../sdk/src/resolver.ts"],
+      "@uberscene/sdk": ["../../sdk/src/index.ts"],
+      "@uberscene/player": ["../../player/src/index.ts"],
+      "@uberscene/editor": ["../src/index.ts"]
+    }
+  },
+  "include": ["src", "../registry", "e2e", "video.tsx", "vite.config.ts", "playwright.config.ts"]
+}

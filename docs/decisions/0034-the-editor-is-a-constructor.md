@@ -1,6 +1,6 @@
 # 0034. The editor is a constructor of building blocks; its styling is a shadcn registry
 
-> Status: proposed. Builds on `@uberscene/editor`, which ships `<Editor.Root>`, `Preview`, `Controls`, `Layers` and
+> Status: accepted in part (the registry and its demo; see Outcome). Builds on `@uberscene/editor`, which ships `<Editor.Root>`, `Preview`, `Controls`, `Layers` and
 > `Timeline` as unstyled parts around one player.
 
 ## Context
@@ -69,7 +69,7 @@ Slider, ScrollArea, ResizablePanelGroup, Tooltip and ToggleGroup, are arrangemen
 `@uberscene/editor` as a dependency. Each part is also its own registry item, so an app can take only the timeline.
 
 **A demo app shows and tests it.** The docs site is VitePress (Vue) and can host the JSON but not render the React
-components, so `examples/editor` (Vite, React, Tailwind, shadcn) installs the registry from the workspace and is
+components, so a Vite app (React, Tailwind, shadcn) installs the registry from the workspace and is
 where the styled editor is seen and tested.
 
 ## Consequences
@@ -85,3 +85,18 @@ where the styled editor is seen and tested.
   shadcn today.
 - Open: whether `shadcn build` runs cleanly inside this pnpm workspace, and how registry items should pin the
   `@uberscene/editor` version.
+
+## Outcome
+
+Built, with three changes to the plan above:
+
+- **The registry lives in the editor package**, not beside the docs: `packages/editor/registry.json` and
+  `packages/editor/registry/editor/`. `pnpm registry:build` writes it to `docs/public/r/`, with the
+  `@uberscene/*` versions pinned, and `pnpm docs:check` fails when the committed files are stale.
+- **The demo lives in the editor package too**, as `packages/editor/app`, and replaces `examples/editor`. It imports
+  the registry's files where they are, so what `shadcn add` installs is what the demo runs, and it is the end-to-end
+  test bed for editing (`packages/editor/app/e2e`). The docs build serves it at `/editor/`.
+- **The core stays as it is.** The compound blocks (`Timeline.Tracks`, `Clips`, their contexts) are not built: the
+  registry's parts read `useEditor()`, `useSelection()` and `useEdit()` and the SDK directly, and a shadcn user changes
+  the parts' own files instead of composing blocks. The open question of pinning is settled by the build step above;
+  `shadcn build` runs cleanly in the workspace.

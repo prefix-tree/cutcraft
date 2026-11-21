@@ -82,8 +82,8 @@ const GROUPS: { label: string; features: Feature[] }[] = [
       {
         icon: "edit",
         title: "Editing API",
-        text: "99 undoable actions (trim, move, retime, restyle), each written back into the file.",
-        link: "/guide/editing",
+        text: "99 undoable actions (trim, move, retime, restyle), each written back into the file, and a shadcn editor built on them.",
+        link: "/guide/editor",
       },
     ],
   },

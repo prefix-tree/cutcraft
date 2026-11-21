@@ -35,9 +35,15 @@
     "packages/graphics": {
       "entry": ["test/**/*.{ts,tsx}"]
     },
-    "examples/editor": {
-      // shadcn/ui components, kept as the CLI writes them; they export more than the example uses.
-      "ignore": ["src/components/ui/**"]
+    "packages/editor": {
+      // The registry is the app's source: its `@/` imports resolve there, so the app's workspace checks it.
+      "entry": ["scripts/*.ts"],
+      "ignore": ["registry/**", "app/**"]
+    },
+    "packages/editor/app": {
+      "entry": ["e2e/**/*.e2e.ts", "../registry/editor/*.{ts,tsx}"],
+      // shadcn/ui components and their `cn`, kept as the CLI writes them; they export more than the editor uses.
+      "ignore": ["src/components/ui/**", "src/lib/utils.ts"]
     },
     "examples/showcase": {
       // Cut files, loaded by path with loadVideo.

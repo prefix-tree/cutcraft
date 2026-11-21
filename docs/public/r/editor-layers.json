@@ -1,0 +1,30 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "editor-layers",
+  "title": "Layers",
+  "description": "Every element, grouped by track. A click selects it.",
+  "dependencies": [
+    "@uberscene/editor@0.5.0",
+    "@uberscene/sdk@0.5.0",
+    "lucide-react@^1.77.0"
+  ],
+  "registryDependencies": [
+    "button",
+    "scroll-area"
+  ],
+  "files": [
+    {
+      "path": "registry/editor/layers.tsx",
+      "content": "import {\n  Captions,\n  Clapperboard,\n  Layers as LayersIcon,\n  type LucideIcon,\n  Music,\n  Shapes,\n  Sparkles,\n  Type,\n} from \"lucide-react\";\n\nimport { useSelection } from \"@uberscene/editor\";\n\nimport { useRows } from \"./use-rows\";\nimport { Button } from \"@/components/ui/button\";\nimport { ScrollArea } from \"@/components/ui/scroll-area\";\nimport { cn } from \"@/lib/utils\";\n\nconst ICONS: Record<string, LucideIcon> = {\n  clip: Clapperboard,\n  audio: Music,\n  title: Type,\n  captions: Captions,\n  caption: Captions,\n  shape: Shapes,\n  svg: Shapes,\n  transition: Sparkles,\n  layer: LayersIcon,\n};\n\n/** Every element, grouped by track. A click selects it; the selection is the one the timeline and inspector share. */\nexport function Layers({ className }: { className?: string }) {\n  const { byTrack } = useRows();\n  const [selected, select] = useSelection();\n  return (\n    <ScrollArea className={cn(\"h-full\", className)} data-editor-layers=\"\">\n      <div className=\"flex flex-col gap-4 p-3\">\n        {byTrack.map(({ track, rows }) => (\n          <section key={track.id} className=\"flex flex-col gap-0.5\">\n            <h3 className=\"px-2 pb-1 text-xs font-medium text-muted-foreground\">{track.id}</h3>\n            {rows.map((row) => {\n              const Icon = ICONS[row.kind] ?? Shapes;\n              return (\n                <Button\n                  key={row.id}\n                  data-editor-layer={row.id}\n                  variant={row.id === selected ? \"secondary\" : \"ghost\"}\n                  size=\"sm\"\n                  className=\"justify-start\"\n                  aria-pressed={row.id === selected}\n                  onClick={() => select(row.id)}\n                >\n                  <Icon className=\"text-muted-foreground\" />\n                  <span className=\"truncate\">{row.text ?? row.label ?? row.id}</span>\n                </Button>\n              );\n            })}\n          </section>\n        ))}\n      </div>\n    </ScrollArea>\n  );\n}\n",
+      "type": "registry:component",
+      "target": "components/editor/layers.tsx"
+    },
+    {
+      "path": "registry/editor/use-rows.ts",
+      "content": "import { useMemo } from \"react\";\n\nimport { useEditor } from \"@uberscene/editor\";\nimport { timelineRows } from \"@uberscene/sdk\";\n\n/** The timeline as rows, grouped by track. Every block below reads the editor through this and the editor's hooks. */\nexport function useRows() {\n  const { state } = useEditor();\n  return useMemo(() => {\n    const rows = timelineRows(state);\n    return {\n      ...rows,\n      byTrack: rows.tracks.map((t) => ({ track: t, rows: rows.elements.filter((e) => e.track === t.id) })),\n    };\n  }, [state]);\n}\n",
+      "type": "registry:hook",
+      "target": "components/editor/use-rows.ts"
+    }
+  ],
+  "type": "registry:component"
+}
