@@ -627,7 +627,7 @@ describe("stylizers and generators", () => {
 
   it("scanlines darken a band every spacing pixels, and roll by speed times time", async () => {
     const effect = (speed: number) =>
-      `<Effect id="s" type="scanlines" params={{ spacing: 10, thickness: 0.5, intensity: 1, speed: ${speed} }} />`;
+      `<Effect id="s" type="scanlines" params={{ spacing: 10, coverage: 0.5, intensity: 1, speed: ${speed} }} />`;
     const [onLine, between] = await at("scan", effect(0), { split: -1 }, [
       [160, 90],
       [160, 95],

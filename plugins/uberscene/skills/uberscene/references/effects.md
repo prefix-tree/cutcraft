@@ -8,10 +8,10 @@ A param's name says what kind of value it is, and each kind has one scale:
 
 | Kind | Scale | Params |
 |---|---|---|
-| strength, mix or share | a fraction, 0 to 1, or -1 to 1 when it goes both ways | `amount`, `opacity`, `softness`, `tolerance`, `tint`, `temperature`, `shadows`, `highlights`, `threshold`, `spill`, `black`, `white`, `blur` (of `zoom`), `roundness`, `star`, `thickness` (of `scanlines`, a share of the spacing), `spread` (of the frame's diagonal) |
+| strength, mix or share | a fraction, 0 to 1, or -1 to 1 when it goes both ways | `amount`, `opacity`, `softness`, `tolerance`, `tint`, `temperature`, `shadows`, `highlights`, `threshold`, `spill`, `black`, `white`, `smear`, `coverage` (a share of the spacing), `roundness`, `star`, `spread` (of the frame's diagonal) |
 | gain | a multiplier | `intensity`, `scale`, `contrast` |
 | exponent | a power, 1 changes nothing | `gamma` |
-| distance | pixels of the composition; a blur's `radius`, a shadow's `blur` (and `bevel`'s `size`) is its Gaussian's standard deviation, as CSS `blur()` reads it | `radius`, `blur` (of `shadow`), `thickness` (of `outline`), `feather`, `length`, `distance`, `size`, `spacing`, `edge`, `x`, `y` |
+| distance | pixels of the composition; a blur's `radius`, a shadow's `blur` (and `bevel`'s `size`) is its Gaussian's standard deviation, as CSS `blur()` reads it | `radius`, `blur`, `thickness`, `feather`, `length`, `distance`, `size`, `spacing`, `edge`, `x`, `y` |
 | angle | degrees, clockwise from up | `angle`, `rotation`, `startAngle` |
 | position | fractions of the frame, `[x, y]` from the top left | `center`, `box`, the corners |
 | colour | `"#rgb"` or `"#rrggbb"` | `color`, `dark`, `light`, `ink`, `paper` |
@@ -508,7 +508,7 @@ Drawn as a shader.
 | param | type | default | description |
 |---|---|---|---|
 | `spacing` | number (2..200) | `4` | The distance from one line to the next, in pixels. |
-| `thickness` | number (0..1) | `0.5` | How much of the space between lines each dark line covers. |
+| `coverage` | number (0..1) | `0.5` | How much of the space between lines each dark line covers, 0 to 1. |
 | `intensity` | number (0..1) | `0.35` | How dark the lines are: 0 is invisible, 1 is black. |
 | `speed` | number (-2000..2000) | `0` | How fast the lines roll across the picture, in pixels per second. |
 | `angle` | number | `0` | How far the lines are turned, in degrees: 0 is horizontal, 90 vertical. |
@@ -727,7 +727,7 @@ Drawn by a shader, as a crossfade where WebGL is missing.
 
 ## `zoom`
 
-Zooms through the first clip into the next, with a blur.
+Zooms through the first clip into the next, smearing along the zoom.
 
 ### Params
 
@@ -737,6 +737,6 @@ Drawn by a shader, as a crossfade where WebGL is missing.
 |---|---|---|---|
 | `center` | [number, number] | `[0.5,0.5]` | The point the clips zoom toward, as `[x, y]` fractions of the frame from the top left. |
 | `scale` | number (1..4) | `1.6` | How far the clips zoom, as a multiplier: the outgoing clip grows to it and the next one shrinks from it. |
-| `blur` | number (0..1) | `0.5` | How much the clips smear along the zoom, most at the middle: 0 is none. |
+| `smear` | number (0..1) | `0.5` | How much the clips smear along the zoom, most at the middle: 0 is none. |
 
 [All effects and transitions](https://uberscene.prefixtree.xyz/reference/effects/) · [Units](https://uberscene.prefixtree.xyz/reference/effects/#units)

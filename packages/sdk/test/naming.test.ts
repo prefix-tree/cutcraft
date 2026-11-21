@@ -66,12 +66,21 @@ describe("an old key is an error naming the new one", () => {
     ["shadow", "radius", "blur", "{ radius: 3 }"],
     ["outline", "width", "thickness", "{ width: 3 }"],
     ["halftone", "mode", "type", '{ mode: "cmyk" }'],
+    ["scanlines", "thickness", "coverage", "{ thickness: 0.5 }"],
   ])("the %s effect's %s param, and a keyframe of it", (type, from, to, params) => {
     const effect = (inner: string) =>
       `<Title id="h" start={0} duration={1}><Effect id="e" type="${type}" params={${params}}>${inner}</Effect>Hi</Title>`;
     expect(messages(effect("")).join("\n")).toContain(`param \`${from}\` of "${type}" is now \`${to}\``);
     const keyed = `<Title id="h" start={0} duration={1}><Effect id="e" type="${type}"><Keyframe id="k" param="${from}" at={0} value={1} /></Effect>Hi</Title>`;
     expect(messages(keyed).join("\n")).toContain(`param "${from}" of "${type}" is now "${to}"`);
+  });
+
+  it("the zoom transition's blur, which is its smear", () => {
+    const pair = (type: string) =>
+      `<Shape id="a" type="rectangle" start={0} duration={2} /><Transition id="x" type="${type}" params={{ blur: 0.5 }} /><Shape id="b" type="rectangle" start={2} duration={2} />`;
+    expect(messages(pair("zoom")).join("\n")).toContain("params.blur is now params.smear");
+    // Another transition's blur is not renamed: it has no such param.
+    expect(messages(pair("wipe")).join("\n")).not.toContain("is now");
   });
 });
 

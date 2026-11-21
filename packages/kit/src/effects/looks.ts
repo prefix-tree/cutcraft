@@ -104,7 +104,7 @@ const pixelate = shaderDefinition("effect", {
 });
 
 /**
- * Scanlines, the raster lines of a CRT: a dark band every `spacing` pixels, `thickness` of the period wide, darkening
+ * Scanlines, the raster lines of a CRT: a dark band every `spacing` pixels, covering `coverage` of the period, darkening
  * the picture by `intensity` in linear light. `angle` turns the lines (0 is horizontal), and `speed` rolls them by that
  * many pixels a second. The band's edges are antialiased over a pixel.
  */
@@ -113,8 +113,8 @@ const scanlines = shaderDefinition("effect", {
   params: z.object({
     /** The distance from one line to the next, in pixels. */
     spacing: z.number().min(2).max(200).default(4),
-    /** How much of the space between lines each dark line covers. */
-    thickness: z.number().min(0).max(1).default(0.5),
+    /** How much of the space between lines each dark line covers, 0 to 1. */
+    coverage: z.number().min(0).max(1).default(0.5),
     /** How dark the lines are: 0 is invisible, 1 is black. */
     intensity: z.number().min(0).max(1).default(0.35),
     /** How fast the lines roll across the picture, in pixels per second. */
@@ -129,7 +129,7 @@ const scanlines = shaderDefinition("effect", {
   vec2 p = uv * resolution;
   float pos = dot(p, vec2(sin(a), cos(a))) + time * params.speed;
   float x = pos - params.spacing * floor(pos / params.spacing + 0.5);
-  float w = params.thickness * params.spacing;
+  float w = params.coverage * params.spacing;
   float dark = min(clamp(w / 2.0 - abs(x) + 0.5, 0.0, 1.0), w);
   return vec4(us_srgb(us_linear(c.rgb) * (1.0 - params.intensity * dark)), c.a);
 }`,

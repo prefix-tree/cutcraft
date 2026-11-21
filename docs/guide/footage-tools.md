@@ -132,7 +132,7 @@ does, but as a coarse mosaic:
 | Param | Does |
 |---|---|
 | `spacing` | A band every that many pixels. |
-| `thickness` | How wide each dark band is, as a fraction of `spacing`. |
+| `coverage` | How much of `spacing` each dark band covers, 0 to 1. |
 | `intensity` | How dark a band is. |
 | `speed` | Rolls the bands by that many pixels a second. |
 | `angle` | Turns them. |

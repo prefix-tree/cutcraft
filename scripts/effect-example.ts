@@ -283,7 +283,7 @@ export const TRANSITION_TEXT: Readonly<Record<keyof typeof TRANSITIONS, string>>
   blinds: "Opens the next clip through turning slats.",
   filmBurn: "Burns through the film into the next clip.",
   pixelDissolve: "Dissolves into the next clip square by square.",
-  zoom: "Zooms through the first clip into the next, with a blur.",
+  zoom: "Zooms through the first clip into the next, smearing along the zoom.",
 };
 
 /** A JSX attribute value. */

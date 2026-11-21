@@ -97,7 +97,7 @@ Every built-in `<Effect type>` and `<Transition type>`. Hover a card to play it;
 <PreviewCard code hover title="blinds" link="/reference/transitions/blinds" src="previews/transitions/blinds" text="Opens the next clip through turning slats." />
 <PreviewCard code hover title="filmBurn" link="/reference/transitions/filmBurn" src="previews/transitions/filmBurn" text="Burns through the film into the next clip." />
 <PreviewCard code hover title="pixelDissolve" link="/reference/transitions/pixelDissolve" src="previews/transitions/pixelDissolve" text="Dissolves into the next clip square by square." />
-<PreviewCard code hover title="zoom" link="/reference/transitions/zoom" src="previews/transitions/zoom" text="Zooms through the first clip into the next, with a blur." />
+<PreviewCard code hover title="zoom" link="/reference/transitions/zoom" src="previews/transitions/zoom" text="Zooms through the first clip into the next, smearing along the zoom." />
 </div>
 
 ## Units
@@ -106,10 +106,10 @@ A param's name says what kind of value it is, and each kind has one scale:
 
 | Kind | Scale | Params |
 |---|---|---|
-| strength, mix or share | a fraction, 0 to 1, or -1 to 1 when it goes both ways | `amount`, `opacity`, `softness`, `tolerance`, `tint`, `temperature`, `shadows`, `highlights`, `threshold`, `spill`, `black`, `white`, `blur` (of `zoom`), `roundness`, `star`, `thickness` (of `scanlines`, a share of the spacing), `spread` (of the frame's diagonal) |
+| strength, mix or share | a fraction, 0 to 1, or -1 to 1 when it goes both ways | `amount`, `opacity`, `softness`, `tolerance`, `tint`, `temperature`, `shadows`, `highlights`, `threshold`, `spill`, `black`, `white`, `smear`, `coverage` (a share of the spacing), `roundness`, `star`, `spread` (of the frame's diagonal) |
 | gain | a multiplier | `intensity`, `scale`, `contrast` |
 | exponent | a power, 1 changes nothing | `gamma` |
-| distance | pixels of the composition; a blur's `radius`, a shadow's `blur` (and `bevel`'s `size`) is its Gaussian's standard deviation, as CSS `blur()` reads it | `radius`, `blur` (of `shadow`), `thickness` (of `outline`), `feather`, `length`, `distance`, `size`, `spacing`, `edge`, `x`, `y` |
+| distance | pixels of the composition; a blur's `radius`, a shadow's `blur` (and `bevel`'s `size`) is its Gaussian's standard deviation, as CSS `blur()` reads it | `radius`, `blur`, `thickness`, `feather`, `length`, `distance`, `size`, `spacing`, `edge`, `x`, `y` |
 | angle | degrees, clockwise from up | `angle`, `rotation`, `startAngle` |
 | position | fractions of the frame, `[x, y]` from the top left | `center`, `box`, the corners |
 | colour | `"#rgb"` or `"#rrggbb"` | `color`, `dark`, `light`, `ink`, `paper` |

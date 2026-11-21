@@ -162,7 +162,7 @@ const pixelDissolve = maskTransition({
 
 /**
  * Zoom: the outgoing clip scales up toward `center` while the next one scales down from `scale` to rest, crossfading
- * through the middle; `blur` smears each along the zoom (zoom blur samples), most at the middle.
+ * through the middle; `smear` smears each along the zoom (zoom blur samples), most at the middle.
  */
 const zoom = shaderDefinition("transition", {
   name: "zoom",
@@ -172,7 +172,7 @@ const zoom = shaderDefinition("transition", {
     /** How far the clips zoom, as a multiplier: the outgoing clip grows to it and the next one shrinks from it. */
     scale: z.number().min(1).max(4).default(1.6),
     /** How much the clips smear along the zoom, most at the middle: 0 is none. */
-    blur: z.number().min(0).max(1).default(0.5),
+    smear: z.number().min(0).max(1).default(0.5),
   }),
   shader: `vec4 us_zoomed(sampler2D picture, vec2 uv, float s, float smear) {
   vec4 sum = vec4(0.0);
@@ -185,7 +185,7 @@ const zoom = shaderDefinition("transition", {
   return sum.a > 0.0 ? vec4(sum.rgb / sum.a, sum.a) : vec4(0.0);
 }
 vec4 transition(vec2 uv) {
-  float smear = params.blur * 0.25 * sin(3.14159265 * progress);
+  float smear = params.smear * 0.25 * sin(3.14159265 * progress);
   vec4 a = us_zoomed(from, uv, mix(1.0, params.scale, progress), smear);
   vec4 b = us_zoomed(to, uv, mix(params.scale, 1.0, progress), smear);
   float w = smoothstep(0.3, 0.7, progress);

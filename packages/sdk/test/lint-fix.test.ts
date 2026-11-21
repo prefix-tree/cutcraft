@@ -452,6 +452,7 @@ export default function V() {
       ["shadow", "{ radius: 3 }", "radius", "{ blur: 3 }", "blur"],
       ["outline", "{ width: 3 }", "width", "{ thickness: 3 }", "thickness"],
       ["halftone", '{ mode: "cmyk" }', "mode", '{ type: "cmyk" }', "type"],
+      ["scanlines", "{ thickness: 0.5 }", "thickness", "{ coverage: 0.5 }", "coverage"],
     ])("renames the %s effect's param, and the param a keyframe inside it names", (type, params, key, now, keyNow) => {
       expect(fixSource(effect(type, params, key)).text).toBe(effect(type, now, keyNow));
     });
@@ -472,6 +473,12 @@ export default function V() {
       const x = (type: string) => free(`<Transition id="x" type="${type}" params={{ curve: "ease-in" }} />`);
       expect(fixSource(x("crossfade")).text).toBe(x("crossfade").replace('"ease-in"', '"easeIn"'));
       expect(lint(x("wipe"), { rules: ["deprecated-props"] })).toEqual([]);
+    });
+
+    it("renames the zoom transition's blur to smear, and no other transition's", () => {
+      const x = (type: string, key: string) => free(`<Transition id="x" type="${type}" params={{ ${key}: 0.5 }} />`);
+      expect(fixSource(x("zoom", "blur")).text).toBe(x("zoom", "smear"));
+      expect(lint(x("wipe", "blur"), { rules: ["deprecated-props"] })).toEqual([]);
     });
 
     it("a caller's own row takes a when", () => {

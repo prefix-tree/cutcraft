@@ -523,7 +523,7 @@ Every name each entry exports, read from the code. The sections above explain th
 
 ### `@uberscene/kit/schema`
 
-242 exports.
+243 exports.
 
 | Export | Kind | |
 |---|---|---|
@@ -676,7 +676,8 @@ Every name each entry exports, read from the code. The sections above explain th
 | `rateProblem` | function | Why a rate cannot be used, or null. |
 | `rateValue` | const | The rate as frames per second, for display and for code that only needs an approximate number. |
 | `RENAMED_EFFECT_PARAMS` | const | Built-in effects' params that had another name before 0.6, by effect. |
-| `renamedParam` | function | What a built-in effect's param `param` is called since 0.6, when that is another name; else undefined. |
+| `RENAMED_TRANSITION_PARAMS` | const | Built-in transitions' params that had another name before 0.6, by transition. |
+| `renamedParam` | function | What a built-in effect's (or transition's) param `param` is called since 0.6, when that is another name; else undefined. |
 | `RENDERED_VALUES` | const |  |
 | `RenderedValues` | interface | An enum prop where only some values render. |
 | `ResolvedTheme` | interface | A file's theme with its base theme merged in. |

@@ -533,7 +533,7 @@ function declaredShader(
     const renamed =
       issue.code === "unrecognized_keys" && issue.path.length === 0
         ? issue.keys.flatMap((k) => {
-            const now = renamedParam(type, k);
+            const now = renamedParam(type, k, node.kind === "transition" ? "transition" : "effect");
             return now === undefined ? [] : [`param \`${k}\` of "${type}" is now \`${now}\``];
           })
         : [];
