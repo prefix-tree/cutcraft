@@ -4,6 +4,10 @@
 
 ## The shadcn editor
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/prefix-tree/uberscene/main/docs/public/readme/editor.webp" width="820" alt="The UberScene editor: layers, the preview, the inspector and a timeline">
+</p>
+
 A whole editor, built from [shadcn/ui](https://ui.shadcn.com) components on the parts below, installs into your app
 as source you own:
 

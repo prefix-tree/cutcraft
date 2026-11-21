@@ -4,6 +4,8 @@ A video editor for an UberScene file, built from [shadcn/ui](https://ui.shadcn.c
 component, it is not a package your app depends on: `npx shadcn add` copies its source into your app, and from then on
 the files are yours to change.
 
+![The editor: layers, the preview, the inspector and a timeline of titles](/readme/editor.webp)
+
 <p><a href="/editor/" target="_self">Try the editor →</a> Drag a bar on the timeline, then open the Source tab: the file
 has changed by the one value you dragged.</p>
 

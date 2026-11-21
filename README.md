@@ -127,6 +127,27 @@ export default function Video({ product, founder, accent }) {
 
 Trim `talk` and every callout moves with its word. Full file: [`examples/showcase/launch.tsx`](examples/showcase/launch.tsx).
 
+## Editor
+
+<p align="center">
+  <img src="docs/public/readme/editor.webp" width="820" alt="The UberScene editor: layers on the left, the title A video is a file in the preview, its fields in the inspector, and the titles as bars on a timeline">
+</p>
+
+A video editor built from [shadcn/ui](https://ui.shadcn.com) components, copied into your app as source you own:
+
+```sh
+npx shadcn add https://uberscene.prefixtree.xyz/r/editor.json
+```
+
+Drag a bar to move it, drag its end to trim it, or type in the inspector. Every edit can be undone, and each one lands
+in the file as the one value it changed:
+
+<p align="center">
+  <img src="docs/public/readme/editor-source.webp" width="820" alt="The editor's Source tab after lengthening the title by half a second: line 14 is marked and now reads duration={3}">
+</p>
+
+[Try it](https://uberscene.prefixtree.xyz/editor/) or read [the shadcn editor](https://uberscene.prefixtree.xyz/guide/editor).
+
 ## License
 
 [MIT](LICENSE). Feedback and ideas welcome in [issues](https://github.com/prefix-tree/uberscene/issues).
