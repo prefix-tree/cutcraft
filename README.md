@@ -39,7 +39,16 @@ captions, audio, transitions, effects, and any React, Motion or three.js on top.
 - **Models write code, not math.** Cuts name a transcript word or a camera shot (`in="word:12"`), not seconds, and
   UberScene works out every frame.
 - **One file, every editor.** Your agent edits the text, you edit on a timeline; both change the same file, with undo.
+- **No FFmpeg.** The export draws and encodes in headless Chrome, with nothing else to install.
 - **MIT.** No paid tier, no watermark.
+
+### Native codecs (experimental)
+
+UberScene can also decode footage and encode the export with its own codecs, written in Rust on FilmCraft's
+[craft-video, craft-media and craft-audio](https://github.com/storytold/craft-libs). They decode H.264, HEVC, VP8,
+VP9, AV1, ProRes and DNxHR, and encode H.264, ProRes and the soundtrack, still with no FFmpeg and no C libraries. They
+are off unless `UBERSCENE_CODECS` turns them on, are built from source for now, and Chrome stays the default.
+[Native codecs](https://uberscene.prefixtree.xyz/guide/native-codecs) has the details.
 
 ## Aim
 

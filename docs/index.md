@@ -17,7 +17,7 @@ import { withBase } from "vitepress";
 <div class="home-hero-grid">
 <div class="home-hero-main">
 
-<p class="home-tags"><span>Unit 01</span><span>Make videos with code</span><span>Work in progress</span></p>
+<p class="home-tags"><span>Make videos with code</span><span>Work in progress</span></p>
 
 <h1 class="home-title"><span class="home-title-line">Multimedia pipeline</span> <span class="home-title-line"><span class="home-title-mark">as code.</span></span></h1>
 
@@ -33,19 +33,19 @@ import { withBase } from "vitepress";
 
 </div>
 <aside class="home-spec" aria-label="Specification">
-<p class="home-spec-head"><span>Spec sheet</span><span>Type US-1</span></p>
+<p class="home-spec-head"><span>At a glance</span></p>
 <dl>
 <div><dt>Input</dt><dd>One TSX file</dd></div>
 <div><dt>Output</dt><dd>MP4 · WebM · PNG</dd></div>
 <div><dt>Effects</dt><dd>45 shaders</dd></div>
-<div><dt>Edit actions</dt><dd>98, undoable</dd></div>
+<div><dt>Edit actions</dt><dd>99, undoable</dd></div>
 <div><dt>Player</dt><dd>Browser, frame-exact</dd></div>
-<div><dt>Render</dt><dd>Headless Chrome</dd></div>
+<div><dt>Render</dt><dd>Headless Chrome, no FFmpeg</dd></div>
 <div><dt>Runtime</dt><dd>Node ≥ 22.19</dd></div>
 <div><dt>Operator</dt><dd>You or your agent</dd></div>
 <div><dt>Next</dt><dd>3D + model guidance</dd></div>
 </dl>
-<p class="home-spec-stamp">MIT · Open source</p>
+<p class="home-spec-foot">MIT · Open source</p>
 </aside>
 </div>
 <figure class="home-sheet">
@@ -117,18 +117,9 @@ import { withBase } from "vitepress";
 
 ## Features
 
-<ul class="home-feature-list">
-<li><strong>Timeline elements</strong> Clips, tracks, transitions, titles, shapes, masks, keyframes, speed ramps, freeze frames and multicam.</li>
-<li><strong>Captions</strong> From the clip's transcript, SRT, VTT or Whisper; karaoke, word by word or typewriter.</li>
-<li><strong>Effects and transitions</strong> 45 built in, run as shaders in the preview and the export, or your own in GLSL.</li>
-<li><strong>Motion graphics</strong> Lower thirds, callouts, counters, badges and themes.</li>
-<li><strong>Free code</strong> Any React, CSS, SVG, canvas, three.js or Motion, on the video's clock.</li>
-<li><strong>Editing API</strong> 98 undoable actions that write each change back into the file.</li>
-<li><strong>Player</strong> A React component that plays the file in the browser, frame-exact.</li>
-<li><strong>Export</strong> MP4, WebM and stills from the command line, rendered in headless Chrome.</li>
-<li><strong>Checks</strong> Lint, contact sheets and layout checks, to review a cut without watching it.</li>
-<li><strong>Agent skill</strong> Teaches Claude Code and other agents to write, check and render videos.</li>
-</ul>
+<p class="home-chapter-lead">Everything a video needs, from the first cut to the export, in the order you use it.</p>
+
+<FeatureGroups />
 
 </section>
 
