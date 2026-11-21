@@ -23,7 +23,7 @@ import {
   type VideoContainer,
 } from "./encoding";
 import { type FontFile, loadFonts } from "./fonts";
-import { AudioFeed, feedPackets, feedSegment, planSegments } from "./join";
+import { AudioFeed, feedPackets, feedSegment, LONGEST_PIECE_SECONDS, planSegments } from "./join";
 import { type CodecModes, codecBinary, codecModes } from "./native/codecs";
 import { encodePageMix, mixNatively, NativeSoundUnavailable, type SoundContainer } from "./native/soundtrack";
 import { avcCodecString } from "./native/wire";
@@ -239,7 +239,9 @@ export async function renderVideo(options: RenderOptions): Promise<RenderResult>
     const pieces: Run[] = runs.flatMap((run) =>
       run.kind === "copy"
         ? [run]
-        : planSegments(run.first, run.last, gopFrames, tabs).map((r): Run => ({ kind: "render", ...r })),
+        : planSegments(run.first, run.last, gopFrames, tabs, Math.round(LONGEST_PIECE_SECONDS * outFps)).map(
+            (r): Run => ({ kind: "render", ...r }),
+          ),
     );
 
     // Written beside the file and renamed over it once whole, so an export that fails keeps the last good one. The

@@ -7,6 +7,7 @@ import type { Readable, Writable } from "node:stream";
 
 import type { MediaResolver } from "@uberscene/player/engine";
 
+import { isAssetId } from "../media";
 import type { CodecModes } from "./codecs";
 import { type NativeEncoded, parseEncoded, rawHeader } from "./wire";
 
@@ -57,6 +58,7 @@ export function nativeRoutes(binary: string, modes: CodecModes, media: MediaReso
   let counter = 0;
 
   const fileOf = async (id: string): Promise<string | null> => {
+    if (!isAssetId(id)) throw new Error(`"${id}" is not an asset id`);
     const handle = await media.resolve(id);
     return handle.kind === "path" ? handle.path : null;
   };

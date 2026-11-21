@@ -13,18 +13,28 @@ import {
 
 import type { NativeEncoded } from "./native/wire";
 
-/** Splits frames [first, last) into runs of whole keyframe intervals, about three per tab, each starting on a keyframe the encoder would make anyway. */
+/**
+ * The longest a piece runs, in seconds. Each piece is held whole in memory, in the page and again in Node, until it is
+ * joined: a long export split only "three per tab" made pieces of most of a gigabyte at 1080p and ran Chrome out of
+ * memory.
+ */
+export const LONGEST_PIECE_SECONDS = 60;
+
+/**
+ * Splits frames [first, last) into runs of whole keyframe intervals, about three per tab, each starting on a keyframe
+ * the encoder would make anyway, and none longer than `longest` frames (rounded down to whole intervals).
+ */
 export function planSegments(
   first: number,
   last: number,
   keyFrames: number,
   tabs: number,
-  wanted?: number,
+  longest = Number.POSITIVE_INFINITY,
 ): { first: number; last: number }[] {
   const total = last - first;
   const gop = Math.max(1, keyFrames);
   const even = Math.ceil(total / (tabs * 3));
-  const length = Math.max(gop, Math.round((wanted ?? even) / gop) * gop);
+  const length = Math.max(gop, Math.min(Math.round(even / gop) * gop, Math.floor(longest / gop) * gop));
   const out: { first: number; last: number }[] = [];
   for (let a = first; a < last; a += length) out.push({ first: a, last: Math.min(last, a + length) });
   return out;
