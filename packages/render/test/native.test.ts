@@ -83,6 +83,51 @@ describe("the wire format", () => {
     expect(times).toEqual([0, 1 / 30]);
   });
 
+  const streamOf = (all: Uint8Array, size: number) =>
+    new ReadableStream<Uint8Array>({
+      start(c) {
+        for (let at = 0; at < all.length; at += size) c.enqueue(all.slice(at, at + size));
+        c.close();
+      },
+    });
+
+  it("reads pictures from one-byte chunks, the header split too, and from several in one chunk", async () => {
+    const all = new Uint8Array([...frame(5, 3, 0), ...frame(5, 3, 1 / 30), ...frame(2, 2, 2 / 30)]);
+    for (const size of [1, 7, 31, 33, all.length]) {
+      const out: NativeFrameData[] = [];
+      for await (const f of readFrames(streamOf(all, size))) out.push(f);
+      expect(out.map((f) => [f.width, f.height, f.timestamp])).toEqual([
+        [5, 3, 0],
+        [5, 3, 1 / 30],
+        [2, 2, 2 / 30],
+      ]);
+      expect(
+        out.every((f) => f.planes.length === planeBytes(f.width, f.height) && f.planes.every((b) => b === 7)),
+      ).toBe(true);
+    }
+  });
+
+  it("copies a 1080p picture about once, however small its chunks", async () => {
+    const one = frame(1920, 1080, 0);
+    const all = new Uint8Array(one.length * 3);
+    for (let i = 0; i < 3; i++) all.set(one, i * one.length);
+    let copied = 0;
+    const set = Uint8Array.prototype.set;
+    Uint8Array.prototype.set = function (this: Uint8Array, array: ArrayLike<number>, offset?: number) {
+      copied += array.length;
+      return set.call(this, array, offset);
+    } as typeof set;
+    try {
+      let n = 0;
+      for await (const _ of readFrames(streamOf(all, 64 * 1024))) n++;
+      expect(n).toBe(3);
+    } finally {
+      Uint8Array.prototype.set = set;
+    }
+    // Appending each chunk to what was left unread copied each picture about 24 times at 64 KB.
+    expect(copied).toBeLessThan(all.length * 1.1);
+  });
+
   it("fails a stream that ends inside a picture", async () => {
     const cut = frame(4, 2, 0).subarray(0, 40);
     const stream = new ReadableStream<Uint8Array>({

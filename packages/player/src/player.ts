@@ -94,6 +94,8 @@ export class PlayerCore {
   private readonly sources: AssetSources;
   private readonly inputs: MediabunnyInputs | null;
   private readonly audioContext: AudioContext | null;
+  /** Whether the player made `audioContext` (and so closes it on dispose), rather than being given it. */
+  private readonly ownsAudioContext: boolean;
   private readonly audioSources = new Map<string, Promise<AudioSource>>();
   private readonly listeners = new Map<keyof PlayerEvents, Set<Listener<keyof PlayerEvents>>>();
   private readonly timeListeners = new Set<() => void>();
@@ -118,11 +120,11 @@ export class PlayerCore {
     this.media = toResolver(options.media);
     const comp = options.state.composition;
     const wantsBrowserAudio = !options.audioOutput || !options.clock || !options.audioSourceFactory;
-    this.audioContext =
-      wantsBrowserAudio && typeof AudioContext !== "undefined"
-        ? (options.audioContext ??
-          new AudioContext({ sampleRate: Number(options.state.items.get(comp.id)?.props.sampleRate ?? 48000) }))
-        : (options.audioContext ?? null);
+    // A context the player makes is the player's to close; one passed in belongs to the caller.
+    this.ownsAudioContext = !options.audioContext && wantsBrowserAudio && typeof AudioContext !== "undefined";
+    this.audioContext = this.ownsAudioContext
+      ? new AudioContext({ sampleRate: Number(options.state.items.get(comp.id)?.props.sampleRate ?? 48000) })
+      : (options.audioContext ?? null);
     const audioClock = this.audioContext && !options.clock ? new AudioContextClock(this.audioContext) : null;
     this.clock = options.clock ?? audioClock ?? new PerformanceClock();
     const toContextTime =
@@ -417,6 +419,9 @@ export class PlayerCore {
     for (const p of this.audioSources.values()) void p.then((s) => s.close()).catch(() => undefined);
     this.audioSources.clear();
     this.inputs?.dispose();
+    // Each live context holds an audio thread, and browsers cap how many a page may open: a player remounted for
+    // every media change or project would run out.
+    if (this.ownsAudioContext) void this.audioContext?.close().catch(() => undefined);
     this.listeners.clear();
     this.timeListeners.clear();
   }

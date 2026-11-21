@@ -229,7 +229,15 @@ export class BrowserEngine {
     return [...new Set([...this.server.mediaErrors, ...all.flat()])];
   }
 
-  async close(): Promise<void> {
+  /** Closes the browser and the server, once: a cancelled export closes it early, and its own `finally` again. */
+  close(): Promise<void> {
+    this.closing ??= this.shutDown();
+    return this.closing;
+  }
+
+  private closing: Promise<void> | null = null;
+
+  private async shutDown(): Promise<void> {
     // Said once, here, so every command that drew frames reports it.
     const counts = await Promise.all(
       this.pages.map((p) => p.evaluate<number>("window.__uberscene.paintFallbacks").catch(() => 0)),

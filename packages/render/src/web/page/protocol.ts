@@ -72,6 +72,11 @@ export interface AudioRequest {
   readonly container: "mp4" | "webm" | "mp3" | "wav" | "pcm";
   /** Bits per second, for the codecs that take one. */
   readonly bitrate: number;
+  /**
+   * `silence`: a clip whose sound cannot be opened (a missing or broken asset) is silent, with a warning, as the
+   * export's `onAssetError: "continue"` asks. Left out, it fails the mix.
+   */
+  readonly missing?: "silence";
 }
 
 interface AudioResult {

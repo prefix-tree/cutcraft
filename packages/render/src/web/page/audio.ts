@@ -78,7 +78,13 @@ export async function renderSoundtrack(
   const source = new AudioSampleSource({ codec, ...(codec.startsWith("pcm-") ? {} : { bitrate: r.bitrate }) });
   output.addAudioTrack(source);
   await output.start();
-  const pcm = new MediabunnyPcm(media);
+  const missing: string[] = [];
+  const pcm = new MediabunnyPcm(
+    media,
+    r.missing === "silence"
+      ? (asset, reason) => missing.push(`asset error: ${reason}; "${asset}" is silent`)
+      : undefined,
+  );
   // Measured before the clamp, then clamped here, so the mix runs once and the file sounds as it did.
   const meter = createLoudnessMeter(sampleRate);
   try {
@@ -106,7 +112,11 @@ export async function renderSoundtrack(
     pcm.dispose();
   }
   const clips = clippingWarning(meter.result(), r.from);
-  return { bytes: new Uint8Array(target.buffer as ArrayBuffer), codec, warnings: clips ? [clips] : [] };
+  return {
+    bytes: new Uint8Array(target.buffer as ArrayBuffer),
+    codec,
+    warnings: [...missing, ...(clips ? [clips] : [])],
+  };
 }
 
 /** What a stretch of the mix sounds like, measured: for a picture of it, and for the numbers beside it. */

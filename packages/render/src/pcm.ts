@@ -24,7 +24,14 @@ export class MediabunnyPcm implements PcmProvider {
   private readonly inputs = new MediabunnyInputs();
   private readonly opened = new Map<string, Promise<Opened | null>>();
 
-  constructor(private readonly media: MediaResolver) {}
+  /**
+   * With `onMissing`, an asset that cannot be opened is silence: `onMissing` is told why, once per asset. Without it,
+   * the failure fails the mix.
+   */
+  constructor(
+    private readonly media: MediaResolver,
+    private readonly onMissing?: (asset: string, reason: string) => void,
+  ) {}
 
   async range(asset: string, from: number, to: number): Promise<PcmBuffer> {
     const open = await this.open(asset);
@@ -59,7 +66,7 @@ export class MediabunnyPcm implements PcmProvider {
   private open(asset: string): Promise<Opened | null> {
     let p = this.opened.get(asset);
     if (!p) {
-      p = (async () => {
+      const opening = (async (): Promise<Opened | null> => {
         const handle = await this.media.resolve(asset);
         const input = this.inputs.acquire(asset, handle);
         const track: InputAudioTrack | null = await input.getPrimaryAudioTrack();
@@ -68,6 +75,13 @@ export class MediabunnyPcm implements PcmProvider {
         const sink = new AudioSampleSink(track);
         return { sink, sampleRate, channels, grid: await firstBlocks(sink, sampleRate) };
       })();
+      const onMissing = this.onMissing;
+      p = onMissing
+        ? opening.catch((error: unknown) => {
+            onMissing(asset, error instanceof Error ? error.message : String(error));
+            return null;
+          })
+        : opening;
       this.opened.set(asset, p);
     }
     return p;

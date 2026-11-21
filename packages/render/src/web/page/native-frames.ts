@@ -35,22 +35,27 @@ export function planeBytes(width: number, height: number): number {
   return width * height + 2 * Math.ceil(width / 2) * Math.ceil(height / 2);
 }
 
-/** Reads pictures from the decoder's byte stream as they arrive. */
+/**
+ * Reads pictures from the decoder's byte stream as they arrive. The chunks are kept as they come, with a running
+ * total, and a picture's bytes are joined once, when all of them are there: appending each 64 KB chunk to what was
+ * left unread copied a 1080p picture about 24 times over.
+ */
 export async function* readFrames(body: ReadableStream<Uint8Array>): AsyncGenerator<NativeFrameData, void, unknown> {
   const reader = body.getReader();
-  let buf: Uint8Array = new Uint8Array(0);
+  const queue = new ByteQueue();
   try {
     for (;;) {
       const { done, value } = await reader.read();
-      if (value?.length) buf = concat(buf, value);
+      if (value?.length) queue.push(value);
       for (;;) {
-        const parsed = parseFrame(buf);
-        if (!parsed) break;
-        yield parsed.frame;
-        buf = buf.subarray(parsed.length);
+        if (queue.size < FRAME_HEADER) break;
+        const length = frameLength(queue.peek(FRAME_HEADER));
+        if (queue.size < length) break;
+        const parsed = parseFrame(queue.take(length), false);
+        if (parsed) yield parsed.frame;
       }
       if (done) {
-        if (buf.length > 0) throw new Error(`the native decoder's stream ended inside a picture (${buf.length} bytes)`);
+        if (queue.size > 0) throw new Error(`the native decoder's stream ended inside a picture (${queue.size} bytes)`);
         return;
       }
     }
@@ -59,8 +64,67 @@ export async function* readFrames(body: ReadableStream<Uint8Array>): AsyncGenera
   }
 }
 
-/** One picture from the start of `buf`, or null when it is not all there yet. */
-export function parseFrame(buf: Uint8Array): { frame: NativeFrameData; length: number } | null {
+/** Chunks of a byte stream in order, read from the front without joining them until asked. */
+class ByteQueue {
+  private readonly chunks: Uint8Array[] = [];
+  /** Bytes of the first chunk already taken. */
+  private head = 0;
+  size = 0;
+
+  push(chunk: Uint8Array): void {
+    this.chunks.push(chunk);
+    this.size += chunk.length;
+  }
+
+  /** The first `n` bytes, left in the queue: a view when the first chunk holds them, else a copy of them alone. */
+  peek(n: number): Uint8Array {
+    const first = this.chunks[0];
+    if (first && first.length - this.head >= n) return first.subarray(this.head, this.head + n);
+    return this.copy(n, false);
+  }
+
+  /** The first `n` bytes, taken out of the queue, as one array of their own. */
+  take(n: number): Uint8Array {
+    return this.copy(n, true);
+  }
+
+  private copy(n: number, consume: boolean): Uint8Array {
+    const out = new Uint8Array(n);
+    let written = 0;
+    let index = 0;
+    let offset = this.head;
+    while (written < n) {
+      const chunk = this.chunks[index] as Uint8Array;
+      const count = Math.min(n - written, chunk.length - offset);
+      out.set(chunk.subarray(offset, offset + count), written);
+      written += count;
+      offset += count;
+      if (offset === chunk.length) {
+        index++;
+        offset = 0;
+      }
+    }
+    if (consume) {
+      this.chunks.splice(0, index);
+      this.head = offset;
+      this.size -= n;
+    }
+    return out;
+  }
+}
+
+/** The whole length of the picture a header starts, header included. */
+function frameLength(header: Uint8Array): number {
+  const view = new DataView(header.buffer, header.byteOffset, FRAME_HEADER);
+  if (view.getUint32(0, true) !== MAGIC) throw new Error("the native decoder sent something that is not a picture");
+  return FRAME_HEADER + planeBytes(view.getUint32(4, true), view.getUint32(8, true));
+}
+
+/**
+ * One picture from the start of `buf`, or null when it is not all there yet. Its planes are a copy unless `copy` is
+ * false, for a `buf` that holds this picture alone and is not kept.
+ */
+export function parseFrame(buf: Uint8Array, copy = true): { frame: NativeFrameData; length: number } | null {
   if (buf.length < FRAME_HEADER) return null;
   const view = new DataView(buf.buffer, buf.byteOffset, FRAME_HEADER);
   if (view.getUint32(0, true) !== MAGIC) throw new Error("the native decoder sent something that is not a picture");
@@ -77,17 +141,9 @@ export function parseFrame(buf: Uint8Array): { frame: NativeFrameData; length: n
       fullRange: view.getUint8(13) === 1,
       timestamp: view.getFloat64(16, true),
       duration: view.getFloat64(24, true),
-      planes: buf.slice(FRAME_HEADER, length),
+      planes: copy ? buf.slice(FRAME_HEADER, length) : buf.subarray(FRAME_HEADER, length),
     },
   };
-}
-
-function concat(a: Uint8Array, b: Uint8Array): Uint8Array {
-  if (a.length === 0) return b;
-  const out = new Uint8Array(a.length + b.length);
-  out.set(a, 0);
-  out.set(b, a.length);
-  return out;
 }
 
 const MATRICES: Record<number, { matrix: VideoMatrixCoefficients; primaries: VideoColorPrimaries }> = {

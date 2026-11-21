@@ -200,10 +200,23 @@ export async function renderVideo(options: RenderOptions): Promise<RenderResult>
 
   const warnings: string[] = [];
   const started = performance.now();
+  if (options.signal?.aborted) throw new Error("render aborted");
   const engine = await openEngine({ ...options, warnings, codecs });
+  // A cancel stops the export at once: closing the browser ends every piece in flight, instead of the loop below
+  // noticing only when the next piece is due, minutes of rendering later.
+  const abort = (): void => void engine.close();
+  options.signal?.addEventListener("abort", abort, { once: true });
   const partial = partialPath(options.out);
   let output: Output | null = null;
   let feed: AudioFeed | null = null;
+  // Under "continue", a clip whose sound cannot be opened is silent rather than failing the soundtrack.
+  const missing = options.onAssetError === "continue" ? ("silence" as const) : undefined;
+  // Under "throw", the first asset that fails stops the export after the piece it was found in, not after the last.
+  const stopOnAssetError = async (): Promise<void> => {
+    if (options.onAssetError === "continue") return;
+    const failed = await engine.errors();
+    if (failed.length > 0) throw new Error(`cannot render: ${failed.join("; ")}`);
+  };
   try {
     const audioBitrate = options.audioBitrate ?? 128_000;
     const soundtrack = options.silent
@@ -219,12 +232,14 @@ export async function renderVideo(options: RenderOptions): Promise<RenderResult>
             to,
             container: container as SoundContainer,
             bitrate: audioBitrate,
+            ...(missing ? { missing } : {}),
           })
         : await engine.audio({
             from,
             to,
             container: audioOnly ? container : videoContainer === "mov" ? "mp4" : videoContainer,
             bitrate: audioBitrate,
+            ...(missing ? { missing } : {}),
           });
     for (const w of soundtrack?.warnings ?? []) if (!warnings.includes(w)) warnings.push(w);
     if (audioOnly) {
@@ -307,6 +322,7 @@ export async function renderVideo(options: RenderOptions): Promise<RenderResult>
           );
         }
       }
+      await stopOnAssetError();
       done += piece.last - piece.first;
       options.onProgress?.({ frame: done, frames: total });
     }
@@ -322,8 +338,10 @@ export async function renderVideo(options: RenderOptions): Promise<RenderResult>
   } catch (error) {
     await output?.cancel().catch(() => undefined);
     await rm(partial, { force: true }).catch(() => undefined);
-    throw error;
+    // A cancel shows up as whatever the closed browser threw; say what happened instead.
+    throw options.signal?.aborted ? new Error("render aborted", { cause: error }) : error;
   } finally {
+    options.signal?.removeEventListener("abort", abort);
     feed?.dispose();
     await engine.close();
   }
@@ -370,6 +388,7 @@ async function nativeSoundtrack(o: {
   readonly to: number;
   readonly container: SoundContainer;
   readonly bitrate: number;
+  readonly missing?: "silence";
 }): Promise<{ readonly bytes: Uint8Array | null; readonly warnings: readonly string[] }> {
   const binary = codecBinary();
   const warnings: string[] = [];
@@ -381,7 +400,13 @@ async function nativeSoundtrack(o: {
       warnings.push(`${error.message}: the page mixed the soundtrack`);
     }
   }
-  const mix = await o.engine.audio({ from: o.from, to: o.to, container: "pcm", bitrate: o.bitrate });
+  const mix = await o.engine.audio({
+    from: o.from,
+    to: o.to,
+    container: "pcm",
+    bitrate: o.bitrate,
+    ...(o.missing ? { missing: o.missing } : {}),
+  });
   warnings.push(...mix.warnings);
   if (!mix.bytes) return { bytes: null, warnings };
   return {

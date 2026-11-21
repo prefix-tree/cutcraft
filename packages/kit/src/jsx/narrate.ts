@@ -73,18 +73,23 @@ type Token =
   | { readonly kind: "mark"; readonly name: string };
 
 const ms = (t: number): number => Math.round(t * 1000) / 1000;
-const letters = (word: string): number => word.replace(/[^a-z]/gi, "").length;
+/**
+ * The letters a word has, in any script: "Привет," has six, as "Hello," has five. Combining marks count, so a word
+ * written with Devanagari vowel signs or a decomposed accent is not short-changed.
+ */
+const letters = (word: string): number => word.replace(/[^\p{L}\p{M}]/gu, "").length;
 const plain = (word: string): string => word.toLowerCase().replace(/[^\p{L}\p{N}]/gu, "");
 
 function tokens(script: string): Token[] {
   const out: Token[] = [];
   for (const raw of script.split(/\s+/).filter(Boolean)) {
     const pause = /^\(([\d.]+)\)$/.exec(raw);
-    const mark = /^\{(\w+)\}$/.exec(raw);
+    // Names are letters (with their marks), digits and _ in any script, so `[світло]` is a cue as `[light]` is.
+    const mark = /^\{([\p{L}\p{M}\p{N}_]+)\}$/u.exec(raw);
     if (pause) out.push({ kind: "pause", seconds: Number(pause[1]) });
     else if (mark?.[1]) out.push({ kind: "mark", name: mark[1] });
     else {
-      const named = /\[(\w+)\]/.exec(raw);
+      const named = /\[([\p{L}\p{M}\p{N}_]+)\]/u.exec(raw);
       out.push({ kind: "word", text: raw.replace(/[[\]]/g, ""), ...(named?.[1] ? { cue: named[1] } : {}) });
     }
   }

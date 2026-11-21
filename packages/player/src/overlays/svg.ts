@@ -1,5 +1,6 @@
 import { SaxesParser } from "saxes";
 
+import { cssColour } from "../model/css-passes";
 import { freezeSmil, hasSmil } from "./smil";
 import { shapeLength } from "./svg-length";
 
@@ -362,7 +363,8 @@ function colorFilter(color: SvgColor | undefined, id: string, region: SvgViewBox
           ],
         }
       : (() => {
-          const [r, g, b] = rgb(color.tint as string);
+          // The same reading of a CSS colour as filters use: hex, rgb() with numbers or percentages, names and hsl().
+          const [r, g, b] = cssColour(color.tint as string);
           const row = (k: number): string => `${num(0.2126 * k)} ${num(0.7152 * k)} ${num(0.0722 * k)} 0 0`;
           return {
             name: "g",
@@ -406,30 +408,6 @@ function colorFilter(color: SvgColor | undefined, id: string, region: SvgViewBox
     height: num(region.height),
   };
   return { name: "filter", attrs: { id, ...bounds, "color-interpolation-filters": "sRGB" }, children: steps };
-}
-
-/** A CSS colour as 0..1 channels; named colours other than black and white count as white. */
-function rgb(color: string): [number, number, number] {
-  const c = color.trim().toLowerCase();
-  const hex = c.match(/^#([0-9a-f]{3,8})$/);
-  if (hex) {
-    const h = hex[1] as string;
-    const full =
-      h.length <= 4
-        ? h
-            .split("")
-            .map((x) => x + x)
-            .join("")
-        : h;
-    return [
-      parseInt(full.slice(0, 2), 16) / 255,
-      parseInt(full.slice(2, 4), 16) / 255,
-      parseInt(full.slice(4, 6), 16) / 255,
-    ];
-  }
-  const fn = c.match(/^rgba?\(\s*([\d.]+)%?[\s,]+([\d.]+)%?[\s,]+([\d.]+)%?/);
-  if (fn) return [Number(fn[1]) / 255, Number(fn[2]) / 255, Number(fn[3]) / 255];
-  return c === "black" ? [0, 0, 0] : [1, 1, 1];
 }
 
 function viewBoxOf(node: SvgNode): SvgViewBox | null {
