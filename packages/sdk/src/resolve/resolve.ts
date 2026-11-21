@@ -115,7 +115,6 @@ export interface ResolvedState {
 
 const DEFAULT_OVERLAY_DURATION = 5;
 const IMAGE_DEFAULT_DURATION = 5;
-const MAX_PASSES = 32;
 
 interface Pending {
   readonly node: CollectedNode;
@@ -1286,7 +1285,9 @@ function placeMulticam(
 }
 
 function iterateDependencies(pending: Map<string, Pending>, manifest: AssetManifest): void {
-  for (let pass = 0; pass < MAX_PASSES; pass++) {
+  // A pass that places nothing ends the loop, so a cycle still stops; a pass that places something places at least one
+  // element, so a chain of any length, in any order, is placed within one pass per element.
+  for (let pass = 0; pass <= pending.size; pass++) {
     let progressed = false;
     for (const p of pending.values()) {
       if (p.anchorDep && p.start === undefined) {
@@ -1416,7 +1417,7 @@ function waitsForFill(p: Pending, pending: Map<string, Pending>): boolean {
 
 /** Gives each element still waiting on a match its target's length, now that fills have theirs. */
 function settleMatches(pending: Map<string, Pending>): void {
-  for (let pass = 0; pass < MAX_PASSES; pass++) {
+  for (let pass = 0; pass <= pending.size; pass++) {
     let progressed = false;
     for (const p of pending.values()) {
       if (!follows(p) || p.duration !== undefined) continue;
