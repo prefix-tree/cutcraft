@@ -52,6 +52,8 @@ as code. Where the elements stop, a `<Layer>` holds any React, CSS, canvas or We
   retime, restyle) that are undoable and written back to the file.
 - A [command line](/reference/cli) that exports MP4, WebM, audio, stills and subtitles, and checks a cut without
   watching it: the timeline as text, sheets of frames, and the layout against a platform's safe zone.
+- No FFmpeg: the export draws and encodes in headless Chrome. [Native codecs](./native-codecs), written in Rust on
+  FilmCraft's codecs, can decode and encode in its place, ProRes and DNxHR included (experimental, off by default).
 - The [UberScene skill](./agents), which teaches a coding agent all of the above.
 
 ## How it fits together
