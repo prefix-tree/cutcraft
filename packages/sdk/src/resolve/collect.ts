@@ -378,7 +378,7 @@ export function removedElement(props: Readonly<Record<string, unknown>>): string
   if ("speed" in props && "at" in props && !("src" in props))
     return `<SpeedKey> is gone: a speed ramp is keys on speed, as speed={[{ at: 0, value: 1 }, { at: 2, value: 0.5 }]}; ${MOVE}`;
   if ("start" in props && "duration" in props && "at" in props && !("src" in props))
-    return `<Freeze> is gone: holds are a list, as freezes={[{ at, duration, source }]}; ${MOVE}`;
+    return `<Freeze> is gone: holds are a list, as freezes={[{ start, duration, source }]}; ${MOVE}`;
   if ("type" in props && ("params" in props || "enabled" in props || !("src" in props)) && !("kind" in props))
     return `<Effect> is gone: effects are a list on the element, as effects={[{ type: "blur", radius: 4 }]}; ${MOVE}`;
   return null;

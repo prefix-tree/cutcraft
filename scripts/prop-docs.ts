@@ -7,8 +7,14 @@ import { COMPONENTS, EFFECTS, ELEMENTS, ENGINE_LAYERS, TRANSITIONS } from "../pa
 const sdk = join(import.meta.dirname, "..", "packages", "sdk");
 const ts = createRequire(join(sdk, "package.json"))("typescript") as typeof import("typescript");
 
+/** Elements whose `style` is a preset name or an object of fields, each documented in a table of its own. */
+export const STYLED = ["Title", "Captions"] as const;
+
 export interface PropDocs {
-  /** Each prop's JSDoc, by table: `element:Clip`, `effect:glow`, `transition:iris`, `component:LowerThird`. */
+  /**
+   * Each prop's JSDoc, by table: `element:Clip`, `effect:glow`, `transition:iris`, `component:LowerThird`, and
+   * `style:Title` for the fields of a `style` object.
+   */
   readonly props: ReadonlyMap<string, ReadonlyMap<string, string>>;
   /** Each action's JSDoc and params' names, from the interfaces in `actions/types/index.ts`. */
   readonly actions: ReadonlyMap<string, { readonly note: string; readonly params: string }>;
@@ -33,12 +39,23 @@ export function readPropDocs(): PropDocs {
     ...Object.keys(COMPONENTS).map(
       (n) => [`component:${n}`, `(typeof COMPONENTS)["${n}"]["props"]`] as [string, string],
     ),
+    // The fields of a title's and the captions' `style` object, for the table under their props.
+    ...STYLED.map(
+      (n) =>
+        [`style:${n}`, `type Exclude<z.input<(typeof ELEMENTS)["${n}"]["schema"]>["style"], string | undefined>`] as [
+          string,
+          string,
+        ],
+    ),
   ];
   const source = [
     'import type { z } from "zod";',
     'import type { COMPONENTS, EFFECTS, ELEMENTS, ENGINE_LAYERS, TRANSITIONS } from "@uberscene/kit/schema";',
     'export type { ActionType } from "./actions/types/index";',
-    ...tables.map(([, type], i) => `export type T${i} = z.input<${type}>;`),
+    // A table's type is a schema, read as its input, or already a type (`style:` tables) when it starts with `type `.
+    ...tables.map(([, type], i) =>
+      type.startsWith("type ") ? `export type T${i} = ${type.slice(5)};` : `export type T${i} = z.input<${type}>;`,
+    ),
   ].join("\n");
 
   const config = ts.getParsedCommandLineOfConfigFile(

@@ -25,8 +25,8 @@ export default function Video() {
         <Clip id="product" src="asset:coffee" in={6} out={9} fit="cover" />
       </Track>
       <Track id="text">
-        <Title id="title" anchor="open" offset={0.3} duration={2.2} size={72}
-          animation={{ preset: "word-by-word" }}>
+        <Title id="title" anchor="open" offset={0.3} duration={2.2} style={{ size: 72 }}
+          animation={{ type: "wordByWord" }}>
           Make videos with code
         </Title>
       </Track>
@@ -44,7 +44,7 @@ export default function Video() {
     preview: "previews/components/lower-third",
     code: `import { Badge, Clip, Composition, LowerThird, Track } from "@uberscene/kit";
 
-// Ready-made components, made of the kit's own titles and shapes. Change the name, or try variant="bar".
+// Ready-made components, made of the kit's own titles and shapes. Change the name, or try type="bar".
 export default function Video() {
   return (
     <Composition fps={30} width={1280} height={720}>
@@ -97,7 +97,7 @@ export default function Video() {
           fit="cover"
           effects={[
             { type: "exposure", stops: -0.3 },
-            { type: "whiteBalance", temperature: [{ at: 0, value: -0.6, easing: "ease-in-out" }, { at: 3, value: 0.6 }] },
+            { type: "whiteBalance", temperature: [{ at: 0, value: -0.6, easing: "easeInOut" }, { at: 3, value: 0.6 }] },
             { type: "vibrance", amount: 0.5 },
             { type: "vignette", amount: 0.6 },
           ]}

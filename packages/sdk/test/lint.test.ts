@@ -218,7 +218,7 @@ describe("lint", () => {
 
     it("warns on a second mask or one on a title, and not on a clip's speed keys and freezes", () => {
       const d = notRendered(`<Track id="t">
-        <Clip id="c" src="asset:city" speed={[{ at: 1, value: 2 }]} freezes={[{ at: 0, duration: 1, source: 1 }]}><Mask id="m1" /><Mask id="m2" /></Clip>
+        <Clip id="c" src="asset:city" speed={[{ at: 1, value: 2 }]} freezes={[{ start: 0, duration: 1, source: 1 }]}><Mask id="m1" /><Mask id="m2" /></Clip>
         <Title id="h">Hi<Mask id="m4" /></Title>
       </Track>`);
       expect(d.map((x) => x.split(":")[1])).toEqual(["m2.", "m4."]);
@@ -274,7 +274,7 @@ describe("lint", () => {
         <Clip id="b3" src="asset:city" />
         <Transition id="d" type="dipToWhite" params={{ holdDuration: 0.2 }} />
         <Clip id="b4" src="asset:city" />
-        <Title id="h" animation={{ preset: "fade" }}>Hi</Title>
+        <Title id="h" animation={{ type: "fade" }}>Hi</Title>
       </Track>`),
       ).toEqual([]);
     });
@@ -320,13 +320,13 @@ export default function V() {
           src="asset:city"
           in={0}
           out={6}
-          transform={{ scale: 1.1, opacity: [{ at: 0, value: 0 }, { at: 0.5, value: 1, easing: "ease-out" }] }}
+          transform={{ scale: 1.1, opacity: [{ at: 0, value: 0 }, { at: 0.5, value: 1, easing: "easeOut" }] }}
           effects={[
             { type: "blur", radius: [{ at: 0, value: 0 }, { at: 1, value: 4 }] },
             { type: "levels", gamma: 1.2, enabled: false },
           ]}
           speed={[{ at: 0, value: 1 }, { at: 2, value: 0.5, easing: "easeInOutQuad" }]}
-          freezes={[{ at: 3, duration: 0.5, source: 1.5 }]}
+          freezes={[{ start: 3, duration: 0.5, source: 1.5 }]}
         />
       </Track>
       <Track id="music" layout="free">
@@ -356,13 +356,44 @@ export default function V() {
       expect(remaining).toEqual([]);
       expect(text).toContain('import { Audio, Clip, Composition, Track } from "@uberscene/kit";');
       expect(text).not.toMatch(/<(Keyframe|Effect|SpeedKey|Freeze)\b|automation=/);
-      expect(text).toContain('opacity: [{ at: 0, value: 0 }, { at: 0.5, value: 1, easing: "ease-out" }]');
+      // The old easing comes out in camelCase, as the naming rule has it.
+      expect(text).toContain('opacity: [{ at: 0, value: 0 }, { at: 0.5, value: 1, easing: "easeOut" }]');
       expect(text).toContain('{ type: "blur", radius: [{ at: 0, value: 0 }, { at: 1, value: 4 }] }');
       expect(text).toContain('{ type: "levels", gamma: 1.2, enabled: false }');
       expect(text).toContain('speed={[{ at: 0, value: 1 }, { at: 2, value: 0.5, easing: "easeInOutQuad" }]}');
-      expect(text).toContain("freezes={[{ at: 3, duration: 0.5, source: 1.5 }]}");
+      expect(text).toContain("freezes={[{ start: 3, duration: 0.5, source: 1.5 }]}");
       // Automation's points were multiplied into the volume.
       expect(text).toContain("volume={[{ at: 0, value: 0 }, { at: 2, value: 0.5 }]}");
+    });
+
+    it("gives an effect's params their names since 0.6 as it moves them, keyed or not", () => {
+      const old = `import { Clip, Composition, Effect, Keyframe, Track } from "@uberscene/kit";
+
+export default function V() {
+  return (
+    <Composition fps={30} width={1920} height={1080}>
+      <Track id="main">
+        <Clip id="c" src="asset:city" in={0} out={6}>
+          <Effect id="s" type="shadow" params={{ radius: 8, opacity: 0.5 }} />
+          <Effect id="o" type="outline" params={{ color: "#ffffff" }}>
+            <Keyframe id="o1" param="width" at={0} value={0} easing="ease-in-out" />
+            <Keyframe id="o2" param="width" at={1} value={6} />
+          </Effect>
+          <Effect id="h" type="halftone" params={{ type: "cmyk" }} />
+          <Effect id="b" type="blur" params={{ radius: 3 }} />
+        </Clip>
+      </Track>
+    </Composition>
+  );
+}
+`;
+      const { text, remaining } = fixSource(old, { manifest });
+      expect(remaining).toEqual([]);
+      expect(text).toContain('{ type: "shadow", blur: 8, opacity: 0.5 }');
+      expect(text).toContain('thickness: [{ at: 0, value: 0, easing: "easeInOut" }, { at: 1, value: 6 }]');
+      expect(text).toContain('{ type: "halftone", inks: "cmyk" }');
+      // The blur keeps its radius: only the shadow's was renamed.
+      expect(text).toContain('{ type: "blur", radius: 3 }');
     });
 
     it("reports keys made in code without a fix", () => {
@@ -424,7 +455,7 @@ export default function V() {
     expect(c1.props.get("in")?.literal).toBe("word:3");
     expect(c1.parent).toBe("main");
     expect(index.elements.get("t1")?.lockedProps).toEqual([]);
-    expect(index.elements.get("t1")?.boundProps).toEqual({ color: "accent" });
+    expect(index.elements.get("t1")?.boundProps).toEqual({ "style.color": "accent" });
     expect(index.defaults?.props.get("title")?.literal).toBe("Why we built it");
     expect(index.helpers.get("Badge")?.pure).toBe(true);
     expect(index.helpers.get("Counter")?.hooks).toEqual(["useT"]);

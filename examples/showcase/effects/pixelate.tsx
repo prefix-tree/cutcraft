@@ -16,7 +16,7 @@ export default function Video() {
               type: "pixelate",
               box: [0.66, 0, 0.34, 1],
               size: [
-                { at: 0.5, value: 1, easing: "ease-in-out" },
+                { at: 0.5, value: 1, easing: "easeInOut" },
                 { at: 1.5, value: 18 },
               ],
             },

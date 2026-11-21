@@ -65,7 +65,7 @@ describe("prepareSvg", () => {
   it("paints every drawn pixel in the colour for replace, and keeps the shading for tint", () => {
     const replace = prepareSvg('<svg viewBox="0 0 10 10"><rect width="10" height="10"/></svg>', {
       box,
-      color: { mode: "replace", tint: "#ff0000" },
+      color: { type: "replace", tint: "#ff0000" },
       idPrefix: "s",
     }).markup;
     expect(replace).toContain('<filter id="s-cc-color"');
@@ -73,12 +73,12 @@ describe("prepareSvg", () => {
     expect(replace).toContain('<g filter="url(#s-cc-color)"><rect width="10" height="10"/></g>');
     const tint = prepareSvg('<svg viewBox="0 0 10 10"><rect width="10" height="10"/></svg>', {
       box,
-      color: { mode: "tint", tint: "#ff0000", opacity: 0.5 },
+      color: { type: "tint", tint: "#ff0000", opacity: 0.5 },
     }).markup;
     expect(tint).toContain('values="0.213 0.715 0.072 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0"');
     expect(tint).toContain('operator="arithmetic" k1="0" k2="0.5" k3="0.5" k4="0"');
     expect(
-      prepareSvg('<svg viewBox="0 0 1 1"/>', { box, color: { mode: "none", tint: "#ff0000" } }).markup,
+      prepareSvg('<svg viewBox="0 0 1 1"/>', { box, color: { type: "none", tint: "#ff0000" } }).markup,
     ).not.toContain("filter");
   });
 

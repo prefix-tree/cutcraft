@@ -103,7 +103,7 @@ export const EFFECT_DEMOS: Readonly<Record<keyof typeof EFFECTS, EffectDemo>> = 
   shadow: {
     text: "Casts a soft drop shadow behind the element's own shape.",
     on: "title",
-    params: { x: 8, y: 8, radius: 3 },
+    params: { x: 8, y: 8, blur: 3 },
     animate: [{ param: "opacity", from: 0, to: 0.9 }],
   },
   vignette: {
@@ -222,7 +222,7 @@ export const EFFECT_DEMOS: Readonly<Record<keyof typeof EFFECTS, EffectDemo>> = 
     text: "Draws a line around the element's shape.",
     on: "title",
     params: { color: "#f4efe6" },
-    animate: [{ param: "width", from: 0, to: 4 }],
+    animate: [{ param: "thickness", from: 0, to: 4 }],
   },
   longShadow: {
     text: "Extrudes a long, hard shadow from the element's shape.",
@@ -283,7 +283,7 @@ export const TRANSITION_TEXT: Readonly<Record<keyof typeof TRANSITIONS, string>>
   blinds: "Opens the next clip through turning slats.",
   filmBurn: "Burns through the film into the next clip.",
   pixelDissolve: "Dissolves into the next clip square by square.",
-  zoom: "Zooms through the first clip into the next, with a blur.",
+  zoom: "Zooms through the first clip into the next, smearing along the zoom.",
 };
 
 /** A value as TypeScript writes it. */
@@ -306,7 +306,7 @@ function effectEntry(name: string, demo: EffectDemo): string {
       .map(([k, v]) => `${k}: ${literal(v)}`),
     ...(demo.animate ?? []).map(
       (a) =>
-        `${a.param}: [{ at: 0.5, value: ${literal(a.from)}, easing: "ease-in-out" }, { at: 1.5, value: ${literal(a.to)} }]`,
+        `${a.param}: [{ at: 0.5, value: ${literal(a.from)}, easing: "easeInOut" }, { at: 1.5, value: ${literal(a.to)} }]`,
     ),
   ];
   return `{ ${fields.join(", ")} }`;
@@ -352,7 +352,7 @@ export function effectExample(name: keyof typeof EFFECTS): string {
       ...shot("backdrop", ESPRESSO.src, 10, ['{ type: "blur", radius: 10 }', '{ type: "brightness", amount: -0.35 }']),
       "      </Track>",
       '      <Track id="text" layout="free">',
-      `        <Title id="word" start={0} duration={${EXAMPLE_SECONDS}} size={128} color="#e8a33d" effects={[${look.join(", ")}]}>`,
+      `        <Title id="word" start={0} duration={${EXAMPLE_SECONDS}} style={{ size: 128, color: "#e8a33d" }} effects={[${look.join(", ")}]}>`,
       "          Crema",
       "        </Title>",
       "      </Track>",

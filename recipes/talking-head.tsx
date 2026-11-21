@@ -16,7 +16,7 @@ export const defaults = { title: "Why a file?", accent: "#ff5a1f" };
  */
 export default function Video({ title, accent }: z.infer<typeof schema>) {
   return (
-    <Composition fps={30} width={1920} height={1080} background={{ mode: "color", color: "#0b0d12" }}>
+    <Composition fps={30} width={1920} height={1080} background={{ type: "color", color: "#0b0d12" }}>
       <Track id="main" name="Dialogue" role="dialogue">
         <Clip id="welcome" src="asset:podcast" in="word:0" out="word:4.end" />
         <Clip id="thanks" src="asset:podcast" in="word:5" out="word:8.end" />
@@ -36,12 +36,9 @@ export default function Video({ title, accent }: z.infer<typeof schema>) {
           anchor="welcome"
           offset={0.3}
           duration={3}
-          size={96}
-          weight={700}
-          color={accent}
-          valign="top"
+          style={{ size: 96, weight: 700, color: accent, valign: "top" }}
           box={{ x: 960, y: 660, origin: "center" }}
-          animation={{ preset: "slide-up", in: 0.4, out: 0.3 }}
+          animation={{ type: "slideUp", in: 0.4, out: 0.3 }}
         >
           {title}
         </Title>
@@ -60,7 +57,7 @@ export default function Video({ title, accent }: z.infer<typeof schema>) {
       </Track>
 
       {/* Cues come from the words the timeline plays, one per sentence, and follow every trim. */}
-      <Captions id="captions" src="asset:podcast" style={{ size: 44 }} animation="word-highlight" />
+      <Captions id="captions" src="asset:podcast" style={{ size: 44 }} animation="wordHighlight" />
     </Composition>
   );
 }

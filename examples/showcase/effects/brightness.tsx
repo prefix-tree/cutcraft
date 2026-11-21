@@ -15,7 +15,7 @@ export default function Video() {
             {
               type: "brightness",
               amount: [
-                { at: 0.5, value: 0, easing: "ease-in-out" },
+                { at: 0.5, value: 0, easing: "easeInOut" },
                 { at: 1.5, value: 0.3 },
               ],
             },

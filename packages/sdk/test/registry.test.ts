@@ -51,7 +51,7 @@ export default function V() { return <Composition fps={30} width={640} height={3
     expect(state.items.get("c.effects.0")?.props.params).toEqual({
       x: 0,
       y: 4,
-      radius: 8,
+      blur: 8,
       color: "#000000",
       opacity: 0.5,
     });
@@ -71,7 +71,6 @@ export default function V() { return <Composition fps={30} width={640} height={3
       "c.effects.2.amount: Too big: expected number to be <=1",
       "c.effects.3.temperature: Too big: expected number to be <=1",
       'c.effects.4: Unrecognized key: "amount"',
-      expect.stringContaining("c.effects.5"),
       expect.stringContaining("c.effects.5"),
     ]);
     // `amount` is a strength or share everywhere: never past -1..1.

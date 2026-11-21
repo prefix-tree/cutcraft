@@ -4,7 +4,15 @@
   "access": "public",
   "changelog": "@changesets/cli/changelog",
   "fixed": [
-    ["@uberscene/kit", "@uberscene/sdk", "@uberscene/graphics", "@uberscene/player", "@uberscene/render", "uberscene"]
+    [
+      "@uberscene/kit",
+      "@uberscene/sdk",
+      "@uberscene/graphics",
+      "@uberscene/player",
+      "@uberscene/editor",
+      "@uberscene/render",
+      "uberscene"
+    ]
   ],
   "updateInternalDependencies": "patch",
   "privatePackages": {

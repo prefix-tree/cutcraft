@@ -68,7 +68,7 @@ const MOVE = 0.5;
 
 /** Keys from `a` to `b` over a clip's first half second. */
 const move = (a: number, b: number) => [
-  { at: 0, value: a, easing: "ease-in-out" as const },
+  { at: 0, value: a, easing: "easeInOut" as const },
   { at: MOVE, value: b },
 ];
 
@@ -124,7 +124,7 @@ const POINT_LIST = POINTS.map((p) => ({
   label: p.label,
   tag: `#${p.video}`,
   icon: ICON[p.key],
-  at: T(p.at),
+  start: T(p.at),
 }));
 
 // "There's infinite ways": what he lists, with the excerpt second of each, laid out as chips in rows.
@@ -141,9 +141,9 @@ const EVERY = 38.44;
 
 function Way({ index, accent }: { index: number; accent: string }) {
   const way = WAYS[index] as (typeof WAYS)[number];
-  const here = useProgress({ at: T(way.at), over: 0.25 });
+  const here = useProgress({ start: T(way.at), over: 0.25 });
   // "every little thing can be improved": they all light.
-  const all = useProgress({ at: T(EVERY) + index * 0.06, over: 0.3 });
+  const all = useProgress({ start: T(EVERY) + index * 0.06, over: 0.3 });
   const width = way.label.length * 15.5 + 34;
   const x = BAND.x + 330 + way.x;
   const y = BAND.y + 18 + way.row * 60 + (1 - here) * 14;
@@ -277,7 +277,7 @@ export default function Video({ accent }: z.infer<typeof schema>) {
       fps={30}
       width={1080}
       height={1920}
-      background={{ mode: "color", color: "$background" }}
+      background={{ type: "color", color: "$background" }}
       theme={{
         extends: "midnight",
         palette: { background: NAVY, surface: "#16234a", accent, primary: accent, text: "#ffffff" },
@@ -370,8 +370,8 @@ export default function Video({ accent }: z.infer<typeof schema>) {
             font={TYPE.fontFamily}
             x={BAND.x}
             y={BAND.y + 30}
-            fill={{ at: T(6.86), over: 2 }}
-            next={{ at: T(9.96), over: 0.3 }}
+            fill={{ start: T(6.86), over: 2 }}
+            next={{ start: T(9.96), over: 0.3 }}
           />
         </Layer>
         {/* Each of the five arrives on its word, is bright while it is the one being named, and dims when the next comes. */}
@@ -404,7 +404,7 @@ export default function Video({ accent }: z.infer<typeof schema>) {
       <Captions
         id="captions"
         src="asset:hundred-videos"
-        animation="word-highlight"
+        animation="wordHighlight"
         maxChars={18}
         breakAfter={["word:39"]}
         box={{ x: 504, y: 1155, width: 756, origin: "center" }}

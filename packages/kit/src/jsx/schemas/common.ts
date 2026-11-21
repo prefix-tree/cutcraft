@@ -9,6 +9,11 @@ const ASSET_REF_PATTERN = /^asset:[A-Za-z0-9_.-]+$/;
 export const idSchema = z.string().regex(ID_PATTERN, "ids are identifiers: letters, digits, _ and -");
 export const assetRefSchema = z.string().regex(ASSET_REF_PATTERN, 'asset references look like "asset:ID"');
 export const colorSchema = z.string().min(1);
+/** How heavy letters are: 100 to 900, or `normal` and `bold`. */
+export const fontWeightSchema = z.union([
+  z.number().int().min(100).max(900).multipleOf(100),
+  z.enum(["normal", "bold"]),
+]);
 /**
  * A length a theme can supply: pixels, or a token such as `$radius`. The
  * resolver replaces tokens before parsing; one it cannot resolve is reported
@@ -285,7 +290,7 @@ export type Transform = z.output<typeof transformSchema>;
 export const graphicAnimationSchema = z.strictObject({
   type: zEntranceAnimation,
   duration: z.number().positive().default(0.5),
-  easing: zEasing.default("ease-out"),
+  easing: zEasing.default("easeOut"),
 });
 
 export const entranceProps = {

@@ -213,7 +213,7 @@ function expandNode(node: CollectedNode): Expansion | null {
   if (Array.isArray(props.freezes)) {
     (props.freezes as unknown[]).forEach((f, i) => {
       const hold = (f ?? {}) as Record<string, unknown>;
-      derived.push(item(`freezes.${i}`, "freeze", { at: hold.source, start: hold.at, duration: hold.duration }));
+      derived.push(item(`freezes.${i}`, "freeze", { at: hold.source, start: hold.start, duration: hold.duration }));
     });
     delete props.freezes;
   }

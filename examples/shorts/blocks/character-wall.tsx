@@ -71,7 +71,7 @@ export function CharacterWall(props: Partial<CharacterWallProps>) {
   const clock = useLayer();
   const set = [...p.chars];
   const passed = p.changeAt.filter((t) => t <= clock.elapsed).length;
-  const faded = p.dim ? progress(clock, { after: p.dim.after, over: p.dim.over, easing: "ease-out" }) : 0;
+  const faded = p.dim ? progress(clock, { after: p.dim.after, over: p.dim.over, easing: "easeOut" }) : 0;
   const cells = p.columns * p.rows;
   return (
     <div

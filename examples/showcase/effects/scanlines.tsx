@@ -17,7 +17,7 @@ export default function Video() {
               spacing: 4,
               speed: 8,
               intensity: [
-                { at: 0.5, value: 0, easing: "ease-in-out" },
+                { at: 0.5, value: 0, easing: "easeInOut" },
                 { at: 1.5, value: 0.5 },
               ],
             },

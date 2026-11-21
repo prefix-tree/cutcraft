@@ -1,30 +1,55 @@
 import { z } from "zod";
 
 import { zCaptionAnimation } from "../enums";
-import { assetRefSchema, boxSchema, colorSchema, idSchema, textShadowSchema, timeRefSchema } from "./common";
+import {
+  assetRefSchema,
+  boxSchema,
+  colorSchema,
+  fontWeightSchema,
+  idSchema,
+  textShadowSchema,
+  timeRefSchema,
+} from "./common";
 import { zTextAlign } from "./enums-local";
 
 const captionStyleSchema = z.strictObject({
+  /** A theme captions preset this style starts from; the fields written beside it win. */
+  preset: idSchema.optional(),
+  /** The font family, as a title's. Left out: Inter. */
   font: z.string().optional(),
+  /** The letters' size, in pixels. Left out: a 24th of the frame's height. */
   size: z.number().min(1).max(1000).optional(),
-  weight: z.union([z.number().int().min(100).max(900).multipleOf(100), z.enum(["normal", "bold"])]).optional(),
+  /** How heavy the letters are: 100 to 900, or `normal` and `bold`. Left out: 800. */
+  weight: fontWeightSchema.optional(),
+  /** The letters' colour, or a theme token. Left out: white. */
   color: colorSchema.optional(),
+  /** A colour behind each cue. */
   background: colorSchema.optional(),
+  /** A drop shadow under the letters. Left out: a dark halo that reads on light and dark footage. */
   shadow: textShadowSchema.optional(),
-  /** An outline around the letters, drawn under them. */
-  stroke: z.strictObject({ color: colorSchema, width: z.number().min(0).max(40) }).optional(),
+  /** An outline around the letters, drawn under them: its colour and thickness in pixels. */
+  stroke: z.strictObject({ color: colorSchema, thickness: z.number().min(0).max(40) }).optional(),
+  /** The colour of the word being said, for the word animations. */
   highlight: colorSchema.optional(),
   /** A filled, rounded box behind the word being said. `highlight` stays the colour of its letters. */
   highlightBox: colorSchema.optional(),
+  /** The colour of the words not yet said. */
   upcoming: colorSchema.optional(),
+  /** Which side of the box's width the lines sit against. Left out: `center`. */
+  align: zTextAlign.optional(),
 });
+
+/** The fields a theme's captions preset may hold: the look, without `preset` (a preset does not start from another). */
+export const CAPTIONS_LOOK_KEYS: readonly string[] = Object.keys(captionStyleSchema.shape).filter(
+  (k) => k !== "preset",
+);
 
 export const captionsSchema = z.strictObject({
   /** The captions' name. */
   id: idSchema,
   /** Generate children from the asset's transcript. Literal `<Caption>` children override this. */
   src: assetRefSchema.optional(),
-  /** Caption styling, or the name of a theme captions preset. */
+  /** How the words look: the name of a theme captions preset, or an object of its fields, with `preset` naming the one it starts from. */
   style: z.union([idSchema, captionStyleSchema]).optional(),
   /** How the words appear: all at once, the word being said highlighted, word by word, karaoke or typewriter. */
   animation: zCaptionAnimation.default("none"),
@@ -36,8 +61,6 @@ export const captionsSchema = z.strictObject({
    * tall as its lines.
    */
   box: boxSchema.optional(),
-  /** Which side of that width the lines sit against. Left out: `center`. */
-  align: zTextAlign.optional(),
   // Generation limits: a cue breaks at a sentence end, a long pause, or when one of these would be exceeded.
   /** The most characters on a generated cue's line. Left out: as many as fit at the caption size on this frame (at most 42). */
   maxChars: z.number().int().positive().optional(),

@@ -149,7 +149,7 @@ function Boxes() {
 }
 export default function Video() {
   return (
-    <Composition fps={30} width={320} height={180} background={{ mode: "color", color: "#000000" }}>
+    <Composition fps={30} width={320} height={180} background={{ type: "color", color: "#000000" }}>
       <Track id="fx" layout="free">
         <Layer id="l" start={0} duration={2}><Boxes /></Layer>
       </Track>
@@ -211,7 +211,7 @@ const swap = effect({
 });
 export default function Video() {
   return (
-    <Composition fps={30} width={320} height={180} background={{ mode: "color", color: "#000000" }}>
+    <Composition fps={30} width={320} height={180} background={{ type: "color", color: "#000000" }}>
       <Track id="fx" layout="free">
         <Motion id="m" start={0} duration={1} sequence={[[".box", { x: [0, 200] }, { duration: 1, ease: "linear" }]]} effects={[{ type: swap }]}>
           <div className="box" style={{ position: "absolute", left: 10, top: 60, width: 60, height: 60, background: "#ff0000" }} />
@@ -307,7 +307,7 @@ import { Panel } from "./blocks/panel";
 export const manifest = { assets: {} };
 export default function Video() {
   return (
-    <Composition fps={30} width={640} height={360} background={{ mode: "color", color: "#000000" }}>
+    <Composition fps={30} width={640} height={360} background={{ type: "color", color: "#000000" }}>
       <Track id="fx" layout="free"><Layer id="panel" start={0} duration={2}><Panel color="#ff6600" /></Layer></Track>
     </Composition>
   );
@@ -455,9 +455,9 @@ export default function Video() {
   return (
     <Composition fps={30} width={640} height={360}>
       <Track id="bg" layout="free">
-        <Shape id="paper" start={0} duration={3} shape="rectangle" width={640} height={360} fill="#f0f0f0" />
+        <Shape id="paper" start={0} duration={3} type="rectangle" width={640} height={360} fill="#f0f0f0" />
       </Track>
-      <Captions id="cap" animation="word-highlight"
+      <Captions id="cap" animation="wordHighlight"
         style={{ size: 40, color: "#111111", highlight: "#111111", highlightBox: "#00c800", shadow: { color: "#f0f0f0" } }}>
         <Caption id="c1" start={0} end={3} text="left middle right" words={[
           { text: "left", start: 0, end: 1 },
@@ -621,10 +621,10 @@ describe("a draft", () => {
 export const manifest = ${JSON.stringify({ assets: mediaManifest.assets })};
 export default function Video() {
   return (
-    <Composition fps={30} width={640} height={360} background={{ mode: "color", color: "#000000" }}>
+    <Composition fps={30} width={640} height={360} background={{ type: "color", color: "#000000" }}>
       <Track id="sound"><Clip id="tone" src="asset:bars" in={0} out={2} transform={{ opacity: 0 }} /></Track>
       <Track id="t" layout="free">
-        <Shape id="box" shape="rectangle" start={0} duration={2} width={80} height={80} fill="#ffffff" box={{
+        <Shape id="box" type="rectangle" start={0} duration={2} width={80} height={80} fill="#ffffff" box={{
           origin: "center",
           x: [{ at: 0, value: 80 }, { at: 2, value: 560 }],
         }} />

@@ -42,7 +42,7 @@ function Helper(...) {...}                       // helpers that make elements a
 - **Placement by track layout.** `layout="sequence"` (default): children play back to back in source order; `<Gap>` inserts a hole; `start` is a lint error. `layout="free"`: every child has literal `start`. On any track an overlay may use `anchor="<id>" offset={s}`; anchors cannot form cycles.
 - **`duration`**: `number | "fill" | "source" | { match: id } | { until: id }` (`match`: as long as that element; `until`: from its own start to that element's end). Media clips give `in`/`out` instead; `duration = (out − in) / speed`. Giving both `in/out` and `duration` is a lint error.
 - **Expressions** are legal in any prop; the editor shows that prop locked (`lockedProps`) with a bake action. Literals and references to `schema` props are editable.
-- **Everything about an element is a prop** (decision 0034). A value that changes over time is a list of `{ at, value, easing? }` keys in place of the value (`transform={{ opacity: [{ at: 0, value: 0 }, { at: 1, value: 1 }] }}`); effects are an ordered `effects={[{ type, ...params, enabled? }]}` list; a speed ramp is keys on `speed`; holds are `freezes={[{ at, duration, source }]}`; `volume` and `pan` take keys. The editor addresses a key by element id, prop path and time, and an effect by its index. The resolver expands these props into its own items with derived ids (`pour.effects.1.radius.0`).
+- **Everything about an element is a prop** (decision 0035). A value that changes over time is a list of `{ at, value, easing? }` keys in place of the value (`transform={{ opacity: [{ at: 0, value: 0 }, { at: 1, value: 1 }] }}`); effects are an ordered `effects={[{ type, ...params, enabled? }]}` list; a speed ramp is keys on `speed`; holds are `freezes={[{ start, duration, source }]}`; `volume` and `pan` take keys. The editor addresses a key by element id, prop path and time, and an effect by its index. The resolver expands these props into its own items with derived ids (`pour.effects.1.radius.0`).
 - **Child elements** for things with their own time and shape: `<Mask>`, `<Caption>`, `<Angle>`, `<Cut>`, `<Marker>`. `<Captions src=...>` is an authoring shorthand; the first user edit of a generated cue bakes it into children.
 - **Editable state per resolved element:** `literal` (id in the source index), `generated` (from a loop or a helper used more than once; gestures bake first), `opaque` (a `<Layer>` interior; model-only).
 
@@ -50,17 +50,17 @@ function Helper(...) {...}                       // helpers that make elements a
 
 | Element | OpenReel kind | Key props beyond id/placement |
 |---|---|---|
-| `<Composition>` | Project settings + Timeline | `fps` (a whole number, an NTSC string such as `"29.97"`, or `{ num, den }`), `width`, `height`, `sampleRate=48000` (must divide the tick; 44100 and 96000 do too), `channels=2`, `background={{ mode: "color"\|"blur"\|"gradient", color, gradient }}`, `theme={{ extends, palette, fonts, radius, motion, styles }}` (see the Themes guide); children `<Track>`, `<Marker>` (a `<Multicam>` goes inside a `<Track>`) |
+| `<Composition>` | Project settings + Timeline | `fps` (a whole number, an NTSC string such as `"29.97"`, or `{ num, den }`), `width`, `height`, `sampleRate=48000` (must divide the tick; 44100 and 96000 do too), `channels=2`, `background={{ type: "color"\|"blur"\|"gradient", color, gradient }}`, `theme={{ extends, palette, fonts, radius, motion, styles }}` (see the Themes guide); children `<Track>`, `<Marker>` (a `<Multicam>` goes inside a `<Track>`) |
 | `<Track>` | Track (universal) | `layout`, `name`, `role: general\|captions\|dialogue\|music\|effects\|ambience`, `locked`, `hidden`, `muted`, `solo`, `group`. Child order = compositing order, first on top. Any item kind on any track. |
 | `<Clip>` (alias `<Audio>`) | Clip (video/image/audio media) | `src="asset:ID"`, `in`, `out`, `duration`, `speed` 0.1–20, `reverse`, `pitchCorrection`, `smoothSlowMo`, `interpolation`, `transform`, `fit`, `blend`, `blendOpacity`, `volume` 0–4, `fade={{in,out}}`, `pan` −1..1 (both a value or keys), `duck={{ under: trackId, to, attack?, release? }}`, `audioTrack`, `stabilize`, `chromaKey`, `emphasis`, `behindSubject`, `effects`, `freezes`; keys on `speed`, `volume`, `pan` and the transform; children `<Mask>` |
 | `<Gap>` | (gaps) | `duration` |
 | `<Transition>` | Transition | Sibling between two clips in a sequence track: `type`, `duration`, `params`. Edge form: `on="<clipId>" edge="in"\|"out"`. In sequence layout the two clips overlap by `duration` (each extends its source by `duration/2`; needs handles) and the sequence shortens by `duration`. The resolver emits a placement for the transition itself at `boundary − duration/2`. |
-| `<Title>` | TextClip | text as children; `style` (theme preset); flat style props (`font`, `size`, `weight`, `italic`, `color`, `background`, `stroke`, `shadow`, `align`, `valign`, `lineHeight`, `letterSpacing`, `decoration`); `animation={{ preset, in, out, stagger, unit, params }}`; `text3d`; `enter`, `exit`; `transform`, `blend`, `emphasis`, `effects` |
-| `<Shape>` | ShapeClip | `style` (theme preset), `shape` (rectangle, circle, ellipse, triangle, arrow, line, polygon, path, star), `points`, `fill`, `stroke`, `shadow`, `shadows`, `cornerRadius`/`cornerRadii`, `starPoints`, `innerRadius`; `enter`, `exit`; transform/blend/emphasis, `effects` |
-| `<Svg>` | SVGClip | `style`, `src` or `content`, `viewBox`, `preserveAspectRatio`, `color={{ mode, tint, opacity }}`, `enter`, `exit` |
+| `<Title>` | TextClip | text as children; `style`: a theme preset's name, or `{ preset, font, size, weight, italic, color, background, stroke, shadow, align, valign, lineHeight, letterSpacing, decoration }`; the text box is `box.width` and `box.height`; `animation={{ type, in, out, stagger, unit, params }}`; `text3d`; `enter`, `exit`; `transform`, `blend`, `emphasis`, `effects` |
+| `<Shape>` | ShapeClip | `style` (theme preset), `type` (rectangle, circle, ellipse, triangle, arrow, line, polygon, path, star), `points`, `fill`, `stroke`, `shadow`, `shadows`, `cornerRadius`/`cornerRadii`, `starPoints`, `innerRadius`; `enter`, `exit`; transform/blend/emphasis, `effects` |
+| `<Svg>` | SVGClip | `style`, `src` or `content`, `viewBox`, `preserveAspectRatio`, `color={{ type, tint, opacity }}`, `enter`, `exit` |
 | `<Sticker>` | StickerClip | `style`, `src`, `category`, `name`; `enter`, `exit`; transform/blend/emphasis |
-| `<Captions>` | Timeline.subtitles | `src="asset:ID"` (generated children from the transcript) or literal `<Caption id start end text words>` children; `style={{ font, size, weight, color, background, shadow, stroke, position, highlight, highlightBox, upcoming }}` or a theme preset name, `animation`. One per composition. |
-| `<Marker>` | Marker | `at`, `label`, `color`; child of `<Composition>` |
+| `<Captions>` | Timeline.subtitles | `src="asset:ID"` (generated children from the transcript) or literal `<Caption id start end text words>` children; `style={{ preset, font, size, weight, color, background, shadow, stroke, highlight, highlightBox, upcoming, align }}` or a theme preset name, `box`, `animation`. One per composition. |
+| `<Marker>` | Marker | `start`, `label`, `color`; child of `<Composition>` |
 | `<Adjustment>` | AdjustmentLayer | `affects="all" \| [trackId]`, `opacity`, `blend`, `enabled`, `transform`, `effects` |
 | `<Mask>` | Mask | child of a visual element: `type: shape\|drawn\|matte`, `shape` or `path={{ points, closed }}`, `feather` 0–100, `inverted`, `expansion` −100..100, `opacity`, `matte={{ source, channel: alpha\|luminance\|bounds }}` |
 | `<Nested>` | CompoundClip + instance | `of={SceneHelper}` (pure helper returning tracks/composition), `in`, `out`, `transform`, `volume` |
@@ -68,11 +68,11 @@ function Helper(...) {...}                       // helpers that make elements a
 | `<Layer>` | — (ours) | `duration`, `anchor`/`offset`, `transform`, `enter`, `exit`; free code inside (any React, hooks, CSS, canvas, WebGL, host-offered libraries), timed by `useT()` (0..1) or `useLayer()` (seconds elapsed, remaining, duration); one component child gives the Layer handles (`layer/setProps`) |
 | `effects` entry (a prop, not an element) | Effect | `{ type, ...params, enabled? }`; list order = stack order |
 | keys (a prop value) | Keyframe | `{ at, value, easing? }`, `at` element-relative |
-| `speed` keys / `freezes` entry | SpeedKeyframe / FreezeFrame | `{ at, value, easing? }` / `{ at, duration, source }`, `at` element-relative, `source` the frozen source time |
+| `speed` keys / `freezes` entry | SpeedKeyframe / FreezeFrame | `{ at, value, easing? }` / `{ start, duration, source }`, `at` element-relative, `source` the frozen source time |
 
 ### A.3 Enums (single source `jsx/enums.ts`, adopted from OpenReel)
 
-- Transitions (24) with per-type param schemas and engine defaults. Easing (50). Blend modes (18). Fit modes (4). Video effects (one unified list of 20, percent-based ranges from OpenReel's `EFFECT_DEFINITIONS`; brightness standardised to −100..100). Audio effects (9). Text animation presets (25), caption animations (6), graphic enter/exit (20), emphasis (26). Keyframe properties use the descriptor naming (`transform.opacity`, `audio.volume`); an effect's params take keys in the `effects` entry itself. Shape types: the 9 2D shapes.
+- Transitions (24) with per-type param schemas and engine defaults. Easing (50). Blend modes (18). Fit modes (4). Video effects (one unified list of 20, percent-based ranges from OpenReel's `EFFECT_DEFINITIONS`; brightness standardised to −100..100). Audio effects (9). Text animation types (25), caption animations (6), graphic enter/exit (20), emphasis (26). Keyframe properties use the descriptor naming (`transform.opacity`, `audio.volume`); an effect's params take keys in the `effects` entry itself. Shape types: the 9 2D shapes.
 
 ### A.4 Resolver output
 
@@ -144,7 +144,7 @@ Fold: `prop` = rewrite a literal prop; `ins`/`rm`/`mv` = element insert/remove/r
 
 **caption/** (7): `import {captionsId, src | items[]}`, `add`, `update`, `remove`, `setStyle`, `setAnimation`, `setAll`. Updates on `src`-generated children bake first.
 
-**marker/** (3): `add {markerId, at, label, color}`, `update`, `remove`.
+**marker/** (3): `add {markerId, start, label, color}`, `update`, `remove`.
 
 **mask/** (4): `create {id, parentId, props}`, `update`, `remove`, `setPath {path}`.
 

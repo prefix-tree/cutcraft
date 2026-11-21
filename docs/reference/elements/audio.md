@@ -22,7 +22,7 @@ A stretch of a sound asset: volume and pan (constant or keys), fades, ducking un
 | `in` | number (0..∞) \| string |  |  | Where in the source it starts: seconds, or a word, shot or silence of its transcript (`word:12`). |
 | `out` | number (0..∞) \| string |  |  | Where in the source it ends, as `in`; `word:40.end` ends after the word is said. |
 | `speed` | number (0.1..20) \| { at, value, easing }[] |  |  | Playback rate: 2 plays twice as fast and half as long; keys ramp it. |
-| `freezes` | { at, duration, source }[] |  |  | Frames held on screen while the clip's time stands still. |
+| `freezes` | { start, duration, source }[] |  |  | Frames held on screen while the clip's time stands still. |
 | `reverse` | boolean | `false` |  | Plays the trimmed source backwards. |
 | `volume` | number (0..4) \| { at, value, easing }[] |  |  | A gain: 1 plays the source as it is, 0 mutes it, 2 is twice as loud; keys change it over time. |
 | `pan` | number (-1..1) \| { at, value, easing }[] |  |  | Where it sits between the speakers, from -1 (left) to 1 (right); keys move it. |

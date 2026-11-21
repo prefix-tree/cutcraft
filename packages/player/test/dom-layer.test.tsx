@@ -51,7 +51,10 @@ describe("DomLayer", () => {
     const items = new Map(state.items);
     const title = items.get("t1") as Placement;
     const cap = items.get("cap") as Placement;
-    items.set("t1", { ...title, props: { ...title.props, font: "Source Sans 3" } });
+    items.set("t1", {
+      ...title,
+      props: { ...title.props, style: { ...(title.props.style as object), font: "Source Sans 3" } },
+    });
     items.set("cap", { ...cap, props: { ...cap.props, style: { font: "Exo 2" } } });
     const m = await mountPlayer({ ...state, items });
     await m.seek(1.5);
@@ -70,7 +73,7 @@ describe("DomLayer", () => {
     const cue = items.get("cp2") as Placement;
     items.set("cap", {
       ...cap,
-      props: { ...cap.props, animation: "word-highlight", style: { highlight: "#111111", highlightBox: "#4aa3ff" } },
+      props: { ...cap.props, animation: "wordHighlight", style: { highlight: "#111111", highlightBox: "#4aa3ff" } },
     });
     items.set("cp2", {
       ...cue,
@@ -104,7 +107,7 @@ describe("DomLayer", () => {
     const cap = items.get("cap") as Placement;
     items.set("cap", {
       ...cap,
-      props: { ...cap.props, box: { x: 40, y: 200, width: 300, origin: "center" }, align: "left" },
+      props: { ...cap.props, box: { x: 40, y: 200, width: 300, origin: "center" }, style: { align: "left" } },
     });
     const m = await mountPlayer({ ...state, items });
     await m.seek(0.5);

@@ -43,7 +43,7 @@ const on = (i: number, time: number): number =>
 
 export default function Video({ hook, outro, warmWall, coolWall }: z.infer<typeof schema>) {
   return (
-    <Composition fps={30} width={1080} height={1920} background={{ mode: "color", color: "#0d0f16" }}>
+    <Composition fps={30} width={1080} height={1920} background={{ type: "color", color: "#0d0f16" }}>
       <Track id="scene" layout="free">
         <Three
           id="room"

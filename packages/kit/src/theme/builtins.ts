@@ -50,23 +50,23 @@ export interface ThemeDefinition {
 export const MOTIONS: Readonly<Record<MotionName, MotionStyle>> = {
   none: {},
   calm: {
-    enter: { type: "fade", duration: 0.8, easing: "ease-in-out" },
-    exit: { type: "fade", duration: 0.6, easing: "ease-in-out" },
+    enter: { type: "fade", duration: 0.8, easing: "easeInOut" },
+    exit: { type: "fade", duration: 0.6, easing: "easeInOut" },
     transition: { type: "crossfade", duration: 0.8 },
   },
   snappy: {
-    enter: { type: "slide-up", duration: 0.35, easing: "easeOutCubic" },
-    exit: { type: "fade", duration: 0.2, easing: "ease-in" },
+    enter: { type: "slideUp", duration: 0.35, easing: "easeOutCubic" },
+    exit: { type: "fade", duration: 0.2, easing: "easeIn" },
     transition: { type: "crossfade", duration: 0.25 },
   },
   bouncy: {
-    enter: { type: "pop", duration: 0.5, easing: "ease-out" },
-    exit: { type: "scale", duration: 0.3, easing: "ease-in" },
+    enter: { type: "pop", duration: 0.5, easing: "easeOut" },
+    exit: { type: "scale", duration: 0.3, easing: "easeIn" },
     transition: { type: "crossfade", duration: 0.4 },
   },
   editorial: {
-    enter: { type: "wipe-right", duration: 0.6, easing: "easeInOutCubic" },
-    exit: { type: "wipe-right", duration: 0.4, easing: "easeInOutCubic" },
+    enter: { type: "wipeRight", duration: 0.6, easing: "easeInOutCubic" },
+    exit: { type: "wipeRight", duration: 0.4, easing: "easeInOutCubic" },
     transition: { type: "crossfade", duration: 0.5 },
   },
 };
@@ -83,8 +83,8 @@ const STYLES: Presets = {
     quote: { font: "$heading", size: 56, weight: 400, italic: true, color: "$text", lineHeight: 1.2 },
     label: { font: "$body", size: 24, weight: 700, color: "$onPrimary", background: "$primary" },
     code: { font: "$mono", size: 28, weight: 400, color: "$text" },
-    // A key point, deck-style: a card in the band under the face on 9:16 (y +230 of 1920), clear of the platform's
-    // right-hand buttons; on screen from the word that names the point until the next one.
+    // A key point, deck-style: dark letters on a light card. A preset is a look only, so the card's size, its
+    // rounded corners and its entrance are written on the title (`box`, `transform`, `animation`).
     note: {
       font: "$heading",
       size: 60,
@@ -92,10 +92,6 @@ const STYLES: Presets = {
       color: "$background",
       background: "$text",
       lineHeight: 1.1,
-      width: 840,
-      height: 160,
-      transform: { borderRadius: 28 },
-      animation: { preset: "scale", in: 0.2, out: 0.15 },
     },
   },
   shape: {
@@ -103,7 +99,7 @@ const STYLES: Presets = {
     card: { fill: "$surface", cornerRadius: "$radius", shadow: { color: "rgba(0,0,0,0.35)", blur: 30, y: 12 } },
     panel: { fill: "$surface", cornerRadius: "$radius" },
     pill: { fill: "$primary", cornerRadius: 999 },
-    outline: { fill: { type: "none" }, stroke: { color: "$primary", width: 4 }, cornerRadius: "$radius" },
+    outline: { fill: { type: "none" }, stroke: { color: "$primary", thickness: 4 }, cornerRadius: "$radius" },
     accent: { fill: "$accent" },
     backdrop: { fill: "$background" },
   },

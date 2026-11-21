@@ -114,7 +114,7 @@ These turn footage into print, mosaic or an old screen.
 [`halftone`](/reference/effects/halftone) prints the picture as dots on a screen of `size`-pixel cells turned by
 `angle`. `amount` mixes the print over the picture.
 
-| `mode` | Prints |
+| `type` | Prints |
 |---|---|
 | `"mono"` | `ink` on `paper`, by brightness. |
 | `"cmyk"` | Four inks, each on its own screen at the classic angles, as a magazine page is printed. |
@@ -132,7 +132,7 @@ does, but as a coarse mosaic:
 | Param | Does |
 |---|---|
 | `spacing` | A band every that many pixels. |
-| `thickness` | How wide each dark band is, as a fraction of `spacing`. |
+| `coverage` | How much of `spacing` each dark band covers, 0 to 1. |
 | `intensity` | How dark a band is. |
 | `speed` | Rolls the bands by that many pixels a second. |
 | `angle` | Turns them. |

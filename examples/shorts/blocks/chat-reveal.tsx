@@ -119,7 +119,7 @@ export function ChatReveal(props: Partial<ChatRevealProps>) {
       {shown.map((m, i) => {
         const mine = m.from === "person";
         const since = clock.elapsed - m.after;
-        const enter = progress(clock, { after: m.after, over: 0.35, easing: "ease-out" });
+        const enter = progress(clock, { after: m.after, over: 0.35, easing: "easeOut" });
         const words = m.text.split(/\s+/);
         const typing = !mine && since < p.thinking;
         const count = mine ? words.length : Math.floor(Math.max(0, since - p.thinking) * p.wordsPerSecond);

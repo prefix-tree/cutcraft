@@ -9,10 +9,10 @@ and moves its sound.
 
 ```tsx
 <Clip id="pour" src="asset:coffee" in={8} out={14}
-  transform={{ scale: [{ at: 0, value: 1, easing: "ease-in-out" }, { at: 3.5, value: 1.2 }] }}
+  transform={{ scale: [{ at: 0, value: 1, easing: "easeInOut" }, { at: 3.5, value: 1.2 }] }}
   effects={[{ type: "lut", src: "asset:warm" }]}
   speed={[{ at: 0, value: 1, easing: "easeInOutQuad" }, { at: 1.6, value: 0.4 }]}
-  freezes={[{ at: 4.2, duration: 1.4, source: 12.4 }]}
+  freezes={[{ start: 4.2, duration: 1.4, source: 12.4 }]}
   volume={[{ at: 0, value: 0 }, { at: 0.5, value: 1 }]} />
 ```
 
@@ -25,7 +25,7 @@ over half a second.
 | A value that changes | A list of keys: `opacity: [{ at: 0, value: 0 }, { at: 1, value: 1 }]`. |
 | A look on the element | `effects={[{ type: "blur", radius: 8 }]}`. |
 | A speed ramp | Keys on `speed`. |
-| A held frame | `freezes={[{ at, duration, source }]}`. |
+| A held frame | `freezes={[{ start, duration, source }]}`. |
 | Sound that changes | Keys on `volume` and `pan`. |
 
 ## A value, or keys over time {#keys}
@@ -41,7 +41,7 @@ Before the first key the value holds the first key's value, and after the last i
 
 ```tsx
 <Title id="name" start={1} duration={3}
-  transform={{ opacity: [{ at: 0, value: 0, easing: "ease-out" }, { at: 0.4, value: 1 }] }}>
+  transform={{ opacity: [{ at: 0, value: 0, easing: "easeOut" }, { at: 0.4, value: 1 }] }}>
   Halvard
 </Title>
 ```
@@ -73,7 +73,7 @@ Anything else is a constant: a font, a colour, a fit.
 
 ### Easing
 
-The easing names are CSS's (`linear`, `ease`, `ease-in`, `ease-out`, `ease-in-out`), the usual curves by name
+The easing names are CSS's, in camelCase (`linear`, `ease`, `easeIn`, `easeOut`, `easeInOut`), the usual curves by name
 (`easeInOutSine`, `easeOutBack`, `easeInOutQuad`…), and `spring`. The [`<Clip>`](/reference/elements/clip) reference
 lists them all. For a move that needs more, draw it yourself in a [`<Layer>`](./free-code).
 
@@ -105,7 +105,7 @@ Every param takes keys, so a blur can clear as the shot starts:
 
 ```tsx
 <Clip id="open" src="asset:city"
-  effects={[{ type: "blur", radius: [{ at: 0, value: 12, easing: "ease-out" }, { at: 1, value: 0 }] }]} />
+  effects={[{ type: "blur", radius: [{ at: 0, value: 12, easing: "easeOut" }, { at: 1, value: 0 }] }]} />
 ```
 
 A param that is a list, such as a box `[x, y, width, height]`, takes keys of lists: each key's `value` is a whole
@@ -134,15 +134,15 @@ falling with the speed.
 ## Freeze frames {#freezes}
 
 `freezes` holds one frame of a clip on screen while its time stands still, then the clip plays on. Each hold is
-`{ at, duration, source }`:
+`{ start, duration, source }`:
 
-- `at`: seconds into the clip where the hold starts.
+- `start`: seconds into the clip where the hold starts.
 - `duration`: seconds it holds.
 - `source`: the time in the source of the frame held.
 
 ```tsx
 <Clip id="shot" src="asset:espresso" in={14} out={17}
-  freezes={[{ at: 1, duration: 1, source: 15 }]} />
+  freezes={[{ start: 1, duration: 1, source: 15 }]} />
 ```
 
 A second into the clip, the frame at 15 seconds of the source stays for one second. The clip is one second longer

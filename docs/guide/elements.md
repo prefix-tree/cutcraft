@@ -8,8 +8,8 @@ parts once and you can read any element in a file, and any page of the [referenc
   id="headline"                                    // 1. who it is
   anchor="talk" at="word:4" duration={2.5}         // 2. when it plays
   box={{ y: 220, origin: "center" }}               // 3. where it sits
-  style="h1" color="$primary"                      // 4. how it looks
-  enter={{ type: "slide-up", duration: 0.4 }}      // 5. how it comes and goes
+  style={{ preset: "h1", color: "$primary" }}      // 4. how it looks
+  enter={{ type: "slideUp", duration: 0.4 }}      // 5. how it comes and goes
   exit={{ type: "fade", duration: 0.3 }}
   transform={{ rotation: [{ at: 0, value: 0 }, { at: 2.5, value: -4 }] }}  // keys: it tilts
   effects={[{ type: "glow", radius: 12 }]}         // 6. its effects

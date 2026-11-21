@@ -15,11 +15,8 @@ export default function Video() {
           id="name"
           start={0.2}
           duration={2.8}
-          style="h1"
-          size={104}
-          width={720}
-          align="left"
-          box={{ x: 380, y: 420, origin: "center" }}
+          style={{ preset: "h1", size: 104, align: "left" }}
+          box={{ x: 380, y: 420, width: 720, origin: "center" }}
         >
           Night Shift
         </Title>
@@ -27,10 +24,8 @@ export default function Video() {
           id="credit"
           start={0.6}
           duration={2.4}
-          style="body"
-          width={720}
-          align="left"
-          box={{ x: 380, y: 492, origin: "center" }}
+          style={{ preset: "body", align: "left" }}
+          box={{ x: 380, y: 492, width: 720, origin: "center" }}
         >
           Set in Titan One and Inter Tight
         </Title>

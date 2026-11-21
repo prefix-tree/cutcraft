@@ -18,19 +18,19 @@ export default function Video() {
             {
               type: "cornerPin",
               topLeft: [
-                { at: 0.5, value: [0, 0], easing: "ease-in-out" },
+                { at: 0.5, value: [0, 0], easing: "easeInOut" },
                 { at: 1.5, value: [0.2, 0.14] },
               ],
               topRight: [
-                { at: 0.5, value: [1, 0], easing: "ease-in-out" },
+                { at: 0.5, value: [1, 0], easing: "easeInOut" },
                 { at: 1.5, value: [0.84, 0.06] },
               ],
               bottomRight: [
-                { at: 0.5, value: [1, 1], easing: "ease-in-out" },
+                { at: 0.5, value: [1, 1], easing: "easeInOut" },
                 { at: 1.5, value: [0.88, 0.9] },
               ],
               bottomLeft: [
-                { at: 0.5, value: [0, 1], easing: "ease-in-out" },
+                { at: 0.5, value: [0, 1], easing: "easeInOut" },
                 { at: 1.5, value: [0.14, 0.82] },
               ],
             },

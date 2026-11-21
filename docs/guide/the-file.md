@@ -26,7 +26,7 @@ export default function Video({ product, accent }: z.infer<typeof schema>) {
         <Clip id="broll" src="asset:product" in="shot:1" out="shot:1.end" fit="cover" />
       </Track>
       <Track id="overlays">
-        <Title id="title" anchor="hook" at="word:14" duration={2.8} color={accent}>{product}</Title>
+        <Title id="title" anchor="hook" at="word:14" duration={2.8} style={{ color: accent }}>{product}</Title>
       </Track>
     </Composition>
   );
@@ -162,7 +162,7 @@ A function that returns timeline elements is a helper. Use one to write a group 
 ```tsx
 function NameCard({ who, what }: { who: string; what: string }) {
   return <>
-    <Shape id="lt-bg" anchor="close" offset={0.5} duration={3.2} shape="rectangle" width={760} height={150} />
+    <Shape id="lt-bg" anchor="close" offset={0.5} duration={3.2} type="rectangle" width={760} height={150} />
     <Title id="lt-who" anchor="lt-bg" duration={3.2}>{who}</Title>
     <Title id="lt-what" anchor="lt-bg" offset={0.2} duration={3}>{what}</Title>
   </>;

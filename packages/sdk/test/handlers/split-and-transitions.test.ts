@@ -14,7 +14,7 @@ export default function Video() {
   return (
     <Composition fps={30} width={1920} height={1080}>
       <Track id="main">
-        <Clip id="a" src="asset:city" in={0} out={6} transform={{ scale: { x: [{ at: 0, value: 1 }, { at: 6, value: 1.3 }], y: 1 } }} effects={[{ type: "blur", radius: [{ at: 1, value: 0, easing: "ease-in-out" }, { at: 5, value: 8 }] }]} />
+        <Clip id="a" src="asset:city" in={0} out={6} transform={{ scale: { x: [{ at: 0, value: 1 }, { at: 6, value: 1.3 }], y: 1 } }} effects={[{ type: "blur", radius: [{ at: 1, value: 0, easing: "easeInOut" }, { at: 5, value: 8 }] }]} />
         <Transition id="x1" type="crossfade" duration={0.5} />
         <Clip id="b" src="asset:interview" in={0} out={4} speed={[{ at: 0, value: 1 }, { at: 2, value: 0.5 }]} />
         <Transition id="x2" type="wipe" duration={0.5} />
@@ -84,7 +84,7 @@ describe("splitting a clip that animates", () => {
         {
           type: "blur",
           radius: [
-            { at: 1, value: 0, easing: "ease-in-out" },
+            { at: 1, value: 0, easing: "easeInOut" },
             { at: 3, value: 4 },
           ],
         },
@@ -93,7 +93,7 @@ describe("splitting a clip that animates", () => {
         {
           type: "blur",
           radius: [
-            { at: 0, value: 4, easing: "ease-in-out" },
+            { at: 0, value: 4, easing: "easeInOut" },
             { at: 2, value: 8 },
           ],
         },

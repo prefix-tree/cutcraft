@@ -96,7 +96,7 @@ describe("fold", () => {
     exec.execute({ type: "text/setContent", params: { id: "t1", text: "Hello there" } });
     exec.execute({ type: "effect/add", params: { id: "c3", effect: { type: "grain", amount: 0.2 } } });
     exec.execute({ type: "element/remove", params: { id: "g1" } });
-    exec.execute({ type: "marker/add", params: { markerId: "m2", at: 6, label: "beat" } });
+    exec.execute({ type: "marker/add", params: { markerId: "m2", start: 6, label: "beat" } });
     const result = foldToSource(fixtureText, exec.log(), exec.state());
     expect(result.skipped).toEqual([]);
     const mod = await evaluate(result.text);
@@ -111,13 +111,28 @@ describe("fold", () => {
 
   it("bakes a generated element before editing it", () => {
     const exec = fixtureExecutor();
-    expect(exec.execute({ type: "element/update", params: { id: "b1", props: { size: 40 } } }).ok).toBe(true);
+    expect(exec.execute({ type: "element/update", params: { id: "b1", props: { style: { size: 40 } } } }).ok).toBe(
+      true,
+    );
     const result = foldToSource(fixtureText, exec.log(), exec.state());
     expect(result.baked).toContain("b1");
     expect(result.text).not.toContain('<Badge id="b1"');
     expect(result.text).toContain('<Title id="b1"');
-    expect(result.text).toContain("size={40}");
-    expect(buildSourceIndex(result.text).elements.get("b1")?.props.get("size")?.literal).toBe(40);
+    expect(result.text).toContain("style={{ size: 40 }}");
+    expect(buildSourceIndex(result.text).elements.get("b1")?.props.get("style")?.literal).toEqual({ size: 40 });
+  });
+
+  it("writes a style key that reads one of the file's props into defaults, and the others in place", () => {
+    const exec = fixtureExecutor();
+    const style = { color: "#00ff00", size: 70 };
+    expect(exec.execute({ type: "element/update", params: { id: "t1", props: { style } } }).ok).toBe(true);
+    const result = foldToSource(fixtureText, exec.log(), exec.state());
+    expect(result.skipped).toEqual([]);
+    expect(result.text).toContain('export const defaults = { title: "Why we built it", accent: "#00ff00" };');
+    expect(result.text).toContain("style={{ color: accent, size: 70 }}");
+    const index = buildSourceIndex(result.text);
+    expect(index.elements.get("t1")?.boundProps).toEqual({ "style.color": "accent" });
+    expect(index.elements.get("t1")?.lockedProps).toEqual([]);
   });
 
   it("writes a Layer's handles into the component tag", () => {
@@ -214,20 +229,37 @@ describe("fold", () => {
     // The round after the bake folds the log again and must still find the defaults in it.
     const exec = fixtureExecutor();
     exec.execute({ type: "composition/setProps", params: { defaults: { title: "Changed", accent: "#123456" } } });
-    expect(exec.execute({ type: "element/update", params: { id: "b1", props: { size: 40 } } }).ok).toBe(true);
+    expect(exec.execute({ type: "element/update", params: { id: "b1", props: { style: { size: 40 } } } }).ok).toBe(
+      true,
+    );
     const result = foldToSource(fixtureText, exec.log(), exec.state());
     expect(result.baked).toContain("b1");
     expect(result.text).toContain('export const defaults = { title: "Changed", accent: "#123456" };');
   });
 
-  it("writes a settings change and an edit to a prop bound to the settings into one defaults literal", () => {
+  it("writes a settings change and an edit to a style key bound to the settings into one defaults literal", () => {
     const exec = fixtureExecutor();
     exec.execute({ type: "composition/setProps", params: { defaults: { title: "Changed", accent: "#123456" } } });
-    expect(exec.execute({ type: "element/update", params: { id: "t1", props: { color: "#abcdef" } } }).ok).toBe(true);
+    const style = { color: "#abcdef", size: 64 };
+    expect(exec.execute({ type: "element/update", params: { id: "t1", props: { style } } }).ok).toBe(true);
     const result = foldToSource(fixtureText, exec.log(), exec.state());
     expect(result.skipped).toEqual([]);
     expect(result.text).toContain('export const defaults = { title: "Changed", accent: "#abcdef" };');
-    expect(result.text).toContain("color={accent}");
+    expect(result.text).toContain("style={{ color: accent, size: 64 }}");
+  });
+
+  it("writes a style key bound to the settings and then a settings change into one defaults literal", () => {
+    const exec = fixtureExecutor();
+    const style = { color: "#abcdef", size: 70 };
+    expect(exec.execute({ type: "element/update", params: { id: "t1", props: { style } } }).ok).toBe(true);
+    exec.execute({ type: "composition/setProps", params: { defaults: { title: "Changed", accent: "#123456" } } });
+    const result = foldToSource(fixtureText, exec.log(), exec.state());
+    expect(result.skipped).toEqual([]);
+    // The title's colour is what the editor shows: the edit, not the settings' accent.
+    expect(exec.state().tree.byId.get("t1")?.props.style).toMatchObject({ color: "#abcdef" });
+    expect(result.text).toContain('export const defaults = { title: "Changed", accent: "#abcdef" };');
+    expect(result.text).toContain("style={{ color: accent, size: 70 }}");
+    expect(lint(result.text, { manifest }).filter((d) => d.severity === "error")).toEqual([]);
   });
 
   it.each(["A &amp; B", "1 &lt; 2", "salt & pepper", "&#169; &copy;"])(
@@ -238,7 +270,7 @@ describe("fold", () => {
       expect(exec.execute({ type: "element/update", params: { id: "v1", props: { content } } }).ok).toBe(true);
       expect(exec.execute({ type: "track/rename", params: { trackId: "main", name: words } }).ok).toBe(true);
       expect(exec.execute({ type: "track/rename", params: { trackId: "music", name: words } }).ok).toBe(true);
-      expect(exec.execute({ type: "marker/add", params: { markerId: "m2", at: 6, label: words } }).ok).toBe(true);
+      expect(exec.execute({ type: "marker/add", params: { markerId: "m2", start: 6, label: words } }).ok).toBe(true);
       const result = foldToSource(fixtureText, exec.log(), exec.state());
       expect(result.skipped).toEqual([]);
       const mod = await evaluate(result.text);

@@ -240,7 +240,7 @@ function elementRow(state: ResolvedState, p: Placement, frame: (t: number) => nu
     ...(p.source ? { asset: p.source.asset, in: ms(p.source.in), out: ms(p.source.out), speed: p.source.speed } : {}),
     ...(typeof text === "string" && text.length > 0 ? { text } : {}),
     ...(typeof props.anchor === "string" ? { anchor: props.anchor } : {}),
-    ...(typeof props.at === "string" || (typeof props.at === "number" && p.kind !== "marker") ? { at: props.at } : {}),
+    ...(typeof props.at === "string" || typeof props.at === "number" ? { at: props.at } : {}),
     ...(typeof props.offset === "number" ? { offset: props.offset } : {}),
     ...(p.kind === "transition" && typeof props.type === "string" ? { type: props.type } : {}),
     ...(p.kind === "transition" && typeof props.type !== "string" ? { type: shaderName(props.type) } : {}),

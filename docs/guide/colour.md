@@ -39,7 +39,7 @@ Each effect also has its own page with a demo: see [Effects and transitions](/re
 Every param takes [keys](./animation#keys) in place of its value. Here the shot brightens over its first two seconds:
 
 ```tsx
-{ type: "exposure", stops: [{ at: 0, value: 0, easing: "ease-in-out" }, { at: 2, value: 0.5 }] }
+{ type: "exposure", stops: [{ at: 0, value: 0, easing: "easeInOut" }, { at: 2, value: 0.5 }] }
 ```
 
 ## Correct

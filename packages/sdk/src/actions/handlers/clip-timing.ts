@@ -418,9 +418,9 @@ function splitAt(node: NodeSpec, atRel: number, taken: Set<string>): SplitPlan {
     touched.add(l.prop);
   }
   if (Array.isArray(props.freezes)) {
-    const holds = props.freezes as { at: number; duration: number; source: number }[];
-    const stay = holds.filter((h) => h.at < atRel);
-    const moved = holds.filter((h) => h.at >= atRel).map((h) => ({ ...h, at: round(h.at - atRel) }));
+    const holds = props.freezes as { start: number; duration: number; source: number }[];
+    const stay = holds.filter((h) => h.start < atRel);
+    const moved = holds.filter((h) => h.start >= atRel).map((h) => ({ ...h, start: round(h.start - atRel) }));
     leftAll.freezes = stay.length > 0 ? stay : undefined;
     rightAll.freezes = moved.length > 0 ? moved : undefined;
     touched.add("freezes");

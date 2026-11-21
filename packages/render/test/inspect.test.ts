@@ -241,7 +241,7 @@ export default function Video({ title, accent }: z.infer<typeof schema>) {
   return (
     <Composition fps={30} width={640} height={360}>
       <Track id="text" layout="free">
-        <Title id="t" start={0} duration={2} color={accent}>{title}</Title>
+        <Title id="t" start={0} duration={2} style={{ color: accent }}>{title}</Title>
       </Track>
     </Composition>
   );

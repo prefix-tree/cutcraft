@@ -7,7 +7,7 @@ describe("CanvasPainter blur background", () => {
     const state = makeState({
       width: 640,
       height: 360,
-      background: { mode: "blur" },
+      background: { type: "blur" },
       tracks: [
         {
           id: "main",

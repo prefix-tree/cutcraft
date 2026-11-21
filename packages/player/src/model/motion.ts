@@ -39,7 +39,7 @@ const SLIDE_MAX = 160;
  * The entrance and exit of an element `rel` seconds into its `duration`, for a
  * `width` by `height` box. Both can play at once on a short element; their
  * effects multiply. Pop, bounce and elastic carry their own curve; the others
- * follow the animation's easing (default ease-out).
+ * follow the animation's easing (default easeOut).
  */
 export function motionAt(
   enter: GraphicAnimation | undefined,
@@ -66,19 +66,19 @@ export function motionAt(
 export function effect(anim: GraphicAnimation, x: number, w: number, h: number): Motion {
   const raw = Math.max(0, Math.min(1, x));
   if (raw >= 1) return STILL;
-  const k = ease(anim.easing ?? "ease-out", raw);
+  const k = ease(anim.easing ?? "easeOut", raw);
   const about = (m: Matrix2D): Matrix2D => multiply(multiply(translate(w / 2, h / 2), m), translate(-w / 2, -h / 2));
   const fadeIn = Math.min(1, raw * 3);
   switch (anim.type) {
     case "fade":
       return { ...STILL, opacity: k };
-    case "slide-left":
+    case "slideLeft":
       return { ...STILL, opacity: k, matrix: translate(Math.min(w * SLIDE, SLIDE_MAX) * (1 - k), 0) };
-    case "slide-right":
+    case "slideRight":
       return { ...STILL, opacity: k, matrix: translate(-Math.min(w * SLIDE, SLIDE_MAX) * (1 - k), 0) };
-    case "slide-up":
+    case "slideUp":
       return { ...STILL, opacity: k, matrix: translate(0, Math.min(h * SLIDE, SLIDE_MAX) * (1 - k)) };
-    case "slide-down":
+    case "slideDown":
       return { ...STILL, opacity: k, matrix: translate(0, -Math.min(h * SLIDE, SLIDE_MAX) * (1 - k)) };
     case "scale":
       return { ...STILL, opacity: k, matrix: about(scaleM(0.6 + 0.4 * k, 0.6 + 0.4 * k)) };
@@ -100,21 +100,21 @@ export function effect(anim: GraphicAnimation, x: number, w: number, h: number):
       const s = ease("easeOutElastic", raw);
       return { ...STILL, opacity: fadeIn, matrix: about(scaleM(s, s)) };
     }
-    case "flip-horizontal":
+    case "flipHorizontal":
       return { ...STILL, matrix: about(scaleM(Math.max(0.001, Math.sin((k * Math.PI) / 2)), 1)) };
-    case "flip-vertical":
+    case "flipVertical":
       return { ...STILL, matrix: about(scaleM(1, Math.max(0.001, Math.sin((k * Math.PI) / 2)))) };
-    case "wipe-right":
+    case "wipeRight":
       return { ...STILL, clip: [{ x: 0, y: 0, w: w * k, h }] };
-    case "wipe-left":
+    case "wipeLeft":
       return { ...STILL, clip: [{ x: w * (1 - k), y: 0, w: w * k, h }] };
-    case "wipe-down":
+    case "wipeDown":
       return { ...STILL, clip: [{ x: 0, y: 0, w, h: h * k }] };
-    case "wipe-up":
+    case "wipeUp":
       return { ...STILL, clip: [{ x: 0, y: h * (1 - k), w, h: h * k }] };
-    case "reveal-center":
+    case "revealCenter":
       return { ...STILL, clip: [{ x: (w * (1 - k)) / 2, y: (h * (1 - k)) / 2, w: w * k, h: h * k }] };
-    case "reveal-edges":
+    case "revealEdges":
       return {
         ...STILL,
         clip: [

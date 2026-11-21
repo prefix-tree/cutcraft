@@ -44,8 +44,8 @@ for a hole; never write `start`. On a **free** track every child has a literal
 
 Timed elements: `<Clip src in out|duration speed reverse fit transform volume fade duck>`
 (video or image), `<Audio>` (same, audio only), `<Transition type duration>`
-as a sibling *between* two clips of a sequence track, `<Title>` (text as
-children), `<Shape shape width height fill stroke cornerRadius>`, `<Svg>`,
+as a sibling *between* two clips of a sequence track, `<Title style box>` (text as
+children), `<Shape type width height fill stroke cornerRadius>`, `<Svg>`,
 `<Sticker>`, `<Motion>` and `<Three>` (Motion and three.js on the video's clock), `<Adjustment>`, `<Nested of>`, `<Layer>` (arbitrary React inside;
 call `useT()` for 0..1 progress or `useLayer()` for `elapsed`, `remaining`,
 `duration` and `time` in seconds; shape them with `interpolate()`,
@@ -58,7 +58,7 @@ list of keys in its place, `{ at, value, easing? }` with `at` in seconds into
 the element (`transform={{ scale: [{ at: 0, value: 1 }, { at: 6, value: 1.08 }] }}`).
 Effects are a list, `effects={[{ type: "vibrance", amount: 0.3 }]}`, each
 param a value or keys. A speed ramp is keys on `speed`; a held frame is
-`freezes={[{ at, duration, source }]}`; `volume` and `pan` take keys.
+`freezes={[{ start, duration, source }]}`; `volume` and `pan` take keys.
 
 Children: `<Mask>`, and `<Caption start end text>` inside `<Captions>`.
 
@@ -121,9 +121,11 @@ Give the video one look, the way a designer would, and say it once.
    next theme.
 3. **Use presets for text.** `<Title style="h1">`, `h2`, `kicker`, `body`,
    `caption`, `quote`, `label`, `code`; a plain title already takes the
-   heading font and the text colour. Own props override a preset
-   (`style="h1" size={180}`). `<Shape style="card">` (also `panel`, `pill`,
-   `outline`, `accent`), `<Captions style="boxed">`.
+   heading font and the text colour. A title's look is all in `style`: a
+   preset's name, or an object whose own fields override the preset it names
+   (`style={{ preset: "h1", size: 180 }}`); its text box is `box.width` and
+   `box.height`. `<Shape style="card">` (also `panel`, `pill`, `outline`,
+   `accent`), `<Captions style="boxed">`.
 4. **Leave entrances to the motion style.** Titles, shapes, SVG, stickers and
    graphics enter and exit the theme's way; write `enter`/`exit` only where
    one element should differ (`enter={{ type: "draw" }}` for a scribble,

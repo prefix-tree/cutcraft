@@ -12,7 +12,7 @@ import { type BlockMeta, Cells, knob, themeCss, useProgress, type When } from "@
 
 const when = z
   .object({
-    at: z.number().optional().describe("Seconds of the video, from a narration cue"),
+    start: z.number().optional().describe("Seconds of the video, from a narration cue"),
     after: z.number().optional().describe("Seconds since the layer started"),
     over: z.number().positive().optional().describe("How long it takes, in seconds"),
   })
@@ -74,7 +74,7 @@ export const meta: BlockMeta = {
 function moment(m: HundredCellsProps["fill"], over: number): When {
   return {
     over: m.over ?? over,
-    ...(m.at !== undefined ? { at: m.at } : {}),
+    ...(m.start !== undefined ? { start: m.start } : {}),
     ...(m.after !== undefined ? { after: m.after } : {}),
   };
 }
@@ -110,7 +110,7 @@ export function HundredCells(props: Partial<HundredCellsProps>) {
   const ink = themeCss(p.ink);
   const type = { fontFamily: themeCss(p.font), fontWeight: p.weight, fill: ink } as const;
   const rows = Math.ceil(p.total / p.columns);
-  const filled = Math.round(p.total * useProgress({ ...moment(p.fill, 2), easing: "ease-in-out" }));
+  const filled = Math.round(p.total * useProgress({ ...moment(p.fill, 2), easing: "easeInOut" }));
   const next = useProgress(moment(p.next, 0.3));
   const arrived = p.extra ? next : 0;
   const pitch = p.cell + p.gap;

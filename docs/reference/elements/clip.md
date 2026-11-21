@@ -30,7 +30,7 @@ The coffee footage is Pixabay videos [209419](https://pixabay.com/videos/id-2094
 | `in` | number (0..∞) \| string |  |  | Where in the source it starts: seconds, or a word, shot or silence of its transcript (`word:12`). |
 | `out` | number (0..∞) \| string |  |  | Where in the source it ends, as `in`; `word:40.end` ends after the word is said. |
 | `speed` | number (0.1..20) \| { at, value, easing }[] |  |  | Playback rate: 2 plays twice as fast and half as long; keys ramp it. |
-| `freezes` | { at, duration, source }[] |  |  | Frames held on screen while the clip's time stands still. |
+| `freezes` | { start, duration, source }[] |  |  | Frames held on screen while the clip's time stands still. |
 | `reverse` | boolean | `false` |  | Plays the trimmed source backwards. |
 | `box` | { x, y, width, height, origin } |  |  | The rectangle it occupies, in pixels from the frame's top left as in CSS: `x` and `y` place the point `origin` names (its top left by default), `width` and `height` size it, and its content fills it as `fit` says. Left out, the whole frame. `transform` applies after. |
 | `transform` | { scale, rotation, anchor, opacity, borderRadius, crop } |  |  | How it is turned and shown: scale, rotation, anchor, opacity, rounded corners and crop. |

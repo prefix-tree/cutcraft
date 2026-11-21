@@ -22,7 +22,7 @@ Drawn as a shader.
 |---|---|---|---|
 | `size` | number (2..200) | `8` | How big each dot's cell is, in pixels. |
 | `angle` | number | `45` | How far the dot grid is turned, in degrees. In `cmyk` it is the black screen's angle, and the others are set from it. |
-| `mode` | "mono" \| "cmyk" | `"mono"` | `mono` prints `ink` on `paper` by brightness; `cmyk` prints cyan, magenta, yellow and black dots, each on its own screen. |
+| `inks` | "mono" \| "cmyk" | `"mono"` | How many inks print: `mono` prints `ink` on `paper` by brightness; `cmyk` prints cyan, magenta, yellow and black dots, each on its own screen. (Not `type`, which names the effect in its entry of `effects`.) |
 | `ink` | string | `"#111111"` | The colour of the dots in `mono`. |
 | `paper` | string | `"#ffffff"` | The colour under the dots. |
 | `amount` | number (0..1) | `1` | How much of the effect to mix in: 0 leaves the picture as it was, 1 is the full effect. |

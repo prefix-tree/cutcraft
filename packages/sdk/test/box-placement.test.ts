@@ -48,7 +48,7 @@ describe("box-placement", () => {
 
   it("moves a keyframe of transform.position to box, and keeps its parent's centre on the keyed point", () => {
     const out = fixed(
-      '<Shape id="s" shape="circle" width={40} height={40} duration={2}><Keyframe id="k" property="transform.position.x" at={0} value={-100} /></Shape>',
+      '<Shape id="s" type="circle" width={40} height={40} duration={2}><Keyframe id="k" property="transform.position.x" at={0} value={-100} /></Shape>',
     );
     expect(out.text).toContain('<Shape box={{ origin: "center" }} id="s"');
     expect(out.text).toContain('<Keyframe id="k" property="box.x" at={0} value={860} />');

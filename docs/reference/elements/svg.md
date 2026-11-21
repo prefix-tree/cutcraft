@@ -32,7 +32,7 @@ One-off vector art from inline SVG markup or a file.
 | `content` | string |  |  | Inline SVG markup. Give this or `src`. |
 | `viewBox` | { minX, minY, width, height } |  |  | The part of the drawing to show, in its own units, as the SVG `viewBox` attribute. |
 | `preserveAspectRatio` | string |  |  | How the drawing fits its box, as the SVG attribute of that name (`xMidYMid meet`). |
-| `color` | { mode, tint, opacity } |  |  | Recolours it: `tint` keeps the shading and colours it, `replace` paints every drawn pixel; `opacity` is how much. |
+| `color` | { type, tint, opacity } |  |  | Recolours it: `tint` keeps the shading and colours it, `replace` paints every drawn pixel; `opacity` is how much. |
 | `enter` | { type, duration, easing } |  |  | How it comes in: a fade, slide, scale or wipe over its first seconds, with an easing. |
 | `exit` | { type, duration, easing } |  |  | How it goes out, over its last seconds, as `enter`. |
 

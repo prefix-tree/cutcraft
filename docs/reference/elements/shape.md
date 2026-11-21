@@ -31,12 +31,12 @@ A vector shape (rectangle, circle, star, polygon, path) with fill, stroke and sh
 | `enter` | { type, duration, easing } |  |  | How it comes in: a fade, slide, scale or wipe over its first seconds, with an easing. |
 | `exit` | { type, duration, easing } |  |  | How it goes out, over its last seconds, as `enter`. |
 | `style` | string |  |  | A theme preset for shapes. |
-| `shape` | "rectangle" \| "circle" \| "ellipse" \| "triangle" \| "arrow" \| … 4 more |  | yes | Which shape it draws. |
+| `type` | "rectangle" \| "circle" \| "ellipse" \| "triangle" \| "arrow" \| … 4 more |  | yes | Which shape it draws. |
 | `width` | number (> 0) |  |  | The shape's box, in pixels; left out, 200. |
 | `height` | number (> 0) |  |  | The shape's box height, in pixels; left out, 200. |
 | `points` | { x, y }[] |  |  | A polygon's or path's corners, as fractions of the box from its top left. |
 | `fill` | string \| { type, color, gradient, opacity } |  |  | A colour, or `{ type, color, gradient, opacity }` for a gradient or no fill. |
-| `stroke` | { color, width, opacity, dashArray, dashOffset, lineCap, lineJoin, gradient } |  |  | The outline: colour, width in pixels, opacity, dashes, caps and joins. |
+| `stroke` | { color, thickness, opacity, dashArray, dashOffset, lineCap, lineJoin, gradient } |  |  | The outline: colour, thickness in pixels, opacity, dashes, caps and joins. |
 | `shadow` | { color, blur, x, y, spread, inset } |  |  | A drop shadow: colour, blur and offset in pixels. |
 | `shadows` | { color, blur, x, y, spread, inset }[] |  |  | Several shadows, drawn in order, for layered or inner shadows. |
 | `cornerRadius` | number (0..∞) \| string |  |  | A rectangle's rounded corners, in pixels or a theme token such as `$radius`. |

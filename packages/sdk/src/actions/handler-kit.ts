@@ -33,10 +33,46 @@ export function requireNotOpaque(item: ResolvedPlacement): ActionError | null {
   return item.editable === "opaque" ? { code: "OPAQUE_TARGET", message: `"${item.id}" is model-only code` } : null;
 }
 
+/**
+ * A prop, or a key of one (`style.font`), the action writes is not an expression. A prop is locked whole, or, a `style`
+ * object, key by key: writing `style.size` is refused only when `style` or `style.size` is locked.
+ */
 function requireLiteralProp(item: ResolvedPlacement, prop: string): ActionError | null {
-  return item.lockedProps.includes(prop)
-    ? { code: "LOCKED_PROP", message: `"${item.id}.${prop}" is an expression; bake it first`, path: prop }
+  const top = prop.split(".")[0] as string;
+  const locked = item.lockedProps.includes(prop) ? prop : item.lockedProps.includes(top) ? top : null;
+  return locked !== null
+    ? { code: "LOCKED_PROP", message: `"${item.id}.${locked}" is an expression; bake it first`, path: locked }
     : null;
+}
+
+/**
+ * The paths a write of `props` changes, for `validateTarget`: each prop, and for a `style` object whose keys lock one
+ * by one, each key whose value differs from `before`'s.
+ */
+export function writtenPaths(
+  item: ResolvedPlacement,
+  props: Readonly<Record<string, unknown>>,
+  before: (prop: string) => unknown,
+): string[] {
+  const out: string[] = [];
+  for (const [prop, value] of Object.entries(props)) {
+    const keyed = item.lockedProps.some((p) => p.startsWith(`${prop}.`));
+    if (!keyed) {
+      out.push(prop);
+      continue;
+    }
+    const prior = before(prop);
+    const was = isPlain(prior) ? prior : {};
+    const now = isPlain(value) ? value : {};
+    if (!isPlain(value)) out.push(prop);
+    for (const key of new Set([...Object.keys(was), ...Object.keys(now)]))
+      if (JSON.stringify(was[key]) !== JSON.stringify(now[key])) out.push(`${prop}.${key}`);
+  }
+  return out;
+}
+
+function isPlain(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 export function requireLayout(
@@ -203,10 +239,11 @@ export function makePropHandler<T extends ActionType>(spec: PropHandlerSpec<T>):
     ...(targets ? { targets } : {}),
     validate(action, state) {
       const id = target(action.params);
-      const props = Object.keys(spec.write(action.params, state));
+      const written = spec.write(action.params, state);
+      const item = state.items.get(id);
+      const props = item ? writtenPaths(item, written, (prop) => rawProp(state, id, prop)) : Object.keys(written);
       const base = validateTarget(state, id, props);
       if (!base.valid) return base;
-      const item = state.items.get(id);
       if (spec.kinds && item && !spec.kinds.includes(item.kind)) {
         return invalid({ code: "INVALID_PARAMS", message: `${spec.type} does not apply to <${item.kind}>` });
       }

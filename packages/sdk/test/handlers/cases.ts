@@ -28,7 +28,7 @@ export const SETUP: Partial<Record<ActionType, readonly ActionInput[]>> = {
 /** One sample action per registered type, against fixtures/sample.tsx. */
 export const CASES: Partial<Record<ActionType, ActionInput>> = {
   "composition/updateSettings": { type: "composition/updateSettings", params: { fps: 25 } },
-  "composition/setBackground": { type: "composition/setBackground", params: { mode: "blur" } },
+  "composition/setBackground": { type: "composition/setBackground", params: { type: "blur" } },
   "composition/setProps": { type: "composition/setProps", params: { defaults: { title: "New", accent: "#000000" } } },
   "composition/setTheme": {
     type: "composition/setTheme",
@@ -127,7 +127,7 @@ export const CASES: Partial<Record<ActionType, ActionInput>> = {
   "clip/setSource": { type: "clip/setSource", params: { id: "c2", src: "asset:interview" } },
   "clip/setAnchor": { type: "clip/setAnchor", params: { id: "s1", anchor: "c3", offset: 0.5 } },
 
-  "freeze/setAll": { type: "freeze/setAll", params: { id: "c2", freezes: [{ at: 1, duration: 0.25, source: 2 }] } },
+  "freeze/setAll": { type: "freeze/setAll", params: { id: "c2", freezes: [{ start: 1, duration: 0.25, source: 2 }] } },
   "transform/update": {
     type: "transform/update",
     params: { id: "c2", transform: { scale: 1.2 } },
@@ -194,11 +194,11 @@ export const CASES: Partial<Record<ActionType, ActionInput>> = {
       kind: "title",
       trackId: "overlays",
       place: { anchor: "c2", offset: 1 },
-      props: { duration: 2, size: 40 },
+      props: { duration: 2, style: { size: 40 } },
       text: "New title",
     },
   },
-  "element/update": { type: "element/update", params: { id: "t1", props: { size: 72 } } },
+  "element/update": { type: "element/update", params: { id: "t1", props: { style: { size: 72 } } } },
   "text/setContent": { type: "text/setContent", params: { id: "t1", text: "Changed" } },
   "nested/extract": { type: "nested/extract", params: { id: "n1" } },
 
@@ -227,12 +227,12 @@ export const CASES: Partial<Record<ActionType, ActionInput>> = {
   "caption/setAnimation": { type: "caption/setAnimation", params: { captionsId: "cap", animation: "typewriter" } },
   "caption/setAll": { type: "caption/setAll", params: { captionsId: "cap", nodes: [] } },
 
-  "marker/add": { type: "marker/add", params: { markerId: "m9", at: 5, label: "x" } },
-  "marker/update": { type: "marker/update", params: { markerId: "m1", at: 3 } },
+  "marker/add": { type: "marker/add", params: { markerId: "m9", start: 5, label: "x" } },
+  "marker/update": { type: "marker/update", params: { markerId: "m1", start: 3 } },
   "marker/remove": { type: "marker/remove", params: { markerId: "m1" } },
   "marker/restore": {
     type: "marker/restore",
-    params: { node: { id: "m8", kind: "marker", props: { id: "m8", at: 1, label: "r" } }, after: null },
+    params: { node: { id: "m8", kind: "marker", props: { id: "m8", start: 1, label: "r" } }, after: null },
   },
 
   "mask/create": {

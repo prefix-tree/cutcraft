@@ -14,7 +14,7 @@ export default function Video() {
           id="dot"
           start={0.5}
           duration={3}
-          shape="circle"
+          type="circle"
           width={90}
           height={90}
           fill="#e8a33d"

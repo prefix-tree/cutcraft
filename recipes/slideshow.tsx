@@ -11,7 +11,7 @@ export const defaults = { title: "Summer, mostly" };
 /** Four photos held four seconds each, a slow push on every one, crossfades between, a bed that fades out at the end. */
 export default function Video({ title }: z.infer<typeof schema>) {
   return (
-    <Composition fps={30} width={1920} height={1080} background={{ mode: "color", color: "#000000" }}>
+    <Composition fps={30} width={1920} height={1080} background={{ type: "color", color: "#000000" }}>
       <Track id="photos" name="Photos">
         <Photo id="p1" src="asset:photo-1" from={1} to={1.12} />
         <Transition id="x1" type="crossfade" duration={0.6} />
@@ -28,9 +28,8 @@ export default function Video({ title }: z.infer<typeof schema>) {
           anchor="start"
           offset={0.5}
           duration={3}
-          size={110}
-          weight={300}
-          animation={{ preset: "fade", in: 0.8, out: 0.6 }}
+          style={{ size: 110, weight: 300 }}
+          animation={{ type: "fade", in: 0.8, out: 0.6 }}
         >
           {title}
         </Title>

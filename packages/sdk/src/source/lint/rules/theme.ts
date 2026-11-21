@@ -10,7 +10,7 @@ import {
 } from "@uberscene/kit/schema";
 
 import type { Json } from "../../../patches/types";
-import type { SourceIndex } from "../../index";
+import type { PropSite, SourceIndex } from "../../index";
 import type { Diagnostic } from "../index";
 import { declaredFamilies } from "./fonts";
 import type { Rule } from "./index";
@@ -41,8 +41,9 @@ export const themeRefs: Rule = {
     const out: Diagnostic[] = [];
     for (const site of index.elements.values()) {
       for (const [name, prop] of site.props) {
-        if (SKIP_KEYS.has(name) || prop.literal === undefined) continue;
-        walk(prop.literal, name, (value, path) => {
+        const literal = literalParts(prop);
+        if (SKIP_KEYS.has(name) || literal === undefined) continue;
+        walk(literal, name, (value, path) => {
           const m = typeof value === "string" ? TOKEN_PATTERN.exec(value) : null;
           if (m && themeToken(theme, m[1] as string) === undefined) {
             out.push({
@@ -59,17 +60,14 @@ export const themeRefs: Rule = {
         });
       }
       const style = site.props.get("style");
-      if (
-        (STYLED_KINDS as readonly string[]).includes(site.kind) &&
-        typeof style?.literal === "string" &&
-        !theme.styles[site.kind]?.[style.literal]
-      ) {
+      const preset = style ? presetOf(site.kind, style) : undefined;
+      if ((STYLED_KINDS as readonly string[]).includes(site.kind) && preset && !theme.styles[site.kind]?.[preset]) {
         const known = Object.keys(theme.styles[site.kind] ?? {});
         out.push({
           rule: "theme-refs",
           severity: "error",
-          message: `"${site.id}": no ${site.kind} style "${style.literal}" in the theme${known.length ? ` (${known.join(", ")})` : ""}`,
-          range: style.range,
+          message: `"${site.id}": no ${site.kind} style "${preset}" in the theme${known.length ? ` (${known.join(", ")})` : ""}`,
+          range: style?.range ?? [0, 0],
           id: site.id,
           prop: "style",
         });
@@ -78,6 +76,21 @@ export const themeRefs: Rule = {
     return out;
   },
 };
+
+/** A prop's literal value, or of a keyed object (`style={{ font: brand, size: 64 }}`) the keys that are literals. */
+function literalParts(prop: PropSite): Json | undefined {
+  if (prop.literal !== undefined || !prop.entries) return prop.literal;
+  return Object.fromEntries(prop.entries.filter((e) => !e.isExpression).map((e) => [e.key, e.literal as Json]));
+}
+
+/** The preset a `style` names: the name itself, or a title's or captions' `style.preset`. */
+function presetOf(kind: string, style: PropSite): string | undefined {
+  if (typeof style.literal === "string") return style.literal;
+  if (kind !== "title" && kind !== "captions") return undefined;
+  const object = literalParts(style);
+  const named = typeof object === "object" && object !== null && !Array.isArray(object) ? object.preset : undefined;
+  return typeof named === "string" ? named : undefined;
+}
 
 /** With a theme declared, literal colours and fonts on graphics drift from it; name a token instead. */
 export const themeLiterals: Rule = {
@@ -92,8 +105,9 @@ export const themeLiterals: Rule = {
     for (const site of index.elements.values()) {
       if (!THEMED_KINDS.has(site.kind)) continue;
       for (const [name, prop] of site.props) {
-        if (SKIP_KEYS.has(name) || prop.literal === undefined) continue;
-        walk(prop.literal, name, (value, path, key) => {
+        const literal = literalParts(prop);
+        if (SKIP_KEYS.has(name) || literal === undefined) continue;
+        walk(literal, name, (value, path, key) => {
           if (typeof value !== "string" || value.startsWith("$")) return;
           if (key === "font") {
             out.push({
@@ -170,8 +184,9 @@ export const fontAvailable: Rule = {
     };
     for (const site of index.elements.values()) {
       for (const [name, prop] of site.props) {
-        if (SKIP_KEYS.has(name) || prop.literal === undefined) continue;
-        walk(prop.literal, name, (value, path, key) => {
+        const literal = literalParts(prop);
+        if (SKIP_KEYS.has(name) || literal === undefined) continue;
+        walk(literal, name, (value, path, key) => {
           if (key !== "font" || typeof value !== "string") return;
           const m = TOKEN_PATTERN.exec(value);
           const family = m ? themeToken(theme, m[1] as string) : value;

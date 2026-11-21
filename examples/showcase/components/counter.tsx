@@ -12,7 +12,7 @@ export default function Video() {
         palette: { primary: "#e8a33d", accent: "#e8a33d", background: "#101421", glow: "#3a2a1c" },
       }}
       background={{
-        mode: "gradient",
+        type: "gradient",
         gradient: {
           type: "linear",
           angle: 135,

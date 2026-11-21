@@ -17,7 +17,7 @@ export const defaults = { title: "Highlights" };
  */
 export default function Video({ title }: z.infer<typeof schema>) {
   return (
-    <Composition fps={30} width={1920} height={1080} background={{ mode: "color", color: "#000000" }}>
+    <Composition fps={30} width={1920} height={1080} background={{ type: "color", color: "#000000" }}>
       <Track id="cams" layout="free" name="Cameras">
         {/* Cuts take seconds; these sit on camera B's shot boundaries at 10 and 25. */}
         <Multicam id="mc" sync={0}>
@@ -40,12 +40,9 @@ export default function Video({ title }: z.infer<typeof schema>) {
           anchor="start"
           offset={0.5}
           duration={4}
-          size={72}
-          weight={700}
-          align="left"
-          valign="bottom"
+          style={{ size: 72, weight: 700, align: "left", valign: "bottom" }}
           box={{ x: 1080, y: 400, origin: "center" }}
-          animation={{ preset: "slide-left", in: 0.3, out: 0.3 }}
+          animation={{ type: "slideLeft", in: 0.3, out: 0.3 }}
         >
           {title}
         </Title>

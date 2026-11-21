@@ -98,7 +98,7 @@ describe("a graphic timed by a word of its anchor", () => {
       h(Track, { id: "text" }, h(Title, { id: "ten", anchor: "make-1", at: "word:9", duration: 1 }, "x")),
     );
     expect(placed(ramped as ReturnType<typeof edit>).errors).toEqual(["UNSUPPORTED_ANCHOR:at"]);
-    const frozen = edit({ clip: { freezes: [{ at: 0.5, duration: 1, source: 2.5 }] } });
+    const frozen = edit({ clip: { freezes: [{ start: 0.5, duration: 1, source: 2.5 }] } });
     expect(placed(frozen).errors).toEqual(["UNSUPPORTED_ANCHOR:at"]);
   });
 

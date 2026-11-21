@@ -1,12 +1,13 @@
 import { z } from "zod";
 
-import { zBlendMode, zShapeType, zTextAnimationPreset } from "../enums";
+import { zBlendMode, zShapeType, zTextAnimationType } from "../enums";
 import {
   adjustmentEffectsProp,
   assetRefSchema,
   colorSchema,
   entranceProps,
   fitProp,
+  fontWeightSchema,
   gradientSchema,
   idSchema,
   overlayProps,
@@ -20,52 +21,69 @@ import {
   visualProps,
   volumeSchema,
 } from "./common";
-import { zSvgColorMode, zTextAlign, zTextDecoration, zTextValign } from "./enums-local";
+import { zSvgColorType, zTextAlign, zTextDecoration, zTextValign } from "./enums-local";
 
 const textAnimationSchema = z.strictObject({
-  preset: zTextAnimationPreset,
+  /** Which animation: `typewriter`, `fade`, a slide, `scale` or `wordByWord`. */
+  type: zTextAnimationType,
   in: z.number().nonnegative().default(0.5),
   out: z.number().nonnegative().default(0.5),
   stagger: z.number().nonnegative().optional(),
 });
 
-export const titleSchema = z.strictObject({
-  ...timedProps,
-  ...overlayProps,
-  ...entranceProps,
-  /** A theme preset for titles; without one, the theme's `default` title preset applies. */
-  style: idSchema.optional(),
+/** How a title's letters look. Every field has a default, so `{}` is plain white Inter at 48 pixels. */
+const titleLookSchema = z.strictObject({
+  /** A theme title preset this look starts from; the fields written beside it win. */
+  preset: idSchema.optional(),
   /** The font family: a bundled one, one the file declares, or one from the font catalogue. A theme preset may set it instead. */
   font: z.string().default("Inter"),
   /** The letters' size, in pixels. */
   size: z.number().min(1).max(1000).default(48),
   /** How heavy the letters are: 100 to 900, or `normal` and `bold`. */
-  weight: z.union([z.number().int().min(100).max(900).multipleOf(100), z.enum(["normal", "bold"])]).default("bold"),
+  weight: fontWeightSchema.default("bold"),
   /** Slanted letters. */
   italic: z.boolean().default(false),
   /** The letters' colour, or a theme token such as `$text`. */
   color: colorSchema.default("#ffffff"),
   /** A colour filling the text box behind the letters. */
   background: colorSchema.optional(),
-  /** An outline around the letters: its colour and width in pixels. */
-  stroke: z.strictObject({ color: colorSchema, width: z.number().min(0).max(100) }).optional(),
+  /** An outline around the letters: its colour and thickness in pixels. */
+  stroke: z.strictObject({ color: colorSchema, thickness: z.number().min(0).max(100) }).optional(),
   /** A drop shadow under the letters: colour, blur and offset in pixels. */
   shadow: textShadowSchema.optional(),
   /** Which side of the text box the lines sit against. */
   align: zTextAlign.default("center"),
   /** Where in the text box's height the text sits. */
   valign: zTextValign.default("middle"),
-  /** The text box, in composition pixels; the whole frame when left out, so background, align and valign work inside it. */
-  width: z.number().positive().optional(),
-  /** The text box's height, in pixels, as `width`. */
-  height: z.number().positive().optional(),
   /** The distance between lines, as a multiple of the letters' size. */
   lineHeight: z.number().min(0.1).max(10).default(1.2),
   /** Extra space between letters, in pixels. */
   letterSpacing: z.number().min(-100).max(100).default(0),
   /** A line under, over or through the letters. */
   decoration: zTextDecoration.optional(),
-  /** An entrance and exit: a preset, its seconds in and out, and for word-by-word the delay between words. */
+});
+
+/** The fields a theme's title preset may hold: the look, without `preset` (a preset does not start from another). */
+export const TITLE_LOOK_KEYS: readonly string[] = Object.keys(titleLookSchema.shape).filter((k) => k !== "preset");
+
+export const titleSchema = z.strictObject({
+  ...timedProps,
+  ...overlayProps,
+  ...entranceProps,
+  /**
+   * How the letters look: a theme title preset by name (`"h1"`), or an object of `font`, `size`, `weight`, `italic`,
+   * `color`, `background`, `stroke`, `shadow`, `align`, `valign`, `lineHeight`, `letterSpacing` and `decoration`, with
+   * `preset` naming the preset it starts from. Without a preset, the theme's `default` title preset applies. The text
+   * box is the title's `box`: its `width` and `height`, the whole frame when left out, so background, align and valign
+   * work inside it.
+   */
+  style: z
+    .union([
+      idSchema.transform((preset): { preset?: string | undefined } => ({ preset })).pipe(titleLookSchema),
+      titleLookSchema,
+    ])
+    .prefault({}),
+  /** An entrance and exit: its type, its seconds in and out, and for wordByWord the delay between words. */
   animation: textAnimationSchema.optional(),
 });
 
@@ -81,7 +99,7 @@ const fillSchema = z.union([
 
 const strokeSchema = z.strictObject({
   color: colorSchema,
-  width: z.number().nonnegative(),
+  thickness: z.number().nonnegative(),
   opacity: z.number().min(0).max(1).optional(),
   dashArray: z.array(z.number().nonnegative()).optional(),
   dashOffset: z.number().optional(),
@@ -97,7 +115,7 @@ export const shapeSchema = z.strictObject({
   /** A theme preset for shapes. */
   style: idSchema.optional(),
   /** Which shape it draws. */
-  shape: zShapeType,
+  type: zShapeType,
   /** The shape's box, in pixels; left out, 200. */
   width: z.number().positive().optional(),
   /** The shape's box height, in pixels; left out, 200. */
@@ -106,7 +124,7 @@ export const shapeSchema = z.strictObject({
   points: z.array(vec2Schema).optional(),
   /** A colour, or `{ type, color, gradient, opacity }` for a gradient or no fill. */
   fill: fillSchema.optional(),
-  /** The outline: colour, width in pixels, opacity, dashes, caps and joins. */
+  /** The outline: colour, thickness in pixels, opacity, dashes, caps and joins. */
   stroke: strokeSchema.optional(),
   /** A drop shadow: colour, blur and offset in pixels. */
   shadow: shadowSchema.optional(),
@@ -143,7 +161,7 @@ export const svgSchema = z
     preserveAspectRatio: z.string().optional(),
     /** Recolours it: `tint` keeps the shading and colours it, `replace` paints every drawn pixel; `opacity` is how much. */
     color: z
-      .strictObject({ mode: zSvgColorMode, tint: colorSchema.optional(), opacity: z.number().min(0).max(1).optional() })
+      .strictObject({ type: zSvgColorType, tint: colorSchema.optional(), opacity: z.number().min(0).max(1).optional() })
       .optional(),
     ...entranceProps,
   })

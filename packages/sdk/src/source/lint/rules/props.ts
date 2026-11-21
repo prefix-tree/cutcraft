@@ -1,8 +1,10 @@
-// Everything about an element is a prop (decision 0034). `<Keyframe>`, `<Effect>`, `<SpeedKey>` and `<Freeze>`
+// Everything about an element is a prop (decision 0035). `<Keyframe>`, `<Effect>`, `<SpeedKey>` and `<Freeze>`
 // children, and the `automation` prop, are the old spelling: this rule reports them and moves them into the element's
 // props, copying every value as it is written. What cannot be moved for certain is reported without a fix: keys made
 // in code (a `.map`, a helper), a spread, a transform that is not written out.
 import * as t from "@babel/types";
+
+import { RENAMED_EFFECT_PARAMS, RESPELLED_VALUES } from "@uberscene/kit/schema";
 
 import type { SourceEdit } from "../../edits";
 import { attributeOf, idOf, tagName } from "../fixes";
@@ -202,7 +204,7 @@ function move(text: string, el: t.JSXElement): Moved | null {
       freezes.push({
         t: "obj",
         fields: [
-          { key: "at", value: raw(need(text, ctag, "start")) },
+          { key: "start", value: raw(need(text, ctag, "start")) },
           { key: "duration", value: raw(need(text, ctag, "duration")) },
           { key: "source", value: raw(need(text, ctag, "at")) },
         ],
@@ -289,8 +291,22 @@ function move(text: string, el: t.JSXElement): Moved | null {
   return { attrs, remove, children, counts };
 }
 
+/** An easing as written, respelled in camelCase when it is a literal in the old spelling (`"ease-in-out"`). */
+function easingOf(text: string, tag: t.JSXOpeningElement): string | undefined {
+  const literal = stringOf(attributeOf(tag, "easing"));
+  const now = literal !== undefined && Object.hasOwn(RESPELLED_VALUES, literal) ? RESPELLED_VALUES[literal] : undefined;
+  return now !== undefined ? JSON.stringify(now) : valueText(text, attributeOf(tag, "easing"));
+}
+
+/** A built-in effect's param under its name since 0.6 (the shadow's `radius` is `blur`). */
+function paramName(type: string | undefined, param: string): string {
+  const moved =
+    type !== undefined && Object.hasOwn(RENAMED_EFFECT_PARAMS, type) ? RENAMED_EFFECT_PARAMS[type] : undefined;
+  return moved && Object.hasOwn(moved, param) ? (moved[param] as string) : param;
+}
+
 function keyOf(text: string, tag: t.JSXOpeningElement, valueName: string, comment: string | undefined): Key {
-  const easing = valueText(text, attributeOf(tag, "easing"));
+  const easing = easingOf(text, tag);
   return {
     at: need(text, tag, "at"),
     value: need(text, tag, valueName),
@@ -307,14 +323,16 @@ function effectOf(text: string, el: t.JSXElement): P {
   const tag = el.openingElement;
   const fields: { key: string | null; value: P }[] = [{ key: "type", value: raw(need(text, tag, "type")) }];
   const params = attributeOf(tag, "params");
+  const type = stringOf(attributeOf(tag, "type"));
   const keyed = new Map<string, Key[]>();
   for (const child of el.children) {
     if (t.isJSXText(child) && child.value.trim() === "") continue;
     if (t.isJSXExpressionContainer(child) && t.isJSXEmptyExpression(child.expression)) continue;
     if (!t.isJSXElement(child) || tagName(child.openingElement) !== "Keyframe")
       throw new Unsure("an <Effect> holding something other than keys");
-    const param = stringOf(attributeOf(child.openingElement, "param"));
-    if (param === undefined) throw new Unsure("an effect key whose param is not a string");
+    const written = stringOf(attributeOf(child.openingElement, "param"));
+    if (written === undefined) throw new Unsure("an effect key whose param is not a string");
+    const param = paramName(type, written);
     const list = keyed.get(param) ?? [];
     keyed.set(param, list);
     list.push(keyOf(text, child.openingElement, "value", undefined));
@@ -323,7 +341,10 @@ function effectOf(text: string, el: t.JSXElement): P {
     const node = expressionOf(params);
     if (t.isObjectExpression(node)) {
       // A param that is keyed is its keys: the constant written beside them was never seen.
-      for (const f of fieldsOf(text, node)) if (f.key === null || !keyed.has(f.key)) fields.push(f);
+      for (const f of fieldsOf(text, node)) {
+        const key = f.key === null ? null : paramName(type, f.key);
+        if (key === null || !keyed.has(key)) fields.push({ ...f, key });
+      }
     } else if (node) fields.push({ key: null, value: raw(src(text, node)) });
   }
   for (const [param, list] of keyed) fields.push({ key: param, value: keyList(list) });

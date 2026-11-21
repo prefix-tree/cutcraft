@@ -464,7 +464,7 @@ describe("title effects", () => {
   });
 
   it("outline draws a band around the box, and outlineOnly fills its silhouette", async () => {
-    const [band, beyond, inside] = await boxed("outline", `{ type: "outline", width: 8 }`, [
+    const [band, beyond, inside] = await boxed("outline", `{ type: "outline", thickness: 8 }`, [
       [204, 90],
       [216, 90],
       [160, 90],
@@ -472,9 +472,11 @@ describe("title effects", () => {
     expect(near(band, [255, 255, 255])).toBe(true);
     expect(near(beyond, [0, 0, 0])).toBe(true);
     expect(near(inside, [255, 0, 0])).toBe(true);
-    const [filled] = await boxed("outline-only", `{ type: "outline", width: 8, outlineOnly: true, color: "#0000ff" }`, [
-      [160, 90],
-    ]);
+    const [filled] = await boxed(
+      "outline-only",
+      `{ type: "outline", thickness: 8, outlineOnly: true, color: "#0000ff" }`,
+      [[160, 90]],
+    );
     expect(near(filled, [0, 0, 255])).toBe(true);
   });
 
@@ -575,7 +577,7 @@ describe("stylizers and generators", () => {
   it("halftone in cmyk prints a grey with all four inks, so it stays neutral on average", async () => {
     const cs = await at(
       "halftone-cmyk",
-      `{ type: "halftone", size: 10, mode: "cmyk" }`,
+      `{ type: "halftone", size: 10, inks: "cmyk" }`,
       { grey: 0.4 },
       grid(40, 40, 40),
     );
@@ -602,7 +604,7 @@ describe("stylizers and generators", () => {
 
   it("scanlines darken a band every spacing pixels, and roll by speed times time", async () => {
     const effect = (speed: number) =>
-      `{ type: "scanlines", spacing: 10, thickness: 0.5, intensity: 1, speed: ${speed} }`;
+      `{ type: "scanlines", spacing: 10, coverage: 0.5, intensity: 1, speed: ${speed} }`;
     const [onLine, between] = await at("scan", effect(0), { split: -1 }, [
       [160, 90],
       [160, 95],
@@ -881,7 +883,7 @@ it("runs a declared effect over overlays: a Layer, a Motion layer and a title, t
       <Motion id="m" start={0} duration={2} sequence={[[".box", { opacity: [1, 1] }, { duration: 1 }]]} effects={[{ type: swap }]}>
         <div className="box" style={{ position: "absolute", left: 120, top: 10, width: 80, height: 60, background: "#ff0000" }} />
       </Motion>
-      <Title id="t" start={0} duration={2} color="#ff0000" size={90} box={{ x: 160, y: 130, origin: "center" }} effects={[{ type: swap }]}>
+      <Title id="t" start={0} duration={2} style={{ color: "#ff0000", size: 90 }} box={{ x: 160, y: 130, origin: "center" }} effects={[{ type: swap }]}>
         ███
       </Title>
     </Track>`,

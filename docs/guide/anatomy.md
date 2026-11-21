@@ -11,7 +11,7 @@ export default function Video() {
   return (
     <Composition fps={30} width={1920} height={1080}>
       <Track id="text" layout="free">
-        <Shape id="card" start={0} duration={3} shape="rectangle" width={900} height={240} style="card" />
+        <Shape id="card" start={0} duration={3} type="rectangle" width={900} height={240} style="card" />
         <Title id="hello" start={0.3} duration={2.7}>Hello, video</Title>
       </Track>
     </Composition>

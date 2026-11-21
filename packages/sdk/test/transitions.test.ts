@@ -47,7 +47,7 @@ describe("the shader transitions", () => {
       seed: 0,
       softness: 0.15,
     });
-    expect(params(`<Transition id="x" type="zoom" />`)).toEqual({ center: [0.5, 0.5], scale: 1.6, blur: 0.5 });
+    expect(params(`<Transition id="x" type="zoom" />`)).toEqual({ center: [0.5, 0.5], scale: 1.6, smear: 0.5 });
   });
 
   it("say what is wrong with their params", () => {

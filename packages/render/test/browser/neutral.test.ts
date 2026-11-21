@@ -58,7 +58,7 @@ ${CHART}
 ${probe}
 export default function Video() {
   return (
-    <Composition fps={30} width={320} height={180} background={{ mode: "color", color: "#000000" }}>
+    <Composition fps={30} width={320} height={180} background={{ type: "color", color: "#000000" }}>
       <Track id="t">
         <Clip id="c" src="asset:solid" fit="cover" effects={[{ type: chart, shape: ${shape} }${type ? `, { type: probe, ...${neutral} }` : ""}]} />
       </Track>

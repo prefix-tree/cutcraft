@@ -30,7 +30,7 @@ export function Badge(props: z.input<typeof badgeSchema>) {
     h(Shape, {
       id: `${p.id}-pill`,
       ...timing(t),
-      shape: "rectangle",
+      type: "rectangle",
       width,
       height,
       cornerRadius: height / 2,
@@ -43,10 +43,7 @@ export function Badge(props: z.input<typeof badgeSchema>) {
       {
         id: `${p.id}-text`,
         ...timing(t),
-        font: "$heading",
-        size: p.size,
-        weight: 700,
-        color: p.textColor,
+        style: { font: "$heading", size: p.size, weight: 700, color: p.textColor },
         box: { x: c.x, y: c.y, origin: "center" },
         ...motion,
       },

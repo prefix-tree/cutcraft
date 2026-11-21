@@ -39,7 +39,7 @@ Every action has `validate`, `apply`, `invert` and `fold`; the inverse is never 
 | `caption/restore` | `{ captionsId, node, after }` | The undo of caption/remove: puts the cue back where it was. |
 | `caption/setAll` | `{ captionsId, nodes, after? }` | Replaces every literal cue with `nodes`; empty `nodes` lets the cues generated from `src` come back. |
 | `caption/setAnimation` | `{ captionsId, animation }` | Sets how caption words animate in (`animation`), separate from the style. |
-| `caption/setStyle` | `{ captionsId, style? }` | Sets the captions' `style`; omit it to clear. |
+| `caption/setStyle` | `{ captionsId, style? }` | Sets the captions' `style`: a theme preset's name, or an object (`{ preset, size, align, … }`); omit it to clear. |
 | `caption/update` | `{ captionId, text?, start?, end?, words? }` | Changes a cue's text, times or words; editing a generated cue makes every cue literal first. |
 
 ## `clip/`
@@ -70,7 +70,7 @@ Every action has `validate`, `apply`, `invert` and `fold`; the inverse is never 
 
 | action | params | what it does |
 |---|---|---|
-| `composition/setBackground` | `{ mode?, color? }` | Sets what shows behind every track: a `color`, or a `blur` of the picture; merges into the current `background`. |
+| `composition/setBackground` | `{ type?, color? }` | Sets what shows behind every track: a `color`, or a `blur` of the picture; merges into the current `background`. |
 | `composition/setProps` | `{ defaults }` | The tweaks panel: rewrites the file's `defaults` literal. |
 | `composition/setTheme` | `{ theme, merge? }` | Swap the theme (or remove it with null); with `merge`, lay the given parts over the current theme instead. |
 | `composition/updateSettings` | `{ fps?, width?, height?, sampleRate?, channels? }` | Sets the composition's fps, size, sample rate or channel count; only the fields given change. `fps` is a whole number of frames per second. An NTSC rate is a string in the file (`fps="29.97"`), which this action does not write. `sampleRate` must divide into whole ticks (44100, 48000, 96000). |
@@ -128,10 +128,10 @@ Every action has `validate`, `apply`, `invert` and `fold`; the inverse is never 
 
 | action | params | what it does |
 |---|---|---|
-| `marker/add` | `{ markerId, at, label?, color? }` | Adds a timeline marker at `at` seconds, with an optional label and colour. |
+| `marker/add` | `{ markerId, start, label?, color? }` | Adds a timeline marker at `start` seconds, with an optional label and colour. |
 | `marker/remove` | `{ markerId }` | Deletes a marker. |
 | `marker/restore` | `{ node, after }` | The undo of marker/remove: puts the marker back where it was. |
-| `marker/update` | `{ markerId, at?, label?, color? }` | Changes a marker's time, label or colour. |
+| `marker/update` | `{ markerId, start?, label?, color? }` | Changes a marker's time, label or colour. |
 
 ## `mask/`
 

@@ -22,16 +22,15 @@ export default function Video() {
           id="word"
           start={0}
           duration={3}
-          size={128}
-          color="#e8a33d"
+          style={{ size: 128, color: "#e8a33d" }}
           effects={[
             {
               type: "shadow",
               x: 8,
               y: 8,
-              radius: 3,
+              blur: 3,
               opacity: [
-                { at: 0.5, value: 0, easing: "ease-in-out" },
+                { at: 0.5, value: 0, easing: "easeInOut" },
                 { at: 1.5, value: 0.9 },
               ],
             },

@@ -1,7 +1,8 @@
 import { z } from "zod";
 
 import { TRANSITION_PARAMS } from "../../effects/registry";
-import { TRANSITION_TYPES, type TransitionType, zTransitionType } from "../enums";
+import { renamedParam } from "../effect-params";
+import { RESPELLED_VALUES, TRANSITION_TYPES, type TransitionType, zTransitionType } from "../enums";
 import { idSchema } from "./common";
 
 /** Per-type parameter schemas, with defaults that validate: the registry's. */
@@ -28,10 +29,28 @@ export const transitionSchema = z
     if (!isBuiltInTransition(v.type)) return;
     const result = TRANSITION_PARAMS[v.type].safeParse(v.params);
     if (!result.success) {
+      const params = v.params as Record<string, unknown>;
+      const renamed = result.error.issues.flatMap((issue) =>
+        issue.code === "unrecognized_keys"
+          ? issue.keys.flatMap((k) => {
+              const now = renamedParam(v.type, k, "transition");
+              return now === undefined ? [] : [`params.${k} is now params.${now}`];
+            })
+          : [],
+      );
+      const respelled = result.error.issues.flatMap((issue) => {
+        const value = issue.path.length === 1 ? params[String(issue.path[0])] : undefined;
+        const now =
+          typeof value === "string" && Object.hasOwn(RESPELLED_VALUES, value) ? RESPELLED_VALUES[value] : undefined;
+        return now === undefined ? [] : [`params.${String(issue.path[0])} "${value}" is now "${now}"`];
+      });
       ctx.addIssue({
         code: "custom",
         path: ["params"],
-        message: `invalid params for ${v.type}: ${result.error.message}`,
+        message:
+          renamed.length + respelled.length > 0
+            ? `${[...renamed, ...respelled].join(", ")}; uberscene lint --fix moves the file`
+            : `invalid params for ${v.type}: ${result.error.message}`,
       });
     }
   });

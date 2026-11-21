@@ -116,14 +116,14 @@ export const shadow = css(
     /** How far the shadow falls down, in pixels; negative falls up. */
     y: z.number().default(4),
     /** How soft the shadow's edge is, in pixels: the blur's standard deviation. */
-    radius: z.number().min(0).max(200).default(8),
+    blur: z.number().min(0).max(200).default(8),
     /** The shadow's colour. */
     color: HEX.default("#000000"),
     /** How dark the shadow is: 0 is invisible, 1 is solid colour. */
     opacity: share(0.5),
   },
   (p) =>
-    `drop-shadow(${num(p, "x", 0)}px ${num(p, "y", 4)}px ${num(p, "radius", 8)}px ${rgba(
+    `drop-shadow(${num(p, "x", 0)}px ${num(p, "y", 4)}px ${num(p, "blur", 8)}px ${rgba(
       typeof p.color === "string" && HEX.safeParse(p.color).success ? p.color : "#000000",
       num(p, "opacity", 0.5),
     )})`,

@@ -26,7 +26,7 @@ export const defaults = {};
  */
 export default function Video() {
   return (
-    <Composition fps={30} width={640} height={360} background={{ mode: "color", color: "#000000" }}>
+    <Composition fps={30} width={640} height={360} background={{ type: "color", color: "#000000" }}>
       <Track id="main">
         <Clip id="v1" src="asset:bars" in={0} out={4} />
         <Transition id="x1" type="crossfade" duration={0.5} params={{ curve: "linear" }} />
@@ -36,7 +36,7 @@ export default function Video() {
         <Clip id="solid" src="asset:solid" in={0} out={1} />
       </Track>
       <Track id="overlays">
-        <Title id="t1" anchor="v1" offset={0.5} duration={2} size={40} color="#00ff00">
+        <Title id="t1" anchor="v1" offset={0.5} duration={2} style={{ size: 40, color: "#00ff00" }}>
           Hello
         </Title>
         <Layer id="l1" anchor="start" duration={3}>

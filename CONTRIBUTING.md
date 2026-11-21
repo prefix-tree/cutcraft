@@ -35,6 +35,7 @@ focused pull request with a test.
 | `packages/kit` | vocabulary (`src/jsx`), manifest and time references (`src/manifest`), resolver (`src/resolve`), patches and actions (`src/patches`, `src/actions`), source tools and lint (`src/source`) |
 | `packages/graphics` | the free-code libraries: three.js, React Three Fiber and Motion on the video's clock (`src/libraries`), installed by `installFreeCodeLibraries()` |
 | `packages/player` | pure model (`src/model`), decoding (`src/media`), compositing (`src/render`), audio (`src/audio`), `PlayerCore` and the React surface (`src/react`) |
+| `packages/editor` | embeddable editor parts around one player: `Editor.Root`, `Preview`, `Layers`, `Timeline`, selection and undoable edits through the sdk's `Executor` |
 | `packages/render` | the export: the page that runs the player in headless Chrome (`src/web`), the Chrome download, joining pieces, the audio mixer, smart copy, stills, the layout check and the CLI |
 | `recipes` | complete cut files for common videos, linted, resolved and tested |
 | `examples/launch-recap` | a file written by a model from a brief, played in the browser |

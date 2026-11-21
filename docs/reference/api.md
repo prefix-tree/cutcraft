@@ -357,7 +357,7 @@ nothing a tool needs to edit a file.
 | `useProgress`, `progress` | `(when?: { at?, after?, over?, easing?, progress? }) => number`, `(clock, when?) => number` | How far along something is on the layer's clock: 0 before it starts, 1 once it is over, eased between. |
 | `random` | `(seed: string \| number) => number` | A number in [0, 1) fixed by `seed`, the same every frame in the preview and the export. |
 | `narrate` | `(script: string, options?: { start?, pace?: { word?, letter?, comma?, stop? }, lineLength?, hold?, transcript? }) => { words, lines, cues, at(name), duration, warnings }` | Times a narration from its script: every word with its start and end, the subtitles a phrase at a time, and the cues by name. A word in square brackets is a cue, a number in round brackets a pause in seconds, a name in curly brackets a cue with no word. Times come from a speaking pace, or from `transcript` ([Narration from a script](/guide/captions-and-sound#narration-from-a-script)). |
-| `effect` | `<P extends ZodObject>({ name, params?: P, shader } \| { name, params?: P, passes: string[] }) => EffectRef<P>` | Declares an effect drawn by a GLSL `vec4 effect(vec2 uv)`, or by several run in order (`passes`, each reading the one before as `image` and the element as `original`), that reads each param as `params.<name>`. Returns the definition as a value, with no side effect, for the `type` of an entry in `effects`, whose params are then checked against `P`. The player finds it on the element that uses it or among the file's exports, so each file's effects are its own ([Effects and transitions of your own](/guide/custom-effects)). |
+| `effect` | `<P extends ZodObject>({ name, params?: P, shader } \| { name, params?: P, passes: string[] }) => EffectRef<P>` | Declares an effect drawn by a GLSL `vec4 effect(vec2 uv)`, or by several run in order (`passes`, each reading the one before as `image` and the element as `original`), that reads each param as `params.<name>`. Returns the definition as a value, with no side effect, for `<Effect type>`, which then checks `params` against `P`. The player finds it on the element that uses it or among the file's exports, so each file's effects are its own ([Effects and transitions of your own](/guide/custom-effects)). |
 | `transition` | `<P extends ZodObject>({ name, params?: P, shader }) => TransitionRef<P>` | Declares a transition drawn by a GLSL `vec4 transition(vec2 uv)` that reads `from`, `to`, `progress` and `params.<name>`. Returns the definition as a value for `<Transition type>`, which then checks `params` against `P`. |
 | `font` | `({ family, src: "asset:<id>", weight?, style? }) => FontRef` | Declares a face from a font file and returns it as a value that stands for its family wherever a string goes ([Fonts](/guide/themes#fonts)). The faces a file uses or exports are on `state.fonts`. |
 | `googleFont` | `(family, { weights?, styles? }?) => FontRef` | Declares a Google Fonts family, one face per weight and style, and returns it as a value that stands for its family. The export downloads it once into a local cache. |
@@ -372,7 +372,7 @@ transition registries, the enums, the fonts and the themes. Tools and the refere
 | `knobsOf` | `(schema, values?) => Knob[]` | A file's schema values in order, each with `key`, `kind`, `description`, `optional`, its `value`, and `options`, `min` and `max` where it has them. |
 | `BUILT_IN_SHADERS`, `builtInShader` | `readonly ShaderDefinition[]`, `(type) => ShaderDefinition \| undefined` | The built-in effects drawn by a shader (the colour, footage and title effects), with the schema of their params. |
 | `EFFECTS`, `TRANSITIONS`, `EFFECT_FAMILIES`, `TRANSITION_FAMILIES` | registries | Every built-in effect and transition: its name, strict params schema and how it draws, and the families the reference groups them in. The generated [effects reference](/reference/effects/) is read from these. |
-| `EffectParams<K>`, `TransitionParams<K>` | types | The params a built-in effect or transition takes, as an `effects` entry and `<Transition params>` check them. |
+| `EffectParams<K>`, `TransitionParams<K>` | types | The params a built-in effect or transition takes, as `<Effect params>` and `<Transition params>` check them. |
 | `isNeutral` | `(type, params) => boolean` | Whether a built-in effect changes nothing with these params (an amount at 0): the player does not draw it then. |
 | `FONT_CATALOG`, `findFont`, `fontsFor`, `nearestFont` | `readonly CatalogFont[]`, `(family) => CatalogFont \| undefined`, `({ role?, category? }?) => CatalogFont[]`, `(family) => CatalogFont \| undefined` | The fonts to choose from: the bundled families and a short list from Google Fonts, each with its category, the roles it suits, a line on how it looks, what it pairs with, and its weights. What `uberscene fonts` prints and what a font picker lists; `nearestFont` finds the family a misspelt name meant ([Choosing a font](/guide/themes#choosing-a-font)). |
 
@@ -522,7 +522,7 @@ Every name each entry exports, read from the code. The sections above explain th
 
 ### `@uberscene/kit/schema`
 
-241 exports.
+247 exports.
 
 | Export | Kind | |
 |---|---|---|
@@ -574,6 +574,7 @@ Every name each entry exports, read from the code. The sections above explain th
 | `ease` | function | `name` applied to `x` clamped to 0..1; an unknown or missing name is linear. |
 | `Easing` | type |  |
 | `EASING_FN` | const |  |
+| `easingCurve` | function | The curve an easing name names, for free code (`interpolate`, `progress`, `ease`). |
 | `EASINGS` | const |  |
 | `effect` | function | Declares an effect drawn by a GLSL function, and returns it for an effect's `type`. |
 | `EFFECT_FAMILIES` | const | The effects by family, for the reference and the editor's menus. |
@@ -668,6 +669,7 @@ Every name each entry exports, read from the code. The sections above explain th
 | `NOT_RENDERED` | const |  |
 | `NotRendered` | interface | Accepted but not rendered. |
 | `NTSC_RATES` | const | The NTSC rates, written as the strings people say them as. |
+| `OldEasing` | type | An easing name spelled the way it was before 0.6, which free code still takes. |
 | `PALETTE_KEYS` | const | The palette names every built-in theme fills. |
 | `parseRate` | function | A frame rate as an exact fraction. |
 | `PlacementScope` | type |  |
@@ -677,10 +679,14 @@ Every name each entry exports, read from the code. The sections above explain th
 | `rateLabel` | function | The rate as people write it. |
 | `rateProblem` | function | Why a rate cannot be used, or null. |
 | `rateValue` | const | The rate as frames per second, for display and for code that only needs an approximate number. |
+| `RENAMED_EFFECT_PARAMS` | const | Built-in effects' params that had another name before 0.6, by effect. |
+| `RENAMED_TRANSITION_PARAMS` | const | Built-in transitions' params that had another name before 0.6, by transition. |
+| `renamedParam` | function | What a built-in effect's (or transition's) param `param` is called since 0.6, when that is another name; else undefined. |
 | `RENDERED_VALUES` | const |  |
 | `RenderedValues` | interface | An enum prop where only some values render. |
 | `ResolvedTheme` | interface | A file's theme with its base theme merged in. |
 | `resolveTheme` | function | The theme a composition's raw `theme` prop describes. |
+| `RESPELLED_VALUES` | const | Values spelled in kebab-case before 0.6 and in camelCase since, old to new. |
 | `sampleAt` | const | The audio sample a tick falls in. |
 | `sampleAtSeconds` | const | The audio sample a time in seconds falls in. |
 | `sampleRateProblem` | function | Why a sample rate cannot be used, or null. |
@@ -703,9 +709,9 @@ Every name each entry exports, read from the code. The sections above explain th
 | `STYLED_KINDS` | const | Element kinds a theme can hold named presets for; their elements pick one with `style`. |
 | `StyledKind` | type |  |
 | `Svg` | const | The `<Svg>` element ([reference](/reference/elements/svg)). |
-| `SVG_COLOR_MODES` | const |  |
+| `SVG_COLOR_TYPES` | const |  |
 | `TEXT_ALIGNS` | const |  |
-| `TEXT_ANIMATION_PRESETS` | const |  |
+| `TEXT_ANIMATION_TYPES` | const |  |
 | `TEXT_DECORATIONS` | const |  |
 | `TEXT_VALIGNS` | const |  |
 | `THEME_NAMES` | const | The built-in themes and motion styles a file can name. |
@@ -762,7 +768,7 @@ Every name each entry exports, read from the code. The sections above explain th
 | `zFitMode` | const |  |
 | `zKeyframeProperty` | const |  |
 | `zShapeType` | const |  |
-| `zTextAnimationPreset` | const |  |
+| `zTextAnimationType` | const |  |
 | `zTrackLayout` | const |  |
 | `zTrackRole` | const |  |
 | `zTransitionType` | const |  |
@@ -1062,7 +1068,7 @@ Every name each entry exports, read from the code. The sections above explain th
 
 ### `@uberscene/player`
 
-22 exports.
+26 exports.
 
 | Export | Kind | |
 |---|---|---|
@@ -1075,13 +1081,17 @@ Every name each entry exports, read from the code. The sections above explain th
 | `FontFaceSource` | interface | A face to add to the page's fonts, from a URL or the file's bytes. |
 | `MediaHandle` | type | Where an asset's bytes come from. |
 | `MediaResolver` | interface |  |
-| `Player` | const | Canvas for media, DOM for overlays, controls below. |
+| `Player` | const | A `<PlayerProvider>` with its `<PlayerView>`. |
 | `PlayerCore` | class | The framework-free player. |
 | `PlayerErrorEvent` | interface |  |
 | `PlayerEvents` | interface |  |
 | `PlayerOptions` | interface |  |
 | `PlayerProps` | interface |  |
+| `PlayerProvider` | function | Owns the PlayerCore and shares it with everything inside. |
+| `PlayerProviderProps` | interface |  |
 | `PlayerRef` | type |  |
+| `PlayerView` | const | The picture of the enclosing `<PlayerProvider>`. |
+| `PlayerViewProps` | interface |  |
 | `TimeSnapshot` | interface |  |
 | `useCompositionFrame` | function |  |
 | `useCompositionTime` | function |  |
@@ -1139,6 +1149,24 @@ Every name each entry exports, read from the code. The sections above explain th
 | `placementSourceTime` | function | Source seconds a media placement shows at composition time `t`. |
 | `SETTLE_MS` | const | Quiet time after the last setState before a paused preview fetches its exact frame. |
 | `visiblePlacements` | function | Visual, timed placements that show at `t`. |
+
+### `@uberscene/editor`
+
+11 exports.
+
+| Export | Kind | |
+|---|---|---|
+| `EditApi` | interface |  |
+| `Editor` | const | The editor parts as one namespace. |
+| `EditorValue` | interface |  |
+| `Layers` | function | Every element, grouped by track, as buttons that select it. |
+| `Preview` | const | The player's picture. |
+| `Root` | function | One player and one selection for every part inside. |
+| `RootProps` | type |  |
+| `Timeline` | function | One row per track, a bar per element, and the playhead. |
+| `useEdit` | function | Undoable edits through the Root's executor. |
+| `useEditor` | function |  |
+| `useSelection` | function | The selected element id and the setter. |
 
 ### `@uberscene/render`
 

@@ -4,7 +4,7 @@
 import { Children, type CSSProperties, cloneElement, isValidElement, type ReactNode } from "react";
 
 import { fontFamily } from "@uberscene/kit";
-import { TEXT_ANIMATION_PRESETS } from "@uberscene/kit/schema";
+import { TEXT_ANIMATION_TYPES } from "@uberscene/kit/schema";
 import type { Placement } from "@uberscene/sdk/resolver";
 
 import { isVisibleAt } from "../model/visible";
@@ -17,29 +17,34 @@ import type { ElementProps } from "./layout";
  * calls. The player mounts these inside positioned divs.
  */
 
-const SUPPORTED: ReadonlySet<string> = new Set(TEXT_ANIMATION_PRESETS);
+const SUPPORTED: ReadonlySet<string> = new Set(TEXT_ANIMATION_TYPES);
 
-/** A title's box: its width and height props, the whole frame when left out. */
+/**
+ * A title's text box: its `box`'s width and height, each the frame's when left out. A title has no `fit`, so its
+ * content is drawn at this size and `placeBox` never scales it.
+ */
 export function titleBox(
   props: Readonly<Record<string, unknown>>,
   comp: { width: number; height: number },
 ): { width: number; height: number } {
+  const box = (props.box ?? {}) as { width?: unknown; height?: unknown };
   return {
-    width: typeof props.width === "number" ? props.width : comp.width,
-    height: typeof props.height === "number" ? props.height : comp.height,
+    width: typeof box.width === "number" ? box.width : comp.width,
+    height: typeof box.height === "number" ? box.height : comp.height,
   };
 }
 
-/** Text title: the file's text content with font props; entrance/exit presets as CSS transforms. */
+/** Text title: the file's text content in its `style`; entrance/exit presets as CSS transforms. */
 export function titleContent(p: ElementProps & { readonly text: string }): ReactNode {
-  const props = p.placement.props as Record<string, unknown>;
+  const own = p.placement.props as Record<string, unknown>;
+  const props = (typeof own.style === "object" && own.style !== null ? own.style : {}) as Record<string, unknown>;
   const text = p.text;
   const rel = p.time - p.placement.start;
-  const anim = props.animation as { preset: string; in: number; out: number } | undefined;
+  const anim = own.animation as { type: string; in: number; out: number } | undefined;
   const { effect, visibleChars } = animation(anim, rel, p.placement.duration, text.length, p.placement.id);
   const weight = props.weight;
   const shadow = props.shadow as { color: string; blur?: number; x?: number; y?: number } | undefined;
-  const stroke = props.stroke as { color: string; width: number } | undefined;
+  const stroke = props.stroke as { color: string; thickness: number } | undefined;
   const inner: CSSProperties = {
     width: "100%",
     height: "100%",
@@ -56,17 +61,17 @@ export function titleContent(p: ElementProps & { readonly text: string }): React
     color: String(props.color ?? "#ffffff"),
     lineHeight: Number(props.lineHeight ?? 1.2),
     letterSpacing: Number(props.letterSpacing ?? 0),
-    textDecoration: typeof props.decoration === "string" ? props.decoration : "none",
+    textDecoration: typeof props.decoration === "string" ? textDecoration(props.decoration) : "none",
     whiteSpace: "pre-wrap",
     ...(props.background ? { background: String(props.background) } : {}),
     ...(shadow ? { textShadow: `${shadow.x ?? 0}px ${shadow.y ?? 0}px ${shadow.blur ?? 0}px ${shadow.color}` } : {}),
-    ...(stroke ? { WebkitTextStroke: `${stroke.width}px ${stroke.color}` } : {}),
+    ...(stroke ? { WebkitTextStroke: `${stroke.thickness}px ${stroke.color}` } : {}),
     ...effect,
   };
   const shown = visibleChars === null ? text : text.slice(0, visibleChars);
   return (
     <div style={inner}>
-      {anim?.preset === "word-by-word" ? (
+      {anim?.type === "wordByWord" ? (
         // One flex item for the whole text: the words then flow and wrap inside it as ordinary text does, instead of
         // each word being an item of a line that never wraps, with the spaces between them lost.
         <span>{words(text, rel, anim, p.placement.duration)}</span>
@@ -77,31 +82,36 @@ export function titleContent(p: ElementProps & { readonly text: string }): React
   );
 }
 
+/** A decoration as CSS writes it: `lineThrough` is `line-through`. */
+function textDecoration(value: string): string {
+  return value === "lineThrough" ? "line-through" : value;
+}
+
 function animation(
-  anim: { preset: string; in: number; out: number } | undefined,
+  anim: { type: string; in: number; out: number } | undefined,
   rel: number,
   duration: number,
   chars: number,
   id: string,
 ): { effect: CSSProperties; visibleChars: number | null } {
-  if (!anim || anim.preset === "none") return { effect: {}, visibleChars: null };
-  let preset = anim.preset;
-  if (!SUPPORTED.has(preset)) {
-    devWarn(`title-anim:${id}:${preset}`, `text animation "${preset}" on "${id}" is shown as a fade`);
-    preset = "fade";
+  if (!anim || anim.type === "none") return { effect: {}, visibleChars: null };
+  let type = anim.type;
+  if (!SUPPORTED.has(type)) {
+    devWarn(`title-anim:${id}:${type}`, `text animation "${type}" on "${id}" is shown as a fade`);
+    type = "fade";
   }
   const inP = anim.in > 0 ? Math.min(1, rel / anim.in) : 1;
   const outP = anim.out > 0 ? Math.min(1, Math.max(0, (duration - rel) / anim.out)) : 1;
   const k = Math.min(inP, outP);
-  if (preset === "typewriter") return { effect: {}, visibleChars: Math.round(chars * inP) };
-  if (preset === "word-by-word") return { effect: {}, visibleChars: null };
-  const slide = { "slide-up": [0, 40], "slide-down": [0, -40], "slide-left": [40, 0], "slide-right": [-40, 0] }[preset];
+  if (type === "typewriter") return { effect: {}, visibleChars: Math.round(chars * inP) };
+  if (type === "wordByWord") return { effect: {}, visibleChars: null };
+  const slide = { slideUp: [0, 40], slideDown: [0, -40], slideLeft: [40, 0], slideRight: [-40, 0] }[type];
   if (slide)
     return {
       effect: { opacity: k, transform: `translate(${slide[0]! * (1 - k)}px, ${slide[1]! * (1 - k)}px)` },
       visibleChars: null,
     };
-  if (preset === "scale") return { effect: { opacity: k, transform: `scale(${0.6 + 0.4 * k})` }, visibleChars: null };
+  if (type === "scale") return { effect: { opacity: k, transform: `scale(${0.6 + 0.4 * k})` }, visibleChars: null };
   return { effect: { opacity: k }, visibleChars: null };
 }
 
@@ -148,7 +158,7 @@ export function captionsContent(p: {
     color?: string;
     background?: string;
     shadow?: { color: string; blur?: number; x?: number; y?: number };
-    stroke?: { color: string; width: number };
+    stroke?: { color: string; thickness: number };
     highlight?: string;
     highlightBox?: string;
     upcoming?: string;
@@ -177,7 +187,7 @@ export function captionsContent(p: {
     textShadow: shadow,
     // The outline is painted under the letters, so it does not eat into them.
     ...(style.stroke
-      ? { WebkitTextStroke: `${style.stroke.width}px ${style.stroke.color}`, paintOrder: "stroke fill" }
+      ? { WebkitTextStroke: `${style.stroke.thickness}px ${style.stroke.color}`, paintOrder: "stroke fill" }
       : {}),
     lineHeight: 1.15,
   };
@@ -239,10 +249,10 @@ function line(
       current = time >= w.start && time < w.end;
     const color = current
       ? (style.highlight ?? "#ffd400")
-      : done || animation === "word-highlight"
+      : done || animation === "wordHighlight"
         ? undefined
         : (style.upcoming ?? "rgba(255,255,255,0.5)");
-    const hidden = animation === "word-by-word" && time < w.start;
+    const hidden = animation === "wordByWord" && time < w.start;
     return (
       <span
         // biome-ignore lint/suspicious/noArrayIndexKey: a caption's words in time order, never reordered.

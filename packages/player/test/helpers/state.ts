@@ -54,7 +54,7 @@ export interface StateSpec {
   fps?: number;
   width?: number;
   height?: number;
-  background?: { mode: "color" | "blur"; color?: string };
+  background?: { type: "color" | "blur"; color?: string };
   tracks: TrackSpec[];
   manifest?: AssetManifest;
 }

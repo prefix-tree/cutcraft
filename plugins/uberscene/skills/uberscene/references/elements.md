@@ -16,7 +16,7 @@ The video: frame rate, size, background and theme. It ends where its content end
 | `height` | integer (16..8192) |  | yes | The frame's height in pixels. |
 | `sampleRate` | integer (8000..192000) | `48000` |  | The soundtrack's samples per second. It must divide into whole ticks; 44100, 48000 and 96000 do. |
 | `channels` | integer (1..8) | `2` |  | The soundtrack's channels: 1 is mono, 2 stereo. |
-| `background` | { mode, color, gradient } |  |  | What shows where nothing covers the frame: a colour, a gradient, or (`blur`) the picture itself, blurred to fill. |
+| `background` | { type, color, gradient } |  |  | What shows where nothing covers the frame: a colour, a gradient, or (`blur`) the picture itself, blurred to fill. |
 | `theme` | { extends, palette, fonts, radius, motion, styles } |  |  | The video's look: palette, fonts, radius, motion style and element presets. Elements use it through `$tokens` and `style`. |
 | `motionBlur` | { shutterAngle, samples } |  |  | A film camera's blur on everything that moves, in the export: each frame averages `samples` moments across the time its shutter is open, `shutterAngle` degrees of the frame (180 is half the frame, the film default). Drawn by the browser export, which a file with it uses on its own; the preview stays sharp. |
 
@@ -60,7 +60,7 @@ A stretch of a video or image asset, trimmed by seconds, transcript words or cam
 | `in` | number (0..∞) \| string |  |  | Where in the source it starts: seconds, or a word, shot or silence of its transcript (`word:12`). |
 | `out` | number (0..∞) \| string |  |  | Where in the source it ends, as `in`; `word:40.end` ends after the word is said. |
 | `speed` | number (0.1..20) \| { at, value, easing }[] |  |  | Playback rate: 2 plays twice as fast and half as long; keys ramp it. |
-| `freezes` | { at, duration, source }[] |  |  | Frames held on screen while the clip's time stands still. |
+| `freezes` | { start, duration, source }[] |  |  | Frames held on screen while the clip's time stands still. |
 | `reverse` | boolean | `false` |  | Plays the trimmed source backwards. |
 | `box` | { x, y, width, height, origin } |  |  | The rectangle it occupies, in pixels from the frame's top left as in CSS: `x` and `y` place the point `origin` names (its top left by default), `width` and `height` size it, and its content fills it as `fit` says. Left out, the whole frame. `transform` applies after. |
 | `transform` | { scale, rotation, anchor, opacity, borderRadius, crop } |  |  | How it is turned and shown: scale, rotation, anchor, opacity, rounded corners and crop. |
@@ -117,7 +117,7 @@ A named point on the timeline.
 | prop | type | default | required | description |
 |---|---|---|---|---|
 | `id` | string |  | yes | The marker's name: `marker:<id>` refers to it as a time. |
-| `at` | number (0..∞) |  | yes | Seconds from the start of the video. |
+| `start` | number (0..∞) |  | yes | Seconds from the start of the video. |
 | `label` | string | `""` |  | Text shown on the editor's ruler. |
 | `color` | string |  |  | Its colour on the ruler. |
 
@@ -223,23 +223,29 @@ Text over the picture in the theme's type, with entrances by letter or by word.
 | `effects` | { type, enabled }[] |  |  | Effects drawn on it, in order: each `{ type, ...params }`, a param written as keys to animate it. |
 | `enter` | { type, duration, easing } |  |  | How it comes in: a fade, slide, scale or wipe over its first seconds, with an easing. |
 | `exit` | { type, duration, easing } |  |  | How it goes out, over its last seconds, as `enter`. |
-| `style` | string |  |  | A theme preset for titles; without one, the theme's `default` title preset applies. |
-| `font` | string | `"Inter"` |  | The font family: a bundled one, one the file declares, or one from the font catalogue. A theme preset may set it instead. |
-| `size` | number (1..1000) | `48` |  | The letters' size, in pixels. |
-| `weight` | integer (100..900) \| "normal" \| "bold" | `"bold"` |  | How heavy the letters are: 100 to 900, or `normal` and `bold`. |
-| `italic` | boolean | `false` |  | Slanted letters. |
-| `color` | string | `"#ffffff"` |  | The letters' colour, or a theme token such as `$text`. |
-| `background` | string |  |  | A colour filling the text box behind the letters. |
-| `stroke` | { color, width } |  |  | An outline around the letters: its colour and width in pixels. |
-| `shadow` | { color, blur, x, y } |  |  | A drop shadow under the letters: colour, blur and offset in pixels. |
-| `align` | "left" \| "center" \| "right" \| "justify" | `"center"` |  | Which side of the text box the lines sit against. |
-| `valign` | "top" \| "middle" \| "bottom" | `"middle"` |  | Where in the text box's height the text sits. |
-| `width` | number (> 0) |  |  | The text box, in composition pixels; the whole frame when left out, so background, align and valign work inside it. |
-| `height` | number (> 0) |  |  | The text box's height, in pixels, as `width`. |
-| `lineHeight` | number (0.1..10) | `1.2` |  | The distance between lines, as a multiple of the letters' size. |
-| `letterSpacing` | number (-100..100) | `0` |  | Extra space between letters, in pixels. |
-| `decoration` | "none" \| "underline" \| "line-through" \| "overline" |  |  | A line under, over or through the letters. |
-| `animation` | { preset, in, out, stagger } |  |  | An entrance and exit: a preset, its seconds in and out, and for word-by-word the delay between words. |
+| `style` | string \| { preset, font, size, weight, italic, color, background, stroke, shadow, align, valign, lineHeight, letterSpacing, decoration } | `{}` |  | How the letters look: a theme title preset by name (`"h1"`), or an object of `font`, `size`, `weight`, `italic`, `color`, `background`, `stroke`, `shadow`, `align`, `valign`, `lineHeight`, `letterSpacing` and `decoration`, with `preset` naming the preset it starts from. Without a preset, the theme's `default` title preset applies. The text box is the title's `box`: its `width` and `height`, the whole frame when left out, so background, align and valign work inside it. |
+| `animation` | { type, in, out, stagger } |  |  | An entrance and exit: its type, its seconds in and out, and for wordByWord the delay between words. |
+
+#### `style`
+
+A theme preset's name, or an object of these fields. `preset` names the preset the object starts from; the fields written beside it win.
+
+| field | type | default | description |
+|---|---|---|---|
+| `preset` | string |  | A theme title preset this look starts from; the fields written beside it win. |
+| `font` | string | `"Inter"` | The font family: a bundled one, one the file declares, or one from the font catalogue. A theme preset may set it instead. |
+| `size` | number (1..1000) | `48` | The letters' size, in pixels. |
+| `weight` | integer (100..900) \| "normal" \| "bold" | `"bold"` | How heavy the letters are: 100 to 900, or `normal` and `bold`. |
+| `italic` | boolean | `false` | Slanted letters. |
+| `color` | string | `"#ffffff"` | The letters' colour, or a theme token such as `$text`. |
+| `background` | string |  | A colour filling the text box behind the letters. |
+| `stroke` | { color, thickness } |  | An outline around the letters: its colour and thickness in pixels. |
+| `shadow` | { color, blur, x, y } |  | A drop shadow under the letters: colour, blur and offset in pixels. |
+| `align` | "left" \| "center" \| "right" \| "justify" | `"center"` | Which side of the text box the lines sit against. |
+| `valign` | "top" \| "middle" \| "bottom" | `"middle"` | Where in the text box's height the text sits. |
+| `lineHeight` | number (0.1..10) | `1.2` | The distance between lines, as a multiple of the letters' size. |
+| `letterSpacing` | number (-100..100) | `0` | Extra space between letters, in pixels. |
+| `decoration` | "none" \| "underline" \| "lineThrough" \| "overline" |  | A line under, over or through the letters. |
 
 Timed, visual, transformable. Children: `mask`. [All elements](https://uberscene.prefixtree.xyz/reference/elements/)
 
@@ -253,14 +259,32 @@ Subtitles from an asset's transcript that follow the clips through every trim.
 |---|---|---|---|---|
 | `id` | string |  | yes | The captions' name. |
 | `src` | string |  |  | Generate children from the asset's transcript. Literal `<Caption>` children override this. |
-| `style` | string \| { font, size, weight, color, background, shadow, stroke, highlight, highlightBox, upcoming } |  |  | Caption styling, or the name of a theme captions preset. |
-| `animation` | "none" \| "word-highlight" \| "word-by-word" \| "karaoke" \| "typewriter" | `"none"` |  | How the words appear: all at once, the word being said highlighted, word by word, karaoke or typewriter. |
+| `style` | string \| { preset, font, size, weight, color, background, shadow, stroke, highlight, highlightBox, upcoming, align } |  |  | How the words look: the name of a theme captions preset, or an object of its fields, with `preset` naming the one it starts from. |
+| `animation` | "none" \| "wordHighlight" \| "wordByWord" \| "karaoke" \| "typewriter" | `"none"` |  | How the words appear: all at once, the word being said highlighted, word by word, karaoke or typewriter. |
 | `box` | { x, y, width, height, origin } |  |  | The rectangle the caption block sits in, from the frame's top left as on any element. Left out, the lower safe area: centred, as wide as the frame less a margin at each side, its bottom a margin above the frame's bottom (`origin: "bottom"`). Each field written replaces that one of the default, so a box with only `y: 1150` and `origin: "center"` puts the block's middle at 1150 and keeps the default width. Without a `height`, the block is as tall as its lines. |
-| `align` | "left" \| "center" \| "right" \| "justify" |  |  | Which side of that width the lines sit against. Left out: `center`. |
 | `maxChars` | integer (> 0) |  |  | The most characters on a generated cue's line. Left out: as many as fit at the caption size on this frame (at most 42). |
 | `maxDuration` | number (> 0) | `5` |  | The longest a generated cue may stay on screen, in seconds. |
 | `maxGap` | number (0..∞) | `0.8` |  | A pause longer than this, in seconds, starts a new cue. |
 | `breakAfter` | string[] |  |  | Words a generated cue always ends after, as `word:N` refs on `src`: `breakAfter={["word:5", "word:12"]}`. |
+
+#### `style`
+
+A theme preset's name, or an object of these fields. `preset` names the preset the object starts from; the fields written beside it win.
+
+| field | type | default | description |
+|---|---|---|---|
+| `preset` | string |  | A theme captions preset this style starts from; the fields written beside it win. |
+| `font` | string |  | The font family, as a title's. Left out: Inter. |
+| `size` | number (1..1000) |  | The letters' size, in pixels. Left out: a 24th of the frame's height. |
+| `weight` | integer (100..900) \| "normal" \| "bold" |  | How heavy the letters are: 100 to 900, or `normal` and `bold`. Left out: 800. |
+| `color` | string |  | The letters' colour, or a theme token. Left out: white. |
+| `background` | string |  | A colour behind each cue. |
+| `shadow` | { color, blur, x, y } |  | A drop shadow under the letters. Left out: a dark halo that reads on light and dark footage. |
+| `stroke` | { color, thickness } |  | An outline around the letters, drawn under them: its colour and thickness in pixels. |
+| `highlight` | string |  | The colour of the word being said, for the word animations. |
+| `highlightBox` | string |  | A filled, rounded box behind the word being said. `highlight` stays the colour of its letters. |
+| `upcoming` | string |  | The colour of the words not yet said. |
+| `align` | "left" \| "center" \| "right" \| "justify" |  | Which side of the box's width the lines sit against. Left out: `center`. |
 
 Visual. Children: `caption`. [All elements](https://uberscene.prefixtree.xyz/reference/elements/)
 
@@ -301,12 +325,12 @@ A vector shape (rectangle, circle, star, polygon, path) with fill, stroke and sh
 | `enter` | { type, duration, easing } |  |  | How it comes in: a fade, slide, scale or wipe over its first seconds, with an easing. |
 | `exit` | { type, duration, easing } |  |  | How it goes out, over its last seconds, as `enter`. |
 | `style` | string |  |  | A theme preset for shapes. |
-| `shape` | "rectangle" \| "circle" \| "ellipse" \| "triangle" \| "arrow" \| … 4 more |  | yes | Which shape it draws. |
+| `type` | "rectangle" \| "circle" \| "ellipse" \| "triangle" \| "arrow" \| … 4 more |  | yes | Which shape it draws. |
 | `width` | number (> 0) |  |  | The shape's box, in pixels; left out, 200. |
 | `height` | number (> 0) |  |  | The shape's box height, in pixels; left out, 200. |
 | `points` | { x, y }[] |  |  | A polygon's or path's corners, as fractions of the box from its top left. |
 | `fill` | string \| { type, color, gradient, opacity } |  |  | A colour, or `{ type, color, gradient, opacity }` for a gradient or no fill. |
-| `stroke` | { color, width, opacity, dashArray, dashOffset, lineCap, lineJoin, gradient } |  |  | The outline: colour, width in pixels, opacity, dashes, caps and joins. |
+| `stroke` | { color, thickness, opacity, dashArray, dashOffset, lineCap, lineJoin, gradient } |  |  | The outline: colour, thickness in pixels, opacity, dashes, caps and joins. |
 | `shadow` | { color, blur, x, y, spread, inset } |  |  | A drop shadow: colour, blur and offset in pixels. |
 | `shadows` | { color, blur, x, y, spread, inset }[] |  |  | Several shadows, drawn in order, for layered or inner shadows. |
 | `cornerRadius` | number (0..∞) \| string |  |  | A rectangle's rounded corners, in pixels or a theme token such as `$radius`. |
@@ -340,7 +364,7 @@ One-off vector art from inline SVG markup or a file.
 | `content` | string |  |  | Inline SVG markup. Give this or `src`. |
 | `viewBox` | { minX, minY, width, height } |  |  | The part of the drawing to show, in its own units, as the SVG `viewBox` attribute. |
 | `preserveAspectRatio` | string |  |  | How the drawing fits its box, as the SVG attribute of that name (`xMidYMid meet`). |
-| `color` | { mode, tint, opacity } |  |  | Recolours it: `tint` keeps the shading and colours it, `replace` paints every drawn pixel; `opacity` is how much. |
+| `color` | { type, tint, opacity } |  |  | Recolours it: `tint` keeps the shading and colours it, `replace` paints every drawn pixel; `opacity` is how much. |
 | `enter` | { type, duration, easing } |  |  | How it comes in: a fade, slide, scale or wipe over its first seconds, with an easing. |
 | `exit` | { type, duration, easing } |  |  | How it goes out, over its last seconds, as `enter`. |
 
@@ -499,7 +523,7 @@ A stretch of a sound asset: volume and pan (constant or keys), fades, ducking un
 | `in` | number (0..∞) \| string |  |  | Where in the source it starts: seconds, or a word, shot or silence of its transcript (`word:12`). |
 | `out` | number (0..∞) \| string |  |  | Where in the source it ends, as `in`; `word:40.end` ends after the word is said. |
 | `speed` | number (0.1..20) \| { at, value, easing }[] |  |  | Playback rate: 2 plays twice as fast and half as long; keys ramp it. |
-| `freezes` | { at, duration, source }[] |  |  | Frames held on screen while the clip's time stands still. |
+| `freezes` | { start, duration, source }[] |  |  | Frames held on screen while the clip's time stands still. |
 | `reverse` | boolean | `false` |  | Plays the trimmed source backwards. |
 | `volume` | number (0..4) \| { at, value, easing }[] |  |  | A gain: 1 plays the source as it is, 0 mutes it, 2 is twice as loud; keys change it over time. |
 | `pan` | number (-1..1) \| { at, value, easing }[] |  |  | Where it sits between the speakers, from -1 (left) to 1 (right); keys move it. |

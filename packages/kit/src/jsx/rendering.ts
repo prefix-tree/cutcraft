@@ -45,7 +45,7 @@ export const NOT_RENDERED: readonly NotRendered[] = [
   // shortcut: the lint cannot see which tracks sit beneath the footage, so it reports every blur; drop this when the blur also paints under backdrop overlays (frame-plan.ts).
   {
     kind: "composition",
-    prop: "background.mode",
+    prop: "background.type",
     value: "blur",
     reason: "draws as the plain colour when an overlay sits beneath the footage",
   },

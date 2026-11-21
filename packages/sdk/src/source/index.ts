@@ -26,7 +26,27 @@ export interface PropSite {
   readonly isExpression: boolean;
   /** The `schema` key this prop reads, when the expression is a plain reference to one of the file's props. */
   readonly binding?: string;
+  /**
+   * A `style` written as an object literal with some keys that are not literals (`{ font: brand, size: 64 }`): each of
+   * its keys, so only those keys lock (`style.font`) and the rest stay editable.
+   */
+  readonly entries?: readonly PropEntry[];
 }
+
+/** One key of an object literal prop. */
+export interface PropEntry {
+  readonly key: string;
+  /** The whole property, key and value. */
+  readonly range: Range;
+  readonly valueRange: Range;
+  readonly literal: Json | undefined;
+  readonly isExpression: boolean;
+  /** The `schema` key this value reads, as `PropSite.binding`. */
+  readonly binding?: string;
+}
+
+/** Props whose object literal locks key by key: a title's or captions' look, where a declared font is an identifier. */
+const KEYED_PROPS: ReadonlySet<string> = new Set(["style"]);
 
 /** The one component inside a Layer: its props are the Layer's handles, its body is opaque. */
 interface InteriorSite {
@@ -321,8 +341,24 @@ export function buildSourceIndex(text: string): SourceIndex {
         site = { ...site, binding };
         bound[site.name] = binding;
       }
+      if (site.entries && t.isJSXExpressionContainer(attr.value) && t.isObjectExpression(attr.value.expression)) {
+        // A key that reads one of the file's props is bound, as a whole prop would be; any other expression locks.
+        const values = attr.value.expression.properties.map((p) => (p as t.ObjectProperty).value);
+        const entries = site.entries.map((e, i) => {
+          const key = e.isExpression && inSchemaFn ? bindingOf(values[i] as t.Node) : null;
+          if (key === null) return e;
+          bound[`${site.name}.${e.key}`] = key;
+          return { ...e, binding: key };
+        });
+        site = { ...site, entries };
+      }
       props.set(site.name, site);
-      if (site.isExpression && binding === null) locked.push(site.name);
+      if (site.isExpression && binding === null) {
+        if (site.entries)
+          for (const e of site.entries)
+            if (e.isExpression && e.binding === undefined) locked.push(`${site.name}.${e.key}`);
+        if (!site.entries) locked.push(site.name);
+      }
     }
     return { props, locked, bound };
   }
@@ -377,9 +413,31 @@ function propSite(attr: t.JSXAttribute): PropSite {
   if (t.isJSXExpressionContainer(value)) {
     const expr = value.expression;
     const lit = literalOf(expr);
-    return { name, range: rangeOf(attr), valueRange: rangeOf(expr), literal: lit.value, isExpression: !lit.ok };
+    const entries = !lit.ok && KEYED_PROPS.has(name) ? entriesOf(expr) : undefined;
+    return {
+      name,
+      range: rangeOf(attr),
+      valueRange: rangeOf(expr),
+      literal: lit.value,
+      isExpression: !lit.ok,
+      ...(entries ? { entries } : {}),
+    };
   }
   return { name, range: rangeOf(attr), valueRange: rangeOf(value), literal: undefined, isExpression: true };
+}
+
+/** The keys of an object literal whose every property is a plain `key: value`; undefined for any other expression. */
+function entriesOf(node: t.Node): PropEntry[] | undefined {
+  if (!t.isObjectExpression(node)) return undefined;
+  const out: PropEntry[] = [];
+  for (const p of node.properties) {
+    if (!t.isObjectProperty(p) || p.computed) return undefined;
+    const key = t.isIdentifier(p.key) ? p.key.name : t.isStringLiteral(p.key) ? p.key.value : null;
+    if (key === null) return undefined;
+    const lit = literalOf(p.value);
+    out.push({ key, range: rangeOf(p), valueRange: rangeOf(p.value), literal: lit.value, isExpression: !lit.ok });
+  }
+  return out;
 }
 
 /** Evaluate a literal expression (numbers, strings, booleans, null, arrays and objects of literals, template strings without holes). */

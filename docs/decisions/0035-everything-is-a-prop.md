@@ -1,4 +1,4 @@
-# 0034. Everything about an element is a prop
+# 0035. Everything about an element is a prop
 
 > Status: accepted. Supersedes in part [0002](./0002-fixed-vocabulary-and-literal-ids.md) (a collection the
 > inspector edits one by one is child elements), and §8 and plan step H of
@@ -40,7 +40,7 @@ left out.
 ```tsx
 <Clip id="pour" src="asset:coffee" in={10} out={14}
   speed={[{ at: 0, value: 1, easing: "easeInOutQuad" }, { at: 1.6, value: 0.4 }]}
-  freezes={[{ at: 4.2, duration: 1.4, source: 12.4 }]}
+  freezes={[{ start: 4.2, duration: 1.4, source: 12.4 }]}
   effects={[{ type: "lut", src: "asset:warm", amount: [{ at: 0, value: 0 }, { at: 1, value: 1 }] }]} />
 ```
 
@@ -49,8 +49,9 @@ left out.
   param of every effect.
 - `effects` is an ordered list on the element, each `{ type, ...params, enabled? }`. `type` is a built-in name or an
   `effect()` the file declares. Clips, titles, shapes, SVG, stickers, adjustments, nested sequences and layers take it.
-- `freezes` is a list on clips and audio, each `{ at, duration, source }`: where the hold starts in the element, how
-  long it lasts, and which source frame it holds.
+  No param may be called `type`, so the halftone's kind of print, `type` under 0.6's naming rule, is `inks`.
+- `freezes` is a list on clips and audio, each `{ start, duration, source }`: where the hold starts in the element, how
+  long it lasts, and which source frame it holds. `start`, by the naming rule; a key's `at` is a moment, not a span.
 - `volume` and `pan` keys replace `automation`.
 - Masks, captions, angles, cuts and markers stay children. They are things with their own time and shape, not values
   of the element.

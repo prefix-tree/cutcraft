@@ -1386,7 +1386,7 @@ describe("time changes inside a clip", () => {
     expect(
       cut(
         T(
-          `<Clip id="a" src="asset:broll" in={0} out={4} freezes={[{ at: 1, duration: 2, source: 1 }]} />` +
+          `<Clip id="a" src="asset:broll" in={0} out={4} freezes={[{ start: 1, duration: 2, source: 1 }]} />` +
             C("b", 0, 1),
         ),
       ),
@@ -1404,7 +1404,7 @@ describe("time changes inside a clip", () => {
     expect(
       cut(
         T(
-          `<Clip id="a" src="asset:broll" in={0} out={4} freezes={[{ at: 1, duration: 2, source: 1 }, { at: 3, duration: 1, source: 3 }]} />`,
+          `<Clip id="a" src="asset:broll" in={0} out={4} freezes={[{ start: 1, duration: 2, source: 1 }, { start: 3, duration: 1, source: 3 }]} />`,
         ),
       ),
     ).toMatchInlineSnapshot(`
@@ -1421,7 +1421,7 @@ describe("time changes inside a clip", () => {
     expect(
       cut(
         T(
-          `<Clip id="hook" src="asset:talk" in="word:4" out="word:9.end" freezes={[{ at: 1, duration: 2, source: 1 }]} />`,
+          `<Clip id="hook" src="asset:talk" in="word:4" out="word:9.end" freezes={[{ start: 1, duration: 2, source: 1 }]} />`,
         ) + O(Ti("t", `anchor="hook" at="word:6" duration={1}`)),
       ),
     ).toMatchInlineSnapshot(`
@@ -1441,7 +1441,7 @@ describe("time changes inside a clip", () => {
         T(
           C("a", 0, 2) +
             X("x", 1) +
-            `<Clip id="b" src="asset:broll" in={0} out={1} freezes={[{ at: 0.5, duration: 2, source: 0.5 }]} />`,
+            `<Clip id="b" src="asset:broll" in={0} out={1} freezes={[{ start: 0.5, duration: 2, source: 0.5 }]} />`,
         ),
       ),
     ).toMatchInlineSnapshot(`
@@ -1458,7 +1458,7 @@ describe("time changes inside a clip", () => {
     expect(
       cut(
         T(
-          `<Clip id="a" src="asset:broll" in={0} out={4} freezes={[{ at: 4, duration: 2, source: 4 }]} />` +
+          `<Clip id="a" src="asset:broll" in={0} out={4} freezes={[{ start: 4, duration: 2, source: 4 }]} />` +
             C("b", 0, 1),
         ),
       ),
@@ -1476,7 +1476,7 @@ describe("time changes inside a clip", () => {
     expect(
       cut(
         T(
-          `<Clip id="a" src="asset:broll" in={0} out={1} freezes={[{ at: 9, duration: 8, source: 0.5 }]} />` +
+          `<Clip id="a" src="asset:broll" in={0} out={1} freezes={[{ start: 9, duration: 8, source: 0.5 }]} />` +
             C("b", 0, 1),
         ),
       ),
@@ -1486,7 +1486,7 @@ describe("time changes inside a clip", () => {
       a clip 0..1 plays broll 0..1 x1
       a.freezes.0 freeze 9..17
       b clip 1..2 plays broll 0..1 x1
-      ! INVALID_TIME_RANGE a.freezes.0.at
+      ! INVALID_TIME_RANGE a.freezes.0.start
       "
     `);
   });
@@ -1495,7 +1495,7 @@ describe("time changes inside a clip", () => {
     expect(
       cut(
         T(
-          `<Clip id="a" src="asset:broll" in={0} out={2} freezes={[{ at: 1, duration: 3, source: 1 }, { at: 5, duration: 1, source: 2 }]} />`,
+          `<Clip id="a" src="asset:broll" in={0} out={2} freezes={[{ start: 1, duration: 3, source: 1 }, { start: 5, duration: 1, source: 2 }]} />`,
         ),
       ),
     ).toMatchInlineSnapshot(`
@@ -1510,7 +1510,7 @@ describe("time changes inside a clip", () => {
 
   it("a freeze of no length is refused and holds nothing", () => {
     expect(
-      cut(T(`<Clip id="a" src="asset:broll" in={0} out={2} freezes={[{ at: 1, duration: 0, source: 1 }]} />`)),
+      cut(T(`<Clip id="a" src="asset:broll" in={0} out={2} freezes={[{ start: 1, duration: 0, source: 1 }]} />`)),
     ).toMatchInlineSnapshot(`
       "
       duration 2
@@ -1618,7 +1618,7 @@ describe("captions and markers", () => {
   });
 
   it("a marker is a point, and one past the end does not lengthen the video", () => {
-    expect(cut(`<Marker id="m1" at={1.5} /><Marker id="m2" at={99} />${MAIN}`)).toMatchInlineSnapshot(`
+    expect(cut(`<Marker id="m1" start={1.5} /><Marker id="m2" start={99} />${MAIN}`)).toMatchInlineSnapshot(`
       "
       duration 6.4
       hook clip 0..2.9 plays talk 2..4.9 x1

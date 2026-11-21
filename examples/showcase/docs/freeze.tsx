@@ -11,7 +11,7 @@ export default function Video() {
           in={14}
           out={17}
           fit="cover"
-          freezes={[{ at: 1, duration: 1, source: 15 }]}
+          freezes={[{ start: 1, duration: 1, source: 15 }]}
         />
       </Track>
     </Composition>

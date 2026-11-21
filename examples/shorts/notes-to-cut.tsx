@@ -60,7 +60,7 @@ export default function Video() {
       fps={30}
       width={1080}
       height={1920}
-      background={{ mode: "color", color: "$background" }}
+      background={{ type: "color", color: "$background" }}
       theme={{
         extends: "midnight",
         palette: {
@@ -82,7 +82,7 @@ export default function Video() {
             stress={["Forty", "One"]}
             author=""
             role=""
-            start={0.2}
+            after={0.2}
             wordsPerSecond={3.6}
             y={700}
             size={84}
@@ -139,7 +139,7 @@ export default function Video() {
             stress={["read", "change", "render"]}
             author=""
             role=""
-            start={at("file") - scene("close")}
+            after={at("file") - scene("close")}
             wordsPerSecond={LAST_PACE}
             y={680}
             size={80}

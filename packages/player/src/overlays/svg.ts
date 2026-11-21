@@ -23,7 +23,7 @@ export interface SvgViewBox {
 }
 
 export interface SvgColor {
-  readonly mode: "none" | "tint" | "replace";
+  readonly type: "none" | "tint" | "replace";
   readonly tint?: string;
   readonly opacity?: number;
 }
@@ -345,10 +345,10 @@ function withTokens(value: string, ctx: Walk): string {
 
 /** `replace` paints every drawn pixel in the colour; `tint` keeps the shading and colours it. `opacity` is how much. */
 function colorFilter(color: SvgColor | undefined, id: string, region: SvgViewBox): SvgNode | null {
-  if (!color || color.mode === "none" || !color.tint) return null;
+  if (!color || color.type === "none" || !color.tint) return null;
   const amount = Math.max(0, Math.min(1, color.opacity ?? 1));
   const recoloured: SvgNode =
-    color.mode === "replace"
+    color.type === "replace"
       ? {
           name: "g",
           attrs: {},

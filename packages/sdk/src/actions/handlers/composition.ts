@@ -40,7 +40,7 @@ define(makePropHandler({
     const prior = (rawProp(state, "composition", "background") ?? {}) as Record<string, unknown>;
     const next = {
       ...prior,
-      ...(p.mode !== undefined ? { mode: p.mode } : {}),
+      ...(p.type !== undefined ? { type: p.type } : {}),
       ...(p.color !== undefined ? { color: p.color } : {}),
     };
     return { background: Object.keys(next).length ? (next as never) : undefined };
@@ -112,17 +112,11 @@ function fontWrites(
     const prior = (theme.fonts ?? {}) as Record<string, Json>;
     writes.push({ id: "composition", props: { theme: { ...theme, fonts: { ...prior, [p.role]: p.family } } } });
   } else if (p.id !== undefined) {
-    const item = state.items.get(p.id);
-    if (item?.kind === "captions") {
-      const style = rawProp(state, p.id, "style");
-      const prior = isObject(style) ? style : {};
-      if (p.weight === undefined && typeof prior.weight === "number") wanted = prior.weight;
-      writes.push({ id: p.id, props: { style: { ...prior, font: p.family, ...weight } } });
-    } else {
-      const own = rawProp(state, p.id, "weight");
-      if (p.weight === undefined && typeof own === "number") wanted = own;
-      writes.push({ id: p.id, props: { font: p.family, ...weight } });
-    }
+    // A title's or captions' look: a preset name alone becomes `{ preset, font }`, so the preset still fills the rest.
+    const style = rawProp(state, p.id, "style");
+    const prior = isObject(style) ? style : typeof style === "string" ? { preset: style } : {};
+    if (p.weight === undefined && typeof prior.weight === "number") wanted = prior.weight;
+    writes.push({ id: p.id, props: { style: { ...prior, font: p.family, ...weight } } });
   }
   const listed = findFont(p.family);
   if (listed?.source === "google") {
@@ -174,13 +168,7 @@ define({
     if (isError(item)) return invalid(item);
     if (item.kind !== "title" && item.kind !== "captions")
       return invalid({ code: "INVALID_PARAMS", path: "id", message: `a ${item.kind} takes no font` });
-    if (item.kind === "captions" && typeof rawProp(state, item.id, "style") === "string")
-      return invalid({
-        code: "INVALID_PARAMS",
-        path: "id",
-        message: `"${item.id}" takes its style from a theme preset; set the theme's font role instead`,
-      });
-    return validateTarget(state, p.id, item.kind === "captions" ? ["style"] : ["font", "weight"]);
+    return validateTarget(state, p.id, ["style.font", ...(p.weight === undefined ? [] : ["style.weight"])]);
   },
   apply: (a, log, ctx) => {
     for (const w of fontWrites(a.params, ctx.before)) setProps(log, w.id, w.props);

@@ -24,7 +24,7 @@ function cardSource(name: string, png: Buffer): string {
 
 export default function Card() {
   return (
-    <Composition fps={1} width={${CARD.width}} height={${CARD.height}} background={{ mode: "color", color: "#16161d" }}>
+    <Composition fps={1} width={${CARD.width}} height={${CARD.height}} background={{ type: "color", color: "#16161d" }}>
       <Track id="cards" layout="free">
         <Layer id="card" start={0} duration={1}>
           <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: 14, paddingTop: 12, color: "#f5f7ff", fontFamily: "Inter, sans-serif" }}>

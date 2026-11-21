@@ -101,7 +101,7 @@ describe("smart copy", () => {
 
   it("copies around a title: only the stretches nothing is drawn over", async () => {
     const { result, out } = await render(
-      `<Track id="main"><Clip id="c" src="asset:bars" in={2.2} out={6.1} /></Track><Track id="o"><Title id="t" anchor="c" offset={1} duration={1} size={30}>Hi</Title></Track>`,
+      `<Track id="main"><Clip id="c" src="asset:bars" in={2.2} out={6.1} /></Track><Track id="o"><Title id="t" anchor="c" offset={1} duration={1} style={{ size: 30 }}>Hi</Title></Track>`,
       { smartCopy: true },
     );
     // The title covers output frames 30-59. Source keyframes at 150 and 180 bound a copy of output frames 84-113.
@@ -154,7 +154,7 @@ describe("smart copy", () => {
     writeFileSync(
       file,
       source(
-        '<Track id="main"><Clip id="a" src="asset:bars" in={1} out={3} /><Clip id="b" src="asset:bars" in={5.5} out={8} /></Track><Track id="o"><Title id="t" anchor="b" offset={0.5} duration={1} size={30}>Hi</Title></Track>',
+        '<Track id="main"><Clip id="a" src="asset:bars" in={1} out={3} /><Clip id="b" src="asset:bars" in={5.5} out={8} /></Track><Track id="o"><Title id="t" anchor="b" offset={0.5} duration={1} style={{ size: 30 }}>Hi</Title></Track>',
       ),
     );
     const loaded = await loadVideo(file);

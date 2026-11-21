@@ -18,7 +18,7 @@ export default function Video() {
               roundness: 0.3,
               feather: 16,
               radius: [
-                { at: 0.5, value: 0, easing: "ease-in-out" },
+                { at: 0.5, value: 0, easing: "easeInOut" },
                 { at: 1.5, value: 18 },
               ],
             },

@@ -45,7 +45,7 @@ describe("resolve", () => {
         // 1 → 0.5 over 2 s plays 1.5 s of source; the other 2.5 s at half speed take 5 s.
         h(Clip, { id: "byOut", src: "asset:city", in: 0, out: 4, speed: ramp }),
         h(Clip, { id: "byDuration", src: "asset:city", in: 0, duration: 4, speed: ramp }),
-        h(Clip, { id: "held", src: "asset:city", in: 0, out: 4, freezes: [{ at: 2, duration: 0.5, source: 1 }] }),
+        h(Clip, { id: "held", src: "asset:city", in: 0, out: 4, freezes: [{ start: 2, duration: 0.5, source: 1 }] }),
         h(Gap, { id: "after", duration: 1 }),
       ),
     );
@@ -107,7 +107,7 @@ describe("resolve", () => {
       h(
         Track,
         { id: "t2" },
-        h(Title, { id: "t", anchor: "c1.end", offset: -1, duration: 2, width: 1080, height: 200 }, "Bye"),
+        h(Title, { id: "t", anchor: "c1.end", offset: -1, duration: 2, box: { width: 1080, height: 200 } }, "Bye"),
       ),
       h(
         Track,
@@ -218,7 +218,7 @@ describe("resolve", () => {
     const state = resolve(fixtureTree(), manifest);
     expect(state.items.get("b1")?.editable).toBe("generated");
     expect(state.items.get("t1")?.lockedProps).toEqual([]);
-    expect(state.items.get("t1")?.boundProps).toEqual({ color: "accent" });
+    expect(state.items.get("t1")?.boundProps).toEqual({ "style.color": "accent" });
     expect(state.items.get("mc1.cu2")).toMatchObject({ editable: "generated", start: 2 });
   });
 

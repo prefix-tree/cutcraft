@@ -2,7 +2,7 @@
 // or the one a file declares with effect().
 import type { ZodType } from "zod";
 
-import { effectEntry } from "../effects/registry";
+import { effectEntry, RENAMED_EFFECT_PARAMS, RENAMED_TRANSITION_PARAMS } from "../effects/registry";
 import type { ShaderDefinition } from "./shader-definition";
 import { shaderFor } from "./shaders";
 
@@ -19,6 +19,12 @@ export function effectParamProblem(
   const schema = effectEntry(type)?.params ?? shaderFor(shaders, "effect", type)?.params;
   const shape = (schema?.shape ?? {}) as Record<string, ZodType>;
   const names = Object.keys(shape);
+  const renamed = renamedParam(type, param);
+  if (renamed !== undefined && names.includes(renamed))
+    return {
+      prop: "param",
+      message: `param "${param}" of "${String(type)}" is now "${renamed}"; uberscene lint --fix moves the file`,
+    };
   if (!names.includes(param))
     return {
       prop: "param",
@@ -31,4 +37,16 @@ export function effectParamProblem(
       message: `param "${param}" of "${String(type)}": ${result.error.issues[0]?.message ?? "invalid value"}`,
     };
   return null;
+}
+
+/** What a built-in effect's (or transition's) param `param` is called since 0.6, when that is another name; else undefined. */
+export function renamedParam(
+  type: unknown,
+  param: string,
+  kind: "effect" | "transition" = "effect",
+): string | undefined {
+  const table = kind === "transition" ? RENAMED_TRANSITION_PARAMS : RENAMED_EFFECT_PARAMS;
+  if (typeof type !== "string" || !Object.hasOwn(table, type)) return undefined;
+  const moved = table[type] as Readonly<Record<string, string>>;
+  return Object.hasOwn(moved, param) ? moved[param] : undefined;
 }

@@ -2,7 +2,7 @@ import { Composition, Svg, Track } from "@uberscene/kit";
 
 export default function Video() {
   return (
-    <Composition fps={30} width={960} height={540} background={{ mode: "color", color: "#101421" }}>
+    <Composition fps={30} width={960} height={540} background={{ type: "color", color: "#101421" }}>
       <Track id="art" layout="free">
         <Svg
           id="sun"

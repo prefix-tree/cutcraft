@@ -19,7 +19,7 @@ export default function Video() {
               type: "colorKey",
               color: "#00b140",
               tolerance: [
-                { at: 0.5, value: 0, easing: "ease-in-out" },
+                { at: 0.5, value: 0, easing: "easeInOut" },
                 { at: 1.5, value: 0.3 },
               ],
             },

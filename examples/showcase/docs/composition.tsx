@@ -12,10 +12,8 @@ export default function Video() {
           anchor="shot"
           offset={0.4}
           duration={3.2}
-          size={56}
-          width={260}
-          align="left"
-          box={{ x: 160, y: 270, origin: "center" }}
+          style={{ size: 56, align: "left" }}
+          box={{ x: 160, y: 270, width: 260, origin: "center" }}
         >
           Morning shot
         </Title>

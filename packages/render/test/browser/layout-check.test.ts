@@ -20,7 +20,7 @@ const box = (
 ) =>
   h(Shape, {
     id,
-    shape: "rectangle",
+    type: "rectangle",
     width: w,
     height: hgt,
     fill: "#ff0000",
@@ -65,7 +65,7 @@ describe("checkLayout", () => {
           box("edge", 620, 120, 100, 100),
           box("margin", 610, 120, 40, 40),
           box("low", 320, 310, 400, 30, 0.5, 0.5),
-          h(Title, { id: "hi", start: 0, duration: 1, size: 40 }, "Hi"),
+          h(Title, { id: "hi", start: 0, duration: 1, style: { size: 40 } }, "Hi"),
         ),
         h(
           Captions,
@@ -125,14 +125,14 @@ describe("checkLayout", () => {
       'import { Composition, Shape, Track } from "@uberscene/kit";',
       "",
       "function Dot({ id }: { id: string }) {",
-      '  return <Shape id={id} shape="circle" width={60} height={60} fill="#f00" start={0} duration={1} box={{ x: 620, y: 180, origin: "center" }} />;',
+      '  return <Shape id={id} type="circle" width={60} height={60} fill="#f00" start={0} duration={1} box={{ x: 620, y: 180, origin: "center" }} />;',
       "}",
       "",
       "export default function Video() {",
       "  return (",
       '    <Composition id="v" fps={10} width={640} height={360}>',
       '      <Track id="t" layout="free">',
-      '        <Shape id="edge" shape="rectangle" width={100} height={100} fill="#f00" start={0} duration={1} box={{ x: 620, y: 120, origin: "center" }} />',
+      '        <Shape id="edge" type="rectangle" width={100} height={100} fill="#f00" start={0} duration={1} box={{ x: 620, y: 120, origin: "center" }} />',
       '        <Dot id="d1" />',
       '        <Dot id="d2" />',
       "      </Track>",
@@ -143,7 +143,7 @@ describe("checkLayout", () => {
     const Dot = ({ id }: { id: string }) =>
       h(Shape, {
         id,
-        shape: "circle",
+        type: "circle",
         width: 60,
         height: 60,
         fill: "#f00",
@@ -187,12 +187,12 @@ describe("checkLayout", () => {
       "  return (",
       '    <Composition id="v" fps={10} width={640} height={360}>',
       '      <Track id="t" layout="free">',
-      '        <Shape id="late" shape="rectangle" width={40} height={40} fill="#f00" start={0.5} duration={0.5} box={{ x: 650, y: 180, origin: "center" }} />',
+      '        <Shape id="late" type="rectangle" width={40} height={40} fill="#f00" start={0.5} duration={0.5} box={{ x: 650, y: 180, origin: "center" }} />',
       "        {[0, 1].map((i) => (",
-      '          <Shape key={i} id={`dot-${i}`} shape="circle" width={40} height={40} fill="#f00" start={0} duration={1} box={{ x: 520 + 130 * i, y: 120, origin: "center" }} />',
+      '          <Shape key={i} id={`dot-${i}`} type="circle" width={40} height={40} fill="#f00" start={0} duration={1} box={{ x: 520 + 130 * i, y: 120, origin: "center" }} />',
       "        ))}",
       "        {[0, 1].map((i) => (",
-      '          <Shape key={i} id={`bar-${i}`} shape="rectangle" width={40} height={10} fill="#00f" start={0} duration={1} box={{ x: 320 - 100 * i, y: 280, origin: "center" }} />',
+      '          <Shape key={i} id={`bar-${i}`} type="rectangle" width={40} height={10} fill="#00f" start={0} duration={1} box={{ x: 320 - 100 * i, y: 280, origin: "center" }} />',
       "        ))}",
       "      </Track>",
       "    </Composition>",
@@ -210,7 +210,7 @@ describe("checkLayout", () => {
           h(Shape, {
             key: `d${i}`,
             id: `dot-${i}`,
-            shape: "circle",
+            type: "circle",
             width: 40,
             height: 40,
             fill: "#f00",
@@ -223,7 +223,7 @@ describe("checkLayout", () => {
           h(Shape, {
             key: `b${i}`,
             id: `bar-${i}`,
-            shape: "rectangle",
+            type: "rectangle",
             width: 40,
             height: 10,
             fill: "#00f",
@@ -439,7 +439,10 @@ describe("checkLayout", () => {
       );
     // In a narrow column at the left, clear of the edges: nothing to report.
     expect(
-      brief((await caps({ box: { x: 170, y: 180, width: 240, origin: "center" }, align: "left" })).issues),
+      brief(
+        (await caps({ box: { x: 170, y: 180, width: 240, origin: "center" }, style: { size: 30, align: "left" } }))
+          .issues,
+      ),
     ).toEqual([]);
     // Pushed right until the line crosses the frame's edge: reported, with the props that move it back.
     const { issues } = await caps({ box: { x: 600, y: 180, origin: "center" } });

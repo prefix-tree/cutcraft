@@ -16,10 +16,10 @@ export const defaults = { accent: "#ffd400" };
  */
 export default function Video({ accent }: z.infer<typeof schema>) {
   return (
-    <Composition fps={30} width={1920} height={1080} background={{ mode: "color", color: "#101418" }}>
-      <Marker id="click-menu" at={3} label="menu" />
-      <Marker id="click-roast" at={9} label="roast" />
-      <Marker id="click-order" at={15} label="order" />
+    <Composition fps={30} width={1920} height={1080} background={{ type: "color", color: "#101418" }}>
+      <Marker id="click-menu" start={3} label="menu" />
+      <Marker id="click-roast" start={9} label="roast" />
+      <Marker id="click-order" start={15} label="order" />
 
       <Track id="screen" name="Screen">
         {/* The recording has no transcript, so a numeric trim. The crop keyframes are element-relative seconds. */}
@@ -67,11 +67,11 @@ export default function Video({ accent }: z.infer<typeof schema>) {
           anchor="rec"
           offset={3}
           duration={1.5}
-          shape="circle"
+          type="circle"
           width={140}
           height={140}
           fill={{ type: "none" }}
-          stroke={{ color: accent, width: 8 }}
+          stroke={{ color: accent, thickness: 8 }}
           box={{ x: 1480, y: 260, origin: "center" }}
         />
         <Shape
@@ -79,11 +79,11 @@ export default function Video({ accent }: z.infer<typeof schema>) {
           anchor="rec"
           offset={9}
           duration={1.5}
-          shape="circle"
+          type="circle"
           width={140}
           height={140}
           fill={{ type: "none" }}
-          stroke={{ color: accent, width: 8 }}
+          stroke={{ color: accent, thickness: 8 }}
           box={{ x: 660, y: 580, origin: "center" }}
         />
         <Shape
@@ -91,11 +91,11 @@ export default function Video({ accent }: z.infer<typeof schema>) {
           anchor="rec"
           offset={15}
           duration={1.5}
-          shape="circle"
+          type="circle"
           width={140}
           height={140}
           fill={{ type: "none" }}
-          stroke={{ color: accent, width: 8 }}
+          stroke={{ color: accent, thickness: 8 }}
           box={{ x: 1600, y: 920, origin: "center" }}
         />
         <Title
@@ -103,11 +103,9 @@ export default function Video({ accent }: z.infer<typeof schema>) {
           anchor="rec"
           offset={0.4}
           duration={2.4}
-          size={56}
-          weight={700}
-          valign="top"
+          style={{ size: 56, weight: 700, valign: "top" }}
           box={{ x: 960, y: 620, origin: "center" }}
-          animation={{ preset: "fade", in: 0.3, out: 0.3 }}
+          animation={{ type: "fade", in: 0.3, out: 0.3 }}
         >
           1. Open the dashboard
         </Title>

@@ -2,10 +2,10 @@ import { z } from "zod";
 
 import { animatable, assetRefSchema, audioProps, timedProps, timeRefSchema, visualProps } from "./common";
 
-/** A hold: the source frame at `source` seconds stays on screen from `at` seconds into the element for `duration`. */
+/** A hold: the source frame at `source` seconds stays on screen from `start` seconds into the element for `duration`. */
 const freezeSpecSchema = z.strictObject({
   /** Seconds into the element where the hold starts. */
-  at: z.number().nonnegative(),
+  start: z.number().nonnegative(),
   /** Seconds the frame is held before it plays on. */
   duration: z.number().positive(),
   /** The source time of the frame held. */

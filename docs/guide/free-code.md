@@ -138,16 +138,16 @@ Each part says when it happens one of two ways, and how long it takes. These pro
 
 | Prop | Means |
 |---|---|
-| `at` | Seconds of the video, which is what a [narration](/guide/captions-and-sound#narration-from-a-script)'s cue gives: `at={story.at("lamp")}`. |
-| `after` | Seconds since the layer started, for a layer that itself starts on a word, as above. With neither `at` nor `after`, the part starts with its layer. |
+| `start` | Seconds of the video, which is what a [narration](/guide/captions-and-sound#narration-from-a-script)'s cue gives: `start={story.at("lamp")}`. |
+| `after` | Seconds since the layer started, for a layer that itself starts on a word, as above. With neither `start` nor `after`, the part starts with its layer. |
 | `over` | How long it takes; 0.4 s unless you say. |
-| `easing` | One of the kit's easing names; `ease-in-out` unless you say. |
+| `easing` | One of the kit's easing names; `easeInOut` unless you say. |
 | `progress` | A number from 0 to 1, in place of the others, to drive the part from your own arithmetic. |
 
 | Part | Draws | Props of its own |
 |---|---|---|
 | `DrawnLine` | A line that draws itself from one point to another. Nothing before it starts. | `from`, `to` (each `[x, y]`), and a line's props. |
-| `Label` | A word that fades in, with a line from beside the word to the point it names. | `text`, `x`, `y` (the word's middle), `to`, `side`, `gap`, `textWidth`, `lineStroke`, `lineWidth`, `name`, and a text's props. |
+| `Label` | A word that fades in, with a line from beside the word to the point it names. | `text`, `x`, `y` (the word's middle), `to`, `side`, `gap`, `textWidth`, `lineStroke`, `lineThickness`, `name`, and a text's props. |
 | `CountUp` | A number that counts. | `from` (0), `to`, `format`, and a text's props. |
 | `Cells` | A row of cells, each with a value under it if you give them. | `values` or `count`, `x`, `y`, `size`, `height`, `gap`, `radius`, `fill`, `litFill`, `lit`, `highlight`, `highlightStroke`, `valueProps`, `valueGap`, `name`. |
 
@@ -155,7 +155,7 @@ A label's line leaves from the edge of the word that faces the point, so it neve
 picks the edge when the guess is wrong. A label names itself for the layout check (its text in lower case, or
 `name`), and `Cells` takes a `name`, so `uberscene where` and `--check-layout` see them as parts of the layer.
 
-`useProgress({ at, after, over, easing })` is the arithmetic the parts share, for your own drawing: 0 before, 1
+`useProgress({ start, after, over, easing })` is the arithmetic the parts share, for your own drawing: 0 before, 1
 after, eased between. `progress(clock, when)` is the same for a clock you already hold.
 
 ## A grid

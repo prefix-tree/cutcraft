@@ -184,7 +184,7 @@ plays on:
 ```tsx
 <Clip id="pour" src="asset:coffee" in={10} out={14}
   speed={[{ at: 0, value: 1, easing: "easeInOutQuad" }, { at: 1.6, value: 0.4 }]}
-  freezes={[{ at: 4.2, duration: 1.4, source: 12.4 }]} />
+  freezes={[{ start: 4.2, duration: 1.4, source: 12.4 }]} />
 ```
 
 The sound follows both: it speeds up with the picture and goes silent through a freeze. See

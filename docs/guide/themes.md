@@ -22,7 +22,7 @@ The theme is the `theme` prop of the composition. Elements use it through `$toke
   <Track id="graphics" layout="free">
     <Title id="kicker" start={0.5} style="kicker">NEW</Title>
     <Title id="name" start={0.5} style="hero">Halvard</Title>
-    <Shape id="card" start={0.5} shape="rectangle" width={720} height={180} style="card" />
+    <Shape id="card" start={0.5} type="rectangle" width={720} height={180} style="card" />
     <Svg id="mark" start={1} content={'<svg viewBox="0 0 24 24"><path d="…" fill="$accent"/></svg>'} />
   </Track>
 </Composition>
@@ -61,14 +61,22 @@ unknown token is an error: `UNKNOWN_TOKEN` when the file resolves, and the [`the
 
 ## Presets
 
-A preset is a named set of props for one kind of element. `style="name"` lays the preset under the element's own
-props, and the element's props always win: `<Title style="h1" color="#fff">` is an h1 in white.
+A preset is a named look for one kind of element. On a title and on the captions, `style` is the look: `style="h1"`
+takes the preset as it is, and an object names it with `preset`, every field written beside it winning.
+<code v-pre>&lt;Title style={{ preset: "h1", color: "#fff" }}&gt;</code> is an h1 in white. On a shape, an SVG or a
+sticker, `style="card"` lays the preset under the element's own props, which win the same way.
+
+A title's or the captions' preset is look only: the letters' font, size, weight, colours, outline, shadow, alignment
+and spacing. Where the text sits, how big its box is and how it comes in are written on the element (`box`,
+`transform`, `animation`), so a preset gives the same look wherever it is used. A field that is not a look, in a preset
+of your own, is reported once on the composition's `theme`, naming the preset and the field, and reaches no element:
+the rest of the theme still applies.
 
 The built-in themes share one set of presets, written in tokens:
 
 | Kind | Presets |
 |---|---|
-| title | `default`, `h1`, `h2`, `kicker`, `body`, `caption`, `quote`, `label`, `code` |
+| title | `default`, `h1`, `h2`, `kicker`, `body`, `caption`, `quote`, `label`, `code`, `note` |
 | shape | `default` (fill `$primary`), `card` (surface, radius, soft shadow), `panel`, `pill`, `outline`, `accent`, `backdrop` |
 | captions | `default`, `boxed`, `bold` (`style="boxed"` on `<Captions>`) |
 
@@ -97,7 +105,7 @@ To keep one element still, give it an `enter` of type `none`.
 Overlays draw above the footage, so a background graphic on top of a clip would hide it. Put a background on a track
 **below every track that holds footage**: overlays there draw beneath the footage, in the preview and the export
 alike, and the composition background goes under them. A plain gradient needs no track at all:
-<code v-pre>&lt;Composition background={{ mode: "gradient", gradient }}&gt;</code>.
+<code v-pre>&lt;Composition background={{ type: "gradient", gradient }}&gt;</code>.
 
 ```tsx
 <Track id="backdrop" layout="free">
@@ -145,7 +153,7 @@ A font file of your own works the same way, and a title can take the value direc
 export const brand = font({ family: "Brand Sans", src: "asset:brand" });
 export const brandBold = font({ family: "Brand Sans", src: "asset:brand-bold", weight: 700 });
 
-<Title id="hello" font={brand}>Hello</Title>
+<Title id="hello" style={{ font: brand }}>Hello</Title>
 ```
 
 Each `font()` call declares one face. `googleFont()` declares one face for each weight and style you give it (400 and

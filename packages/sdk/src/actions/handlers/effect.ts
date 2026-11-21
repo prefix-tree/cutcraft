@@ -359,10 +359,16 @@ define(makePropHandler({
   kinds: ["clip", "audio"],
   write: (p) => ({
     freezes:
-      p.freezes.length > 0 ? p.freezes.map((f) => ({ at: f.at, duration: f.duration, source: f.source })) : undefined,
+      p.freezes.length > 0
+        ? p.freezes.map((f) => ({ start: f.start, duration: f.duration, source: f.source }))
+        : undefined,
   }),
   validate: (a) =>
-    a.params.freezes.every((f) => f.at >= 0 && f.duration > 0 && f.source >= 0)
+    a.params.freezes.every((f) => f.start >= 0 && f.duration > 0 && f.source >= 0)
       ? ok
-      : invalid({ code: "INVALID_PARAMS", message: "a hold has at ≥ 0, duration > 0 and source ≥ 0", path: "freezes" }),
+      : invalid({
+          code: "INVALID_PARAMS",
+          message: "a hold has start ≥ 0, duration > 0 and source ≥ 0",
+          path: "freezes",
+        }),
 }));

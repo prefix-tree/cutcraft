@@ -33,8 +33,8 @@ export const defaults = { title: "Why we built it", accent: "#ff5a1f" };
 
 export default function Video({ title, accent }: z.infer<typeof schema>) {
   return (
-    <Composition fps={30} width={1920} height={1080} background={{ mode: "color", color: "#000000" }}>
-      <Marker id="m1" at={2} label="hook" color="#ffcc00" />
+    <Composition fps={30} width={1920} height={1080} background={{ type: "color", color: "#000000" }}>
+      <Marker id="m1" start={2} label="hook" color="#ffcc00" />
       <Track id="main" name="Main">
         <Clip
           id="c1"
@@ -65,7 +65,7 @@ export default function Video({ title, accent }: z.infer<typeof schema>) {
             { at: 0, value: 1 },
             { at: 2, value: 0.5, easing: "easeInOutQuad" },
           ]}
-          freezes={[{ at: 3, duration: 0.5, source: 1.5 }]}
+          freezes={[{ start: 3, duration: 0.5, source: 1.5 }]}
         />
         <Gap id="g1" duration={1} />
         <Clip id="c3" src="asset:interview" in="shot:2" out="shot:2.end" speed={1.2} />
@@ -77,9 +77,8 @@ export default function Video({ title, accent }: z.infer<typeof schema>) {
           anchor="c1"
           offset={1}
           duration={3}
-          color={accent}
-          size={64}
-          animation={{ preset: "slide-up", in: 0.4, out: 0.3 }}
+          style={{ color: accent, size: 64 }}
+          animation={{ type: "slideUp", in: 0.4, out: 0.3 }}
         >
           {title}
         </Title>
@@ -87,7 +86,7 @@ export default function Video({ title, accent }: z.infer<typeof schema>) {
           id="s1"
           anchor="c2"
           duration={2}
-          shape="rectangle"
+          type="rectangle"
           width={400}
           height={80}
           fill="#ffffff"
@@ -137,7 +136,7 @@ function Outro() {
 
 function Badge({ id, anchor, label }: { id: string; anchor: string; label: string }) {
   return (
-    <Title id={id} anchor={anchor} offset={0.2} duration={1.5} size={28} color="#ffffff">
+    <Title id={id} anchor={anchor} offset={0.2} duration={1.5} style={{ size: 28, color: "#ffffff" }}>
       {label}
     </Title>
   );

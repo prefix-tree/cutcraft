@@ -3,7 +3,7 @@
 import { z } from "zod";
 
 import { shaderDefinition } from "../jsx/shader-definition";
-import { BLEND, BLEND_MODES, COLOUR, glsl, HEX, NOISE, NOISE3 } from "./glsl";
+import { BLEND, COLOUR, glsl, HEX, NOISE, NOISE3, SHADER_BLEND_MODES } from "./glsl";
 
 const BOX = z.tuple([z.number(), z.number(), z.number().positive(), z.number().positive()]);
 
@@ -22,8 +22,11 @@ const halftone = shaderDefinition("effect", {
     size: z.number().min(2).max(200).default(8),
     /** How far the dot grid is turned, in degrees. In `cmyk` it is the black screen's angle, and the others are set from it. */
     angle: z.number().default(45),
-    /** `mono` prints `ink` on `paper` by brightness; `cmyk` prints cyan, magenta, yellow and black dots, each on its own screen. */
-    mode: z.enum(["mono", "cmyk"]).default("mono"),
+    /**
+     * How many inks print: `mono` prints `ink` on `paper` by brightness; `cmyk` prints cyan, magenta, yellow and black
+     * dots, each on its own screen. (Not `type`, which names the effect in its entry of `effects`.)
+     */
+    inks: z.enum(["mono", "cmyk"]).default("mono"),
     /** The colour of the dots in `mono`. */
     ink: HEX.default("#111111"),
     /** The colour under the dots. */
@@ -34,7 +37,7 @@ const halftone = shaderDefinition("effect", {
   shader: glsl`${COLOUR}vec2 ht_turn(vec2 p, float a) { float s = sin(a), c = cos(a); return vec2(c * p.x - s * p.y, s * p.x + c * p.y); }
 // The ink share each channel of a colour needs: x for mono (by luminance), or c, m, y, k.
 vec4 ht_inks(vec3 rgb) {
-  if (params.mode == params.mode.mono) return vec4(1.0 - us_luma(rgb));
+  if (params.inks == params.inks.mono) return vec4(1.0 - us_luma(rgb));
   float k = 1.0 - max(rgb.r, max(rgb.g, rgb.b));
   vec3 cmy = k < 1.0 ? (1.0 - rgb - k) / (1.0 - k) : vec3(0.0);
   return vec4(cmy, k);
@@ -63,7 +66,7 @@ vec4 effect(vec2 uv) {
   vec2 p = uv * resolution;
   float a = radians(params.angle);
   vec3 printed;
-  if (params.mode == params.mode.mono) {
+  if (params.inks == params.inks.mono) {
     printed = mix(params.paper, params.ink, ht_cover(p, a, 0));
   } else {
     printed = params.paper;
@@ -104,7 +107,7 @@ const pixelate = shaderDefinition("effect", {
 });
 
 /**
- * Scanlines, the raster lines of a CRT: a dark band every `spacing` pixels, `thickness` of the period wide, darkening
+ * Scanlines, the raster lines of a CRT: a dark band every `spacing` pixels, covering `coverage` of the period, darkening
  * the picture by `intensity` in linear light. `angle` turns the lines (0 is horizontal), and `speed` rolls them by that
  * many pixels a second. The band's edges are antialiased over a pixel.
  */
@@ -113,8 +116,8 @@ const scanlines = shaderDefinition("effect", {
   params: z.object({
     /** The distance from one line to the next, in pixels. */
     spacing: z.number().min(2).max(200).default(4),
-    /** How much of the space between lines each dark line covers. */
-    thickness: z.number().min(0).max(1).default(0.5),
+    /** How much of the space between lines each dark line covers, 0 to 1. */
+    coverage: z.number().min(0).max(1).default(0.5),
     /** How dark the lines are: 0 is invisible, 1 is black. */
     intensity: z.number().min(0).max(1).default(0.35),
     /** How fast the lines roll across the picture, in pixels per second. */
@@ -129,7 +132,7 @@ const scanlines = shaderDefinition("effect", {
   vec2 p = uv * resolution;
   float pos = dot(p, vec2(sin(a), cos(a))) + time * params.speed;
   float x = pos - params.spacing * floor(pos / params.spacing + 0.5);
-  float w = params.thickness * params.spacing;
+  float w = params.coverage * params.spacing;
   float dark = min(clamp(w / 2.0 - abs(x) + 0.5, 0.0, 1.0), w);
   return vec4(us_srgb(us_linear(c.rgb) * (1.0 - params.intensity * dark)), c.a);
 }`,
@@ -196,7 +199,7 @@ const fractalNoise = shaderDefinition("effect", {
     /** The colour the noise is tinted with. */
     color: HEX.default("#ffffff"),
     /** How the noise is blended onto the picture, as a W3C blend mode. */
-    blend: z.enum(BLEND_MODES).default("overlay"),
+    blend: z.enum(SHADER_BLEND_MODES).default("overlay"),
     /** How much of the blended noise to mix in: 0 leaves the picture as it was, 1 is the full blend. */
     opacity: z.number().min(0).max(1).default(0.5),
     /** Picks the pattern; the same seed draws the same noise. */

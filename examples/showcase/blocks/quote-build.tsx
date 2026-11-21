@@ -14,7 +14,7 @@ export const schema = z.object({
   stress: z.array(z.string()).describe("Words to stress, as written in the quote; punctuation around them is ignored"),
   author: z.string().describe("Who said it; empty for none"),
   role: z.string().describe("A line under the name, such as a title or a year; empty for none"),
-  start: z.number().min(0).describe("Seconds since the layer started at which the first word arrives"),
+  after: z.number().min(0).describe("Seconds since the layer started at which the first word arrives"),
   wordsPerSecond: z.number().positive().describe("How fast the words arrive"),
   x: z.number().describe("Left edge of the quote, in pixels"),
   y: z.number().describe("Top edge of the quote, in pixels"),
@@ -33,7 +33,7 @@ export const defaults: QuoteBuildProps = {
   stress: ["yourself", "story"],
   author: "A writer's rule",
   role: "on drafts",
-  start: 0.6,
+  after: 0.6,
   wordsPerSecond: 3.2,
   x: 150,
   y: 600,
@@ -58,7 +58,7 @@ export const meta: BlockMeta = {
   tags: ["quote", "text", "testimonial", "typography", "words"],
   aspects: ["9:16"],
   length: 5,
-  beats: ["start"],
+  beats: ["after"],
   poster: 4.6,
 };
 
@@ -70,9 +70,9 @@ export function QuoteBuild(props: Partial<QuoteBuildProps>) {
   const words = p.text.split(/\s+/).filter(Boolean);
   const stressed = new Set(p.stress.map(bare));
   const every = 1 / p.wordsPerSecond;
-  const end = p.start + words.length * every;
-  const mark = progress(clock, { after: Math.max(0, p.start - 0.5), over: 0.45, easing: "ease-out" });
-  const name = progress(clock, { after: end + 0.25, over: 0.45, easing: "ease-out" });
+  const end = p.after + words.length * every;
+  const mark = progress(clock, { after: Math.max(0, p.after - 0.5), over: 0.45, easing: "easeOut" });
+  const name = progress(clock, { after: end + 0.25, over: 0.45, easing: "easeOut" });
   const font = themeCss(p.font);
   return (
     <div
@@ -111,10 +111,10 @@ export function QuoteBuild(props: Partial<QuoteBuildProps>) {
         }}
       >
         {words.map((word, i) => {
-          const at = p.start + i * every;
-          const k = progress(clock, { after: at, over: 0.32, easing: "ease-out" });
+          const at = p.after + i * every;
+          const k = progress(clock, { after: at, over: 0.32, easing: "easeOut" });
           const stress = stressed.has(bare(word));
-          const line = stress ? progress(clock, { after: at + 0.15, over: 0.4, easing: "ease-in-out" }) : 0;
+          const line = stress ? progress(clock, { after: at + 0.15, over: 0.4, easing: "easeInOut" }) : 0;
           return (
             <span
               key={`${word}-${i}`}

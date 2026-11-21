@@ -44,7 +44,7 @@ export default function V() { return <Composition fps={30} width={1920} height={
   );
 
 // hook plays words 4..9 (2 s to 4.9 s of the talk) from 0; x1 overlaps it and the b-roll by 0.5 s.
-const CUT = `<Marker id="intro" at={1.5} />
+const CUT = `<Marker id="intro" start={1.5} />
 <Track id="main">
   <Clip id="hook" src="asset:talk" in="word:4" out="word:9.end" />
   <Transition id="x1" type="crossfade" duration={0.5} />
@@ -130,7 +130,7 @@ describe("moments", () => {
     );
     expect(at(fast, "word:6").moments[0]?.time).toBe(0.5);
     const held = stateOf(
-      `<Track id="main"><Clip id="a" src="asset:talk" in="word:4" out="word:9.end" freezes={[{ at: 0.5, duration: 2, source: 0.5 }]} /></Track>`,
+      `<Track id="main"><Clip id="a" src="asset:talk" in="word:4" out="word:9.end" freezes={[{ start: 0.5, duration: 2, source: 0.5 }]} /></Track>`,
     );
     expect(at(held, "word:6").moments[0]?.time).toBe(3);
   });

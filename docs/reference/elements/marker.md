@@ -13,7 +13,7 @@ A named point on the timeline.
 | prop | type | default | required | description |
 |---|---|---|---|---|
 | `id` | string |  | yes | The marker's name: `marker:<id>` refers to it as a time. |
-| `at` | number (0..∞) |  | yes | Seconds from the start of the video. |
+| `start` | number (0..∞) |  | yes | Seconds from the start of the video. |
 | `label` | string | `""` |  | Text shown on the editor's ruler. |
 | `color` | string |  |  | Its colour on the ruler. |
 

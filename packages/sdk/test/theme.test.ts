@@ -24,13 +24,17 @@ function film(theme: ThemeInput | undefined, ...overlays: ReturnType<typeof h>[]
   );
 }
 
+/** A placement's parsed `style`. */
+const styleOf = (state: { items: ReadonlyMap<string, { props: Record<string, unknown> }> }, id: string) =>
+  (state.items.get(id)?.props.style ?? {}) as Record<string, unknown>;
+
 describe("theme", () => {
   it("resolves tokens against the default theme when the file declares none, and leaves the rest alone", () => {
     const state = resolve(
       collect(
         film(
           undefined,
-          h(Shape, { id: "s", start: 0, shape: "rectangle", fill: "$primary", cornerRadius: "$radius" }),
+          h(Shape, { id: "s", start: 0, type: "rectangle", fill: "$primary", cornerRadius: "$radius" }),
           h(Title, { id: "t", start: 0 }, "Hello"),
         ),
       ),
@@ -44,7 +48,7 @@ describe("theme", () => {
     });
     expect(state.items.get("s")?.themed).toEqual({ fill: "$primary", cornerRadius: "$radius" });
     // No declared theme: no default preset, no motion.
-    expect(state.items.get("t")?.props).toMatchObject({ font: "Inter", color: "#ffffff" });
+    expect(state.items.get("t")?.props.style).toMatchObject({ font: "Inter", color: "#ffffff" });
     expect(state.items.get("t")?.props.enter).toBeUndefined();
     expect(state.items.get("t")?.themed).toBeUndefined();
     expect(state.theme.declared).toBe(false);
@@ -56,26 +60,28 @@ describe("theme", () => {
         film(
           { extends: "paper" },
           h(Title, { id: "plain", start: 0 }, "Plain"),
-          h(Title, { id: "big", start: 0, style: "h1", color: "#123456" }, "Big"),
+          h(Title, { id: "big", start: 0, style: { preset: "h1", color: "#123456" } }, "Big"),
         ),
       ),
       manifest,
     );
     expect(state.errors).toEqual([]);
     const paper = THEMES.paper;
-    expect(state.items.get("plain")?.props).toMatchObject({
+    expect(state.items.get("plain")?.props.style).toMatchObject({
       font: paper.fonts.heading,
       color: paper.palette.text,
       size: 48,
     });
-    expect(state.items.get("big")?.props).toMatchObject({
+    expect(state.items.get("big")?.props.style).toMatchObject({
+      preset: "h1",
       font: paper.fonts.heading,
       size: 96,
       weight: 700,
       color: "#123456",
     });
-    expect(state.items.get("big")?.themed).toMatchObject({ font: "$heading", size: "style:h1" });
-    expect(state.items.get("big")?.themed?.color).toBeUndefined();
+    expect(state.items.get("big")?.themed).toMatchObject({ "style.font": "$heading", "style.size": "style:h1" });
+    expect(state.items.get("big")?.themed?.["style.color"]).toBeUndefined();
+    expect(state.items.get("big")?.themed?.["style.preset"]).toBeUndefined();
   });
 
   it("fills entrances, exits and transitions from the motion style where the file says nothing", () => {
@@ -85,8 +91,8 @@ describe("theme", () => {
           { motion: "bouncy" },
           h(Title, { id: "t", start: 0 }, "Pop"),
           h(Title, { id: "own", start: 0, enter: { type: "fade" } }, "Own"),
-          h(Title, { id: "text", start: 0, animation: { preset: "typewriter" } }, "Typed"),
-          h(Shape, { id: "s", start: 0, shape: "circle" }),
+          h(Title, { id: "text", start: 0, animation: { type: "typewriter" } }, "Typed"),
+          h(Shape, { id: "s", start: 0, type: "circle" }),
         ),
       ),
       manifest,
@@ -94,7 +100,7 @@ describe("theme", () => {
     expect(state.errors).toEqual([]);
     expect(state.items.get("t")?.props.enter).toMatchObject({ type: "pop", duration: 0.5 });
     expect(state.items.get("t")?.props.exit).toMatchObject({ type: "scale" });
-    expect(state.items.get("own")?.props.enter).toMatchObject({ type: "fade", duration: 0.5, easing: "ease-out" });
+    expect(state.items.get("own")?.props.enter).toMatchObject({ type: "fade", duration: 0.5, easing: "easeOut" });
     expect(state.items.get("own")?.props.exit).toMatchObject({ type: "scale" });
     expect(state.items.get("text")?.props.enter).toBeUndefined();
     expect(state.items.get("s")?.props.enter).toMatchObject({ type: "pop" });
@@ -118,7 +124,7 @@ describe("theme", () => {
     expect(theme.tokens).toMatchObject({ heading: "Playfair Display", body: THEMES.neon.fonts.body, radius: 3 });
     expect(theme.styles.title?.h1).toMatchObject({ size: 120, font: "$heading", weight: 700 });
     const hero = applyTheme("title", { id: "t", style: "hero" }, theme);
-    expect(hero.props).toMatchObject({ size: 140, color: "#00ff00", style: "hero" });
+    expect(hero.props.style).toEqual({ preset: "hero", size: 140, color: "#00ff00" });
     const raw = { extends: "neon" };
     expect(resolveTheme(raw)).toBe(resolveTheme(raw));
   });
@@ -133,7 +139,7 @@ describe("theme", () => {
     const state = resolve(collect(el), manifest);
     expect(state.errors).toEqual([]);
     expect(state.items.get("composition")?.props.background).toEqual({
-      mode: "color",
+      type: "color",
       color: THEMES.pastel.palette.background,
     });
     expect(state.items.get("caps")?.props.style).toMatchObject({
@@ -142,12 +148,61 @@ describe("theme", () => {
     });
   });
 
+  it("merges a title's and the captions' style.preset under the style's own fields, tokens and all", () => {
+    const theme = resolveTheme({ extends: "paper", palette: { brand: "#00ff00" } });
+    const title = applyTheme("title", { id: "t", style: { preset: "kicker", size: 40, color: "$brand" } }, theme);
+    expect(title.props.style).toEqual({
+      preset: "kicker",
+      font: THEMES.paper.fonts.body,
+      size: 40,
+      weight: 700,
+      color: "#00ff00",
+      letterSpacing: 3,
+    });
+    expect(title.from).toEqual({
+      enter: "motion",
+      exit: "motion",
+      "style.font": "$body",
+      "style.weight": "style:kicker",
+      "style.letterSpacing": "style:kicker",
+      "style.color": "$brand",
+    });
+    const captions = applyTheme("captions", { id: "c", style: { preset: "boxed", size: 40, align: "left" } }, theme);
+    expect(captions.props.style).toEqual({
+      preset: "boxed",
+      font: THEMES.paper.fonts.body,
+      color: THEMES.paper.palette.text,
+      background: THEMES.paper.palette.surface,
+      highlight: THEMES.paper.palette.primary,
+      size: 40,
+      align: "left",
+    });
+    expect(captions.from["style.background"]).toBe("$surface");
+    // The name alone is the same as `{ preset }`.
+    expect(applyTheme("captions", { id: "c", style: "boxed" }, theme).props.style).toMatchObject({ preset: "boxed" });
+  });
+
+  it("reports an unknown preset name and keeps the rest of the style", () => {
+    const theme = resolveTheme({ extends: "paper" });
+    for (const kind of ["title", "captions"]) {
+      const out = applyTheme(kind, { id: "x", style: { preset: "giant", size: 40 } }, theme);
+      expect(out.issues).toEqual([
+        expect.objectContaining({
+          code: "UNKNOWN_STYLE",
+          prop: "style.preset",
+          message: expect.stringContaining("giant"),
+        }),
+      ]);
+      expect(out.props.style).toEqual({ preset: "giant", size: 40 });
+    }
+  });
+
   it("reports unknown tokens and styles", () => {
     const state = resolve(
       collect(
         film(
           {},
-          h(Shape, { id: "s", start: 0, shape: "rectangle", fill: "$brand" }),
+          h(Shape, { id: "s", start: 0, type: "rectangle", fill: "$brand" }),
           h(Title, { id: "t", start: 0, style: "giant" }, "?"),
         ),
       ),
@@ -156,9 +211,44 @@ describe("theme", () => {
     expect(state.errors.map((e) => [e.code, e.id, e.prop])).toEqual(
       expect.arrayContaining([
         ["UNKNOWN_TOKEN", "s", "fill"],
-        ["UNKNOWN_STYLE", "t", "style"],
+        ["UNKNOWN_STYLE", "t", "style.preset"],
       ]),
     );
+  });
+
+  it("reports a title or captions preset that holds more than a look once, where the theme is declared", () => {
+    const theme = {
+      palette: { brand: "#ff3366" },
+      styles: {
+        title: { card: { size: 80, color: "$brand", width: 600, transform: { borderRadius: 28 } } },
+        captions: { lower: { size: 40, animation: "karaoke" } },
+      },
+    } as unknown as ThemeInput;
+    const state = resolve(
+      collect(
+        film(
+          theme,
+          h(Title, { id: "t1", start: 0, style: "card" }, "One"),
+          h(Title, { id: "t2", start: 0, style: { preset: "card", size: 60 } }, "Two"),
+          h(Captions, { id: "cap", style: "lower" }),
+        ),
+      ),
+      manifest,
+    );
+    const errors = state.errors.map((e) => [e.id, e.prop]);
+    expect(errors).toEqual([
+      ["composition", "theme.styles.title.card.width"],
+      ["composition", "theme.styles.title.card.transform"],
+      ["composition", "theme.styles.captions.lower.animation"],
+    ]);
+    const messages = state.errors.map((e) => e.message).join("\n");
+    expect(messages).toContain('the title preset "card" holds "width", which is not how text looks');
+    expect(messages).toContain("write box.width on the titles that use it");
+    expect(messages).toContain('the captions preset "lower" holds "animation"');
+    // The rest of the theme still applies, the look of the preset included.
+    expect(styleOf(state, "t1")).toMatchObject({ preset: "card", size: 80, color: "#ff3366" });
+    expect(styleOf(state, "t2")).toMatchObject({ preset: "card", size: 60, color: "#ff3366" });
+    expect(styleOf(state, "cap")).toMatchObject({ preset: "lower", size: 40 });
   });
 
   it("keeps placements the theme does not touch when the theme changes", () => {
@@ -170,16 +260,16 @@ describe("theme", () => {
     const after = exec.state();
     expect(after.items.get("c1")).toBe(before.items.get("c1"));
     expect(after.items.get("t")).not.toBe(before.items.get("t"));
-    expect(after.items.get("t")?.props.font).toBe(THEMES.paper.fonts.heading);
+    expect(styleOf(after, "t").font).toBe(THEMES.paper.fonts.heading);
     exec.execute({ type: "theme/setToken", params: { token: "$text", value: "#010203" } });
-    expect(exec.state().items.get("t")?.props.color).toBe("#010203");
+    expect(styleOf(exec.state(), "t").color).toBe("#010203");
     expect(exec.state().items.get("composition")?.props.theme).toEqual({
       extends: "paper",
       palette: { text: "#010203" },
     });
     exec.undo();
     exec.undo();
-    expect(exec.state().items.get("t")?.props.font).toBe(THEMES.midnight.fonts.heading);
+    expect(styleOf(exec.state(), "t").font).toBe(THEMES.midnight.fonts.heading);
   });
 
   it("folds a theme change into the composition's theme literal", () => {
@@ -197,9 +287,10 @@ export default function Video() {
   return (
     <Composition fps={30} width={1920} height={1080} theme={{ extends: "paper", fonts: { mono: "Comic Mono" } }}>
       <Track id="over" layout="free">
-        <Title id="a" start={0} style="h1" color="$brand">A</Title>
-        <Title id="b" start={0} style="giant" font="Helvetica" color="#1d1b17">B</Title>
-        <Shape id="s" start={0} shape="rectangle" fill="$surface" shadow={{ color: "#000000", blur: 10 }} />
+        <Title id="a" start={0} style={{ preset: "h1", color: "$brand" }}>A</Title>
+        <Title id="b" start={0} style={{ preset: "giant", font: "Helvetica", color: "#1d1b17" }}>B</Title>
+        <Title id="c" start={0} style={{ preset: "nope", font: face }}>C</Title>
+        <Shape id="s" start={0} type="rectangle" fill="$surface" shadow={{ color: "#000000", blur: 10 }} />
       </Track>
     </Composition>
   );
@@ -210,16 +301,23 @@ export default function Video() {
       .map((x) => [x.rule, x.id, x.prop, x.severity]);
     expect(d).toEqual(
       expect.arrayContaining([
-        ["theme-refs", "a", "color", "error"],
+        ["theme-refs", "a", "style", "error"],
         ["theme-refs", "b", "style", "error"],
-        ["theme-literals", "b", "font", "warning"],
-        ["theme-literals", "b", "color", "warning"],
-        ["font-available", "b", "font", "warning"],
+        ["theme-refs", "c", "style", "error"],
+        ["theme-literals", "b", "style", "warning"],
+        ["font-available", "b", "style", "warning"],
         ["font-available", "composition", "theme", "warning"],
       ]),
     );
     expect(d.filter((x) => x[1] === "s")).toEqual([]);
-    expect(lint(text).find((x) => x.rule === "theme-literals" && x.prop === "color")?.message).toContain("$text");
+    expect(
+      lint(text).find((x) => x.rule === "theme-literals" && x.message.includes("b.style.color"))?.message,
+    ).toContain("$text");
+    expect(
+      lint(text)
+        .filter((x) => x.rule === "theme-refs")
+        .map((x) => x.message),
+    ).toEqual(expect.arrayContaining([expect.stringContaining('no title style "nope"')]));
   });
 
   it("takes a font the file declares as available, and wants declarations at the top with literal arguments", () => {
@@ -233,9 +331,9 @@ export default function Video() {
   return (
     <Composition fps={30} width={1920} height={1080}>
       <Track id="over" layout="free">
-        <Title id="a" start={0} font="Brand">A</Title>
-        <Title id="b" start={0} font="Titan One">B</Title>
-        <Title id="c" start={0} font="Other">C</Title>
+        <Title id="a" start={0} style={{ font: "Brand" }}>A</Title>
+        <Title id="b" start={0} style={{ font: "Titan One" }}>B</Title>
+        <Title id="c" start={0} style={{ preset: "h1", font: "Other" }}>C</Title>
       </Track>
     </Composition>
   );

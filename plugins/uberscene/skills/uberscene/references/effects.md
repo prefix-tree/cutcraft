@@ -8,10 +8,10 @@ A param's name says what kind of value it is, and each kind has one scale:
 
 | Kind | Scale | Params |
 |---|---|---|
-| strength, mix or share | a fraction, 0 to 1, or -1 to 1 when it goes both ways | `amount`, `opacity`, `softness`, `tolerance`, `tint`, `temperature`, `shadows`, `highlights`, `threshold`, `spill`, `black`, `white`, `blur`, `roundness`, `star`, `thickness`, `spread` (of the frame's diagonal) |
+| strength, mix or share | a fraction, 0 to 1, or -1 to 1 when it goes both ways | `amount`, `opacity`, `softness`, `tolerance`, `tint`, `temperature`, `shadows`, `highlights`, `threshold`, `spill`, `black`, `white`, `smear`, `coverage` (a share of the spacing), `roundness`, `star`, `spread` (of the frame's diagonal) |
 | gain | a multiplier | `intensity`, `scale`, `contrast` |
 | exponent | a power, 1 changes nothing | `gamma` |
-| distance | pixels of the composition; a blur's `radius` (and `bevel`'s `size`) is its Gaussian's standard deviation, as CSS `blur()` reads it | `radius`, `width`, `feather`, `length`, `distance`, `size`, `spacing`, `edge`, `x`, `y` |
+| distance | pixels of the composition; a blur's `radius`, a shadow's `blur` (and `bevel`'s `size`) is its Gaussian's standard deviation, as CSS `blur()` reads it | `radius`, `blur`, `thickness`, `feather`, `length`, `distance`, `size`, `spacing`, `edge`, `x`, `y` |
 | angle | degrees, clockwise from up | `angle`, `rotation`, `startAngle` |
 | position | fractions of the frame, `[x, y]` from the top left | `center`, `box`, the corners |
 | colour | `"#rgb"` or `"#rrggbb"` | `color`, `dark`, `light`, `ink`, `paper` |
@@ -23,7 +23,7 @@ A param's name says what kind of value it is, and each kind has one scale:
 | switch | `true` or `false` | `fade`, `inverted`, `outlineOnly`, `pushOut`, `radial` |
 | curve | `[input, output]` points, 0 to 1 | `rgb`, `red`, `green`, `blue` |
 | asset | `"asset:<id>"` from the manifest | `src` |
-| choice | a string | `direction`, `curve`, `mode`, `blend` |
+| choice | a string | `direction`, `curve`, `type`, `blend` |
 
 ## `brightness`
 
@@ -135,7 +135,7 @@ Drawn as a CSS filter; no WebGL needed.
 |---|---|---|---|
 | `x` | number | `0` | How far the shadow falls to the right, in pixels; negative falls left. |
 | `y` | number | `4` | How far the shadow falls down, in pixels; negative falls up. |
-| `radius` | number (0..200) | `8` | How soft the shadow's edge is, in pixels: the blur's standard deviation. |
+| `blur` | number (0..200) | `8` | How soft the shadow's edge is, in pixels: the blur's standard deviation. |
 | `color` | string | `"#000000"` | The shadow's colour. |
 | `opacity` | number (0..1) | `0.5` | How dark the shadow is: 0 is invisible, 1 is solid colour. |
 
@@ -419,7 +419,7 @@ Drawn as a shader.
 
 | param | type | default | description |
 |---|---|---|---|
-| `width` | number (0..64) | `8` | How thick the outline is, in pixels. |
+| `thickness` | number (0..64) | `8` | How thick the outline is, in pixels. |
 | `color` | string | `"#ffffff"` | The outline's colour. |
 | `opacity` | number (0..1) | `1` | How opaque the outline is: 0 is invisible, 1 is solid. |
 | `outlineOnly` | boolean | `false` | Draw only the outline, filled in, without the element over it. |
@@ -474,7 +474,7 @@ Drawn as a shader.
 |---|---|---|---|
 | `size` | number (2..200) | `8` | How big each dot's cell is, in pixels. |
 | `angle` | number | `45` | How far the dot grid is turned, in degrees. In `cmyk` it is the black screen's angle, and the others are set from it. |
-| `mode` | "mono" \| "cmyk" | `"mono"` | `mono` prints `ink` on `paper` by brightness; `cmyk` prints cyan, magenta, yellow and black dots, each on its own screen. |
+| `inks` | "mono" \| "cmyk" | `"mono"` | How many inks print: `mono` prints `ink` on `paper` by brightness; `cmyk` prints cyan, magenta, yellow and black dots, each on its own screen. (Not `type`, which names the effect in its entry of `effects`.) |
 | `ink` | string | `"#111111"` | The colour of the dots in `mono`. |
 | `paper` | string | `"#ffffff"` | The colour under the dots. |
 | `amount` | number (0..1) | `1` | How much of the effect to mix in: 0 leaves the picture as it was, 1 is the full effect. |
@@ -508,7 +508,7 @@ Drawn as a shader.
 | param | type | default | description |
 |---|---|---|---|
 | `spacing` | number (2..200) | `4` | The distance from one line to the next, in pixels. |
-| `thickness` | number (0..1) | `0.5` | How much of the space between lines each dark line covers. |
+| `coverage` | number (0..1) | `0.5` | How much of the space between lines each dark line covers, 0 to 1. |
 | `intensity` | number (0..1) | `0.35` | How dark the lines are: 0 is invisible, 1 is black. |
 | `speed` | number (-2000..2000) | `0` | How fast the lines roll across the picture, in pixels per second. |
 | `angle` | number | `0` | How far the lines are turned, in degrees: 0 is horizontal, 90 vertical. |
@@ -564,7 +564,7 @@ Drawn without a shader.
 
 | param | type | default | description |
 |---|---|---|---|
-| `curve` | "linear" \| "ease" \| "ease-in" \| "ease-out" \| "ease-in-out" | `"ease"` | How the fade eases over its duration. |
+| `curve` | "linear" \| "ease" \| "easeIn" \| "easeOut" \| "easeInOut" | `"ease"` | How the fade eases over its duration. |
 
 [All effects and transitions](https://uberscene.prefixtree.xyz/reference/effects/) · [Units](https://uberscene.prefixtree.xyz/reference/effects/#units)
 
@@ -727,7 +727,7 @@ Drawn by a shader, as a crossfade where WebGL is missing.
 
 ## `zoom`
 
-Zooms through the first clip into the next, with a blur.
+Zooms through the first clip into the next, smearing along the zoom.
 
 ### Params
 
@@ -737,6 +737,6 @@ Drawn by a shader, as a crossfade where WebGL is missing.
 |---|---|---|---|
 | `center` | [number, number] | `[0.5,0.5]` | The point the clips zoom toward, as `[x, y]` fractions of the frame from the top left. |
 | `scale` | number (1..4) | `1.6` | How far the clips zoom, as a multiplier: the outgoing clip grows to it and the next one shrinks from it. |
-| `blur` | number (0..1) | `0.5` | How much the clips smear along the zoom, most at the middle: 0 is none. |
+| `smear` | number (0..1) | `0.5` | How much the clips smear along the zoom, most at the middle: 0 is none. |
 
 [All effects and transitions](https://uberscene.prefixtree.xyz/reference/effects/) · [Units](https://uberscene.prefixtree.xyz/reference/effects/#units)

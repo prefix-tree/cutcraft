@@ -22,13 +22,13 @@ describe("the stylizers and generators", () => {
     expect(params("halftone")).toEqual({
       size: 8,
       angle: 45,
-      mode: "mono",
+      inks: "mono",
       ink: "#111111",
       paper: "#ffffff",
       amount: 1,
     });
     expect(params("pixelate")).toEqual({ size: 12, box: [0, 0, 1, 1], feather: 0 });
-    expect(params("scanlines")).toEqual({ spacing: 4, thickness: 0.5, intensity: 0.35, speed: 0, angle: 0 });
+    expect(params("scanlines")).toEqual({ spacing: 4, coverage: 0.5, intensity: 0.35, speed: 0, angle: 0 });
     expect(params("lightLeak")).toEqual({ color: "#ff8a3d", intensity: 0.6, spread: 0.6, evolution: 0.15, seed: 0 });
     expect(params("fractalNoise")).toEqual({
       size: 160,
@@ -43,12 +43,12 @@ describe("the stylizers and generators", () => {
   });
 
   it("say what is out of range, unknown or not one of the choices", () => {
-    const state = stateOf(`{ type: "halftone", mode: "rgb" },
+    const state = stateOf(`{ type: "halftone", inks: "rgb" },
       { type: "pixelate", size: 0 },
       { type: "fractalNoise", octaves: 9 },
       { type: "lightLeak", size: 0.5 }`);
     expect(state.errors.map((e) => `${e.id}.${e.prop}`)).toEqual([
-      "h0.effects.0.mode",
+      "h0.effects.0.inks",
       "h0.effects.1.size",
       "h0.effects.2.octaves",
       "h0.effects.3",

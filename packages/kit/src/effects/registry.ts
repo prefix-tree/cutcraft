@@ -102,6 +102,19 @@ export const EFFECTS = {
   fractalNoise: shaderEntry(fractalNoise, undefined, { opacity: 0 }),
 } as const satisfies Record<string, EffectEntry>;
 
+/** Built-in effects' params that had another name before 0.6, by effect: the old name to the new. */
+export const RENAMED_EFFECT_PARAMS: Readonly<Record<string, Readonly<Record<string, string>>>> = {
+  shadow: { radius: "blur" },
+  outline: { width: "thickness" },
+  halftone: { mode: "inks", type: "inks" },
+  scanlines: { thickness: "coverage" },
+};
+
+/** Built-in transitions' params that had another name before 0.6, by transition: the old name to the new. */
+export const RENAMED_TRANSITION_PARAMS: Readonly<Record<string, Readonly<Record<string, string>>>> = {
+  zoom: { blur: "smear" },
+};
+
 const dir4 = z.enum(["left", "right", "up", "down"]);
 const look = <P extends z.ZodObject>(name: string, params: P): TransitionEntry<P> => ({
   name,
@@ -118,7 +131,7 @@ export const TRANSITIONS = {
     "crossfade",
     z.strictObject({
       /** How the fade eases over its duration. */
-      curve: z.enum(["linear", "ease", "ease-in", "ease-out", "ease-in-out"]).default("ease"),
+      curve: z.enum(["linear", "ease", "easeIn", "easeOut", "easeInOut"]).default("ease"),
     }),
   ),
   dipToBlack: look(

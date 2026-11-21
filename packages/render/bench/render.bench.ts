@@ -113,14 +113,14 @@ const EFFECT_CASES: readonly { readonly key: string; readonly label: string; rea
     key: "silhouette",
     label: "silhouette, 5 s 1080p30 (outline and glow on the footage)",
     effects: `
-          { type: "outline", width: 12 },
+          { type: "outline", thickness: 12 },
           { type: "glow", radius: 8 }`,
   },
   {
     key: "print",
     label: "print, 5 s 1080p30 (a CMYK halftone and eight octaves of fractal noise on the footage, the heaviest looks)",
     effects: `
-          { type: "halftone", mode: "cmyk", size: 10 },
+          { type: "halftone", inks: "cmyk", size: 10 },
           { type: "fractalNoise", octaves: 8, opacity: 0.4 }`,
   },
 ];

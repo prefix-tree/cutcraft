@@ -15,21 +15,21 @@ export default function V() { return <Composition fps={30} width={640} height={3
 describe("the title effects", () => {
   it("fill their defaults on a title", () => {
     const state = stateOf(`{ type: "glow" },
-      { type: "outline", width: 4 },
+      { type: "outline", thickness: 4 },
       { type: "longShadow", fade: true },
       { type: "bevel" }`);
     expect(state.errors).toEqual([]);
     const params = (n: number) => state.items.get(`h.effects.${n}`)?.props.params;
     expect(params(0)).toEqual({ radius: 7, intensity: 1, threshold: 0, color: "#ffffff", tint: 1 });
-    expect(params(1)).toEqual({ width: 4, color: "#ffffff", opacity: 1, outlineOnly: false });
+    expect(params(1)).toEqual({ thickness: 4, color: "#ffffff", opacity: 1, outlineOnly: false });
     expect(params(2)).toEqual({ length: 240, angle: 135, color: "#777777", opacity: 1, fade: true });
     expect(params(3)).toEqual({ size: 1.5, angle: -60, amount: 0.4, highlight: "#ffffff", shade: "#000000" });
   });
 
   it("say what is out of range", () => {
     const state = stateOf(`{ type: "glow", intensity: 9 },
-      { type: "outline", width: 100 }`);
-    expect(state.errors.map((e) => `${e.id}.${e.prop}`)).toEqual(["h.effects.0.intensity", "h.effects.1.width"]);
+      { type: "outline", thickness: 100 }`);
+    expect(state.errors.map((e) => `${e.id}.${e.prop}`)).toEqual(["h.effects.0.intensity", "h.effects.1.thickness"]);
   });
 
   it("glow and bevel blur in passes; outline takes two, longShadow one", () => {
@@ -38,12 +38,12 @@ describe("the title effects", () => {
     expect(builtInShader("longShadow")?.passes).toHaveLength(1);
   });
 
-  it("outline measures the distance down each column, then along each row, within its width", () => {
+  it("outline measures the distance down each column, then along each row, within its thickness", () => {
     const [down, along] = builtInShader("outline")?.passes ?? [];
     expect(builtInShader("outline")?.passes).toHaveLength(2);
     expect(down).toContain("texelFetch(image, up, 0)");
     expect(along).toContain("float(k * k) + dy * dy");
-    expect([down, along].every((s) => s?.includes("ceil(params.width)"))).toBe(true);
+    expect([down, along].every((s) => s?.includes("ceil(params.thickness)"))).toBe(true);
   });
 
   it("glow is a halo under the element, and a bloom over it only once it has a threshold", () => {

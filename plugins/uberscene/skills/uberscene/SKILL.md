@@ -22,7 +22,7 @@ references.
 | To | Use |
 |---|---|
 | Cut on meaning | `in`/`out` as `word:12`, `word:23.end`, `shot:1`, `silence:2`; `at="marker:intro"` with `<Marker>`; `<Gap duration>` for a hole |
-| Change speed | `speed`, `reverse`; keys on `speed` ramp it (`speed={[{ at: 0, value: 1, easing: "easeInOutQuad" }, { at: 1.6, value: 0.4 }]}`); `freezes={[{ at, duration, source }]}` holds the source frame at `source` from `at` seconds into the clip. Sound follows |
+| Change speed | `speed`, `reverse`; keys on `speed` ramp it (`speed={[{ at: 0, value: 1, easing: "easeInOutQuad" }, { at: 1.6, value: 0.4 }]}`); `freezes={[{ start, duration, source }]}` holds the source frame at `source` from `start` seconds into the clip. Sound follows |
 | Several cameras | `<Multicam sync>` with `<Angle src offset>` per camera and `<Cut at angle>` to switch |
 | Reuse a sequence | `<Nested>`: a sequence written once as a component and placed like a clip |
 | Place and frame | `box` (`x`, `y`, `width`, `height` in pixels from the frame's top left, `origin`: which point sits at `x`, `y`; left out, the whole frame); `fit` (`contain`, `cover`, `stretch`, `none`) fills the box; `transform` (scale, rotation, opacity, crop, `borderRadius`) after it; `frame={{ focus }}` reframes footage to the composition's shape, a landscape interview into a vertical short |
@@ -35,8 +35,8 @@ references.
 | Fix footage | `colorKey` (green screen), `regionBlur` (hide a face or a plate), `cornerPin` (put a picture on a screen), `blur`, `zoomBlur` |
 | Style text and graphics | `glow`, `outline`, `shadow`, `longShadow`, `bevel` on a title, shape or layer |
 | Affect everything below | `<Adjustment effects={[…]}>`, for its time, on every track beneath it |
-| Words on screen | `<Title>` with a theme `style` and `animation={{ preset }}`: `typewriter`, `fade`, `slide-up`, `slide-down`, `slide-left`, `slide-right`, `scale`, `word-by-word` |
-| Captions | `<Captions>` from the transcript, or `<Caption>` cues; `animation`: `word-highlight`, `word-by-word`, `karaoke`, `typewriter`; `style.highlightBox` boxes the word being said; `box` places them (the lower safe area when left out; each field written replaces that one) |
+| Words on screen | `<Title>` with a theme `style` and `animation={{ type }}`: `typewriter`, `fade`, `slideUp`, `slideDown`, `slideLeft`, `slideRight`, `scale`, `wordByWord` |
+| Captions | `<Captions>` from the transcript, or `<Caption>` cues; `animation`: `wordHighlight`, `wordByWord`, `karaoke`, `typewriter`; `style.highlightBox` boxes the word being said; `box` places them (the lower safe area when left out; each field written replaces that one) |
 | Shapes and images | `<Shape>` (rectangle, circle, ellipse, triangle, arrow and more), `<Svg>` (inline markup or an SVG asset), `<Sticker>` (a PNG, SVG, WebP or GIF asset) |
 | Ready-made graphics | `LowerThird`, `Callout`, `Badge`, `Counter`, `TypeCard` |
 | Ready-made scenes | Blocks: `uberscene blocks --for "<job>"` lists them with when to use each (`--sheet blocks.png` to look); `uberscene blocks add <name> --into video.tsx --track <id> --at hook@word:N` copies one to `blocks/<name>.tsx` and places its component in a `<Layer>`, its props set there; `blocks update` after an upgrade |
@@ -88,7 +88,7 @@ Work in this order, and check after each stage.
    ```
    For a diagram inside a `<Layer>`, use the kit's parts in an `<svg>`: `DrawnLine` (a line that draws itself),
    `Label` (a word with a line to what it names, which names itself for this check), `CountUp` and `Cells`. Each
-   takes `at` (seconds of the video) or `after` (seconds since its layer started) and `over`.
+   takes `start` (seconds of the video) or `after` (seconds since its layer started) and `over`.
    Place things from those numbers; do not guess from a picture. To see them on the frames, add `--zones tiktok`
    to a `look`: the zone is drawn on every cell and each thing outlined, red where it leaves the zone.
 6. **Look at it.** `look` draws many frames in one go, on one contact sheet, and prints what each cell is. With no
@@ -238,11 +238,15 @@ Give the video one look and say it once.
   (`--category condensed|serif|display|…` narrows it). `uberscene fonts --for headline --sheet fonts.png --text "YOUR
   WORDS"` draws them; read the image, then pick. A starred family is bundled: use its name. Any other is declared at
   the top of the file, `const bebasNeue = googleFont("Bebas Neue", { weights: [400] })`, and passed as the value:
-  `fonts: { heading: bebasNeue }` or `font={bebasNeue}`. Ask only for weights the list shows.
+  `fonts: { heading: bebasNeue }` or `style={{ font: bebasNeue }}`. Ask only for weights the list shows.
 - **Tokens, not literals.** Colours: `$primary`, `$secondary`, `$accent`, `$background`, `$surface`, `$text`,
   `$muted`, `$onPrimary`. Fonts: `$heading`, `$body`, `$mono`. Corners: `$radius`.
 - **Presets for text.** `<Title style="h1">`, also `h2`, `kicker`, `body`, `caption`, `quote`, `label`, `code`,
-  `note`. Own props override a preset. `<Shape style="card">`, `<Captions style="boxed">`.
+  `note`. A title's whole look is its `style`, a preset's name or an object of `font`, `size`, `weight`, `italic`,
+  `color`, `background`, `stroke`, `shadow`, `align`, `valign`, `lineHeight`, `letterSpacing` and `decoration`, whose
+  fields override the preset it names: `style={{ preset: "h1", size: 64, color: "$primary" }}`. Its text box is
+  `box.width` and `box.height`. A preset is look only. `<Shape style="card">`, `<Captions style="boxed">`, and
+  `style={{ preset: "boxed", align: "left" }}` on captions.
 - **Leave entrances to the motion style.** Write `enter` or `exit` only where one element should differ.
 - **Components** for the common graphics: `LowerThird`, `Callout`, `Badge`, `Counter` and
   `TypeCard`, imported from `@uberscene/kit`. They take the timing props any element takes.

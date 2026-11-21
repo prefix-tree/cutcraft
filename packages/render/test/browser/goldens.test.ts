@@ -111,14 +111,14 @@ const CASES: readonly Case[] = [
     shape: true,
     effects: `{ type: "glow", radius: 6, intensity: 1.5, color: "#ffee88" }`,
   },
-  { name: "outline", shape: true, effects: `{ type: "outline", width: 6 }` },
+  { name: "outline", shape: true, effects: `{ type: "outline", thickness: 6 }` },
   {
     name: "longShadow",
     shape: true,
     effects: `{ type: "longShadow", length: 60, color: "#333333", fade: true }`,
   },
   { name: "bevel", shape: true, effects: `{ type: "bevel", size: 2, amount: 0.8 }` },
-  { name: "halftone", effects: `{ type: "halftone", size: 10, mode: "cmyk" }` },
+  { name: "halftone", effects: `{ type: "halftone", size: 10, inks: "cmyk" }` },
   {
     name: "pixelate",
     effects: `{ type: "pixelate", size: 16, box: [0.25, 0.2, 0.5, 0.6], feather: 6 }`,
@@ -170,7 +170,7 @@ export const manifest = ${JSON.stringify(manifest)};
 ${CHART}
 export default function Video() {
   return (
-    <Composition fps={30} width={320} height={180} background={{ mode: "color", color: "#000000" }}>
+    <Composition fps={30} width={320} height={180} background={{ type: "color", color: "#000000" }}>
       ${
         c.layer
           ? `<Track id="fx" layout="free">
@@ -258,19 +258,19 @@ const COMPOSED = `import { Caption, Captions, Clip, Composition, Motion, Title, 
 export const manifest = ${JSON.stringify(mediaManifest)};
 export default function Video() {
   return (
-    <Composition fps={30} width={480} height={270} background={{ mode: "color", color: "#000000" }}>
+    <Composition fps={30} width={480} height={270} background={{ type: "color", color: "#000000" }}>
       <Track id="main">
         <Clip id="solid" src="asset:solid" in={0} out={2} effects={[{ type: "levels", black: 0.05, white: 0.9, gamma: 1.2 }]} />
         <Transition id="w" type="wipe" duration={0.6} params={{ direction: "left" }} />
         <Clip id="logo" src="asset:logo" duration={2} fit="contain" />
       </Track>
       <Track id="overlays" layout="free">
-        <Title id="title" start={0.2} duration={2.8} size={36} color="#ffffff">Golden frame</Title>
+        <Title id="title" start={0.2} duration={2.8} style={{ size: 36, color: "#ffffff" }}>Golden frame</Title>
         <Motion id="dot" start={0.5} duration={2} sequence={[[".dot", { x: [0, 300] }, { duration: 2, ease: "linear" }]]}>
           <div className="dot" style={{ position: "absolute", left: 40, top: 200, width: 30, height: 30, borderRadius: 15, background: "#ffcc00" }} />
         </Motion>
       </Track>
-      <Captions id="cap" animation="word-highlight" style={{ size: 24, color: "#ffffff", highlight: "#ff3366" }}>
+      <Captions id="cap" animation="wordHighlight" style={{ size: 24, color: "#ffffff", highlight: "#ff3366" }}>
         <Caption id="c1" start={0} end={3.4} text="every frame matters" words={[
           { text: "every", start: 0, end: 1 },
           { text: "frame", start: 1, end: 2 },

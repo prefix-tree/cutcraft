@@ -25,7 +25,7 @@ import { listHandlers } from "../packages/sdk/src/index";
 import { readApiExports } from "./api-exports";
 import { EFFECT_DEMOS, effectExample, TRANSITION_TEXT, transitionExample } from "./effect-example";
 import { syncGeneratedFiles } from "./generated-files";
-import { readPropDocs } from "./prop-docs";
+import { readPropDocs, STYLED } from "./prop-docs";
 
 /**
  * Generated reference pages: the element table from the Zod schemas and the
@@ -319,6 +319,24 @@ function elementPage(name: string, summary: string): string {
   }
   if (name === "Effect" || name === "Transition")
     lines.push("", "Every built-in type and its params: [Effects and transitions](/reference/effects/).");
+  // A `style` that is a preset name or an object: the object's fields, each with its default.
+  const style = (STYLED as readonly string[]).includes(name)
+    ? (schema.properties?.style?.anyOf ?? []).find((s) => s.properties)
+    : undefined;
+  if (style)
+    lines.push(
+      "",
+      "### `style`",
+      "",
+      "A theme preset's name, or an object of these fields. `preset` names the preset the object starts from; the fields written beside it win.",
+      "",
+      "| field | type | default | description |",
+      "|---|---|---|---|",
+      ...Object.entries(style.properties ?? {}).map(
+        ([field, s]) =>
+          `| \`${field}\` | ${typeOf(s, 6)} | ${defaultOf(s.default)} | ${describe(`style:${name}`, field)} |`,
+      ),
+    );
   lines.push(
     "",
     `${traits.length ? `${capital(traits.join(", "))}. ` : ""}${
@@ -471,10 +489,10 @@ function effectsIndex(): string {
     "",
     "| Kind | Scale | Params |",
     "|---|---|---|",
-    "| strength, mix or share | a fraction, 0 to 1, or -1 to 1 when it goes both ways | `amount`, `opacity`, `softness`, `tolerance`, `tint`, `temperature`, `shadows`, `highlights`, `threshold`, `spill`, `black`, `white`, `blur`, `roundness`, `star`, `thickness`, `spread` (of the frame's diagonal) |",
+    "| strength, mix or share | a fraction, 0 to 1, or -1 to 1 when it goes both ways | `amount`, `opacity`, `softness`, `tolerance`, `tint`, `temperature`, `shadows`, `highlights`, `threshold`, `spill`, `black`, `white`, `smear`, `coverage` (a share of the spacing), `roundness`, `star`, `spread` (of the frame's diagonal) |",
     "| gain | a multiplier | `intensity`, `scale`, `contrast` |",
     "| exponent | a power, 1 changes nothing | `gamma` |",
-    "| distance | pixels of the composition; a blur's `radius` (and `bevel`'s `size`) is its Gaussian's standard deviation, as CSS `blur()` reads it | `radius`, `width`, `feather`, `length`, `distance`, `size`, `spacing`, `edge`, `x`, `y` |",
+    "| distance | pixels of the composition; a blur's `radius`, a shadow's `blur` (and `bevel`'s `size`) is its Gaussian's standard deviation, as CSS `blur()` reads it | `radius`, `blur`, `thickness`, `feather`, `length`, `distance`, `size`, `spacing`, `edge`, `x`, `y` |",
     "| angle | degrees, clockwise from up | `angle`, `rotation`, `startAngle` |",
     "| position | fractions of the frame, `[x, y]` from the top left | `center`, `box`, the corners |",
     '| colour | `"#rgb"` or `"#rrggbb"` | `color`, `dark`, `light`, `ink`, `paper` |',
@@ -486,7 +504,7 @@ function effectsIndex(): string {
     "| switch | `true` or `false` | `fade`, `inverted`, `outlineOnly`, `pushOut`, `radial` |",
     "| curve | `[input, output]` points, 0 to 1 | `rgb`, `red`, `green`, `blue` |",
     '| asset | `"asset:<id>"` from the manifest | `src` |',
-    "| choice | a string | `direction`, `curve`, `mode`, `blend` |",
+    "| choice | a string | `direction`, `curve`, `type`, `blend` |",
     "",
   );
   return lines.join("\n");

@@ -147,7 +147,7 @@ export function RankedList(props: Partial<RankedListProps>) {
           const at = a + (b - a) * k;
           const value = valueAt(r, Math.max(0, step - 1)) + (valueAt(r, step) - valueAt(r, Math.max(0, step - 1))) * k;
           const leads = Math.round(at) === 0;
-          const enter = progress(clock, { after: 0.15 + 0.08 * b, over: 0.4, easing: "ease-out" });
+          const enter = progress(clock, { after: 0.15 + 0.08 * b, over: 0.4, easing: "easeOut" });
           const y = titleSpace + at * (p.rowHeight + p.gap) + (1 - enter) * 30;
           const fill = r.color ? themeCss(r.color) : themeCss(leads ? p.accent : p.bar);
           return (

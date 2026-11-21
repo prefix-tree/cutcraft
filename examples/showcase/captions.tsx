@@ -13,12 +13,10 @@ export default function Video() {
           anchor="talk"
           at="word:16"
           duration={3.4}
-          style="note"
-          width={420}
-          height={84}
-          size={34}
-          box={{ x: 270, y: 595, origin: "center" }}
+          style={{ preset: "note", size: 34 }}
+          box={{ x: 270, y: 595, width: 420, height: 84, origin: "center" }}
           transform={{ borderRadius: 18 }}
+          animation={{ type: "scale", in: 0.2, out: 0.15 }}
         >
           Crema: the sign of a good shot
         </Title>
