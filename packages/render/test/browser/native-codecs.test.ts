@@ -155,6 +155,56 @@ export default function Video() {
     decodesClean(out);
   });
 
+  it("makes the soundtrack natively, and it sounds as the browser's does", async () => {
+    // The browser's mix, the page's mix encoded natively, and the mix made in Node from the native decoder's sound.
+    const files = { browser: "", "native-encode": "", native: "" };
+    for (const codecs of Object.keys(files) as (keyof typeof files)[]) {
+      const out = join(dir, `sound-${codecs}.wav`);
+      await withCodecs(codecs, () => renderVideo({ ...base, out }));
+      files[codecs] = out;
+    }
+    const decoded = (file: string): Float32Array => {
+      const raw = execFileSync("ffmpeg", ["-v", "error", "-i", file, "-f", "f32le", "-ac", "2", "-"], {
+        maxBuffer: 1 << 28,
+      });
+      return new Float32Array(raw.buffer.slice(raw.byteOffset, raw.byteOffset + raw.byteLength));
+    };
+    const reference = decoded(files.browser);
+    expect(reference.length / 2).toBe(7 * 48000);
+    // The page's mix encoded natively: the same 16-bit samples, give or take one step.
+    const pageMix = decoded(files["native-encode"]);
+    expect(pageMix.length).toBe(reference.length);
+    let worst = 0;
+    for (let i = 0; i < pageMix.length; i++)
+      worst = Math.max(worst, Math.abs((pageMix[i] as number) - (reference[i] as number)));
+    expect(worst).toBeLessThan(1e-4);
+    // The mix made from the native decoder's sound, the whole of it: v2 starts 6 s into its WebM, where a block's time
+    // is rounded to the millisecond, so this also checks that both place a clip read from the middle where the file has it.
+    const nodeMix = decoded(files.native);
+    expect(nodeMix.length).toBe(reference.length);
+    worst = 0;
+    for (let i = 0; i < nodeMix.length; i++)
+      worst = Math.max(worst, Math.abs((nodeMix[i] as number) - (reference[i] as number)));
+    // 16-bit PCM, and two decoders of the same Opus.
+    expect(worst).toBeLessThan(3e-3);
+
+    // A MOV carries 24-bit PCM, an MP4 AAC.
+    const audioCodec = (file: string): string =>
+      execFileSync(
+        "ffprobe",
+        ["-v", "error", "-select_streams", "a:0", "-show_entries", "stream=codec_name", "-of", "csv=p=0", file],
+        { encoding: "utf8" },
+      ).trim();
+    const mov = join(dir, "sound.mov");
+    await withCodecs("native", () => renderVideo({ ...base, out: mov, to: 1, quality: "low" }));
+    expect(audioCodec(mov)).toBe("pcm_s24le");
+    expect(probe(mov).audioDuration).toBeCloseTo(1, 2);
+    const mp4 = join(dir, "sound.mp4");
+    await withCodecs("native", () => renderVideo({ ...base, out: mp4, to: 1 }));
+    expect(audioCodec(mp4)).toBe("aac");
+    expect(probe(mp4).audioDuration).toBeCloseTo(1, 1);
+  });
+
   it("refuses what the native encoder does not write", async () => {
     await expect(
       withCodecs("native-encode", () => renderVideo({ ...base, out: join(dir, "x.webm"), to: 0.2 })),
