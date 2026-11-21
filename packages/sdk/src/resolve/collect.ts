@@ -8,6 +8,8 @@ import {
   fontFaces,
   isShaderRef,
   isVocabulary,
+  MAIN_TRACK_ID,
+  MAIN_TRACK_KINDS,
   type ShaderDefinition,
 } from "@uberscene/kit/schema";
 
@@ -242,7 +244,10 @@ function collectChildren(
       const placeholder = makeNode(element, type.kind, parent, walker, origin, [], false);
       const expand = () => collectChildren(element.props.children as ReactNode, placeholder.id, walker, origin);
       // Components inside a composition centre an axis of their box left out on its frame.
-      const children = type.kind === "composition" ? withFrame(frameOf(element.props), expand) : expand();
+      const children =
+        type.kind === "composition"
+          ? withMainTrack(withFrame(frameOf(element.props), expand), placeholder.id, walker)
+          : expand();
       const node: CollectedNode = { ...placeholder, children };
       walker.byId.set(node.id, node);
       out.push(node);
@@ -294,6 +299,47 @@ function collectChildren(
     out.push(...collectChildren(element.props.children as ReactNode, parent, walker, origin));
   });
   return out;
+}
+
+const MAIN_KINDS: ReadonlySet<string> = new Set(MAIN_TRACK_KINDS);
+
+/**
+ * The clips, transitions and gaps written straight in a composition make its main track: one sequence, the bottom
+ * one, whatever tracks the file writes around them.
+ */
+function withMainTrack(children: CollectedNode[], composition: string, walker: Walker): CollectedNode[] {
+  const direct = children.filter((c) => MAIN_KINDS.has(c.kind));
+  if (direct.length === 0) return children;
+  if (walker.byId.has(MAIN_TRACK_ID)) {
+    const taken = walker.byId.get(MAIN_TRACK_ID) as CollectedNode;
+    walker.errors.push({
+      code: "DUPLICATE_ID",
+      id: MAIN_TRACK_ID,
+      message:
+        taken.kind === "track"
+          ? `clips written straight in <Composition> are its "${MAIN_TRACK_ID}" track, and the file has a <Track id="${MAIN_TRACK_ID}"> too: move them into it`
+          : `clips written straight in <Composition> are its "${MAIN_TRACK_ID}" track, so no element can have the id "${MAIN_TRACK_ID}": rename the <${taken.kind}>`,
+    });
+    return children;
+  }
+  const items = direct.map((c) => {
+    const item: CollectedNode = { ...c, parent: MAIN_TRACK_ID };
+    walker.byId.set(item.id, item);
+    return item;
+  });
+  const track: CollectedNode = {
+    id: MAIN_TRACK_ID,
+    kind: "track",
+    props: { id: MAIN_TRACK_ID },
+    children: items,
+    parent: composition,
+    editable: "literal",
+    lockedProps: [],
+    boundProps: NO_BINDINGS,
+    implicit: true,
+  };
+  walker.byId.set(track.id, track);
+  return [track, ...children.filter((c) => !MAIN_KINDS.has(c.kind))];
 }
 
 function makeNode(

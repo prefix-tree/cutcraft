@@ -64,3 +64,4 @@ export { ALLOWED_IMPORTS, type CutModule, type LoadOptions, loadModule } from ".
 export { type GatherOptions, gatherLocalFiles } from "./source/local-files";
 export { parseSource, type Range, rangeOf } from "./source/parse";
 export { elementName, printElement, printLiteral, printProp, printValue } from "./source/print";
+export { wrapMainTrack } from "./source/wrap-track";

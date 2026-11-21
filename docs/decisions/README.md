@@ -11,3 +11,4 @@ sums them up.
 | [0033](./0033-time-in-ticks.md) | Time in ticks: frame and sample conversions count 1/254,016,000,000 s, NTSC rates are exact, drop-frame timecode |
 | [0034](./0034-the-editor-is-a-constructor.md) | The editor is a constructor of building blocks with context and hooks; its styling is a shadcn registry (accepted in part: the registry and its demo) |
 | [0035](./0035-everything-is-a-prop.md) | Everything about an element is a prop: keys over time, `effects` and `freezes` as values, `<Keyframe>`, `<Effect>`, `<SpeedKey>`, `<Freeze>` and `automation` removed |
+| [0036](./0036-clips-straight-in-the-composition.md) | Clips straight in the composition are its main track: the bottom one, id `main`, with `<Track>` for the rows above |

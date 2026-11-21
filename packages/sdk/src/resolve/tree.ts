@@ -29,6 +29,8 @@ export interface CollectedNode {
   readonly origin?: { readonly helper: string; readonly callerId: string | null; readonly callIndex: number };
   /** A Layer's handles: the one component inside it and its props. The component's body stays opaque. */
   readonly interior?: LayerInterior;
+  /** The main track when the file writes its clips straight in the composition: no `<Track>` stands for it. */
+  readonly implicit?: true;
 }
 
 export interface LayerInterior {

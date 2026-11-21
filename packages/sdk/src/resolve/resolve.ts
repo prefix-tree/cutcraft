@@ -10,6 +10,7 @@ import {
   effectParamProblem,
   type FrameRate,
   isBuiltInTransition,
+  MAIN_TRACK_KINDS,
   MAX_SECONDS,
   parseRate,
   type Rate,
@@ -75,6 +76,8 @@ export interface Placement {
   readonly themed?: Readonly<Record<string, ThemeOrigin>>;
 }
 
+const MAIN_KINDS: ReadonlySet<string> = new Set(MAIN_TRACK_KINDS);
+
 export interface ResolvedTrack {
   readonly id: string;
   readonly layout: TrackLayout;
@@ -85,6 +88,8 @@ export interface ResolvedTrack {
   readonly solo: boolean;
   readonly role?: TrackRole;
   readonly group?: string;
+  /** The main track of a file that writes its clips straight in the composition: no `<Track>` stands for it. */
+  readonly implicit?: true;
   readonly items: readonly string[];
 }
 
@@ -259,6 +264,7 @@ function compute(
         solo: Boolean(p.solo),
         ...(typeof p.role === "string" ? { role: p.role as TrackRole } : {}),
         ...(typeof p.group === "string" ? { group: p.group } : {}),
+        ...(child.implicit ? { implicit: true as const } : {}),
         items: child.children.map((c) => c.id),
       });
       for (const item of child.children)
@@ -267,8 +273,14 @@ function compute(
       intrinsic(child, null, pending, manifest, markers, markersKey, theme, errors);
     } else if (child.kind === "multicam") {
       errors.push({ code: "INVALID_CHILD", id: child.id, message: "<Multicam> belongs inside a <Track>" });
+    } else if (MAIN_KINDS.has(child.kind)) {
+      // Left here only when the id "main" is taken, which `collect` has reported.
     } else if (child.kind !== "marker") {
-      errors.push({ code: "INVALID_CHILD", id: child.id, message: `<Composition> cannot contain <${child.kind}>` });
+      errors.push({
+        code: "INVALID_CHILD",
+        id: child.id,
+        message: `<Composition> cannot contain <${child.kind}>: put it in a <Track>`,
+      });
     }
   }
 

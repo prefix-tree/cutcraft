@@ -1,4 +1,4 @@
-export { type AddOptions, type AddResult, addAsset } from "./add";
+export { type AddOptions, type AddResult, addAsset, snippetOf } from "./add";
 export {
   type BlockFilter,
   type BlockInfo,

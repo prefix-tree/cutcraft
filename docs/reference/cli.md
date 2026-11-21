@@ -467,7 +467,8 @@ npx uberscene videos/launch.tsx --out launch.mp4
 
 ## Adding media
 
-`uberscene add talk.mp4` writes the media file's entry into the manifest. It reads the kind, length, size, frame rate
+`uberscene add talk.mp4` writes the media file's entry into the manifest, and prints the element that plays it
+(`<Clip id="talk" src="asset:talk" />`) to paste into the video. It reads the kind, length, size, frame rate
 and sound from the file itself, and the words from a transcript with the same name in the same folder: `talk.json`
 from Whisper or ElevenLabs first, then `talk.vtt`, then `talk.srt`. Running it again refreshes the entry and keeps the
 fields it does not write. See [Getting a transcript](/guide/captions-and-sound#getting-a-transcript). A `.cube` file

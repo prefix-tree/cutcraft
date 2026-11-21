@@ -6,7 +6,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { collectModule, loadModule, resolve, subtitles } from "@uberscene/sdk";
 
 import generateMedia, { mediaDir } from "../../player/e2e/gen-media";
-import { addAsset } from "../src";
+import { addAsset, snippetOf } from "../src";
 
 const scratch = join(import.meta.dirname, ".tmp", "add");
 let dir = "";
@@ -40,6 +40,7 @@ describe("addAsset", () => {
   it("probes a video and writes its entry into a new manifest in the current folder", async () => {
     const result = await addAsset(join(dir, "bars.webm"), { cwd: dir });
     expect(result.manifest).toBe(join(dir, "uberscene.json"));
+    expect(snippetOf(result)).toBe('<Clip id="bars" src="asset:bars" />');
     expect(manifestAt(result.manifest).assets.bars).toEqual({
       id: "bars",
       kind: "video",
@@ -69,6 +70,7 @@ describe("addAsset", () => {
     const result = await addAsset(join(dir, "teal.cube"), { manifest });
     expect(manifestAt(manifest).assets.teal).toEqual({ id: "teal", kind: "lut", duration: 0 });
     expect(result.transcript).toBeUndefined();
+    expect(snippetOf(result)).toBeNull();
     writeFileSync(join(dir, "broken.cube"), "LUT_3D_SIZE 2\n0 0 0");
     await expect(addAsset(join(dir, "broken.cube"), { manifest })).rejects.toThrow("1 values, expected 2³ = 8");
   });

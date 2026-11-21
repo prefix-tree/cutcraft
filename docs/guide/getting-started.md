@@ -1,7 +1,7 @@
 # Quick start
 
-Make a short video from a clip of someone talking: the clip trimmed, a name card over it and captions under it. Then
-look at it, export it to MP4, and change it.
+Make a video from one clip, look at it, export it to MP4, then build on it: a second clip, a trim, a name card and
+captions.
 
 ::: warning Work in progress
 UberScene is early. The API is still being shaped and changes between releases, often in breaking
@@ -30,36 +30,31 @@ from Whisper or ElevenLabs, or a `talk.srt` or `talk.vtt`. Then add it:
 ```sh
 npx uberscene add talk.mp4
 # talk: video, 32.0 s, 1920x1080 at 30 fps, with sound, 96 words from talk.json → uberscene.json
+#   <Clip id="talk" src="asset:talk" />
 ```
 
 `uberscene.json` is the manifest. It lists the media the video may use, each by an id (`talk`), with what UberScene reads from the file
-once: its length, size, frame rate, sound and the words of its transcript. The video refers to it as `asset:talk`.
+once: its length, size, frame rate, sound and the words of its transcript. The video refers to it as `asset:talk`, and
+the last line is the element that plays it, ready to paste.
 
 ## 3. Write the video
 
 Save this as `video.tsx`:
 
 ```tsx [video.tsx]
-import { Captions, Clip, Composition, LowerThird, Track } from "@uberscene/kit";
+import { Clip, Composition } from "@uberscene/kit";
 
 export default function Video() {
   return (
     <Composition fps={30} width={1920} height={1080}>
-      <Track id="main">
-        <Clip id="talk" src="asset:talk" in={2} out={12} fit="cover" />
-      </Track>
-      <Track id="over" layout="free">
-        <LowerThird id="name" start={0.5} duration={4} name="Maya Chen" role="Head roaster, Halvard" />
-      </Track>
-      <Captions id="captions" src="asset:talk" animation="karaoke" />
+      <Clip id="talk" src="asset:talk" />
     </Composition>
   );
 }
 ```
 
-The `<Composition>` is the video: 1920×1080 at 30 frames a second. Its first track plays seconds 2 to 12 of the
-clip; the second places a name card at half a second; the captions come from the words the clip plays. Without a
-transcript, leave out `<Captions>`. [Anatomy of a video](./anatomy) explains each piece.
+The `<Composition>` is the video: 1920×1080 at 30 frames a second. The `<Clip>` plays the whole of `talk`, and the
+video is as long as the clip. [Anatomy of a video](./anatomy) explains each piece.
 
 ## 4. Look at it
 
@@ -91,6 +86,23 @@ one frame.
 
 The video is the file, so a change is an edit and another export.
 
+**Add a clip.** Clips written in the composition play one after another, in the order they are written. Add
+`intro.mp4` with `npx uberscene add intro.mp4`, then write it first:
+
+```tsx
+<Composition fps={30} width={1920} height={1080}>
+  <Clip id="intro" src="asset:intro" />
+  <Clip id="talk" src="asset:talk" />
+</Composition>
+```
+
+**Trim it.** `in` and `out` are seconds of the source. This plays seconds 2 to 12 of `talk`; `fit="cover"` fills the
+frame when the footage has another shape:
+
+```tsx
+<Clip id="talk" src="asset:talk" in={2} out={12} fit="cover" />
+```
+
 **Cut on a word.** With a transcript, `in` and `out` can name words instead of seconds, so the cut never lands
 mid-word. `in="word:5"` starts on the sixth word; `out="word:30.end"` ends after the 31st:
 
@@ -98,7 +110,26 @@ mid-word. `in="word:5"` starts on the sixth word; `out="word:30.end"` ends after
 <Clip id="talk" src="asset:talk" in="word:5" out="word:30.end" fit="cover" />
 ```
 
-**Add music.** A third track, with `layout="free"` so the music can start at 0 and run to the end, however long the
+**Put a name over it.** Anything that goes over the clips sits in a `<Track>`, written after them. With
+`layout="free"` each element in it takes its own `start`. The clips stay as they are:
+
+```tsx
+<Composition fps={30} width={1920} height={1080}>
+  <Clip id="intro" src="asset:intro" />
+  <Clip id="talk" src="asset:talk" in={2} out={12} fit="cover" />
+  <Track id="over" layout="free">
+    <LowerThird id="name" start={0.5} duration={4} name="Maya Chen" role="Head roaster, Halvard" />
+  </Track>
+</Composition>
+```
+
+**Add captions.** They come from the words the clips play, so they need a transcript:
+
+```tsx
+<Captions id="captions" src="asset:talk" animation="karaoke" />
+```
+
+**Add music.** Another track, with `layout="free"` so the music can start at 0 and run to the end, however long the
 cut becomes:
 
 ```tsx
@@ -121,7 +152,7 @@ function Badge() {
 <Layer id="badge" start={0} duration={3}><Badge /></Layer>
 ```
 
-Import `Audio`, `Layer` and `useLayer` from `@uberscene/kit` as you use them. Run `look` again after each change.
+Import `Track`, `LowerThird`, `Captions`, `Audio`, `Layer` and `useLayer` from `@uberscene/kit` as you use them. Run `look` again after each change.
 
 ## Play it in a page
 
