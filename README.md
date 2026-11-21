@@ -3,7 +3,7 @@
 <h1 align="center">UberScene</h1>
 
 <p align="center">
-  <b>A React library for making videos and building editors around them.</b>
+  <b>A whole multimedia pipeline written as code.</b>
 </p>
 
 <p align="center">
@@ -25,8 +25,13 @@
 
 ---
 
-UberScene is a React library where one TSX file is the video: clips, captions, audio, transitions, effects, and any
-React, Motion or three.js on top. Play it in the browser, adjust it on a timeline, export it to MP4.
+> [!WARNING]
+> **Work in progress.** UberScene is early. The API is still being shaped and changes between releases, often in
+> breaking ways, and will keep changing until 1.0. Each release's changelog says how to move a file, and
+> `uberscene lint --fix` moves most of it for you.
+
+UberScene is a React library for making videos and building editors around them. One TSX file is the video: clips,
+captions, audio, transitions, effects, and any React, Motion or three.js on top. Play it in the browser, adjust it on a timeline, export it to MP4.
 
 ## Why
 
@@ -38,8 +43,8 @@ React, Motion or three.js on top. Play it in the browser, adjust it on a timelin
 
 ## Aim
 
-> **A whole multimedia pipeline written as code.** Agents work better with code than with ffmpeg flags or a mouse,
-> so the video, its graphics and its 3D scenes all live in one file.
+Agents work better with code than with ffmpeg flags or a mouse, so the video, its graphics and its 3D scenes all live
+in one file.
 
 ```mermaid
 flowchart LR
