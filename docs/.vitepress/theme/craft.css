@@ -1,6 +1,6 @@
-/* UberScene's site, set like a brutalist poster: black and white, one orange accent, heavy ink lines and hard
-   shadows. Doto (dot matrix) for the wordmark and numbers, Barlow Condensed capitals for headlines, Inter for text, Geist
-   Mono for labels. */
+/* UberScene's site. The earlier layers set it as a poster; the Clean section at the end has the last word: a light
+   ground, white cards on hairlines with soft corners, and one orange accent. Big Shoulders for headlines, IBM Plex Sans
+   for text, Geist Mono for labels. */
 
 :root {
   --cc-paper: #ffffff;
@@ -2128,4 +2128,437 @@ html:has(.VPContent.has-sidebar) .DocSearch-Button {
 }
 .cc-playground-page.vp-doc p {
   max-width: 66ch;
+}
+
+/* ── Clean: the last word on the look. A light ground, white cards on hairlines with soft corners, no hard shadows,
+   rivets, stamps or hazard bands. The orange stays the one accent: buttons, the active agent, the headline's mark. ── */
+
+:root {
+  --cc-paper: #f5f5f3;
+  --cc-paper-2: #ffffff;
+  --cc-ink: #141516;
+  --cc-ink-2: #3b3e42;
+  --cc-grey: #5f6368;
+  --cc-rule: #e2e2de;
+  --cc-radius: 12px;
+  --cc-radius-sm: 8px;
+  --cc-line: 1px solid var(--cc-rule);
+  --cc-line-heavy: 1px solid var(--cc-rule);
+  --cc-hard: none;
+  --cc-hard-sm: none;
+  --cc-lift: 0 1px 2px rgba(20, 21, 22, 0.04), 0 8px 24px rgba(20, 21, 22, 0.06);
+  --vp-code-bg: #efefec;
+  --vp-code-block-bg: #ffffff;
+  --vp-code-copy-code-bg: #f5f5f3;
+  --vp-code-copy-code-hover-bg: #ececea;
+}
+.dark {
+  --cc-paper: #0f1011;
+  --cc-paper-2: #17181a;
+  --cc-ink: #eeefef;
+  --cc-ink-2: #c4c7ca;
+  --cc-grey: #9a9ea3;
+  --cc-rule: #2a2c2f;
+  --cc-lift: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.35);
+  --vp-code-bg: #1d1f21;
+  --vp-code-block-bg: #17181a;
+  --vp-code-copy-code-bg: #1d1f21;
+  --vp-code-copy-code-hover-bg: #26282b;
+}
+
+/* The bar: a hairline under it, nothing else. */
+.VPNavBar .divider-line,
+.VPNav .VPNavBar:not(.home.top) .divider-line {
+  height: 1px !important;
+  background: var(--cc-rule) !important;
+  border-bottom: 0 !important;
+}
+.DocSearch-Button,
+html:has(.VPContent.has-sidebar) .DocSearch-Button {
+  border: 1px solid var(--cc-rule) !important;
+  border-radius: var(--cc-radius-sm) !important;
+  background: var(--cc-paper-2) !important;
+}
+.VPSidebar,
+html:has(.VPContent.has-sidebar) .VPSidebar {
+  border-right: 1px solid var(--cc-rule);
+}
+
+/* Headings: the condensed face stays for the large ones, set in sentence case without plates or numbers. */
+.home.vp-doc h2 {
+  padding-top: 0;
+  border-top: 0;
+  font-size: clamp(34px, 4vw, 52px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.home.vp-doc h2::before {
+  content: none;
+}
+.home section + section {
+  margin-top: 128px;
+}
+
+/* Hero: quiet tags, the headline's mark a flat orange block. */
+.home-tags span,
+.home-tags span:first-child {
+  padding: 4px 12px;
+  border: 1px solid var(--cc-rule);
+  border-radius: 999px;
+  background: var(--cc-paper-2);
+  color: var(--cc-ink-2);
+  font-size: 11.5px;
+  letter-spacing: 0.08em;
+}
+.home-title-mark {
+  padding: 0 0.12em;
+  border: 0;
+  border-radius: 0.08em;
+  background: var(--cc-accent);
+  color: #141516;
+  box-shadow: none;
+}
+
+/* Cards and panels: white, a hairline, soft corners, no rivets. */
+.home-spec,
+.vp-doc ul.home-why-list,
+.vp-doc ul.home-feature-list {
+  background-image: none;
+  background-color: var(--cc-paper-2);
+}
+.home-spec,
+.vp-doc ul.home-why-list,
+.home-sheet > a,
+.vp-doc div[class*="language-"],
+.vp-doc .cc-example,
+.cc-playground,
+.cc-command,
+.vp-doc .custom-block,
+.VPDoc .vp-doc div[class*="language-"],
+.VPDoc .vp-doc .cc-example {
+  border: 1px solid var(--cc-rule) !important;
+  border-radius: var(--cc-radius) !important;
+  box-shadow: none !important;
+  overflow: hidden;
+}
+.vp-doc .cc-example div[class*="language-"] {
+  border: 0 !important;
+  border-radius: 0 !important;
+}
+.home-spec,
+.home-sheet > a {
+  margin: 0;
+  box-shadow: var(--cc-lift) !important;
+}
+.vp-doc p.home-spec-head {
+  padding: 0;
+  background: none;
+  color: var(--cc-grey);
+}
+.home-spec dl > div {
+  border-bottom: 1px solid var(--cc-rule);
+}
+.home-spec dl > div:last-child {
+  border-bottom: 0;
+}
+.vp-doc p.home-spec-foot {
+  margin: 14px 0 0;
+  font-size: 11.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cc-grey);
+}
+.vp-doc ul.home-why-list li::before {
+  border-radius: 50%;
+  background: var(--cc-accent);
+  color: #141516;
+  font-size: 14px;
+}
+.vp-doc ul.home-why-list li + li {
+  border-top: 1px solid var(--cc-rule);
+}
+
+/* Code on the landing page: a dark panel with soft corners. */
+.home .vp-doc div[class*="language-"],
+.home div[class*="language-"] {
+  background: #141516 !important;
+}
+
+/* Buttons: soft keys, no press-in. */
+.vp-doc a.home-button {
+  border: 1px solid var(--cc-rule);
+  border-radius: var(--cc-radius-sm);
+  background: var(--cc-paper-2);
+  box-shadow: none;
+  font-family: var(--vp-font-family-base);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  text-transform: none;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
+}
+.vp-doc a.home-button:hover,
+.vp-doc a.home-button:active {
+  transform: none;
+  box-shadow: none;
+  border-color: var(--cc-ink-2);
+}
+.vp-doc a.home-button.primary,
+.vp-doc a.home-button.primary:hover {
+  border-color: var(--cc-accent);
+  background: var(--cc-accent);
+  color: #141516;
+}
+.vp-doc a.home-button.primary:hover {
+  filter: brightness(1.05);
+}
+
+/* Link chips after a lead: plain accent links. */
+.home-chapter-lead a,
+.home-element-lead a,
+.vp-doc .home-install-more a {
+  margin-left: 2px;
+  padding: 0;
+  background: none;
+  color: var(--cc-ink) !important;
+  font-family: var(--vp-font-family-base);
+  font-size: inherit;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  text-decoration: underline !important;
+  text-decoration-color: var(--cc-accent) !important;
+  text-underline-offset: 3px;
+}
+.home-chapter-lead a:hover,
+.home-element-lead a:hover,
+.vp-doc .home-install-more a:hover {
+  background: none;
+  color: var(--cc-accent) !important;
+}
+
+/* Videos and cards: soft corners, a gentle lift on hover. */
+.cc-preview,
+.cc-pair video,
+.cc-gallery-tile,
+.vp-doc a.cc-gallery-tile {
+  border-radius: var(--cc-radius-sm) !important;
+  overflow: hidden;
+}
+.vp-doc a.cc-gallery-tile,
+.vp-doc a.cc-card .cc-preview,
+.cc-pair video {
+  border: 1px solid var(--cc-rule);
+}
+.vp-doc a.cc-card:hover .cc-preview,
+.vp-doc a.cc-card:focus-visible .cc-preview {
+  transform: none;
+  box-shadow: var(--cc-lift);
+}
+.cc-gallery-caption {
+  border-top: 0;
+}
+.vp-doc .home-element h3 {
+  padding-top: 0;
+  border-top: 0;
+}
+.vp-doc .home-element .cc-example-code,
+.vp-doc .home-chapter .cc-example-code {
+  border-top: 1px solid #2a2c2f;
+  border-left: 0;
+}
+@media (min-width: 861px) {
+  .vp-doc .home-chapter .cc-example-code {
+    border-top: 0;
+    border-left: 1px solid #2a2c2f;
+  }
+}
+
+/* The agent picker: rounded tiles; the chosen one ringed in orange. */
+.cc-agents-icon {
+  border: 1px solid var(--cc-rule);
+  border-radius: var(--cc-radius-sm);
+}
+.cc-agents-tabs button:hover .cc-agents-icon {
+  transform: none;
+  box-shadow: none;
+  border-color: var(--cc-ink-2);
+}
+.cc-agents-tabs button.active .cc-agents-icon,
+.dark .cc-agents-tabs button.active .cc-agents-icon,
+.cc-agents-tabs button.active .cc-agents-icon:has(img),
+.dark .cc-agents-tabs button.active .cc-agents-icon:has(img) {
+  transform: none;
+  border-color: var(--cc-accent);
+  box-shadow: 0 0 0 2px var(--cc-accent);
+}
+.cc-agents-panel,
+.dark .cc-agents-panel {
+  border: 1px solid #2a2c2f;
+  border-radius: var(--cc-radius);
+  background: #141516;
+}
+.cc-agents-line + .cc-agents-line,
+.vp-doc p.cc-agents-then {
+  border-top-style: solid;
+  border-top-color: #2a2c2f;
+}
+.cc-agents-line button,
+.cc-agents-brief button,
+.cc-command button {
+  border: 1px solid #3a3d40;
+  border-radius: 6px;
+  background: transparent;
+}
+.vp-doc .cc-agents-brief p {
+  border-radius: 6px;
+}
+
+/* Features: five groups of white cards, each an icon, a name and one line, linking to its guide. */
+.cc-features {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 40px 16px;
+}
+.cc-features-group {
+  grid-column: span var(--span);
+  min-width: 0;
+}
+.vp-doc p.cc-features-label {
+  margin: 0 0 14px;
+  font-family: var(--cc-mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cc-grey);
+}
+.vp-doc ul.cc-features-cards {
+  display: grid;
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.vp-doc ul.cc-features-cards li {
+  margin: 0;
+}
+.vp-doc a.cc-feature {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  height: 100%;
+  padding: 22px 22px 24px;
+  border: 1px solid var(--cc-rule);
+  border-radius: var(--cc-radius);
+  background: var(--cc-paper-2);
+  color: var(--cc-ink);
+  text-decoration: none;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+.vp-doc a.cc-feature:hover,
+.vp-doc a.cc-feature:focus-visible {
+  border-color: var(--cc-ink-2);
+  box-shadow: var(--cc-lift);
+  color: var(--cc-ink);
+}
+.vp-doc a.cc-feature:focus-visible {
+  outline: 2px solid var(--cc-accent);
+  outline-offset: 2px;
+}
+.cc-feature-icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  margin-bottom: 6px;
+  border-radius: 10px;
+  background: rgba(255, 90, 31, 0.12);
+  color: #c2410c;
+}
+.dark .cc-feature-icon {
+  background: rgba(255, 106, 51, 0.16);
+  color: #ff8a5c;
+}
+.cc-feature-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.015em;
+}
+.cc-feature-tag {
+  padding: 2px 8px;
+  border: 1px solid var(--cc-rule);
+  border-radius: 999px;
+  font-family: var(--cc-mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cc-grey);
+}
+.cc-feature-text {
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--cc-ink-2);
+}
+/* The roadmap row: one wide card, its icon beside the words. */
+.cc-features-group.wide a.cc-feature {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  column-gap: 18px;
+  row-gap: 4px;
+  border-style: dashed;
+  background: transparent;
+}
+.cc-features-group.wide .cc-feature-icon {
+  grid-row: span 2;
+  margin: 0;
+}
+@media (max-width: 960px) {
+  .cc-features {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .cc-features-group {
+    grid-column: auto;
+  }
+  .vp-doc ul.cc-features-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 600px) {
+  .vp-doc ul.cc-features-cards {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* The foot: the dark block stays, without the hazard band above it; the wordmark in the headline face, not stencil. */
+.home section.home-foot {
+  border-top: 0;
+  background: #141516;
+  padding-top: 64px;
+}
+.vp-doc p.home-foot-mark {
+  font-family: var(--cc-display);
+  font-weight: 800;
+  font-size: clamp(56px, 12vw, 180px);
+  letter-spacing: -0.02em;
+  line-height: 0.9;
+  text-transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vp-doc a.cc-feature,
+  .vp-doc a.home-button {
+    transition: none;
+  }
 }
