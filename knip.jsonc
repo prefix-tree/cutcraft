@@ -35,6 +35,10 @@
     "packages/graphics": {
       "entry": ["test/**/*.{ts,tsx}"]
     },
+    "examples/editor": {
+      // shadcn/ui components, kept as the CLI writes them; they export more than the example uses.
+      "ignore": ["src/components/ui/**"]
+    },
     "examples/showcase": {
       // Cut files, loaded by path with loadVideo.
       "entry": [
