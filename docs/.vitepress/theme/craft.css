@@ -132,7 +132,7 @@
 .vp-doc a {
   color: var(--cc-ink);
   text-decoration: underline;
-  text-decoration-color: var(--cc-accent);
+  text-decoration-color: color-mix(in srgb, currentColor 30%, transparent);
   text-underline-offset: 3px;
 }
 .vp-doc a:hover {
@@ -688,7 +688,7 @@ html {
 }
 .vp-doc .home-foot a {
   color: #ffffff;
-  text-decoration-color: var(--cc-accent);
+  text-decoration-color: color-mix(in srgb, currentColor 30%, transparent);
 }
 .vp-doc .home-foot a:hover {
   color: var(--cc-accent);
@@ -904,7 +904,7 @@ html {
   font-size: 17px;
 }
 .home .home-cards .cc-card-title::after {
-  content: " →";
+  content: "\00a0→";
   color: var(--cc-accent);
 }
 .home .home-cards .cc-card-text {
@@ -1679,7 +1679,7 @@ html:has(.VPContent.has-sidebar) .VPDocAsideOutline .outline-link {
 .VPDoc .vp-doc a {
   color: var(--cc-ink);
   font-weight: 500;
-  text-decoration-color: var(--cc-accent);
+  text-decoration-color: color-mix(in srgb, currentColor 30%, transparent);
   text-decoration-thickness: 1.5px;
   text-underline-offset: 3px;
 }
@@ -2018,7 +2018,7 @@ html:has(.VPContent.has-sidebar) .DocSearch-Button {
   min-width: 0;
   margin: 0;
   padding: 10px 12px;
-  border-left: 3px solid var(--cc-accent);
+  border-left: 0;
   background: #1d1d1b;
   font-family: var(--cc-mono);
   font-size: 13px;
@@ -2329,7 +2329,7 @@ html:has(.VPContent.has-sidebar) .VPSidebar {
   letter-spacing: 0;
   text-transform: none;
   text-decoration: underline !important;
-  text-decoration-color: var(--cc-accent) !important;
+  text-decoration-color: color-mix(in srgb, currentColor 30%, transparent) !important;
   text-underline-offset: 3px;
 }
 .home-chapter-lead a:hover,
@@ -2559,6 +2559,141 @@ html:has(.VPContent.has-sidebar) .VPSidebar {
 @media (prefers-reduced-motion: reduce) {
   .vp-doc a.cc-feature,
   .vp-doc a.home-button {
+    transition: none;
+  }
+}
+
+/* Hero: the words on the left in plain ink, the film on the right. One filled button; everything else is quiet. */
+.home-hero-grid {
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: clamp(32px, 5vw, 72px);
+  align-items: center;
+}
+.vp-doc p.home-tags {
+  margin: 0 0 28px;
+}
+.home-tags span,
+.home-tags span:first-child {
+  padding: 6px 14px;
+  border-color: var(--cc-rule);
+  background: var(--cc-paper-2);
+  color: var(--cc-ink-2);
+  font-family: var(--vp-font-family-base);
+  font-size: 13.5px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.vp-doc .home-title,
+.home.vp-doc h1.home-title {
+  font-size: clamp(48px, 5vw, 80px);
+  line-height: 0.98;
+  letter-spacing: -0.025em;
+}
+.vp-doc p.home-lead {
+  max-width: 34em;
+  margin: 28px 0 32px !important;
+  font-size: 19px !important;
+  line-height: 1.55 !important;
+  font-weight: 400;
+  color: var(--cc-ink-2);
+}
+.home-lead strong {
+  font-weight: 650;
+  color: var(--cc-ink);
+}
+.home-actions {
+  align-items: center;
+  gap: 28px;
+  margin: 0;
+}
+.vp-doc a.home-button.primary {
+  padding: 15px 28px;
+  border-radius: 999px;
+  font-size: 16px;
+}
+.vp-doc a.home-link {
+  color: var(--cc-ink);
+  font-size: 16px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.vp-doc a.home-link::after {
+  content: "\00a0→";
+  display: inline-block;
+  transition: transform 0.15s;
+}
+.vp-doc a.home-link:hover {
+  color: var(--cc-ink);
+}
+.vp-doc a.home-link:hover::after {
+  transform: translateX(3px);
+}
+.vp-doc p.home-run {
+  margin: 40px 0 10px;
+  font-size: 15px;
+  color: var(--cc-grey);
+}
+/* The command as a light pill, like a key on the page, not a terminal. */
+.home-hero .cc-command {
+  display: inline-flex;
+  width: auto;
+  max-width: 100%;
+  padding: 6px 6px 6px 18px;
+  border-radius: 999px !important;
+  background: var(--cc-paper-2);
+}
+.vp-doc .home-hero .cc-command code {
+  color: var(--cc-ink) !important;
+}
+.home-hero .cc-command-prompt {
+  color: var(--cc-grey);
+}
+.home-hero .cc-command button {
+  border-color: var(--cc-rule);
+  border-radius: 999px;
+  color: var(--cc-ink-2);
+  font-family: var(--vp-font-family-base);
+  letter-spacing: 0;
+  text-transform: none;
+}
+.home-hero .cc-command button:hover {
+  border-color: var(--cc-ink-2);
+  background: transparent;
+  color: var(--cc-ink);
+}
+.vp-doc figure.home-film {
+  margin: 0;
+  min-width: 0;
+}
+.home-film video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: 20px;
+  background: #141516;
+  box-shadow: var(--cc-lift);
+}
+.home-film figcaption {
+  margin-top: 16px;
+  font-size: 16px;
+  color: var(--cc-grey);
+}
+.vp-doc .home-film figcaption a {
+  color: var(--cc-ink);
+  text-decoration: none;
+}
+.home-film figcaption strong {
+  font-weight: 600;
+}
+@media (max-width: 960px) {
+  .home-hero-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .vp-doc a.home-link::after {
     transition: none;
   }
 }

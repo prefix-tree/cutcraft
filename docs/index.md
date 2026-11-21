@@ -17,36 +17,26 @@ import { withBase } from "vitepress";
 <div class="home-hero-grid">
 <div class="home-hero-main">
 
-<p class="home-tags"><span>Make videos with code</span><span>Work in progress</span></p>
+<p class="home-tags"><span>Open source · MIT</span><span>Early: the API changes until 1.0</span></p>
 
-<h1 class="home-title"><span class="home-title-line">Multimedia pipeline</span> <span class="home-title-line"><span class="home-title-mark">as code.</span></span></h1>
+<h1 class="home-title">Multimedia pipeline as code.</h1>
 
-<p class="home-lead">Write a video as a React file. Play it in the browser, fine-tune it on a timeline, export it to MP4. Next: 3D scenes in the same file that guide generative video models. Early: the API changes until 1.0.</p>
-
-<AgentPicker />
+<p class="home-lead">Write a video as <strong>a React file</strong>. Play it in the browser, fine-tune it on a timeline and <strong>export it to MP4</strong>. <strong>Your coding agent</strong> can do all of it.</p>
 
 <div class="home-actions">
 <a class="home-button primary" :href="withBase('/guide/getting-started')">Get started</a>
-<a class="home-button" :href="withBase('/examples/')">Examples</a>
-<a class="home-button" href="https://github.com/prefix-tree/uberscene">GitHub</a>
+<a class="home-link" :href="withBase('/examples/')">See the examples</a>
 </div>
 
+<p class="home-run">Or run in your terminal:</p>
+
+<CopyCommand command="npm install uberscene @uberscene/kit react zod" />
+
 </div>
-<aside class="home-spec" aria-label="Specification">
-<p class="home-spec-head"><span>At a glance</span></p>
-<dl>
-<div><dt>Input</dt><dd>One TSX file</dd></div>
-<div><dt>Output</dt><dd>MP4 · WebM · PNG</dd></div>
-<div><dt>Effects</dt><dd>45 shaders</dd></div>
-<div><dt>Edit actions</dt><dd>99, undoable</dd></div>
-<div><dt>Player</dt><dd>Browser, frame-exact</dd></div>
-<div><dt>Render</dt><dd>Headless Chrome, no FFmpeg</dd></div>
-<div><dt>Runtime</dt><dd>Node ≥ 22.19</dd></div>
-<div><dt>Operator</dt><dd>You or your agent</dd></div>
-<div><dt>Next</dt><dd>3D + model guidance</dd></div>
-</dl>
-<p class="home-spec-foot">MIT · Open source</p>
-</aside>
+<figure class="home-film">
+<video :src="withBase('/showcase/coffee.webm')" :poster="withBase('/showcase/coffee.jpg')" autoplay muted loop playsinline aria-label="The coffee film: a pour-over and an espresso cut together with transitions, titles and a warm grade"></video>
+<figcaption><a :href="withBase('/examples/coffee')"><strong>The coffee film</strong></a>, four stock shots cut in one TSX file</figcaption>
+</figure>
 </div>
 <figure class="home-sheet">
 <a :href="withBase('/examples/coffee')"><img :src="withBase('/showcase/coffee-look.webp')" width="2600" height="972" loading="eager" alt="Eight frames of the coffee film in two rows: a pour-over titled SLOW POUR, a lower third over the bloom, a callout on a held frame, an espresso machine titled FAST SHOT, a Warm LUT badge, three glasses under EVERY GLASS, A LINE OF CODE, and a red cup as a quote builds word by word; under them, a strip of the film's sound with a peak on every cue" /></a>
