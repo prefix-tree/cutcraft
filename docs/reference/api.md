@@ -770,7 +770,7 @@ Every name each entry exports, read from the code. The sections above explain th
 
 ### `@uberscene/sdk`
 
-200 exports.
+201 exports.
 
 | Export | Kind | |
 |---|---|---|
@@ -973,6 +973,7 @@ Every name each entry exports, read from the code. The sections above explain th
 | `VideoModule` | interface |  |
 | `walk` | function |  |
 | `WaveformSummary` | interface |  |
+| `withoutEffects` | function | A patch log that turns these effects off (`enabled: false`), each named by the id the resolver gave it (`pour.effects.1`). |
 | `WordRow` | interface |  |
 
 ### `@uberscene/sdk/resolver`
