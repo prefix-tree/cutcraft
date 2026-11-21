@@ -231,7 +231,8 @@ export function fold(
         if (net.place) {
           const original = text.slice(site.range[0], site.range[1]);
           movedSites.set(id, site.range);
-          const printMoved = (indent: string) => reindent(movedTexts.get(id) ?? original, site.indent, indent);
+          // Like printElement, the text starts with its indent: the insertion point is at the start of a line.
+          const printMoved = (indent: string) => indent + reindent(movedTexts.get(id) ?? original, site.indent, indent);
           placements.push({ id, at: net.place, print: printMoved, from: lineRange(text, site.range) });
         }
         let newAttrs = -1;
