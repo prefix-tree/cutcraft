@@ -1,0 +1,24 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "editor-transport",
+  "title": "Transport",
+  "description": "Play and pause, back to the start, a scrubber, the time, the speed and mute.",
+  "dependencies": [
+    "@uberscene/player@0.5.0",
+    "lucide-react@^1.77.0"
+  ],
+  "registryDependencies": [
+    "button",
+    "select",
+    "slider"
+  ],
+  "files": [
+    {
+      "path": "registry/editor/transport.tsx",
+      "content": "import { Pause, Play, SkipBack, Volume2, VolumeX } from \"lucide-react\";\nimport { useEffect, useState } from \"react\";\n\nimport { useCompositionTime, usePlayer } from \"@uberscene/player\";\n\nimport { Button } from \"@/components/ui/button\";\nimport { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from \"@/components/ui/select\";\nimport { Slider } from \"@/components/ui/slider\";\nimport { cn } from \"@/lib/utils\";\n\nconst read = (core: ReturnType<typeof usePlayer>) => ({\n  playing: core.isPlaying(),\n  rate: core.playbackRate,\n  muted: core.muted,\n});\n\n/** The player's play state, rate and mute, kept in step with its events. */\nfunction usePlayback() {\n  const core = usePlayer();\n  const [now, setNow] = useState(() => read(core));\n  useEffect(() => {\n    const offs = ([\"play\", \"pause\", \"ended\", \"ratechange\", \"volumechange\"] as const).map((type) =>\n      core.addEventListener(type, () => setNow(read(core))),\n    );\n    return () => offs.forEach((off) => off());\n  }, [core]);\n  return now;\n}\n\nconst RATES = [\"0.5\", \"1\", \"1.5\", \"2\"];\n\n/** Play and pause, back to the start, a scrubber, the time, the rate and mute. */\nexport function Transport({ className }: { className?: string }) {\n  const core = usePlayer();\n  const time = useCompositionTime();\n  const { playing, rate, muted } = usePlayback();\n  const { fps } = core.state.composition;\n  return (\n    <div className={cn(\"flex items-center gap-2\", className)} data-editor-transport=\"\">\n      <Button variant=\"ghost\" size=\"icon\" aria-label=\"To start\" onClick={() => void core.seekTo(0)}>\n        <SkipBack />\n      </Button>\n      <Button size=\"icon\" aria-label={playing ? \"Pause\" : \"Play\"} onClick={() => void core.toggle()}>\n        {playing ? <Pause /> : <Play />}\n      </Button>\n      <Slider\n        className=\"flex-1\"\n        aria-label=\"Scrub\"\n        min={0}\n        max={core.duration}\n        step={1 / fps}\n        value={[time]}\n        onValueChange={([t]) => void core.seekTo(t ?? 0)}\n      />\n      <span className=\"w-28 text-right font-mono text-xs text-muted-foreground tabular-nums\">\n        {time.toFixed(2)} / {core.duration.toFixed(2)} s\n      </span>\n      <Select value={String(rate)} onValueChange={(v) => (core.playbackRate = Number(v))}>\n        <SelectTrigger size=\"sm\" aria-label=\"Speed\" className=\"w-20\">\n          <SelectValue />\n        </SelectTrigger>\n        <SelectContent>\n          {RATES.map((r) => (\n            <SelectItem key={r} value={r}>\n              {r}×\n            </SelectItem>\n          ))}\n        </SelectContent>\n      </Select>\n      <Button\n        variant=\"ghost\"\n        size=\"icon\"\n        aria-label={muted ? \"Unmute\" : \"Mute\"}\n        aria-pressed={muted}\n        onClick={() => (core.muted = !muted)}\n      >\n        {muted ? <VolumeX /> : <Volume2 />}\n      </Button>\n    </div>\n  );\n}\n",
+      "type": "registry:component",
+      "target": "components/editor/transport.tsx"
+    }
+  ],
+  "type": "registry:component"
+}

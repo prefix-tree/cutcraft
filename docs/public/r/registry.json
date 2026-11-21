@@ -1,0 +1,168 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "uberscene",
+  "homepage": "https://uberscene.prefixtree.xyz/guide/editor",
+  "items": [
+    {
+      "name": "editor",
+      "type": "registry:block",
+      "title": "Video editor",
+      "description": "A whole video editor for an UberScene file: layers, the picture and its transport, an inspector, the timeline and the file with every edit written in.",
+      "dependencies": [
+        "@uberscene/editor@0.5.0",
+        "@uberscene/player@0.5.0",
+        "@uberscene/sdk@0.5.0"
+      ],
+      "registryDependencies": [
+        "resizable",
+        "tabs",
+        "https://uberscene.prefixtree.xyz/r/editor-layers.json",
+        "https://uberscene.prefixtree.xyz/r/editor-transport.json",
+        "https://uberscene.prefixtree.xyz/r/editor-inspector.json",
+        "https://uberscene.prefixtree.xyz/r/editor-timeline.json",
+        "https://uberscene.prefixtree.xyz/r/editor-source.json"
+      ],
+      "files": [
+        {
+          "path": "registry/editor/editor.tsx",
+          "type": "registry:component",
+          "target": "components/editor/editor.tsx"
+        }
+      ]
+    },
+    {
+      "name": "editor-timeline",
+      "type": "registry:component",
+      "title": "Timeline",
+      "description": "A row per track and a bar per element: click to select, drag to move, drag an end to trim. Each drag is one undoable edit.",
+      "dependencies": [
+        "@uberscene/editor@0.5.0",
+        "@uberscene/player@0.5.0",
+        "@uberscene/sdk@0.5.0",
+        "lucide-react@^1.77.0"
+      ],
+      "registryDependencies": [
+        "scroll-area",
+        "slider"
+      ],
+      "files": [
+        {
+          "path": "registry/editor/timeline.tsx",
+          "type": "registry:component",
+          "target": "components/editor/timeline.tsx"
+        },
+        {
+          "path": "registry/editor/use-rows.ts",
+          "type": "registry:hook",
+          "target": "components/editor/use-rows.ts"
+        }
+      ]
+    },
+    {
+      "name": "editor-layers",
+      "type": "registry:component",
+      "title": "Layers",
+      "description": "Every element, grouped by track. A click selects it.",
+      "dependencies": [
+        "@uberscene/editor@0.5.0",
+        "@uberscene/sdk@0.5.0",
+        "lucide-react@^1.77.0"
+      ],
+      "registryDependencies": [
+        "button",
+        "scroll-area"
+      ],
+      "files": [
+        {
+          "path": "registry/editor/layers.tsx",
+          "type": "registry:component",
+          "target": "components/editor/layers.tsx"
+        },
+        {
+          "path": "registry/editor/use-rows.ts",
+          "type": "registry:hook",
+          "target": "components/editor/use-rows.ts"
+        }
+      ]
+    },
+    {
+      "name": "editor-transport",
+      "type": "registry:component",
+      "title": "Transport",
+      "description": "Play and pause, back to the start, a scrubber, the time, the speed and mute.",
+      "dependencies": [
+        "@uberscene/player@0.5.0",
+        "lucide-react@^1.77.0"
+      ],
+      "registryDependencies": [
+        "button",
+        "select",
+        "slider"
+      ],
+      "files": [
+        {
+          "path": "registry/editor/transport.tsx",
+          "type": "registry:component",
+          "target": "components/editor/transport.tsx"
+        }
+      ]
+    },
+    {
+      "name": "editor-inspector",
+      "type": "registry:component",
+      "title": "Inspector",
+      "description": "The selected element's timing, text and every prop its schema lists, as fields. Props written as code show locked.",
+      "dependencies": [
+        "@uberscene/editor@0.5.0",
+        "@uberscene/kit@0.5.0",
+        "@uberscene/sdk@0.5.0",
+        "lucide-react@^1.77.0"
+      ],
+      "registryDependencies": [
+        "badge",
+        "button",
+        "input",
+        "label",
+        "scroll-area",
+        "select",
+        "separator",
+        "switch",
+        "textarea"
+      ],
+      "files": [
+        {
+          "path": "registry/editor/inspector.tsx",
+          "type": "registry:component",
+          "target": "components/editor/inspector.tsx"
+        }
+      ]
+    },
+    {
+      "name": "editor-source",
+      "type": "registry:component",
+      "title": "Source",
+      "description": "The file with every edit so far written into it, the changed lines marked, to copy or download.",
+      "dependencies": [
+        "@uberscene/editor@0.5.0",
+        "@uberscene/sdk@0.5.0",
+        "lucide-react@^1.77.0"
+      ],
+      "registryDependencies": [
+        "button",
+        "scroll-area"
+      ],
+      "files": [
+        {
+          "path": "registry/editor/source.tsx",
+          "type": "registry:component",
+          "target": "components/editor/source.tsx"
+        },
+        {
+          "path": "registry/editor/use-source.ts",
+          "type": "registry:hook",
+          "target": "components/editor/use-source.ts"
+        }
+      ]
+    }
+  ]
+}

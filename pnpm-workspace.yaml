@@ -1,5 +1,6 @@
 packages:
   - packages/*
+  - packages/editor/app
   - examples/*
   - recipes
   - blocks

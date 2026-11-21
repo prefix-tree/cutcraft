@@ -54,6 +54,7 @@
     "@types/react-dom": "catalog:",
     "@vitest/coverage-v8": "catalog:",
     "jsdom": "catalog:",
+    "lucide-react": "^1.77.0",
     "react": "catalog:",
     "react-dom": "catalog:",
     "typescript": "catalog:",
