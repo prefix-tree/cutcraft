@@ -67,7 +67,7 @@ grouped into lines. Trim a clip and its captions change with it.
 
 | Prop | Does |
 |---|---|
-| `animation` | Colours the words as they are said: `word-highlight`, `word-by-word`, `karaoke` or `typewriter`. |
+| `animation` | Colours the words as they are said: `wordHighlight`, `wordByWord`, `karaoke` or `typewriter`. |
 | `style` | How they look, not where: a theme preset's name (`"boxed"`), or an object of the font, size, colours, background, stroke and `align`, with `preset` naming the preset it starts from (`{ preset: "boxed", size: 40 }`). |
 | `box` | Where they sit; [Place captions](#place-captions). Left out, the lower safe area. |
 
@@ -116,7 +116,7 @@ box behind it.
 <Captions
   id="captions"
   src="asset:founder"
-  animation="word-highlight"
+  animation="wordHighlight"
   style={{ color: "#111111", highlight: "#111111", highlightBox: "#4aa3ff" }}
 />
 ```

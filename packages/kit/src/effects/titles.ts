@@ -54,17 +54,17 @@ const glow = {
 };
 
 /**
- * Outline: a band of `width` pixels around the element's silhouette (its pixels of alpha 0.5 or more), drawn under the
+ * Outline: a band of `thickness` pixels around the element's silhouette (its pixels of alpha 0.5 or more), drawn under the
  * element in `color`; `outlineOnly` draws the grown silhouette alone, filled. The distance to the silhouette is the
  * exact Euclidean one, separable into a pass down each column and one along each row (Felzenszwalb and Huttenlocher,
  * "Distance Transforms of Sampled Functions", 2012), so the band's corners round as a circle's, and it costs a few
- * reads per pixel of width rather than a fixed ring of them. Its outer edge fades over one pixel.
+ * reads per pixel of thickness rather than a fixed ring of them. Its outer edge fades over one pixel.
  */
 const outline = shaderDefinition("effect", {
   name: "outline",
   params: z.object({
     /** How thick the outline is, in pixels. */
-    width: z.number().min(0).max(64).default(8),
+    thickness: z.number().min(0).max(64).default(8),
     /** The outline's colour. */
     color: HEX.default("#ffffff"),
     /** How opaque the outline is: 0 is invisible, 1 is solid. */
@@ -73,12 +73,12 @@ const outline = shaderDefinition("effect", {
     outlineOnly: z.boolean().default(false),
   }),
   passes: [
-    // Down each column: how many rows away the nearest silhouette pixel is, within the width, as red × 255 (255: none).
+    // Down each column: how many rows away the nearest silhouette pixel is, within the thickness, as red × 255 (255: none).
     `vec4 effect(vec2 uv) {
   ivec2 size = textureSize(image, 0);
   ivec2 p = ivec2(uv * vec2(size));
   if (texelFetch(image, p, 0).a >= 0.5) return vec4(0.0, 0.0, 0.0, 1.0);
-  int w = min(int(ceil(params.width)), 64);
+  int w = min(int(ceil(params.thickness)), 64);
   for (int k = 1; k <= w; k++) {
     ivec2 up = p - ivec2(0, k), down = p + ivec2(0, k);
     if ((up.y >= 0 && texelFetch(image, up, 0).a >= 0.5) || (down.y < size.y && texelFetch(image, down, 0).a >= 0.5))
@@ -86,12 +86,12 @@ const outline = shaderDefinition("effect", {
   }
   return vec4(1.0, 0.0, 0.0, 1.0);
 }`,
-    // Along each row: the nearest of those, by Pythagoras; the band where it is within the width.
+    // Along each row: the nearest of those, by Pythagoras; the band where it is within the thickness.
     glsl`${OVER}vec4 effect(vec2 uv) {
   vec4 o = texture(original, uv);
   ivec2 size = textureSize(image, 0);
   ivec2 p = ivec2(uv * vec2(size));
-  int w = min(int(ceil(params.width)), 64);
+  int w = min(int(ceil(params.thickness)), 64);
   float best = 1e9;
   for (int k = -w; k <= w; k++) {
     int x = p.x + k;
@@ -102,7 +102,7 @@ const outline = shaderDefinition("effect", {
   }
   // Distances run to silhouette pixels' centres; the shape's edge lies half a pixel past them, and the band's own edge
   // fades over the pixel after it.
-  float grown = max(o.a, clamp(params.width - sqrt(best) + 1.0, 0.0, 1.0));
+  float grown = max(o.a, clamp(params.thickness - sqrt(best) + 1.0, 0.0, 1.0));
   vec4 band = vec4(params.color, grown * params.opacity);
   return params.outlineOnly ? band : us_over(o, band);
 }`,

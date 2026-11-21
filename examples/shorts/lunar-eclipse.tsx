@@ -50,13 +50,13 @@ const BOXED = {
 };
 // The border round the box is drawn under the footage, a little larger than it, so only its outer edge shows.
 const RING = {
-  shape: "rectangle",
+  type: "rectangle",
   box: AT,
   width: BOX.width + 16,
   height: BOX.height + 16,
   cornerRadius: 36,
   fill: { type: "none" },
-  stroke: { color: "$accent", width: 16 },
+  stroke: { color: "$accent", thickness: 16 },
   enter: { type: "fade", duration: 0.25 },
   exit: { type: "fade", duration: 0.2 },
 } as const;
@@ -69,7 +69,7 @@ export default function Video({ accent, question, wrong }: z.infer<typeof schema
       fps={30}
       width={1080}
       height={1920}
-      background={{ mode: "color", color: "$background" }}
+      background={{ type: "color", color: "$background" }}
       theme={{ extends: "midnight", palette: { accent, primary: accent } }}
     >
       <Track id="rings" layout="free">
@@ -172,7 +172,7 @@ export default function Video({ accent, question, wrong }: z.infer<typeof schema
       <Captions
         id="captions"
         src="asset:eclipse"
-        animation="word-highlight"
+        animation="wordHighlight"
         maxChars={22}
         box={{ y: 1152, origin: "center" }}
         style={{ size: 60, weight: 800, highlight: "#14141c", highlightBox: "$accent" }}

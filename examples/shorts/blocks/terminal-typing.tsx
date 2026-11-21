@@ -77,7 +77,7 @@ export const meta: BlockMeta = {
 export function TerminalTyping(props: Partial<TerminalTypingProps>) {
   const p = { ...defaults, ...props };
   const clock = useLayer();
-  const enter = progress(clock, { after: 0, over: 0.4, easing: "ease-out" });
+  const enter = progress(clock, { after: 0, over: 0.4, easing: "easeOut" });
   const lineHeight = p.size * 1.5;
   const barHeight = p.title ? p.size * 2 : 0;
   // What each step shows now: how many letters of its command, and how many lines of its output.

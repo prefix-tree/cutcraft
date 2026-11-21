@@ -38,7 +38,7 @@ export default function Video() {
       fps={30}
       width={1920}
       height={1080}
-      background={{ mode: "color", color: "#000000" }}
+      background={{ type: "color", color: "#000000" }}
       theme={{
         extends: "midnight",
         palette: {
@@ -72,7 +72,7 @@ export default function Video() {
         {/* The espresso machine: the warm LUT comes in halfway, so the shot is seen before and after. */}
         <Clip id="shot" src="asset:espresso" in={1} out={9} fit="cover">
           <Effect id="shot-warm" type="lut" params={{ src: "asset:warm" }}>
-            <Keyframe id="shot-warm-0" param="amount" at={3.2} value={0} easing="ease-in-out" />
+            <Keyframe id="shot-warm-0" param="amount" at={3.2} value={0} easing="easeInOut" />
             <Keyframe id="shot-warm-1" param="amount" at={4.4} value={1} />
           </Effect>
         </Clip>
@@ -151,7 +151,7 @@ export default function Video() {
             shadow: LIFT,
           }}
           box={{ x: 960, y: 500, width: 1600, height: 760, origin: "center" }}
-          animation={{ preset: "word-by-word" }}
+          animation={{ type: "wordByWord" }}
         >
           SLOW POUR.
         </Title>
@@ -162,7 +162,7 @@ export default function Video() {
           duration={3.8}
           style={{ font: mono, size: 44, weight: 500, color: ACCENT, align: "left", valign: "bottom", shadow: LIFT }}
           box={{ x: 960, y: 580, width: 1600, height: 760, origin: "center" }}
-          animation={{ preset: "fade" }}
+          animation={{ type: "fade" }}
         >
           POUR-OVER · 92 °C · 4 MIN
         </Title>
@@ -203,7 +203,7 @@ export default function Video() {
             shadow: LIFT,
           }}
           box={{ x: 960, y: 500, width: 1600, height: 760, origin: "center" }}
-          animation={{ preset: "word-by-word" }}
+          animation={{ type: "wordByWord" }}
         >
           FAST SHOT.
         </Title>
@@ -223,7 +223,7 @@ export default function Video() {
             shadow: LIFT,
           }}
           box={{ x: 960, y: 540, width: 1600, height: 840, origin: "center" }}
-          animation={{ preset: "word-by-word" }}
+          animation={{ type: "wordByWord" }}
         >
           EVERY GLASS, A LINE OF CODE.
         </Title>
@@ -234,7 +234,7 @@ export default function Video() {
             stress={["line", "read,", "change", "render"]}
             author="UberScene"
             role="Video editor as code"
-            start={0.8}
+            after={0.8}
             x={120}
             y={250}
             width={720}

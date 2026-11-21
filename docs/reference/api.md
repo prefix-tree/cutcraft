@@ -523,7 +523,7 @@ Every name each entry exports, read from the code. The sections above explain th
 
 ### `@uberscene/kit/schema`
 
-237 exports.
+242 exports.
 
 | Export | Kind | |
 |---|---|---|
@@ -570,6 +570,7 @@ Every name each entry exports, read from the code. The sections above explain th
 | `ease` | function | `name` applied to `x` clamped to 0..1; an unknown or missing name is linear. |
 | `Easing` | type |  |
 | `EASING_FN` | const |  |
+| `easingCurve` | function | The curve an easing name names, for free code (`interpolate`, `progress`, `ease`). |
 | `EASINGS` | const |  |
 | `effect` | function | Declares an effect drawn by a GLSL function, and returns it for `<Effect type>`. |
 | `Effect` | const | The `<Effect>` element ([reference](/reference/elements/effect)). |
@@ -664,6 +665,7 @@ Every name each entry exports, read from the code. The sections above explain th
 | `NOT_RENDERED` | const |  |
 | `NotRendered` | interface | Accepted but not rendered. |
 | `NTSC_RATES` | const | The NTSC rates, written as the strings people say them as. |
+| `OldEasing` | type | An easing name spelled the way it was before 0.6, which free code still takes. |
 | `PALETTE_KEYS` | const | The palette names every built-in theme fills. |
 | `parseRate` | function | A frame rate as an exact fraction. |
 | `PlacementScope` | type |  |
@@ -673,10 +675,13 @@ Every name each entry exports, read from the code. The sections above explain th
 | `rateLabel` | function | The rate as people write it. |
 | `rateProblem` | function | Why a rate cannot be used, or null. |
 | `rateValue` | const | The rate as frames per second, for display and for code that only needs an approximate number. |
+| `RENAMED_EFFECT_PARAMS` | const | Built-in effects' params that had another name before 0.6, by effect. |
+| `renamedParam` | function | What a built-in effect's param `param` is called since 0.6, when that is another name; else undefined. |
 | `RENDERED_VALUES` | const |  |
 | `RenderedValues` | interface | An enum prop where only some values render. |
 | `ResolvedTheme` | interface | A file's theme with its base theme merged in. |
 | `resolveTheme` | function | The theme a composition's raw `theme` prop describes. |
+| `RESPELLED_VALUES` | const | Values spelled in kebab-case before 0.6 and in camelCase since, old to new. |
 | `sampleAt` | const | The audio sample a tick falls in. |
 | `sampleAtSeconds` | const | The audio sample a time in seconds falls in. |
 | `sampleRateProblem` | function | Why a sample rate cannot be used, or null. |
@@ -700,9 +705,9 @@ Every name each entry exports, read from the code. The sections above explain th
 | `STYLED_KINDS` | const | Element kinds a theme can hold named presets for; their elements pick one with `style`. |
 | `StyledKind` | type |  |
 | `Svg` | const | The `<Svg>` element ([reference](/reference/elements/svg)). |
-| `SVG_COLOR_MODES` | const |  |
+| `SVG_COLOR_TYPES` | const |  |
 | `TEXT_ALIGNS` | const |  |
-| `TEXT_ANIMATION_PRESETS` | const |  |
+| `TEXT_ANIMATION_TYPES` | const |  |
 | `TEXT_DECORATIONS` | const |  |
 | `TEXT_VALIGNS` | const |  |
 | `THEME_NAMES` | const | The built-in themes and motion styles a file can name. |
@@ -759,7 +764,7 @@ Every name each entry exports, read from the code. The sections above explain th
 | `zFitMode` | const |  |
 | `zKeyframeProperty` | const |  |
 | `zShapeType` | const |  |
-| `zTextAnimationPreset` | const |  |
+| `zTextAnimationType` | const |  |
 | `zTrackLayout` | const |  |
 | `zTrackRole` | const |  |
 | `zTransitionType` | const |  |

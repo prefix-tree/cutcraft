@@ -71,7 +71,7 @@ const pressOf = (elapsed: number, at: number) => Math.min(1, Math.max(0, (elapse
 export function PhoneTap(props: Partial<PhoneTapProps>) {
   const p = { ...defaults, ...props };
   const clock = useLayer();
-  const enter = progress(clock, { after: 0, over: 0.5, easing: "ease-out" });
+  const enter = progress(clock, { after: 0, over: 0.5, easing: "easeOut" });
   const width = Math.round(p.height * 0.49);
   const bezel = Math.round(p.height * 0.022);
   const screenW = width - 2 * bezel;

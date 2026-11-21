@@ -71,7 +71,7 @@ import { withBase } from "vitepress";
 <Transition id="x2" type="iris" duration={0.9} />
 <Clip id="shot" src="asset:espresso" in={1} out={9} fit="cover">
   <Effect id="shot-warm" type="lut" params={{ src: "asset:warm" }}>
-    <Keyframe id="shot-warm-0" param="amount" at={3.2} value={0} easing="ease-in-out" />
+    <Keyframe id="shot-warm-0" param="amount" at={3.2} value={0} easing="easeInOut" />
     <Keyframe id="shot-warm-1" param="amount" at={4.4} value={1} />
   </Effect>
 </Clip>

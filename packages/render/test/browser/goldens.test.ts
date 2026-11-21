@@ -111,14 +111,14 @@ const CASES: readonly Case[] = [
     shape: true,
     effects: `<Effect id="e" type="glow" params={{ radius: 6, intensity: 1.5, color: "#ffee88" }} />`,
   },
-  { name: "outline", shape: true, effects: `<Effect id="e" type="outline" params={{ width: 6 }} />` },
+  { name: "outline", shape: true, effects: `<Effect id="e" type="outline" params={{ thickness: 6 }} />` },
   {
     name: "longShadow",
     shape: true,
     effects: `<Effect id="e" type="longShadow" params={{ length: 60, color: "#333333", fade: true }} />`,
   },
   { name: "bevel", shape: true, effects: `<Effect id="e" type="bevel" params={{ size: 2, amount: 0.8 }} />` },
-  { name: "halftone", effects: `<Effect id="e" type="halftone" params={{ size: 10, mode: "cmyk" }} />` },
+  { name: "halftone", effects: `<Effect id="e" type="halftone" params={{ size: 10, type: "cmyk" }} />` },
   {
     name: "pixelate",
     effects: `<Effect id="e" type="pixelate" params={{ size: 16, box: [0.25, 0.2, 0.5, 0.6], feather: 6 }} />`,
@@ -170,7 +170,7 @@ export const manifest = ${JSON.stringify(manifest)};
 ${CHART}
 export default function Video() {
   return (
-    <Composition fps={30} width={320} height={180} background={{ mode: "color", color: "#000000" }}>
+    <Composition fps={30} width={320} height={180} background={{ type: "color", color: "#000000" }}>
       ${
         c.layer
           ? `<Track id="fx" layout="free">
@@ -262,7 +262,7 @@ const COMPOSED = `import { Caption, Captions, Clip, Composition, Effect, Motion,
 export const manifest = ${JSON.stringify(mediaManifest)};
 export default function Video() {
   return (
-    <Composition fps={30} width={480} height={270} background={{ mode: "color", color: "#000000" }}>
+    <Composition fps={30} width={480} height={270} background={{ type: "color", color: "#000000" }}>
       <Track id="main">
         <Clip id="solid" src="asset:solid" in={0} out={2}>
           <Effect id="grade" type="levels" params={{ black: 0.05, white: 0.9, gamma: 1.2 }} />
@@ -276,7 +276,7 @@ export default function Video() {
           <div className="dot" style={{ position: "absolute", left: 40, top: 200, width: 30, height: 30, borderRadius: 15, background: "#ffcc00" }} />
         </Motion>
       </Track>
-      <Captions id="cap" animation="word-highlight" style={{ size: 24, color: "#ffffff", highlight: "#ff3366" }}>
+      <Captions id="cap" animation="wordHighlight" style={{ size: 24, color: "#ffffff", highlight: "#ff3366" }}>
         <Caption id="c1" start={0} end={3.4} text="every frame matters" words={[
           { text: "every", start: 0, end: 1 },
           { text: "frame", start: 1, end: 2 },

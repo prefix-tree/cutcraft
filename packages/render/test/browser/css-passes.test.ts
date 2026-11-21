@@ -54,7 +54,7 @@ export const manifest = ${JSON.stringify(manifest)};
 ${declarations}
 export default function Video() {
   return (
-    <Composition fps={30} width={320} height={180} background={{ mode: "color", color: "${background}" }}>
+    <Composition fps={30} width={320} height={180} background={{ type: "color", color: "${background}" }}>
       <Track id="t">${body}</Track>
     </Composition>
   );
@@ -170,7 +170,7 @@ const CASES: readonly {
   {
     name: "shadow-shape",
     picture: "shape",
-    effect: `<Effect id="e" type="shadow" params={{ x: 6, y: 8, radius: 10, color: "#000000", opacity: 0.6 }} />`,
+    effect: `<Effect id="e" type="shadow" params={{ x: 6, y: 8, blur: 10, color: "#000000", opacity: 0.6 }} />`,
   },
   {
     name: "brightness-shape",

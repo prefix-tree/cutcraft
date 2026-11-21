@@ -106,10 +106,10 @@ A param's name says what kind of value it is, and each kind has one scale:
 
 | Kind | Scale | Params |
 |---|---|---|
-| strength, mix or share | a fraction, 0 to 1, or -1 to 1 when it goes both ways | `amount`, `opacity`, `softness`, `tolerance`, `tint`, `temperature`, `shadows`, `highlights`, `threshold`, `spill`, `black`, `white`, `blur`, `roundness`, `star`, `thickness`, `spread` (of the frame's diagonal) |
+| strength, mix or share | a fraction, 0 to 1, or -1 to 1 when it goes both ways | `amount`, `opacity`, `softness`, `tolerance`, `tint`, `temperature`, `shadows`, `highlights`, `threshold`, `spill`, `black`, `white`, `blur` (of `zoom`), `roundness`, `star`, `thickness` (of `scanlines`, a share of the spacing), `spread` (of the frame's diagonal) |
 | gain | a multiplier | `intensity`, `scale`, `contrast` |
 | exponent | a power, 1 changes nothing | `gamma` |
-| distance | pixels of the composition; a blur's `radius` (and `bevel`'s `size`) is its Gaussian's standard deviation, as CSS `blur()` reads it | `radius`, `width`, `feather`, `length`, `distance`, `size`, `spacing`, `edge`, `x`, `y` |
+| distance | pixels of the composition; a blur's `radius`, a shadow's `blur` (and `bevel`'s `size`) is its Gaussian's standard deviation, as CSS `blur()` reads it | `radius`, `blur` (of `shadow`), `thickness` (of `outline`), `feather`, `length`, `distance`, `size`, `spacing`, `edge`, `x`, `y` |
 | angle | degrees, clockwise from up | `angle`, `rotation`, `startAngle` |
 | position | fractions of the frame, `[x, y]` from the top left | `center`, `box`, the corners |
 | colour | `"#rgb"` or `"#rrggbb"` | `color`, `dark`, `light`, `ink`, `paper` |
@@ -121,7 +121,7 @@ A param's name says what kind of value it is, and each kind has one scale:
 | switch | `true` or `false` | `fade`, `inverted`, `outlineOnly`, `pushOut`, `radial` |
 | curve | `[input, output]` points, 0 to 1 | `rgb`, `red`, `green`, `blue` |
 | asset | `"asset:<id>"` from the manifest | `src` |
-| choice | a string | `direction`, `curve`, `mode`, `blend` |
+| choice | a string | `direction`, `curve`, `type`, `blend` |
 
 <script setup>
 import { onMounted } from "vue";

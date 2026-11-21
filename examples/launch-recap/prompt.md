@@ -45,7 +45,7 @@ for a hole; never write `start`. On a **free** track every child has a literal
 Timed elements: `<Clip src in out|duration speed reverse fit transform volume fade duck>`
 (video or image), `<Audio>` (same, audio only), `<Transition type duration>`
 as a sibling *between* two clips of a sequence track, `<Title style box>` (text as
-children), `<Shape shape width height fill stroke cornerRadius>`, `<Svg>`,
+children), `<Shape type width height fill stroke cornerRadius>`, `<Svg>`,
 `<Sticker>`, `<Motion>` and `<Three>` (Motion and three.js on the video's clock), `<Adjustment>`, `<Nested of>`, `<Layer>` (arbitrary React inside;
 call `useT()` for 0..1 progress or `useLayer()` for `elapsed`, `remaining`,
 `duration` and `time` in seconds; shape them with `interpolate()`,

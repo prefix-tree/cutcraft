@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { zBlendMode, zShapeType, zTextAnimationPreset } from "../enums";
+import { zBlendMode, zShapeType, zTextAnimationType } from "../enums";
 import {
   assetRefSchema,
   colorSchema,
@@ -19,10 +19,11 @@ import {
   vec2Schema,
   visualProps,
 } from "./common";
-import { zSvgColorMode, zTextAlign, zTextDecoration, zTextValign } from "./enums-local";
+import { zSvgColorType, zTextAlign, zTextDecoration, zTextValign } from "./enums-local";
 
 const textAnimationSchema = z.strictObject({
-  preset: zTextAnimationPreset,
+  /** Which animation: `typewriter`, `fade`, a slide, `scale` or `wordByWord`. */
+  type: zTextAnimationType,
   in: z.number().nonnegative().default(0.5),
   out: z.number().nonnegative().default(0.5),
   stagger: z.number().nonnegative().optional(),
@@ -44,8 +45,8 @@ const titleLookSchema = z.strictObject({
   color: colorSchema.default("#ffffff"),
   /** A colour filling the text box behind the letters. */
   background: colorSchema.optional(),
-  /** An outline around the letters: its colour and width in pixels. */
-  stroke: z.strictObject({ color: colorSchema, width: z.number().min(0).max(100) }).optional(),
+  /** An outline around the letters: its colour and thickness in pixels. */
+  stroke: z.strictObject({ color: colorSchema, thickness: z.number().min(0).max(100) }).optional(),
   /** A drop shadow under the letters: colour, blur and offset in pixels. */
   shadow: textShadowSchema.optional(),
   /** Which side of the text box the lines sit against. */
@@ -80,7 +81,7 @@ export const titleSchema = z.strictObject({
       titleLookSchema,
     ])
     .prefault({}),
-  /** An entrance and exit: a preset, its seconds in and out, and for word-by-word the delay between words. */
+  /** An entrance and exit: its type, its seconds in and out, and for wordByWord the delay between words. */
   animation: textAnimationSchema.optional(),
 });
 
@@ -96,7 +97,7 @@ const fillSchema = z.union([
 
 const strokeSchema = z.strictObject({
   color: colorSchema,
-  width: z.number().nonnegative(),
+  thickness: z.number().nonnegative(),
   opacity: z.number().min(0).max(1).optional(),
   dashArray: z.array(z.number().nonnegative()).optional(),
   dashOffset: z.number().optional(),
@@ -112,7 +113,7 @@ export const shapeSchema = z.strictObject({
   /** A theme preset for shapes. */
   style: idSchema.optional(),
   /** Which shape it draws. */
-  shape: zShapeType,
+  type: zShapeType,
   /** The shape's box, in pixels; left out, 200. */
   width: z.number().positive().optional(),
   /** The shape's box height, in pixels; left out, 200. */
@@ -121,7 +122,7 @@ export const shapeSchema = z.strictObject({
   points: z.array(vec2Schema).optional(),
   /** A colour, or `{ type, color, gradient, opacity }` for a gradient or no fill. */
   fill: fillSchema.optional(),
-  /** The outline: colour, width in pixels, opacity, dashes, caps and joins. */
+  /** The outline: colour, thickness in pixels, opacity, dashes, caps and joins. */
   stroke: strokeSchema.optional(),
   /** A drop shadow: colour, blur and offset in pixels. */
   shadow: shadowSchema.optional(),
@@ -158,7 +159,7 @@ export const svgSchema = z
     preserveAspectRatio: z.string().optional(),
     /** Recolours it: `tint` keeps the shading and colours it, `replace` paints every drawn pixel; `opacity` is how much. */
     color: z
-      .strictObject({ mode: zSvgColorMode, tint: colorSchema.optional(), opacity: z.number().min(0).max(1).optional() })
+      .strictObject({ type: zSvgColorType, tint: colorSchema.optional(), opacity: z.number().min(0).max(1).optional() })
       .optional(),
     ...entranceProps,
   })

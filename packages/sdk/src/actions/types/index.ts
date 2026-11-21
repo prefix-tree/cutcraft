@@ -21,7 +21,7 @@ export interface CompositionActions {
   /**
    * Sets what shows behind every track: a `color`, or a `blur` of the picture; merges into the current `background`.
    */
-  "composition/setBackground": { mode?: "color" | "blur"; color?: string };
+  "composition/setBackground": { type?: "color" | "blur"; color?: string };
   /** The tweaks panel: rewrites the file's `defaults` literal. */
   "composition/setProps": { defaults: Readonly<Record<string, Json>> };
   /** Swap the theme (or remove it with null); with `merge`, lay the given parts over the current theme instead. */
@@ -342,10 +342,10 @@ export interface CaptionActions {
 }
 
 export interface MarkerActions {
-  /** Adds a timeline marker at `at` seconds, with an optional label and colour. */
-  "marker/add": { markerId: Id; at: number; label?: string; color?: string };
+  /** Adds a timeline marker at `start` seconds, with an optional label and colour. */
+  "marker/add": { markerId: Id; start: number; label?: string; color?: string };
   /** Changes a marker's time, label or colour. */
-  "marker/update": { markerId: Id; at?: number; label?: string; color?: string };
+  "marker/update": { markerId: Id; start?: number; label?: string; color?: string };
   /** Deletes a marker. */
   "marker/remove": { markerId: Id };
   /** The undo of marker/remove: puts the marker back where it was. */

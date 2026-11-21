@@ -18,7 +18,7 @@ const series = z.object({
 export const schema = z.object({
   series: z.array(series).min(2).max(16).describe("The series that race"),
   periods: z.array(z.string()).min(2).describe("The name of each period, such as a year"),
-  start: z.number().min(0).describe("Seconds since the layer started at which the race begins"),
+  after: z.number().min(0).describe("Seconds since the layer started at which the race begins"),
   every: z.number().positive().describe("Seconds each period lasts"),
   show: z.number().int().min(2).max(10).describe("How many bars are shown, the leaders"),
   suffix: z.string().describe("Written after every value"),
@@ -45,7 +45,7 @@ export const defaults: BarRaceProps = {
     { label: "Scooters", values: [2, 4, 7, 10, 13, 15] },
   ],
   periods: ["2019", "2020", "2021", "2022", "2023", "2024"],
-  start: 0.5,
+  after: 0.5,
   every: 0.9,
   show: 5,
   suffix: "%",
@@ -74,7 +74,7 @@ export const meta: BlockMeta = {
   tags: ["race", "bars", "chart", "data", "time", "ranking"],
   aspects: ["9:16"],
   length: 5.5,
-  beats: ["start"],
+  beats: ["after"],
   poster: 5.2,
 };
 
@@ -105,7 +105,7 @@ export function BarRace(props: Partial<BarRaceProps>) {
   const p = { ...defaults, ...props };
   const clock = useLayer();
   const last = p.periods.length - 1;
-  const at = Math.min(last, Math.max(0, (clock.elapsed - p.start) / p.every));
+  const at = Math.min(last, Math.max(0, (clock.elapsed - p.after) / p.every));
   const values = valuesAt(p.series, at);
   // A bar slides to a new place instead of jumping: its place is the average of its places over the last stretch of
   // the race, as if each place change were eased in over that stretch.
@@ -122,7 +122,7 @@ export function BarRace(props: Partial<BarRaceProps>) {
   const font = { fontFamily: themeCss(p.font), fontWeight: p.weight } as const;
   const row = p.barHeight + p.gap;
   const height = p.show * row - p.gap;
-  const enter = progress(clock, { after: 0, over: 0.45, easing: "ease-out" });
+  const enter = progress(clock, { after: 0, over: 0.45, easing: "easeOut" });
   const period = p.periods[Math.min(last, Math.round(at))] as string;
   return (
     <svg width="100%" height="100%" style={{ position: "absolute", left: 0, top: 0, overflow: "visible" }} role="img">

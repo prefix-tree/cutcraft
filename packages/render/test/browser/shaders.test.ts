@@ -475,17 +475,21 @@ describe("title effects", () => {
   });
 
   it("outline draws a band around the box, and outlineOnly fills its silhouette", async () => {
-    const [band, beyond, inside] = await boxed("outline", `<Effect id="o" type="outline" params={{ width: 8 }} />`, [
-      [204, 90],
-      [216, 90],
-      [160, 90],
-    ]);
+    const [band, beyond, inside] = await boxed(
+      "outline",
+      `<Effect id="o" type="outline" params={{ thickness: 8 }} />`,
+      [
+        [204, 90],
+        [216, 90],
+        [160, 90],
+      ],
+    );
     expect(near(band, [255, 255, 255])).toBe(true);
     expect(near(beyond, [0, 0, 0])).toBe(true);
     expect(near(inside, [255, 0, 0])).toBe(true);
     const [filled] = await boxed(
       "outline-only",
-      `<Effect id="o" type="outline" params={{ width: 8, outlineOnly: true, color: "#0000ff" }} />`,
+      `<Effect id="o" type="outline" params={{ thickness: 8, outlineOnly: true, color: "#0000ff" }} />`,
       [[160, 90]],
     );
     expect(near(filled, [0, 0, 255])).toBe(true);
@@ -596,7 +600,7 @@ describe("stylizers and generators", () => {
   it("halftone in cmyk prints a grey with all four inks, so it stays neutral on average", async () => {
     const cs = await at(
       "halftone-cmyk",
-      `<Effect id="h" type="halftone" params={{ size: 10, mode: "cmyk" }} />`,
+      `<Effect id="h" type="halftone" params={{ size: 10, type: "cmyk" }} />`,
       { grey: 0.4 },
       grid(40, 40, 40),
     );

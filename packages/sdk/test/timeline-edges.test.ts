@@ -1626,7 +1626,7 @@ describe("captions and markers", () => {
   });
 
   it("a marker is a point, and one past the end does not lengthen the video", () => {
-    expect(cut(`<Marker id="m1" at={1.5} /><Marker id="m2" at={99} />${MAIN}`)).toMatchInlineSnapshot(`
+    expect(cut(`<Marker id="m1" start={1.5} /><Marker id="m2" start={99} />${MAIN}`)).toMatchInlineSnapshot(`
       "
       duration 6.4
       hook clip 0..2.9 plays talk 2..4.9 x1

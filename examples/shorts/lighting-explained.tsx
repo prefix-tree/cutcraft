@@ -220,7 +220,7 @@ const scenes = {
 
 export default function Video({ hook, stage: colour, accent }: z.infer<typeof schema>) {
   return (
-    <Composition fps={30} width={1080} height={1920} background={{ mode: "color", color: GROUND }}>
+    <Composition fps={30} width={1080} height={1920} background={{ type: "color", color: GROUND }}>
       <Track id="scenes" layout="free">
         <Three id="hook" start={0} duration={3} camera={{ orthographic: true }} setup={scenes.hook(colour, accent)} />
 

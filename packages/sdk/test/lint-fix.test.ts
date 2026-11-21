@@ -264,7 +264,7 @@ describe("one style for text (0.6)", () => {
     ["italic", "italic", "italic: true"],
     ["color", 'color="$primary"', 'color: "$primary"'],
     ["background", 'background="#000"', 'background: "#000"'],
-    ["stroke", 'stroke={{ color: "#000", width: 2 }}', 'stroke: { color: "#000", width: 2 }'],
+    ["stroke", 'stroke={{ color: "#000", thickness: 2 }}', 'stroke: { color: "#000", thickness: 2 }'],
     ["shadow", "shadow={LIFT}", "shadow: LIFT"],
     ["align", 'align="left"', 'align: "left"'],
     ["valign", 'valign="top"', 'valign: "top"'],
@@ -340,6 +340,157 @@ describe("one style for text (0.6)", () => {
       ),
     );
     expect(fixed.remaining.filter((d) => d.severity === "error")).toEqual([]);
+  });
+});
+
+describe("one naming rule (0.6)", () => {
+  const free = (body: string, extra = "") => wrap(body, extra);
+  const fixes: [string, string, string][] = [
+    ["a shape's kind", '<Shape id="s" shape="circle" duration={2} />', '<Shape id="s" type="circle" duration={2} />'],
+    [
+      "a shape's stroke width",
+      '<Shape id="s" type="circle" stroke={{ color: "#fff", width: 4 }} duration={2} />',
+      '<Shape id="s" type="circle" stroke={{ color: "#fff", thickness: 4 }} duration={2} />',
+    ],
+    [
+      "a title's animation, key and value",
+      '<Title id="h" animation={{ preset: "word-by-word", in: 0.3 }} duration={2}>Hi</Title>',
+      '<Title id="h" animation={{ type: "wordByWord", in: 0.3 }} duration={2}>Hi</Title>',
+    ],
+    [
+      "a title's animation value under the new key",
+      '<Title id="h" animation={{ type: "slide-up" }} duration={2}>Hi</Title>',
+      '<Title id="h" animation={{ type: "slideUp" }} duration={2}>Hi</Title>',
+    ],
+    [
+      "a title's stroke and decoration in its style",
+      '<Title id="h" style={{ stroke: { color: "#000", width: 2 }, decoration: "line-through" }} duration={2}>Hi</Title>',
+      '<Title id="h" style={{ stroke: { color: "#000", thickness: 2 }, decoration: "lineThrough" }} duration={2}>Hi</Title>',
+    ],
+    [
+      "an old flat stroke, moved into the style and renamed as it goes",
+      '<Title id="h" stroke={{ color: "#000", width: 2 }} duration={2}>Hi</Title>',
+      '<Title id="h" style={{ stroke: { color: "#000", thickness: 2 } }} duration={2}>Hi</Title>',
+    ],
+    [
+      "the captions' stroke and animation",
+      '<Captions id="c" src="asset:talk" animation="word-highlight" style={{ stroke: { color: "#000", width: 2 } }} />',
+      '<Captions id="c" src="asset:talk" animation="wordHighlight" style={{ stroke: { color: "#000", thickness: 2 } }} />',
+    ],
+    [
+      "an entrance, an exit, their easings and a blend",
+      '<Shape id="s" type="circle" blend="soft-light" enter={{ type: "wipe-left", easing: "ease-in-out" }} exit={{ type: "flip-vertical", easing: "ease-in" }} duration={2} />',
+      '<Shape id="s" type="circle" blend="softLight" enter={{ type: "wipeLeft", easing: "easeInOut" }} exit={{ type: "flipVertical", easing: "easeIn" }} duration={2} />',
+    ],
+    [
+      "a lower third's variant",
+      '<LowerThird id="l" name="Ada" variant="bar" />',
+      '<LowerThird id="l" name="Ada" type="bar" />',
+    ],
+    [
+      "an svg's colour mode",
+      '<Svg id="v" content="<svg/>" color={{ mode: "tint", tint: "#f00" }} duration={2} />',
+      '<Svg id="v" content="<svg/>" color={{ type: "tint", tint: "#f00" }} duration={2} />',
+    ],
+    [
+      "the diagram parts' at, easing and line width",
+      '<Label text="A" x={1} y={2} at={3} easing="ease-out" lineWidth={4} />',
+      '<Label text="A" x={1} y={2} start={3} easing="easeOut" lineThickness={4} />',
+    ],
+    [
+      "a block's moments",
+      "<HundredCells fill={{ at: 2, over: 1 }} next={{ at: 4 }} /><QuoteBuild start={0.6} /><BarRace start={1} />",
+      "<HundredCells fill={{ start: 2, over: 1 }} next={{ start: 4 }} /><QuoteBuild after={0.6} /><BarRace after={1} />",
+    ],
+  ];
+
+  it.each(fixes)("moves %s", (_, written, moved) => {
+    const text = free(written);
+    const found = lint(text, { rules: ["deprecated-props"] });
+    expect(found.length).toBeGreaterThan(0);
+    for (const d of found) expect(d.message).toMatch(/is .+ since 0\.6\.0/);
+    expect(fixSource(text, { rules: ["deprecated-props"] }).text).toBe(free(moved));
+  });
+
+  it("names the new spelling in each message", () => {
+    const text = free(
+      '<Shape id="s" shape="circle" enter={{ type: "slide-up" }} duration={2} /><Marker id="m" at={2} />',
+    );
+    expect(lint(text, { rules: ["deprecated-props"] }).map((d) => d.message)).toEqual([
+      '<Shape id="s">: `shape` is `type` since 0.6.0',
+      '<Shape id="s">: `enter.type="slide-up"` is "slideUp" since 0.6.0',
+      '<Marker id="m">: `at` is `start` since 0.6.0',
+    ]);
+  });
+
+  it("moves a composition's background, its theme's motion, and a marker", () => {
+    const text = `import { Composition, Marker } from "@uberscene/kit";
+export default function V() {
+  return (
+    <Composition fps={30} width={1920} height={1080} background={{ mode: "blur" }} theme={{ motion: { enter: { type: "slide-up", easing: "ease-out" } } }}>
+      <Marker id="m" at={2} />
+    </Composition>
+  );
+}
+`;
+    expect(fixSource(text).text).toBe(
+      text
+        .replace("mode:", "type:")
+        .replace('"slide-up"', '"slideUp"')
+        .replace('"ease-out"', '"easeOut"')
+        .replace("at={2}", "start={2}"),
+    );
+  });
+
+  describe("a row can depend on the element's type", () => {
+    const effect = (type: string, params: string, keyframe: string) =>
+      free(
+        `<Title id="h" duration={2}><Effect id="e" type="${type}" params={${params}}><Keyframe id="k" param="${keyframe}" at={0} value={1} /></Effect>Hi</Title>`,
+      );
+
+    it.each([
+      ["shadow", "{ radius: 3 }", "radius", "{ blur: 3 }", "blur"],
+      ["outline", "{ width: 3 }", "width", "{ thickness: 3 }", "thickness"],
+      ["halftone", '{ mode: "cmyk" }', "mode", '{ type: "cmyk" }', "type"],
+    ])("renames the %s effect's param, and the param a keyframe inside it names", (type, params, key, now, keyNow) => {
+      expect(fixSource(effect(type, params, key)).text).toBe(effect(type, now, keyNow));
+    });
+
+    it("leaves the same names alone on another type, or inside another element", () => {
+      const blur = effect("blur", "{ radius: 3 }", "radius");
+      expect(lint(blur, { rules: ["deprecated-props"] })).toEqual([]);
+      const glow = free(
+        '<Title id="h" duration={2}><Effect id="e" type="glow" params={{ radius: 3 }} />Hi</Title><Shape id="s" type="circle" duration={2}><Keyframe id="k" property="transform.opacity" param="radius" at={0} value={1} /></Shape>',
+      );
+      expect(lint(glow, { rules: ["deprecated-props"] })).toEqual([]);
+      // A type in code is not a literal: the row does not hold.
+      const coded = free('<Title id="h" duration={2}><Effect id="e" type={KIND} params={{ radius: 3 }} />Hi</Title>');
+      expect(lint(coded, { rules: ["deprecated-props"] })).toEqual([]);
+    });
+
+    it("respells a crossfade's curve, and no other transition's", () => {
+      const x = (type: string) => free(`<Transition id="x" type="${type}" params={{ curve: "ease-in" }} />`);
+      expect(fixSource(x("crossfade")).text).toBe(x("crossfade").replace('"ease-in"', '"easeIn"'));
+      expect(lint(x("wipe"), { rules: ["deprecated-props"] })).toEqual([]);
+    });
+
+    it("a caller's own row takes a when", () => {
+      const rows: Deprecation[] = [
+        { element: "Shape", prop: "size", to: { rename: "width" }, when: { type: "circle" }, since: "9.0.0" },
+      ];
+      const text = free(
+        '<Shape id="a" type="circle" size={4} duration={2} /><Shape id="b" type="star" size={4} duration={2} />',
+      );
+      expect(lint(text, { rules: ["deprecated-props"], deprecations: rows }).map((d) => d.id)).toEqual(["a"]);
+    });
+  });
+
+  it("cannot reach values in arrays, spreads or shared constants", () => {
+    const text = free(
+      '<Shape id="s" {...RING} duration={2} /><Title id="h" animation={ANIM} duration={2}>Hi</Title>',
+      'const RING = { shape: "circle" };\nconst ANIM = { preset: "fade" };',
+    );
+    expect(lint(text, { rules: ["deprecated-props"] })).toEqual([]);
   });
 });
 

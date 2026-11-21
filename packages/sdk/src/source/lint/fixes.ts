@@ -36,6 +36,26 @@ export function attributeOf(tag: t.JSXOpeningElement, name: string): t.JSXAttrib
   );
 }
 
+/** Each JSX tag's parent tag: the opening tag of the element it is a child of, through fragments. */
+export function parentTags(index: Pick<SourceIndex, "ast">): Map<t.JSXOpeningElement, t.JSXOpeningElement> {
+  const out = new Map<t.JSXOpeningElement, t.JSXOpeningElement>();
+  const visit = (children: readonly t.Node[], parent: t.JSXOpeningElement) => {
+    for (const child of children) {
+      if (t.isJSXElement(child)) out.set(child.openingElement, parent);
+      else if (t.isJSXFragment(child)) visit(child.children, parent);
+    }
+  };
+  t.traverseFast(index.ast.program, (node) => {
+    if (t.isJSXElement(node)) visit(node.children, node.openingElement);
+  });
+  return out;
+}
+
+/** The string a prop holds, written as a literal (`type="shadow"`, `type={"shadow"}`); undefined for anything else. */
+export function literalString(tag: t.JSXOpeningElement, path: string): string | undefined {
+  return stringAt(tag, path)?.node.value;
+}
+
 /** The tag's literal `id`, or an empty string: what its edits are filed under. */
 export function idOf(tag: t.JSXOpeningElement): string {
   const value = attributeOf(tag, "id")?.value;

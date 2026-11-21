@@ -7,7 +7,7 @@ export const defaults = {};
 /** Solid blue footage under an adjustment that halves its brightness. */
 export default function Video() {
   return (
-    <Composition fps={30} width={640} height={360} background={{ mode: "color", color: "#000000" }}>
+    <Composition fps={30} width={640} height={360} background={{ type: "color", color: "#000000" }}>
       <Track id="main">
         <Clip id="solid" src="asset:solid" in={0} out={1} />
       </Track>

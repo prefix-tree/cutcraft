@@ -191,7 +191,7 @@ export const EDITS: readonly Edit[] = [
       return (
         c && {
           type: "caption/setAnimation",
-          params: { captionsId: c.id, animation: c.props.animation === "karaoke" ? "word-highlight" : "karaoke" },
+          params: { captionsId: c.id, animation: c.props.animation === "karaoke" ? "wordHighlight" : "karaoke" },
         }
       );
     },
@@ -207,7 +207,7 @@ export const EDITS: readonly Edit[] = [
     name: "drops a marker",
     pick: (s) => ({
       type: "marker/add",
-      params: { markerId: "e2e-m", at: r(s.composition.duration / 2), label: "check" },
+      params: { markerId: "e2e-m", start: r(s.composition.duration / 2), label: "check" },
     }),
   },
   {

@@ -19,7 +19,7 @@ type Fill =
   | undefined;
 interface Stroke {
   readonly color: string;
-  readonly width: number;
+  readonly thickness: number;
   readonly opacity?: number;
   readonly dashArray?: readonly number[];
   readonly dashOffset?: number;
@@ -77,7 +77,7 @@ function shapeMarkup(props: Readonly<Record<string, unknown>>, size: { width: nu
       defs.push(gradient("stroke", stroke.gradient, warnings));
       attrs.stroke = "url(#stroke)";
     } else attrs.stroke = stroke.color;
-    attrs["stroke-width"] = num(stroke.width);
+    attrs["stroke-width"] = num(stroke.thickness);
     if (stroke.opacity !== undefined) attrs["stroke-opacity"] = num(stroke.opacity);
     if (stroke.dashArray?.length) attrs["stroke-dasharray"] = stroke.dashArray.map(num).join(" ");
     if (stroke.dashOffset !== undefined) attrs["stroke-dashoffset"] = num(stroke.dashOffset);
@@ -88,7 +88,7 @@ function shapeMarkup(props: Readonly<Record<string, unknown>>, size: { width: nu
   const shadows = (props.shadows as Shadow[] | undefined) ?? (props.shadow ? [props.shadow as Shadow] : []);
   const outer = shadows.filter((s) => !s.inset);
   if (outer.length < shadows.length) warnings.push("inset shadows are not drawn");
-  const strokeReach = stroke ? stroke.width / 2 + 1 : 0;
+  const strokeReach = stroke ? stroke.thickness / 2 + 1 : 0;
   const shadowReach = outer.reduce(
     (m, s) =>
       Math.max(m, Math.max(Math.abs(s.x ?? 0), Math.abs(s.y ?? 0)) + (s.blur ?? 0) * 1.5 + Math.max(0, s.spread ?? 0)),
@@ -100,7 +100,7 @@ function shapeMarkup(props: Readonly<Record<string, unknown>>, size: { width: nu
     attrs.filter = "url(#shadow)";
   }
 
-  const shape = String(props.shape ?? "rectangle");
+  const shape = String(props.type ?? "rectangle");
   const body = geometry(shape, w, h, props, attrs);
   const out = `<svg xmlns="http://www.w3.org/2000/svg" width="${num(w)}" height="${num(h)}" viewBox="0 0 ${num(w)} ${num(h)}">${defs.length ? `<defs>${defs.join("")}</defs>` : ""}${body}</svg>`;
   return { markup: out, size, bleed, warnings };

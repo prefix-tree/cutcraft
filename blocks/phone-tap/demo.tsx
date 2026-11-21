@@ -9,7 +9,7 @@ export default function Demo() {
       fps={30}
       width={1080}
       height={1920}
-      background={{ mode: "color", color: "#070a14" }}
+      background={{ type: "color", color: "#070a14" }}
       theme={{ extends: "midnight" }}
     >
       <Track id="graphics" layout="free">

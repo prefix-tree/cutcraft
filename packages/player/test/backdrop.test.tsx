@@ -11,7 +11,7 @@ const under = {
       kind: "shape",
       start: 0,
       duration: 4,
-      props: { shape: "rectangle", width: 640, height: 360, fill: "#000000" },
+      props: { type: "rectangle", width: 640, height: 360, fill: "#000000" },
     },
   ],
 };

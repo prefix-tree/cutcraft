@@ -11,7 +11,7 @@ export const lowerThirdSchema = timingSchema.extend({
   /** The line under the name, in the body face. Left out: a shorter card with the name alone. */
   role: z.string().optional(),
   /** `card`: on a surface card; `bar`: the words beside an accent bar, straight over the picture. */
-  variant: z.enum(["card", "bar"]).default("card"),
+  type: z.enum(["card", "bar"]).default("card"),
   /** Where the card's centre sits, in pixels from the frame's top left. Left out: `{ x: 400, y: 870 }`, set for a 1920 by 1080 frame (give it a box on another size). */
   box: centre(400, 870),
   /** The card's width in pixels; the words wrap inside it. */
@@ -27,7 +27,7 @@ export const lowerThirdSchema = timingSchema.extend({
  * heading face and the role under it, sliding in.
  */
 export function LowerThird(props: z.input<typeof lowerThirdSchema>) {
-  const p = parse("LowerThird", lowerThirdSchema, props);
+  const p = parse("LowerThird", lowerThirdSchema, props, { variant: "type" });
   const c = centreOf(p.box);
   const t = timingOf(p);
   // Every measure below was drawn for a 44 px name; `k` keeps them in proportion at any size.
@@ -37,28 +37,28 @@ export function LowerThird(props: z.input<typeof lowerThirdSchema>) {
   const textX = c.x + 18 * k;
   const textWidth = p.width - 72 * k;
   return [
-    p.variant === "card" &&
+    p.type === "card" &&
       h(Shape, {
         id: `${p.id}-card`,
         ...timing(t),
-        shape: "rectangle",
+        type: "rectangle",
         width: p.width,
         height,
         fill: "$surface",
         cornerRadius: "$radius",
         box: { x: c.x, y: c.y, origin: "center" },
-        enter: { type: "slide-up", duration: 0.45, easing: "easeOutCubic" },
+        enter: { type: "slideUp", duration: 0.45, easing: "easeOutCubic" },
         exit: { type: "fade", duration: 0.3 },
       }),
     h(Shape, {
       id: `${p.id}-bar`,
       ...timing(t, 0.1),
-      shape: "rectangle",
+      type: "rectangle",
       width: 8 * k,
       height: height - 36 * k,
       fill: p.accent,
       box: { x: left + 28 * k, y: c.y, origin: "center" },
-      enter: { type: "wipe-down", duration: 0.35 },
+      enter: { type: "wipeDown", duration: 0.35 },
       exit: { type: "fade", duration: 0.3 },
     }),
     h(
@@ -68,7 +68,7 @@ export function LowerThird(props: z.input<typeof lowerThirdSchema>) {
         ...timing(t, 0.15),
         style: { font: "$heading", size: p.size, weight: 700, color: "$text", align: "left" },
         box: { x: textX, y: c.y - (p.role ? 20 * k : 0), width: textWidth, origin: "center" },
-        enter: { type: "slide-right", duration: 0.45, easing: "easeOutCubic" },
+        enter: { type: "slideRight", duration: 0.45, easing: "easeOutCubic" },
         exit: { type: "fade", duration: 0.3 },
       },
       p.name,

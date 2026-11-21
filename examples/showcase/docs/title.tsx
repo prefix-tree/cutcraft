@@ -14,7 +14,7 @@ export default function Video() {
           duration={3.4}
           style={{ preset: "h1", size: 64, align: "left" }}
           box={{ x: 200, y: 460, width: 360, origin: "center" }}
-          animation={{ preset: "word-by-word" }}
+          animation={{ type: "wordByWord" }}
         >
           Bloom first
         </Title>

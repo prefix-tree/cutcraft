@@ -13,8 +13,10 @@ import {
   MAX_SECONDS,
   parseRate,
   type Rate,
+  RESPELLED_VALUES,
   type ResolvedTheme,
   rateValue,
+  renamedParam,
   resolveTheme,
   SCHEMAS_BY_KIND,
   type ShaderDefinition,
@@ -233,9 +235,9 @@ function compute(
 
   for (const child of root.children) {
     if (child.kind === "marker") {
-      // A failed parse returns the raw props; the schema error already names a non-numeric `at`.
-      const at = parseProps(child, errors, theme).at;
-      if (typeof at === "number") markers.set(child.id, at);
+      // A failed parse returns the raw props; the schema error already names a non-numeric `start`.
+      const start = parseProps(child, errors, theme).start;
+      if (typeof start === "number") markers.set(child.id, start);
     }
   }
 
@@ -526,13 +528,25 @@ function declaredShader(
   }
   const result = params.safeParse(data.params ?? {});
   if (result.success) return { ...data, params: result.data };
-  for (const issue of result.error.issues)
+  const given = (data.params ?? {}) as Readonly<Record<string, unknown>>;
+  for (const issue of result.error.issues) {
+    const renamed =
+      issue.code === "unrecognized_keys" && issue.path.length === 0
+        ? issue.keys.flatMap((k) => {
+            const now = renamedParam(type, k);
+            return now === undefined ? [] : [`param \`${k}\` of "${type}" is now \`${now}\``];
+          })
+        : [];
     own.push({
       code: "SCHEMA",
       id: node.id,
       prop: ["params", ...issue.path.map(String)].join("."),
-      message: issue.message,
+      message:
+        renamed.length > 0
+          ? `${renamed.join(", ")}; uberscene lint --fix moves the file`
+          : (movedKey(node.kind, issue, given) ?? issue.message),
     });
+  }
   return null;
 }
 
@@ -594,7 +608,7 @@ function parseProps(node: CollectedNode, errors: ResolveError[], theme: Resolved
               code: "SCHEMA",
               id: node.id,
               prop: issue.path.map(String).join(".") || undefined,
-              message: movedKey(node.kind, issue) ?? issue.message,
+              message: movedKey(node.kind, issue, themed.props) ?? issue.message,
             }) as ResolveError,
         ),
       );
@@ -624,11 +638,55 @@ const TITLE_LOOK_KEYS = [
   "decoration",
 ];
 
-/** Where a key a file may still write has moved to, said in place of the schema's "Unrecognized key". */
-function movedKey(kind: string, issue: z.core.$ZodIssue): string | undefined {
+/** Keys renamed in 0.6, by element kind and the object they are in (`""` for the element's own props): old to new. */
+const RENAMED_KEYS: Readonly<Record<string, Readonly<Record<string, Readonly<Record<string, string>>>>>> = {
+  shape: { "": { shape: "type" }, stroke: { width: "thickness" } },
+  title: { animation: { preset: "type" }, "style.stroke": { width: "thickness" } },
+  captions: { "style.stroke": { width: "thickness" } },
+  svg: { color: { mode: "type" } },
+  composition: { background: { mode: "type" } },
+  marker: { "": { at: "start" } },
+};
+
+/** The value at a path into props, for a message about it. */
+function valueAt(props: Readonly<Record<string, unknown>>, path: readonly PropertyKey[]): unknown {
+  let value: unknown = props;
+  for (const key of path) {
+    if (typeof value !== "object" || value === null) return undefined;
+    value = (value as Record<PropertyKey, unknown>)[key];
+  }
+  return value;
+}
+
+/**
+ * Where a key a file may still write has moved to, said in place of the schema's "Unrecognized key", and the new
+ * spelling of a value spelled the old way (`"ease-in-out"`), in place of "Invalid option".
+ */
+function movedKey(kind: string, issue: z.core.$ZodIssue, props: Readonly<Record<string, unknown>>): string | undefined {
+  const fix = "uberscene lint --fix moves the file";
+  if (issue.code === "invalid_union") {
+    // A prop that is one of several shapes (a title's `style`, a preset name or an object): what a branch says.
+    for (const branch of issue.errors)
+      for (const inner of branch) {
+        const said = movedKey(kind, { ...inner, path: [...issue.path, ...inner.path] } as z.core.$ZodIssue, props);
+        if (said !== undefined) return said;
+      }
+    return undefined;
+  }
+  if (issue.code === "invalid_value") {
+    const value = valueAt(props, issue.path);
+    const now =
+      typeof value === "string" && Object.hasOwn(RESPELLED_VALUES, value) ? RESPELLED_VALUES[value] : undefined;
+    return now !== undefined && issue.values.includes(now) ? `"${value}" is now "${now}"; ${fix}` : undefined;
+  }
   if (issue.code !== "unrecognized_keys") return undefined;
   const at = issue.path.map(String).join(".");
-  const fix = "uberscene lint --fix moves the file";
+  const renamed = RENAMED_KEYS[kind]?.[at];
+  const respelled = renamed ? issue.keys.filter((k) => Object.hasOwn(renamed, k)) : [];
+  if (renamed && respelled.length > 0) {
+    const path = (k: string) => (at ? `${at}.${k}` : k);
+    return `${respelled.map((k) => `\`${path(k)}\` is now \`${path(renamed[k] as string)}\``).join(", ")}; ${fix}`;
+  }
   if (at === "transform" && issue.keys.includes("position"))
     return `transform.position moved to box, in pixels from the frame's top left: box={{ x, y, origin: "center" }} draws what it did with x and y each plus half the frame; ${fix}`;
   const keys = (names: readonly string[]) => issue.keys.filter((k) => names.includes(k));

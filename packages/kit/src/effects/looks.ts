@@ -3,7 +3,7 @@
 import { z } from "zod";
 
 import { shaderDefinition } from "../jsx/shader-definition";
-import { BLEND, BLEND_MODES, COLOUR, glsl, HEX, NOISE, NOISE3 } from "./glsl";
+import { BLEND, COLOUR, glsl, HEX, NOISE, NOISE3, SHADER_BLEND_MODES } from "./glsl";
 
 const BOX = z.tuple([z.number(), z.number(), z.number().positive(), z.number().positive()]);
 
@@ -23,7 +23,7 @@ const halftone = shaderDefinition("effect", {
     /** How far the dot grid is turned, in degrees. In `cmyk` it is the black screen's angle, and the others are set from it. */
     angle: z.number().default(45),
     /** `mono` prints `ink` on `paper` by brightness; `cmyk` prints cyan, magenta, yellow and black dots, each on its own screen. */
-    mode: z.enum(["mono", "cmyk"]).default("mono"),
+    type: z.enum(["mono", "cmyk"]).default("mono"),
     /** The colour of the dots in `mono`. */
     ink: HEX.default("#111111"),
     /** The colour under the dots. */
@@ -34,7 +34,7 @@ const halftone = shaderDefinition("effect", {
   shader: glsl`${COLOUR}vec2 ht_turn(vec2 p, float a) { float s = sin(a), c = cos(a); return vec2(c * p.x - s * p.y, s * p.x + c * p.y); }
 // The ink share each channel of a colour needs: x for mono (by luminance), or c, m, y, k.
 vec4 ht_inks(vec3 rgb) {
-  if (params.mode == params.mode.mono) return vec4(1.0 - us_luma(rgb));
+  if (params.type == params.type.mono) return vec4(1.0 - us_luma(rgb));
   float k = 1.0 - max(rgb.r, max(rgb.g, rgb.b));
   vec3 cmy = k < 1.0 ? (1.0 - rgb - k) / (1.0 - k) : vec3(0.0);
   return vec4(cmy, k);
@@ -63,7 +63,7 @@ vec4 effect(vec2 uv) {
   vec2 p = uv * resolution;
   float a = radians(params.angle);
   vec3 printed;
-  if (params.mode == params.mode.mono) {
+  if (params.type == params.type.mono) {
     printed = mix(params.paper, params.ink, ht_cover(p, a, 0));
   } else {
     printed = params.paper;
@@ -196,7 +196,7 @@ const fractalNoise = shaderDefinition("effect", {
     /** The colour the noise is tinted with. */
     color: HEX.default("#ffffff"),
     /** How the noise is blended onto the picture, as a W3C blend mode. */
-    blend: z.enum(BLEND_MODES).default("overlay"),
+    blend: z.enum(SHADER_BLEND_MODES).default("overlay"),
     /** How much of the blended noise to mix in: 0 leaves the picture as it was, 1 is the full blend. */
     opacity: z.number().min(0).max(1).default(0.5),
     /** Picks the pattern; the same seed draws the same noise. */

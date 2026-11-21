@@ -152,7 +152,7 @@ export function applyTheme(kind: string, raw: Readonly<Record<string, unknown>>,
     }
   }
   if (kind === "composition" && theme.declared && out.background === undefined) {
-    out.background = { mode: "color", color: theme.palette.background };
+    out.background = { type: "color", color: theme.palette.background };
     from.background = "theme";
   }
 

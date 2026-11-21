@@ -16,7 +16,7 @@ export const defaults = { accent: "#5ad1ff" };
  */
 export default function Video({ accent }: z.infer<typeof schema>) {
   return (
-    <Composition fps={30} width={1080} height={1920} background={{ mode: "color", color: "#000000" }}>
+    <Composition fps={30} width={1080} height={1920} background={{ type: "color", color: "#000000" }}>
       <Track id="main" name="Dialogue" role="dialogue">
         {/* A 9:16 window on the 16:9 source: 0.3164 of the width is 1080 of 1920 scaled to the frame. */}
         <Clip
@@ -101,7 +101,7 @@ export default function Video({ accent }: z.infer<typeof schema>) {
           duration={1.8}
           style={{ size: 48, weight: 700, color: accent, align: "left", valign: "bottom" }}
           box={{ x: 600, y: 600, origin: "center" }}
-          animation={{ preset: "slide-left", in: 0.3, out: 0.2 }}
+          animation={{ type: "slideLeft", in: 0.3, out: 0.2 }}
         >
           Ana
         </Title>
@@ -112,7 +112,7 @@ export default function Video({ accent }: z.infer<typeof schema>) {
           duration={1.8}
           style={{ size: 48, weight: 700, color: accent, align: "left", valign: "bottom" }}
           box={{ x: 600, y: 600, origin: "center" }}
-          animation={{ preset: "slide-left", in: 0.3, out: 0.2 }}
+          animation={{ type: "slideLeft", in: 0.3, out: 0.2 }}
         >
           Ben
         </Title>
@@ -123,7 +123,7 @@ export default function Video({ accent }: z.infer<typeof schema>) {
           duration={1.8}
           style={{ size: 48, weight: 700, color: accent, align: "left", valign: "bottom" }}
           box={{ x: 600, y: 600, origin: "center" }}
-          animation={{ preset: "slide-left", in: 0.3, out: 0.2 }}
+          animation={{ type: "slideLeft", in: 0.3, out: 0.2 }}
         >
           Ana
         </Title>
@@ -134,7 +134,7 @@ export default function Video({ accent }: z.infer<typeof schema>) {
           duration={1.8}
           style={{ size: 48, weight: 700, color: accent, align: "left", valign: "bottom" }}
           box={{ x: 600, y: 600, origin: "center" }}
-          animation={{ preset: "slide-left", in: 0.3, out: 0.2 }}
+          animation={{ type: "slideLeft", in: 0.3, out: 0.2 }}
         >
           Ben
         </Title>
@@ -145,7 +145,7 @@ export default function Video({ accent }: z.infer<typeof schema>) {
           duration={1.8}
           style={{ size: 48, weight: 700, color: accent, align: "left", valign: "bottom" }}
           box={{ x: 600, y: 600, origin: "center" }}
-          animation={{ preset: "slide-left", in: 0.3, out: 0.2 }}
+          animation={{ type: "slideLeft", in: 0.3, out: 0.2 }}
         >
           Ana
         </Title>
@@ -156,7 +156,7 @@ export default function Video({ accent }: z.infer<typeof schema>) {
           duration={1.8}
           style={{ size: 48, weight: 700, color: accent, align: "left", valign: "bottom" }}
           box={{ x: 600, y: 600, origin: "center" }}
-          animation={{ preset: "slide-left", in: 0.3, out: 0.2 }}
+          animation={{ type: "slideLeft", in: 0.3, out: 0.2 }}
         >
           Ben
         </Title>
@@ -167,7 +167,7 @@ export default function Video({ accent }: z.infer<typeof schema>) {
           duration={1.8}
           style={{ size: 48, weight: 700, color: accent, align: "left", valign: "bottom" }}
           box={{ x: 600, y: 600, origin: "center" }}
-          animation={{ preset: "slide-left", in: 0.3, out: 0.2 }}
+          animation={{ type: "slideLeft", in: 0.3, out: 0.2 }}
         >
           Ana
         </Title>
@@ -178,7 +178,7 @@ export default function Video({ accent }: z.infer<typeof schema>) {
           duration={1.8}
           style={{ size: 48, weight: 700, color: accent, align: "left", valign: "bottom" }}
           box={{ x: 600, y: 600, origin: "center" }}
-          animation={{ preset: "slide-left", in: 0.3, out: 0.2 }}
+          animation={{ type: "slideLeft", in: 0.3, out: 0.2 }}
         >
           Ben
         </Title>
@@ -189,7 +189,7 @@ export default function Video({ accent }: z.infer<typeof schema>) {
           duration={1.8}
           style={{ size: 48, weight: 700, color: accent, align: "left", valign: "bottom" }}
           box={{ x: 600, y: 600, origin: "center" }}
-          animation={{ preset: "slide-left", in: 0.3, out: 0.2 }}
+          animation={{ type: "slideLeft", in: 0.3, out: 0.2 }}
         >
           Ana
         </Title>

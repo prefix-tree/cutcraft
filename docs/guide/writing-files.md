@@ -31,8 +31,8 @@ export const defaults = { product: "Halvard", tagline: "Coffee roasted on Monday
 
 export default function Video({ product, tagline, accent, cta }: z.infer<typeof schema>) {
   return (
-    <Composition fps={30} width={1920} height={1080} background={{ mode: "color", color: "#0b0d12" }}>
-      <Marker id="m-hook" at={0} label="hook" />
+    <Composition fps={30} width={1920} height={1080} background={{ type: "color", color: "#0b0d12" }}>
+      <Marker id="m-hook" start={0} label="hook" />
       <Track id="main" name="Story">
         {/* The sentence the whole recap hangs on; trimmed by words so a re-transcription keeps it. */}
         <Clip id="hook" src="asset:founder" in="word:12" out="word:23.end" />

@@ -86,7 +86,7 @@ export interface FramePlan {
   readonly backgroundGradient?: BackgroundGradient;
   /** The footage goes over a transparent ground: overlays beneath it (see `backdropTracks`) and the background are drawn under the canvas. */
   readonly clear?: true;
-  /** `background.mode: "blur"`: this op's picture, blurred to cover the frame, goes under everything. */
+  /** `background.type: "blur"`: this op's picture, blurred to cover the frame, goes under everything. */
   readonly backgroundBlur?: { readonly id: string };
   readonly ops: readonly DrawOp[];
   readonly warnings: readonly string[];
@@ -101,10 +101,10 @@ const BLEND_TO_CANVAS: Readonly<Record<BlendMode, GlobalCompositeOperation>> = {
   overlay: "overlay",
   darken: "darken",
   lighten: "lighten",
-  "color-dodge": "color-dodge",
-  "color-burn": "color-burn",
-  "hard-light": "hard-light",
-  "soft-light": "soft-light",
+  colorDodge: "color-dodge",
+  colorBurn: "color-burn",
+  hardLight: "hard-light",
+  softLight: "soft-light",
   difference: "difference",
   exclusion: "exclusion",
   hue: "hue",
@@ -112,7 +112,7 @@ const BLEND_TO_CANVAS: Readonly<Record<BlendMode, GlobalCompositeOperation>> = {
   color: "color",
   luminosity: "luminosity",
   add: "lighter",
-  "linear-dodge": "lighter",
+  linearDodge: "lighter",
 };
 
 export function blendOf(value: unknown): GlobalCompositeOperation {
@@ -183,13 +183,13 @@ export function compositionBackground(state: ResolvedState): {
   blur: boolean;
 } {
   const bg = state.items.get(state.composition.id)?.props.background as
-    | { mode?: string; color?: string; gradient?: BackgroundGradient }
+    | { type?: string; color?: string; gradient?: BackgroundGradient }
     | undefined;
-  const gradient = bg?.mode === "gradient" && bg.gradient && bg.gradient.stops.length >= 2 ? bg.gradient : undefined;
+  const gradient = bg?.type === "gradient" && bg.gradient && bg.gradient.stops.length >= 2 ? bg.gradient : undefined;
   return {
     background: bg?.color ?? gradient?.stops[0]?.color ?? "#000000",
     ...(gradient ? { backgroundGradient: gradient } : {}),
-    blur: bg?.mode === "blur",
+    blur: bg?.type === "blur",
   };
 }
 

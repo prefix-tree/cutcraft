@@ -73,7 +73,7 @@ describe("DomLayer", () => {
     const cue = items.get("cp2") as Placement;
     items.set("cap", {
       ...cap,
-      props: { ...cap.props, animation: "word-highlight", style: { highlight: "#111111", highlightBox: "#4aa3ff" } },
+      props: { ...cap.props, animation: "wordHighlight", style: { highlight: "#111111", highlightBox: "#4aa3ff" } },
     });
     items.set("cp2", {
       ...cue,

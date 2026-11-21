@@ -26,7 +26,7 @@ it("draws a sticker's image in a still of its first moment", async () => {
 export const manifest = ${JSON.stringify({ assets: mediaManifest.assets })};
 export default function Video() {
   return (
-    <Composition fps={30} width={320} height={180} background={{ mode: "color", color: "#000000" }}>
+    <Composition fps={30} width={320} height={180} background={{ type: "color", color: "#000000" }}>
       <Track id="o" layout="free">
         <Sticker id="s" start={0.3} duration={1} src="asset:logo" />
       </Track>

@@ -20,6 +20,6 @@ Drawn without a shader.
 
 | param | type | default | description |
 |---|---|---|---|
-| `curve` | "linear" \| "ease" \| "ease-in" \| "ease-out" \| "ease-in-out" | `"ease"` | How the fade eases over its duration. |
+| `curve` | "linear" \| "ease" \| "easeIn" \| "easeOut" \| "easeInOut" | `"ease"` | How the fade eases over its duration. |
 
 [All effects and transitions](/reference/effects/) · [Units](/reference/effects/#units)

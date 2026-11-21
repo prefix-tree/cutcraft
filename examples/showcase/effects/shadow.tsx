@@ -12,8 +12,8 @@ export default function Video() {
       </Track>
       <Track id="text" layout="free">
         <Title id="word" start={0} duration={3} style={{ size: 128, color: "#e8a33d" }}>
-          <Effect id="look" type="shadow" params={{ x: 8, y: 8, radius: 3 }}>
-            <Keyframe id="k1" param="opacity" at={0.5} value={0} easing="ease-in-out" />
+          <Effect id="look" type="shadow" params={{ x: 8, y: 8, blur: 3 }}>
+            <Keyframe id="k1" param="opacity" at={0.5} value={0} easing="easeInOut" />
             <Keyframe id="k2" param="opacity" at={1.5} value={0.9} />
           </Effect>
           Crema

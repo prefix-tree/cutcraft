@@ -18,9 +18,9 @@ export interface LabelProps extends When, Omit<SVGProps<SVGTextElement>, "x" | "
   readonly gap?: number;
   /** The word's width in pixels, when the estimate from its length is not close enough. */
   readonly textWidth?: number;
-  /** The line's colour and width. Default: the word's fill, 3. */
+  /** The line's colour and thickness in pixels. Default: the word's fill, 3. */
   readonly lineStroke?: string;
-  readonly lineWidth?: number;
+  readonly lineThickness?: number;
   /** What the layout check calls it. Default: the text in lower case, spaces as hyphens. */
   readonly name?: string;
 }
@@ -37,7 +37,7 @@ function facing(dx: number, dy: number, halfWidth: number, halfHeight: number): 
  */
 export function Label(props: LabelProps) {
   const [when, rest] = splitWhen(props);
-  const { text, x, y, to, side, gap = 10, textWidth, lineStroke, lineWidth = 3, name, ...type } = rest;
+  const { text, x, y, to, side, gap = 10, textWidth, lineStroke, lineThickness = 3, name, ...type } = rest;
   const k = useProgress(when);
   const size = Number(type.fontSize ?? 32);
   const spacing = Number(type.letterSpacing ?? 0);
@@ -59,7 +59,7 @@ export function Label(props: LabelProps) {
   return (
     <g data-name={name ?? text.toLowerCase().trim().replace(/\s+/g, "-")} opacity={k}>
       {to && start ? (
-        <DrawnLine from={start} to={to} progress={k} stroke={lineStroke ?? fill} strokeWidth={lineWidth} />
+        <DrawnLine from={start} to={to} progress={k} stroke={lineStroke ?? fill} strokeWidth={lineThickness} />
       ) : null}
       <text
         fontSize={size}

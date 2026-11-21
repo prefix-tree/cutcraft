@@ -92,14 +92,14 @@ describe("lintFiles", () => {
   });
 
   it("with fix, moves old spellings a caller's table names", () => {
-    const dir = project({ "video.tsx": video('<Shape id="t" shape="circle" size={64} start={0} duration={2} />') });
+    const dir = project({ "video.tsx": video('<Shape id="t" type="circle" size={64} start={0} duration={2} />') });
     const file = join(dir, "video.tsx");
     const results = lintFiles([file], {
       fix: true,
       lint: { deprecations: [{ element: "Shape", prop: "size", to: { into: "style" }, since: "0.6.0" }] },
     });
     expect(readFileSync(file, "utf8")).toContain(
-      '<Shape id="t" shape="circle" style={{ size: 64 }} start={0} duration={2} />',
+      '<Shape id="t" type="circle" style={{ size: 64 }} start={0} duration={2} />',
     );
     expect(results[0]?.diagnostics.filter((d) => d.rule === "deprecated-props")).toEqual([]);
   });

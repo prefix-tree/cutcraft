@@ -1,6 +1,6 @@
 import { isValidElement, type ReactElement, type ReactNode } from "react";
 
-import { Cells, CountUp, DrawnLine, grid, Label, type LayerClock, progress } from "@uberscene/kit";
+import { Cells, CountUp, DrawnLine, grid, Label, type LayerClock, progress, type When } from "@uberscene/kit";
 import { installLayerClock } from "@uberscene/kit/schema";
 
 /** The layer's clock, set by hand: seconds of the video, and seconds since the layer started. */
@@ -33,31 +33,49 @@ describe("progress", () => {
   const clock = (time: number, elapsed = time) => ({ time, elapsed });
 
   it("is 0 before it starts, 1 once it is over, and eased between", () => {
-    expect(progress(clock(1.9), { at: 2, over: 1 })).toBe(0);
-    expect(progress(clock(3), { at: 2, over: 1 })).toBe(1);
-    expect(progress(clock(2.5), { at: 2, over: 1, easing: "linear" })).toBe(0.5);
+    expect(progress(clock(1.9), { start: 2, over: 1 })).toBe(0);
+    expect(progress(clock(3), { start: 2, over: 1 })).toBe(1);
+    expect(progress(clock(2.5), { start: 2, over: 1, easing: "linear" })).toBe(0.5);
     // Eased in and out by default: slower than a straight line at the start.
-    expect(progress(clock(2.25), { at: 2, over: 1 })).toBeLessThan(0.25);
-    expect(progress(clock(2.5), { at: 2, over: 1 })).toBeCloseTo(0.5, 2);
+    expect(progress(clock(2.25), { start: 2, over: 1 })).toBeLessThan(0.25);
+    expect(progress(clock(2.5), { start: 2, over: 1 })).toBeCloseTo(0.5, 2);
   });
 
-  it("counts `at` in the video's seconds and `after` from the layer's start", () => {
+  it("counts `start` in the video's seconds and `after` from the layer's start", () => {
     // 12 s into the video, 2 s into the layer.
-    expect(progress(clock(12, 2), { at: 11, over: 2, easing: "linear" })).toBe(0.5);
+    expect(progress(clock(12, 2), { start: 11, over: 2, easing: "linear" })).toBe(0.5);
     expect(progress(clock(12, 2), { after: 1, over: 2, easing: "linear" })).toBe(0.5);
     // With neither, it starts with the layer; 0.4 s unless `over` says.
     expect(progress(clock(12, 0.2), { easing: "linear" })).toBe(0.5);
   });
 
+  it("still takes an old easing name and an old `at`, warning once for each", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    try {
+      const old = { at: 2, over: 1, easing: "ease-in-out" } as unknown as When;
+      const now: When = { start: 2, over: 1, easing: "easeInOut" };
+      for (const t of [2.25, 2.5, 2.75]) expect(progress(clock(t), old)).toBe(progress(clock(t), now));
+      expect(progress(clock(2.5), { start: 2, over: 1, easing: "ease-in" })).toBe(
+        progress(clock(2.5), { start: 2, over: 1, easing: "easeIn" }),
+      );
+      const said = warn.mock.calls.map((c) => String(c[0]));
+      expect(said.filter((m) => m.includes('"ease-in-out" is now "easeInOut"'))).toHaveLength(1);
+      expect(said.filter((m) => m.includes('"ease-in" is now "easeIn"'))).toHaveLength(1);
+      expect(said.filter((m) => m.includes("`at` is now `start`"))).toHaveLength(1);
+    } finally {
+      warn.mockRestore();
+    }
+  });
+
   it("happens at once with no time to take, and takes a progress as given", () => {
-    expect([progress(clock(1.99), { at: 2, over: 0 }), progress(clock(2), { at: 2, over: 0 })]).toEqual([0, 1]);
+    expect([progress(clock(1.99), { start: 2, over: 0 }), progress(clock(2), { start: 2, over: 0 })]).toEqual([0, 1]);
     expect([progress(clock(0), { progress: 0.3 }), progress(clock(0), { progress: 4 })]).toEqual([0.3, 1]);
   });
 });
 
 describe("DrawnLine", () => {
   const line = (
-    <DrawnLine from={[10, 20]} to={[110, 220]} at={1} over={2} easing="linear" strokeWidth={4} stroke="#fff" />
+    <DrawnLine from={[10, 20]} to={[110, 220]} start={1} over={2} easing="linear" strokeWidth={4} stroke="#fff" />
   );
 
   it("draws nothing before it starts, then from its first point towards its second", () => {
@@ -77,7 +95,7 @@ describe("DrawnLine", () => {
 
 describe("Label", () => {
   it("fades the word in at its place, named for the layout check", () => {
-    const part = <Label text="LAMP" x={400} y={300} fontSize={40} fill="#fff" at={2} over={1} easing="linear" />;
+    const part = <Label text="LAMP" x={400} y={300} fontSize={40} fill="#fff" start={2} over={1} easing="linear" />;
     expect(attr(draw(part, 2.5), "opacity")).toBe("0.5");
     const shown = draw(part, 4);
     expect(attr(shown, "data-name")).toBe("lamp");
@@ -121,7 +139,7 @@ describe("Label", () => {
 describe("CountUp", () => {
   it("counts from one number to another, rounded, or as its format says", () => {
     const degrees = (
-      <CountUp to={5} x={10} y={20} at={1} over={2} easing="linear" format={(v) => `${Math.round(v)}°`} />
+      <CountUp to={5} x={10} y={20} start={1} over={2} easing="linear" format={(v) => `${Math.round(v)}°`} />
     );
     expect(draw(degrees, 0)).toContain(">0°</text>");
     expect(draw(degrees, 2.2)).toContain(">3°</text>");

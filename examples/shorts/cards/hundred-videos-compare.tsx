@@ -90,7 +90,7 @@ function Card({ before, after, accent }: z.infer<typeof schema>) {
 
 export default function Video(props: z.infer<typeof schema>) {
   return (
-    <Composition fps={30} width={FRAME.width} height={FRAME.height} background={{ mode: "color", color: PAPER }}>
+    <Composition fps={30} width={FRAME.width} height={FRAME.height} background={{ type: "color", color: PAPER }}>
       <Track id="card" layout="free">
         <Layer id="paper" anchor="edit" duration={{ until: "edit" }}>
           <Card {...props} />

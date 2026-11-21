@@ -25,7 +25,7 @@ export default function Video() {
           duration={2.2}
           style={{ preset: "h1", size: 64, align: "left" }}
           box={{ x: 240, y: 100, width: 420, origin: "center" }}
-          animation={{ preset: "word-by-word" }}
+          animation={{ type: "wordByWord" }}
         >
           Slow pour
         </Title>
@@ -78,7 +78,7 @@ export default function Video() {
           duration={2.2}
           style={{ preset: "h2", align: "left" }}
           box={{ x: 720, y: 100, width: 420, origin: "center" }}
-          animation={{ preset: "slide-up" }}
+          animation={{ type: "slideUp" }}
         >
           Ready in four minutes.
         </Title>

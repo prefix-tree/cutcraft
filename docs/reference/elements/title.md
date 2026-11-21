@@ -32,7 +32,7 @@ The coffee footage is Pixabay videos [209419](https://pixabay.com/videos/id-2094
 | `enter` | { type, duration, easing } |  |  | How it comes in: a fade, slide, scale or wipe over its first seconds, with an easing. |
 | `exit` | { type, duration, easing } |  |  | How it goes out, over its last seconds, as `enter`. |
 | `style` | string \| { preset, font, size, weight, italic, color, background, stroke, shadow, align, valign, lineHeight, letterSpacing, decoration } | `{}` |  | How the letters look: a theme title preset by name (`"h1"`), or an object of `font`, `size`, `weight`, `italic`, `color`, `background`, `stroke`, `shadow`, `align`, `valign`, `lineHeight`, `letterSpacing` and `decoration`, with `preset` naming the preset it starts from. Without a preset, the theme's `default` title preset applies. The text box is the title's `box`: its `width` and `height`, the whole frame when left out, so background, align and valign work inside it. |
-| `animation` | { preset, in, out, stagger } |  |  | An entrance and exit: a preset, its seconds in and out, and for word-by-word the delay between words. |
+| `animation` | { type, in, out, stagger } |  |  | An entrance and exit: its type, its seconds in and out, and for wordByWord the delay between words. |
 
 ### `style`
 
@@ -47,12 +47,12 @@ A theme preset's name, or an object of these fields. `preset` names the preset t
 | `italic` | boolean | `false` | Slanted letters. |
 | `color` | string | `"#ffffff"` | The letters' colour, or a theme token such as `$text`. |
 | `background` | string |  | A colour filling the text box behind the letters. |
-| `stroke` | { color, width } |  | An outline around the letters: its colour and width in pixels. |
+| `stroke` | { color, thickness } |  | An outline around the letters: its colour and thickness in pixels. |
 | `shadow` | { color, blur, x, y } |  | A drop shadow under the letters: colour, blur and offset in pixels. |
 | `align` | "left" \| "center" \| "right" \| "justify" | `"center"` | Which side of the text box the lines sit against. |
 | `valign` | "top" \| "middle" \| "bottom" | `"middle"` | Where in the text box's height the text sits. |
 | `lineHeight` | number (0.1..10) | `1.2` | The distance between lines, as a multiple of the letters' size. |
 | `letterSpacing` | number (-100..100) | `0` | Extra space between letters, in pixels. |
-| `decoration` | "none" \| "underline" \| "line-through" \| "overline" |  | A line under, over or through the letters. |
+| `decoration` | "none" \| "underline" \| "lineThrough" \| "overline" |  | A line under, over or through the letters. |
 
 Timed, visual, transformable. Children: `effect`, `keyframe`, `mask`. [All elements](/reference/elements/)

@@ -332,13 +332,13 @@ describe("buildFramePlan", () => {
         { id: "d", kind: "clip", source: { in: 0, out: 4, asset: "b" } },
       ],
     };
-    const blurred = buildFramePlan(makeState({ background: { mode: "blur" }, tracks: [main] }), 1);
+    const blurred = buildFramePlan(makeState({ background: { type: "blur" }, tracks: [main] }), 1);
     expect(blurred.backgroundBlur).toEqual({ id: "c" });
     expect(blurred.warnings).toEqual([]);
     expect(buildFramePlan(makeState({ tracks: [main] }), 1).backgroundBlur).toBeUndefined();
     const under = buildFramePlan(
       makeState({
-        background: { mode: "blur" },
+        background: { type: "blur" },
         tracks: [{ id: "bg", items: [{ id: "h", kind: "title", duration: 4, text: "Hi" }] }, main],
       }),
       1,

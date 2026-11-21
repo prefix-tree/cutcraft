@@ -6,7 +6,18 @@ import { COMPONENT_NAMES, ELEMENTS, ENGINE_LAYERS } from "@uberscene/kit/schema"
 import type { SourceEdit } from "../../edits";
 import type { Range } from "../../parse";
 import { DEPRECATIONS, type Deprecation } from "../deprecations";
-import { attributeRange, idOf, jsxTags, movePropsInto, propAt, renameProp, renameValue, tagName } from "../fixes";
+import {
+  attributeRange,
+  idOf,
+  jsxTags,
+  literalString,
+  movePropsInto,
+  parentTags,
+  propAt,
+  renameProp,
+  renameValue,
+  tagName,
+} from "../fixes";
 import type { Diagnostic } from "../index";
 import type { Rule } from "./index";
 
@@ -27,14 +38,33 @@ export const deprecatedProps: Rule = {
     const table = [...DEPRECATIONS, ...(options.deprecations ?? [])];
     if (table.length === 0) return [];
     const out: Diagnostic[] = [];
+    const parents = table.some((d) => d.when?.in !== undefined) ? parentTags(index) : undefined;
     for (const tag of jsxTags(index)) {
       const name = tagName(tag);
-      const rows = table.filter((d) => d.element === name || (d.element === "*" && KIT_TAGS.has(name)));
+      const rows = table.filter(
+        (d) => (d.element === name || (d.element === "*" && KIT_TAGS.has(name))) && holds(d, tag, parents),
+      );
       if (rows.length > 0) out.push(...onTag(index.text, tag, name, rows));
     }
     return out;
   },
 };
+
+/** Whether a row's `when` holds on this tag: its literal `type`, or that of the nearest tag named `in` around it. */
+function holds(
+  row: Deprecation,
+  tag: t.JSXOpeningElement,
+  parents: ReadonlyMap<t.JSXOpeningElement, t.JSXOpeningElement> | undefined,
+): boolean {
+  const when = row.when;
+  if (!when) return true;
+  let on: t.JSXOpeningElement | undefined = tag;
+  if (when.in !== undefined) {
+    on = parents?.get(tag);
+    while (on && tagName(on) !== when.in) on = parents?.get(on);
+  }
+  return on !== undefined && literalString(on, "type") === when.type;
+}
 
 interface Finding {
   readonly row: Deprecation;

@@ -38,7 +38,7 @@ const video = (
 export const manifest = ${JSON.stringify({ assets: mediaManifest.assets })};
 export default function Video() {
   return (
-    <Composition fps={30} width={${W}} height={${H}} background={{ mode: "color", color: "#000000" }}>
+    <Composition fps={30} width={${W}} height={${H}} background={{ type: "color", color: "#000000" }}>
       <Track id="main">
         <Clip id="bars" src="asset:bars" in={0} out={2} fit="cover">
           ${options.effect === false ? "" : `<Effect id="invert" type="invert" params={{ amount: 1 }} />`}
@@ -459,9 +459,9 @@ describe("--motion", () => {
 export const manifest = { assets: {} };
 export default function Video() {
   return (
-    <Composition fps={30} width={${W}} height={${H}} background={{ mode: "color", color: "#000000" }}>
+    <Composition fps={30} width={${W}} height={${H}} background={{ type: "color", color: "#000000" }}>
       <Track id="t" layout="free">
-        <Shape id="box" shape="rectangle" start={0} duration={3} width={40} height={40} fill="#ffffff" box={{ origin: "center" }}>
+        <Shape id="box" type="rectangle" start={0} duration={3} width={40} height={40} fill="#ffffff" box={{ origin: "center" }}>
           <Keyframe id="k1" property="box.x" at={0} value={${W / 2 - 120}} />
           <Keyframe id="k2" property="box.x" at={2} value={${W / 2 + 120}} />
         </Shape>
@@ -561,11 +561,11 @@ describe("--zones", () => {
 export const manifest = { assets: {} };
 export default function Video() {
   return (
-    <Composition fps={30} width={${W}} height={${H}} background={{ mode: "color", color: "#404040" }}>
+    <Composition fps={30} width={${W}} height={${H}} background={{ type: "color", color: "#404040" }}>
       <Track id="t" layout="free">
-        <Shape id="inside" shape="rectangle" start={0} duration={2} width={40} height={40} fill="#202020"
+        <Shape id="inside" type="rectangle" start={0} duration={2} width={40} height={40} fill="#202020"
           box={{ x: ${W / 2 - 60}, y: ${H / 2}, origin: "center" }} />
-        <Shape id="over" shape="rectangle" start={0} duration={2} width={40} height={40} fill="#202020"
+        <Shape id="over" type="rectangle" start={0} duration={2} width={40} height={40} fill="#202020"
           box={{ x: ${W / 2 + 135}, y: ${H / 2}, origin: "center" }} />
         <Layer id="drawn" start={0} duration={2}>
           <div data-name="tag" style={{ position: "absolute", left: 150, top: 120, width: 30, height: 20, background: "#202020" }} />

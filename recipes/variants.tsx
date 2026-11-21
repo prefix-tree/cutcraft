@@ -50,7 +50,7 @@ export default function Video({ headline, cta, theme, accent, logo }: z.infer<ty
           offset={0.4}
           duration={4}
           style={{ preset: "h1", size: 104, color: "$primary" }}
-          animation={{ preset: "slide-up", in: 0.4, out: 0.3 }}
+          animation={{ type: "slideUp", in: 0.4, out: 0.3 }}
         >
           {headline}
         </Title>
@@ -61,7 +61,7 @@ export default function Video({ headline, cta, theme, accent, logo }: z.infer<ty
           duration={2.5}
           style={{ preset: "h2", weight: 500, valign: "bottom" }}
           box={{ x: 960, y: 380, origin: "center" }}
-          animation={{ preset: "fade", in: 0.3, out: 0.3 }}
+          animation={{ type: "fade", in: 0.3, out: 0.3 }}
         >
           {cta}
         </Title>

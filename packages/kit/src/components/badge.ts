@@ -30,7 +30,7 @@ export function Badge(props: z.input<typeof badgeSchema>) {
     h(Shape, {
       id: `${p.id}-pill`,
       ...timing(t),
-      shape: "rectangle",
+      type: "rectangle",
       width,
       height,
       cornerRadius: height / 2,
