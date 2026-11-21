@@ -6,7 +6,6 @@ import {
   Captions,
   Clip,
   Composition,
-  Keyframe,
   knob,
   Layer,
   Marker,
@@ -42,12 +41,19 @@ export default function Video({ product, tagline, accent, cta }: z.infer<typeof 
         <Clip id="hook" src="asset:founder" in="word:12" out="word:23.end" />
         <Transition id="x1" type="crossfade" duration={0.4} />
         {/* Product b-roll, second shot, with a slow push-in. */}
-        <Clip id="broll" src="asset:product" in="shot:1" out="shot:1.end" fit="cover">
-          <Keyframe id="broll-sx0" property="transform.scale.x" at={0} value={1} easing="easeInOutSine" />
-          <Keyframe id="broll-sx1" property="transform.scale.x" at={6} value={1.08} />
-          <Keyframe id="broll-sy0" property="transform.scale.y" at={0} value={1} easing="easeInOutSine" />
-          <Keyframe id="broll-sy1" property="transform.scale.y" at={6} value={1.08} />
-        </Clip>
+        <Clip
+          id="broll"
+          src="asset:product"
+          in="shot:1"
+          out="shot:1.end"
+          fit="cover"
+          transform={{
+            scale: [
+              { at: 0, value: 1, easing: "easeInOutSine" },
+              { at: 6, value: 1.08 },
+            ],
+          }}
+        />
         {/* The screen recording has no transcript, so a numeric trim. */}
         <Clip id="demo" src="asset:screen" in={2} duration={7} />
         <Transition id="x2" type="crossfade" duration={0.4} />

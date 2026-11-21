@@ -181,11 +181,16 @@ export interface ClipActions {
   "clip/setAnchor": { id: Id; anchor?: Id | "start"; offset?: number };
 }
 
-export interface SpeedActions {
-  /** Replaces the element's speed-ramp keys with `keys`. */
-  "speed/setKeys": { id: Id; keys: readonly NodeSpec[]; after?: Id | null };
-  /** Replaces the element's freeze frames with `freezes`. */
-  "speed/setFreezes": { id: Id; freezes: readonly NodeSpec[]; after?: Id | null };
+/** One key as a file writes it: `value` at `at` seconds into the element; `easing` leaves it. */
+export interface KeyJson {
+  readonly at: number;
+  readonly value: Json;
+  readonly easing?: string;
+}
+
+export interface FreezeActions {
+  /** Replaces the element's holds: each keeps the source frame at `source` on screen from `at` for `duration`. */
+  "freeze/setAll": { id: Id; freezes: readonly { start: number; duration: number; source: number }[] };
 }
 
 export interface TransformActions {
@@ -198,57 +203,39 @@ export interface TransformActions {
   "box/update": { id: Id; box: Readonly<Record<string, Json>> };
 }
 
-interface ChildStack<K extends string> {
-  add: { id: Id; childId: Id; type: K; params?: Readonly<Record<string, Json>>; index?: number };
-  remove: { id: Id; childId: Id };
-  restore: { id: Id; node: NodeSpec; after: Id | null };
-  update: { id: Id; childId: Id; params: Readonly<Record<string, Json>> };
-  toggle: { id: Id; childId: Id; enabled: boolean };
-  setOrder: { id: Id; childIds: readonly Id[] };
-  setStack: { id: Id; nodes: readonly NodeSpec[]; after?: Id | null };
-}
-
 export interface EffectActions {
   /**
-   * Adds an effect of `type` (built in, or a shader the file declares) to element `id` at `index` (last by default),
-   * turned on.
+   * Adds `effect` (`{ type, ...params }`, a built-in type or a shader the file declares) to element `id`'s effects at
+   * `index` (last by default).
    */
-  "effect/add": ChildStack<string>["add"];
-  /** Removes one effect from an element's stack. */
-  "effect/remove": ChildStack<string>["remove"];
-  /** The undo of effect/remove: puts the effect back at its old place in the stack. */
-  "effect/restore": ChildStack<string>["restore"];
-  /** Merges `params` into one effect's params. */
-  "effect/update": ChildStack<string>["update"];
-  /** Turns one effect on or off without removing it. */
-  "effect/toggle": ChildStack<string>["toggle"];
-  /** Reorders an element's effect stack; `childIds` must name every effect once. */
-  "effect/setOrder": ChildStack<string>["setOrder"];
-  /** Replaces an element's whole effect stack with `nodes`. */
-  "effect/setStack": ChildStack<string>["setStack"];
+  "effect/add": { id: Id; effect: Readonly<Record<string, Json>> & { readonly type: Json }; index?: number };
+  /** Removes the effect at `index`. */
+  "effect/remove": { id: Id; index: number };
+  /** Merges `params` into the effect at `index`; a param set to null is removed. A param may be keys. */
+  "effect/update": { id: Id; index: number; params: Readonly<Record<string, Json>> };
+  /** Turns the effect at `index` on or off without removing it. */
+  "effect/toggle": { id: Id; index: number; enabled: boolean };
+  /** Reorders the effects: `order` lists the current indexes in their new order. */
+  "effect/setOrder": { id: Id; order: readonly number[] };
+  /** Replaces the element's effects with `effects`. */
+  "effect/setStack": { id: Id; effects: readonly Readonly<Record<string, Json>>[] };
 }
 
-export interface KeyframeActions {
-  /** `property` animates the element `id`; `param` animates a param of the effect `id`. One of the two. */
-  "keyframe/add": {
-    id: Id;
-    keyId: Id;
-    property?: string;
-    param?: string;
-    at: number;
-    value: Json;
-    easing?: string;
-  };
-  /** Deletes one keyframe. */
-  "keyframe/remove": { id: Id; keyId: Id };
-  /** The undo of keyframe/remove: puts the keyframe back in place, with its value and easing. */
-  "keyframe/restore": { id: Id; node: NodeSpec; after: Id | null };
-  /** Changes a keyframe's value and/or easing. */
-  "keyframe/update": { id: Id; keyId: Id; value?: Json; easing?: string };
-  /** Moves a keyframe to `at`, seconds from the element's start; it must stay inside the element. */
-  "keyframe/move": { id: Id; keyId: Id; at: number };
-  /** Replaces every keyframe on the element with `nodes`. */
-  "keyframe/setAll": { id: Id; nodes: readonly NodeSpec[]; after?: Id | null };
+export interface KeyActions {
+  /**
+   * Adds a key at `at` seconds into element `id` on `path`: `transform.opacity`, `transform.scale`, `box.x`,
+   * `volume`, `pan`, `speed`, `effects.<n>.<param>`… A constant there becomes the first key, at 0; a key already at
+   * `at` is replaced.
+   */
+  "key/add": { id: Id; path: string; at: number; value: Json; easing?: string };
+  /** Changes the value and/or easing of the key at `at` on `path`. */
+  "key/update": { id: Id; path: string; at: number; value?: Json; easing?: string };
+  /** Moves the key at `at` on `path` to `to`, seconds into the element; it must stay inside the element. */
+  "key/move": { id: Id; path: string; at: number; to: number };
+  /** Removes the key at `at` on `path`; removing the last one removes the value. */
+  "key/remove": { id: Id; path: string; at: number };
+  /** Replaces the keys on `path` with `keys`; none removes the value. */
+  "key/setAll": { id: Id; path: string; keys: readonly KeyJson[] };
 }
 
 export interface TransitionActions {
@@ -282,8 +269,6 @@ export interface AudioActions {
   "audio/setVolume": { id: Id; volume: number };
   /** Sets the fade-in and/or fade-out length in seconds; merges into `fade`. */
   "audio/setFade": { id: Id; in?: number; out?: number };
-  /** Replaces one automation lane, `volume` or `pan`, with `[seconds, value]` points. */
-  "audio/setAutomation": { id: Id; lane: "volume" | "pan"; points: readonly (readonly [number, number])[] };
   /**
    * Turns this sound down to `to` while the track `under` plays, over `attack` and `release` seconds; omit `duck` to
    * stop ducking. `under` is a track id or a track role, as in a file.
@@ -408,10 +393,10 @@ export interface SourceActions {
 export type ActionMap = CompositionActions &
   TrackActions &
   ClipActions &
-  SpeedActions &
+  FreezeActions &
   TransformActions &
   EffectActions &
-  KeyframeActions &
+  KeyActions &
   TransitionActions &
   AudioActions &
   OverlayActions &
@@ -451,8 +436,8 @@ export const AUTO_GROUP_TYPES: ReadonlySet<ActionType> = new Set<ActionType>([
   "clip/slide",
   "clip/roll",
   "clip/setSpeed",
-  "keyframe/move",
-  "keyframe/update",
+  "key/move",
+  "key/update",
   "composition/updateSettings",
   "composition/setBackground",
   "theme/setToken",
@@ -468,8 +453,6 @@ export const TARGET_PARAM_KEYS = [
   "leftId",
   "trackId",
   "transitionId",
-  "childId",
-  "keyId",
   "captionId",
   "captionsId",
   "cutId",

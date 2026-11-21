@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { zBlendMode, zShapeType, zTextAnimationType } from "../enums";
 import {
+  adjustmentEffectsProp,
   assetRefSchema,
   colorSchema,
   entranceProps,
@@ -18,6 +19,7 @@ import {
   timeRefSchema,
   vec2Schema,
   visualProps,
+  volumeSchema,
 } from "./common";
 import { zSvgColorType, zTextAlign, zTextDecoration, zTextValign } from "./enums-local";
 
@@ -179,6 +181,7 @@ export const stickerSchema = z.strictObject({
 
 export const adjustmentSchema = z.strictObject({
   ...timedProps,
+  ...adjustmentEffectsProp,
   /** How much of its effects to mix over the picture beneath. */
   opacity: z.number().min(0).max(1).default(1),
   /** How the filtered picture mixes with the one beneath, as CSS `mix-blend-mode` does. */
@@ -199,8 +202,8 @@ export const nestedSchema = z.strictObject({
   in: timeRefSchema.optional(),
   /** Where in the nested sequence it ends, as `in`. */
   out: timeRefSchema.optional(),
-  /** A gain on all its sound: 1 as it is, 0 muted. */
-  volume: z.number().min(0).max(4).default(1),
+  /** A gain on all its sound: 1 as it is, 0 muted; keys change it over time. */
+  volume: volumeSchema.default(1),
 });
 
 export const layerSchema = z.strictObject({

@@ -65,13 +65,13 @@ describe("an old key is an error naming the new one", () => {
   it.each([
     ["shadow", "radius", "blur", "{ radius: 3 }"],
     ["outline", "width", "thickness", "{ width: 3 }"],
-    ["halftone", "mode", "type", '{ mode: "cmyk" }'],
+    // Not `type`, which names the effect in its entry of `effects`.
+    ["halftone", "mode", "inks", '{ mode: "cmyk" }'],
     ["scanlines", "thickness", "coverage", "{ thickness: 0.5 }"],
-  ])("the %s effect's %s param, and a keyframe of it", (type, from, to, params) => {
-    const effect = (inner: string) =>
-      `<Title id="h" start={0} duration={1}><Effect id="e" type="${type}" params={${params}}>${inner}</Effect>Hi</Title>`;
-    expect(messages(effect("")).join("\n")).toContain(`param \`${from}\` of "${type}" is now \`${to}\``);
-    const keyed = `<Title id="h" start={0} duration={1}><Effect id="e" type="${type}"><Keyframe id="k" param="${from}" at={0} value={1} /></Effect>Hi</Title>`;
+  ])("the %s effect's %s param, and keys on it", (type, from, to, params) => {
+    const effect = `<Title id="h" start={0} duration={1} effects={[{ type: "${type}", ...${params} }]}>Hi</Title>`;
+    expect(messages(effect).join("\n")).toContain(`param \`${from}\` of "${type}" is now \`${to}\``);
+    const keyed = `<Title id="h" start={0} duration={1} effects={[{ type: "${type}", ${from}: [{ at: 0, value: 1 }] }]}>Hi</Title>`;
     expect(messages(keyed).join("\n")).toContain(`param "${from}" of "${type}" is now "${to}"`);
   });
 
@@ -116,9 +116,9 @@ describe("an old value is an error naming the new one", () => {
     expect(messages(`<Title id="h" start={0} duration={1} ${prop}>Hi</Title>`).join("\n")).toContain(said);
   });
 
-  it("on a keyframe, the captions and a crossfade's curve", () => {
+  it("on a key, the captions and a crossfade's curve", () => {
     const key =
-      '<Shape id="s" start={0} duration={1} type="circle"><Keyframe id="k" property="transform.opacity" at={0} value={1} easing="ease-in" /></Shape>';
+      '<Shape id="s" start={0} duration={1} type="circle" transform={{ opacity: [{ at: 0, value: 1, easing: "ease-in" }, { at: 1, value: 0 }] }} />';
     expect(messages(key).join("\n")).toContain('"ease-in" is now "easeIn"');
     expect(messages('<Captions id="c" animation="word-highlight" />').join("\n")).toContain(
       '"word-highlight" is now "wordHighlight"',

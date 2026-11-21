@@ -68,9 +68,9 @@ function element(d: Dice, id: string, ids: string[], free: boolean): string {
     return `<Audio id="${id}" src="asset:music"${length}${speed}${start} />`;
   }
   const holds = d.chance(0.5)
-    ? `<Freeze id="${id}-f" at={${d.pick(SECONDS)}} start={${d.pick(SECONDS)}} duration={${d.pick(LENGTHS)}} />`
-    : `<SpeedKey id="${id}-k1" at={0} speed={${d.pick(SPEEDS)}} /><SpeedKey id="${id}-k2" at={${d.pick(SECONDS)}} speed={${d.pick(SPEEDS)}} />`;
-  return `<Clip id="${id}" src="asset:broll" in={${d.pick(SECONDS)}} out={${d.pick(SECONDS)}}${start}>${holds}</Clip>`;
+    ? ` freezes={[{ source: ${d.pick(SECONDS)}, start: ${d.pick(SECONDS)}, duration: ${d.pick(LENGTHS)} }]}`
+    : ` speed={[{ at: 0, value: ${d.pick(SPEEDS)} }, { at: ${d.pick(SECONDS)}, value: ${d.pick(SPEEDS)} }]}`;
+  return `<Clip id="${id}" src="asset:broll" in={${d.pick(SECONDS)}} out={${d.pick(SECONDS)}}${start}${holds} />`;
 }
 
 /** An overlay placed against something that may or may not be there. */

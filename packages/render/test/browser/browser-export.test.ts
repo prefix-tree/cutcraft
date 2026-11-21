@@ -203,7 +203,7 @@ it("redraws a shader on a layer from the layer's content of each frame", async (
   const loaded = await loadVideo(
     cut(
       "layer-shader.tsx",
-      `import { Composition, effect, Effect, Motion, Track } from "@uberscene/kit";
+      `import { Composition, effect, Motion, Track } from "@uberscene/kit";
 export const manifest = { assets: {} };
 const swap = effect({
   name: "swap",
@@ -213,8 +213,7 @@ export default function Video() {
   return (
     <Composition fps={30} width={320} height={180} background={{ type: "color", color: "#000000" }}>
       <Track id="fx" layout="free">
-        <Motion id="m" start={0} duration={1} sequence={[[".box", { x: [0, 200] }, { duration: 1, ease: "linear" }]]}>
-          <Effect id="e" type={swap} />
+        <Motion id="m" start={0} duration={1} sequence={[[".box", { x: [0, 200] }, { duration: 1, ease: "linear" }]]} effects={[{ type: swap }]}>
           <div className="box" style={{ position: "absolute", left: 10, top: 60, width: 60, height: 60, background: "#ff0000" }} />
         </Motion>
       </Track>
@@ -377,7 +376,7 @@ export default function Video() {
 it("keeps a three.js scene under an effect on screen, set up once and showing each frame's own picture", async () => {
   // The glow is at 0 until 0.5 s, where it has no pass at all, then rises. The scene counts its own setups in the
   // red of its background, so a second setup shows.
-  const source = `import { Composition, Effect, Keyframe, Three, Track } from "@uberscene/kit";
+  const source = `import { Composition, Three, Track } from "@uberscene/kit";
 export const manifest = { assets: {} };
 let setups = 0;
 export default function Video() {
@@ -395,12 +394,17 @@ export default function Video() {
               box.rotation.set(time, time * 1.3, 0);
               box.material.color.set(time < 0.75 ? "#ff3300" : "#ffffff");
             };
-          }}>
-          <Effect id="glow" type="glow" params={{ radius: 4, intensity: 0, threshold: 0.95, tint: 0 }}>
-            <Keyframe id="k1" param="intensity" at={0.5} value={0} />
-            <Keyframe id="k2" param="intensity" at={0.6} value={1} />
-          </Effect>
-        </Three>
+          }}
+          effects={[
+            {
+              type: "glow",
+              radius: 4,
+              threshold: 0.95,
+              tint: 0,
+              intensity: [{ at: 0.5, value: 0 }, { at: 0.6, value: 1 }],
+            },
+          ]}
+        />
       </Track>
     </Composition>
   );
@@ -613,17 +617,17 @@ export default function Video() {
 
 describe("a draft", () => {
   // A white square that crosses a black frame in two seconds, with a tone under it.
-  const MOVER = `import { Clip, Composition, Keyframe, Shape, Track } from "@uberscene/kit";
+  const MOVER = `import { Clip, Composition, Shape, Track } from "@uberscene/kit";
 export const manifest = ${JSON.stringify({ assets: mediaManifest.assets })};
 export default function Video() {
   return (
     <Composition fps={30} width={640} height={360} background={{ type: "color", color: "#000000" }}>
       <Track id="sound"><Clip id="tone" src="asset:bars" in={0} out={2} transform={{ opacity: 0 }} /></Track>
       <Track id="t" layout="free">
-        <Shape id="box" type="rectangle" start={0} duration={2} width={80} height={80} fill="#ffffff" box={{ origin: "center" }}>
-          <Keyframe id="k1" property="box.x" at={0} value={80} />
-          <Keyframe id="k2" property="box.x" at={2} value={560} />
-        </Shape>
+        <Shape id="box" type="rectangle" start={0} duration={2} width={80} height={80} fill="#ffffff" box={{
+          origin: "center",
+          x: [{ at: 0, value: 80 }, { at: 2, value: 560 }],
+        }} />
       </Track>
     </Composition>
   );

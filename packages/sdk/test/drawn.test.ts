@@ -52,12 +52,14 @@ describe("what a file can say is what renders", () => {
   it("refuses a type or prop no renderer draws, naming it", () => {
     expect(
       errorsOf(
-        `<Clip id="a" src="asset:city" chromaKey={{ color: "#0f0" }} /><Transition id="x" type="glitch" /><Clip id="b" src="asset:city"><Effect id="g" type="sparkle-dust" /></Clip>`,
+        `<Clip id="a" src="asset:city" chromaKey={{ color: "#0f0" }} /><Transition id="x" type="glitch" /><Clip id="b" src="asset:city" effects={[{ type: "sparkle-dust" }]} />`,
       ),
     ).toEqual([
       'a: Unrecognized key: "chromaKey"',
       'x.type: unknown transition "glitch": use one of crossfade, dipToBlack, dipToWhite, wipe, slide, push, iris, clockWipe, blinds, filmBurn, pixelDissolve, zoom, or declare it with transition()',
-      expect.stringMatching(/^g\.type: unknown effect "sparkle-dust": use one of .*, or declare it with effect\(\)$/),
+      expect.stringMatching(
+        /^b\.effects\.0\.type: unknown effect "sparkle-dust": use one of .*, or declare it with effect\(\)$/,
+      ),
     ]);
     expect(errorsOf(`<Title id="h" emphasis="pulse" animation={{ type: "bounce" }}>Hi</Title>`)).toEqual([
       expect.stringMatching(/^h\.animation\.type: Invalid option/),

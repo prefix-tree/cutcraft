@@ -45,6 +45,7 @@ import {
   timelineWords,
 } from "./captions";
 import type { ResolveError } from "./errors";
+import { derivedOrigin, expandKeys } from "./expand";
 import { overlay } from "./overlay";
 import { freezeHoldsOf, heldWithin, holdTotal, rampAdvance, rampInverse, reachedHolds, speedKeysOf } from "./speed";
 import type { CollectedNode, CollectedTree, Editable, LayerInterior } from "./tree";
@@ -167,7 +168,10 @@ function compute(
   log: PatchLog | undefined,
   previous?: ReadonlyMap<string, Placement>,
 ): ResolvedState {
-  const tree = overlay(original, log);
+  // The tree as written, with the log over it: what the editor reads and writes. Its key lists, effects, speed keys
+  // and holds are expanded into items for placing.
+  const written = overlay(original, log);
+  const tree = expandKeys(written);
   fileShaders = original.shaders ?? [];
   const errors: ResolveError[] = [...tree.errors];
   const root = tree.root;
@@ -440,8 +444,8 @@ function compute(
     },
     tracks,
     items,
-    errors,
-    tree,
+    errors: errors.map(onElement),
+    tree: written,
     manifest,
     log,
     theme,
@@ -499,7 +503,7 @@ const themedByData = new WeakMap<object, Readonly<Record<string, ThemeOrigin>>>(
 let fileShaders: readonly ShaderDefinition[] = [];
 
 /**
- * An `<Effect>` (built-in or the file's own) or a `<Transition>` the file declares: its params checked and filled by
+ * An effect (built-in or the file's own) or a `<Transition>` the file declares: its params checked and filled by
  * its schema. An unknown type is an error naming the built-in ones; null for a built-in transition or another element.
  */
 function declaredShader(
@@ -521,7 +525,7 @@ function declaredShader(
       id: node.id,
       prop: "type",
       message: moved
-        ? `effect "${type}" is now whiteBalance: <Effect type="whiteBalance" params={{ ${type}: … }} />`
+        ? `effect "${type}" is now whiteBalance: effects={[{ type: "whiteBalance", ${type}: … }]}`
         : `unknown ${node.kind} "${type}": use one of ${builtIn.join(", ")}, or declare it with ${node.kind === "effect" ? "effect" : "transition"}()`,
     });
     return null;
@@ -681,6 +685,8 @@ function movedKey(kind: string, issue: z.core.$ZodIssue, props: Readonly<Record<
   }
   if (issue.code !== "unrecognized_keys") return undefined;
   const at = issue.path.map(String).join(".");
+  if (at === "" && issue.keys.includes("automation"))
+    return `automation moved into volume and pan, as keys: volume={[{ at, value }]} pan={[{ at, value }]}; ${fix}`;
   const renamed = RENAMED_KEYS[kind]?.[at];
   const respelled = renamed ? issue.keys.filter((k) => Object.hasOwn(renamed, k)) : [];
   if (renamed && respelled.length > 0) {
@@ -845,7 +851,7 @@ function intrinsicCompute(
         code: "SCHEMA",
         id: node.id,
         prop: "src",
-        message: `asset ${props.src} is a LUT, which plays nothing; grade with it: <Effect type="lut" params={{ src: "${props.src}" }} />`,
+        message: `asset ${props.src} is a LUT, which plays nothing; grade with it: effects={[{ type: "lut", src: "${props.src}" }]}`,
       });
       p.duration = typeof dur === "number" ? dur : 0;
     } else {
@@ -911,44 +917,45 @@ function framed(
   return out;
 }
 
-/**
- * Keyframes against what they animate: a `param` keyframe sits inside an `<Effect>` and names one of its params, with a
- * value that param's schema takes; a `property` keyframe animates its parent element, so it does not sit in an effect.
- */
+/** Keys on an effect's params: each value one that param's schema takes. */
 function keyframeErrors(items: ReadonlyMap<string, Placement>): ResolveError[] {
   const out: ResolveError[] = [];
   for (const k of items.values()) {
     if (k.kind !== "keyframe") continue;
     const parent = k.parent ? items.get(k.parent) : undefined;
     const param = k.props.param;
-    if (typeof param !== "string") {
-      if (parent?.kind === "effect")
-        out.push({
-          code: "INVALID_CHILD",
-          id: k.id,
-          prop: "property",
-          message: `a keyframe inside an <Effect> animates one of its params: param="…", not property`,
-        });
-      continue;
-    }
-    if (parent?.kind !== "effect") {
-      out.push({
-        code: "INVALID_CHILD",
-        id: k.id,
-        prop: "param",
-        message: `a keyframe with param goes inside the <Effect> it animates; on <${parent?.kind ?? "?"}> it takes property`,
-      });
-      continue;
-    }
+    if (typeof param !== "string" || parent?.kind !== "effect") continue;
     const problem = effectParamProblem(parent.props.type, fileShaders, param, k.props.value);
-    if (problem) out.push({ code: "SCHEMA", id: k.id, prop: problem.prop, message: problem.message });
+    // A param the effect does not have is the list's; a value it does not take is the key's.
+    if (problem)
+      out.push({
+        code: "SCHEMA",
+        id: problem.prop === "value" ? k.id : (k.parent ?? k.id),
+        ...(problem.prop === "value" ? { prop: "value" } : { prop: param }),
+        message: problem.message,
+      });
   }
   return out;
 }
 
 /**
+ * An error found on an item the resolver made from a prop (a key, an effect, a speed key, a hold) is the element's,
+ * at the prop that wrote it: `pour.effects.1` with `params.radius` is `pour` at `effects.1.radius`.
+ */
+function onElement(error: ResolveError): ResolveError {
+  const origin = error.id ? derivedOrigin(error.id) : null;
+  if (!origin) return error;
+  const field = error.prop
+    ?.replace(/^params(\.|$)/, "")
+    .replace(/^speed$/, "value")
+    .replace(/^at$/, origin.path.startsWith("freezes.") ? "source" : "at");
+  const { prop: _, ...rest } = error;
+  return { ...rest, id: origin.id, prop: field ? `${origin.path}.${field}` : origin.path };
+}
+
+/**
  * Effect params that name an asset (`"asset:ID"`, a texture the shader reads): the asset must be in the manifest, a
- * LUT for `<Effect type="lut">`, and an image or a LUT for an effect the file declares.
+ * LUT for a `lut` effect, and an image or a LUT for an effect the file declares.
  */
 function textureErrors(items: ReadonlyMap<string, Placement>, manifest: AssetManifest): ResolveError[] {
   const out: ResolveError[] = [];

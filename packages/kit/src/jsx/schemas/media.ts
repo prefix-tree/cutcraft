@@ -1,6 +1,16 @@
 import { z } from "zod";
 
-import { assetRefSchema, audioProps, timedProps, timeRefSchema, visualProps } from "./common";
+import { animatable, assetRefSchema, audioProps, timedProps, timeRefSchema, visualProps } from "./common";
+
+/** A hold: the source frame at `source` seconds stays on screen from `start` seconds into the element for `duration`. */
+const freezeSpecSchema = z.strictObject({
+  /** Seconds into the element where the hold starts. */
+  start: z.number().nonnegative(),
+  /** Seconds the frame is held before it plays on. */
+  duration: z.number().positive(),
+  /** The source time of the frame held. */
+  source: z.number().nonnegative(),
+});
 
 const sourceProps = {
   /** The media, as `asset:<id>` from the manifest. */
@@ -9,8 +19,10 @@ const sourceProps = {
   in: timeRefSchema.optional(),
   /** Where in the source it ends, as `in`; `word:40.end` ends after the word is said. */
   out: timeRefSchema.optional(),
-  /** Playback rate: 2 plays twice as fast and half as long. */
-  speed: z.number().min(0.1).max(20).default(1),
+  /** Playback rate: 2 plays twice as fast and half as long; keys ramp it. */
+  speed: animatable(z.number().min(0.1).max(20)).default(1),
+  /** Frames held on screen while the clip's time stands still. */
+  freezes: z.array(freezeSpecSchema).optional(),
   /** Plays the trimmed source backwards. */
   reverse: z.boolean().default(false),
 };

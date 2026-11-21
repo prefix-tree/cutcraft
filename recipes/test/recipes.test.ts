@@ -55,7 +55,7 @@ const recipes: { name: string; file: string; mod: Module; check: (state: Resolve
       expect(s.items.get("rec")).toMatchObject({ start: 0, end: 20 });
       expect(s.items.get("ring-roast")).toMatchObject({ start: 9, end: 10.5 });
       expect(s.items.get("click-order")).toMatchObject({ start: 15 });
-      expect(s.items.get("z1-x1")).toMatchObject({ start: 3 });
+      expect(s.items.get("rec.transform.crop.x.1")).toMatchObject({ start: 3 });
       expect(cues(s).map((c) => c.props.text)).toEqual([
         "Open the menu.",
         "Choose a roast.",
@@ -89,7 +89,7 @@ const recipes: { name: string; file: string; mod: Module; check: (state: Resolve
       expect(s.items.get("p2")?.start).toBeCloseTo(3.4);
       expect(s.items.get("p4")?.end).toBeCloseTo(14.2);
       expect(s.items.get("bed")?.end).toBeCloseTo(s.composition.duration);
-      expect(s.items.get("p3-sx1")).toMatchObject({ start: s.items.get("p3")!.start + 4 });
+      expect(s.items.get("p3.transform.scale.x.1")).toMatchObject({ start: s.items.get("p3")!.start + 4 });
     },
   },
   {

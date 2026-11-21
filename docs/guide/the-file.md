@@ -139,20 +139,21 @@ The player puts `data-el="hook"` on what it draws, so an editor can select thing
   (`literal-ids`). Inside a [helper](#helpers) that makes several elements, a generated pattern is fine.
 - Ids must be unique among timeline elements. An `id` on a `<div>` inside a Layer is ordinary HTML and doesn't count.
 
-## Children for collections
+## Everything about an element is a prop
 
-A clip's keyframes are `<Keyframe>` children, not a `keyframes={[…]}` array. Captions, effects, masks, speed keys and
-freezes work the same way. Each child has its own id and its own place in the file, so an editor can change one
-keyframe or move one caption.
+What an element is, how it moves and what it looks like are its props. A value that changes over time is a list of
+keys in place of the value; effects are a list; a clip's speed ramp is keys on `speed`, its held frames `freezes`.
 
 ```tsx
-<Clip id="broll" src="asset:product" in="shot:1" out="shot:1.end" fit="cover">
-  <Keyframe id="broll-s0" property="transform.scale.x" at={0} value={1} easing="easeInOutSine" />
-  <Keyframe id="broll-s1" property="transform.scale.x" at={6} value={1.08} />
-</Clip>
+<Clip id="broll" src="asset:product" in="shot:1" out="shot:1.end" fit="cover"
+  transform={{ scale: [{ at: 0, value: 1, easing: "easeInOutSine" }, { at: 6, value: 1.08 }] }}
+  effects={[{ type: "vibrance", amount: 0.2 }]} />
 ```
 
-[What it holds](./elements#_6-what-it-holds-children) lists every kind of child.
+An editor finds a key by the element's id, the prop's path and the key's time, and an effect by its place in the list,
+so nothing inside needs an id of its own ([Keys, effects and speed](./animation)). Things with a time and shape of
+their own, such as masks and hand-written captions, are children
+([What it holds](./elements#_7-what-it-holds-children)).
 
 ## Helpers
 

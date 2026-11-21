@@ -38,19 +38,10 @@ export interface NotRendered {
   readonly kind: string;
   readonly prop?: string;
   readonly value?: string;
-  /** Only on an element inside this kind. */
-  readonly parent?: string;
   readonly reason: string;
 }
 
 export const NOT_RENDERED: readonly NotRendered[] = [
-  // shortcut: nested sequences play at their constant source speed (time.ts nestedSourceTime, audio-plan.ts nestedOccurrences); drop these when they map through the ramp.
-  {
-    kind: "speedKey",
-    parent: "nested",
-    reason: "is ignored inside <Nested>: the sequence plays at its constant speed",
-  },
-  { kind: "freeze", parent: "nested", reason: "is ignored inside <Nested>: the sequence plays at its constant speed" },
   // shortcut: the lint cannot see which tracks sit beneath the footage, so it reports every blur; drop this when the blur also paints under backdrop overlays (frame-plan.ts).
   {
     kind: "composition",
@@ -64,14 +55,22 @@ export const NOT_RENDERED: readonly NotRendered[] = [
     value: "typewriter",
     reason: "types out only cues without word timings; cues with words show as karaoke",
   },
+];
+
+/** An effect type an element of `kind` takes in its `effects` but does not draw. */
+export interface EffectNotRendered {
+  readonly kind: string;
+  readonly type: string;
+  readonly reason: string;
+}
+
+export const EFFECTS_NOT_RENDERED: readonly EffectNotRendered[] = [
   // shortcut: vignette and grain are painted on the canvas (painter.ts paintPost); an overlay's effects run in the DOM
   // plane or HTML-in-Canvas, which has no pass for them yet. Drop these when an overlay draws them.
-  ...OVERLAY_KINDS.flatMap((parent) =>
-    (["vignette", "grain"] as const).map((value) => ({
-      kind: "effect",
-      prop: "type",
-      value,
-      parent,
+  ...OVERLAY_KINDS.flatMap((kind) =>
+    (["vignette", "grain"] as const).map((type) => ({
+      kind,
+      type,
       reason: "is not drawn on an overlay yet: put it on the clip, or on an <Adjustment> to cover everything beneath",
     })),
   ),

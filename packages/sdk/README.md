@@ -31,7 +31,7 @@ const { text: edited } = foldToSource(text, exec.log(), exec.state());   // the 
 | | |
 |---|---|
 | `collectModule(mod)`, `resolve(tree, manifest, log?)` | Read a file and place everything in it: sequences, gaps, transitions, anchors, `fill` and `match` durations, transcript references and multicam cuts. Errors are typed and point at the element that caused them. A change costs about 2 µs per element, and placements that did not change keep their identity, so a UI can memoise on them. |
-| `Executor` | Runs 98 editor actions (trim, split, move, ripple, keyframes, captions and more). Each one validates, applies and undoes; history groups a drag into one step. `element/create`, `element/update` and `element/remove` work on every overlay kind, and a remove takes what depends on the element with it. |
+| `Executor` | Runs 98 editor actions (trim, split, move, ripple, keys, effects, captions and more). Each one validates, applies and undoes; history groups a drag into one step. `element/create`, `element/update` and `element/remove` work on every overlay kind, and a remove takes what depends on the element with it. |
 | `loadModule`, `buildSourceIndex`, `foldToSource` | `loadModule(source, { imports })` evaluates a file's text; the file may import `react`, `zod` and the kit, plus the modules you pass. `buildSourceIndex` maps ids to their place in the text, and `foldToSource` writes edits back as small token changes. |
 | `lint`, `fixSource` | Check the file follows the conventions an editor relies on, and apply the fixes that have one right answer. |
 | `@uberscene/sdk/resolver` | The resolver and the manifest types alone, without the parser, the actions or the lint: what a player needs. |

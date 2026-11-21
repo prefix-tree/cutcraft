@@ -1,4 +1,4 @@
-import { Adjustment, Clip, Composition, Effect, Track } from "@uberscene/kit";
+import { Adjustment, Clip, Composition, Track } from "@uberscene/kit";
 
 export default function Video() {
   return (
@@ -9,9 +9,7 @@ export default function Video() {
       </Track>
       {/* One filter over everything beneath it, for its own stretch of time. */}
       <Track id="looks" layout="free">
-        <Adjustment id="sepia" start={1} duration={2}>
-          <Effect id="tone" type="sepia" />
-        </Adjustment>
+        <Adjustment id="sepia" start={1} duration={2} effects={[{ type: "sepia" }]} />
       </Track>
     </Composition>
   );

@@ -4,7 +4,7 @@ editLink: false
 
 # `<Adjustment>`
 
-Filters everything beneath it for its own stretch of time.
+Filters everything beneath it, through its `effects`, for its own stretch of time.
 
 <Example src="previews/elements/adjustment" alt="<Adjustment>">
 
@@ -24,8 +24,9 @@ The coffee footage is Pixabay videos [209419](https://pixabay.com/videos/id-2094
 | `at` | string |  |  | With `anchor`: a word, shot or silence of the anchor's source (`word:14655`); the start is where the anchor plays it, plus `offset`. |
 | `offset` | number |  |  | Seconds added to the start that `anchor` and `at` give; negative starts earlier. |
 | `duration` | number (> 0) \| "fill" \| "source" \| { match } \| { until } |  |  | How long it plays: seconds; `"source"` for the whole trimmed source; `"fill"` to run to the end of the composition; `{ match: id }` for as long as another element; `{ until: id }` to end when another element ends. |
+| `effects` | { type, enabled }[] |  |  | Effects drawn on it, in order: each `{ type, ...params }`, a param written as keys to animate it. |
 | `opacity` | number (0..1) | `1` |  | How much of its effects to mix over the picture beneath. |
 | `blend` | "normal" \| "multiply" \| "screen" \| "overlay" \| "darken" \| … 13 more | `"normal"` |  | How the filtered picture mixes with the one beneath, as CSS `mix-blend-mode` does. |
 | `enabled` | boolean | `true` |  | Off, it filters nothing and stays in the file. |
 
-Timed, visual. Children: `effect`, `keyframe`. [All elements](/reference/elements/)
+Timed, visual. No children. [All elements](/reference/elements/)

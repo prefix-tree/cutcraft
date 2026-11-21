@@ -10,7 +10,7 @@ frame's top left as in CSS. `x` and `y` place the point `origin` names (`topLeft
 `bottomRight` and the rest of the nine), `width` and `height` size it, and `fit` fills it as CSS `object-fit` does;
 `transform` (scale, rotation, opacity, crop, rounded corners) applies after. With no box an element fills the frame as
 before, so nothing written without a position moves. Clips, nested sequences, titles, shapes, SVG, stickers and
-layers all take `box`, and keyframes move it with the paths `box.x` and `box.y`.
+layers all take `box`, and keys on `box.x` and `box.y` move it.
 
 `transform.position`, which measured from the frame's centre, is removed. Captions lose `style.position` and their
 flat `x`, `y` and `width`: they sit in their default box, the lower safe area, unless their `box` changes a field of
@@ -22,8 +22,8 @@ action places an element or the captions, the layout check's fixes name the `box
 `uberscene inspect --at` prints each element's box.
 
 To move a file, run `uberscene lint --fix video.tsx`. It turns `transform.position` into a box with
-`origin: "center"` at the same point (each coordinate plus half the frame), keyframes of `transform.position.x` and
-`.y` into `box.x` and `box.y`, the captions' `style.position`, `x`, `y` and `width` into the box that draws them where
+`origin: "center"` at the same point (each coordinate plus half the frame), keys on `transform.position.x` and
+`.y` into keys on `box.x` and `box.y`, the captions' `style.position`, `x`, `y` and `width` into the box that draws them where
 they were, and components' `x` and `y` into `box`. It also gives a box to a `LowerThird` or `Callout` placed by its
 default on a frame that is not 1920 by 1080, where that default was an offset from the centre. It needs the composition's width and
 height written as numbers or as top-level constants. Two things it cannot move: a

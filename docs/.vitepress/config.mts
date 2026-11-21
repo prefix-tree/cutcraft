@@ -66,6 +66,7 @@ export default defineConfig({
         text: "Build a video",
         items: [
           { text: "Titles and graphics", link: "/guide/titles-and-graphics" },
+          { text: "Keys, effects and speed", link: "/guide/animation" },
           { text: "Captions and sound", link: "/guide/captions-and-sound" },
           { text: "Transitions", link: "/guide/transitions" },
           { text: "Colour and grading", link: "/guide/colour" },

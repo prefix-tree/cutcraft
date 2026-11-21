@@ -7,7 +7,6 @@ import { framesUntil, nearestFrame } from "@uberscene/kit/schema";
 import type { MediaResolver } from "@uberscene/player/engine";
 import {
   aroundMoments,
-  createPatchLog,
   listenRange,
   type Moment,
   parseMoments,
@@ -16,6 +15,7 @@ import {
   resolveMoments,
   skimMoments,
   spokenWords,
+  withoutEffects,
 } from "@uberscene/sdk";
 
 import { writeAtomically } from "./atomic";
@@ -268,9 +268,7 @@ export async function renderLook(options: LookOptions): Promise<LookResult> {
   // A frame without some effects is a frame of the file with them switched off: the same state the page draws.
   let bare = state;
   if (out && "effects" in out) {
-    const log = createPatchLog();
-    for (const id of out.effects) log.append({ op: "set", id, prop: "enabled", value: false });
-    bare = resolve(state.tree, state.manifest, log);
+    bare = resolve(state.tree, state.manifest, withoutEffects(state.tree, out.effects));
   }
   // The zone as a rectangle of the frame, and its name for the rows. A strip's cells are too small for words.
   const { width: W, height: H } = state.composition;

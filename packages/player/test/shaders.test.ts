@@ -10,7 +10,7 @@ const stateOf = (body: string, declarations: string) =>
   resolve(
     collectModule(
       loadModule(`import { z } from "zod";
-import { Adjustment, Clip, Composition, effect, transition, Effect, Keyframe, Track, Transition } from "@uberscene/kit";
+import { Adjustment, Clip, Composition, effect, transition, Track, Transition } from "@uberscene/kit";
 ${declarations}
 export default function V() { return <Composition fps={30} width={640} height={360}>${body}</Composition>; }`) as never,
     ),
@@ -23,13 +23,7 @@ const SWEEP = `const sweep = transition({ name: "sweep", shader: "vec4 transitio
 describe("declared shaders in the frame plan", () => {
   it("attach a clip's declared effects, with keyframed params and the element's clock, after its CSS ones in file order", () => {
     const state = stateOf(
-      `<Track id="t"><Clip id="c" src="asset:city" in={0} out={4}>
-        <Effect id="b" type="sepia" params={{ amount: 0.5 }} />
-        <Effect id="g" type={glow}>
-          <Keyframe id="k1" param="amount" at={0} value={0} />
-          <Keyframe id="k2" param="amount" at={2} value={1} />
-        </Effect>
-      </Clip></Track>`,
+      `<Track id="t"><Clip id="c" src="asset:city" in={0} out={4} effects={[{ type: "sepia", amount: 0.5 }, { type: glow, amount: [{ at: 0, value: 0 }, { at: 2, value: 1 }] }]} /></Track>`,
       GLOW,
     );
     expect(state.errors).toEqual([]);
@@ -53,10 +47,7 @@ describe("declared shaders in the frame plan", () => {
 
   it("run a built-in shader effect as a pass after the CSS one before it, with the CSS look kept for a painter without WebGL", () => {
     const state = stateOf(
-      `<Track id="t"><Clip id="c" src="asset:city" in={0} out={4}>
-        <Effect id="b" type="grayscale" params={{ amount: 0.5 }} />
-        <Effect id="l" type="levels" params={{ black: 0.2, gamma: 2 }} />
-      </Clip></Track>`,
+      `<Track id="t"><Clip id="c" src="asset:city" in={0} out={4} effects={[{ type: "grayscale", amount: 0.5 }, { type: "levels", black: 0.2, gamma: 2 }]} /></Track>`,
       "",
     );
     expect(state.errors).toEqual([]);
@@ -71,12 +62,12 @@ describe("declared shaders in the frame plan", () => {
 
   it("give exposure, vibrance and white balance a CSS fallback, and curves none", () => {
     const state = stateOf(
-      `<Track id="t"><Clip id="c" src="asset:city" in={0} out={4}>
-        <Effect id="e" type="exposure" params={{ stops: 1 }} />
-        <Effect id="v" type="vibrance" params={{ amount: 0.4 }} />
-        <Effect id="w" type="whiteBalance" params={{ temperature: 0.3 }} />
-        <Effect id="k" type="curves" params={{ rgb: [[0, 0.1], [1, 1]] }} />
-      </Clip></Track>`,
+      `<Track id="t"><Clip id="c" src="asset:city" in={0} out={4} effects={[
+  { type: "exposure", stops: 1 },
+  { type: "vibrance", amount: 0.4 },
+  { type: "whiteBalance", temperature: 0.3 },
+  { type: "curves", rgb: [[0, 0.1], [1, 1]] },
+]} /></Track>`,
       "",
     );
     expect(state.errors).toEqual([]);
@@ -89,16 +80,10 @@ describe("declared shaders in the frame plan", () => {
 
   it("move a keyframed box element by element, and step a value that is not a number list", () => {
     const state = stateOf(
-      `<Track id="t"><Clip id="c" src="asset:city" in={0} out={4}>
-        <Effect id="b" type="regionBlur">
-          <Keyframe id="k1" param="box" at={0} value={[0, 0, 0.2, 0.4]} />
-          <Keyframe id="k2" param="box" at={2} value={[0.6, 0.2, 0.2, 0.4]} />
-        </Effect>
-        <Effect id="k" type="colorKey">
-          <Keyframe id="k3" param="color" at={0} value="#00ff00" />
-          <Keyframe id="k4" param="color" at={2} value="#0000ff" />
-        </Effect>
-      </Clip></Track>`,
+      `<Track id="t"><Clip id="c" src="asset:city" in={0} out={4} effects={[
+  { type: "regionBlur", box: [{ at: 0, value: [0, 0, 0.2, 0.4] }, { at: 2, value: [0.6, 0.2, 0.2, 0.4] }] },
+  { type: "colorKey", color: [{ at: 0, value: "#00ff00" }, { at: 2, value: "#0000ff" }] },
+]} /></Track>`,
       "",
     );
     expect(state.errors).toEqual([]);
@@ -117,10 +102,7 @@ describe("declared shaders in the frame plan", () => {
 
   it("give glow a CSS fallback, stacked for intensity, and outline none", () => {
     const state = stateOf(
-      `<Track id="t"><Clip id="c" src="asset:city" in={0} out={4}>
-        <Effect id="g" type="glow" params={{ radius: 10, intensity: 2, color: "#ff0000" }} />
-        <Effect id="o" type="outline" />
-      </Clip></Track>`,
+      `<Track id="t"><Clip id="c" src="asset:city" in={0} out={4} effects={[{ type: "glow", radius: 10, intensity: 2, color: "#ff0000" }, { type: "outline" }]} /></Track>`,
       "",
     );
     expect(state.errors).toEqual([]);
@@ -131,7 +113,7 @@ describe("declared shaders in the frame plan", () => {
 
   it("carry every pass of an effect of several", () => {
     const state = stateOf(
-      `<Track id="t"><Clip id="c" src="asset:city" in={0} out={4}><Effect id="s" type={soft} /></Clip></Track>`,
+      `<Track id="t"><Clip id="c" src="asset:city" in={0} out={4} effects={[{ type: soft }]} /></Track>`,
       `const soft = effect({ name: "soft", passes: ["vec4 effect(vec2 uv) { return texture(image, uv); }", "vec4 effect(vec2 uv) { return texture(original, uv); }"] });`,
     );
     const op = buildFramePlan(state, 1).ops[0]!;
@@ -143,7 +125,7 @@ describe("declared shaders in the frame plan", () => {
   it("attach an adjustment's declared effects", () => {
     const state = stateOf(
       `<Track id="t"><Clip id="c" src="asset:city" in={0} out={4} /></Track>
-       <Track id="fx" layout="free"><Adjustment id="a" start={0} duration={4}><Effect id="g" type={glow} /></Adjustment></Track>`,
+       <Track id="fx" layout="free"><Adjustment id="a" start={0} duration={4} effects={[{ type: glow }]} /></Track>`,
       GLOW,
     );
     expect(
@@ -195,14 +177,17 @@ describe("declared shaders in the frame plan", () => {
 describe("a run of colour effects", () => {
   const passesOf = (effects: string, declarations = "") =>
     buildFramePlan(
-      stateOf(`<Track id="t"><Clip id="c" src="asset:city" in={0} out={4}>${effects}</Clip></Track>`, declarations),
+      stateOf(
+        `<Track id="t"><Clip id="c" src="asset:city" in={0} out={4} effects={[${effects}]} /></Track>`,
+        declarations,
+      ),
       1,
     ).ops[0]?.shaders ?? [];
 
   it("is drawn as one pass calling each function in order, with each member's params and uniforms under its prefix", () => {
-    const [pass, ...rest] = passesOf(`<Effect id="e" type="exposure" params={{ stops: 0.4 }} />
-      <Effect id="w" type="whiteBalance" params={{ temperature: 0.2 }} />
-      <Effect id="v" type="vibrance" params={{ amount: 0.4 }} />`);
+    const [pass, ...rest] = passesOf(`{ type: "exposure", stops: 0.4 },
+      { type: "whiteBalance", temperature: 0.2 },
+      { type: "vibrance", amount: 0.4 }`);
     expect(rest).toEqual([]);
     expect(pass?.name).toBe("fused:exposure+whiteBalance+vibrance");
     expect(pass?.params).toEqual({ e0_stops: 0.4, e1_temperature: 0.2, e1_tint: 0, e2_amount: 0.4 });
@@ -216,24 +201,24 @@ describe("a run of colour effects", () => {
 
   it("breaks at an effect that is not a colour change, and at a second white balance or curves", () => {
     expect(
-      passesOf(`<Effect id="a" type="exposure" params={{ stops: 0.4 }} />
-        <Effect id="b" type="regionBlur" />
-        <Effect id="d" type="vibrance" params={{ amount: 0.4 }} />`).map((p) => p.name),
+      passesOf(`{ type: "exposure", stops: 0.4 },
+        { type: "regionBlur" },
+        { type: "vibrance", amount: 0.4 }`).map((p) => p.name),
     ).toEqual(["exposure", "regionBlur", "vibrance"]);
     expect(
-      passesOf(`<Effect id="a" type="whiteBalance" params={{ temperature: 0.2 }} />
-        <Effect id="b" type="exposure" params={{ stops: 0.4 }} />
-        <Effect id="d" type="whiteBalance" params={{ tint: 0.2 }} />`).map((p) => p.name),
+      passesOf(`{ type: "whiteBalance", temperature: 0.2 },
+        { type: "exposure", stops: 0.4 },
+        { type: "whiteBalance", tint: 0.2 }`).map((p) => p.name),
     ).toEqual(["fused:whiteBalance+exposure", "whiteBalance"]);
     expect(
-      passesOf(`<Effect id="a" type="curves" params={{ rgb: [[0, 0.1], [1, 1]] }} />
-        <Effect id="b" type="curves" params={{ blue: [[0, 0.1], [1, 1]] }} />`).map((p) => p.name),
+      passesOf(`{ type: "curves", rgb: [[0, 0.1], [1, 1]] },
+        { type: "curves", blue: [[0, 0.1], [1, 1]] }`).map((p) => p.name),
     ).toEqual(["curves", "curves"]);
   });
 
   it("never takes in a file's own effect", () => {
     const names = passesOf(
-      `<Effect id="a" type="exposure" params={{ stops: 0.4 }} /><Effect id="o" type={own} /><Effect id="b" type="vibrance" params={{ amount: 0.4 }} />`,
+      `{ type: "exposure", stops: 0.4 }, { type: own }, { type: "vibrance", amount: 0.4 }`,
       `const own = effect({ name: "own", shader: "vec4 effect(vec2 uv) { return texture(image, uv); }" });`,
     ).map((p) => p.name);
     expect(names).toEqual(["exposure", "own", "vibrance"]);
@@ -243,13 +228,13 @@ describe("a run of colour effects", () => {
 describe("effects whose params change nothing", () => {
   it("are not drawn: no pass, so an element whose shader effects are all neutral needs no WebGL", () => {
     const state = stateOf(
-      `<Track id="t"><Clip id="c" src="asset:city" in={0} out={4}>
-        <Effect id="e" type="exposure" params={{ stops: 0 }} />
-        <Effect id="l" type="levels" />
-        <Effect id="k" type="curves" />
-        <Effect id="b" type="brightness" params={{ amount: 0.1 }} />
-        <Effect id="g" type="grayscale" params={{ amount: 0 }} />
-      </Clip></Track>`,
+      `<Track id="t"><Clip id="c" src="asset:city" in={0} out={4} effects={[
+  { type: "exposure", stops: 0 },
+  { type: "levels" },
+  { type: "curves" },
+  { type: "brightness", amount: 0.1 },
+  { type: "grayscale", amount: 0 },
+]} /></Track>`,
       "",
     );
     expect(state.errors).toEqual([]);
@@ -260,12 +245,7 @@ describe("effects whose params change nothing", () => {
 
   it("bail out only on the frames where a keyframed param is neutral", () => {
     const state = stateOf(
-      `<Track id="t"><Clip id="c" src="asset:city" in={0} out={4}>
-        <Effect id="e" type="exposure">
-          <Keyframe id="k1" param="stops" at={0} value={0} />
-          <Keyframe id="k2" param="stops" at={2} value={1} />
-        </Effect>
-      </Clip></Track>`,
+      `<Track id="t"><Clip id="c" src="asset:city" in={0} out={4} effects={[{ type: "exposure", stops: [{ at: 0, value: 0 }, { at: 2, value: 1 }] }]} /></Track>`,
       "",
     );
     expect(buildFramePlan(state, 0).ops[0]?.shaders).toBeUndefined();

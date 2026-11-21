@@ -15,7 +15,7 @@ import {
   validateTarget,
 } from "../handler-kit";
 import { invalid, nodeOfSpec, nodeSpecOf, ok } from "../types";
-import { lastNonStack } from "./effect";
+import { lastNonStack } from "./stack";
 
 define({
   type: "mask/create",

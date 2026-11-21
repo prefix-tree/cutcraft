@@ -449,13 +449,23 @@ export default function V() {
       );
 
     it.each([
-      ["shadow", "{ radius: 3 }", "radius", "{ blur: 3 }", "blur"],
-      ["outline", "{ width: 3 }", "width", "{ thickness: 3 }", "thickness"],
-      ["halftone", '{ mode: "cmyk" }', "mode", '{ type: "cmyk" }', "type"],
-      ["scanlines", "{ thickness: 0.5 }", "thickness", "{ coverage: 0.5 }", "coverage"],
-    ])("renames the %s effect's param, and the param a keyframe inside it names", (type, params, key, now, keyNow) => {
-      expect(fixSource(effect(type, params, key)).text).toBe(effect(type, now, keyNow));
-    });
+      ["shadow", "{ radius: 3, x: 2 }", "radius", "blur", "x"],
+      ["outline", "{ width: 3, opacity: 1 }", "width", "thickness", "opacity"],
+      // Not `type`, which names the effect in its entry of `effects`.
+      ["halftone", '{ mode: "cmyk", size: 9 }', "mode", "inks", "size"],
+      ["scanlines", "{ thickness: 0.5, spacing: 4 }", "thickness", "coverage", "spacing"],
+    ])(
+      "renames the %s effect's param as it moves the effect into props, keyed or not",
+      (type, params, key, now, other) => {
+        const constant = fixSource(effect(type, params, "amount").replace(/<Keyframe[^>]*\/>/, "")).text;
+        expect(constant).toContain(`effects={[{ type: "${type}", ${now}: `);
+        expect(constant).not.toContain(`${key}:`);
+        const keyed = fixSource(effect(type, params, key)).text;
+        expect(keyed).toContain(`${now}: [{ at: 0, value: 1 }]`);
+        expect(keyed).toContain(`${other}: `);
+        expect(keyed).not.toMatch(new RegExp(`\\b${key}:`));
+      },
+    );
 
     it("leaves the same names alone on another type, or inside another element", () => {
       const blur = effect("blur", "{ radius: 3 }", "radius");

@@ -14,7 +14,7 @@ import { declaredIdentifiers } from "./lint/rules/fonts";
 import { identifier } from "./lint/rules/theme";
 import type { Range } from "./parse";
 import { parseSource } from "./parse";
-import { escapeText, Identifier, isPlainAttribute, printElement, printLiteral, printProp } from "./print";
+import { escapeText, Identifier, isPlainAttribute, printElement, printLiteral, printProp, printValue } from "./print";
 
 const traverse = ((traverseModule as unknown as { default?: typeof traverseModule }).default ??
   traverseModule) as typeof traverseModule;
@@ -115,6 +115,12 @@ export function fold(
       typeof value.font === "string"
     )
       return { ...value, font: fontValue(value.font) } as Json;
+    // An effect the file declares, by the name it is declared under: `effects={[{ type: tone }]}`.
+    if (prop === "effects" && Array.isArray(value))
+      return value.map((e) => {
+        const ident = isRecord(e) && typeof e.type === "string" ? idents.get(`effect:${e.type}`) : undefined;
+        return ident && isRecord(e) ? { ...e, type: new Identifier(ident) as unknown as Json } : e;
+      }) as Json;
     if (typeof value !== "string") return value;
     if (prop === "font") return fontValue(value);
     const key = prop === "type" && (kind === "effect" || kind === "transition") ? `${kind}:${value}` : null;
@@ -643,7 +649,9 @@ function propEdit(
       return { kind: "prop", id: site.id, prop, range: existing.range, text: printProp(prop, value) };
     }
     const asString = typeof value === "string" && text[existing.valueRange[0]] === '"' && isPlainAttribute(value);
-    const replacement = asString ? `"${value}"` : printLiteral(value);
+    const lineStart = text.lastIndexOf("\n", existing.range[0] - 1) + 1;
+    const indent = /^[ \t]*/.exec(text.slice(lineStart))?.[0] ?? "";
+    const replacement = asString ? `"${value}"` : printValue(value, indent, existing.valueRange[0] - lineStart);
     if (asString) return { kind: "prop", id: site.id, prop, range: existing.valueRange, text: replacement };
     // Expression container `{...}` or a string literal that must become `{...}`.
     const r = existing.valueRange;

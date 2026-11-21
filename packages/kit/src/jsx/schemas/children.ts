@@ -1,73 +1,42 @@
 import { z } from "zod";
 
 import { zEasing, zKeyframeProperty, zVideoEffectType } from "../enums";
-import { idSchema, vec2Schema } from "./common";
+import { idSchema, paramValue, vec2Schema } from "./common";
 import { zMaskType } from "./enums-local";
 
-const paramValue = z.union([
-  z.number(),
-  z.string(),
-  z.boolean(),
-  z.array(z.number()),
-  // A list of points, as `curves` takes.
-  z.array(z.array(z.number())),
-  z.record(z.string(), z.number()),
-]);
 const paramsSchema = z.record(z.string(), paramValue);
 
+// The resolver's own items: what `expandKeys` makes of the `effects`, key lists, `speed` keys and `freezes` a file
+// writes as props. They are not elements a file writes, so they carry no id of their own.
+
 export const effectSchema = z.strictObject({
-  /** The effect's name. */
-  id: idSchema,
-  /** A built-in effect, or one the file declares with `effect()`. */
   type: z.union([zVideoEffectType, z.string().min(1)]),
-  /** The type's own settings; each effect's page lists them. */
   params: paramsSchema.default({}),
-  /** Off, it draws nothing and stays in the file. */
   enabled: z.boolean().default(true),
 });
 
+/** One key: a property of its element (`transform.opacity`, `box.x`, `audio.volume`), or a param of its effect. */
 export const keyframeSchema = z
   .strictObject({
-    /** The keyframe's name. */
-    id: idSchema,
-    /** A property of the parent element (`transform.opacity`…). */
     property: zKeyframeProperty.optional(),
-    /** Inside an `<Effect>`: the effect param it animates. */
-    param: z
-      .string()
-      .regex(/^[A-Za-z_]\w*$/, "a param is a name: letters, digits and _")
-      .optional(),
-    /** Element-relative seconds. */
+    param: z.string().optional(),
     at: z.number().nonnegative(),
-    /** The value the property or param has at `at`. */
     value: z.unknown(),
-    /** How it moves from this keyframe to the next one. The last keyframe's easing is not used. */
     easing: zEasing.default("linear"),
   })
-  .refine((k) => (k.property === undefined) !== (k.param === undefined), {
-    message:
-      "a keyframe animates a property of its parent (property) or, inside an <Effect>, a param (param): give one",
-  });
+  .refine((k) => (k.property === undefined) !== (k.param === undefined));
 
+/** One key of a speed ramp: the rate reached at `at`. */
 export const speedKeySchema = z.strictObject({
-  /** The key's name. */
-  id: idSchema,
-  /** Seconds into the clip where the new speed is reached. */
   at: z.number().nonnegative(),
-  /** The playback rate from here on: 2 is twice as fast. */
   speed: z.number().min(0.1).max(20),
-  /** How the speed changes from this key to the next one. The last key's easing is not used. */
   easing: zEasing.default("linear"),
 });
 
+/** A hold: the source frame at `at` held from `start` seconds into the element. */
 export const freezeSchema = z.strictObject({
-  /** The freeze's name. */
-  id: idSchema,
-  /** Source time of the frozen frame. */
   at: z.number().nonnegative(),
-  /** Element-relative start of the hold. */
   start: z.number().nonnegative(),
-  /** Seconds the frame is held before the clip plays on. */
   duration: z.number().positive(),
 });
 

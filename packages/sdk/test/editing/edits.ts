@@ -69,7 +69,7 @@ export const EDITS: readonly Edit[] = [
     name: "grades a clip with an effect",
     pick: (s) => {
       const c = clip(s);
-      return c && { type: "effect/add", params: { id: c.id, childId: "e2e-look", type: "vignette" } };
+      return c && { type: "effect/add", params: { id: c.id, effect: { type: "vignette" } } };
     },
   },
   {
@@ -78,10 +78,27 @@ export const EDITS: readonly Edit[] = [
       const c = clip(s);
       return (
         c && {
-          type: "keyframe/add",
-          params: { id: c.id, keyId: "e2e-k", property: "transform.opacity", at: 0, value: 0 },
+          type: "key/add",
+          params: { id: c.id, path: "transform.opacity", at: 0, value: 0 },
         }
       );
+    },
+  },
+  {
+    name: "moves a key",
+    pick: (s) => {
+      const k = keyOf(s);
+      if (!k) return undefined;
+      const item = s.items.get(k.element);
+      const to = Math.min(item?.duration ?? 0, k.at + 0.1);
+      return to === k.at ? undefined : { type: "key/move", params: { id: k.element, path: k.path, at: k.at, to } };
+    },
+  },
+  {
+    name: "removes a key",
+    pick: (s) => {
+      const k = keyOf(s);
+      return k && { type: "key/remove", params: { id: k.element, path: k.path, at: k.at } };
     },
   },
   {
@@ -302,3 +319,31 @@ export const REFUSALS: readonly Refusal[] = [
   ),
   breaks("deletes and undoes", ["examples/launch-recap/video.tsx"], "refuses to delete, so has nothing to undo"),
 ];
+
+/**
+ * The last key of the first element with keys, as the editor addresses one: the element, the path of its list, its
+ * time. Its id says where it came from (`zoom.transform.scale.0`).
+ */
+function keyOf(s: ResolvedState): { element: string; path: string; at: number } | undefined {
+  // A key in a prop written as a literal: one computed in code is the file's to change, not the editor's.
+  const key = [...s.items.values()].find((p) => {
+    if (p.kind !== "keyframe") return false;
+    const owner = s.items.get(p.id.split(".")[0] ?? "");
+    return owner?.editable === "literal" && !owner.lockedProps.includes(p.id.split(".")[1] ?? "");
+  });
+
+  if (!key) return undefined;
+  const [element, ...rest] = key.id.split(".") as [string, ...string[]];
+  const path = rest.slice(0, -1).join(".");
+  const owner = s.items.get(element);
+  if (!owner) return undefined;
+  // The last key of that list: its time, seconds into the element.
+  const siblings = [...s.items.values()].filter(
+    (p) =>
+      p.kind === "keyframe" &&
+      p.id.startsWith(`${element}.${path}.`) &&
+      p.id.split(".").length === key.id.split(".").length,
+  );
+  const last = siblings[siblings.length - 1] ?? key;
+  return { element, path, at: Number(last.props.at) };
+}

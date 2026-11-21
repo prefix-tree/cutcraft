@@ -16,10 +16,10 @@ Three shots cut back to back, with transitions, a push-in and titles.
 
 - **A sequence track**: the shots play back to back.
 - **`<Transition>`s as siblings** of the clips: a wipe and a slide.
-- **`<Keyframe>`s** push in on the middle shot.
+- **Two keys on `transform.scale`** push in on the middle shot.
 - **A `<Title>` built word by word** and a **`<Motion>` lower third**, both anchored to shots, so they move when a cut moves.
 
-See: [Timing](/guide/time) · [`<Transition>`](/reference/elements/transition) · [`<Keyframe>`](/reference/elements/keyframe)
+See: [Timing](/guide/time) · [`<Transition>`](/reference/elements/transition) · [Keys over time](/guide/animation#keys)
 
 ## The code
 

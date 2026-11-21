@@ -102,7 +102,9 @@ test("the typography panel writes each property into the title's style, the pres
   const color = panel.getByRole("textbox", { name: "Color", exact: true });
   await color.fill("$primary");
   await color.press("Enter");
-  const line = (await changed(page))[0] ?? "";
+  // The title's whole element: a long style is printed over several lines.
+  const out = await source(page);
+  const line = out.slice(out.indexOf('id="file"'), out.indexOf("</Title>", out.indexOf('id="file"')));
   for (const part of ['preset: "h1"', "size: 96", "weight: 400", 'align: "left"', "italic: true"])
     expect(line).toContain(part);
   for (const part of ['decoration: "underline"', "letterSpacing: 4", 'color: "$primary"']) expect(line).toContain(part);

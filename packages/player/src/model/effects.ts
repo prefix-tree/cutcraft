@@ -14,7 +14,7 @@ type Params = Readonly<Record<string, unknown>>;
 /** The placements of an element and its children, by id: where an effect's own keyframes are found. */
 export type Items = ReadonlyMap<string, Placement>;
 
-/** An effect's params, with the ones its own `<Keyframe param>` children animate evaluated at element-relative `rel`. */
+/** An effect's params, with the ones its keys animate evaluated at element-relative `rel`. */
 export function paramsAt(items: Items, effect: Placement, rel: number): Params {
   const base = (effect.props.params ?? {}) as Params;
   const keys = effect.children
@@ -28,7 +28,7 @@ export function paramsAt(items: Items, effect: Placement, rel: number): Params {
 }
 
 /**
- * One child's CSS filter (an `<Effect>` drawn as CSS) at element-relative `rel`, or "" for a
+ * One child's CSS filter (an effect drawn as CSS) at element-relative `rel`, or "" for a
  * child drawn otherwise: a post effect, a type in `skip` (drawn by its shader), a shader-only type, a disabled one, or a
  * built-in whose params change nothing at this moment.
  * An unknown type is reported once and draws nothing.

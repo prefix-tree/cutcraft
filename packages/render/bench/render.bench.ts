@@ -43,13 +43,14 @@ export default function Video() {
 `;
 
 /** One source clip for 5 s with these effects on it, for the shader cases. */
-const effectsFile = (effects: string) => `import { Clip, Composition, Effect, effect, Track } from "@uberscene/kit";
+const effectsFile = (effects: string) => `import { Clip, Composition, effect, Track } from "@uberscene/kit";
 const same = effect({ name: "same", shader: "vec4 effect(vec2 uv) { return texture(image, uv); }" });
 export default function Video() {
   return (
     <Composition fps={30} width={1920} height={1080}>
       <Track id="main">
-        <Clip id="c1" src="asset:src" in={2} out={7}>${effects}</Clip>
+        <Clip id="c1" src="asset:src" in={2} out={7} effects={[${effects}
+        ]} />
       </Track>
     </Composition>
   );
@@ -61,66 +62,66 @@ const EFFECT_CASES: readonly { readonly key: string; readonly label: string; rea
     key: "passthrough",
     label: "passthrough, 5 s 1080p30 (one shader that changes nothing: the shader path's ceiling)",
     effects: `
-          <Effect id="e1" type={same} />`,
+          { type: same }`,
   },
   {
     key: "grade",
     label: "colour grade, 5 s 1080p30 (exposure, white balance, curves, vibrance, LUT)",
     effects: `
-          <Effect id="e1" type="exposure" params={{ stops: 0.4 }} />
-          <Effect id="e2" type="whiteBalance" params={{ temperature: 0.2 }} />
-          <Effect id="e3" type="curves" params={{ rgb: [[0, 0], [0.5, 0.6], [1, 1]] }} />
-          <Effect id="e4" type="vibrance" params={{ amount: 0.4 }} />
-          <Effect id="e5" type="lut" params={{ src: "asset:warm", amount: 0.5 }} />`,
+          { type: "exposure", stops: 0.4 },
+          { type: "whiteBalance", temperature: 0.2 },
+          { type: "curves", rgb: [[0, 0], [0.5, 0.6], [1, 1]] },
+          { type: "vibrance", amount: 0.4 },
+          { type: "lut", src: "asset:warm", amount: 0.5 }`,
   },
   {
     key: "interleaved",
     label: "interleaved, 5 s 1080p30 (brightness, levels, saturation, LUT: CSS and shader effects alternating)",
     effects: `
-          <Effect id="e1" type="brightness" params={{ amount: 0.1 }} />
-          <Effect id="e2" type="levels" params={{ gamma: 1.2 }} />
-          <Effect id="e3" type="saturation" params={{ amount: 0.2 }} />
-          <Effect id="e4" type="lut" params={{ src: "asset:warm", amount: 0.5 }} />`,
+          { type: "brightness", amount: 0.1 },
+          { type: "levels", gamma: 1.2 },
+          { type: "saturation", amount: 0.2 },
+          { type: "lut", src: "asset:warm", amount: 0.5 }`,
   },
   {
     key: "blurs",
     label: "blurs, 5 s 1080p30 (region blur of a small box, shadows and highlights)",
     effects: `
-          <Effect id="e1" type="regionBlur" params={{ box: [0.4, 0.3, 0.15, 0.2], radius: 10 }} />
-          <Effect id="e2" type="shadowsHighlights" params={{ shadows: 0.5, radius: 10 }} />`,
+          { type: "regionBlur", box: [0.4, 0.3, 0.15, 0.2], radius: 10 },
+          { type: "shadowsHighlights", shadows: 0.5, radius: 10 }`,
   },
   {
     key: "blur",
     label: "blur, 5 s 1080p30 (a plain blur of the footage)",
     effects: `
-          <Effect id="e1" type="blur" params={{ radius: 8 }} />`,
+          { type: "blur", radius: 8 }`,
   },
   {
     key: "neutral",
     label: "neutral, 5 s 1080p30 (exposure at 0 stops and a brightness: the shader effect changes nothing)",
     effects: `
-          <Effect id="e1" type="exposure" params={{ stops: 0 }} />
-          <Effect id="e2" type="brightness" params={{ amount: 0.1 }} />`,
+          { type: "exposure", stops: 0 },
+          { type: "brightness", amount: 0.1 }`,
   },
   {
     key: "zoom",
     label: "zoom, 5 s 1080p30 (a zoom blur of the footage)",
     effects: `
-          <Effect id="e1" type="zoomBlur" params={{ length: 60 }} />`,
+          { type: "zoomBlur", length: 60 }`,
   },
   {
     key: "silhouette",
     label: "silhouette, 5 s 1080p30 (outline and glow on the footage)",
     effects: `
-          <Effect id="e1" type="outline" params={{ thickness: 12 }} />
-          <Effect id="e2" type="glow" params={{ radius: 8 }} />`,
+          { type: "outline", thickness: 12 },
+          { type: "glow", radius: 8 }`,
   },
   {
     key: "print",
     label: "print, 5 s 1080p30 (a CMYK halftone and eight octaves of fractal noise on the footage, the heaviest looks)",
     effects: `
-          <Effect id="e1" type="halftone" params={{ type: "cmyk", size: 10 }} />
-          <Effect id="e2" type="fractalNoise" params={{ octaves: 8, opacity: 0.4 }} />`,
+          { type: "halftone", inks: "cmyk", size: 10 },
+          { type: "fractalNoise", octaves: 8, opacity: 0.4 }`,
   },
 ];
 

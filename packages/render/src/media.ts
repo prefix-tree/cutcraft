@@ -23,7 +23,7 @@ const EXTENSIONS = [
   ".webp",
   ".gif",
   ".svg",
-  // LUTs (`<Effect type="lut">`).
+  // LUTs (the `lut` effect).
   ".cube",
   // Fonts the manifest lists (`fonts`).
   ".ttf",

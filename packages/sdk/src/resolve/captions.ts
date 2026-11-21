@@ -10,9 +10,9 @@ export interface AssetPlay {
   /** Infinity while the placement's length is still open (`duration="fill"`). */
   readonly out: number;
   readonly speed: number;
-  /** `<SpeedKey>` children, which replace `speed`. */
+  /** The speed keys (`speed={[…]}`), which replace a constant speed. */
   readonly keys?: readonly RampKey[];
-  /** `<Freeze>` children, inserted holds that push later words back. */
+  /** The holds (`freezes`), inserted that push later words back. */
   readonly holds?: readonly FreezeHold[];
 }
 

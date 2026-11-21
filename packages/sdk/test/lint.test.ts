@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { buildSourceIndex, lint } from "@uberscene/sdk";
+import { buildSourceIndex, collectModule, fixSource, lint, loadModule, resolve } from "@uberscene/sdk";
 
 import { fixtureText, manifest } from "./helpers";
 
 const wrap = (body: string, extra = "") => `
-import { Composition, Track, Clip, Layer, Title, Transition, Effect, Adjustment, SpeedKey, Freeze, Mask, Keyframe } from "@uberscene/kit";
+import { Composition, Track, Clip, Layer, Title, Transition, Adjustment, Mask } from "@uberscene/kit";
 ${extra}
 export default function V() {
   return (<Composition fps={30} width={1920} height={1080}>${body}</Composition>);
@@ -216,21 +216,19 @@ describe("lint", () => {
         .filter((d) => d.rule === "not-rendered")
         .map((d) => `${d.severity}:${d.id}.${d.prop ?? ""}: ${d.message}`);
 
-    it("warns on SpeedKey and Freeze inside a Nested only, and on a second mask or one on a title", () => {
+    it("warns on a second mask or one on a title, and not on a clip's speed keys and freezes", () => {
       const d = notRendered(`<Track id="t">
-        <Clip id="c" src="asset:city"><SpeedKey id="s" at={1} speed={2} /><Freeze id="f" at={1} start={0} duration={1} /><Mask id="m1" /><Mask id="m2" /></Clip>
+        <Clip id="c" src="asset:city" speed={[{ at: 1, value: 2 }]} freezes={[{ start: 0, duration: 1, source: 1 }]}><Mask id="m1" /><Mask id="m2" /></Clip>
         <Title id="h">Hi<Mask id="m4" /></Title>
-        <Nested id="n" duration={3}><SpeedKey id="ns" at={1} speed={2} /><Freeze id="nf" at={1} start={0} duration={1} /></Nested>
       </Track>`);
-      expect(d.map((x) => x.split(":")[1])).toEqual(["m2.", "m4.", "ns.", "nf."]);
-      expect(d[2]).toContain("is ignored inside <Nested>");
+      expect(d.map((x) => x.split(":")[1])).toEqual(["m2.", "m4."]);
       expect(d[1]).toContain("masks render on clips and nested sequences only");
     });
 
     it("leaves a levels gamma alone, which the shader draws", () => {
       expect(
         notRendered(
-          '<Track id="t"><Clip id="c" src="asset:city"><Effect id="lv" type="levels" params={{ black: 0.1, gamma: 1.2 }} /></Clip></Track>',
+          '<Track id="t"><Clip id="c" src="asset:city" effects={[{ type: "levels", black: 0.1, gamma: 1.2 }]} /></Track>',
         ),
       ).toEqual([]);
     });
@@ -248,20 +246,26 @@ describe("lint", () => {
     it("warns on vignette and grain on an overlay, and not on a clip or an adjustment", () => {
       expect(
         notRendered(`<Track id="t">
-        <Clip id="c" src="asset:city"><Effect id="cv" type="vignette" /></Clip>
-        <Adjustment id="a" start={0} duration={1}><Effect id="av" type="vignette" /><Effect id="ag" type="grain" /></Adjustment>
-        <Title id="h">Hi<Effect id="hv" type="vignette" /><Effect id="hg" type="grain" /><Effect id="hb" type="blur" /></Title>
+        <Clip id="c" src="asset:city" effects={[{ type: "vignette" }]} />
+        <Adjustment id="a" start={0} duration={1} effects={[{ type: "vignette" }, { type: "grain" }]} />
+        <Title id="h" effects={[{ type: "vignette" }, { type: "grain" }, { type: "blur" }]}>Hi</Title>
       </Track>`),
       ).toEqual([
-        'warning:hv.type: "hv" <Effect> type "vignette" is not drawn on an overlay yet: put it on the clip, or on an <Adjustment> to cover everything beneath',
-        'warning:hg.type: "hg" <Effect> type "grain" is not drawn on an overlay yet: put it on the clip, or on an <Adjustment> to cover everything beneath',
+        'warning:h.effects: "h" <Title> effect 0 "vignette" is not drawn on an overlay yet: put it on the clip, or on an <Adjustment> to cover everything beneath',
+        'warning:h.effects: "h" <Title> effect 1 "grain" is not drawn on an overlay yet: put it on the clip, or on an <Adjustment> to cover everything beneath',
       ]);
     });
 
     it("says nothing about a file that only uses what renders", () => {
       expect(
         notRendered(`<Track id="t">
-        <Clip id="a" src="asset:city" speed={2}><Effect id="e" type="blur" /><Effect id="wb" type="whiteBalance" params={{ temperature: 0.2, tint: -0.1 }} /><Effect id="lv" type="levels" params={{ black: 0.05, white: 0.95 }} /><Effect id="vg" type="vignette" params={{ amount: 0.4 }} /><Effect id="gr" type="grain" /><Mask id="m" shape={{ rect: { x: 0, y: 0, width: 1, height: 1 } }} /><Keyframe id="k" property="box.x" at={0} value={0} /></Clip>
+        <Clip id="a" src="asset:city" speed={2} box={{ x: [{ at: 0, value: 0 }] }} effects={[
+          { type: "blur" },
+          { type: "whiteBalance", temperature: 0.2, tint: -0.1 },
+          { type: "levels", black: 0.05, white: 0.95 },
+          { type: "vignette", amount: 0.4 },
+          { type: "grain" },
+        ]}><Mask id="m" shape={{ rect: { x: 0, y: 0, width: 1, height: 1 } }} /></Clip>
         <Transition id="x" type="crossfade" />
         <Clip id="b" src="asset:city" />
         <Transition id="w" type="wipe" params={{ direction: "up" }} />
@@ -273,6 +277,174 @@ describe("lint", () => {
         <Title id="h" animation={{ type: "fade" }}>Hi</Title>
       </Track>`),
       ).toEqual([]);
+    });
+  });
+
+  describe("everything-is-a-prop", () => {
+    // The old spelling: keys, effects, speed keys and holds as children, sound keys as automation.
+    const OLD = `import { Audio, Clip, Composition, Effect, Freeze, Keyframe, SpeedKey, Track } from "@uberscene/kit";
+
+export default function V() {
+  return (
+    <Composition fps={30} width={1920} height={1080}>
+      <Track id="main">
+        <Clip id="c" src="asset:city" in={0} out={6} transform={{ scale: 1.1 }}>
+          <Keyframe id="k1" property="transform.opacity" at={0} value={0} />
+          <Keyframe id="k2" property="transform.opacity" at={0.5} value={1} easing="ease-out" />
+          <Effect id="fx" type="blur" params={{ radius: 2 }}>
+            <Keyframe id="fk1" param="radius" at={0} value={0} />
+            <Keyframe id="fk2" param="radius" at={1} value={4} />
+          </Effect>
+          <Effect id="lv" type="levels" params={{ gamma: 1.2 }} enabled={false} />
+          <SpeedKey id="s1" at={0} speed={1} />
+          <SpeedKey id="s2" at={2} speed={0.5} easing="easeInOutQuad" />
+          <Freeze id="f1" at={1.5} start={3} duration={0.5} />
+        </Clip>
+      </Track>
+      <Track id="music" layout="free">
+        <Audio id="a" src="asset:bed" start={0} duration={4} volume={0.5} automation={{ volume: [[0, 0], [2, 1]] }} />
+      </Track>
+    </Composition>
+  );
+}
+`;
+    // The same video written with props by hand.
+    const PROPS = `import { Audio, Clip, Composition, Track } from "@uberscene/kit";
+
+export default function V() {
+  return (
+    <Composition fps={30} width={1920} height={1080}>
+      <Track id="main">
+        <Clip
+          id="c"
+          src="asset:city"
+          in={0}
+          out={6}
+          transform={{ scale: 1.1, opacity: [{ at: 0, value: 0 }, { at: 0.5, value: 1, easing: "easeOut" }] }}
+          effects={[
+            { type: "blur", radius: [{ at: 0, value: 0 }, { at: 1, value: 4 }] },
+            { type: "levels", gamma: 1.2, enabled: false },
+          ]}
+          speed={[{ at: 0, value: 1 }, { at: 2, value: 0.5, easing: "easeInOutQuad" }]}
+          freezes={[{ start: 3, duration: 0.5, source: 1.5 }]}
+        />
+      </Track>
+      <Track id="music" layout="free">
+        <Audio id="a" src="asset:bed" start={0} duration={4} volume={[{ at: 0, value: 0 }, { at: 2, value: 0.5 }]} />
+      </Track>
+    </Composition>
+  );
+}
+`;
+    const rule = (text: string) => lint(text, { manifest }).filter((d) => d.rule === "everything-is-a-prop");
+
+    it("moves old children, automation and the kit's removed names into props", () => {
+      const found = rule(OLD);
+      expect(found.map((d) => [d.id, d.fix !== undefined && d.fix.length > 0])).toEqual([
+        ["c", true],
+        ["a", true],
+      ]);
+      expect(found[0]?.message).toContain("2 <Keyframe>, 2 <Effect>, 2 <SpeedKey>, 1 <Freeze>");
+      // The kit's names go once no tag uses them: the next round of the fix.
+      const unused = rule(OLD.replace(/<Clip id="c"[\s\S]*?<\/Clip>/, '<Clip id="c" src="asset:city" />'));
+      expect(unused.map((d) => d.message)).toEqual([
+        "@uberscene/kit no longer has Effect, Freeze, Keyframe, SpeedKey: they are props of the elements now",
+        expect.stringContaining("automation"),
+      ]);
+      expect(unused[0]?.fix).toHaveLength(1);
+      const { text, remaining } = fixSource(OLD, { manifest });
+      expect(remaining).toEqual([]);
+      expect(text).toContain('import { Audio, Clip, Composition, Track } from "@uberscene/kit";');
+      expect(text).not.toMatch(/<(Keyframe|Effect|SpeedKey|Freeze)\b|automation=/);
+      // The old easing comes out in camelCase, as the naming rule has it.
+      expect(text).toContain('opacity: [{ at: 0, value: 0 }, { at: 0.5, value: 1, easing: "easeOut" }]');
+      expect(text).toContain('{ type: "blur", radius: [{ at: 0, value: 0 }, { at: 1, value: 4 }] }');
+      expect(text).toContain('{ type: "levels", gamma: 1.2, enabled: false }');
+      expect(text).toContain('speed={[{ at: 0, value: 1 }, { at: 2, value: 0.5, easing: "easeInOutQuad" }]}');
+      expect(text).toContain("freezes={[{ start: 3, duration: 0.5, source: 1.5 }]}");
+      // Automation's points were multiplied into the volume.
+      expect(text).toContain("volume={[{ at: 0, value: 0 }, { at: 2, value: 0.5 }]}");
+    });
+
+    it("gives an effect's params their names since 0.6 as it moves them, keyed or not", () => {
+      const old = `import { Clip, Composition, Effect, Keyframe, Track } from "@uberscene/kit";
+
+export default function V() {
+  return (
+    <Composition fps={30} width={1920} height={1080}>
+      <Track id="main">
+        <Clip id="c" src="asset:city" in={0} out={6}>
+          <Effect id="s" type="shadow" params={{ radius: 8, opacity: 0.5 }} />
+          <Effect id="o" type="outline" params={{ color: "#ffffff" }}>
+            <Keyframe id="o1" param="width" at={0} value={0} easing="ease-in-out" />
+            <Keyframe id="o2" param="width" at={1} value={6} />
+          </Effect>
+          <Effect id="h" type="halftone" params={{ type: "cmyk" }} />
+          <Effect id="b" type="blur" params={{ radius: 3 }} />
+        </Clip>
+      </Track>
+    </Composition>
+  );
+}
+`;
+      const { text, remaining } = fixSource(old, { manifest });
+      expect(remaining).toEqual([]);
+      expect(text).toContain('{ type: "shadow", blur: 8, opacity: 0.5 }');
+      expect(text).toContain('thickness: [{ at: 0, value: 0, easing: "easeInOut" }, { at: 1, value: 6 }]');
+      expect(text).toContain('{ type: "halftone", inks: "cmyk" }');
+      // The blur keeps its radius: only the shadow's was renamed.
+      expect(text).toContain('{ type: "blur", radius: 3 }');
+    });
+
+    it("reports keys made in code without a fix", () => {
+      const made = `import { Clip, Composition, Keyframe, Track } from "@uberscene/kit";
+const KEYS = [0, 1, 2];
+export default function V() {
+  return (
+    <Composition fps={30} width={1920} height={1080}>
+      <Track id="main">
+        <Clip id="c" src="asset:city" in={0} out={6}>
+          {KEYS.map((at) => (
+            <Keyframe key={at} id={\`k\${at}\`} property="transform.opacity" at={at} value={at / 2} />
+          ))}
+        </Clip>
+      </Track>
+    </Composition>
+  );
+}
+`;
+      const found = rule(made);
+      expect(found).toHaveLength(1);
+      expect(found[0]?.message).toContain("<Keyframe> made in code is now a prop of the element it belongs to");
+      expect(found[0]?.fix).toBeUndefined();
+      expect(fixSource(made, { manifest }).text).toBe(made);
+    });
+
+    it("leaves a file that resolves to the same keys, effects, speed keys and holds as one written with props", () => {
+      const stateOf = (text: string) => resolve(collectModule(loadModule(text) as never), manifest);
+      const derived = (text: string) => {
+        const state = stateOf(text);
+        expect(state.errors).toEqual([]);
+        return [...state.items.values()]
+          .filter((p) => ["keyframe", "effect", "speedKey", "freeze"].includes(p.kind))
+          .map((p) => ({ id: p.id, kind: p.kind, parent: p.parent, start: p.start, props: p.props }))
+          .sort((a, b) => (a.id < b.id ? -1 : 1));
+      };
+      const fixed = derived(fixSource(OLD, { manifest }).text);
+      expect(fixed.map((p) => p.id)).toEqual([
+        "a.volume.0",
+        "a.volume.1",
+        "c.effects.0",
+        "c.effects.0.radius.0",
+        "c.effects.0.radius.1",
+        "c.effects.1",
+        "c.freezes.0",
+        "c.speed.0",
+        "c.speed.1",
+        "c.transform.opacity.0",
+        "c.transform.opacity.1",
+      ]);
+      expect(fixed).toEqual(derived(PROPS));
     });
   });
 

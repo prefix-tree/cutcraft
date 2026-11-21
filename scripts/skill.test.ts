@@ -86,7 +86,18 @@ test("the whole files in SKILL.md resolve with no errors", () => {
 test("the skill names no API UberScene has removed", () => {
   for (const file of [join(skill, "SKILL.md"), ...references]) {
     const md = readFileSync(file, "utf8");
-    for (const gone of ["<Graphic", 'src="icon:', "captureSheet", "<ColorGrade", "--engine"])
+    for (const gone of [
+      "<Graphic",
+      'src="icon:',
+      "captureSheet",
+      "<ColorGrade",
+      "--engine",
+      "<Keyframe",
+      "<Effect",
+      "<SpeedKey",
+      "<Freeze",
+      "automation=",
+    ])
       assert.ok(!md.includes(gone), `${file} mentions ${gone}`);
   }
 });

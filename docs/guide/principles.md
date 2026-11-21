@@ -12,9 +12,10 @@ the model.
 ## 2. A fixed vocabulary with literal ids
 
 The timeline is written in a fixed set of elements whose props are Zod schemas, and every element carries a literal
-`id`, unique in the file. That is how an editor, a lint or a model finds the element a change belongs to. A
-collection the inspector edits one by one (keyframes, effects, captions) is child elements, not a prop array. Pure
-helper functions, such as the ready-made components, expand into the same elements.
+`id`, unique in the file. That is how an editor, a lint or a model finds the element a change belongs to. Everything
+about an element is a prop on it: a value that changes over time is a list of keys, and its effects are a list, so an
+editor finds a key by the element, the prop's path and the time, and an effect by its place. Pure helper functions,
+such as the ready-made components, expand into the same elements.
 
 ## 3. Time by meaning
 
@@ -43,7 +44,7 @@ footage, then overlays, then music, which is how a brief is written.
 
 ## 7. Free code where the timeline stops
 
-Time keeps a strict skeleton: compositions, tracks, clips, transitions, captions and keyframes. Pictures do not. A
+Time keeps a strict skeleton: compositions, tracks, clips, transitions, captions and keys. Pictures do not. A
 `<Layer>` holds any React, CSS, canvas or WebGL, on the video's clock, and one component inside it gets handles the
 editor can change. Ready-made pieces are plain functions built from the kit's own elements, not a second drawing
 engine, so editing one turns it into elements you own.

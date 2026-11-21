@@ -223,14 +223,18 @@ function collectChildren(
           [],
           true,
         );
-        // <Effect> and <Keyframe> written inside a Layer are its children on the timeline; the rest is its free code.
-        const all = Children.toArray(element.props.children as ReactNode);
-        const own = all.filter(isLayerChild);
-        const children = own.length > 0 ? collectChildren(own, node.id, walker, origin) : [];
-        const free = all.filter((c) => !isLayerChild(c));
+        // A Layer's children are its free code; its effects and keys are its props. One written the old way, as an
+        // <Effect> or <Keyframe> child, would draw nothing: say so.
+        const free = Children.toArray(element.props.children as ReactNode);
+        for (const c of free)
+          if (isValidElement(c) && (c.type === undefined || c.type === null)) {
+            const message = removedElement((c as ReactElement<Record<string, unknown>>).props);
+            if (message && !walker.errors.some((e) => e.id === node.id && e.message === message))
+              walker.errors.push({ code: "SCHEMA", id: node.id, message });
+          }
         scanDeclared(walker, free, node.id);
         const interior = engine ? null : interiorOf(free);
-        const full: CollectedNode = { ...node, children, ...(interior ? { interior } : {}) };
+        const full: CollectedNode = { ...node, children: [], ...(interior ? { interior } : {}) };
         if (full !== node) walker.byId.set(node.id, full);
         out.push(full);
         return;
@@ -270,14 +274,19 @@ function collectChildren(
       const grade = "temperature" in element.props || "tint" in element.props;
       // `<Graphic kind="…">` is the only element that took a `kind`.
       const graphic = typeof element.props.kind === "string";
+      const removed = removedElement(element.props);
+      // One report per element and kind: its four keys are one thing to move.
+      if (removed && walker.errors.some((e) => e.id === (parent ?? "composition") && e.message === removed)) return;
       walker.errors.push({
         code: "SCHEMA",
-        id,
-        message: grade
-          ? '<ColorGrade> is now a whiteBalance effect: <Effect type="whiteBalance" params={{ temperature, tint }} />'
-          : graphic
-            ? `<Graphic kind="${String(element.props.kind)}"> was removed: use LowerThird, Callout, Badge, Counter or TypeCard from @uberscene/kit, or free code (<Layer>, <Motion>, <Svg>)`
-            : "an element whose component is undefined: check its import from @uberscene/kit",
+        id: removed ? (parent ?? "composition") : id,
+        message:
+          removedElement(element.props) ??
+          (grade
+            ? '<ColorGrade> is now a whiteBalance effect: effects={[{ type: "whiteBalance", temperature, tint }]}'
+            : graphic
+              ? `<Graphic kind="${String(element.props.kind)}"> was removed: use LowerThird, Callout, Badge, Counter or TypeCard from @uberscene/kit, or free code (<Layer>, <Motion>, <Svg>)`
+              : "an element whose component is undefined: check its import from @uberscene/kit"),
       });
       return;
     }
@@ -341,7 +350,7 @@ function textOf(children: ReactNode): string | undefined {
   let onlyText = true;
   Children.forEach(children, (child) => {
     if (typeof child === "string" || typeof child === "number") parts.push(String(child));
-    // A timeline child (<Effect>, <Keyframe>, <Mask>) is collected on its own; it is not part of the text.
+    // A timeline child (a <Mask>) is collected on its own; it is not part of the text.
     else if (isValidElement(child) && isVocabulary(child.type)) return;
     else if (child !== null && child !== undefined && typeof child !== "boolean") onlyText = false;
   });
@@ -357,11 +366,22 @@ function withEngine(
   return { ...element, props: { ...element.props, engine } };
 }
 
-/** The timeline children a Layer may hold in its JSX, beside its free code. */
-const LAYER_CHILD_KINDS: ReadonlySet<string> = new Set(["effect", "keyframe"]);
+const MOVE = "uberscene lint --fix moves the file";
 
-function isLayerChild(child: ReactNode): boolean {
-  return isValidElement(child) && isVocabulary(child.type) && LAYER_CHILD_KINDS.has(child.type.kind);
+/**
+ * What became of `<Keyframe>`, `<Effect>`, `<SpeedKey>` and `<Freeze>`, told from the props of an element whose
+ * component is undefined: each is now a prop of the element it sat in. Null for anything else.
+ */
+export function removedElement(props: Readonly<Record<string, unknown>>): string | null {
+  if (("property" in props || "param" in props) && "at" in props && "value" in props)
+    return `<Keyframe> is gone: keys are a list on the value they animate, as transform={{ opacity: [{ at: 0, value: 0 }, { at: 0.5, value: 1 }] }}; ${MOVE}`;
+  if ("speed" in props && "at" in props && !("src" in props))
+    return `<SpeedKey> is gone: a speed ramp is keys on speed, as speed={[{ at: 0, value: 1 }, { at: 2, value: 0.5 }]}; ${MOVE}`;
+  if ("start" in props && "duration" in props && "at" in props && !("src" in props))
+    return `<Freeze> is gone: holds are a list, as freezes={[{ start, duration, source }]}; ${MOVE}`;
+  if ("type" in props && ("params" in props || "enabled" in props || !("src" in props)) && !("kind" in props))
+    return `<Effect> is gone: effects are a list on the element, as effects={[{ type: "blur", radius: 4 }]}; ${MOVE}`;
+  return null;
 }
 
 /** A Layer's handles: exactly one child element whose type is a function component (not a vocabulary element). */

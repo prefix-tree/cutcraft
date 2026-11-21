@@ -4,7 +4,7 @@ editLink: false
 
 # `<Audio>`
 
-A stretch of a sound asset: volume, fades, ducking under another track, automation.
+A stretch of a sound asset: volume and pan (constant or keys), fades, ducking under another track.
 
 **Used in:** [the walkthrough](/guide/writing-files) · [Product demo with zoom-ins](/recipes/product-demo) · [Slideshow with motion](/recipes/slideshow) · [Talking-head cut](/recipes/talking-head)
 
@@ -21,11 +21,12 @@ A stretch of a sound asset: volume, fades, ducking under another track, automati
 | `src` | string |  | yes | The media, as `asset:<id>` from the manifest. |
 | `in` | number (0..∞) \| string |  |  | Where in the source it starts: seconds, or a word, shot or silence of its transcript (`word:12`). |
 | `out` | number (0..∞) \| string |  |  | Where in the source it ends, as `in`; `word:40.end` ends after the word is said. |
-| `speed` | number (0.1..20) | `1` |  | Playback rate: 2 plays twice as fast and half as long. |
+| `speed` | number (0.1..20) \| { at, value, easing }[] |  |  | Playback rate: 2 plays twice as fast and half as long; keys ramp it. |
+| `freezes` | { start, duration, source }[] |  |  | Frames held on screen while the clip's time stands still. |
 | `reverse` | boolean | `false` |  | Plays the trimmed source backwards. |
-| `volume` | number (0..4) |  |  | A gain: 1 plays the source as it is, 0 mutes it, 2 is twice as loud. |
+| `volume` | number (0..4) \| { at, value, easing }[] |  |  | A gain: 1 plays the source as it is, 0 mutes it, 2 is twice as loud; keys change it over time. |
+| `pan` | number (-1..1) \| { at, value, easing }[] |  |  | Where it sits between the speakers, from -1 (left) to 1 (right); keys move it. |
 | `fade` | { in, out } |  |  | Seconds the sound fades in at the start and out at the end. |
-| `automation` | { volume, pan } |  |  | Volume and pan over time, as `[seconds into the element, value]` points; pan runs from -1 (left) to 1 (right). |
 | `duck` | { under, to, attack, release } |  |  | Turns this sound down while another plays: `under` is a track id or a track role (`dialogue`), `to` the volume it falls to, `attack` and `release` the seconds it takes to fall and recover. |
 
-Timed, audible, trims its source. Children: `keyframe`, `speedKey`, `freeze`. [All elements](/reference/elements/)
+Timed, audible, trims its source. No children. [All elements](/reference/elements/)

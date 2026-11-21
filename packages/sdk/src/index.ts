@@ -19,6 +19,7 @@ export * from "./resolve/captions";
 export * from "./resolve/collect";
 export * from "./resolve/dependents";
 export * from "./resolve/errors";
+export { withoutEffects } from "./resolve/expand";
 export * from "./resolve/resolve";
 export * from "./resolve/scene";
 export * from "./resolve/speed";
@@ -62,4 +63,4 @@ export {
 export { ALLOWED_IMPORTS, type CutModule, type LoadOptions, loadModule } from "./source/load";
 export { type GatherOptions, gatherLocalFiles } from "./source/local-files";
 export { parseSource, type Range, rangeOf } from "./source/parse";
-export { elementName, printElement, printLiteral, printProp } from "./source/print";
+export { elementName, printElement, printLiteral, printProp, printValue } from "./source/print";

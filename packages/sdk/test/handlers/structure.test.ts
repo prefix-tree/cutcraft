@@ -205,22 +205,25 @@ describe("structure on free and sequence tracks", () => {
     ).toBe("ELEMENT_NOT_FOUND");
   });
 
-  it("keeps the keyframe inside its element and the transition on an existing cut", () => {
+  it("keeps a key inside its element, on a path keys can take, and the effects in order", () => {
     const exec = fixtureExecutor();
-    expect(exec.execute({ type: "keyframe/move", params: { id: "c1", keyId: "k2", at: 99 } }).errors?.[0]?.code).toBe(
+    const code = (input: Parameters<typeof exec.execute>[0]) => exec.execute(input).errors?.[0]?.code;
+    expect(code({ type: "key/move", params: { id: "c1", path: "transform.opacity", at: 0.5, to: 99 } })).toBe(
       "OUT_OF_BOUNDS",
     );
-    expect(
-      exec.execute({ type: "keyframe/add", params: { id: "c1", keyId: "k9", property: "nope", at: 0, value: 1 } })
-        .errors?.[0]?.code,
-    ).toBe("INVALID_PARAMS");
-    expect(
-      exec.execute({ type: "effect/setOrder", params: { id: "c1", childIds: ["fx1", "ghost"] } }).errors?.[0]?.code,
-    ).toBe("INVALID_PARAMS");
-    expect(
-      exec.execute({ type: "effect/add", params: { id: "c1", childId: "fx9", type: "nope" as never } }).errors?.[0]
-        ?.code,
-    ).toBe("INVALID_PARAMS");
+    expect(code({ type: "key/move", params: { id: "c1", path: "transform.opacity", at: 0.3, to: 1 } })).toBe(
+      "ELEMENT_NOT_FOUND",
+    );
+    expect(code({ type: "key/add", params: { id: "c1", path: "nope", at: 0, value: 1 } })).toBe("INVALID_PARAMS");
+    expect(code({ type: "key/add", params: { id: "c1", path: "effects.9.radius", at: 0, value: 1 } })).toBe(
+      "INVALID_PARAMS",
+    );
+    expect(code({ type: "key/add", params: { id: "c1", path: "effects.0.radius", at: 0, value: "x" } })).toBe(
+      "INVALID_PARAMS",
+    );
+    expect(code({ type: "effect/setOrder", params: { id: "c1", order: [0, 0] } })).toBe("INVALID_PARAMS");
+    expect(code({ type: "effect/remove", params: { id: "c1", index: 5 } })).toBe("ELEMENT_NOT_FOUND");
+    expect(code({ type: "effect/add", params: { id: "c1", effect: { type: "nope" } } })).toBe("INVALID_PARAMS");
   });
 
   it("converts a sequence track to free, keeping every element where it played", () => {

@@ -94,7 +94,7 @@ describe("fold", () => {
     const exec = fixtureExecutor();
     exec.execute({ type: "clip/trim", params: { id: "c2", edge: "out", value: 4.4 } });
     exec.execute({ type: "text/setContent", params: { id: "t1", text: "Hello there" } });
-    exec.execute({ type: "effect/add", params: { id: "c3", childId: "fx9", type: "grain", params: { amount: 0.2 } } });
+    exec.execute({ type: "effect/add", params: { id: "c3", effect: { type: "grain", amount: 0.2 } } });
     exec.execute({ type: "element/remove", params: { id: "g1" } });
     exec.execute({ type: "marker/add", params: { markerId: "m2", start: 6, label: "beat" } });
     const result = foldToSource(fixtureText, exec.log(), exec.state());
@@ -105,7 +105,7 @@ describe("fold", () => {
     expect(reresolved.errors).toEqual([]);
     expect(lint(result.text, { manifest }).filter((d) => d.severity === "error")).toEqual([]);
     expect(serialize(reresolved, false)).toEqual(serialize(exec.state(), false));
-    expect(result.text).toContain('<Effect id="fx9" type="grain" params={{ amount: 0.2 }} enabled />');
+    expect(result.text).toContain('speed={1.2} effects={[{ type: "grain", amount: 0.2 }]} />');
     expect(result.text).not.toContain('<Gap id="g1"');
   });
 
@@ -202,14 +202,14 @@ describe("fold", () => {
   it("writes a clip back once when a delete is undone after an element was added inside it", async () => {
     // The clip put back is not the file's clip (it has a keyframe the file lacks): it is printed anew, the old one goes.
     const exec = fixtureExecutor();
-    const add = { id: "c3", keyId: "kz", property: "transform.opacity", at: 0, value: 0 };
-    expect(exec.execute({ type: "keyframe/add", params: add }).ok).toBe(true);
+    const add = { id: "c3", path: "transform.opacity", at: 0, value: 0 };
+    expect(exec.execute({ type: "key/add", params: add }).ok).toBe(true);
     expect(exec.execute({ type: "element/remove", params: { id: "c3" } }).ok).toBe(true);
     expect(exec.undo()?.ok).toBe(true);
     const result = foldToSource(fixtureText, exec.log(), exec.state());
     expect(result.skipped).toEqual([]);
     expect(result.text.match(/<Clip id="c3"/g)).toHaveLength(1);
-    expect(result.text.match(/<Keyframe id="kz"/g)).toHaveLength(1);
+    expect(result.text.match(/transform=\{\{ opacity: \[\{ at: 0, value: 0 \}\] \}\}/g)).toHaveLength(1);
     const mod = await evaluate(result.text);
     const reresolved = resolve(collectModule(mod, {}, { index: buildSourceIndex(result.text) }), manifest);
     expect(reresolved.errors).toEqual([]);
@@ -346,9 +346,7 @@ describe("fold, layout conversion, flatten and extract", () => {
       expect: (text) => {
         expect(text).toContain('<Track id="main" name="Main" layout="free">');
         expect(text).toContain('<Transition id="x1" type="crossfade" duration={0.5} on="c1" edge="out" />');
-        expect(text).toContain(
-          '<Clip id="c2" src="asset:city" duration={3.5} fit="cover" transform={{ scale: 1.1 }} start={5}>',
-        );
+        expect(text).toMatch(/<Clip\s+id="c2"\s+src="asset:city"\s+duration=\{3\.5\}[^>]*\sstart=\{5\}\s*\/>/);
         expect(text).not.toContain('<Gap id="g1"');
       },
     },

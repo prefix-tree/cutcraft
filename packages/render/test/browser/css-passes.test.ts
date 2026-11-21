@@ -49,7 +49,7 @@ async function still(name: string, body: string, declarations: string, backgroun
   writeFileSync(
     file,
     `import { z } from "zod";
-import { Clip, Composition, effect, Effect, Track } from "@uberscene/kit";
+import { Clip, Composition, effect, Track } from "@uberscene/kit";
 export const manifest = ${JSON.stringify(manifest)};
 ${declarations}
 export default function Video() {
@@ -85,7 +85,7 @@ beforeAll(async () => {
   // transparent background to draw them on).
   const photo = await still(
     "photo-chart",
-    `<Clip id="c" src="asset:solid" fit="cover"><Effect id="chart" type={chart} /></Clip>`,
+    `<Clip id="c" src="asset:solid" fit="cover" effects={[{ type: chart }]} />`,
     CHART,
   );
   copyFileSync(photo, join(dir, "photo.png"));
@@ -148,34 +148,34 @@ const CASES: readonly {
   picture: "photo" | "shape";
   tolerance?: { off: number; max: number };
 }[] = [
-  { name: "brightness", picture: "photo", effect: `<Effect id="e" type="brightness" params={{ amount: 0.25 }} />` },
-  { name: "contrast", picture: "photo", effect: `<Effect id="e" type="contrast" params={{ amount: 0.4 }} />` },
-  { name: "saturation", picture: "photo", effect: `<Effect id="e" type="saturation" params={{ amount: 0.6 }} />` },
-  { name: "hue", picture: "photo", effect: `<Effect id="e" type="hue" params={{ angle: 90 }} />` },
-  { name: "sepia", picture: "photo", effect: `<Effect id="e" type="sepia" params={{ amount: 0.7 }} />` },
-  { name: "grayscale", picture: "photo", effect: `<Effect id="e" type="grayscale" params={{ amount: 0.8 }} />` },
-  { name: "invert", picture: "photo", effect: `<Effect id="e" type="invert" params={{ amount: 0.6 }} />` },
+  { name: "brightness", picture: "photo", effect: `{ type: "brightness", amount: 0.25 }` },
+  { name: "contrast", picture: "photo", effect: `{ type: "contrast", amount: 0.4 }` },
+  { name: "saturation", picture: "photo", effect: `{ type: "saturation", amount: 0.6 }` },
+  { name: "hue", picture: "photo", effect: `{ type: "hue", angle: 90 }` },
+  { name: "sepia", picture: "photo", effect: `{ type: "sepia", amount: 0.7 }` },
+  { name: "grayscale", picture: "photo", effect: `{ type: "grayscale", amount: 0.8 }` },
+  { name: "invert", picture: "photo", effect: `{ type: "invert", amount: 0.6 }` },
   {
     name: "blur",
     picture: "photo",
-    effect: `<Effect id="e" type="blur" params={{ radius: 4 }} />`,
+    effect: `{ type: "blur", radius: 4 }`,
     tolerance: { off: 0.15, max: 10 },
   },
   {
     name: "blur-shape",
     picture: "shape",
-    effect: `<Effect id="e" type="blur" params={{ radius: 6 }} />`,
+    effect: `{ type: "blur", radius: 6 }`,
     tolerance: { off: 0.15, max: 10 },
   },
   {
     name: "shadow-shape",
     picture: "shape",
-    effect: `<Effect id="e" type="shadow" params={{ x: 6, y: 8, blur: 10, color: "#000000", opacity: 0.6 }} />`,
+    effect: `{ type: "shadow", x: 6, y: 8, blur: 10, color: "#000000", opacity: 0.6 }`,
   },
   {
     name: "brightness-shape",
     picture: "shape",
-    effect: `<Effect id="e" type="brightness" params={{ amount: -0.3 }} />`,
+    effect: `{ type: "brightness", amount: -0.3 }`,
   },
 ];
 
@@ -188,11 +188,11 @@ afterAll(() => {
 describe.each(CASES)("$name as a shader pass", (c) => {
   it("matches Chrome's canvas filter", async () => {
     const clip = (extra: string) =>
-      `<Clip id="c" src="asset:${c.picture}" duration={2} fit="cover">${c.effect}${extra}</Clip>`;
+      `<Clip id="c" src="asset:${c.picture}" duration={2} fit="cover" effects={[${c.effect}${extra}]} />`;
     // The shapes sit on light grey, so a dark shadow or a blurred edge shows against it.
     const ground = c.picture === "shape" ? "#d0d0d0" : "#000000";
     const css = await still(`${c.name}-css`, clip(""), PASS_THROUGH, ground);
-    const shader = await still(`${c.name}-shader`, clip(`<Effect id="same" type={same} />`), PASS_THROUGH, ground);
+    const shader = await still(`${c.name}-shader`, clip(`, { type: same }`), PASS_THROUGH, ground);
     const d = difference(css, shader);
     measured[c.name] = d;
     const t = c.tolerance ?? { off: 0.002, max: 32 };

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { zBlendMode, zEasing, zEntranceAnimation, zFitMode } from "../enums";
+import { zBlendMode, zEasing, zEntranceAnimation, zFitMode, zVideoEffectType } from "../enums";
 
 const ID_PATTERN = /^[A-Za-z_][A-Za-z0-9_-]*$/;
 const TIME_REF_PATTERN = /^(word|shot|silence):\d+(\.end)?$|^marker:[A-Za-z_][A-Za-z0-9_-]*$/;
@@ -66,6 +66,23 @@ export const timedProps = {
 
 export const vec2Schema = z.strictObject({ x: z.number(), y: z.number() });
 
+/**
+ * One key of a value that changes over time: `value` at `at` seconds into the element. `easing` says how the value
+ * moves from this key to the next one; the last key's is not used.
+ */
+const keySchema = <S extends z.ZodType>(value: S) =>
+  z.strictObject({ at: z.number().nonnegative(), value, easing: zEasing.optional() });
+
+/** Keys over time, in place of a constant. */
+const keysSchema = <S extends z.ZodType>(value: S) => z.array(keySchema(value)).min(1);
+
+/**
+ * A value written as a constant, or as a list of keys when it changes over time. The resolver takes the keys out
+ * before it parses the props (`expandKeys` in the SDK), so a parsed prop holds the constant, or nothing.
+ */
+export const animatable = <S extends z.ZodType>(value: S) =>
+  z.union([value, keysSchema(value)]).transform((v) => v as z.output<S>);
+
 /** Which point of an element's box `box.x` and `box.y` place: a corner, the middle of an edge, or the centre. */
 export const BOX_ORIGINS = [
   "topLeft",
@@ -94,10 +111,10 @@ export const BOX_ORIGIN_POINT: Readonly<Record<BoxOrigin, { readonly x: number; 
 };
 
 export const boxSchema = z.strictObject({
-  /** Pixels from the frame's left edge to the box's `origin`. Left out: the box is centred across the frame. */
-  x: z.number().optional(),
-  /** Pixels from the frame's top edge to the box's `origin`. Left out: the box is centred down the frame. */
-  y: z.number().optional(),
+  /** Pixels from the frame's left edge to the box's `origin`, or keys to move it. Left out: centred across the frame. */
+  x: animatable(z.number()).optional(),
+  /** Pixels from the frame's top edge to the box's `origin`, or keys to move it. Left out: centred down the frame. */
+  y: animatable(z.number()).optional(),
   /**
    * The box's width in pixels; its content fills it as `fit` says. Left out: the width its content takes in the frame
    * (from `height` and the content's shape when only that is given).
@@ -119,27 +136,59 @@ const boxProp = {
   box: boxSchema.optional(),
 };
 
+const scaleValue = z.number().min(0).max(10);
+const fraction = z.number().min(0).max(1);
+
 const transformSchema = z.strictObject({
-  /** A multiplier, the same on both axes or `{ x, y }`. */
-  scale: z.union([z.number().min(0).max(10), vec2Schema]).optional(),
+  /** A multiplier, the same on both axes or `{ x, y }`; keys on either animate it. */
+  scale: z
+    .union([animatable(scaleValue), z.strictObject({ x: animatable(scaleValue), y: animatable(scaleValue) })])
+    .optional(),
   /** Degrees, clockwise. */
-  rotation: z.number().min(-360).max(360).optional(),
+  rotation: animatable(z.number().min(-360).max(360)).optional(),
   /** The point it scales and rotates around, as fractions of its own box; left out, its centre `{ x: 0.5, y: 0.5 }`. */
-  anchor: vec2Schema.optional(),
+  anchor: z.strictObject({ x: animatable(z.number()), y: animatable(z.number()) }).optional(),
   /** 0 is invisible, 1 opaque. */
-  opacity: z.number().min(0).max(1).optional(),
+  opacity: animatable(fraction).optional(),
   /** Rounded corners, in pixels or a theme token such as `$radius`. */
-  borderRadius: themedLengthSchema.optional(),
-  /** The part of the source to show, as fractions of its width and height from the top left. */
+  borderRadius: animatable(themedLengthSchema).optional(),
+  /** The part of the source to show, as fractions of its width and height from the top left; a field left out is the whole. */
   crop: z
     .strictObject({
-      x: z.number().min(0).max(1),
-      y: z.number().min(0).max(1),
-      width: z.number().min(0).max(1),
-      height: z.number().min(0).max(1),
+      x: animatable(fraction).default(0),
+      y: animatable(fraction).default(0),
+      width: animatable(fraction).default(1),
+      height: animatable(fraction).default(1),
     })
     .optional(),
 });
+
+/** What an effect's param may be: a number, text, a switch, a list of numbers or points, or named numbers. */
+export const paramValue = z.union([
+  z.number(),
+  z.string(),
+  z.boolean(),
+  z.array(z.number()),
+  // A list of points, as `curves` takes.
+  z.array(z.array(z.number())),
+  z.record(z.string(), z.number()),
+]);
+
+/**
+ * One effect: its `type`, a built-in or one the file declares with `effect()`, then its params by name, each a
+ * constant or keys over time. Off (`enabled: false`), it draws nothing and stays in the file.
+ */
+const effectSpecSchema = z
+  .object({
+    type: z.union([zVideoEffectType, z.string().min(1), z.custom<object>((v) => typeof v === "object" && v !== null)]),
+    enabled: z.boolean().optional(),
+  })
+  .catchall(z.union([paramValue, keysSchema(z.unknown())]));
+
+const effectsProp = {
+  /** Effects drawn on it, in order: each `{ type, ...params }`, a param written as keys to animate it. */
+  effects: z.array(effectSpecSchema).optional(),
+};
 
 const transformProp = {
   ...boxProp,
@@ -158,33 +207,36 @@ export const fitProp = {
   fit: zFitMode.optional(),
 };
 
-/** What everything drawn over the picture takes: where it sits, and how it mixes with what is under it. */
-export const overlayProps = { ...transformProp, ...blendProp };
+/** What everything drawn over the picture takes: where it sits, how it mixes with what is under it, its effects. */
+export const overlayProps = { ...transformProp, ...blendProp, ...effectsProp };
 
-/** Where an element sits and how it is turned, without `fit` or blending: a layer's or an adjustment's. */
-export const placedProps = transformProp;
+/** Where an element sits and how it is turned, with its effects, without `fit` or blending: a layer's. */
+export const placedProps = { ...transformProp, ...effectsProp };
+
+/** An adjustment's effects: drawn over everything beneath it. */
+export const adjustmentEffectsProp = effectsProp;
 
 /** Footage and nested sequences: drawn on the canvas, fitted to the frame, with a strength for their blend. */
 export const visualProps = {
   ...transformProp,
   ...fitProp,
   ...blendProp,
+  ...effectsProp,
   /** How strongly it blends: multiplied into its opacity. */
   blendOpacity: z.number().min(0).max(1).optional(),
 };
 
-const automationPointsSchema = z.array(z.tuple([z.number().nonnegative(), z.number()]));
+/** A gain: 1 plays the source as it is, 0 mutes it, 2 is twice as loud; keys change it over time. */
+export const volumeSchema = animatable(z.number().min(0).max(4));
 
 export const audioProps = {
-  /** A gain: 1 plays the source as it is, 0 mutes it, 2 is twice as loud. */
-  volume: z.number().min(0).max(4).optional(),
+  /** A gain: 1 plays the source as it is, 0 mutes it, 2 is twice as loud; keys change it over time. */
+  volume: volumeSchema.optional(),
+  /** Where it sits between the speakers, from -1 (left) to 1 (right); keys move it. */
+  pan: animatable(z.number().min(-1).max(1)).optional(),
   /** Seconds the sound fades in at the start and out at the end. */
   fade: z
     .strictObject({ in: z.number().nonnegative().optional(), out: z.number().nonnegative().optional() })
-    .optional(),
-  /** Volume and pan over time, as `[seconds into the element, value]` points; pan runs from -1 (left) to 1 (right). */
-  automation: z
-    .strictObject({ volume: automationPointsSchema.optional(), pan: automationPointsSchema.optional() })
     .optional(),
   /**
    * Turns this sound down while another plays: `under` is a track id or a track role (`dialogue`), `to` the volume

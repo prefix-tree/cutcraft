@@ -7,8 +7,8 @@ const manifest = { assets: { city: { id: "city", kind: "video" as const, duratio
 const stateOf = (effects: string) =>
   resolve(
     collectModule(
-      loadModule(`import { Clip, Composition, Effect, Track } from "@uberscene/kit";
-export default function V() { return <Composition fps={30} width={640} height={360}><Track id="t"><Clip id="c" src="asset:city">${effects}</Clip></Track></Composition>; }`) as never,
+      loadModule(`import { Clip, Composition, Track } from "@uberscene/kit";
+export default function V() { return <Composition fps={30} width={640} height={360}><Track id="t"><Clip id="c" src="asset:city" effects={[${effects}]} /></Track></Composition>; }`) as never,
     ),
     manifest,
   );
@@ -63,20 +63,20 @@ describe("monotoneCurve", () => {
 
 describe("the colour effects", () => {
   it("fill their defaults", () => {
-    const state = stateOf(`<Effect id="e" type="exposure" />
-      <Effect id="v" type="vibrance" params={{ amount: 0.5 }} />
-      <Effect id="w" type="whiteBalance" params={{ temperature: 0.2 }} />
-      <Effect id="s" type="shadowsHighlights" params={{ shadows: 0.4 }} />
-      <Effect id="d" type="duotone" />
-      <Effect id="k" type="curves" params={{ rgb: [[0, 0], [0.5, 0.6], [1, 1]] }} />`);
+    const state = stateOf(`{ type: "exposure" },
+      { type: "vibrance", amount: 0.5 },
+      { type: "whiteBalance", temperature: 0.2 },
+      { type: "shadowsHighlights", shadows: 0.4 },
+      { type: "duotone" },
+      { type: "curves", rgb: [[0, 0], [0.5, 0.6], [1, 1]] }`);
     expect(state.errors).toEqual([]);
-    const params = (id: string) => state.items.get(id)?.props.params;
-    expect(params("e")).toEqual({ stops: 0 });
-    expect(params("v")).toEqual({ amount: 0.5 });
-    expect(params("w")).toEqual({ temperature: 0.2, tint: 0 });
-    expect(params("s")).toEqual({ shadows: 0.4, highlights: 0, radius: 10 });
-    expect(params("d")).toEqual({ dark: "#1d2b53", light: "#ffd27f", amount: 1 });
-    expect(params("k")).toMatchObject({
+    const params = (n: number) => state.items.get(`c.effects.${n}`)?.props.params;
+    expect(params(0)).toEqual({ stops: 0 });
+    expect(params(1)).toEqual({ amount: 0.5 });
+    expect(params(2)).toEqual({ temperature: 0.2, tint: 0 });
+    expect(params(3)).toEqual({ shadows: 0.4, highlights: 0, radius: 10 });
+    expect(params(4)).toEqual({ dark: "#1d2b53", light: "#ffd27f", amount: 1 });
+    expect(params(5)).toMatchObject({
       rgb: [
         [0, 0],
         [0.5, 0.6],
@@ -90,10 +90,14 @@ describe("the colour effects", () => {
   });
 
   it("say what is out of range", () => {
-    const state = stateOf(`<Effect id="e" type="exposure" params={{ stops: 9 }} />
-      <Effect id="d" type="duotone" params={{ dark: "navy" }} />
-      <Effect id="k" type="curves" params={{ rgb: [[0.5, 0], [0.2, 1]] }} />`);
-    expect(state.errors.map((e) => `${e.id}.${e.prop}`)).toEqual(["e.params.stops", "d.params.dark", "k.params.rgb"]);
+    const state = stateOf(`{ type: "exposure", stops: 9 },
+      { type: "duotone", dark: "navy" },
+      { type: "curves", rgb: [[0.5, 0], [0.2, 1]] }`);
+    expect(state.errors.map((e) => `${e.id}.${e.prop}`)).toEqual([
+      "c.effects.0.stops",
+      "c.effects.1.dark",
+      "c.effects.2.rgb",
+    ]);
     expect(state.errors[2]?.message).toContain("x rising");
   });
 
