@@ -2,7 +2,7 @@
 // or the one a file declares with effect().
 import type { ZodType } from "zod";
 
-import { effectEntry, RENAMED_EFFECT_PARAMS } from "../effects/registry";
+import { effectEntry, RENAMED_EFFECT_PARAMS, RENAMED_TRANSITION_PARAMS } from "../effects/registry";
 import type { ShaderDefinition } from "./shader-definition";
 import { shaderFor } from "./shaders";
 
@@ -39,9 +39,14 @@ export function effectParamProblem(
   return null;
 }
 
-/** What a built-in effect's param `param` is called since 0.6, when that is another name; else undefined. */
-export function renamedParam(type: unknown, param: string): string | undefined {
-  if (typeof type !== "string" || !Object.hasOwn(RENAMED_EFFECT_PARAMS, type)) return undefined;
-  const moved = RENAMED_EFFECT_PARAMS[type] as Readonly<Record<string, string>>;
+/** What a built-in effect's (or transition's) param `param` is called since 0.6, when that is another name; else undefined. */
+export function renamedParam(
+  type: unknown,
+  param: string,
+  kind: "effect" | "transition" = "effect",
+): string | undefined {
+  const table = kind === "transition" ? RENAMED_TRANSITION_PARAMS : RENAMED_EFFECT_PARAMS;
+  if (typeof type !== "string" || !Object.hasOwn(table, type)) return undefined;
+  const moved = table[type] as Readonly<Record<string, string>>;
   return Object.hasOwn(moved, param) ? moved[param] : undefined;
 }

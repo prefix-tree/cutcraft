@@ -28,7 +28,7 @@ describe("the stylizers and generators", () => {
       amount: 1,
     });
     expect(params("pixelate")).toEqual({ size: 12, box: [0, 0, 1, 1], feather: 0 });
-    expect(params("scanlines")).toEqual({ spacing: 4, thickness: 0.5, intensity: 0.35, speed: 0, angle: 0 });
+    expect(params("scanlines")).toEqual({ spacing: 4, coverage: 0.5, intensity: 0.35, speed: 0, angle: 0 });
     expect(params("lightLeak")).toEqual({ color: "#ff8a3d", intensity: 0.6, spread: 0.6, evolution: 0.15, seed: 0 });
     expect(params("fractalNoise")).toEqual({
       size: 160,

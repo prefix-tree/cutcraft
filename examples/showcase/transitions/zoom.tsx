@@ -1,6 +1,6 @@
 import { Clip, Composition, Track, Transition } from "@uberscene/kit";
 
-// zoom: Zooms through the first clip into the next, with a blur.
+// zoom: Zooms through the first clip into the next, smearing along the zoom.
 export default function Video() {
   return (
     <Composition fps={30} width={640} height={360}>

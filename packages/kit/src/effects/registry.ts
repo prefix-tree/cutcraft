@@ -107,6 +107,12 @@ export const RENAMED_EFFECT_PARAMS: Readonly<Record<string, Readonly<Record<stri
   shadow: { radius: "blur" },
   outline: { width: "thickness" },
   halftone: { mode: "type" },
+  scanlines: { thickness: "coverage" },
+};
+
+/** Built-in transitions' params that had another name before 0.6, by transition: the old name to the new. */
+export const RENAMED_TRANSITION_PARAMS: Readonly<Record<string, Readonly<Record<string, string>>>> = {
+  zoom: { blur: "smear" },
 };
 
 const dir4 = z.enum(["left", "right", "up", "down"]);

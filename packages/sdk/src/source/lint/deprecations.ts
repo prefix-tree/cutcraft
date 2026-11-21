@@ -4,6 +4,7 @@ import {
   EASINGS,
   ENTRANCE_ANIMATIONS,
   RENAMED_EFFECT_PARAMS,
+  RENAMED_TRANSITION_PARAMS,
   RESPELLED_VALUES,
   TEXT_ANIMATION_TYPES,
   TEXT_DECORATIONS,
@@ -145,6 +146,9 @@ const NAMING: readonly Deprecation[] = [
   ...respelled("Title", ["animation.preset", "animation.type"], OLD_TEXT_ANIMATIONS),
   ...respelled("Title", ["decoration", "style.decoration"], OLD_DECORATIONS),
   ...respelled("Captions", ["animation"], OLD_CAPTION_ANIMATIONS),
+  ...Object.entries(RENAMED_TRANSITION_PARAMS).flatMap(([type, params]) =>
+    Object.entries(params).map(([from, to]) => rename("Transition", `params.${from}`, to, { type })),
+  ),
   ...respelled("Transition", ["params.curve"], OLD_EASINGS, { type: "crossfade" }),
 ];
 
