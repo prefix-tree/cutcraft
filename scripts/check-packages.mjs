@@ -13,6 +13,7 @@ const PACKAGES = [
   { dir: "packages/graphics" },
   // A stylesheet, not a module: attw would try to resolve it as one.
   { dir: "packages/player", attw: ["--exclude-entrypoints", "fonts.css"] },
+  { dir: "packages/editor" },
   { dir: "packages/render" },
   { dir: "packages/cli" },
 ];
