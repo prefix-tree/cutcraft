@@ -146,6 +146,14 @@ in the file as the one value it changed:
   <img src="docs/public/readme/editor-source.webp" width="820" alt="The editor's Source tab after lengthening the title by half a second: line 14 is marked and now reads duration={3}">
 </p>
 
+Titles and captions get a typography panel, laid out as a design tool's text section: preset, font, weight, size,
+line height, letter spacing, alignment, decoration, colour, stroke and shadow. Each field shows the value the text has
+now and writes only the key you change:
+
+<p align="center">
+  <img src="docs/public/readme/editor-typography.webp" width="360" alt="The typography panel: preset h1, Space Grotesk, Bold 700 at 96, line height 1.05, letter spacing 6, centred, italic, colour #ffcf5a">
+</p>
+
 [Try it](https://uberscene.prefixtree.xyz/editor/) or read [the shadcn editor](https://uberscene.prefixtree.xyz/guide/editor).
 
 ## License
