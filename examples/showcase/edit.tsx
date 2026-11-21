@@ -23,11 +23,8 @@ export default function Video() {
           anchor="open"
           offset={0.3}
           duration={2.2}
-          style="h1"
-          size={64}
-          width={420}
-          align="left"
-          box={{ x: 240, y: 100, origin: "center" }}
+          style={{ preset: "h1", size: 64, align: "left" }}
+          box={{ x: 240, y: 100, width: 420, origin: "center" }}
           animation={{ preset: "word-by-word" }}
         >
           Slow pour
@@ -79,10 +76,8 @@ export default function Video() {
           anchor="close"
           offset={0.2}
           duration={2.2}
-          style="h2"
-          width={420}
-          align="left"
-          box={{ x: 720, y: 100, origin: "center" }}
+          style={{ preset: "h2", align: "left" }}
+          box={{ x: 720, y: 100, width: 420, origin: "center" }}
           animation={{ preset: "slide-up" }}
         >
           Ready in four minutes.

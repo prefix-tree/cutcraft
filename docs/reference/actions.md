@@ -40,7 +40,7 @@ Every action has `validate`, `apply`, `invert` and `fold`; the inverse is never 
 | `caption/restore` | `{ captionsId, node, after }` | The undo of caption/remove: puts the cue back where it was. |
 | `caption/setAll` | `{ captionsId, nodes, after? }` | Replaces every literal cue with `nodes`; empty `nodes` lets the cues generated from `src` come back. |
 | `caption/setAnimation` | `{ captionsId, animation }` | Sets how caption words animate in (`animation`), separate from the style. |
-| `caption/setStyle` | `{ captionsId, style? }` | Sets the captions' `style`; omit it to clear. |
+| `caption/setStyle` | `{ captionsId, style? }` | Sets the captions' `style`: a theme preset's name, or an object (`{ preset, size, align, … }`); omit it to clear. |
 | `caption/update` | `{ captionId, text?, start?, end?, words? }` | Changes a cue's text, times or words; editing a generated cue makes every cue literal first. |
 
 ## `clip/`

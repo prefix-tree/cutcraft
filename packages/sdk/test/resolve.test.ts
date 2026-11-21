@@ -124,7 +124,7 @@ describe("resolve", () => {
       h(
         Track,
         { id: "t2" },
-        h(Title, { id: "t", anchor: "c1.end", offset: -1, duration: 2, width: 1080, height: 200 }, "Bye"),
+        h(Title, { id: "t", anchor: "c1.end", offset: -1, duration: 2, box: { width: 1080, height: 200 } }, "Bye"),
       ),
       h(
         Track,
@@ -235,7 +235,7 @@ describe("resolve", () => {
     const state = resolve(fixtureTree(), manifest);
     expect(state.items.get("b1")?.editable).toBe("generated");
     expect(state.items.get("t1")?.lockedProps).toEqual([]);
-    expect(state.items.get("t1")?.boundProps).toEqual({ color: "accent" });
+    expect(state.items.get("t1")?.boundProps).toEqual({ "style.color": "accent" });
     expect(state.items.get("mc1.cu2")).toMatchObject({ editable: "generated", start: 2 });
   });
 

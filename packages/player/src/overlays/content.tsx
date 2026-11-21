@@ -19,23 +19,28 @@ import type { ElementProps } from "./layout";
 
 const SUPPORTED: ReadonlySet<string> = new Set(TEXT_ANIMATION_PRESETS);
 
-/** A title's box: its width and height props, the whole frame when left out. */
+/**
+ * A title's text box: its `box`'s width and height, each the frame's when left out. A title has no `fit`, so its
+ * content is drawn at this size and `placeBox` never scales it.
+ */
 export function titleBox(
   props: Readonly<Record<string, unknown>>,
   comp: { width: number; height: number },
 ): { width: number; height: number } {
+  const box = (props.box ?? {}) as { width?: unknown; height?: unknown };
   return {
-    width: typeof props.width === "number" ? props.width : comp.width,
-    height: typeof props.height === "number" ? props.height : comp.height,
+    width: typeof box.width === "number" ? box.width : comp.width,
+    height: typeof box.height === "number" ? box.height : comp.height,
   };
 }
 
-/** Text title: the file's text content with font props; entrance/exit presets as CSS transforms. */
+/** Text title: the file's text content in its `style`; entrance/exit presets as CSS transforms. */
 export function titleContent(p: ElementProps & { readonly text: string }): ReactNode {
-  const props = p.placement.props as Record<string, unknown>;
+  const own = p.placement.props as Record<string, unknown>;
+  const props = (typeof own.style === "object" && own.style !== null ? own.style : {}) as Record<string, unknown>;
   const text = p.text;
   const rel = p.time - p.placement.start;
-  const anim = props.animation as { preset: string; in: number; out: number } | undefined;
+  const anim = own.animation as { preset: string; in: number; out: number } | undefined;
   const { effect, visibleChars } = animation(anim, rel, p.placement.duration, text.length, p.placement.id);
   const weight = props.weight;
   const shadow = props.shadow as { color: string; blur?: number; x?: number; y?: number } | undefined;

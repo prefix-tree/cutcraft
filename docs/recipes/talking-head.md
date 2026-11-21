@@ -21,7 +21,7 @@ The `podcast` asset has a two-speaker transcript with punctuation and silences. 
 
 - Drag any clip edge: the cue under it follows.
 - Edit a cue's text: every cue becomes literal in the file, then the edit applies. Undo brings generation back.
-- The title's `color` is bound to `accent`; an inspector change writes `defaults`.
+- The title's `style.color` is bound to `accent`; an inspector change writes `defaults`.
 
 ## What to check
 

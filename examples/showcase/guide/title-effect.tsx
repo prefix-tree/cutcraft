@@ -28,11 +28,8 @@ export default function Video() {
           id="name"
           start={0.2}
           duration={2.8}
-          size={96}
-          width={280}
-          align="left"
-          color="#f4efe6"
-          box={{ x: 160, y: 230, origin: "center" }}
+          style={{ size: 96, align: "left", color: "#f4efe6" }}
+          box={{ x: 160, y: 230, width: 280, origin: "center" }}
         >
           <Effect id="title-split" type={split} />
           Crema

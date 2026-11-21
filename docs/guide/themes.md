@@ -61,14 +61,22 @@ unknown token is an error: `UNKNOWN_TOKEN` when the file resolves, and the [`the
 
 ## Presets
 
-A preset is a named set of props for one kind of element. `style="name"` lays the preset under the element's own
-props, and the element's props always win: `<Title style="h1" color="#fff">` is an h1 in white.
+A preset is a named look for one kind of element. On a title and on the captions, `style` is the look: `style="h1"`
+takes the preset as it is, and an object names it with `preset`, every field written beside it winning.
+<code v-pre>&lt;Title style={{ preset: "h1", color: "#fff" }}&gt;</code> is an h1 in white. On a shape, an SVG or a
+sticker, `style="card"` lays the preset under the element's own props, which win the same way.
+
+A title's or the captions' preset is look only: the letters' font, size, weight, colours, outline, shadow, alignment
+and spacing. Where the text sits, how big its box is and how it comes in are written on the element (`box`,
+`transform`, `animation`), so a preset gives the same look wherever it is used. A field that is not a look, in a preset
+of your own, is reported once on the composition's `theme`, naming the preset and the field, and reaches no element:
+the rest of the theme still applies.
 
 The built-in themes share one set of presets, written in tokens:
 
 | Kind | Presets |
 |---|---|
-| title | `default`, `h1`, `h2`, `kicker`, `body`, `caption`, `quote`, `label`, `code` |
+| title | `default`, `h1`, `h2`, `kicker`, `body`, `caption`, `quote`, `label`, `code`, `note` |
 | shape | `default` (fill `$primary`), `card` (surface, radius, soft shadow), `panel`, `pill`, `outline`, `accent`, `backdrop` |
 | captions | `default`, `boxed`, `bold` (`style="boxed"` on `<Captions>`) |
 
@@ -145,7 +153,7 @@ A font file of your own works the same way, and a title can take the value direc
 export const brand = font({ family: "Brand Sans", src: "asset:brand" });
 export const brandBold = font({ family: "Brand Sans", src: "asset:brand-bold", weight: 700 });
 
-<Title id="hello" font={brand}>Hello</Title>
+<Title id="hello" style={{ font: brand }}>Hello</Title>
 ```
 
 Each `font()` call declares one face. `googleFont()` declares one face for each weight and style you give it (400 and

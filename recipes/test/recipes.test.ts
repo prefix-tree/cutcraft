@@ -112,7 +112,7 @@ const recipes: { name: string; file: string; mod: Module; check: (state: Resolve
     check: (s) => {
       expect(s.tree.byId.get("headline")?.text).toBe("Fresh coffee, slow mornings");
       expect(s.items.get("card")?.props).toMatchObject({ src: "asset:logo" });
-      expect(s.items.get("headline")?.props).toMatchObject({
+      expect(s.items.get("headline")?.props.style).toMatchObject({
         color: "#ff5a1f",
         font: THEMES.midnight.fonts.heading,
         size: 104,
@@ -127,7 +127,10 @@ const recipes: { name: string; file: string; mod: Module; check: (state: Resolve
       );
       expect(es.errors).toEqual([]);
       expect(es.tree.byId.get("headline")?.text).toBe("Café fresco, mañanas lentas");
-      expect(es.items.get("headline")?.props).toMatchObject({ color: "#ffcc00", font: THEMES.paper.fonts.heading });
+      expect(es.items.get("headline")?.props.style).toMatchObject({
+        color: "#ffcc00",
+        font: THEMES.paper.fonts.heading,
+      });
       expect(es.items.get("captions")?.props.style).toMatchObject({
         highlight: "#ffcc00",
         font: THEMES.paper.fonts.body,
@@ -159,7 +162,7 @@ const recipes: { name: string; file: string; mod: Module; check: (state: Resolve
       expect(s.items.get("demo")).toMatchObject({ start: 4, end: 10 });
       expect(s.items.get("window")).toMatchObject({ start: 4, end: 10 });
       expect(s.items.get("step-2")?.start).toBeCloseTo(7);
-      expect(s.items.get("name")?.props).toMatchObject({
+      expect(s.items.get("name")?.props.style).toMatchObject({
         font: THEMES.midnight.fonts.heading,
         color: THEMES.midnight.palette.text,
         size: 180,
@@ -168,11 +171,11 @@ const recipes: { name: string; file: string; mod: Module; check: (state: Resolve
       for (const theme of ["paper", "neon"] as const) {
         const t = resolve(collectModule(brandSpot as Module, { theme }), manifest);
         expect(t.errors).toEqual([]);
-        expect(t.items.get("name")?.props).toMatchObject({
+        expect(t.items.get("name")?.props.style).toMatchObject({
           font: THEMES[theme].fonts.heading,
           color: THEMES[theme].palette.text,
         });
-        expect(t.items.get("kicker")?.props.color).toBe(THEMES[theme].palette.primary);
+        expect(t.items.get("kicker")?.props.style).toMatchObject({ color: THEMES[theme].palette.primary });
         expect(t.items.get("composition")?.props.background).toEqual({
           mode: "color",
           color: THEMES[theme].palette.background,

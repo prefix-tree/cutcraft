@@ -59,7 +59,7 @@ export default function Video() {
   return (
     <Composition fps={30} width={640} height={360} theme={{ fonts: { heading } }}>
       <Track id="t" layout="free">
-        <Title id="h" start={0} duration={1} font={label}>Hi</Title>
+        <Title id="h" start={0} duration={1} style={{ font: label }}>Hi</Title>
         <Layer id="l" start={0} duration={1}><div style={{ fontFamily: free }} /></Layer>
       </Track>
     </Composition>
@@ -97,9 +97,11 @@ export default function Video() {
 }
 `;
     const exec = new Executor({ tree: collectModule(loadModule(text) as never), manifest: { assets: {} } });
-    expect(exec.execute({ type: "element/update", params: { id: "h", props: { font: "Titan One" } } }).ok).toBe(true);
+    expect(
+      exec.execute({ type: "element/update", params: { id: "h", props: { style: { font: "Titan One" } } } }).ok,
+    ).toBe(true);
     const folded = foldToSource(text, exec.log(), exec.state()).text;
-    expect(folded).toContain("font={titan}");
+    expect(folded).toContain("style={{ font: titan }}");
     expect(resolve(collectModule(loadModule(folded) as never), { assets: {} }).errors).toEqual([]);
   });
 });

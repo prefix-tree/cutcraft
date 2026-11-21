@@ -31,5 +31,27 @@ export interface Deprecation {
   readonly note?: string;
 }
 
-/** Every respelling the kit knows how to move a file across. Empty until a release respells something. */
-export const DEPRECATIONS: readonly Deprecation[] = [];
+/** A title's look, flat props before 0.6 and fields of its one `style` since: a preset name or an object. */
+const TITLE_LOOK = [
+  "font",
+  "size",
+  "weight",
+  "italic",
+  "color",
+  "background",
+  "stroke",
+  "shadow",
+  "align",
+  "valign",
+  "lineHeight",
+  "letterSpacing",
+  "decoration",
+] as const;
+
+/** Every respelling the kit knows how to move a file across. */
+export const DEPRECATIONS: readonly Deprecation[] = [
+  ...TITLE_LOOK.map(
+    (prop): Deprecation => ({ element: "Title", prop, to: { into: "style", wrap: "preset" }, since: "0.6.0" }),
+  ),
+  { element: "Captions", prop: "align", to: { into: "style", wrap: "preset" }, since: "0.6.0" },
+];

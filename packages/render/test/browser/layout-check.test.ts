@@ -70,7 +70,7 @@ describe("checkLayout", () => {
           box("edge", 620, 120, 100, 100),
           box("margin", 610, 120, 40, 40),
           box("low", 320, 310, 400, 30, 0.5, 0.5),
-          h(Title, { id: "hi", start: 0, duration: 1, size: 40 }, "Hi"),
+          h(Title, { id: "hi", start: 0, duration: 1, style: { size: 40 } }, "Hi"),
         ),
         h(
           Captions,
@@ -436,7 +436,10 @@ describe("checkLayout", () => {
       );
     // In a narrow column at the left, clear of the edges: nothing to report.
     expect(
-      brief((await caps({ box: { x: 170, y: 180, width: 240, origin: "center" }, align: "left" })).issues),
+      brief(
+        (await caps({ box: { x: 170, y: 180, width: 240, origin: "center" }, style: { size: 30, align: "left" } }))
+          .issues,
+      ),
     ).toEqual([]);
     // Pushed right until the line crosses the frame's edge: reported, with the props that move it back.
     const { issues } = await caps({ box: { x: 600, y: 180, origin: "center" } });

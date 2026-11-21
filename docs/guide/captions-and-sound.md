@@ -68,7 +68,7 @@ grouped into lines. Trim a clip and its captions change with it.
 | Prop | Does |
 |---|---|
 | `animation` | Colours the words as they are said: `word-highlight`, `word-by-word`, `karaoke` or `typewriter`. |
-| `style` | Sets the font, size, colours, background and stroke: how they look, not where. |
+| `style` | How they look, not where: a theme preset's name (`"boxed"`), or an object of the font, size, colours, background, stroke and `align`, with `preset` naming the preset it starts from (`{ preset: "boxed", size: 40 }`). |
 | `box` | Where they sit; [Place captions](#place-captions). Left out, the lower safe area. |
 
 ::: details How lines are made
@@ -93,7 +93,7 @@ the middle of the lines at 1152 pixels down puts them under the chin, clear of t
 A narrow block to the left of a diagram:
 
 ```tsx
-<Captions id="captions" src="asset:founder" box={{ x: 340, y: 1152, width: 520, origin: "center" }} align="left" />
+<Captions id="captions" src="asset:founder" box={{ x: 340, y: 1152, width: 520, origin: "center" }} style={{ align: "left" }} />
 ```
 
 | Prop | Does |
@@ -102,10 +102,10 @@ A narrow block to the left of a diagram:
 | `box.width` | The widest a line may be. |
 | `box.height` | A fixed height for the block; left out, it is as tall as its lines. |
 | `box.origin` | Which point of the block sits at `x` and `y`: `bottom` by default, `top`, `center` or any of the nine. |
-| `align` | The side of that width the lines sit against: `left`, `center`, `right` or `justify`. |
+| `style.align` | The side of that width the lines sit against: `left`, `center`, `right` or `justify`. |
 
-The layout check measures the captions where the box puts them. Files written with `style.position` or with `x`, `y`
-and `width` from the frame's centre move with `uberscene lint --fix`.
+The layout check measures the captions where the box puts them. Files written with `style.position`, with `x`, `y`
+and `width` from the frame's centre, or with a flat `align` move with `uberscene lint --fix`.
 
 ## Highlight the word being said
 

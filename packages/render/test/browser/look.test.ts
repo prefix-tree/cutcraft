@@ -47,7 +47,7 @@ export default function Video() {
         <Clip id="solid" src="asset:solid" in={0} out={1.4} fit="cover" />
       </Track>
       <Track id="text" layout="free">
-        ${options.title === false ? "" : `<Title id="point" start={0.2} duration={1} size={40} enter={{ type: "none" }} exit={{ type: "none" }}>${options.words ?? "Point"}</Title>`}
+        ${options.title === false ? "" : `<Title id="point" start={0.2} duration={1} style={{ size: 40 }} enter={{ type: "none" }} exit={{ type: "none" }}>${options.words ?? "Point"}</Title>`}
       </Track>
     </Composition>
   );

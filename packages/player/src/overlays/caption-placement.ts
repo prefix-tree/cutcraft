@@ -4,7 +4,7 @@ import { BOX_ORIGIN_POINT, BOX_ORIGINS, type BoxOrigin } from "@uberscene/kit/sc
 
 import { placeAxis } from "../model/box";
 
-/** Where the file puts the captions: the fields of its `box` it writes, and its `align`. */
+/** Where the file puts the captions: the fields of its `box` it writes, and its `style.align`. */
 export interface CaptionPlace {
   readonly x?: number;
   readonly y?: number;
@@ -26,7 +26,8 @@ export function captionPlace(props: Readonly<Record<string, unknown>>): CaptionP
     if (v !== undefined) out[k] = v;
   }
   if ((BOX_ORIGINS as readonly unknown[]).includes(box.origin)) out.origin = box.origin as BoxOrigin;
-  if (props.align === "left" || props.align === "right" || props.align === "center") out.align = props.align;
+  const style = (typeof props.style === "object" && props.style ? props.style : {}) as Record<string, unknown>;
+  if (style.align === "left" || style.align === "right" || style.align === "center") out.align = style.align;
   return out;
 }
 

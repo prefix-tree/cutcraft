@@ -29,26 +29,50 @@ thirds. Use it when a video needs a headline, a name card or a callout. For anyt
 All of them work the same way:
 
 - They are placed in time like any overlay ([Timing](./time#overlays-anchor)).
-- They take a `transform` for position, scale, rotation and opacity, and can have `<Keyframe>` children.
+- They take a `box` for where they sit and how big they are, a `transform` for scale, rotation and opacity, and can
+  have `<Keyframe>` children.
 - They take colours and fonts from the [theme](./themes), and their props show up in an editor's inspector.
 
 ## Titles
 
-A `<Title>` draws text in the theme's type.
+A `<Title>` draws text in the theme's type. How it looks is one prop, `style`: the name of a theme preset, or an object
+of the look's fields.
 
 ```tsx
 <Title id="title" start={0.3} duration={2.2} style="h1" animation={{ preset: "word-by-word" }}>
   Cut by words
 </Title>
+<Title id="note" start={2.5} duration={2} box={{ x: 960, y: 820, width: 840, origin: "center" }}
+  style={{ preset: "body", size: 40, color: "$primary", align: "left" }}>
+  Every cut lands on a word
+</Title>
 ```
 
 | Prop | Does |
 |---|---|
-| `style` | Picks a preset from the theme: `h1`, `h2`, `kicker`, `note`, and any you define. |
-| `size`, `weight`, `color`… | Override the preset. |
+| `style` | A preset from the theme by name (`h1`, `h2`, `kicker`, `body`, `quote`, `label`, `note`, and any you define), or an object of the fields below. In an object, `preset` names the preset it starts from and every field written beside it wins. |
+| `box` | Where the text box sits and its size. Its `width` and `height` are the text box: the lines wrap at its width, and `background`, `align` and `valign` work inside it. Left out, the box is the whole frame. |
 | `animation` | Builds the text in by letter or by word, or fades, slides or scales it in. |
 
-[`<Title>`](/reference/elements/title) lists every prop.
+The look's fields, each with its default when neither the element nor a preset sets it:
+
+| Field | Does | Default |
+|---|---|---|
+| `font` | The family: a bundled one, one the file declares, or one from the catalogue. | `"Inter"` |
+| `size` | The letters' size, in pixels. | `48` |
+| `weight` | 100 to 900, or `"normal"` and `"bold"`. | `"bold"` |
+| `italic` | Slanted letters. | `false` |
+| `color` | The letters' colour, or a token such as `"$text"`. | `"#ffffff"` |
+| `background` | A colour filling the text box. | none |
+| `stroke` | An outline: `{ color, width }`. | none |
+| `shadow` | A drop shadow: `{ color, blur, x, y }`. | none |
+| `align`, `valign` | Where the lines sit in the text box, across and down. | `"center"`, `"middle"` |
+| `lineHeight` | The distance between lines, as a multiple of the size. | `1.2` |
+| `letterSpacing` | Extra space between letters, in pixels. | `0` |
+| `decoration` | `"underline"`, `"overline"` or `"line-through"`. | none |
+
+A file written before 0.6, with these fields as flat props (`size={64}`) and the text box as `width` and `height`, is
+moved by `uberscene lint --fix`. [`<Title>`](/reference/elements/title) lists every prop.
 
 ## Entrances and exits
 
@@ -161,7 +185,7 @@ Four effects shape an element by its silhouette. Write them inside a title, a sh
 any `<Effect>`; they work on clips too.
 
 ```tsx
-<Title id="headline" start={0} duration={4} size={120} color="#ffd166">
+<Title id="headline" start={0} duration={4} style={{ size: 120, color: "#ffd166" }}>
   Launch day
   <Effect id="glow" type="glow" params={{ radius: 8, color: "#ff9f1c", intensity: 1.5 }} />
 </Title>

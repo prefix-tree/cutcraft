@@ -86,9 +86,7 @@ export default function Video({ accent }: z.infer<typeof schema>) {
           anchor="rec"
           offset={0.4}
           duration={2.4}
-          size={56}
-          weight={700}
-          valign="top"
+          style={{ size: 56, weight: 700, valign: "top" }}
           box={{ x: 960, y: 620, origin: "center" }}
           animation={{ preset: "fade", in: 0.3, out: 0.3 }}
         >

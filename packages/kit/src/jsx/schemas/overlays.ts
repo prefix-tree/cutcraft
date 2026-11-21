@@ -6,6 +6,7 @@ import {
   colorSchema,
   entranceProps,
   fitProp,
+  fontWeightSchema,
   gradientSchema,
   idSchema,
   overlayProps,
@@ -27,18 +28,16 @@ const textAnimationSchema = z.strictObject({
   stagger: z.number().nonnegative().optional(),
 });
 
-export const titleSchema = z.strictObject({
-  ...timedProps,
-  ...overlayProps,
-  ...entranceProps,
-  /** A theme preset for titles; without one, the theme's `default` title preset applies. */
-  style: idSchema.optional(),
+/** How a title's letters look. Every field has a default, so `{}` is plain white Inter at 48 pixels. */
+const titleLookSchema = z.strictObject({
+  /** A theme title preset this look starts from; the fields written beside it win. */
+  preset: idSchema.optional(),
   /** The font family: a bundled one, one the file declares, or one from the font catalogue. A theme preset may set it instead. */
   font: z.string().default("Inter"),
   /** The letters' size, in pixels. */
   size: z.number().min(1).max(1000).default(48),
   /** How heavy the letters are: 100 to 900, or `normal` and `bold`. */
-  weight: z.union([z.number().int().min(100).max(900).multipleOf(100), z.enum(["normal", "bold"])]).default("bold"),
+  weight: fontWeightSchema.default("bold"),
   /** Slanted letters. */
   italic: z.boolean().default(false),
   /** The letters' colour, or a theme token such as `$text`. */
@@ -53,16 +52,34 @@ export const titleSchema = z.strictObject({
   align: zTextAlign.default("center"),
   /** Where in the text box's height the text sits. */
   valign: zTextValign.default("middle"),
-  /** The text box, in composition pixels; the whole frame when left out, so background, align and valign work inside it. */
-  width: z.number().positive().optional(),
-  /** The text box's height, in pixels, as `width`. */
-  height: z.number().positive().optional(),
   /** The distance between lines, as a multiple of the letters' size. */
   lineHeight: z.number().min(0.1).max(10).default(1.2),
   /** Extra space between letters, in pixels. */
   letterSpacing: z.number().min(-100).max(100).default(0),
   /** A line under, over or through the letters. */
   decoration: zTextDecoration.optional(),
+});
+
+/** The fields a theme's title preset may hold: the look, without `preset` (a preset does not start from another). */
+export const TITLE_LOOK_KEYS: readonly string[] = Object.keys(titleLookSchema.shape).filter((k) => k !== "preset");
+
+export const titleSchema = z.strictObject({
+  ...timedProps,
+  ...overlayProps,
+  ...entranceProps,
+  /**
+   * How the letters look: a theme title preset by name (`"h1"`), or an object of `font`, `size`, `weight`, `italic`,
+   * `color`, `background`, `stroke`, `shadow`, `align`, `valign`, `lineHeight`, `letterSpacing` and `decoration`, with
+   * `preset` naming the preset it starts from. Without a preset, the theme's `default` title preset applies. The text
+   * box is the title's `box`: its `width` and `height`, the whole frame when left out, so background, align and valign
+   * work inside it.
+   */
+  style: z
+    .union([
+      idSchema.transform((preset): { preset?: string | undefined } => ({ preset })).pipe(titleLookSchema),
+      titleLookSchema,
+    ])
+    .prefault({}),
   /** An entrance and exit: a preset, its seconds in and out, and for word-by-word the delay between words. */
   animation: textAnimationSchema.optional(),
 });

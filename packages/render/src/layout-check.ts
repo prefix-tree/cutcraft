@@ -361,6 +361,8 @@ function moveText(kind: string, dx: number, dy: number, at?: Placed): string {
   if (kind === "captions")
     return `move the captions ${words} (${at ? `${boxMove(at, dx, dy)}, ` : ""}a narrower box.width, or a smaller style.size)`;
   if (kind === "part" || !at) return `move it ${words}, in the layer's code where it is drawn`;
+  if (kind === "title")
+    return `move it ${words} (${boxMove(at, dx, dy)}, a narrower box.width, or a smaller style.size)`;
   return `move it ${words} (${boxMove(at, dx, dy)})`;
 }
 
@@ -400,7 +402,7 @@ function describe(issue: LayoutIssue, at?: Placed): LayoutIssue {
       return {
         ...issue,
         message,
-        fix: `it is ${box.w}×${box.h} px but the ${issue.rule === "frame-edge" ? "frame" : "zone"} is ${Math.round(area.w)}×${Math.round(area.h)}: ${issue.kind === "part" ? `draw it at ${scale} of its size or less` : `scale it to ${scale} or less (transform.scale)`} and keep it within ${rect(area)}`,
+        fix: `it is ${box.w}×${box.h} px but the ${issue.rule === "frame-edge" ? "frame" : "zone"} is ${Math.round(area.w)}×${Math.round(area.h)}: ${issue.kind === "part" ? `draw it at ${scale} of its size or less` : issue.kind === "title" ? `make its style.size ${scale} of what it is or less, or scale it to that (transform.scale),` : `scale it to ${scale} or less (transform.scale)`} and keep it within ${rect(area)}`,
       };
     }
     const dx =

@@ -1,13 +1,7 @@
 import { AudioSampleSink, type InputAudioTrack } from "mediabunny";
 
-import {
-  AUDIO_PREROLL_SECONDS,
-  type BlockGrid,
-  blockGrid,
-  blockStart,
-  MediabunnyInputs,
-  type MediaResolver,
-} from "@uberscene/player/engine";
+import type { MediaResolver } from "@uberscene/player/engine";
+import { MediabunnyInputs } from "@uberscene/player/engine";
 
 import type { PcmBuffer, PcmProvider } from "./mixer";
 
@@ -15,8 +9,6 @@ interface Opened {
   readonly sink: AudioSampleSink;
   readonly sampleRate: number;
   readonly channels: number;
-  /** Where the stream's blocks start, from its first two; null when it gives no grid. */
-  readonly grid: BlockGrid | null;
 }
 
 /** Decodes audio ranges of the assets a composition uses, through Mediabunny, as planar float PCM. */
@@ -32,10 +24,8 @@ export class MediabunnyPcm implements PcmProvider {
     const sr = open.sampleRate;
     const length = Math.max(1, Math.ceil((to - from) * sr));
     const channels = Array.from({ length: Math.max(1, open.channels) }, () => new Float32Array(length));
-    // Decoded from a little before the range and the start dropped: a decoder started mid-stream needs it to settle,
-    // and its first block (cut short by Opus's pre-skip, applied again after a seek) falls there.
-    for await (const sample of open.sink.samples(Math.max(0, from - AUDIO_PREROLL_SECONDS), to)) {
-      const offset = blockStart(sample.timestamp, sample.numberOfFrames, sr, open.grid) - Math.round(from * sr);
+    for await (const sample of open.sink.samples(Math.max(0, from), to)) {
+      const offset = Math.round((sample.timestamp - from) * sr);
       const srcStart = Math.max(0, -offset);
       const dstStart = Math.max(0, offset);
       const n = Math.min(sample.numberOfFrames - srcStart, length - dstStart);
@@ -65,22 +55,10 @@ export class MediabunnyPcm implements PcmProvider {
         const track: InputAudioTrack | null = await input.getPrimaryAudioTrack();
         if (!track || !(await track.canDecode())) return null;
         const [sampleRate, channels] = await Promise.all([track.getSampleRate(), track.getNumberOfChannels()]);
-        const sink = new AudioSampleSink(track);
-        return { sink, sampleRate, channels, grid: await firstBlocks(sink, sampleRate) };
+        return { sink: new AudioSampleSink(track), sampleRate, channels };
       })();
       this.opened.set(asset, p);
     }
     return p;
   }
-}
-
-/** Where the stream's blocks start, from its first two ([blockGrid]). */
-async function firstBlocks(sink: AudioSampleSink, sampleRate: number): Promise<BlockGrid | null> {
-  const seen: { start: number; frames: number }[] = [];
-  for await (const sample of sink.samples()) {
-    seen.push({ start: Math.round(sample.timestamp * sampleRate), frames: sample.numberOfFrames });
-    sample.close();
-    if (seen.length === 2) break;
-  }
-  return blockGrid(seen[0], seen[1]);
 }

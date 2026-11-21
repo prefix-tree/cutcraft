@@ -9,7 +9,7 @@ import type { ResolvedState } from "../resolve/resolve";
 import { INTERIOR_PREFIX } from "../resolve/tree";
 import { bake } from "./bake";
 import { applyEdits, lineRange, type SourceEdit } from "./edits";
-import { buildSourceIndex, type ElementSite, type SourceIndex } from "./index";
+import { buildSourceIndex, type ElementSite, type PropEntry, type PropSite, type SourceIndex } from "./index";
 import { declaredIdentifiers } from "./lint/rules/fonts";
 import { identifier } from "./lint/rules/theme";
 import type { Range } from "./parse";
@@ -102,13 +102,18 @@ export function fold(
     return new Identifier(entry.identifier) as unknown as Json;
   };
   const declared = (kind: string, prop: string, value: Json | undefined): Json | undefined => {
-    // A font where it is nested: a theme's roles, a caption style.
+    // A font where it is nested: a theme's roles, a title's or captions' style.
     if (kind === "composition" && prop === "theme" && isRecord(value) && isRecord(value.fonts))
       return {
         ...value,
         fonts: Object.fromEntries(Object.entries(value.fonts).map(([role, family]) => [role, fontValue(family)])),
       } as Json;
-    if (kind === "captions" && prop === "style" && isRecord(value) && typeof value.font === "string")
+    if (
+      (kind === "captions" || kind === "title") &&
+      prop === "style" &&
+      isRecord(value) &&
+      typeof value.font === "string"
+    )
       return { ...value, font: fontValue(value.font) } as Json;
     if (typeof value !== "string") return value;
     if (prop === "font") return fontValue(value);
@@ -251,6 +256,23 @@ export function fold(
                   handle ? value : declared(site.kind, prop, value),
                   text,
                 );
+          // A key of a keyed object that reads one of the file's props is written where that prop's value is.
+          const keyed = !handle && key === undefined ? site.props.get(prop) : undefined;
+          if (keyed?.entries && isRecord(value))
+            for (const entry of keyed.entries) {
+              if (entry.binding === undefined) continue;
+              const now = value[entry.key];
+              // Against the value the file's `defaults` gives it: only a key the write changed is written back.
+              const was = index.defaults?.props.get(entry.binding)?.literal;
+              if (was === undefined || JSON.stringify(now) === JSON.stringify(was)) continue;
+              // With new settings in the same log, into their one edit of the literal, as a bound prop goes.
+              if (settings && now !== undefined) {
+                settings[entry.binding] = now;
+                continue;
+              }
+              const bound = bindingEdit(index, id, `${prop}.${entry.key}`, entry.binding, now, skipped);
+              if (bound) edits.push(bound);
+            }
           if (!e) continue;
           if (e.kind === "prop" && e.range[0] === e.range[1]) {
             // New attributes share one insertion point; one edit keeps them in write order.
@@ -610,6 +632,10 @@ function propEdit(
     while (start > site.openingTag[0] && /\s/.test(text[start - 1] as string)) start -= 1;
     return { kind: "prop", id: site.id, prop, range: [start, existing.range[1]], text: "" };
   }
+  if (existing?.entries && existing.valueRange && isRecord(value)) {
+    // An object some of whose keys are expressions: those stay as written, the others are edited key by key.
+    return { kind: "prop", id: site.id, prop, range: existing.valueRange, text: keyedObject(text, existing, value) };
+  }
   if (existing) {
     if (existing.valueRange === null) {
       // Bare attribute (`reverse`): rewrite the whole attribute.
@@ -633,6 +659,47 @@ function propEdit(
   let pos = selfClosing ? open[1] - 2 : open[1] - 1;
   while (pos > open[0] && /\s/.test(text[pos - 1] as string)) pos -= 1;
   return { kind: "prop", id: site.id, prop, range: [pos, pos], text: ` ${printProp(prop, value)}` };
+}
+
+/**
+ * The object literal `site` holds, rewritten to `value` key by key: a key whose value is an expression is kept as
+ * written (it is locked, so no action changes it), a literal key that changed is reprinted, one `value` leaves out is
+ * removed, and a new one is added at the end.
+ */
+function keyedObject(text: string, site: PropSite, value: Readonly<Record<string, Json>>): string {
+  const entries = site.entries ?? [];
+  const [start, end] = site.valueRange as Range;
+  const edits: { range: Range; text: string }[] = [];
+  entries.forEach((entry, i) => {
+    if (entry.isExpression) return;
+    if (!(entry.key in value) || value[entry.key] === undefined) {
+      // With the comma between it and the key before; the first key goes up to the next (one key is always kept,
+      // an expression).
+      const from = i > 0 ? (entries[i - 1] as PropEntry).range[1] : start + 1;
+      const to = i > 0 ? entry.range[1] : (entries[i + 1]?.range[0] ?? entry.range[1]);
+      edits.push({ range: [from, to], text: i > 0 ? "" : " " });
+      return;
+    }
+    const next = value[entry.key] as Json;
+    if (JSON.stringify(next) !== JSON.stringify(entry.literal))
+      edits.push({ range: entry.valueRange, text: printLiteral(next) });
+  });
+  const known = new Set(entries.map((e) => e.key));
+  const added = Object.entries(value).filter(([k, v]) => !known.has(k) && v !== undefined);
+  const last = entries.at(-1);
+  if (added.length > 0) {
+    const keyText = (k: string) => (/^[A-Za-z_$][\w$]*$/.test(k) ? k : JSON.stringify(k));
+    const body = added.map(([k, v]) => `${keyText(k)}: ${printLiteral(v)}`).join(", ");
+    edits.push(
+      last
+        ? { range: [last.range[1], last.range[1]], text: `, ${body}` }
+        : { range: [start, end], text: `{ ${body} }` },
+    );
+  }
+  let out = text.slice(start, end);
+  for (const e of edits.sort((a, b) => b.range[0] - a.range[0]))
+    out = out.slice(0, e.range[0] - start) + e.text + out.slice(e.range[1] - start);
+  return out;
 }
 
 function textEdit(site: ElementSite, value: string): SourceEdit | null {

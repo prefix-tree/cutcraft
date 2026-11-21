@@ -1,5 +1,4 @@
 export * from "./asset-sources";
-export * from "./block-grid";
 export * from "./clip-decoder";
 export * from "./decoder-pool";
 export * from "./fonts";

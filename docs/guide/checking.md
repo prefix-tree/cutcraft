@@ -124,9 +124,9 @@ npx uberscene video.tsx --check-layout --safe-zone tiktok
 
 ```text
 video.tsx:30:9: subject: title "t1" covers the subject from 0.53 s to 2.40 s.
-  30 |         <Title id="t1" anchor="v1" offset={0.5} duration={2} size={40}>Hello</Title>
+  30 |         <Title id="t1" anchor="v1" offset={0.5} duration={2} style={{ size: 40 }}>Hello</Title>
      |         ^
-  fix: move it down 89 px (box.y 269, box.origin "center"), then check again: the move may run into something else
+  fix: move it down 89 px (box.y 269, box.origin "center", a narrower box.width, or a smaller style.size), then check again: the move may run into something else
 
 1 layout issue on 1 element in 900 samples (every frame, safe zone tiktok).
 ```
@@ -168,7 +168,7 @@ worst one, where `box` is the element's ink and `area` is what it breaks. Pixels
     "rule": "subject", "id": "t1", "kind": "title", "with": "subject", "from": 0.533, "to": 2.4, "at": 0.533,
     "box": { "x": 273, "y": 165, "w": 96, "h": 30 }, "area": { "x": 224, "y": 72, "w": 192, "h": 180 },
     "message": "title \"t1\" covers the subject from 0.53 s to 2.40 s.",
-    "fix": "move it down 89 px (box.y 269, box.origin \"center\"), then check again: the move may run into something else",
+    "fix": "move it down 89 px (box.y 269, box.origin \"center\", a narrower box.width, or a smaller style.size), then check again: the move may run into something else",
     "source": { "file": "video.tsx", "line": 30, "column": 9, "code": "        <Title id=\"t1\" …>Hello</Title>" }
   }],
   "samples": 900,

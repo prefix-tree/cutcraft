@@ -254,7 +254,7 @@ import { Composition, Title, Track, googleFont } from "@uberscene/kit";
 
 const bebasNeue = googleFont("Bebas Neue");
 
-<Title id="headline" font={bebasNeue}>…</Title>
+<Title id="headline" style={{ font: bebasNeue }}>…</Title>
 ```
 
 A weight added to a family the file already declares is added to that declaration's `weights`. Undo takes the font

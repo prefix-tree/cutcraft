@@ -19,11 +19,8 @@ export default function Video() {
           id="angles"
           start={0}
           duration={3}
-          size={28}
-          width={380}
-          height={60}
-          background="rgba(16, 20, 33, 0.78)"
-          box={{ x: 230, y: 480, origin: "center" }}
+          style={{ size: 28, background: "rgba(16, 20, 33, 0.78)" }}
+          box={{ x: 230, y: 480, width: 380, height: 60, origin: "center" }}
         >
           Three angles, one take
         </Title>

@@ -1,7 +1,6 @@
 import { AudioBufferSink, type Input } from "mediabunny";
 
 import type { AudioSource, AudioSourceFactory, AudioSourceInfo, MediaHandle } from "../types";
-import { AUDIO_PREROLL_SECONDS, type BlockGrid, blockGrid, blockStart } from "./block-grid";
 import type { MediabunnyInputs } from "./mediabunny-input";
 
 /** PCM ranges of one audio track, decoded on demand into AudioBuffers of the track's sample rate. */
@@ -10,7 +9,6 @@ export class MediabunnyAudioSource implements AudioSource {
   private sink: AudioBufferSink | null = null;
   private sampleRate = 48000;
   private channels = 2;
-  private grid: BlockGrid | null = null;
 
   constructor(
     private readonly assetId: string,
@@ -34,7 +32,6 @@ export class MediabunnyAudioSource implements AudioSource {
     this.sampleRate = sampleRate;
     this.channels = channels;
     this.sink = new AudioBufferSink(track);
-    if (decodable) this.grid = await this.firstBlocks(sampleRate);
     return { sampleRate, channels, duration, decodable };
   }
 
@@ -43,8 +40,8 @@ export class MediabunnyAudioSource implements AudioSource {
     const length = Math.max(1, Math.ceil((to - from) * sr));
     const out = this.context.createBuffer(Math.max(1, this.channels), length, sr);
     if (!this.sink) return out;
-    for await (const { buffer, timestamp } of this.sink.buffers(Math.max(0, from - AUDIO_PREROLL_SECONDS), to)) {
-      const offset = blockStart(timestamp, buffer.length, sr, this.grid) - Math.round(from * sr);
+    for await (const { buffer, timestamp } of this.sink.buffers(Math.max(0, from), to)) {
+      const offset = Math.round((timestamp - from) * sr);
       const srcStart = Math.max(0, -offset);
       const dstStart = Math.max(0, offset);
       const n = Math.min(buffer.length - srcStart, length - dstStart);
@@ -55,17 +52,6 @@ export class MediabunnyAudioSource implements AudioSource {
       }
     }
     return out;
-  }
-
-  /** Where the track's blocks start, from its first two ([blockGrid]). */
-  private async firstBlocks(sampleRate: number): Promise<BlockGrid | null> {
-    const seen: { start: number; frames: number }[] = [];
-    if (!this.sink) return null;
-    for await (const { buffer, timestamp } of this.sink.buffers()) {
-      seen.push({ start: Math.round(timestamp * sampleRate), frames: buffer.length });
-      if (seen.length === 2) break;
-    }
-    return blockGrid(seen[0], seen[1]);
   }
 
   close(): void {

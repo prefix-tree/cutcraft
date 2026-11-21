@@ -24,8 +24,7 @@ import {
 } from "./encoding";
 import { type FontFile, loadFonts } from "./fonts";
 import { AudioFeed, feedPackets, feedSegment, planSegments } from "./join";
-import { type CodecModes, codecBinary, codecModes } from "./native/codecs";
-import { encodePageMix, mixNatively, NativeSoundUnavailable, type SoundContainer } from "./native/soundtrack";
+import { type CodecModes, codecModes } from "./native/codecs";
 import { avcCodecString } from "./native/wire";
 import { BrowserEngine } from "./web/engine";
 import type { NativeEncodeOptions } from "./web/page/protocol";
@@ -205,27 +204,14 @@ export async function renderVideo(options: RenderOptions): Promise<RenderResult>
   let output: Output | null = null;
   let feed: AudioFeed | null = null;
   try {
-    const audioBitrate = options.audioBitrate ?? 128_000;
     const soundtrack = options.silent
       ? null
-      : // MP3 stays with the page's encoder: craft-audio writes no gapless (LAME) header yet, so its file starts late.
-        nativeEncode && container !== "mp3"
-        ? await nativeSoundtrack({
-            engine,
-            state,
-            media: options.media,
-            decode: codecs.decode,
-            from,
-            to,
-            container: container as SoundContainer,
-            bitrate: audioBitrate,
-          })
-        : await engine.audio({
-            from,
-            to,
-            container: audioOnly ? container : videoContainer === "mov" ? "mp4" : videoContainer,
-            bitrate: audioBitrate,
-          });
+      : await engine.audio({
+          from,
+          to,
+          container: audioOnly ? container : videoContainer === "mov" ? "mp4" : videoContainer,
+          bitrate: options.audioBitrate ?? 128_000,
+        });
     for (const w of soundtrack?.warnings ?? []) if (!warnings.includes(w)) warnings.push(w);
     if (audioOnly) {
       if (!soundtrack?.bytes) throw new Error("nothing to render: the composition has no sound in this range");
@@ -352,38 +338,4 @@ function nativeOptions(
   if (codec === "prores") return { codec: "prores", proresProfile: PRORES_PROFILES[quality ?? "high"] };
   if (quality && !bitrateGiven) return { codec: "h264", crf: NATIVE_CRF[quality], preset: "balanced" };
   return { codec: "h264", kbps: Math.max(1, Math.round(bitrate / 1000)), preset: "balanced" };
-}
-
-/**
- * The soundtrack of an export whose encoder is native, encoded by `uberscene-codec`: mixed in this process from the
- * native decoder's sound when decoding is native too, else (or when an asset's sound is one it cannot read) mixed in
- * the page and handed over as float PCM.
- */
-async function nativeSoundtrack(o: {
-  readonly engine: BrowserEngine;
-  readonly state: ResolvedState;
-  readonly media: MediaResolver;
-  readonly decode: CodecModes["decode"];
-  readonly from: number;
-  readonly to: number;
-  readonly container: SoundContainer;
-  readonly bitrate: number;
-}): Promise<{ readonly bytes: Uint8Array | null; readonly warnings: readonly string[] }> {
-  const binary = codecBinary();
-  const warnings: string[] = [];
-  if (o.decode === "native") {
-    try {
-      return await mixNatively({ binary, ...o });
-    } catch (error) {
-      if (!(error instanceof NativeSoundUnavailable)) throw error;
-      warnings.push(`${error.message}: the page mixed the soundtrack`);
-    }
-  }
-  const mix = await o.engine.audio({ from: o.from, to: o.to, container: "pcm", bitrate: o.bitrate });
-  warnings.push(...mix.warnings);
-  if (!mix.bytes) return { bytes: null, warnings };
-  return {
-    bytes: await encodePageMix({ binary, wav: mix.bytes, container: o.container, bitrate: o.bitrate }),
-    warnings,
-  };
 }

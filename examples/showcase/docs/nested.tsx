@@ -19,7 +19,7 @@ function EndCard() {
         <Clip id="card-shot" src="asset:redCup" in={18} out={20} fit="cover" />
       </Track>
       <Track id="card-text">
-        <Title id="card-title" anchor="card-shot" duration={2} size={56}>
+        <Title id="card-title" anchor="card-shot" duration={2} style={{ size: 56 }}>
           Thanks for watching
         </Title>
       </Track>

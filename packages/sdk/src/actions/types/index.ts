@@ -333,8 +333,8 @@ export interface CaptionActions {
   "caption/remove": { captionId: Id };
   /** The undo of caption/remove: puts the cue back where it was. */
   "caption/restore": { captionsId: Id; node: NodeSpec; after: Id | null };
-  /** Sets the captions' `style`; omit it to clear. */
-  "caption/setStyle": { captionsId: Id; style?: Readonly<Record<string, Json>> };
+  /** Sets the captions' `style`: a theme preset's name, or an object (`{ preset, size, align, … }`); omit it to clear. */
+  "caption/setStyle": { captionsId: Id; style?: string | Readonly<Record<string, Json>> };
   /** Sets how caption words animate in (`animation`), separate from the style. */
   "caption/setAnimation": { captionsId: Id; animation: string };
   /** Replaces every literal cue with `nodes`; empty `nodes` lets the cues generated from `src` come back. */

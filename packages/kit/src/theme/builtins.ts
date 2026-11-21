@@ -83,8 +83,8 @@ const STYLES: Presets = {
     quote: { font: "$heading", size: 56, weight: 400, italic: true, color: "$text", lineHeight: 1.2 },
     label: { font: "$body", size: 24, weight: 700, color: "$onPrimary", background: "$primary" },
     code: { font: "$mono", size: 28, weight: 400, color: "$text" },
-    // A key point, deck-style: a card in the band under the face on 9:16 (y +230 of 1920), clear of the platform's
-    // right-hand buttons; on screen from the word that names the point until the next one.
+    // A key point, deck-style: dark letters on a light card. A preset is a look only, so the card's size, its
+    // rounded corners and its entrance are written on the title (`box`, `transform`, `animation`).
     note: {
       font: "$heading",
       size: 60,
@@ -92,10 +92,6 @@ const STYLES: Presets = {
       color: "$background",
       background: "$text",
       lineHeight: 1.1,
-      width: 840,
-      height: 160,
-      transform: { borderRadius: 28 },
-      animation: { preset: "scale", in: 0.2, out: 0.15 },
     },
   },
   shape: {

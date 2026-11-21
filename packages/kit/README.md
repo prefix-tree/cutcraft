@@ -28,7 +28,7 @@ export default function Video({ title, accent }: z.infer<typeof schema>) {
         <Clip id="c2" src="asset:city" duration={4} fit="cover" />
       </Track>
       <Track id="overlays">
-        <Title id="t1" anchor="c1" offset={1} duration={3} color={accent}>{title}</Title>
+        <Title id="t1" anchor="c1" offset={1} duration={3} style={{ color: accent }}>{title}</Title>
       </Track>
     </Composition>
   );

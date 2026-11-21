@@ -25,7 +25,7 @@ export default function Video() {
         <Clip id="product" src="asset:coffee" in={6} out={9} fit="cover" />
       </Track>
       <Track id="text">
-        <Title id="title" anchor="open" offset={0.3} duration={2.2} size={72}
+        <Title id="title" anchor="open" offset={0.3} duration={2.2} style={{ size: 72 }}
           animation={{ preset: "word-by-word" }}>
           Make videos with code
         </Title>

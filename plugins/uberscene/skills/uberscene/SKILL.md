@@ -225,11 +225,15 @@ Give the video one look and say it once.
   (`--category condensed|serif|display|…` narrows it). `uberscene fonts --for headline --sheet fonts.png --text "YOUR
   WORDS"` draws them; read the image, then pick. A starred family is bundled: use its name. Any other is declared at
   the top of the file, `const bebasNeue = googleFont("Bebas Neue", { weights: [400] })`, and passed as the value:
-  `fonts: { heading: bebasNeue }` or `font={bebasNeue}`. Ask only for weights the list shows.
+  `fonts: { heading: bebasNeue }` or `style={{ font: bebasNeue }}`. Ask only for weights the list shows.
 - **Tokens, not literals.** Colours: `$primary`, `$secondary`, `$accent`, `$background`, `$surface`, `$text`,
   `$muted`, `$onPrimary`. Fonts: `$heading`, `$body`, `$mono`. Corners: `$radius`.
 - **Presets for text.** `<Title style="h1">`, also `h2`, `kicker`, `body`, `caption`, `quote`, `label`, `code`,
-  `note`. Own props override a preset. `<Shape style="card">`, `<Captions style="boxed">`.
+  `note`. A title's whole look is its `style`, a preset's name or an object of `font`, `size`, `weight`, `italic`,
+  `color`, `background`, `stroke`, `shadow`, `align`, `valign`, `lineHeight`, `letterSpacing` and `decoration`, whose
+  fields override the preset it names: `style={{ preset: "h1", size: 64, color: "$primary" }}`. Its text box is
+  `box.width` and `box.height`. A preset is look only. `<Shape style="card">`, `<Captions style="boxed">`, and
+  `style={{ preset: "boxed", align: "left" }}` on captions.
 - **Leave entrances to the motion style.** Write `enter` or `exit` only where one element should differ.
 - **Components** for the common graphics: `LowerThird`, `Callout`, `Badge`, `Counter` and
   `TypeCard`, imported from `@uberscene/kit`. They take the timing props any element takes.

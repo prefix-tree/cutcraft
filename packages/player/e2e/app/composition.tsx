@@ -36,7 +36,7 @@ export default function Video() {
         <Clip id="solid" src="asset:solid" in={0} out={1} />
       </Track>
       <Track id="overlays">
-        <Title id="t1" anchor="v1" offset={0.5} duration={2} size={40} color="#00ff00">
+        <Title id="t1" anchor="v1" offset={0.5} duration={2} style={{ size: 40, color: "#00ff00" }}>
           Hello
         </Title>
         <Layer id="l1" anchor="start" duration={3}>

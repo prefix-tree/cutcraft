@@ -2,10 +2,10 @@
 
 By default Chrome decodes the footage and encodes the export. The native codecs can do either job, or both, in place
 of Chrome. They run in `uberscene-codec`, a small Rust process built on FilmCraft's codecs,
-[craft-video, craft-audio and craft-media](https://github.com/storytold/craft-libs). These are pure Rust and need no
-FFmpeg. The player still draws every frame in the page. Only the decoding and the encoding move, the sound's included.
+[craft-video and craft-media](https://github.com/storytold/craft-libs). These are pure Rust and need no FFmpeg. The
+player still draws every frame in the page. Only the decoding and the encoding move.
 
-This page covers how pictures and sound get to the process and back, and which formats it reads and writes. To turn it on,
+This page covers how pictures get to the process and back, and which formats it reads and writes. To turn it on,
 [Exporting](./exporting#native-codecs-experimental) has `UBERSCENE_CODECS` and the commands.
 
 ::: warning Experimental
@@ -22,9 +22,6 @@ NativeFrameSource ── /native/frames ─► reads the asset's file ───�
    VideoFrame ◄────── streamed back ── pipes stdout to the page
 capture → RGBA ───── /native/encode ─► writes pictures in order ────────► encode (H.264, ProRes) → packets
                                       keeps the packets for the join ◄──
-                                      mixPlan (with native) ◄──────────── decode-audio → float PCM
-mix as float WAV ── (native-encode) ──► the mix, interleaved ────────────► encode-audio → M4A or WAV
-                                      muxed with the pictures ◄─────────
 ```
 
 For each stream, Node starts one `uberscene-codec`, writes to its stdin and reads its stdout. If the process exits
@@ -49,7 +46,7 @@ When the page stops reading, the server closes the stream and the process stops.
 capture stay the same.
 
 If probing says an asset can't be decoded, or the asset comes from a URL, Chrome decodes it instead, with one warning.
-Images always stay in the browser; the sound is under [Sound](#sound).
+Images and audio always stay in the browser.
 
 ## Encoding
 
@@ -65,21 +62,6 @@ The H.264 encoder writes no B-frames, and puts keyframes only at the start of ea
 whole number of intervals, so the pieces join without re-encoding, the same as with Chrome
 ([Pieces and pages](./export-architecture#pieces-and-pages)). Every ProRes packet is a keyframe.
 
-## Sound
-
-With a native encoder, `uberscene-codec encode-audio` writes the soundtrack: it reads the mix as interleaved float on
-stdin and writes the whole file when the input ends. Who mixes depends on who decodes:
-
-- **`native`:** Node runs `mixPlan`, the page's own mixer, so volume, fades, ducking, pan and speed sound the same. Its
-  sound comes from `uberscene-codec decode-audio`: each range planar float at the file's own rate, silence where the
-  file has none. Decoding starts 120 ms before the range and drops the warm-up, so a decoder started mid-stream gives
-  what a decode from the start gives. The page plays no part in the sound.
-- **`native-encode`:** the page mixes as with Chrome and hands the mix over as a WAV of 32-bit float, which Node feeds
-  to the encoder.
-
-An asset whose sound the native decoder cannot read (FLAC, Vorbis, or one served from a URL) sends the whole mix back
-to the page, with one warning. An MP3 export keeps Chrome's encoder, since the native MP3 has no gapless header yet.
-
 ## Formats
 
 | Decodes | Containers |
@@ -92,16 +74,6 @@ to the page, with one warning. An MP3 export keeps Chrome's encoder, since the n
 |---|---|
 | H.264, High profile, BT.709 limited range | MP4 |
 | ProRes: Proxy, LT, 422, 422 HQ, 4444 | MOV (`--codec prores`; `--quality` picks the profile) |
-
-| Sound decodes | Containers |
-|---|---|
-| AAC, Opus, MP3, AC-3/E-AC-3, ALAC, PCM | MP4/MOV, Matroska/WebM, Ogg, WAV, AIFF, raw ADTS and MP3 |
-
-| Sound encodes | For |
-|---|---|
-| AAC-LC in an M4A, its edit list trimming the encoder's priming | MP4 |
-| 24-bit PCM | MOV |
-| 16-bit PCM | WAV |
 
 Pictures reach the page as 8-bit 4:2:0. Higher bit depths and 4:2:2/4:4:4 are converted, alpha is dropped, and a
 rotated file is turned upright. What the native codecs leave to Chrome is listed under

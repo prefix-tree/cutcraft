@@ -3,6 +3,7 @@ import { z } from "zod";
 import { zTransitionType } from "../jsx/enums";
 import { colorSchema, graphicAnimationSchema } from "../jsx/schemas/common";
 import { MOTION_NAMES, THEME_NAMES } from "./builtins";
+import { placementKeys } from "./look-presets";
 
 /** A whole prop value naming a theme value: `$primary`, `$heading`, `$radius`. */
 export const TOKEN_PATTERN = /^\$([A-Za-z][A-Za-z0-9_-]*)$/;
@@ -46,6 +47,14 @@ export const themeSchema = z
           message: `"${name}" is a palette colour too; tokens share one namespace`,
         });
     }
+    for (const [kind, presets] of Object.entries(theme.styles ?? {}))
+      for (const [name, preset] of Object.entries(presets ?? {}))
+        for (const { key, message } of placementKeys(kind, preset))
+          ctx.addIssue({
+            code: "custom",
+            path: ["styles", kind, name, key],
+            message: `the ${kind} preset "${name}" ${message}`,
+          });
     if (theme.palette && "radius" in theme.palette)
       ctx.addIssue({
         code: "custom",

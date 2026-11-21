@@ -36,10 +36,7 @@ export default function Video({ title, accent }: z.infer<typeof schema>) {
           anchor="welcome"
           offset={0.3}
           duration={3}
-          size={96}
-          weight={700}
-          color={accent}
-          valign="top"
+          style={{ size: 96, weight: 700, color: accent, valign: "top" }}
           box={{ x: 960, y: 660, origin: "center" }}
           animation={{ preset: "slide-up", in: 0.4, out: 0.3 }}
         >

@@ -86,12 +86,16 @@ describe("clip timing", () => {
     exec.execute({ type: "track/setFlag", params: { trackId: "main", flag: "locked", value: true } });
     const r = exec.execute({ type: "clip/trim", params: { id: "c2", edge: "out", value: 4 } });
     expect(r.errors?.[0]?.code).toBe("TRACK_LOCKED");
-    const bound = exec.execute({ type: "element/update", params: { id: "t1", props: { color: "#fff" } } });
+    // `style.color` reads the file's `accent`: bound, so writable; `style.size` written as an expression locks.
+    const bound = exec.execute({
+      type: "element/update",
+      params: { id: "t1", props: { style: { color: "#fff", size: 64 } } },
+    });
     expect(bound.ok).toBe(true);
-    const index = buildSourceIndex(fixtureText.replace("size={64}", "size={32 + 32}"));
+    const index = buildSourceIndex(fixtureText.replace("size: 64", "size: 32 + 32"));
     const locked = new Executor({ tree: collectModule(sample, {}, { index }), manifest, now: () => 0 }).execute({
       type: "element/update",
-      params: { id: "t1", props: { size: 40 } },
+      params: { id: "t1", props: { style: { color: "#ff5a1f", size: 40 } } },
     });
     expect(locked.errors?.[0]?.code).toBe("LOCKED_PROP");
   });

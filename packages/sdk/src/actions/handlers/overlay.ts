@@ -15,6 +15,7 @@ import {
   siblingAfter,
   uniqueId,
   validateTarget,
+  writtenPaths,
 } from "../handler-kit";
 import { type ActionInput, invalid, type NodeSpec, nodeSpecOf, ok, type PlacementSpec } from "../types";
 
@@ -75,7 +76,11 @@ define({
   type: "element/update",
   targets: onElement({ kinds: ELEMENT_KINDS }),
   validate: (a, state) => {
-    const base = validateTarget(state, a.params.id, Object.keys(a.params.props));
+    const item = state.items.get(a.params.id);
+    const paths = item
+      ? writtenPaths(item, a.params.props, (prop) => rawProp(state, a.params.id, prop))
+      : Object.keys(a.params.props);
+    const base = validateTarget(state, a.params.id, paths);
     if (!base.valid) return base;
     const kind = state.items.get(a.params.id)!.kind;
     return ELEMENT_KINDS.includes(kind)
