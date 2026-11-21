@@ -178,3 +178,23 @@ describe("narrate: with the transcript of a recorded voice", () => {
 function ms(t: number): number {
   return Math.round(t * 1000) / 1000;
 }
+
+describe("narrate: any script", () => {
+  it("times a word by its letters in any alphabet", () => {
+    // Six and six letters, as in the Latin line beside it: the same timing, not the punctuation's alone.
+    const cyrillic = narrate("Привет, друзья.");
+    const latin = narrate("Abcdef, abcdef.");
+    expect(cyrillic.words.map((w) => [w.start, w.end])).toEqual(latin.words.map((w) => [w.start, w.end]));
+    expect(cyrillic.duration).toBe(latin.duration);
+    // Greek and a script with combining marks count their letters too.
+    expect(narrate("γεια").words[0]?.end).toBe(narrate("abcd").words[0]?.end);
+    expect(narrate("नमस्ते").words[0]!.end).toBeGreaterThan(narrate("a").words[0]!.end);
+  });
+
+  it("names a cue in any script, in brackets and in braces", () => {
+    const story = narrate("Вмикаємо [світло]. (0.5) {місто} Ось.");
+    expect(story.at("світло")).toBe(story.words[1]?.start);
+    expect(story.at("місто")).toBeGreaterThan(story.words[1]!.end);
+    expect(Object.keys(story.cues).sort()).toEqual(["місто", "світло"].sort());
+  });
+});
