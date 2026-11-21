@@ -4,7 +4,7 @@ editLink: false
 
 # `<Composition>`
 
-The video: frame rate, size, background and theme. It ends where its content ends.
+The video: frame rate, size, background and theme. It ends where its content ends. Clips written straight in it play in order, as its main track.
 
 <Example src="previews/elements/composition" alt="<Composition>">
 

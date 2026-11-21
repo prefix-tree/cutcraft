@@ -4,7 +4,7 @@ editLink: false
 
 # `<Track>`
 
-A row of elements. A sequence track plays its children back to back; a free track (`layout="free"`) places each at its own start.
+A row of elements, drawn over the clips written straight in the composition and the tracks before it. A sequence track plays its children back to back; a free track (`layout="free"`) places each at its own start.
 
 <Example src="previews/elements/track" alt="<Track>">
 

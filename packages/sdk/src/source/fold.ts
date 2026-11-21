@@ -1,7 +1,7 @@
 import traverseModule from "@babel/traverse";
 import * as t from "@babel/types";
 
-import { ELEMENTS, findFont } from "@uberscene/kit/schema";
+import { ELEMENTS, findFont, MAIN_TRACK_ID } from "@uberscene/kit/schema";
 
 import { type NodeSpec, nodeSpecOf } from "../actions/types";
 import type { Json, NetPatch, PatchLog } from "../patches/types";
@@ -15,6 +15,7 @@ import { identifier } from "./lint/rules/theme";
 import type { Range } from "./parse";
 import { parseSource } from "./parse";
 import { escapeText, Identifier, isPlainAttribute, printElement, printLiteral, printProp, printValue } from "./print";
+import { wrapMainTrack } from "./wrap-track";
 
 const traverse = ((traverseModule as unknown as { default?: typeof traverseModule }).default ??
   traverseModule) as typeof traverseModule;
@@ -505,7 +506,11 @@ export function foldToSource(text: string, log: PatchLog, state: ResolvedState, 
   const baked: string[] = [];
   let allEdits: SourceEdit[] = [];
   for (let round = 0; round < maxRounds; round++) {
-    const index = buildSourceIndex(current);
+    let index = buildSourceIndex(current);
+    if (needsMainTrackTag(log, index, state)) {
+      current = wrapMainTrack(current, mainTrackCalls(index, state));
+      index = buildSourceIndex(current);
+    }
     const { edits, needsBake, skipped, fonts } = fold(log, index, state);
     if (needsBake.length === 0) {
       allEdits = [...allEdits, ...edits];
@@ -539,6 +544,34 @@ export function foldToSource(text: string, log: PatchLog, state: ResolvedState, 
   return { text: current, edits: allEdits, baked, skipped: [{ id: "*", reason: "bake did not converge" }] };
 }
 
+/**
+ * Whether the edits need the main track written as a `<Track>`: one of its own settings changed, it moved or went, or
+ * another track took the place under it. Clips written straight in the composition stay the bottom track, so a track
+ * can only stand below them once they have a tag of their own.
+ */
+function needsMainTrackTag(log: PatchLog, index: SourceIndex, state: ResolvedState): boolean {
+  if (!index.elements.get(MAIN_TRACK_ID)?.implicit) return false;
+  if (log.net.has(MAIN_TRACK_ID)) return true;
+  for (const [id, net] of log.net) {
+    if (!net.place || net.place.parent !== index.compositionId || net.place.after !== null) continue;
+    const kind = net.presence === "inserted" ? net.node?.kind : state.tree.byId.get(id)?.kind;
+    if (kind === "track") return true;
+  }
+  return false;
+}
+
+/** The helper calls in the composition that make clips of the main track: they go into its tag with the rest. */
+function mainTrackCalls(index: SourceIndex, state: ResolvedState): Range[] {
+  const out: Range[] = [];
+  for (const id of state.tree.byId.get(MAIN_TRACK_ID)?.children.map((c) => c.id) ?? []) {
+    const origin = state.tree.byId.get(id)?.origin;
+    if (!origin) continue;
+    const call = index.calls.find((c) => c.helper === origin.helper && c.callIndex === origin.callIndex);
+    if (call && call.parent === index.compositionId) out.push(call.range);
+  }
+  return out;
+}
+
 function dedupe(edits: SourceEdit[]): SourceEdit[] {
   const seen = new Set<string>();
   return edits.filter((e) => {
@@ -567,6 +600,10 @@ function insertionPoint(index: SourceIndex, parentId: string, after: string | nu
     if (!sibling || sibling.parent !== parentId) return null;
     const end = lineRange(text, sibling.range)[1];
     return { pos: end, indent: sibling.indent, wrap: (p) => `${p}\n` };
+  }
+  if (parent.implicit) {
+    // The main track has no tag: its first child goes on the line before the clip that is first now.
+    return { pos: lineRange(text, parent.range)[0], indent: parent.indent, wrap: (p) => `${p}\n` };
   }
   if (parent.childrenRange) {
     // First child: right after the opening tag, on its own line.

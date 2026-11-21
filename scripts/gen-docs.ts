@@ -121,10 +121,13 @@ const written = (kinds: readonly string[]): string[] => kinds.filter((k) => !DER
 /** What each element is for, by group: the index's cards and the first line of each page. */
 const ELEMENT_DOCS: Record<string, readonly (readonly [element: string, summary: string])[]> = {
   Timeline: [
-    ["Composition", "The video: frame rate, size, background and theme. It ends where its content ends."],
+    [
+      "Composition",
+      "The video: frame rate, size, background and theme. It ends where its content ends. Clips written straight in it play in order, as its main track.",
+    ],
     [
       "Track",
-      'A row of elements. A sequence track plays its children back to back; a free track (`layout="free"`) places each at its own start.',
+      'A row of elements, drawn over the clips written straight in the composition and the tracks before it. A sequence track plays its children back to back; a free track (`layout="free"`) places each at its own start.',
     ],
     [
       "Clip",

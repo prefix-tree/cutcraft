@@ -4,7 +4,7 @@ import { parseArgs } from "node:util";
 
 import { MOMENT_FORMS, subtitles } from "@uberscene/sdk";
 
-import { addAsset, describeAdded } from "./add";
+import { addAsset, describeAdded, snippetOf } from "./add";
 import { blockSheet, formatBlocks, listBlocks } from "./blocks";
 import { addBlock, placeBlock, updateBlocks } from "./blocks-add";
 import { QUALITIES, type QualityName, type VideoCodec } from "./encoding";
@@ -538,6 +538,8 @@ async function add(
     });
     for (const w of result.warnings) process.stderr.write(`warning: ${w}\n`);
     process.stderr.write(`${describeAdded(result)} → ${result.manifest}\n`);
+    const snippet = snippetOf(result);
+    if (snippet) process.stderr.write(`  ${snippet}\n`);
   }
   return 0;
 }

@@ -166,3 +166,10 @@ export function describeAdded(result: AddResult): string {
     );
   return `${e.id}: ${parts.join(", ")}`;
 }
+
+/** The element that plays the asset, to paste into the video: `<Clip id="talk" src="asset:talk" />`. A LUT has none. */
+export function snippetOf(result: AddResult): string | null {
+  const e = result.entry;
+  if (e.kind === "lut") return null;
+  return `<${e.kind === "audio" ? "Audio" : "Clip"} id="${e.id}" src="asset:${e.id}" />`;
+}

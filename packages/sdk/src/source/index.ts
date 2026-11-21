@@ -1,7 +1,7 @@
 import traverseModule from "@babel/traverse";
 import * as t from "@babel/types";
 
-import { COMPONENT_NAMES, ELEMENTS, ENGINE_LAYERS } from "@uberscene/kit/schema";
+import { COMPONENT_NAMES, ELEMENTS, ENGINE_LAYERS, MAIN_TRACK_ID, MAIN_TRACK_KINDS } from "@uberscene/kit/schema";
 
 import type { Json } from "../patches/types";
 import { INTERIOR_PREFIX } from "../resolve/tree";
@@ -58,6 +58,8 @@ interface InteriorSite {
   readonly boundProps: Readonly<Record<string, string>>;
 }
 
+const MAIN_KINDS: ReadonlySet<string> = new Set(MAIN_TRACK_KINDS);
+
 export interface ElementSite {
   readonly generated: false;
   readonly id: string;
@@ -78,6 +80,11 @@ export interface ElementSite {
   readonly indent: string;
   /** Set on a Layer whose interior is exactly one component element; its props also appear on the Layer as `interior.<name>`. */
   readonly interior?: InteriorSite;
+  /**
+   * The main track of a file that writes its clips straight in the composition. No `<Track>` stands for it: the range
+   * runs from the first of those clips to the last, and the tags are empty. `wrapMainTrack` writes the tag.
+   */
+  readonly implicit?: true;
 }
 
 export interface HelperCallSite {
@@ -379,6 +386,36 @@ export function buildSourceIndex(text: string): SourceIndex {
       lockedProps: locked,
       boundProps: bound,
     };
+  }
+
+  // Clips written straight in the composition are its main track: they answer to it, and a site with no tags stands
+  // for it, spanning from the first of them to the last.
+  if (compositionId !== null && !elements.has(MAIN_TRACK_ID)) {
+    const direct = [...elements.values()]
+      .filter((e) => e.parent === compositionId && MAIN_KINDS.has(e.kind))
+      .sort((a, b) => a.range[0] - b.range[0]);
+    const first = direct[0];
+    const last = direct[direct.length - 1];
+    if (first && last) {
+      for (const e of direct) elements.set(e.id, { ...e, parent: MAIN_TRACK_ID });
+      elements.set(MAIN_TRACK_ID, {
+        generated: false,
+        id: MAIN_TRACK_ID,
+        kind: "track",
+        name: "Track",
+        range: [first.range[0], last.range[1]],
+        openingTag: [first.range[0], first.range[0]],
+        closingTag: null,
+        childrenRange: null,
+        props: new Map(),
+        parent: compositionId,
+        siblingIndex: -1,
+        lockedProps: [],
+        boundProps: {},
+        indent: first.indent,
+        implicit: true,
+      });
+    }
   }
 
   return {

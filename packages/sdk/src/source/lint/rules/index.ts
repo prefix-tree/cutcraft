@@ -1,3 +1,5 @@
+import { MAIN_TRACK_ID } from "@uberscene/kit/schema";
+
 import { lookupAsset } from "../../../manifest/types";
 import type { ElementSite, SourceIndex } from "../../index";
 import type { Diagnostic, LintOptions } from "../index";
@@ -220,6 +222,34 @@ const sequenceGap: Rule = {
   },
 };
 
+/**
+ * Clips written straight in the composition are its bottom track wherever they stand, so one written after a
+ * `<Track>` reads as if it drew over that track when it draws under it.
+ */
+const mainClipsFirst: Rule = {
+  name: "main-clips-first",
+  check: (index) => {
+    const main = index.elements.get(MAIN_TRACK_ID);
+    if (!main?.implicit) return [];
+    let firstTrack = Number.POSITIVE_INFINITY;
+    for (const site of index.elements.values())
+      if (site.kind === "track" && !site.implicit && site.parent === index.compositionId)
+        firstTrack = Math.min(firstTrack, site.range[0]);
+    const out: Diagnostic[] = [];
+    for (const site of index.elements.values()) {
+      if (site.parent !== main.id || site.range[0] < firstTrack) continue;
+      out.push({
+        rule: "main-clips-first",
+        severity: "warning",
+        message: `"${site.id}" is written after a <Track> but plays on the main track, under every other: write the main clips first, or put them in <Track id="${MAIN_TRACK_ID}"> to place that track`,
+        range: site.range,
+        id: site.id,
+      });
+    }
+    return out;
+  },
+};
+
 const cutInsideWord: Rule = {
   name: "cut-inside-word",
   check: (index, options) => {
@@ -279,6 +309,7 @@ export const rules: readonly Rule[] = [
   boxPlacement,
   everythingIsAProp,
   ntscFrameRate,
+  mainClipsFirst,
 ];
 
 /** The composition's first track in document order that lays out as a sequence and is not hidden: the one under everything else. */

@@ -4,7 +4,7 @@ Every element a file can use, with its props. Generated from the code by `script
 
 ## `<Composition>`
 
-The video: frame rate, size, background and theme. It ends where its content ends.
+The video: frame rate, size, background and theme. It ends where its content ends. Clips written straight in it play in order, as its main track.
 
 ### Props
 
@@ -24,7 +24,7 @@ Children: `track`, `marker`, `captions`. [All elements](https://uberscene.prefix
 
 ## `<Track>`
 
-A row of elements. A sequence track plays its children back to back; a free track (`layout="free"`) places each at its own start.
+A row of elements, drawn over the clips written straight in the composition and the tracks before it. A sequence track plays its children back to back; a free track (`layout="free"`) places each at its own start.
 
 ### Props
 

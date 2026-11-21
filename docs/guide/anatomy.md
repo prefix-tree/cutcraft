@@ -31,20 +31,26 @@ first frame is at 0 seconds. A video longer than 35,459 seconds, about 9.85 hour
 
 ## Tracks
 
-A `<Track>` is a row of the timeline. A track plays its children one after another, in the order the file lists
-them, so you never add up start times. A track with `layout="free"` places each child at its own `start` instead.
-Here the two clips play back to back, the title comes in at one second, and the music runs from the start to the end
-of the video, however long the edit becomes (`duration="fill"`).
-
-The first track is the bottom of the picture and each later one draws on top, so a file reads like a timeline seen
-from above: the footage, then what goes over it, then the music.
+Clips written straight in the composition play one after another, in the order the file lists them, so you never add
+up start times. They are the video's **main track**, the bottom of the picture:
 
 ```tsx
 <Composition fps={30} width={1920} height={1080}>
-  <Track id="main">
-    <Clip id="intro" src="asset:intro" />
-    <Clip id="demo" src="asset:demo" in={2} out={9} />
-  </Track>
+  <Clip id="intro" src="asset:intro" />
+  <Clip id="demo" src="asset:demo" in={2} out={9} />
+</Composition>
+```
+
+A `<Track>` is another row of the timeline, drawn over the main track; each later track draws over the one before.
+So a file reads like a timeline seen from above: the footage, then what goes over it, then the music. A track plays
+its children one after another too. With `layout="free"` it places each child at its own `start` instead. Here the
+title comes in at one second, and the music runs from the start to the end of the video, however long the edit
+becomes (`duration="fill"`). Adding the tracks leaves the two clips where they were.
+
+```tsx
+<Composition fps={30} width={1920} height={1080}>
+  <Clip id="intro" src="asset:intro" />
+  <Clip id="demo" src="asset:demo" in={2} out={9} />
   <Track id="text" layout="free">
     <Title id="name" start={1} duration={3}>Halvard</Title>
   </Track>
@@ -53,6 +59,10 @@ from above: the footage, then what goes over it, then the music.
   </Track>
 </Composition>
 ```
+
+Only clips, the transitions between them and gaps go straight in the composition; everything else sits in a track.
+The main track's id is `main`. Write it as `<Track id="main">` around the clips when it needs a setting of its own
+(`muted`, `locked`) or a place above another track; nothing else changes. Most examples in this guide write it out.
 
 ## Clips
 

@@ -8,6 +8,7 @@ import { applyEdits, type SourceEdit } from "./edits";
 import { buildSourceIndex } from "./index";
 import { parseSource } from "./parse";
 import { printProp } from "./print";
+import { wrapMainTrack } from "./wrap-track";
 
 export interface LayerPlacement {
   /** The track the Layer goes into, as its last child. */
@@ -29,13 +30,15 @@ export interface LayerPlacement {
  * end of the track. A missing track, a taken id, or a name the file already binds to something else is an error.
  */
 export function insertLayer(text: string, placement: LayerPlacement): string {
+  // A Layer needs a `<Track>` to sit in: the main track of clips written straight in the composition gets its tag.
+  if (buildSourceIndex(text).elements.get(placement.track)?.implicit) text = wrapMainTrack(text);
   const index = buildSourceIndex(text);
   const track = index.elements.get(placement.track);
   if (track?.kind !== "track") throw new Error(`there is no <Track id="${placement.track}"> in the file`);
   if (index.elements.has(placement.id)) throw new Error(`the id "${placement.id}" is taken in the file`);
 
   const edits: SourceEdit[] = [];
-  const layerImport = kitImportEdit(text, placement.id);
+  const layerImport = kitImportEdit(text, placement.id, "Layer");
   if (layerImport) edits.push(layerImport);
   const imported = importOf(text, placement.component);
   if (imported === undefined) edits.push(importEdit(text, placement));
@@ -121,22 +124,23 @@ function importEdit(text: string, placement: LayerPlacement): SourceEdit {
 const KIT = ["@uberscene/kit", "@cut/kit"];
 
 /** `Layer` added to the file's import from the kit, or a kit import of its own, unless the file has it already. */
-function kitImportEdit(text: string, id: string): SourceEdit | null {
+/** The edit that imports an element of the kit by name, in the file's own kit import when it has one; null when it is imported. */
+export function kitImportEdit(text: string, id: string, name: string): SourceEdit | null {
   const { ast } = parseSource(text);
   const imports = ast.program.body.filter(t.isImportDeclaration);
-  if (imports.some((node) => node.specifiers.some((s) => s.local.name === "Layer"))) return null;
+  if (imports.some((node) => node.specifiers.some((s) => s.local.name === name))) return null;
   const kit = imports.find((node) => KIT.includes(node.source.value) && node.importKind !== "type");
   const named = kit?.specifiers.filter(t.isImportSpecifier) ?? [];
   if (kit && named.length > 0 && named.length === kit.specifiers.length) {
-    // Keep the list in order: written again with Layer among the names, each as it was written.
+    // Keep the list in order: written again with the name among them, each as it was written.
     const parts = named.map((s) => ({ name: s.local.name, text: text.slice(s.start ?? 0, s.end ?? 0) }));
-    parts.push({ name: "Layer", text: "Layer" });
+    parts.push({ name, text: name });
     parts.sort((a, b) => a.name.localeCompare(b.name, "en", { sensitivity: "base" }));
     const first = named[0] as t.ImportSpecifier;
     const last = named.at(-1) as t.ImportSpecifier;
     return { kind: "text", id, range: [first.start ?? 0, last.end ?? 0], text: parts.map((p) => p.text).join(", ") };
   }
   const pos = imports.at(-1)?.end ?? 0;
-  const line = 'import { Layer } from "@uberscene/kit";';
+  const line = `import { ${name} } from "@uberscene/kit";`;
   return { kind: "insert", id, range: [pos, pos], text: pos === 0 ? `${line}\n` : `\n${line}` };
 }

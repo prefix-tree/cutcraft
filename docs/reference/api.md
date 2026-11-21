@@ -522,7 +522,7 @@ Every name each entry exports, read from the code. The sections above explain th
 
 ### `@uberscene/kit/schema`
 
-247 exports.
+249 exports.
 
 | Export | Kind | |
 |---|---|---|
@@ -645,6 +645,8 @@ Every name each entry exports, read from the code. The sections above explain th
 | `layerEngine` | function |  |
 | `LayerEngine` | type | What draws an engine Layer (`<Three>`, `<Motion>`). |
 | `layerFramesPending` | function | How many holds are open. |
+| `MAIN_TRACK_ID` | const | The id of the track made of the clips written straight in a `<Composition>`. |
+| `MAIN_TRACK_KINDS` | const | What may be written straight in a `<Composition>` to make that track. |
 | `Marker` | const | The `<Marker>` element ([reference](/reference/elements/marker)). |
 | `Mask` | const | The `<Mask>` element ([reference](/reference/elements/mask)). |
 | `MASK_NOT_RENDERED` | const |  |
@@ -776,7 +778,7 @@ Every name each entry exports, read from the code. The sections above explain th
 
 ### `@uberscene/sdk`
 
-201 exports.
+202 exports.
 
 | Export | Kind | |
 |---|---|---|
@@ -981,6 +983,7 @@ Every name each entry exports, read from the code. The sections above explain th
 | `WaveformSummary` | interface |  |
 | `withoutEffects` | function | A patch log that turns these effects off (`enabled: false`), each named by the id the resolver gave it (`pour.effects.1`). |
 | `WordRow` | interface |  |
+| `wrapMainTrack` | function | The text with its main clips wrapped in `<Track id="main">`, where the first of them stands; clips written further down, between tracks, are gathered into it in order. |
 
 ### `@uberscene/sdk/resolver`
 
@@ -1170,7 +1173,7 @@ Every name each entry exports, read from the code. The sections above explain th
 
 ### `@uberscene/render`
 
-84 exports.
+85 exports.
 
 | Export | Kind | |
 |---|---|---|
@@ -1248,6 +1251,7 @@ Every name each entry exports, read from the code. The sections above explain th
 | `SeenElement` | interface | One element on screen at a moment, with its values there. |
 | `SkillInstallOptions` | interface |  |
 | `SkillInstallResult` | interface |  |
+| `snippetOf` | function | The element that plays the asset, to paste into the video. |
 | `SourceSpot` | interface | A place in the cut file, as a compiler reports it. |
 | `StillOptions` | interface |  |
 | `StillResult` | interface |  |

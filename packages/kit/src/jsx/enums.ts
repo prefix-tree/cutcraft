@@ -5,6 +5,10 @@ import { TRANSITION_TYPES, VIDEO_EFFECT_TYPES } from "../effects/registry";
 // Every value here is drawn by the player and the export: a type the renderers do not draw is not offered.
 
 export const TRACK_LAYOUTS = ["sequence", "free"] as const;
+/** The id of the track made of the clips written straight in a `<Composition>`: the bottom one. */
+export const MAIN_TRACK_ID = "main";
+/** What may be written straight in a `<Composition>` to make that track. */
+export const MAIN_TRACK_KINDS = ["clip", "transition", "gap"] as const;
 export const TRACK_ROLES = ["general", "captions", "dialogue", "music", "effects", "ambience"] as const;
 
 export const FIT_MODES = ["contain", "cover", "stretch", "none"] as const;

@@ -195,6 +195,7 @@ line, `uberscene lint video.tsx --fix` does the same to a file ([CLI](/reference
 | Rule | Reports |
 |---|---|
 | `sequence-gap` | A `<Gap>` on the first sequence track, which is black unless another track covers it. |
+| `main-clips-first` | A clip written straight in the composition after a `<Track>`: it still plays on the main track, under every other. |
 | `cut-inside-word` | A numeric `in` or `out` that lands strictly inside a transcript word. It needs the manifest, and names the `word:N` reference to use instead. |
 | `cut-near-shot` | An `in` just before a shot change or an `out` just after one, which flashes a few frames of the other shot. It reads the source's cuts from the manifest's shots, and names the `shot:N` edge to use. |
 | `shot-change-inside-crop` | One `transform.crop` over a range the camera cuts inside, so the framing the crop was set for ends mid-clip. Split there. |

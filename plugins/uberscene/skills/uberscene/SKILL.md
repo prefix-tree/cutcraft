@@ -201,7 +201,8 @@ export default function Video({ product, who }: z.infer<typeof schema>) {
    `duration`; a music bed takes `duration="fill"`.
 5. **Tracks.** The first track is the bottom of the picture, and later tracks draw on top. A track plays its children
    back to back (`<Gap duration>` makes a hole) and never takes `start`. A `layout="free"` track takes a literal
-   `start` on every child.
+   `start` on every child. Clips, with their transitions and gaps, may be written straight in `<Composition>` with no
+   `<Track>`: they are the bottom track, id `main`, and the tracks written after them draw on top.
 6. **Overlays anchor.** `anchor="hook" at="word:12"` starts an element where clip `hook` says word 12;
    `anchor="hook" offset={0.4}` starts it 0.4 s into `hook`. Anchored elements follow their clip when the edit
    changes.
