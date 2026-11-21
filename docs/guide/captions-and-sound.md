@@ -271,13 +271,13 @@ A clip plays its own sound. For music and voice-over, use `<Audio>`, usually on 
 
 | Prop | Does |
 |---|---|
-| `volume` | Loudness, 0 to 4 (1 is as recorded). |
+| `volume` | Loudness, 0 to 4 (1 is as recorded), or [keys](./animation#sound) that change it over time. |
 | `fade` | Seconds to fade `in` and `out`. |
 | `duck` | Lowers the volume `to` this level while `under` has sound (a track id, or a [track role](#track-roles)), with `attack` and `release` times. |
-| `automation` | Volume and pan changing over time. |
+| `pan` | Where it sits between the speakers, -1 (left) to 1 (right), or keys that move it. |
 | `in`, `out`, `speed` | Trim and speed, as on a clip; `word:N` references work too. |
 
-Speed ramps and freezes on a clip apply to its sound as well.
+Speed ramps and freezes on a clip apply to its sound as well ([Keys, effects and speed](./animation#speed)).
 
 ### Track roles
 
@@ -287,7 +287,7 @@ with `under: "dialogue"` turns sound down under every track of that role. To tim
 [Transitions](./transitions#over-a-cut-light-leaks-flashes-and-whooshes).
 
 ::: warning No audio effects
-There are no audio effects: a clip's sound plays with its volume, fades, automation, ducking and speed.
+There are no audio effects: a clip's sound plays with its volume, pan, fades, ducking and speed.
 :::
 
 ## Next

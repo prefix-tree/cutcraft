@@ -65,11 +65,11 @@ export const vec2Schema = z.strictObject({ x: z.number(), y: z.number() });
  * One key of a value that changes over time: `value` at `at` seconds into the element. `easing` says how the value
  * moves from this key to the next one; the last key's is not used.
  */
-export const keySchema = <S extends z.ZodType>(value: S) =>
+const keySchema = <S extends z.ZodType>(value: S) =>
   z.strictObject({ at: z.number().nonnegative(), value, easing: zEasing.optional() });
 
 /** Keys over time, in place of a constant. */
-export const keysSchema = <S extends z.ZodType>(value: S) => z.array(keySchema(value)).min(1);
+const keysSchema = <S extends z.ZodType>(value: S) => z.array(keySchema(value)).min(1);
 
 /**
  * A value written as a constant, or as a list of keys when it changes over time. The resolver takes the keys out
@@ -173,7 +173,7 @@ export const paramValue = z.union([
  * One effect: its `type`, a built-in or one the file declares with `effect()`, then its params by name, each a
  * constant or keys over time. Off (`enabled: false`), it draws nothing and stays in the file.
  */
-export const effectSpecSchema = z
+const effectSpecSchema = z
   .object({
     type: z.union([zVideoEffectType, z.string().min(1), z.custom<object>((v) => typeof v === "object" && v !== null)]),
     enabled: z.boolean().optional(),

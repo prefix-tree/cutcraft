@@ -37,11 +37,8 @@ export default function Video({ product, tagline, accent, cta }: z.infer<typeof 
         {/* The sentence the whole recap hangs on; trimmed by words so a re-transcription keeps it. */}
         <Clip id="hook" src="asset:founder" in="word:12" out="word:23.end" />
         <Transition id="x1" type="crossfade" duration={0.4} />
-        <Clip id="broll" src="asset:product" in="shot:1" out="shot:1.end" fit="cover">
-          <Keyframe id="broll-sx0" property="transform.scale.x" at={0} value={1} easing="easeInOutSine" />
-          <Keyframe id="broll-sx1" property="transform.scale.x" at={6} value={1.08} />
-          …
-        </Clip>
+        <Clip id="broll" src="asset:product" in="shot:1" out="shot:1.end" fit="cover"
+          transform={{ scale: [{ at: 0, value: 1, easing: "easeInOutSine" }, { at: 6, value: 1.08 }] }} />
         <Clip id="demo" src="asset:screen" in={2} duration={7} />
         <Transition id="x2" type="crossfade" duration={0.4} />
         <Clip id="close" src="asset:founder" in="word:40" out="word:52.end" />
@@ -92,8 +89,9 @@ The overlays anchor. The title starts with the video, the tagline after the titl
 call to action with `outro`. Move the close and the lower third follows; no overlay has an absolute time
 ([Overlays anchor](./time#overlays-anchor)).
 
-The push-in is four `<Keyframe>` children on `broll`, so an editor can change one key
-([Children for collections](./the-file#children-for-collections)).
+The push-in is two keys on `broll`'s scale, which move both axes. An editor finds a key by the clip, the path
+`transform.scale` and its time, so it can drag or change one key
+([Keys, effects and speed](./animation#keys)).
 
 `NameCard` is a helper that returns a shape and two titles. The kit has a ready-made
 [`LowerThird`](/reference/components/lower-third) too; this file draws its own. It is used once, so its elements stay as editable as

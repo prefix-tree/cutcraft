@@ -4,20 +4,21 @@ Footage rarely comes out of the camera looking the way the video should: too dar
 shows how to fix that in the file and then give the picture a look, with colour effects on a clip.
 
 ```tsx
-<Clip id="interview" src="asset:interview">
-  <Effect id="expose" type="exposure" params={{ stops: 0.5 }} />
-  <Effect id="balance" type="whiteBalance" params={{ temperature: 0.15 }} />
-  <Effect id="tone" type="curves" params={{ rgb: [[0, 0.03], [0.25, 0.22], [0.75, 0.8], [1, 1]] }} />
-  <Effect id="pop" type="vibrance" params={{ amount: 0.3 }} />
-</Clip>
+<Clip id="interview" src="asset:interview"
+  effects={[
+    { type: "exposure", stops: 0.5 },
+    { type: "whiteBalance", temperature: 0.15 },
+    { type: "curves", rgb: [[0, 0.03], [0.25, 0.22], [0.75, 0.8], [1, 1]] },
+    { type: "vibrance", amount: 0.3 },
+  ]} />
 ```
 
-Each colour effect is an `<Effect>` child. Put it on a clip to grade that clip, or on an `<Adjustment>` to grade
+Each colour effect is an entry of the element's `effects`. Put it on a clip to grade that clip, or on an `<Adjustment>` to grade
 everything beneath it for a stretch of time. The effects run as shaders, the same in the preview and the export.
 
 ## Work in a colourist's order
 
-Effects run in the order they appear in the file. Write them in the order a colourist works:
+Effects run in the order of the list. Write them in the order a colourist works:
 
 1. **Correct** the light and the white.
 2. **Shape** the tones.
@@ -35,10 +36,10 @@ Each effect also has its own page with a demo: see [Effects and transitions](/re
 
 ## Animate a grade
 
-Every param can be animated by a [`<Keyframe>`](/reference/elements/keyframe) inside the effect, naming the param:
+Every param takes [keys](./animation#keys) in place of its value. Here the shot brightens over its first two seconds:
 
 ```tsx
-<Keyframe id="k1" param="stops" at={0} value={0} />
+{ type: "exposure", stops: [{ at: 0, value: 0, easing: "ease-in-out" }, { at: 2, value: 0.5 }] }
 ```
 
 ## Correct
@@ -74,7 +75,7 @@ for all channels, or `red`, `green` and `blue` for each one.
 
 ```tsx
 // A gentle S: deeper shadows, brighter highlights, and slightly warmer whites.
-<Effect id="s" type="curves" params={{ rgb: [[0, 0], [0.25, 0.2], [0.75, 0.82], [1, 1]], blue: [[0, 0], [1, 0.95]] }} />
+{ type: "curves", rgb: [[0, 0], [0.25, 0.2], [0.75, 0.82], [1, 1]], blue: [[0, 0], [1, 0.95]] }
 ```
 
 A point is `[input, output]`, both 0 to 1, written left to right. Two points `[[0, 0], [1, 1]]` change nothing, which
@@ -99,7 +100,7 @@ npx uberscene add teal-orange.cube
 ```
 
 ```tsx
-<Effect id="look" type="lut" params={{ src: "asset:teal-orange", amount: 0.8 }} />
+<Clip id="interview" src="asset:interview" effects={[{ type: "lut", src: "asset:teal-orange", amount: 0.8 }]} />
 ```
 
 `amount` mixes the graded colour with the original, from 0 to 1.

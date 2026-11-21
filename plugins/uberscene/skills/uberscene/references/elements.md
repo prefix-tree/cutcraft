@@ -74,7 +74,7 @@ A stretch of a video or image asset, trimmed by seconds, transcript words or cam
 | `duck` | { under, to, attack, release } |  |  | Turns this sound down while another plays: `under` is a track id or a track role (`dialogue`), `to` the volume it falls to, `attack` and `release` the seconds it takes to fall and recover. |
 | `frame` | { focus } |  |  | Reframe to the composition's aspect: the resolver writes `transform.crop` from the source size and this focus, unless a crop is written. |
 
-Timed, visual, audible, trims its source, transformable. Children: `effect`, `keyframe`, `mask`, `speedKey`, `freeze`. [All elements](https://uberscene.prefixtree.xyz/reference/elements/)
+Timed, visual, audible, trims its source, transformable. Children: `mask`. [All elements](https://uberscene.prefixtree.xyz/reference/elements/)
 
 ## `<Gap>`
 
@@ -145,7 +145,7 @@ Free code in the frame: any React, CSS, canvas or WebGL, placed on the timeline 
 | `blend` | "normal" \| "multiply" \| "screen" \| "overlay" \| "darken" \| … 13 more |  |  | How the layer mixes with what is under it, as CSS `mix-blend-mode` does. Only `normal` renders ([What renders](https://uberscene.prefixtree.xyz/reference/rendering)). |
 | `ground` | boolean |  |  | The layer is a ground that other things sit on: a wall behind a game, a scrim that darkens footage under a title. The layout check then treats it like a background: it is not held to the safe zone and is not said to cover the captions. |
 
-Timed, visual, transformable. Children: `effect`, `keyframe`. [All elements](https://uberscene.prefixtree.xyz/reference/elements/)
+Timed, visual, transformable. No children. [All elements](https://uberscene.prefixtree.xyz/reference/elements/)
 
 ## `<Three>`
 
@@ -174,7 +174,7 @@ The player draws it once the host calls `installFreeCodeLibraries()` ([Free code
 | `background` | string |  |  | The scene's background colour; left out, transparent over what is beneath. |
 | `setup` | any |  |  | Builds the scene once from `{ scene, camera, renderer, THREE, width, height }`, and may return `update(frame)` for every frame. |
 
-Timed, visual, transformable. Children: `effect`, `keyframe`. [All elements](https://uberscene.prefixtree.xyz/reference/elements/)
+Timed, visual, transformable. No children. [All elements](https://uberscene.prefixtree.xyz/reference/elements/)
 
 ## `<Motion>`
 
@@ -201,7 +201,7 @@ The player draws it once the host calls `installFreeCodeLibraries()` ([Free code
 | `ground` | boolean |  |  | The layer is a ground that other things sit on: a wall behind a game, a scrim that darkens footage under a title. The layout check then treats it like a background: it is not held to the safe zone and is not said to cover the captions. |
 | `sequence` | [string, object] \| [string, object, object][] | `[]` |  | Motion steps: `[selector, keyframes, options]`, where `at` in the options is seconds into the layer. |
 
-Timed, visual, transformable. Children: `effect`, `keyframe`. [All elements](https://uberscene.prefixtree.xyz/reference/elements/)
+Timed, visual, transformable. No children. [All elements](https://uberscene.prefixtree.xyz/reference/elements/)
 
 ## `<Title>`
 
@@ -241,7 +241,7 @@ Text over the picture in the theme's type, with entrances by letter or by word.
 | `decoration` | "none" \| "underline" \| "line-through" \| "overline" |  |  | A line under, over or through the letters. |
 | `animation` | { preset, in, out, stagger } |  |  | An entrance and exit: a preset, its seconds in and out, and for word-by-word the delay between words. |
 
-Timed, visual, transformable. Children: `effect`, `keyframe`, `mask`. [All elements](https://uberscene.prefixtree.xyz/reference/elements/)
+Timed, visual, transformable. Children: `mask`. [All elements](https://uberscene.prefixtree.xyz/reference/elements/)
 
 ## `<Captions>`
 
@@ -314,7 +314,7 @@ A vector shape (rectangle, circle, star, polygon, path) with fill, stroke and sh
 | `starPoints` | integer (3..∞) |  |  | How many points a star has; left out, 5. |
 | `innerRadius` | number (0..1) |  |  | A star's inner corners, as a fraction of its outer radius; left out, 0.5. |
 
-Timed, visual, transformable. Children: `effect`, `keyframe`, `mask`. [All elements](https://uberscene.prefixtree.xyz/reference/elements/)
+Timed, visual, transformable. Children: `mask`. [All elements](https://uberscene.prefixtree.xyz/reference/elements/)
 
 ## `<Svg>`
 
@@ -344,7 +344,7 @@ One-off vector art from inline SVG markup or a file.
 | `enter` | { type, duration, easing } |  |  | How it comes in: a fade, slide, scale or wipe over its first seconds, with an easing. |
 | `exit` | { type, duration, easing } |  |  | How it goes out, over its last seconds, as `enter`. |
 
-Timed, visual, transformable. Children: `effect`, `keyframe`, `mask`. [All elements](https://uberscene.prefixtree.xyz/reference/elements/)
+Timed, visual, transformable. Children: `mask`. [All elements](https://uberscene.prefixtree.xyz/reference/elements/)
 
 ## `<Sticker>`
 
@@ -369,7 +369,7 @@ A ready-made icon or sticker by name.
 | `style` | string |  |  | A theme preset for stickers. |
 | `src` | string |  | yes | An image the manifest lists (`asset:party`): PNG, SVG, WebP or GIF. |
 
-Timed, visual, transformable. Children: `effect`, `keyframe`, `mask`. [All elements](https://uberscene.prefixtree.xyz/reference/elements/)
+Timed, visual, transformable. Children: `mask`. [All elements](https://uberscene.prefixtree.xyz/reference/elements/)
 
 ## `<Adjustment>`
 
@@ -390,7 +390,7 @@ Filters everything beneath it, through its `effects`, for its own stretch of tim
 | `blend` | "normal" \| "multiply" \| "screen" \| "overlay" \| "darken" \| … 13 more | `"normal"` |  | How the filtered picture mixes with the one beneath, as CSS `mix-blend-mode` does. |
 | `enabled` | boolean | `true` |  | Off, it filters nothing and stays in the file. |
 
-Timed, visual. Children: `effect`, `keyframe`. [All elements](https://uberscene.prefixtree.xyz/reference/elements/)
+Timed, visual. No children. [All elements](https://uberscene.prefixtree.xyz/reference/elements/)
 
 ## `<Mask>`
 
@@ -435,7 +435,7 @@ A sequence written once as a component and placed like a clip.
 | `out` | number (0..∞) \| string |  |  | Where in the nested sequence it ends, as `in`. |
 | `volume` | number (0..4) \| { at, value, easing }[] |  |  | A gain on all its sound: 1 as it is, 0 muted; keys change it over time. |
 
-Timed, visual, audible, trims its source, transformable. Children: `effect`, `keyframe`, `mask`, `speedKey`, `freeze`. [All elements](https://uberscene.prefixtree.xyz/reference/elements/)
+Timed, visual, audible, trims its source, transformable. Children: `mask`. [All elements](https://uberscene.prefixtree.xyz/reference/elements/)
 
 ## `<Multicam>`
 
@@ -506,4 +506,4 @@ A stretch of a sound asset: volume and pan (constant or keys), fades, ducking un
 | `fade` | { in, out } |  |  | Seconds the sound fades in at the start and out at the end. |
 | `duck` | { under, to, attack, release } |  |  | Turns this sound down while another plays: `under` is a track id or a track role (`dialogue`), `to` the volume it falls to, `attack` and `release` the seconds it takes to fall and recover. |
 
-Timed, audible, trims its source. Children: `keyframe`, `speedKey`, `freeze`. [All elements](https://uberscene.prefixtree.xyz/reference/elements/)
+Timed, audible, trims its source. No children. [All elements](https://uberscene.prefixtree.xyz/reference/elements/)

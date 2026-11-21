@@ -1,10 +1,11 @@
-// <Effect> and <Transition> check their type and params at compile time: a built-in's against the registry, a file's
-// own against the schema it declared. The @ts-expect-error lines are the test (`pnpm typecheck` fails if one of them
-// compiles); the runtime test checks the resolver agrees with the types on the lines that do compile.
+// An element's `effects` and a <Transition> check their type and params at compile time: a built-in's against the
+// registry, a file's own against the schema it declared. The @ts-expect-error lines are the test (`pnpm typecheck`
+// fails if one of them compiles); the runtime test checks the resolver agrees with the types on the lines that do
+// compile.
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
 
-import { Clip, Composition, Effect, effect, Track, Transition, transition } from "@uberscene/kit";
+import { Clip, Composition, effect, Track, Transition, transition } from "@uberscene/kit";
 import { collectModule, resolve } from "@uberscene/sdk";
 
 import { manifest } from "./helpers";
@@ -23,33 +24,50 @@ const sweep = transition({
 
 /** Elements that only need to type-check; never rendered. */
 export const typeChecks = [
-  <Effect key="1" id="a" type="blur" params={{ radius: 4 }} />,
-  <Effect key="2" id="b" type="levels" params={{ gamma: 1.2 }} />,
-  <Effect key="3" id="c" type={glitch} params={{ amount: 0.5 }} />,
-  <Effect key="4" id="d" type={bare} />,
-  <Transition key="5" id="e" />,
-  <Transition key="6" id="f" type="iris" params={{ sides: 5 }} />,
-  <Transition key="7" id="g" type={sweep} params={{ softness: 0.2 }} />,
+  <Clip key="1" id="a" src="asset:city" effects={[{ type: "blur", radius: 4 }]} />,
+  <Clip key="2" id="b" src="asset:city" effects={[{ type: "levels", gamma: 1.2 }]} />,
+  <Clip key="3" id="c" src="asset:city" effects={[{ type: glitch, amount: 0.5 }]} />,
+  <Clip key="4" id="d" src="asset:city" effects={[{ type: bare }]} />,
+  <Clip
+    key="5"
+    id="e"
+    src="asset:city"
+    effects={[
+      {
+        type: "blur",
+        radius: [
+          { at: 0, value: 0 },
+          { at: 1, value: 8 },
+        ],
+      },
+      { type: glitch, enabled: false, amount: [{ at: 0, value: 1 }] },
+    ]}
+  />,
+  <Transition key="6" id="f" />,
+  <Transition key="7" id="g" type="iris" params={{ sides: 5 }} />,
+  <Transition key="8" id="h" type={sweep} params={{ softness: 0.2 }} />,
   // @ts-expect-error an unknown built-in type
-  <Effect key="8" id="h" type="bluur" />,
+  <Clip key="9" id="i" src="asset:city" effects={[{ type: "bluur" }]} />,
   // @ts-expect-error a param of the wrong type on a built-in
-  <Effect key="9" id="i" type="blur" params={{ radius: "4px" }} />,
+  <Clip key="10" id="j" src="asset:city" effects={[{ type: "blur", radius: "4px" }]} />,
+  // @ts-expect-error a key of the wrong type on a built-in
+  <Clip key="11" id="k" src="asset:city" effects={[{ type: "blur", radius: [{ at: 0, value: "4px" }] }]} />,
   // @ts-expect-error a param a built-in does not take
-  <Effect key="10" id="j" type="blur" params={{ amount: 4 }} />,
+  <Clip key="12" id="l" src="asset:city" effects={[{ type: "blur", amount: 4 }]} />,
   // @ts-expect-error a param of the wrong type on the file's own effect
-  <Effect key="11" id="k" type={glitch} params={{ amount: "lots" }} />,
+  <Clip key="13" id="m" src="asset:city" effects={[{ type: glitch, amount: "lots" }]} />,
   // @ts-expect-error a param the file's own effect does not declare
-  <Effect key="12" id="l" type={glitch} params={{ radius: 4 }} />,
+  <Clip key="14" id="n" src="asset:city" effects={[{ type: glitch, radius: 4 }]} />,
   // @ts-expect-error an effect has no params when it declares none
-  <Effect key="13" id="m" type={bare} params={{ amount: 1 }} />,
+  <Clip key="15" id="o" src="asset:city" effects={[{ type: bare, amount: 1 }]} />,
   // @ts-expect-error a transition is not an effect
-  <Effect key="14" id="n" type={sweep} />,
+  <Clip key="16" id="p" src="asset:city" effects={[{ type: sweep }]} />,
   // @ts-expect-error an effect is not a transition
-  <Transition key="15" id="o" type={glitch} />,
+  <Transition key="17" id="q" type={glitch} />,
   // @ts-expect-error a param a built-in transition does not take
-  <Transition key="16" id="p" type="wipe" params={{ sides: 5 }} />,
+  <Transition key="18" id="r" type="wipe" params={{ sides: 5 }} />,
   // @ts-expect-error a plain string is not a declared effect: pass what effect() returned
-  <Effect key="17" id="q" type={"typed-glitch" as string} />,
+  <Clip key="19" id="s" src="asset:city" effects={[{ type: "typed-glitch" as string }]} />,
 ];
 
 describe("typed effect props", () => {
@@ -59,10 +77,16 @@ describe("typed effect props", () => {
         default: () => (
           <Composition fps={30} width={640} height={360}>
             <Track id="t">
-              <Clip id="a" src="asset:city" in={0} out={2}>
-                <Effect id="g" type={glitch} params={{ amount: 0.5 }} />
-                <Effect id="b" type="blur" params={{ radius: 2 }} />
-              </Clip>
+              <Clip
+                id="a"
+                src="asset:city"
+                in={0}
+                out={2}
+                effects={[
+                  { type: glitch, amount: 0.5 },
+                  { type: "blur", radius: 2 },
+                ]}
+              />
               <Transition id="x" type={sweep} duration={0.5} params={{ softness: 0.1 }} />
               <Clip id="c" src="asset:city" in={0} out={2} />
             </Track>
@@ -72,8 +96,8 @@ describe("typed effect props", () => {
       manifest,
     );
     expect(state.errors).toEqual([]);
-    expect(state.items.get("g")?.props.params).toEqual({ amount: 0.5, tint: "#ffffff" });
-    expect(state.items.get("b")?.props.params).toEqual({ radius: 2 });
+    expect(state.items.get("a.effects.0")?.props.params).toEqual({ amount: 0.5, tint: "#ffffff" });
+    expect(state.items.get("a.effects.1")?.props.params).toEqual({ radius: 2 });
     expect(state.items.get("x")?.props.params).toEqual({ softness: 0.1 });
   });
 });

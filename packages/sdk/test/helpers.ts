@@ -43,8 +43,9 @@ export interface SerializedItem {
 /** A stable view of a resolved state for equality checks: ids sorted, numbers rounded to the millisecond. */
 export function serialize(state: ResolvedState, withProps = true): SerializedItem[] {
   const orderOf = (id: string, parent: string | null): number => {
-    const siblings = parent ? (state.tree.byId.get(parent)?.children ?? []) : [];
-    return siblings.findIndex((c) => c.id === id);
+    // The placement's children: the written ones, then the items its props derive (keys, effects, holds).
+    const siblings = parent ? (state.items.get(parent)?.children ?? []) : [];
+    return siblings.indexOf(id);
   };
   return [...state.items.values()]
     .sort((a, b) => (a.id < b.id ? -1 : 1))

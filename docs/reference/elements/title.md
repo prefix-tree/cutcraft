@@ -50,4 +50,4 @@ The coffee footage is Pixabay videos [209419](https://pixabay.com/videos/id-2094
 | `decoration` | "none" \| "underline" \| "line-through" \| "overline" |  |  | A line under, over or through the letters. |
 | `animation` | { preset, in, out, stagger } |  |  | An entrance and exit: a preset, its seconds in and out, and for word-by-word the delay between words. |
 
-Timed, visual, transformable. Children: `effect`, `keyframe`, `mask`. [All elements](/reference/elements/)
+Timed, visual, transformable. Children: `mask`. [All elements](/reference/elements/)

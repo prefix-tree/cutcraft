@@ -6,6 +6,8 @@
 
 import { capabilitiesOf } from "@uberscene/kit/schema";
 
+import { createPatchLog } from "../patches/log";
+import type { Json, PatchLog } from "../patches/types";
 import type { CollectedNode, CollectedTree } from "./tree";
 
 /** A list of keys: objects, each with `at` and `value`. Anything else (a number, a list of numbers) is a constant. */
@@ -232,4 +234,29 @@ function expandNode(node: CollectedNode): Expansion | null {
   }
 
   return derived.length === 0 ? null : { props, derived };
+}
+
+/**
+ * A patch log that turns these effects off (`enabled: false`), each named by the id the resolver gave it
+ * (`pour.effects.1`): the element's `effects` prop written with those entries off, everything else as it was. For a
+ * sheet's "without" cells, which draw the file as if the effect were switched off.
+ */
+export function withoutEffects(tree: CollectedTree, ids: readonly string[]): PatchLog {
+  const log = createPatchLog();
+  const off = new Map<string, Set<number>>();
+  for (const id of ids) {
+    const origin = derivedOrigin(id);
+    const index = origin ? /^effects\.(\d+)$/.exec(origin.path)?.[1] : undefined;
+    if (!origin || index === undefined) continue;
+    const set = off.get(origin.id) ?? new Set<number>();
+    off.set(origin.id, set);
+    set.add(Number(index));
+  }
+  for (const [element, indexes] of off) {
+    const effects = tree.byId.get(element)?.props.effects;
+    if (!Array.isArray(effects)) continue;
+    const value = effects.map((e, i) => (indexes.has(i) ? { ...(e as Record<string, unknown>), enabled: false } : e));
+    log.append({ op: "set", id: element, prop: "effects", value: value as unknown as Json });
+  }
+  return log;
 }

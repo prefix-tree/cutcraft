@@ -93,9 +93,11 @@ const engineLayer = <E extends string, S extends Parameters<typeof defineElement
 };
 
 /** A three.js scene on the timeline: `setup` for plain three.js, or React Three Fiber children. */
-export const Three = engineLayer("three", threeSchema.omit({ engine: true }));
+const threeLayer = engineLayer("three", threeSchema.omit({ engine: true }));
+export const Three = threeLayer as unknown as WithEffects<typeof threeLayer> & { readonly engine: "three" };
 /** Children animated by a Motion `sequence` on the video's clock. */
-export const Motion = engineLayer("motion", motionSchema.omit({ engine: true }));
+const motionLayer = engineLayer("motion", motionSchema.omit({ engine: true }));
+export const Motion = motionLayer as unknown as WithEffects<typeof motionLayer> & { readonly engine: "motion" };
 
 /** The engine Layers by tag, and the schema each is checked against once collected (with its `engine`). */
 export const ENGINE_LAYERS = { Three, Motion } as const;
@@ -128,19 +130,35 @@ export interface Key<V> {
 export type Animatable<V> = V | readonly Key<V>[];
 
 /** One entry of an element's `effects`: its type, then each of that type's params, a constant or keys. */
-export type EffectSpec<T> = { readonly type: T; readonly enabled?: boolean } & {
-  readonly [P in keyof EffectParamsOf<T>]?: Animatable<EffectParamsOf<T>[P]>;
-};
+export type EffectSpec<T> = { readonly type: T; readonly enabled?: boolean } & (string extends keyof EffectParamsOf<T>
+  ? // An effect that declares no params takes none.
+    unknown
+  : { readonly [P in keyof EffectParamsOf<T>]?: Animatable<EffectParamsOf<T>[P]> });
 
 /** Any effect a file may write: a built-in by name, or one the file declares. */
 // biome-ignore lint/suspicious/noExplicitAny: any declared effect, whatever its params; read back by EffectParamsOf.
 export type AnyEffectSpec = { [T in VideoEffectType]: EffectSpec<T> }[VideoEffectType] | EffectSpec<EffectRef<any>>;
 
+/**
+ * Each entry of an `effects` list checked against its own type: a built-in's params, or those of the `effect()` it
+ * names. The list is read as a tuple, so a declared effect's params are its own, not any effect's.
+ */
+export type CheckedEffects<A extends readonly unknown[]> = {
+  readonly [I in keyof A]: A[I] extends { readonly type: infer T }
+    ? // biome-ignore lint/suspicious/noExplicitAny: any declared effect; its own params are read back by EffectParamsOf.
+      T extends VideoEffectType | EffectRef<any>
+      ? EffectSpec<T> & { readonly [P in Exclude<keyof A[I], keyof EffectSpec<T>>]: never }
+      : AnyEffectSpec
+    : AnyEffectSpec;
+};
+
 /** An element whose `effects` prop is typed per effect, so a wrong param name is a type error. */
 type WithEffects<C> =
   C extends VocabularyComponent<infer K, infer S>
     ? VocabularyMeta<K, S> &
-        ((props: Omit<VocabularyProps<S>, "effects"> & { effects?: readonly AnyEffectSpec[] }) => ReactElement | null)
+        (<const A extends readonly AnyEffectSpec[] = readonly []>(
+          props: Omit<VocabularyProps<S>, "effects"> & { effects?: A & CheckedEffects<A> },
+        ) => ReactElement | null)
     : never;
 
 export const ELEMENTS = {

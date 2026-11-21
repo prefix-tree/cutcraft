@@ -64,21 +64,21 @@ The elements a file is written in: the timeline (clips, tracks, transitions, cap
 |---|---|---|---|---|---|---|
 | [`<Composition>`](/reference/elements/composition) |  |  |  |  |  | `track`, `marker`, `captions` |
 | [`<Track>`](/reference/elements/track) |  |  |  |  |  | `clip`, `audio`, `gap`, `transition`, `title`, `shape`, `svg`, `sticker`, `adjustment`, `nested`, `layer`, `multicam` |
-| [`<Clip>`](/reference/elements/clip) | yes | yes | yes | yes | yes | `effect`, `keyframe`, `mask`, `speedKey`, `freeze` |
-| [`<Audio>`](/reference/elements/audio) | yes |  | yes | yes |  | `keyframe`, `speedKey`, `freeze` |
+| [`<Clip>`](/reference/elements/clip) | yes | yes | yes | yes | yes | `mask` |
+| [`<Audio>`](/reference/elements/audio) | yes |  | yes | yes |  |  |
 | [`<Gap>`](/reference/elements/gap) | yes |  |  |  |  |  |
 | [`<Transition>`](/reference/elements/transition) | yes | yes |  |  |  |  |
-| [`<Title>`](/reference/elements/title) | yes | yes |  |  | yes | `effect`, `keyframe`, `mask` |
-| [`<Shape>`](/reference/elements/shape) | yes | yes |  |  | yes | `effect`, `keyframe`, `mask` |
-| [`<Svg>`](/reference/elements/svg) | yes | yes |  |  | yes | `effect`, `keyframe`, `mask` |
-| [`<Sticker>`](/reference/elements/sticker) | yes | yes |  |  | yes | `effect`, `keyframe`, `mask` |
+| [`<Title>`](/reference/elements/title) | yes | yes |  |  | yes | `mask` |
+| [`<Shape>`](/reference/elements/shape) | yes | yes |  |  | yes | `mask` |
+| [`<Svg>`](/reference/elements/svg) | yes | yes |  |  | yes | `mask` |
+| [`<Sticker>`](/reference/elements/sticker) | yes | yes |  |  | yes | `mask` |
 | [`<Captions>`](/reference/elements/captions) |  | yes |  |  |  | `caption` |
 | [`<Caption>`](/reference/elements/caption) | yes | yes |  |  |  |  |
 | [`<Marker>`](/reference/elements/marker) |  |  |  |  |  |  |
-| [`<Adjustment>`](/reference/elements/adjustment) | yes | yes |  |  |  | `effect`, `keyframe` |
+| [`<Adjustment>`](/reference/elements/adjustment) | yes | yes |  |  |  |  |
 | [`<Mask>`](/reference/elements/mask) |  |  |  |  |  |  |
-| [`<Nested>`](/reference/elements/nested) | yes | yes | yes | yes | yes | `effect`, `keyframe`, `mask`, `speedKey`, `freeze` |
+| [`<Nested>`](/reference/elements/nested) | yes | yes | yes | yes | yes | `mask` |
 | [`<Multicam>`](/reference/elements/multicam) |  |  |  |  |  | `angle`, `cut` |
 | [`<Angle>`](/reference/elements/angle) |  |  |  |  |  |  |
 | [`<Cut>`](/reference/elements/cut) |  |  |  |  |  |  |
-| [`<Layer>`](/reference/elements/layer) | yes | yes |  |  | yes | `effect`, `keyframe` |
+| [`<Layer>`](/reference/elements/layer) | yes | yes |  |  | yes |  |

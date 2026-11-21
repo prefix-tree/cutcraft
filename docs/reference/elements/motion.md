@@ -37,4 +37,4 @@ The player draws it once the host calls `installFreeCodeLibraries()` ([Free code
 | `ground` | boolean |  |  | The layer is a ground that other things sit on: a wall behind a game, a scrim that darkens footage under a title. The layout check then treats it like a background: it is not held to the safe zone and is not said to cover the captions. |
 | `sequence` | [string, object] \| [string, object, object][] | `[]` |  | Motion steps: `[selector, keyframes, options]`, where `at` in the options is seconds into the layer. |
 
-Timed, visual, transformable. Children: `effect`, `keyframe`. [All elements](/reference/elements/)
+Timed, visual, transformable. No children. [All elements](/reference/elements/)

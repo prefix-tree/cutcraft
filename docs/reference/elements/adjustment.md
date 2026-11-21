@@ -29,4 +29,4 @@ The coffee footage is Pixabay videos [209419](https://pixabay.com/videos/id-2094
 | `blend` | "normal" \| "multiply" \| "screen" \| "overlay" \| "darken" \| … 13 more | `"normal"` |  | How the filtered picture mixes with the one beneath, as CSS `mix-blend-mode` does. |
 | `enabled` | boolean | `true` |  | Off, it filters nothing and stays in the file. |
 
-Timed, visual. Children: `effect`, `keyframe`. [All elements](/reference/elements/)
+Timed, visual. No children. [All elements](/reference/elements/)

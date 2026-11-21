@@ -105,8 +105,9 @@ moment always draws the same frame. Change what you draw from moment to moment a
 
 - **Text and graphics:** `<Title>`, `<Shape>`, `<Svg>`, `<Captions>`, and [components](/reference/components/)
   such as lower thirds, callouts and counters, all styled by the file's [theme](./themes).
-- **Between and on clips:** `<Transition>` between two clips, `<Effect>` for colour, blur, keying and the rest,
-  `<Mask>`, `<Keyframe>`, speed ramps and freeze frames. [All elements](/reference/elements/)
+- **Between and on clips:** `<Transition>` between two clips, `<Mask>`, and props on the clip: `effects` for colour,
+  blur, keying and the rest, keys that animate a value, speed ramps and freeze frames.
+  [Keys, effects and speed](./animation)
 - **Values to change later:** a file can export a `schema` and `defaults`, so the same cut renders with another name
   or colour. [The file](./the-file)
 

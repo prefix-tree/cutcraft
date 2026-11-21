@@ -1,7 +1,15 @@
 // Keys on an effect's params: a param written as a list of keys in place of its value, inside `effects`.
 import { describe, expect, it } from "vitest";
 
-import { buildSourceIndex, collectModule, Executor, foldToSource, loadModule, resolve } from "@uberscene/sdk";
+import {
+  buildSourceIndex,
+  collectModule,
+  Executor,
+  foldToSource,
+  loadModule,
+  resolve,
+  withoutEffects,
+} from "@uberscene/sdk";
 
 const manifest = { assets: { city: { id: "city", kind: "video" as const, duration: 10 } } };
 const file = (effects: string) => `import { z } from "zod";
@@ -81,5 +89,18 @@ describe("keys on an effect's params", () => {
     exec.undo();
     expect(exec.state().items.has("c.effects.0.radius.0")).toBe(false);
     expect(exec.state().items.get("c.effects.0")?.props.params).toMatchObject({ radius: 20 });
+  });
+});
+
+describe("withoutEffects", () => {
+  it("turns an effect off by the id the resolver gave it, and leaves the others on", () => {
+    const tree = collectModule(
+      loadModule(file(`{ type: "blur", radius: 4 }, { type: "brightness", amount: 0.2 }`)) as never,
+    );
+    const state = resolve(tree, manifest, withoutEffects(tree, ["c.effects.1"]));
+    expect(state.errors).toEqual([]);
+    expect(state.items.get("c.effects.0")?.props.enabled).toBe(true);
+    expect(state.items.get("c.effects.1")?.props.enabled).toBe(false);
+    expect(state.items.get("c.effects.1")?.props.params).toMatchObject({ amount: 0.2 });
   });
 });

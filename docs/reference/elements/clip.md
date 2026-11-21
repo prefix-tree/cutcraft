@@ -44,4 +44,4 @@ The coffee footage is Pixabay videos [209419](https://pixabay.com/videos/id-2094
 | `duck` | { under, to, attack, release } |  |  | Turns this sound down while another plays: `under` is a track id or a track role (`dialogue`), `to` the volume it falls to, `attack` and `release` the seconds it takes to fall and recover. |
 | `frame` | { focus } |  |  | Reframe to the composition's aspect: the resolver writes `transform.crop` from the source size and this focus, unless a crop is written. |
 
-Timed, visual, audible, trims its source, transformable. Children: `effect`, `keyframe`, `mask`, `speedKey`, `freeze`. [All elements](/reference/elements/)
+Timed, visual, audible, trims its source, transformable. Children: `mask`. [All elements](/reference/elements/)

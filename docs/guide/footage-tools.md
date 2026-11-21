@@ -1,7 +1,7 @@
 # Keying, blurs and pins
 
 The everyday work on footage: take out a green screen, hide a face or a screen, put a recording into a screen filmed
-at an angle, and add a camera look or a texture. Each is an `<Effect>` child of a clip, and runs as a shader, the
+at an angle, and add a camera look or a texture. Each is an entry of a clip's `effects`, and runs as a shader, the
 same in the preview and the export.
 
 ## Green screen
@@ -14,9 +14,8 @@ the background on a track below the keyed clip:
   <Clip id="studio" src="asset:studio" />
 </Track>
 <Track id="presenter">
-  <Clip id="talk" src="asset:greenscreen">
-    <Effect id="key" type="colorKey" params={{ color: "#18c43a", tolerance: 0.3, softness: 0.1, spill: 0.6 }} />
-  </Clip>
+  <Clip id="talk" src="asset:greenscreen"
+    effects={[{ type: "colorKey", color: "#18c43a", tolerance: 0.3, softness: 0.1, spill: 0.6 }]} />
 </Track>
 ```
 
@@ -31,15 +30,16 @@ It compares colour, not brightness, so the shadowed and lit parts of the screen 
 
 ## Hiding a face, a plate or a screen
 
-[`regionBlur`](/reference/effects/regionBlur) blurs inside a box. Keyframe the box to follow what it hides:
+[`regionBlur`](/reference/effects/regionBlur) blurs inside a box. Give the box keys to follow what it hides:
 
 ```tsx
-<Clip id="street" src="asset:street">
-  <Effect id="plate" type="regionBlur" params={{ box: [0.42, 0.66, 0.12, 0.06], radius: 10, roundness: 0.3 }}>
-    <Keyframe id="p1" param="box" at={0} value={[0.42, 0.66, 0.12, 0.06]} />
-    <Keyframe id="p2" param="box" at={2.5} value={[0.3, 0.7, 0.14, 0.07]} />
-  </Effect>
-</Clip>
+<Clip id="street" src="asset:street"
+  effects={[{
+    type: "regionBlur",
+    box: [{ at: 0, value: [0.42, 0.66, 0.12, 0.06] }, { at: 2.5, value: [0.3, 0.7, 0.14, 0.07] }],
+    radius: 10,
+    roundness: 0.3,
+  }]} />
 ```
 
 | Param | Does |
@@ -66,24 +66,26 @@ screen filmed at an angle. Put the recording on a track above the shot of the de
   <Clip id="laptop" src="asset:laptop-on-desk" />
 </Track>
 <Track id="screen">
-  <Clip id="demo" src="asset:screen-recording">
-    <Effect
-      id="pin"
-      type="cornerPin"
-      params={{ topLeft: [0.31, 0.22], topRight: [0.68, 0.25], bottomRight: [0.66, 0.6], bottomLeft: [0.33, 0.58] }}
-    />
-  </Clip>
+  <Clip id="demo" src="asset:screen-recording"
+    effects={[{
+      type: "cornerPin",
+      topLeft: [0.31, 0.22],
+      topRight: [0.68, 0.25],
+      bottomRight: [0.66, 0.6],
+      bottomLeft: [0.33, 0.58],
+    }]} />
 </Track>
 ```
 
 The corners are `topLeft`, `topRight`, `bottomRight` and `bottomLeft`, each `[x, y]` as fractions of the frame. The
 picture is warped in perspective, as a flat screen seen at an angle is, and outside its four corners it is
-transparent. When the camera moves, keyframe each corner.
+transparent. When the camera moves, give each corner keys.
 
 ## Follow something that moves
 
-Every param can be animated by a [`<Keyframe>`](/reference/elements/keyframe) inside the effect, lists included. A box
-or a corner moves smoothly between two keys, which is how a blur follows a face or a pin follows a screen.
+Every param takes [keys](./animation#effects) in place of its value, lists included: each key's `value` is a whole box
+or corner. A box or a corner moves smoothly between two keys, which is how a blur follows a face or a pin follows a
+screen.
 
 ## Camera looks
 
@@ -94,7 +96,7 @@ These imitate what a lens or a fast camera move does to the picture.
 | Param | Does |
 |---|---|
 | `center` | `[x, y]`: the point it smears toward. |
-| `length` | Up to that many pixels of smear at the corners. Keyframe it down from a high value for a punch-in. |
+| `length` | Up to that many pixels of smear at the corners. Key it down from a high value for a punch-in. |
 | `samples` | Up to 64: trades smoothness for speed. |
 
 [`chromaticAberration`](/reference/effects/chromaticAberration) splits red and blue apart, as a lens fringes.
@@ -122,9 +124,7 @@ only that part is pixelated, so it hides a face or a plate the way [`regionBlur`
 does, but as a coarse mosaic:
 
 ```tsx
-<Clip id="street" src="asset:street">
-  <Effect id="hide" type="pixelate" params={{ size: 18, box: [0.62, 0.1, 0.2, 0.35], feather: 6 }} />
-</Clip>
+<Clip id="street" src="asset:street" effects={[{ type: "pixelate", size: 18, box: [0.62, 0.1, 0.2, 0.35], feather: 6 }]} />
 ```
 
 [`scanlines`](/reference/effects/scanlines) lays dark bands over the picture, for an old screen.
@@ -147,9 +147,7 @@ plays and only ever lightening it. `evolution` sets how fast they wander; change
 
 ```tsx
 <Track id="look" layout="free">
-  <Adjustment id="leak" start={0} duration={12}>
-    <Effect id="l" type="lightLeak" params={{ intensity: 0.5, color: "#ff9a4d" }} />
-  </Adjustment>
+  <Adjustment id="leak" start={0} duration={12} effects={[{ type: "lightLeak", intensity: 0.5, color: "#ff9a4d" }]} />
 </Track>
 ```
 

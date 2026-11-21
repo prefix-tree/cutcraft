@@ -167,7 +167,7 @@ export const TRANSITIONS = {
 } as const satisfies Record<string, TransitionEntry>;
 
 export type VideoEffectType = keyof typeof EFFECTS;
-/** The params a built-in effect takes, as written in `<Effect params>`. */
+/** The params a built-in effect takes, as written in an `effects` entry. */
 export type EffectParams<K extends VideoEffectType> = z.input<(typeof EFFECTS)[K]["params"]>;
 
 /** The effects by family, for the reference and the editor's menus. Every effect is in exactly one. */

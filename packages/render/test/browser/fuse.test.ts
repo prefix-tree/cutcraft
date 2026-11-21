@@ -66,9 +66,15 @@ export default function Video() {
   return (
     <Composition fps={30} width={320} height={180} background={{ mode: "color", color: "#000000" }}>
       <Track id="t">
-        <Clip id="c" src="asset:solid" fit="cover" effects={[{ type: chart }]}>
-          ${effects}
-        </Clip>
+        <Clip
+          id="c"
+          src="asset:solid"
+          fit="cover"
+          effects={[
+            { type: chart },
+            ${effects},
+          ]}
+        />
       </Track>
     </Composition>
   );
@@ -89,10 +95,10 @@ export default function Video() {
 }
 
 it("draws a run of colour effects as one pass that looks like one pass each", async () => {
-  const fused = await still("fused", GRADE.join("\n          "));
+  const fused = await still("fused", GRADE.join(",\n            "));
   const separate = await still(
     "separate",
-    GRADE.map((e, i) => (i === 0 ? e : `{ type: same }, ${e}`)).join("\n          "),
+    GRADE.map((e, i) => (i === 0 ? e : `{ type: same },\n            ${e}`)).join(",\n            "),
   );
   const a = readImage(fused),
     b = readImage(separate);

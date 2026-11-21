@@ -178,9 +178,17 @@ At `"29.97"` and `"59.94"` the player shows drop-frame timecode, `HH:MM:SS;FF`: 
 
 ## Speed and freezes
 
-`<SpeedKey>` changes a clip's speed from a moment on, eased into the new speed, and `<Freeze>` holds one frame for a
-while before the clip plays on. The sound follows both: it speeds up with the picture and goes silent through a
-freeze. See [`<SpeedKey>`](/reference/elements/speedkey) and [`<Freeze>`](/reference/elements/freeze).
+Keys on a clip's `speed` ramp it from one speed to another, and `freezes` holds one frame for a while before the clip
+plays on:
+
+```tsx
+<Clip id="pour" src="asset:coffee" in={10} out={14}
+  speed={[{ at: 0, value: 1, easing: "easeInOutQuad" }, { at: 1.6, value: 0.4 }]}
+  freezes={[{ at: 4.2, duration: 1.4, source: 12.4 }]} />
+```
+
+The sound follows both: it speeds up with the picture and goes silent through a freeze. See
+[Speed ramps](./animation#speed) and [Freeze frames](./animation#freezes).
 
 ## Next
 

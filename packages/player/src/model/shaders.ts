@@ -88,7 +88,7 @@ export interface EffectPipeline {
 }
 
 /**
- * An element's effects (its `<Effect>` children) in the order the file writes them, at
+ * An element's effects (its `effects`) in the order the file writes them, at
  * element-relative `rel`:
  *
  * - no shader effect (and no shader transition, `transition`): one CSS filter, which needs no WebGL;

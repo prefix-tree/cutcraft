@@ -22,6 +22,17 @@
     "errors": []
   },
   {
+    "id": "adj1.effects.0",
+    "kind": "effect",
+    "track": "overlays",
+    "parent": "adj1",
+    "order": 0,
+    "start": 0,
+    "end": 17.167,
+    "editable": "literal",
+    "errors": []
+  },
+  {
     "id": "an1",
     "kind": "angle",
     "track": "mc",
@@ -79,6 +90,50 @@
     "errors": []
   },
   {
+    "id": "c1.effects.0",
+    "kind": "effect",
+    "track": "main",
+    "parent": "c1",
+    "order": 3,
+    "start": 0,
+    "end": 5.5,
+    "editable": "literal",
+    "errors": []
+  },
+  {
+    "id": "c1.effects.1",
+    "kind": "effect",
+    "track": "main",
+    "parent": "c1",
+    "order": 4,
+    "start": 0,
+    "end": 5.5,
+    "editable": "literal",
+    "errors": []
+  },
+  {
+    "id": "c1.transform.opacity.0",
+    "kind": "keyframe",
+    "track": "main",
+    "parent": "c1",
+    "order": 1,
+    "start": 0,
+    "end": 0,
+    "editable": "literal",
+    "errors": []
+  },
+  {
+    "id": "c1.transform.opacity.1",
+    "kind": "keyframe",
+    "track": "main",
+    "parent": "c1",
+    "order": 2,
+    "start": 0.5,
+    "end": 0.5,
+    "editable": "literal",
+    "errors": []
+  },
+  {
     "id": "c2",
     "kind": "clip",
     "track": "main",
@@ -86,6 +141,39 @@
     "order": 2,
     "start": 5,
     "end": 9,
+    "editable": "literal",
+    "errors": []
+  },
+  {
+    "id": "c2.freezes.0",
+    "kind": "freeze",
+    "track": "main",
+    "parent": "c2",
+    "order": 2,
+    "start": 8,
+    "end": 8.5,
+    "editable": "literal",
+    "errors": []
+  },
+  {
+    "id": "c2.speed.0",
+    "kind": "speedKey",
+    "track": "main",
+    "parent": "c2",
+    "order": 0,
+    "start": 5,
+    "end": 5,
+    "editable": "literal",
+    "errors": []
+  },
+  {
+    "id": "c2.speed.1",
+    "kind": "speedKey",
+    "track": "main",
+    "parent": "c2",
+    "order": 1,
+    "start": 7,
+    "end": 7,
     "editable": "literal",
     "errors": []
   },
@@ -167,39 +255,6 @@
     "errors": []
   },
   {
-    "id": "fr1",
-    "kind": "freeze",
-    "track": "main",
-    "parent": "c2",
-    "order": 2,
-    "start": 8,
-    "end": 8.5,
-    "editable": "literal",
-    "errors": []
-  },
-  {
-    "id": "fx1",
-    "kind": "effect",
-    "track": "main",
-    "parent": "c1",
-    "order": 0,
-    "start": 0,
-    "end": 5.5,
-    "editable": "literal",
-    "errors": []
-  },
-  {
-    "id": "fx2",
-    "kind": "effect",
-    "track": "overlays",
-    "parent": "adj1",
-    "order": 0,
-    "start": 0,
-    "end": 17.167,
-    "editable": "literal",
-    "errors": []
-  },
-  {
     "id": "g1",
     "kind": "gap",
     "track": "main",
@@ -207,28 +262,6 @@
     "order": 3,
     "start": 9,
     "end": 10,
-    "editable": "literal",
-    "errors": []
-  },
-  {
-    "id": "k1",
-    "kind": "keyframe",
-    "track": "main",
-    "parent": "c1",
-    "order": 2,
-    "start": 0,
-    "end": 0,
-    "editable": "literal",
-    "errors": []
-  },
-  {
-    "id": "k2",
-    "kind": "keyframe",
-    "track": "main",
-    "parent": "c1",
-    "order": 3,
-    "start": 0.5,
-    "end": 0.5,
     "editable": "literal",
     "errors": []
   },
@@ -314,7 +347,7 @@
     "kind": "mask",
     "track": "main",
     "parent": "c1",
-    "order": 4,
+    "order": 0,
     "start": 0,
     "end": 5.5,
     "editable": "literal",
@@ -365,28 +398,6 @@
     "errors": []
   },
   {
-    "id": "sk1",
-    "kind": "speedKey",
-    "track": "main",
-    "parent": "c2",
-    "order": 0,
-    "start": 5,
-    "end": 5,
-    "editable": "literal",
-    "errors": []
-  },
-  {
-    "id": "sk2",
-    "kind": "speedKey",
-    "track": "main",
-    "parent": "c2",
-    "order": 1,
-    "start": 7,
-    "end": 7,
-    "editable": "literal",
-    "errors": []
-  },
-  {
     "id": "st1",
     "kind": "sticker",
     "track": "overlays",
@@ -417,17 +428,6 @@
     "order": 2,
     "start": 0.5,
     "end": 2.5,
-    "editable": "literal",
-    "errors": []
-  },
-  {
-    "id": "wb1",
-    "kind": "effect",
-    "track": "main",
-    "parent": "c1",
-    "order": 1,
-    "start": 0,
-    "end": 5.5,
     "editable": "literal",
     "errors": []
   },

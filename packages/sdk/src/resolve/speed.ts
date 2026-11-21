@@ -1,12 +1,12 @@
 import { curveAt } from "@uberscene/kit/schema";
 
-/** A `<SpeedKey>`: `at` is clip seconds with the freeze holds taken out. */
+/** A speed key: `at` is clip seconds with the freeze holds taken out. */
 export interface RampKey {
   readonly at: number;
   readonly speed: number;
   readonly easing?: string | undefined;
 }
-/** A `<Freeze>`: shows source second `at` for `duration` from element-relative `start`, then the clip resumes where it stopped. */
+/** A hold: shows source second `at` for `duration` from element-relative `start`, then the clip resumes where it stopped. */
 export interface FreezeHold {
   readonly at: number;
   readonly start: number;
@@ -118,7 +118,7 @@ interface TimingChild {
   readonly props: Readonly<Record<string, unknown>>;
 }
 
-/** A clip's `<SpeedKey>` children, sorted by `at`. */
+/** A clip's speed keys (from `speed={[…]}`), sorted by `at`. */
 export function speedKeysOf(children: readonly TimingChild[]): RampKey[] {
   return (
     children
@@ -134,7 +134,7 @@ export function speedKeysOf(children: readonly TimingChild[]): RampKey[] {
   );
 }
 
-/** A clip's `<Freeze>` children, sorted by `start`. */
+/** A clip's holds (from `freezes`), sorted by `start`. */
 export function freezeHoldsOf(children: readonly TimingChild[]): FreezeHold[] {
   return (
     children

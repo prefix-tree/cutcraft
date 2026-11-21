@@ -11,12 +11,11 @@ parts once and you can read any element in a file, and any page of the [referenc
   style="h1" color="$primary"                      // 4. how it looks
   enter={{ type: "slide-up", duration: 0.4 }}      // 5. how it comes and goes
   exit={{ type: "fade", duration: 0.3 }}
+  transform={{ rotation: [{ at: 0, value: 0 }, { at: 2.5, value: -4 }] }}  // keys: it tilts
+  effects={[{ type: "glow", radius: 12 }]}         // 6. its effects
 >
   Ship small
-  {/* 6. what it holds */}
-  <Effect id="headline-glow" type="glow" params={{ radius: 12 }} />
-  <Keyframe id="headline-tilt-0" property="transform.rotation" at={0} value={0} />
-  <Keyframe id="headline-tilt-1" property="transform.rotation" at={2.5} value={-4} />
+  {/* 7. what it holds */}
 </Title>
 ```
 
@@ -26,8 +25,9 @@ parts once and you can read any element in a file, and any page of the [referenc
 | 2. When it plays | `start`, `anchor`, `at`, `offset`, `duration` | Everything placed in time |
 | 3. Where it sits | `box`, `fit`, `transform`, `blend` | Everything that draws |
 | 4. How it looks | its own props, `style`, `$tokens` | Each element has its own |
-| 5. How it comes and goes | `enter`, `exit`, `<Keyframe>` | Titles, shapes, SVG, stickers, layers |
-| 6. What it holds | text, `<Effect>`, `<Keyframe>`, `<Mask>`… | Depends on the element |
+| 5. How it comes and goes | `enter`, `exit`, keys | Titles, shapes, SVG, stickers, layers |
+| 6. Its effects | `effects` | Everything that draws |
+| 7. What it holds | text, `<Mask>`, `<Caption>`… | Depends on the element |
 
 ## 1. Who it is: `id`
 
@@ -87,7 +87,7 @@ A picture in picture: a box 672 pixels wide whose top right corner sits 40 pixel
 <Clip id="pip" src="asset:screen" box={{ x: 1880, y: 40, width: 672, origin: "topRight" }} transform={{ borderRadius: 24 }} />
 ```
 
-A keyframe moves a box with the paths `box.x` and `box.y`. Files written for the older `transform.position`, which
+Keys on `box.x` and `box.y` move a box ([Keys, effects and speed](./animation#keys)). Files written for the older `transform.position`, which
 measured from the frame's centre, move with `uberscene lint --fix`.
 
 The track order sets what is on top: the first track is the bottom of the picture
@@ -105,29 +105,38 @@ Most looks come from the file's [theme](./themes) instead of being written on ea
 
 Change the theme and every element that uses it follows. A prop written on the element wins over the preset.
 
-## 5. How it comes and goes: `enter`, `exit`, keyframes
+## 5. How it comes and goes: `enter`, `exit`, keys
 
 - **`enter` and `exit`** play a ready-made move at the element's start or end: a fade, a slide, a scale, a wipe, a
   draw-on. Each takes a `type`, a `duration` and an `easing`
   ([Entrances and exits](./titles-and-graphics#entrances-and-exits)).
-- **`<Keyframe>`** children animate one property between values over time: position, scale, rotation, opacity, crop,
-  or an effect's param. `at` is seconds into the element. A keyframe's `easing` shapes the move from that keyframe to
-  the next one, so the easing on the last keyframe of a move is not used.
+- **Keys** animate a prop: in place of a value, write a list of `{ at, value, easing? }`, as in
+  `rotation: [{ at: 0, value: 0 }, { at: 2.5, value: -4 }]`. Position, scale, rotation, opacity, crop, volume and
+  every effect param take keys. `at` is seconds into the element. A key's `easing` shapes the move from that key to
+  the next one, so the easing on the last key is not used ([Keys, effects and speed](./animation)).
 - A title's **`animation`** builds the text in letter by letter or word by word, or fades, slides or scales it in.
 
 For anything more, draw it yourself in a `<Layer>` ([Free code](./free-code)).
 
-## 6. What it holds: children
+## 6. Its effects: `effects`
 
-Children are written inside the element. Each has its own `id`, so an editor can change one keyframe or one effect.
+A look on an element is an entry of its `effects` list, `{ type, ...params }`: colour, blur, glow, keying and the
+rest. They run in the order of the list, and each param takes keys.
+
+```tsx
+<Clip id="talk" src="asset:talk" effects={[{ type: "exposure", stops: 0.4 }, { type: "vignette", amount: 0.3 }]} />
+```
+
+A clip's speed ramps and held frames are props too: keys on `speed`, and a `freezes` list
+([Keys, effects and speed](./animation)).
+
+## 7. What it holds: children
+
+Children are written inside the element. They are things with a time and a shape of their own, each with its own `id`.
 
 | Child | Does | On |
 |---|---|---|
-| `<Effect>` | A look: colour, blur, glow, keying… Several run in order. | Clips, titles, shapes, SVG, stickers, layers, adjustments |
-| `<Keyframe>` | Animates one property. | Everything that draws, and audio and effects |
 | `<Mask>` | Shows only a shape of the element. | Clips and nested sequences |
-| `<SpeedKey>` | Changes a clip's speed from a moment on. | Clips |
-| `<Freeze>` | Holds one frame of a clip. | Clips |
 | `<Caption>` | One line of captions, written by hand. | Captions |
 
 A title's text and a layer's React are children too. The [capabilities table](/reference/elements/#capabilities)

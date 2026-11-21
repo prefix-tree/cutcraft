@@ -38,7 +38,7 @@ async function colourAt(
   writeFileSync(
     file,
     `import { z } from "zod";
-import { Adjustment, Clip, Composition, effect, transition, Effect, Keyframe, Layer, Motion, Title, Track, Transition } from "@uberscene/kit";
+import { Adjustment, Clip, Composition, effect, transition, Layer, Motion, Title, Track, Transition } from "@uberscene/kit";
 export const manifest = ${JSON.stringify(manifest)};
 ${declarations}
 export default function Video() {
@@ -200,7 +200,7 @@ describe("colour effects", () => {
   const graded = (name: string, effect: string, left: number[], right = left) =>
     colourAt(
       name,
-      `<Track id="t"><Clip id="c" src="asset:solid" fit="cover" effects={[{ type: paint, left: ${JSON.stringify(left)}, right: ${JSON.stringify(right)} }]}>${effect}</Clip></Track>`,
+      `<Track id="t"><Clip id="c" src="asset:solid" fit="cover" effects={[{ type: paint, left: ${JSON.stringify(left)}, right: ${JSON.stringify(right)} }, ${effect}]} /></Track>`,
       PAINT,
       0.5,
       [
@@ -284,11 +284,10 @@ describe("footage tools", () => {
     paint: { left: number[]; right: number[]; split?: number },
     points: [number, number][],
     time = 0.5,
-    keys = "",
   ) =>
     colourAt(
       name,
-      `<Track id="t"><Clip id="c" src="asset:solid" fit="cover" effects={[{ type: paint, ...${JSON.stringify(paint)} }]}>${effect}${keys}</Clip></Track>`,
+      `<Track id="t"><Clip id="c" src="asset:solid" fit="cover" effects={[{ type: paint, ...${JSON.stringify(paint)} }, ${effect}]} /></Track>`,
       PAINT,
       time,
       points,
@@ -346,10 +345,15 @@ describe("footage tools", () => {
     // The box moves from x 0..0.2 to 0.6..0.8; half way it is at 0.3..0.5, over the edge at 0.4.
     const [edge] = await at(
       "region-keys",
-      `<Effect id="b" type="regionBlur" params={{ box: [0, 0, 0.2, 1], radius: 7, feather: 0 }}>
-        <Keyframe id="k1" param="box" at={0} value={[0, 0, 0.2, 1]} />
-        <Keyframe id="k2" param="box" at={2} value={[0.6, 0, 0.2, 1]} />
-      </Effect>`,
+      `{
+        type: "regionBlur",
+        radius: 7,
+        feather: 0,
+        box: [
+          { at: 0, value: [0, 0, 0.2, 1] },
+          { at: 2, value: [0.6, 0, 0.2, 1] },
+        ],
+      }`,
       { left: [0, 0, 0], right: [1, 1, 1], split: 0.4 },
       [[124, 90]],
       1,
@@ -427,8 +431,7 @@ describe("title effects", () => {
     colourAt(
       name,
       `<Track id="fx" layout="free">
-        <Layer id="l" start={0} duration={2}>
-          ${effect}
+        <Layer id="l" start={0} duration={2} effects={[${effect}]}>
           <div style={{ position: "absolute", left: 120, top: 60, width: 80, height: 60, background: "#ff0000" }} />
         </Layer>
       </Track>`,
@@ -542,7 +545,7 @@ describe("stylizers and generators", () => {
   ) =>
     colourAt(
       name,
-      `<Track id="t"><Clip id="c" src="asset:solid" fit="cover" effects={[{ type: paint, ...${JSON.stringify(paint)} }]}>${effect}</Clip></Track>`,
+      `<Track id="t"><Clip id="c" src="asset:solid" fit="cover" effects={[{ type: paint, ...${JSON.stringify(paint)} }, ${effect}]} /></Track>`,
       PAINT,
       time,
       points,
@@ -766,13 +769,13 @@ const square = effect({ name: "square", shader: "vec4 effect(vec2 uv) { vec4 c =
     const at = (name: string, effects: string) =>
       colourAt(
         name,
-        `<Track id="t"><Clip id="c" src="asset:solid" fit="cover" effects={[{ type: grey }]}>${effects}</Clip></Track>`,
+        `<Track id="t"><Clip id="c" src="asset:solid" fit="cover" effects={[{ type: grey }, ${effects}]} /></Track>`,
         SQUARE,
         0.5,
         [[160, 90]],
       );
-    const [cssFirst] = await at("order-css-first", BRIGHT + SQ);
-    const [shaderFirst] = await at("order-shader-first", SQ + BRIGHT);
+    const [cssFirst] = await at("order-css-first", `${BRIGHT}, ${SQ}`);
+    const [shaderFirst] = await at("order-shader-first", `${SQ}, ${BRIGHT}`);
     // The grey is 128/255, not exactly 0.5.
     const g = 128 / 255;
     expect(close(cssFirst, (g * 1.5) ** 2)).toBe(true);
@@ -783,13 +786,13 @@ const square = effect({ name: "square", shader: "vec4 effect(vec2 uv) { vec4 c =
     const at = (name: string, effects: string) =>
       colourAt(
         name,
-        `<Track id="fx" layout="free"><Layer id="l" start={0} duration={2}>${effects}<div style={{ position: "absolute", inset: 0, background: "#808080" }} /></Layer></Track>`,
+        `<Track id="fx" layout="free"><Layer id="l" start={0} duration={2} effects={[${effects}]}><div style={{ position: "absolute", inset: 0, background: "#808080" }} /></Layer></Track>`,
         SQUARE,
         0.5,
         [[160, 90]],
       );
-    const [cssFirst] = await at("layer-css-first", BRIGHT + SQ);
-    const [shaderFirst] = await at("layer-shader-first", SQ + BRIGHT);
+    const [cssFirst] = await at("layer-css-first", `${BRIGHT}, ${SQ}`);
+    const [shaderFirst] = await at("layer-shader-first", `${SQ}, ${BRIGHT}`);
     const g = 128 / 255;
     expect(close(cssFirst, (g * 1.5) ** 2)).toBe(true);
     expect(close(shaderFirst, g * g * 1.5)).toBe(true);
@@ -805,7 +808,7 @@ const square = effect({ name: "square", shader: "vec4 effect(vec2 uv) { vec4 c =
     const probe = join(dir, "order-probe.tsx");
     writeFileSync(
       probe,
-      `import { Clip, Composition, Effect, Track, Transition } from "@uberscene/kit";
+      `import { Clip, Composition, Track, Transition } from "@uberscene/kit";
 export const manifest = ${JSON.stringify(mediaManifest)};
 export default function Video() { return <Composition fps={30} width={320} height={180}>${body}</Composition>; }`,
     );

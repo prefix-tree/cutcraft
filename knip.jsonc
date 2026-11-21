@@ -9,9 +9,6 @@
       // not read .vue files.
       "entry": [
         "scripts/*.{ts,mjs}",
-        // The spelling eval: run.ts is run by hand, and reads the base files as text.
-        "scripts/evals/*/run.ts",
-        "scripts/evals/*/base.*.tsx",
         "docs/gallery.data.ts",
         "docs/.vitepress/config.mts",
         "docs/.vitepress/theme/index.ts",
@@ -19,8 +16,7 @@
         "docs/.vitepress/theme/playground/starters.ts"
       ],
       // Run through its binary by scripts/check-packages.mjs.
-      // The spelling eval borrows the SDK's own Babel by path.
-      "ignoreDependencies": ["@arethetypeswrong/cli", "@babel/parser", "@babel/types"]
+      "ignoreDependencies": ["@arethetypeswrong/cli"]
     },
     "packages/kit": {
       "entry": ["scripts/*.ts"]

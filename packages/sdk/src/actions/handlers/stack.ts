@@ -2,26 +2,10 @@
 import type { PatchLog } from "../../patches/types";
 import type { ResolvedState } from "../../resolve/resolve";
 import { rawNode, siblingAfter } from "../handler-kit";
-import { type ActionError, type NodeSpec, nodeOfSpec } from "../types";
+import { type NodeSpec, nodeOfSpec } from "../types";
 
 export function childrenOfKind(state: ResolvedState, parentId: string, kind: string) {
   return (rawNode(state, parentId)?.children ?? []).filter((c) => c.kind === kind);
-}
-
-export function requireChild(
-  state: ResolvedState,
-  parentId: string,
-  childId: string,
-  kind: string,
-): ActionError | null {
-  const child = rawNode(state, childId);
-  if (!child || child.parent !== parentId || child.kind !== kind)
-    return {
-      code: "ELEMENT_NOT_FOUND",
-      message: `${kind} "${childId}" is not a child of "${parentId}"`,
-      path: "childId",
-    };
-  return null;
 }
 
 /** Where a replaced collection sits: where its first member was, or after the other children when there was none. */

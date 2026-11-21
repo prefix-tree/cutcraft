@@ -39,4 +39,4 @@ The player draws it once the host calls `installFreeCodeLibraries()` ([Free code
 | `background` | string |  |  | The scene's background colour; left out, transparent over what is beneath. |
 | `setup` | any |  |  | Builds the scene once from `{ scene, camera, renderer, THREE, width, height }`, and may return `update(frame)` for every frame. |
 
-Timed, visual, transformable. Children: `effect`, `keyframe`. [All elements](/reference/elements/)
+Timed, visual, transformable. No children. [All elements](/reference/elements/)

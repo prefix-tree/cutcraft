@@ -33,4 +33,4 @@ The coffee footage is Pixabay videos [209419](https://pixabay.com/videos/id-2094
 | `style` | string |  |  | A theme preset for stickers. |
 | `src` | string |  | yes | An image the manifest lists (`asset:party`): PNG, SVG, WebP or GIF. |
 
-Timed, visual, transformable. Children: `effect`, `keyframe`, `mask`. [All elements](/reference/elements/)
+Timed, visual, transformable. Children: `mask`. [All elements](/reference/elements/)

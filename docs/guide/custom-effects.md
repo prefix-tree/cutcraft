@@ -1,8 +1,8 @@
 # Your own effects and transitions
 
 The built-in [effects and transitions](/reference/effects/) cover the usual looks. When you need another, write it in
-GLSL in the file itself: declare it at the top with `effect()` or `transition()`, and pass what it returns as an
-`<Effect>` or `<Transition>` type.
+GLSL in the file itself: declare it at the top with `effect()` or `transition()`, and pass what it returns as the
+`type` of an entry in `effects`, or of a `<Transition>`.
 
 <Example src="previews/guide/shader-effect" alt="A coffee shot turned navy and gold by a duotone effect">
 
@@ -13,8 +13,8 @@ GLSL in the file itself: declare it at the top with `effect()` or `transition()`
 ## Declare an effect
 
 An effect is a name, a zod schema of its params, and a shader. The example above is a two-colour tone (the built-in
-`duotone` does the same; this shows how it is written), with two colour params and a third that the keyframes animate
-from the plain footage to the full effect. TypeScript checks the params you write on `<Effect>` against the schema you
+`duotone` does the same; this shows how it is written), with two colour params and a third whose keys animate it
+from the plain footage to the full effect. TypeScript checks the params you write beside `type` against the schema you
 declared, as it does for the built-in types.
 
 An effect's shader defines `vec4 effect(vec2 uv)` and returns the colour at `uv`. It gets:
@@ -35,7 +35,7 @@ editor and lint can read them; the `declaration` lint ([Lint](/guide/editing#lin
 
 The player finds an effect on the element that uses it, and among the file's exports, so `export const` the ones the
 editor should offer before anything uses them. The editor's [actions](/reference/actions) take the names too, for
-example `effect/add` and `transition/update`, and write `type={glitch}` back into the file.
+example `effect/add` and `transition/update`, and write `{ type: glitch }` back into the file.
 
 ::: details A declaration is a value, not a registration
 Each file's effects belong to it alone, so many players on one page never see each other's.
@@ -60,8 +60,8 @@ come from the schema, once:
 The schema does the rest of the work too:
 
 - the zod schema checks the values and fills in defaults;
-- a [`<Keyframe>`](/reference/elements/keyframe) inside the `<Effect>` animates one with `param="<name>"`, and the
-  resolver checks the name and the values against the schema;
+- [keys](./animation#effects) in place of a param's value animate it, and the resolver checks the name and the
+  values against the schema;
 - an editor can build its inspector from the schema.
 
 ### A texture from an asset
@@ -157,7 +157,7 @@ Its shader defines `vec4 transition(vec2 uv)` and gets:
 ## Effects on titles and layers
 
 Overlays take the same effects: titles, shapes, SVG, stickers and any `<Layer>`, including `<Three>` and `<Motion>`.
-Write the `<Effect>` inside the element, next to its text or its free code. Here one colour-split effect runs on a
+Write the effect in the element's `effects`, as on a clip. Here one colour-split effect runs on a
 title and, more gently, on a Motion badge, while the footage under them stays as it is:
 
 <Example src="previews/guide/title-effect" alt="A white title and an orange badge with red and blue fringes over a coffee shot">
@@ -167,7 +167,7 @@ title and, more gently, on a Motion badge, while the footage under them stays as
 </Example>
 
 An overlay is DOM, so the player draws it into a canvas with HTML-in-Canvas and runs its effects over that picture,
-in file order.
+in the order of the list.
 
 ::: warning Overlay effects in the preview
 HTML-in-Canvas is a Chrome feature that is still behind a flag: turn on `chrome://flags/#canvas-draw-element` to see
@@ -177,7 +177,7 @@ ones only a shader draws, and warns once. The export always draws them all, beca
 
 ## How effects are drawn
 
-An element's effects run in the order they appear in the file, yours and the built-in ones alike, after its mask,
+An element's effects run in the order of its `effects` list, yours and the built-in ones alike, after its mask,
 vignette and grain. Here the same two effects in the opposite order give two different pictures:
 
 <Example src="previews/guide/effect-order" alt="The same shot twice: toned navy and amber on the left, grey on the right">

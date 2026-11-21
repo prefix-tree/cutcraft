@@ -24,6 +24,7 @@ const CHART = `const chart = effect({
   shader: \`vec4 effect(vec2 uv) { return vec4(vec3(0.8), 1.0); }\`,
 });`;
 
+/** `looks` are the adjustment's effect entries, comma-separated. */
 async function still(name: string, looks: string): Promise<string> {
   const file = join(dir, `${name}.tsx`);
   writeFileSync(
@@ -38,9 +39,7 @@ export default function Video() {
         <Clip id="c" src="asset:solid" fit="cover" effects={[{ type: chart }]} />
       </Track>
       <Track id="looks" layout="free">
-        <Adjustment id="a" start={0} duration={1}>
-          ${looks}
-        </Adjustment>
+        <Adjustment id="a" start={0} duration={1} effects={[${looks}]} />
       </Track>
     </Composition>
   );
@@ -75,15 +74,15 @@ function mean(file: string, x: number, y: number, size = 8): number {
 }
 
 it("darkens the corners of everything beneath an adjustment with a vignette, and leaves its centre", async () => {
-  const plain = await still("plain", '<Effect id="none" type="brightness" params={{ amount: 0 }} />');
-  const vignette = await still("vignette", '<Effect id="v" type="vignette" params={{ amount: 0.9 }} />');
+  const plain = await still("plain", '{ type: "brightness", amount: 0 }');
+  const vignette = await still("vignette", '{ type: "vignette", amount: 0.9 }');
   expect(mean(vignette, 6, 6)).toBeLessThan(mean(plain, 6, 6) - 60);
   expect(Math.abs(mean(vignette, 160, 90) - mean(plain, 160, 90))).toBeLessThan(4);
 });
 
 it("speckles everything beneath an adjustment with grain", async () => {
-  const plain = await still("plain-g", '<Effect id="none" type="brightness" params={{ amount: 0 }} />');
-  const grain = await still("grain", '<Effect id="g" type="grain" params={{ amount: 0.6 }} />');
+  const plain = await still("plain-g", '{ type: "brightness", amount: 0 }');
+  const grain = await still("grain", '{ type: "grain", amount: 0.6 }');
   const a = readImage(plain),
     b = readImage(grain);
   let off = 0;

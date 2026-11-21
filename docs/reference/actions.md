@@ -111,10 +111,10 @@ Every action has `validate`, `apply`, `invert` and `fold`; the inverse is never 
 
 | action | params | what it does |
 |---|---|---|
-| `key/add` | `{ id, path, at, value, easing? }` | Adds a key at `at` seconds into element `id` on `path`: `transform.opacity`, `transform.scale`, `box.x`, `volume`, `pan`, `speed`, `effects.<n>.<param>`… A constant there becomes keys; a key already at `at` is replaced. |
+| `key/add` | `{ id, path, at, value, easing? }` | Adds a key at `at` seconds into element `id` on `path`: `transform.opacity`, `transform.scale`, `box.x`, `volume`, `pan`, `speed`, `effects.<n>.<param>`… A constant there becomes the first key, at 0; a key already at `at` is replaced. |
 | `key/move` | `{ id, path, at, to }` | Moves the key at `at` on `path` to `to`, seconds into the element; it must stay inside the element. |
-| `key/remove` | `{ id, path, at }` | Removes the key at `at` on `path`; the one key left is written as a constant. |
-| `key/setAll` | `{ id, path, keys }` | Replaces the keys on `path` with `keys`: none removes the value, one is written as a constant. |
+| `key/remove` | `{ id, path, at }` | Removes the key at `at` on `path`; removing the last one removes the value. |
+| `key/setAll` | `{ id, path, keys }` | Replaces the keys on `path` with `keys`; none removes the value. |
 | `key/update` | `{ id, path, at, value?, easing? }` | Changes the value and/or easing of the key at `at` on `path`. |
 
 ## `layer/`

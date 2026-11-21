@@ -357,7 +357,7 @@ nothing a tool needs to edit a file.
 | `useProgress`, `progress` | `(when?: { at?, after?, over?, easing?, progress? }) => number`, `(clock, when?) => number` | How far along something is on the layer's clock: 0 before it starts, 1 once it is over, eased between. |
 | `random` | `(seed: string \| number) => number` | A number in [0, 1) fixed by `seed`, the same every frame in the preview and the export. |
 | `narrate` | `(script: string, options?: { start?, pace?: { word?, letter?, comma?, stop? }, lineLength?, hold?, transcript? }) => { words, lines, cues, at(name), duration, warnings }` | Times a narration from its script: every word with its start and end, the subtitles a phrase at a time, and the cues by name. A word in square brackets is a cue, a number in round brackets a pause in seconds, a name in curly brackets a cue with no word. Times come from a speaking pace, or from `transcript` ([Narration from a script](/guide/captions-and-sound#narration-from-a-script)). |
-| `effect` | `<P extends ZodObject>({ name, params?: P, shader } \| { name, params?: P, passes: string[] }) => EffectRef<P>` | Declares an effect drawn by a GLSL `vec4 effect(vec2 uv)`, or by several run in order (`passes`, each reading the one before as `image` and the element as `original`), that reads each param as `params.<name>`. Returns the definition as a value, with no side effect, for `<Effect type>`, which then checks `params` against `P`. The player finds it on the element that uses it or among the file's exports, so each file's effects are its own ([Effects and transitions of your own](/guide/custom-effects)). |
+| `effect` | `<P extends ZodObject>({ name, params?: P, shader } \| { name, params?: P, passes: string[] }) => EffectRef<P>` | Declares an effect drawn by a GLSL `vec4 effect(vec2 uv)`, or by several run in order (`passes`, each reading the one before as `image` and the element as `original`), that reads each param as `params.<name>`. Returns the definition as a value, with no side effect, for the `type` of an entry in `effects`, whose params are then checked against `P`. The player finds it on the element that uses it or among the file's exports, so each file's effects are its own ([Effects and transitions of your own](/guide/custom-effects)). |
 | `transition` | `<P extends ZodObject>({ name, params?: P, shader }) => TransitionRef<P>` | Declares a transition drawn by a GLSL `vec4 transition(vec2 uv)` that reads `from`, `to`, `progress` and `params.<name>`. Returns the definition as a value for `<Transition type>`, which then checks `params` against `P`. |
 | `font` | `({ family, src: "asset:<id>", weight?, style? }) => FontRef` | Declares a face from a font file and returns it as a value that stands for its family wherever a string goes ([Fonts](/guide/themes#fonts)). The faces a file uses or exports are on `state.fonts`. |
 | `googleFont` | `(family, { weights?, styles? }?) => FontRef` | Declares a Google Fonts family, one face per weight and style, and returns it as a value that stands for its family. The export downloads it once into a local cache. |
@@ -372,7 +372,7 @@ transition registries, the enums, the fonts and the themes. Tools and the refere
 | `knobsOf` | `(schema, values?) => Knob[]` | A file's schema values in order, each with `key`, `kind`, `description`, `optional`, its `value`, and `options`, `min` and `max` where it has them. |
 | `BUILT_IN_SHADERS`, `builtInShader` | `readonly ShaderDefinition[]`, `(type) => ShaderDefinition \| undefined` | The built-in effects drawn by a shader (the colour, footage and title effects), with the schema of their params. |
 | `EFFECTS`, `TRANSITIONS`, `EFFECT_FAMILIES`, `TRANSITION_FAMILIES` | registries | Every built-in effect and transition: its name, strict params schema and how it draws, and the families the reference groups them in. The generated [effects reference](/reference/effects/) is read from these. |
-| `EffectParams<K>`, `TransitionParams<K>` | types | The params a built-in effect or transition takes, as `<Effect params>` and `<Transition params>` check them. |
+| `EffectParams<K>`, `TransitionParams<K>` | types | The params a built-in effect or transition takes, as an `effects` entry and `<Transition params>` check them. |
 | `isNeutral` | `(type, params) => boolean` | Whether a built-in effect changes nothing with these params (an amount at 0): the player does not draw it then. |
 | `FONT_CATALOG`, `findFont`, `fontsFor`, `nearestFont` | `readonly CatalogFont[]`, `(family) => CatalogFont \| undefined`, `({ role?, category? }?) => CatalogFont[]`, `(family) => CatalogFont \| undefined` | The fonts to choose from: the bundled families and a short list from Google Fonts, each with its category, the roles it suits, a line on how it looks, what it pairs with, and its weights. What `uberscene fonts` prints and what a font picker lists; `nearestFont` finds the family a misspelt name meant ([Choosing a font](/guide/themes#choosing-a-font)). |
 
@@ -446,7 +446,7 @@ Every name each entry exports, read from the code. The sections above explain th
 | `Cut` | const | The `<Cut>` element ([reference](/reference/elements/cut)). |
 | `DrawnLine` | function | A line that draws itself from one point to another. |
 | `DrawnLineProps` | interface |  |
-| `effect` | function | Declares an effect drawn by a GLSL function, and returns it for `<Effect type>`. |
+| `effect` | function | Declares an effect drawn by a GLSL function, and returns it for an effect's `type`. |
 | `EffectParamsOf` | type | The params of an effect type. |
 | `EffectRef` | interface | An effect a file declares, as `effect()` returns it. |
 | `EffectSpec` | type | One entry of an element's `effects`. |
@@ -475,7 +475,7 @@ Every name each entry exports, read from the code. The sections above explain th
 | `LowerThird` | function | A name and a role in the lower third of the frame. |
 | `Marker` | const | The `<Marker>` element ([reference](/reference/elements/marker)). |
 | `Mask` | const | The `<Mask>` element ([reference](/reference/elements/mask)). |
-| `Motion` | const | Children animated by a Motion `sequence` on the video's clock. |
+| `Motion` | const | The `<Motion>` element ([reference](/reference/elements/motion)). |
 | `Multicam` | const | The `<Multicam>` element ([reference](/reference/elements/multicam)). |
 | `narrate` | function | Times a narration from its script. |
 | `NarratedLine` | interface | A subtitle. |
@@ -499,7 +499,7 @@ Every name each entry exports, read from the code. The sections above explain th
 | `ThemeInput` | type |  |
 | `ThemeName` | type |  |
 | `THEMES` | const |  |
-| `Three` | const | A three.js scene on the timeline. |
+| `Three` | const | The `<Three>` element ([reference](/reference/elements/three)). |
 | `ThreeFrameArgs` | interface | What the update `setup` returns gets on every frame. |
 | `ThreeSetupArgs` | interface | What `<Three setup>` gets once. |
 | `ThreeSetupFunction` | type |  |
@@ -522,7 +522,7 @@ Every name each entry exports, read from the code. The sections above explain th
 
 ### `@uberscene/kit/schema`
 
-240 exports.
+241 exports.
 
 | Export | Kind | |
 |---|---|---|
@@ -550,6 +550,7 @@ Every name each entry exports, read from the code. The sections above explain th
 | `CAPTION_ANIMATIONS` | const |  |
 | `Captions` | const | The `<Captions>` element ([reference](/reference/elements/captions)). |
 | `CatalogFont` | interface | One family to choose from. |
+| `CheckedEffects` | type | Each entry of an `effects` list checked against its own type. |
 | `Clip` | const | The `<Clip>` element ([reference](/reference/elements/clip)). |
 | `ColourFunction` | interface | A built-in colour transform's function, in parts a fused source can combine. |
 | `COMPONENT_NAMES` | const | The components' names. |
@@ -574,14 +575,14 @@ Every name each entry exports, read from the code. The sections above explain th
 | `Easing` | type |  |
 | `EASING_FN` | const |  |
 | `EASINGS` | const |  |
-| `effect` | function | Declares an effect drawn by a GLSL function, and returns it for `<Effect type>`. |
+| `effect` | function | Declares an effect drawn by a GLSL function, and returns it for an effect's `type`. |
 | `EFFECT_FAMILIES` | const | The effects by family, for the reference and the editor's menus. |
 | `EffectDraw` | type | How a built-in effect draws. |
 | `effectEntry` | function | The built-in effect of a type, if there is one. |
 | `EffectEntry` | interface |  |
 | `EffectNotRendered` | interface | An effect type an element of `kind` takes in its `effects` but does not draw. |
 | `effectParamProblem` | function | Whether `param` is a param of an effect of `type`, and `value` one it takes, by the effect's params schema. |
-| `EffectParams` | type | The params a built-in effect takes, as written in `<Effect params>`. |
+| `EffectParams` | type | The params a built-in effect takes, as written in an `effects` entry. |
 | `EffectParamsOf` | type | The params of an effect type. |
 | `EffectRef` | interface | An effect a file declares, as `effect()` returns it. |
 | `EFFECTS` | const |  |
@@ -630,7 +631,7 @@ Every name each entry exports, read from the code. The sections above explain th
 | `isBuiltInTransition` | function |  |
 | `isBundledFont` | function |  |
 | `isDropFrame` | const | Whether a rate is shown in drop-frame timecode. |
-| `isKeyframeProperty` | function | A property a key list can animate, as the resolver names it (`transform.opacity` for `transform={{ opacity. |
+| `isKeyframeProperty` | function | A property a key list can animate, as the resolver names it (`transform.opacity` for <code v-pre>transform={{ opacity: […] }}</code>). |
 | `isNeutral` | function | Whether a built-in effect changes nothing with these params. |
 | `isShaderRef` | function | Whether a value is an effect or transition a file declared. |
 | `isVocabulary` | function |  |
@@ -650,7 +651,7 @@ Every name each entry exports, read from the code. The sections above explain th
 | `MASKED_KINDS` | const | Masks render on these kinds, one per element. |
 | `MAX_SECONDS` | const | The longest time ticks hold exactly as a JavaScript number. |
 | `monotoneCurve` | function | The curve through `points` (x strictly increasing) as a function on 0..1, clamped to 0..1. |
-| `Motion` | const | Children animated by a Motion `sequence` on the video's clock. |
+| `Motion` | const | The `<Motion>` element ([reference](/reference/elements/motion)). |
 | `MOTION_NAMES` | const |  |
 | `MotionAnimation` | interface |  |
 | `MotionBlur` | interface |  |
@@ -689,7 +690,7 @@ Every name each entry exports, read from the code. The sections above explain th
 | `SHADER_ONLY_EFFECTS` | const | Built-in shader effects with no CSS filter to fall back on. |
 | `shaderDefinition` | function | Checks a declaration and makes its definition; throws what is wrong with it. |
 | `ShaderDefinition` | interface |  |
-| `shaderFor` | function | The shader a file declares under this name for an `<Effect>` or `<Transition>`, if any. |
+| `shaderFor` | function | The shader a file declares under this name for an effect or a `<Transition>`, if any. |
 | `ShaderStep` | interface | One pass of a built-in as it is drawn. |
 | `ShaderTable` | interface | A small picture a built-in effect computes from its params. |
 | `ShaderUniform` | interface | How a param reaches the shader, worked out from its schema once. |
@@ -719,7 +720,7 @@ Every name each entry exports, read from the code. The sections above explain th
 | `THEMES` | const |  |
 | `themeSchema` | const |  |
 | `themeToken` | function | The value of `$name`, or undefined. |
-| `Three` | const | A three.js scene on the timeline. |
+| `Three` | const | The `<Three>` element ([reference](/reference/elements/three)). |
 | `TICKS_PER_SECOND` | const | Ticks in one second. |
 | `ticksPerFrame` | const | Ticks in one frame. |
 | `ticksToSeconds` | const |  |
@@ -838,8 +839,8 @@ Every name each entry exports, read from the code. The sections above explain th
 | `FoldResult` | interface |  |
 | `foldToSource` | function | Fold with baking. |
 | `FreezeActions` | interface |  |
-| `FreezeHold` | interface | A `<Freeze>`. |
-| `freezeHoldsOf` | function | A clip's `<Freeze>` children, sorted by `start`. |
+| `FreezeHold` | interface | A hold. |
+| `freezeHoldsOf` | function | A clip's holds (from `freezes`), sorted by `start`. |
 | `freezeShift` | function | Element-relative `rel` with the holds before it taken out, or the held source second when `rel` is inside a hold. |
 | `freezeUnshift` | function | Element-relative time of clip time `u`. |
 | `gatherLocalFiles` | function | The texts of every local module a video file imports, and of the modules they import in turn, keyed by path from the video file's folder. |
@@ -921,7 +922,7 @@ Every name each entry exports, read from the code. The sections above explain th
 | `PropSite` | interface |  |
 | `rampAdvance` | function | Source seconds played in `rel` clip seconds. |
 | `rampInverse` | function | Clip seconds that play `advance` source seconds. |
-| `RampKey` | interface | A `<SpeedKey>`. |
+| `RampKey` | interface | A speed key. |
 | `rampSpeed` | function | Speed at clip time `u` under keys sorted by `at`. |
 | `Range` | type |  |
 | `rangeOf` | function |  |
@@ -949,7 +950,7 @@ Every name each entry exports, read from the code. The sections above explain th
 | `SourceEdit` | type |  |
 | `SourceIndex` | interface |  |
 | `SourceIndexLike` | interface |  |
-| `speedKeysOf` | function | A clip's `<SpeedKey>` children, sorted by `at`. |
+| `speedKeysOf` | function | A clip's speed keys (from `speed={[…]}`), sorted by `at`. |
 | `spokenWords` | function | Every transcript word the timeline plays, at the time it plays, in timeline order. |
 | `stableJson` | function |  |
 | `SubjectBox` | interface | A subject's box at source second `t`, as fractions of the source picture (0..1 from its top left). |
@@ -1000,8 +1001,8 @@ Every name each entry exports, read from the code. The sections above explain th
 | `Editable` | type |  |
 | `EMPTY_MANIFEST` | const |  |
 | `findParentOf` | function |  |
-| `FreezeHold` | interface | A `<Freeze>`. |
-| `freezeHoldsOf` | function | A clip's `<Freeze>` children, sorted by `start`. |
+| `FreezeHold` | interface | A hold. |
+| `freezeHoldsOf` | function | A clip's holds (from `freezes`), sorted by `start`. |
 | `freezeShift` | function | Element-relative `rel` with the holds before it taken out, or the held source second when `rel` is inside a hold. |
 | `freezeUnshift` | function | Element-relative time of clip time `u`. |
 | `heldWithin` | function | Seconds of holds inside the first `length` seconds of a clip. |
@@ -1028,7 +1029,7 @@ Every name each entry exports, read from the code. The sections above explain th
 | `Presence` | type |  |
 | `rampAdvance` | function | Source seconds played in `rel` clip seconds. |
 | `rampInverse` | function | Clip seconds that play `advance` source seconds. |
-| `RampKey` | interface | A `<SpeedKey>`. |
+| `RampKey` | interface | A speed key. |
 | `rampSpeed` | function | Speed at clip time `u` under keys sorted by `at`. |
 | `reachedHolds` | function | The holds a clip reaches when, without any hold, it would last `played` seconds. |
 | `removedElement` | function | What became of `<Keyframe>`, `<Effect>`, `<SpeedKey>` and `<Freeze>`, told from the props of an element whose component is undefined. |
@@ -1045,7 +1046,7 @@ Every name each entry exports, read from the code. The sections above explain th
 | `Shot` | interface |  |
 | `Silence` | interface |  |
 | `SourceIndexLike` | interface |  |
-| `speedKeysOf` | function | A clip's `<SpeedKey>` children, sorted by `at`. |
+| `speedKeysOf` | function | A clip's speed keys (from `speed={[…]}`), sorted by `at`. |
 | `SubjectBox` | interface | A subject's box at source second `t`, as fractions of the source picture (0..1 from its top left). |
 | `SubtitleOptions` | interface |  |
 | `subtitles` | function | The captions the cut plays, as an SRT or WebVTT file. |
@@ -1132,7 +1133,7 @@ Every name each entry exports, read from the code. The sections above explain th
 | `MediaHandle` | type | Where an asset's bytes come from. |
 | `MediaResolver` | interface |  |
 | `OVERLAY_KINDS` | const | Kinds the overlay plane draws (as DOM, in the preview and the export) rather than the canvas. |
-| `paramsAt` | function | An effect's params, with the ones its own `<Keyframe param>` children animate evaluated at element-relative `rel`. |
+| `paramsAt` | function | An effect's params, with the ones its keys animate evaluated at element-relative `rel`. |
 | `PICK_EPS` | const | Container timestamps are often rounded to the millisecond, so the frame for the exact time n/fps can sit a fraction of a millisecond after it. |
 | `placementSourceTime` | function | Source seconds a media placement shows at composition time `t`. |
 | `SETTLE_MS` | const | Quiet time after the last setState before a paused preview fetches its exact frame. |

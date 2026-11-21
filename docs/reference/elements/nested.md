@@ -35,4 +35,4 @@ The coffee footage is Pixabay videos [209419](https://pixabay.com/videos/id-2094
 | `out` | number (0..∞) \| string |  |  | Where in the nested sequence it ends, as `in`. |
 | `volume` | number (0..4) \| { at, value, easing }[] |  |  | A gain on all its sound: 1 as it is, 0 muted; keys change it over time. |
 
-Timed, visual, audible, trims its source, transformable. Children: `effect`, `keyframe`, `mask`, `speedKey`, `freeze`. [All elements](/reference/elements/)
+Timed, visual, audible, trims its source, transformable. Children: `mask`. [All elements](/reference/elements/)

@@ -1,4 +1,4 @@
-// A tone curve through control points, for `<Effect type="curves">`: monotone cubic Hermite interpolation with the
+// A tone curve through control points, for the `curves` effect: monotone cubic Hermite interpolation with the
 // tangents limited as Fritsch and Carlson give ("Monotone Piecewise Cubic Interpolation", SIAM J. Numer. Anal., 1980),
 // so a curve whose points rise never dips or overshoots between them. Before the first point and after the last it is
 // flat.

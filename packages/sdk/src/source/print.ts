@@ -27,7 +27,7 @@ export function printLiteral(value: Json | undefined): string {
 }
 
 /** The widest line the printers write, as the formatter keeps the files. */
-export const LINE_WIDTH = 120;
+const LINE_WIDTH = 120;
 
 /**
  * A JSON value as source that starts `column` characters into a line indented by `indent`: compact while it fits

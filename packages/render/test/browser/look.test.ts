@@ -40,9 +40,7 @@ export default function Video() {
   return (
     <Composition fps={30} width={${W}} height={${H}} background={{ mode: "color", color: "#000000" }}>
       <Track id="main">
-        <Clip id="bars" src="asset:bars" in={0} out={2} fit="cover">
-          ${options.effect === false ? "" : `<Effect id="invert" type="invert" params={{ amount: 1 }} />`}
-        </Clip>
+        <Clip id="bars" src="asset:bars" in={0} out={2} fit="cover"${options.effect === false ? "" : ` effects={[{ type: "invert", amount: 1 }]}`} />
         <Transition id="x1" type="crossfade" duration={0.4} />
         <Clip id="solid" src="asset:solid" in={0} out={1.4} fit="cover" />
       </Track>
@@ -130,7 +128,7 @@ it("draws a frame with and without an effect, side by side", async () => {
     media: v.media,
     out,
     at: "0.5",
-    without: "invert",
+    without: "bars.effects.0",
     cell: W,
   });
   expect(result.cells.map((c) => [c.column, c.variant])).toEqual([
@@ -323,7 +321,10 @@ describe("--listen", () => {
     };
     return video()
       .replace(JSON.stringify({ assets: mediaManifest.assets }), JSON.stringify({ assets }))
-      .replace(`fit="cover">`, `fit="cover"${volume === undefined ? "" : ` volume={${volume}}`}>`);
+      .replace(
+        `<Clip id="bars" src="asset:bars" in={0} out={2} fit="cover"`,
+        `<Clip id="bars" src="asset:bars" in={0} out={2} fit="cover"${volume === undefined ? "" : ` volume={${volume}}`}`,
+      );
   };
   const listen = async (name: string, source: string, stretch: string, more: { cacheDir?: string } = {}) => {
     const v = await load(name, source);

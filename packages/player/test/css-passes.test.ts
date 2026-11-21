@@ -6,18 +6,18 @@ import { effectPipeline } from "../src/model/shaders";
 const manifest = {
   assets: { city: { id: "city", kind: "video" as const, duration: 10, fps: 30, width: 640, height: 360 } },
 };
-const stateOf = (children: string, declarations = "") =>
+const stateOf = (effects: string, declarations = "") =>
   resolve(
     collectModule(
       loadModule(`import { z } from "zod";
-import { Clip, Composition, effect, Effect, Track } from "@uberscene/kit";
+import { Clip, Composition, effect, Track } from "@uberscene/kit";
 ${declarations}
-export default function V() { return <Composition fps={30} width={640} height={360}><Track id="t"><Clip id="c" src="asset:city" in={0} out={4}>${children}</Clip></Track></Composition>; }`) as never,
+export default function V() { return <Composition fps={30} width={640} height={360}><Track id="t"><Clip id="c" src="asset:city" in={0} out={4} effects={[${effects}]} /></Track></Composition>; }`) as never,
     ),
     manifest,
   );
-const pipelineOf = (children: string, options: { shaders: boolean; transition?: boolean }, declarations = "") => {
-  const state = stateOf(children, declarations);
+const pipelineOf = (effects: string, options: { shaders: boolean; transition?: boolean }, declarations = "") => {
+  const state = stateOf(effects, declarations);
   expect(state.errors).toEqual([]);
   const clip = state.items.get("c")!;
   const kids = clip.children.map((id) => state.items.get(id)!);

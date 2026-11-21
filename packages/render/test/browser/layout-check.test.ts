@@ -1,6 +1,6 @@
 import { createElement as h } from "react";
 
-import { Caption, Captions, Clip, Composition, Keyframe, Shape, Svg, Title, Track, TypeCard } from "@uberscene/kit";
+import { Caption, Captions, Clip, Composition, Shape, Svg, Title, Track, TypeCard } from "@uberscene/kit";
 import { type AssetManifest, collect, resolve } from "@uberscene/sdk";
 
 import { manifest } from "../../../player/e2e/app/composition";
@@ -11,28 +11,23 @@ import { toSource } from "../helpers/jsx";
 
 const box = (
   id: string,
-  x: number,
+  x: number | { at: number; value: number }[],
   y: number,
   w: number,
   hgt: number,
   start = 0,
   duration = 1,
-  children: unknown[] = [],
 ) =>
-  h(
-    Shape,
-    {
-      id,
-      shape: "rectangle",
-      width: w,
-      height: hgt,
-      fill: "#ff0000",
-      start,
-      duration,
-      box: { x, y, origin: "center" },
-    },
-    ...(children as []),
-  );
+  h(Shape, {
+    id,
+    shape: "rectangle",
+    width: w,
+    height: hgt,
+    fill: "#ff0000",
+    start,
+    duration,
+    box: { x, y, origin: "center" },
+  });
 
 async function check(
   composition: ReturnType<typeof h>,
@@ -265,10 +260,18 @@ describe("checkLayout", () => {
         h(
           Track,
           { id: "t", layout: "free" },
-          box("slide", 320, 180, 60, 60, 0, 2, [
-            h(Keyframe, { id: "k1", property: "box.x", at: 1, value: 320 }),
-            h(Keyframe, { id: "k2", property: "box.x", at: 2, value: 720 }),
-          ]),
+          box(
+            "slide",
+            [
+              { at: 1, value: 320 },
+              { at: 2, value: 720 },
+            ],
+            180,
+            60,
+            60,
+            0,
+            2,
+          ),
         ),
       ),
       manifest,

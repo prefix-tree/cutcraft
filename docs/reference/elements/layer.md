@@ -34,4 +34,4 @@ The coffee footage is Pixabay videos [209419](https://pixabay.com/videos/id-2094
 | `blend` | "normal" \| "multiply" \| "screen" \| "overlay" \| "darken" \| … 13 more |  |  | How the layer mixes with what is under it, as CSS `mix-blend-mode` does. Only `normal` renders ([What renders](/reference/rendering)). |
 | `ground` | boolean |  |  | The layer is a ground that other things sit on: a wall behind a game, a scrim that darkens footage under a title. The layout check then treats it like a background: it is not held to the safe zone and is not said to cover the captions. |
 
-Timed, visual, transformable. Children: `effect`, `keyframe`. [All elements](/reference/elements/)
+Timed, visual, transformable. No children. [All elements](/reference/elements/)

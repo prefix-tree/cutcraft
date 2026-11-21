@@ -29,4 +29,4 @@ A stretch of a sound asset: volume and pan (constant or keys), fades, ducking un
 | `fade` | { in, out } |  |  | Seconds the sound fades in at the start and out at the end. |
 | `duck` | { under, to, attack, release } |  |  | Turns this sound down while another plays: `under` is a track id or a track role (`dialogue`), `to` the volume it falls to, `attack` and `release` the seconds it takes to fall and recover. |
 
-Timed, audible, trims its source. Children: `keyframe`, `speedKey`, `freeze`. [All elements](/reference/elements/)
+Timed, audible, trims its source. No children. [All elements](/reference/elements/)

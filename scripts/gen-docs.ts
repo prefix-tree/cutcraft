@@ -6,6 +6,7 @@ import { z } from "zod";
 
 import {
   COMPONENTS,
+  DERIVED_KINDS,
   EFFECT_FAMILIES,
   EFFECTS,
   EFFECTS_NOT_RENDERED,
@@ -113,6 +114,9 @@ function defaultOf(value: unknown): string {
   );
   return `\`${rounded}\``;
 }
+
+/** The children a file writes: the resolver's own kinds (keys, effects, speed keys, holds) are props now. */
+const written = (kinds: readonly string[]): string[] => kinds.filter((k) => !DERIVED_KINDS.has(k));
 
 /** What each element is for, by group: the index's cards and the first line of each page. */
 const ELEMENT_DOCS: Record<string, readonly (readonly [element: string, summary: string])[]> = {
@@ -260,7 +264,11 @@ function elementsIndex(): string {
     const c = KIND_CAPABILITIES[component.kind]!;
     const yes = (b: boolean): string => (b ? "yes" : "");
     lines.push(
-      `| [\`<${name}>\`](/reference/elements/${slug(name)}) | ${yes(c.timed)} | ${yes(c.visual)} | ${yes(c.audio)} | ${yes(c.trimSource)} | ${yes(c.transformable)} | ${c.childKinds.map((k) => `\`${k}\``).join(", ")} |`,
+      `| [\`<${name}>\`](/reference/elements/${slug(name)}) | ${yes(c.timed)} | ${yes(c.visual)} | ${yes(c.audio)} | ${yes(c.trimSource)} | ${yes(c.transformable)} | ${written(
+        c.childKinds,
+      )
+        .map((k) => `\`${k}\``)
+        .join(", ")} |`,
     );
   }
   return `${lines.join("\n")}\n`;
@@ -313,7 +321,13 @@ function elementPage(name: string, summary: string): string {
     lines.push("", "Every built-in type and its params: [Effects and transitions](/reference/effects/).");
   lines.push(
     "",
-    `${traits.length ? `${capital(traits.join(", "))}. ` : ""}${c.childKinds.length ? `Children: ${c.childKinds.map((k) => `\`${k}\``).join(", ")}.` : "No children."} [All elements](/reference/elements/)`,
+    `${traits.length ? `${capital(traits.join(", "))}. ` : ""}${
+      written(c.childKinds).length
+        ? `Children: ${written(c.childKinds)
+            .map((k) => `\`${k}\``)
+            .join(", ")}.`
+        : "No children."
+    } [All elements](/reference/elements/)`,
     "",
   );
   return lines.join("\n");
@@ -428,7 +442,7 @@ function effectsIndex(): string {
   const lines = [
     "# Effects and transitions",
     "",
-    "Every built-in `<Effect type>` and `<Transition type>`. Hover a card to play it; each page shows the file that made the video and the params it takes. Params outside their ranges, or not listed, are an error when the file resolves; a keyframe inside an effect animates one by `param`. Generated from the effect registry (`packages/kit/src/effects/registry.ts`) by `pnpm docs:gen`.",
+    "Every built-in effect, written in an element's `effects` as `{ type, ...params }`, and every `<Transition type>`. Hover a card to play it; each page shows the file that made the video and the params it takes. Params outside their ranges, or not listed, are an error when the file resolves; keys in place of a param's value animate it ([Keys, effects and speed](/guide/animation#effects)). Generated from the effect registry (`packages/kit/src/effects/registry.ts`) by `pnpm docs:gen`.",
     "",
     "## Effects",
     "",
@@ -655,6 +669,11 @@ function renderingPage(): string {
   return `${lines.join("\n")}\n`;
 }
 
+/** A code span holding `{{`, which Vue would read as an interpolation even inside code: shown as is, uncompiled. */
+function vPre(code: string): string {
+  return `<code v-pre>${code.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")}</code>`;
+}
+
 /** VitePress compiles markdown as Vue, so a bare `<Layer>` or `{{ … }}` in prose must be escaped; code spans and fences are left alone. */
 function escapeTags(markdown: string): string {
   let fenced = false;
@@ -848,7 +867,7 @@ write(
 
 /** An export's cell: its JSDoc, or for an element, a link to its reference page. */
 function apiDoc(name: string, doc: string): string {
-  if (doc) return escapeTags(cell(doc));
+  if (doc) return escapeTags(cell(doc)).replace(/`([^`]*\{\{[^`]*)`/g, (_, c: string) => vPre(c));
   if (name in ELEMENTS || name in ENGINE_LAYERS)
     return `The \`<${name}>\` element ([reference](/reference/elements/${name.toLowerCase()})).`;
   return "";

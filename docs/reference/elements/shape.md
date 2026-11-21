@@ -44,4 +44,4 @@ A vector shape (rectangle, circle, star, polygon, path) with fill, stroke and sh
 | `starPoints` | integer (3..∞) |  |  | How many points a star has; left out, 5. |
 | `innerRadius` | number (0..1) |  |  | A star's inner corners, as a fraction of its outer radius; left out, 0.5. |
 
-Timed, visual, transformable. Children: `effect`, `keyframe`, `mask`. [All elements](/reference/elements/)
+Timed, visual, transformable. Children: `mask`. [All elements](/reference/elements/)

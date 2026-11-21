@@ -49,7 +49,7 @@ async function still(name: string, body: string, declarations: string, backgroun
   writeFileSync(
     file,
     `import { z } from "zod";
-import { Clip, Composition, effect, Effect, Track } from "@uberscene/kit";
+import { Clip, Composition, effect, Track } from "@uberscene/kit";
 export const manifest = ${JSON.stringify(manifest)};
 ${declarations}
 export default function Video() {
@@ -188,11 +188,11 @@ afterAll(() => {
 describe.each(CASES)("$name as a shader pass", (c) => {
   it("matches Chrome's canvas filter", async () => {
     const clip = (extra: string) =>
-      `<Clip id="c" src="asset:${c.picture}" duration={2} fit="cover">${c.effect}${extra}</Clip>`;
+      `<Clip id="c" src="asset:${c.picture}" duration={2} fit="cover" effects={[${c.effect}${extra}]} />`;
     // The shapes sit on light grey, so a dark shadow or a blurred edge shows against it.
     const ground = c.picture === "shape" ? "#d0d0d0" : "#000000";
     const css = await still(`${c.name}-css`, clip(""), PASS_THROUGH, ground);
-    const shader = await still(`${c.name}-shader`, clip(`{ type: same }`), PASS_THROUGH, ground);
+    const shader = await still(`${c.name}-shader`, clip(`, { type: same }`), PASS_THROUGH, ground);
     const d = difference(css, shader);
     measured[c.name] = d;
     const t = c.tolerance ?? { off: 0.002, max: 32 };

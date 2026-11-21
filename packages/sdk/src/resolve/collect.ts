@@ -350,7 +350,7 @@ function textOf(children: ReactNode): string | undefined {
   let onlyText = true;
   Children.forEach(children, (child) => {
     if (typeof child === "string" || typeof child === "number") parts.push(String(child));
-    // A timeline child (<Effect>, <Keyframe>, <Mask>) is collected on its own; it is not part of the text.
+    // A timeline child (a <Mask>) is collected on its own; it is not part of the text.
     else if (isValidElement(child) && isVocabulary(child.type)) return;
     else if (child !== null && child !== undefined && typeof child !== "boolean") onlyText = false;
   });

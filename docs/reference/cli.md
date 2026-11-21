@@ -471,7 +471,7 @@ npx uberscene videos/launch.tsx --out launch.mp4
 and sound from the file itself, and the words from a transcript with the same name in the same folder: `talk.json`
 from Whisper or ElevenLabs first, then `talk.vtt`, then `talk.srt`. Running it again refreshes the entry and keeps the
 fields it does not write. See [Getting a transcript](/guide/captions-and-sound#getting-a-transcript). A `.cube` file
-is added as a LUT (kind `lut`) after it is checked, for [`<Effect type="lut">`](/guide/colour#a-look-from-a-lut).
+is added as a LUT (kind `lut`) after it is checked, for the [`lut` effect](/guide/colour#a-look-from-a-lut).
 
 | Option | |
 |---|---|

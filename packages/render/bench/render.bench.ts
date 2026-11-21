@@ -43,13 +43,14 @@ export default function Video() {
 `;
 
 /** One source clip for 5 s with these effects on it, for the shader cases. */
-const effectsFile = (effects: string) => `import { Clip, Composition, Effect, effect, Track } from "@uberscene/kit";
+const effectsFile = (effects: string) => `import { Clip, Composition, effect, Track } from "@uberscene/kit";
 const same = effect({ name: "same", shader: "vec4 effect(vec2 uv) { return texture(image, uv); }" });
 export default function Video() {
   return (
     <Composition fps={30} width={1920} height={1080}>
       <Track id="main">
-        <Clip id="c1" src="asset:src" in={2} out={7}>${effects}</Clip>
+        <Clip id="c1" src="asset:src" in={2} out={7} effects={[${effects}
+        ]} />
       </Track>
     </Composition>
   );

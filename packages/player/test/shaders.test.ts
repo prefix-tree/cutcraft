@@ -10,7 +10,7 @@ const stateOf = (body: string, declarations: string) =>
   resolve(
     collectModule(
       loadModule(`import { z } from "zod";
-import { Adjustment, Clip, Composition, effect, transition, Effect, Keyframe, Track, Transition } from "@uberscene/kit";
+import { Adjustment, Clip, Composition, effect, transition, Track, Transition } from "@uberscene/kit";
 ${declarations}
 export default function V() { return <Composition fps={30} width={640} height={360}>${body}</Composition>; }`) as never,
     ),
@@ -177,7 +177,10 @@ describe("declared shaders in the frame plan", () => {
 describe("a run of colour effects", () => {
   const passesOf = (effects: string, declarations = "") =>
     buildFramePlan(
-      stateOf(`<Track id="t"><Clip id="c" src="asset:city" in={0} out={4}>${effects}</Clip></Track>`, declarations),
+      stateOf(
+        `<Track id="t"><Clip id="c" src="asset:city" in={0} out={4} effects={[${effects}]} /></Track>`,
+        declarations,
+      ),
       1,
     ).ops[0]?.shaders ?? [];
 

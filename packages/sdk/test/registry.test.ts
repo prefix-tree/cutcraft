@@ -16,8 +16,8 @@ const manifest = { assets: { city: { id: "city", kind: "video" as const, duratio
 const errorsOf = (effects: string) =>
   resolve(
     collectModule(
-      loadModule(`import { Clip, Composition, Effect, Track } from "@uberscene/kit";
-export default function V() { return <Composition fps={30} width={640} height={360}><Track id="t"><Clip id="c" src="asset:city">${effects}</Clip></Track></Composition>; }`) as never,
+      loadModule(`import { Clip, Composition, Track } from "@uberscene/kit";
+export default function V() { return <Composition fps={30} width={640} height={360}><Track id="t"><Clip id="c" src="asset:city" effects={[${effects}]} /></Track></Composition>; }`) as never,
     ),
     manifest,
   ).errors.map((e) => `${e.id}.${e.prop}: ${e.message}`);
@@ -38,9 +38,9 @@ describe("the effect registry", () => {
 
   it("checks and fills a CSS effect's params, which it did not before", () => {
     expect(errorsOf(`{ type: "brightness", amount: 3 }`)).toEqual([
-      "b.params.amount: Too big: expected number to be <=1",
+      "c.effects.0.amount: Too big: expected number to be <=1",
     ]);
-    expect(errorsOf(`{ type: "brightness", value: 10 }`)).toEqual(['b.params: Unrecognized key: "value"']);
+    expect(errorsOf(`{ type: "brightness", value: 10 }`)).toEqual(['c.effects.0: Unrecognized key: "value"']);
     const state = resolve(
       collectModule(
         loadModule(`import { Clip, Composition, Track } from "@uberscene/kit";
@@ -48,7 +48,13 @@ export default function V() { return <Composition fps={30} width={640} height={3
       ),
       manifest,
     );
-    expect(state.items.get("s")?.props.params).toEqual({ x: 0, y: 4, radius: 8, color: "#000000", opacity: 0.5 });
+    expect(state.items.get("c.effects.0")?.props.params).toEqual({
+      x: 0,
+      y: 4,
+      radius: 8,
+      color: "#000000",
+      opacity: 0.5,
+    });
   });
 
   it("takes each kind of value on one scale, and refuses the old ones", () => {
@@ -60,13 +66,13 @@ export default function V() { return <Composition fps={30} width={640} height={3
           { type: "zoomBlur", amount: 60 },
           { type: "shadow", blur: 4, color: "rgba(0,0,0,0.5)" }`),
     ).toEqual([
-      "b.params.amount: Too big: expected number to be <=1",
-      "s.params.amount: Too big: expected number to be <=1",
-      "v.params.amount: Too big: expected number to be <=1",
-      "w.params.temperature: Too big: expected number to be <=1",
-      'z.params: Unrecognized key: "amount"',
-      expect.stringContaining("d.params"),
-      expect.stringContaining("d.params"),
+      "c.effects.0.amount: Too big: expected number to be <=1",
+      "c.effects.1.amount: Too big: expected number to be <=1",
+      "c.effects.2.amount: Too big: expected number to be <=1",
+      "c.effects.3.temperature: Too big: expected number to be <=1",
+      'c.effects.4: Unrecognized key: "amount"',
+      expect.stringContaining("c.effects.5"),
+      expect.stringContaining("c.effects.5"),
     ]);
     // `amount` is a strength or share everywhere: never past -1..1.
     for (const [type, entry] of Object.entries(EFFECTS)) {
@@ -77,7 +83,7 @@ export default function V() { return <Composition fps={30} width={640} height={3
   });
 
   it("refuses an unknown param on a shader effect too, where it was dropped before", () => {
-    expect(errorsOf(`{ type: "exposure", stop: 1 }`)).toEqual(['e.params: Unrecognized key: "stop"']);
+    expect(errorsOf(`{ type: "exposure", stop: 1 }`)).toEqual(['c.effects.0: Unrecognized key: "stop"']);
   });
 
   it("checks a CSS effect's keyframed param by its schema", () => {
@@ -97,20 +103,24 @@ export default function V() { return <Composition fps={30} width={640} height={3
     expect(effectEntry("temperature")).toBeUndefined();
     expect(effectEntry("tint")).toBeUndefined();
     expect(cssOf("whiteBalance")?.({ temperature: 0.4, tint: 0 })).toBe("sepia(0.2)");
-    const errors = (body: string) =>
+    const errors = (clip: string) =>
       resolve(
         collectModule(
-          loadModule(`import { Clip, ColorGrade, Composition, Effect, Keyframe, Track } from "@uberscene/kit";
-export default function V() { return <Composition fps={30} width={640} height={360}><Track id="t"><Clip id="c" src="asset:city">${body}</Clip></Track></Composition>; }`) as never,
+          loadModule(`import { Clip, ColorGrade, Composition, Keyframe, Track } from "@uberscene/kit";
+export default function V() { return <Composition fps={30} width={640} height={360}><Track id="t">${clip}</Track></Composition>; }`) as never,
         ),
         manifest,
       ).errors.map((e) => e.message);
-    expect(errors(`<ColorGrade id="g" temperature={0.2} />`)).toEqual([expect.stringContaining('type="whiteBalance"')]);
-    expect(errors(`{ type: "temperature", amount: 0.2 }`)).toEqual([
-      expect.stringContaining('type="whiteBalance" params={{ temperature: … }}'),
+    expect(errors(`<Clip id="c" src="asset:city"><ColorGrade id="g" temperature={0.2} /></Clip>`)).toEqual([
+      expect.stringContaining('effects={[{ type: "whiteBalance"'),
     ]);
-    expect(errors(`<Keyframe id="k" property="colorGrade.temperature" at={0} value={0} />`)).toEqual([
-      expect.stringContaining('<Effect type="whiteBalance" …><Keyframe param="temperature"'),
+    expect(errors(`<Clip id="c" src="asset:city" effects={[{ type: "temperature", amount: 0.2 }]} />`)).toEqual([
+      expect.stringContaining('effects={[{ type: "whiteBalance", temperature: … }]}'),
     ]);
+    expect(
+      errors(
+        `<Clip id="c" src="asset:city"><Keyframe id="k" property="colorGrade.temperature" at={0} value={0} /></Clip>`,
+      ),
+    ).toEqual([expect.stringContaining("<Keyframe> is gone")]);
   });
 });

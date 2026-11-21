@@ -18,7 +18,7 @@ export interface InstalledBlock {
 
 export interface AssetEntry {
   readonly id: string;
-  /** `lut`: a 3D colour lookup table (`.cube`), read by `<Effect type="lut">`, not played. */
+  /** `lut`: a 3D colour lookup table (`.cube`), read by the `lut` effect, not played. */
   readonly kind: "video" | "audio" | "image" | "lut";
   /** Seconds. Images and LUTs report 0; an image may be held for any duration. */
   readonly duration: number;

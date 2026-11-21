@@ -36,4 +36,4 @@ One-off vector art from inline SVG markup or a file.
 | `enter` | { type, duration, easing } |  |  | How it comes in: a fade, slide, scale or wipe over its first seconds, with an easing. |
 | `exit` | { type, duration, easing } |  |  | How it goes out, over its last seconds, as `enter`. |
 
-Timed, visual, transformable. Children: `effect`, `keyframe`, `mask`. [All elements](/reference/elements/)
+Timed, visual, transformable. Children: `mask`. [All elements](/reference/elements/)
