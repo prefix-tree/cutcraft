@@ -8,6 +8,7 @@ import { fileURLToPath } from "node:url";
 import type { MediaResolver } from "@uberscene/player/engine";
 
 import type { FontFile } from "../fonts";
+import { isAssetId } from "../media";
 import type { CodecModes } from "../native/codecs";
 import { nativeRoutes } from "../native/routes";
 import type { NativeEncoded } from "../native/wire";
@@ -108,6 +109,12 @@ export async function servePage(
     }
     if (routes && (await routes.handle(req, res, path))) return;
     if (path.startsWith("/media/")) {
+      // Code in the file can fetch any URL here: only an asset id is looked up, never a path.
+      if (!isAssetId(path.slice("/media/".length))) {
+        res.writeHead(404);
+        res.end();
+        return;
+      }
       await sendMedia(req, res, media, path.slice("/media/".length)).catch((error: unknown) => {
         const message = error instanceof Error ? error.message : String(error);
         if (!mediaErrors.includes(message)) mediaErrors.push(message);
