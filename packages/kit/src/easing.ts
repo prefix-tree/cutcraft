@@ -195,8 +195,8 @@ const warned = new Set<string>();
  */
 export function easingCurve(name: string | undefined): Fn | undefined {
   if (name === undefined) return undefined;
-  const fn = EASING_FN[name as Easing];
-  if (fn) return fn;
+  // Own keys only: `toString` or `constructor` would otherwise read a function every object inherits.
+  if (Object.hasOwn(EASING_FN, name)) return EASING_FN[name as Easing];
   const now = Object.hasOwn(OLD_EASINGS, name) ? OLD_EASINGS[name as OldEasing] : undefined;
   if (now === undefined) return undefined;
   if (!warned.has(name)) {
