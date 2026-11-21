@@ -1,21 +1,40 @@
-import { Clip, Composition, Effect, Keyframe, Title, Track } from "@uberscene/kit";
+import { Clip, Composition, Title, Track } from "@uberscene/kit";
 
 // longShadow: Extrudes a long, hard shadow from the element's shape.
 export default function Video() {
   return (
     <Composition fps={30} width={640} height={360}>
       <Track id="main">
-        <Clip id="backdrop" src="asset:espresso" in={10} out={13} fit="cover">
-          <Effect id="soft" type="blur" params={{ radius: 10 }} />
-          <Effect id="dim" type="brightness" params={{ amount: -0.35 }} />
-        </Clip>
+        <Clip
+          id="backdrop"
+          src="asset:espresso"
+          in={10}
+          out={13}
+          fit="cover"
+          effects={[
+            { type: "blur", radius: 10 },
+            { type: "brightness", amount: -0.35 },
+          ]}
+        />
       </Track>
       <Track id="text" layout="free">
-        <Title id="word" start={0} duration={3} style={{ size: 128, color: "#e8a33d" }}>
-          <Effect id="look" type="longShadow" params={{ color: "#5a3a22", length: 160 }}>
-            <Keyframe id="k1" param="opacity" at={0.5} value={0} easing="easeInOut" />
-            <Keyframe id="k2" param="opacity" at={1.5} value={1} />
-          </Effect>
+        <Title
+          id="word"
+          start={0}
+          duration={3}
+          style={{ size: 128, color: "#e8a33d" }}
+          effects={[
+            {
+              type: "longShadow",
+              color: "#5a3a22",
+              length: 160,
+              opacity: [
+                { at: 0.5, value: 0, easing: "easeInOut" },
+                { at: 1.5, value: 1 },
+              ],
+            },
+          ]}
+        >
           Crema
         </Title>
       </Track>

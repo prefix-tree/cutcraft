@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { Clip, Composition, Effect, effect, Motion, Title, Track } from "@uberscene/kit";
+import { Clip, Composition, effect, Motion, Title, Track } from "@uberscene/kit";
 
 // The same kind of effect a clip takes, on a title and on a Motion layer: the overlay's pixels only.
 const split = effect({
@@ -30,8 +30,8 @@ export default function Video() {
           duration={2.8}
           style={{ size: 96, align: "left", color: "#f4efe6" }}
           box={{ x: 160, y: 230, width: 280, origin: "center" }}
+          effects={[{ type: split }]}
         >
-          <Effect id="title-split" type={split} />
           Crema
         </Title>
         <Motion
@@ -39,8 +39,8 @@ export default function Video() {
           start={0.8}
           duration={2.2}
           sequence={[[".badge", { opacity: [0, 1], scale: [0.7, 1] }, { duration: 0.4 }]]}
+          effects={[{ type: split, amount: 0.004 }]}
         >
-          <Effect id="badge-split" type={split} params={{ amount: 0.004 }} />
           <div
             className="badge"
             style={{

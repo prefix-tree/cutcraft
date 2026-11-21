@@ -82,22 +82,26 @@ export default function Video() {
   {
     name: "Grade",
     preview: "previews/guide/colour-grade",
-    code: `import { Clip, Composition, Effect, Keyframe, Track } from "@uberscene/kit";
+    code: `import { Clip, Composition, Track } from "@uberscene/kit";
 
 // Effects run in the order they are written. Change a value, or swap two lines.
 export default function Video() {
   return (
     <Composition fps={30} width={640} height={360}>
       <Track id="main">
-        <Clip id="pour" src="asset:coffee" in={6} out={10} fit="cover">
-          <Effect id="expose" type="exposure" params={{ stops: -0.3 }} />
-          <Effect id="balance" type="whiteBalance">
-            <Keyframe id="k1" param="temperature" at={0} value={-0.6} easing="easeInOut" />
-            <Keyframe id="k2" param="temperature" at={3} value={0.6} />
-          </Effect>
-          <Effect id="pop" type="vibrance" params={{ amount: 0.5 }} />
-          <Effect id="edges" type="vignette" params={{ amount: 0.6 }} />
-        </Clip>
+        <Clip
+          id="pour"
+          src="asset:coffee"
+          in={6}
+          out={10}
+          fit="cover"
+          effects={[
+            { type: "exposure", stops: -0.3 },
+            { type: "whiteBalance", temperature: [{ at: 0, value: -0.6, easing: "easeInOut" }, { at: 3, value: 0.6 }] },
+            { type: "vibrance", amount: 0.5 },
+            { type: "vignette", amount: 0.6 },
+          ]}
+        />
       </Track>
     </Composition>
   );
@@ -109,7 +113,7 @@ export default function Video() {
     preview: "previews/guide/shader-effect",
     code: `import { z } from "zod";
 
-import { Clip, Composition, Effect, effect, Keyframe, Track } from "@uberscene/kit";
+import { Clip, Composition, effect, Track } from "@uberscene/kit";
 
 // A shader of your own: each pixel's brightness picks a colour between dark and light.
 const tone = effect({
@@ -130,12 +134,14 @@ export default function Video() {
   return (
     <Composition fps={30} width={640} height={360}>
       <Track id="main">
-        <Clip id="pour" src="asset:coffee" in={6} out={10} fit="cover">
-          <Effect id="look" type={tone}>
-            <Keyframe id="k1" param="strength" at={0} value={0} />
-            <Keyframe id="k2" param="strength" at={2} value={1} />
-          </Effect>
-        </Clip>
+        <Clip
+          id="pour"
+          src="asset:coffee"
+          in={6}
+          out={10}
+          fit="cover"
+          effects={[{ type: tone, strength: [{ at: 0, value: 0 }, { at: 2, value: 1 }] }]}
+        />
       </Track>
     </Composition>
   );

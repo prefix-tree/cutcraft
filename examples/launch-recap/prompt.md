@@ -53,9 +53,14 @@ call `useT()` for 0..1 progress or `useLayer()` for `elapsed`, `remaining`,
 props are literals or schema props: those props are the editor's handles,
 the component's body is not.
 
-Children that the inspector edits one by one: `<Keyframe property at value easing>`,
-`<Effect type params>`, `<Mask>`, `<SpeedKey>`, `<Freeze>`,
-`<Caption start end text>`.
+Everything about an element is a prop. A value that changes over time is a
+list of keys in its place, `{ at, value, easing? }` with `at` in seconds into
+the element (`transform={{ scale: [{ at: 0, value: 1 }, { at: 6, value: 1.08 }] }}`).
+Effects are a list, `effects={[{ type: "vibrance", amount: 0.3 }]}`, each
+param a value or keys. A speed ramp is keys on `speed`; a held frame is
+`freezes={[{ start, duration, source }]}`; `volume` and `pan` take keys.
+
+Children: `<Mask>`, and `<Caption start end text>` inside `<Captions>`.
 
 ## Conventions the editor relies on
 

@@ -64,12 +64,12 @@ describe("print", () => {
               return null;
             } as never,
           },
-          children: [{ id: "e", kind: "effect", props: { id: "e", type: "blur", params: { radius: 2 } } }],
+          children: [{ id: "m", kind: "mask", props: { id: "m", shape: { rect: { x: 0, y: 0 } }, feather: 2 } }],
         },
         "  ",
       ),
     ).toBe(
-      '  <Clip id="c" src="asset:a" of={Outro}>\n    <Effect id="e" type="blur" params={{ radius: 2 }} />\n  </Clip>',
+      '  <Clip id="c" src="asset:a" of={Outro}>\n    <Mask id="m" shape={{ rect: { x: 0, y: 0 } }} feather={2} />\n  </Clip>',
     );
     expect(printElement({ id: "t", kind: "title", props: { id: "t" }, text: "a {b}" })).toBe(
       '<Title id="t">{"a {b}"}</Title>',
@@ -117,13 +117,13 @@ describe("fold, structural cases", () => {
   it("inserts a first child into a self-closing element", () => {
     const exec = fixtureExecutor();
     exec.execute({
-      type: "keyframe/add",
-      params: { id: "c3", keyId: "kz", property: "transform.opacity", at: 0, value: 1 },
+      type: "mask/create",
+      params: { id: "mk9", parentId: "c3", props: { shape: { ellipse: { cx: 0.5, cy: 0.5, rx: 0.3, ry: 0.3 } } } },
     });
     const { text, skipped } = foldToSource(fixtureText, exec.log(), exec.state());
     expect(skipped).toEqual([]);
     expect(text).toContain(
-      'speed={1.2}>\n          <Keyframe id="kz" property="transform.opacity" at={0} value={1} />\n        </Clip>',
+      'speed={1.2}>\n          <Mask shape={{ ellipse: { cx: 0.5, cy: 0.5, rx: 0.3, ry: 0.3 } }} id="mk9" />\n        </Clip>',
     );
   });
 
@@ -135,7 +135,8 @@ describe("fold, structural cases", () => {
     const { text, skipped } = foldToSource(fixtureText, exec.log(), exec.state());
     expect(skipped).toEqual([]);
     expect(text).not.toContain('<Clip id="c2"');
-    expect(text.indexOf('<Clip id="c3"')).toBeLessThan(text.indexOf('<Clip id="c1"'));
+    expect(text.search(/<Clip\s+id="c3"/)).toBeGreaterThan(0);
+    expect(text.search(/<Clip\s+id="c3"/)).toBeLessThan(text.search(/<Clip\s+id="c1"/));
     expect(text).toContain('<Track id="mc" layout="free" hidden={false}>');
     expect(buildSourceIndex(text).elements.get("c1")?.parent).toBe("main");
   });
@@ -145,7 +146,7 @@ describe("fold, structural cases", () => {
     exec.execute({ type: "source/setProps", params: { id: "c2", props: { fit: undefined, transform: undefined } } });
     expect(exec.execute({ type: "source/setProps", params: { id: "m1", props: { label: 'we"ird' } } }).ok).toBe(true);
     const { text } = foldToSource(fixtureText, exec.log(), exec.state());
-    expect(text).toContain('<Clip id="c2" src="asset:city" duration={3.5}>');
+    expect(text).toContain('id="c2"\n          src="asset:city"\n          duration={3.5}\n          speed={[');
     expect(text).toContain('label={"we\\"ird"}');
   });
 

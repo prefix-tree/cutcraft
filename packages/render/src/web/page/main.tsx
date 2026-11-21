@@ -34,7 +34,7 @@ import {
   mediabunnyFrameSourceFactory,
   SETTLE_MS,
 } from "@uberscene/player/engine";
-import { type AssetManifest, collectModule, createPatchLog, loadModule, resolve } from "@uberscene/sdk";
+import { type AssetManifest, collectModule, loadModule, resolve, withoutEffects } from "@uberscene/sdk";
 
 import { measureSound, renderSoundtrack } from "./audio";
 import { createFreeCodeClock } from "./clock";
@@ -84,9 +84,7 @@ async function start(): Promise<void> {
   // The same file with some effects switched off, for a sheet's "without" cells: a patch on each, nothing else moved.
   let bare = state;
   if (job.disabled?.length) {
-    const log = createPatchLog();
-    for (const id of job.disabled) log.append({ op: "set", id, prop: "enabled", value: false });
-    bare = resolve(tree, manifest, log);
+    bare = resolve(tree, manifest, withoutEffects(tree, job.disabled));
   }
   const element = mod.default(props);
   const { width, height, fps } = state.composition;

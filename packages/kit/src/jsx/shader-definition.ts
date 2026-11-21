@@ -7,7 +7,7 @@ import type { GlslModule } from "../effects/glsl";
 export interface ShaderDefinition<P extends ZodObject = ZodObject> {
   readonly kind: "effect" | "transition";
   readonly name: string;
-  /** The params `<Effect params>` or `<Transition params>` takes, validated and given defaults by this schema. */
+  /** The params an `effects` entry or `<Transition params>` takes, validated and given defaults by this schema. */
   readonly params: P;
   /**
    * GLSL ES 3.00, one source per pass, run in order. An effect's pass defines `vec4 effect(vec2 uv)` and a transition's

@@ -29,8 +29,8 @@ thirds. Use it when a video needs a headline, a name card or a callout. For anyt
 All of them work the same way:
 
 - They are placed in time like any overlay ([Timing](./time#overlays-anchor)).
-- They take a `box` for where they sit and how big they are, a `transform` for scale, rotation and opacity, and can
-  have `<Keyframe>` children.
+- They take a `box` for where they sit and how big they are, a `transform` for scale, rotation and opacity, whose
+  values can be [keys](./animation#keys) that change over time, and a list of `effects`.
 - They take colours and fonts from the [theme](./themes), and their props show up in an editor's inspector.
 
 ## Titles
@@ -181,13 +181,13 @@ For anything more, use a Layer.
 
 ## Glow, outline, long shadow and bevel
 
-Four effects shape an element by its silhouette. Write them inside a title, a shape, a sticker or a `<Layer>`, like
-any `<Effect>`; they work on clips too.
+Four effects shape an element by its silhouette. Write them in the `effects` of a title, a shape, a sticker or a
+`<Layer>`, like any effect; they work on clips too.
 
 ```tsx
-<Title id="headline" start={0} duration={4} style={{ size: 120, color: "#ffd166" }}>
+<Title id="headline" start={0} duration={4} style={{ size: 120, color: "#ffd166" }}
+  effects={[{ type: "glow", radius: 8, color: "#ff9f1c", intensity: 1.5 }]}>
   Launch day
-  <Effect id="glow" type="glow" params={{ radius: 8, color: "#ff9f1c", intensity: 1.5 }} />
 </Title>
 ```
 

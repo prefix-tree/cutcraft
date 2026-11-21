@@ -24,7 +24,7 @@ const MANIFEST = `export const manifest = { assets: {
 
 /** A two-clip cut: a title over the first clip, an effect on the second, and whatever `more` adds to the text track. */
 const video = (o: { title?: string; out?: number; stops?: number; more?: string; top?: string; fps?: number } = {}) => `
-import { Clip, Composition, Effect, Layer, Title, Track, useLayer } from "@uberscene/kit";
+import { Clip, Composition, Layer, Title, Track, useLayer } from "@uberscene/kit";
 ${MANIFEST}
 ${o.top ?? ""}
 export default function Video() {
@@ -32,9 +32,7 @@ export default function Video() {
     <Composition fps={${o.fps ?? 30}} width={640} height={360}>
       <Track id="main">
         <Clip id="first" src="asset:a" in={0} out={2} />
-        <Clip id="second" src="asset:b" in={0} out={${o.out ?? 2}}>
-          <Effect id="lift" type="exposure" params={{ stops: ${o.stops ?? 0.5} }} />
-        </Clip>
+        <Clip id="second" src="asset:b" in={0} out={${o.out ?? 2}} effects={[{ type: "exposure", stops: ${o.stops ?? 0.5} }]} />
       </Track>
       <Track id="text" layout="free">
         <Title id="name" start={0.5} duration={1}>${o.title ?? "Hello"}</Title>

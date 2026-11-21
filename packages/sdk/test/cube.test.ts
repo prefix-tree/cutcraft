@@ -65,29 +65,27 @@ export default function V() { return <Composition fps={30} width={640} height={3
     ).errors.map((e) => `${e.id}.${e.prop}: ${e.message}`);
 
   it("reads a LUT asset, and says when the asset is missing or is not a LUT", () => {
-    expect(
-      errorsOf(`<Clip id="c" src="asset:city"><Effect id="l" type="lut" params={{ src: "asset:teal" }} /></Clip>`),
-    ).toEqual([]);
+    expect(errorsOf(`<Clip id="c" src="asset:city" effects={[{ type: "lut", src: "asset:teal" }]} />`)).toEqual([]);
     expect(
       errorsOf(
-        `<Clip id="c" src="asset:city"><Effect id="a" type="lut" params={{ src: "asset:nope" }} /><Effect id="b" type="lut" params={{ src: "asset:logo" }} /><Effect id="d" type="lut" /></Clip>`,
+        `<Clip id="c" src="asset:city" effects={[{ type: "lut", src: "asset:nope" }, { type: "lut", src: "asset:logo" }, { type: "lut" }]} />`,
       ),
     ).toEqual([
-      "d.params.src: Invalid input: expected string, received undefined",
-      "a.params.src: asset asset:nope is not in the manifest",
-      "b.params.src: asset asset:logo is an image; a lut effect reads a .cube file (kind lut)",
+      "c.effects.2.src: Invalid input: expected string, received undefined",
+      "c.effects.0.src: asset asset:nope is not in the manifest",
+      "c.effects.1.src: asset asset:logo is an image; a lut effect reads a .cube file (kind lut)",
     ]);
   });
 
   it("lets a file's own effect read an image or a LUT, and a clip play neither a LUT", () => {
     expect(
       errorsOf(
-        `<Clip id="c" src="asset:city"><Effect id="m" type={mix} params={{ over: "asset:logo" }} /><Effect id="v" type={mix} params={{ over: "asset:city" }} /></Clip><Clip id="x" src="asset:teal" />`,
+        `<Clip id="c" src="asset:city" effects={[{ type: mix, over: "asset:logo" }, { type: mix, over: "asset:city" }]} /><Clip id="x" src="asset:teal" />`,
         `const mix = effect({ name: "mix", params: z.object({ over: z.string() }), shader: "vec4 effect(vec2 uv) { return texture(params.over, uv); }" });`,
       ),
     ).toEqual([
       expect.stringMatching(/^x\.src: asset asset:teal is a LUT, which plays nothing/),
-      "v.params.over: asset asset:city is a video; a shader reads an image or a LUT",
+      "c.effects.1.over: asset asset:city is a video; a shader reads an image or a LUT",
     ]);
   });
 });

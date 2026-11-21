@@ -13,7 +13,7 @@ let dir = "";
 let file = "";
 
 const words = Array.from({ length: 12 }, (_, i) => ({ i, text: `w${i}`, start: i * 0.5, end: i * 0.5 + 0.4 }));
-const VIDEO = `import { Audio, Clip, Composition, Effect, Keyframe, Title, Track, Transition } from "@uberscene/kit";
+const VIDEO = `import { Audio, Clip, Composition, Title, Track, Transition } from "@uberscene/kit";
 export const manifest = { assets: {
   talk: { id: "talk", kind: "video", duration: 10, fps: 30, width: 640, height: 360,
     audio: { sampleRate: 48000, channels: 2, streams: 1 }, transcript: { words: ${JSON.stringify(words)} } },
@@ -24,14 +24,7 @@ export default function Video() {
   return (
     <Composition fps={30} width={640} height={360}>
       <Track id="main">
-        <Clip id="hook" src="asset:talk" in="word:0" out="word:7.end" fade={{ in: 1 }}>
-          <Effect id="lift" type="exposure" params={{ stops: 0 }}>
-            <Keyframe id="k0" param="stops" at={0} value={0} />
-            <Keyframe id="k1" param="stops" at={2} value={1} />
-          </Effect>
-          <Keyframe id="s0" property="transform.scale.x" at={0} value={1} />
-          <Keyframe id="s1" property="transform.scale.x" at={2} value={1.2} />
-        </Clip>
+        <Clip id="hook" src="asset:talk" in="word:0" out="word:7.end" fade={{ in: 1 }} transform={{ scale: { x: [{ at: 0, value: 1 }, { at: 2, value: 1.2 }], y: 1 } }} effects={[{ type: "exposure", stops: [{ at: 0, value: 0 }, { at: 2, value: 1 }] }]} />
         <Transition id="x1" type="crossfade" duration={0.5} />
         <Clip id="broll" src="asset:broll" in={2} out={5} />
       </Track>
@@ -68,7 +61,7 @@ describe("describeAt", () => {
     expect(view?.seen.map((s) => s.id)).toEqual(["point", "hook"]);
     const hook = view?.seen[1];
     // Half way through two-second keyframes: the effect's param and the transform are half way too.
-    expect(hook?.effects).toEqual([{ id: "lift", type: "exposure", params: { stops: 0.5 } }]);
+    expect(hook?.effects).toEqual([{ id: "hook.effects.0", type: "exposure", params: { stops: 0.5 } }]);
     expect(hook?.transform).toEqual({ scale: { x: 1.1, y: 1 } });
     expect(hook?.sourceTime).toBe(1);
     expect(view?.seen[0]).toMatchObject({ kind: "title", text: "The point", progress: 0 });
@@ -108,7 +101,7 @@ describe("inspect", () => {
     expect(errors).toEqual([]);
     expect(output).toBe(`video.tsx  640x360  30 fps  6.40 s (192 frames)  0 errors
 track main (sequence)
-     0.00–3.90     clip        hook  asset:talk 0.00–3.90  words 0–7 "w0 w1 w2 w3 w4 w5 w6 w7"  effects: lift(exposure stops=0)  keyframes: transform.scale.x
+     0.00–3.90     clip        hook  asset:talk 0.00–3.90  words 0–7 "w0 w1 w2 w3 w4 w5 w6 w7"  effects: hook.effects.0(exposure stops=0)  keyframes: transform.scale.x, effects.0.stops
      3.40–3.90     transition  x1  crossfade (hook → broll)
      3.40–6.40     clip        broll  asset:broll 2.00–5.00
 track text (sequence)
@@ -145,7 +138,7 @@ cuts: 3.40 hook→broll (x1)
     expect(errors).toEqual(['nope: the file has no element with the id "nope"']);
     expect(output).toBe(`word:2  1.00 s  frame 30  (word 2 "w2" in hook)
   seen: title point  0% through  "The point"
-  seen: clip hook  26% through  source 1.00 s  transform scale.x=1.1 scale.y=1  lift(exposure stops=0.5)
+  seen: clip hook  26% through  source 1.00 s  transform scale.x=1.1 scale.y=1  hook.effects.0(exposure stops=0.5)
   heard: hook (asset:talk) gain 1.00
   heard: bed (asset:music) gain 0.50
   said: word 2 "w2" in hook

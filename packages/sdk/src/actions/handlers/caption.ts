@@ -12,7 +12,7 @@ import {
   validateTarget,
 } from "../handler-kit";
 import { type ActionError, type ActionInput, invalid, nodeOfSpec, nodeSpecOf, ok } from "../types";
-import { childrenOfKind, replaceAll, stackPosition } from "./effect";
+import { childrenOfKind, replaceAll, stackPosition } from "./stack";
 
 function requireCaptions(state: ResolvedState, id: string): ActionError | null {
   return rawNode(state, id)?.kind === "captions"

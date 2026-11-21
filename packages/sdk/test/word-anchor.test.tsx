@@ -1,7 +1,7 @@
 import { createElement as h } from "react";
 import { describe, expect, it } from "vitest";
 
-import { Clip, Composition, Gap, SpeedKey, Title, Track } from "@uberscene/kit";
+import { Clip, Composition, Gap, Title, Track } from "@uberscene/kit";
 import { collect, Executor, resolve } from "@uberscene/sdk";
 
 import { manifest } from "./helpers";
@@ -84,15 +84,22 @@ describe("a graphic timed by a word of its anchor", () => {
       h(
         Track,
         { id: "main" },
-        h(
-          Clip,
-          { id: "make-1", src: "asset:interview", in: "word:3", out: "word:13.end" },
-          h(SpeedKey, { id: "k", at: 0, speed: 2 }),
-        ),
+        h(Clip, {
+          id: "make-1",
+          src: "asset:interview",
+          in: "word:3",
+          out: "word:13.end",
+          speed: [
+            { at: 0, value: 2 },
+            { at: 1, value: 1 },
+          ],
+        }),
       ),
       h(Track, { id: "text" }, h(Title, { id: "ten", anchor: "make-1", at: "word:9", duration: 1 }, "x")),
     );
     expect(placed(ramped as ReturnType<typeof edit>).errors).toEqual(["UNSUPPORTED_ANCHOR:at"]);
+    const frozen = edit({ clip: { freezes: [{ start: 0.5, duration: 1, source: 2.5 }] } });
+    expect(placed(frozen).errors).toEqual(["UNSUPPORTED_ANCHOR:at"]);
   });
 
   it("needs a plain anchor that is footage", () => {

@@ -1,5 +1,5 @@
 // Effects and transitions a file writes itself: a GLSL function and a zod schema for its params, declared at the top of
-// the file with effect() or transition() and passed to <Effect type> or <Transition type>. A declaration is a value:
+// the file with effect() or transition() and passed as an effect's `type` or to <Transition type>. A declaration is a value:
 // nothing is registered anywhere. A tree's definitions are collected from the elements that use them and from the
 // module's exports (resolve/collect.ts), so each player owns its own. The player draws them with WebGL.
 import type { ZodObject } from "zod";
@@ -23,7 +23,7 @@ export const DECLARED = Symbol.for("uberscene.declared");
 
 /**
  * An effect a file declares, as `effect()` returns it: the definition itself, a value with no side effect. Passed as
- * `<Effect type={ref}>`, it is collected from the element; exported, from the module, so the editor can offer it.
+ * `effects={[{ type: ref }]}`, it is collected from the element; exported, from the module, so the editor can offer it.
  */
 export interface EffectRef<P extends ZodObject = ZodObject> {
   readonly [DECLARED]: "effect";
@@ -50,7 +50,7 @@ function declare<P extends ZodObject>(kind: ShaderDefinition["kind"], options: D
 }
 
 /**
- * Declares an effect drawn by a GLSL function, and returns it for `<Effect type>`. Call it at the top of the file. The
+ * Declares an effect drawn by a GLSL function, and returns it for an effect's `type`. Call it at the top of the file. The
  * shader reads each param as `params.NAME`.
  *
  *   const glitch = effect({
@@ -62,7 +62,7 @@ function declare<P extends ZodObject>(kind: ShaderDefinition["kind"], options: D
  *                   texture(image, uv).a);
  *     }`,
  *   });
- *   <Clip id="city" src="asset:city"><Effect id="g" type={glitch} params={{ amount: 0.5 }} /></Clip>
+ *   <Clip id="city" src="asset:city" effects={[{ type: glitch, amount: 0.5 }]} />
  */
 export function effect<P extends ZodObject = NoParams>(options: DefineOptions<P>): EffectRef<P> {
   const definition = declare("effect", options);
@@ -82,7 +82,7 @@ export function transition<P extends ZodObject = NoParams>(options: DefineOption
   return Object.freeze({ [DECLARED]: "transition" as const, name: definition.name, definition });
 }
 
-/** The shader a file declares under this name for an `<Effect>` or `<Transition>`, if any. */
+/** The shader a file declares under this name for an effect or a `<Transition>`, if any. */
 export function shaderFor(
   shaders: readonly ShaderDefinition[],
   kind: ShaderDefinition["kind"],

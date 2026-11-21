@@ -1,4 +1,4 @@
-import { Clip, Composition, Effect, Track } from "@uberscene/kit";
+import { Clip, Composition, Track } from "@uberscene/kit";
 
 // The same two effects in either order. Left: grayscale, then duotone, which maps the grey onto navy and amber.
 // Right: duotone, then grayscale, which takes the colour back out. Effects run in the order the file lists them.
@@ -14,10 +14,8 @@ export default function Video() {
           fit="cover"
           box={{ x: 240, y: 270, origin: "center" }}
           transform={{ scale: { x: 0.5, y: 0.5 } }}
-        >
-          <Effect id="grey-a" type="grayscale" />
-          <Effect id="tone-a" type="duotone" />
-        </Clip>
+          effects={[{ type: "grayscale" }, { type: "duotone" }]}
+        />
       </Track>
       <Track id="right">
         <Clip
@@ -28,10 +26,8 @@ export default function Video() {
           fit="cover"
           box={{ x: 720, y: 270, origin: "center" }}
           transform={{ scale: { x: 0.5, y: 0.5 } }}
-        >
-          <Effect id="tone-b" type="duotone" />
-          <Effect id="grey-b" type="grayscale" />
-        </Clip>
+          effects={[{ type: "duotone" }, { type: "grayscale" }]}
+        />
       </Track>
     </Composition>
   );

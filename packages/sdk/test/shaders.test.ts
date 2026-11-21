@@ -7,7 +7,7 @@ import { collectModule, Executor, foldToSource, lint, loadModule, resolve } from
 const INVERT = "vec4 effect(vec2 uv) { vec4 c = texture(image, uv); return vec4(1.0 - c.rgb, c.a); }";
 
 const file = (body: string, declarations = "") => `import { z } from "zod";
-import { Clip, Composition, effect, transition, Effect, Track, Transition } from "@uberscene/kit";
+import { Clip, Composition, effect, transition, Track, Transition } from "@uberscene/kit";
 ${declarations}
 export default function V() {
   return <Composition fps={30} width={640} height={360}><Track id="t">${body}</Track></Composition>;
@@ -55,36 +55,32 @@ describe("effect() and transition()", () => {
   });
 
   it("check a built-in shader effect's params and fill its defaults", () => {
-    const ok = stateOf(
-      file(`<Clip id="c" src="asset:city"><Effect id="l" type="levels" params={{ gamma: 1.5 }} /></Clip>`),
-    );
+    const ok = stateOf(file(`<Clip id="c" src="asset:city" effects={[{ type: "levels", gamma: 1.5 }]} />`));
     expect(ok.errors).toEqual([]);
-    expect(ok.items.get("l")?.props.params).toEqual({ black: 0, white: 1, gamma: 1.5 });
-    const bad = stateOf(
-      file(`<Clip id="c" src="asset:city"><Effect id="l" type="levels" params={{ white: 2 }} /></Clip>`),
-    );
-    expect(bad.errors.map((e) => e.prop)).toEqual(["params.white"]);
+    expect(ok.items.get("c.effects.0")?.props.params).toEqual({ black: 0, white: 1, gamma: 1.5 });
+    const bad = stateOf(file(`<Clip id="c" src="asset:city" effects={[{ type: "levels", white: 2 }]} />`));
+    expect(bad.errors.map((e) => e.prop)).toEqual(["effects.0.white"]);
   });
 
   it("put a file's effects on its state, with params checked and filled by their schema", () => {
     const state = stateOf(
       file(
-        `<Clip id="c" src="asset:city"><Effect id="g" type={glitch} params={{ amount: 0.5 }} /><Effect id="h" type={glitch} /></Clip>`,
+        `<Clip id="c" src="asset:city" effects={[{ type: glitch, amount: 0.5 }, { type: glitch }]} />`,
         `const glitch = effect({ name: "glitch", params: z.object({ amount: z.number().min(0).max(1).default(0.3) }), shader: \`${INVERT}\` });`,
       ),
     );
     expect(state.errors).toEqual([]);
     expect(state.shaders.map((s) => `${s.kind}:${s.name}`)).toEqual(["effect:glitch"]);
-    expect(state.items.get("g")?.props.params).toEqual({ amount: 0.5 });
-    expect(state.items.get("h")?.props.params).toEqual({ amount: 0.3 });
+    expect(state.items.get("c.effects.0")?.props.params).toEqual({ amount: 0.5 });
+    expect(state.items.get("c.effects.1")?.props.params).toEqual({ amount: 0.3 });
 
     const bad = stateOf(
       file(
-        `<Clip id="c" src="asset:city"><Effect id="g" type="glitch" params={{ amount: 4 }} /></Clip>`,
+        `<Clip id="c" src="asset:city" effects={[{ type: "glitch", amount: 4 }]} />`,
         `export const glitch = effect({ name: "glitch", params: z.object({ amount: z.number().max(1) }), shader: \`${INVERT}\` });`,
       ),
     );
-    expect(bad.errors.map((e) => `${e.id}.${e.prop}`)).toEqual(["g.params.amount"]);
+    expect(bad.errors.map((e) => `${e.id}.${e.prop}`)).toEqual(["c.effects.0.amount"]);
   });
 
   it("let a transition of the file's own sit between two clips, and keep each file's shaders apart", () => {
@@ -106,10 +102,10 @@ describe("effect() and transition()", () => {
 export const sweep = transition({ name: "sweep", shader: "vec4 transition(vec2 uv) { return texture(to, uv); }" });`,
     );
     const exec = new Executor({ tree: collectModule(loadModule(source) as never), manifest });
-    expect(exec.execute({ type: "effect/add", params: { id: "a", childId: "e1", type: "inv" } }).ok).toBe(true);
+    expect(exec.execute({ type: "effect/add", params: { id: "a", effect: { type: "inv" } } }).ok).toBe(true);
     expect(exec.execute({ type: "transition/update", params: { transitionId: "x", type: "sweep" } }).ok).toBe(true);
     expect(exec.state().items.get("x")?.props.type).toBe("sweep");
-    expect(exec.execute({ type: "effect/add", params: { id: "a", childId: "e2", type: "nope" } }).ok).toBe(false);
+    expect(exec.execute({ type: "effect/add", params: { id: "a", effect: { type: "nope" } } }).ok).toBe(false);
   });
 
   it("want declarations at the top of the file, with a literal name and shader", () => {
@@ -156,7 +152,7 @@ describe("declarations as values", () => {
   it("are found on the element that uses them, or among the exports; one neither used nor exported is not", () => {
     const state = stateOf(
       file(
-        `<Clip id="a" src="asset:city"><Effect id="u" type={used} /></Clip>`,
+        `<Clip id="a" src="asset:city" effects={[{ type: used }]} />`,
         `const used = effect({ name: "used", shader: \`${INVERT}\` });
 export const offered = effect({ name: "offered", shader: \`${INVERT}\` });
 const hidden = effect({ name: "hidden", shader: \`${INVERT}\` });`,
@@ -164,13 +160,13 @@ const hidden = effect({ name: "hidden", shader: \`${INVERT}\` });`,
     );
     expect(state.errors).toEqual([]);
     expect(state.shaders.map((s) => s.name).sort()).toEqual(["offered", "used"]);
-    expect(state.items.get("u")?.props.type).toBe("used");
+    expect(state.items.get("a.effects.0")?.props.type).toBe("used");
   });
 
   it("refuse two different definitions under one name", () => {
     const state = stateOf(
       file(
-        `<Clip id="a" src="asset:city"><Effect id="u" type={a} /><Effect id="v" type={b} /></Clip>`,
+        `<Clip id="a" src="asset:city" effects={[{ type: a }, { type: b }]} />`,
         `const a = effect({ name: "same", shader: \`${INVERT}\` });
 const b = effect({ name: "same", shader: "vec4 effect(vec2 uv) { return vec4(1.0); }" });`,
       ),
@@ -183,7 +179,7 @@ const b = effect({ name: "same", shader: "vec4 effect(vec2 uv) { return vec4(1.0
   it("want one neither exported nor used to be exported, so the editor can offer it", () => {
     const d = lint(
       file(
-        `<Clip id="a" src="asset:city"><Effect id="u" type={used} /></Clip>`,
+        `<Clip id="a" src="asset:city" effects={[{ type: used }]} />`,
         `const used = effect({ name: "used", shader: \`${INVERT}\` });
 export const offered = effect({ name: "offered", shader: \`${INVERT}\` });
 const hidden = effect({ name: "hidden", shader: \`${INVERT}\` });`,
@@ -201,14 +197,14 @@ const hidden = effect({ name: "hidden", shader: \`${INVERT}\` });`,
 export const sweep = transition({ name: "sweep", shader: "vec4 transition(vec2 uv) { return texture(to, uv); }" });`,
     );
     const exec = new Executor({ tree: collectModule(loadModule(source) as never), manifest });
-    expect(exec.execute({ type: "effect/add", params: { id: "a", childId: "e1", type: "inv" } }).ok).toBe(true);
+    expect(exec.execute({ type: "effect/add", params: { id: "a", effect: { type: "inv" } } }).ok).toBe(true);
     expect(exec.execute({ type: "transition/update", params: { transitionId: "x", type: "sweep" } }).ok).toBe(true);
     const folded = foldToSource(source, exec.log(), exec.state());
-    expect(folded.text).toContain('<Effect id="e1" type={inv}');
+    expect(folded.text).toContain("effects={[{ type: inv }]}");
     expect(folded.text).toContain('<Transition id="x" type={sweep}');
     const again = stateOf(folded.text);
     expect(again.errors).toEqual([]);
-    expect(again.items.get("e1")?.props.type).toBe("inv");
+    expect(again.items.get("a.effects.0")?.props.type).toBe("inv");
     expect(again.items.get("x")?.props.type).toBe("sweep");
   });
 });
@@ -216,20 +212,17 @@ export const sweep = transition({ name: "sweep", shader: "vec4 transition(vec2 u
 describe("timeline children inside overlays", () => {
   it("keep a title's text, and collect a Layer's effects apart from its free code", () => {
     const state = stateOf(`import { z } from "zod";
-import { Composition, effect, Effect, Keyframe, Layer, Title, Track } from "@uberscene/kit";
+import { Composition, effect, Layer, Title, Track } from "@uberscene/kit";
 const swap = effect({ name: "swap", shader: "vec4 effect(vec2 uv) { return texture(image, uv); }" });
 function Box() { return null; }
 export default function V() {
   return (
     <Composition fps={30} width={640} height={360}>
       <Track id="t" layout="free">
-        <Title id="h" start={0} duration={2}>
-          <Effect id="e1" type={swap} />
+        <Title id="h" start={0} duration={2} effects={[{ type: swap }]}>
           Hello
         </Title>
-        <Layer id="l" start={0} duration={2}>
-          <Effect id="e2" type={swap} />
-          <Keyframe id="k" property="transform.opacity" at={0} value={1} />
+        <Layer id="l" start={0} duration={2} transform={{ opacity: [{ at: 0, value: 1 }] }} effects={[{ type: swap }]}>
           <Box />
         </Layer>
       </Track>
@@ -238,7 +231,7 @@ export default function V() {
 }`);
     expect(state.errors).toEqual([]);
     expect(state.tree.byId.get("h")?.text).toBe("Hello");
-    expect(state.items.get("l")?.children).toEqual(["e2", "k"]);
+    expect(state.items.get("l")?.children).toEqual(["l.transform.opacity.0", "l.effects.0"]);
     expect(state.tree.byId.get("l")?.interior?.component).toBe("Box");
   });
 });

@@ -8,25 +8,15 @@ import { type ActionInput, Executor, foldToSource } from "@uberscene/sdk";
 import { resolveText, treeOf } from "../editing/corpus";
 import { manifest, serialize } from "../helpers";
 
-const FILE = `import { Audio, Clip, Composition, Effect, Keyframe, SpeedKey, Track, Transition } from "@uberscene/kit";
+const FILE = `import { Audio, Clip, Composition, Track, Transition } from "@uberscene/kit";
 
 export default function Video() {
   return (
     <Composition fps={30} width={1920} height={1080}>
       <Track id="main">
-        <Clip id="a" src="asset:city" in={0} out={6}>
-          <Keyframe id="a-s0" property="transform.scale.x" at={0} value={1} />
-          <Keyframe id="a-s1" property="transform.scale.x" at={6} value={1.3} />
-          <Effect id="a-blur" type="blur" params={{ radius: 0 }}>
-            <Keyframe id="a-b0" param="radius" at={1} value={0} easing="easeInOut" />
-            <Keyframe id="a-b1" param="radius" at={5} value={8} />
-          </Effect>
-        </Clip>
+        <Clip id="a" src="asset:city" in={0} out={6} transform={{ scale: { x: [{ at: 0, value: 1 }, { at: 6, value: 1.3 }], y: 1 } }} effects={[{ type: "blur", radius: [{ at: 1, value: 0, easing: "easeInOut" }, { at: 5, value: 8 }] }]} />
         <Transition id="x1" type="crossfade" duration={0.5} />
-        <Clip id="b" src="asset:interview" in={0} out={4}>
-          <SpeedKey id="b-v0" at={0} speed={1} />
-          <SpeedKey id="b-v1" at={2} speed={0.5} />
-        </Clip>
+        <Clip id="b" src="asset:interview" in={0} out={4} speed={[{ at: 0, value: 1 }, { at: 2, value: 0.5 }]} />
         <Transition id="x2" type="wipe" duration={0.5} />
         <Clip id="c" src="asset:city" in={6} out={10} />
       </Track>
@@ -44,11 +34,6 @@ function executor(): Executor {
 }
 
 const props = (exec: Executor, id: string) => exec.state().tree.byId.get(id)?.props as Record<string, unknown>;
-const childIds = (exec: Executor, id: string) =>
-  exec
-    .state()
-    .tree.byId.get(id)
-    ?.children.map((c) => c.id);
 
 /** Runs `input`: no errors, the folded file reads back as the editor holds it, `check` passes, undo restores. */
 function edited(input: ActionInput, check: (exec: Executor) => void): void {
@@ -71,22 +56,48 @@ describe("splitting a clip that animates", () => {
   it("gives each half a key at the cut with the value the clip had there", () => {
     edited({ type: "clip/split", params: { id: "a", at: 3, newId: "a2" } }, (exec) => {
       // The scale ramps 1 to 1.3 over six seconds: 1.15 at the cut, where the first half now ends and the second starts.
-      expect(childIds(exec, "a")).toEqual(["a-s0", "a-s1_cut", "a-blur"]);
-      expect(props(exec, "a-s1_cut")).toMatchObject({ at: 3, value: 1.15, property: "transform.scale.x" });
-      expect(childIds(exec, "a2")).toEqual(["a-s1_cut_b", "a-s1_b", "a-blur_b"]);
-      expect(props(exec, "a-s1_cut_b")).toMatchObject({ at: 0, value: 1.15 });
-      expect(props(exec, "a-s1_b")).toMatchObject({ at: 3, value: 1.3 });
+      expect(props(exec, "a").transform).toEqual({
+        scale: {
+          x: [
+            { at: 0, value: 1 },
+            { at: 3, value: 1.15 },
+          ],
+          y: 1,
+        },
+      });
+      expect(props(exec, "a2").transform).toEqual({
+        scale: {
+          x: [
+            { at: 0, value: 1.15 },
+            { at: 3, value: 1.3 },
+          ],
+          y: 1,
+        },
+      });
     });
   });
 
   it("splits the keys inside an effect the same way, eased as the curve was where it was cut", () => {
     edited({ type: "clip/split", params: { id: "a", at: 3, newId: "a2" } }, (exec) => {
       // The blur eases in-out from 0 at 1 s to 8 at 5 s: halfway in time is halfway in value, 4.
-      expect(childIds(exec, "a-blur")).toEqual(["a-b0", "a-b1_cut"]);
-      expect(props(exec, "a-b1_cut")).toMatchObject({ at: 3, value: 4, param: "radius" });
-      expect(childIds(exec, "a-blur_b")).toEqual(["a-b1_cut_b", "a-b1_b"]);
-      expect(props(exec, "a-b1_cut_b")).toMatchObject({ at: 0, value: 4, easing: "easeInOut" });
-      expect(props(exec, "a-b1_b")).toMatchObject({ at: 2, value: 8 });
+      expect(props(exec, "a").effects).toEqual([
+        {
+          type: "blur",
+          radius: [
+            { at: 1, value: 0, easing: "easeInOut" },
+            { at: 3, value: 4 },
+          ],
+        },
+      ]);
+      expect(props(exec, "a2").effects).toEqual([
+        {
+          type: "blur",
+          radius: [
+            { at: 0, value: 4, easing: "easeInOut" },
+            { at: 2, value: 8 },
+          ],
+        },
+      ]);
     });
   });
 
@@ -95,10 +106,7 @@ describe("splitting a clip that animates", () => {
       const cut = exec.state().items.get("b")!.start;
       expect(cut).toBeLessThan(6.5);
       const speeds = (id: string) =>
-        exec
-          .state()
-          .tree.byId.get(id)!
-          .children.map((k) => [k.props.at, k.props.speed] as const);
+        (props(exec, id).speed as { at: number; value: number }[]).map((k) => [k.at, k.value]);
       expect(speeds("b").at(-1)?.[0]).toBeCloseTo(6.5 - cut, 6);
       expect(speeds("b2")[0]?.[0]).toBe(0);
       expect(speeds("b").at(-1)?.[1]).toBe(speeds("b2")[0]?.[1]);

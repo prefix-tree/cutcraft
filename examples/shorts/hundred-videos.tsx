@@ -12,7 +12,6 @@ import {
   Composition,
   fontFamily,
   googleFont,
-  Keyframe,
   Layer,
   Track,
   useLayer,
@@ -67,24 +66,22 @@ const framed = (f: Framing) => ({ crop: f.crop });
 /** How long a move between the two layouts takes. */
 const MOVE = 0.5;
 
-/** Keyframes that move a clip from one framing to another over its first half second: the layout changes, not the shot. */
-function Reframe({ id, from, to }: { id: string; from: Framing; to: Framing }) {
-  const moves = [
-    ["x", "transform.crop.x", from.crop.x, to.crop.x],
-    ["t", "transform.crop.y", from.crop.y, to.crop.y],
-    ["w", "transform.crop.width", from.crop.width, to.crop.width],
-    ["h", "transform.crop.height", from.crop.height, to.crop.height],
-    ["y", "box.y", from.y, to.y],
-  ] as const;
-  return (
-    <>
-      {moves.flatMap(([key, property, a, b]) => [
-        <Keyframe key={`${key}0`} id={`${id}-${key}0`} property={property} at={0} value={a} easing="easeInOut" />,
-        <Keyframe key={`${key}1`} id={`${id}-${key}1`} property={property} at={MOVE} value={b} />,
-      ])}
-    </>
-  );
-}
+/** Keys from `a` to `b` over a clip's first half second. */
+const move = (a: number, b: number) => [
+  { at: 0, value: a, easing: "easeInOut" as const },
+  { at: MOVE, value: b },
+];
+
+/** A clip moving from one framing to another as it starts: the layout changes, not the shot. */
+const reframedBox = (from: Framing, to: Framing) => ({ y: move(from.y, to.y), origin: "center" }) as const;
+const reframedCrop = (from: Framing, to: Framing) => ({
+  crop: {
+    x: move(from.crop.x, to.crop.x),
+    y: move(from.crop.y, to.crop.y),
+    width: move(from.crop.width, to.crop.width),
+    height: move(from.crop.height, to.crop.height),
+  },
+});
 
 // ── The graphics ────────────────────────────────────────────────────────────────────────────────────────────────
 // Each is drawn under the face in the Explain framing, inside what TikTok, Reels and Shorts all leave clear:
@@ -305,11 +302,9 @@ export default function Video({ accent }: z.infer<typeof schema>) {
           volume={VOICE}
           in="word:21"
           out={TO_LEX}
-          box={placed(BEAST_EXPLAIN)}
-          transform={framed(BEAST_EXPLAIN)}
-        >
-          <Reframe id="hundred" from={BEAST_FULL} to={BEAST_EXPLAIN} />
-        </Clip>
+          box={reframedBox(BEAST_FULL, BEAST_EXPLAIN)}
+          transform={reframedCrop(BEAST_FULL, BEAST_EXPLAIN)}
+        />
         {/* Lex: "the improve something each time is the tricky one. How do you improve something each time?" */}
         <Clip
           id="how"
@@ -347,11 +342,9 @@ export default function Video({ accent }: z.infer<typeof schema>) {
           volume={VOICE}
           in="word:173"
           out={END}
-          box={placed(BEAST_FULL)}
-          transform={framed(BEAST_FULL)}
-        >
-          <Reframe id="perfect" from={BEAST_EXPLAIN} to={BEAST_FULL} />
-        </Clip>
+          box={reframedBox(BEAST_EXPLAIN, BEAST_FULL)}
+          transform={reframedCrop(BEAST_EXPLAIN, BEAST_FULL)}
+        />
       </Track>
 
       <Track id="scrim" layout="free">

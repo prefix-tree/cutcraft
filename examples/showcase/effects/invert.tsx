@@ -1,16 +1,26 @@
-import { Clip, Composition, Effect, Keyframe, Track } from "@uberscene/kit";
+import { Clip, Composition, Track } from "@uberscene/kit";
 
 // invert: Turns the picture into its negative.
 export default function Video() {
   return (
     <Composition fps={30} width={640} height={360}>
       <Track id="main">
-        <Clip id="shot" src="asset:coffee" in={12} out={15} fit="cover">
-          <Effect id="look" type="invert">
-            <Keyframe id="k1" param="amount" at={0.5} value={0} easing="easeInOut" />
-            <Keyframe id="k2" param="amount" at={1.5} value={1} />
-          </Effect>
-        </Clip>
+        <Clip
+          id="shot"
+          src="asset:coffee"
+          in={12}
+          out={15}
+          fit="cover"
+          effects={[
+            {
+              type: "invert",
+              amount: [
+                { at: 0.5, value: 0, easing: "easeInOut" },
+                { at: 1.5, value: 1 },
+              ],
+            },
+          ]}
+        />
       </Track>
     </Composition>
   );

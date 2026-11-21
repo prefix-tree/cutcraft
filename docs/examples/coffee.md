@@ -17,11 +17,11 @@ cut can do: transitions, speed, colour, titles, components, a block and sound.
 
 - **Four shader transitions** between the five shots, each a different kind: a film burn, an iris, a pixel dissolve and a
   clock wipe, set as siblings of the clips. ([Transitions](/guide/transitions))
-- **A push-in** on the wide pour-over and on the three glasses: two `<Keyframe>`s on each scale axis.
-  ([`<Keyframe>`](/reference/elements/keyframe))
-- **A speed ramp into slow motion** on the close pour (`<SpeedKey>`), then **one frame held** (`<Freeze>`) while a
-  callout points at it. ([`<SpeedKey>`](/reference/elements/speedkey) · [`<Freeze>`](/reference/elements/freeze))
-- **A warm LUT that comes in while you watch**: its `amount` is keyframed from 0 to 1 halfway through the first
+- **A push-in** on the wide pour-over and on the three glasses: two keys on `transform.scale`.
+  ([Keys over time](/guide/animation#keys))
+- **A speed ramp into slow motion** on the close pour (keys on `speed`), then **one frame held** (`freezes`) while a
+  callout points at it. ([Speed ramps](/guide/animation#speed) · [Freeze frames](/guide/animation#freezes))
+- **A warm LUT that comes in while you watch**: its `amount` has keys from 0 to 1 halfway through the first
   espresso shot, so the shot is seen before and after. A badge names it as it lands.
   ([`lut`](/reference/effects/lut) · [Colour and grading](/guide/colour))
 - **A grade under the closing line**: an `<Adjustment>` with exposure, curves and vibrance, and a dark fall-off from

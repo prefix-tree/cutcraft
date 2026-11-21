@@ -34,15 +34,13 @@ const W = 320,
 /** A two-clip cut with a crossfade, a title over the first clip and an effect on it; parts can be left out. */
 const video = (
   options: { effect?: boolean; title?: boolean; words?: string } = {},
-) => `import { Clip, Composition, Effect, Title, Track, Transition } from "@uberscene/kit";
+) => `import { Clip, Composition, Title, Track, Transition } from "@uberscene/kit";
 export const manifest = ${JSON.stringify({ assets: mediaManifest.assets })};
 export default function Video() {
   return (
     <Composition fps={30} width={${W}} height={${H}} background={{ type: "color", color: "#000000" }}>
       <Track id="main">
-        <Clip id="bars" src="asset:bars" in={0} out={2} fit="cover">
-          ${options.effect === false ? "" : `<Effect id="invert" type="invert" params={{ amount: 1 }} />`}
-        </Clip>
+        <Clip id="bars" src="asset:bars" in={0} out={2} fit="cover"${options.effect === false ? "" : ` effects={[{ type: "invert", amount: 1 }]}`} />
         <Transition id="x1" type="crossfade" duration={0.4} />
         <Clip id="solid" src="asset:solid" in={0} out={1.4} fit="cover" />
       </Track>
@@ -130,7 +128,7 @@ it("draws a frame with and without an effect, side by side", async () => {
     media: v.media,
     out,
     at: "0.5",
-    without: "invert",
+    without: "bars.effects.0",
     cell: W,
   });
   expect(result.cells.map((c) => [c.column, c.variant])).toEqual([
@@ -323,7 +321,10 @@ describe("--listen", () => {
     };
     return video()
       .replace(JSON.stringify({ assets: mediaManifest.assets }), JSON.stringify({ assets }))
-      .replace(`fit="cover">`, `fit="cover"${volume === undefined ? "" : ` volume={${volume}}`}>`);
+      .replace(
+        `<Clip id="bars" src="asset:bars" in={0} out={2} fit="cover"`,
+        `<Clip id="bars" src="asset:bars" in={0} out={2} fit="cover"${volume === undefined ? "" : ` volume={${volume}}`}`,
+      );
   };
   const listen = async (name: string, source: string, stretch: string, more: { cacheDir?: string } = {}) => {
     const v = await load(name, source);
@@ -455,16 +456,16 @@ describe("--listen", () => {
 
 describe("--motion", () => {
   /** A white square that crosses a black frame from left to right in two seconds. */
-  const mover = `import { Composition, Keyframe, Shape, Track } from "@uberscene/kit";
+  const mover = `import { Composition, Shape, Track } from "@uberscene/kit";
 export const manifest = { assets: {} };
 export default function Video() {
   return (
     <Composition fps={30} width={${W}} height={${H}} background={{ type: "color", color: "#000000" }}>
       <Track id="t" layout="free">
-        <Shape id="box" type="rectangle" start={0} duration={3} width={40} height={40} fill="#ffffff" box={{ origin: "center" }}>
-          <Keyframe id="k1" property="box.x" at={0} value={${W / 2 - 120}} />
-          <Keyframe id="k2" property="box.x" at={2} value={${W / 2 + 120}} />
-        </Shape>
+        <Shape id="box" type="rectangle" start={0} duration={3} width={40} height={40} fill="#ffffff" box={{
+          origin: "center",
+          x: [{ at: 0, value: ${W / 2 - 120} }, { at: 2, value: ${W / 2 + 120} }],
+        }} />
       </Track>
     </Composition>
   );

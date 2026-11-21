@@ -9,7 +9,7 @@ import { createRef, type ReactNode } from "react";
 import { createRoot, type Root } from "react-dom/client";
 
 import { Player, type PlayerRef } from "@uberscene/player";
-import { type AssetManifest, collectModule, loadModule, type ResolvedState, resolve } from "@uberscene/sdk";
+import { type AssetManifest, collectModule, fixSource, loadModule, type ResolvedState, resolve } from "@uberscene/sdk";
 import "@uberscene/player/fonts.css";
 
 import { MANIFEST } from "./starters";
@@ -127,4 +127,13 @@ export function mountPlayground(options: PlaygroundOptions): Playground {
       root.unmount();
     },
   };
+}
+
+/** A file in the current spelling: what `uberscene lint --fix` makes of one written before a respelling. */
+export function upgraded(code: string): string {
+  try {
+    return fixSource(code).text;
+  } catch {
+    return code;
+  }
 }

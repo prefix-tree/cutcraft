@@ -106,7 +106,7 @@ export const EFFECTS = {
 export const RENAMED_EFFECT_PARAMS: Readonly<Record<string, Readonly<Record<string, string>>>> = {
   shadow: { radius: "blur" },
   outline: { width: "thickness" },
-  halftone: { mode: "type" },
+  halftone: { mode: "inks", type: "inks" },
   scanlines: { thickness: "coverage" },
 };
 
@@ -180,7 +180,7 @@ export const TRANSITIONS = {
 } as const satisfies Record<string, TransitionEntry>;
 
 export type VideoEffectType = keyof typeof EFFECTS;
-/** The params a built-in effect takes, as written in `<Effect params>`. */
+/** The params a built-in effect takes, as written in an `effects` entry. */
 export type EffectParams<K extends VideoEffectType> = z.input<(typeof EFFECTS)[K]["params"]>;
 
 /** The effects by family, for the reference and the editor's menus. Every effect is in exactly one. */

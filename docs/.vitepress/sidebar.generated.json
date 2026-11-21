@@ -79,33 +79,12 @@
       "text": "Effects and colour",
       "items": [
         {
-          "text": "Effect",
-          "link": "/reference/elements/effect"
-        },
-        {
           "text": "Adjustment",
           "link": "/reference/elements/adjustment"
         },
         {
           "text": "Mask",
           "link": "/reference/elements/mask"
-        }
-      ]
-    },
-    {
-      "text": "Motion and time",
-      "items": [
-        {
-          "text": "Keyframe",
-          "link": "/reference/elements/keyframe"
-        },
-        {
-          "text": "SpeedKey",
-          "link": "/reference/elements/speedkey"
-        },
-        {
-          "text": "Freeze",
-          "link": "/reference/elements/freeze"
         }
       ]
     },

@@ -84,7 +84,7 @@ all: Node copies the source's encoded packets for whole groups of pictures, and 
 One page mixes the soundtrack for the whole range before any picture is drawn.
 
 1. It builds the audio plan and decodes each source with WebCodecs.
-2. It mixes with `mixPlan`: volume, fades, automation, ducking, pan, speed with pitch, freeze holds and resampling.
+2. It mixes with `mixPlan`: volume and pan with their keys, fades, ducking, speed with pitch, freeze holds and resampling.
 3. It encodes for the container.
 
 | Container | Sound | Encoder |

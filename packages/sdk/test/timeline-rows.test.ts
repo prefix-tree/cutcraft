@@ -49,8 +49,8 @@ describe("the timeline as rows", () => {
   });
 
   it("puts keyframes at the seconds of the finished video", () => {
-    expect(rows.keyframes.find((k) => k.id === "broll-sx1")).toEqual({
-      id: "broll-sx1",
+    expect(rows.keyframes.find((k) => k.id === "broll.transform.scale.x.1")).toEqual({
+      id: "broll.transform.scale.x.1",
       element: "broll",
       property: "transform.scale.x",
       at: 10.8,
@@ -88,16 +88,14 @@ describe("the timeline as rows", () => {
   it("lists effects in the order they run", () => {
     const graded = resolve(
       collectModule(
-        loadModule(`import { Clip, Composition, Effect, Track } from "@uberscene/kit";
-export default function V() { return <Composition fps={30} width={640} height={360}><Track id="t"><Clip id="c" src="asset:founder" in={0} out={2}>
-  <Effect id="expose" type="exposure" params={{ stops: 0.5 }} /><Effect id="warm" type="whiteBalance" params={{ temperature: 0.3 }} />
-</Clip></Track></Composition>; }`) as never,
+        loadModule(`import { Clip, Composition, Track } from "@uberscene/kit";
+export default function V() { return <Composition fps={30} width={640} height={360}><Track id="t"><Clip id="c" src="asset:founder" in={0} out={2} effects={[{ type: "exposure", stops: 0.5 }, { type: "whiteBalance", temperature: 0.3 }]} /></Track></Composition>; }`) as never,
       ),
       state.manifest,
     );
     expect(timelineRows(graded).effects).toEqual([
-      { id: "expose", element: "c", type: "exposure", params: { stops: 0.5 }, order: 0 },
-      { id: "warm", element: "c", type: "whiteBalance", params: { temperature: 0.3, tint: 0 }, order: 1 },
+      { id: "c.effects.0", element: "c", type: "exposure", params: { stops: 0.5 }, order: 0 },
+      { id: "c.effects.1", element: "c", type: "whiteBalance", params: { temperature: 0.3, tint: 0 }, order: 1 },
     ]);
   });
 });

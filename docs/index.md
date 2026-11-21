@@ -63,18 +63,22 @@ import { withBase } from "vitepress";
 <Example src="showcase/coffee" alt="A pour-over and an espresso cut together with transitions, titles, a warm grade and a closing quote">
 
 ```tsx
-<Clip id="pour" src="asset:coffee" in={10} out={14} fit="cover">
-  <SpeedKey id="pour-s0" at={0} speed={1} />
-  <SpeedKey id="pour-s1" at={1.6} speed={0.4} easing="easeInOutQuad" />
-  <Freeze id="pour-hold" at={12.4} start={4.2} duration={1.4} />
-</Clip>
+<Clip id="pour" src="asset:coffee" in={10} out={14} fit="cover"
+  speed={[
+    { at: 0, value: 1 },
+    { at: 1.6, value: 0.4, easing: "easeInOutQuad" },
+  ]}
+  freezes={[{ start: 4.2, duration: 1.4, source: 12.4 }]} />
 <Transition id="x2" type="iris" duration={0.9} />
-<Clip id="shot" src="asset:espresso" in={1} out={9} fit="cover">
-  <Effect id="shot-warm" type="lut" params={{ src: "asset:warm" }}>
-    <Keyframe id="shot-warm-0" param="amount" at={3.2} value={0} easing="easeInOut" />
-    <Keyframe id="shot-warm-1" param="amount" at={4.4} value={1} />
-  </Effect>
-</Clip>
+<Clip id="shot" src="asset:espresso" in={1} out={9} fit="cover"
+  effects={[{
+    type: "lut",
+    src: "asset:warm",
+    amount: [
+      { at: 3.2, value: 0, easing: "easeInOut" },
+      { at: 4.4, value: 1 },
+    ],
+  }]} />
 ```
 
 </Example>

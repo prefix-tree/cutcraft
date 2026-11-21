@@ -52,7 +52,7 @@ const probe = effect({ name: "probe", params: def.params, shader: def.passes[0] 
   writeFileSync(
     file,
     `import { z } from "zod";
-import { builtInShader, Clip, Composition, effect, Effect, Track } from "@uberscene/kit";
+import { builtInShader, Clip, Composition, effect, Track } from "@uberscene/kit";
 export const manifest = ${JSON.stringify({ assets: mediaManifest.assets })};
 ${CHART}
 ${probe}
@@ -60,10 +60,7 @@ export default function Video() {
   return (
     <Composition fps={30} width={320} height={180} background={{ type: "color", color: "#000000" }}>
       <Track id="t">
-        <Clip id="c" src="asset:solid" fit="cover">
-          <Effect id="chart" type={chart} params={{ shape: ${shape} }} />
-          ${type ? `<Effect id="p" type={probe} params={${neutral}} />` : ""}
-        </Clip>
+        <Clip id="c" src="asset:solid" fit="cover" effects={[{ type: chart, shape: ${shape} }${type ? `, { type: probe, ...${neutral} }` : ""}]} />
       </Track>
     </Composition>
   );

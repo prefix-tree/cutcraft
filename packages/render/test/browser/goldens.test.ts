@@ -75,85 +75,85 @@ interface Case {
 
 /** One case per built-in shader effect, and stacks that later steps fuse or reorder. */
 const CASES: readonly Case[] = [
-  { name: "levels", effects: `<Effect id="e" type="levels" params={{ black: 0.1, white: 0.85, gamma: 1.4 }} />` },
-  { name: "lut", effects: `<Effect id="e" type="lut" params={{ src: "asset:warm", amount: 0.8 }} />` },
-  { name: "exposure", effects: `<Effect id="e" type="exposure" params={{ stops: 0.75 }} />` },
-  { name: "vibrance", effects: `<Effect id="e" type="vibrance" params={{ amount: 0.6 }} />` },
-  { name: "whiteBalance", effects: `<Effect id="e" type="whiteBalance" params={{ temperature: 0.35, tint: -0.2 }} />` },
+  { name: "levels", effects: `{ type: "levels", black: 0.1, white: 0.85, gamma: 1.4 }` },
+  { name: "lut", effects: `{ type: "lut", src: "asset:warm", amount: 0.8 }` },
+  { name: "exposure", effects: `{ type: "exposure", stops: 0.75 }` },
+  { name: "vibrance", effects: `{ type: "vibrance", amount: 0.6 }` },
+  { name: "whiteBalance", effects: `{ type: "whiteBalance", temperature: 0.35, tint: -0.2 }` },
   {
     name: "shadowsHighlights",
-    effects: `<Effect id="e" type="shadowsHighlights" params={{ shadows: 0.7, highlights: -0.5, radius: 8 }} />`,
+    effects: `{ type: "shadowsHighlights", shadows: 0.7, highlights: -0.5, radius: 8 }`,
   },
-  { name: "duotone", effects: `<Effect id="e" type="duotone" params={{ dark: "#102040", light: "#ffcc66" }} />` },
+  { name: "duotone", effects: `{ type: "duotone", dark: "#102040", light: "#ffcc66" }` },
   {
     name: "curves",
-    effects: `<Effect id="e" type="curves" params={{ rgb: [[0, 0.05], [0.3, 0.22], [0.7, 0.82], [1, 0.97]], blue: [[0, 0.1], [1, 0.9]] }} />`,
+    effects: `{ type: "curves", rgb: [[0, 0.05], [0.3, 0.22], [0.7, 0.82], [1, 0.97]], blue: [[0, 0.1], [1, 0.9]] }`,
   },
   {
     name: "colorKey",
-    effects: `<Effect id="e" type="colorKey" params={{ color: "#00ff00", tolerance: 0.35, softness: 0.15 }} />`,
+    effects: `{ type: "colorKey", color: "#00ff00", tolerance: 0.35, softness: 0.15 }`,
   },
   {
     name: "regionBlur",
-    effects: `<Effect id="e" type="regionBlur" params={{ box: [0.3, 0.2, 0.4, 0.5], radius: 5, feather: 8, roundness: 0.5 }} />`,
+    effects: `{ type: "regionBlur", box: [0.3, 0.2, 0.4, 0.5], radius: 5, feather: 8, roundness: 0.5 }`,
   },
   {
     name: "cornerPin",
-    effects: `<Effect id="e" type="cornerPin" params={{ topLeft: [0.1, 0.15], topRight: [0.85, 0.05], bottomRight: [0.9, 0.9], bottomLeft: [0.05, 0.8] }} />`,
+    effects: `{ type: "cornerPin", topLeft: [0.1, 0.15], topRight: [0.85, 0.05], bottomRight: [0.9, 0.9], bottomLeft: [0.05, 0.8] }`,
   },
-  { name: "zoomBlur", effects: `<Effect id="e" type="zoomBlur" params={{ length: 60, center: [0.4, 0.5] }} />` },
+  { name: "zoomBlur", effects: `{ type: "zoomBlur", length: 60, center: [0.4, 0.5] }` },
   {
     name: "chromaticAberration",
-    effects: `<Effect id="e" type="chromaticAberration" params={{ distance: 10, radial: true }} />`,
+    effects: `{ type: "chromaticAberration", distance: 10, radial: true }`,
   },
   {
     name: "glow",
     shape: true,
-    effects: `<Effect id="e" type="glow" params={{ radius: 6, intensity: 1.5, color: "#ffee88" }} />`,
+    effects: `{ type: "glow", radius: 6, intensity: 1.5, color: "#ffee88" }`,
   },
-  { name: "outline", shape: true, effects: `<Effect id="e" type="outline" params={{ thickness: 6 }} />` },
+  { name: "outline", shape: true, effects: `{ type: "outline", thickness: 6 }` },
   {
     name: "longShadow",
     shape: true,
-    effects: `<Effect id="e" type="longShadow" params={{ length: 60, color: "#333333", fade: true }} />`,
+    effects: `{ type: "longShadow", length: 60, color: "#333333", fade: true }`,
   },
-  { name: "bevel", shape: true, effects: `<Effect id="e" type="bevel" params={{ size: 2, amount: 0.8 }} />` },
-  { name: "halftone", effects: `<Effect id="e" type="halftone" params={{ size: 10, type: "cmyk" }} />` },
+  { name: "bevel", shape: true, effects: `{ type: "bevel", size: 2, amount: 0.8 }` },
+  { name: "halftone", effects: `{ type: "halftone", size: 10, inks: "cmyk" }` },
   {
     name: "pixelate",
-    effects: `<Effect id="e" type="pixelate" params={{ size: 16, box: [0.25, 0.2, 0.5, 0.6], feather: 6 }} />`,
+    effects: `{ type: "pixelate", size: 16, box: [0.25, 0.2, 0.5, 0.6], feather: 6 }`,
   },
   {
     name: "scanlines",
-    effects: `<Effect id="e" type="scanlines" params={{ spacing: 6, intensity: 0.6, speed: 20, angle: 10 }} />`,
+    effects: `{ type: "scanlines", spacing: 6, intensity: 0.6, speed: 20, angle: 10 }`,
   },
-  { name: "lightLeak", effects: `<Effect id="e" type="lightLeak" params={{ intensity: 0.8, seed: 3 }} />` },
+  { name: "lightLeak", effects: `{ type: "lightLeak", intensity: 0.8, seed: 3 }` },
   {
     name: "fractalNoise",
-    effects: `<Effect id="e" type="fractalNoise" params={{ size: 50, octaves: 6, blend: "softLight", opacity: 0.8, seed: 2 }} />`,
+    effects: `{ type: "fractalNoise", size: 50, octaves: 6, blend: "softLight", opacity: 0.8, seed: 2 }`,
   },
-  { name: "blur", effects: `<Effect id="e" type="blur" params={{ radius: 4 }} />` },
-  { name: "blur-shape", shape: true, effects: `<Effect id="e" type="blur" params={{ radius: 6 }} />` },
+  { name: "blur", effects: `{ type: "blur", radius: 4 }` },
+  { name: "blur-shape", shape: true, effects: `{ type: "blur", radius: 6 }` },
   {
     name: "stack-grade",
-    effects: `<Effect id="s1" type="exposure" params={{ stops: 0.4 }} />
-      <Effect id="s2" type="whiteBalance" params={{ temperature: 0.2 }} />
-      <Effect id="s3" type="curves" params={{ rgb: [[0, 0], [0.5, 0.6], [1, 1]] }} />
-      <Effect id="s4" type="vibrance" params={{ amount: 0.4 }} />
-      <Effect id="s5" type="lut" params={{ src: "asset:warm", amount: 0.5 }} />`,
+    effects: `{ type: "exposure", stops: 0.4 },
+      { type: "whiteBalance", temperature: 0.2 },
+      { type: "curves", rgb: [[0, 0], [0.5, 0.6], [1, 1]] },
+      { type: "vibrance", amount: 0.4 },
+      { type: "lut", src: "asset:warm", amount: 0.5 }`,
   },
   {
     name: "stack-css-and-shader-title",
     layer: true,
-    effects: `<Effect id="s1" type="brightness" params={{ amount: 0.1 }} />
-      <Effect id="s2" type="levels" params={{ gamma: 1.2 }} />
-      <Effect id="s3" type="blur" params={{ radius: 1 }} />`,
+    effects: `{ type: "brightness", amount: 0.1 },
+      { type: "levels", gamma: 1.2 },
+      { type: "blur", radius: 1 }`,
   },
   {
     name: "stack-css-and-shader",
-    effects: `<Effect id="s1" type="brightness" params={{ amount: 0.1 }} />
-      <Effect id="s2" type="levels" params={{ gamma: 1.2 }} />
-      <Effect id="s3" type="blur" params={{ radius: 1 }} />`,
+    effects: `{ type: "brightness", amount: 0.1 },
+      { type: "levels", gamma: 1.2 },
+      { type: "blur", radius: 1 }`,
   },
 ];
 
@@ -165,7 +165,7 @@ async function still(c: Case): Promise<string> {
   writeFileSync(
     file,
     `import { z } from "zod";
-import { Clip, Composition, effect, Effect, Layer, Track } from "@uberscene/kit";
+import { Clip, Composition, effect, Layer, Track } from "@uberscene/kit";
 export const manifest = ${JSON.stringify(manifest)};
 ${CHART}
 export default function Video() {
@@ -174,16 +174,12 @@ export default function Video() {
       ${
         c.layer
           ? `<Track id="fx" layout="free">
-        <Layer id="l" start={0} duration={2}>
-          ${c.effects}
+        <Layer id="l" start={0} duration={2} effects={[${c.effects}]}>
           <div style={{ position: "absolute", inset: 0, background: "linear-gradient(90deg, #ff2200, #22ff88 50%, #2244ff)" }} />
         </Layer>
       </Track>`
           : `<Track id="t">
-        <Clip id="c" src="asset:solid" fit="cover">
-          <Effect id="chart" type={chart} params={{ shape: ${c.shape === true} }} />
-          ${c.effects}
-        </Clip>
+        <Clip id="c" src="asset:solid" fit="cover" effects={[{ type: chart, shape: ${c.shape === true} }, ${c.effects}]} />
       </Track>`
       }
     </Composition>
@@ -258,15 +254,13 @@ describe.each(CASES)("golden: $name", (c) => {
 // layer, so a change to the resolver, the compositor, text layout or caption timing that moves a pixel shows. Only
 // the solid and the logo: the bars carry a counter drawn only by an ffmpeg with drawtext, so they differ by machine.
 // solid 0–2, wipe 1.4–2, logo 1.4–3.4; the title 0.2–3; the dot slides right over 0.5–2.5.
-const COMPOSED = `import { Caption, Captions, Clip, Composition, Effect, Motion, Title, Track, Transition } from "@uberscene/kit";
+const COMPOSED = `import { Caption, Captions, Clip, Composition, Motion, Title, Track, Transition } from "@uberscene/kit";
 export const manifest = ${JSON.stringify(mediaManifest)};
 export default function Video() {
   return (
     <Composition fps={30} width={480} height={270} background={{ type: "color", color: "#000000" }}>
       <Track id="main">
-        <Clip id="solid" src="asset:solid" in={0} out={2}>
-          <Effect id="grade" type="levels" params={{ black: 0.05, white: 0.9, gamma: 1.2 }} />
-        </Clip>
+        <Clip id="solid" src="asset:solid" in={0} out={2} effects={[{ type: "levels", black: 0.05, white: 0.9, gamma: 1.2 }]} />
         <Transition id="w" type="wipe" duration={0.6} params={{ direction: "left" }} />
         <Clip id="logo" src="asset:logo" duration={2} fit="contain" />
       </Track>

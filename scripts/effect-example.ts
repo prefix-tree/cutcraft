@@ -286,11 +286,6 @@ export const TRANSITION_TEXT: Readonly<Record<keyof typeof TRANSITIONS, string>>
   zoom: "Zooms through the first clip into the next, smearing along the zoom.",
 };
 
-/** A JSX attribute value. */
-function value(v: Value): string {
-  return typeof v === "string" ? JSON.stringify(v) : `{${literal(v)}}`;
-}
-
 /** A value as TypeScript writes it. */
 function literal(v: Value | Readonly<Record<string, Value>>): string {
   if (Array.isArray(v)) return `[${v.map((x: Value) => literal(x)).join(", ")}]`;
@@ -301,31 +296,33 @@ function literal(v: Value | Readonly<Record<string, Value>>): string {
   return JSON.stringify(v);
 }
 
-/** The `<Effect>`, its keyframes inside it, indented to `pad`. */
-function effectElement(name: string, demo: EffectDemo, pad: string): string[] {
-  const params = demo.params && Object.keys(demo.params).length > 0 ? ` params={${literal(demo.params)}}` : "";
-  const open = `${pad}<Effect id="look" type="${name}"${params}`;
-  if (!demo.animate) return [`${open} />`];
-  const keys = demo.animate.flatMap((a, i) => [
-    `${pad}  <Keyframe id="k${2 * i + 1}" param="${a.param}" at={0.5} value=${value(a.from)} easing="easeInOut" />`,
-    `${pad}  <Keyframe id="k${2 * i + 2}" param="${a.param}" at={1.5} value=${value(a.to)} />`,
-  ]);
-  return [`${open}>`, ...keys, `${pad}</Effect>`];
+/** The effect as an entry of `effects`: its type, its params, and each animated param as keys. */
+function effectEntry(name: string, demo: EffectDemo): string {
+  const animated = new Set((demo.animate ?? []).map((a) => a.param));
+  const fields = [
+    `type: "${name}"`,
+    ...Object.entries(demo.params ?? {})
+      .filter(([k]) => !animated.has(k))
+      .map(([k, v]) => `${k}: ${literal(v)}`),
+    ...(demo.animate ?? []).map(
+      (a) =>
+        `${a.param}: [{ at: 0.5, value: ${literal(a.from)}, easing: "easeInOut" }, { at: 1.5, value: ${literal(a.to)} }]`,
+    ),
+  ];
+  return `{ ${fields.join(", ")} }`;
 }
 
-const shot = (id: string, src: string, from: number, children: string[]): string[] =>
-  children.length === 0
-    ? [`        <Clip id="${id}" src="asset:${src}" in={${from}} out={${from + EXAMPLE_SECONDS}} fit="cover" />`]
-    : [
-        `        <Clip id="${id}" src="asset:${src}" in={${from}} out={${from + EXAMPLE_SECONDS}} fit="cover">`,
-        ...children,
-        "        </Clip>",
-      ];
+/** A clip of the shot, with `effects` when it has some. */
+const shot = (id: string, src: string, from: number, effects: readonly string[]): string[] => [
+  `        <Clip id="${id}" src="asset:${src}" in={${from}} out={${from + EXAMPLE_SECONDS}} fit="cover"${
+    effects.length > 0 ? ` effects={[${effects.join(", ")}]}` : ""
+  } />`,
+];
 
 /** The whole file a built-in effect's demo renders, unformatted (the generator formats it as the repository does). */
 export function effectExample(name: keyof typeof EFFECTS): string {
   const demo = EFFECT_DEMOS[name];
-  const look = effectElement(name, demo, "          ");
+  const look = [effectEntry(name, demo)];
   const tracks: string[] = [];
   const own = demo.shot ?? SHOT;
   if (demo.on === "shot")
@@ -352,26 +349,15 @@ export function effectExample(name: keyof typeof EFFECTS): string {
     tracks.push(
       '      <Track id="main">',
       // The shot behind the word is defocused and darkened, as a title card's would be, so the look reads on its own.
-      ...shot("backdrop", ESPRESSO.src, 10, [
-        '          <Effect id="soft" type="blur" params={{ radius: 10 }} />',
-        '          <Effect id="dim" type="brightness" params={{ amount: -0.35 }} />',
-      ]),
+      ...shot("backdrop", ESPRESSO.src, 10, ['{ type: "blur", radius: 10 }', '{ type: "brightness", amount: -0.35 }']),
       "      </Track>",
       '      <Track id="text" layout="free">',
-      `        <Title id="word" start={0} duration={${EXAMPLE_SECONDS}} style={{ size: 128, color: "#e8a33d" }}>`,
-      ...look,
+      `        <Title id="word" start={0} duration={${EXAMPLE_SECONDS}} style={{ size: 128, color: "#e8a33d" }} effects={[${look.join(", ")}]}>`,
       "          Crema",
       "        </Title>",
       "      </Track>",
     );
-  const imports = [
-    "Clip",
-    "Composition",
-    "Effect",
-    ...(demo.animate ? ["Keyframe"] : []),
-    ...(demo.on === "title" ? ["Title"] : []),
-    "Track",
-  ];
+  const imports = ["Clip", "Composition", ...(demo.on === "title" ? ["Title"] : []), "Track"];
   return [
     `import { ${imports.join(", ")} } from "@uberscene/kit";`,
     "",

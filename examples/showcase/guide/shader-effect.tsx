@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { Clip, Composition, Effect, effect, Keyframe, Track } from "@uberscene/kit";
+import { Clip, Composition, effect, Track } from "@uberscene/kit";
 
 // A two-colour tone (the kit has one built in, `duotone`; this is how such an effect is written): each pixel's
 // brightness picks a colour between `dark` and `light`. Colour params arrive in the shader as vec3; `strength` blends
@@ -23,12 +23,24 @@ export default function Video() {
   return (
     <Composition fps={30} width={960} height={540}>
       <Track id="main">
-        <Clip id="pour" src="asset:redCup" in={18} out={21} fit="cover">
-          <Effect id="tone" type={navyGold} params={{ dark: "#0b1d3a", light: "#ffcf70" }}>
-            <Keyframe id="k1" param="strength" at={0} value={0} />
-            <Keyframe id="k2" param="strength" at={1.5} value={1} />
-          </Effect>
-        </Clip>
+        <Clip
+          id="pour"
+          src="asset:redCup"
+          in={18}
+          out={21}
+          fit="cover"
+          effects={[
+            {
+              type: navyGold,
+              dark: "#0b1d3a",
+              light: "#ffcf70",
+              strength: [
+                { at: 0, value: 0 },
+                { at: 1.5, value: 1 },
+              ],
+            },
+          ]}
+        />
       </Track>
     </Composition>
   );

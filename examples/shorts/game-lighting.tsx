@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { Caption, Captions, Composition, Effect, Keyframe, Layer, Three, Track, useLayer } from "@uberscene/kit";
+import { Caption, Captions, Composition, Layer, Three, Track, useLayer } from "@uberscene/kit";
 
 // What a person may change without touching the film: the words, and the two wall colours the bounce light picks up.
 export const schema = z.object({
@@ -245,16 +245,23 @@ export default function Video({ hook, outro, warmWall, coolWall }: z.infer<typeo
               camera.lookAt(0, 1.75, 0);
             };
           }}
-        >
-          {/* Bloom is not in the room at all: it is done to the finished picture. */}
-          <Effect id="bloom" type="glow" params={{ radius: 36, intensity: 0, threshold: 0.86, tint: 0 }}>
-            <Keyframe id="bloom-a" param="intensity" at={0} value={1.5} />
-            <Keyframe id="bloom-b" param="intensity" at={2.6} value={1.5} />
-            <Keyframe id="bloom-c" param="intensity" at={3.5} value={0} />
-            <Keyframe id="bloom-d" param="intensity" at={23} value={0} />
-            <Keyframe id="bloom-e" param="intensity" at={23.9} value={1.5} />
-          </Effect>
-        </Three>
+          effects={[
+            // Bloom is not in the room at all: it is done to the finished picture.
+            {
+              type: "glow",
+              radius: 36,
+              threshold: 0.86,
+              tint: 0,
+              intensity: [
+                { at: 0, value: 1.5 },
+                { at: 2.6, value: 1.5 },
+                { at: 3.5, value: 0 },
+                { at: 23, value: 0 },
+                { at: 23.9, value: 1.5 },
+              ],
+            },
+          ]}
+        />
       </Track>
 
       <Track id="switches" layout="free">

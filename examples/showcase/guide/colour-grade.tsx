@@ -1,4 +1,4 @@
-import { Adjustment, Clip, Composition, Effect, Track } from "@uberscene/kit";
+import { Adjustment, Clip, Composition, Track } from "@uberscene/kit";
 
 // The shot as it came from the camera, then, from 1.5 s, a grade over it: exposure, white balance, curves and
 // vibrance, written in the order a colourist works. An <Adjustment> grades everything beneath it for its own time.
@@ -9,23 +9,25 @@ export default function Video() {
         <Clip id="pour" src="asset:redCup" in={18} out={21} fit="cover" />
       </Track>
       <Track id="looks" layout="free">
-        <Adjustment id="grade" start={1.5} duration={1.5}>
-          <Effect id="expose" type="exposure" params={{ stops: 0.5 }} />
-          <Effect id="balance" type="whiteBalance" params={{ temperature: 0.3 }} />
-          <Effect
-            id="tone"
-            type="curves"
-            params={{
+        <Adjustment
+          id="grade"
+          start={1.5}
+          duration={1.5}
+          effects={[
+            { type: "exposure", stops: 0.5 },
+            { type: "whiteBalance", temperature: 0.3 },
+            {
+              type: "curves",
               rgb: [
                 [0, 0.03],
                 [0.25, 0.2],
                 [0.75, 0.84],
                 [1, 1],
               ],
-            }}
-          />
-          <Effect id="pop" type="vibrance" params={{ amount: 0.6 }} />
-        </Adjustment>
+            },
+            { type: "vibrance", amount: 0.6 },
+          ]}
+        />
       </Track>
     </Composition>
   );

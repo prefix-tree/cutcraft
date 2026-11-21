@@ -38,7 +38,7 @@ async function colourAt(
   writeFileSync(
     file,
     `import { z } from "zod";
-import { Adjustment, Clip, Composition, effect, transition, Effect, Keyframe, Layer, Motion, Title, Track, Transition } from "@uberscene/kit";
+import { Adjustment, Clip, Composition, effect, transition, Layer, Motion, Title, Track, Transition } from "@uberscene/kit";
 export const manifest = ${JSON.stringify(manifest)};
 ${declarations}
 export default function Video() {
@@ -80,7 +80,7 @@ it("runs a declared effect over a clip, with its params", async () => {
   // solid.webm is blue: inverted, it is yellow; at amount 0 it stays blue.
   const [full] = await colourAt(
     "invert",
-    `<Track id="t"><Clip id="c" src="asset:solid" fit="cover"><Effect id="e" type={inv} /></Clip></Track>`,
+    `<Track id="t"><Clip id="c" src="asset:solid" fit="cover" effects={[{ type: inv }]} /></Track>`,
     `const inv = ${INVERT};`,
     0.5,
     [[160, 90]],
@@ -88,7 +88,7 @@ it("runs a declared effect over a clip, with its params", async () => {
   expect(near(full, [255, 255, 0])).toBe(true);
   const [none] = await colourAt(
     "invert-0",
-    `<Track id="t"><Clip id="c" src="asset:solid" fit="cover"><Effect id="e" type={inv} params={{ amount: 0 }} /></Clip></Track>`,
+    `<Track id="t"><Clip id="c" src="asset:solid" fit="cover" effects={[{ type: inv, amount: 0 }]} /></Track>`,
     `const inv = ${INVERT};`,
     0.5,
     [[160, 90]],
@@ -101,7 +101,7 @@ it("runs an effect's passes in order, each the right way up, with the element's 
   // and shows the blue clip (original) on the right.
   const [top, bottom, right] = await colourAt(
     "passes",
-    `<Track id="t"><Clip id="c" src="asset:solid" fit="cover"><Effect id="e" type={split} /></Clip></Track>`,
+    `<Track id="t"><Clip id="c" src="asset:solid" fit="cover" effects={[{ type: split }]} /></Track>`,
     `const split = effect({
       name: "split",
       passes: [
@@ -128,7 +128,7 @@ it("draws levels with its gamma, after an effect of the file's own", async () =>
   const at = (gamma: number) =>
     colourAt(
       `levels-${gamma}`,
-      `<Track id="t"><Clip id="c" src="asset:solid" fit="cover"><Effect id="g" type={grey} /><Effect id="l" type="levels" params={{ gamma: ${gamma} }} /></Clip></Track>`,
+      `<Track id="t"><Clip id="c" src="asset:solid" fit="cover" effects={[{ type: grey }, { type: "levels", gamma: ${gamma} }]} /></Track>`,
       grey,
       0.5,
       [[160, 90]],
@@ -144,8 +144,7 @@ it("draws levels with its gamma on an overlay, through HTML-in-Canvas", async ()
   const [c] = await colourAt(
     "levels-layer",
     `<Track id="fx" layout="free">
-      <Layer id="l" start={0} duration={2}>
-        <Effect id="e" type="levels" params={{ gamma: 2 }} />
+      <Layer id="l" start={0} duration={2} effects={[{ type: "levels", gamma: 2 }]}>
         <div style={{ position: "absolute", inset: 0, background: "#808080" }} />
       </Layer>
     </Track>`,
@@ -167,7 +166,7 @@ it("grades through a LUT asset, mixed by its amount", async () => {
   const at = (amount: number) =>
     colourAt(
       `lut-${amount}`,
-      `<Track id="t"><Clip id="c" src="asset:solid" fit="cover"><Effect id="l" type="lut" params={{ src: "asset:swap", amount: ${amount} }} /></Clip></Track>`,
+      `<Track id="t"><Clip id="c" src="asset:solid" fit="cover" effects={[{ type: "lut", src: "asset:swap", amount: ${amount} }]} /></Track>`,
       "",
       0.5,
       [[160, 90]],
@@ -183,7 +182,7 @@ it("lets a file's own effect read an image asset as a texture", async () => {
   // The effect shows the logo (red) where the clip (blue) is: the image param is a sampler2D.
   const [c] = await colourAt(
     "texture",
-    `<Track id="t"><Clip id="c" src="asset:solid" fit="cover"><Effect id="o" type={over} params={{ picture: "asset:logo" }} /></Clip></Track>`,
+    `<Track id="t"><Clip id="c" src="asset:solid" fit="cover" effects={[{ type: over, picture: "asset:logo" }]} /></Track>`,
     `const over = effect({ name: "over", params: z.object({ picture: z.string() }), shader: "vec4 effect(vec2 uv) { return texture(params.picture, uv); }" });`,
     0.5,
     [[160, 90]],
@@ -201,7 +200,7 @@ describe("colour effects", () => {
   const graded = (name: string, effect: string, left: number[], right = left) =>
     colourAt(
       name,
-      `<Track id="t"><Clip id="c" src="asset:solid" fit="cover"><Effect id="p" type={paint} params={{ left: ${JSON.stringify(left)}, right: ${JSON.stringify(right)} }} />${effect}</Clip></Track>`,
+      `<Track id="t"><Clip id="c" src="asset:solid" fit="cover" effects={[{ type: paint, left: ${JSON.stringify(left)}, right: ${JSON.stringify(right)} }, ${effect}]} /></Track>`,
       PAINT,
       0.5,
       [
@@ -216,18 +215,13 @@ describe("colour effects", () => {
     want.every((v, i) => Math.abs((c?.[i] ?? -999) - v * 255) <= by);
 
   it("exposure doubles linear light at +1 stop", async () => {
-    const [c] = await graded("exposure", `<Effect id="e" type="exposure" params={{ stops: 1 }} />`, [0.2, 0.2, 0.2]);
+    const [c] = await graded("exposure", `{ type: "exposure", stops: 1 }`, [0.2, 0.2, 0.2]);
     const v = toSrgb(toLinear(51 / 255) * 2);
     expect(about(c, [v, v, v])).toBe(true);
   });
 
   it("vibrance moves a muted colour and leaves a saturated one", async () => {
-    const [muted, blue] = await graded(
-      "vibrance",
-      `<Effect id="v" type="vibrance" params={{ amount: 0.8 }} />`,
-      [0.4, 0.45, 0.6],
-      [0, 0, 1],
-    );
+    const [muted, blue] = await graded("vibrance", `{ type: "vibrance", amount: 0.8 }`, [0.4, 0.45, 0.6], [0, 0, 1]);
     expect(about(blue, [0, 0, 1])).toBe(true);
     // The muted colour spreads from its luminance: blue up, red down.
     expect((muted?.[2] ?? 0) - (muted?.[0] ?? 0)).toBeGreaterThan((0.6 - 0.4) * 255 + 20);
@@ -235,8 +229,8 @@ describe("colour effects", () => {
 
   it("white balance warms grey at a positive temperature, and cools it at a negative one", async () => {
     const [warm, cool] = await Promise.all([
-      graded("wb-warm", `<Effect id="w" type="whiteBalance" params={{ temperature: 0.5 }} />`, [0.5, 0.5, 0.5]),
-      graded("wb-cool", `<Effect id="w" type="whiteBalance" params={{ temperature: -0.5 }} />`, [0.5, 0.5, 0.5]),
+      graded("wb-warm", `{ type: "whiteBalance", temperature: 0.5 }`, [0.5, 0.5, 0.5]),
+      graded("wb-cool", `{ type: "whiteBalance", temperature: -0.5 }`, [0.5, 0.5, 0.5]),
     ]);
     expect((warm[0]?.[0] ?? 0) - (warm[0]?.[2] ?? 0)).toBeGreaterThan(10);
     expect((cool[0]?.[2] ?? 0) - (cool[0]?.[0] ?? 0)).toBeGreaterThan(10);
@@ -245,7 +239,7 @@ describe("colour effects", () => {
   it("duotone maps black and white to its two colours", async () => {
     const [black, white] = await graded(
       "duotone",
-      `<Effect id="d" type="duotone" params={{ dark: "#102040", light: "#ffcc00" }} />`,
+      `{ type: "duotone", dark: "#102040", light: "#ffcc00" }`,
       [0, 0, 0],
       [1, 1, 1],
     );
@@ -254,7 +248,7 @@ describe("colour effects", () => {
   });
 
   it("curves lift the midtones through a point and keep black and white", async () => {
-    const effect = `<Effect id="k" type="curves" params={{ rgb: [[0, 0], [0.5, 0.75], [1, 1]] }} />`;
+    const effect = `{ type: "curves", rgb: [[0, 0], [0.5, 0.75], [1, 1]] }`;
     const [mid, white] = await graded("curves", effect, [0.5, 0.5, 0.5], [1, 1, 1]);
     const [black] = await graded("curves-black", effect, [0, 0, 0]);
     expect(about(mid, [0.75, 0.75, 0.75], 5)).toBe(true);
@@ -265,7 +259,7 @@ describe("colour effects", () => {
   it("shadows lift a dark area and leave a bright one", async () => {
     const [dark, bright] = await graded(
       "shadows",
-      `<Effect id="s" type="shadowsHighlights" params={{ shadows: 1, radius: 7 }} />`,
+      `{ type: "shadowsHighlights", shadows: 1, radius: 7 }`,
       [0.1, 0.1, 0.1],
       [0.9, 0.9, 0.9],
     );
@@ -290,11 +284,10 @@ describe("footage tools", () => {
     paint: { left: number[]; right: number[]; split?: number },
     points: [number, number][],
     time = 0.5,
-    keys = "",
   ) =>
     colourAt(
       name,
-      `<Track id="t"><Clip id="c" src="asset:solid" fit="cover"><Effect id="p" type={paint} params={${JSON.stringify(paint)}} />${effect}${keys}</Clip></Track>`,
+      `<Track id="t"><Clip id="c" src="asset:solid" fit="cover" effects={[{ type: paint, ...${JSON.stringify(paint)} }, ${effect}]} /></Track>`,
       PAINT,
       time,
       points,
@@ -307,7 +300,7 @@ describe("footage tools", () => {
   ];
 
   it("colorKey takes out the key colour, keeps the rest, and fades what is close", async () => {
-    const [green, red] = await at("key", `<Effect id="k" type="colorKey" />`, { left: [0, 1, 0], right: [1, 0, 0] }, [
+    const [green, red] = await at("key", `{ type: "colorKey" }`, { left: [0, 1, 0], right: [1, 0, 0] }, [
       [40, 90],
       [280, 90],
     ]);
@@ -321,7 +314,7 @@ describe("footage tools", () => {
     const keep = t * t * (3 - 2 * t);
     const [faded] = await at(
       "key-soft",
-      `<Effect id="k" type="colorKey" params={{ tolerance: 0.4, softness: 0.4, spill: 0 }} />`,
+      `{ type: "colorKey", tolerance: 0.4, softness: 0.4, spill: 0 }`,
       { left: pale, right: pale },
       [[160, 90]],
     );
@@ -336,7 +329,7 @@ describe("footage tools", () => {
   it("regionBlur softens an edge inside the box and leaves it sharp outside", async () => {
     const [inside, outside] = await at(
       "region",
-      `<Effect id="b" type="regionBlur" params={{ box: [0.4, 0, 0.2, 0.5], radius: 7, feather: 0 }} />`,
+      `{ type: "regionBlur", box: [0.4, 0, 0.2, 0.5], radius: 7, feather: 0 }`,
       { left: [0, 0, 0], right: [1, 1, 1] },
       [
         [156, 40],
@@ -352,10 +345,15 @@ describe("footage tools", () => {
     // The box moves from x 0..0.2 to 0.6..0.8; half way it is at 0.3..0.5, over the edge at 0.4.
     const [edge] = await at(
       "region-keys",
-      `<Effect id="b" type="regionBlur" params={{ box: [0, 0, 0.2, 1], radius: 7, feather: 0 }}>
-        <Keyframe id="k1" param="box" at={0} value={[0, 0, 0.2, 1]} />
-        <Keyframe id="k2" param="box" at={2} value={[0.6, 0, 0.2, 1]} />
-      </Effect>`,
+      `{
+        type: "regionBlur",
+        radius: 7,
+        feather: 0,
+        box: [
+          { at: 0, value: [0, 0, 0.2, 1] },
+          { at: 2, value: [0.6, 0, 0.2, 1] },
+        ],
+      }`,
       { left: [0, 0, 0], right: [1, 1, 1], split: 0.4 },
       [[124, 90]],
       1,
@@ -366,7 +364,7 @@ describe("footage tools", () => {
   it("cornerPin draws the picture into its quad and nothing outside it", async () => {
     const [left, right, outside] = await at(
       "pin",
-      `<Effect id="p2" type="cornerPin" params={{ topRight: [0.5, 0], bottomRight: [0.5, 1] }} />`,
+      `{ type: "cornerPin", topRight: [0.5, 0], bottomRight: [0.5, 1] }`,
       { left: [1, 0, 0], right: [0, 1, 0] },
       [
         [40, 90],
@@ -382,7 +380,7 @@ describe("footage tools", () => {
   it("zoomBlur keeps its centre and smears an edge far from it", async () => {
     const [centre, edge] = await at(
       "zoom",
-      `<Effect id="z" type="zoomBlur" params={{ length: 120, center: [0.25, 0.5] }} />`,
+      `{ type: "zoomBlur", length: 120, center: [0.25, 0.5] }`,
       { left: [0, 0, 0], right: [1, 1, 1], split: 0.75 },
       [
         [80, 90],
@@ -396,7 +394,7 @@ describe("footage tools", () => {
   it("chromaticAberration splits red and blue across an edge", async () => {
     const [before, after, far] = await at(
       "aberration",
-      `<Effect id="a" type="chromaticAberration" params={{ distance: 8 }} />`,
+      `{ type: "chromaticAberration", distance: 8 }`,
       { left: [0, 0, 0], right: [1, 1, 1] },
       [
         [156, 90],
@@ -413,7 +411,7 @@ describe("footage tools", () => {
   it("radial aberration fringes the edges and leaves the centre", async () => {
     const [centre, edge] = await at(
       "aberration-radial",
-      `<Effect id="a" type="chromaticAberration" params={{ distance: 12, radial: true }} />`,
+      `{ type: "chromaticAberration", distance: 12, radial: true }`,
       { left: [1, 1, 1], right: [0, 0, 0], split: 0.95 },
       [
         [160, 90],
@@ -433,8 +431,7 @@ describe("title effects", () => {
     colourAt(
       name,
       `<Track id="fx" layout="free">
-        <Layer id="l" start={0} duration={2}>
-          ${effect}
+        <Layer id="l" start={0} duration={2} effects={[${effect}]}>
           <div style={{ position: "absolute", left: 120, top: 60, width: 80, height: 60, background: "#ff0000" }} />
         </Layer>
       </Track>`,
@@ -446,14 +443,10 @@ describe("title effects", () => {
     want.every((v, i) => Math.abs((c?.[i] ?? -999) - v) <= by);
 
   it("glow lights the area around the box in its colour", async () => {
-    const [around, far] = await boxed(
-      "glow",
-      `<Effect id="g" type="glow" params={{ radius: 7, color: "#00ffff" }} />`,
-      [
-        [205, 90],
-        [20, 20],
-      ],
-    );
+    const [around, far] = await boxed("glow", `{ type: "glow", radius: 7, color: "#00ffff" }`, [
+      [205, 90],
+      [20, 20],
+    ]);
     // 5 px out from a hard edge, a Gaussian of sigma 20 / 3 holds about a fifth of the alpha.
     expect(around?.[1] ?? 0).toBeGreaterThan(35);
     expect(around?.[2] ?? 0).toBeGreaterThan(35);
@@ -462,64 +455,48 @@ describe("title effects", () => {
   });
 
   it("glow is a halo: the box keeps its own colour inside", async () => {
-    const [inside, around] = await boxed(
-      "glow-halo",
-      `<Effect id="g" type="glow" params={{ radius: 7, color: "#00ffff", intensity: 2 }} />`,
-      [
-        [160, 90],
-        [205, 90],
-      ],
-    );
+    const [inside, around] = await boxed("glow-halo", `{ type: "glow", radius: 7, color: "#00ffff", intensity: 2 }`, [
+      [160, 90],
+      [205, 90],
+    ]);
     expect(near(inside, [255, 0, 0])).toBe(true);
     expect(around?.[1] ?? 0).toBeGreaterThan(35);
   });
 
   it("outline draws a band around the box, and outlineOnly fills its silhouette", async () => {
-    const [band, beyond, inside] = await boxed(
-      "outline",
-      `<Effect id="o" type="outline" params={{ thickness: 8 }} />`,
-      [
-        [204, 90],
-        [216, 90],
-        [160, 90],
-      ],
-    );
+    const [band, beyond, inside] = await boxed("outline", `{ type: "outline", thickness: 8 }`, [
+      [204, 90],
+      [216, 90],
+      [160, 90],
+    ]);
     expect(near(band, [255, 255, 255])).toBe(true);
     expect(near(beyond, [0, 0, 0])).toBe(true);
     expect(near(inside, [255, 0, 0])).toBe(true);
     const [filled] = await boxed(
       "outline-only",
-      `<Effect id="o" type="outline" params={{ thickness: 8, outlineOnly: true, color: "#0000ff" }} />`,
+      `{ type: "outline", thickness: 8, outlineOnly: true, color: "#0000ff" }`,
       [[160, 90]],
     );
     expect(near(filled, [0, 0, 255])).toBe(true);
   });
 
   it("longShadow falls down and right of the box, not up and left", async () => {
-    const [cast, behind, inside] = await boxed(
-      "long-shadow",
-      `<Effect id="s" type="longShadow" params={{ length: 40, color: "#00ff00" }} />`,
-      [
-        [205, 125],
-        [115, 55],
-        [160, 90],
-      ],
-    );
+    const [cast, behind, inside] = await boxed("long-shadow", `{ type: "longShadow", length: 40, color: "#00ff00" }`, [
+      [205, 125],
+      [115, 55],
+      [160, 90],
+    ]);
     expect(near(cast, [0, 255, 0])).toBe(true);
     expect(near(behind, [0, 0, 0])).toBe(true);
     expect(near(inside, [255, 0, 0])).toBe(true);
   });
 
   it("bevel lights the edge facing the light and shades the other, and leaves the middle", async () => {
-    const [top, bottom, middle] = await boxed(
-      "bevel",
-      `<Effect id="b" type="bevel" params={{ size: 2, angle: 0, amount: 1 }} />`,
-      [
-        [160, 61],
-        [160, 118],
-        [160, 90],
-      ],
-    );
+    const [top, bottom, middle] = await boxed("bevel", `{ type: "bevel", size: 2, angle: 0, amount: 1 }`, [
+      [160, 61],
+      [160, 118],
+      [160, 90],
+    ]);
     expect(top?.[1] ?? 0).toBeGreaterThan(50);
     expect(bottom?.[0] ?? 255).toBeLessThan(200);
     expect(near(middle, [255, 0, 0])).toBe(true);
@@ -528,7 +505,7 @@ describe("title effects", () => {
   it("glow works on footage too", async () => {
     const [edge] = await colourAt(
       "glow-clip",
-      `<Track id="t"><Clip id="c" src="asset:solid" fit="cover"><Effect id="p" type={paint} /><Effect id="g" type="glow" params={{ radius: 7, color: "#ff0000" }} /></Clip></Track>`,
+      `<Track id="t"><Clip id="c" src="asset:solid" fit="cover" effects={[{ type: paint }, { type: "glow", radius: 7, color: "#ff0000" }]} /></Track>`,
       `const paint = effect({ name: "paint", shader: "vec4 effect(vec2 uv) { return uv.x < 0.5 ? vec4(0.0, 0.0, 0.0, 0.0) : vec4(1.0); }" });`,
       0.5,
       [[155, 90]],
@@ -541,7 +518,7 @@ describe("title effects", () => {
     const grey = (threshold: number) =>
       colourAt(
         `glow-bloom-${threshold}`,
-        `<Track id="t"><Clip id="c" src="asset:solid" fit="cover"><Effect id="p" type={paint} /><Effect id="g" type="glow" params={{ radius: 7, threshold: ${threshold} }} /></Clip></Track>`,
+        `<Track id="t"><Clip id="c" src="asset:solid" fit="cover" effects={[{ type: paint }, { type: "glow", radius: 7, threshold: ${threshold} }]} /></Track>`,
         PAINT,
         0.5,
         [[240, 90]],
@@ -570,7 +547,7 @@ describe("stylizers and generators", () => {
   ) =>
     colourAt(
       name,
-      `<Track id="t"><Clip id="c" src="asset:solid" fit="cover"><Effect id="p" type={paint} params={${JSON.stringify(paint)}} />${effect}</Clip></Track>`,
+      `<Track id="t"><Clip id="c" src="asset:solid" fit="cover" effects={[{ type: paint, ...${JSON.stringify(paint)} }, ${effect}]} /></Track>`,
       PAINT,
       time,
       points,
@@ -587,7 +564,7 @@ describe("stylizers and generators", () => {
 
   it("halftone covers about half of a mid-grey cell with ink, and prints no dots on white", async () => {
     // sRGB 0.5 has luminance 0.5, so its dots cover half the screen's area.
-    const effect = `<Effect id="h" type="halftone" params={{ size: 8, angle: 0, ink: "#000000" }} />`;
+    const effect = `{ type: "halftone", size: 8, angle: 0, ink: "#000000" }`;
     const grey = await at("halftone-grey", effect, { grey: 0.5 }, grid(40, 40, 32));
     expect(mean(grey)).toBeGreaterThan(100);
     expect(mean(grey)).toBeLessThan(155);
@@ -600,7 +577,7 @@ describe("stylizers and generators", () => {
   it("halftone in cmyk prints a grey with all four inks, so it stays neutral on average", async () => {
     const cs = await at(
       "halftone-cmyk",
-      `<Effect id="h" type="halftone" params={{ size: 10, type: "cmyk" }} />`,
+      `{ type: "halftone", size: 10, inks: "cmyk" }`,
       { grey: 0.4 },
       grid(40, 40, 40),
     );
@@ -611,7 +588,7 @@ describe("stylizers and generators", () => {
   it("pixelate gives a cell one colour inside its box, and leaves the picture outside it", async () => {
     const [a, b, c, d] = await at(
       "pixelate",
-      `<Effect id="x" type="pixelate" params={{ size: 20, box: [0.5, 0, 0.5, 1] }} />`,
+      `{ type: "pixelate", size: 20, box: [0.5, 0, 0.5, 1] }`,
       { gradient: true },
       [
         [201, 41],
@@ -627,7 +604,7 @@ describe("stylizers and generators", () => {
 
   it("scanlines darken a band every spacing pixels, and roll by speed times time", async () => {
     const effect = (speed: number) =>
-      `<Effect id="s" type="scanlines" params={{ spacing: 10, coverage: 0.5, intensity: 1, speed: ${speed} }} />`;
+      `{ type: "scanlines", spacing: 10, coverage: 0.5, intensity: 1, speed: ${speed} }`;
     const [onLine, between] = await at("scan", effect(0), { split: -1 }, [
       [160, 90],
       [160, 95],
@@ -645,7 +622,7 @@ describe("stylizers and generators", () => {
 
   it("lightLeak only lightens, and wanders over time", async () => {
     const points = grid(0, 0, 320, 180, 16);
-    const effect = `<Effect id="l" type="lightLeak" params={{ intensity: 1, evolution: 1 }} />`;
+    const effect = `{ type: "lightLeak", intensity: 1, evolution: 1 }`;
     const early = await at("leak-early", effect, { grey: 0.3 }, points, 0.2);
     const late = await at("leak-late", effect, { grey: 0.3 }, points, 1.6);
     const base = 0.3 * 255;
@@ -656,8 +633,7 @@ describe("stylizers and generators", () => {
 
   it("fractalNoise draws a mid-grey pattern, the same for a seed and different for another", async () => {
     const points = grid(0, 0, 320, 180, 16);
-    const effect = (seed: number) =>
-      `<Effect id="n" type="fractalNoise" params={{ size: 60, blend: "normal", opacity: 1, seed: ${seed} }} />`;
+    const effect = (seed: number) => `{ type: "fractalNoise", size: 60, blend: "normal", opacity: 1, seed: ${seed} }`;
     const a = await at("noise-a", effect(0), { grey: 0.5 }, points);
     const again = await at("noise-a2", effect(0), { grey: 0.5 }, points);
     const b = await at("noise-b", effect(1), { grey: 0.5 }, points);
@@ -786,8 +762,8 @@ describe("effects run in the order the file writes them", () => {
   // Mid grey, then brightness 1.5 and a squaring shader in either order: 0.75² = 0.5625, or 0.25 · 1.5 = 0.375.
   const SQUARE = `const grey = effect({ name: "grey", shader: "vec4 effect(vec2 uv) { return vec4(vec3(0.5), 1.0); }" });
 const square = effect({ name: "square", shader: "vec4 effect(vec2 uv) { vec4 c = texture(image, uv); return vec4(c.rgb * c.rgb, c.a); }" });`;
-  const BRIGHT = `<Effect id="b" type="brightness" params={{ amount: 0.5 }} />`;
-  const SQ = `<Effect id="s" type={square} />`;
+  const BRIGHT = `{ type: "brightness", amount: 0.5 }`;
+  const SQ = `{ type: square }`;
   const close = (c: number[] | undefined, v: number) =>
     c?.slice(0, 3).every((x) => Math.abs(x - v * 255) <= 4) === true;
 
@@ -795,13 +771,13 @@ const square = effect({ name: "square", shader: "vec4 effect(vec2 uv) { vec4 c =
     const at = (name: string, effects: string) =>
       colourAt(
         name,
-        `<Track id="t"><Clip id="c" src="asset:solid" fit="cover"><Effect id="g" type={grey} />${effects}</Clip></Track>`,
+        `<Track id="t"><Clip id="c" src="asset:solid" fit="cover" effects={[{ type: grey }, ${effects}]} /></Track>`,
         SQUARE,
         0.5,
         [[160, 90]],
       );
-    const [cssFirst] = await at("order-css-first", BRIGHT + SQ);
-    const [shaderFirst] = await at("order-shader-first", SQ + BRIGHT);
+    const [cssFirst] = await at("order-css-first", `${BRIGHT}, ${SQ}`);
+    const [shaderFirst] = await at("order-shader-first", `${SQ}, ${BRIGHT}`);
     // The grey is 128/255, not exactly 0.5.
     const g = 128 / 255;
     expect(close(cssFirst, (g * 1.5) ** 2)).toBe(true);
@@ -812,13 +788,13 @@ const square = effect({ name: "square", shader: "vec4 effect(vec2 uv) { vec4 c =
     const at = (name: string, effects: string) =>
       colourAt(
         name,
-        `<Track id="fx" layout="free"><Layer id="l" start={0} duration={2}>${effects}<div style={{ position: "absolute", inset: 0, background: "#808080" }} /></Layer></Track>`,
+        `<Track id="fx" layout="free"><Layer id="l" start={0} duration={2} effects={[${effects}]}><div style={{ position: "absolute", inset: 0, background: "#808080" }} /></Layer></Track>`,
         SQUARE,
         0.5,
         [[160, 90]],
       );
-    const [cssFirst] = await at("layer-css-first", BRIGHT + SQ);
-    const [shaderFirst] = await at("layer-shader-first", SQ + BRIGHT);
+    const [cssFirst] = await at("layer-css-first", `${BRIGHT}, ${SQ}`);
+    const [shaderFirst] = await at("layer-shader-first", `${SQ}, ${BRIGHT}`);
     const g = 128 / 255;
     expect(close(cssFirst, (g * 1.5) ** 2)).toBe(true);
     expect(close(shaderFirst, g * g * 1.5)).toBe(true);
@@ -829,12 +805,12 @@ const square = effect({ name: "square", shader: "vec4 effect(vec2 uv) { vec4 c =
     const body = `<Track id="t">
       <Clip id="a" src="asset:solid" in={0} out={2} fit="cover" />
       <Transition id="x" type="clockWipe" duration={1} />
-      <Clip id="b" src="asset:logo" duration={2} fit="cover"><Effect id="s" type="sepia" /></Clip>
+      <Clip id="b" src="asset:logo" duration={2} fit="cover" effects={[{ type: "sepia" }]} />
     </Track>`;
     const probe = join(dir, "order-probe.tsx");
     writeFileSync(
       probe,
-      `import { Clip, Composition, Effect, Track, Transition } from "@uberscene/kit";
+      `import { Clip, Composition, Track, Transition } from "@uberscene/kit";
 export const manifest = ${JSON.stringify(mediaManifest)};
 export default function Video() { return <Composition fps={30} width={320} height={180}>${body}</Composition>; }`,
     );
@@ -855,7 +831,7 @@ it("runs a declared effect on an adjustment, over everything beneath it", async 
   const [c] = await colourAt(
     "adjust",
     `<Track id="t"><Clip id="c" src="asset:solid" fit="cover" /></Track>
-     <Track id="fx" layout="free"><Adjustment id="a" start={0} duration={2}><Effect id="e" type={inv} /></Adjustment></Track>`,
+     <Track id="fx" layout="free"><Adjustment id="a" start={0} duration={2} effects={[{ type: inv }]} /></Track>`,
     `const inv = ${INVERT};`,
     0.5,
     [[160, 90]],
@@ -901,16 +877,13 @@ it("runs a declared effect over overlays: a Layer, a Motion layer and a title, t
   const [layer, motion, title, around] = await colourAt(
     "overlays",
     `<Track id="fx" layout="free">
-      <Layer id="l" start={0} duration={2}>
-        <Effect id="e1" type={swap} />
+      <Layer id="l" start={0} duration={2} effects={[{ type: swap }]}>
         <div style={{ position: "absolute", left: 10, top: 10, width: 80, height: 60, background: "#ff0000" }} />
       </Layer>
-      <Motion id="m" start={0} duration={2} sequence={[[".box", { opacity: [1, 1] }, { duration: 1 }]]}>
-        <Effect id="e2" type={swap} />
+      <Motion id="m" start={0} duration={2} sequence={[[".box", { opacity: [1, 1] }, { duration: 1 }]]} effects={[{ type: swap }]}>
         <div className="box" style={{ position: "absolute", left: 120, top: 10, width: 80, height: 60, background: "#ff0000" }} />
       </Motion>
-      <Title id="t" start={0} duration={2} style={{ color: "#ff0000", size: 90 }} box={{ x: 160, y: 130, origin: "center" }}>
-        <Effect id="e3" type={swap} />
+      <Title id="t" start={0} duration={2} style={{ color: "#ff0000", size: 90 }} box={{ x: 160, y: 130, origin: "center" }} effects={[{ type: swap }]}>
         ███
       </Title>
     </Track>`,

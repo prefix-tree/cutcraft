@@ -1,16 +1,4 @@
-import {
-  Audio,
-  Caption,
-  Captions,
-  Composition,
-  Effect,
-  Keyframe,
-  Layer,
-  narrate,
-  Three,
-  Track,
-  useLayer,
-} from "@uberscene/kit";
+import { Audio, Caption, Captions, Composition, Layer, narrate, Three, Track, useLayer } from "@uberscene/kit";
 
 // "One pixel": how a game lights a room, told by following one dot of the screen. A narrator's words lead; the
 // subtitles show a phrase at a time with a box on the word being said, and each thing on screen arrives on the
@@ -1027,16 +1015,22 @@ export default function Video() {
               camera.lookAt(aim);
             };
           }}
-        >
-          {/* The glow of the lamp and of the rays is done to the finished picture, as a game does it. */}
-          <Effect id="bloom" type="glow" params={{ radius: 64, intensity: 2.2, threshold: 0.84, tint: 0 }}>
-            <Keyframe id="bloom-on" param="intensity" at={at("cheats") - 0.05} value={2.2} />
-            <Keyframe id="bloom-off" param="intensity" at={at("cheats") + 0.3} value={0} />
-            {/* The last trick: the lamp is a flat disc until its brightness is smeared outwards. */}
-            <Keyframe id="bloom-flat" param="intensity" at={at("smeared")} value={0} />
-            <Keyframe id="bloom-back" param="intensity" at={at("smeared") + 0.6} value={2.2} />
-          </Effect>
-        </Three>
+          effects={[
+            // The glow of the lamp and of the rays is done to the finished picture, as a game does it.
+            {
+              type: "glow",
+              radius: 64,
+              threshold: 0.84,
+              tint: 0,
+              intensity: [
+                { at: at("cheats") - 0.05, value: 2.2 },
+                { at: at("cheats") + 0.3, value: 0 },
+                { at: at("smeared"), value: 0 },
+                { at: at("smeared") + 0.6, value: 2.2 },
+              ],
+            },
+          ]}
+        />
         <Layer id="clock" start={0} duration={LENGTH}>
           <Clock />
         </Layer>

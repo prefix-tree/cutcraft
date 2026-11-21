@@ -6,8 +6,10 @@ import { z } from "zod";
 
 import {
   COMPONENTS,
+  DERIVED_KINDS,
   EFFECT_FAMILIES,
   EFFECTS,
+  EFFECTS_NOT_RENDERED,
   ELEMENTS,
   ENGINE_LAYERS,
   KIND_CAPABILITIES,
@@ -113,6 +115,9 @@ function defaultOf(value: unknown): string {
   return `\`${rounded}\``;
 }
 
+/** The children a file writes: the resolver's own kinds (keys, effects, speed keys, holds) are props now. */
+const written = (kinds: readonly string[]): string[] => kinds.filter((k) => !DERIVED_KINDS.has(k));
+
 /** What each element is for, by group: the index's cards and the first line of each page. */
 const ELEMENT_DOCS: Record<string, readonly (readonly [element: string, summary: string])[]> = {
   Timeline: [
@@ -149,17 +154,8 @@ const ELEMENT_DOCS: Record<string, readonly (readonly [element: string, summary:
     ["Sticker", "A ready-made icon or sticker by name."],
   ],
   "Effects and colour": [
-    [
-      "Effect",
-      "A look on its parent: colour grading, blur, glow, outline, keying, corner pin, vignette, grain and more, or your own shader.",
-    ],
-    ["Adjustment", "Filters everything beneath it for its own stretch of time."],
+    ["Adjustment", "Filters everything beneath it, through its `effects`, for its own stretch of time."],
     ["Mask", "Shows only a shape of its clip, with a feathered edge or inverted."],
-  ],
-  "Motion and time": [
-    ["Keyframe", "Animates one property of its parent between values, with easing."],
-    ["SpeedKey", "Changes its clip's speed from a moment on, eased: speed ramps."],
-    ["Freeze", "Holds one frame of its clip for a while, then plays on."],
   ],
   Structure: [
     ["Nested", "A sequence written once as a component and placed like a clip."],
@@ -167,7 +163,9 @@ const ELEMENT_DOCS: Record<string, readonly (readonly [element: string, summary:
     ["Angle", "One camera of a `<Multicam>`: its asset and sync offset."],
     ["Cut", "Switches a `<Multicam>` to an angle at a moment."],
   ],
-  Sound: [["Audio", "A stretch of a sound asset: volume, fades, ducking under another track, automation."]],
+  Sound: [
+    ["Audio", "A stretch of a sound asset: volume and pan (constant or keys), fades, ducking under another track."],
+  ],
 };
 /** Elements with no rendered example (the Node export does not draw them yet): code, and a note. */
 const CODE_ONLY: Record<string, string> = {
@@ -266,7 +264,11 @@ function elementsIndex(): string {
     const c = KIND_CAPABILITIES[component.kind]!;
     const yes = (b: boolean): string => (b ? "yes" : "");
     lines.push(
-      `| [\`<${name}>\`](/reference/elements/${slug(name)}) | ${yes(c.timed)} | ${yes(c.visual)} | ${yes(c.audio)} | ${yes(c.trimSource)} | ${yes(c.transformable)} | ${c.childKinds.map((k) => `\`${k}\``).join(", ")} |`,
+      `| [\`<${name}>\`](/reference/elements/${slug(name)}) | ${yes(c.timed)} | ${yes(c.visual)} | ${yes(c.audio)} | ${yes(c.trimSource)} | ${yes(c.transformable)} | ${written(
+        c.childKinds,
+      )
+        .map((k) => `\`${k}\``)
+        .join(", ")} |`,
     );
   }
   return `${lines.join("\n")}\n`;
@@ -337,7 +339,13 @@ function elementPage(name: string, summary: string): string {
     );
   lines.push(
     "",
-    `${traits.length ? `${capital(traits.join(", "))}. ` : ""}${c.childKinds.length ? `Children: ${c.childKinds.map((k) => `\`${k}\``).join(", ")}.` : "No children."} [All elements](/reference/elements/)`,
+    `${traits.length ? `${capital(traits.join(", "))}. ` : ""}${
+      written(c.childKinds).length
+        ? `Children: ${written(c.childKinds)
+            .map((k) => `\`${k}\``)
+            .join(", ")}.`
+        : "No children."
+    } [All elements](/reference/elements/)`,
     "",
   );
   return lines.join("\n");
@@ -452,7 +460,7 @@ function effectsIndex(): string {
   const lines = [
     "# Effects and transitions",
     "",
-    "Every built-in `<Effect type>` and `<Transition type>`. Hover a card to play it; each page shows the file that made the video and the params it takes. Params outside their ranges, or not listed, are an error when the file resolves; a keyframe inside an effect animates one by `param`. Generated from the effect registry (`packages/kit/src/effects/registry.ts`) by `pnpm docs:gen`.",
+    "Every built-in effect, written in an element's `effects` as `{ type, ...params }`, and every `<Transition type>`. Hover a card to play it; each page shows the file that made the video and the params it takes. Params outside their ranges, or not listed, are an error when the file resolves; keys in place of a param's value animate it ([Keys, effects and speed](/guide/animation#effects)). Generated from the effect registry (`packages/kit/src/effects/registry.ts`) by `pnpm docs:gen`.",
     "",
     "## Effects",
     "",
@@ -662,20 +670,26 @@ function renderingPage(): string {
     "| element | prop | value | what happens |",
     "|---|---|---|---|",
   );
-  // A row that holds only inside some parents names them: `<Effect>` inside `<Title>`, `<Shape>`.
-  const free = NOT_RENDERED.filter((r) => !r.parent);
-  const inside = NOT_RENDERED.filter((r) => r.parent).map((r) => ({ ...r, kind: r.parent!, child: r.kind }));
-  const rows = [
-    ...merge(free, (r) => `${r.prop}|${r.value}|${r.reason}`).map(([r, kinds]) => [r, on(kinds)] as const),
-    ...merge(inside, (r) => `${r.child}|${r.prop}|${r.value}|${r.reason}`).map(
-      ([r, parents]) => [r, `${on([r.child])} inside ${on(parents)}`] as const,
-    ),
-  ];
+  // An effect type an element takes in its `effects` but does not draw is a row of `effects` with that type.
+  const effectRows = EFFECTS_NOT_RENDERED.map((r) => ({
+    kind: r.kind,
+    prop: "effects",
+    value: r.type,
+    reason: r.reason,
+  }));
+  const rows = merge([...NOT_RENDERED, ...effectRows], (r) => `${r.prop}|${r.value}|${r.reason}`).map(
+    ([r, kinds]) => [r, on(kinds)] as const,
+  );
   for (const [r, element] of rows)
     lines.push(
       `| ${element} | ${r.prop ? code(r.prop) : "the element"} | ${r.value ? code(r.value) : ""} | ${why(r.reason)} |`,
     );
   return `${lines.join("\n")}\n`;
+}
+
+/** A code span holding `{{`, which Vue would read as an interpolation even inside code: shown as is, uncompiled. */
+function vPre(code: string): string {
+  return `<code v-pre>${code.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")}</code>`;
 }
 
 /** VitePress compiles markdown as Vue, so a bare `<Layer>` or `{{ … }}` in prose must be escaped; code spans and fences are left alone. */
@@ -871,7 +885,7 @@ write(
 
 /** An export's cell: its JSDoc, or for an element, a link to its reference page. */
 function apiDoc(name: string, doc: string): string {
-  if (doc) return escapeTags(cell(doc));
+  if (doc) return escapeTags(cell(doc)).replace(/`([^`]*\{\{[^`]*)`/g, (_, c: string) => vPre(c));
   if (name in ELEMENTS || name in ENGINE_LAYERS)
     return `The \`<${name}>\` element ([reference](/reference/elements/${name.toLowerCase()})).`;
   return "";

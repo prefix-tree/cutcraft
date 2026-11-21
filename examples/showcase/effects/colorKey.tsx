@@ -1,4 +1,4 @@
-import { Clip, Composition, Effect, Keyframe, Track } from "@uberscene/kit";
+import { Clip, Composition, Track } from "@uberscene/kit";
 
 // colorKey: Makes one colour transparent: a green screen.
 export default function Video() {
@@ -8,12 +8,23 @@ export default function Video() {
         <Clip id="shot" src="asset:coffeeWide" in={4} out={7} fit="cover" />
       </Track>
       <Track id="keyed">
-        <Clip id="greenscreen" src="asset:greenscreen" in={0} out={3} fit="cover">
-          <Effect id="look" type="colorKey" params={{ color: "#00b140" }}>
-            <Keyframe id="k1" param="tolerance" at={0.5} value={0} easing="easeInOut" />
-            <Keyframe id="k2" param="tolerance" at={1.5} value={0.3} />
-          </Effect>
-        </Clip>
+        <Clip
+          id="greenscreen"
+          src="asset:greenscreen"
+          in={0}
+          out={3}
+          fit="cover"
+          effects={[
+            {
+              type: "colorKey",
+              color: "#00b140",
+              tolerance: [
+                { at: 0.5, value: 0, easing: "easeInOut" },
+                { at: 1.5, value: 0.3 },
+              ],
+            },
+          ]}
+        />
       </Track>
     </Composition>
   );

@@ -3,8 +3,8 @@ import type { z } from "zod";
 
 import type { EffectParams, TransitionParams } from "../effects/registry";
 import { capabilitiesOf } from "./capabilities";
-import { defineElement, type VocabularyMeta, type VocabularyProps } from "./define";
-import type { TransitionType, VideoEffectType } from "./enums";
+import { defineElement, type VocabularyComponent, type VocabularyMeta, type VocabularyProps } from "./define";
+import type { Easing, TransitionType, VideoEffectType } from "./enums";
 import { captionSchema, captionsSchema } from "./schemas/captions";
 import { effectSchema, freezeSchema, keyframeSchema, maskSchema, speedKeySchema } from "./schemas/children";
 import { compositionSchema, gapSchema, markerSchema, trackSchema } from "./schemas/composition";
@@ -29,7 +29,7 @@ const el = <K extends string, S extends Parameters<typeof defineElement>[0]["sch
 
 export const Composition = el("composition", compositionSchema);
 export const Track = el("track", trackSchema);
-export const Clip = el("clip", clipSchema);
+export const Clip = el("clip", clipSchema) as unknown as WithEffects<VocabularyComponent<"clip", typeof clipSchema>>;
 export const Audio = el("audio", audioSchema);
 export const Gap = el("gap", gapSchema);
 type TransitionBase = Omit<VocabularyProps<typeof transitionSchema>, "type" | "params">;
@@ -53,20 +53,32 @@ export interface TransitionComponent extends VocabularyMeta<"transition", typeof
 }
 
 export const Transition = el("transition", transitionSchema) as unknown as TransitionComponent;
-export const Title = el("title", titleSchema);
-export const Shape = el("shape", shapeSchema);
-export const Svg = el("svg", svgSchema);
-export const Sticker = el("sticker", stickerSchema);
+export const Title = el("title", titleSchema) as unknown as WithEffects<
+  VocabularyComponent<"title", typeof titleSchema>
+>;
+export const Shape = el("shape", shapeSchema) as unknown as WithEffects<
+  VocabularyComponent<"shape", typeof shapeSchema>
+>;
+export const Svg = el("svg", svgSchema) as unknown as WithEffects<VocabularyComponent<"svg", typeof svgSchema>>;
+export const Sticker = el("sticker", stickerSchema) as unknown as WithEffects<
+  VocabularyComponent<"sticker", typeof stickerSchema>
+>;
 export const Captions = el("captions", captionsSchema);
 export const Caption = el("caption", captionSchema);
 export const Marker = el("marker", markerSchema);
-export const Adjustment = el("adjustment", adjustmentSchema);
+export const Adjustment = el("adjustment", adjustmentSchema) as unknown as WithEffects<
+  VocabularyComponent<"adjustment", typeof adjustmentSchema>
+>;
 export const Mask = el("mask", maskSchema);
-export const Nested = el("nested", nestedSchema);
+export const Nested = el("nested", nestedSchema) as unknown as WithEffects<
+  VocabularyComponent<"nested", typeof nestedSchema>
+>;
 export const Multicam = el("multicam", multicamSchema);
 export const Angle = el("angle", angleSchema);
 export const Cut = el("cut", cutSchema);
-export const Layer = el("layer", layerSchema);
+export const Layer = el("layer", layerSchema) as unknown as WithEffects<
+  VocabularyComponent<"layer", typeof layerSchema>
+>;
 /**
  * A Layer drawn by a library: kind `layer` to the resolver, the timeline and the editor, with props of its own and
  * an `engine` the Player looks up among the installed layer engines (`installLayerEngine`).
@@ -81,9 +93,11 @@ const engineLayer = <E extends string, S extends Parameters<typeof defineElement
 };
 
 /** A three.js scene on the timeline: `setup` for plain three.js, or React Three Fiber children. */
-export const Three = engineLayer("three", threeSchema.omit({ engine: true }));
+const threeLayer = engineLayer("three", threeSchema.omit({ engine: true }));
+export const Three = threeLayer as unknown as WithEffects<typeof threeLayer> & { readonly engine: "three" };
 /** Children animated by a Motion `sequence` on the video's clock. */
-export const Motion = engineLayer("motion", motionSchema.omit({ engine: true }));
+const motionLayer = engineLayer("motion", motionSchema.omit({ engine: true }));
+export const Motion = motionLayer as unknown as WithEffects<typeof motionLayer> & { readonly engine: "motion" };
 
 /** The engine Layers by tag, and the schema each is checked against once collected (with its `engine`). */
 export const ENGINE_LAYERS = { Three, Motion } as const;
@@ -98,8 +112,6 @@ export function engineOf(type: unknown): string | null {
   return typeof engine === "string" ? engine : null;
 }
 
-type EffectBase = Omit<VocabularyProps<typeof effectSchema>, "type" | "params">;
-
 /** The params of an effect type: a built-in's, or those of one `effect()` returned. */
 export type EffectParamsOf<T> = T extends VideoEffectType
   ? EffectParams<T>
@@ -107,21 +119,47 @@ export type EffectParamsOf<T> = T extends VideoEffectType
     ? z.input<P>
     : never;
 
-/**
- * `<Effect>`: a built-in by its type, with that type's params, or one the file declares by what `effect()` returned,
- * with its own params.
- */
-export interface EffectComponent extends VocabularyMeta<"effect", typeof effectSchema> {
-  // biome-ignore lint/suspicious/noExplicitAny: any ref, whatever its params; they are read back by EffectParamsOf.
-  <T extends VideoEffectType | EffectRef<any>>(
-    props: EffectBase & { type: T; params?: EffectParamsOf<T> },
-  ): ReactElement | null;
+/** One key of a value that changes over time. */
+export interface Key<V> {
+  readonly at: number;
+  readonly value: V;
+  readonly easing?: Easing;
 }
 
-export const Effect = el("effect", effectSchema) as unknown as EffectComponent;
-export const Keyframe = el("keyframe", keyframeSchema);
-export const SpeedKey = el("speedKey", speedKeySchema);
-export const Freeze = el("freeze", freezeSchema);
+/** A value written as a constant, or as keys over time. */
+export type Animatable<V> = V | readonly Key<V>[];
+
+/** One entry of an element's `effects`: its type, then each of that type's params, a constant or keys. */
+export type EffectSpec<T> = { readonly type: T; readonly enabled?: boolean } & (string extends keyof EffectParamsOf<T>
+  ? // An effect that declares no params takes none.
+    unknown
+  : { readonly [P in keyof EffectParamsOf<T>]?: Animatable<EffectParamsOf<T>[P]> });
+
+/** Any effect a file may write: a built-in by name, or one the file declares. */
+// biome-ignore lint/suspicious/noExplicitAny: any declared effect, whatever its params; read back by EffectParamsOf.
+export type AnyEffectSpec = { [T in VideoEffectType]: EffectSpec<T> }[VideoEffectType] | EffectSpec<EffectRef<any>>;
+
+/**
+ * Each entry of an `effects` list checked against its own type: a built-in's params, or those of the `effect()` it
+ * names. The list is read as a tuple, so a declared effect's params are its own, not any effect's.
+ */
+export type CheckedEffects<A extends readonly unknown[]> = {
+  readonly [I in keyof A]: A[I] extends { readonly type: infer T }
+    ? // biome-ignore lint/suspicious/noExplicitAny: any declared effect; its own params are read back by EffectParamsOf.
+      T extends VideoEffectType | EffectRef<any>
+      ? EffectSpec<T> & { readonly [P in Exclude<keyof A[I], keyof EffectSpec<T>>]: never }
+      : AnyEffectSpec
+    : AnyEffectSpec;
+};
+
+/** An element whose `effects` prop is typed per effect, so a wrong param name is a type error. */
+type WithEffects<C> =
+  C extends VocabularyComponent<infer K, infer S>
+    ? VocabularyMeta<K, S> &
+        (<const A extends readonly AnyEffectSpec[] = readonly []>(
+          props: Omit<VocabularyProps<S>, "effects"> & { effects?: A & CheckedEffects<A> },
+        ) => ReactElement | null)
+    : never;
 
 export const ELEMENTS = {
   Composition,
@@ -144,14 +182,24 @@ export const ELEMENTS = {
   Angle,
   Cut,
   Layer,
-  Effect,
-  Keyframe,
-  SpeedKey,
-  Freeze,
 } as const;
 
-export const SCHEMAS_BY_KIND = Object.fromEntries(
-  Object.values(ELEMENTS).map((component) => [component.kind, component.schema]),
-) as Readonly<Record<string, (typeof ELEMENTS)[keyof typeof ELEMENTS]["schema"]>>;
+/**
+ * The resolver's own item kinds: what it makes of the `effects`, key lists, `speed` keys and `freezes` a file writes
+ * as props (`expandKeys` in the SDK). No file writes them as elements.
+ */
+export const DERIVED_SCHEMAS = {
+  effect: effectSchema,
+  keyframe: keyframeSchema,
+  speedKey: speedKeySchema,
+  freeze: freezeSchema,
+} as const;
+export type DerivedKind = keyof typeof DERIVED_SCHEMAS;
+export const DERIVED_KINDS: ReadonlySet<string> = new Set(Object.keys(DERIVED_SCHEMAS));
+
+export const SCHEMAS_BY_KIND = {
+  ...Object.fromEntries(Object.values(ELEMENTS).map((component) => [component.kind, component.schema])),
+  ...DERIVED_SCHEMAS,
+} as Readonly<Record<string, z.ZodType>>;
 
 export type ElementKind = (typeof ELEMENTS)[keyof typeof ELEMENTS]["kind"];

@@ -222,7 +222,7 @@ describe("buildGainEnvelope", () => {
     expect(env.some(([t]) => t === 4.15)).toBe(true);
   });
 
-  it("multiplies automation points in", () => {
+  it("follows volume keys in place of the constant volume", () => {
     const auto = makeState({
       tracks: [
         {
@@ -232,15 +232,11 @@ describe("buildGainEnvelope", () => {
               id: "x",
               kind: "audio",
               source: { in: 0, out: 4, asset: "tone" },
-              props: {
-                volume: 0.5,
-                automation: {
-                  volume: [
-                    [0, 1],
-                    [2, 0],
-                  ],
-                },
-              },
+              props: { volume: 1 },
+              children: [
+                { id: "k1", kind: "keyframe", props: { property: "audio.volume", at: 0, value: 0.5 } },
+                { id: "k2", kind: "keyframe", props: { property: "audio.volume", at: 2, value: 0 } },
+              ],
             },
           ],
         },
@@ -248,14 +244,14 @@ describe("buildGainEnvelope", () => {
     });
     const x = auto.items.get("x")!;
     const env = buildGainEnvelope(x, auto.tracks[0]!, auto, 0, 4);
-    expect(env).toEqual([
-      [0, 0.5],
-      [2, 0],
-      [4, 0],
-    ]);
+    expect(env[0]).toEqual([0, 0.5]);
+    expect(env.find(([t]) => t === 2)).toEqual([2, 0]);
+    expect(env.at(-1)).toEqual([4, 0]);
+    expect(env.find(([t]) => t === 1)?.[1]).toBeCloseTo(0.25);
+    for (const [t, g] of env) expect(g).toBeCloseTo(t < 2 ? 0.5 - t / 4 : 0);
   });
 
-  it("pans by audio.pan keyframes, sampled inside each segment, over automation", () => {
+  it("pans by audio.pan keyframes, sampled inside each segment, over a constant pan", () => {
     const s = makeState({
       tracks: [
         {
@@ -267,7 +263,7 @@ describe("buildGainEnvelope", () => {
               kind: "audio",
               start: 1,
               source: { in: 0, out: 4, asset: "tone" },
-              props: { automation: { pan: [[0, 1]] } },
+              props: { pan: 1 },
               children: [
                 { id: "k1", kind: "keyframe", props: { property: "audio.pan", at: 0, value: -1 } },
                 { id: "k2", kind: "keyframe", props: { property: "audio.pan", at: 2, value: 1 } },

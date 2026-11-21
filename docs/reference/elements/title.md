@@ -29,6 +29,7 @@ The coffee footage is Pixabay videos [209419](https://pixabay.com/videos/id-2094
 | `box` | { x, y, width, height, origin } |  |  | The rectangle it occupies, in pixels from the frame's top left as in CSS: `x` and `y` place the point `origin` names (its top left by default), `width` and `height` size it, and its content fills it as `fit` says. Left out, the whole frame. `transform` applies after. |
 | `transform` | { scale, rotation, anchor, opacity, borderRadius, crop } |  |  | How it is turned and shown: scale, rotation, anchor, opacity, rounded corners and crop. |
 | `blend` | "normal" \| "multiply" \| "screen" \| "overlay" \| "darken" \| … 13 more |  |  | How it mixes with what is under it, as CSS `mix-blend-mode` does. Only `normal` renders ([What renders](/reference/rendering)). |
+| `effects` | { type, enabled }[] |  |  | Effects drawn on it, in order: each `{ type, ...params }`, a param written as keys to animate it. |
 | `enter` | { type, duration, easing } |  |  | How it comes in: a fade, slide, scale or wipe over its first seconds, with an easing. |
 | `exit` | { type, duration, easing } |  |  | How it goes out, over its last seconds, as `enter`. |
 | `style` | string \| { preset, font, size, weight, italic, color, background, stroke, shadow, align, valign, lineHeight, letterSpacing, decoration } | `{}` |  | How the letters look: a theme title preset by name (`"h1"`), or an object of `font`, `size`, `weight`, `italic`, `color`, `background`, `stroke`, `shadow`, `align`, `valign`, `lineHeight`, `letterSpacing` and `decoration`, with `preset` naming the preset it starts from. Without a preset, the theme's `default` title preset applies. The text box is the title's `box`: its `width` and `height`, the whole frame when left out, so background, align and valign work inside it. |
@@ -55,4 +56,4 @@ A theme preset's name, or an object of these fields. `preset` names the preset t
 | `letterSpacing` | number (-100..100) | `0` | Extra space between letters, in pixels. |
 | `decoration` | "none" \| "underline" \| "lineThrough" \| "overline" |  | A line under, over or through the letters. |
 
-Timed, visual, transformable. Children: `effect`, `keyframe`, `mask`. [All elements](/reference/elements/)
+Timed, visual, transformable. Children: `mask`. [All elements](/reference/elements/)

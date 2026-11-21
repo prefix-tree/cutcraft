@@ -22,7 +22,7 @@ export const SETUP: Partial<Record<ActionType, readonly ActionInput[]>> = {
   "clip/roll": [{ type: "transition/remove", params: { transitionId: "x1" } }],
   "track/consolidate": [{ type: "clip/move", params: { id: "a1", place: { start: 2 } } }],
   "clip/merge": [{ type: "clip/split", params: { id: "c3", at: 11, newId: "c3_b" } }],
-  "effect/setOrder": [{ type: "effect/add", params: { id: "c1", childId: "fx0", type: "sepia" } }],
+  "effect/setOrder": [{ type: "effect/add", params: { id: "c1", effect: { type: "sepia" }, index: 0 } }],
 };
 
 /** One sample action per registered type, against fixtures/sample.tsx. */
@@ -127,51 +127,41 @@ export const CASES: Partial<Record<ActionType, ActionInput>> = {
   "clip/setSource": { type: "clip/setSource", params: { id: "c2", src: "asset:interview" } },
   "clip/setAnchor": { type: "clip/setAnchor", params: { id: "s1", anchor: "c3", offset: 0.5 } },
 
-  "speed/setKeys": {
-    type: "speed/setKeys",
-    params: { id: "c2", keys: [{ id: "sk9", kind: "speedKey", props: { id: "sk9", at: 1, speed: 0.25 } }] },
-  },
-  "speed/setFreezes": { type: "speed/setFreezes", params: { id: "c2", freezes: [] } },
+  "freeze/setAll": { type: "freeze/setAll", params: { id: "c2", freezes: [{ start: 1, duration: 0.25, source: 2 }] } },
   "transform/update": {
     type: "transform/update",
     params: { id: "c2", transform: { scale: 1.2 } },
   },
   "box/update": { type: "box/update", params: { id: "c2", box: { x: 970, y: 540, origin: "center" } } },
 
-  "effect/add": {
-    type: "effect/add",
-    params: { id: "c3", childId: "fx9", type: "grain", params: { amount: 0.2 }, index: 0 },
+  "effect/add": { type: "effect/add", params: { id: "c3", effect: { type: "grain", amount: 0.2 }, index: 0 } },
+  "effect/remove": { type: "effect/remove", params: { id: "c1", index: 0 } },
+  "effect/update": { type: "effect/update", params: { id: "c1", index: 0, params: { radius: 9 } } },
+  "effect/toggle": { type: "effect/toggle", params: { id: "c1", index: 0, enabled: false } },
+  "effect/setOrder": { type: "effect/setOrder", params: { id: "c1", order: [2, 0, 1] } },
+  "effect/setStack": { type: "effect/setStack", params: { id: "c1", effects: [] } },
+
+  "key/add": {
+    type: "key/add",
+    params: { id: "c2", path: "transform.scale.x", at: 1, value: 1.5, easing: "easeOutBack" },
   },
-  "effect/remove": { type: "effect/remove", params: { id: "c1", childId: "fx1" } },
-  "effect/restore": {
-    type: "effect/restore",
+  "key/update": {
+    type: "key/update",
+    params: { id: "c1", path: "transform.opacity", at: 0.5, value: 0.9, easing: "hold" },
+  },
+  "key/move": { type: "key/move", params: { id: "c1", path: "transform.opacity", at: 0.5, to: 1 } },
+  "key/remove": { type: "key/remove", params: { id: "c1", path: "transform.opacity", at: 0 } },
+  "key/setAll": {
+    type: "key/setAll",
     params: {
       id: "c3",
-      node: { id: "fx8", kind: "effect", props: { id: "fx8", type: "blur", params: {}, enabled: true } },
-      after: null,
+      path: "volume",
+      keys: [
+        { at: 0, value: 0 },
+        { at: 1, value: 1 },
+      ],
     },
   },
-  "effect/update": { type: "effect/update", params: { id: "c1", childId: "fx1", params: { radius: 9 } } },
-  "effect/toggle": { type: "effect/toggle", params: { id: "c1", childId: "fx1", enabled: false } },
-  "effect/setOrder": { type: "effect/setOrder", params: { id: "c1", childIds: ["wb1", "fx0", "fx1"] } },
-  "effect/setStack": { type: "effect/setStack", params: { id: "c1", nodes: [] } },
-
-  "keyframe/add": {
-    type: "keyframe/add",
-    params: { id: "c2", keyId: "k9", property: "transform.scale.x", at: 1, value: 1.5, easing: "easeOutBack" },
-  },
-  "keyframe/remove": { type: "keyframe/remove", params: { id: "c1", keyId: "k1" } },
-  "keyframe/restore": {
-    type: "keyframe/restore",
-    params: {
-      id: "c1",
-      node: { id: "k8", kind: "keyframe", props: { id: "k8", property: "transform.opacity", at: 0.2, value: 0.5 } },
-      after: "k1",
-    },
-  },
-  "keyframe/update": { type: "keyframe/update", params: { id: "c1", keyId: "k2", value: 0.9, easing: "hold" } },
-  "keyframe/move": { type: "keyframe/move", params: { id: "c1", keyId: "k2", at: 1 } },
-  "keyframe/setAll": { type: "keyframe/setAll", params: { id: "c1", nodes: [] } },
 
   "transition/add": {
     type: "transition/add",
@@ -195,17 +185,6 @@ export const CASES: Partial<Record<ActionType, ActionInput>> = {
   },
   "audio/setVolume": { type: "audio/setVolume", params: { id: "a1", volume: 0.5 } },
   "audio/setFade": { type: "audio/setFade", params: { id: "a1", in: 1, out: 2 } },
-  "audio/setAutomation": {
-    type: "audio/setAutomation",
-    params: {
-      id: "a1",
-      lane: "volume",
-      points: [
-        [0, 1],
-        [5, 0.2],
-      ],
-    },
-  },
   "audio/setDuck": { type: "audio/setDuck", params: { id: "a1", duck: { under: "overlays", to: 0.1 } } },
 
   "element/create": {

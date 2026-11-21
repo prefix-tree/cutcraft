@@ -46,11 +46,17 @@ function kindOf(symbol: import("typescript").Symbol): string {
   return "other";
 }
 
-/** The first sentence of a JSDoc comment, on one line. */
+/** The first sentence of a JSDoc comment, on one line. A `.` or `:` inside a code span does not end it. */
 function firstSentence(text: string): string {
   const flat = text.replace(/\s*\n\s*/g, " ").trim();
-  const end = flat.search(/[.:](\s|$)/);
-  return end < 0 ? flat : flat.slice(0, end + 1).replace(/:$/, ".");
+  let code = false;
+  for (let i = 0; i < flat.length; i++) {
+    const c = flat[i];
+    if (c === "`") code = !code;
+    else if (!code && (c === "." || c === ":") && (i + 1 === flat.length || /\s/.test(flat[i + 1] as string)))
+      return flat.slice(0, i + 1).replace(/:$/, ".");
+  }
+  return flat;
 }
 
 /** The names each public entry exports, read by the TypeScript checker over each package's own tsconfig. */

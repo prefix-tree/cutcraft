@@ -113,7 +113,7 @@ function Badge() {
 }
 ```
 
-A `<Keyframe>` can use `easing="spring"` too.
+A key can use `easing: "spring"` too ([Keys, effects and speed](./animation#easing)).
 
 ## Diagram parts
 
@@ -327,7 +327,7 @@ an open source one.
 ## Effects and transitions of your own
 
 A look the built-in effects don't have is a few lines of GLSL, declared in the file with `effect()` or
-`transition()` and used as an `<Effect>` or `<Transition>` type. [Your own effects and transitions](./custom-effects)
+`transition()` and used as the `type` of an effect or a `<Transition>`. [Your own effects and transitions](./custom-effects)
 shows how.
 
 ## Libraries
